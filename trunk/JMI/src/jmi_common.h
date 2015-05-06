@@ -256,6 +256,14 @@ typedef jmi_ad_tape_t *jmi_ad_tape_p;
 #define JMI_RET_GEN(DEST, SRC) \
     *DEST = SRC;
 
+/* Initialization of function variables */
+#define JMI_INI(TYPE, NAME, EXP) \
+    JMI_INI_##TYPE(NAME, EXP)
+#define JMI_INI_GEN(NAME, EXP) \
+    NAME = EXP;
+#define JMI_INI_STR(NAME, EXP) \
+    NAME = EXP;
+
 #ifdef _MSC_VER
 /* Note: the return value isn't the same as for snprintf(). */
 #define snprintf sprintf_s

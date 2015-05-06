@@ -49,12 +49,20 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 #define JMI_DEF_STR_DYNA(NAME) \
     jmi_string_t NAME;
 
-/* Initialization of string */
+/* Initialization of strings from expressions */
 #define JMI_INI_STR_STAT(NAME) \
     NAME[0] = '\0';
 #define JMI_INI_STR_DYNA(NAME, LEN) \
     NAME = calloc(JMI_MIN(LEN, JMI_STR_MAX) + 1, 1); \
     JMI_INI_STR_STAT(NAME)
+
+/* Initialization of function variables */
+#define JMI_INI(TYPE, NAME, EXP) \
+    JMI_INI_##TYPE(NAME, EXP)
+#define JMI_INI_GEN(NAME, EXP) \
+    NAME = EXP;
+#define JMI_INI_STR(NAME, EXP) \
+    NAME = EXP;
 
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \

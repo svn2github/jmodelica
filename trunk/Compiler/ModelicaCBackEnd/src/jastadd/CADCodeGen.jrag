@@ -77,6 +77,10 @@ aspect CADCodeGen {
         public TypePrinter_C createInitPrinter(CodeStream str) {
             return new InitPrinter_CAD(this, str);
         }
+        
+        public TypePrinter_C createInitSetPrinter(CodeStream str) {
+            return createInitPrinter(str);
+        }
     }
 	
 	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();

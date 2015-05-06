@@ -66,7 +66,7 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
 /* Static array declaration macro */
 #define JMI_ARRAY_DECL_STAT(type, arr, name, ne, nd) \
     int  name##_size[nd];\
-    type name##_var[(ne == 0) ? 1 : ne];\
+    type name##_var[(ne == 0) ? 1 : ne] = {0};\
     arr  name##_obj = { 0, (int) (nd), (int) (ne), 0 };\
     arr* name = &name##_obj;
 

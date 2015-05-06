@@ -129,6 +129,7 @@ aspect CCodeGen {
 
         public abstract TypePrinter_C createDeclPrinter(CodeStream str);
         public abstract TypePrinter_C createInitPrinter(CodeStream str);
+        public abstract TypePrinter_C createInitSetPrinter(CodeStream str);
     }
     
     public class CPrettyPrinter extends CodePrinter {
@@ -174,6 +175,10 @@ aspect CCodeGen {
         
         public TypePrinter_C createInitPrinter(CodeStream str) {
             return new InitPrinter_C(this, str);
+        }
+        
+        public TypePrinter_C createInitSetPrinter(CodeStream str) {
+            return new InitSetPrinter_C(this, str);
         }
     }
 	
@@ -1184,12 +1189,10 @@ aspect CCodeGen {
     }
 	
     public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            if (isOutput() && !isString()) {
-                prettyPrintInitOutput_C(p, str, indent, name_C());
-            } else {
-                print(p.createInitPrinter(str), name_C(), indent);
-            }
+        if (isComposite() && isOutput() && !isString()) {
+            prettyPrintInitOutput_C(p, str, indent, name_C());
+        } else {
+            print(p.createInitSetPrinter(str), name_C(), indent);
         }
     }
     
@@ -1197,7 +1200,7 @@ aspect CCodeGen {
         String next = p.indent(indent);
         String iniName = name + C_SUFFIX_NULL;
         str.print(indent + "if (" + name + " == NULL) {\n");
-        print(p.createInitPrinter(str), iniName, next);
+        print(p.createInitSetPrinter(str), iniName, next);
         str.print(next + name + " = " + iniName + ";\n");
         str.print(indent + "}\n");
     }
@@ -1338,16 +1341,21 @@ aspect CCodeGen {
         
         protected void printComps(FRecordType type) {
             for (FRecordComponentType comp : type.getComponents()) {
-                if (comp.getFType().isComposite()) {
+                if (shouldPrintComp(comp)) {
                     String compName = name() + "->" + comp.getName();
-                    String tempName = dynamic() ? compName : acquireTemp(compName);
+                    boolean useTempName = !dynamic() && comp.getFType().isComposite();
+                    String tempName = useTempName ? acquireTemp(compName) : compName;
                     pushLevel(tempName, false, comp.getFType().size().isUnknown());
                     comp.getFType().print(this);
                     popLevel();
-                    if (!dynamic())
+                    if (useTempName)
                         tempWriteBack(compName, tempName);
                 }
             }
+        }
+        
+        protected boolean shouldPrintComp(FRecordComponentType comp) {
+            return comp.getFType().isComposite();
         }
         
         protected void printComps(FExternalObjectType type) {
@@ -1478,6 +1486,40 @@ aspect CCodeGen {
         }
     }
     
+    public class InitSetPrinter_C extends InitPrinter_C {
+        public InitSetPrinter_C(CodePrinter p, CodeStream str) {
+            super(p, str);
+        }
+        protected void printScalar(FType type) {
+            type.printInitStartValue_C(p, str, indent(), name());
+        }
+        protected boolean shouldPrintComp(FRecordComponentType comp) {
+            return true;
+        }
+    }
+    
+    public void FType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
+        
+    }
+    
+    public void FPrimitiveType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
+        str.print(indent);
+        str.print("JMI_INI(");
+        str.print(macroTypeScalar());
+        str.print(", ");
+        str.print(name);
+        str.print(", ");
+        printStartValue_C(p, str, indent);
+        str.print(")\n");
+    }
+    
+    public void FType.printStartValue_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("0");
+    }
+    
+    public void FStringType.printStartValue_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("\"\"");
+    }
 	
 	private Map<String,String> FExp.recordChildTempNameMap = null;
 	
