@@ -981,6 +981,7 @@ class LocalDAECollocator(CasadiCollocator):
         self._scale_variables()
         self._define_collocation()
         self._create_nlp_variables()
+        self._count_constraints()
         self._create_nlp_parameters()
         self._create_constraints_and_cost()
         self._create_blocking_factors_constraints_and_cost()
@@ -1782,6 +1783,77 @@ class LocalDAECollocator(CasadiCollocator):
         self.global_split_indices = global_split_indices
         self.n_xx = n_xx
     
+    def _count_constraints(self):
+        """
+        Count the number of constraints in the final NLP,
+        so that we can allocate scaling factors for them.
+        """
+        n_c_e = n_c_i = 0
+
+        n_tp = 1 + self.n_e * (self.n_cp + (1 if self.is_gauss else 0))
+
+        n_c_e += self.initial.numel() # initial equations
+        n_c_e += self.dae.numel() * (1 + self.n_e * self.n_cp) # dae equations
+
+        # todo: save!
+        if self.blocking_factors is None:
+            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u']]
+        else:
+            inp_list = [inp.getName() for inp in self.mvar_vectors['unelim_u'] 
+                   if not self.blocking_factors.factors.has_key(inp.getName())]
+
+        n_c_e += len(inp_list) # u_1_0
+
+        if self.is_gauss:
+            # Continuity constraints for x_{i, n_cp + 1}
+            n_c_e += self.n_e * self.n_var['x']
+            
+            n_c_e += self.n_var['unelim_u'] + self.n_var['w']  # terminal
+            if not self.eliminate_der_var:
+                n_c_e += self.n_var['x'] # terminal_dx
+
+        if self.hs == "free":
+            n_c_e += 1 # h_sum
+
+        # Path constraints
+        for cnstr in self.op.getPathConstraints():
+            if cnstr.getType() == cnstr.EQ:
+                n_c_e += n_tp
+            else:
+                n_c_i += n_tp
+
+        # Point constraints
+        for cnstr in self.op.getPointConstraints():
+            if cnstr.getType() == cnstr.EQ:
+                n_c_e += 1
+            else:
+                n_c_i += 1
+
+        if not self.eliminate_der_var: # collocation constraints
+            n_c_e += self.n_e * self.n_cp * self.n_var['x']
+
+        if not self.eliminate_cont_var: # continuity constraints
+            n_c_e += (self.n_e - 1) * self.n_var['x']
+
+        # Bounds on du
+        if self.blocking_factors is not None:
+            for var in self.mvar_vectors['unelim_u']:
+                name = var.getName()
+                if ((name in self.blocking_factors.factors) and
+                    (name in self.blocking_factors.du_bounds)):
+                    n_c_i += 2*(len(self.blocking_factors.factors[name])-1)
+
+        # Equality constraints for constrained inputs
+        if self.external_data is not None:
+            n_c_e += self.n_e * self.n_cp * len(self.external_data.constr_quad_pen)
+
+        # Equality constraints for delayed feedback
+        if self.delayed_feedback is not None:
+            n_c_e += self.n_e * self.n_cp * len(self.delayed_feedback)
+
+        self.n_c_e, self.n_c_i = n_c_e, n_c_i
+        self.n_c = n_c_e + n_c_i
+
     def _create_nlp_parameters(self):
         """
         Create parameter symbols that will be used in the final nlp,
@@ -4354,6 +4426,11 @@ class LocalDAECollocator(CasadiCollocator):
         # We need to know the number of equality and inequality constraints at this point
         n_e = self.c_e.numel()
         n_i = self.c_i.numel()
+        if (n_e, n_i) != (self.n_c_e, self.n_c_i):
+            print "(n_e, self.n_c_e) =", (n_e, self.n_c_e)
+            print "(n_i, self.n_c_i) =", (n_i, self.n_c_i)
+        assert n_e == self.n_c_e
+        assert n_i == self.n_c_i
         n_c = n_e + n_i
 
         self.c_sources = {}
@@ -5964,7 +6041,7 @@ class OptimizationSolver(object):
         # To be safe, only returning copies
         if eqtype == 'initial':      return op.getInitialEquations()
         elif eqtype == 'dae':        return op.getDaeEquations()
-        elif eqtype == 'path_eq':    return N.array(self.collocator.path_eq_orig) 
+        elif eqtype == 'path_eq':    return N.array(self.collocator.path_eq_orig)
         elif eqtype == 'path_ineq':  return N.array(self.collocator.path_ineq_orig)
         elif eqtype == 'point_eq':   return N.array(self.collocator.point_eq_orig)
         elif eqtype == 'point_ineq': return N.array(self.collocator.point_ineq_orig)
