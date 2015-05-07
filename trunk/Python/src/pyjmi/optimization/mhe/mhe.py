@@ -173,8 +173,8 @@ class MHE(object):
         #Specifies backward Euler
         self._opts['n_cp'] = 1
         
-        #REMOVE THIS MAYBE
-        self._opts["IPOPT_options"]["print_level"] = 0
+        #Set the IPOPT options
+        self._opts["IPOPT_options"] = self.MHE_opts['IPOPT_options']
         ###Dirty flag indicating change of the parameters
         self._dirty = False
             
@@ -1474,6 +1474,7 @@ class MHEOptions(OptionBase):
             A list of the input signals which are control signals, 
             i.e. does not include the names of inputs that are used 
             exclusively to insert process noise.
+            Default: Empty list.
             
         process_noise_cov --
             A list describing the covariance structure of the 
@@ -1484,7 +1485,8 @@ class MHEOptions(OptionBase):
             or tuple of length 1 or a string the covariance_matrix 
             can be given as a float or a 1D or 2D numpy array. For 
             lists or tuple of length greater than 1 covariance_matrix 
-            is given as a 2D numpy array. 
+            is given as a 2D numpy array.
+            Default: Empty list.
             
         measurement_cov --
             A list describing the covariance structure of the 
@@ -1496,6 +1498,7 @@ class MHEOptions(OptionBase):
             can be given as a float or a 1D or 2D numpy array. For 
             lists or tuple of length greater than 1 covariance_matrix 
             is given as a 2D numpy array.
+            Default: Empty list.
             
         P0_cov --   
             A list describing the covariance structure of the 
@@ -1507,13 +1510,19 @@ class MHEOptions(OptionBase):
             can be given as a float or a 1D or 2D numpy array. For 
             lists or tuple of length greater than 1 covariance_matrix 
             is given as a 2D numpy array.
+            Default: Empty list.
+            
+        IPOPT_options --
+            IPOPT options for solution of NLP. See IPOPT's 
+            documentation for available options.
+            Default: Empty dictionary.
     """
     def __init__(self, *args, **kw):
         _defaults = {'input_names':[],
                      'process_noise_cov':[],
                      'measurement_cov':[],
                      'P0_cov':[],
-                     }
+                     'IPOPT_options':{}}
         super(MHEOptions, self).__init__(_defaults)
         self.update(*args, **kw)
 
