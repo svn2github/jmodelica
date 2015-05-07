@@ -2134,7 +2134,6 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray_F_def0(R_0_ra* x_
     JMI_ARR(STAT, R_0_r, R_0_ra, y_an, 1, 1)
     if (y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_an, 1, 1, 1)
-        JMI_INI(GEN, jmi_array_rec_1(y_an, 1)->x, 0)
         y_a = y_an;
     }
     jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
@@ -2148,11 +2147,9 @@ void func_Differentiation_AlgorithmDifferentiation_RecordArray__der_F_def1(R_0_r
     JMI_ARR(STAT, R_0_r, R_0_ra, y_a, 1, 1)
     if (_der_y_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, _der_y_an, 1, 1, 1)
-        JMI_INI(GEN, jmi_array_rec_1(_der_y_an, 1)->x, 0)
         _der_y_a = _der_y_an;
     }
     JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, y_a, 1, 1, 1)
-    JMI_INI(GEN, jmi_array_rec_1(y_a, 1)->x, 0)
     jmi_array_rec_1(_der_y_a, 1)->x = jmi_array_rec_1(_der_x_a, 1)->x;
     jmi_array_rec_1(y_a, 1)->x = jmi_array_rec_1(x_a, 1)->x;
     JMI_DYNAMIC_FREE()

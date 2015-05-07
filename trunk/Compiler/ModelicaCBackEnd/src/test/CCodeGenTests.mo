@@ -695,13 +695,12 @@ model CCodeGenTest20
 void func_CCodeGenTests_CCodeGenTest20_fw_def0(jmi_array_t* x_a, jmi_array_t* y_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2)
-    jmi_ad_var_t t_v;
+    JMI_DEF(REA, t_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 2)
     if (y_a == NULL) {
         JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 1, 2, 1, 1)
         y_a = y_an;
     }
-    JMI_INI(GEN, t_v, 0)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 2, 1, 1)
     jmi_array_ref_2(tmp_1, 1,1) = jmi_array_val_2(x_a, 1, 1);
     func_CCodeGenTests_CCodeGenTest20_f_def1(func_CCodeGenTests_CCodeGenTest20_mysum_exp2(tmp_1), y_a);
@@ -723,14 +722,12 @@ void func_CCodeGenTests_CCodeGenTest20_f_def1(jmi_ad_var_t t_v, jmi_array_t* y_a
 
 void func_CCodeGenTests_CCodeGenTest20_mysum_def2(jmi_array_t* x_a, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    jmi_ad_var_t temp_1_v;
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
     jmi_ad_var_t i2_1i;
     jmi_ad_var_t i2_1ie;
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(GEN, temp_1_v, 0)
     temp_1_v = 0.0;
     i1_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
@@ -746,7 +743,7 @@ void func_CCodeGenTests_CCodeGenTest20_mysum_def2(jmi_array_t* x_a, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenTest20_mysum_exp2(jmi_array_t* x_a) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenTest20_mysum_def2(x_a, &y_v);
     return y_v;
 }
@@ -1332,8 +1329,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenExpOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_exp_function(\"CCodeGenTests.CCodeGenExpOp.f\", x_v,\"exp(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1341,7 +1337,7 @@ void func_CCodeGenTests_CCodeGenExpOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenExpOp_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenExpOp_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1377,8 +1373,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenLogOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_log_function(\"CCodeGenTests.CCodeGenLogOp.f\", x_v,\"log(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1386,7 +1381,7 @@ void func_CCodeGenTests_CCodeGenLogOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenLogOp_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenLogOp_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1422,8 +1417,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenLog10Op_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_log10_function(\"CCodeGenTests.CCodeGenLog10Op.f\", x_v,\"log10(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1431,7 +1425,7 @@ void func_CCodeGenTests_CCodeGenLog10Op_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenLog10Op_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenLog10Op_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1467,8 +1461,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenSinhOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_sinh_function(\"CCodeGenTests.CCodeGenSinhOp.f\", x_v,\"sinh(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1476,7 +1469,7 @@ void func_CCodeGenTests_CCodeGenSinhOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenSinhOp_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenSinhOp_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1512,8 +1505,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenCoshOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_cosh_function(\"CCodeGenTests.CCodeGenCoshOp.f\", x_v,\"cosh(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1521,7 +1513,7 @@ void func_CCodeGenTests_CCodeGenCoshOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenCoshOp_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenCoshOp_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1557,8 +1549,7 @@ $C_functions$
 
 void func_CCodeGenTests_CCodeGenTanOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_tan_function(\"CCodeGenTests.CCodeGenTanOp.f\", x_v,\"tan(x)\");
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -1566,7 +1557,7 @@ void func_CCodeGenTests_CCodeGenTanOp_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CCodeGenTanOp_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CCodeGenTanOp_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -1685,8 +1676,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp0(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunction1_def0(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(REA, o1_v)
     o1_v = i1_v;
     JMI_RET(GEN, o1_o, o1_v)
     JMI_DYNAMIC_FREE()
@@ -1694,7 +1684,7 @@ void func_CCodeGenTests_TestFunction1_def0(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp0(jmi_ad_var_t i1_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction1_def0(i1_v, &o1_v);
     return o1_v;
 }
@@ -1729,10 +1719,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var
 
 void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
     o1_v = 0;
     o2_v = i2_v;
     o1_v = i1_v;
@@ -1743,14 +1731,14 @@ void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction2_def0(i1_v, i2_v, &o1_v, NULL);
     return o1_v;
 }
 
 
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     func_CCodeGenTests_TestFunction2_def0(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), &tmp_1, &tmp_2);
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_y_1);
@@ -1782,10 +1770,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var
 
 void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
     o1_v = 0;
     o2_v = i2_v;
     o1_v = i1_v;
@@ -1796,7 +1782,7 @@ void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction2_def0(i1_v, i2_v, &o1_v, NULL);
     return o1_v;
 }
@@ -1834,10 +1820,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp1(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
     o1_v = 0;
     o2_v = i2_v;
     o1_v = i1_v;
@@ -1848,15 +1832,14 @@ void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction2_def0(i1_v, i2_v, &o1_v, NULL);
     return o1_v;
 }
 
 void func_CCodeGenTests_TestFunction1_def1(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(REA, o1_v)
     o1_v = i1_v;
     JMI_RET(GEN, o1_o, o1_v)
     JMI_DYNAMIC_FREE()
@@ -1864,7 +1847,7 @@ void func_CCodeGenTests_TestFunction1_def1(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp1(jmi_ad_var_t i1_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction1_def1(i1_v, &o1_v);
     return o1_v;
 }
@@ -1900,12 +1883,9 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp0(jmi_ad_var_t i1_v, jmi_ad_var
 
 void func_CCodeGenTests_TestFunction3_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o, jmi_ad_var_t* o3_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    jmi_ad_var_t o3_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
-    JMI_INI(GEN, o3_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
+    JMI_DEF(REA, o3_v)
     o1_v = i1_v + i2_v + i3_v;
     o2_v = i2_v + i3_v;
     o3_v = i1_v + i2_v;
@@ -1917,14 +1897,14 @@ void func_CCodeGenTests_TestFunction3_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction3_def0(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
     return o1_v;
 }
 
 
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     func_CCodeGenTests_TestFunction3_def0(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_1, &tmp_2, NULL);
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_y_1);
@@ -1956,12 +1936,9 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp0(jmi_ad_var_t i1_v, jmi_ad_var
 
 void func_CCodeGenTests_TestFunction3_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o, jmi_ad_var_t* o3_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    jmi_ad_var_t o3_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
-    JMI_INI(GEN, o3_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
+    JMI_DEF(REA, o3_v)
     o1_v = i1_v + i2_v + i3_v;
     o2_v = i2_v + i3_v;
     o3_v = i1_v + i2_v;
@@ -1973,14 +1950,14 @@ void func_CCodeGenTests_TestFunction3_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction3_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t i3_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction3_def0(i1_v, i2_v, i3_v, &o1_v, NULL, NULL);
     return o1_v;
 }
 
 
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     func_CCodeGenTests_TestFunction3_def0(AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2), AD_WRAP_LITERAL(3), &tmp_1, NULL, &tmp_2);
     (*res)[0] = tmp_1 - (_x_0);
     (*res)[1] = tmp_2 - (_z_1);
@@ -2010,10 +1987,8 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var
 
 void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v, jmi_ad_var_t* o1_o, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    jmi_ad_var_t o2_v;
-    JMI_INI(GEN, o1_v, 0)
-    JMI_INI(GEN, o2_v, 0)
+    JMI_DEF(REA, o1_v)
+    JMI_DEF(REA, o2_v)
     o1_v = 0;
     o2_v = i2_v;
     o1_v = i1_v;
@@ -2024,7 +1999,7 @@ void func_CCodeGenTests_TestFunction2_def0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v,
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction2_exp0(jmi_ad_var_t i1_v, jmi_ad_var_t i2_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction2_def0(i1_v, i2_v, &o1_v, NULL);
     return o1_v;
 }
@@ -2058,8 +2033,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp1(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunctionCallingFunction_def0(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(REA, o1_v)
     o1_v = func_CCodeGenTests_TestFunction1_exp1(i1_v);
     JMI_RET(GEN, o1_o, o1_v)
     JMI_DYNAMIC_FREE()
@@ -2067,15 +2041,14 @@ void func_CCodeGenTests_TestFunctionCallingFunction_def0(jmi_ad_var_t i1_v, jmi_
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunctionCallingFunction_exp0(jmi_ad_var_t i1_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunctionCallingFunction_def0(i1_v, &o1_v);
     return o1_v;
 }
 
 void func_CCodeGenTests_TestFunction1_def1(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(REA, o1_v)
     o1_v = i1_v;
     JMI_RET(GEN, o1_o, o1_v)
     JMI_DYNAMIC_FREE()
@@ -2083,7 +2056,7 @@ void func_CCodeGenTests_TestFunction1_def1(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction1_exp1(jmi_ad_var_t i1_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction1_def1(i1_v, &o1_v);
     return o1_v;
 }
@@ -2113,8 +2086,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp0(jmi_ad_var_t i1_v);
 
 void func_CCodeGenTests_TestFunctionRecursive_def0(jmi_ad_var_t i1_v, jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(INT, o1_v)
     if (COND_EXP_LT(i1_v, 3, JMI_TRUE, JMI_FALSE)) {
         o1_v = 1;
     } else {
@@ -2126,7 +2098,7 @@ void func_CCodeGenTests_TestFunctionRecursive_def0(jmi_ad_var_t i1_v, jmi_ad_var
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunctionRecursive_exp0(jmi_ad_var_t i1_v) {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(INT, o1_v)
     func_CCodeGenTests_TestFunctionRecursive_def0(i1_v, &o1_v);
     return o1_v;
 }
@@ -2157,8 +2129,7 @@ jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp0();
 
 void func_CCodeGenTests_TestFunction0_def0(jmi_ad_var_t* o1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o1_v;
-    JMI_INI(GEN, o1_v, 0)
+    JMI_DEF(REA, o1_v)
     o1_v = 0;
     JMI_RET(GEN, o1_o, o1_v)
     JMI_DYNAMIC_FREE()
@@ -2166,7 +2137,7 @@ void func_CCodeGenTests_TestFunction0_def0(jmi_ad_var_t* o1_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestFunction0_exp0() {
-    jmi_ad_var_t o1_v;
+    JMI_DEF(REA, o1_v)
     func_CCodeGenTests_TestFunction0_def0(&o1_v);
     return o1_v;
 }
@@ -2571,12 +2542,10 @@ model CForLoop1
             generatedCode="
 void func_CCodeGenTests_CForLoop1_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, o_v)
+    JMI_DEF(REA, x_v)
     jmi_ad_var_t i_0i;
     jmi_ad_var_t i_0ie;
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v, 0)
     o_v = 1.0;
     x_v = 0;
     i_0ie = 3 + 1 / 2.0;
@@ -2589,7 +2558,7 @@ void func_CCodeGenTests_CForLoop1_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop1_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CForLoop1_f_def0(&o_v);
     return o_v;
 }
@@ -2620,13 +2589,11 @@ model CForLoop2
             generatedCode="
 void func_CCodeGenTests_CForLoop2_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, o_v)
+    JMI_DEF(REA, x_v)
     jmi_ad_var_t i_0i;
     int i_0ii;
     jmi_ad_var_t i_0ia[3];
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v, 0)
     o_v = 1.0;
     x_v = 0;
     i_0ia[0] = 2;
@@ -2642,7 +2609,7 @@ void func_CCodeGenTests_CForLoop2_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop2_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CForLoop2_f_def0(&o_v);
     return o_v;
 }
@@ -2673,12 +2640,10 @@ model CForLoop3
             generatedCode="
 void func_CCodeGenTests_CForLoop3_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, o_v)
+    JMI_DEF(REA, x_v)
     jmi_ad_var_t i_0i;
     jmi_ad_var_t i_0ie;
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v, 0)
     o_v = 1.0;
     x_v = 0;
     i_0ie = 1 + -1 / 2.0;
@@ -2691,7 +2656,7 @@ void func_CCodeGenTests_CForLoop3_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop3_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CForLoop3_f_def0(&o_v);
     return o_v;
 }
@@ -2723,12 +2688,10 @@ model CForLoop4
             generatedCode="
 void func_CCodeGenTests_CForLoop4_f_def0(jmi_ad_var_t i_v, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, o_v)
+    JMI_DEF(REA, x_v)
     jmi_ad_var_t i_0i;
     jmi_ad_var_t i_0ie;
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v, 0)
     o_v = 1.0;
     x_v = 0;
     i_0ie = 1 + i_0i / 2.0;
@@ -2741,7 +2704,7 @@ void func_CCodeGenTests_CForLoop4_f_def0(jmi_ad_var_t i_v, jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CForLoop4_f_exp0(jmi_ad_var_t i_v) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CForLoop4_f_def0(i_v, &o_v);
     return o_v;
 }
@@ -2779,8 +2742,7 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp0(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput1_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -2788,7 +2750,7 @@ void func_CCodeGenTests_CArrayInput1_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* ou
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput1_f_exp0(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput1_f_def0(inp_a, &out_v);
     return out_v;
 }
@@ -2832,8 +2794,7 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp0(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput2_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -2841,7 +2802,7 @@ void func_CCodeGenTests_CArrayInput2_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* ou
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput2_f_exp0(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput2_f_def0(inp_a, &out_v);
     return out_v;
 }
@@ -2885,8 +2846,7 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp0(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput3_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -2894,7 +2854,7 @@ void func_CCodeGenTests_CArrayInput3_f_def0(jmi_array_t* inp_a, jmi_ad_var_t* ou
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput3_f_exp0(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput3_f_def0(inp_a, &out_v);
     return out_v;
 }
@@ -2958,9 +2918,8 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp1(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput4_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
-    JMI_INI(GEN, out_v, 0)
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
@@ -2973,15 +2932,14 @@ void func_CCodeGenTests_CArrayInput4_f1_def0(jmi_ad_var_t* out_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f1_exp0() {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput4_f1_def0(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput4_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -2989,7 +2947,7 @@ void func_CCodeGenTests_CArrayInput4_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput4_f2_exp1(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput4_f2_def1(inp_a, &out_v);
     return out_v;
 }
@@ -3033,11 +2991,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp1(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput5_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    jmi_ad_var_t t_v;
+    JMI_DEF(REA, out_v)
+    JMI_DEF(REA, t_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
-    JMI_INI(GEN, out_v, 0)
-    JMI_INI(GEN, t_v, 0)
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
@@ -3050,17 +3006,15 @@ void func_CCodeGenTests_CArrayInput5_f1_def0(jmi_ad_var_t* out_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f1_exp0() {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput5_f1_def0(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput5_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out1_o, jmi_ad_var_t* out2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out1_v;
-    jmi_ad_var_t out2_v;
-    JMI_INI(GEN, out1_v, 0)
-    JMI_INI(GEN, out2_v, 0)
+    JMI_DEF(REA, out1_v)
+    JMI_DEF(REA, out2_v)
     out1_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     out2_v = jmi_max(jmi_max(jmi_array_val_1(inp_a, 1), jmi_array_val_1(inp_a, 2)), jmi_array_val_1(inp_a, 3));
     JMI_RET(GEN, out1_o, out1_v)
@@ -3070,7 +3024,7 @@ void func_CCodeGenTests_CArrayInput5_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput5_f2_exp1(jmi_array_t* inp_a) {
-    jmi_ad_var_t out1_v;
+    JMI_DEF(REA, out1_v)
     func_CCodeGenTests_CArrayInput5_f2_def1(inp_a, &out1_v, NULL);
     return out1_v;
 }
@@ -3118,13 +3072,12 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp1(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
-    JMI_INI(GEN, out_v, 0)
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
@@ -3154,15 +3107,14 @@ void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t* out_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp0() {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput6_f1_def0(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput6_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -3170,7 +3122,7 @@ void func_CCodeGenTests_CArrayInput6_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp1(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput6_f2_def1(inp_a, &out_v);
     return out_v;
 }
@@ -3214,10 +3166,9 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp1(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput7_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
-    JMI_INI(GEN, out_v, 0)
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
@@ -3236,15 +3187,14 @@ void func_CCodeGenTests_CArrayInput7_f1_def0(jmi_ad_var_t* out_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f1_exp0() {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput7_f1_def0(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput7_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -3252,7 +3202,7 @@ void func_CCodeGenTests_CArrayInput7_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput7_f2_exp1(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput7_f2_def1(inp_a, &out_v);
     return out_v;
 }
@@ -3296,14 +3246,13 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp1(jmi_array_t* inp_a);
 
 void func_CCodeGenTests_CArrayInput8_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
     jmi_ad_var_t i_0i;
     int i_0ii;
     jmi_ad_var_t i_0ia[2];
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
-    JMI_INI(GEN, out_v, 0)
     out_v = 1.0;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
@@ -3329,15 +3278,14 @@ void func_CCodeGenTests_CArrayInput8_f1_def0(jmi_ad_var_t* out_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f1_exp0() {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput8_f1_def0(&out_v);
     return out_v;
 }
 
 void func_CCodeGenTests_CArrayInput8_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t out_v;
-    JMI_INI(GEN, out_v, 0)
+    JMI_DEF(REA, out_v)
     out_v = jmi_array_val_1(inp_a, 1) + jmi_array_val_1(inp_a, 2) + jmi_array_val_1(inp_a, 3);
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
@@ -3345,7 +3293,7 @@ void func_CCodeGenTests_CArrayInput8_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp1(jmi_array_t* inp_a) {
-    jmi_ad_var_t out_v;
+    JMI_DEF(REA, out_v)
     func_CCodeGenTests_CArrayInput8_f2_def1(inp_a, &out_v);
     return out_v;
 }
@@ -3486,11 +3434,9 @@ void func_CCodeGenTests_CArrayOutputs3_f2_def1(jmi_array_t* o_a);
 
 void func_CCodeGenTests_CArrayOutputs3_f1_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, o_v)
+    JMI_DEF(REA, x_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1)
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v, 0)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
     o_v = 0;
     func_CCodeGenTests_CArrayOutputs3_f2_def1(temp_1_a);
@@ -3501,7 +3447,7 @@ void func_CCodeGenTests_CArrayOutputs3_f1_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayOutputs3_f1_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CArrayOutputs3_f1_def0(&o_v);
     return o_v;
 }
@@ -3562,12 +3508,10 @@ void func_CCodeGenTests_CArrayOutputs4_f2_def1(jmi_array_t* o1_a, jmi_ad_var_t* 
 
 void func_CCodeGenTests_CArrayOutputs4_f1_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1)
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
-    JMI_INI(GEN, y_v, 0)
     o_v = 0;
     func_CCodeGenTests_CArrayOutputs4_f2_def1(x_a, &y_v);
     JMI_RET(GEN, o_o, o_v)
@@ -3576,7 +3520,7 @@ void func_CCodeGenTests_CArrayOutputs4_f1_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayOutputs4_f1_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CArrayOutputs4_f1_def0(&o_v);
     return o_v;
 }
@@ -3584,12 +3528,11 @@ jmi_ad_var_t func_CCodeGenTests_CArrayOutputs4_f1_exp0() {
 void func_CCodeGenTests_CArrayOutputs4_f2_def1(jmi_array_t* o1_a, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, o1_an, 2, 1)
-    jmi_ad_var_t o2_v;
+    JMI_DEF(REA, o2_v)
     if (o1_a == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, o1_an, 2, 1, 2)
         o1_a = o1_an;
     }
-    JMI_INI(GEN, o2_v, 0)
     jmi_array_ref_1(o1_a, 1) = 1;
     jmi_array_ref_1(o1_a, 2) = 2;
     o2_v = 3;
@@ -3643,12 +3586,10 @@ void func_CCodeGenTests_CArrayOutputs5_f2_def1(jmi_array_t* i_a, jmi_array_t* o1
 
 void func_CCodeGenTests_CArrayOutputs5_f1_def0(jmi_array_t* i_a, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1)
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
-    JMI_INI(GEN, y_v, 0)
     o_v = 0;
     func_CCodeGenTests_CArrayOutputs5_f2_def1(i_a, x_a, &y_v);
     JMI_RET(GEN, o_o, o_v)
@@ -3657,7 +3598,7 @@ void func_CCodeGenTests_CArrayOutputs5_f1_def0(jmi_array_t* i_a, jmi_ad_var_t* o
 }
 
 jmi_ad_var_t func_CCodeGenTests_CArrayOutputs5_f1_exp0(jmi_array_t* i_a) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CArrayOutputs5_f1_def0(i_a, &o_v);
     return o_v;
 }
@@ -3665,12 +3606,11 @@ jmi_ad_var_t func_CCodeGenTests_CArrayOutputs5_f1_exp0(jmi_array_t* i_a) {
 void func_CCodeGenTests_CArrayOutputs5_f2_def1(jmi_array_t* i_a, jmi_array_t* o1_a, jmi_ad_var_t* o2_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, o1_an, 2, 1)
-    jmi_ad_var_t o2_v;
+    JMI_DEF(REA, o2_v)
     if (o1_a == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, o1_an, 2, 1, 2)
         o1_a = o1_an;
     }
-    JMI_INI(GEN, o2_v, 0)
     jmi_array_ref_1(o1_a, 1) = jmi_array_val_1(i_a, 1);
     jmi_array_ref_1(o1_a, 2) = jmi_array_val_1(i_a, 2);
     o2_v = 3;
@@ -3771,7 +3711,7 @@ void func_CCodeGenTests_CUnknownArray2_f_def0(jmi_array_t* x_a, jmi_array_t* y_a
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, -1, 2)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 2)
-    jmi_ad_var_t temp_2_v;
+    JMI_DEF(REA, temp_2_v)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, temp_3_a, 4, 2)
     jmi_ad_var_t i3_0i;
     jmi_ad_var_t i3_0ie;
@@ -3783,7 +3723,6 @@ void func_CCodeGenTests_CUnknownArray2_f_def0(jmi_array_t* x_a, jmi_array_t* y_a
     jmi_ad_var_t i1_3ie;
     jmi_ad_var_t i2_4i;
     jmi_ad_var_t i2_4ie;
-    JMI_INI(GEN, temp_2_v, 0)
     JMI_ARRAY_INIT_2(STAT, jmi_ad_var_t, jmi_array_t, temp_3_a, 4, 2, 2, 2)
     if (y_a == NULL) {
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, jmi_array_size(x_a, 0) * 2, 2, jmi_array_size(x_a, 0), 2)
@@ -3856,9 +3795,8 @@ model CUnknownArray3
             generatedCode="
 void func_CCodeGenTests_CUnknownArray3_f1_def0(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y1_v;
+    JMI_DEF(REA, y1_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
-    JMI_INI(GEN, y1_v, 0)
     JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(x1_a, 0), 1, jmi_array_size(x1_a, 0))
     func_CCodeGenTests_CUnknownArray3_f2_def2(x1_a, temp_1_a);
     y1_v = func_CCodeGenTests_CUnknownArray3_f3_exp1(temp_1_a);
@@ -3868,19 +3806,17 @@ void func_CCodeGenTests_CUnknownArray3_f1_def0(jmi_array_t* x1_a, jmi_ad_var_t* 
 }
 
 jmi_ad_var_t func_CCodeGenTests_CUnknownArray3_f1_exp0(jmi_array_t* x1_a) {
-    jmi_ad_var_t y1_v;
+    JMI_DEF(REA, y1_v)
     func_CCodeGenTests_CUnknownArray3_f1_def0(x1_a, &y1_v);
     return y1_v;
 }
 
 void func_CCodeGenTests_CUnknownArray3_f3_def1(jmi_array_t* x3_a, jmi_ad_var_t* y3_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y3_v;
-    jmi_ad_var_t temp_1_v;
+    JMI_DEF(REA, y3_v)
+    JMI_DEF(REA, temp_1_v)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
-    JMI_INI(GEN, y3_v, 0)
-    JMI_INI(GEN, temp_1_v, 0)
     temp_1_v = 0.0;
     i1_0ie = jmi_array_size(x3_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
@@ -3893,7 +3829,7 @@ void func_CCodeGenTests_CUnknownArray3_f3_def1(jmi_array_t* x3_a, jmi_ad_var_t* 
 }
 
 jmi_ad_var_t func_CCodeGenTests_CUnknownArray3_f3_exp1(jmi_array_t* x3_a) {
-    jmi_ad_var_t y3_v;
+    JMI_DEF(REA, y3_v)
     func_CCodeGenTests_CUnknownArray3_f3_def1(x3_a, &y3_v);
     return y3_v;
 }
@@ -3951,14 +3887,13 @@ equation
 void func_CCodeGenTests_CUnknownArray4_fw_def0(jmi_array_t* i_a, jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, o_an, -1, 1)
-    jmi_ad_var_t dummy_v;
+    JMI_DEF(REA, dummy_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, -1, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
     jmi_ad_var_t i1_1i;
     jmi_ad_var_t i1_1ie;
-    JMI_INI(GEN, dummy_v, 0)
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, o_an, jmi_array_size(i_a, 0), 1, jmi_array_size(i_a, 0))
         o_a = o_an;
@@ -3986,10 +3921,9 @@ void func_CCodeGenTests_CUnknownArray4_fw_def0(jmi_array_t* i_a, jmi_array_t* o_
 void func_CCodeGenTests_CUnknownArray4_f_def1(jmi_array_t* i_a, jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, o_an, -1, 1)
-    jmi_ad_var_t dummy_v;
+    JMI_DEF(REA, dummy_v)
     jmi_ad_var_t i1_2i;
     jmi_ad_var_t i1_2ie;
-    JMI_INI(GEN, dummy_v, 0)
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, o_an, jmi_array_size(i_a, 0), 1, jmi_array_size(i_a, 0))
         o_a = o_an;
@@ -4178,15 +4112,15 @@ model CUnknownArray7
 void func_CCodeGenTests_CUnknownArray7_f_def0(jmi_ad_var_t m_v, R1_1_ra* o_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNA, R1_1_r, R1_1_ra, o_an, -1, 2)
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_1_max;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_2_max;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_1_max)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_2_max)
     JMI_ARR(DYNA, R1_1_r, R1_1_ra, temp_1_a, -1, 1)
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_3_max;
-    jmi_ad_var_t tmp_4;
-    jmi_ad_var_t tmp_4_max;
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_3_max)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_4_max)
     jmi_ad_var_t i_0i;
     jmi_ad_var_t i_0ie;
     jmi_ad_var_t i2_1i;
@@ -4282,12 +4216,10 @@ void func_CCodeGenTests_CUnknownArray8_f_def0(jmi_array_t* a_a, jmi_array_t* b_a
 
 void func_CCodeGenTests_CUnknownArray8_l_def1(jmi_array_t* x_a, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    jmi_ad_var_t temp_1_v;
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, temp_1_v)
     jmi_ad_var_t i1_2i;
     jmi_ad_var_t i1_2ie;
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(GEN, temp_1_v, 0)
     temp_1_v = 0.0;
     i1_2ie = jmi_array_size(x_a, 0) + 1 / 2.0;
     for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
@@ -4300,7 +4232,7 @@ void func_CCodeGenTests_CUnknownArray8_l_def1(jmi_array_t* x_a, jmi_ad_var_t* y_
 }
 
 jmi_ad_var_t func_CCodeGenTests_CUnknownArray8_l_exp1(jmi_array_t* x_a) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_CUnknownArray8_l_def1(x_a, &y_v);
     return y_v;
 }
@@ -4583,11 +4515,8 @@ model CRecordDecl5
             generatedCode="
 void func_CCodeGenTests_CRecordDecl5_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_RECORD_STATIC(A_0_r, x_v)
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v->a, 0)
-    JMI_INI(GEN, x_v->b, 0)
     x_v->a = 1;
     x_v->b = 2;
     o_v = x_v->a;
@@ -4597,7 +4526,7 @@ void func_CCodeGenTests_CRecordDecl5_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl5_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl5_f_def0(&o_v);
     return o_v;
 }
@@ -4637,12 +4566,9 @@ model CRecordDecl6
             generatedCode="
 void func_CCodeGenTests_CRecordDecl6_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_RECORD_STATIC(A_1_r, x_v)
     JMI_RECORD_STATIC(B_0_r, tmp_1)
-    JMI_INI(GEN, o_v, 0)
-    JMI_INI(GEN, x_v->a, 0)
-    JMI_INI(GEN, tmp_1->c, 0)
     x_v->b = tmp_1;
     x_v->a = 1;
     x_v->b->c = 2;
@@ -4653,7 +4579,7 @@ void func_CCodeGenTests_CRecordDecl6_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl6_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl6_f_def0(&o_v);
     return o_v;
 }
@@ -4686,10 +4612,9 @@ model CRecordDecl7
             generatedCode="
 void func_CCodeGenTests_CRecordDecl7_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_RECORD_STATIC(A_0_r, x_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_INI(GEN, o_v, 0)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     x_v->a = tmp_1;
     jmi_array_ref_1(x_v->a, 1) = 1;
@@ -4701,7 +4626,7 @@ void func_CCodeGenTests_CRecordDecl7_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl7_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl7_f_def0(&o_v);
     return o_v;
 }
@@ -4741,27 +4666,17 @@ model CRecordDecl8
             generatedCode="
 void func_CCodeGenTests_CRecordDecl8_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     JMI_ARR(STAT, A_1_r, A_1_ra, x_a, 3, 1)
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_1, 2, 1)
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_2, 2, 1)
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_3, 2, 1)
-    JMI_INI(GEN, o_v, 0)
     JMI_ARRAY_INIT_1(STAT, A_1_r, A_1_ra, x_a, 3, 1, 3)
-    JMI_INI(GEN, jmi_array_rec_1(x_a, 1)->a, 0)
     JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_1, 2, 1, 2)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_1, 1)->c, 0)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_1, 2)->c, 0)
     jmi_array_rec_1(x_a, 1)->b = tmp_1;
-    JMI_INI(GEN, jmi_array_rec_1(x_a, 2)->a, 0)
     JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_2, 2, 1, 2)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_2, 1)->c, 0)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_2, 2)->c, 0)
     jmi_array_rec_1(x_a, 2)->b = tmp_2;
-    JMI_INI(GEN, jmi_array_rec_1(x_a, 3)->a, 0)
     JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_3, 2, 1, 2)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_3, 1)->c, 0)
-    JMI_INI(GEN, jmi_array_rec_1(tmp_3, 2)->c, 0)
     jmi_array_rec_1(x_a, 3)->b = tmp_3;
     jmi_array_rec_1(x_a, 1)->a = 1;
     jmi_array_rec_1(jmi_array_rec_1(x_a, 1)->b, 1)->c = 2;
@@ -4779,7 +4694,7 @@ void func_CCodeGenTests_CRecordDecl8_f_def0(jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl8_f_exp0() {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl8_f_def0(&o_v);
     return o_v;
 }
@@ -4821,8 +4736,6 @@ void func_CCodeGenTests_CRecordDecl9_f_def0(A_0_r* x_v) {
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(A_0_r, x_vn)
     if (x_v == NULL) {
-        JMI_INI(GEN, x_vn->a, 0)
-        JMI_INI(GEN, x_vn->b, 0)
         x_v = x_vn;
     }
     x_v->a = 1;
@@ -4878,8 +4791,6 @@ void func_CCodeGenTests_CRecordDecl10_f_def0(A_1_r* x_v) {
     JMI_RECORD_STATIC(A_1_r, x_vn)
     JMI_RECORD_STATIC(B_0_r, tmp_1)
     if (x_v == NULL) {
-        JMI_INI(GEN, x_vn->a, 0)
-        JMI_INI(GEN, tmp_1->c, 0)
         x_vn->b = tmp_1;
         x_v = x_vn;
     }
@@ -4996,20 +4907,11 @@ void func_CCodeGenTests_CRecordDecl12_f_def0(A_1_ra* x_a) {
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_3, 2, 1)
     if (x_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, A_1_r, A_1_ra, x_an, 3, 1, 3)
-        JMI_INI(GEN, jmi_array_rec_1(x_an, 1)->a, 0)
         JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_1, 2, 1, 2)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_1, 1)->c, 0)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_1, 2)->c, 0)
         jmi_array_rec_1(x_an, 1)->b = tmp_1;
-        JMI_INI(GEN, jmi_array_rec_1(x_an, 2)->a, 0)
         JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_2, 2, 1, 2)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_2, 1)->c, 0)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_2, 2)->c, 0)
         jmi_array_rec_1(x_an, 2)->b = tmp_2;
-        JMI_INI(GEN, jmi_array_rec_1(x_an, 3)->a, 0)
         JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_3, 2, 1, 2)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_3, 1)->c, 0)
-        JMI_INI(GEN, jmi_array_rec_1(tmp_3, 2)->c, 0)
         jmi_array_rec_1(x_an, 3)->b = tmp_3;
         x_a = x_an;
     }
@@ -5086,8 +4988,7 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl13_f_exp0(A_0_r* x_v);
 
 void func_CCodeGenTests_CRecordDecl13_f_def0(A_0_r* x_v, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, o_v)
     o_v = x_v->a;
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -5095,7 +4996,7 @@ void func_CCodeGenTests_CRecordDecl13_f_def0(A_0_r* x_v, jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl13_f_exp0(A_0_r* x_v) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl13_f_def0(x_v, &o_v);
     return o_v;
 }
@@ -5147,8 +5048,7 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl14_f_exp0(A_1_r* x_v);
 
 void func_CCodeGenTests_CRecordDecl14_f_def0(A_1_r* x_v, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, o_v)
     o_v = x_v->b->c;
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -5156,7 +5056,7 @@ void func_CCodeGenTests_CRecordDecl14_f_def0(A_1_r* x_v, jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl14_f_exp0(A_1_r* x_v) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl14_f_def0(x_v, &o_v);
     return o_v;
 }
@@ -5205,8 +5105,7 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl15_f_exp0(A_0_r* x_v);
 
 void func_CCodeGenTests_CRecordDecl15_f_def0(A_0_r* x_v, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, o_v)
     o_v = jmi_array_val_1(x_v->a, 1);
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -5214,7 +5113,7 @@ void func_CCodeGenTests_CRecordDecl15_f_def0(A_0_r* x_v, jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl15_f_exp0(A_0_r* x_v) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl15_f_def0(x_v, &o_v);
     return o_v;
 }
@@ -5269,8 +5168,7 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a);
 
 void func_CCodeGenTests_CRecordDecl16_f_def0(A_1_ra* x_a, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t o_v;
-    JMI_INI(GEN, o_v, 0)
+    JMI_DEF(REA, o_v)
     o_v = jmi_array_rec_1(jmi_array_rec_1(x_a, 1)->b, 2)->c;
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -5278,7 +5176,7 @@ void func_CCodeGenTests_CRecordDecl16_f_def0(A_1_ra* x_a, jmi_ad_var_t* o_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a) {
-    jmi_ad_var_t o_v;
+    JMI_DEF(REA, o_v)
     func_CCodeGenTests_CRecordDecl16_f_def0(x_a, &o_v);
     return o_v;
 }
@@ -5510,8 +5408,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     b_v = f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -5519,7 +5416,7 @@ void func_CCodeGenTests_SimpleExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal1_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternal1_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -5555,8 +5452,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_f_exp0(jmi_ad_var_t a_v, jmi_ad_
 
 void func_CCodeGenTests_SimpleExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, c_v)
     c_v = f(a_v, b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -5564,7 +5460,7 @@ void func_CCodeGenTests_SimpleExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal2_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternal2_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -5598,8 +5494,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     b_v = my_f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -5607,7 +5502,7 @@ void func_CCodeGenTests_SimpleExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal3_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternal3_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -5641,8 +5536,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     my_f(a_v, &b_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -5650,7 +5544,7 @@ void func_CCodeGenTests_SimpleExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal4_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternal4_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -5748,8 +5642,7 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_f_exp0(jmi_ad_var_t a_v, jmi_ad_
 
 void func_CCodeGenTests_SimpleExternal7_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, c_v)
     my_f(a_v, &c_v, b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -5757,7 +5650,7 @@ void func_CCodeGenTests_SimpleExternal7_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal7_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternal7_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -5795,10 +5688,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal8_f_exp0(jmi_ad_var_t a_v, jmi_ad_
 
 void func_CCodeGenTests_SimpleExternal8_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
     my_f(a_v, &c_v, b_v, &d_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -5807,7 +5698,7 @@ void func_CCodeGenTests_SimpleExternal8_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal8_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternal8_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -5845,10 +5736,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal9_f_exp0(jmi_ad_var_t a_v, jmi_ad_
 
 void func_CCodeGenTests_SimpleExternal9_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
     d_v = my_f(a_v, b_v, &c_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -5857,7 +5746,7 @@ void func_CCodeGenTests_SimpleExternal9_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal9_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternal9_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -5897,12 +5786,9 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternal10_f_exp0(jmi_ad_var_t a_v, jmi_ad
 
 void func_CCodeGenTests_SimpleExternal10_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    jmi_ad_var_t e_v;
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
-    JMI_INI(GEN, e_v, 0)
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
+    JMI_DEF(REA, e_v)
     d_v = my_f(a_v, &c_v, b_v, &e_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -5912,7 +5798,7 @@ void func_CCodeGenTests_SimpleExternal10_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternal10_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternal10_f_def0(a_v, b_v, &c_v, NULL, NULL);
     return c_v;
 }
@@ -5946,9 +5832,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal1_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_IntegerExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    jmi_int_t tmp_1;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
+    JMI_DEF(INT_EXT, tmp_1)
     tmp_1 = (int)a_v;
     b_v = f(tmp_1);
     JMI_RET(GEN, b_o, b_v)
@@ -5957,7 +5842,7 @@ void func_CCodeGenTests_IntegerExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* 
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternal1_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternal1_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -5991,8 +5876,7 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal2_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_IntegerExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(INT, b_v)
     b_v = f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -6000,7 +5884,7 @@ void func_CCodeGenTests_IntegerExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* 
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternal2_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(INT, b_v)
     func_CCodeGenTests_IntegerExternal2_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -6034,9 +5918,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal3_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_IntegerExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    jmi_int_t tmp_1;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(INT, b_v)
+    JMI_DEF(INT_EXT, tmp_1)
     tmp_1 = (int)b_v;
     my_f(a_v, &tmp_1);
     b_v = tmp_1;
@@ -6046,7 +5929,7 @@ void func_CCodeGenTests_IntegerExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* 
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternal3_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(INT, b_v)
     func_CCodeGenTests_IntegerExternal3_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -6084,13 +5967,11 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal4_f_exp0(jmi_ad_var_t a_v, jmi_ad
 
 void func_CCodeGenTests_IntegerExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    jmi_int_t tmp_1;
-    jmi_int_t tmp_2;
-    jmi_int_t tmp_3;
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
+    JMI_DEF(INT, c_v)
+    JMI_DEF(INT, d_v)
+    JMI_DEF(INT_EXT, tmp_1)
+    JMI_DEF(INT_EXT, tmp_2)
+    JMI_DEF(INT_EXT, tmp_3)
     tmp_1 = (int)a_v;
     tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
@@ -6103,7 +5984,7 @@ void func_CCodeGenTests_IntegerExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternal4_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(INT, c_v)
     func_CCodeGenTests_IntegerExternal4_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -6139,8 +6020,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp0(jmi_ad_var_t a_v, jmi_ad
 
 void func_CCodeGenTests_ExternalLiteral1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, c_v)
     my_f(a_v, b_v, 10);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -6148,7 +6028,7 @@ void func_CCodeGenTests_ExternalLiteral1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalLiteral1_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_ExternalLiteral1_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -6184,8 +6064,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp0(jmi_ad_var_t a_v, jmi_ad
 
 void func_CCodeGenTests_ExternalLiteral2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, c_v)
     my_f(a_v, 20, b_v, 10);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -6193,7 +6072,7 @@ void func_CCodeGenTests_ExternalLiteral2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalLiteral2_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_ExternalLiteral2_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -6225,8 +6104,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp0();
 
 void func_CCodeGenTests_ExternalLiteral3_f_def0(jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, c_v)
     my_f(10, 20, 30);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -6234,7 +6112,7 @@ void func_CCodeGenTests_ExternalLiteral3_f_def0(jmi_ad_var_t* c_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalLiteral3_f_exp0() {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_ExternalLiteral3_f_def0(&c_v);
     return c_v;
 }
@@ -6277,12 +6155,10 @@ jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f2_exp1(jmi_ad_var_t x_v);
 
 void func_CCodeGenTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
-    JMI_INI(GEN, y_v, 0)
     c_v = 3;
     jmi_array_ref_1(d_a, 1) = 3;
     y_v = f(x_v, c_v, d_a->var);
@@ -6292,19 +6168,17 @@ void func_CCodeGenTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f1_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_ExternalConstant1_f1_def0(x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, c_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
-    JMI_INI(GEN, y_v, 0)
     c_v = 3;
     jmi_array_ref_1(d_a, 1) = 3;
     y_v = f2(x_v, c_v, d_a->var, jmi_array_size(d_a, 0));
@@ -6314,7 +6188,7 @@ void func_CCodeGenTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalConstant1_f2_exp1(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_ExternalConstant1_f2_def1(x_v, &y_v);
     return y_v;
 }
@@ -6345,8 +6219,7 @@ model IntegerInFunc1
             generatedCode="
 void func_CCodeGenTests_IntegerInFunc1_f_def0(jmi_ad_var_t i_v, jmi_array_t* a_a, jmi_ad_var_t* x_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t x_v;
-    JMI_INI(GEN, x_v, 0)
+    JMI_DEF(REA, x_v)
     x_v = jmi_array_val_1(a_a, i_v);
     JMI_RET(GEN, x_o, x_v)
     JMI_DYNAMIC_FREE()
@@ -6354,7 +6227,7 @@ void func_CCodeGenTests_IntegerInFunc1_f_def0(jmi_ad_var_t i_v, jmi_array_t* a_a
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerInFunc1_f_exp0(jmi_ad_var_t i_v, jmi_array_t* a_a) {
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, x_v)
     func_CCodeGenTests_IntegerInFunc1_f_def0(i_v, a_a, &x_v);
     return x_v;
 }
@@ -7324,8 +7197,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -7654,8 +7527,8 @@ $C_dae_init_blocks_residual_functions$
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     /********* Write back reinits *******/
  
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     model_ode_guards(jmi);
     _a_2 = _time;
     _b_3 = _time * 2;
@@ -7674,8 +7547,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -7756,8 +7629,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -7846,10 +7719,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -8022,12 +7895,12 @@ equation
             inline_functions="none",
             template="$C_ode_derivatives$",
             generatedCode="
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
-    jmi_ad_var_t tmp_5;
-    jmi_ad_var_t tmp_6;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_6)
     model_ode_guards(jmi);
     /********* Initialize reinits *******/
     /************* ODE section *********/
@@ -8075,10 +7948,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -8145,14 +8018,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
-    jmi_ad_var_t tmp_5;
-    jmi_ad_var_t tmp_6;
-    jmi_ad_var_t tmp_7;
-    jmi_ad_var_t tmp_8;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_6)
+    JMI_DEF(REA, tmp_7)
+    JMI_DEF(REA, tmp_8)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -8294,8 +8167,8 @@ equation
             inline_functions="none",
             template="$C_ode_initialization$",
             generatedCode="
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     model_ode_guards(jmi);
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (1), _sw(0), jmi->events_epsilon, JMI_REL_GT);
@@ -10427,8 +10300,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10490,8 +10363,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10547,9 +10420,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(INT, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10615,9 +10488,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(INT, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10690,10 +10563,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(INT, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10772,10 +10645,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(INT, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -10851,8 +10724,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(INT, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11098,8 +10971,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11140,8 +11013,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11305,9 +11178,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11356,9 +11229,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11429,9 +11302,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-	jmi_ad_var_t tmp_1;
-	jmi_ad_var_t tmp_2;
-	jmi_ad_var_t tmp_3;
+	JMI_DEF(REA, tmp_1)
+	JMI_DEF(REA, tmp_2)
+	JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11476,9 +11349,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11614,8 +11487,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11654,8 +11527,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11737,10 +11610,10 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -11828,8 +11701,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -12059,14 +11932,13 @@ $C_ode_derivatives$
 void func_CCodeGenTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, o_an, 5, 1)
-    jmi_ad_var_t dummy_v;
+    JMI_DEF(REA, dummy_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, o_an, 5, 1, 5)
         o_a = o_an;
     }
-    JMI_INI(GEN, dummy_v, 0)
     dummy_v = 1;
     jmi_array_ref_1(o_a, 1) = 1;
     jmi_array_ref_1(o_a, 3) = 1;
@@ -12086,12 +11958,11 @@ void func_CCodeGenTests_Algorithm10_fw_def0(jmi_array_t* o_a, jmi_ad_var_t* dumm
 void func_CCodeGenTests_Algorithm10_f_def1(jmi_array_t* i_a, jmi_array_t* o_a, jmi_ad_var_t* dummy_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, o_an, 2, 1)
-    jmi_ad_var_t dummy_v;
+    JMI_DEF(REA, dummy_v)
     if (o_a == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, o_an, 2, 1, 2)
         o_a = o_an;
     }
-    JMI_INI(GEN, dummy_v, 0)
     dummy_v = 1;
     jmi_array_ref_1(o_a, 1) = jmi_array_val_1(i_a, 1);
     jmi_array_ref_1(o_a, 2) = jmi_array_val_1(i_a, 2);
@@ -12172,12 +12043,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
-    jmi_ad_var_t tmp_5;
-    jmi_ad_var_t tmp_6;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_6)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -12233,8 +12104,8 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_7;
-    jmi_ad_var_t tmp_8;
+    JMI_DEF(REA, tmp_7)
+    JMI_DEF(REA, tmp_8)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -12694,9 +12565,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -12855,10 +12726,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
-    jmi_ad_var_t tmp_4;
+    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -13161,8 +13032,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray1_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArray1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     b_v = f(a_a->var, jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13170,7 +13040,7 @@ void func_CCodeGenTests_ExternalArray1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArray1_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArray1_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -13204,8 +13074,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray2_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArray2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13213,7 +13082,7 @@ void func_CCodeGenTests_ExternalArray2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArray2_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArray2_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -13248,8 +13117,7 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArray3_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArray3_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, b_v)
     b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13257,7 +13125,7 @@ void func_CCodeGenTests_ExternalArray3_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArray3_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArray3_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -13409,9 +13277,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray1_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_IntegerExternalArray1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 2, 1)
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_1(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 2, 1, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
@@ -13421,7 +13288,7 @@ void func_CCodeGenTests_IntegerExternalArray1_f_def0(jmi_array_t* a_a, jmi_ad_va
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray1_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternalArray1_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -13455,9 +13322,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray2_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_IntegerExternalArray2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 4, 2)
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_2(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 4, 2, 2, 2)
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
@@ -13467,7 +13333,7 @@ void func_CCodeGenTests_IntegerExternalArray2_f_def0(jmi_array_t* a_a, jmi_ad_va
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalArray2_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternalArray2_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -13592,9 +13458,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran1_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternalFortran1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     extern double f_(double*);
-    JMI_INI(GEN, b_v, 0)
     b_v = f_(&a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13602,7 +13467,7 @@ void func_CCodeGenTests_SimpleExternalFortran1_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran1_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternalFortran1_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -13638,9 +13503,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran2_f_exp0(jmi_ad_var_t a_v, 
 
 void func_CCodeGenTests_SimpleExternalFortran2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     extern double f_(double*, double*);
-    JMI_INI(GEN, c_v, 0)
     c_v = f_(&a_v, &b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -13648,7 +13512,7 @@ void func_CCodeGenTests_SimpleExternalFortran2_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran2_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternalFortran2_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -13682,9 +13546,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran3_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternalFortran3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     extern double my_f_(double*);
-    JMI_INI(GEN, b_v, 0)
     b_v = my_f_(&a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13692,7 +13555,7 @@ void func_CCodeGenTests_SimpleExternalFortran3_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran3_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternalFortran3_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -13726,9 +13589,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran4_f_exp0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTests_SimpleExternalFortran4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     extern void my_f_(double*, double*);
-    JMI_INI(GEN, b_v, 0)
     my_f_(&a_v, &b_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -13736,7 +13598,7 @@ void func_CCodeGenTests_SimpleExternalFortran4_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran4_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_SimpleExternalFortran4_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -13839,9 +13701,8 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran7_f_exp0(jmi_ad_var_t a_v, 
 
 void func_CCodeGenTests_SimpleExternalFortran7_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     extern void my_f_(double*, double*, double*);
-    JMI_INI(GEN, c_v, 0)
     my_f_(&a_v, &c_v, &b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -13849,7 +13710,7 @@ void func_CCodeGenTests_SimpleExternalFortran7_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran7_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternalFortran7_f_def0(a_v, b_v, &c_v);
     return c_v;
 }
@@ -13888,11 +13749,9 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran8_f_exp0(jmi_ad_var_t a_v, 
 
 void func_CCodeGenTests_SimpleExternalFortran8_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
     extern void my_f_(double*, double*, double*, double*);
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
     my_f_(&a_v, &c_v, &b_v, &d_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -13901,7 +13760,7 @@ void func_CCodeGenTests_SimpleExternalFortran8_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran8_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternalFortran8_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -13940,11 +13799,9 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran9_f_exp0(jmi_ad_var_t a_v, 
 
 void func_CCodeGenTests_SimpleExternalFortran9_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
     extern double my_f_(double*, double*, double*);
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
     d_v = my_f_(&a_v, &b_v, &c_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -13953,7 +13810,7 @@ void func_CCodeGenTests_SimpleExternalFortran9_f_def0(jmi_ad_var_t a_v, jmi_ad_v
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran9_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternalFortran9_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -13994,13 +13851,10 @@ jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran10_f_exp0(jmi_ad_var_t a_v,
 
 void func_CCodeGenTests_SimpleExternalFortran10_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o, jmi_ad_var_t* e_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    jmi_ad_var_t e_v;
+    JMI_DEF(REA, c_v)
+    JMI_DEF(REA, d_v)
+    JMI_DEF(REA, e_v)
     extern double my_f_(double*, double*, double*, double*);
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
-    JMI_INI(GEN, e_v, 0)
     d_v = my_f_(&a_v, &c_v, &b_v, &e_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -14010,7 +13864,7 @@ void func_CCodeGenTests_SimpleExternalFortran10_f_def0(jmi_ad_var_t a_v, jmi_ad_
 }
 
 jmi_ad_var_t func_CCodeGenTests_SimpleExternalFortran10_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(REA, c_v)
     func_CCodeGenTests_SimpleExternalFortran10_f_def0(a_v, b_v, &c_v, NULL, NULL);
     return c_v;
 }
@@ -14044,10 +13898,9 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran1_f_exp0(jmi_ad_var_t a_v)
 
 void func_CCodeGenTests_IntegerExternalFortran1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    jmi_int_t tmp_1;
+    JMI_DEF(REA, b_v)
+    JMI_DEF(INT_EXT, tmp_1)
     extern double f_(int*);
-    JMI_INI(GEN, b_v, 0)
     tmp_1 = (int)a_v;
     b_v = f_(&tmp_1);
     JMI_RET(GEN, b_o, b_v)
@@ -14056,7 +13909,7 @@ void func_CCodeGenTests_IntegerExternalFortran1_f_def0(jmi_ad_var_t a_v, jmi_ad_
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran1_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternalFortran1_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -14090,9 +13943,8 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran2_f_exp0(jmi_ad_var_t a_v)
 
 void func_CCodeGenTests_IntegerExternalFortran2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(INT, b_v)
     extern int f_(double*);
-    JMI_INI(GEN, b_v, 0)
     b_v = f_(&a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -14100,7 +13952,7 @@ void func_CCodeGenTests_IntegerExternalFortran2_f_def0(jmi_ad_var_t a_v, jmi_ad_
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran2_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(INT, b_v)
     func_CCodeGenTests_IntegerExternalFortran2_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -14134,10 +13986,9 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran3_f_exp0(jmi_ad_var_t a_v)
 
 void func_CCodeGenTests_IntegerExternalFortran3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
-    jmi_int_t tmp_1;
+    JMI_DEF(INT, b_v)
+    JMI_DEF(INT_EXT, tmp_1)
     extern void my_f_(double*, int*);
-    JMI_INI(GEN, b_v, 0)
     tmp_1 = (int)b_v;
     my_f_(&a_v, &tmp_1);
     b_v = tmp_1;
@@ -14147,7 +13998,7 @@ void func_CCodeGenTests_IntegerExternalFortran3_f_def0(jmi_ad_var_t a_v, jmi_ad_
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran3_f_exp0(jmi_ad_var_t a_v) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(INT, b_v)
     func_CCodeGenTests_IntegerExternalFortran3_f_def0(a_v, &b_v);
     return b_v;
 }
@@ -14185,14 +14036,12 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran4_f_exp0(jmi_ad_var_t a_v,
 
 void func_CCodeGenTests_IntegerExternalFortran4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o, jmi_ad_var_t* d_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t c_v;
-    jmi_ad_var_t d_v;
-    jmi_int_t tmp_1;
-    jmi_int_t tmp_2;
-    jmi_int_t tmp_3;
+    JMI_DEF(INT, c_v)
+    JMI_DEF(INT, d_v)
+    JMI_DEF(INT_EXT, tmp_1)
+    JMI_DEF(INT_EXT, tmp_2)
+    JMI_DEF(INT_EXT, tmp_3)
     extern int my_f_(int*, int*, int*);
-    JMI_INI(GEN, c_v, 0)
-    JMI_INI(GEN, d_v, 0)
     tmp_1 = (int)a_v;
     tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
@@ -14205,7 +14054,7 @@ void func_CCodeGenTests_IntegerExternalFortran4_f_def0(jmi_ad_var_t a_v, jmi_ad_
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalFortran4_f_exp0(jmi_ad_var_t a_v, jmi_ad_var_t b_v) {
-    jmi_ad_var_t c_v;
+    JMI_DEF(INT, c_v)
     func_CCodeGenTests_IntegerExternalFortran4_f_def0(a_v, b_v, &c_v, NULL);
     return c_v;
 }
@@ -14233,31 +14082,28 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenReal_an, -1, 1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenImag_an, -1, 1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenVectors_an, -1, 2)
-    jmi_ad_var_t info_v;
+    JMI_DEF(INT, info_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, dummy_a, 1, 2)
-    jmi_ad_var_t n_v;
-    jmi_ad_var_t lwork_v;
+    JMI_DEF(INT, n_v)
+    JMI_DEF(INT, lwork_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, -1, 2)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, work_a, -1, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
     jmi_ad_var_t i2_1i;
     jmi_ad_var_t i2_1ie;
-    JMI_DEF_STR_DYNA(tmp_1)
-    JMI_DEF_STR_DYNA(tmp_2)
-    jmi_int_t tmp_3;
+    JMI_DEF(STR_EXT, tmp_1)
+    JMI_DEF(STR_EXT, tmp_2)
+    JMI_DEF(INT_EXT, tmp_3)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_4, -1, 2)
-    jmi_int_t tmp_5;
+    JMI_DEF(INT_EXT, tmp_5)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 1, 2)
-    jmi_int_t tmp_7;
+    JMI_DEF(INT_EXT, tmp_7)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_8, -1, 2)
-    jmi_int_t tmp_9;
-    jmi_int_t tmp_10;
+    JMI_DEF(INT_EXT, tmp_9)
+    JMI_DEF(INT_EXT, tmp_10)
     extern void dgeev_(char*, char*, int*, double*, int*, double*, double*, double*, int*, double*, int*, double*, int*, int*);
-    JMI_INI(GEN, info_v, 0)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
-    JMI_INI(GEN, n_v, 0)
-    JMI_INI(GEN, lwork_v, 0)
     if (eigenReal_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenReal_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         eigenReal_a = eigenReal_an;
@@ -14332,9 +14178,8 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran1_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArrayFortran1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     extern double f_(double*, int*);
-    JMI_INI(GEN, b_v, 0)
     b_v = f_(a_a->var, &jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -14342,7 +14187,7 @@ void func_CCodeGenTests_ExternalArrayFortran1_f_def0(jmi_array_t* a_a, jmi_ad_va
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran1_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArrayFortran1_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -14377,10 +14222,9 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran2_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArrayFortran2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
     extern double f_(double*, int*, int*);
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
@@ -14390,7 +14234,7 @@ void func_CCodeGenTests_ExternalArrayFortran2_f_def0(jmi_array_t* a_a, jmi_ad_va
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran2_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArrayFortran2_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -14426,10 +14270,9 @@ jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran3_f_exp0(jmi_array_t* a_a);
 
 void func_CCodeGenTests_ExternalArrayFortran3_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 2)
     extern double f_(double*, int*, int*);
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_matrix_to_fortran_real(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
@@ -14439,7 +14282,7 @@ void func_CCodeGenTests_ExternalArrayFortran3_f_def0(jmi_array_t* a_a, jmi_ad_va
 }
 
 jmi_ad_var_t func_CCodeGenTests_ExternalArrayFortran3_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_ExternalArrayFortran3_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -14611,10 +14454,9 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran1_f_exp0(jmi_array_t*
 
 void func_CCodeGenTests_IntegerExternalArrayFortran1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 2, 1)
     extern double f_(int*, int*);
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_1(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 2, 1, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0));
@@ -14624,7 +14466,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran1_f_def0(jmi_array_t* a_a, jm
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran1_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternalArrayFortran1_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -14658,10 +14500,9 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran2_f_exp0(jmi_array_t*
 
 void func_CCodeGenTests_IntegerExternalArrayFortran2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 4, 2)
     extern double f_(int*, int*, int*);
-    JMI_INI(GEN, b_v, 0)
     JMI_ARRAY_INIT_2(STAT, jmi_int_t, jmi_int_array_t, tmp_1, 4, 2, 2, 2)
     jmi_matrix_to_fortran_int(a_a, a_a->var, tmp_1->var);
     b_v = f_(tmp_1->var, &jmi_array_size(a_a, 0), &jmi_array_size(a_a, 1));
@@ -14671,7 +14512,7 @@ void func_CCodeGenTests_IntegerExternalArrayFortran2_f_def0(jmi_array_t* a_a, jm
 }
 
 jmi_ad_var_t func_CCodeGenTests_IntegerExternalArrayFortran2_f_exp0(jmi_array_t* a_a) {
-    jmi_ad_var_t b_v;
+    JMI_DEF(REA, b_v)
     func_CCodeGenTests_IntegerExternalArrayFortran2_f_def0(a_a, &b_v);
     return b_v;
 }
@@ -15220,12 +15061,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
-    jmi_ad_var_t tmp_3;
-    jmi_ad_var_t tmp_4;
-    jmi_ad_var_t tmp_5;
-    jmi_ad_var_t tmp_6;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_6)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -15301,8 +15142,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
@@ -15360,8 +15201,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
 void func_Modelica_Math_Matrices_solve_def0(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, -1, 1)
-    jmi_ad_var_t info_v;
-    JMI_INI(GEN, info_v, 0)
+    JMI_DEF(INT, info_v)
     if (x_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, jmi_array_size(b_a, 0), 1, jmi_array_size(b_a, 0))
         x_a = x_an;
@@ -15377,10 +15217,10 @@ void func_Modelica_Math_Matrices_solve_def0(jmi_array_t* A_a, jmi_array_t* b_a, 
 void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_array_t* b_a, jmi_array_t* x_a, jmi_ad_var_t* info_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, -1, 1)
-    jmi_ad_var_t info_v;
+    JMI_DEF(INT, info_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, -1, 2)
-    jmi_ad_var_t lda_v;
-    jmi_ad_var_t ldb_v;
+    JMI_DEF(INT, lda_v)
+    JMI_DEF(INT, ldb_v)
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, -1, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
@@ -15388,16 +15228,13 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     jmi_ad_var_t i1_1ie;
     jmi_ad_var_t i2_2i;
     jmi_ad_var_t i2_2ie;
-    jmi_int_t tmp_1;
+    JMI_DEF(INT_EXT, tmp_1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_2, -1, 2)
-    jmi_int_t tmp_3;
+    JMI_DEF(INT_EXT, tmp_3)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_4, -1, 1)
-    jmi_int_t tmp_5;
-    jmi_int_t tmp_6;
+    JMI_DEF(INT_EXT, tmp_5)
+    JMI_DEF(INT_EXT, tmp_6)
     extern void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
-    JMI_INI(GEN, info_v, 0)
-    JMI_INI(GEN, lda_v, 0)
-    JMI_INI(GEN, ldb_v, 0)
     if (x_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         x_a = x_an;
@@ -15460,8 +15297,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
 void func_Modelica_Math_Matrices_solve2_def0(jmi_array_t* A_a, jmi_array_t* B_a, jmi_array_t* X_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, -1, 2)
-    jmi_ad_var_t info_v;
-    JMI_INI(GEN, info_v, 0)
+    JMI_DEF(INT, info_v)
     if (X_a == NULL) {
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, jmi_array_size(B_a, 0) * jmi_array_size(B_a, 1), 2, jmi_array_size(B_a, 0), jmi_array_size(B_a, 1))
         X_a = X_an;
@@ -15477,10 +15313,10 @@ void func_Modelica_Math_Matrices_solve2_def0(jmi_array_t* A_a, jmi_array_t* B_a,
 void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t* B_a, jmi_array_t* X_a, jmi_ad_var_t* info_o) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, -1, 2)
-    jmi_ad_var_t info_v;
+    JMI_DEF(INT, info_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, -1, 2)
-    jmi_ad_var_t lda_v;
-    jmi_ad_var_t ldb_v;
+    JMI_DEF(INT, lda_v)
+    JMI_DEF(INT, ldb_v)
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, -1, 1)
     jmi_ad_var_t i1_0i;
     jmi_ad_var_t i1_0ie;
@@ -15491,15 +15327,12 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     jmi_ad_var_t i2_3i;
     jmi_ad_var_t i2_3ie;
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 2)
-    jmi_int_t tmp_2;
+    JMI_DEF(INT_EXT, tmp_2)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_3, -1, 1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_4, -1, 2)
-    jmi_int_t tmp_5;
-    jmi_int_t tmp_6;
+    JMI_DEF(INT_EXT, tmp_5)
+    JMI_DEF(INT_EXT, tmp_6)
     extern void dgesv_(int*, int*, double*, int*, int*, double*, int*, int*);
-    JMI_INI(GEN, info_v, 0)
-    JMI_INI(GEN, lda_v, 0)
-    JMI_INI(GEN, ldb_v, 0)
     if (X_a == NULL) {
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), 2, jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
         X_a = X_an;
@@ -15622,7 +15455,7 @@ void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 
 void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -15630,15 +15463,14 @@ void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
 }
 
 jmi_extobj_t func_CCodeGenTests_ExtObject_constructor_exp1() {
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     func_CCodeGenTests_ExtObject_constructor_def1(&eo_v);
     return eo_v;
 }
 
 void func_CCodeGenTests_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_v;
-    JMI_INI(GEN, r_v, 0)
+    JMI_DEF(REA, r_v)
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -15646,7 +15478,7 @@ void func_CCodeGenTests_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_useMyEO_exp2(jmi_extobj_t eo_v) {
-    jmi_ad_var_t r_v;
+    JMI_DEF(REA, r_v)
     func_CCodeGenTests_useMyEO_def2(eo_v, &r_v);
     return r_v;
 }
@@ -15700,7 +15532,7 @@ void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 
 void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -15708,15 +15540,14 @@ void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
 }
 
 jmi_extobj_t func_CCodeGenTests_ExtObject_constructor_exp1() {
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     func_CCodeGenTests_ExtObject_constructor_def1(&eo_v);
     return eo_v;
 }
 
 void func_CCodeGenTests_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_v;
-    JMI_INI(GEN, r_v, 0)
+    JMI_DEF(REA, r_v)
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -15724,7 +15555,7 @@ void func_CCodeGenTests_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_useMyEO_exp2(jmi_extobj_t eo_v) {
-    jmi_ad_var_t r_v;
+    JMI_DEF(REA, r_v)
     func_CCodeGenTests_useMyEO_def2(eo_v, &r_v);
     return r_v;
 }
@@ -15995,7 +15826,7 @@ void func_CCodeGenTests_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 
 void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -16003,15 +15834,14 @@ void func_CCodeGenTests_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
 }
 
 jmi_extobj_t func_CCodeGenTests_ExtObject_constructor_exp1() {
-    jmi_extobj_t eo_v;
+    JMI_DEF(EXO, eo_v)
     func_CCodeGenTests_ExtObject_constructor_def1(&eo_v);
     return eo_v;
 }
 
 void func_CCodeGenTests_TestExtObjectArray1_get_y_def2(jmi_extobj_array_t* eos_a, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = func_CCodeGenTests_useMyEO_exp3(jmi_array_val_1(eos_a, 1));
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -16019,15 +15849,14 @@ void func_CCodeGenTests_TestExtObjectArray1_get_y_def2(jmi_extobj_array_t* eos_a
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestExtObjectArray1_get_y_exp2(jmi_extobj_array_t* eos_a) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_TestExtObjectArray1_get_y_def2(eos_a, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_useMyEO_def3(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t r_v;
-    JMI_INI(GEN, r_v, 0)
+    JMI_DEF(REA, r_v)
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -16035,7 +15864,7 @@ void func_CCodeGenTests_useMyEO_def3(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
 }
 
 jmi_ad_var_t func_CCodeGenTests_useMyEO_exp3(jmi_extobj_t eo_v) {
-    jmi_ad_var_t r_v;
+    JMI_DEF(REA, r_v)
     func_CCodeGenTests_useMyEO_def3(eo_v, &r_v);
     return r_v;
 }
@@ -16217,8 +16046,7 @@ model VariableArrayIndex1
             generatedCode="
 void func_temp_1_def0(jmi_ad_var_t i_0_v, jmi_array_t* x_a, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = jmi_array_val_1(x_a, i_0_v);
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -16226,7 +16054,7 @@ void func_temp_1_def0(jmi_ad_var_t i_0_v, jmi_array_t* x_a, jmi_ad_var_t* y_o) {
 }
 
 jmi_ad_var_t func_temp_1_exp0(jmi_ad_var_t i_0_v, jmi_array_t* x_a) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_temp_1_def0(i_0_v, x_a, &y_v);
     return y_v;
 }
@@ -16993,9 +16821,8 @@ $C_ode_derivatives$
             generatedCode="
 void func_CCodeGenTests_StringOperations4_f_def0(jmi_string_t s_v, jmi_ad_var_t* x_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, x_v)
     JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI(GEN, x_v, 0)
     x_v = 1;
     JMI_INI_STR_DYNA(tmp_1, JMI_LEN(s_v) + 3)
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", s_v);
@@ -17008,7 +16835,7 @@ void func_CCodeGenTests_StringOperations4_f_def0(jmi_string_t s_v, jmi_ad_var_t*
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations4_f_exp0(jmi_string_t s_v) {
-    jmi_ad_var_t x_v;
+    JMI_DEF(REA, x_v)
     func_CCodeGenTests_StringOperations4_f_def0(s_v, &x_v);
     return x_v;
 }
@@ -17055,13 +16882,12 @@ model StringOperations5
             generatedCode="
 void func_CCodeGenTests_StringOperations5_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_DEF_STR_DYNA(s_v)
-    JMI_DEF_STR_DYNA(t_v)
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF(STR, t_v)
     JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(STR, s_v, \"\")
-    JMI_INI(STR, t_v, \"\")
+    JMI_INI(STR, s_v)
+    JMI_INI(STR, t_v)
     y_v = x_v;
     JMI_ASG(STR, s_v, \"str\")
     JMI_ASG(STR, s_v, s_v)
@@ -17077,7 +16903,7 @@ void func_CCodeGenTests_StringOperations5_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations5_f2_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations5_f2_def0(x_v, &y_v);
     return y_v;
 }
@@ -17118,13 +16944,12 @@ model StringOperations6
             generatedCode="
 void func_CCodeGenTests_StringOperations6_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_DEF_STR_DYNA(s_v)
-    JMI_DEF_STR_DYNA(t_v)
-    JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(STR, s_v, \"\")
-    JMI_INI(STR, t_v, \"\")
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF(STR, t_v)
+    JMI_DEF(STR, tmp_1)
+    JMI_INI(STR, s_v)
+    JMI_INI(STR, t_v)
     y_v = x_v;
     JMI_ASG(STR, s_v, \"str\")
     tmp_1 = func_CCodeGenTests_StringOperations6_f1_exp1(s_v);
@@ -17136,17 +16961,16 @@ void func_CCodeGenTests_StringOperations6_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations6_f2_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations6_f2_def0(x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_StringOperations6_f1_def1(jmi_string_t s_v, jmi_string_t* o_o, jmi_ad_var_t* i_o) {
     JMI_DYNAMIC_INIT()
-    JMI_DEF_STR_DYNA(o_v)
-    jmi_ad_var_t i_v;
-    JMI_INI(STR, o_v, \"\")
-    JMI_INI(GEN, i_v, 0)
+    JMI_DEF(STR, o_v)
+    JMI_DEF(INT, i_v)
+    JMI_INI(STR, o_v)
     JMI_ASG(STR, o_v, s_v)
     i_v = 1;
     JMI_RET(STR, o_o, o_v)
@@ -17156,7 +16980,7 @@ void func_CCodeGenTests_StringOperations6_f1_def1(jmi_string_t s_v, jmi_string_t
 }
 
 jmi_string_t func_CCodeGenTests_StringOperations6_f1_exp1(jmi_string_t s_v) {
-    JMI_DEF_STR_DYNA(o_v)
+    JMI_DEF(STR, o_v)
     func_CCodeGenTests_StringOperations6_f1_def1(s_v, &o_v, NULL);
     return o_v;
 }
@@ -17197,15 +17021,15 @@ model StringOperations7
             generatedCode="
 void func_CCodeGenTests_StringOperations7_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_DEF_STR_DYNA(s_v)
-    JMI_DEF_STR_DYNA(t_v)
-    JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(STR, s_v, \"\")
-    JMI_INI(STR, t_v, \"\")
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF(STR, t_v)
+    JMI_DEF(STR, tmp_1)
+    JMI_INI(STR, s_v)
+    JMI_INI(STR, t_v)
     y_v = x_v;
     JMI_ASG(STR, s_v, \"str\")
+    JMI_INI(STR, tmp_1)
     func_CCodeGenTests_StringOperations7_f1_def1(s_v, &tmp_1, NULL);
     JMI_ASG(STR, s_v, tmp_1)
     JMI_FREE(tmp_1)
@@ -17215,17 +17039,16 @@ void func_CCodeGenTests_StringOperations7_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations7_f2_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations7_f2_def0(x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_StringOperations7_f1_def1(jmi_string_t s_v, jmi_string_t* o_o, jmi_ad_var_t* i_o) {
     JMI_DYNAMIC_INIT()
-    JMI_DEF_STR_DYNA(o_v)
-    jmi_ad_var_t i_v;
-    JMI_INI(STR, o_v, \"\")
-    JMI_INI(GEN, i_v, 0)
+    JMI_DEF(STR, o_v)
+    JMI_DEF(INT, i_v)
+    JMI_INI(STR, o_v)
     JMI_ASG(STR, o_v, s_v)
     i_v = 1;
     JMI_RET(STR, o_o, o_v)
@@ -17235,7 +17058,7 @@ void func_CCodeGenTests_StringOperations7_f1_def1(jmi_string_t s_v, jmi_string_t
 }
 
 jmi_string_t func_CCodeGenTests_StringOperations7_f1_exp1(jmi_string_t s_v) {
-    JMI_DEF_STR_DYNA(o_v)
+    JMI_DEF(STR, o_v)
     func_CCodeGenTests_StringOperations7_f1_def1(s_v, &o_v, NULL);
     return o_v;
 }
@@ -17276,17 +17099,17 @@ model StringOperations8
             generatedCode="
 void func_CCodeGenTests_StringOperations8_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_DEF_STR_DYNA(s_v)
-    JMI_DEF_STR_DYNA(t_v)
-    JMI_DEF_STR_DYNA(tmp_1)
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
+    JMI_DEF(STR, t_v)
+    JMI_DEF(STR, tmp_1)
     JMI_DEF_STR_STAT(tmp_2, 13)
-    JMI_DEF_STR_DYNA(tmp_3)
+    JMI_DEF(STR, tmp_3)
     JMI_DEF_STR_DYNA(tmp_4)
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(STR, s_v, \"\")
-    JMI_INI(STR, t_v, \"\")
+    JMI_INI(STR, s_v)
+    JMI_INI(STR, t_v)
     y_v = x_v;
+    JMI_INI(STR, tmp_1)
     JMI_INI_STR_STAT(tmp_2)
     snprintf(JMI_STR_END(tmp_2), JMI_STR_LEFT(tmp_2), \"%-.*g\", (int) 6, x_v);
     tmp_3 = func_CCodeGenTests_StringOperations8_f1_exp1(tmp_2);
@@ -17308,17 +17131,16 @@ void func_CCodeGenTests_StringOperations8_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations8_f2_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations8_f2_def0(x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_StringOperations8_f1_def1(jmi_string_t s_v, jmi_string_t* o_o, jmi_ad_var_t* i_o) {
     JMI_DYNAMIC_INIT()
-    JMI_DEF_STR_DYNA(o_v)
-    jmi_ad_var_t i_v;
-    JMI_INI(STR, o_v, \"\")
-    JMI_INI(GEN, i_v, 0)
+    JMI_DEF(STR, o_v)
+    JMI_DEF(INT, i_v)
+    JMI_INI(STR, o_v)
     JMI_ASG(STR, o_v, s_v)
     i_v = 1;
     JMI_RET(STR, o_o, o_v)
@@ -17328,7 +17150,7 @@ void func_CCodeGenTests_StringOperations8_f1_def1(jmi_string_t s_v, jmi_string_t
 }
 
 jmi_string_t func_CCodeGenTests_StringOperations8_f1_exp1(jmi_string_t s_v) {
-    JMI_DEF_STR_DYNA(o_v)
+    JMI_DEF(STR, o_v)
     func_CCodeGenTests_StringOperations8_f1_def1(s_v, &o_v, NULL);
     return o_v;
 }
@@ -17382,11 +17204,10 @@ model StringOperations9
             generatedCode="
 void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_string_t fmt_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_DEF_STR_DYNA(s_v)
+    JMI_DEF(REA, y_v)
+    JMI_DEF(STR, s_v)
     JMI_DEF_STR_DYNA(tmp_1)
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(STR, s_v, \"\")
+    JMI_INI(STR, s_v)
     JMI_INI_STR_DYNA(tmp_1, jmi_max(7 + AD_WRAP_LITERAL(1), i_v) + jmi_max(7 + i_v, AD_WRAP_LITERAL(2)) + jmi_max(7 + i_v, i_v) + jmi_max(7 + i_v, i_v) + 7 + i_v + 7 + 6 + 16 + jmi_max(10, AD_WRAP_LITERAL(2)) + jmi_max(10, i_v) + jmi_max(10, i_v) + 16 + jmi_max(5, AD_WRAP_LITERAL(2)) + jmi_max(5, i_v) + jmi_max(5, i_v))
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) i_v, (int) AD_WRAP_LITERAL(1), x_v);
     snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), COND_EXP_EQ(b_v, JMI_TRUE, \"%-*.*g\", \"%*.*g\"), (int) AD_WRAP_LITERAL(2), (int) i_v, x_v);
@@ -17410,7 +17231,7 @@ void func_CCodeGenTests_StringOperations9_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t 
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations9_f_exp0(jmi_ad_var_t x_v, jmi_ad_var_t i_v, jmi_ad_var_t b_v, jmi_string_t fmt_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations9_f_def0(x_v, i_v, b_v, fmt_v, &y_v);
     return y_v;
 }
@@ -17448,10 +17269,9 @@ model StringOperations10
             generatedCode="
 void func_CCodeGenTests_StringOperations10_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, s_a, 2, 1)
     JMI_ARR(STAT, jmi_string_t, jmi_string_array_t, tmp_1, 2, 1)
-    JMI_INI(GEN, y_v, 0)
     JMI_ARRAY_INIT_1(STAT, jmi_string_t, jmi_string_array_t, s_a, 2, 1, 2)
     y_v = x_v;
     JMI_ASG(STR, jmi_array_ref_1(s_a, 1), \"str\")
@@ -17467,7 +17287,7 @@ void func_CCodeGenTests_StringOperations10_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations10_f2_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations10_f2_def0(x_v, &y_v);
     return y_v;
 }
@@ -17521,7 +17341,7 @@ model StringOperations11
             generatedCode="
 void func_CCodeGenTests_StringOperations11_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_t n_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, s_a, -1, 1)
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, temp_1_a, -1, 1)
     jmi_ad_var_t i2_0i;
@@ -17529,7 +17349,6 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_
     jmi_ad_var_t i1_1i;
     jmi_ad_var_t i1_1ie;
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, -1, 1)
-    JMI_INI(GEN, y_v, 0)
     JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, s_a, n_v, 1, n_v)
     y_v = x_v;
     JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, temp_1_a, n_v, 1, n_v)
@@ -17551,7 +17370,7 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_StringOperations11_f2_exp0(jmi_ad_var_t x_v, jmi_ad_var_t n_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_StringOperations11_f2_def0(x_v, n_v, &y_v);
     return y_v;
 }
@@ -17670,8 +17489,7 @@ model TestAssert1
             generatedCode="
 void func_CCodeGenTests_TestAssert1_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x_v + 1;
     if (COND_EXP_LT(x_v, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
         jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
@@ -17688,7 +17506,7 @@ void func_CCodeGenTests_TestAssert1_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) 
 }
 
 jmi_ad_var_t func_CCodeGenTests_TestAssert1_f_exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_TestAssert1_f_def0(x_v, &y_v);
     return y_v;
 }
@@ -18820,22 +18638,22 @@ $ECE_main$
 
 
     /* Declarations */
-    jmi_ad_var_t a1_v;
-    jmi_ad_var_t a2_v;
-    jmi_ad_var_t a3_v;
-    JMI_DEF_STR_DYNA(a4_v)
-    jmi_ad_var_t a5_v;
-    jmi_ad_var_t b1_v;
-    jmi_ad_var_t b2_v;
-    jmi_ad_var_t b3_v;
-    JMI_DEF_STR_DYNA(b4_v)
-    jmi_ad_var_t b5_v;
-    jmi_int_t tmp_1;
-    jmi_int_t tmp_2;
-    jmi_int_t tmp_3;
-    jmi_int_t tmp_4;
-    jmi_int_t tmp_5;
-    jmi_int_t tmp_6;
+    JMI_DEF(REA, a1_v)
+    JMI_DEF(INT, a2_v)
+    JMI_DEF(BOO, a3_v)
+    JMI_DEF(STR, a4_v)
+    JMI_DEF(ENU, a5_v)
+    JMI_DEF(REA, b1_v)
+    JMI_DEF(INT, b2_v)
+    JMI_DEF(BOO, b3_v)
+    JMI_DEF(STR, b4_v)
+    JMI_DEF(ENU, b5_v)
+    JMI_DEF(INT_EXT, tmp_1)
+    JMI_DEF(BOO_EXT, tmp_2)
+    JMI_DEF(ENU_EXT, tmp_3)
+    JMI_DEF(INT_EXT, tmp_4)
+    JMI_DEF(BOO_EXT, tmp_5)
+    JMI_DEF(ENU_EXT, tmp_6)
 
     JMCEVAL_setup();
     printf(\"START\\n\"); fflush(stdout);
@@ -19083,18 +18901,18 @@ $ECE_main$
 
 
     /* Declarations */
-    jmi_ad_var_t x_v;
-    jmi_extobj_t o3_v;
-    jmi_extobj_t tmp_1_arg0;
-    jmi_int_t tmp_2;
-    jmi_int_t tmp_3;
-    jmi_ad_var_t tmp_4_arg0;
-    jmi_ad_var_t tmp_4_arg1;
-    jmi_ad_var_t tmp_4_arg2;
-    JMI_DEF_STR_DYNA(tmp_4_arg3)
+    JMI_DEF(REA, x_v)
+    JMI_DEF(EXO, o3_v)
+    JMI_DEF(EXO, tmp_1_arg0)
+    JMI_DEF(INT_EXT, tmp_2)
+    JMI_DEF(BOO_EXT, tmp_3)
+    JMI_DEF(REA, tmp_4_arg0)
+    JMI_DEF(INT, tmp_4_arg1)
+    JMI_DEF(BOO, tmp_4_arg2)
+    JMI_DEF(STR, tmp_4_arg3)
     JMI_ARR(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_1_arg1, -1, 1)
-    jmi_ad_var_t tmp_5;
-    jmi_ad_var_t tmp_5_max;
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_5_max)
     JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_6, 2, 1)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_7, -1, 1)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_8_arg0, -1, 1)
@@ -19219,29 +19037,29 @@ $ECE_main$
 
 
     /* Declarations */
-    jmi_ad_var_t nrow_v;
-    jmi_ad_var_t ncol_v;
-    jmi_ad_var_t nrhs_v;
+    JMI_DEF(INT, nrow_v)
+    JMI_DEF(INT, ncol_v)
+    JMI_DEF(INT, nrhs_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, -1, 2)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_a, -1, 2)
-    jmi_ad_var_t nx_v;
+    JMI_DEF(INT, nx_v)
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, jpvt_a, -1, 1)
-    jmi_ad_var_t rcond_v;
-    jmi_ad_var_t rank_v;
+    JMI_DEF(REA, rcond_v)
+    JMI_DEF(INT, rank_v)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, work_a, -1, 1)
-    jmi_ad_var_t lwork_v;
-    jmi_ad_var_t info_v;
-    jmi_int_t tmp_1;
-    jmi_int_t tmp_2;
-    jmi_int_t tmp_3;
+    JMI_DEF(INT, lwork_v)
+    JMI_DEF(INT, info_v)
+    JMI_DEF(INT_EXT, tmp_1)
+    JMI_DEF(INT_EXT, tmp_2)
+    JMI_DEF(INT_EXT, tmp_3)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_4, -1, 2)
-    jmi_int_t tmp_5;
+    JMI_DEF(INT_EXT, tmp_5)
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_6, -1, 2)
-    jmi_int_t tmp_7;
+    JMI_DEF(INT_EXT, tmp_7)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_8, -1, 1)
-    jmi_int_t tmp_9;
-    jmi_int_t tmp_10;
-    jmi_int_t tmp_11;
+    JMI_DEF(INT_EXT, tmp_9)
+    JMI_DEF(INT_EXT, tmp_10)
+    JMI_DEF(INT_EXT, tmp_11)
     extern void dgelsx_(int*, int*, int*, double*, int*, double*, int*, int*, double*, int*, double*, int*, int*);
 
     JMCEVAL_setup();
@@ -19342,8 +19160,7 @@ jmi_ad_var_t func_CCodeGenTests_QuotedIdentifierFunc1_______exp1(jmi_ad_var_t x_
 
 void func_CCodeGenTests_QuotedIdentifierFunc1_______def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x_v + 1;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -19351,15 +19168,14 @@ void func_CCodeGenTests_QuotedIdentifierFunc1_______def0(jmi_ad_var_t x_v, jmi_a
 }
 
 jmi_ad_var_t func_CCodeGenTests_QuotedIdentifierFunc1_______exp0(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_QuotedIdentifierFunc1_______def0(x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_QuotedIdentifierFunc1_______def1(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x_v + 1;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -19367,7 +19183,7 @@ void func_CCodeGenTests_QuotedIdentifierFunc1_______def1(jmi_ad_var_t x_v, jmi_a
 }
 
 jmi_ad_var_t func_CCodeGenTests_QuotedIdentifierFunc1_______exp1(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_QuotedIdentifierFunc1_______def1(x_v, &y_v);
     return y_v;
 }
@@ -19575,8 +19391,7 @@ func_CCodeGenTests_Functional1_fullFunc_fp2* func_CCodeGenTests_Functional1_full
 
 void func_CCodeGenTests_Functional1_usePartFunc_def0(func_CCodeGenTests_Functional1_partFunc_fp1* pf1_v, func_CCodeGenTests_Functional1_partFunc_fp1* pf2_v, jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = pf1_v->fpcl(pf1_v, NULL) + pf2_v->fpcl(pf2_v, NULL);
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -19584,30 +19399,28 @@ void func_CCodeGenTests_Functional1_usePartFunc_def0(func_CCodeGenTests_Function
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional1_usePartFunc_exp0(func_CCodeGenTests_Functional1_partFunc_fp1* pf1_v, func_CCodeGenTests_Functional1_partFunc_fp1* pf2_v, jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional1_usePartFunc_def0(pf1_v, pf2_v, x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional1_partFunc_def1(jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional1_partFunc_exp1() {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional1_partFunc_def1(&y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional1_fullFunc_def2(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x_v * x_v;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -19615,7 +19428,7 @@ void func_CCodeGenTests_Functional1_fullFunc_def2(jmi_ad_var_t x_v, jmi_ad_var_t
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional1_fullFunc_exp2(jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional1_fullFunc_def2(x_v, &y_v);
     return y_v;
 }
@@ -19820,13 +19633,10 @@ func_CCodeGenTests_Functional2_fullFunc_fp2* func_CCodeGenTests_Functional2_full
 
 void func_CCodeGenTests_Functional2_usePartFunc_def0(func_CCodeGenTests_Functional2_partFunc_fp1* pf_v, jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    jmi_ad_var_t y1_v;
-    jmi_ad_var_t y2_v;
+    JMI_DEF(REA, y_v)
+    JMI_DEF(REA, y1_v)
+    JMI_DEF(REA, y2_v)
     func_CCodeGenTests_Functional2_partFunc_fpout1 tmp_1;
-    JMI_INI(GEN, y_v, 0)
-    JMI_INI(GEN, y1_v, 0)
-    JMI_INI(GEN, y2_v, 0)
     tmp_1.n = 2;
     pf_v->fpcl(pf_v, &tmp_1, (jmi_ad_var_t)(x_v), (jmi_ad_var_t)(x_v + AD_WRAP_LITERAL(1)));
     y1_v = tmp_1.y1_v;
@@ -19838,17 +19648,15 @@ void func_CCodeGenTests_Functional2_usePartFunc_def0(func_CCodeGenTests_Function
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional2_usePartFunc_exp0(func_CCodeGenTests_Functional2_partFunc_fp1* pf_v, jmi_ad_var_t x_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional2_usePartFunc_def0(pf_v, x_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional2_partFunc_def1(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t* y1_o, jmi_ad_var_t* y2_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y1_v;
-    jmi_ad_var_t y2_v;
-    JMI_INI(GEN, y1_v, 0)
-    JMI_INI(GEN, y2_v, 0)
+    JMI_DEF(REA, y1_v)
+    JMI_DEF(REA, y2_v)
     JMI_RET(GEN, y1_o, y1_v)
     JMI_RET(GEN, y2_o, y2_v)
     JMI_DYNAMIC_FREE()
@@ -19856,19 +19664,16 @@ void func_CCodeGenTests_Functional2_partFunc_def1(jmi_ad_var_t x1_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional2_partFunc_exp1(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v) {
-    jmi_ad_var_t y1_v;
+    JMI_DEF(REA, y1_v)
     func_CCodeGenTests_Functional2_partFunc_def1(x1_v, x2_v, &y1_v, NULL);
     return y1_v;
 }
 
 void func_CCodeGenTests_Functional2_fullFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, R_0_r* r_v, jmi_ad_var_t a_v, jmi_ad_var_t* y1_o, jmi_ad_var_t* y2_o, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y1_v;
-    jmi_ad_var_t y2_v;
-    jmi_ad_var_t b_v;
-    JMI_INI(GEN, y1_v, 0)
-    JMI_INI(GEN, y2_v, 0)
-    JMI_INI(GEN, b_v, 0)
+    JMI_DEF(REA, y1_v)
+    JMI_DEF(REA, y2_v)
+    JMI_DEF(REA, b_v)
     y1_v = r_v->x + r_v->y + x1_v + x2_v + a_v;
     y2_v = y1_v + 1;
     b_v = y2_v + 1;
@@ -19880,7 +19685,7 @@ void func_CCodeGenTests_Functional2_fullFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional2_fullFunc_exp2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, R_0_r* r_v, jmi_ad_var_t a_v) {
-    jmi_ad_var_t y1_v;
+    JMI_DEF(REA, y1_v)
     func_CCodeGenTests_Functional2_fullFunc_def2(x1_v, x2_v, r_v, a_v, &y1_v, NULL, NULL);
     return y1_v;
 }
@@ -20133,9 +19938,8 @@ func_CCodeGenTests_Functional3_middleFunc_fp3* func_CCodeGenTests_Functional3_mi
 
 void func_CCodeGenTests_Functional3_useMiddleFunc_def0(func_CCodeGenTests_Functional3_middleFunc_fp3* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_middleFunc_fp3* tmp_1;
-    JMI_INI(GEN, y_v, 0)
     tmp_1 = mf_v->fpcr(mf_v, NULL, 0, 1, (jmi_ad_var_t)(b_v));
     JMI_DYNAMIC_ADD(tmp_1)
     y_v = func_CCodeGenTests_Functional3_usePartFunc_exp1((func_CCodeGenTests_Functional3_partFunc_fp2*)tmp_1, c_v);
@@ -20145,15 +19949,14 @@ void func_CCodeGenTests_Functional3_useMiddleFunc_def0(func_CCodeGenTests_Functi
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional3_useMiddleFunc_exp0(func_CCodeGenTests_Functional3_middleFunc_fp3* mf_v, jmi_ad_var_t b_v, jmi_ad_var_t c_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_useMiddleFunc_def0(mf_v, b_v, c_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional3_usePartFunc_def1(func_CCodeGenTests_Functional3_partFunc_fp2* pf_v, jmi_ad_var_t c_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = pf_v->fpcl(pf_v, NULL, (jmi_ad_var_t)(c_v));
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -20161,45 +19964,42 @@ void func_CCodeGenTests_Functional3_usePartFunc_def1(func_CCodeGenTests_Function
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional3_usePartFunc_exp1(func_CCodeGenTests_Functional3_partFunc_fp2* pf_v, jmi_ad_var_t c_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_usePartFunc_def1(pf_v, c_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional3_partFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional3_partFunc_exp2(jmi_ad_var_t x1_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_partFunc_def2(x1_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional3_middleFunc_def3(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional3_middleFunc_exp3(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_middleFunc_def3(x1_v, x2_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional3_fullFunc_def4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x1_v + x2_v + x3_v;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -20207,7 +20007,7 @@ void func_CCodeGenTests_Functional3_fullFunc_def4(jmi_ad_var_t x1_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional3_fullFunc_exp4(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional3_fullFunc_def4(x1_v, x2_v, x3_v, &y_v);
     return y_v;
 }
@@ -20558,8 +20358,7 @@ func_CCodeGenTests_Functional5_fullFunc_fp2* func_CCodeGenTests_Functional5_full
 
 void func_CCodeGenTests_Functional5_usePartFunc_def0(func_CCodeGenTests_Functional5_partFunc_fp1* pf_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = pf_v->fpcl(pf_v, NULL, (jmi_ad_var_t)(AD_WRAP_LITERAL(1)), (jmi_ad_var_t)(AD_WRAP_LITERAL(3)), (jmi_ad_var_t)(AD_WRAP_LITERAL(5)));
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -20567,30 +20366,28 @@ void func_CCodeGenTests_Functional5_usePartFunc_def0(func_CCodeGenTests_Function
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional5_usePartFunc_exp0(func_CCodeGenTests_Functional5_partFunc_fp1* pf_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional5_usePartFunc_def0(pf_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional5_partFunc_def1(jmi_ad_var_t x1_v, jmi_ad_var_t x3_v, jmi_ad_var_t x5_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
     return;
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional5_partFunc_exp1(jmi_ad_var_t x1_v, jmi_ad_var_t x3_v, jmi_ad_var_t x5_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional5_partFunc_def1(x1_v, x3_v, x5_v, &y_v);
     return y_v;
 }
 
 void func_CCodeGenTests_Functional5_fullFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v, jmi_ad_var_t x4_v, jmi_ad_var_t x5_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
-    jmi_ad_var_t y_v;
-    JMI_INI(GEN, y_v, 0)
+    JMI_DEF(REA, y_v)
     y_v = x1_v + x2_v + x3_v + x4_v + x5_v;
     JMI_RET(GEN, y_o, y_v)
     JMI_DYNAMIC_FREE()
@@ -20598,7 +20395,7 @@ void func_CCodeGenTests_Functional5_fullFunc_def2(jmi_ad_var_t x1_v, jmi_ad_var_
 }
 
 jmi_ad_var_t func_CCodeGenTests_Functional5_fullFunc_exp2(jmi_ad_var_t x1_v, jmi_ad_var_t x2_v, jmi_ad_var_t x3_v, jmi_ad_var_t x4_v, jmi_ad_var_t x5_v) {
-    jmi_ad_var_t y_v;
+    JMI_DEF(REA, y_v)
     func_CCodeGenTests_Functional5_fullFunc_def2(x1_v, x2_v, x3_v, x4_v, x5_v, &y_v);
     return y_v;
 }
@@ -21063,9 +20860,9 @@ static const int DAE_relations[] = { JMI_REL_GEQ, JMI_REL_GEQ };
     _x3_2 = COND_EXP_EQ(JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
     _x4_3 = (0.0);
 
-    jmi_ad_var_t tmp_7;
-    jmi_ad_var_t tmp_8;
-    jmi_ad_var_t tmp_9;
+    JMI_DEF(REA, tmp_7)
+    JMI_DEF(REA, tmp_8)
+    JMI_DEF(REA, tmp_9)
     model_ode_guards(jmi);
     /********* Initialize reinits *******/
     /************* ODE section *********/
@@ -21110,8 +20907,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    jmi_ad_var_t tmp_1;
-    jmi_ad_var_t tmp_2;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
     } else if (evaluation_mode == JMI_BLOCK_START) {
     } else if (evaluation_mode == JMI_BLOCK_MIN) {

@@ -1146,6 +1146,16 @@ aspect CCodeGen {
     syn String FType.macroTypeScalar() = "GEN";
     eq FStringType.macroTypeScalar()   = "STR";
     
+    syn String FType.macroTypeDecl(boolean external) = external ? macroTypeDeclScalar() + "_EXT" : macroTypeDeclScalar();
+    
+    syn String FType.macroTypeDeclScalar()       = "GEN";
+    eq FRealType.macroTypeDeclScalar()           = "REA";
+    eq FIntegerType.macroTypeDeclScalar()        = "INT";
+    eq FBooleanType.macroTypeDeclScalar()        = "BOO";
+    eq FEnumType.macroTypeDeclScalar()           = "ENU";
+    eq FStringType.macroTypeDeclScalar()         = "STR";
+    eq FExternalObjectType.macroTypeDeclScalar() = "EXO";
+    
 	
 	public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
 		str.print(typeReturn_C());
@@ -1204,28 +1214,25 @@ aspect CCodeGen {
         str.print(next + name + " = " + iniName + ";\n");
         str.print(indent + "}\n");
     }
-	
-    public final void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
-        TypePrinter_C tp = p.createDeclPrinter(str);
-        tp.reset(name, src, size().isUnknown(), false, indent);
-        print(tp);
+    
+    public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
+        printDecl_C(p, str, indent, name, src, false);
     }
     
-    public final void FType.printExternDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
-        TypePrinter_C tp = p.createDeclPrinter(str);
-        tp.reset(name, src, size().isUnknown(), true, indent);
-        print(tp);
+    public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
+        print(p.createDeclPrinter(str), indent, name, src, external);
     }
     
     public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
-        TypePrinter_C tp = p.createInitPrinter(str);
-        tp.reset(name, src, size().isUnknown(), false, indent);
-        print(tp);
+        printInit_C(p, str, indent, name, src, false);
     }
     
-    public void FType.printExternInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
-        TypePrinter_C tp = p.createInitPrinter(str);
-        tp.reset(name, src, size().isUnknown(), true, indent);
+    public void FType.printInit_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
+        print(p.createInitSetPrinter(str), indent, name, src, external);
+    }
+    
+    public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
+        tp.reset(name, src, size().isUnknown(), external, indent);
         print(tp);
     }
     
@@ -1494,7 +1501,7 @@ aspect CCodeGen {
             type.printInitStartValue_C(p, str, indent(), name());
         }
         protected boolean shouldPrintComp(FRecordComponentType comp) {
-            return true;
+            return super.shouldPrintComp(comp) || comp.getFType().isString();
         }
     }
     
@@ -1502,23 +1509,13 @@ aspect CCodeGen {
         
     }
     
-    public void FPrimitiveType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
+    public void FStringType.printInitStartValue_C(CodePrinter p, CodeStream str, String indent, String name) {
         str.print(indent);
         str.print("JMI_INI(");
         str.print(macroTypeScalar());
         str.print(", ");
         str.print(name);
-        str.print(", ");
-        printStartValue_C(p, str, indent);
         str.print(")\n");
-    }
-    
-    public void FType.printStartValue_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("0");
-    }
-    
-    public void FStringType.printStartValue_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("\"\"");
     }
 	
 	private Map<String,String> FExp.recordChildTempNameMap = null;
@@ -1776,8 +1773,9 @@ aspect CCodeGen {
      */
     public void FExternalLanguage.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
         for (FExp arg: stmt.getArgs()) {
-            if (extShouldArgConvert(arg))
-                arg.type().printExternDecl_C(p, str, indent, arg.tempName_C(), arg);
+            if (extShouldArgConvert(arg)) {
+                arg.type().printDecl_C(p, str, indent, arg.tempName_C(), arg, true);
+            }
         }
     }
     
@@ -3017,8 +3015,9 @@ aspect CCodeGen {
     
     public void FIdUseExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {
         if (!writeback || myCommonVarDecl().isOutput()) {
-            if (isArray() && !writeback)
-                type().printExternInit_C(p, str, indent, tempName_C(), this);
+            if (isArray() && !writeback) {
+                type().print(p.createInitPrinter(str), indent, tempName_C(), this, true);
+            }
             super.prepExternalArg(p, str, indent, lang, writeback);
         }
     }
@@ -3231,7 +3230,7 @@ aspect CCodeGen {
 	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
 			String name = tempName_C();
-			type().printInit_C(p, str, indent, name, this);
+            type().print(p.createInitPrinter(str), indent, name, this, false);
 			type().genTempInputAssigns_C(p, str, indent, name, this);
 		}
 	}
@@ -4314,15 +4313,16 @@ aspect CCodeGen {
     }
     
     public void FType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%s%s %s;", indent, nameScalar_C(external), name);
+        str.print(indent);
+        str.print("JMI_DEF(");
+        str.print(macroTypeDecl(external));
+        str.print(", ");
+        str.print(name);
+        str.print(")\n");
     }
     
     public void FRecordType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
         str.formatln("%sJMI_RECORD_STATIC(%s, %s)", indent, nameScalar_C(external), name);
-    }
-    
-    public void FStringType.printScalarDecl_C(CodeStream str, String indent, boolean external, String name) {
-        str.formatln("%sJMI_DEF_STR_DYNA(%s)", indent, name);
     }
     
     public void FType.printFree_C(CodeStream str, String indent, boolean external, String name) {
