@@ -1089,7 +1089,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _dummy_3 = (0.0)/sf(3);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -1233,7 +1233,7 @@ void jmi_set_start_values_0_0(jmi_t* jmi) {
     _n_22 = (2);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
 model_init_eval_parameters(jmi);
 }
@@ -2440,7 +2440,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _der_w_7 = (0.0);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -12950,7 +12950,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _der_x_4 = (0.0);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -12997,7 +12997,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     pre_temp_1_6 = (0);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
 model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -15612,7 +15612,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _y4_7 = (0.0);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -15756,7 +15756,7 @@ void jmi_set_start_values_0_0(jmi_t* jmi) {
     _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
 }
@@ -15992,7 +15992,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x_0 = (0.0);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -17716,7 +17716,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x3_2 = (1);
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
@@ -17765,7 +17765,7 @@ void jmi_set_start_values_1_0(jmi_t* jmi) {
     _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+void jmi_set_start_values_base(jmi_t* jmi) {
     model_init_eval_parameters(jmi);
     jmi_set_start_values_1_0(jmi);
 }
