@@ -28,7 +28,7 @@ import copy
 import types
 from operator import sub
 from collections import OrderedDict, Iterable
-from scipy.sparse import csc_matrix
+from scipy.sparse import csc_matrix, csr_matrix
 
 try:
     import casadi
@@ -533,6 +533,33 @@ class CasadiCollocator(object):
         total_exec_time = stats['t_mainloop']
         return (return_status, nbr_iter, objective, total_exec_time)
 
+    def _update_equation_scaling(self):
+        """
+        Update the equation scaling based on the residual Jacobian 
+        """
+        # Set all equation scalings to 1 initially
+        offset = self.pp_offset['equation_scale']
+        self._par_vals[offset:offset + self.n_c] = 1
+
+        # Evaluate the Jacobian
+        self.residual_jac_fcn.setInput(self.xx_init, 0)
+        self.residual_jac_fcn.setInput(self._par_vals, 1)
+        self.residual_jac_fcn.evaluate()
+        J = self.residual_jac_fcn.getOutput(0)
+        J = csr_matrix(J)
+        
+        # Row-wise maximum
+        row_norms = N.maximum.reduceat(N.hstack((N.abs(J.data), 0)), J.indptr[0:-1])
+        row_norms[N.diff(J.indptr) == 0] = 0
+        # Set nonfinite row norms to 1
+        row_norms[row_norms != row_norms] = 1
+
+        # Calculate scales from row norms
+        scales = N.maximum(1e-8, N.minimum(1, 100/row_norms))
+
+        # Store the updated scaling factors
+        self._par_vals[offset:offset + self.n_c] = scales
+
     def solve_nlp(self):
         """
         Calls the nonlinear programming solver.
@@ -544,6 +571,8 @@ class CasadiCollocator(object):
                 Type: float
         """
         init = time.clock()
+        if self.equation_scaling:
+            self._update_equation_scaling()
         # Initialize solver
         if self.warm_start:
             # Initialize primal variables and set parameters
@@ -4512,6 +4541,12 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
+
+        if self.equation_scaling:
+            self.solver_object.init() # Probably needed before extracting the nlp function
+            nlp = self.solver_object.nlp()
+            self.residual_jac_fcn = nlp.jacobian(0,1)
+            self.residual_jac_fcn.init()
 
         # Circumvent CasADi bug, see #4313
         if self.explicit_hessian:
