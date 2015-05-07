@@ -1594,6 +1594,14 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: True
+
+        equation_scaling --
+            Whether to scale the equations in collocated NLP.
+            Many NLP solvers default to scaling the equations, but if it is
+            done through this option the resulting scaling can be inspected.
+            
+            Type: bool
+            Default: True
         
         nominal_traj --
             Variable trajectory data used for scaling of the NLP variables.
@@ -1844,6 +1852,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'init_dual': None,
                 'variable_scaling': True,
+                'equation_scaling': False,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},
                 'result_file_name': "",

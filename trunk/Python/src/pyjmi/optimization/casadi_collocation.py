@@ -1865,7 +1865,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Count parameters
         n_pp_unvarying = self.n_var['p_fixed']
         n_pp_kinds = [n_pp_unvarying] # total number of parameters of each kind
-        n_var_pp = [n_pp_unvarying]   # number of variables of each kind in the continuous time model
+        n_var_pp = {}                 # number of variables of each kind in the continuous time model
         pp_kinds = ['p_fixed']        # corresponding kinds. 'p_fixed' expected to be first        
 
         if self.discr == "LG":
@@ -1873,34 +1873,48 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             n_add_points=1
 
+        ext_data_kinds = ['elim_u', 'quad_pen', 'constr_u']
         if self.mutable_external_data:
-
             nv = N.array([len(self.external_data.eliminated),
                           len(self.external_data.quad_pen),
                           len(self.external_data.constr_quad_pen)])
-            n_var_pp.extend(nv)
+            for (kind, n) in zip(ext_data_kinds, nv):
+                n_var_pp[kind] = n
             n_pp_kinds.extend(nv * (self.n_e * (self.n_cp + n_add_points)))
-            pp_kinds.extend(['elim_u', 'quad_pen', 'constr_u'])
+            pp_kinds.extend(ext_data_kinds)
+
+        n_c = self.n_c_e + self.n_c_i
+        if self.equation_scaling:
+            n_pp_kinds.append(n_c)
+            pp_kinds.append('equation_scale')
+
         n_pp = N.sum(n_pp_kinds)
-        pp_offsets = N.hstack((0, N.cumsum(n_pp_kinds)))
-        # CasADi's vertsplit seems to be having trouble with taking pp_offsets
+        pp_offset = N.hstack((0, N.cumsum(n_pp_kinds)))
+        # CasADi's vertsplit seems to be having trouble with taking pp_offset
         # as a numpy array of dtype=int64
-        pp_offsets = [offset for offset in pp_offsets]
+        pp_offset = [offset for offset in pp_offset]
+
+        #Create parameter symbols
+        self.pp = casadi.MX.sym("par", n_pp, 1)
+        if len(pp_kinds) > 1:
+            pp_split = casadi.vertsplit(self.pp, pp_offset)
+            self.pp_unvarying = pp_split[0]
+
+            self.pp_split  = dict(zip(pp_kinds, pp_split))
+            self.pp_offset = dict(zip(pp_kinds, pp_offset))
+        else:
+            self.pp_unvarying = self.pp
 
         # Get parameter values and symbols
         par_vars = [par.getVar() for par in self.mvar_vectors['p_fixed']]
         pp_unvarying_vals = [self.op.get_attr(par, "_value")
                              for par in self.mvar_vectors['p_fixed']]
         par_vals = N.hstack([pp_unvarying_vals, N.zeros(n_pp - n_pp_unvarying)])
+        if self.equation_scaling:
+            # set all equation scalings to 1 initially
+            offset = self.pp_offset['equation_scale']
+            par_vals[offset:offset + n_c] = 1
         self._par_vals = N.asarray(par_vals)
-
-        #Create parameter symbols
-        self.pp = casadi.MX.sym("par", n_pp, 1)
-        if self.mutable_external_data:
-            self.pp_split = casadi.vertsplit(self.pp, pp_offsets)
-            self.pp_unvarying = self.pp_split[0]
-        else:
-            self.pp_unvarying = self.pp
 
         #Add parameters to variable dictionaries
         #Note: For parameters the var_indices dictionary gives the index in 
@@ -1935,11 +1949,18 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Fill in var_map, var_indices, and named_pp for time-varying nlp parameters
         if self.mutable_external_data:
-            # Assume 'p_fixed' (handled above) is the first entry
-            for j in xrange(1, len(pp_kinds)):
-                self._fill_checkpoint_map(pp_kinds[j], self.pp_split[j],
-                    n_var_pp[j], pp_offsets[j],
+            for kind in ext_data_kinds:
+                self._fill_checkpoint_map(kind, self.pp_split[kind],
+                    n_var_pp[kind], self.pp_offset[kind],
                     'pp', n_add_points=n_add_points, move_zero=0)
+
+        if self.equation_scaling:
+            self.n_named_pp += n_c
+            if self.named_vars:
+                for j in range(self.n_c_e):
+                    self.named_pp.append(casadi.SX.sym('eq_scale_%d' % j))
+                for j in range(self.n_c_i):
+                    self.named_pp.append(casadi.SX.sym('ineq_scale_%d' % j))
 
         # Finalize named_pp
         assert self.n_named_pp == n_pp
@@ -4475,6 +4496,9 @@ class LocalDAECollocator(CasadiCollocator):
         # Concatenate constraints
         constraints = casadi.vertcat([self.c_e, self.c_i])
 
+        if self.equation_scaling:
+            constraints = self.pp_split['equation_scale'] * constraints
+
         # Create solver object
         nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
                                 casadi.nlpOut(f=self.cost, g=constraints))
@@ -5235,7 +5259,7 @@ class LocalDAECollocator(CasadiCollocator):
         elif point == "opt":
             J_fcn.setInput(self.primal_opt, 0)
         elif point == "sym":
-            return J_fcn.call([self.xx, []],True)[0]
+            return J_fcn.call([self.xx, self.pp],True)[0]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         J_fcn.setInput(self._par_vals, 1)
@@ -5302,7 +5326,7 @@ class LocalDAECollocator(CasadiCollocator):
             sigma = casadi.MX.sym("sigma")
             lam = casadi.MX.sym("lambda", self.c_i.numel())
             dual = casadi.vertcat([nu, lam])
-            return [H_fcn.call([self.xx, [], sigma, dual],True)[0], sigma,
+            return [H_fcn.call([self.xx, self.pp, sigma, dual],True)[0], sigma,
                     dual]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
