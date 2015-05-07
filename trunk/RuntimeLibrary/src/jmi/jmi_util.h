@@ -177,6 +177,11 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #endif
 
 
+/**
+ * \brief Maximum depth for nested try blocks.
+ */
+#define JMI_MAX_EXCEPTION_DEPTH 10
+
 /** Use for internal hard errors. Does not return. */
 void jmi_internal_error(jmi_t *jmi, const char msg[]);
 
@@ -1244,7 +1249,9 @@ struct jmi_t {
     jmi_real_t* real_x_work;             /**< \brief Work array for the real x variables */
     jmi_real_t* real_u_work;             /**< \brief Work array for the real u variables */
     
-    jmp_buf try_location;                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
+    jmp_buf try_location[JMI_MAX_EXCEPTION_DEPTH+1];                /**< \brief Buffer for setjmp/longjmp, for exception handling. */
+    jmi_int_t current_try_depth;
+
     jmi_int_t model_terminate;           /**< \brief Flag to trigger termination of the simulation. */
     jmi_int_t user_terminate;            /**< \brief Flag that the user has terminated the model. */
 

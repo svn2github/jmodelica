@@ -40,6 +40,7 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, jmi_ad_var_
 void jmi_internal_error(jmi_t *jmi, const char msg[]) {
     jmi_log_node(jmi->log, logError, "Error", "Internal error <msg:%s>", msg);
     jmi_throw();
+    jmi_log_node(jmi->log, logError, "Error", "Could not throw an exception after internal error", msg);
 }
 
 /* Helper function for logging warnings from the "_equation"- and "_function"-functions below */
@@ -259,9 +260,9 @@ jmi_ad_var_t jmi_tan_equation(jmi_t *jmi, jmi_ad_var_t x, const char msg[]) {
 }
 
 void jmi_flag_termination(jmi_t *jmi, const char* msg) {
-	jmi->model_terminate = 1;
-	/* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
-	jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
+    jmi->model_terminate = 1;
+    /* TODO: This is an informative message, not a warning, but is rather important. Change once log level is made separate from message category. */
+    jmi_log_node(jmi->log, logWarning, "SimulationTerminated", "<msg:%s>", msg);
 }
 
 jmi_ad_var_t jmi_abs(jmi_ad_var_t v) {
@@ -362,16 +363,17 @@ int jmi_func_delete(jmi_func_t *func) {
 int jmi_func_sym_dF(jmi_t *jmi,jmi_func_t *func, int sparsity,
         int independent_vars, int* mask, jmi_real_t* jac) {
     int return_status;
+    int depth;
 
     if (func->sym_dF==NULL) {
         return -1;
     }
-	jmi_set_current(jmi);
-	if (jmi_try(jmi))
-		return_status = -1;
-	else
-		return_status = func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
-    jmi_set_current(NULL);
+    depth = jmi_prepare_try(jmi);
+    if (jmi_try(jmi,depth))
+        return_status = -1;
+    else
+        return_status = func->sym_dF(jmi, sparsity, independent_vars, mask, jac);
+    jmi_finalize_try(jmi, depth);
     return return_status;
 
 }
@@ -2456,12 +2458,12 @@ jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps
 
 int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func) {
     int return_status;
-    jmi_set_current(jmi);
-    if (jmi_try(jmi))
-		return_status = -1;
-	else
-		return_status = func(jmi);
-    jmi_set_current(NULL);
+    int depth = jmi_prepare_try(jmi);
+    if (jmi_try(jmi, depth))
+        return_status = -1;
+    else
+        return_status = func(jmi);
+    jmi_finalize_try(jmi, depth);
     return return_status;
 }
 

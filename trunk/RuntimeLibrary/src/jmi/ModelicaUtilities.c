@@ -57,6 +57,7 @@ void ModelicaError(const char* string)
 {
 	jmi_global_log(1, "ModelicaError", "<msg:%s>", string);
     jmi_throw();
+    jmi_global_log(1, "Error", "<msg:%s>", "Could not throw an exception from ModelicaError");
 }
 
 void ModelicaFormatError(const char* string, ...)

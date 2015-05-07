@@ -47,18 +47,18 @@ DWORD jmi_tls_handle;
  * Used to set up and free thread-specific storage.
  */
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved) {
-	switch (fdwReason) {
-	case DLL_PROCESS_ATTACH:
-		/* TODO: Handle failure. */
-		jmi_tls_handle = TlsAlloc();
-		break;
-	case DLL_PROCESS_DETACH:
-		TlsFree(jmi_tls_handle);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
+    switch (fdwReason) {
+    case DLL_PROCESS_ATTACH:
+        /* TODO: Handle failure. */
+        jmi_tls_handle = TlsAlloc();
+        break;
+    case DLL_PROCESS_DETACH:
+        TlsFree(jmi_tls_handle);
+        break;
+    default:
+        break;
+    }
+    return TRUE;
 }
 
 /* Macro for function that sets thread-specific storage value. */
@@ -88,8 +88,8 @@ pthread_key_t jmi_tls_handle;
  * Used to set up thread-specific storage.
  */
 __attribute__((constructor)) static void jmi_init_tls() {
-	/* TODO: Handle failure. */
-	pthread_key_create(&jmi_tls_handle, NULL);
+    /* TODO: Handle failure. */
+    pthread_key_create(&jmi_tls_handle, NULL);
 }
 
 /**
@@ -98,7 +98,7 @@ __attribute__((constructor)) static void jmi_init_tls() {
  * Used to free thread-specific storage.
  */
 __attribute__((destructor)) static void jmi_free_tls() {
-	pthread_key_delete(jmi_tls_handle);
+    pthread_key_delete(jmi_tls_handle);
 }
 
 /* Macro for function that sets thread-specific storage value. */
@@ -116,39 +116,67 @@ __attribute__((destructor)) static void jmi_free_tls() {
  * \brief Set the current jmi struct.
  */
 void jmi_set_current(jmi_t* jmi) {
-	if (jmi != NULL && jmi_tls_get_value(jmi_tls_handle) != NULL)
-	    fprintf(stderr, "jmi_set_current(): current is not NULL\n");
-	jmi_tls_set_value(jmi_tls_handle, jmi);
+    if (jmi != NULL && jmi_tls_get_value(jmi_tls_handle) != NULL)
+        fprintf(stderr, "jmi_set_current(): current is not NULL\n");
+    jmi_tls_set_value(jmi_tls_handle, jmi);
 }
 
 /**
  * \brief Get the current jmi struct.
  */
 jmi_t* jmi_get_current() {
-	jmi_t* res = (jmi_t*) jmi_tls_get_value(jmi_tls_handle);
-	if (res == NULL)
-	    fprintf(stderr, "jmi_get_current(): current is NULL\n");
-	return res;
+    jmi_t* res = (jmi_t*) jmi_tls_get_value(jmi_tls_handle);
+    if (res == NULL)
+        fprintf(stderr, "jmi_get_current(): current is NULL\n");
+    return res;
 }
 
 /**
  * \brief Check if the current jmi struct is set.
  */
 int jmi_current_is_set() {
-	return jmi_tls_get_value(jmi_tls_handle) != NULL;
+    return jmi_tls_get_value(jmi_tls_handle) != NULL;
 }
 
 /* TODO: This version needs more consideration to support FMUs calling other FMUs. */
 
+/**
+ * \brief Prepare try buffer for calling jmi_try()
+ * \returns Try depth to be submitted to jmi_try and jmi_finalize_try
+ */
+int jmi_prepare_try(jmi_t* jmi) {
+    int depth;
+
+    if (!jmi_current_is_set()) {
+        jmi_set_current(jmi);
+        jmi->current_try_depth = 0;
+    }
+    depth = jmi->current_try_depth;
+    if(depth < JMI_MAX_EXCEPTION_DEPTH) 
+        jmi->current_try_depth = depth + 1;
+    return depth;
+}
+
+/**
+*    \brief Cleans up try buffer after jmi_try returnes.
+*/
+void jmi_finalize_try(jmi_t* jmi, int depth) {
+    jmi->current_try_depth = depth;
+    if(depth == 0) {
+        jmi_set_current(NULL);
+    }
+}
 
 /**
  * \brief Set up for exception handling.
  */
 void jmi_throw() {
-	jmi_t* jmi;
+    jmi_t* jmi;
 
-	jmi = jmi_get_current();
-	longjmp(jmi->try_location, 1);
+    jmi = jmi_get_current();
+    if(jmi && jmi->current_try_depth > 0) {
+        longjmp(jmi->try_location[jmi->current_try_depth-1], 1);
+    }
 }
 
 
@@ -156,7 +184,7 @@ void jmi_throw() {
  * \brief Print a node with single attribute to logger, using saved jmi_t struct.
  */
 void jmi_global_log(int warning, const char* name, const char* fmt, const char* value) {
-	jmi_t* jmi = jmi_get_current();
+    jmi_t* jmi = jmi_get_current();
     jmi_log_node(jmi->log, warning ? logWarning : logInfo, name, fmt, value);
 }
 
@@ -164,12 +192,12 @@ void jmi_global_log(int warning, const char* name, const char* fmt, const char* 
  * \brief Allocate memory with user-supplied function, if any. Otherwise use calloc().
  */
 void* jmi_global_calloc(size_t n, size_t s) {
-	jmi_t* jmi = jmi_get_current();
-	if (jmi->jmi_callbacks.allocate_memory != NULL) {
-		return (char*) jmi->jmi_callbacks.allocate_memory(n, s);
-	} else {
-		return (char*) calloc(n, s);
-	}
+    jmi_t* jmi = jmi_get_current();
+    if (jmi->jmi_callbacks.allocate_memory != NULL) {
+        return (char*) jmi->jmi_callbacks.allocate_memory(n, s);
+    } else {
+        return (char*) calloc(n, s);
+    }
 }
 
 /**
@@ -178,10 +206,11 @@ void* jmi_global_calloc(size_t n, size_t s) {
  * If level is JMI_ASSERT_ERROR, then function will not return.
  */
 void jmi_assert_failed(const char* msg, int level) {
-	if (level == JMI_ASSERT_WARNING) {
-		jmi_global_log(1, "AssertionWarning", "<msg:%s>", msg);
-	} else if (level == JMI_ASSERT_ERROR) {
-		jmi_global_log(1, "AssertionError", "<msg:%s>", msg);
-		jmi_throw();
-	}
+    if (level == JMI_ASSERT_WARNING) {
+        jmi_global_log(1, "AssertionWarning", "<msg:%s>", msg);
+    } else if (level == JMI_ASSERT_ERROR) {
+        jmi_global_log(1, "AssertionError", "<msg:%s>", msg);
+        jmi_throw();
+        jmi_global_log(1, "Error", "<msg:%s>", "Could not throw an exception from Assert call");
+    }
 }

@@ -269,7 +269,7 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->is_initialized = 0;
 
-	jmi_->nbr_event_iter = 0;
+    jmi_->nbr_event_iter = 0;
 
     return 0;
 
@@ -377,29 +377,30 @@ int jmi_destroy_delay_if(jmi_t* jmi) {
 
 int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
+    int depth = jmi_prepare_try(jmi);
 
-    if (jmi_current_is_set()) {
-    	return_status = func->F(jmi, &res);
-    } else {
-    	jmi_set_current(jmi);
-		if (jmi_try(jmi))
-			return_status = -1;
-		else
-			return_status = func->F(jmi, &res);
-		jmi_set_current(NULL);
+    if (jmi_try(jmi, depth))
+        return_status = -1;
+    else {
+        return_status = func->F(jmi, &res);
     }
+
+    jmi_finalize_try(jmi, depth);
+
     return return_status;
 }
 
 int jmi_func_cad_directional_dF(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res,
              jmi_real_t *dF, jmi_real_t* dv) {
-	int return_status;
-	jmi_set_current(jmi);
-	if (jmi_try(jmi))
-		return_status = -1;
-	else
-		return_status = func->cad_dir_dF(jmi, &res, &dF, &dv);
-    jmi_set_current(NULL);
+    int return_status;
+    int depth = jmi_prepare_try(jmi);
+    if (jmi_try(jmi, depth)) {
+        return_status = -1;
+    }
+    else {
+        return_status = func->cad_dir_dF(jmi, &res, &dF, &dv);
+    }
+    jmi_finalize_try(jmi, depth);
     return return_status;
 }
 
@@ -593,16 +594,15 @@ int jmi_ode_guards_init(jmi_t* jmi) {
 int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
 
     int return_status;
+    int depth = jmi_prepare_try(jmi);
 
-    jmi_set_current(jmi);
-    if (jmi_try(jmi)) {
-		return_status = -1;
+    if (jmi_try(jmi, depth)) {
+        return_status = -1;
     }
-	else {
+    else {
         return_status = jmi->dae->ode_next_time_event(jmi, event);
     }
-    jmi_set_current(NULL);
-
+    jmi_finalize_try(jmi, depth);
     return return_status;
 }
 
