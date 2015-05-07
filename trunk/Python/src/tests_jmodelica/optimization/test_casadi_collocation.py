@@ -1839,7 +1839,6 @@ class TestLocalDAECollocator(object):
         # Solve
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 20
-        opts['equation_scaling'] = False
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=5e-3)
 

@@ -581,7 +581,9 @@ class CasadiCollocator(object):
             self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
 
             # Initialize dual variables
-            self.solver_object.setInput(self.dual_opt['g'],
+            # The stored dual variables are unscaled, so that we can change
+            # the scaling without invalidating them
+            self.solver_object.setInput(self._inv_scale_residuals(self.dual_opt['g']),
                                         casadi.NLP_SOLVER_LAM_G0)
             self.solver_object.setInput(self.dual_opt['x'],
                                         casadi.NLP_SOLVER_LAM_X0)
@@ -597,7 +599,9 @@ class CasadiCollocator(object):
         primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
         self.primal_opt = primal_opt.reshape(-1)
         dual_g_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
-        dual_g_opt = dual_g_opt.reshape(-1)
+        # The stored dual variables are unscaled, so that we can change
+        # the scaling without invalidating them
+        dual_g_opt = self._scale_residuals(dual_g_opt.reshape(-1))
         dual_x_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_X))
         dual_x_opt = dual_x_opt.reshape(-1)
         self.dual_opt = {'g': dual_g_opt, 'x': dual_x_opt}
@@ -647,8 +651,8 @@ class CasadiCollocator(object):
         self.solver_object.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
 
         # Bounds on the constraints
-        self.solver_object.setInput(self.gllb, casadi.NLP_SOLVER_LBG)
-        self.solver_object.setInput(self.glub, casadi.NLP_SOLVER_UBG)
+        self.solver_object.setInput(self._scale_residuals(self.gllb), casadi.NLP_SOLVER_LBG)
+        self.solver_object.setInput(self._scale_residuals(self.glub), casadi.NLP_SOLVER_UBG)
 
 
 def _create_trajectory_function(data):
@@ -4452,8 +4456,8 @@ class LocalDAECollocator(CasadiCollocator):
         n_g = self.get_inequality_constraint().numel()
         gub = n_g * [0]
         glb = n_g * [self.LOWER]
-        self.glub = hublb + gub
-        self.gllb = hublb + glb
+        self.glub = N.array(hublb + gub)
+        self.gllb = N.array(hublb + glb)
 
     def _assemble_back_tracking_info(self):
         # Finalize and sort recorded tracking info
@@ -5216,7 +5220,70 @@ class LocalDAECollocator(CasadiCollocator):
             raise CasadiCollocatorException(
                 "named_var_expr only works if named_vars is enabled.")
 
-    def get_nlp(self, point="fcn"):
+    def get_residual_scales(self):
+        """
+        Get the scaling factors used for the residuals.
+
+        Call only if using the equation_scaling option.
+        """
+        offset = self.pp_offset['equation_scale']
+        return self._par_vals[offset:offset + self.n_c]
+
+    def _scale_residuals(self, r):
+        """
+        Return the argument scaled by the current residual scaling.
+        """
+        if self.equation_scaling:
+            return r*self.get_residual_scales()
+        else:
+            return r
+
+    def _inv_scale_residuals(self, r):
+        """
+        Return the argument divided by the current residual scaling.
+        """
+        if self.equation_scaling:
+            return r/self.get_residual_scales()
+        else:
+            return r
+            
+    def get_par_vals(self, scaled_residuals=False):
+        """
+        Get the parameter values for the NLP.
+
+        If scaled_residuals is True, return the parameter values needed
+        to get the scaled residuals (requires the equation_sorting option).
+        """
+        if self.equation_scaling:
+            if scaled_residuals:
+                return self._par_vals
+            else:
+                # Set the equation scalings to one
+                par_vals = self._par_vals.copy()
+                offset = self.pp_offset['equation_scale']
+                par_vals[offset:offset + self.n_c] = 1
+                return par_vals
+        else:
+            if scaled_residuals:
+                raise CasadiCollocatorException("Must enable the " +
+                    "equation_sorting option to get scaled residuals")
+            return self._par_vals
+
+    def get_opt_constraint_duals(self, scaled=False):
+        """
+        Get the optimal dual variables for the constraints
+
+        If scaled is True then get the duals for the equation scaled NLP.
+        """
+        if not scaled:
+            return self.dual_opt['g']
+        else:
+            if not self.collocator.equation_scaling:
+                raise CasadiCollocatorException("Must enable the " +
+                    "equation_sorting option to get scaled residuals")
+            return self._inv_scale_residuals(self.dual_opt['g'])
+
+    def get_nlp(self, point="fcn", scaled_residuals=False):
         """
         Get the nlp residual function.
         
@@ -5236,6 +5303,9 @@ class LocalDAECollocator(CasadiCollocator):
                 
                 Type: str
                 Default: "fcn"
+
+            scaled_residuals --
+                If True, return the residuals for the equation scaled NLP.
         
         Returns::
             
@@ -5256,11 +5326,11 @@ class LocalDAECollocator(CasadiCollocator):
             return nlp_fcn.call([self.xx, self.pp],True)
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        nlp_fcn.setInput(self._par_vals, 1)
+        nlp_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         nlp_fcn.evaluate()
         return (nlp_fcn.output(0).getValue(), nlp_fcn.output(1).toArray().ravel())
 
-    def get_J(self, point="fcn", dense=True):
+    def get_J(self, point="fcn", scaled_residuals=False, dense=True):
         """
         Get the Jacobian of the constraints.
         
@@ -5281,6 +5351,9 @@ class LocalDAECollocator(CasadiCollocator):
                 Type: str
                 Default: "fcn"
         
+            scaled_residuals --
+                If True, return the Jacobian for the equation scaled NLP.
+
         Returns::
             
             matrix --
@@ -5297,14 +5370,14 @@ class LocalDAECollocator(CasadiCollocator):
             return J_fcn.call([self.xx, self.pp],True)[0]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        J_fcn.setInput(self._par_vals, 1)
+        J_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         J_fcn.evaluate()
         result = J_fcn.output(0)
         if dense: result = result.toArray()
         else: result = csc_matrix(result)
         return result
     
-    def get_H(self, point="fcn"):
+    def get_H(self, point="fcn", scaled_residuals=False):
         """
         Get the Hessian of the Lagrangian.
         
@@ -5325,6 +5398,9 @@ class LocalDAECollocator(CasadiCollocator):
                 Type: str
                 Default: "fcn"
         
+            scaled_residuals --
+                If True, return the Hessian for the equation scaled NLP.
+
         Returns::
             
             matrix --
@@ -5341,19 +5417,19 @@ class LocalDAECollocator(CasadiCollocator):
             return H_fcn
         elif point == "init":
             x = self.xx_init
-            sigma = self._compute_sigma()
+            sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
             dual = N.zeros(self.c_e.numel() +
                            self.c_i.numel())
             H_fcn.setInput(x, 0)
-            H_fcn.setInput(self._par_vals, 1)
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "opt":
             x = self.primal_opt
-            sigma = self._compute_sigma()
-            dual = self.dual_opt['g']
+            sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
+            dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
             H_fcn.setInput(x, 0)
-            H_fcn.setInput(self._par_vals, 1)
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "sym":
@@ -5368,7 +5444,7 @@ class LocalDAECollocator(CasadiCollocator):
         H_fcn.evaluate()
         return H_fcn.output(0).toArray()
 
-    def get_KKT(self, point="fcn"):
+    def get_KKT(self, point="fcn", scaled_residuals=False):
         """
         Get the KKT matrix.
 
@@ -5392,6 +5468,9 @@ class LocalDAECollocator(CasadiCollocator):
                 
                 Type: str
                 Default: "fcn"
+
+            scaled_residuals --
+                If True, return the KKT matrix for the equation scaled NLP.
         
         Returns::
             
@@ -5406,8 +5485,8 @@ class LocalDAECollocator(CasadiCollocator):
         """
         if point == "fcn" or point == "sym":
             x = self.xx
-            J = self.get_J("sym")
-            [H, sigma, dual] = self.get_H("sym")
+            J = self.get_J("sym", scaled_residuals=scaled_residuals)
+            [H, sigma, dual] = self.get_H("sym", scaled_residuals=scaled_residuals)
             zeros = N.zeros([dual.numel(), dual.numel()])
             KKT = casadi.blockcat([[H, J.T], [J, zeros]])
             if point == "sym":
@@ -5421,23 +5500,28 @@ class LocalDAECollocator(CasadiCollocator):
                            self.c_i.numel())
         elif point == "opt":
             x = self.primal_opt
-            dual = self.dual_opt['g']
+            dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        sigma = self._compute_sigma()
-        J = self.get_J(point)
-        H = self.get_H(point)
+        sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
+        J = self.get_J(point, scaled_residuals=scaled_residuals)
+        H = self.get_H(point, scaled_residuals=scaled_residuals)
         zeros = N.zeros([len(dual), len(dual)])
         KKT = N.bmat([[H, J.T], [J, zeros]])
         return KKT
 
-    def _compute_sigma(self):
+    def _compute_sigma(self, scaled_residuals=False):
         """
         Computes the objective scaling factor sigma.
+
+        Parameters::
+
+            scaled_residuals --
+                If True, return sigma for the equation scaled NLP.
         """
         grad_fcn = self.solver_object.gradF()
         grad_fcn.setInput(self.xx_init, 0)
-        grad_fcn.setInput(self._par_vals, 1)
+        grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         grad_fcn.evaluate()
         grad = grad_fcn.output(0).toArray()
         sigma_inv = N.linalg.norm(grad, N.inf)
@@ -5603,10 +5687,10 @@ class LocalDAECollocationAlgResult(JMResultBase):
 
         # Print condition numbers
         if options is not None and self.options['print_condition_numbers']:
-            J_init_cond = N.linalg.cond(solver.get_J("init"))
-            J_opt_cond = N.linalg.cond(solver.get_J("opt"))
-            KKT_init_cond = N.linalg.cond(solver.get_KKT("init"))
-            KKT_opt_cond = N.linalg.cond(solver.get_KKT("opt"))
+            J_init_cond = N.linalg.cond(solver.get_J("init"), scaled_residuals=self.op.equation_scaling)
+            J_opt_cond = N.linalg.cond(solver.get_J("opt"), scaled_residuals=self.op.equation_scaling)
+            KKT_init_cond = N.linalg.cond(solver.get_KKT("init"), scaled_residuals=self.op.equation_scaling)
+            KKT_opt_cond = N.linalg.cond(solver.get_KKT("opt"), scaled_residuals=self.op.equation_scaling)
             print("\nJacobian condition number at the initial guess: %.3g" %
                   J_init_cond)
             print("Jacobian condition number at the optimum: %.3g" %
@@ -5786,7 +5870,7 @@ class OptimizationSolver(object):
         else:
             return self.collocator.xx_init
 
-    def get_nlp_residuals(self, point = 'opt', raw=False):
+    def get_nlp_residuals(self, point = 'opt', raw=False, scaled=False):
         """
         Get the raw vector of (unscaled) residuals for the underlying NLP.
 
@@ -5808,12 +5892,15 @@ class OptimizationSolver(object):
                 the violated bound otherwise.
                 Default: False
 
+            scaled --
+                If True, return the residuals for the equation scaled NLP.
+
         """
         assert point in ('opt', 'init')
-        residuals = self.collocator.get_nlp(point)[1]
+        residuals = self.collocator.get_nlp(point, scaled_residuals=scaled)[1]
         if raw:
             return residuals
-        lb, ub = self.get_nlp_residual_bounds()
+        lb, ub = self.get_nlp_residual_bounds(scaled=scaled)
         violations = N.zeros_like(residuals)
         violations[residuals < lb] = (residuals - lb)[residuals < lb]
         violations[residuals > ub] = (residuals - ub)[residuals > ub]
@@ -5824,15 +5911,32 @@ class OptimizationSolver(object):
         # Returning copies to be safe
         return (N.array(self.collocator.xx_lb), N.array(self.collocator.xx_ub))
 
-    def get_nlp_residual_bounds(self):
-        """Get the raw vectors (lb, ub) of bounds on residuals in the underlying NLP"""
-        # Returning copies to be safe
-        return (N.array(self.collocator.gllb), N.array(self.collocator.glub))
+    def get_nlp_residual_bounds(self, scaled=False):
+        """
+        Get the raw vectors (lb, ub) of bounds on residuals in the underlying NLP
 
-    def get_nlp_constraint_duals(self):
-        """Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP"""
-        # Returning a copy to be safe
-        return N.array(self.collocator.dual_opt['g'])
+        Parameters::
+
+            scaled --
+                If True, return the residual bounds for the equation scaled NLP.        
+        """
+        if scaled:
+            scales = self.collocator.get_residual_scales()
+            return (self.collocator.gllb*scales, self.collocator.glub*scales)
+        else:
+            # Returning copies to be safe
+            return (N.array(self.collocator.gllb), N.array(self.collocator.glub))
+
+    def get_nlp_constraint_duals(self, scaled=False):
+        """
+        Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP
+
+        Parameters::
+
+            scaled --
+                If True, return the constraint duals for the equation scaled NLP.        
+        """
+        return self.collocator.get_opt_constraint_duals(scaled).copy()
 
     def get_nlp_bound_duals(self):
         """Get the raw vector of dual variables for variable bounds in the underlying NLP"""
@@ -5909,7 +6013,7 @@ class OptimizationSolver(object):
         time = self.get_point_time(i, k)
         return (inds, time, i, k)
 
-    def get_residuals(self, eqtype, inds=None, point='opt', raw=False):
+    def get_residuals(self, eqtype, inds=None, point='opt', raw=False, scaled=False):
         """
         Get the residuals for a given equation type.
 
@@ -5941,6 +6045,9 @@ class OptimizationSolver(object):
                 the violated bound otherwise.
                 Default: False
 
+            scaled --
+                If True, return the residuals for the equation scaled NLP.        
+
         Returns::
 
             residuals --
@@ -5959,13 +6066,13 @@ class OptimizationSolver(object):
                 -1 if not applicable.
         """
         rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
-        residuals = self.get_nlp_residuals(point, raw=raw)
+        residuals = self.get_nlp_residuals(point, raw=raw, scaled=scaled)
         residuals = residuals[rinds]
         if inds is not None:
             residuals = residuals[:, inds]
         return (residuals, time, i, k)
 
-    def get_constraint_duals(self, eqtype, inds=None):
+    def get_constraint_duals(self, eqtype, inds=None, scaled=False):
         """
         Get the dual variables at the optimization solution for a given equation type.
 
@@ -5983,6 +6090,9 @@ class OptimizationSolver(object):
                 should be returned for, or None if duals should be
                 returned for all equations.
                 Default: None
+
+            scaled --
+                If True, return the constraint duals for the equation scaled NLP.        
 
         Returns::
 
@@ -6002,7 +6112,7 @@ class OptimizationSolver(object):
                 -1 if not applicable.
         """
         rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
-        duals = self.get_nlp_constraint_duals()
+        duals = self.get_nlp_constraint_duals(scaled=scaled)
         duals = duals[rinds]
         if inds is not None:
             duals = duals[:, inds]
@@ -6037,7 +6147,7 @@ class OptimizationSolver(object):
         duals = duals[inds]
         return duals, time, i, k
 
-    def get_residual_norms(self, eqtype=None, point='opt', ord=N.inf):
+    def get_residual_norms(self, eqtype=None, point='opt', scaled=False, ord=N.inf):
         """
         List the norms of different parts of the residual, in descending order
 
@@ -6057,6 +6167,9 @@ class OptimizationSolver(object):
                 'init' for the initial guess.
                 Default: 'opt'
 
+            scaled --
+                If True, consider the residuals for the equation scaled NLP.        
+
             ord --
                 Vector norm order used with numpy.linalg.norm
         """
@@ -6064,11 +6177,11 @@ class OptimizationSolver(object):
 
         if eqtype is None:
             for eqtype in self.get_constraint_types():
-                r, t, i, k = self.get_residuals(eqtype, point=point)
+                r, t, i, k = self.get_residuals(eqtype, point=point, scaled=scaled)
                 rnorm = N.linalg.norm(r.ravel(), ord=ord)
                 result.append((rnorm, eqtype))
         else:
-            r, t, i, k = self.get_residuals(eqtype, point=point)
+            r, t, i, k = self.get_residuals(eqtype, point=point, scaled=scaled)
             for j in xrange(r.shape[1]):
                 rnorm = N.linalg.norm(r[:,j], ord=ord)
                 result.append((rnorm, j))
@@ -6106,7 +6219,7 @@ class OptimizationSolver(object):
         elif eqtype == 'point_ineq': return N.array(self.collocator.point_ineq_orig)
         else: raise KeyError("Unsupported equation type %s" % repr(eqtype))
 
-    def get_nlp_jacobian(self, point='opt'):
+    def get_nlp_jacobian(self, point='opt', scaled_residuals=False):
         """
         Get the raw Jacobian of the nlp's constraints
 
@@ -6117,13 +6230,16 @@ class OptimizationSolver(object):
                 'init' for the initial guess.
                 Default: 'opt'
 
+            scaled_residuals --
+                If True, return the Jacobian for the equation scaled NLP.
+
         Returns::
             J --
                 The constraint Jacobian evaluated at the given point.
                 Type: scipy.sparse.csc_matrix
         """
         assert point in ('opt', 'init')
-        return self.collocator.get_J(point, dense=False)
+        return self.collocator.get_J(point, scaled_residuals=scaled_residuals, dense=False)
 
     def get_point_time(self, i, k):
         """
