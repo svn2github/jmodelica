@@ -1020,7 +1020,7 @@ public class CGenerator extends GenericGenerator {
             cs2.add(fclass.discretePreVariables());
             cs2.genFuncs();
             
-            str.print("int jmi_set_start_values_base(jmi_t* jmi) {\n");
+            str.print("void jmi_set_start_values_base(jmi_t* jmi) {\n");
             cs1.genCalls();
             str.print(next);
             str.print("model_init_eval_parameters(jmi);\n");
