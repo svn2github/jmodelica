@@ -3140,7 +3140,7 @@ model RedeclareTest37
 			description="Class lookup from replacing record",
 			flatModel="
 fclass RedeclareTests.RedeclareTest37
- parameter RedeclareTests.RedeclareTest37.A a(c(x = 1,e(y = a.c.x)));
+ parameter RedeclareTests.RedeclareTest37.A a;
 
 public
  record RedeclareTests.RedeclareTest37.G.E
@@ -3153,7 +3153,7 @@ public
  end RedeclareTests.RedeclareTest37.G.D;
 
  record RedeclareTests.RedeclareTest37.A
-  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1,e(y = c.x));
+  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1);
  end RedeclareTests.RedeclareTest37.A;
 
 end RedeclareTests.RedeclareTest37;
