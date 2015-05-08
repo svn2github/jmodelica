@@ -5872,7 +5872,7 @@ class OptimizationSolver(object):
 
     def get_nlp_residuals(self, point = 'opt', raw=False, scaled=False):
         """
-        Get the raw vector of (unscaled) residuals for the underlying NLP.
+        Get the raw vector of residuals for the underlying NLP.
 
         The vector contains residuals for all equality and inequality
         constraints.
@@ -5906,6 +5906,18 @@ class OptimizationSolver(object):
         violations[residuals > ub] = (residuals - ub)[residuals > ub]
         return violations
 
+    def get_nlp_residual_scales(self):
+        """
+        Get the raw vector of scaling factors used for the NLP residuals.
+
+        The scaled residuals are those exposed to the NLP solver,
+        and are formed as the product of the original (unscaled) residuals
+        with the residual scale factors.
+
+        Needs the equation_scaling option to be set to true.
+        """
+        return self.collocator.get_residual_scales()
+
     def get_nlp_variable_bounds(self):
         """Get the raw vectors (lb, ub) of bounds on variables in the underlying NLP"""
         # Returning copies to be safe
@@ -5929,7 +5941,7 @@ class OptimizationSolver(object):
 
     def get_nlp_constraint_duals(self, scaled=False):
         """
-        Get the raw vector of (unscaled) dual variables for the constraints in the underlying NLP
+        Get the raw vector of dual variables for the constraints in the underlying NLP
 
         Parameters::
 
@@ -6013,7 +6025,38 @@ class OptimizationSolver(object):
         time = self.get_point_time(i, k)
         return (inds, time, i, k)
 
-    def get_residuals(self, eqtype, inds=None, point='opt', raw=False, scaled=False):
+    def get_constraint_points(self, eqtype):
+        """
+        Get the time points where a given equation type is instantiated.
+
+        For the given equation type, each equation is instantiated in the time
+        points returned, so residuals, residual scale factors, and dual
+        variables all refer to the these points.
+
+        Parameters::
+            eqtype --
+                Type of equation, see get_constraint_types() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+        Returns::
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        return time, i, k
+
+    def get_residuals(self, eqtype, inds=None, point='opt', raw=False, scaled=False, tik=True):
         """
         Get the residuals for a given equation type.
 
@@ -6048,10 +6091,15 @@ class OptimizationSolver(object):
             scaled --
                 If True, return the residuals for the equation scaled NLP.        
 
+            tik:
+                If True, return (residuals, time, i, k),
+                otherwise return just residuals. (Use get_constraint_points
+                to get (time, i, k)).
+
         Returns::
 
             residuals --
-                Array of shape (n_tp, n_eq) of (unscaled) residuals,
+                Array of shape (n_tp, n_eq) of residuals,
                 where n_tp is the number of time points found
                 and n_eq the number of equations.
 
@@ -6070,9 +6118,12 @@ class OptimizationSolver(object):
         residuals = residuals[rinds]
         if inds is not None:
             residuals = residuals[:, inds]
-        return (residuals, time, i, k)
+        if tik:
+            return (residuals, time, i, k)
+        else:
+            return residuals
 
-    def get_constraint_duals(self, eqtype, inds=None, scaled=False):
+    def get_constraint_duals(self, eqtype, inds=None, scaled=False, tik=True):
         """
         Get the dual variables at the optimization solution for a given equation type.
 
@@ -6094,10 +6145,15 @@ class OptimizationSolver(object):
             scaled --
                 If True, return the constraint duals for the equation scaled NLP.        
 
+            tik:
+                If True, return (duals, time, i, k),
+                otherwise return just residuals. (Use get_constraint_points
+                to get (time, i, k)).
+
         Returns::
 
             duals --
-                Array of shape (n_tp, n_eq) of (unscaled) dual variable values,
+                Array of shape (n_tp, n_eq) of dual variable values,
                 where n_tp is the number of time points found
                 and n_eq the number of equations.
 
@@ -6116,9 +6172,85 @@ class OptimizationSolver(object):
         duals = duals[rinds]
         if inds is not None:
             duals = duals[:, inds]
-        return (duals, time, i, k)
+        if tik:
+            return (duals, time, i, k)
+        else:
+            return duals
 
-    def get_bound_duals(self, var):
+    def get_residual_scales(self, eqtype, inds=None):
+        """
+        Get the residual scaling factors for a given equation type.
+
+        The scaled residuals are those exposed to the NLP solver,
+        and are formed as the product of the original (unscaled) residuals
+        with the residual scale factors.
+
+        As a result, the scaled (constraint) dual variables obtained from
+        the NLP solver are equal to the constraint duals for the original
+        (unscaled) problem divided by the residual scale factors.
+
+        Needs the equation_scaling option to be enabled.
+
+        Parameters::
+            eqtype --
+                Type of equation, see get_constraint_types() for available
+                types in the model.
+                Possible values include
+
+                    'initial', 'dae', 'path_eq', 'path_ineq',
+                    'point_eq', 'point_ineq'
+
+            inds --
+                Iterable of equation indices within eqtype that the scale
+                factors should be returned for, or None if scale factors
+                should be returned for all equations.
+                Default: None
+
+        Returns::
+
+            residual_scales --
+                Array of shape (n_tp, n_eq) of scale factors,
+                where n_tp is the number of time points found
+                and n_eq the number of equations.
+                The corresponding time points can be retrieved
+                with the get_constraint_points method.
+        """
+        rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
+        scales = self.get_nlp_residual_scales()
+        scales = scales[rinds]
+        if inds is not None:
+            scales = scales[:, inds]
+        return scales
+
+    def get_variable_points(self, var):
+        """
+        Get the time points where a given equation variable is instantiated.
+
+        These are the time points at which an NLP variable has been created
+        from the given variable in the model, and the time points that
+        bounds duals for the variable refer to.
+
+        Parameters::
+            var --
+                The model variable to get the time points for.
+                Type: string or Variable
+
+        Returns::
+
+            time --
+                The time for each time point
+
+            i --
+                The element index for each time point. -1 if not applicable.
+
+            k --
+                The collocation point index for each time point.
+                -1 if not applicable.
+        """
+        inds, time, i, k = self.get_nlp_variable_indices(var)
+        return time, i, k
+
+    def get_bound_duals(self, var, tik=True):
         """
         Get the dual variables at the optimization solution for the bounds on the given variable.
 
@@ -6126,6 +6258,11 @@ class OptimizationSolver(object):
             var --
                 The model variable to get the bounds dual variables for.
                 Type: string or Variable
+
+            tik:
+                If True, return (duals, time, i, k),
+                otherwise return just duals. (Use get_constraint_points
+                to get (time, i, k)).
 
         Returns::
 
@@ -6145,7 +6282,10 @@ class OptimizationSolver(object):
         inds, time, i, k = self.get_nlp_variable_indices(var)
         duals = self.get_nlp_bound_duals()
         duals = duals[inds]
-        return duals, time, i, k
+        if tik:
+            return duals, time, i, k
+        else:
+            return duals
 
     def get_residual_norms(self, eqtype=None, point='opt', scaled=False, ord=N.inf):
         """
@@ -6168,7 +6308,7 @@ class OptimizationSolver(object):
                 Default: 'opt'
 
             scaled --
-                If True, consider the residuals for the equation scaled NLP.        
+                If True, consider the residuals for the equation scaled NLP.
 
             ord --
                 Vector norm order used with numpy.linalg.norm
@@ -6177,11 +6317,51 @@ class OptimizationSolver(object):
 
         if eqtype is None:
             for eqtype in self.get_constraint_types():
-                r, t, i, k = self.get_residuals(eqtype, point=point, scaled=scaled)
+                r = self.get_residuals(eqtype, point=point, scaled=scaled, tik=False)
                 rnorm = N.linalg.norm(r.ravel(), ord=ord)
                 result.append((rnorm, eqtype))
         else:
-            r, t, i, k = self.get_residuals(eqtype, point=point, scaled=scaled)
+            r = self.get_residuals(eqtype, point=point, scaled=scaled, tik=False)
+            for j in xrange(r.shape[1]):
+                rnorm = N.linalg.norm(r[:,j], ord=ord)
+                result.append((rnorm, j))
+
+        result.sort(reverse = True)
+        return result
+
+    def get_residual_scale_norms(self, eqtype=None, inv=False, ord=N.inf):
+        """
+        List the norms of different parts of the residual scales, in descending order.        
+
+        For the inverse scale factors, the equations/equation types
+        that have been scaled down the most will appear first.
+
+        Parameters::
+            eqtype --
+                If None, list all equation types and their scaling norms.
+                Otherwise, list the scaling norm of each equation
+                of the given type, along with its index within the type.
+                Default: None
+
+            inv --
+                If True, consider the inverse scale factors instead.
+
+            ord --
+                Vector norm order used with numpy.linalg.norm
+        """
+        result = []
+
+        if eqtype is None:
+            for eqtype in self.get_constraint_types():
+                r = self.get_residual_scales(eqtype)
+                if inv:
+                    r = 1/r
+                rnorm = N.linalg.norm(r.ravel(), ord=ord)
+                result.append((rnorm, eqtype))
+        else:
+            r = self.get_residual_scales(eqtype)
+            if inv:
+                r = 1/r
             for j in xrange(r.shape[1]):
                 rnorm = N.linalg.norm(r[:,j], ord=ord)
                 result.append((rnorm, j))

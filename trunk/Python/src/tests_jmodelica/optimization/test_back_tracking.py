@@ -88,6 +88,7 @@ def test_get_residuals():
     opts['n_e'] = n_e
     opts['n_cp'] = n_cp
     opts['variable_scaling'] = False
+    opts['equation_scaling'] = True
 
     var_names = ('x', 'der(x)', 'w', 'u')
     eqtypes   = ('initial', 'dae', 'path_eq', 'path_ineq', 'point_eq', 'point_ineq')
@@ -108,22 +109,27 @@ def test_get_residuals():
 
     # Check that the residuals match the equations in the model
     for eqtype in eqtypes:
-        r1, t, i, k = solver.get_residuals(eqtype, point='init', raw=True)
+        r1 = solver.get_residuals(eqtype, point='init', raw=True, tik=False)
+        t, i, k = solver.get_constraint_points(eqtype)
         i, k = N.maximum(1, i), N.maximum(0, k)
-        if eqtype == 'initial':      r2 = x - 1 # x = 1;
-        elif eqtype == 'dae':        r2 = derx - u # der(x) = u;
-        elif eqtype == 'path_eq':    r2 = w - x**2 # w = x^2;
-        elif eqtype == 'path_ineq':  r2 = x - u**2 # x <= u^2;
+        if eqtype == 'initial':      r2 = 1e3*(x - 1) # x = 1;
+        elif eqtype == 'dae':        r2 = 2e4*(derx - u) # der(x) = u;
+        elif eqtype == 'path_eq':    r2 = 3e3*(w - x**2) # w = x^2;
+        elif eqtype == 'path_ineq':  r2 = 4e3*(x - u**2) # x <= u^2;
         elif eqtype == 'point_eq':
-            r2 = x - 2 # x(finalTime) = 2;
+            r2 = 5e3*(x - 2) # x(finalTime) = 2;
             i, k = -1, -1
         elif eqtype == 'point_ineq':
-            r2 = -5 - x # x(startTime) >= -5;
+            r2 = 6e3*(-5 - x) # x(startTime) >= -5;
             i, k = 1, 0
         r2 = r2[i, k]
-        assert N.max(N.abs(r2 - r1.ravel())) < 1e-12
+        assert N.max(N.abs(r2 - r1.ravel())) < 1e-12*1e4
 
-        v1, t, i, k = solver.get_residuals(eqtype, point='init', raw=False)
+        r1 = solver.get_residuals(eqtype, point='init', raw=True, scaled=True, tik=False)
+        rs = solver.get_residual_scales(eqtype)
+        assert N.max(N.abs(r2*rs - r1.ravel())) < 1e-12
+
+        v1 = solver.get_residuals(eqtype, point='init', raw=False, tik=False)
         if eqtype in ('path_ineq', 'point_ineq'):
             v2 = N.maximum(0, r2)
         else:
@@ -177,11 +183,13 @@ def test_duals():
     # Strange things seem to happen with the first two entries in the duals;
     # skip them in the comparison.
     # Interaction with initial constraints?
-    l, t, i, k = solver.get_constraint_duals('path_ineq')
+    l = solver.get_constraint_duals('path_ineq', tik=False)
+    t, i, k = solver.get_constraint_points('path_ineq')
     l0 = t*h
     assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
 
-    l, t, i, k = solver.get_bound_duals('y')
+    l = solver.get_bound_duals('y', tik=False)
+    t, i, k = solver.get_variable_points('y')
     l0 = (t-2)*h
     assert N.max(N.abs((l.ravel()-l0)[2:])) < 1e-12
 
