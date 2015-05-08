@@ -1601,7 +1601,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             done through this option the resulting scaling can be inspected.
             
             Type: bool
-            Default: True
+            Default: False
         
         nominal_traj --
             Variable trajectory data used for scaling of the NLP variables.

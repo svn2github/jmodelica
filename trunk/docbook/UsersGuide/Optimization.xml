@@ -580,6 +580,17 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>equation_scaling</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>Whether to scale the equations in collocated NLP. Many
+              NLP solvers default to scaling the equations, but if it is done
+              through this option the resulting scaling can be inspected.
+              </entry>
+            </row>
+
+            <row>
               <entry><literal>nominal_traj</literal></entry>
 
               <entry>None</entry>
@@ -3563,6 +3574,12 @@ all_eqs = solver.get_equations(eqtype)        # all equations of the given type
         (<literal>raw=False</literal>, default) or raw residuals
         (<literal>raw=True</literal>).</para>
 
+        <para>The above can also be done with</para>
+
+        <programlisting>r = solver.get_residuals(eqtype, tik=False)
+t, i, k = solver.get_constraint_points(eqtype)
+</programlisting>
+
         <para>To get an overview of which residuals are the biggest,</para>
 
         <programlisting>solver.get_residual_norms()</programlisting>
@@ -3574,6 +3591,24 @@ all_eqs = solver.get_equations(eqtype)        # all equations of the given type
 
         <para>returns a list of equation indices of the given type sorted by
         residual norm.</para>
+
+        <para>By default, the methods above work with the unscaled residuals
+        that result directly from collocation. If the
+        <literal>equation_scaling</literal> option is turned on, the
+        constraints will be rescaled before they are sent to the NLP solver.
+        It might be of more interest to look at the size of the scaled
+        residuals, since these are what the NLP solver will try to make small.
+        The above methods can then be made to work with the scaled residuals
+        instead of the unscaled by use of the <literal>scaled=True</literal>
+        keyword argument. The residual scale factors can also be retrieved in
+        analogy to <literal>solver.get_residuals</literal> through</para>
+
+        <programlisting>scales = solver.get_residual_scales(eqtype)</programlisting>
+
+        <para>and an overview of the residual scale factors (or inverse scale
+        factors with <literal>inv=True</literal>) can be gained from</para>
+
+        <programlisting>solver.get_residual_scale_norms()</programlisting>
       </section>
 
       <section>
@@ -3617,6 +3652,9 @@ c_inds, xx_inds = N.nonzero(J)
 entries = solver.get_model_jacobian_entries(c_inds, xx_inds) # Map the indices to equations and variables in the model
 solver.print_jacobian_entries(entries) # Print them
 </programlisting>
+
+        <para>To get the Jacobian with residual scaling applied, use the
+        <literal>scaled_residuals=True</literal> option.</para>
       </section>
 
       <section>
@@ -3637,7 +3675,9 @@ solver.print_jacobian_entries(entries) # Print them
 
         <programlisting>d, t, i, k = solver.get_constraint_duals(eqtype)</programlisting>
 
-        <para>in analogy to <literal>solver.get_residuals</literal>.</para>
+        <para>in analogy to <literal>solver.get_residuals</literal>. To get
+        constraint duals for the equation scaled problem, use the
+        <literal>scaled=True</literal> keyword argument.</para>
 
         <para>Besides regular constraints, the NLP can also contain upper and
         lower bounds on variables. These will correspond to the Modelica
@@ -3647,6 +3687,12 @@ solver.print_jacobian_entries(entries) # Print them
         function of time through</para>
 
         <programlisting>d, t, i, k = solver.get_bound_duals(var)</programlisting>
+
+        <para>The above can also be done with</para>
+
+        <programlisting>d = solver.get_bound_duals(var, tik=False)
+t, i, k = solver.get_variable_points(var)
+</programlisting>
       </section>
 
       <section>
@@ -3673,6 +3719,11 @@ solver.print_jacobian_entries(entries) # Print them
             <para><literal>get_nlp_variable_bounds</literal> and
             <literal>get_nlp_residual_bounds</literal> to get the
             corresponding bounds used in the NLP.</para>
+          </listitem>
+
+          <listitem>
+            <para><literal>get_nlp_residual_scales</literal> to get the raw
+            residual scale factors.</para>
           </listitem>
 
           <listitem>
