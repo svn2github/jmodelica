@@ -33,14 +33,14 @@ optimization TestResiduals(startTime=0, finalTime=1)
     Real w;
     input Real u;
 initial equation
-    x = 1;
+    1e3*(x - 1) = 0; // Scale up to rest equation scaling
 equation
-    der(x) = u; 
+    2e4*(der(x) - u) = 0; 
 constraint
-    w = x^2;
-    x <= u^2;
-    x(finalTime) = 2;
-    x(startTime) >= -5;
+    3e3*(w - x^2) = 0;
+    4e3*(x - u^2) <= 0;
+    5e3*(x(finalTime) - 2) = 0;
+    6e3*(x(startTime) - (-5)) >= 0;
 end TestResiduals;
 
 optimization TestEquations()
