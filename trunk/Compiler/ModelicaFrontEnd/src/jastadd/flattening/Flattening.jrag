@@ -1227,14 +1227,6 @@ aspect Flattening {
 
 	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
 	/**
-	 * Check if the binding expression of an InstAssignable node is set 
-	 *        through a modification that is declared "each".
-	 */
-	syn lazy boolean InstAssignable.myBindingExpHasEach() {
-		return hasInstValueMod() ? myInstValueMod().hasEach() : false;
-	}
-	
-	/**
 	 * Check if this InstAssignable node has an InstModification setting 
 	 *        its binding expression.
 	 */

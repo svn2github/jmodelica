@@ -193,17 +193,17 @@ aspect ContentCheck {
 
     inh boolean InstModification.isForAttributeOnOperatorRecordDeclarationMember();
     eq InstNode.getChild().isForAttributeOnOperatorRecordDeclarationMember()                                 = false;
-    eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = 
+    eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = // TODO: not needed?
         isForAttributeOnOperatorRecordDeclarationMember();
-    eq InstComponentModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()     =
-        isForOperatorRecordDeclarationMember();
+    eq InstElementModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()       =
+        getName().myInstComponentDecl().isPrimitive() && isForOperatorRecordDeclarationMember();
 
-    syn boolean InstNamedModification.isForOperatorRecordDeclarationMember() = 
-        getName().myInstComponentDecl().isOperatorRecordDeclarationMember();
-
-    inh boolean InstComponentDecl.isOperatorRecordDeclarationMember();
-    eq InstClassDecl.getChild().isOperatorRecordDeclarationMember() = isOperatorRecord();
-    eq Root.getChild().isOperatorRecordDeclarationMember()          = false;
+    inh boolean InstNamedModification.isForOperatorRecordDeclarationMember();
+    eq InstElementModification.getChild().isForOperatorRecordDeclarationMember() = 
+        getName().isComponentAccess() && isForOperatorRecordDeclarationMember();
+    eq InstClassDecl.getChild().isForOperatorRecordDeclarationMember()           = isOperatorRecord();
+    eq InstExtends.getChild().isForOperatorRecordDeclarationMember()             = myInstClass().isOperatorRecord();
+    eq InstNode.getChild().isForOperatorRecordDeclarationMember()                = false;
 
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
        if (generated) {

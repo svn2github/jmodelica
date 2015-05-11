@@ -112,7 +112,8 @@ aspect FlatNames {
     eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()    = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
     eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = isFunction() || isRecord() ? new FQNameEmpty() : retrieveFQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstReplacingSimpleShortClassDecl.getChild().retrieveFQName()      = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
     eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
     eq InstValueModification.getChild().retrieveFQName()                  = retrieveFQNameFromModification();
     eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();

@@ -421,7 +421,11 @@ Semantic error at line 386, column 37:
 Error: in file 'src/test/modelica/NameTests.mo':
 Semantic error at line 386, column 39:
   Cannot find component declaration for y
-")})));
+
+Error: in file 'src/test/modelica/NameTests.mo':
+Semantic error at line 389, column 39:
+  Cannot find component declaration for y
+  ")})));
 end NameTest13_Err;
   
  model NameTest14_Err

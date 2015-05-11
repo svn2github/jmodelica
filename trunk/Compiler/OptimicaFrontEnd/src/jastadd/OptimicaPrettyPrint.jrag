@@ -109,7 +109,8 @@ aspect OptimicaPrettyPrint {
 		str.print(indent + "end for");
 	}
 
-	eq OptimizationClass.toString() = "optimization";
+    eq OptimizationClass.toString()     = "optimization";
+    eq InstOptimizationClass.toString() = "optimization";
 
 	public void TimedVariable.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print(getName().name());
