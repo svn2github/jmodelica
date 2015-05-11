@@ -168,7 +168,7 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
-    type name##_rec;\
+    type name##_rec = {0};\
     type* name = &name##_rec;
 
 #ifdef _MSC_VER
