@@ -222,6 +222,14 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
             break; 
         }
         
+        /* If the step is zero, stop */
+        if (JMI_ABS(delta) < UNIT_ROUNDOFF*block->nominal[0]) { 
+            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
+                jmi_log_fmt(block->log, node, logInfo, "The step is too small <delta: %f>. Stopping Newton.", delta);
+            }
+            break; 
+        }
+        
         flag = brentdf(x, f, &df, block);
         if (flag) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
@@ -242,16 +250,6 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
             jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Dervative value <df: %f>, Delta <delta:%f>",
             x,f,df,delta);
         }
-        
-        /* If the step is zero, stop */
-        /*
-        if (JMI_ABS(delta) < UNIT_ROUNDOFF*block->nominal[0]) { 
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-                jmi_log_fmt(block->log, node, logInfo, "The step is too small <delta: %f>. Stopping Newton.", delta);
-            }
-            break; 
-        }
-        */
         
         x = x - delta;
         
