@@ -122,19 +122,19 @@ Semantic error at line 96, column 4:
 			errorMessage="
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 10:
-  The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute start does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 21:
-  The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute unit does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 28:
-  The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute nominal does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 40:
-  The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute min does not match the declared type of the variable
 Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
 Semantic error at line 130, column 49:
-  The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
+  The type of the binding expression of the attribute max does not match the declared type of the variable
 ")})));
 	end TypeTest6;
 

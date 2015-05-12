@@ -112,26 +112,24 @@ aspect FlatTypeCheck {
         Size componentSize = size();
         if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
             error("Can not infer array size of the variable " + name());
-        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
-            InstValueModification ivm = myInstValueMod();
-            FType expectedBT = bindingType();
-            FType actualBT = bexp.type();
-            if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
-                InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
-                if (needsEach != null) {
-                    needsEach.generateMissingEachWarning();
-                } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-                    bexp.error("The binding expression of the variable " + name() +
-                            " does not match the declared type of the variable");
-                } else {
-                    if (ivm.myInstNode() == this)
-                        bexp.error("Array size mismatch in declaration of " + name() +
+        if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown() && !isInRedeclareMod()) {
+            if (myBindingExpHasEach() && !inArrayComponent()) {
+                bexp.error("The 'each' keyword cannot be applied to members of non-array components");
+            } else {
+                FType expectedBT = bindingType();
+                FType actualBT = bexp.type();
+                if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
+                    if (!myBindingExpHasEach() && type().typeCompatible(actualBT, func)) {
+                        bexp.warning("Assuming 'each' for the binding expression to the variable " + name());
+                    } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                        bexp.error("The binding expression of the variable " + name() +
+                                " does not match the declared type of the variable");
+                    } else {
+                        bexp.error("Array size mismatch in declaration of " + 
+                                (myBindingExpHasEach() ? "each " : "") + name() +
                                 ", size of declaration is " + expectedBT.size() + 
                                 " and size of binding expression is " + actualBT.size());
-                    else
-                        bexp.error("Array size mismatch in modification of " + name() + 
-                                ", expected size is " + (ivm.hasEach() ? "(due to 'each') " : "") + expectedBT.size() +
-                                " and size of binding expression is " + actualBT.size());
+                    }
                 }
             }
         }
@@ -152,15 +150,10 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
     }
 
-    public void InstModification.generateMissingEachWarning() {
-        warning("Assuming 'each' for the modification '" + this + "'");
-    }
-
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
-    eq InstComponentDecl.getChild().inRecordWithBindingExp()      = false;
-    eq InstClassDecl.getChild().inRecordWithBindingExp()          = false;
+    eq InstNode.getChild().inRecordWithBindingExp()               = false;
     eq Root.getChild().inRecordWithBindingExp()                   = false;
     
     public void InstAssignable.typeCheckAttributes() {}
@@ -176,37 +169,31 @@ aspect FlatTypeCheck {
         if (hasInstModification() && getInstModification().hasInstValueMod()) {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
-                String description = "the attribute " + name() + " for the " + owner.kindDescription() + " " + owner.name();
-                Size attrSize = expectedSize();
+                Size attrSize = owner.attributeSize(this);
+                boolean checkSize = !owner.isInRedeclareMod();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
-                    error("The type of the binding expression of " + description + 
+                    error("The type of the binding expression of the attribute " + name() +
                             " does not match the declared type of the variable");
-                } else {
-                    if (!attrSize.equivalent(valMod.size(), true)) {
-                        InstModification im = findModificationLackingEach(valMod.size());
-                        if (im != null) {
-                            im.generateMissingEachWarning();
+                } else if (checkSize) {
+                    if (!hasEach() && !attrSize.equivalent(valMod.size(), false)) { 
+                        if (valMod.ndims() == 0) {
+                            warning("Assuming 'each' for the attribute " + name());
                         } else {
-                            error("Array size mismatch in modification of " + description +
-                                    ", expected size is " + (hasEach() ? "(due to 'each') " : "") + attrSize +
+                            error("Array size mismatch for the attribute " + name() +
+                                    ", size of declaration is " + attrSize + 
                                     " and size of " + name() + " expression is " + valMod.size());
+                        }
+                    } else if (hasEach()) { 
+                        if (owner.ndims() == 0 && !owner.inArrayComponent()) {
+                            error("The 'each' keyword cannot be applied to attributes of scalar components");
+                        } else if (valMod.ndims() > 0) {
+                            error("The attribute " + name() + 
+                                    " is declared 'each' and the binding expression is not scalar");
                         }
                     }
                 }
             }
         }
-    }
-
-    syn String InstNode.kindDescription() {
-        throw new UnsupportedOperationException();
-    }
-    eq InstComponentDecl.kindDescription() = myInstClass().kindDescription() + " instance";
-    eq InstPrimitive.kindDescription()     = "variable";
-    eq InstBaseClassDecl.kindDescription() = getInstRestriction().toString();
-
-    public void InstArgument.typeCheck(ErrorCheckType checkType) {
-        if (getEach() && expectedSizeFromParent() == Size.SCALAR) 
-            error("The 'each' keyword cannot be applied in a modification of a scalar component: " + this);
     }
 
     inh boolean InstNode.isInRedeclareMod();

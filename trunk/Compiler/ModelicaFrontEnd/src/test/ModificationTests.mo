@@ -556,7 +556,7 @@ model ArrayModifications2
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 712, column 9:
-  The 'each' keyword cannot be applied in a modification of a scalar component: each start = 3
+  The 'each' keyword cannot be applied to attributes of scalar components
 ")})));
 end ArrayModifications2;
 
@@ -572,7 +572,7 @@ model ArrayModifications3
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 728, column 11:
-  Array size mismatch in modification of the attribute start for the variable b, expected size is [3] and size of start expression is [4]
+  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [4]
 ")})));
 end ArrayModifications3;
 
@@ -588,7 +588,7 @@ model ArrayModifications4
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 744, column 12:
-  Array size mismatch in modification of the attribute start for the variable a, expected size is (due to 'each') scalar and size of start expression is [2]
+  The attribute start is declared 'each' and the binding expression is not scalar
 ")})));
 end ArrayModifications4;
 
@@ -639,7 +639,7 @@ model ArrayModifications6
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 792, column 8:
-  Array size mismatch in modification of x, expected size is [3] and size of binding expression is [4]
+  Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end ArrayModifications6;
 
@@ -659,7 +659,7 @@ model ArrayModifications7
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 813, column 8:
-  The 'each' keyword cannot be applied in a modification of a scalar component: each y = 2
+  The 'each' keyword cannot be applied to members of non-array components
 ")})));
 end ArrayModifications7;
 
@@ -951,7 +951,7 @@ model ArrayModifications16
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1176, column 8:
-  Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is scalar
+  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is scalar
 ")})));
 end ArrayModifications16;
 
@@ -975,7 +975,7 @@ model ArrayModifications17
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1200, column 8:
-  Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is [3]
+  Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications17;
 
@@ -999,7 +999,7 @@ model ArrayModifications18
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1231, column 13:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is (due to 'each') scalar and size of start expression is [2]
+  The attribute start is declared 'each' and the binding expression is not scalar
 ")})));
 end ArrayModifications18;
 
@@ -1063,7 +1063,7 @@ model ArrayModifications20
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1248, column 8:
-  Array size mismatch in modification of z, expected size is [2, 2, 3] and size of binding expression is [2, 3, 2]
+  Array size mismatch in declaration of z, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications20;
 
@@ -1087,7 +1087,7 @@ model ArrayModifications21
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1279, column 12:
-  Array size mismatch in modification of the attribute start for the variable z, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
+  Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications21;
 
@@ -1112,7 +1112,7 @@ model ArrayModifications22
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1296, column 8:
-  Array size mismatch in modification of zc, expected size is [2, 2, 3] and size of binding expression is [2, 3, 2]
+  Array size mismatch in declaration of zc, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications22;
 
@@ -1137,7 +1137,7 @@ model ArrayModifications23
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1328, column 15:
-  Array size mismatch in modification of the attribute start for the variable zc, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
+  Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications23;
 
@@ -1157,7 +1157,7 @@ model ArrayModifications24
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1346, column 8:
-  Array size mismatch in modification of yb, expected size is [2, 2] and size of binding expression is [2, 3]
+  Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications24;
 
@@ -1179,7 +1179,7 @@ model ArrayModifications25
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1366, column 8:
-  Array size mismatch in modification of yb, expected size is [2, 2] and size of binding expression is [2, 3]
+  Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications25;
 
@@ -1293,7 +1293,7 @@ model ArrayModifications29
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1510, column 11:
-  Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications29;
 
@@ -1315,7 +1315,7 @@ model ArrayModifications30
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1530, column 11:
-  Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications30;
 
@@ -1537,7 +1537,7 @@ model ArrayModifications38
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1759, column 8:
-  Array size mismatch in modification of x, expected size is [2, 2] and size of binding expression is [2, 3]
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications38;
 
@@ -1561,7 +1561,7 @@ model ArrayModifications39
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1783, column 8:
-  Array size mismatch in modification of x, expected size is [2, 2] and size of binding expression is [2, 2, 2]
+  Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 2, 2]
 ")})));
 end ArrayModifications39;
 
@@ -1585,7 +1585,7 @@ model ArrayModifications40
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1807, column 12:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [2] and size of start expression is [3]
+  Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [3]
 ")})));
 end ArrayModifications40;
 
@@ -1609,14 +1609,14 @@ model ArrayModifications41
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1831, column 12:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [2] and size of start expression is [2, 2]
+  Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [2, 2]
 ")})));
 end ArrayModifications41;
 
 
 model ArrayModifications42
  model C
-  Real x[2] = {1,2};
+  Real x[2];
  end C;
  
  model B
@@ -1625,15 +1625,15 @@ model ArrayModifications42
  
  B x[2];
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications42",
-            description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayModifications42",
+			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
+			errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1623, column 9:
-  Assuming 'each' for the modification 'x(start = {1,2})'
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
+Semantic error at line 1859, column 11:
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2]
 ")})));
 end ArrayModifications42;
 
@@ -1657,7 +1657,7 @@ model ArrayModifications43
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1883, column 11:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 2] and size of start expression is [2, 3]
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications43;
 
@@ -1681,7 +1681,7 @@ model ArrayModifications44
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
 Semantic error at line 1907, column 11:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 2] and size of start expression is [2, 2, 2]
+  Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 2, 2]
 ")})));
 end ArrayModifications44;
 
@@ -1689,15 +1689,15 @@ end ArrayModifications44;
 model ArrayModifications45
  Real x[2](start=0) = {1,2};
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications45",
-            description="Modifications to arrays: inferring each: attribute",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1690, column 11:
-  Assuming 'each' for the modification 'start = 0'
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications45",
+			description="Modifications to arrays: inferring each: attribute",
+			flatModel="
+fclass ModificationTests.ArrayModifications45
+ constant Real x[1](start = 0) = 1;
+ constant Real x[2](start = 0) = 2;
+end ModificationTests.ArrayModifications45;
 ")})));
 end ArrayModifications45;
 
@@ -1709,15 +1709,17 @@ model ArrayModifications46
  
  A y[2](x = {1,2});
 
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications46",
-            description="Modifications to arrays: inferring each: binding expression",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1710, column 8:
-  Assuming 'each' for the modification 'x = {1,2}'
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="ArrayModifications46",
+			description="Modifications to arrays: inferring each: binding expression",
+			flatModel="
+fclass ModificationTests.ArrayModifications46
+ constant Real y[1].x[1] = 1;
+ constant Real y[1].x[2] = 2;
+ constant Real y[2].x[1] = 1;
+ constant Real y[2].x[2] = 2;
+end ModificationTests.ArrayModifications46;
 ")})));
 end ArrayModifications46;
 
@@ -1834,15 +1836,9 @@ model ArrayModifications51
             name="ArrayModifications51",
             description="Test each on other level of modification",
             errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 1829, column 9:
-  The 'each' keyword cannot be applied in a modification of a scalar component: each b(c = 1)
+1 errors found:
 Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1829, column 15:
-  Assuming 'each' for the modification 'c = 1'
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1829, column 23:
+At line 1819, column 21:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications51;
@@ -1857,7 +1853,7 @@ model ArrayModifications52
         B b[3];
     end A;
 
-    A a(b(each c(start = 1)));
+    A a(each b(c(start = 1)));
     parameter Real d;
 
     annotation(__JModelica(UnitTesting(tests={
@@ -1871,586 +1867,6 @@ At line 1856, column 30:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications52;
-
-
-model ArrayModifications53
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    B b[2](each a(x(start=1:3)));
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications53",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1885, column 33:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications53;
-
-
-model ArrayModifications54
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](each a(x = 1:3));
-    end C;
-    
-    C c[2];
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications54",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1914, column 11:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications54;
-
-
-model ArrayModifications55
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](a(each x = 1:3));
-    end C;
-    
-    C c[2];
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications55",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1943, column 11:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications55;
-
-
-model ArrayModifications56
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](a(each x(start = 1:3)));
-    end C;
-    
-    C c[2];
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications56",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1972, column 11:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications56;
-
-
-model ArrayModifications57
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](a(x(start = 1:3)));
-    end C;
-    
-    C c[2];
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications57",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1998, column 17:
-  Assuming 'each' for the modification 'a(x(start = 1:3))'
-")})));
-end ArrayModifications57;
-
-
-model ArrayModifications58
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](a(each x(start = 1)));
-    end C;
-    
-    C c[2];
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications58",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2030, column 24:
-  Assuming 'each' for the modification 'start = 1'
-")})));
-end ArrayModifications58;
-
-
-model ArrayModifications59
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2](a(x(each start = 1)));
-    end C;
-    
-    C c[2];
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications59",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2065, column 11:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications59;
-
-
-model ArrayModifications60
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2];
-    end C;
-    
-    C c[2](each b(a(x = {1:3, 4:6})));
-    parameter Real d; // Provoke warning
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications60",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2094, column 38:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications60;
-
-
-model ArrayModifications61
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2];
-    end C;
-    
-    C c[2](b(a(x = {1:3, 4:6})));
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications61",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2123, column 11:
-  Assuming 'each' for the modification 'b(a(x = {1:3,4:6}))'
-")})));
-end ArrayModifications61;
-
-
-model ArrayModifications62
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b[2];
-    end C;
-    
-    C c[2](b(each a(x = {1:3, 4:6})));
-    parameter Real d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayModifications62",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2155, column 25:
-  Array size mismatch in modification of x, expected size is (due to 'each') [3] and size of binding expression is [2, 3]
-")})));
-end ArrayModifications62;
-
-
-model ArrayModifications63
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b(each a(x = 1:3));
-    end C;
-    
-    C c[2];
-    parameter Real d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayModifications63",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2184, column 13:
-  The 'each' keyword cannot be applied in a modification of a scalar component: each a(x = 1:3)
-")})));
-end ArrayModifications63;
-
-
-model ArrayModifications64
-    model A
-        Real x[3];
-    end A;
-    
-    model B
-        A a;
-    end B;
-    
-    model C
-        B b;
-    end C;
-    
-    C c(b(each a(x = 1:3)));
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayModifications64",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2219, column 11:
-  The 'each' keyword cannot be applied in a modification of a scalar component: each a(x = 1:3)
-")})));
-end ArrayModifications64;
-
-
-model ArrayModifications65
-    model A
-        Real x;
-    end A;
-    
-    model B
-        A a[3];
-    end B;
-    
-    model C
-        B b[2](a(x(start = 1:3) = 1));
-    end C;
-    
-    C c[2];
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayModifications65",
-            description="Test each on other levels of modification",
-            errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2248, column 19:
-  Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 3] and size of start expression is [3]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2248, column 35:
-  Array size mismatch in modification of x, expected size is [2, 3] and size of binding expression is scalar
-")})));
-end ArrayModifications65;
-
-
-model ArrayModifications66
-    record R
-        Real x[2];
-        Real y;
-    end R;
-    
-    model A
-        R r;
-    end A;
-    
-    model B
-        A a[2];
-    end B;
-    
-    B b(a(r(each x = {1,2}, y = {1,2})));
-    parameter Real d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications66",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2261, column 41:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications66;
-
-
-model ArrayModifications67
-    record R
-        Real x[2];
-        Real y;
-    end R;
-    
-    model A
-        R r;
-    end A;
-    
-    model B
-        A a[2];
-    end B;
-    
-    B b(a(each r(x = {1,2}, y = {1,2})));
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications67",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2291, column 33:
-  Array size mismatch in modification of y, expected size is (due to 'each') scalar and size of binding expression is [2]
-")})));
-end ArrayModifications67;
-
-
-model ArrayModifications68
-    record R
-        Real x[2];
-        Real y;
-    end R;
-    
-    model A
-        R r;
-    end A;
-    
-    model B
-        A a[2];
-    end B;
-    
-    B b(a(each r(x = {1,2,3}, y = 1)));
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications68",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-Semantic error at line 2320, column 22:
-  Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is [3]
-")})));
-end ArrayModifications68;
-
-
-model ArrayModifications69
-    record R
-        Real x[2];
-        Real y;
-    end R;
-    
-    model A
-        R r;
-    end A;
-    
-    model B
-        A a[2];
-    end B;
-    
-    B b(a(each r(x = {1,2}, y = 1)));
-    B b2(a(r = b.a.r));
-    parameter Real d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications69",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2350, column 23:
-  The parameter d does not have a binding expression
-")})));
-end ArrayModifications69;
-
-
-model ArrayModifications70
-    record R
-        Real x[2];
-        Real y;
-    end R;
-    
-    model A
-        R r;
-    end A;
-    
-    model B
-        A a[2];
-    end B;
-    
-    B b(a(r(x = {1,2}, y = 1)));
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="ArrayModifications70",
-            description="Test each on other levels of modification",
-            errorMessage="
-1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 2383, column 10:
-  Assuming 'each' for the modification 'r(x = {1,2}, y = 1)'
-")})));
-end ArrayModifications70;
-
-
-model ArrayModifications71
-    B[1] b1 = b2;
-    B[1] b2(each x=0);
-
-    record A
-        Real x;
-    end A;
-
-    record B = A;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ArrayModifications71",
-            description="Test type checking of modifiers on records with short class declarations",
-            flatModel="
-fclass ModificationTests.ArrayModifications71
- ModificationTests.ArrayModifications71.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications71.B b2[1](each x = 0);
-
-public
- record ModificationTests.ArrayModifications71.B
-  Real x;
- end ModificationTests.ArrayModifications71.B;
-
-end ModificationTests.ArrayModifications71;
-")})));
-end ArrayModifications71;
-
-
-model ArrayModifications72
-    B[1] b1 = b2;
-    B[1] b2(each x=0);
-
-    record A
-        Real x;
-    end A;
-
-    record B
-        extends A;
-    end B;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ArrayModifications72",
-            description="Test type checking of modifiers on records with inheritance",
-            flatModel="
-fclass ModificationTests.ArrayModifications72
- ModificationTests.ArrayModifications72.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications72.B b2[1](each x = 0);
-
-public
- record ModificationTests.ArrayModifications72.B
-  Real x;
- end ModificationTests.ArrayModifications72.B;
-
-end ModificationTests.ArrayModifications72;
-")})));
-end ArrayModifications72;
-
 
 
 /* ========= Modifications on type declarations ========= */

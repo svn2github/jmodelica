@@ -287,32 +287,9 @@ aspect Environments {
 	eq InstReplacingFullClassDecl.originalInstClass()        = getOriginalInstClass();
 
     syn boolean InstClassDecl.hasInstClassModification() = false;
-    // Check in source tree instead of on InstExtends NTA to avoid expanding tree while calculating shouldBeExpanded()
-    eq InstShortClassDecl.hasInstClassModification()     = getClassDecl().hasClassModification();
+    eq InstShortClassDecl.hasInstClassModification()     = getInstExtends(0).hasInstClassModification();
     syn InstClassModification InstClassDecl.getInstClassModification() = null;
     eq InstShortClassDecl.getInstClassModification()                   = getInstExtends(0).getInstClassModification();
-
-    // Check in source tree instead of on InstClassDecl NTA to avoid expanding tree while calculating shouldBeExpanded()
-    syn boolean InstClassRedeclare.hasInstClassModification()     = getClassRedeclare().getBaseClassDecl().hasClassModification();
-
-    /**
-     * Check if there is a constraining clause with modifications.
-     */
-    syn boolean InstElementRedeclare.hasConstrainingModification();
-    // Check in source tree instead of on InstClassDecl NTA to avoid expanding tree while calculating shouldBeExpanded()
-    eq InstClassRedeclare.hasConstrainingModification()     = getClassRedeclare().getBaseClassDecl().hasConstrainingModification();
-    eq InstComponentRedeclare.hasConstrainingModification() = getComponentRedeclare().getComponentDecl().hasConstrainingModification();
-
-    /**
-     * Check if there is a constraining clause with modifications.
-     */
-    syn boolean Element.hasConstrainingModification() = false;
-    eq BaseClassDecl.hasConstrainingModification()    = hasConstrainingClause() && getConstrainingClause().hasClassModification();
-    eq ComponentDecl.hasConstrainingModification()    = hasConstrainingClause() && getConstrainingClause().hasClassModification();
-    eq ComponentClause.hasConstrainingModification()  = hasConstrainingClause() && getConstrainingClause().hasClassModification();
-
-    syn boolean ClassDecl.hasClassModification() = false;
-    eq ShortClassDecl.hasClassModification()     = getExtendsClauseShortClass().hasClassModification();
 
 	eq InstExtends.localInstModifications() {
 		ArrayList<InstModification> l = new ArrayList<InstModification>();
@@ -417,7 +394,7 @@ aspect Environments {
             // TODO: Do we need to handle the case when iclrn is an InstClassDecl?
             if (!classRedeclareFound && im == iclrn) {
                 InstClassRedeclare iclr = (InstClassRedeclare) im;
-                if (iclr.hasInstClassModification()) 
+                if (iclr.getInstClassDecl().hasInstClassModification()) 
                     res.mergeInnerModification(iclr.getInstClassDecl().getInstClassModification());
                 classRedeclareFound = true;
             }
@@ -438,44 +415,46 @@ aspect Environments {
 		getFExp().populateInstRecordModificationList(res, this);
 		return res;
 	}
-
-    syn InstModification InstModification.matchInstModification(String name) = null;
-    eq InstCompleteModification.matchInstModification(String name) {
-        for (InstModification im : getInstClassModification().getInstArguments()) {
-            InstModification match = im.matchInstModification(name);
-            if (match != null)
-                return match;
-        }
-        return null;
-    }
-
-    eq InstComponentModification.matchInstModification(String name) {
-        if (name().equals(name))
-            return hasInstModification() ? getInstModification() : null;
-        return null;
-    }
-
-    eq InstValueModification.matchInstModification(String name) {
-        for (InstRecordModification im : getInstRecordModifications())
-            if (im.getName().equals(name))
-                return im;
-        return null;
-    }
-
-    // Only add modifiers in constraining clauses
-    eq InstComponentRedeclare.matchInstModification(String name) {
-        if (name().equals(name) && hasConstrainingModification())
-            return getInstComponentDecl().getInstConstraining().getInstClassModification();
-        return null;
-    }
-
-    // Only add modifiers in constraining clauses
-    eq InstClassRedeclare.matchInstModification(String name) {
-        if (name().equals(name) && hasConstrainingModification())
-            return getInstClassDecl().getInstConstraining().getInstClassModification();
-        return null;
-    }
-
+	
+	syn InstModification InstModification.matchInstModification(String name) = null;
+	eq InstCompleteModification.matchInstModification(String name) {
+		for (InstModification im : getInstClassModification().getInstArguments()) {
+		    InstModification match = im.matchInstModification(name);
+			if (match != null)
+				return match;
+		}
+		return null;
+	}
+	
+	eq InstComponentModification.matchInstModification(String name) {
+		if (getName().matches(name))
+			return hasInstModification() ? getInstModification() : null;
+		return null;
+	}
+	
+	eq InstValueModification.matchInstModification(String name) {
+		for (InstRecordModification im : getInstRecordModifications())
+			if (im.getName().equals(name))
+				return im;
+		return null;
+	}
+	
+	// Only add modifiers in constraining clauses
+	eq InstComponentRedeclare.matchInstModification(String name) {
+		if (getName().matches(name) && getInstComponentDecl().hasInstConstraining() &&
+		    getInstComponentDecl().getInstConstraining().hasInstClassModification())
+			return getInstComponentDecl().getInstConstraining().getInstClassModification();
+		return null;
+	}	
+	
+	// Only add modifiers in constraining clauses
+	eq InstClassRedeclare.matchInstModification(String name) {
+		if (getName().matches(name) && getInstClassDecl().hasInstConstraining() &&
+		    getInstClassDecl().getInstConstraining().hasInstClassModification())
+			return getInstClassDecl().getInstConstraining().getInstClassModification();
+		return null;
+	}
+	
 	public void FExp.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org) {}
 	

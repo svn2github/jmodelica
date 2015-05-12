@@ -296,15 +296,16 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
   equation
     der(x) = -x;
 
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ArrayTest3_Err",
-            description="Test type checking of class attributes in Optimica.",
-            errorMessage="
+	annotation(__JModelica(UnitTesting(tests={
+		ErrorTestCase(
+			name="ArrayTest3_Err",
+			description="Test type checking of class attributes in Optimica.",
+			errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd\\src\\test\\OptimicaTransformCanonicalTests.mo':
-Semantic error at line 293, column 31:
-  Array size mismatch in modification of the attribute objective for the optimization ArrayTest3_Err, expected size is scalar and size of objective expression is [2]
+Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
+Semantic error at line 271, column 27:
+  Array size mismatch for the attribute objective, size of declaration is scalar and size of objective expression is [2]
+  
 ")})));
   end ArrayTest3_Err;
 

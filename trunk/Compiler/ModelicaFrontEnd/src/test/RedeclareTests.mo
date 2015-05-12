@@ -3512,26 +3512,6 @@ end RedeclareTests.RedeclareTest50;
 end RedeclareTest50;
 
 
-model RedeclareTest51
-    connector FluidPort
-        replaceable package Medium = BaseMedium;
-		Real x;
-    end FluidPort;
-		
-	
-	connector FluidPort_b
-		extends FluidPort;
-	end FluidPort_b;
-	
-	model TankWith3InletOutletArraysWithEvaporatorCondensor
-		replaceable package Medium = BaseMedium;
-		FluidPort_b BottomFluidPort[2](redeclare package Medium = Medium);
-	end TankWith3InletOutletArraysWithEvaporatorCondensor;
-	
-	TankWith3InletOutletArraysWithEvaporatorCondensor B5(redeclare package Medium = BatchMedium);
-end RedeclareTest51;
-
-
 
 model RedeclareElement1
   model A

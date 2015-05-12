@@ -940,19 +940,7 @@ aspect Names {
     syn boolean InstAccess.hasFArraySubscripts() = false;
     eq InstArrayAccess.hasFArraySubscripts() = true;
     eq InstDot.hasFArraySubscripts() = getLastInstAccess().hasFArraySubscripts();
-
-    /**
-     * Is this an access to a component?
-     */
-    syn boolean InstAccess.isComponentAccess() = false;
-    eq InstComponentAccess.isComponentAccess() = true;
-
-    /**
-     * Is this an access to a class?
-     */
-    syn boolean InstAccess.isClassAccess() = false;
-    eq InstClassAccess.isClassAccess()     = true;
-
+    
     /**
      * Copy this access, append a name part to the copy and return the copy.
      */
