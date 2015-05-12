@@ -546,7 +546,7 @@ class CasadiCollocator(object):
         self.residual_jac_fcn.setInput(self._par_vals, 1)
         self.residual_jac_fcn.evaluate()
         J = self.residual_jac_fcn.getOutput(0)
-        J = csr_matrix(J)
+        J = csr_matrix(J.toCsc_matrix())
         
         # Row-wise maximum
         row_norms = N.maximum.reduceat(N.hstack((N.abs(J.data), 0)), J.indptr[0:-1])
@@ -5374,7 +5374,7 @@ class LocalDAECollocator(CasadiCollocator):
         J_fcn.evaluate()
         result = J_fcn.output(0)
         if dense: result = result.toArray()
-        else: result = csc_matrix(result)
+        else: result = result.toCsc_matrix()
         return result
     
     def get_H(self, point="fcn", scaled_residuals=False):
