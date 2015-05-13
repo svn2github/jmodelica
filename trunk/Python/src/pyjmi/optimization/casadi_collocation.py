@@ -5252,7 +5252,7 @@ class LocalDAECollocator(CasadiCollocator):
         Get the parameter values for the NLP.
 
         If scaled_residuals is True, return the parameter values needed
-        to get the scaled residuals (requires the equation_sorting option).
+        to get the scaled residuals (requires the equation_scaling option).
         """
         if self.equation_scaling:
             if scaled_residuals:
@@ -5266,7 +5266,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             if scaled_residuals:
                 raise CasadiCollocatorException("Must enable the " +
-                    "equation_sorting option to get scaled residuals")
+                    "equation_scaling option to get scaled residuals")
             return self._par_vals
 
     def get_opt_constraint_duals(self, scaled=False):
@@ -5280,7 +5280,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             if not self.collocator.equation_scaling:
                 raise CasadiCollocatorException("Must enable the " +
-                    "equation_sorting option to get scaled residuals")
+                    "equation_scaling option to get scaled residuals")
             return self._inv_scale_residuals(self.dual_opt['g'])
 
     def get_nlp(self, point="fcn", scaled_residuals=False):
