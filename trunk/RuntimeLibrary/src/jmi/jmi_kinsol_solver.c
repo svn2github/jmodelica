@@ -949,7 +949,6 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 /* Form regualrized matrix Transpose(J).J */
 static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
-    /*    jmi_t * jmi = block->jmi; */
     int i,j,k;
     realtype **JTJ_c =  solver->JTJ->cols;
     realtype **jac = solver->J->cols;
