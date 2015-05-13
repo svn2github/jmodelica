@@ -239,7 +239,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
         delta = f/df;
         
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
-            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Dervative value <df: %f>, Delta <delta:%f>",
+            jmi_log_fmt(block->log, node, logInfo, "Iteration variable <ivs: %f>, Function value <f: %f>, Derivative value <df: %f>, Delta <delta:%f>",
             x,f,df,delta);
         }
         
