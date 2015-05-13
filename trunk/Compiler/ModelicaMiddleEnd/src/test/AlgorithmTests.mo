@@ -107,8 +107,7 @@ algorithm
 end AlgorithmTests.For.Break2;
 ")})));
 end Break2;
-/*
-// Enable this after #3631 is done
+
 model Break3
     Real x;
     algorithm
@@ -138,6 +137,9 @@ fclass AlgorithmTests.For.Break3
  Real x;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
+initial equation 
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 algorithm
  x := 1;
  temp_1 := true;
@@ -176,7 +178,7 @@ algorithm
 end AlgorithmTests.For.Break3;
 ")})));
 end Break3;
-*/
+
 end For;
 
 model TempAssign1
