@@ -927,7 +927,16 @@ aspect Names {
     eq BaseNode.getChild().retrieveTopInstAccess(InstAccess pre)         = pre;
     eq InstDot.getChild().retrieveTopInstAccess(InstAccess pre)          = retrieveTopInstAccess(this);
     eq InstGlobalAccess.getChild().retrieveTopInstAccess(InstAccess pre) = this;
-    
+
+    /**
+     * Check if this access is a name part of a qualified access.
+     */
+    inh boolean Access.inQualified();
+    inh boolean InstAccess.inQualified();
+    eq Dot.getAccess().inQualified()         = true;
+    eq InstDot.getInstAccess().inQualified() = true;
+    eq BaseNode.getChild().inQualified()     = false;
+
     /**
      * Get the array subscripts of the last name part.
      */
