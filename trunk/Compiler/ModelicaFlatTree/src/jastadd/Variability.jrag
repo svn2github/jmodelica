@@ -407,7 +407,47 @@ aspect Variability {
     eq FTimeExp.expVariability()  = fContinuous();
     eq FRelExp.expVariability()   = super.expVariability().combineDown(fDiscrete());
 
-    eq FSizeExp.expVariability() = hasDim() ? getDim().variability() : fParameter();
+    eq FSizeExp.expVariability() {
+        FTypePrefixVariability res = ASTNode.fConstant();
+        if (hasDim()) {
+            if (getDim().variability().knownParameterOrLess()) {
+                try {
+                    CValue v = getDim().ceval();
+                    return getFExp().size().variability(v.intValue() - 1);
+                } catch (ConstantEvaluationException e) {
+                    
+                }
+            }
+            res = res.combine(getDim().variability());
+        }
+        res = res.combine(getFExp().size().variability());
+        return res;
+    }
+    
+    public FTypePrefixVariability Size.variability() {
+        return ASTNode.fConstant();
+    }
+    public FTypePrefixVariability MutableSize.variability() {
+        FTypePrefixVariability res = super.variability();
+        for (int i = 0; i < exps.length; i++) {
+            res = res.combine(variability(i));
+        }
+        return res;
+    }
+    
+    public FTypePrefixVariability Size.variability(int d) {
+        return ASTNode.fConstant();
+    }
+    public FTypePrefixVariability MutableSize.variability(int d) {
+        FTypePrefixVariability res = super.variability(d);
+        if (hasFExp(d)) {
+            res = res.combine(getFExp(d).variability());
+        }
+        return res;
+    }
+    
+    eq FUnknownSizeExp.expVariability() = fParameter();
+    
     eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 
     eq FEventGenExp.expVariability()    = getX().variability().combineDown(fDiscrete());
