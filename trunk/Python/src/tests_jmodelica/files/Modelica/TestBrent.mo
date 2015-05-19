@@ -38,7 +38,20 @@ model TestBrent
   equation
     log(1 + x) = y;
   end Logarithmic;
-
+  
+  model LogarithmicAssert
+    extends Sweep;
+    function logXplus1
+        input Real x;
+        output Real y;
+    algorithm
+        assert(noEvent(x > -1), "x must be larger than -1");
+        y:= log(1 + x);
+    end logXplus1;
+  equation
+    logXplus1(x) = y;
+  end LogarithmicAssert;
+  
   model XLogX
     extends Sweep;
   equation

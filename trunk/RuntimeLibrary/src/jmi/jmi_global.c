@@ -152,7 +152,7 @@ int jmi_prepare_try(jmi_t* jmi) {
         jmi->current_try_depth = 0;
     }
     depth = jmi->current_try_depth;
-    if(depth < JMI_MAX_EXCEPTION_DEPTH) 
+    if (depth < JMI_MAX_EXCEPTION_DEPTH) 
         jmi->current_try_depth = depth + 1;
     return depth;
 }
@@ -161,8 +161,12 @@ int jmi_prepare_try(jmi_t* jmi) {
 *    \brief Cleans up try buffer after jmi_try returnes.
 */
 void jmi_finalize_try(jmi_t* jmi, int depth) {
+    if (depth < 0 || depth >= JMI_MAX_EXCEPTION_DEPTH) {
+        fprintf(stderr, "jmi_finalize_try(): Unexpected try depth=%d, resetting to 0\n",depth);
+        depth = 0;
+    }
     jmi->current_try_depth = depth;
-    if(depth == 0) {
+    if (depth == 0) {
         jmi_set_current(NULL);
     }
 }
@@ -174,7 +178,7 @@ void jmi_throw() {
     jmi_t* jmi;
 
     jmi = jmi_get_current();
-    if(jmi && jmi->current_try_depth > 0) {
+    if (jmi && jmi->current_try_depth > 0) {
         longjmp(jmi->try_location[jmi->current_try_depth-1], 1);
     }
 }

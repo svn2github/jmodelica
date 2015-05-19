@@ -74,6 +74,26 @@ def test_logarithmic():
         relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
         assert abs(relativeDiff) < 1e-6
 
+@testattr(stddist = True)        
+def test_logarithmic_with_assert():
+    model = load_model('TestBrent.LogarithmicAssert')
+    for t in N.linspace(0,1,11):
+        y0 = -5
+        y1 = 2
+        model.set('y0',y0)
+        model.set('y1',y1)
+        model.set('_use_newton_for_brent', False)
+        model.time = t
+        model.initialize()
+            
+        x = model.get('x')
+        y = model.get('y')
+        assert abs(y - (y0 * (1-t) + y1*t)) < 1e-6
+        yy = N.log(1+x)
+        relativeDiff = (yy - y)/((abs(yy + y) + 1e-16)/2)
+        assert abs(relativeDiff) < 1e-6
+        model.reset()
+        
 @testattr(stddist = True)
 def test_xlogx():
     model = load_model('TestBrent.XLogX')

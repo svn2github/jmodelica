@@ -379,8 +379,9 @@ int jmi_func_F(jmi_t *jmi, jmi_func_t *func, jmi_real_t *res) {
     int return_status;
     int depth = jmi_prepare_try(jmi);
 
-    if (jmi_try(jmi, depth))
+    if (jmi_try(jmi, depth)) {
         return_status = -1;
+    }
     else {
         return_status = func->F(jmi, &res);
     }
@@ -516,7 +517,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t *t = jmi_get_t(jmi);
 
-    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
         jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
@@ -525,7 +526,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
     jmi->block_level = 0; /* to recover from errors */
     return_status = jmi_generic_func(jmi, jmi->dae->ode_derivatives);
 
-    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_reals(jmi->log, node, logInfo, "Derivatives", jmi_get_real_dx(jmi), jmi->n_real_x);
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
@@ -559,14 +560,14 @@ int jmi_ode_initialize(jmi_t* jmi) {
     jmi_log_node_t node;
     jmi_real_t* t = jmi_get_t(jmi);
 
-    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
     }
 
     return_status = jmi_generic_func(jmi, jmi->dae->ode_initialize);
 
-    if((jmi->jmi_callbacks.log_options.log_level >= 5)) {
+    if ((jmi->jmi_callbacks.log_options.log_level >= 5)) {
         jmi_log_fmt(jmi->log, node, logInfo, "Model equations evaluation finished");
         jmi_log_leave(jmi->log, node);
     }
@@ -644,7 +645,7 @@ int jmi_dae_dF_n_nz(jmi_t* jmi, int eval_alg, int* n_nz) {
         return jmi_func_sym_dF_n_nz(jmi, jmi->dae->F, n_nz);
     } else if (eval_alg & JMI_DER_CAD) {
         return jmi_func_cad_dF_n_nz(jmi, jmi->dae->F, n_nz);
-    } else if(eval_alg & JMI_DER_FD) {
+    } else if (eval_alg & JMI_DER_FD) {
         return jmi_func_fd_dF_n_nz(jmi, jmi->dae->F, n_nz);
     } else {
         return -1;
