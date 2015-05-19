@@ -806,8 +806,8 @@ class MPC(object):
         
         # Update timepoints
         if self.startTime != self.collocator.time[0]:
-            coll_time = self.collocator._compute_time_points()
-            self.collocator.time = N.array(coll_time)
+            coll_time = self.collocator.time+(self.startTime-self.collocator.time[0])
+            self.collocator.time = coll_time
             
             
         # Set the next initial guesses for primal variables
