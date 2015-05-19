@@ -234,6 +234,7 @@ aspect Serialize {
     
     public void FSizeExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
         getFExp().varsToSerialize(decls);
+        //getDim().varsToSerialize(decls);
     }
     
     /**
@@ -288,72 +289,5 @@ aspect Serialize {
         buf.append('_');
         buf.append(type().isArray() ? C_SUFFIX_ARRAY : C_SUFFIX_VARIABLE);
         return buf.toString();
-    }
-
-    syn int DynamicStateSet.id_C() = id();
-
-    public void DynamicStateSet.genDSCoefficientsFuncName_C(CodePrinter p, CodeStream str, String indent) {
-        str.print("ds_coefficients");
-        str.format("_%d", id_C());
-    }
-
-    public void DynamicStateManager.genDynamicStateAddCall_C(CodePrinter p, CodeStream str, String indent) {
-        for (DynamicStateSet set : getSets())
-            set.genDynamicStateAddCall_C(p, str, indent);
-    }
-
-    public void DynamicStateSet.genDynamicStateAddCall_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%s{", indent);
-        String innerIndent = p.indent(indent);
-        str.formatln("%sint* ds_var_value_refs = calloc(%d, sizeof(int));", innerIndent, numVars());
-        str.formatln("%sint* ds_state_value_refs = calloc(%d, sizeof(int));", innerIndent, numStates());
-        str.formatln("%sint* ds_algebraic_value_refs = calloc(%d, sizeof(int));", innerIndent, numAlgebraics());
-        int i = 0;
-        for (FVariable var : fVars()) {
-            str.formatln("%sds_var_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
-            i++;
-        }
-        i = 0;
-        for (FVariable var : getStateVars()) {
-            str.formatln("%sds_state_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
-            i++;
-        }
-        i = 0;
-        for (FVariable var : getAlgebraicVars()) {
-            str.formatln("%sds_algebraic_value_refs[%d] = %d; /* %s */", innerIndent, i, var.valueReference(), var.name());
-            i++;
-        }
-        str.format("%sjmi_dynamic_state_add_set(*jmi, %d, %d, %d, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ", innerIndent, id_C(), numVars(), numStates());
-        genDSCoefficientsFuncName_C(p, str, indent);
-        str.println(");");
-        str.formatln("%sfree(ds_var_value_refs);", innerIndent);
-        str.formatln("%sfree(ds_state_value_refs);", innerIndent);
-        str.formatln("%sfree(ds_algebraic_value_refs);", innerIndent);
-        str.formatln("%s}", indent);
-    }
-
-    public void DynamicStateManager.genDynamicStateCoefficients_C(CodePrinter p, CodeStream str, String indent) {
-        for (DynamicStateSet set : getSets())
-            set.genDynamicStateCoefficients_C(p, str, indent);
-    }
-
-    public void DynamicStateSet.genDynamicStateCoefficients_C(CodePrinter p, CodeStream str, String outerIndent) {
-        str.format("%sstatic void ", outerIndent);
-        String indent = p.indent(outerIndent);
-        genDSCoefficientsFuncName_C(p, str, indent);
-        str.println("(jmi_t* jmi, jmi_real_t* res) {");
-        for (DynamicStateCoefficient coff : getCoefficients())
-            p.printVarDecls(coff, str, indent);
-        str.format("%smemset(res, 0, %d * sizeof(jmi_real_t));\n", indent, numAlgebraics() * numVars());
-        for (DynamicStateCoefficient coff : getCoefficients()) {
-            p.printPreSteps(coff, str, indent);
-            str.format("%sres[%d] = ", indent, coff.getEquation() + numAlgebraics() * coff.getVariable());
-            p.print(coff, str, indent);
-            str.println(";");
-            p.printPostSteps(coff, str, indent);
-        }
-        
-        str.formatln("%s}", outerIndent);
-        str.println();
     }
 }
