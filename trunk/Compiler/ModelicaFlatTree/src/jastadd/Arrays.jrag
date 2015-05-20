@@ -3517,23 +3517,24 @@ aspect ArrayHelpers {
         protected FExp getFExp(int d) {
             return exps[d];
         }
- 		
-		/**
-		 * Get length in the <code>i</code>th dimension.
-		 */
-		public int get(int i) {
-			evaluate(i);
-			if (i < 0 || i >= size.length)
-				return UNKNOWN;
+
+        /**
+         * Get length in the <code>i</code>th dimension.
+         */
+        public int get(int i) {
+            evaluate(i);
+            if (i < 0 || i >= size.length)
+                return UNKNOWN;
             if (size[i] != Size.UNKNOWN) // We want to evaluate FUnknownSizeExps as well
-				return size[i];
-			try {
-				return exps[i].ceval().intValue();
-			} catch (ConstantEvaluationException e) {
-				return UNKNOWN;
-			}
-		}
-		
+                return size[i];
+            try {
+                if (exps[i] != null)
+                    return exps[i].ceval().intValue();
+            } catch (ConstantEvaluationException e) {
+            }
+            return UNKNOWN;
+        }
+
 		/**
 		 * Check if the lengths in the given dimension has a value (fix length or integer).
 		 */
