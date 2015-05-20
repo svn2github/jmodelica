@@ -101,9 +101,15 @@ void* jmi_global_calloc(size_t n, size_t s)
     return calloc(n, s);
 }
 
+jmp_buf jmceval_try_location;
+
+int JMCEVAL_try() {
+    return setjmp(jmceval_try_location) == 0;
+}
+
 void jmi_throw()
 {
-    exit(1);
+    longjmp(jmceval_try_location, 1);
 }
 
 void JMCEVAL_setup() {
@@ -111,6 +117,27 @@ void JMCEVAL_setup() {
     /* Prevent win from translating \n to \r\n */
     _setmode(fileno(stdout), _O_BINARY);
 #endif
+}
+
+int JMCEVAL_cont() {
+    /*
+    char* l = NULL;
+    size_t n = getline(char **lineptr, size_t *n, FILE *stream);
+    if (n == 5) {
+        return strncmp(l, "EVAL\n", 5) == 0;
+    }
+    */
+    return 0;
+}
+
+void JMCEVAL_check(const char* str) {
+    printf(str);
+    printf("\n");
+    fflush(stdout);
+}
+
+void JMCEVAL_failed(const char* str) {
+    exit(1);
 }
 
 /* Main */
@@ -122,11 +149,40 @@ int main(int argc, const char* argv[])
     /* Indices for parsing/printing vars, dimensions */
     size_t vi,di;
     
-    JMI_DYNAMIC_INIT()
+    $ECE_decl$
+
+    /* Init phase */
+    if (JMCEVAL_try()) {
+        JMI_DYNAMIC_INIT()
+        JMCEVAL_setup();
+        $ECE_init$
+        JMI_DYNAMIC_FREE()
+    } else {
+        JMCEVAL_failed("TODO");
+        return 1;
+    }
     
-    $ECE_main$
-    
-    JMI_DYNAMIC_FREE()
+    /*while (JMCEVAL_cont()) {*/
+        /* Calc phase */
+        if (JMCEVAL_try()) {
+            JMI_DYNAMIC_INIT()
+            $ECE_calc$
+            JMI_DYNAMIC_FREE()
+        } else {
+            JMCEVAL_failed("TODO");
+        }
+    /*}*/
+
+    /* End phase */
+    if (JMCEVAL_try()) {
+        JMI_DYNAMIC_INIT()
+        $ECE_end$
+        JMI_DYNAMIC_FREE()
+    } else {
+        JMCEVAL_failed("TODO");
+        return 1;
+    }
+
     return 0;
 }
 

@@ -130,8 +130,15 @@ aspect Serialize {
         }
     }
     
+    public void FExternalStmt.genSerializeDecl_C(CodeStream str, String indent) {
+        
+    }
     
-    public void FExternalStmt.genSerializeMain_C(CodeStream str, String indent) {
+    public void FExternalStmt.genSerializeInit_C(CodeStream str, String indent) {
+        genCheckPoint(str, indent, "START");
+    }
+    
+    public void FExternalStmt.genSerializeCalc_C(CodeStream str, String indent) {
         ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         Map<String,String> tempMap = new HashMap<String,String>();
         indent = ASTNode.printer_C.indent(indent);
@@ -144,9 +151,6 @@ aspect Serialize {
         }
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
-        
-        str.println(indent + "JMCEVAL_setup();");
-        genCheckPoint(str, indent, "START");
         
         str.println(indent + "/* Parse */");
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
@@ -175,12 +179,19 @@ aspect Serialize {
         }
         str.println();
         
-        genCheckPoint(str, indent, "END");
         codeGenContext = null;
     }
     
+    
+    public void FExternalStmt.genSerializeEnd_C(CodeStream str, String indent) {
+        genCheckPoint(str, indent, "END");
+    }
+    
     public void FExternalStmt.genCheckPoint(CodeStream str, String indent, String token) {
-        str.println(indent + "printf(\"" + token + "\\n\"); fflush(stdout);");
+        str.print(indent);
+        str.print("JMCEVAL_check(\"");
+        str.print(token);
+        str.print("\");\n");
     }
     
     /**

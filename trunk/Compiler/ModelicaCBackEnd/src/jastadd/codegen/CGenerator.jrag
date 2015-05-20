@@ -1230,13 +1230,43 @@ public class CGenerator extends GenericGenerator {
         }
     }
     
-    public class ECETag_main extends ExternalCEvalTag {
-        public ECETag_main(AbstractGenerator myGenerator, FClass fClass) {
-            super("ECE_main", myGenerator, fClass);
+    public class ECETag_decl extends ExternalCEvalTag {
+        public ECETag_decl(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_decl", myGenerator, fClass);
         }
         
         public void generate(CodeStream genPrinter, FExternalStmt ext) {
-            ext.genSerializeMain_C(genPrinter, "");
+            ext.genSerializeDecl_C(genPrinter, "");
+        }
+    }
+    
+    public class ECETag_init extends ExternalCEvalTag {
+        public ECETag_init(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_init", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            ext.genSerializeInit_C(genPrinter, "");
+        }
+    }
+    
+    public class ECETag_calc extends ExternalCEvalTag {
+        public ECETag_calc(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_calc", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            ext.genSerializeCalc_C(genPrinter, "");
+        }
+    }
+    
+    public class ECETag_end extends ExternalCEvalTag {
+        public ECETag_end(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_end", myGenerator, fClass);
+        }
+        
+        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+            ext.genSerializeEnd_C(genPrinter, "");
         }
     }
 
