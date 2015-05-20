@@ -70,11 +70,8 @@ aspect ExternalConstantEvaluation {
     eq FFunctionDecl.getChild().isDestructorStmt() = isDestructor();
     eq InstClassDecl.getChild().isDestructorStmt() = isDestructor();
     
-    public ModelicaCompiler.ExternalFunction FExternalStmt.myExternalFunction() {
-        ModelicaCompiler mc = root().getUtilInterface().getModelicaCompiler();
-        if (mc != null)
-            return mc.getExternalFunction(this);
-        return ModelicaCompiler.ExternalFunction.FAILED;
+    public ExternalFunctionCache.ExternalFunction FExternalStmt.myExternalFunction() {
+        return root().getUtilInterface().getExternalFunctionCache().getExternalFunction(this);
     }
     
     /**
@@ -88,7 +85,7 @@ aspect ExternalConstantEvaluation {
         
         int res = 0;
         int timeout = myOptions().getIntegerOption("external_constant_evaluation");
-        ModelicaCompiler.ExternalFunction ef = myExternalFunction();
+        ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
         ProcessCommunicator com = ef.getProcessCommunicator(this, timeout);
         try {
             com.accept("START");
@@ -352,40 +349,65 @@ aspect ExternalConstantEvaluation {
 
 aspect ExternalConstantEvaluationCaching {
     
-    private ExternalFunctionCache ModelicaCompiler.externalFunctionCache = new ExternalFunctionCache();
-    
-    public ExternalFunction ModelicaCompiler.getExternalFunction(FExternalStmt ext) {
-        return externalFunctionCache.getExternalFunction(ext);
-    }
-    
-    private void ModelicaCompiler.removeCompiledExternals() {
-        externalFunctionCache.removeExternalFunctions();
-    }
-    
-    class ModelicaCompiler {
+    public class ExternalFunctionCache {
+        
+        /**
+         * Maps external functions names to compiled executables.
+         */
+        private Map<String, ExternalFunction> cachedExternals = new HashMap<String, ExternalFunction>();
+        
+        private UtilInterface uif;
+        
+        public ExternalFunctionCache(UtilInterface uif) {
+            this.uif = uif;
+        }
+        
+        /**
+         * If there is no executable corresponding to <code>ext</code>, create one.
+         */
+        public ExternalFunction getExternalFunction(FExternalStmt ext) {
+            ExternalFunction ef = cachedExternals.get(ext.getName());
+            if (ef == null) {
+                String executable = uif.getModelicaCompiler().compileExternal(ext);
+                if (executable == null) {
+                    ef = FailedExternalFunction;
+                } else {
+                    ef = new CompiledExternalFunction(ext, executable);
+                }
+                cachedExternals.put(ext.getName(), ef);
+            }
+            return ef;
+        }
+        
+        /**
+         * Remove executables compiled by the constant evaluation framework.
+         */
+        public void removeExternalFunctions() {
+            for (ExternalFunction ef : cachedExternals.values()) {
+                ef.remove();
+            }
+            cachedExternals = new HashMap<String,ExternalFunction>();
+        }
+        
         public static abstract class ExternalFunction {
             public abstract ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout);
             public abstract void remove();
+        }
+        
+        public static final ExternalFunction FailedExternalFunction = new ExternalFunction() {
             
-            public ExternalFunction invalidate() {
-                remove();
-                return FAILED;
+            @Override
+            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout) {
+                throw new ConstantEvaluationException(null, 
+                        "Failed to evaluate external function call, could not start process");
             }
             
-            public static final ExternalFunction FAILED = new ExternalFunction() {
+            @Override
+            public void remove() {
                 
-                @Override
-                public void remove() {
-                    
-                }
-                
-                @Override
-                public ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout) {
-                    throw new ConstantEvaluationException(null, 
-                            "Failed to evaluate external function call, could not start process");
-                }
-            };
-        }
+            }
+            
+        };
         
         private class CompiledExternalFunction extends ExternalFunction {
             protected String executable;
@@ -396,15 +418,17 @@ aspect ExternalConstantEvaluationCaching {
                 this.processBuilder = createProcessBuilder(ext);
             }
             
+            @Override
             public ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout) {
                 try {
                     return new ProcessCommunicator(processBuilder.start(), timeout);
                 } catch (IOException e) {
-                    log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+                    ModelicaCompiler.log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
                 }
                 return null;
             }
             
+            @Override
             public void remove() {
                 new File(executable).delete();
             }
@@ -414,7 +438,8 @@ aspect ExternalConstantEvaluationCaching {
                 pb.redirectErrorStream(true);
                 if (ext.libraryDirectory() != null) {
                     // Update environment in case of shared library
-                    String platform = ModelicaCompiler.reduceBits(getPlatform(), getCCompiler().getTargetPlatforms());
+                    String platform = ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), 
+                            uif.getModelicaCompiler().getCCompiler().getTargetPlatforms());
                     File f = new File(ext.libraryDirectory(), platform);
                     String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
                     appendPath(pb, libLoc, platform);
@@ -436,82 +461,36 @@ aspect ExternalConstantEvaluationCaching {
                 pb.environment().put(var, res);
             }
         }
-        
-        private class ExternalFunctionCache {
-            
-            /**
-             * Maps external functions names to compiled executables.
-             * A null/nonexistent entry means it has not been compiled yet.
-             * An empty string means compilation was not succesful.
-             */
-            private Map<String, ExternalFunction> cachedExternals = new HashMap<String, ExternalFunction>();
-            
-            /**
-             * If there is no executable corresponding to <code>ext</code>, create one.
-             */
-            private ExternalFunction getExternalFunction(FExternalStmt ext) {
-                ExternalFunction ef = cachedExternals.get(ext.getName());
-                if (ef == null) {
-                    ef = compileExternal(ext);
-                    cachedExternals.put(ext.getName(), ef);
-                }
-                return ef;
-            }
-            
-            private ExternalFunction compileExternal(FExternalStmt ext) {
-                ExternalFunction res;
-                if (outDir == null)
-                    setRandomOutDir();
-                String source = ext.getName().replace(".", "_");
-                TargetObject target = createTargetObject("ceval", "0.1");
-                Set<String> libs = new HashSet<String>();
-                Set<String> libDirs = new HashSet<String>();
-                Set<String> incDirs = new HashSet<String>();
-                if (ext.library() != null)
-                    for (String lib : ext.library())
-                        libs.add(lib);
-                if (ext.libraryDirectory() != null)
-                    libDirs.add(ext.libraryDirectory());
-                if (ext.includeDirectory() != null)
-                    incDirs.add(ext.includeDirectory());
-                try {
-                    target.getTemplates().generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
-                    String executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
-                    res = new CompiledExternalFunction(ext, executable);
-                    new File(sourceDir, source + ".c").delete();
-                    log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
-                } catch (FileNotFoundException e) {
-                    res = ExternalFunction.FAILED;
-                    log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
-                } catch (CcodeCompilationException e) {
-                    res = ExternalFunction.FAILED;
-                    log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
-                    e.printStackTrace(new PrintStream(log.debugStream()));
-                }
-                return res;
-            }
-            
-            /**
-             * Remove executables compiled by the constant evaluation framework.
-             */
-            private void removeExternalFunctions() {
-                for (ExternalFunction ce : cachedExternals.values()) {
-                    ce.remove();
-                }
-                cachedExternals = new HashMap<String,ExternalFunction>();
-            }
-            
-            /**
-             * Make sure <code>ext</code> executable is not used.
-             */
-            public void invalidateExternal(FExternalStmt ext) {
-                String key = ext.getName();
-                ExternalFunction ef = cachedExternals.get(key);
-                if (ef != null) {
-                    cachedExternals.put(key, ef.invalidate());
-                }
-            }
+    }
+    
+    public String ModelicaCompiler.compileExternal(FExternalStmt ext) {
+        String executable = null;
+        if (outDir == null)
+            setRandomOutDir();
+        String source = ext.getName().replace(".", "_");
+        TargetObject target = createTargetObject("ceval", "0.1");
+        Set<String> libs = new HashSet<String>();
+        Set<String> libDirs = new HashSet<String>();
+        Set<String> incDirs = new HashSet<String>();
+        if (ext.library() != null)
+            for (String lib : ext.library())
+                libs.add(lib);
+        if (ext.libraryDirectory() != null)
+            libDirs.add(ext.libraryDirectory());
+        if (ext.includeDirectory() != null)
+            incDirs.add(ext.includeDirectory());
+        try {
+            target.getTemplates().generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
+            executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
+            new File(sourceDir, source + ".c").delete();
+            log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
+        } catch (FileNotFoundException e) {
+            log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
+        } catch (CcodeCompilationException e) {
+            log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
+            e.printStackTrace(new PrintStream(log.debugStream()));
         }
+        return executable;
     }
 }
 

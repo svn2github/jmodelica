@@ -1886,7 +1886,7 @@ public class ModelicaCompiler {
             }
             
             fc.loadResources(new File(outDir, "resources"));
-            removeCompiledExternals();
+            fc.root().getUtilInterface().getExternalFunctionCache().removeExternalFunctions();
             
         } finally {
         }

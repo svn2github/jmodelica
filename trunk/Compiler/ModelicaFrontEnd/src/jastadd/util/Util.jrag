@@ -1859,11 +1859,13 @@ aspect UtilInterface {
         private ModelicaCompiler mc;
         private OptionRegistry options;
         private IErrorHandler eh;
+        private ExternalFunctionCache efc;
         
         protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
+            this.efc = new ExternalFunctionCache(this);
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -1876,6 +1878,10 @@ aspect UtilInterface {
         
         public IErrorHandler getErrorHandler() {
             return eh;
+        }
+        
+        public ExternalFunctionCache getExternalFunctionCache() {
+            return efc;
         }
     }
     
