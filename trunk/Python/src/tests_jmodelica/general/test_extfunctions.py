@@ -545,7 +545,7 @@ class TestAdvanced:
         
         
     
-class TestUtilities:
+class TestUtilitiesCEval:
     '''
     Test utility functions in external C functions.
     '''

@@ -136,8 +136,8 @@ void JMCEVAL_check(const char* str) {
     fflush(stdout);
 }
 
-void JMCEVAL_failed(const char* str) {
-    exit(1);
+void JMCEVAL_failed() {
+    JMCEVAL_check("ABORT");
 }
 
 /* Main */
@@ -158,8 +158,7 @@ int main(int argc, const char* argv[])
         $ECE_init$
         JMI_DYNAMIC_FREE()
     } else {
-        JMCEVAL_failed("TODO");
-        return 1;
+        JMCEVAL_failed();
     }
     
     /*while (JMCEVAL_cont()) {*/
@@ -169,7 +168,7 @@ int main(int argc, const char* argv[])
             $ECE_calc$
             JMI_DYNAMIC_FREE()
         } else {
-            JMCEVAL_failed("TODO");
+            JMCEVAL_failed();
         }
     /*}*/
 
@@ -179,8 +178,7 @@ int main(int argc, const char* argv[])
         $ECE_end$
         JMI_DYNAMIC_FREE()
     } else {
-        JMCEVAL_failed("TODO");
-        return 1;
+        JMCEVAL_failed();
     }
 
     return 0;

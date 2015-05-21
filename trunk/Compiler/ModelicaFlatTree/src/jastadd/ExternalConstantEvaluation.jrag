@@ -101,8 +101,9 @@ aspect ExternalConstantEvaluation {
         } catch (IOException e) {
 //            ModelicaCompiler.log.debug(e);
             res = -2;
+        } finally {
+            com.destroy();
         }
-        com.destroy();
         
         if (res != 0) {
             ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
@@ -177,6 +178,7 @@ aspect ExternalConstantEvaluation {
          */
         public void accept(String s) throws IOException {
             log();
+            abort();
             String line = getLine();
             if (line == null || !line.equals(s)) {
                 ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
@@ -196,6 +198,14 @@ aspect ExternalConstantEvaluation {
                 else
                     ModelicaCompiler.log.info("%s: " + format, name, value);
                 line = getLine();
+            }
+            buffLine(line);
+        }
+        
+        private void abort() throws IOException, ConstantEvaluationException {
+            String line = getLine();
+            if (line.equals("ABORT")) {
+                throw new ConstantEvaluationException(null, "Evaluation aborted by request of external function");
             }
             buffLine(line);
         }
