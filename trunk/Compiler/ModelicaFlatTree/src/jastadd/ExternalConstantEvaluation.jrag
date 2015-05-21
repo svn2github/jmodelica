@@ -368,6 +368,9 @@ aspect ExternalConstantEvaluationCaching {
         public ExternalFunction getExternalFunction(FExternalStmt ext) {
             ExternalFunction ef = cachedExternals.get(ext.getName());
             if (ef == null) {
+                if (uif.getModelicaCompiler() == null) {
+                    return FailedExternalFunction;
+                }
                 String executable = uif.getModelicaCompiler().compileExternal(ext);
                 if (executable == null) {
                     ef = FailedExternalFunction;

@@ -52,10 +52,13 @@ equation
             template="
 $ECE_external_includes$
 $ECE_record_definitions$
-$ECE_main$
+$ECE_decl$
+$ECE_init$
+$ECE_calc$
+$ECE_end$
 ",
             generatedCode="
-
+    JMCEVAL_check(\"START\");
 
     /* Declarations */
     JMI_DEF(REA, a1_v)
@@ -75,8 +78,6 @@ $ECE_main$
     JMI_DEF(BOO_EXT, tmp_5)
     JMI_DEF(ENU_EXT, tmp_6)
 
-    JMCEVAL_setup();
-    printf(\"START\\n\"); fflush(stdout);
     /* Parse */
     JMCEVAL_parse(Real, a1_v);
     JMCEVAL_parse(Integer, a2_v);
@@ -90,7 +91,7 @@ $ECE_main$
     JMCEVAL_parse(Enum, b5_v);
 
     /* Call the function */
-    printf(\"CALC\\n\"); fflush(stdout);
+    JMCEVAL_check(\"CALC\");
     tmp_1 = (int)a2_v;
     tmp_2 = (int)a3_v;
     tmp_3 = (int)a5_v;
@@ -101,7 +102,7 @@ $ECE_main$
     b2_v = tmp_4;
     b3_v = tmp_5;
     b5_v = tmp_6;
-    printf(\"DONE\\n\"); fflush(stdout);
+    JMCEVAL_check(\"DONE\");
 
     /* Print */
     JMCEVAL_print(Real, b1_v);
@@ -114,7 +115,7 @@ $ECE_main$
     JMCEVAL_free(a4_v);
     JMCEVAL_free(b4_v);
 
-    printf(\"END\\n\"); fflush(stdout);
+    JMCEVAL_check(\"END\");
 ")})));
 end Scalar;
 
@@ -150,10 +151,13 @@ equation
             template="
 $ECE_external_includes$
 $ECE_record_definitions$
-$ECE_main$
+$ECE_decl$
+$ECE_init$
+$ECE_calc$
+$ECE_end$
 ",
             generatedCode="
-
+    JMCEVAL_check(\"START\");
 
     /* Declarations */
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, a1_a, -1, 1)
@@ -173,8 +177,6 @@ $ECE_main$
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_5, -1, 1)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_6, -1, 1)
 
-    JMCEVAL_setup();
-    printf(\"START\\n\"); fflush(stdout);
     /* Parse */
     JMCEVAL_parseArrayDims(1);
     JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, a1_a, d[0], 1, d[0])
@@ -208,7 +210,7 @@ $ECE_main$
     JMCEVAL_parseArray(Enum, b5_a);
 
     /* Call the function */
-    printf(\"CALC\\n\"); fflush(stdout);
+    JMCEVAL_check(\"CALC\");
     JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a2_a, 0), 1, jmi_array_size(a2_a, 0))
     jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_1->var);
     JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(a3_a, 0), 1, jmi_array_size(a3_a, 0))
@@ -225,7 +227,7 @@ $ECE_main$
     jmi_copy_matrix_from_int(b2_a, tmp_4->var, b2_a->var);
     jmi_copy_matrix_from_int(b3_a, tmp_5->var, b3_a->var);
     jmi_copy_matrix_from_int(b5_a, tmp_6->var, b5_a->var);
-    printf(\"DONE\\n\"); fflush(stdout);
+    JMCEVAL_check(\"DONE\");
 
     /* Print */
     JMCEVAL_printArray(Real, b1_a);
@@ -238,7 +240,7 @@ $ECE_main$
     JMCEVAL_freeArray(a4_a);
     JMCEVAL_freeArray(b4_a);
 
-    printf(\"END\\n\"); fflush(stdout);
+    JMCEVAL_check(\"END\");
 ")})));
 end Array;
 
@@ -314,11 +316,14 @@ model ExtObj
             template="
 $ECE_external_includes$
 $ECE_record_definitions$
-$ECE_main$
+$ECE_decl$
+$ECE_init$
+$ECE_calc$
+$ECE_end$
 ",
             generatedCode="
 #include \"extObjects.h\"
-
+JMCEVAL_check(\"START\");
 
     /* Declarations */
     JMI_DEF(REA, x_v)
@@ -340,8 +345,6 @@ $ECE_main$
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg2, -1, 1)
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, -1, 1)
 
-    JMCEVAL_setup();
-    printf(\"START\\n\"); fflush(stdout);
     /* Parse */
     JMCEVAL_parse(Real, x_v);
     JMCEVAL_parse(Real, tmp_4_arg0);
@@ -376,9 +379,9 @@ $ECE_main$
     my_constructor3(tmp_1_arg0, tmp_1_arg1->var, &o3_v);
 
     /* Call the function */
-    printf(\"CALC\\n\"); fflush(stdout);
+    JMCEVAL_check(\"CALC\");
     x_v = use3(o3_v);
-    printf(\"DONE\\n\"); fflush(stdout);
+    JMCEVAL_check(\"DONE\");
 
     /* Print */
     JMCEVAL_print(Real, x_v);
@@ -393,7 +396,7 @@ $ECE_main$
     }
     destructor(o3_v);
 
-    printf(\"END\\n\"); fflush(stdout);
+    JMCEVAL_check(\"END\");
 ")})));
 end ExtObj;
 
@@ -451,10 +454,13 @@ model Dgelsx
             template="
 $ECE_external_includes$
 $ECE_record_definitions$
-$ECE_main$
+$ECE_decl$
+$ECE_init$
+$ECE_calc$
+$ECE_end$
 ",
             generatedCode="
-
+JMCEVAL_check(\"START\");
 
     /* Declarations */
     JMI_DEF(INT, nrow_v)
@@ -482,8 +488,6 @@ $ECE_main$
     JMI_DEF(INT_EXT, tmp_11)
     extern void dgelsx_(int*, int*, int*, double*, int*, double*, int*, int*, double*, int*, double*, int*, int*);
 
-    JMCEVAL_setup();
-    printf(\"START\\n\"); fflush(stdout);
     /* Parse */
     JMCEVAL_parse(Integer, nrow_v);
     JMCEVAL_parse(Integer, ncol_v);
@@ -507,7 +511,7 @@ $ECE_main$
     JMCEVAL_parse(Integer, info_v);
 
     /* Call the function */
-    printf(\"CALC\\n\"); fflush(stdout);
+    JMCEVAL_check(\"CALC\");
     tmp_1 = (int)nrow_v;
     tmp_2 = (int)ncol_v;
     tmp_3 = (int)nrhs_v;
@@ -526,7 +530,7 @@ $ECE_main$
     jmi_matrix_from_fortran_real(X_a, tmp_6->var, X_a->var);
     rank_v = tmp_9;
     info_v = tmp_11;
-    printf(\"DONE\\n\"); fflush(stdout);
+    JMCEVAL_check(\"DONE\");
 
     /* Print */
     JMCEVAL_printArray(Real, X_a);
@@ -535,7 +539,7 @@ $ECE_main$
 
     /* Free strings */
 
-    printf(\"END\\n\"); fflush(stdout);
+    JMCEVAL_check(\"END\");
 ")})));
 end Dgelsx;
 end CEval;
