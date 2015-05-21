@@ -182,7 +182,6 @@ aspect Serialize {
         codeGenContext = null;
     }
     
-    
     public void FExternalStmt.genSerializeEnd_C(CodeStream str, String indent) {
         genCheckPoint(str, indent, "END");
     }
@@ -246,6 +245,30 @@ aspect Serialize {
     public void FSizeExp.varsToSerialize(ArrayList<CommonVariableDecl> decls) {
         getFExp().varsToSerialize(decls);
         //getDim().varsToSerialize(decls);
+    }
+    
+    syn ArrayList<CommonVariableDecl> FExternalStmt.externalObjectsToSerialize() {
+        ArrayList<CommonVariableDecl> externalObjects = new ArrayList<CommonVariableDecl>();
+
+        for (CommonVariableDecl var : varsToSerialize()) {
+            if (var.type().isExternalObject()) {
+                externalObjects.add(var);
+            }
+        }
+
+        return externalObjects;
+    }
+    
+    syn ArrayList<CommonVariableDecl> FExternalStmt.functionArgsToSerialize() {
+        ArrayList<CommonVariableDecl> functionArgs = new ArrayList<CommonVariableDecl>();
+
+        for (CommonVariableDecl var : varsToSerialize()) {
+            if (!var.type().isExternalObject()) {
+                functionArgs.add(var);
+            }
+        }
+
+        return functionArgs;
     }
     
     /**
