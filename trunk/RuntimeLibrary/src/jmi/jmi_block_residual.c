@@ -658,6 +658,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->nr_pre_index);
     free(b->nr_direct_index);
     free(b->nr_vref);
+    free(b->sr_vref);
     free(b->jac);
     free(b->ipiv);
     free(b->min);
