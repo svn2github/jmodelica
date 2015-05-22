@@ -1408,6 +1408,52 @@ end RecordTests.RecordBinding25;
 ")})));
 end RecordBinding25;
 
+model RecordBinding26
+    record R
+        parameter Real[:,:] x = {{i + j for i in 1:1} for j in 1:2};
+    end R;
+    
+    R r;
+  
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding26",
+            description="Reflatten iter exp",
+            flatModel="
+fclass RecordTests.RecordBinding26
+ parameter Real r.x[1,1] = 2 /* 2 */;
+ parameter Real r.x[2,1] = 3 /* 3 */;
+end RecordTests.RecordBinding26;
+")})));
+end RecordBinding26;
+
+model RecordBinding27
+    record R
+        Real t[:] = {time,time+1};
+        Real[:,:] x = {{t[i] + t[j] for i in 1:1} for j in 1:2};
+    end R;
+    
+    R r;
+  
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding27",
+            description="Reflatten iter exp",
+            flatModel="
+fclass RecordTests.RecordBinding27
+ Real r.t[1];
+ Real r.t[2];
+ Real r.x[1,1];
+ Real r.x[2,1];
+equation
+ r.t[1] = time;
+ r.t[2] = time + 1;
+ r.x[1,1] = r.t[1] + r.t[1];
+ r.x[2,1] = r.t[1] + r.t[1];
+end RecordTests.RecordBinding27;
+")})));
+end RecordBinding27;
+
 
 model UnmodifiableComponent1
     record R

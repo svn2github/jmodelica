@@ -486,7 +486,8 @@ aspect Scalarization {
     public void FIdUseExp.prefixInternalUses(FQName prefix, FRecordDecl decl) {
         FQName fqn = getFIdUse().getFQName();
         fqn.prefixInternalUses(prefix, decl);
-        if (decl == lookupFV(fqn.copyFirstPrefix()).containingRecordDecl()) 
+        FAbstractVariable p = lookupFV(fqn.copyFirstPrefix());
+        if (decl == p.containingRecordDecl() && !p.isForIndex()) 
             getFIdUse().setFQName(prefix.copyAndAppend(fqn));
     }
     
