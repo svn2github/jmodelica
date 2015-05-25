@@ -3137,9 +3137,16 @@ aspect Scalarization {
         if (getFArraySubscripts().hasUnknownIndices() && inFunction()) {
             return new FIdUseExp(tempVarName(), fas);
         } else {
-            fas.setParent(this);
-            Index i = fas.asIndex();
-            return getFExp().getArray().get(i).scalarize(indexMap);
+            try {
+                fas.setParent(this);
+                Index i = fas.asIndex();
+                return getFExp().getArray().get(i).scalarize(indexMap);
+            } catch (ConstantEvaluationException e) {
+                FSubscriptedExp res = createEmptyNode();
+                res.setFExp(getFExp().scalarize(indexMap));
+                res.setFArraySubscripts(getFArraySubscripts().scalarize(indexMap));
+                return res;
+            }
         }
     }
 

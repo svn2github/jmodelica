@@ -5910,6 +5910,72 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest9;
 ")})));
 end ArrayIterTest9;
 
+model ArrayIterTest10
+    constant Real[1,2] c = {{1,2}};
+    parameter Real[:,:] x = {{c[i,j] for i in 1:1} for j in 1:2};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest10",
+            description="Nested iteration expressions",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest10
+ constant Real c[1,1] = 1;
+ constant Real c[1,2] = 2;
+ parameter Real x[1,1] = 1.0 /* 1.0 */;
+ parameter Real x[2,1] = 2.0 /* 2.0 */;
+end ArrayTests.Constructors.Iterators.ArrayIterTest10;
+")})));
+end ArrayIterTest10;
+
+model ArrayIterTest11
+    record R
+        parameter Real[:,:] x = {{i + j for i in 1:1} for j in 1:2};
+    end R;
+    
+    R r;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest11",
+            description="Nested iteration expressions",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest11
+ parameter Real r.x[1,1] = 2 /* 2 */;
+ parameter Real r.x[2,1] = 3 /* 3 */;
+end ArrayTests.Constructors.Iterators.ArrayIterTest11;
+")})));
+end ArrayIterTest11;
+
+model ArrayIterTest12
+    record R
+        Real t[:] = {time,time};
+        Real[:,:] x = {{t[i] + t[j] for i in 1:1} for j in 1:2};
+    end R;
+    
+    R r;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest12",
+            description="Nested iteration expressions",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest12
+ Real r.t[1];
+ Real r.t[2];
+ Real r.x[1,1];
+ Real r.x[2,1];
+equation
+ r.t[1] = time;
+ r.t[2] = time;
+ r.x[1,1] = r.t[1] + r.t[1];
+ r.x[2,1] = r.t[1] + r.t[1];
+end ArrayTests.Constructors.Iterators.ArrayIterTest12;
+")})));
+end ArrayIterTest12;
 
 model ArrayIterTestUnknown1
     function f
