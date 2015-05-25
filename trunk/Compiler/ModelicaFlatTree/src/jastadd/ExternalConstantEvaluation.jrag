@@ -89,8 +89,11 @@ aspect ExternalConstantEvaluation {
         ProcessCommunicator com = ef.getProcessCommunicator(this, timeout);
         try {
             com.accept("START");
-            for (CommonVariableDecl cvd : varsToSerialize()) {
-                com.put(values.get(cvd), cvd.type(), cvd.canBeUnknown());
+            for (CommonVariableDecl eo : externalObjectsToSerialize()) {
+                com.put(values.get(eo), eo.type(), eo.canBeUnknown());
+            }
+            for (CommonVariableDecl arg : functionArgsToSerialize()) {
+                com.put(values.get(arg), arg.type(), arg.canBeUnknown());
             }
             com.accept("CALC");
             com.accept("DONE");

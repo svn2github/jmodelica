@@ -346,7 +346,6 @@ JMCEVAL_check(\"START\");
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, -1, 1)
 
     /* Parse */
-    JMCEVAL_parse(Real, x_v);
     JMCEVAL_parse(Real, tmp_4_arg0);
     JMCEVAL_parse(Integer, tmp_4_arg1);
     JMCEVAL_parse(Boolean, tmp_4_arg2);
@@ -377,6 +376,7 @@ JMCEVAL_check(\"START\");
         my_constructor2(tmp_8_arg0->var, tmp_6->var, &jmi_array_ref_1(tmp_1_arg1, tmp_5), tmp_7->var, tmp_8_arg3->var);
     }
     my_constructor3(tmp_1_arg0, tmp_1_arg1->var, &o3_v);
+    JMCEVAL_parse(Real, x_v);
 
     /* Call the function */
     JMCEVAL_check(\"CALC\");
