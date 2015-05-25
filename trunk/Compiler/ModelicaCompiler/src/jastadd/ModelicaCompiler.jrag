@@ -1888,7 +1888,6 @@ public class ModelicaCompiler {
             }
             
             fc.loadResources(new File(outDir, "resources"));
-            fc.root().getUtilInterface().getExternalFunctionCache().removeExternalFunctions();
             
         } finally {
         }
@@ -1957,6 +1956,7 @@ public class ModelicaCompiler {
      * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
      */
     protected void ModelicaCompiler.tearDown() {
+        getExternalFunctionCache().tearDown();
         setErrorHandler(null);
         isSetUp = false;
     }

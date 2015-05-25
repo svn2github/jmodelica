@@ -1861,11 +1861,11 @@ aspect UtilInterface {
         private IErrorHandler eh;
         private ExternalFunctionCache efc;
         
-        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh) {
+        protected UtilInterface(ModelicaCompiler mc, OptionRegistry options, IErrorHandler eh, ExternalFunctionCache efc) {
             this.mc = mc;
             this.options = options;
             this.eh = eh;
-            this.efc = new ExternalFunctionCache(this);
+            this.efc = efc;
         }
         
         public ModelicaCompiler getModelicaCompiler() {
@@ -1890,20 +1890,21 @@ aspect UtilInterface {
     }
     
     public static UtilInterface UtilInterface.create(ModelicaCompiler mc) {
-        return create(mc, mc.getOptions(), mc.getErrorHandler());
+        return create(mc, mc.getOptions(), mc.getErrorHandler(), mc.getExternalFunctionCache());
     }
     
     public static UtilInterface UtilInterface.create(UtilInterface other) {
-        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), other.getErrorHandler());
+        return create(other.getModelicaCompiler(), other.getOptionRegistry().copy(), 
+                other.getErrorHandler(), other.getExternalFunctionCache());
     }
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
-        return create(null, options, new DefaultErrorHandler());
+        return create(null, options, new DefaultErrorHandler(), null);
     }
     
     private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
-            IErrorHandler eh) {
-        return new UtilInterface(mc, options, eh);
+            IErrorHandler eh, ExternalFunctionCache efc) {
+        return new UtilInterface(mc, options, eh, efc);
     }
     
     public void Root.transferRoot(Root other) {
@@ -1911,6 +1912,10 @@ aspect UtilInterface {
     }
     
     public void UtilInterface.transferRoot(Root root) {
+        ExternalFunctionCache efc = getExternalFunctionCache();
+        if (efc != null) {
+            efc.destroyProcesses();
+        }
         root.setUtilInterface(UtilInterface.create(this));
     }
     

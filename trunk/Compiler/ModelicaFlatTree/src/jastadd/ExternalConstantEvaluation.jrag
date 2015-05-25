@@ -71,7 +71,11 @@ aspect ExternalConstantEvaluation {
     eq InstClassDecl.getChild().isDestructorStmt() = isDestructor();
     
     public ExternalFunctionCache.ExternalFunction FExternalStmt.myExternalFunction() {
-        return root().getUtilInterface().getExternalFunctionCache().getExternalFunction(this);
+        ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
+        if (efc == null) {
+            return ExternalFunctionCache.FailedExternalFunction;
+        }
+        return efc.getExternalFunction(this);
     }
     
     /**
@@ -362,6 +366,12 @@ aspect ExternalConstantEvaluation {
 
 aspect ExternalConstantEvaluationCaching {
     
+    protected ExternalFunctionCache ModelicaCompiler.externalFunctionCache = new ExternalFunctionCache(this);
+    
+    public ExternalFunctionCache ModelicaCompiler.getExternalFunctionCache() {
+        return externalFunctionCache;
+    }
+    
     public class ExternalFunctionCache {
         
         /**
@@ -369,10 +379,10 @@ aspect ExternalConstantEvaluationCaching {
          */
         private Map<String, ExternalFunction> cachedExternals = new HashMap<String, ExternalFunction>();
         
-        private UtilInterface uif;
+        private ModelicaCompiler mc;
         
-        public ExternalFunctionCache(UtilInterface uif) {
-            this.uif = uif;
+        public ExternalFunctionCache(ModelicaCompiler mc) {
+            this.mc = mc;
         }
         
         /**
@@ -381,10 +391,10 @@ aspect ExternalConstantEvaluationCaching {
         public ExternalFunction getExternalFunction(FExternalStmt ext) {
             ExternalFunction ef = cachedExternals.get(ext.getName());
             if (ef == null) {
-                if (uif.getModelicaCompiler() == null) {
+                if (mc == null) {
                     return FailedExternalFunction;
                 }
-                String executable = uif.getModelicaCompiler().compileExternal(ext);
+                String executable = mc.compileExternal(ext);
                 if (executable == null) {
                     ef = FailedExternalFunction;
                 } else {
@@ -403,6 +413,18 @@ aspect ExternalConstantEvaluationCaching {
                 ef.remove();
             }
             cachedExternals = new HashMap<String,ExternalFunction>();
+        }
+        
+        /**
+         * Kill cached processes
+         */
+        public void destroyProcesses() {
+            /* TODO: implement */
+        }
+        
+        public void tearDown() {
+            destroyProcesses();
+            removeExternalFunctions();
         }
         
         public static abstract class ExternalFunction {
@@ -455,7 +477,7 @@ aspect ExternalConstantEvaluationCaching {
                 if (ext.libraryDirectory() != null) {
                     // Update environment in case of shared library
                     String platform = ModelicaCompiler.reduceBits(ModelicaCompiler.getPlatform(), 
-                            uif.getModelicaCompiler().getCCompiler().getTargetPlatforms());
+                            mc.getCCompiler().getTargetPlatforms());
                     File f = new File(ext.libraryDirectory(), platform);
                     String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
                     appendPath(pb, libLoc, platform);
