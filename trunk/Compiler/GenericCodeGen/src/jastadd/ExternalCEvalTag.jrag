@@ -21,6 +21,8 @@ public abstract class ExternalCEvalTag extends AbstractTag {
 
     protected FClass fClass;
     protected FExternalStmt ext;
+    protected CodeGenContext cgc;
+    protected Map<String,String> tempMap;
 
     /**
      * Default constructor.
@@ -33,10 +35,14 @@ public abstract class ExternalCEvalTag extends AbstractTag {
         super(name, myGenerator);
         this.fClass = fc;
         this.ext = null;
+        this.cgc = null;
+        this.tempMap = null;
     }
     
-    public void setExt(FExternalStmt ext) {
+    public void setExt(FExternalStmt ext, CodeGenContext cgc, Map<String,String> tempMap) {
         this.ext = ext;
+        this.cgc = cgc;
+        this.tempMap = tempMap;
     }
     
     protected  void instantiateTags(Map<String,AbstractTag> map) {
@@ -47,13 +53,21 @@ public abstract class ExternalCEvalTag extends AbstractTag {
         if (ext == null) {
             for (FExternalStmt ext : fClass.myExternals()) {
                 if (ext.canEvaluate() && !ext.isConstructorStmt() && !ext.isDestructorStmt())
-                    generate(genPrinter, ext);
+                    generate_wrap(genPrinter, ext, new CodeGenContext(), new HashMap<String,String>());
             }
         } else {
-            generate(genPrinter, ext);
+            generate_wrap(genPrinter, ext, cgc, tempMap);
         }
     }
     
-    public abstract void generate(CodeStream genPrinter, FExternalStmt ext);
+    public void generate_wrap(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc,
+            Map<String,String> tempMap) {
+        ext.setCodeGenContext(cgc);
+        generate(genPrinter, ext, cgc, tempMap);
+        ext.setCodeGenContext(null);
+    }
+    
+    public abstract void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+            Map<String,String> tempMap);
 }
 

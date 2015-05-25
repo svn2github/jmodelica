@@ -1246,7 +1246,9 @@ public class ModelicaCompiler {
     }
     
     protected ExternCEvalGenerator createCGenerator(FExternalStmt ext) {
-        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext);
+        CodeGenContext cgc = new CodeGenContext();
+        Map<String,String> tempMap = new HashMap<String,String>();
+        return new ExternCEvalGenerator(new PrettyPrinter(), '$', null, ext, cgc, tempMap);
     }
 
     /**

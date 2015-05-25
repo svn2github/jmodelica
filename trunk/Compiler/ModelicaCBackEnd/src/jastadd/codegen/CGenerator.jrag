@@ -1211,7 +1211,9 @@ public class CGenerator extends GenericGenerator {
             super("ECE_external_includes", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
             String inc = ext.include();
             if (inc != null)
                 genPrinter.println(inc);
@@ -1223,7 +1225,9 @@ public class CGenerator extends GenericGenerator {
             super("ECE_record_definitions", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
             for (FRecordDecl rec : ext.usedRecords()) {
                 rec.prettyPrint_C(genPrinter, "");
             }
@@ -1235,8 +1239,10 @@ public class CGenerator extends GenericGenerator {
             super("ECE_decl", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
-            ext.genSerializeDecl_C(genPrinter, "");
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeDecl_C(genPrinter, "", cgc, tempMap);
         }
     }
     
@@ -1245,8 +1251,10 @@ public class CGenerator extends GenericGenerator {
             super("ECE_init", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
-            ext.genSerializeInit_C(genPrinter, "");
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeInit_C(genPrinter, "", cgc, tempMap);
         }
     }
     
@@ -1255,8 +1263,10 @@ public class CGenerator extends GenericGenerator {
             super("ECE_calc", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
-            ext.genSerializeCalc_C(genPrinter, "");
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeCalc_C(genPrinter, "", cgc, tempMap);
         }
     }
     
@@ -1265,8 +1275,10 @@ public class CGenerator extends GenericGenerator {
             super("ECE_end", myGenerator, fClass);
         }
         
-        public void generate(CodeStream genPrinter, FExternalStmt ext) {
-            ext.genSerializeEnd_C(genPrinter, "");
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeEnd_C(genPrinter, "", cgc, tempMap);
         }
     }
 
@@ -1305,10 +1317,11 @@ public class CGenerator extends GenericGenerator {
 }
 
 public class ExternCEvalGenerator extends CGenerator {
-    public ExternCEvalGenerator(Printer expPrinter, char escapeCharacter, FClass fclass, FExternalStmt ext) {
+    public ExternCEvalGenerator(Printer expPrinter, char escapeCharacter, FClass fclass,
+            FExternalStmt ext, CodeGenContext cgc, Map<String,String> tempMap) {
         super(expPrinter, escapeCharacter, fclass);
         for (AbstractTag t : tagMap.values())
             if (t instanceof ExternalCEvalTag)
-                ((ExternalCEvalTag)t).setExt(ext);
+                ((ExternalCEvalTag)t).setExt(ext, cgc, tempMap);
     }
 }
