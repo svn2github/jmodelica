@@ -1258,6 +1258,19 @@ public class CGenerator extends GenericGenerator {
         }
     }
     
+    
+    public class ECETag_calc_init extends ExternalCEvalTag {
+        public ECETag_calc_init(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_calc_init", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeCalcInit_C(genPrinter, "", cgc, tempMap);
+        }
+    }
+    
     public class ECETag_calc extends ExternalCEvalTag {
         public ECETag_calc(AbstractGenerator myGenerator, FClass fClass) {
             super("ECE_calc", myGenerator, fClass);
@@ -1267,6 +1280,18 @@ public class CGenerator extends GenericGenerator {
         public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
                 Map<String,String> tempMap) {
             ext.genSerializeCalc_C(genPrinter, "", cgc, tempMap);
+        }
+    }
+    
+    public class ECETag_calc_free extends ExternalCEvalTag {
+        public ECETag_calc_free(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_calc_free", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
+                Map<String,String> tempMap) {
+            ext.genSerializeCalcFree_C(genPrinter, "", cgc, tempMap);
         }
     }
     

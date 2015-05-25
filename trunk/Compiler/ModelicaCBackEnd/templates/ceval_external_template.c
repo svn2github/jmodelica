@@ -162,6 +162,7 @@ int main(int argc, const char* argv[])
     }
     
     /*while (JMCEVAL_cont()) {*/
+        $ECE_calc_init$
         /* Calc phase */
         if (JMCEVAL_try()) {
             JMI_DYNAMIC_INIT()
@@ -170,6 +171,7 @@ int main(int argc, const char* argv[])
         } else {
             JMCEVAL_failed();
         }
+        $ECE_calc_free$
     /*}*/
 
     /* End phase */

@@ -136,6 +136,11 @@ aspect Serialize {
     
     public void FExternalStmt.genSerializeInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
         genCheckPoint(str, indent, "START");
+        /* Generate code to receive cached function arguments */
+    }
+    
+    public void FExternalStmt.genSerializeCalcInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
+        /* Generate code to receive non-cached function arguments */
     }
     
     public void FExternalStmt.genSerializeCalc_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
@@ -186,7 +191,12 @@ aspect Serialize {
         str.println();
     }
     
+    public void FExternalStmt.genSerializeCalcFree_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
+        /* Generate code to free memory allocated by genSerializeCalcInit_C */
+    }
+    
     public void FExternalStmt.genSerializeEnd_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
+        /* Generate code to free memory allocated by genSerializeInit_C */
         genCheckPoint(str, indent, "END");
     }
     
