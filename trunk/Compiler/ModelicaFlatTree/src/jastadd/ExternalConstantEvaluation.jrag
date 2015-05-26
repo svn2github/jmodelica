@@ -73,7 +73,7 @@ aspect ExternalConstantEvaluation {
     public ExternalFunctionCache.ExternalFunction FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
-            return ExternalFunctionCache.FailedExternalFunction;
+            return ExternalFunctionCache.FAILED_EXTERNAL_FUNCTION;
         }
         return efc.getExternalFunction(this);
     }
@@ -90,26 +90,15 @@ aspect ExternalConstantEvaluation {
         int res = 0;
         int timeout = myOptions().getIntegerOption("external_constant_evaluation");
         ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
-        ProcessCommunicator com = ef.getProcessCommunicator(this, timeout);
         try {
-            com.accept("START");
-            for (CommonVariableDecl eo : externalObjectsToSerialize()) {
-                com.put(values.get(eo), eo.type(), eo.canBeUnknown());
-            }
-            for (CommonVariableDecl arg : functionArgsToSerialize()) {
-                com.put(values.get(arg), arg.type(), arg.canBeUnknown());
-            }
-            com.accept("CALC");
-            com.accept("DONE");
-            for (CommonVariableDecl cvd : varsToDeserialize())
-                values.put(cvd, com.get(cvd.type()));
-            com.accept("END");
-            res = com.end();
+            ef.setup(this, values, timeout);
+            ef.evaluate(this, values, timeout);
+            res = ef.teardown(this, values, timeout);
         } catch (IOException e) {
 //            ModelicaCompiler.log.debug(e);
             res = -2;
         } finally {
-            com.destroy();
+            ef.destroyProcess();
         }
         
         if (res != 0) {
@@ -130,22 +119,14 @@ aspect ExternalConstantEvaluation {
         private BufferedWriter out;
         private Process process;
         private Timer timer;
+        private TimerTask task;
         String buffLine = null;
         
-        public ProcessCommunicator(Process proc, int timeout) {
+        public ProcessCommunicator(Process proc) {
             process = proc;
             in  = new BufferedReader(new InputStreamReader(process.getInputStream()));
             out = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
             timer = new Timer();
-            if (timeout >= 0) {
-                timer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        process.destroy();
-                        cancel();
-                    }
-                }, timeout);
-            }
         }
         
         private String getLine() throws IOException {
@@ -237,6 +218,9 @@ aspect ExternalConstantEvaluation {
          * Tear down everything
          */
         public void destroy() {
+            timer.cancel();
+            timer.purge();
+            timer = null;
             try {
                 in.close();
             } catch (IOException e) {
@@ -248,9 +232,6 @@ aspect ExternalConstantEvaluation {
             
             process.destroy();
             process = null;
-            timer.cancel();
-            timer.purge();
-            timer = null;
         }
         
         public double deserializeReal() throws IOException {
@@ -277,6 +258,32 @@ aspect ExternalConstantEvaluation {
             } catch (NumberFormatException e) {
                 throw new IOException();
             }
+        }
+        
+        public void startTimer(int timeout) {
+            if (timeout >= 0) {
+                if (task != null) {
+                    //XXX: Throw exception instead?
+                    task.cancel();
+                    timer.purge();
+                }
+                task = new TimerTask() {
+                    @Override
+                    public void run() {
+                        process.destroy();
+                        cancel();
+                    }
+                };
+                timer.schedule(task, timeout);
+            }
+        }
+        
+        public void cancelTimer() {
+            if (task != null) {
+                task.cancel();
+            }
+            task = null;
+            timer.purge();
         }
     }
     
@@ -392,11 +399,11 @@ aspect ExternalConstantEvaluationCaching {
             ExternalFunction ef = cachedExternals.get(ext.getName());
             if (ef == null) {
                 if (mc == null) {
-                    return FailedExternalFunction;
+                    return FAILED_EXTERNAL_FUNCTION;
                 }
                 String executable = mc.compileExternal(ext);
                 if (executable == null) {
-                    ef = FailedExternalFunction;
+                    ef = FAILED_EXTERNAL_FUNCTION;
                 } else {
                     ef = new CompiledExternalFunction(ext, executable);
                 }
@@ -412,7 +419,7 @@ aspect ExternalConstantEvaluationCaching {
             for (ExternalFunction ef : cachedExternals.values()) {
                 ef.remove();
             }
-            cachedExternals = new HashMap<String,ExternalFunction>();
+            cachedExternals = new HashMap<String, ExternalFunction>();
         }
         
         /**
@@ -428,28 +435,65 @@ aspect ExternalConstantEvaluationCaching {
         }
         
         public static abstract class ExternalFunction {
-            public abstract ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout);
+            public abstract ProcessCommunicator getProcessCommunicator(FExternalStmt ext);
+            public abstract void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract void destroyProcess();
             public abstract void remove();
         }
         
-        public static final ExternalFunction FailedExternalFunction = new ExternalFunction() {
+        public static final ExternalFunction FAILED_EXTERNAL_FUNCTION = new FailedExternalFunction();
+        
+        private static class FailedExternalFunction extends ExternalFunction {
+            private ConstantEvaluationException ex;
+            
+            private void makeCEE() {
+                if (ex == null) {
+                    ex = new ConstantEvaluationException(null, 
+                        "Failed to evaluate external function call, could not start process");
+                }
+            }
             
             @Override
-            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout) {
-                throw new ConstantEvaluationException(null, 
-                        "Failed to evaluate external function call, could not start process");
+            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext) {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void destroyProcess() {
+                // Do nothing.
             }
             
             @Override
             public void remove() {
-                
+                // Do nothing.
             }
-            
-        };
+        }
         
         private class CompiledExternalFunction extends ExternalFunction {
             protected String executable;
             protected ProcessBuilder processBuilder;
+            protected ProcessCommunicator com;
             
             public CompiledExternalFunction(FExternalStmt ext, String executable) {
                 this.executable = executable;
@@ -457,13 +501,60 @@ aspect ExternalConstantEvaluationCaching {
             }
             
             @Override
-            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext, int timeout) {
-                try {
-                    return new ProcessCommunicator(processBuilder.start(), timeout);
-                } catch (IOException e) {
-                    ModelicaCompiler.log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext) {
+                if (com == null) {
+                    try {
+                        com =  new ProcessCommunicator(processBuilder.start());
+                    } catch (IOException e) {
+                        ModelicaCompiler.log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+                        // Throw exc
+                    }
                 }
-                return null;
+                
+                return com;
+            }
+            
+            @Override
+            public void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
+                com.startTimer(timeout);
+                com.accept("START");
+                for (CommonVariableDecl eo : ext.externalObjectsToSerialize()) {
+                    com.put(values.get(eo), eo.type(), eo.canBeUnknown());
+                }
+                com.cancelTimer();
+            }
+            
+            @Override
+            public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
+                com.startTimer(timeout);
+                for (CommonVariableDecl arg : ext.functionArgsToSerialize()) {
+                    com.put(values.get(arg), arg.type(), arg.canBeUnknown());
+                }
+                com.accept("CALC");
+                com.accept("DONE");
+                for (CommonVariableDecl cvd : ext.varsToDeserialize())
+                    values.put(cvd, com.get(cvd.type()));
+                com.cancelTimer();
+            }
+            
+            @Override
+            public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
+                com.startTimer(timeout);
+                com.accept("END");
+                int result = com.end();
+                com.cancelTimer();
+                return result;
+            }
+            
+            @Override
+            public void destroyProcess() {
+                if (com != null) {
+                    com.destroy();
+                    com = null;
+                }
             }
             
             @Override
