@@ -76,3 +76,58 @@ double use3(void* o3) {
     Obj3_t* o = (Obj3_t*) o3;
     return use1((void*)o->o1) + use2((void*)o->o2[0]) + use2((void*)o->o2[1]);
 }
+
+
+typedef struct inc_int {
+    int x;
+} inc_int_t;
+void* inc_int_con(int x) {
+    inc_int_t* res;
+    ModelicaMessage("Constructor message");
+    res = malloc(sizeof(inc_int_t)); res->x = x;
+    return res;
+}
+void inc_int_decon(void* o1) {
+    free(o1);
+}
+int inc_int_use(void* o1) {
+    inc_int_t* eo = (inc_int_t*) o1;
+    eo->x += 1;
+    return eo->x;
+}
+
+void* crash_con(int x) {
+    inc_int_t* res;
+    exit(1);
+    res = malloc(sizeof(inc_int_t)); res->x = x;
+    return res;
+}
+void crash_decon(void* o1) {
+    exit(1);
+    free(o1);
+}
+int crash_use(void* o1) {
+    inc_int_t* eo = (inc_int_t*) o1;
+    eo->x += 1;
+    exit(1);
+    return eo->x;
+}
+
+void* error_con(int x) {
+    inc_int_t* res;
+    ModelicaError("Constructor error message");
+    res = malloc(sizeof(inc_int_t)); res->x = x;
+    return res;
+}
+void error_decon(void* o1) {
+    ModelicaError("Deconstructor error message");
+    free(o1);
+}
+int error_use(void* o1) {
+    inc_int_t* eo = (inc_int_t*) o1;
+    ModelicaError("Use error message");
+    eo->x += 1;
+    return eo->x;
+}
+
+

@@ -595,6 +595,182 @@ package CEval
       (y, ) = f(3, time);
     end UnknownInput;
   end Advanced;
+  
+  package Caching
+    model CacheExtObj
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+        Real[n3] x = (1:n3)*time;
+        Integer nn1,nn2,nn3;
+      equation
+        nn1 = use(o1);
+        nn2 = use(o1);
+        nn3 = nn1 + nn2;
+    end CacheExtObj;
+    
+    model ConError
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = error_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end ConError;
+    
+    model DeconError
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" error_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end DeconError;
+    
+    model UseError
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = error_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end UseError;
+    
+    model ConCrash
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = crash_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end ConCrash;
+    
+    model DeconCrash
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" crash_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end DeconCrash;
+    
+    model UseCrash
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use
+            input  EO o1;
+            output Integer x;
+            external x = crash_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use;
+        parameter EO o1 = EO(1) annotation(Evaluate=true);
+        parameter Integer n1 = use(o1);
+        parameter Integer n2 = use(o1);
+        parameter Integer n3 = n1 + n2;
+    end UseCrash;
+  end Caching;
 end CEval;
 
 end ExtFunctionTests;
