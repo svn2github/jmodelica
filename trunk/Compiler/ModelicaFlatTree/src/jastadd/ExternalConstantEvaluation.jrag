@@ -233,9 +233,15 @@ aspect ExternalConstantEvaluation {
         private void abort() throws IOException, ConstantEvaluationException {
             String line = getLine();
             if (line.equals("ABORT")) {
-                throw new ConstantEvaluationException(null, "Evaluation aborted by request of external function");
+                throw new AbortConstantEvaluationException("Evaluation aborted by request of external function");
             }
             buffLine(line);
+        }
+        
+        class AbortConstantEvaluationException extends ConstantEvaluationException {
+            public AbortConstantEvaluationException(String string) {
+                super(null, string);
+            }
         }
         
         /**
@@ -472,7 +478,7 @@ aspect ExternalConstantEvaluationCaching {
          * Kill cached processes
          */
         public void destroyProcesses() {
-            for (ExternalFunction ef : livingCachedExternals) {
+            for (ExternalFunction ef : new ArrayList<ExternalFunction>(livingCachedExternals)) {
                 ef.destroyProcess();
             }
         }
@@ -676,11 +682,16 @@ aspect ExternalConstantEvaluationCaching {
                     try {
                         ready(ext, values, timeout);
                         MappedExternalFunction.this.evaluate(ext, values, timeout, com);
-                        return 0;
-                    } finally {
-                        // TODO: only destroy from exceptions (except abort)
+                    } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
+                        
+                    } catch (ConstantEvaluationException e) {
                         destroyProcess();
+                        throw e;
+                    } catch (IOException e) {
+                        destroyProcess();
+                        throw e;
                     }
+                    return 0;
                 }
                 
                 protected void ready(FExternalStmt ext, Map<CommonVariableDecl, 
@@ -688,6 +699,7 @@ aspect ExternalConstantEvaluationCaching {
                     if (com == null) {
                         com = createProcessCommunicator(ext);
                         MappedExternalFunction.this.setup(ext, values, timeout, com);
+                        ModelicaCompiler.log.debug("Setup live external function: " + ext.getName());
                     }
                     livingCachedExternals.remove(this);
                     livingCachedExternals.add(this);

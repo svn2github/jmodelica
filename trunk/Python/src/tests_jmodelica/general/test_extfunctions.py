@@ -577,7 +577,7 @@ class TestCevalCaching:
     def setUpClass(self):
         self.fpath = path(path_to_mofiles, "ExtFunctionTests.mo")
     
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testCaching1(self):
         '''
         Test caching of external objects during constant evaluation
@@ -588,7 +588,7 @@ class TestCevalCaching:
         res = model.simulate()
         nose.tools.assert_equals(res.final('n3'), 5)
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testConError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in constructor.
@@ -596,7 +596,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.ConError"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testDeconError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in deconstructor.
@@ -604,7 +604,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.DeconError"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testUseError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in use.
@@ -613,7 +613,7 @@ class TestCevalCaching:
         fmu_name = compile_fmu(cpath, self.fpath)
         
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testConCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in constructor.
@@ -621,7 +621,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.ConCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testDeconCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in deconstructor.
@@ -629,7 +629,7 @@ class TestCevalCaching:
         cpath = "ExtFunctionTests.CEval.Caching.DeconCrash"
         fmu_name = compile_fmu(cpath, self.fpath)
         
-    @testattr(caching = True)
+    @testattr(stddist = True)
     def testUseCrash(self):
         '''
         Test caching of external objects during constant evaluation, Crash in use.
