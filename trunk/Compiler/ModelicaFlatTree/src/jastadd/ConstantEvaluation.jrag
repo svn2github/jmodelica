@@ -2684,6 +2684,12 @@ aspect ConstantEvaluation {
         return val;
     }
     
+    eq InstExternalObject.ceval(VariableEvaluator evaluator, Index i) {
+        CValue val = super.ceval(evaluator, i);
+        val.markExternalObject(qualifiedName());
+        return val;
+    }
+    
     syn CValue InstAssignable.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         CValue val = startAttributeCValue(evaluator);
         if (i != Index.NULL) 
@@ -2938,7 +2944,14 @@ aspect ConstantEvaluation {
         }
 		return val;
 	}
-
+    
+    eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
+        CValue val = super.ceval(evaluator, inParameterRecord);
+        val.markExternalObject(name());
+        return val;
+    }
+    
+	
 	/**
 	 * Constant evaluation of FVariable binding expressions.
 	 * 
@@ -2974,6 +2987,12 @@ aspect ConstantEvaluation {
 			return val;
 		}
 	}
+    
+    eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, Index i) {
+        CValue val = super.ceval(evaluator, i);
+        val.markExternalObject(name());
+        return val;
+    }
 
   /**
    * Constant evaluation of binding equation for dependent parameter.
