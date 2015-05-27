@@ -168,6 +168,11 @@ SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 SUNDIALS_LIB_DIR64 = $(SUNDIALS_HOME)/lib64
 
 # Flags needed for specific libs
+ifdef IPOPT_HOME
+LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
+else
+LIB_FLAGS_IPOPT = 
+endif
 LIB_FLAGS_IPOPT := $(shell set "PKG_CONFIG_PATH=$(IPOPT_HOME)/lib/pkgconfig" && pkg-config --libs ipopt)
 LIB_MINPACK  = "-L$(MINPACK_LIB_DIR)" -l:libcminpack.a
 LIB_SUNDIALS = "-L$(SUNDIALS_LIB_DIR)" -l:libsundials_kinsol.a -l:libsundials_nvecserial.a -l:libsundials_cvode.a
