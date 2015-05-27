@@ -208,6 +208,12 @@ aspect ExternalConstantEvaluation {
             }
         }
         
+        public void check(String s) throws IOException {
+            out.write(s);
+            out.write("\n");
+            out.flush();
+        }
+        
         private void log() throws IOException {
             String line = getLine();
             while (line.equals("LOG")) {
@@ -543,12 +549,14 @@ aspect ExternalConstantEvaluationCaching {
                 for (CommonVariableDecl eo : ext.externalObjectsToSerialize()) {
                     com.put(values.get(eo), eo.type(), eo.canBeUnknown());
                 }
+                com.accept("READY");
                 com.cancelTimer();
             }
             
             public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout,
                     ProcessCommunicator com) throws IOException {
                 com.startTimer(timeout);
+                com.check("EVAL");
                 for (CommonVariableDecl arg : ext.functionArgsToSerialize()) {
                     com.put(values.get(arg), arg.type(), arg.canBeUnknown());
                 }
@@ -556,12 +564,14 @@ aspect ExternalConstantEvaluationCaching {
                 com.accept("DONE");
                 for (CommonVariableDecl cvd : ext.varsToDeserialize())
                     values.put(cvd, com.get(cvd.type()));
+                com.accept("READY");
                 com.cancelTimer();
             }
             
             public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout,
                     ProcessCommunicator com) throws IOException {
                 com.startTimer(timeout);
+                com.check("EXIT");
                 com.accept("END");
                 int result = com.end();
                 com.cancelTimer();
