@@ -5849,7 +5849,17 @@ class OptimizationSolver(object):
         return self.collocator.get_result_object()
 
     def set_warm_start(self, warm_start):
-        """Set whether warm start is enabled for the optimization"""
+        """
+        Set whether warm start is enabled for the optimization
+
+        When warm start is enabled, the last solutions for the primal and
+        dual variables will be used as the starting point for the next
+        optimization.
+
+        If set_init_traj has been called on self since the last call to
+        optimize, the supplied initial trajectory will be used for the
+        primal variables instead.
+        """
         self.collocator.warm_start = warm_start
 
     def get_nlp_variables(self, point = 'opt'):

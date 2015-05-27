@@ -951,7 +951,11 @@ Returns::
 
         <programlisting>solver.set_warm_start(True)</programlisting>
 
-        <para>before calling <literal>solver.optimize()</literal>.</para>
+        <para>before calling <literal>solver.optimize()</literal>. This will
+        reuse the last solution for the primal variables (unless
+        <literal>solver.set_init_traj</literal> was called since the last
+        <literal>solver.optimize</literal>) as well as the last solution for
+        the dual variables.</para>
 
         <para>When using the IPOPT solver with warm starting, several solver
         options typically also need to be set to see the benefits, e g:</para>
