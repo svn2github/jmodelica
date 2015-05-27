@@ -626,10 +626,13 @@ aspect ExternalConstantEvaluationCaching {
         
         private class MappedExternalFunction extends CompiledExternalFunction {
             
-            Map<String, ExternalFunction> lives = new HashMap<String, ExternalFunction>();
+            private Map<String, ExternalFunction> lives = new HashMap<String, ExternalFunction>();
+            
+            private final int externalConstantEvaluationMaxProc;
             
             public MappedExternalFunction(FExternalStmt ext, String executable) {
                 super(ext, executable);
+                externalConstantEvaluationMaxProc = ext.myOptions().getIntegerOption("external_constant_evaluation_max_proc");
             }
             
             private ExternalFunction getActual(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) {
@@ -703,7 +706,7 @@ aspect ExternalConstantEvaluationCaching {
                     }
                     livingCachedExternals.remove(this);
                     livingCachedExternals.add(this);
-                    if (livingCachedExternals.size() > 10) {
+                    if (livingCachedExternals.size() > externalConstantEvaluationMaxProc) {
                         livingCachedExternals.iterator().next().destroyProcess();
                     }
                 }
