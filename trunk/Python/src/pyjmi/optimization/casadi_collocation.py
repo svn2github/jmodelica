@@ -2689,7 +2689,7 @@ class LocalDAECollocator(CasadiCollocator):
 
     def set_external_variable_data(self, name, data):
         """
-        Set new data for one variable that was supplied the external_data option
+        Set new data for one variable that was supplied using the external_data option.
 
         The option mutable_external_data must be enabled to use this method.
         """
@@ -5776,7 +5776,7 @@ class OptimizationSolver(object):
 
     def set_external_variable_data(self, name, data):
         """
-        Set new data for one variable that was supplied the external_data option
+        Set new data for one variable that was supplied using the external_data option
 
         Parameters::
 
@@ -6157,7 +6157,7 @@ class OptimizationSolver(object):
 
             tik:
                 If True, return (duals, time, i, k),
-                otherwise return just residuals. (Use get_constraint_points
+                otherwise return just duals. (Use get_constraint_points
                 to get (time, i, k)).
 
         Returns::
