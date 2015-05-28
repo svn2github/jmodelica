@@ -95,6 +95,9 @@ int inc_int_use(void* o1) {
     eo->x += 1;
     return eo->x;
 }
+int inc_int_use2(void* o1) {
+    return inc_int_use(o1);
+}
 
 void* crash_con(int x) {
     inc_int_t* res;

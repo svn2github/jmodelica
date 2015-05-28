@@ -40,6 +40,7 @@ typedef struct inc_int {
 void* inc_int_con(int x);
 void inc_int_decon(void* o1);
 int inc_int_use(void* o1);
+int inc_int_use2(void* o1);
 
 void* crash_con(int x);
 void crash_decon(void* o1);

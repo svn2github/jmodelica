@@ -589,6 +589,17 @@ class TestCevalCaching:
         nose.tools.assert_equals(res.final('n3'), 5)
         
     @testattr(stddist = True)
+    def testCaching2(self):
+        '''
+        Test caching process limit of external objects during constant evaluation
+        '''
+        cpath = "ExtFunctionTests.CEval.Caching.CacheExtObjLimit"
+        fmu_name = compile_fmu(cpath, self.fpath, compiler_options={'external_constant_evaluation_max_proc':2})
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('n3'), 20)
+        
+    @testattr(stddist = True)
     def testConError(self):
         '''
         Test caching of external objects during constant evaluation, ModelicaError in constructor.

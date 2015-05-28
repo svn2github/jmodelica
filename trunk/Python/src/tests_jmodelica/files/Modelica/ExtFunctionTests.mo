@@ -627,6 +627,37 @@ package CEval
         nn3 = nn1 + nn2;
     end CacheExtObj;
     
+    model CacheExtObjLimit
+        model EO
+            extends ExternalObject;
+            function constructor
+                input Integer x;
+                output EO o1;
+                external "C" o1 = inc_int_con(x) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end constructor;
+            function destructor
+                input EO o1;
+                external "C" inc_int_decon(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+            end destructor;
+        end EO;
+        function use1
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use1;
+        function use2
+            input  EO o1;
+            output Integer x;
+            external x = inc_int_use2(o1) annotation(Library="extObjects", Include="#include \"extObjects.h\"");
+        end use2;
+        parameter EO o1 = EO(1);
+        parameter EO o2 = EO(1);
+        parameter Integer n1 = use1(o1) + use2(o1) + use1(o2) + use2(o1);
+        parameter Integer n2 = use2(o2) + use2(o1) + use2(o2) + use1(o1);
+        parameter Integer n3 = n1 + n2;
+        Real[n3] x = (1:n3)*time;
+    end CacheExtObjLimit;
+    
     model ConError
         model EO
             extends ExternalObject;
