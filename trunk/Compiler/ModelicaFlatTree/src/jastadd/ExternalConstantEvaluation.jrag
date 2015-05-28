@@ -269,18 +269,24 @@ aspect ExternalConstantEvaluation {
          * Tear down everything
          */
         public void destroy() {
+            /* Kill timer */
             timer.cancel();
             timer.purge();
             timer = null;
+            
+            /* Close streams */
             try {
                 in.close();
             } catch (IOException e) {
             }
+            in = null;
             try {
                 out.close();
             } catch (IOException e) {
             }
+            out = null;
             
+            /* Destroy process */
             process.destroy();
             process = null;
         }
@@ -476,27 +482,28 @@ aspect ExternalConstantEvaluationCaching {
             for (ExternalFunction ef : cachedExternals.values()) {
                 ef.remove();
             }
-            cachedExternals = new HashMap<String, ExternalFunction>();
+            cachedExternals.clear();
         }
         
         /**
          * Kill cached processes
          */
-        public void destroyProcesses() {
+        public void destroyProcesses(OptionRegistry options) {
+            int timeout = options.getIntegerOption("external_constant_evaluation");
             for (ExternalFunction ef : new ArrayList<ExternalFunction>(livingCachedExternals)) {
-                ef.destroyProcess();
+                ef.destroyProcess(timeout);
             }
         }
         
-        public void tearDown() {
-            destroyProcesses();
+        public void tearDown(OptionRegistry options) {
+            destroyProcesses(options);
             removeExternalFunctions();
         }
         
         public static abstract class ExternalFunction {
             public abstract int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout)
                     throws IOException;
-            public abstract void destroyProcess();
+            public abstract void destroyProcess(int timeout);
             public abstract void remove();
         }
         
@@ -513,7 +520,7 @@ aspect ExternalConstantEvaluationCaching {
             }
             
             @Override
-            public void destroyProcess() {
+            public void destroyProcess(int timeout) {
                 // Do nothing.
             }
             
@@ -545,7 +552,7 @@ aspect ExternalConstantEvaluationCaching {
                     com = createProcessCommunicator(ext);
                     setup(ext, values, timeout, com);
                     evaluate(ext, values, timeout, com);
-                    return teardown(ext, values, timeout, com);
+                    return teardown(timeout, com);
                 } finally {
                     if (com != null) {
                         com.destroy();
@@ -579,24 +586,23 @@ aspect ExternalConstantEvaluationCaching {
                 com.cancelTimer();
             }
             
-            public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout,
-                    ProcessCommunicator com) throws IOException {
+            public int teardown(int timeout, ProcessCommunicator com) throws IOException {
                 com.startTimer(timeout);
                 com.check("EXIT");
                 com.accept("END");
                 int result = com.end();
                 com.cancelTimer();
+//                ModelicaCompiler.log.debug("SUCCESS TEARDOWN");
                 return result;
             }
             
             @Override
-            public void destroyProcess() {
+            public void destroyProcess(int timeout) {
                 
             }
             
             @Override
             public void remove() {
-                destroyProcess();
                 new File(executable).delete();
             }
             
@@ -650,8 +656,10 @@ aspect ExternalConstantEvaluationCaching {
                         lef.ready(ext, values, timeout);
                         ef = lef;
                     } catch (IOException e) {
+                        lef.destroyProcess(timeout);
                         ef = FAILED_EXTERNAL_FUNCTION;
                     } catch (ConstantEvaluationException e) {
+                        lef.destroyProcess(timeout);
                         ef = FAILED_EXTERNAL_FUNCTION;
                     }
                     lives.put(name, ef);
@@ -666,9 +674,9 @@ aspect ExternalConstantEvaluationCaching {
             }
             
             @Override
-            public void destroyProcess() {
+            public void destroyProcess(int timeout) {
                 for (ExternalFunction ef : lives.values()) {
-                    ef.destroyProcess();
+                    ef.destroyProcess(timeout);
                 }
                 lives.clear();
             }
@@ -693,10 +701,10 @@ aspect ExternalConstantEvaluationCaching {
                     } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
                         
                     } catch (ConstantEvaluationException e) {
-                        destroyProcess();
+                        destroyProcess(timeout);
                         throw e;
                     } catch (IOException e) {
-                        destroyProcess();
+                        destroyProcess(timeout);
                         throw e;
                     }
                     return 0;
@@ -712,14 +720,22 @@ aspect ExternalConstantEvaluationCaching {
                     livingCachedExternals.remove(this);
                     livingCachedExternals.add(this);
                     if (livingCachedExternals.size() > externalConstantEvaluationMaxProc) {
-                        livingCachedExternals.iterator().next().destroyProcess();
+                        livingCachedExternals.iterator().next().destroyProcess(timeout);
                     }
                 }
                 
                 @Override
-                public void destroyProcess() {
+                public void destroyProcess(int timeout) {
                     if (com != null) {
                         livingCachedExternals.remove(this);
+//                        ModelicaCompiler.log.debug("Destroy live external function: " + executable + " : " + name);
+                        try {
+                            teardown(timeout, com);
+                        } catch (IOException e) {
+//                            ModelicaCompiler.log.debug("FAIL Destroy live external function: "  + executable + " : " + name);
+                        } catch (ConstantEvaluationException e) {
+//                            ModelicaCompiler.log.debug("SUCCESS Destroy live external function: " + executable + " : " + name);
+                        }
                         com.destroy();
                         com = null;
                     }

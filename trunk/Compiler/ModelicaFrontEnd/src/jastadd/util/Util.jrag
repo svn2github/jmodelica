@@ -1914,7 +1914,7 @@ aspect UtilInterface {
     public void UtilInterface.transferRoot(Root root) {
         ExternalFunctionCache efc = getExternalFunctionCache();
         if (efc != null) {
-            efc.destroyProcesses();
+            efc.destroyProcesses(getOptionRegistry());
         }
         root.setUtilInterface(UtilInterface.create(this));
     }

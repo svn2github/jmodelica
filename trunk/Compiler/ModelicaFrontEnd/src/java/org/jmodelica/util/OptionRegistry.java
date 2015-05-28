@@ -233,7 +233,7 @@ abstract public class OptionRegistry {
         EXT_CEVAL_MAX_PROC
             ("external_constant_evaluation_max_proc",
               compiler,
-              0,
+              10,
               "The maximum number of processes kept alive for evaluation of external functions during compilation."),
         HALT_WARN
             ("halt_on_warning", 
