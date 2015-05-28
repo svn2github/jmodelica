@@ -130,12 +130,23 @@ aspect Serialize {
         }
     }
     
-    private Map<String,String> FExternalStmt.tempMap = null; // Workaround for unittests
     public void FExternalStmt.genSerializeDecl_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        this.tempMap = tempMap;
-        this.codeGenContext = cgc;
+        
+    }
+    
+    public void FExternalStmt.genSerializeInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
+        genCheckPoint(str, indent, "START");
+        /* Generate code to receive cached function arguments */
+    }
+    
+    public void FExternalStmt.genSerializeCalcInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
+        /* Generate code to receive non-cached function arguments */
+    }
+    
+    public void FExternalStmt.genSerializeCalc_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
         ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         indent = ASTNode.printer_C.indent(indent);
+        str.println(indent + "/* Declarations */");
         TypePrinter_C dp = new DeclPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl cvd : vars) {
              dp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
@@ -143,65 +154,50 @@ aspect Serialize {
         }
         genVarDecls_C(ASTNode.printer_C, str, indent);
         str.println();
-    }
-    
-    public void FExternalStmt.genSerializeInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
-        indent = ASTNode.printer_C.indent(indent);
+        
+        str.println(indent + "/* Parse */");
+        //str.println(indent + "/* Parse external objects. */");
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl eo : externalObjectsToSerialize()) {
              ip.reset(eo.name_C(), null, eo.size().isUnknown(), false, indent);
              eo.type().print(ip);
         }
-        str.println();
-    }
-    
-    public void FExternalStmt.genSerializeCalcInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
-        indent = ASTNode.printer_C.indent(indent);
-        TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
+        //str.println();
+        //str.println(indent + "/* Parse other function arguments. */");
+        //TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, codeGenContext);
         for (CommonVariableDecl arg : functionArgsToSerialize()) {
              ip.reset(arg.name_C(), null, arg.size().isUnknown(), false, indent);
              arg.type().print(ip);
         }
         str.println();
-    }
-    
-    public void FExternalStmt.genSerializeCalc_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
-        indent = ASTNode.printer_C.indent(indent);
+        
+        str.println(indent + "/* Call the function */");
+        genCheckPoint(str, indent, "CALC");
         prettyPrint_C(ASTNode.printer_C, str, indent);
         genCheckPoint(str, indent, "DONE");
+        str.println();
+        
+        str.println(indent + "/* Print */");
         for (CommonVariableDecl cvd : varsToDeserialize())
             cvd.type().genSerialize_C(str, indent, cvd.name_C(), false);
+        str.println();
+        
+        str.println(indent + "/* Free strings */");
+        TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
+        for (CommonVariableDecl cvd : vars) {
+             fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             cvd.type().print(fp);
+        }
         str.println();
     }
     
     public void FExternalStmt.genSerializeCalcFree_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
-        indent = ASTNode.printer_C.indent(indent);
-        TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
-        for (CommonVariableDecl cvd : functionArgsToSerialize()) {
-             fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-             cvd.type().print(fp);
-        }
+        /* Generate code to free memory allocated by genSerializeCalcInit_C */
     }
     
     public void FExternalStmt.genSerializeEnd_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
-        indent = ASTNode.printer_C.indent(indent);
-        TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
-        for (CommonVariableDecl cvd : externalObjectsToSerialize()) {
-             fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-             cvd.type().print(fp);
-        }
-        this.tempMap = null;
-        this.codeGenContext = null;
+        /* Generate code to free memory allocated by genSerializeInit_C */
+        genCheckPoint(str, indent, "END");
     }
     
     public void FExternalStmt.genCheckPoint(CodeStream str, String indent, String token) {

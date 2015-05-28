@@ -230,11 +230,6 @@ abstract public class OptionRegistry {
              5000,
              "Time limit (ms) when evaluating constant calls to external functions during compilation. "
              + "0 indicates no evaluation. -1 indicates no time limit. Default is 5000."),
-        EXT_CEVAL_MAX_PROC
-            ("external_constant_evaluation_max_proc",
-              compiler,
-              10,
-              "The maximum number of processes kept alive for evaluation of external functions during compilation."),
         HALT_WARN
             ("halt_on_warning", 
              compiler, 

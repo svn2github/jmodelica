@@ -119,18 +119,14 @@ void JMCEVAL_setup() {
 #endif
 }
 
-int JMCEVAL_cont(const char* word) {
-    char l[10];
-    char* s = fgets(l, 10, stdin);
-    if (strlen(s) == 1) {
-        s = fgets(l, 10, stdin); /* Extra call to fix stray newline */
+int JMCEVAL_cont() {
+    /*
+    char* l = NULL;
+    size_t n = getline(char **lineptr, size_t *n, FILE *stream);
+    if (n == 5) {
+        return strncmp(l, "EVAL\n", 5) == 0;
     }
-    if (s == NULL) {
-        exit(2);
-    }
-    if (strlen(s) == strlen(word)) {
-        return strncmp(l, word, strlen(word)) == 0;
-    }
+    */
     return 0;
 }
 
@@ -155,41 +151,38 @@ int main(int argc, const char* argv[])
     
     $ECE_decl$
 
-
-    JMCEVAL_check("START");
-    JMI_DYNAMIC_INIT()
-    JMCEVAL_setup();
+    /* Init phase */
     if (JMCEVAL_try()) {
-        /* Init phase */
+        JMI_DYNAMIC_INIT()
+        JMCEVAL_setup();
         $ECE_init$
+        JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
     }
     
-    JMCEVAL_check("READY");
-    while (JMCEVAL_cont("EVAL\n")) {
-        JMI_DYNAMIC_INIT()
+    /*while (JMCEVAL_cont()) {*/
         $ECE_calc_init$
-        JMCEVAL_check("CALC");
+        /* Calc phase */
         if (JMCEVAL_try()) {
-            /* Calc phase */
+            JMI_DYNAMIC_INIT()
             $ECE_calc$
+            JMI_DYNAMIC_FREE()
         } else {
             JMCEVAL_failed();
         }
         $ECE_calc_free$
-        JMI_DYNAMIC_FREE()
-        JMCEVAL_check("READY");
-    }
+    /*}*/
 
+    /* End phase */
     if (JMCEVAL_try()) {
-        /* End phase */
+        JMI_DYNAMIC_INIT()
         $ECE_end$
+        JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
     }
-    JMI_DYNAMIC_FREE()
-    JMCEVAL_check("END");
+
     return 0;
 }
 

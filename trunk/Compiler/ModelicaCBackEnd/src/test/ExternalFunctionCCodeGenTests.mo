@@ -54,12 +54,13 @@ $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
 $ECE_init$
-$ECE_calc_init$
 $ECE_calc$
-$ECE_calc_free$
 $ECE_end$
 ",
             generatedCode="
+    JMCEVAL_check(\"START\");
+
+    /* Declarations */
     JMI_DEF(REA, a1_v)
     JMI_DEF(INT, a2_v)
     JMI_DEF(BOO, a3_v)
@@ -77,6 +78,7 @@ $ECE_end$
     JMI_DEF(BOO_EXT, tmp_5)
     JMI_DEF(ENU_EXT, tmp_6)
 
+    /* Parse */
     JMCEVAL_parse(Real, a1_v);
     JMCEVAL_parse(Integer, a2_v);
     JMCEVAL_parse(Boolean, a3_v);
@@ -88,6 +90,8 @@ $ECE_end$
     JMCEVAL_parse(String, b4_v);
     JMCEVAL_parse(Enum, b5_v);
 
+    /* Call the function */
+    JMCEVAL_check(\"CALC\");
     tmp_1 = (int)a2_v;
     tmp_2 = (int)a3_v;
     tmp_3 = (int)a5_v;
@@ -99,14 +103,19 @@ $ECE_end$
     b3_v = tmp_5;
     b5_v = tmp_6;
     JMCEVAL_check(\"DONE\");
+
+    /* Print */
     JMCEVAL_print(Real, b1_v);
     JMCEVAL_print(Integer, b2_v);
     JMCEVAL_print(Boolean, b3_v);
     JMCEVAL_print(String, b4_v);
     JMCEVAL_print(Enum, b5_v);
 
+    /* Free strings */
     JMCEVAL_free(a4_v);
     JMCEVAL_free(b4_v);
+
+    JMCEVAL_check(\"END\");
 ")})));
 end Scalar;
 
@@ -144,12 +153,13 @@ $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
 $ECE_init$
-$ECE_calc_init$
 $ECE_calc$
-$ECE_calc_free$
 $ECE_end$
 ",
             generatedCode="
+    JMCEVAL_check(\"START\");
+
+    /* Declarations */
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, a1_a, -1, 1)
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, a2_a, -1, 1)
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, a3_a, -1, 1)
@@ -167,6 +177,7 @@ $ECE_end$
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_5, -1, 1)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_6, -1, 1)
 
+    /* Parse */
     JMCEVAL_parseArrayDims(1);
     JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, a1_a, d[0], 1, d[0])
     JMCEVAL_parseArray(Real, a1_a);
@@ -198,6 +209,8 @@ $ECE_end$
     JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, b5_a, d[0], 1, d[0])
     JMCEVAL_parseArray(Enum, b5_a);
 
+    /* Call the function */
+    JMCEVAL_check(\"CALC\");
     JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a2_a, 0), 1, jmi_array_size(a2_a, 0))
     jmi_copy_matrix_to_int(a2_a, a2_a->var, tmp_1->var);
     JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, jmi_array_size(a3_a, 0), 1, jmi_array_size(a3_a, 0))
@@ -215,14 +228,19 @@ $ECE_end$
     jmi_copy_matrix_from_int(b3_a, tmp_5->var, b3_a->var);
     jmi_copy_matrix_from_int(b5_a, tmp_6->var, b5_a->var);
     JMCEVAL_check(\"DONE\");
+
+    /* Print */
     JMCEVAL_printArray(Real, b1_a);
     JMCEVAL_printArray(Integer, b2_a);
     JMCEVAL_printArray(Boolean, b3_a);
     JMCEVAL_printArray(String, b4_a);
     JMCEVAL_printArray(Enum, b5_a);
 
+    /* Free strings */
     JMCEVAL_freeArray(a4_a);
     JMCEVAL_freeArray(b4_a);
+
+    JMCEVAL_check(\"END\");
 ")})));
 end Array;
 
@@ -300,14 +318,14 @@ $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
 $ECE_init$
-$ECE_calc_init$
 $ECE_calc$
-$ECE_calc_free$
 $ECE_end$
 ",
             generatedCode="
 #include \"extObjects.h\"
+JMCEVAL_check(\"START\");
 
+    /* Declarations */
     JMI_DEF(REA, x_v)
     JMI_DEF(EXO, o3_v)
     JMI_DEF(EXO, tmp_1_arg0)
@@ -327,6 +345,7 @@ $ECE_end$
     JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_8_arg2, -1, 1)
     JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_8_arg3, -1, 1)
 
+    /* Parse */
     JMCEVAL_parse(Real, tmp_4_arg0);
     JMCEVAL_parse(Integer, tmp_4_arg1);
     JMCEVAL_parse(Boolean, tmp_4_arg2);
@@ -359,10 +378,15 @@ $ECE_end$
     my_constructor3(tmp_1_arg0, tmp_1_arg1->var, &o3_v);
     JMCEVAL_parse(Real, x_v);
 
+    /* Call the function */
+    JMCEVAL_check(\"CALC\");
     x_v = use3(o3_v);
     JMCEVAL_check(\"DONE\");
+
+    /* Print */
     JMCEVAL_print(Real, x_v);
 
+    /* Free strings */
     JMCEVAL_free(tmp_4_arg3);
     destructor(tmp_1_arg0);
     tmp_5_max = d[0] + 1;
@@ -371,6 +395,8 @@ $ECE_end$
         destructor(jmi_array_ref_1(tmp_1_arg1, tmp_5));
     }
     destructor(o3_v);
+
+    JMCEVAL_check(\"END\");
 ")})));
 end ExtObj;
 
@@ -430,12 +456,13 @@ $ECE_external_includes$
 $ECE_record_definitions$
 $ECE_decl$
 $ECE_init$
-$ECE_calc_init$
 $ECE_calc$
-$ECE_calc_free$
 $ECE_end$
 ",
             generatedCode="
+JMCEVAL_check(\"START\");
+
+    /* Declarations */
     JMI_DEF(INT, nrow_v)
     JMI_DEF(INT, ncol_v)
     JMI_DEF(INT, nrhs_v)
@@ -461,6 +488,7 @@ $ECE_end$
     JMI_DEF(INT_EXT, tmp_11)
     extern void dgelsx_(int*, int*, int*, double*, int*, double*, int*, int*, double*, int*, double*, int*, int*);
 
+    /* Parse */
     JMCEVAL_parse(Integer, nrow_v);
     JMCEVAL_parse(Integer, ncol_v);
     JMCEVAL_parse(Integer, nrhs_v);
@@ -482,6 +510,8 @@ $ECE_end$
     JMCEVAL_parse(Integer, lwork_v);
     JMCEVAL_parse(Integer, info_v);
 
+    /* Call the function */
+    JMCEVAL_check(\"CALC\");
     tmp_1 = (int)nrow_v;
     tmp_2 = (int)ncol_v;
     tmp_3 = (int)nrhs_v;
@@ -501,9 +531,15 @@ $ECE_end$
     rank_v = tmp_9;
     info_v = tmp_11;
     JMCEVAL_check(\"DONE\");
+
+    /* Print */
     JMCEVAL_printArray(Real, X_a);
     JMCEVAL_print(Integer, rank_v);
     JMCEVAL_print(Integer, info_v);
+
+    /* Free strings */
+
+    JMCEVAL_check(\"END\");
 ")})));
 end Dgelsx;
 end CEval;

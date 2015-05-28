@@ -41,49 +41,6 @@ aspect ExternalConstantEvaluation {
         return true;
     }
     
-    syn boolean FExternalStmt.shouldCacheExternalObject() {
-        return cachedExternalObject() != null && 
-            myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;
-    }
-    
-    syn CommonVariableDecl FExternalStmt.cachedExternalObject() {
-        CommonVariableDecl eo = null;
-        for (CommonVariableDecl cvd : varsToSerialize()) {
-            if (cvd.type().isExternalObject() && cvd.type().isScalar()) {
-                if (eo != null) {
-                    return null;
-                } else {
-                    eo = cvd;
-                }
-            }
-        }
-        return eo;
-    }
-    
-    
-    public void CValue.markExternalObject(String name) {
-        
-    }
-    
-    private String CValueExternalObject.marked = null;
-    public void CValueExternalObject.markExternalObject(String name) {
-        if (marked == null) {
-            marked = name;
-        }
-    }
-    
-    public String CValue.getMarkedExternalObject() {
-        throw new ConstantEvaluationException();
-    }
-    
-    public String CValueExternalObject.getMarkedExternalObject() {
-        if (marked == null) {
-            return super.getMarkedExternalObject();
-        }
-        return marked;
-    }
-    
-    
     /**
      * External functions does not have a FAlgorithm in the instance tree
      * so we have to generate one.
@@ -134,10 +91,14 @@ aspect ExternalConstantEvaluation {
         int timeout = myOptions().getIntegerOption("external_constant_evaluation");
         ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
         try {
-            res = ef.evaluate(this, values, timeout);
+            ef.setup(this, values, timeout);
+            ef.evaluate(this, values, timeout);
+            res = ef.teardown(this, values, timeout);
         } catch (IOException e) {
 //            ModelicaCompiler.log.debug(e);
             res = -2;
+        } finally {
+            ef.destroyProcess();
         }
         
         if (res != 0) {
@@ -213,12 +174,6 @@ aspect ExternalConstantEvaluation {
             }
         }
         
-        public void check(String s) throws IOException {
-            out.write(s);
-            out.write("\n");
-            out.flush();
-        }
-        
         private void log() throws IOException {
             String line = getLine();
             while (line.equals("LOG")) {
@@ -238,15 +193,9 @@ aspect ExternalConstantEvaluation {
         private void abort() throws IOException, ConstantEvaluationException {
             String line = getLine();
             if (line.equals("ABORT")) {
-                throw new AbortConstantEvaluationException("Evaluation aborted by request of external function");
+                throw new ConstantEvaluationException(null, "Evaluation aborted by request of external function");
             }
             buffLine(line);
-        }
-        
-        class AbortConstantEvaluationException extends ConstantEvaluationException {
-            public AbortConstantEvaluationException(String string) {
-                super(null, string);
-            }
         }
         
         /**
@@ -269,24 +218,18 @@ aspect ExternalConstantEvaluation {
          * Tear down everything
          */
         public void destroy() {
-            /* Kill timer */
             timer.cancel();
             timer.purge();
             timer = null;
-            
-            /* Close streams */
             try {
                 in.close();
             } catch (IOException e) {
             }
-            in = null;
             try {
                 out.close();
             } catch (IOException e) {
             }
-            out = null;
             
-            /* Destroy process */
             process.destroy();
             process = null;
         }
@@ -443,8 +386,6 @@ aspect ExternalConstantEvaluationCaching {
          */
         private Map<String, ExternalFunction> cachedExternals = new HashMap<String, ExternalFunction>();
         
-        private LinkedHashSet<ExternalFunction> livingCachedExternals = new LinkedHashSet<ExternalFunction>();
-        
         private ModelicaCompiler mc;
         
         public ExternalFunctionCache(ModelicaCompiler mc) {
@@ -464,11 +405,7 @@ aspect ExternalConstantEvaluationCaching {
                 if (executable == null) {
                     ef = FAILED_EXTERNAL_FUNCTION;
                 } else {
-                    if (ext.shouldCacheExternalObject()) {
-                        ef = new MappedExternalFunction(ext, executable);
-                    } else {
-                        ef = new CompiledExternalFunction(ext, executable);
-                    }
+                    ef = new CompiledExternalFunction(ext, executable);
                 }
                 cachedExternals.put(ext.getName(), ef);
             }
@@ -482,45 +419,68 @@ aspect ExternalConstantEvaluationCaching {
             for (ExternalFunction ef : cachedExternals.values()) {
                 ef.remove();
             }
-            cachedExternals.clear();
+            cachedExternals = new HashMap<String, ExternalFunction>();
         }
         
         /**
          * Kill cached processes
          */
-        public void destroyProcesses(OptionRegistry options) {
-            int timeout = options.getIntegerOption("external_constant_evaluation");
-            for (ExternalFunction ef : new ArrayList<ExternalFunction>(livingCachedExternals)) {
-                ef.destroyProcess(timeout);
-            }
+        public void destroyProcesses() {
+            /* TODO: implement */
         }
         
-        public void tearDown(OptionRegistry options) {
-            destroyProcesses(options);
+        public void tearDown() {
+            destroyProcesses();
             removeExternalFunctions();
         }
         
         public static abstract class ExternalFunction {
-            public abstract int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout)
-                    throws IOException;
-            public abstract void destroyProcess(int timeout);
+            public abstract ProcessCommunicator getProcessCommunicator(FExternalStmt ext);
+            public abstract void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException;
+            public abstract void destroyProcess();
             public abstract void remove();
         }
         
         public static final ExternalFunction FAILED_EXTERNAL_FUNCTION = new FailedExternalFunction();
         
         private static class FailedExternalFunction extends ExternalFunction {
+            private ConstantEvaluationException ex;
             
-            @Override
-            public int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) 
-                    throws IOException {
-                ModelicaCompiler.log.debug("Evaluating failed external function: " + ext.getName());
-                throw new ConstantEvaluationException(null, 
+            private void makeCEE() {
+                if (ex == null) {
+                    ex = new ConstantEvaluationException(null, 
                         "Failed to evaluate external function call, could not start process");
+                }
             }
             
             @Override
-            public void destroyProcess(int timeout) {
+            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext) {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                makeCEE();
+                throw ex;
+            }
+            
+            @Override
+            public void destroyProcess() {
                 // Do nothing.
             }
             
@@ -533,48 +493,42 @@ aspect ExternalConstantEvaluationCaching {
         private class CompiledExternalFunction extends ExternalFunction {
             protected String executable;
             protected ProcessBuilder processBuilder;
+            protected ProcessCommunicator com;
             
             public CompiledExternalFunction(FExternalStmt ext, String executable) {
                 this.executable = executable;
                 this.processBuilder = createProcessBuilder(ext);
             }
             
-            protected ProcessCommunicator createProcessCommunicator(FExternalStmt ext) throws IOException {
-                return new ProcessCommunicator(processBuilder.start());
+            @Override
+            public ProcessCommunicator getProcessCommunicator(FExternalStmt ext) {
+                if (com == null) {
+                    try {
+                        com =  new ProcessCommunicator(processBuilder.start());
+                    } catch (IOException e) {
+                        ModelicaCompiler.log.debug("Could not execute external function process for constant evaluation. Executable: " + executable);
+                        // Throw exc
+                    }
+                }
+                
+                return com;
             }
             
             @Override
-            public int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) 
-                    throws IOException {
-                ModelicaCompiler.log.debug("Evaluating compiled external function: " + ext.getName());
-                ProcessCommunicator com = null;
-                try {
-                    com = createProcessCommunicator(ext);
-                    setup(ext, values, timeout, com);
-                    evaluate(ext, values, timeout, com);
-                    return teardown(timeout, com);
-                } finally {
-                    if (com != null) {
-                        com.destroy();
-                    }
-                }
-            }
-            
-            public void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout,
-                    ProcessCommunicator com) throws IOException {
+            public void setup(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
                 com.startTimer(timeout);
                 com.accept("START");
                 for (CommonVariableDecl eo : ext.externalObjectsToSerialize()) {
                     com.put(values.get(eo), eo.type(), eo.canBeUnknown());
                 }
-                com.accept("READY");
                 com.cancelTimer();
             }
             
-            public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout,
-                    ProcessCommunicator com) throws IOException {
+            @Override
+            public void evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
                 com.startTimer(timeout);
-                com.check("EVAL");
                 for (CommonVariableDecl arg : ext.functionArgsToSerialize()) {
                     com.put(values.get(arg), arg.type(), arg.canBeUnknown());
                 }
@@ -582,23 +536,25 @@ aspect ExternalConstantEvaluationCaching {
                 com.accept("DONE");
                 for (CommonVariableDecl cvd : ext.varsToDeserialize())
                     values.put(cvd, com.get(cvd.type()));
-                com.accept("READY");
                 com.cancelTimer();
             }
             
-            public int teardown(int timeout, ProcessCommunicator com) throws IOException {
+            @Override
+            public int teardown(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) throws IOException {
+                ProcessCommunicator com = getProcessCommunicator(ext);
                 com.startTimer(timeout);
-                com.check("EXIT");
                 com.accept("END");
                 int result = com.end();
                 com.cancelTimer();
-//                ModelicaCompiler.log.debug("SUCCESS TEARDOWN");
                 return result;
             }
             
             @Override
-            public void destroyProcess(int timeout) {
-                
+            public void destroyProcess() {
+                if (com != null) {
+                    com.destroy();
+                    com = null;
+                }
             }
             
             @Override
@@ -632,119 +588,6 @@ aspect ExternalConstantEvaluationCaching {
                 else
                     res = res + sep + libLoc;
                 pb.environment().put(var, res);
-            }
-        }
-        
-        private class MappedExternalFunction extends CompiledExternalFunction {
-            
-            private Map<String, ExternalFunction> lives = new HashMap<String, ExternalFunction>();
-            
-            private final int externalConstantEvaluationMaxProc;
-            
-            public MappedExternalFunction(FExternalStmt ext, String executable) {
-                super(ext, executable);
-                externalConstantEvaluationMaxProc = ext.myOptions().getIntegerOption("external_constant_evaluation_max_proc");
-            }
-            
-            private ExternalFunction getActual(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) {
-                CommonVariableDecl cvd = ext.cachedExternalObject();
-                String name = cvd.ceval().getMarkedExternalObject();
-                ExternalFunction ef = lives.get(name);
-                if (ef == null) {
-                    LiveExternalFunction lef = new LiveExternalFunction(name);
-                    try {
-                        lef.ready(ext, values, timeout);
-                        ef = lef;
-                    } catch (IOException e) {
-                        lef.destroyProcess(timeout);
-                        ef = FAILED_EXTERNAL_FUNCTION;
-                    } catch (ConstantEvaluationException e) {
-                        lef.destroyProcess(timeout);
-                        ef = FAILED_EXTERNAL_FUNCTION;
-                    }
-                    lives.put(name, ef);
-                }
-                return ef;
-            }
-            
-            @Override
-            public int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) 
-                    throws IOException {
-                return getActual(ext, values, timeout).evaluate(ext, values, timeout);
-            }
-            
-            @Override
-            public void destroyProcess(int timeout) {
-                for (ExternalFunction ef : lives.values()) {
-                    ef.destroyProcess(timeout);
-                }
-                lives.clear();
-            }
-            
-            private class LiveExternalFunction extends ExternalFunction {
-                
-                private String name;
-                
-                protected ProcessCommunicator com;
-                
-                public LiveExternalFunction(String name) {
-                    this.name = name;
-                }
-                
-                @Override
-                public int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) 
-                        throws IOException {
-                    ModelicaCompiler.log.debug("Evaluating live external function: " + ext.getName());
-                    try {
-                        ready(ext, values, timeout);
-                        MappedExternalFunction.this.evaluate(ext, values, timeout, com);
-                    } catch (ProcessCommunicator.AbortConstantEvaluationException e) {
-                        
-                    } catch (ConstantEvaluationException e) {
-                        destroyProcess(timeout);
-                        throw e;
-                    } catch (IOException e) {
-                        destroyProcess(timeout);
-                        throw e;
-                    }
-                    return 0;
-                }
-                
-                protected void ready(FExternalStmt ext, Map<CommonVariableDecl, 
-                        CValue> values, int timeout) throws IOException {
-                    if (com == null) {
-                        com = createProcessCommunicator(ext);
-                        MappedExternalFunction.this.setup(ext, values, timeout, com);
-                        ModelicaCompiler.log.debug("Setup live external function: " + ext.getName());
-                    }
-                    livingCachedExternals.remove(this);
-                    livingCachedExternals.add(this);
-                    if (livingCachedExternals.size() > externalConstantEvaluationMaxProc) {
-                        livingCachedExternals.iterator().next().destroyProcess(timeout);
-                    }
-                }
-                
-                @Override
-                public void destroyProcess(int timeout) {
-                    if (com != null) {
-                        livingCachedExternals.remove(this);
-//                        ModelicaCompiler.log.debug("Destroy live external function: " + executable + " : " + name);
-                        try {
-                            teardown(timeout, com);
-                        } catch (IOException e) {
-//                            ModelicaCompiler.log.debug("FAIL Destroy live external function: "  + executable + " : " + name);
-                        } catch (ConstantEvaluationException e) {
-//                            ModelicaCompiler.log.debug("SUCCESS Destroy live external function: " + executable + " : " + name);
-                        }
-                        com.destroy();
-                        com = null;
-                    }
-                }
-                
-                @Override
-                public void remove() {
-                    throw new UnsupportedOperationException();
-                }
             }
         }
     }

@@ -33,21 +33,4 @@ void my_constructor3(void* o1, void** o2, void** o3);
 void my_destructor2(void* o3);
 double use3(void* o3);
 
-typedef struct inc_int {
-    int x;
-} inc_int_t;
-
-void* inc_int_con(int x);
-void inc_int_decon(void* o1);
-int inc_int_use(void* o1);
-int inc_int_use2(void* o1);
-
-void* crash_con(int x);
-void crash_decon(void* o1);
-int crash_use(void* o1);
-
-void* error_con(int x);
-void error_decon(void* o1);
-int error_use(void* o1);
-
 #endif
