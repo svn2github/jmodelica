@@ -41,6 +41,11 @@ aspect ExternalConstantEvaluation {
         return true;
     }
     
+    syn boolean FExternalStmt.shouldCacheExternalObject() {
+        return cachedExternalObject() != null && 
+            myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;
+    }
+    
     syn CommonVariableDecl FExternalStmt.cachedExternalObject() {
         CommonVariableDecl eo = null;
         for (CommonVariableDecl cvd : varsToSerialize()) {
@@ -453,7 +458,7 @@ aspect ExternalConstantEvaluationCaching {
                 if (executable == null) {
                     ef = FAILED_EXTERNAL_FUNCTION;
                 } else {
-                    if (ext.cachedExternalObject() != null) {
+                    if (ext.shouldCacheExternalObject()) {
                         ef = new MappedExternalFunction(ext, executable);
                     } else {
                         ef = new CompiledExternalFunction(ext, executable);
