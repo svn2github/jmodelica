@@ -155,13 +155,13 @@ int main(int argc, const char* argv[])
     
     $ECE_decl$
 
-    /* Init phase */
+
     JMCEVAL_check("START");
+    JMI_DYNAMIC_INIT()
+    JMCEVAL_setup();
     if (JMCEVAL_try()) {
-        JMI_DYNAMIC_INIT()
-        JMCEVAL_setup();
+        /* Init phase */
         $ECE_init$
-        JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
     }
@@ -170,9 +170,9 @@ int main(int argc, const char* argv[])
     while (JMCEVAL_cont("EVAL\n")) {
         JMI_DYNAMIC_INIT()
         $ECE_calc_init$
-        /* Calc phase */
         JMCEVAL_check("CALC");
         if (JMCEVAL_try()) {
+            /* Calc phase */
             $ECE_calc$
         } else {
             JMCEVAL_failed();
@@ -182,16 +182,14 @@ int main(int argc, const char* argv[])
         JMCEVAL_check("READY");
     }
 
-    /* End phase */
     if (JMCEVAL_try()) {
-        JMI_DYNAMIC_INIT()
+        /* End phase */
         $ECE_end$
-        JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
     }
+    JMI_DYNAMIC_FREE()
     JMCEVAL_check("END");
-
     return 0;
 }
 
