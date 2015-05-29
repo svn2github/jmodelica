@@ -157,7 +157,7 @@ int main(int argc, const char* argv[])
 
 
     JMI_DYNAMIC_INIT()
-    JMCEVAL_setup(); // This needs to happen first
+    JMCEVAL_setup(); /* This needs to happen first */
 
     JMCEVAL_check("START");
     if (JMCEVAL_try()) {
