@@ -1176,6 +1176,7 @@ public class ModelicaCompiler {
         fc.transformCanonical();
         
         /* Temporary fix to problems with long compilation times due to later evaluations */
+        getExternalFunctionCache().tearDown(getOptions());
         fc.myOptions().setIntegerOption("external_constant_evaluation", 0);
         
         hookModelTransformed(fc);
@@ -1956,7 +1957,7 @@ public class ModelicaCompiler {
      * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
      */
     protected void ModelicaCompiler.tearDown() {
-        getExternalFunctionCache().tearDown();
+        getExternalFunctionCache().tearDown(getOptions());
         setErrorHandler(null);
         isSetUp = false;
     }
