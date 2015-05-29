@@ -584,15 +584,25 @@ aspect LookupInstComponentsInModifications {
     eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = 
         getClassName().myInstClassDecl().memberInstComponent(name);
     eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = 
-        myInstClass().memberInstComponent(name); 
+        memberInstComponent(name); 
     eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name)        = 
         getName().qualifiedLookupInstComponent(name);
     eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = 
-        myInstClass().memberInstComponent(name);
+        memberInstComponent(name);
 //  eq InstShortClassDecl.getInstClassModification().lookupInstComponentInInstElement(String name)        = getClassName().myInstClassDecl().memberInstComponent(name);
     eq InstComponentRedeclare.getName().lookupInstComponent(String name)                                  = lookupInstComponentInInstElement(name);
     eq InstRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
     eq FlatRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
+
+    /**
+     * Find the actual redeclared component for a redeclaration modification.
+     */
+    syn InstComponentDecl InstComponentRedeclare.myInstReplacingComponent() = 
+        lookupInstReplacingComponent(name()).target(INST_UNKNOWN_COMPONENT, this);
+
+    inh InstLookupResult<InstComponentDecl> InstComponentRedeclare.lookupInstReplacingComponent(String name);
+    eq InstNamedModification.getChild().lookupInstReplacingComponent(String name) = getName().qualifiedLookupInstComponent(name);
+    eq InstNode.getChild().lookupInstReplacingComponent(String name)              = memberInstComponent(name);
 
 }
 

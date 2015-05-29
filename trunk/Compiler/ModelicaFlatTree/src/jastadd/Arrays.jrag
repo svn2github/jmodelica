@@ -1172,15 +1172,31 @@ aspect Arrays {
 			s = s.createKnown(getBindingFExp());
 		return s;
 	}
-	
-	/**
-	 * Get the array sizes as declared. May be unknown. 
-	 */
-	syn Size InstComponentDecl.declaredSize() = 
-		hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : Size.SCALAR;
+
+    /**
+     * Get the array sizes as declared. May be unknown. 
+     */
+    syn Size InstComponentDecl.declaredSize() = 
+        hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : defaultSize();
     syn Size InstComponentDecl.declaredSizeCalc() =
-        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : Size.SCALAR;
-	
+        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : defaultSizeCalc();
+
+    /**
+     * Find the declared size for a component that does not have any array subscripts in the declaration. 
+     * For all components except the NTA of InstComponentRedeclare, this is simply scalar.
+     */
+    inh Size InstComponentDecl.defaultSize();
+    eq InstComponentRedeclare.getInstComponentDecl().defaultSize() = myInstReplacingComponent().declaredSize();
+    eq ASTNode.getChild().defaultSize()                            = Size.SCALAR;
+
+    /**
+     * Find the declared calculated size for a component that does not have any array subscripts in the declaration. 
+     * For all components except the NTA of InstComponentRedeclare, this is simply scalar.
+     */
+    inh Size InstComponentDecl.defaultSizeCalc();
+    eq InstComponentRedeclare.getInstComponentDecl().defaultSizeCalc() = myInstReplacingComponent().declaredSizeCalc();
+    eq ASTNode.getChild().defaultSizeCalc()                            = Size.SCALAR;
+
 	/**
 	 * Get the array sizes. 
 	 */
@@ -3144,29 +3160,40 @@ aspect ArrayHelpers {
             ns[size.length] = s;
             return new Size(ns);
         }
-        
-		/**
-		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
-		 * 
-		 * <code>s</code> is added on the left side.
-		 */
-		public Size expand(Size s) {
-			return s.expandFrom(this);
-		}
-		
-		/**
-		 * Delegate method for expand(Size). Double dispatch is needed there.
-		 */
-		protected Size expandFrom(Size s) {
-            int ndims = size.length + s.size.length;
+
+        /**
+         * Creates a new Size that is a concatenation of <code>s</code> and this size.
+         * 
+         * <code>s</code> is added on the left side.
+         */
+        public Size expand(Size s) {
+            return s.createExpanded(s, this);
+        }
+
+        /**
+         * Creates a new Size that is a concatenation of this size and <code>s</code>.
+         * 
+         * <code>s</code> is added on the right side.
+         */
+        public Size expandRight(Size s) {
+            return s.createExpanded(this, s);
+        }
+
+        /**
+         * Delegate method for expand(Size) and expandRight(Size).
+         * 
+         * Creates a new size that is the concatenation of a and b.
+         */
+        protected Size createExpanded(Size a, Size b) {
+            int ndims = a.size.length + b.size.length;
             if (ndims == 0)
                 return Size.SCALAR;
             int[] ns = new int[ndims];
-            System.arraycopy(size, 0, ns, 0, size.length);
-            System.arraycopy(s.size, 0, ns, size.length, s.size.length);
+            System.arraycopy(a.size, 0, ns, 0, a.size.length);
+            System.arraycopy(b.size, 0, ns, a.size.length, b.size.length);
             return new Size(ns);
-		}
-		
+        }
+
 		/**
 		 * Create an FExp that describes the length of dimension <code>d</code>, 
 		 *        given the supplied variable values.
@@ -3609,43 +3636,48 @@ aspect ArrayHelpers {
 			System.arraycopy(exps, 0, ns.exps, 1, size.length);
 			return ns;
 		}
-		
-		/**
-		 * Creates a new Size that is a concatenation of <code>s</code> and this size.
-		 * 
-		 * <code>s</code> is added on the left side.
-		 */
-		public Size expand(Size s) {
+
+        /**
+         * Creates a new Size that is a concatenation of <code>s</code> and this size.
+         * 
+         * <code>s</code> is added on the left side.
+         */
+        public Size expand(Size s) {
             return createExpanded(s, this);
         }
-        
+
         /**
-         * Delegate method for expand(Size). Double dispatch is needed there.
+         * Creates a new Size that is a concatenation of this size and <code>s</code>.
+         * 
+         * <code>s</code> is added on the right side.
          */
-        protected Size expandFrom(Size s) {
+        public Size expandRight(Size s) {
             return createExpanded(this, s);
         }
-        
-        private static Size createExpanded(Size a, Size b) {
-			int ndims = a.size.length + b.size.length;
-			if (ndims == 0)
-				return Size.SCALAR;
-			MutableSize ns = new MutableSize(ndims);
-			if (a instanceof MutableSize) {
-			    MutableSize m = (MutableSize) a;
-			    m.evaluate();
-				System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
-			}
+
+        /**
+         * Delegate method for expand(Size) and expandRight(Size). Creates a new size tyhat is the concatenation of a and b.
+         */
+        protected Size createExpanded(Size a, Size b) {
+            int ndims = a.size.length + b.size.length;
+            if (ndims == 0)
+                return Size.SCALAR;
+            MutableSize ns = new MutableSize(ndims);
+            if (a instanceof MutableSize) {
+                MutableSize m = (MutableSize) a;
+                m.evaluate();
+                System.arraycopy(m.exps, 0, ns.exps, 0, m.size.length);
+            }
             if (b instanceof MutableSize) {
                 MutableSize m = (MutableSize) b;
                 m.evaluate();
                 System.arraycopy(m.exps, 0, ns.exps, a.size.length, m.size.length);
             }
-			System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
-			System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
-			return ns;
-		}
-		
+            System.arraycopy(a.size, 0, ns.size, 0, a.size.length);
+            System.arraycopy(b.size, 0, ns.size, a.size.length, b.size.length);
+            return ns;
+        }
+
         /**
          * Create an FExp that describes the length of dimension <code>d</code>, 
          *        given the supplied variable values.

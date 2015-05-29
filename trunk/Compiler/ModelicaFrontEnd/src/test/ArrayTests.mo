@@ -728,7 +728,7 @@ equation
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
 Semantic error at line 592, column 13:
-  Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [2]
+  Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
 

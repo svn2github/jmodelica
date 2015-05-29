@@ -2021,6 +2021,20 @@ aspect FlatPrettyPrint {
     eq OperatorRecord.toString()      = "operator record";
     eq OperatorFunction.toString()    = "operator function";
 
+    syn String InstRestriction.toString();
+    eq InstModel.toString()               = "model";
+    eq InstBlock.toString()               = "block";
+    eq InstMClass.toString()              = "class";
+    eq InstConnector.toString()           = "connector";
+    eq InstExpandableConnector.toString() = "expandable connector";
+    eq InstMType.toString()               = "type";
+    eq InstMPackage.toString()            = "package";
+    eq InstFunction.toString()            = "function";
+    eq InstMRecord.toString()             = "record";
+    eq InstOperator.toString()            = "operator";
+    eq InstOperatorRecord.toString()      = "operator record";
+    eq InstOperatorFunction.toString()    = "operator function";
+
     syn String ComponentDecl.toString() = prettyPrint("");
     syn String Access.toString()        = prettyPrint("");
     syn String Modification.toString()  = prettyPrint("");

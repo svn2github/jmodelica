@@ -24,6 +24,6 @@ aspect OptimicaFlatTypeAnalysis {
 		return getName().type();
 	}
 
-	eq InstOptClassDecl.attributeSize(InstComponentModification icm) = Size.SCALAR;
-	
+    eq InstOptClassDecl.getChild().expectedSizeFromParent() = Size.SCALAR;
+
 }
