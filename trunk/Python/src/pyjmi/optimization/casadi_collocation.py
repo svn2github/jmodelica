@@ -1949,16 +1949,6 @@ class LocalDAECollocator(CasadiCollocator):
             par_vals[offset:offset + n_c] = 1
         self._par_vals = N.asarray(par_vals)
 
-        #Add parameters to variable dictionaries
-        #Note: For parameters the var_indices dictionary gives the index in 
-        #self.pp_unvarying (and not self.xx).  
-        i=0
-        for para in par_vars:
-            self.var_indices[para.getName()] = i
-            # todo: Consider if this is really right. What if there is a parameter named 'x' or 'elim_u'?
-            self.var_map[para.getName()] = self.pp_unvarying[i]
-            i+=1
-
         # Count the number of named variables to see that they match up even
         # if named_vars is off - also needed for back tracking of variables
         self.n_named_pp = 0

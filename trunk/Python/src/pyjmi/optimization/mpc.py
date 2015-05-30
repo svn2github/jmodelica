@@ -455,14 +455,14 @@ class MPC(object):
         self.index = {}    
         for name in self.state_names:
             name_init = "_start_"+name
-            self.index[name_init] = self.collocator.var_indices[name_init]
+            (self.index[name_init], _) = self.collocator.name_map[name_init]
 
         for par in ['startTime', 'finalTime']:
-                self.index[par] = self.collocator.var_indices[par]
+            (self.index[par], _) = self.collocator.name_map[par]
                 
         # Find and save the index for blocking factor parameters
         for par in self.extra_param:
-            self.index[par] = self.collocator.var_indices[par]
+            (self.index[par], _) = self.collocator.name_map[par]
         
     def _set_warm_start_options(self):
         """
