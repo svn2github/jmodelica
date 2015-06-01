@@ -3690,24 +3690,56 @@ end RedeclareTest50;
 
 
 model RedeclareTest51
-    connector FluidPort
-        replaceable package Medium = BaseMedium;
-		Real x;
-    end FluidPort;
-		
-	
-	connector FluidPort_b
-		extends FluidPort;
-	end FluidPort_b;
-	
-	model TankWith3InletOutletArraysWithEvaporatorCondensor
-		replaceable package Medium = BaseMedium;
-		FluidPort_b BottomFluidPort[2](redeclare package Medium = Medium);
-	end TankWith3InletOutletArraysWithEvaporatorCondensor;
-	
-	TankWith3InletOutletArraysWithEvaporatorCondensor B5(redeclare package Medium = BatchMedium);
+    record A
+        String b;
+    end A;
+
+    parameter A[:] a;
+    parameter String[:] c = a.b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RedeclareTest51",
+            description="Check that arrays of unknown size are correctly error checked",
+            checkType=check,
+            errorMessage="
+3 errors found:
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+At line 3693, column 12:
+  String parameters are only partially supported
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+At line 3693, column 12:
+  The parameter a[:].b does not have a binding expression
+Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+At line 3697, column 20:
+  String parameters are only partially supported
+")})));
 end RedeclareTest51;
 
+
+model RedeclareTest52
+    model R
+        Real x = time;
+    end R;
+
+    model M
+        parameter Integer n;
+        R[:] r;
+    end M;
+
+    parameter Integer k = 0;
+    M m[k](redeclare R r, n = 1:k);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest52",
+            description="Check that arrays of unknown size are correctly error checked",
+            flatModel="
+fclass RedeclareTests.RedeclareTest52
+ structural parameter Integer k = 0 /* 0 */;
+end RedeclareTests.RedeclareTest52;
+")})));
+end RedeclareTest52;
 
 
 model RedeclareElement1

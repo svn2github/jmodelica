@@ -330,10 +330,11 @@ abstract public class TestCase implements GenericTestCase {
         Collection<Problem> problems = null;
         try {
             ipr.checkErrorsInInstClass(className, checkType);
+            problems = sr.collectWarnings();
         } catch (CompilerException e) {
             problems = e.getProblems();
-            if (testSemanticProblems(problems)) return;
         }
+        if (testSemanticProblems(problems)) return;
         
         
         // Flatten class and check errors reported during flattening

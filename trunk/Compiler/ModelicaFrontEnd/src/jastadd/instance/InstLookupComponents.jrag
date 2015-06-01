@@ -403,15 +403,9 @@ aspect InstLookupComponents {
     syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, int ndims) {
         if (ndims == 0) 
             return memberInstComponent(name);
-        if (getNumInstComponentDecl() == 0)
-            return emptyArrayMemberInstComponent(name);
         return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
     }
     eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
-
-    syn InstLookupResult<InstComponentDecl> InstNode.emptyArrayMemberInstComponent(String name) = InstLookupResult.notFound();
-    eq InstComponentDecl.emptyArrayMemberInstComponent(String name)                             = 
-        size().isUnknown() ? myInstClass().memberInstComponent(name) : InstLookupResult.<InstComponentDecl>notFound();
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
         if (isArray()) {

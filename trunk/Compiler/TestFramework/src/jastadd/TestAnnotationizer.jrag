@@ -528,7 +528,14 @@ abstract public class TestAnnotationizerHelper {
      */
     protected FClass flatten(InstClassDecl icd) {
         FClass fc = FClass.create(icd, filePath, null, null);
-        icd.flattenInstClassDecl(fc);
+        Collection<Problem> problems = null;
+        try {
+            icd.flattenInstClassDecl(fc);
+            problems = root.collectWarnings();
+        } catch (CompilerException e) {
+            problems = e.getProblems();
+        }
+        handleCompilerProblems(problems);
         return fc;
     }
 

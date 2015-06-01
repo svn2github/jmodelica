@@ -770,40 +770,22 @@ aspect InstanceTreeConstruction {
 		
 	}
 
-	eq InstComponentDecl.getInstComponentDeclList() {
-		//System.out.println( " : " + getClass().getName() + " : "+ myFSubscripts().size());
-		if (isArrayDecl()) { // Take care of array declarations separately
-			// Loop over indices and create new InstArrayComponentDecls
-			List l = new List();
-			// Only the first FSubscript is used to create the first layer
-			// of InstArrayComponentDecls. The remaining are used when
-			// InstArrayComponentDecls are created further down in the tree.
-			// For a zero length, create a dummy node with index 0 
-			int n = size().get(0);
-			for (int i = (n == 0) ? 0 : 1; i <= n; i++)
-				l.add(createInstArrayComponentDecl(i));
-			return l;
-		} else { // If not array, then proceed as usual
-			return super.getInstComponentDeclList();
-		}
-	}
+    eq InstComponentDecl.getInstComponentDeclList() {
+        //System.out.println( " : " + getClass().getName() + " : "+ myFSubscripts().size());
+        if (isArray()) { // Take care of array declarations separately
+            // Loop over indices and create new InstArrayComponentDecls
+            List l = new List();
+            // Only one FSubscript is used to create the one layer of InstArrayComponentDecls.
+            // For a zero length or unknown length, create a dummy node with index 0.
+            int n = childDimensionLength();
+            for (int i = (n < 1) ? 0 : 1; i <= n || i == 0; i++)
+                l.add(createInstArrayComponentDecl(i));
+            return l;
+        } else { // If not array, then proceed as usual
+            return super.getInstComponentDeclList();
+        }
+    }
 
-	eq InstArrayComponentDecl.getInstComponentDeclList() {
-		// Get the FSubscript corresponding to this InstArrayComponentDecl
-		int n = childDimensionLength();
-		List l = new List();
-		if (n > 0) {
-			// Loop over indices and create new InstArrayComponentDecls
-            // For a zero length, create a dummy node with index 0 
-			for (int i = (n == 0) ? 0 : 1; i <= n; i++)
-				l.add(createInstArrayComponentDecl(i));
-		} else {
-			for (ComponentDecl cd : components()) 
-				l.add(createInstComponentDecl(cd));
-		}
-			return l;
-	}
-	
 	public InstComponentDecl InstComponentDecl.createInstArrayComponentDecl(int i) {
 	    return new InstArrayComponentDecl(new InstClassAccess("ArrayDecl"), new Opt(), 
                 getComponentDecl(), new Opt(), new Opt(), new Opt(), i);
@@ -2149,13 +2131,15 @@ aspect InstArrays {
 	 */
 	syn int InstComponentDecl.myDimensionLength() = size().get(0);
 	eq InstArrayComponentDecl.myDimensionLength() = dimensionLength(0);
-	
-	/**
-	 * Find the length of the dimension corresponding to the level under 
-	 *        this InstArrayComponentDecl. 
-	 */
-	syn int InstArrayComponentDecl.childDimensionLength() = dimensionLength(1);
-	
+
+    /**
+     * Find the length of the dimension corresponding to the next level of InstArrayComponentDecls in an array.
+     * 
+     * For a primitive, the length of the first dimension is returned.
+     */
+    syn int InstComponentDecl.childDimensionLength() = size().get(0);
+    eq InstArrayComponentDecl.childDimensionLength() = dimensionLength(1);
+
 	/**
 	 * Find the length of the dimension corresponding to the InstArrayComponentDecl(s)
 	 *        <code>i</code> levels under this one. 

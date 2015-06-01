@@ -102,7 +102,7 @@ aspect FlatNames {
                 prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
                 prefix.copyAndAppend(name());
     eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
-        prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex()));
+        (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
     eq InstEnumLiteral.appendMyName(FQName prefix)           = prefix.copyAndAppend(name());
     
     inh lazy FQName InstNode.retrieveFQName();
