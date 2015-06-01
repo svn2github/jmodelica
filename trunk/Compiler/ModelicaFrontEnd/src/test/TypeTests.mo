@@ -420,7 +420,10 @@ model AbsType5
             name="AbsType5",
             description="abs() operator: String arg",
             errorMessage="
-1 errors found:
+2 errors found:
+Error: in file '...':
+Semantic error at line 415, column 14:
+  Could not evaluate binding expression of structural parameter x
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
 Semantic error at line 416, column 27:
   Calling function abs(): types of positional argument 1 and input v are not compatible
@@ -1892,13 +1895,19 @@ model StringExpType1
             name="StringExpType1",
             description="",
             errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1802, column 30:
+4 errors found:
+Error: in file '...':
+Semantic error at line 1886, column 20:
+  Could not evaluate binding expression of structural parameter a
+Error: in file '...':
+Semantic error at line 1887, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1803, column 30:
+Error: in file '...':
+Semantic error at line 1887, column 36:
+  Could not evaluate binding expression of structural parameter b
+Error: in file '...':
+Semantic error at line 1888, column 30:
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
 ")})));

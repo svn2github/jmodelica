@@ -1721,7 +1721,7 @@ equation
 1 errors found:
 Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
 Semantic error at line 1129, column 9:
-  Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
 ")})));
 end ConnectErrTest10;
 
@@ -1755,6 +1755,154 @@ Semantic error at line 1721, column 5:
   Types of connected components do not match
 ")})));
 end ConnectErrTest11;
+
+model ConnectErrTest12
+    connector A = Real;
+    
+    A x;
+    A y = time;
+    
+    parameter Real p(start=3,fixed=false);
+equation
+    if p < 2 then
+        x = y + 2;
+    else
+        connect(x,y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest12",
+            description="Connect clause in else branch of if with non-fixed parameter test",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
+Semantic error at line 1129, column 9:
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+")})));
+end ConnectErrTest12;
+
+model ConnectErrTest13
+    connector A = Real;
+    
+    A x;
+    A y = time;
+    
+    parameter Real p(start=3,fixed=false);
+equation
+    if time < 2 then
+        if p < 2 then
+            connect(x,y);
+        else
+            connect(x,y);
+        end if;
+    else
+        if p < 2 then
+            connect(x,y);
+        else
+            connect(x,y);
+        end if;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest13",
+            description="Connect clause in nested branch of if with non-fixed parameter test",
+            errorMessage="
+4 errors found:
+Error: in file '...':
+Semantic error at line 1795, column 13:
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+Error: in file '...':
+Semantic error at line 1797, column 13:
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+Error: in file '...':
+Semantic error at line 1801, column 13:
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+Error: in file '...':
+Semantic error at line 1803, column 13:
+  Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions
+")})));
+end ConnectErrTest13;
+
+model ConnectErrTest14
+
+    function f
+        input Integer i;
+        output Integer o;
+        external;
+    end f;
+
+    connector A = Real;
+    
+    A x;
+    A y = time;
+    
+    parameter Integer p = 3;
+    parameter Real[2] pa = 1:2;
+equation
+    if pa[f(p)] < 2 then
+        x = y + 2;
+    else
+        connect(x,y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConnectErrTest14",
+            description="Connect clause in nested branch of if with non-evaluable test",
+            errorMessage="
+1 errors found:
+
+Error: in file '...':
+Semantic error at line 1844, column 8:
+  Could not evaluate test expression for if equation containing connect clause
+
+")})));
+end ConnectErrTest14;
+
+model ConnectInIfNoErr1
+    connector A = Real;
+    A[3] a = (1:3) * time;
+    A[3] b;
+    
+    parameter Boolean[2] p1 = { true , false };
+    parameter Boolean[1] p2 = { true };
+    
+equation
+    for i in 1:3 loop
+        if rem(i, 2) == 1 then
+            if p1[integer((i + 1) / 2)] then
+                connect(a[i], b[i]);
+            else
+                connect(a[i], b[i]);
+            end if;
+        else
+            if p2[integer((i + 1) / 2)] then
+                connect(a[i], b[i]);
+            else
+                connect(a[i], b[i]);
+            end if;
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectInIfNoErr1",
+            description="Check that connect statements are not error checked in inactive if branches",
+            flatModel="
+fclass ConnectTests.ConnectInIfNoErr1
+ Real a[3] = (1:3) * time;
+ Real b[3];
+ structural parameter Boolean p1[2] = {true, false} /* { true, false } */;
+ structural parameter Boolean p2[1] = {true} /* { true } */;
+equation
+ a[1] = b[1];
+ a[2] = b[2];
+ a[3] = b[3];
+end ConnectTests.ConnectInIfNoErr1;
+")})));
+end ConnectInIfNoErr1;
 
 
 

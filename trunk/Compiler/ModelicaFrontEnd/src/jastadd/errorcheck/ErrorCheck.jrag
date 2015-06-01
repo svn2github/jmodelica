@@ -359,13 +359,24 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfExp.lockMyBranch(ErrorCheckType checkType, boolean then) {
-	  if (getIfExp().variability().parameterOrLess() && getIfExp().ceval().booleanValue() != then) {
+        if (getIfExp().lockable(then)) {
 		  getIfExp().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {
 		  return lockBranch(checkType);
 	  }
   }
+  
+    syn boolean FExp.lockable(boolean then) {
+        if (variability().parameterOrLess() && valueIsFixed()) {
+            try {
+                return ceval().booleanValue() != then;
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
+        return false;
+    }
   
   /**
    * Lock this if-expression and return true if it only has only parameter-expression 
@@ -378,7 +389,7 @@ aspect ErrorCheck {
    * @param then       if true, we are trying to remove the then-branch, otherwise the else-branch
    */
   public boolean FIfEquation.lockMyBranch(ErrorCheckType checkType, boolean then) {
-	  if (getTest().variability().parameterOrLess() && getTest().ceval().booleanValue() != then) {
+        if (getTest().lockable(then)) {
 		  getTest().markAsStructuralParameter(checkType);
 		  return true;
 	  } else {

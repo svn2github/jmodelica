@@ -338,28 +338,46 @@ aspect ContentCheck {
         super.contentCheck(checkType);
         checkQuotedIdentifier(this, getID());
     }
-
+    
 	/**
-     * Check if this equation is in a place that allows connect clauses.
+	 * Check if this equation may legally contain a connect clause.
 	 */
-	inh boolean FAbstractEquation.connectAllowed();
-	eq FAbstractEquation.getChild().connectAllowed() = mayContainConnect() && connectAllowed();
-	eq FClass.getChild().connectAllowed()            = true;
-	eq InstNode.getChild().connectAllowed()          = true;
-	
-	/**
-	 * Check if this equation may legally contain a conncect clause.
-	 */
-	syn boolean FAbstractEquation.mayContainConnect() = false;
-	eq InstForClauseE.mayContainConnect()             = true;
-	eq FElseEquation.mayContainConnect()              = true;
-	eq FIfEquation.mayContainConnect()                = 
-		getTest().variability().parameterOrLess() && getTest().canCeval();
-	
+    public void FAbstractEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
+        FAbstractEquation context = surroundingFAbstractEquation();
+        if (context != null) {
+            context.checkMayContainConnect(checkType, connect);
+        }
+    }
+    
+    public void FWhenEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
+        super.checkMayContainConnect(checkType, connect);
+        connect.error("Connect clauses are not allowed in when equations");
+    }
+    
+    public void FIfEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
+        super.checkMayContainConnect(checkType, connect);
+        FTypePrefixVariability v = getTest().variability();
+        if (!v.parameterOrLess() || (v.parameterVariability() && !getTest().valueIsFixed())) {
+            connect.error("Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions");
+        } else {
+            if (!getTest().canCeval()) {
+                getTest().error("Could not evaluate test expression for if equation containing connect clause");
+            }
+            getTest().markAsStructuralParameter(checkType);
+        }
+    }
+    
+    inh FAbstractEquation FConnectClause.surroundingFAbstractEquation();
+    inh FAbstractEquation FAbstractEquation.surroundingFAbstractEquation();
+    eq FAbstractEquation.getChild().surroundingFAbstractEquation() = this;
+    eq FClass.getChild().surroundingFAbstractEquation()            = null;
+    eq InstNode.getChild().surroundingFAbstractEquation()          = null;
+    
 	public void FConnectClause.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
-		if (!connectAllowed())
-			error("Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations"); 
+        if (!lockBranch(checkType)) {
+            checkMayContainConnect(checkType, this);
+        }
 	}
 	
 	public void FWhenEquation.contentCheck(ErrorCheckType checkType) {
@@ -665,8 +683,6 @@ aspect ForceVariability {
     public void FExp.forceVariability(ErrorCheckType checkType,  FTypePrefixVariability v) {
         if (inFunction())
             return;
-        if (!checkType.allowConstantNoValue() && !canCeval())
-            compliance("Could not evaluate expression used as structural parameter: " + this);
         forceUsesVariability(checkType, v);
     }
     
@@ -731,7 +747,7 @@ aspect ForceVariability {
         if (hasBindingFExp()) {
             FExp e = getBindingFExp();
             if (!checkType.allowConstantNoValue() && !e.canCeval())
-                compliance("Could not evaluate binding expression of structural parameter " + qualifiedName());
+                error("Could not evaluate binding expression of structural parameter " + qualifiedName());
             e.forceUsesVariability(checkType, v);
         }
     }
