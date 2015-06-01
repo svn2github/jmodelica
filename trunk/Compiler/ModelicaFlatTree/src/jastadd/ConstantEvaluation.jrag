@@ -3071,20 +3071,30 @@ aspect ConstantEvaluation {
    * Uses the start value for non-records.
    */
   syn CValue FVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) = startAttributeCValue();
-  eq FRecordVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) {
-	  CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
-	  FRecordDecl rec = myFRecordDecl();
-	  for (int j = 0, n = rec.getNumFVariable(); j < n; j++) {
-		  FVariable fv = rec.getFVariable(j);
-		  if (inParameterRecord || fv.isParameter() || fv.isRecord())
-			  res.setMember(j, fv.ceval(evaluator, inParameterRecord));
-		  else
-			  res.setMember(j, CValue.UNKNOWN);
-	  }
-	  for (FAttribute a : getFAttributes())
-		  a.applyToCValue(evaluator, res, i);
-	  return res;
-  }
+    
+    private boolean FRecordVariable.circular = false;
+    eq FRecordVariable.defaultCValueCell(VariableEvaluator evaluator, Index i, boolean inParameterRecord) {
+        if (circular) {
+            throw new ConstantEvaluationException(null, "Circular evaluation in record component");
+        }
+        circular = true;
+        try {
+            CValueRecord res = new CValueRecord((FRecordType) type().scalarType());
+            FRecordDecl rec = myFRecordDecl();
+            for (int j = 0, n = rec.getNumFVariable(); j < n; j++) {
+                FVariable fv = rec.getFVariable(j);
+                if (inParameterRecord || fv.isParameter() || fv.isRecord())
+                    res.setMember(j, fv.ceval(evaluator, inParameterRecord));
+                else
+                    res.setMember(j, CValue.UNKNOWN);
+            }
+            for (FAttribute a : getFAttributes())
+                a.applyToCValue(evaluator, res, i);
+            return res;
+        } finally {
+            circular = false;
+        }
+    }
   
   /**
    * Apply any binding expressions for record members to a record CValue.
