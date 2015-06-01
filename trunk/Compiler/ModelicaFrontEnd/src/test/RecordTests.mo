@@ -3593,8 +3593,8 @@ model RecordScalarize37
             flatModel="
 fclass RecordTests.RecordScalarize37
  Real a1.x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_1.x)));
- Real a2[1].x(start = {RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_2.x)), RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_3.x))});
- Real a2[2].x(start = {RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_4.x)), RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_5.x))});
+ Real a2[1].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_2.x)));
+ Real a2[2].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_4.x)));
  Real temp_1.x;
  Real temp_2.x;
  Real temp_3.x;
