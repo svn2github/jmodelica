@@ -2321,7 +2321,7 @@ aspect FlatExpressions {
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-	public FEndExp  FEndExp.flatten(FQName prefix)  { return new FEndExp(); }
+    public FExp  FEndExp.flatten(FQName prefix)  { return dynamicFExp(mySize().createFExp(0)).flatten(prefix); }
 	
 	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();

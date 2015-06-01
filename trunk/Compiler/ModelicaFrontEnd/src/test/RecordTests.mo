@@ -424,6 +424,33 @@ end RecordTests.RecordFlat11;
 ")})));
 end RecordFlat11;
 
+model RecordFlat12
+    record R
+        Real[:] x;
+        Real y = x[end];
+    end R;
+    
+    R r(x=1:2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordFlat1",
+            description="Records: end expression",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordFlat12
+ RecordTests.RecordFlat12.R r(x(size() = {2}) = 1:2,y = r.x[2]);
+
+public
+ record RecordTests.RecordFlat12.R
+  Real x[:];
+  Real y = x[size(x, 1)];
+ end RecordTests.RecordFlat12.R;
+
+end RecordTests.RecordFlat12;
+
+")})));
+end RecordFlat12;
 
 model RecordType1
  record A

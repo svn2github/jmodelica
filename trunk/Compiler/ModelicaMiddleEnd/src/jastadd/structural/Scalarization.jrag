@@ -3277,26 +3277,6 @@ aspect Scalarization {
                 getX().scalarize(indexMap), getPositiveVelocity().scalarize(indexMap),
                 getInitialPoints().scalarize(indexMap), getInitialValues().scalarize(indexMap));
     }
-
-	public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return mySize().isUnknown() ? createFSizeExp() : mySize().createFExp(0);
-	}
-	
-	inh FSizeExp FEndExp.createFSizeExp();
-	eq FArraySubscripts.getFSubscript(int i).createFSizeExp() = createFSizeExp(i);
-	eq FlatRoot.getChild().createFSizeExp()                   = null;
-	eq InstRoot.getChild().createFSizeExp()                   = null;
-	
-	inh FSizeExp FArraySubscripts.createFSizeExp(int dim);
-	eq FlatRoot.getChild().createFSizeExp(int dim) = null;
-	eq InstRoot.getChild().createFSizeExp(int dim) = null;
-	eq FQName.getChild().createFSizeExp(int dim) {
-		FQName fqn = fullCopy();
-		fqn.removeFArraySubscripts();
-		FExp dimExp = new FIntegerLitExp(dim + 1);
-		return new FSizeExp(new FIdUseExp(fqn), new Opt(dimExp));
-	}
-
 	
 	public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
 		return new FForIndex(hasFExp() ? new Opt(getFExp().scalarizeIndexExp(indexMap)) : new Opt(), 

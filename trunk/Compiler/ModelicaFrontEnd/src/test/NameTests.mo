@@ -2735,7 +2735,7 @@ equation
 fclass NameTests.EndExpTest1
  Real x[1];
 equation 
- x[end] = 2;
+ x[1] = 2;
 
 end NameTests.EndExpTest1;
 ")})));
