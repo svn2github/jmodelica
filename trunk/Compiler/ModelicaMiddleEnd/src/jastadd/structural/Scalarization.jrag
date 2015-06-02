@@ -597,6 +597,7 @@ aspect Scalarization {
                     if (o.hasValue()) {
                         s.setValue(o.getValue());
                     }
+                    s.setLevel(o.getLevel());
                 } else if (!sa.equals(FAttribute.SIZE)){
                     FAttribute orig = other.get(sa);
                     FAttribute copy = orig.fullCopy();
@@ -631,7 +632,7 @@ aspect Scalarization {
 		if (hasFStringComment())
 			fv.setFStringComment(getFStringComment().fullCopy());
 		
-		Index myCell = null;
+        Index myCell = Index.NULL;
 		if (name.hasFArraySubscripts()) 
 			myCell = name.getFArraySubscripts().asIndex();
 		for (FAttribute a : getFAttributes())
@@ -672,11 +673,12 @@ aspect Scalarization {
 	 * to an index.
 	 */
 	public FAttribute FAttribute.copyForCell(Index i) {
-		if (i == null)
+        if (i == Index.NULL)
 			return fullCopy();
 		FAttribute res = createEmptyNode();
 		res.setType(getType().fullCopy());
 		res.setName(getName().fullCopy());
+        res.setLevel(getLevel());
 		if (hasValue()) {
 			FExp val = getValue();
 			if (val.ndims() < i.ndims() || isInternal())

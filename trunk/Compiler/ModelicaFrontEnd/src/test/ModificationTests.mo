@@ -2773,6 +2773,77 @@ Variables:
 ")})));
 end ModificationLevel2;
 
+model ModificationLevel3
+    record A
+        Real x(start = 1) = time;
+    end A;
+    
+    A a;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ModificationLevel3",
+            description="Test calculation of modification levels for record",
+            methodName="attributeLevels",
+            methodResult="
+Variables:
+  a.x(start:4=1)
+")})));
+end ModificationLevel3;
+
+model ModificationLevel4
+    record A
+        Real x(start = 1) = time;
+        Real y(start = 2) = time;
+    end A;
+    
+    A a(y(start = 3));
+    
+    model M
+        A a(y(start = 4));
+    end M;
+    
+    model W
+        M m;
+    end W;
+    
+    W w;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ModificationLevel4",
+            description="Test merging attribute level",
+            methodName="attributeLevels",
+            methodResult="
+Variables:
+  a.x(start:4=1)
+  a.y(start:3=3)
+  w.m.a.x(start:4=1)
+  w.m.a.y(start:5=4)
+")})));
+end ModificationLevel4;
+
+model ModificationLevel5
+    record A
+        Real[2] x(each start = 1) = {time,time};
+    end A;
+    
+    A a1;
+    A a2(x(each start = 2));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ModificationLevel5",
+            description="Test merging attribute level of array",
+            methodName="attributeLevels",
+            methodResult="
+Variables:
+  a1.x[1](start:4=1)
+  a1.x[2](start:4=1)
+  a2.x[1](start:3=2)
+  a2.x[2](start:3=2)
+")})));
+end ModificationLevel5;
 
 model StartPropagation1
     Real x(start = 1);

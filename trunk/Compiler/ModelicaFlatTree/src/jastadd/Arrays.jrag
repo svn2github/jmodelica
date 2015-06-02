@@ -78,6 +78,9 @@ aspect Arrays {
 	 *                                      constant Integer values.
 	 */
 	public Index FArraySubscripts.createIndex() {
+        if (getNumFSubscript() == 0) {
+            return Index.NULL;
+        }
 		int[] i = new int[getNumFSubscript()];
 		int j = 0;
 		for (FSubscript s : getFSubscripts()) 
