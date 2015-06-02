@@ -3742,6 +3742,90 @@ end RedeclareTests.RedeclareTest52;
 end RedeclareTest52;
 
 
+model RedeclareTest53
+    model A
+        Real x[2];
+    end A;
+	
+	model B
+		Real x;
+	end B;
+
+    model C
+        replaceable A a;
+    end C;
+
+    C c(redeclare B a);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest53",
+            description="Error for redeclare that replace a class containing an array with class containing a scalar with the same name",
+            errorMessage="
+1 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 3758, column 9:
+  In the declaration 'redeclare B a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable A a'
+")})));
+end RedeclareTest53;
+
+
+model RedeclareTest54
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        Real y;
+    end B;
+    
+    model C
+        extends A;
+        Real z;
+    end C;
+    
+    model D
+        extends A;
+        Real w;
+    end D;
+    
+    model E
+        replaceable model F = B constrainedby A;
+        F f;
+    end E;
+    
+    model G
+        extends E(redeclare model F = C);
+    end G;
+    
+    model H
+        extends E(redeclare model F = D);
+    end H;
+    
+    model I
+        replaceable G g constrainedby E;
+    end I;
+    
+    model J
+        extends I(redeclare H g);
+    end J;
+    
+    I i;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest54",
+            description="Redeclare with constraining type that contains a component of a replaceable class.",
+            flatModel="
+fclass RedeclareTests.RedeclareTest54
+ Real i.g.f.z;
+ Real i.g.f.x;
+end RedeclareTests.RedeclareTest54;
+")})));
+end RedeclareTest54;
+
+
 model RedeclareElement1
   model A
     replaceable model B
