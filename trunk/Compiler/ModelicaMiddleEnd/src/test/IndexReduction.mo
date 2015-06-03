@@ -222,21 +222,21 @@ parameter equation
 equation
  inertia1.w = inertia1._der_phi;
  inertia1.a = inertia1._der_w;
- inertia1.J * inertia1.a = torque.tau + (- idealGear.flange_a.tau);
+ inertia1.J * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - torque.phi_support;
  idealGear.phi_b = inertia2.phi - torque.phi_support;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
  inertia2.a = inertia2._der_w;
- inertia2.J * inertia2.a = - idealGear.flange_b.tau + inertia2.flange_b.tau;
+ inertia2.J * inertia2._der_w = - idealGear.flange_b.tau + inertia2.flange_b.tau;
  spring.tau = spring.c * (spring.phi_rel - spring.phi_rel0);
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = der(inertia3.phi);
  inertia3.a = der(inertia3.w);
- inertia3.J * inertia3.a = - spring.tau;
- damper.tau = damper.d * damper.w_rel;
- damper.lossPower = damper.tau * damper.w_rel;
+ inertia3.J * der(inertia3.w) = - spring.tau;
+ damper.tau = damper.d * der(damper.phi_rel);
+ damper.lossPower = damper.tau * der(damper.phi_rel);
  damper.phi_rel = torque.phi_support - inertia2.phi;
  damper.w_rel = der(damper.phi_rel);
  damper.a_rel = der(damper.w_rel);
@@ -964,7 +964,7 @@ equation
  c1_a = der(c1_w);
  c2_w = der(c1_phi);
  c2_a = _der_c2_w;
- c2_a * p = 0;
+ _der_c2_w * p = 0;
  der(c1_w) = _der_der_c1_phi;
  _der_c2_w = _der_der_c1_phi;
 
@@ -1019,7 +1019,7 @@ equation
  c1_a = der(c1_w);
  c2_w = der(x);
  c2_a = _der_c2_w;
- c2_a * p = 0;
+ _der_c2_w * p = 0;
  der(c1_w) = _der_der_x;
  _der_c2_w = _der_der_x;
 

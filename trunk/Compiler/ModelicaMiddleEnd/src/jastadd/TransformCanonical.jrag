@@ -1839,6 +1839,10 @@ aspect TransformCanonical {
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
 
+        for (FAbstractEquation eqn : eqns) {
+            eqn.propagateDerivativeBindings();
+        }
+
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
@@ -1929,10 +1933,22 @@ aspect TransformCanonical {
         when (rewriteAlias) to FExp {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FExp new_exp = fv.alias().createUseExp();
+                FIdUseExp new_exp = fv.alias().createUseExp();
+                new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 
-                    new_exp = new FNegExp(new_exp);
-                return new_exp;
+                    return new FNegExp(new_exp);
+                else
+                    return new_exp;
+            }
+            FAbstractEquation eqn = myFEquation();
+            if (eqn != null && !eqn.isDerivativeBindingEquation()
+                    && myFV().derivativeEquivalent() != null
+                    && order() == 0 && inEquationSection()
+                    && !inWhen()) {
+                FVariable var = myFV().derivativeEquivalent();
+                if (var.isAlias())
+                    var = var.alias();
+                return var.getMeDifferentiated().createUseExp();
             } else {
                 rewriteAlias = false;
                 return this;
