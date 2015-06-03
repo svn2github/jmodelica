@@ -983,7 +983,8 @@ aspect IndexReduction {
                 ASTNode.log.info(block);
                 for (IndexReductionEq eqn : block.getMembers())
                     for (IndexReductionVar var : eqn.getVariables())
-                        varsToKeep.add(var);
+                        if (var.numDifferentiations() > 0)
+                            varsToKeep.add(var);
             } else {
                 for (IndexReductionEq eqn : block.getMembers())
                     removeEquation(eqn);
