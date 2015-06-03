@@ -1019,7 +1019,8 @@ aspect FlatPrettyPrint {
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
-	syn String FVariable.displayName()          = getFQName().toString();
+	syn String FAbstractVariable.displayName()  = name();
+	eq FVariable.displayName()                  = getFQName().toString();
 	eq FDerivativeVariable.displayName()        = name();
 	eq FPreBooleanVariable.displayName()        = name();
 	eq FPreEnumVariable.displayName()           = name();
