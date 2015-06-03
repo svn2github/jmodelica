@@ -999,6 +999,8 @@ aspect IndexReduction {
 
         java.util.List<FVariable> zHat = new ArrayList<FVariable>();
 
+        lookForHigherOrderVars();
+
         // Initialize variable to keep track of there are still 
         // differentiated equations
         boolean remainingDifferentiatedEquations = true;
@@ -1030,7 +1032,12 @@ aspect IndexReduction {
             }
             
             // Run matching
-            matchMunkres(weights);
+            try {
+                ASTNode.beginStep("Munkres");
+                matchMunkres(weights);
+            } finally {
+                ASTNode.endStep("Munkres");
+            }
             ASTNode.log.info(printMatchingObj());
             Set<IndexReductionVar> dsVars = Collections.emptySet();
             if (computeDynamicStates)
@@ -1363,5 +1370,60 @@ aspect IndexReduction {
         }
 
     }
+    
+    public void IndexReductionBiPGraph.lookForHigherOrderVars() {
+        Map<IndexReductionVar, Collection<IndexReductionEq>> varToEqMap = computeVariableToEquationMap();
+        Map<IndexReductionVar, Collection<IndexReductionVar>> visitedCache = new HashMap<IndexReductionVar, Collection<IndexReductionVar>>();
 
+        for (IndexReductionEq eqn : getEquations()) {
+            eqn.lookForHigherOrderVars(varToEqMap, visitedCache);
+        }
+
+        
+    }
+
+    public void IndexReductionEq.lookForHigherOrderVars(Map<IndexReductionVar, Collection<IndexReductionEq>> reverseMap,
+            Map<IndexReductionVar, Collection<IndexReductionVar>> visitedCache) {
+        Set<IndexReductionVar> newIncidences = new HashSet<IndexReductionVar>();
+        for (IndexReductionVar var : getVariables()) {
+            if (var.numDifferentiations() < numDifferentiations()) { // && isNonDiffUse(var)) {
+                newIncidences.addAll(lookForHigherOrderVars(reverseMap, visitedCache, var));
+            }
+        }
+        for (IndexReductionVar incidence : newIncidences) {
+            addVariable(incidence);
+        }
+    }
+
+    public Collection<IndexReductionVar> IndexReductionEq.lookForHigherOrderVars(Map<IndexReductionVar, Collection<IndexReductionEq>> reverseMap, 
+            Map<IndexReductionVar, Collection<IndexReductionVar>> visitedCache, IndexReductionVar startVar) {
+        Collection<IndexReductionVar> higherOrderVars = visitedCache.get(startVar);
+        if (higherOrderVars != null)
+            return higherOrderVars;
+        
+        higherOrderVars = new ArrayList<IndexReductionVar>();
+        
+        Queue<IndexReductionVar> queue = new ArrayDeque<IndexReductionVar>();
+        queue.add(startVar);
+        
+        while (!queue.isEmpty()) {
+            IndexReductionVar currentVar = queue.poll();
+            if (visitedCache.containsKey(currentVar))
+                continue;
+            visitedCache.put(currentVar, higherOrderVars);
+            for (IndexReductionEq eqn : reverseMap.get(currentVar)) {
+                if (eqn.numDifferentiations() >= numDifferentiations())
+                    continue;
+                for (IndexReductionVar var : eqn.getVariables()) {
+                    if (var == currentVar)
+                        continue;
+                    if (var.numDifferentiations() >= numDifferentiations())
+                        higherOrderVars.add(var);
+                    else if (!higherOrderVars.contains(var))
+                        queue.add(var);
+                }
+            }
+        }
+        return higherOrderVars;
+    }
 }
