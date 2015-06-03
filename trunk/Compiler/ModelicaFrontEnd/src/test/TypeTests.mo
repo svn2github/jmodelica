@@ -2589,4 +2589,48 @@ Semantic error at line 2539, column 21:
 ")})));
 end CircularIfExp6;
 
+model DivType1
+    function f
+        input Integer n;
+        output Real[n] x;
+        Real[:] t = 1:5;
+    algorithm
+        x := t[div(2:n+1,n)];
+    end f;
+    
+    Real[3] x = f(3);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DivType1",
+            description="Type calculation for div() operator",
+            flatModel="
+fclass TypeTests.DivType1
+ parameter Real x[1];
+ constant Real x[2] = 1;
+ constant Real x[3] = 1;
+parameter equation
+ ({x[1], , }) = TypeTests.DivType1.f(3);
+
+public
+ function TypeTests.DivType1.f
+  input Integer n;
+  output Real[:] x;
+  Real[5] t;
+ algorithm
+  size(x) := {n};
+  t[1] := 1;
+  t[2] := 2;
+  t[3] := 3;
+  t[4] := 4;
+  t[5] := 5;
+  for i1 in 1:max(integer(n + 1 - 2) + 1, 0) loop
+   x[i1] := t[div(2 + (i1 - 1), n)];
+  end for;
+  return;
+ end TypeTests.DivType1.f;
+
+end TypeTests.DivType1;
+")})));
+end DivType1;
+
 end TypeTests;
