@@ -951,7 +951,7 @@ fclass TransformCanonicalTests.AliasTest24
 initial equation 
  x1 = 0.0;
 equation 
- x2 = der(x1);
+ x2 = u;
  der(x1) = u;
 
 end TransformCanonicalTests.AliasTest24;
@@ -2378,7 +2378,7 @@ initial equation
  x1 = 1;
  x2 = 2;
 equation
- der(x1) = - der(x2);
+ der(x1) = - x1;
  der(x2) = x1;
 end TransformCanonicalTests.InitialEqTest13;
 ")})));

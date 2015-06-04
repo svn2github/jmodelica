@@ -880,11 +880,17 @@ aspect DerivativeRewriting {
     private Map<FVariable, FVariable> AliasManager.derivativeBindingPairs = new HashMap<FVariable, FVariable>();
 
     public void AliasManager.addDerivativeBindingPair(FVariable var, FVariable derVar) {
+        if (derivativeBindingPairs == null)
+            return;
         derivativeBindingPairs.put(var, derVar);
     }
 
     public FVariable AliasManager.derivativeEquivalent(FVariable var) {
-        return derivativeBindingPairs.get(var);
+        return derivativeBindingPairs == null ? null : derivativeBindingPairs.get(var);
+    }
+    
+    public void AliasManager.stopCollectingDerivativeBindings() {
+        derivativeBindingPairs = null;
     }
 
     public void FAbstractEquation.propagateDerivativeBindings() {

@@ -122,6 +122,8 @@ aspect IndexReduction {
                 addFEquation(fe);
         }
         
+        getAliasManager().stopCollectingDerivativeBindings();
+        
         Collection<FVariable> l = new ArrayList<FVariable>();
         
         for (FVariable fv : getFVariables()) {
