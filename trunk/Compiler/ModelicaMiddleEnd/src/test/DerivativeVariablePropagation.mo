@@ -36,7 +36,7 @@ equation
  b = time;
  _der_b = 1.0;
 end DerivativeVariablePropagation.RewriteTest1;
-    ")})));
+")})));
     end RewriteTest1;
     
     model NegativeBaseAlias1
@@ -59,7 +59,53 @@ equation
  a = - der(b);
  b = time + (- der(b));
 end DerivativeVariablePropagation.NegativeBaseAlias1;
-    ")})));
+")})));
     end NegativeBaseAlias1;
+    
+    model FunctionCallLefts1
+        function F
+            input Real i1;
+            output Real o1;
+            output Real o2;
+        algorithm
+            o1 := i1;
+            o2 := - i1;
+        annotation(Inline=false);
+        end F;
+        
+        Real a,b;
+    equation
+        (a,) = F(time);
+        der(b) = a;
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="FunctionCallLefts1",
+                description="Ensure that variables in function call lefts aren't rewritten.",
+                flatModel="
+fclass DerivativeVariablePropagation.FunctionCallLefts1
+ Real a;
+ Real b;
+initial equation 
+ b = 0.0;
+equation
+ (a, ) = DerivativeVariablePropagation.FunctionCallLefts1.F(time);
+ der(b) = a;
+
+public
+ function DerivativeVariablePropagation.FunctionCallLefts1.F
+  input Real i1;
+  output Real o1;
+  output Real o2;
+ algorithm
+  o1 := i1;
+  o2 := - i1;
+  return;
+ annotation(Inline = false);
+ end DerivativeVariablePropagation.FunctionCallLefts1.F;
+
+end DerivativeVariablePropagation.FunctionCallLefts1;
+")})));
+    end FunctionCallLefts1;
     
 end DerivativeVariablePropagation;

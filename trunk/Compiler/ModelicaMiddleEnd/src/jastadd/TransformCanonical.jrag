@@ -1962,7 +1962,7 @@ aspect TransformCanonical {
             if (eqn != null && !eqn.potentialAliasEquation()
                     && myFV().derivativeEquivalent() != null
                     && order() == 0 && inEquationSection()
-                    && !inWhen()) {
+                    && !inWhen() && !inFunctionCallLeft()) {
                 FVariable var = myFV().derivativeEquivalent();
                 FIdUseExp exp =  var.getMeDifferentiated().createUseExp();
                 if (var.isAlias())
