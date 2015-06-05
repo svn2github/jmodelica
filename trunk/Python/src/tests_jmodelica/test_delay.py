@@ -163,7 +163,7 @@ class TestFixedDelay:
             assert len(t) < 200
 
     @testattr(stddist = True)
-    def test_sinusoid(self):
+    def test_commute(self):
         res = self.compile_and_simulate('TestCommute', final_time = 10, maxh = 1/5.5)
         t, x_delay, delay_x = res['time'], res['x_delay'], res['delay_x']
         x_expected = N.cos(N.maximum(0,t-1))
