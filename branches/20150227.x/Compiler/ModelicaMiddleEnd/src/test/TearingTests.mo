@@ -135,10 +135,9 @@ der(dummy) := 1
 --- Solved equation ---
 u := 2 * sin(time)
 
---- Torn mixed linear system (Block 1) of 1 iteration variables and 3 solved variables ---
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 2 solved variables ---
 Coefficient variability: discrete-time
 Torn variables:
-  a
   der(v)
   f
 
@@ -151,8 +150,7 @@ Solved discrete variables:
   mode
 
 Torn equations:
-  a := if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
-  der(v) := a
+  der(v) := if pre(mode) == 1 or startFor then sa - 1 elseif pre(mode) == 3 or startBack then sa + 1 else 0
   f := if pre(mode) == 1 or startFor then f0 + f1 * v elseif pre(mode) == 3 or startBack then - f0 + f1 * v else f0 * sa
 
 Continuous residual equations:
@@ -165,10 +163,12 @@ Discrete equations:
   mode := if (pre(mode) == 1 or startFor) and v > 0 then 1 elseif (pre(mode) == 3 or startBack) and v < 0 then 3 else 2
 
 Jacobian:
-  |1.0, 0.0, 0.0, - (if pre(mode) == 1 or startFor then 1.0 elseif pre(mode) == 3 or startBack then 1.0 else 0)|
-  |-1.0, 1.0, 0.0, 0.0|
-  |0.0, 0.0, 1.0, - (if pre(mode) == 1 or startFor then 0.0 elseif pre(mode) == 3 or startBack then 0.0 else f0)|
-  |0.0, m, 1.0, 0.0|
+  |1.0, 0.0, - (if pre(mode) == 1 or startFor then 1.0 elseif pre(mode) == 3 or startBack then 1.0 else 0)|
+  |0.0, 1.0, - (if pre(mode) == 1 or startFor then 0.0 elseif pre(mode) == 3 or startBack then 0.0 else f0)|
+  |m, 1.0, 0.0|
+
+--- Solved equation ---
+a := der(v)
 -------------------------------
 ")})));
 end Test2;

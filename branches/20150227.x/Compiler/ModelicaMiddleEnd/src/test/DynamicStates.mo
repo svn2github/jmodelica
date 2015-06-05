@@ -208,7 +208,7 @@ der(_ds.0.s1) := dsDer(0, 1)
             Real a3;
             Real b;
         equation
-            der(a1) = b;
+            der(a1) = b + 1;
             der(a2) + der(a3) = b;
             a1 * a2 = 1;
             a2 * a3 = 1;
@@ -255,7 +255,7 @@ Iteration variables:
 
 Torn equations:
   b := dynDer(a2) + dynDer(a3)
-  dynDer(a1) := b
+  dynDer(a1) := b + 1
 
 Residual equations:
   ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3) = 0
@@ -285,8 +285,8 @@ der(_ds.0.s0) := dsDer(0, 0)
             Real a4;
             Real b;
         equation
-            der(a1) = b;
-            der(a2) = b;
+            der(a1) = b + 1;
+            der(a2) = b + 2;
             der(a3) + der(a4) = b;
             a1 * a2 * a3 = 1;
             a2 * a3 * a4 = 1;
@@ -360,8 +360,8 @@ Iteration variables:
 
 Torn equations:
   b := dynDer(a3) + dynDer(a4)
-  dynDer(a2) := b
-  dynDer(a1) := b
+  dynDer(a2) := b + 2
+  dynDer(a1) := b + 1
 
 Residual equations:
   ds(0, a2) * ds(0, a3) * dynDer(a4) + (ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3)) * ds(0, a4) = 0

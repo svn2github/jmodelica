@@ -77,7 +77,7 @@ aspect FunctionInlining {
             NONE        (false, false, false), 
             INLINE      (true,  true,  false), 
             LATE        (true,  true,  true), 
-            AFTER_INDEX (true,  true,  false);
+            AFTER_INDEX (true,  true,  true);
 
             private boolean may;
             private boolean always;

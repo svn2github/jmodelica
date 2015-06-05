@@ -1676,90 +1676,108 @@ aspect TransformCanonical {
 	public boolean FAbstractEquation.aliasClassified = false;
 	public boolean FAbstractEquation.classifiedAsAlias = false;
 	
-	/**
-	 * Detection of alias variables in equations
-	 * 
-	 * Equations of the type 'x=y', 'x=-y', '-x=y' and '-x=-y' are detected
-	 * as alias equations and an AliasPair object is returned.
-	 */
-	public AliasPair FEquation.aliasVariables() {
-		AliasPair res = null;
-		if (!containsActiveAnnotations()) // This equation should not be alias-removed if it is marked as residual!
-			res = aliasVariables(getLeft(), getRight(), 1);
-		aliasClassified = true;
-		classifiedAsAlias = res != null;
-		return res;
-	}
-	
-	/**
-	 * Determine if two expressions would form an alias pair if on the left and right sides of 
-	 * an equation.
-	 * 
-	 * @param e1    an expression that would form one side of the equation
-	 * @param e2    an expression that would form the other side of the equation
-	 * @param sign  alias sign is multiplied with this - useful for e.g. 0 = x + y
-	 */
-	public static AliasPair ASTNode.aliasVariables(FExp e1, FExp e2, int sign) {
-		if (e1.canBeAlias() && e2.canBeAlias() 
-				&& e1.type().typeAliasCompatible(e2.type()) 
-				&& e1.variability().aliasCompatible(e2.variability())) {   // x = y, etc.
-			FVariable fv1 = e1.variableThatCanBeAlias();
-			FVariable fv2 = e2.variableThatCanBeAlias();
-			
-			boolean negated = e1.aliasSign() * e2.aliasSign() * sign < 0;
-			return new AliasPair(fv1, fv2, negated);
-		} else {                                    // 0 = x + y, etc
-			FExp eqZero = null;
-			if (e1.isLiteralZero())
-				eqZero = e2;
-			else if (e2.isLiteralZero())
-				eqZero = e1;
-			if (eqZero != null)
-				return eqZero.aliasVariables();
-			else
-				return null;
-		}
-	}
-	
-	syn boolean FTypePrefixVariability.aliasCompatible(FTypePrefixVariability that) {
+    /**
+     * Detection of alias variables in equations
+     * 
+     * Equations of the type 'x=y', 'x=-y', '-x=y' and '-x=-y' are detected
+     * as alias equations and an AliasPair object is returned.
+     */
+    public AliasPair FEquation.aliasVariables() {
+        AliasPair res = null;
+        if (!containsActiveAnnotations()) // This equation should not be alias-removed if it is marked as residual!
+            res = aliasVariables(true);
+        aliasClassified = true;
+        classifiedAsAlias = res != null;
+        return res;
+    }
+
+    public AliasPair FEquation.aliasVariables(boolean checkVariables) {
+        return aliasVariables(getLeft(), getRight(), 1, checkVariables);
+    }
+
+    syn boolean FAbstractEquation.potentialAliasEquation() = false;
+    eq FEquation.potentialAliasEquation() = aliasVariables(false) != null;
+    
+    /**
+     * Determine if two expressions would form an alias pair if on the left and right sides of 
+     * an equation.
+     * 
+     * @param e1    an expression that would form one side of the equation
+     * @param e2    an expression that would form the other side of the equation
+     * @param sign  alias sign is multiplied with this - useful for e.g. 0 = x + y
+     */
+    public static AliasPair ASTNode.aliasVariables(FExp e1, FExp e2, int sign, boolean checkVariables) {
+        FVariable fv1 = e1.variableThatCanBeAlias();
+        FVariable fv2 = e2.variableThatCanBeAlias();
+        if (fv1 != null && fv2 != null) {  // x = y, etc.
+            if (!checkVariables || e1.canBeAlias() && e2.canBeAlias() 
+                    && e1.type().typeAliasCompatible(e2.type()) 
+                    && e1.variability().aliasCompatible(e2.variability())) {
+                boolean negated = e1.aliasSign() * e2.aliasSign() * sign < 0;
+                return new AliasPair(fv1, fv2, negated);
+            } else {
+                return null;
+            }
+        } else {                          // 0 = x + y, etc
+            FExp eqZero = null;
+            if (e1.isLiteralZero()) {
+                eqZero = e2;
+            } else if (e2.isLiteralZero()) {
+                eqZero = e1;
+            } if (eqZero != null) {
+                return eqZero.aliasVariables(checkVariables);
+            } else {
+                return null;
+            }
+        }
+    }
+
+    syn boolean FTypePrefixVariability.aliasCompatible(FTypePrefixVariability that) {
         return this.equals(that);
-	}
+    }
 	
-	/**
-	 * Detection of alias variables in expressions
-	 * 
-	 * Only valid when in an equation that gives that the value of this expression is always 0.
-	 */
-	public AliasPair FExp.aliasVariables() {
-		return null;
-	}
-	
-	public AliasPair FDotAddExp.aliasVariables() {
-		return aliasVariables(getLeft(), getRight(), -1);
-	}
-	
-	public AliasPair FDotSubExp.aliasVariables() {
-		return aliasVariables(getLeft(), getRight(), 1);
-	}
-	
-	syn boolean FExp.canBeAlias() = false;
-	eq FIdUseExp.canBeAlias()     = myFV().canBeAlias();
-	eq FDerExp.canBeAlias()       = false;
-	eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
-	
-	syn boolean FAbstractVariable.canBeAlias() = false;
+    /**
+     * Detection of alias variables in expressions
+     * 
+     * Only valid when in an equation that gives that the value of this expression is always 0.
+     */
+    public AliasPair FExp.aliasVariables(boolean checkVariables) {
+        return null;
+    }
+
+    public AliasPair FDotAddExp.aliasVariables(boolean checkVariables) {
+        return aliasVariables(getLeft(), getRight(), -1, checkVariables);
+    }
+
+    public AliasPair FDotSubExp.aliasVariables(boolean checkVariables) {
+        return aliasVariables(getLeft(), getRight(), 1, checkVariables);
+    }
+
+    syn boolean FExp.canBeAlias() = false;
+    eq FIdUseExp.canBeAlias()     = myFV().canBeAlias();
+    eq FDerExp.canBeAlias()       = false;
+    eq FNegExp.canBeAlias()       = getFExp().canBeAlias();
+
+    syn boolean FAbstractVariable.canBeAlias() = false;
     // TODO: Use meDifferentiated instead of myDerivativeVariable()
     eq FVariable.canBeAlias() = !lookupDerFV(getFQName(), order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isAbstractDerivativeVariable()
             && !isInput() && !isOutput();
-	
-	syn int FExp.aliasSign() = 1;
-	eq FNegExp.aliasSign()   = -getFExp().aliasSign();
-	
-	syn FVariable FExp.variableThatCanBeAlias() = null;
-	eq FIdUseExp.variableThatCanBeAlias()       = (FVariable) myFV();
-	eq FNegExp.variableThatCanBeAlias()         = getFExp().variableThatCanBeAlias();
-	
+
+    syn int FExp.aliasSign() = 1;
+    eq FNegExp.aliasSign()   = -getFExp().aliasSign();
+
+    syn FVariable FExp.variableThatCanBeAlias() = null;
+    eq FNegExp.variableThatCanBeAlias()         = getFExp().variableThatCanBeAlias();
+    eq FIdUseExp.variableThatCanBeAlias() {
+        FAbstractVariable fav = myFV();
+        if (fav.isFVariable()) {
+            return fav.asFVariable();
+        } else {
+            return null;
+        }
+    }
+
 	syn boolean FExp.isLiteralExp() = false;
 	eq FLitExp.isLiteralExp()       = true;
 	
@@ -1823,6 +1841,10 @@ aspect TransformCanonical {
 		for (FAbstractEquation equation : getFAbstractEquations()) 
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
+
+        for (FAbstractEquation eqn : eqns) {
+            eqn.propagateDerivativeBindings();
+        }
 
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
@@ -1901,24 +1923,41 @@ aspect TransformCanonical {
 	boolean FIdUseExp.rewriteAlias = false;
 	boolean FAssignStmt.rewriteAlias = false;
 	
-	/**
-	 * FIdUses referring to alias variables need to be changed to 
-	 * FIdUses referring to their alias targets. 
-	 * 
-	 * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
-	 * is true. Notice that in order for the rewrite to be enable, the is$final
-	 * field of FIdUseExp needs to be set to false: this is done by the recursive
-	 * method ASTNode.flushAllRecursiveClearFinal. 
-	 */
-	rewrite FIdUseExp {
-		when (rewriteAlias && myFV().isFVariable() && myFV().isAlias()) to FExp {
-			FVariable fv = (FVariable) myFV();
-			FExp new_exp = fv.alias().createUseExp();
-			if (fv.isNegated()) 
-				new_exp = new FNegExp(new_exp);
-			return new_exp;
-		}
-	}
+    /**
+     * FIdUses referring to alias variables need to be changed to 
+     * FIdUses referring to their alias targets. 
+     * 
+     * This is done by rewrites which are activated once FClass.aliasVariablesEliminated
+     * is true. Notice that in order for the rewrite to be enable, the is$final
+     * field of FIdUseExp needs to be set to false: this is done by the recursive
+     * method ASTNode.flushAllRecursiveClearFinal. 
+     */
+    rewrite FIdUseExp {
+        when (rewriteAlias) to FExp {
+            if (myFV().isFVariable() && myFV().isAlias()) {
+                FVariable fv = (FVariable) myFV();
+                FIdUseExp new_exp = fv.alias().createUseExp();
+                new_exp.rewriteAlias = true;
+                if (fv.isNegated()) 
+                    return new FNegExp(new_exp);
+                else
+                    return new_exp;
+            }
+            FAbstractEquation eqn = myFEquation();
+            if (eqn != null && !eqn.potentialAliasEquation()
+                    && myFV().derivativeEquivalent() != null
+                    && order() == 0 && inEquationSection()
+                    && !inWhen()) {
+                FVariable var = myFV().derivativeEquivalent();
+                if (var.isAlias())
+                    var = var.alias();
+                return var.getMeDifferentiated().createUseExp();
+            } else {
+                rewriteAlias = false;
+                return this;
+            }
+        }
+    }
 	
 	rewrite FPreExp {
 		when (rewriteAlias && myNonPreFV().isFVariable() && myNonPreFV().isAlias()) to FExp {

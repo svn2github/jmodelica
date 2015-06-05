@@ -819,7 +819,8 @@ aspect AliasVariables {
                 }
                 
             }
-		}
+        }
+
 	}
 	
 	/**
@@ -870,5 +871,74 @@ aspect AliasVariables {
         
         return score;
 	}
+
+}
+
+aspect DerivativeRewriting {
+    private Map<FVariable, FVariable> AliasManager.derivativeBindingPairs = new HashMap<FVariable, FVariable>();
+
+    public void AliasManager.addDerivativeBindingPair(FVariable var, FVariable derVar) {
+        if (derivativeBindingPairs == null)
+            return;
+        derivativeBindingPairs.put(var, derVar);
+    }
+
+    public FVariable AliasManager.derivativeEquivalent(FVariable var) {
+        return derivativeBindingPairs == null ? null : derivativeBindingPairs.get(var);
+    }
+    
+    public void AliasManager.stopCollectingDerivativeBindings() {
+        derivativeBindingPairs = null;
+    }
+
+    public void FAbstractEquation.propagateDerivativeBindings() {
+    }
+    
+    public void FEquation.propagateDerivativeBindings() {
+        if (!isDerivativeBindingEquation())
+            return;
+        FAbstractVariable right = getRight().asFIdUseExp().myFV();
+        FAbstractVariable left = getLeft().asFIdUseExp().myFV();
+        if (!left.isFVariable() || !right.isFVariable())
+            return;
+        if (left.isTemporary() || right.isTemporary())
+            return;
+        if (left.variability().discreteOrLess() || right.variability().discreteOrLess())
+            return;
+        boolean rightIsDer = right.isDerivativeVariable();
+        boolean leftIsDer = left.isDerivativeVariable();
+        FVariable var;
+        FVariable derVar;
+        if (rightIsDer && !leftIsDer) {
+            var = left.asFVariable();
+            derVar = right.asFVariable();
+        } else if (!rightIsDer && leftIsDer) {
+            var = right.asFVariable();
+            derVar = left.asFVariable();
+        } else {
+            return;
+        }
+        myFClass().getAliasManager().addDerivativeBindingPair(var, derVar.getMeIntegrated());
+    }
+
+    syn boolean FAbstractEquation.isDerivativeBindingEquation() = false;
+    eq FEquation.isDerivativeBindingEquation() {
+        if (!getRight().isAccess() || !getLeft().isAccess())
+            return false;
+        if (!inEquationSection())
+            return false;
+        boolean rightIsDer = getRight().isAbstractDerAccess();
+        boolean leftIsDer = getLeft().isAbstractDerAccess();
+        return rightIsDer && !leftIsDer || !rightIsDer && leftIsDer;
+    }
+
+    syn boolean FExp.isDerAccess() = false;
+    eq FDerExp.isDerAccess() = true;
+
+    syn boolean FExp.isAbstractDerAccess() = false;
+    eq FAbstractDerExp.isAbstractDerAccess() = true;
+
+    syn FVariable FAbstractVariable.derivativeEquivalent() = null;
+    syn lazy FVariable FVariable.derivativeEquivalent() = myFClass().getAliasManager().derivativeEquivalent(this);
 
 }

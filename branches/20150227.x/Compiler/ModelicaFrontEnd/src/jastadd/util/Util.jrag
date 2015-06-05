@@ -1076,7 +1076,9 @@ aspect Visibility {
 
     syn boolean FVariable.isPublic()    = getFVisibilityType().isPublic();
     syn boolean FVariable.isProtected() = getFVisibilityType().isProtected();
-    syn boolean FVariable.isTemporary() = getFVisibilityType().isTemporary();
+
+    syn boolean FAbstractVariable.isTemporary() = false;
+    eq FVariable.isTemporary()                  = getFVisibilityType().isTemporary();
     
 }
 
