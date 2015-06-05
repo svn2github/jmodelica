@@ -39,4 +39,27 @@ end DerivativeVariablePropagation.RewriteTest1;
     ")})));
     end RewriteTest1;
     
+    model NegativeBaseAlias1
+        Real a, b, c;
+    equation
+        a = der(c);
+        b = -c;
+        b = time + a;
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NegativeBaseAlias1",
+                description="Ensure that the negation is handled when substitution for an alias.",
+                flatModel="
+fclass DerivativeVariablePropagation.NegativeBaseAlias1
+ Real a;
+ Real b;
+initial equation 
+ b = 0.0;
+equation
+ a = - der(b);
+ b = time + (- der(b));
+end DerivativeVariablePropagation.NegativeBaseAlias1;
+    ")})));
+    end NegativeBaseAlias1;
+    
 end DerivativeVariablePropagation;
