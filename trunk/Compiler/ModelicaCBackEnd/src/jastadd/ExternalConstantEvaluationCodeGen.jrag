@@ -130,10 +130,7 @@ aspect Serialize {
         }
     }
     
-    private Map<String,String> FExternalStmt.tempMap = null; // Workaround for unittests
     public void FExternalStmt.genSerializeDecl_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        this.tempMap = tempMap;
-        this.codeGenContext = cgc;
         ArrayList<CommonVariableDecl> vars  = varsToSerialize();
         indent = ASTNode.printer_C.indent(indent);
         TypePrinter_C dp = new DeclPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
@@ -146,8 +143,6 @@ aspect Serialize {
     }
     
     public void FExternalStmt.genSerializeInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
         indent = ASTNode.printer_C.indent(indent);
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl eo : externalObjectsToSerialize()) {
@@ -158,8 +153,6 @@ aspect Serialize {
     }
     
     public void FExternalStmt.genSerializeCalcInit_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
         indent = ASTNode.printer_C.indent(indent);
         TypePrinter_C ip = new InitPrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl arg : functionArgsToSerialize()) {
@@ -170,8 +163,6 @@ aspect Serialize {
     }
     
     public void FExternalStmt.genSerializeCalc_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
         indent = ASTNode.printer_C.indent(indent);
         prettyPrint_C(ASTNode.printer_C, str, indent);
         genCheckPoint(str, indent, "DONE");
@@ -181,8 +172,6 @@ aspect Serialize {
     }
     
     public void FExternalStmt.genSerializeCalcFree_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
         indent = ASTNode.printer_C.indent(indent);
         TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl cvd : functionArgsToSerialize()) {
@@ -192,16 +181,12 @@ aspect Serialize {
     }
     
     public void FExternalStmt.genSerializeEnd_C(CodeStream str, String indent, CodeGenContext cgc, Map<String,String> tempMap) {
-        tempMap = this.tempMap;
-        cgc = this.codeGenContext;
         indent = ASTNode.printer_C.indent(indent);
         TypePrinter_C fp = new FreePrinter_ECE(ASTNode.printer_C, str, tempMap, cgc);
         for (CommonVariableDecl cvd : externalObjectsToSerialize()) {
              fp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
              cvd.type().print(fp);
         }
-        this.tempMap = null;
-        this.codeGenContext = null;
     }
     
     public void FExternalStmt.genCheckPoint(CodeStream str, String indent, String token) {

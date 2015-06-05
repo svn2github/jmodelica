@@ -49,11 +49,15 @@ public abstract class ExternalCEvalTag extends AbstractTag {
         instantiateTags(getClass(), map, this, myGenerator, fClass);
     }
     
-    public void generate(CodeStream genPrinter) {
+    /* Used when unit testing. Temp names will accumulate over all tests */
+    private static final CodeGenContext unitCgc = new CodeGenContext();
+    private static final Map<String,String> unitTempMap = new HashMap<String,String>();
+    
+    public  void generate(CodeStream genPrinter) {
         if (ext == null) {
             for (FExternalStmt ext : fClass.myExternals()) {
                 if (ext.canEvaluate() && !ext.isConstructorStmt() && !ext.isDestructorStmt())
-                    generate_wrap(genPrinter, ext, new CodeGenContext(), new HashMap<String,String>());
+                    generate_wrap(genPrinter, ext, unitCgc, unitTempMap);
             }
         } else {
             generate_wrap(genPrinter, ext, cgc, tempMap);
