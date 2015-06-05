@@ -53,25 +53,27 @@ public abstract class ExternalCEvalTag extends AbstractTag {
     private static final CodeGenContext unitCgc = new CodeGenContext();
     private static final Map<String,String> unitTempMap = new HashMap<String,String>();
     
-    public  void generate(CodeStream genPrinter) {
+    public  void generate(CodeStream str) {
         if (ext == null) {
             for (FExternalStmt ext : fClass.myExternals()) {
                 if (ext.canEvaluate() && !ext.isConstructorStmt() && !ext.isDestructorStmt())
-                    generate_wrap(genPrinter, ext, unitCgc, unitTempMap);
+                    generate_wrap(str, ext, unitCgc, unitTempMap);
             }
         } else {
-            generate_wrap(genPrinter, ext, cgc, tempMap);
+            generate_wrap(str, ext, cgc, tempMap);
         }
     }
     
-    public void generate_wrap(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc,
+    public void generate_wrap(CodeStream str, FExternalStmt ext, CodeGenContext cgc,
             Map<String,String> tempMap) {
+        CodePrinter p = ASTNode.printer_C;
+        String indent = p.indent("");
         ext.setCodeGenContext(cgc);
-        generate(genPrinter, ext, cgc, tempMap);
+        generate(p, str, indent, ext, cgc, tempMap);
         ext.setCodeGenContext(null);
     }
     
-    public abstract void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-            Map<String,String> tempMap);
+    public abstract void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+            CodeGenContext cgc, Map<String,String> tempMap);
 }
 

@@ -1212,11 +1212,11 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
             String inc = ext.include();
             if (inc != null)
-                genPrinter.println(inc);
+                str.println(inc);
         }
     }
     
@@ -1226,10 +1226,10 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
             for (FRecordDecl rec : ext.usedRecords()) {
-                rec.prettyPrint_C(genPrinter, "");
+                rec.prettyPrint_C(str, "");
             }
         }
     }
@@ -1240,9 +1240,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeDecl_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeDecl_C(p, str, indent, cgc, tempMap);
         }
     }
     
@@ -1252,9 +1252,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeInit_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeInit_C(p, str, indent, cgc, tempMap);
         }
     }
     
@@ -1265,9 +1265,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeCalcInit_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeCalcInit_C(p, str, indent, cgc, tempMap);
         }
     }
     
@@ -1277,9 +1277,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeCalc_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeCalc_C(p, str, indent, cgc, tempMap);
         }
     }
     
@@ -1289,9 +1289,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeCalcFree_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeCalcFree_C(p, str, indent, cgc, tempMap);
         }
     }
     
@@ -1301,9 +1301,9 @@ public class CGenerator extends GenericGenerator {
         }
         
         @Override
-        public void generate(CodeStream genPrinter, FExternalStmt ext, CodeGenContext cgc, 
-                Map<String,String> tempMap) {
-            ext.genSerializeEnd_C(genPrinter, "", cgc, tempMap);
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            ext.genSerializeEnd_C(p, str, indent, cgc, tempMap);
         }
     }
 
