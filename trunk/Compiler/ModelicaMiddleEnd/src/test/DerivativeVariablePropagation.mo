@@ -108,4 +108,42 @@ end DerivativeVariablePropagation.FunctionCallLefts1;
 ")})));
     end FunctionCallLefts1;
     
+    model NoIndexReduction1
+        Real x;
+        Real y;
+    equation
+        der(x) = y;
+        y = x + time;
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NoIndexReduction1_disabled",
+                index_reduction=false,
+                description="Ensure that no substitution is done when index reduction is disabled.",
+                flatModel="
+fclass DerivativeVariablePropagation.NoIndexReduction1
+ Real x;
+ Real y;
+initial equation 
+ x = 0.0;
+equation
+ der(x) = y;
+ y = x + time;
+end DerivativeVariablePropagation.NoIndexReduction1;
+"),TransformCanonicalTestCase(
+                name="NoIndexReduction1_enabled",
+                index_reduction=true,
+                description="Ensure that substitution is done when index reduction is enabled.",
+                flatModel="
+fclass DerivativeVariablePropagation.NoIndexReduction1
+ Real x;
+ Real y;
+initial equation 
+ x = 0.0;
+equation
+ der(x) = y;
+ der(x) = x + time;
+end DerivativeVariablePropagation.NoIndexReduction1;
+")})));
+    end NoIndexReduction1;
+    
 end DerivativeVariablePropagation;

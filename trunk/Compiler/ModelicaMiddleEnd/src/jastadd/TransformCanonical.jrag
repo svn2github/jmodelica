@@ -1857,8 +1857,12 @@ aspect TransformCanonical {
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
 
-        for (FAbstractEquation eqn : eqns) {
-            eqn.propagateDerivativeBindings();
+        // Collect derivative binding equations, however only if we are going
+        // to perform index reduction!
+        if (myOptions().getBooleanOption("index_reduction")) {
+            for (FAbstractEquation eqn : eqns) {
+                eqn.propagateDerivativeBindings();
+            }
         }
 
 		setFVariableList(new List(nonAliasVars));
