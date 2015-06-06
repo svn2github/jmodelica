@@ -445,6 +445,8 @@ aspect DynamicStateSelect{
                 for (IndexReductionEq eqn : getEquations()) {
                     sb.append(eqn);
                     Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+                    if (coefficients == null)
+                        continue; // Yes this can happen :)
                     for (IndexReductionVar var : getVariables()) {
                         sb.append('\t');
                         Coefficient coff = coefficients.get(var);
