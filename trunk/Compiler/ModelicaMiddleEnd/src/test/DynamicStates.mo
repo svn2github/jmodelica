@@ -32,7 +32,6 @@ package DynamicStates
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSOneEq",
                 description="Two dynamic states in one equation",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -88,7 +87,6 @@ der(_ds.0.s0) := dsDer(0, 0)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSOneEqUnsolved",
                 description="Two dynamic states in one equation with unsolved incidences",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -148,7 +146,6 @@ der(_ds.0.s0) := dsDer(0, 0)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_ThreeDSOneEq",
                 description="Three dynamic states in one equation",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -217,7 +214,6 @@ der(_ds.0.s1) := dsDer(0, 1)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_ThreeDSTwoEq",
                 description="Three dynamic states in two equation",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -295,7 +291,6 @@ der(_ds.0.s0) := dsDer(0, 0)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_FourDSTwoEq",
                 description="Four dynamic states in two equation",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -407,7 +402,6 @@ der(_ds.0.s1) := dsDer(0, 1)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_FiveDSTwoEq",
                 description="Five dynamic states in two equation",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 ")})));
@@ -434,7 +428,6 @@ der(_ds.0.s1) := dsDer(0, 1)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSSetMerge",
                 description="Two dynamic state sets that need to be merged",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -541,7 +534,6 @@ der(_ds.0.s0) := dsDer(0, 0)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoBigDSSetMerge",
                 description="Two dynamic state sets of two equations each that need to be merged",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -674,7 +666,6 @@ der(_ds.0.s0) := dsDer(0, 0)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSSetForced",
                 description="Two dynamic states sets where one is forced by the other",
-                dynamic_states=true,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -751,6 +742,190 @@ der(_ds.1.s0) := dsDer(1, 0)
         end TwoDSSetForced;
 
     end Basic;
+    
+    package Leafs
+        model OneLeaf
+            // a1 a2 a3
+            // +  + 
+            //    *  + 
+            Real a1;
+            Real a2;
+            Real a3;
+            Real b;
+        equation
+            der(a3) = b;
+            der(a1) + der(a2) = b;
+            a1*a2 = time;
+            a2 = sin(a3);
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_Leafs_OneLeaf",
+                description="Test the leafs algorithm with a single leaf, two non sets form a single set",
+                methodName="printDAEBLT",
+                methodResult="
+--- Dynamic state block ---
+  --- States: a3 ---
+    --- Solved equation ---
+    a2 := sin(ds(0, a3))
+
+    --- Solved equation ---
+    a1 := time / ds(0, a2)
+    -------------------------------
+  --- States: a1 ---
+    --- Solved equation ---
+    a2 := time / ds(0, a1)
+
+    --- Unsolved equation (Block 1(a1).0) ---
+    ds(0, a2) = sin(ds(0, a3))
+      Computed variables: a3
+    -------------------------------
+  --- States: a2 ---
+    --- Unsolved equation (Block 1(a2).0) ---
+    ds(0, a2) = sin(ds(0, a3))
+      Computed variables: a3
+
+    --- Solved equation ---
+    a1 := time / ds(0, a2)
+    -------------------------------
+
+--- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  dynDer(a2)
+  dynDer(a1)
+
+Iteration variables:
+  dynDer(a3)
+
+Torn equations:
+  dynDer(a2) := cos(ds(0, a3)) * dynDer(a3)
+  dynDer(a1) := - dynDer(a2) + dynDer(a3)
+
+Residual equations:
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 1.0
+    Iteration variables: dynDer(a3)
+
+Jacobian:
+  |1.0, 0.0, (- cos(ds(0, a3)))|
+  |1.0, 1.0, -1.0|
+  |ds(0, a1), ds(0, a2), 0.0|
+
+--- Solved equation ---
+b := dynDer(a3)
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+-------------------------------
+")})));
+        end OneLeaf;
+    
+        model TwoLeafs
+            // a1 a2 a3 a4
+            // +  + 
+            // *     + 
+            //    *     + 
+            Real a1;
+            Real a2;
+            Real a3;
+            Real a4;
+            Real b;
+        equation
+            der(a2) + der(a3) = b;
+            der(a1) + der(a4) = b;
+            a1 * a2 = time;
+            a1 = sin(a3);
+            a2 = sin(a4);
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_Leafs_TwoLeafs",
+                description="Test the leafs algorithm with two leafs that join a existing set",
+                methodName="printDAEBLT",
+                methodResult="
+--- Dynamic state block ---
+  --- States: a4 ---
+    --- Solved equation ---
+    a2 := sin(ds(0, a4))
+
+    --- Solved equation ---
+    a1 := time / ds(0, a2)
+
+    --- Unsolved equation (Block 1(a4).0) ---
+    ds(0, a1) = sin(ds(0, a3))
+      Computed variables: a3
+    -------------------------------
+  --- States: a3 ---
+    --- Solved equation ---
+    a1 := sin(ds(0, a3))
+
+    --- Solved equation ---
+    a2 := time / ds(0, a1)
+
+    --- Unsolved equation (Block 1(a3).0) ---
+    ds(0, a2) = sin(ds(0, a4))
+      Computed variables: a4
+    -------------------------------
+  --- States: a1 ---
+    --- Solved equation ---
+    a2 := time / ds(0, a1)
+
+    --- Unsolved equation (Block 1(a1).0) ---
+    ds(0, a2) = sin(ds(0, a4))
+      Computed variables: a4
+
+    --- Unsolved equation (Block 1(a1).1) ---
+    ds(0, a1) = sin(ds(0, a3))
+      Computed variables: a3
+    -------------------------------
+  --- States: a2 ---
+    --- Unsolved equation (Block 1(a2).0) ---
+    ds(0, a2) = sin(ds(0, a4))
+      Computed variables: a4
+
+    --- Solved equation ---
+    a1 := time / ds(0, a2)
+
+    --- Unsolved equation (Block 1(a2).1) ---
+    ds(0, a1) = sin(ds(0, a3))
+      Computed variables: a3
+    -------------------------------
+
+--- Torn linear system (Block 2) of 2 iteration variables and 3 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  dynDer(a1)
+  dynDer(a2)
+  b
+
+Iteration variables:
+  dynDer(a4)
+  dynDer(a3)
+
+Torn equations:
+  dynDer(a1) := cos(ds(0, a3)) * dynDer(a3)
+  dynDer(a2) := cos(ds(0, a4)) * dynDer(a4)
+  b := dynDer(a2) + dynDer(a3)
+
+Residual equations:
+  dynDer(a1) + dynDer(a4) = b
+    Iteration variables: dynDer(a4)
+  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 1.0
+    Iteration variables: dynDer(a3)
+
+Jacobian:
+  |1.0, 0.0, 0.0, 0.0, (- cos(ds(0, a3)))|
+  |0.0, 1.0, 0.0, (- cos(ds(0, a4))), 0.0|
+  |0.0, 1.0, -1.0, 0.0, 1.0|
+  |1.0, 0.0, -1.0, 1.0, 0.0|
+  |ds(0, a2), ds(0, a1), 0.0, 0.0, 0.0|
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+-------------------------------
+")})));
+        end TwoLeafs;
+    end Leafs;
     
     package StateSelectBias
         
@@ -869,6 +1044,7 @@ Jacobian:
         end AlwaysVar2;
         
         model NeverVar1
+        // Disabled since UniversalConstraint and RevoluteConstraint seems to need state select never variables in the ds sets.
             // a1 a2 a3
             // *  *    
             //    +  + 
@@ -882,7 +1058,7 @@ Jacobian:
             a1 + a2 = 1;
             a2 * a3 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_NeverVar1",
                 description="Test so that StateSelect.never prevents the dss algorithm from moving variables.",
@@ -923,6 +1099,7 @@ a1 := - a2 + 1
         end NeverVar1;
         
         model NeverVar2
+        // Disabled since UniversalConstraint and RevoluteConstraint seems to need state select never variables in the ds sets.
             // a1 a2 a3
             // *  +  + 
             //    +  + 
@@ -936,7 +1113,7 @@ a1 := - a2 + 1
             a1 + a2 * a3 = 1;
             a2 * a3 = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
+        annotation(__JModelica_disabled(UnitTesting(tests={
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_NeverVar2",
                 description="Test so that StateSelect.never prevents the dss algorithm from moving variables.",
@@ -980,95 +1157,6 @@ a1 := - a2 * a3 + 1
         
     end StateSelectBias;
     
-    model TempVar1
-        function F
-            input Real a;
-            input Real b;
-            input Real c;
-            output Real d;
-        algorithm
-            d := a * b + c * a;
-        end F;
-        // a1 a2 tmp
-        // +  +  + 
-        Real a1;
-        Real a2;
-        Real b;
-    equation
-        der(a1) = b;
-        der(a2) = b;
-        0 = F(a1 * a2, a1, a2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="DynamicStates_TempVar1",
-            description="Test so that temp variables doesn't form dynamic state sets",
-            dynamic_states=true,
-            methodName="printDAEBLT",
-            methodResult="
---- Dynamic state block ---
-  --- States: a1 ---
-    --- Torn system (Block 1(a1).0) of 1 iteration variables and 1 solved variables ---
-    Torn variables:
-      temp_1
-
-    Iteration variables:
-      a2 ()
-
-    Torn equations:
-      temp_1 := ds(0, a1) * ds(0, a2)
-
-    Residual equations:
-      0 = temp_1 * ds(0, a1) + ds(0, a2) * temp_1
-        Iteration variables: a2
-    -------------------------------
-  --- States: a2 ---
-    --- Torn system (Block 1(a2).0) of 1 iteration variables and 1 solved variables ---
-    Torn variables:
-      temp_1
-
-    Iteration variables:
-      a1 ()
-
-    Torn equations:
-      temp_1 := ds(0, a1) * ds(0, a2)
-
-    Residual equations:
-      0 = temp_1 * ds(0, a1) + ds(0, a2) * temp_1
-        Iteration variables: a1
-    -------------------------------
-
---- Torn linear system (Block 2) of 1 iteration variables and 3 solved variables ---
-Coefficient variability: continuous-time
-Torn variables:
-  b
-  dynDer(a1)
-  _der_temp_1
-
-Iteration variables:
-  dynDer(a2)
-
-Torn equations:
-  b := dynDer(a2)
-  dynDer(a1) := b
-  _der_temp_1 := ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)
-
-Residual equations:
-  0 = temp_1 * dynDer(a1) + _der_temp_1 * ds(0, a1) + (ds(0, a2) * _der_temp_1 + dynDer(a2) * temp_1)
-    Iteration variables: dynDer(a2)
-
-Jacobian:
-  |-1.0, 0.0, 0.0, 1.0|
-  |-1.0, 1.0, 0.0, 0.0|
-  |0.0, - ds(0, a2), 1.0, - ds(0, a1)|
-  |0.0, - temp_1, - ds(0, a1) - ds(0, a2), - temp_1|
-
---- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
--------------------------------
-")})));
-    end TempVar1;
-
     package Examples
         model Pendulum
             parameter Real L = 1 "Pendulum length";

@@ -1,3 +1,4 @@
+import java.util.Collections;
 import java.util.Map;
 
 /*
@@ -300,7 +301,7 @@ aspect DynamicStateSelect{
             if (coefficients == null)
                 continue;
             Coefficient coff = coefficients.get(eqn.getMatching());
-            if (coff != null && coff.continuous)
+            if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS)
                 worklist.add(eqn);
         }
         while (!worklist.isEmpty()) {
@@ -384,9 +385,36 @@ aspect DynamicStateSelect{
             }
         }
         
+        for (IndexReductionEq eqn : getEquations()) {
+            if (dsLookup.containsKey(eqn))
+                continue;
+            if (eqn.getMatching() == null)
+                continue; // Possible?
+            Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
+            if (coefficients == null)
+                continue; // Possible?
+            if (!eqn.getMatching().dynamicSetCandidate(coefficients.get(eqn.getMatching())))
+                continue;
+            for (IndexReductionVar var : eqn.getVariables()) {
+                if (eqn.getMatching() == var || var.getMatching() == null)
+                    continue;
+                IndexReductionEq otherEqn = var.getMatching();
+                coefficients = coefficientsMatrix.get(otherEqn);
+                if (!var.dynamicSetCandidate(coefficients.get(var)))
+                    continue;
+                DSSet set = dsLookup.get(otherEqn);
+                if (set == null)
+                    continue;
+                set.eqns.add(eqn);
+                set.vars.add(eqn.getMatching());
+                dsLookup.put(eqn, set);
+                break;
+            }
+        }
+        
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
-            if (set.eqns.size() > 2 || set.vars.size() > 8) {
+            if (set.eqns.size() > 8 || set.vars.size() > 8) {
                 ASTNode.log.info("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
                 ASTNode.log.info(set);
                 skipDynamicStates = true;
@@ -434,15 +462,15 @@ aspect DynamicStateSelect{
     public boolean IndexReductionVar.dynamicSetCandidate(IndexReductionBiPGraph.Coefficient coefficient) {
         if (coefficient == null)
             return false;
-        if (!coefficient.continuous)
+        if (coefficient.state != IndexReductionBiPGraph.COEFFICIENT_STATE.CONTINUOUS)
             return false;
-        if (getVariable().isTemporary())
-            return false;
+//        if (getVariable().isTemporary())
+//            return false;
         FAbstractVariable.StateSelect stateSelect = getVariable().stateSelection();
         if (stateSelect == FRealVariable.StateSelect.ALWAYS)
             return false;
-        if (stateSelect == FRealVariable.StateSelect.NEVER)
-            return false;
+//        if (stateSelect == FRealVariable.StateSelect.NEVER)
+//            return false;
         return true;
     }
 
@@ -459,7 +487,7 @@ aspect DynamicStateSelect{
                     sb.append(eqn);
                     Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                     if (coefficients == null)
-                        continue; // Yes this can happen :)
+                        coefficients = Collections.emptyMap();
                     for (IndexReductionVar var : getVariables()) {
                         sb.append('\t');
                         Coefficient coff = coefficients.get(var);
@@ -468,10 +496,19 @@ aspect DynamicStateSelect{
                         if (printExpressions) {
                             sb.append(coff.exp);
                         } else {
-                            if (coff.continuous)
+                            switch (coff.state) {
+                            case CONTINUOUS:
                                 sb.append('+');
-                            else
+                                break;
+                            case EXCEPTION:
+                                sb.append('X');
+                                break;
+                            case SPLIT:
+                                sb.append('S');
+                                break;
+                            default:
                                 sb.append('*');
+                            }
                         }
                     }
                     sb.append('\n');
@@ -525,7 +562,7 @@ aspect DynamicStateSelect{
                 Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
                 if (coefficients != null) {
                     Coefficient coff = coefficients.get(var);
-                    if (coff != null && coff.continuous)
+                    if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS)
                         return false;
                 }
                 FAbstractVariable.StateSelect stateSelect = var.getVariable().stateSelection();
@@ -584,7 +621,7 @@ aspect DynamicStateSelect{
                 if (coefficients == null)
                     return;
                 Coefficient coff = coefficients.get(var);
-                if (coff != null && coff.continuous) {
+                if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS) {
                     ASTNode.log.debug("      Adding %s to worklist", eqn);
                     worklist.add(eqn);
                 }
