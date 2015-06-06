@@ -239,7 +239,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param FVariable A variable class.
      */
     protected boolean isXMLVariable(FVariable var) {
-        return !var.isPreVariable() && !var.isExternalObject() && !var.isTemporary();
+        return !var.isPreVariable() && !var.isExternalObject() && (!var.isTemporary() || var.isDifferentiatedVariable());
     }
     
     /**

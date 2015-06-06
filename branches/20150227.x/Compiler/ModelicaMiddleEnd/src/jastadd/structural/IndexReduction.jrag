@@ -1101,11 +1101,22 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph {
         public static class Coefficient {
             public final FExp exp;
-            public final boolean continuous;
+            public final COEFFICIENT_STATE state;
             
-            public Coefficient(FExp exp, boolean continuous) {
+            public Coefficient(FExp exp, COEFFICIENT_STATE state) {
                 this.exp = exp;
-                this.continuous = continuous;
+                this.state = state;
+            }
+        }
+        
+        public enum COEFFICIENT_STATE{
+            CONSTANT, CONTINUOUS, EXCEPTION, SPLIT;
+            public static COEFFICIENT_STATE create(FTypePrefixVariability variability) {
+                if (variability == null)
+                    return EXCEPTION;
+                if (variability.lessOrEqual(ASTNode.fParameter()))
+                    return CONSTANT;
+                return CONTINUOUS;
             }
         }
     }
@@ -1118,6 +1129,16 @@ aspect IndexReduction {
     }
     
     public int IndexReductionEq.calculateLinearityWeight(IndexReductionVar var, Map<IndexReductionEq, Map<IndexReductionVar, IndexReductionBiPGraph.Coefficient>> coefficientsMatrix) {
+        Map<IndexReductionVar, IndexReductionBiPGraph.Coefficient> coefficients = coefficientsMatrix.get(this);
+        if (coefficients == null) {
+            coefficients = new HashMap<IndexReductionVar, IndexReductionBiPGraph.Coefficient>();
+            coefficientsMatrix.put(this, coefficients);
+        }
+        if (!extraEquations.isEmpty()) {
+            if (getVariables().contains(var))
+                coefficients.put(var, new IndexReductionBiPGraph.Coefficient(null, IndexReductionBiPGraph.COEFFICIENT_STATE.SPLIT));
+            return 0;
+        }
         try {
             FVariable variable = var.getVariable();
             if (!getEquation().referencedFVariables().contains(variable))
@@ -1126,19 +1147,16 @@ aspect IndexReduction {
             FTypePrefixVariability variability = ASTNode.fConstant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
-            Map<IndexReductionVar, IndexReductionBiPGraph.Coefficient> coefficients = coefficientsMatrix.get(this);
-            if (coefficients == null) {
-                coefficients = new HashMap<IndexReductionVar, IndexReductionBiPGraph.Coefficient>();
-                coefficientsMatrix.put(this, coefficients);
-            }
             FAbstractEquation eqn = feqds.iterator().next();
-            coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), !variability.lessOrEqual(ASTNode.fParameter())));
+            coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), IndexReductionBiPGraph.COEFFICIENT_STATE.create(variability)));
             
             if (!variability.lessOrEqual(ASTNode.fParameter())) {
                 return 2;
             } else if (!variability.lessOrEqual(ASTNode.fConstant()))
                 return 0;
-        } catch(EquationDifferentiationException e) {}
+        } catch(EquationDifferentiationException e) {
+            coefficients.put(var, new IndexReductionBiPGraph.Coefficient(null, IndexReductionBiPGraph.COEFFICIENT_STATE.EXCEPTION));
+        }
         return 0;
     }
     

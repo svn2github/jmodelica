@@ -108,7 +108,25 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            errorCheckWhenEquations(component);
+            BiPGraph g = new BiPGraph(component.getMembers());
+            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options);
+            
+            errorCheckWhenEquations(subBlocks);
+            
+            Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+            boolean allOk = true;
+            for (SCCBlock<Eq, Var> subBlock : subBlocks) {
+                SimpleEquationBlock subSEB = createSimpleEquationBlock(subBlock, producer, true);
+                if (subSEB != null && subSEB.isSolvable()) {
+                    solvedBlocks.add(subSEB);
+                } else {
+                    allOk = false;
+                    break;
+                }
+            }
+            if (allOk) {
+                return new PrePropagationEquationBlock(producer, component.computeBlockDependency(), solvedBlocks, Collections.<SimpleEquationBlock>emptyList());
+            }
             
             Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
@@ -180,8 +198,8 @@ aspect BLT{
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
-                    BiPGraph g = new BiPGraph(nonRealEquations);
-                    Collection<SimpleEquationBlock> nonRealBlocks = g.computeNonRealBlocks(producer, options);
+                    BiPGraph nonRealG = new BiPGraph(nonRealEquations);
+                    Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, options);
                     eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
                 }
@@ -228,28 +246,10 @@ aspect BLT{
             return blocks;
         }
 
-        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void errorCheckWhenEquations(SCCBlock<E, V> component) {
-            boolean containsWhen = false;
-            for (E eqn : component.getMembers()) {
-                if (eqn.getEquation().isWhen()) {
-                    containsWhen = true;
-                    break;
-                }
-            }
-            if (!containsWhen)
-                return;
-            BiPGraph g = new BiPGraph(component.getMembers());
-            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan();
+        private static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void errorCheckWhenEquations(Collection<SCCBlock<Eq, Var>> subBlocks) {
             for (SCCBlock<Eq, Var> block : subBlocks) {
                 if (block.getMembers().size() == 1)
                     continue;
-                containsWhen = false;
-                for (Eq eqn : block.getMembers()) {
-                    if (eqn.getEquation().isWhen()) {
-                        containsWhen = true;
-                        break;
-                    }
-                }
                 Collection<FVariable> vars = new ArrayList<FVariable>();
                 for (Eq eqn : block.getMembers()) {
                     vars.add(eqn.getMatching().getVariable());
@@ -379,10 +379,14 @@ aspect BLT{
         }
     }
 
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options) {
+        return computeBLT(options, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    }
+
     public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, Collection<SCCContributor> extraContributors) {
         return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), extraContributors);
     }
-
+    
     public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
         return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
@@ -1447,6 +1451,18 @@ aspect BLT{
 
     }
 
+    /**
+     * PrePropagationEquationBlock represents an equation block resulting from
+     * algebraic loops that only exists when pre variables are considered.
+     */
+    public class PrePropagationEquationBlock extends EquationBlock {
+
+        public PrePropagationEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+            super(producer, blockDependency, solvedBlocks, unsolvedBlocks);
+        }
+
+    }
+    
     public class DynamicStateBlock extends AbstractEquationBlock {
         private Collection<DynamicStateBLT> subBLTs;
         private Collection<DynamicStateSet> sets;
@@ -2527,6 +2543,11 @@ aspect BLTPrettyPrinting {
         str.print("Torn");
     }
 
+    @Override
+    protected void PrePropagationEquationBlock.prettyPrintTypeStr(CodeStream str) {
+        str.print("Pre propagation");
+    }
+    
     protected void EquationBlock.prettyPrintNumVarStr(CodeStream str) {
         str.print(allVariables().size() + " variables");
     }
@@ -2547,6 +2568,19 @@ aspect BLTPrettyPrinting {
         str.println();
     }
 
+    @Override
+    protected void PrePropagationEquationBlock.prettyPrintBeforeVariablesStr(Printer p, CodeStream str, String indent) {
+        if (solvedRealBlocks().isEmpty())
+            return;
+        String innerIndent = p.indent(indent);
+        if (isMixed())
+            str.formatln("%sContinuous variables:", indent);
+        else
+            str.formatln("%sVariables:", indent);
+        for (AbstractEquationBlock aeb : solvedRealBlocks())
+            aeb.prettyPrintActiveVariables(p, str, innerIndent, false, true);
+    }
+    
     protected void EquationBlock.prettyPrintUnsolvedVariablesStr(Printer p, CodeStream str, String indent) {
         if (isMixed())
             str.formatln("%sUnknown continuous variables:", indent);
@@ -2559,6 +2593,10 @@ aspect BLTPrettyPrinting {
         str.formatln("%sIteration variables:", indent);
     }
 
+    @Override
+    protected void PrePropagationEquationBlock.prettyPrintUnsolvedVariablesStr(Printer p, CodeStream str, String indent) {
+    }
+    
     protected void EquationBlock.prettyPrintBeforeEquationsStr(Printer p, CodeStream str, String indent) {}
 
     @Override
@@ -2570,6 +2608,19 @@ aspect BLTPrettyPrinting {
         str.println();
     }
 
+    @Override
+    protected void PrePropagationEquationBlock.prettyPrintBeforeEquationsStr(Printer p, CodeStream str, String indent) {
+        if (solvedRealBlocks().isEmpty())
+            return;
+        String innerIndent = p.indent(indent);
+        if (isMixed())
+            str.formatln("%sContinuous equations:", indent);
+        else
+            str.formatln("%sEquations:", indent);
+        for (AbstractEquationBlock seb : solvedRealBlocks())
+            seb.prettyPrintSub(p, str, innerIndent);
+    }
+    
     protected void EquationBlock.prettyPrintUnsolvedEquationsStr(Printer p, CodeStream str, String indent) {
         if (isMixed())
             str.formatln("%sContinuous residual equations:", indent);
@@ -2585,6 +2636,10 @@ aspect BLTPrettyPrinting {
             str.formatln("%sResidual equations:", indent);
     }
 
+    @Override
+    protected void PrePropagationEquationBlock.prettyPrintUnsolvedEquationsStr(Printer p, CodeStream str, String indent) {
+    }
+    
     public abstract void AbstractEquationBlock.prettyPrintActiveVariables(Printer p, CodeStream str, String indent, boolean printAttributes, boolean printLabel);
 
     @Override

@@ -3766,7 +3766,7 @@ aspect CCodeGen {
 	eq FCompositeVariability.genJMIVariabilityConstant_C() = null;
 	
     public String AbstractEquationBlock.genJMISolverConstant_C(String nleSolver) {
-        if (isLinear())
+        if (isLinear() || localUnsolvedEquations().isEmpty())
             return "JMI_LINEAR_SOLVER";
         else if (nleSolver.equals("kinsol"))
             return "JMI_KINSOL_SOLVER";
