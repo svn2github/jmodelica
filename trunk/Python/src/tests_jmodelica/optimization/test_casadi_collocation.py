@@ -1354,7 +1354,7 @@ class TestLocalDAECollocator(object):
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),
-                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*x1_1_1)" +
+                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)" +
                  "-x2_1_1)+u_1_1)))")
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_20)),

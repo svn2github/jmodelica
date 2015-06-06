@@ -88,7 +88,7 @@ class ModelicaTransfer(object):
     def test_ModelicaFunctionCallEquations(self):
         assert( strnorm(repr(self.load_model("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual())) == 
                     strnorm("MX(vertcat((der(x1)-x1), (vertcat(x2, x3)-vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
-                    ".call([x1]){0}, function(\"AtomicModelFunctionCallEquation.f\").call([x1]){1}))))") )  
+                    ".call([der(x1)]){0}, function(\"AtomicModelFunctionCallEquation.f\").call([der(x1)]){1}))))") )  
 
     @testattr(casadi = True)
     def test_ModelicaBindingExpression(self):
