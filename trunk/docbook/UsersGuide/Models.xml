@@ -668,6 +668,29 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                 </row>
 
                 <row>
+                  <entry><literal>external_constant_evaluation</literal></entry>
+
+                  <entry><literal>integer / 5000</literal></entry>
+
+                  <entry>Time limit (ms) when evaluating constant calls to
+				  external functions during compilation. 0 indicates no
+				  evaluation. -1 indicates no time limit.</entry>
+                </row>
+
+                <row>
+                  <entry><literal>external_constant_evaluation_max_proc</literal></entry>
+
+                  <entry><literal>integer / 10</literal></entry>
+
+                  <entry>The maximum number of processes kept alive for
+				  evaluation of external functions during compilation. If the
+				  value of this option is less than 1, no processes will be
+				  kept alive, i.e. this feature is turned off. Using this
+				  feature may reduce compilation time if external functions
+				  use external objects.</entry>
+                </row>
+
+                <row>
                   <entry><literal>generate_block_jacobian</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
