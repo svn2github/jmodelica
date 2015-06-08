@@ -379,21 +379,6 @@ aspect FExpToCasADi {
     }
     
     /**
-     * Connects the FIdUse to its symbolic and lazy MX variable
-     * @return A MX
-     */
-    syn MX FIdUse.toMX() {
-        if (myFV().inRecord()) {
-            return getParent().getMXVariableFromRecordHashMap(getFQName().toString());
-        } else if (hasFArraySubscripts() && inFunction()) {
-            int flatIndex = getFArraySubscripts().computeFlattenedIndexBasedOnSizeData(myFV().size());
-            return myFV().asMXVector().get(flatIndex);
-        } else {
-            return  myFV().asMXVariable();
-        }
-    }
-    
-    /**
      * Returns a zero-based index for flattened arrays and records.
      * Row-major, e.g. Real[2,2] is indexed as : [1,2] -> 1, [2,1] -> 2
      */
@@ -475,12 +460,7 @@ aspect FExpToCasADi {
     }
     
     
-    eq FEnumVariable.asMXVariable() = ifcasadi.msym("enum_" + getFQName().toString());
-    eq FVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
-    eq FDerivativeVariable.asMXVariable() = ifcasadi.msym("der(" + getFQName().toString() + ")");
-    eq FPreBooleanVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
-    eq FPreIntegerVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
-    eq FPreRealVariable.asMXVariable() = ifcasadi.msym("pre(" + getFQName().toString() + ")");
+    eq FVariable.asMXVariable() = ifcasadi.msym(displayName());
     eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
     
     eq FFunctionArray.asMXVector() {
