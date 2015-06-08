@@ -905,6 +905,8 @@ aspect DerivativeRewriting {
             return;
         if (left.isTemporary() || right.isTemporary())
             return;
+        if (left.isInput() || right.isInput())
+            return;
         if (left.variability().discreteOrLess() || right.variability().discreteOrLess())
             return;
         boolean rightIsDer = right.isDerivativeVariable();
