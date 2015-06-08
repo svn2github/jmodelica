@@ -234,7 +234,10 @@ abstract public class OptionRegistry {
             ("external_constant_evaluation_max_proc",
               compiler,
               10,
-              "The maximum number of processes kept alive for evaluation of external functions during compilation."),
+              "The maximum number of processes kept alive for evaluation of external functions during compilation, the"
+              + " default value is 10. If the value of this option is less than 1, no processes will be kept alive,"
+              + " i.e. this feature is turned off. Using this feature may reduce compilation time if external functions"
+              + " use external objects."),
         HALT_WARN
             ("halt_on_warning", 
              compiler, 
