@@ -2316,9 +2316,26 @@ aspect TransformCanonical {
 	}
 
 	public FType FClass.createEquivalentRecordType(FType old) {
-		FRecordDecl rec = equivalentRecordMap.get(old.name());
-		return (rec != null) ? rec.type().sizedType(old.size()).fullCopy() : old;
-	}
+        FRecordDecl rec = equivalentRecordMap.get(old.name());
+        if (rec == null) {
+            return old;
+        }
+        FType t = rec.type().fullCopy();
+        t.transferSizes(old);
+        return t;
+    }
+    
+    public void FType.transferSizes(FType t) {
+        setSize(t.getSize());
+    }
+    
+    public void FRecordType.transferSizes(FType t) {
+        super.transferSizes(t);
+        FRecordType rt = (FRecordType) t;
+        for (int i = 0; i < getNumComponent(); i++) {
+            getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
+        }
+    }
 	
 	public void FClass.insertTempsInLHS() {
 		for (FAbstractEquation equation : getFAbstractEquations()) {

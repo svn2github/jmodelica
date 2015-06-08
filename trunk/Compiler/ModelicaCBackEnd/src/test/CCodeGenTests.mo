@@ -4333,6 +4333,100 @@ void func_CCodeGenTests_CUnknownArray10_f_def0(jmi_ad_var_t n_v, jmi_array_t* ab
 ")})));
 end CUnknownArray10;
 
+model CUnknownArray11
+    record R
+        constant Real[:] x;
+    end R;
+    
+    function f
+        R r(x=1:2);
+        output Real x = r.x[1];
+        algorithm
+    end f;
+    
+    Real x = f();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray11",
+            description="Sorted initialization",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray11_f_def0(jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R_0_r, r_v)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_DEF(REA, x_v)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    r_v->x = tmp_1;
+    jmi_array_ref_1(r_v->x, 1) = 1;
+    jmi_array_ref_1(r_v->x, 2) = 2;
+    x_v = 1.0;
+    JMI_RET(GEN, x_o, x_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CUnknownArray11_f_exp0() {
+    JMI_DEF(REA, x_v)
+    func_CCodeGenTests_CUnknownArray11_f_def0(&x_v);
+    return x_v;
+}
+
+")})));
+end CUnknownArray11;
+
+model CUnknownArray12
+    record R
+        Real[:] a;
+    end R;
+    
+    function f
+        input Integer i;
+        constant R[:] c = {R(1:2)};
+        output Real y = c[i].a[1];
+        algorithm
+    end f;
+    
+    Real x = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray12",
+            description="Sorted initialization",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray12_f_def0(jmi_ad_var_t i_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STAT, R_0_r, R_0_ra, c_a, 1, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_DEF(REA, y_v)
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, c_a, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_rec_1(c_a, 1)->a = tmp_1;
+    jmi_array_ref_1(jmi_array_rec_1(c_a, 1)->a, 1) = 1;
+    jmi_array_ref_1(jmi_array_rec_1(c_a, 1)->a, 2) = 2;
+    y_v = jmi_array_val_1(jmi_array_rec_1(c_a, i_v)->a, 1);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CUnknownArray12_f_exp0(jmi_ad_var_t i_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_CUnknownArray12_f_def0(i_v, &y_v);
+    return y_v;
+}
+
+
+
+")})));
+end CUnknownArray12;
+
 
 model CRecordDecl1
     record A

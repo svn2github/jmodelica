@@ -52,7 +52,6 @@ aspect FlatTypeAnalysis {
             if (getType().isRecord()) {
                 FRecordType type = (FRecordType) getType();
                 type.setFClass(myFClass());
-                setType((FType) type.myFRecordDecl().type().sizedType(type.size()).unboundCopy());
             } else if (getType().isFunction()) {
                 FFunctionType type = (FFunctionType) getType();
                 type.setFClass(myFClass());
@@ -288,7 +287,13 @@ aspect FlatTypeAnalysis {
             getX().type().scalarType().numericPromotion(getY().type().scalarType()).sizedType(size());
 
     eq FRecordConstructor.type() = getType();
-    syn FType FRecordConstructor.getType() = getRecord().recordType().fullCopy();
+    syn FType FRecordConstructor.getType() {
+        FRecordType frt = getRecord().recordType().fullCopy();
+        for (int i = 0; i < frt.getNumComponent(); i++) {
+            frt.getComponent(i).getFType().transferSizes(getArg(i).type());
+        }
+        return frt;
+    }
 
     syn FRecordType FIdUse.recordType() = myFRecordDecl().type();
 
@@ -608,6 +613,18 @@ aspect FlatTypeAnalysis {
     eq FIntegerSubscript.type() = fIntegerScalarType();
     eq FExpSubscript.type()     = getFExp().type();
 
+    public FType FType.lookupHierarchical(FQName name, int part) {
+        return this;
+    }
+    
+    public FType FRecordType.lookupHierarchical(FQName name, int part) {
+        FAbstractVariable res = null;
+        String pn = name.partName(part);
+        for (FRecordComponentType frct : getComponents())
+            if (frct.getName().equals(pn))
+                return frct.getFType().lookupHierarchical(name, part + 1);
+        return null;
+    }
 }
 
 

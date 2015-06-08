@@ -702,7 +702,16 @@ aspect Arrays {
     inh Size FEndExp.mySize();
     inh Size FSubscript.mySize();
     inh Size FArraySubscripts.mySize();
-    eq FIdUse.getChild().mySize()                        = myFV().size();
+    eq FIdUse.getChild().mySize() {
+        if (inFunction()) {
+            FQNameFull fqn = getFQName().asFQNameFull();
+            if (fqn.numParts() > 1) {
+                FType type = lookupFV(fqn.copyPrefix(1)).type();
+                return type.lookupHierarchical(fqn, 1).size();
+            }
+        }
+        return myFV().size();
+    }
     eq FIdUseInstAccess.getChild().mySize()              = getInstAccess().size();
     eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
     eq InstArrayAccess.getFArraySubscripts().mySize()    = myInstComponentDecl().size();
