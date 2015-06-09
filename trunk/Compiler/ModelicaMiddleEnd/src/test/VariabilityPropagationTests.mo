@@ -1383,41 +1383,29 @@ end VariabilityPropagationTests.PartiallyKnownComposite7;
       equation
         r = f(1,time);
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
+        CCodeGenTestCase(
             name="PartiallyKnownComposite8",
             description="Test cleanup of record/array outputs",
             inline_functions="none",
-            flatModel="
-fclass VariabilityPropagationTests.PartiallyKnownComposite8
- constant Real r.r2.y1[1] = 1;
- constant Real r.r2.y1[2] = 1;
- Real r.y2;
-equation
- (VariabilityPropagationTests.PartiallyKnownComposite8.R1(, r.y2)) = VariabilityPropagationTests.PartiallyKnownComposite8.f(1, time);
-
-public
- function VariabilityPropagationTests.PartiallyKnownComposite8.f
-  input Real x1;
-  input Real x2;
-  output VariabilityPropagationTests.PartiallyKnownComposite8.R1 r;
- algorithm
-  r.r2.y1[1] := x1;
-  r.r2.y1[2] := x1;
-  r.y2 := x2;
-  return;
- annotation(Inline = false);
- end VariabilityPropagationTests.PartiallyKnownComposite8.f;
-
- record VariabilityPropagationTests.PartiallyKnownComposite8.R2
-  Real y1[2];
- end VariabilityPropagationTests.PartiallyKnownComposite8.R2;
-
- record VariabilityPropagationTests.PartiallyKnownComposite8.R1
-  VariabilityPropagationTests.PartiallyKnownComposite8.R2 r2;
-  Real y2;
- end VariabilityPropagationTests.PartiallyKnownComposite8.R1;
-
-end VariabilityPropagationTests.PartiallyKnownComposite8;
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+    JMI_RECORD_STATIC(R1_1_r, tmp_1)
+    JMI_RECORD_STATIC(R2_0_r, tmp_2)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
+    tmp_2->y1 = tmp_3;
+    tmp_1->r2 = tmp_2;
+    func_VariabilityPropagationTests_PartiallyKnownComposite8_f_def0(AD_WRAP_LITERAL(1), _time, tmp_1);
+    _r_y2_2 = (tmp_1->y2);
+    /********* Write back reinits *******/
 ")})));
     end PartiallyKnownComposite8;
 

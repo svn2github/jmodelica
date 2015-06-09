@@ -2326,14 +2326,18 @@ aspect TransformCanonical {
     }
     
     public void FType.transferSizes(FType t) {
-        setSize(t.getSize());
+        if (!t.isUnknown()) {
+            setSize(t.getSize());
+        }
     }
     
     public void FRecordType.transferSizes(FType t) {
         super.transferSizes(t);
-        FRecordType rt = (FRecordType) t;
-        for (int i = 0; i < getNumComponent(); i++) {
-            getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
+        if (!t.isUnknown()) {
+            FRecordType rt = (FRecordType) t;
+            for (int i = 0; i < getNumComponent(); i++) {
+                getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
+            }
         }
     }
 	

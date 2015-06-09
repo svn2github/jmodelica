@@ -4438,6 +4438,9 @@ aspect CCodeGen {
 	}
 	
 	public void FType.genWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        if (exp.isNoExp()) {
+            return;
+        }
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -4456,6 +4459,9 @@ aspect CCodeGen {
 	}
 	
 	public void FRecordType.genCellWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        if (exp.isNoExp()) {
+            return;
+        }
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
@@ -4493,6 +4499,9 @@ aspect CCodeGen {
 	}
 	
 	public void FType.genWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+        if (exp.isNoExp()) {
+            return;
+        }
 		if (isArray()) {
             if (size().isUnknown()) {
                  str.format("%sJMI_ASG(%s, ", indent, macroType());
@@ -4517,6 +4526,9 @@ aspect CCodeGen {
 	}
 	
 	public void FRecordType.genCellWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+        if (exp.isNoExp()) {
+            return;
+        }
 		for (FRecordComponentType comp : getComponents()) {
 			String compName = name + "->" + comp.getName();
 			FExp compExp = exp.extractRecordComponentExp(comp.getName());
