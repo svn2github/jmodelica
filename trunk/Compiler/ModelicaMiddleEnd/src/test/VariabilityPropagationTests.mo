@@ -1362,6 +1362,64 @@ public
 end VariabilityPropagationTests.PartiallyKnownComposite7;
 ")})));
     end PartiallyKnownComposite7;
+    
+    model PartiallyKnownComposite8
+        record R1
+            R2 r2;
+            Real y2;
+        end R1;
+        record R2
+            Real[2] y1;
+        end R2;
+        function f
+            input Real x1;
+            input Real x2;
+            output R1 r = R1(R2({x1,x1}),x2);
+          algorithm
+            annotation(Inline=false);
+        end f;
+        
+        R1 r;
+      equation
+        r = f(1,time);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite8",
+            description="Test cleanup of record/array outputs",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite8
+ constant Real r.r2.y1[1] = 1;
+ constant Real r.r2.y1[2] = 1;
+ Real r.y2;
+equation
+ (VariabilityPropagationTests.PartiallyKnownComposite8.R1(, r.y2)) = VariabilityPropagationTests.PartiallyKnownComposite8.f(1, time);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite8.f
+  input Real x1;
+  input Real x2;
+  output VariabilityPropagationTests.PartiallyKnownComposite8.R1 r;
+ algorithm
+  r.r2.y1[1] := x1;
+  r.r2.y1[2] := x1;
+  r.y2 := x2;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.PartiallyKnownComposite8.f;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite8.R2
+  Real y1[2];
+ end VariabilityPropagationTests.PartiallyKnownComposite8.R2;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite8.R1
+  VariabilityPropagationTests.PartiallyKnownComposite8.R2 r2;
+  Real y2;
+ end VariabilityPropagationTests.PartiallyKnownComposite8.R1;
+
+end VariabilityPropagationTests.PartiallyKnownComposite8;
+")})));
+    end PartiallyKnownComposite8;
 
 model ConstantRecord1
 	record A
