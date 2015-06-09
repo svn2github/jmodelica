@@ -350,7 +350,7 @@ aspect Scalarization {
      * @param i          the index of this scalar variable in an array, or Index.NULL for scalar components
      */
     public void FVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes, Index i) {
-        bes.createScalarized(scalarizer, this, i);
+        bes.createScalarized(scalarizer, this);
     }
     
     public void FRecordVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes, Index i) {
@@ -506,13 +506,13 @@ aspect Scalarization {
         
         public ScalarizingVariableInstance create(Scalarizer scalarizer, Index i) {
             FExp nbexp = null;
-            Index ni = index.expand(i);
+            Index ti = index.expand(i);
             if (bExp != null) {
-                ni = ni.subIndex(ni.ndims() - bExpDims);
+                Index ni = ti.subIndex(ti.ndims() - bExpDims);
                 nbexp = bExp.extractArrayCell(Collections.<String,FExp>emptyMap(), ni);
                 nbexp = bExp.dynamicFExp(nbexp);
             }
-            return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), mattrs, nbexp, -1, variability, ni);
+            return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), mattrs, nbexp, -1, variability, ti);
         }
         
         public ScalarizingVariableInstance create(Scalarizer scalarizer, FVariable comp) {
@@ -555,7 +555,7 @@ aspect Scalarization {
             return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbexpdims, nv, index);
         }
         
-        public void createScalarized(Scalarizer scalarizer, FVariable comp, Index i) {
+        public void createScalarized(Scalarizer scalarizer, FVariable comp) {
             FVariable fv = comp.copyForName(name);
             Map<String,FExp> im = Collections.<String,FExp>emptyMap();
             if (bExp != null) {
@@ -569,7 +569,7 @@ aspect Scalarization {
                 fv.setBindingExpOpt(new Opt());
             }
             fv.setFTypePrefixVariability(variability);
-            inheritMerge(scalarizer, fv.getFAttributeList(), mattrs, i);
+            inheritMerge(scalarizer, fv.getFAttributeList(), mattrs);
             fv.addArrayAttributesFromType(myCell(), comp.myFDerivedType());
             scalarizer.add(fv);
         }
@@ -585,14 +585,14 @@ aspect Scalarization {
         /**
          * Merge attributes from other into self
          */
-        public void inheritMerge(Scalarizer scalarizer, List<FAttribute> selfa, Map<String,FAttribute> other, Index i) {
+        public void inheritMerge(Scalarizer scalarizer, List<FAttribute> selfa, Map<String,FAttribute> other) {
             Map<String, FAttribute> self = ScalarizingVariableInstance.mapped(selfa);
             for (String sa : other.keySet()) {
                 // TODO: support attributes on single cell in array (#599)
                 if (self.containsKey(sa)) {
                     FAttribute s = self.get(sa);
                     FAttribute o = other.get(sa);
-                    inheritMerge(scalarizer, s.getFAttributes(), ScalarizingVariableInstance.mapped(o.getFAttributes()), i);
+                    inheritMerge(scalarizer, s.getFAttributes(), ScalarizingVariableInstance.mapped(o.getFAttributes()));
                     if (o.hasValue()) {
                         s.setValue(o.getValue());
                     }
@@ -602,8 +602,7 @@ aspect Scalarization {
                     FAttribute copy = orig.fullCopy();
                     copy.parent = orig;
                     if (copy.hasValue()) {
-                        Index ni = index.expand(i);
-                        ni = ni.subIndex(ni.ndims() - copy.getValue().ndims());
+                        Index ni = index.subIndex(index.ndims() - copy.getValue().ndims());
                         copy.getValue().createArrayTemporaries(scalarizer, variability);
                         copy.setValue(copy.getValue().extractArrayCell(Collections.<String, FExp>emptyMap(), ni));
                     }

@@ -1848,7 +1848,7 @@ model EvaluateAnnotation11
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="EvaluateAnnotation10",
+            name="EvaluateAnnotation11",
             description="Evaluate annotation on record with mixed variabilities",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation11

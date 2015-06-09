@@ -3719,6 +3719,34 @@ end RecordTests.RecordScalarize39;
 ")})));
 end RecordScalarize39;
 
+model RecordScalarize40
+    record R
+        Real[2] x;
+    end R;
+    
+    R[2] r(x(start={1:2,3:4}) = {1:2,3:4});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize40",
+            description="Scalarizing record with array start value.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize40
+ Real r[1].x[1](start = 1);
+ Real r[1].x[2](start = 2);
+ Real r[2].x[1](start = 3);
+ Real r[2].x[2](start = 4);
+equation
+ r[1].x[1] = 1;
+ r[1].x[2] = 2;
+ r[2].x[1] = 3;
+ r[2].x[2] = 4;
+end RecordTests.RecordScalarize40;
+")})));
+end RecordScalarize40;
+
 
 model RecordFunc1
  record A
