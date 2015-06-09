@@ -511,7 +511,6 @@ aspect Scalarization {
                 ni = ni.subIndex(ni.ndims() - bExpDims);
                 nbexp = bExp.extractArrayCell(Collections.<String,FExp>emptyMap(), ni);
                 nbexp = bExp.dynamicFExp(nbexp);
-                ni = Index.NULL;
             }
             return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), mattrs, nbexp, -1, variability, ni);
         }
@@ -603,8 +602,10 @@ aspect Scalarization {
                     FAttribute copy = orig.fullCopy();
                     copy.parent = orig;
                     if (copy.hasValue()) {
+                        Index ni = index.expand(i);
+                        ni = ni.subIndex(ni.ndims() - copy.getValue().ndims());
                         copy.getValue().createArrayTemporaries(scalarizer, variability);
-                        copy.setValue(copy.getValue().extractArrayCell(Collections.<String, FExp>emptyMap(), i));
+                        copy.setValue(copy.getValue().extractArrayCell(Collections.<String, FExp>emptyMap(), ni));
                     }
                     selfa.add(copy);
                 }

@@ -3621,7 +3621,7 @@ model RecordScalarize37
 fclass RecordTests.RecordScalarize37
  Real a1.x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_1.x)));
  Real a2[1].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_2.x)));
- Real a2[2].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_4.x)));
+ Real a2[2].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_5.x)));
  Real temp_1.x;
  Real temp_2.x;
  Real temp_3.x;
@@ -3694,6 +3694,30 @@ equation
 end RecordTests.RecordScalarize38;
 ")})));
 end RecordScalarize38;
+
+model RecordScalarize39
+    record R
+        Real x;
+    end R;
+    
+    R[2] r(x(start=1:2) = 1:2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize39",
+            description="Scalarizing record with array start value.",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordScalarize39
+ Real r[1].x(start = 1);
+ Real r[2].x(start = 2);
+equation
+ r[1].x = 1;
+ r[2].x = 2;
+end RecordTests.RecordScalarize39;
+")})));
+end RecordScalarize39;
 
 
 model RecordFunc1
