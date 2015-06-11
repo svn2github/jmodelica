@@ -117,7 +117,7 @@ end DerivativeVariablePropagation.FunctionCallLefts1;
         annotation(__JModelica(UnitTesting(tests={
             TransformCanonicalTestCase(
                 name="NoIndexReduction1_disabled",
-                index_reduction=false,
+                propagate_derivatives=false,
                 description="Ensure that no substitution is done when index reduction is disabled.",
                 flatModel="
 fclass DerivativeVariablePropagation.NoIndexReduction1
@@ -131,7 +131,7 @@ equation
 end DerivativeVariablePropagation.NoIndexReduction1;
 "),TransformCanonicalTestCase(
                 name="NoIndexReduction1_enabled",
-                index_reduction=true,
+                propagate_derivatives=true,
                 description="Ensure that substitution is done when index reduction is enabled.",
                 flatModel="
 fclass DerivativeVariablePropagation.NoIndexReduction1

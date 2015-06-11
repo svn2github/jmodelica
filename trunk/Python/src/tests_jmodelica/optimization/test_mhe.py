@@ -875,7 +875,8 @@ class TestMHE:
                                            self.VDP_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "propagate_derivatives":False})
         MHE_object = MHE(op, sample_time, horizon, self.VDP_x_0_guess, 
                          self.VDP_dx_0, self.VDP_c_0, self.VDP_MHE_opts)
         #Get the names for the inputs and measured variables
@@ -1149,7 +1150,8 @@ class TestMHE:
                                            self.CSTR_fpath, 
                                            accept_model = True, 
                                            compiler_options = \
-                                           {"state_initial_equations":True})
+                                           {"state_initial_equations":True,
+                                            "propagate_derivatives":False})
         MHE_opts = MHEOptions()
         #Process noise and input specifications
         MHE_opts['process_noise_cov'] = [('Tc', 1.)]

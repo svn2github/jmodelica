@@ -1859,7 +1859,7 @@ aspect TransformCanonical {
 
         // Collect derivative binding equations, however only if we are going
         // to perform index reduction!
-        if (myOptions().getBooleanOption("index_reduction")) {
+        if (myOptions().getBooleanOption("propagate_derivatives")) {
             for (FAbstractEquation eqn : eqns) {
                 eqn.propagateDerivativeBindings();
             }

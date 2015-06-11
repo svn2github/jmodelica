@@ -35,7 +35,8 @@ def run_demo(with_plots=True):
     curr_dir = os.path.dirname(os.path.abspath(__file__));
 
     jmu_name = compile_jmu("JMExamples_opt.ContState_opt", 
-        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')))
+        (os.path.join(curr_dir, 'files', 'JMExamples_opt.mop'), os.path.join(curr_dir, 'files', 'JMExamples.mo')),
+        compiler_options={'propagate_derivatives':False})
     cs = JMUModel(jmu_name)
     
     res = cs.optimize()

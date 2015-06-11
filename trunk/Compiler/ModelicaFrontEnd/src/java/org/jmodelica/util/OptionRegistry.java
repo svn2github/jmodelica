@@ -256,6 +256,14 @@ abstract public class OptionRegistry {
              true, 
              // NB: this description used in a Python test 
              "If this option is true (default is true), index reduction is performed."),
+        PROPAGATE_DERIVATIVES
+            ("propagate_derivatives", 
+             compiler, 
+             true, 
+             "If this option is true (default is true), the compiler will try " +
+             "to replace ordinary variable references with derivative " +
+             "references. This is done by first finding equations on the form " +
+             "x = der(y). If possible, uses of x will the be replaced with der(x)."),
         EQU_SORT
             ("equation_sorting", 
              compiler, 
