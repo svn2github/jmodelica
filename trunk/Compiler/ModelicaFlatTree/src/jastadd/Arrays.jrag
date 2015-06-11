@@ -1941,8 +1941,15 @@ aspect Arrays {
 	eq FIterExp.getArray() = copyArray();
 	
 	eq FSubscriptedExp.getArray() {
-		if (!isArray()) 
-			return new ScalarAsArray(this);
+        if (!isArray()) {
+            try {
+                Index i = getFArraySubscripts().createIndex();
+                return new ScalarAsArray(getFExp().getArray().get(i));
+            } catch (ConstantEvaluationException e) {
+                
+            }
+            return new ScalarAsArray(this);
+        }
 		Array arr = new Array(indices());
 		Array old = getFExp().getArray();
 		Indices ind = arr.indices();

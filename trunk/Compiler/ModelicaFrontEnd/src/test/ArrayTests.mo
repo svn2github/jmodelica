@@ -1576,6 +1576,97 @@ end ArrayTests.Subscripts.SubscriptExpression9;
 ")})));
 end SubscriptExpression9;
 
+model SubscriptExpression10
+    record R
+        Real a;
+    end R;
+    
+    function f1
+        input R x;
+        output Real y;
+    algorithm
+        y := x.a;
+        y := y + 1;
+    end f1;
+    
+    function f2
+        input Real x;
+        output R y;
+    algorithm
+        x := x - 1;
+        y.a := x;
+    end f2;
+    
+    model M
+        parameter Real b = 1;
+    end M;
+    
+    parameter Real c[3] = { 1, 2, 3 };
+    M m[3](b = f1(f2(c)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_SubscriptExpression10",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression10
+ parameter Real c[1] = 1 /* 1 */;
+ parameter Real c[2] = 2 /* 2 */;
+ parameter Real c[3] = 3 /* 3 */;
+ parameter Real temp_1.a;
+ parameter Real temp_2.a;
+ parameter Real temp_3.a;
+ parameter Real temp_4.a;
+ parameter Real temp_5.a;
+ parameter Real temp_6.a;
+ parameter Real temp_7.a;
+ parameter Real temp_8.a;
+ parameter Real temp_9.a;
+ parameter Real m[1].b;
+ parameter Real m[2].b;
+ parameter Real m[3].b;
+parameter equation
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_2.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_3.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_4.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_6.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_7.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_8.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
+ (ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
+ m[1].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a));
+ m[2].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a));
+ m[3].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a));
+
+public
+ function ArrayTests.Subscripts.SubscriptExpression10.f1
+  input ArrayTests.Subscripts.SubscriptExpression10.R x;
+  output Real y;
+ algorithm
+  y := x.a;
+  y := y + 1;
+  return;
+ end ArrayTests.Subscripts.SubscriptExpression10.f1;
+
+ function ArrayTests.Subscripts.SubscriptExpression10.f2
+  input Real x;
+  output ArrayTests.Subscripts.SubscriptExpression10.R y;
+ algorithm
+  x := x - 1;
+  y.a := x;
+  return;
+ end ArrayTests.Subscripts.SubscriptExpression10.f2;
+
+ record ArrayTests.Subscripts.SubscriptExpression10.R
+  Real a;
+ end ArrayTests.Subscripts.SubscriptExpression10.R;
+
+end ArrayTests.Subscripts.SubscriptExpression10;
+")})));
+end SubscriptExpression10;
+
 
 
 model NumSubscripts1
