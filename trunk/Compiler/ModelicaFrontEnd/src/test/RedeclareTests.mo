@@ -3148,7 +3148,7 @@ public
  end RedeclareTests.RedeclareTest37.G.E;
 
  record RedeclareTests.RedeclareTest37.G.D
-  parameter Real x = 1 /* 1 */;
+  parameter Real x;
   parameter RedeclareTests.RedeclareTest37.G.E e(y = x);
  end RedeclareTests.RedeclareTest37.G.D;
 
@@ -4840,7 +4840,7 @@ equation
 
 public
  record RedeclareTests.RedeclareElement26.b.R
-  Real a = 1;
+  Real a;
  end RedeclareTests.RedeclareElement26.b.R;
 
 end RedeclareTests.RedeclareElement26;

@@ -263,7 +263,7 @@ fclass RecordTests.RecordFlat7
 
 public
  record RecordTests.RecordFlat7.A
-  Real b = time;
+  Real b;
  end RecordTests.RecordFlat7.A;
 
 end RecordTests.RecordFlat7;
@@ -362,7 +362,7 @@ public
 
  record RecordTests.RecordFlat10.R2
   Real x;
-  Real xx = x;
+  Real xx;
  end RecordTests.RecordFlat10.R2;
 
 end RecordTests.RecordFlat10;
@@ -434,7 +434,7 @@ model RecordFlat12
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
-            name="RecordFlat1",
+            name="RecordFlat12",
             description="Records: end expression",
             variability_propagation=false,
             flatModel="
@@ -444,7 +444,7 @@ fclass RecordTests.RecordFlat12
 public
  record RecordTests.RecordFlat12.R
   Real x[:];
-  Real y = x[size(x, 1)];
+  Real y;
  end RecordTests.RecordFlat12.R;
 
 end RecordTests.RecordFlat12;
@@ -2011,8 +2011,8 @@ fclass RecordTests.RecordConstructor3
 public
  record RecordTests.RecordConstructor3.A
   Real a;
-  discrete Integer b = 0;
-  constant String c = \"foo\";
+  discrete Integer b;
+  constant String c;
  end RecordTests.RecordConstructor3.A;
 
 end RecordTests.RecordConstructor3;
@@ -2135,7 +2135,7 @@ fclass RecordTests.RecordConstructor8
 public
  record RecordTests.RecordConstructor8.A
   Real x;
-  Real y = x + 2;
+  Real y;
  end RecordTests.RecordConstructor8.A;
 
 end RecordTests.RecordConstructor8;
@@ -2166,7 +2166,7 @@ fclass RecordTests.RecordConstructor9
 public
  record RecordTests.RecordConstructor9.A
   discrete Integer x;
-  discrete Integer y = x + 2;
+  discrete Integer y;
  end RecordTests.RecordConstructor9.A;
 
 end RecordTests.RecordConstructor9;
@@ -2206,7 +2206,7 @@ fclass RecordTests.RecordConstructor10
 public
  record RecordTests.RecordConstructor10.b.C
   Real a;
-  Real b = b.d;
+  Real b;
  end RecordTests.RecordConstructor10.b.C;
 
 end RecordTests.RecordConstructor10;
@@ -2237,7 +2237,7 @@ fclass RecordTests.RecordConstructor11
 public
  record RecordTests.RecordConstructor11.B
   Real x;
-  Real y = x + 2;
+  Real y;
  end RecordTests.RecordConstructor11.B;
 
 end RecordTests.RecordConstructor11;
@@ -5859,8 +5859,8 @@ equation
 public
  record RecordTests.RecordEval7.SB
   parameter Real x;
-  parameter Real y = x + 1;
-  final parameter Integer n = 1 /* 1 */;
+  parameter Real y;
+  final parameter Integer n;
  end RecordTests.RecordEval7.SB;
 
  record RecordTests.RecordEval7.A
@@ -5870,7 +5870,7 @@ public
 
  record RecordTests.RecordEval7.B
   parameter Real x;
-  parameter Real y = x + 1;
+  parameter Real y;
   parameter Integer n;
  end RecordTests.RecordEval7.B;
 
@@ -5901,6 +5901,86 @@ equation
 end RecordTests.RecordModification1;
 ")})));
 end RecordModification1;
+
+model RecordModification2
+    record A
+        Real x = 1;
+        Real y = 2;
+    end A;
+    
+    parameter A[2] a1;
+    parameter A[2] a2 = a1;
+    parameter A[2] a3(each x = 3);
+    parameter A[2] a4(x = {4,5});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordModification2",
+            description="Modification on record array",
+            flatModel="
+fclass RecordTests.RecordModification2
+ parameter Real a1[1].x = 1 /* 1 */;
+ parameter Real a1[1].y = 2 /* 2 */;
+ parameter Real a1[2].x = 1 /* 1 */;
+ parameter Real a1[2].y = 2 /* 2 */;
+ parameter Real a2[1].x;
+ parameter Real a2[1].y;
+ parameter Real a2[2].x;
+ parameter Real a2[2].y;
+ parameter Real a3[1].x = 3 /* 3 */;
+ parameter Real a3[1].y = 2 /* 2 */;
+ parameter Real a3[2].x = 3 /* 3 */;
+ parameter Real a3[2].y = 2 /* 2 */;
+ parameter Real a4[1].x = 4 /* 4 */;
+ parameter Real a4[1].y = 2 /* 2 */;
+ parameter Real a4[2].x = 5 /* 5 */;
+ parameter Real a4[2].y = 2 /* 2 */;
+parameter equation
+ a2[1].x = a1[1].x;
+ a2[1].y = a1[1].y;
+ a2[2].x = a1[2].x;
+ a2[2].y = a1[2].y;
+end RecordTests.RecordModification2;
+")})));
+end RecordModification2;
+
+model RecordModification3
+    record RA
+        RB[2] b(each x = 5:6);
+    end RA;
+    
+    record RB
+        Real[2] x;
+    end RB;
+    
+    RA[2] a1(each b(x=1:2));
+    RA[2] a2(b(each x=3:4));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordModification3",
+            description="Modification on record array",
+            flatModel="
+fclass RecordTests.RecordModification3
+ constant Real a1[1].b[1].x[1] = 1;
+ constant Real a1[1].b[1].x[2] = 2;
+ constant Real a1[1].b[2].x[1] = 1;
+ constant Real a1[1].b[2].x[2] = 2;
+ constant Real a1[2].b[1].x[1] = 1;
+ constant Real a1[2].b[1].x[2] = 2;
+ constant Real a1[2].b[2].x[1] = 1;
+ constant Real a1[2].b[2].x[2] = 2;
+ constant Real a2[1].b[1].x[1] = 3;
+ constant Real a2[1].b[1].x[2] = 4;
+ constant Real a2[1].b[2].x[1] = 3;
+ constant Real a2[1].b[2].x[2] = 4;
+ constant Real a2[2].b[1].x[1] = 3;
+ constant Real a2[2].b[1].x[2] = 4;
+ constant Real a2[2].b[2].x[1] = 3;
+ constant Real a2[2].b[2].x[2] = 4;
+end RecordTests.RecordModification3;
+")})));
+end RecordModification3;
 
 
 model RecordConnector1

@@ -1679,7 +1679,7 @@ public
  end EvaluationTests.EvaluateAnnotation6.f;
 
  record EvaluationTests.EvaluateAnnotation6.R
-  Real n = 1;
+  Real n;
  end EvaluationTests.EvaluateAnnotation6.R;
 
 end EvaluationTests.EvaluateAnnotation6;
@@ -1724,7 +1724,7 @@ public
  end EvaluationTests.EvaluateAnnotation7.f;
 
  record EvaluationTests.EvaluateAnnotation7.P
-  Real n = 1;
+  Real n;
  end EvaluationTests.EvaluateAnnotation7.P;
 
 end EvaluationTests.EvaluateAnnotation7;
@@ -1752,7 +1752,7 @@ fclass EvaluationTests.EvaluateAnnotation8
 public
  record EvaluationTests.EvaluateAnnotation8.R
   Real y;
-  Real x = y;
+  Real x;
  end EvaluationTests.EvaluateAnnotation8.R;
 
 end EvaluationTests.EvaluateAnnotation8;
@@ -1795,7 +1795,7 @@ public
  end EvaluationTests.EvaluateAnnotation9.F;
 
  record EvaluationTests.EvaluateAnnotation9.R
-  parameter Real p = -41 /* -41 */;
+  parameter Real p;
  end EvaluationTests.EvaluateAnnotation9.R;
 
 end EvaluationTests.EvaluateAnnotation9;
@@ -1828,9 +1828,9 @@ fclass EvaluationTests.EvaluateAnnotation10
 
 public
  record EvaluationTests.EvaluateAnnotation10.R
-  parameter Real a = 1 /* 1 */;
-  parameter Real b = a;
-  constant Real p = 3;
+  parameter Real a;
+  parameter Real b;
+  constant Real p;
  end EvaluationTests.EvaluateAnnotation10.R;
 
 end EvaluationTests.EvaluateAnnotation10;
@@ -2019,7 +2019,7 @@ public
  end EvaluationTests.FinalParameterEval6.f;
 
  record EvaluationTests.FinalParameterEval6.R
-  Real n = 1;
+  Real n;
  end EvaluationTests.FinalParameterEval6.R;
 
 end EvaluationTests.FinalParameterEval6;

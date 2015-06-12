@@ -535,10 +535,6 @@ aspect Scalarization {
                 if (a != null) {
                     nbexp = a.getValue();
                 }
-                if (nbexp == null) {
-                    // Covers bug in flattening
-                    nbexp = comp.getBindingExp();
-                }
                 if (nbexp != null) {
                     nbexpdims = nbexp.ndims();
                     nbexp.createArrayTemporaries(scalarizer, nv);

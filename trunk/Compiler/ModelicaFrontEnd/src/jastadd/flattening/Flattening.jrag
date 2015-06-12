@@ -807,7 +807,7 @@ aspect Flattening {
     public boolean FVariable.modifiableInRecord = true;
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
-            FVariable fv = createFVariable();
+            FVariable fv = createFVariable(getFQName(), true);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
@@ -935,32 +935,48 @@ aspect Flattening {
 	
 	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
 		super.addAttributesToFV(attr);
-        generateAdditionalAttributes(attr, hasBindingFExp() || variability().knownParameterOrLess());
+        generateAdditionalAttributes(attr, hasBindingFExp() || variability().knownParameterOrLess(), false);
     }
     
-    public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound) {}
-    
-    public void InstRecord.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound) {
-		for (InstComponentDecl icd : allInstComponentDecls()) {
-			FAttribute a = findMatching(attr, icd.name());
-			boolean create = (a == null);
-            boolean canBind = icd.hasBindingFExp() || icd.variability().knownParameterOrLess();
-			List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
-            if (icd.declaredSizeCalc().isUnknownNoEval())
-				list.add(new FInternalAttribute("size()", icd.size().createFExp()));
-            icd.generateAdditionalAttributes(list, isBound || canBind);
-            if (create && (list.getNumChild() > 0 || (!isBound && canBind))) {
-				a = new FAttribute(new FIdUse(icd.getClassName().flatten(new FQNameEmpty())), 
-						new FIdDecl(new FQNameString(icd.name())), 
-						new Opt(), true, 0, new Opt(), new Opt(), list);
-				attr.add(a);
-			}
-            
-            if (!isBound && canBind) {
-                a.setValue(((InstAssignable)icd).flattenBindingFExp());
+    public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound, boolean array) {
+        if (isArray()) {
+            if (allInstComponentDecls().iterator().hasNext()) {
+                allInstComponentDecls().iterator().next().generateAdditionalAttributes(attr, isBound, true);
             }
-		}
-	}
+        } else {
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                icd.generateAdditionalAttributesCell(attr, isBound, array);
+            }
+        }
+    }
+    
+    public void InstComponentDecl.generateAdditionalAttributesCell(List<FAttribute> attr, boolean isBound, boolean array) {
+        
+    }
+    
+    public void InstAssignable.generateAdditionalAttributesCell(List<FAttribute> attr, boolean isBound, boolean array) {
+        FAttribute a = findMatching(attr, name());
+        boolean create = (a == null);
+        boolean canBind = hasBindingFExp() || variability().knownParameterOrLess();
+        isBound = isBound || (a != null && a.hasValue());
+        List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
+        if (declaredSizeCalc().isUnknownNoEval())
+            list.add(new FInternalAttribute("size()", size().createFExp()));
+        generateAdditionalAttributes(list, isBound || canBind, false);
+        if (create && (list.getNumChild() > 0 || (!isBound && canBind))) {
+            a = new FAttribute(new FIdUse(getClassName().flatten(new FQNameEmpty())), 
+                    new FIdDecl(new FQNameString(name())), 
+                    new Opt(), true, 0, new Opt(), new Opt(), list);
+            attr.add(a);
+        }
+        
+        if (!isBound && canBind) {
+            a.setValue(flattenBindingFExp());
+            if (array) {
+                a.setFEach(new FEach());
+            }
+        }
+    }
 	
 	private boolean InstClassDecl.derivedTypeAdded;
 	
