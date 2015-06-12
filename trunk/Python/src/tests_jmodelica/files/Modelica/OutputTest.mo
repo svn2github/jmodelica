@@ -118,3 +118,17 @@ sin(w_other_2_1) + sin(w_other_2_2) - (w_other_2_3) + 4*(x_1)*4*(x_4) - (x_4) + 
 cos(w_other_3_1)*4*(w_other_3_2) + (w_other_3_3) + 4*(x_4) - sin(x_4) + (x_3) + 4*(ur_3) - cos(ur_4) = 0;
 
 end OutputTest;
+
+
+model OutputTest2
+    Real x1,x2;
+    output Real y1, y2, y3;
+    input Real u1;
+equation
+    der(x1) = -1;
+    der(x2) = -2;
+    
+    y2 = x2;
+    y3 = u1+x1;
+    y1 = x1*x2 - u1;
+end OutputTest2;
