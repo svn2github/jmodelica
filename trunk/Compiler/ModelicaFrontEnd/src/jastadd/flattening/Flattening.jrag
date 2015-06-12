@@ -174,8 +174,16 @@ aspect Flattening {
     }
 
 	public void InstValueModification.flattenUsedFuncsAndEnums(FClass fc) {
-		getFExp().flattenUsedFuncsAndEnums(fc);
-	}
+        if (isFlattened(this)) {
+            getFExp().flattenUsedFuncsAndEnums(fc);
+        }
+    }
+    
+    inh boolean InstValueModification.isFlattened(InstValueModification ivm);
+    eq InstModification.getChild().isFlattened(InstValueModification ivm) = true;
+    eq InstAssignable.getChild().isFlattened(InstValueModification ivm) = !inRecordDecl() && myInstValueMod() == ivm;
+    eq InstForIndex.getChild().isFlattened(InstValueModification ivm) = true;
+    
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
         InstCallable target = myInstCallable();

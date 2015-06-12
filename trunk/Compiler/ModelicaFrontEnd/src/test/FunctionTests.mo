@@ -15163,4 +15163,35 @@ end FunctionTests.DerivativeAnnotation.ExtendsTest1;
 
 end DerivativeAnnotation;
 
+
+model UnusedFunction1
+    function f
+        input Real x;
+        output Real y = x;
+        algorithm
+    end f;
+    
+    record R
+        Real x = f(time);
+    end R;
+    
+    R r(x=time+1);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="UnusedFunction1",
+            description="",
+            flatModel="
+fclass FunctionTests.UnusedFunction1
+ FunctionTests.UnusedFunction1.R r(x = time + 1);
+
+public
+ record FunctionTests.UnusedFunction1.R
+  Real x;
+ end FunctionTests.UnusedFunction1.R;
+
+end FunctionTests.UnusedFunction1;
+
+")})));
+end UnusedFunction1;
+
 end FunctionTests;
