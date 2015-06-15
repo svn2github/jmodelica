@@ -584,6 +584,38 @@ Semantic error at line 511, column 17:
 ")})));
 end ExtObjConstructor;
 
+model ExtObjConstructor2
+    model X
+        extends ExternalObject;
+        function constructor
+            output X x;
+            external "C";
+        end constructor;
+        function destructor
+            input X x;
+            external "C";
+        end destructor;
+    end X;
+    
+    model X1
+        extends X;
+        extends ExternalObject;
+    end X1;
+    
+    parameter X x;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExtObjConstructor",
+            description="No external object binding expression",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 603, column 11:
+  Missing binding expression for external object
+")})));
+end ExtObjConstructor2;
+
 
 
 package Functional

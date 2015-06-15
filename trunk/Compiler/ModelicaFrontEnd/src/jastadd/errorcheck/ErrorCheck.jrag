@@ -1039,6 +1039,9 @@ aspect InstanceErrorCheck {
 			super.collectErrors(checkType);
 	    	errorChecked = true;
 	    	if (!inFunction()) {
+                if (!hasBindingExp()) {
+                    error("Missing binding expression for external object");
+                }
 	    		getDestructorCall().collectErrors(checkType);
 	    		myInstClass().collectErrors(checkType);
 	    	}
