@@ -2394,8 +2394,8 @@ class LocalDAECollocator(CasadiCollocator):
                         constant_sf = N.abs(nom_val)
                         ordinates = N.array([[constant_sf]])
                     else:
-                        abscissae = data.t
-                        ordinates = data.x
+                        abscissae = N.asarray(data.t)
+                        ordinates = N.asarray(data.x)
                         nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
                         if len(nonfinite_ind) > 0:
                             print("Warning: Nominal trajectory for variable " + name +
@@ -4241,8 +4241,8 @@ class LocalDAECollocator(CasadiCollocator):
                             self.op.get_attr(var, "initialGuess")]])
                         abscissae = N.array([0])
                     else:
-                        abscissae = data.t
-                        ordinates = data.x
+                        abscissae = N.asarray(data.t)
+                        ordinates = N.asarray(data.x)
                         nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
                         if len(nonfinite_ind) > 0:
                             print("Warning: Initial trajectory for variable " + name +
@@ -4360,8 +4360,8 @@ class LocalDAECollocator(CasadiCollocator):
                                 op.get_attr(var, "initialGuess")]])
                             abscissae = N.array([0])
                         else:
-                            abscissae = data.t
-                            ordinates = data.x.reshape([-1, 1])
+                            abscissae = N.asarray(data.t)
+                            ordinates = N.asarray(data.x).reshape([-1, 1])
                         traj[vt][var_index] = TrajectoryLinearInterpolation(
                             abscissae, ordinates)
 
