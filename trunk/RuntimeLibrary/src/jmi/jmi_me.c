@@ -20,7 +20,6 @@
 #include "jmi_me.h"
 #include "jmi_delay.h"
 #include "jmi_dynamic_state.h"
-#include "module_include/jmi_get_set.h"
 
 #define indexmask  0x07FFFFFF
 #define negatemask 0x08000000
@@ -61,14 +60,6 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     jmi_ = jmi;
     
-    retval = jmi_me_init_modules(jmi);
-    if (retval != 0) {
-    	jmi_log_comment(jmi_->log, logError, "Failed to initialize modules");
-    	jmi_delete(jmi_);
-    	return -1;
-    }
-
-
     /* Check if the GUID is correct.*/
     if (strcmp(GUID, C_GUID) != 0) {
         jmi_log_comment(jmi_->log, logError, "The model and the description file are not consistent to each other.");
@@ -127,23 +118,6 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     }
     
     return 0;
-}
-
-int jmi_me_init_modules(jmi_t* jmi) {
-	int retval;
-
-	retval = jmi_get_set_module_init(jmi);
-	if (retval != 0) {
-    	jmi_log_comment(jmi->log, logError, "jmi_get_set_module_init() failed");
-    	return -1;
-	}
-
-	return 0;
-}
-
-void jmi_me_delete_modules(jmi_t* jmi) {
-    /* TODO */
-    jmi_get_set_module_destroy(jmi);
 }
 
 void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
@@ -256,8 +230,14 @@ int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
 int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  const jmi_real_t value[]) {
+    
+    /* Get the z vector*/
+    jmi_value_reference i;
+    jmi_value_reference index;
+    jmi_real_t* z;
+    int needParameterUpdate = 0, needRecomputeVars = 0;
 
-	if (jmi->user_terminate == 1) {
+    if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set Real variables when the model is terminated");
         return -1;
@@ -276,13 +256,42 @@ int jmi_set_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         
         return -1;
     }
+    
+    z = jmi_get_z(jmi);
+    
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
 
-    /* Transfer control to module */
-    return jmi_set_real_impl(jmi, vr, nvr, value);
+        if(z[index] != value[i]) {
+            /* Set value from the value array to z vector. */
+            z[index] = value[i];
+            needRecomputeVars = 1;
+            if (index < jmi->offs_real_dx) {
+                needParameterUpdate = 1;
+            }
+        }
+
+    }
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = 1;    
+
+        if( needParameterUpdate ) {
+          jmi_init_eval_parameters(jmi);
+        }
+    }
+    return 0;
 }
 
 int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     const jmi_int_t value[]) {
+    
+    /* Get the z vector*/
+    jmi_value_reference i;
+    jmi_value_reference index;
+    jmi_real_t* z;
+    int needParameterUpdate = 0;
+    int needRecomputeVars = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -304,12 +313,40 @@ int jmi_set_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
 
-    /* Transfer control to module */
-    return jmi_set_integer_impl(jmi, vr, nvr, value);
+    z = jmi_get_z(jmi);
+
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
+        
+        if(z[index] != value[i]) {
+            /* Set value from the value array to z vector. */
+            z[index] = value[i];
+            needRecomputeVars = 1;
+            if (index < jmi->offs_real_dx) {
+                needParameterUpdate = 1;
+            }
+        }
+    }
+
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = needRecomputeVars;
+    
+        if( needParameterUpdate ) {
+              jmi_init_eval_parameters(jmi);
+        }
+    }
+    return 0;
 }
 
 int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     const jmi_boolean value[]) {
+    
+    /* Get the z vector*/
+    jmi_value_reference i;
+    jmi_value_reference index;
+    jmi_real_t* z;
+    int needParameterUpdate = 0, needRecomputeVars = 0;
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -331,78 +368,209 @@ int jmi_set_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         return -1;
     }
 
-    /* Transfer control to module */
-    return jmi_set_boolean_impl(jmi, vr, nvr, value);
+    z = jmi_get_z(jmi);
+
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
+        
+        if(z[index] != value[i]) {
+            /* Set value from the value array to z vector. */
+            z[index] = value[i];
+            needRecomputeVars = 1;
+            if (index < jmi->offs_real_dx) {
+                needParameterUpdate = 1;
+            }
+        }
+    }
+
+    if(needRecomputeVars) {
+        jmi->recomputeVariables = needRecomputeVars;
+    
+        if( needParameterUpdate ) {
+              jmi_init_eval_parameters(jmi);
+        }
+    }
+    return 0;
 }
 
 int jmi_set_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    const jmi_string value[]) {
-
+    
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          "Cannot set String variables when the model is terminated");
         return -1;
     }
 
-    /* Transfer control to module */
-    return jmi_set_string_impl(jmi, vr, nvr, value);
-}
-
-static int
-jmi_is_parameter_or_constant(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
-{
-	jmi_value_reference i;
-
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-	for (i = 0; i < nvr; i = i + 1) {
-		if (get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
-			return 1;
-		}
-	}
-
-	return 0;
+    jmi->recomputeVariables = 1;
+    jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
+    return 0;
 }
 
 int jmi_get_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  jmi_real_t value[]) {
-    int eval_required;
+    
+    int retval;
+    jmi_value_reference i;
+    jmi_value_reference index;
+    jmi_real_t* z;
+    int isParameterOrConstant = 1;
 
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
 
-    /* Transfer control to module */
-    return jmi_get_real_impl(jmi, vr, nvr, value, eval_required);
+        if (index >= jmi->offs_real_dx) {
+            isParameterOrConstant = 0;
+            break;
+        }
+    }
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return -1;
+        }
+        jmi->recomputeVariables = 0;
+    }
+
+    /* Get the z vector*/
+    z = jmi_get_z(jmi);
+
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
+        
+        /* Set value from z vector to return value array*/
+        value[i] = (jmi_real_t)z[index];
+    }
+    return 0;
 }
 
 int jmi_get_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     jmi_int_t value[]) {
-    int eval_required;
+    
+    int retval;
+    jmi_real_t* z;
+    jmi_value_reference i;
+    jmi_value_reference index;
+    int isParameterOrConstant = 1;
+    
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
 
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
+        if (index >= jmi->offs_real_dx) {
+            isParameterOrConstant = 0;
+            break;
+        }
+    }
 
-    /* Transfer control to module */
-    return jmi_get_integer_impl(jmi, vr, nvr, value, eval_required);
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return -1;
+        }
+        jmi->recomputeVariables = 0;
+    }
+
+    /* Get the z vector*/
+    z = jmi_get_z(jmi);
+    
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
+        
+        /* Set value from z vector to return value array*/
+        value[i] = (jmi_int_t)z[index];
+    }
+    return 0;
 }
 
 int jmi_get_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     jmi_boolean value[]) {
-    int eval_required;
-
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
     
-    /* Transfer control to module */
-    return jmi_get_boolean_impl(jmi, vr, nvr, value, eval_required);
+    int retval;
+    jmi_real_t* z;
+    jmi_value_reference i;
+    jmi_value_reference index;
+    int isParameterOrConstant = 1;
+    
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index >= jmi->offs_real_dx) {
+            isParameterOrConstant = 0;
+            break;
+        }
+    }
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return -1;
+        }
+        jmi->recomputeVariables = 0;
+    }
+    
+    /* Get the z vector*/
+    z = jmi_get_z(jmi);
+    
+    for (i = 0; i < nvr; i = i + 1) {
+        /* Get index in z vector from value reference. */ 
+        index = get_index_from_value_ref(vr[i]);
+        
+        /* Set value from z vector to return value array*/
+        value[i] = z[index];
+    }
+    return 0;
 }
 
 int jmi_get_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                   jmi_string value[]) {
-    int eval_required;
-
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
+                   jmi_string  value[]) {
     
-    /* Transfer control to module */
-    return jmi_get_string_impl(jmi, vr, nvr, value, eval_required);
+    int retval;
+    int i;
+    int index;
+    int isParameterOrConstant = 1;
+    
+    /* This is to make sure that if all variables that are inquired
+     * are parameters or constants, then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i = i + 1) {
+        index = get_index_from_value_ref(vr[i]);
+
+        if (index >= jmi->offs_real_dx) {
+            isParameterOrConstant = 0;
+            break;
+        }
+    }
+
+    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && isParameterOrConstant == 0 && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            return -1;
+        }
+        jmi->recomputeVariables = 0;
+    }
+
+    /* Strings not yet supported. */
+    for(i = 0; i < nvr; i++) value[i] = 0;
+    jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
+    
+    return 0;
 }
 
 int jmi_get_directional_derivative(jmi_t* jmi,
@@ -435,13 +603,93 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     return ef;
 }
 
-int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
+static int jmi_reset_internal_variables(jmi_t* jmi) {
+    /* Store the current time and states */
+    jmi_real_t time = *(jmi_get_t(jmi));
+    jmi_real_t *x = jmi->real_x_work;
+    jmi_real_t *u = jmi->real_u_work;
+    memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
+    memcpy(u, jmi_get_real_u(jmi), jmi->n_real_u*sizeof(jmi_real_t));
     
-    /* Transfer control to module */
-    return jmi_get_derivatives_impl(jmi, derivatives, nx);
+    jmi_reset_last_internal_successful_values(jmi);
+    
+    /* Restore the current time and states */
+    memcpy (jmi_get_real_u(jmi), u, jmi->n_real_u*sizeof(jmi_real_t));
+    memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
+    *(jmi_get_t(jmi)) = time;
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 6){
+        jmi_log_node_t node =jmi_log_enter_fmt(jmi->log, logInfo, "ResettingInternalVariables", 
+                                "Resetting internal variables at <t:%g>.", jmi_get_t(jmi)[0]);
+        jmi_log_leave(jmi->log, node);
+    }
+    
+    return 0;
+}
+
+int jmi_get_derivatives(jmi_t* jmi, jmi_real_t derivatives[] , size_t nx) {
+    int retval;
+    jmi_log_node_t node;
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetDerivatives", 
+                                "Call to get derivatives at <t:%g>.", jmi_get_t(jmi)[0]);
+        if (jmi->jmi_callbacks.log_options.log_level >= 6){
+            jmi_log_reals(jmi->log, node, logInfo, "switches", jmi_get_sw(jmi), jmi->n_sw);
+            jmi_log_reals(jmi->log, node, logInfo, "booleans", jmi_get_boolean_d(jmi), jmi->n_boolean_d);
+            jmi_log_reals(jmi->log, node, logInfo, "integers", jmi_get_integer_d(jmi), jmi->n_integer_d);
+        }
+    }
+    
+    
+    if (jmi->recomputeVariables == 1  && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+
+            jmi_log_node(jmi->log, logWarning, "Warning",
+                "Evaluating the derivatives failed at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+            
+            /* Try again */
+            retval = jmi_ode_derivatives(jmi);
+            if(retval != 0) {
+                if (jmi->jmi_callbacks.log_options.log_level >= 5){
+                    jmi_log_leave(jmi->log, node);
+                }
+                jmi_log_node(jmi->log, logError, "Error",
+                    "Evaluating the derivatives failed at <t:%g>", jmi_get_t(jmi)[0]);
+                /* If it failed, reset to the previous succesful values */
+                jmi_reset_last_successful_values(jmi);
+            
+                return -1;
+            }
+        }
+        jmi->recomputeVariables = 0;
+    }
+
+    memcpy (derivatives, jmi_get_real_dx(jmi), nx*sizeof(jmi_real_t));
+    
+    /* Verify that output is free from NANs */
+    {
+        int index_of_nan = 0;
+        retval = jmi_check_nan(jmi, derivatives, nx, &index_of_nan);
+        if (retval != 0) {
+            jmi_log_node(jmi->log, logError, "Error",
+                    "Evaluating the derivatives failed at <t:%g>. Produced NaN in <index:%I>", jmi_get_t(jmi)[0], index_of_nan);
+            return -1;
+        }
+    }
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_leave(jmi->log, node);
+    }
+    
+    return 0;
 }
 
 int jmi_set_time(jmi_t* jmi, jmi_real_t time) {
+    jmi_real_t* time_old = (jmi_get_t(jmi));
 
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -449,11 +697,20 @@ int jmi_set_time(jmi_t* jmi, jmi_real_t time) {
         return -1;
     }
 
-    /* Transfer control to module */
-    return jmi_set_time_impl(jmi, time);
+    if (*time_old != time) {
+        if (*time_old > time && jmi->is_initialized == 1) {
+            jmi_reset_internal_variables(jmi);
+        }
+        *time_old = time;
+        jmi->recomputeVariables = 1;
+    }
+
+    return 0;
 }
 
 int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
+    jmi_real_t* x_cur = jmi_get_real_x(jmi);
+    size_t i;
     
     if (jmi->user_terminate == 1) {
         jmi_log_node(jmi->log, logError, "CannotSetVariable",
@@ -461,8 +718,13 @@ int jmi_set_continuous_states(jmi_t* jmi, const jmi_real_t x[], size_t nx) {
         return -1;
     }
 
-    /* Transfer control to module */
-    return jmi_set_continuous_states_impl(jmi, x, nx);
+    for (i = 0; i < nx; i++){
+        if (x_cur[i] != x[i]){
+            x_cur[i] = x[i];
+            jmi->recomputeVariables = 1;
+        }
+    }
+    return 0;
 }
 
 int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
@@ -506,9 +768,55 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
 }
 
 int jmi_get_event_indicators(jmi_t* jmi, jmi_real_t eventIndicators[], size_t ni) {
+    int retval;
+    jmi_log_node_t node;
     
-    /* Transfer control to module */
-    return jmi_get_event_indicators_impl(jmi, eventIndicators, ni);
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        node =jmi_log_enter_fmt(jmi->log, logInfo, "GetEventIndicators", 
+                                "Call to get event indicators at <t:%g>.", jmi_get_t(jmi)[0]);
+    }
+    
+    if (jmi->recomputeVariables == 1 && jmi->user_terminate == 0) {
+        retval = jmi_ode_derivatives(jmi);
+        if(retval != 0) {
+            
+            jmi_log_node(jmi->log, logWarning, "Warning",
+                "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+            
+            /* Try again */
+            retval = jmi_ode_derivatives(jmi);
+            if(retval != 0) {
+                if (jmi->jmi_callbacks.log_options.log_level >= 5){
+                    jmi_log_leave(jmi->log, node);
+                }
+                jmi_log_node(jmi->log, logError, "Error",
+                    "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>", jmi_get_t(jmi)[0]);
+                /* If it failed, reset to the previous succesful values */
+                jmi_reset_last_successful_values(jmi);
+            
+                return -1;
+            }
+        }
+        jmi->recomputeVariables = 0;
+    }
+
+    retval = jmi_dae_R_perturbed(jmi,eventIndicators);
+    if(retval != 0) {
+        jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 5){
+            jmi_log_leave(jmi->log, node);
+        }
+        return -1;
+    }
+    
+    if (jmi->jmi_callbacks.log_options.log_level >= 5){
+        jmi_log_reals(jmi->log, node, logInfo, "Event Indicators", eventIndicators, ni);
+        jmi_log_leave(jmi->log, node);
+    }
+    
+    return 0;
 }
 
 int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t nx) {
@@ -559,9 +867,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         }
 
         /* Initial evaluation of model so that we enter the event iteration with correct values. */
-        /* TODO, make sure all blocks are updated */
         retval = jmi_ode_derivatives(jmi);
-
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Initial evaluation of the model equations during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);

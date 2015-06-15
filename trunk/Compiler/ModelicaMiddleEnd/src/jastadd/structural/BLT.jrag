@@ -476,10 +476,7 @@ aspect BLT{
             for (AbstractEquationBlock block : this) {
                 for (AbstractEquationBlock preBlock : block.immediatePredecessors()) {
                     BlockDependency blockDependency = preBlock.getBlockDependency();
-                    
-                    if (!blockDependency.immediateSuccessors().contains(block)) {
-                        blockDependency.immediateSuccessors().add(block);
-                    }
+                    blockDependency.immediateSuccessors().add(block);
                 }
             }
         }
@@ -2229,10 +2226,7 @@ aspect BlockDependencies {
                 AbstractEquationBlock block = blockMap.get(var);
                 if (block == null)
                     throw new IllegalArgumentException("Unable to get predecessor block for variable " + var.name());
-                
-                if (!immediatePredecessors.contains(block)) {
-                    immediatePredecessors.add(block);
-                }
+                immediatePredecessors.add(block);
             }
             return new CompleteBlockDependency(dependentVariables, immediatePredecessors);
         }

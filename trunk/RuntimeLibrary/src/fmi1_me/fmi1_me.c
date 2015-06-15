@@ -182,7 +182,6 @@ void fmi1_me_free_model_instance(fmiComponent c) {
         fmi_free = component -> fmi_functions.freeMemory;
 
         fmi_free(component->jmi.resource_location);
-        /* TODO: Also delete modules */
         jmi_delete(&component->jmi);
         fmi_free((void*)component -> fmi_instance_name);
         fmi_free(component);

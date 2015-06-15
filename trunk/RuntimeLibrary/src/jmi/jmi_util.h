@@ -117,8 +117,6 @@ typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief
 typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
 typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;       /**< \brief Forward declaration of struct. */
-typedef struct jmi_modules_t jmi_modules_t;               /**< \brief Forward declaration of struct. */
-typedef struct jmi_module_t jmi_module_t; 				  /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
     int defined;
@@ -1051,15 +1049,6 @@ int jmi_init_init(jmi_t* jmi, jmi_residual_func_t F0, int n_eq_F0,
 void jmi_delete_init(jmi_init_t** pinit);
 
 /**
- * \brief Contains a pointers to the runtime modules.
- */
-struct jmi_modules_t {
-    jmi_module_t *mod_get_set;
-
-    /* Add future modules here */
-};
-
-/**
  * \brief The main struct of the JMI Model interface containing
  * dimension information and pointers to jmi_dae_t and jmi_init_t.
  *
@@ -1269,8 +1258,6 @@ struct jmi_t {
     jmi_int_t reinit_triggered;          /**< \brief Flag to signal that a reinit triggered in the current event iteration. */
     
     jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
-
-    jmi_modules_t modules;               /**< \brief Interchangable modules struct */
 };
 
 /**

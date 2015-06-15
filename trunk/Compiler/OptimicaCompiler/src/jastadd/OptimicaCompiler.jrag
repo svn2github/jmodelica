@@ -119,7 +119,7 @@ aspect OptimicaCompilationHelpers {
     //Overshadowing the use of templates in case of optimization.
     refine CompilationHelpers private String Templates.getCTemplateName(FClass fc) {
         if (fc != null && fc instanceof FOptClass)
-            return (type == ModelicaCompiler.TargetType.JMU) ? "jmi_optimica_template.c" : null;
+            return (this == JMU) ? "jmi_optimica_template.c" : null;
         else
             return template(C);
     }
