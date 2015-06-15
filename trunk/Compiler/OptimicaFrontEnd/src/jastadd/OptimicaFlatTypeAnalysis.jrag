@@ -19,7 +19,7 @@ aspect OptimicaFlatTypeAnalysis {
 	eq InstTimedVariable.type() {
 		if (!fRealScalarType().typeCompatible(getArg().type()))
 			return fUnknownType();
-		if (!getArg().variability().lessOrEqual(fParameter()))
+		if (!getArg().variability().parameterOrLess())
 			return fUnknownType();
 		return getName().type();
 	}

@@ -5807,7 +5807,7 @@ model RecordEval6
 			description="Test that evaluation before scalarization of record variable works",
 			flatModel="
 fclass RecordTests.RecordEval6
- parameter Integer r.n1 = 2 /* 2 */;
+ structural parameter Integer r.n1 = 2 /* 2 */;
  Real r.x;
  structural parameter Integer n2 = 2 /* 2 */;
  Real y[1];

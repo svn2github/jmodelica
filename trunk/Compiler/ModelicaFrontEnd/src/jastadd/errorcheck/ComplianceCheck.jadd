@@ -43,13 +43,13 @@ aspect ComplianceCheck {
 	
 	public void FIfWhenClause.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (!getTest().variability().lessOrEqual(fParameter()))
+		if (!getTest().variability().parameterOrLess())
 			complianceOnlyFMU("Using if statements is");
 	}
 	
 	public void FWhileStmt.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (!getTest().variability().lessOrEqual(fParameter()))
+		if (!getTest().variability().parameterOrLess())
 			complianceOnlyFMU("Using while statements is");
 	}
 	
@@ -75,7 +75,7 @@ aspect ComplianceCheck {
 	public void InstAccess.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
-				!getFArraySubscripts().variability().lessOrEqual(fParameter())) {
+				!getFArraySubscripts().variability().parameterOrLess()) {
 			complianceOnlyFMU("Using arrays of records with indices of higher than parameter variability is");
 		}
 	}
@@ -257,7 +257,7 @@ aspect ComplianceCheck {
 		if (isString()) {
 			if (inFunction()) {
 				warning("String arguments in functions are only partially supported");
-			} else if (variability().lessOrEqual(fParameter())) {
+			} else if (variability().parameterOrLess()) {
 				warning("String parameters are only partially supported");
 				if (isParameter())
 					forceVariability(checkType, fStructParameter());
@@ -266,16 +266,16 @@ aspect ComplianceCheck {
 			}
 		}
 		if (!myOptions().getBooleanOption("generate_ode")) {
-			if (isInteger() && !variability().lessOrEqual(fParameter()) && !inFunction())
+			if (isInteger() && !variability().parameterOrLess() && !inFunction())
 				compliance("Integer variables are supported only when compiling FMUs (constants and parameters are always supported)");
-			if (isBoolean() && !variability().lessOrEqual(fParameter()))
+			if (isBoolean() && !variability().parameterOrLess())
 				compliance("Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)");
 		}
 	}
 	
 	public void InstEnum.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
-		if (!variability().lessOrEqual(fParameter()) && !myOptions().getBooleanOption("generate_ode"))
+		if (!variability().parameterOrLess() && !myOptions().getBooleanOption("generate_ode"))
 			compliance("Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)");
 	}
 

@@ -60,6 +60,11 @@ aspect InstVariability {
         FTypePrefixVariability v =  super.calcVariability();
         if (v.parameterVariability()) {
             
+            if (!valueIsFixed()) {
+                // TODO: this propagation should be done in combinePropagate
+                return fNonFixedParameter();
+            }
+            
             if (isEvalFixed()) {
                 v = v.combineDown(fEvalParameter());
             } else if (isFinalIndependent()) {
@@ -93,13 +98,24 @@ aspect InstVariability {
     syn boolean InstAssignable.isEvalFixed() = annotation().forPath("Evaluate").bool() && valueIsFixed();
     
     syn boolean InstComponentDecl.valueIsFixed() = true;
-    eq InstAssignable.valueIsFixed() {
-        // TODO: hierarchical check for records?
-        if (isPrimitive() && attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && !fixedAttributeCValue().reduceBooleanAnd())
-            return false;
-        if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
-            return false;
-        return true;
+    
+    private boolean InstAssignable.circularValueIsFixed = false;
+    
+    syn lazy boolean InstAssignable.valueIsFixed() {
+        if (circularValueIsFixed) {
+            return true;
+        }
+        circularValueIsFixed = true;
+        try {
+            // TODO: hierarchical check for records?
+            if (isPrimitive() && attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && !fixedAttributeCValue().reduceBooleanAnd())
+                return false;
+            if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
+                return false;
+            return true;
+        } finally {
+            circularValueIsFixed = false;
+        }
     }
     eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
     eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();

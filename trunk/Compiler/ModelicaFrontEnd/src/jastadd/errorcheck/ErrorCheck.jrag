@@ -368,7 +368,7 @@ aspect ErrorCheck {
   }
   
     syn boolean FExp.lockable(boolean then) {
-        if (variability().parameterOrLess() && valueIsFixed()) {
+        if (variability().fixedParameterOrLess()) {
             try {
                 return ceval().booleanValue() != then;
             } catch (ConstantEvaluationException e) {
@@ -819,7 +819,7 @@ aspect InstanceErrorCheck {
 					FExp val_mod = icm.getInstModification().instValueMod();
 					if (val_mod.variability().lessOrEqual(fConstant())) 
 						val_mod.checkConstantExpression(checkType, "attribute", icm.getName().name());
-					else if (!val_mod.variability().lessOrEqual(fParameter())) 
+					else if (!val_mod.variability().parameterOrLess()) 
 						val_mod.error("Variability of binding expression for attribute '%s' is not less than or equal to parameter variability: %s", 
 								icm.getName().name(), val_mod);
 					if (val_mod.isCircular() && !checkType.allowConstantNoValue())

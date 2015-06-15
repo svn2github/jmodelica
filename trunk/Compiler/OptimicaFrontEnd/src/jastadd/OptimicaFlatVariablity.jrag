@@ -35,7 +35,7 @@ aspect OptimicaVariability {
 	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
 	protected int FOptParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
 	protected static final int FTimed.VARIABILITY_LEVEL        = FDiscrete.VARIABILITY_LEVEL - 5;
-	protected static final int FOptParameter.VARIABILITY_LEVEL = FParameter.VARIABILITY_LEVEL;
+	protected static final int FOptParameter.VARIABILITY_LEVEL = FNonFixedParameter.VARIABILITY_LEVEL;
 	
 	syn int FOptParameter.combineLevel() = variabilityLevel() * 10 + 5;
 	

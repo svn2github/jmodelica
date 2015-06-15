@@ -2667,7 +2667,7 @@ aspect ConstantEvaluation {
         CValue val = CValue.UNKNOWN;
         if (hasEvaluationValue(evaluator)) {
             val = evaluationValue(evaluator);
-        } else if ((variability().parameterOrLess() || (inFunction() && !isInput())) && !isForIndex()) {
+        } else if ((variability().fixedParameterOrLess() || (inFunction() && !isInput())) && !isForIndex()) {
             boolean func = inFunction();
             i = func ? i : Index.NULL;
             if (hasBindingFExp()) {
@@ -2930,6 +2930,11 @@ aspect ConstantEvaluation {
 	eq FFunctionVariable.ceval(VariableEvaluator evaluator)         = evaluationValue(evaluator);
 	eq FVariable.ceval(VariableEvaluator evaluator)                 = ceval(evaluator, isParameter());
 	syn CValue FVariable.ceval(VariableEvaluator evaluator, boolean inParameterRecord) {
+        
+        if (!variability().fixedParameterOrLess() && !isForIndex() && !inRecord()) {
+            return CValue.UNKNOWN;
+        }
+        
 		CValue val;
 		if (isForIndex())
 			val = evaluationValue(evaluator);
@@ -2969,24 +2974,25 @@ aspect ConstantEvaluation {
 	syn CValue FAbstractVariable.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
 	eq FFunctionVariable.ceval(VariableEvaluator evaluator, Index i)         = evaluationValue(evaluator).array().getCell(i);
 	eq FVariable.ceval(VariableEvaluator evaluator, Index i) {
-		if (!isConstant() && !isParameter() && !inRecord()) {
-			return CValue.UNKNOWN;
-		} else {
-			CValue val;
-			if (isForIndex())
-				val = evaluationValue(evaluator);
-			else if (hasParameterEquation())
-				val = parameterEquation().cevalParameter(evaluator, this, i);
-			else if (hasBindingExp())
-				val = getBindingExp().ceval(evaluator, i);
-			else
-				val = startAttributeCValue();
-			val = val.array().getCell(i);
-			if (isReal())
-				val = val.convertReal();
-			return val;
-		}
-	}
+        
+        if (!variability().fixedParameterOrLess() && !isForIndex() && !inRecord()) {
+            return CValue.UNKNOWN;
+        }
+        
+        CValue val;
+        if (isForIndex())
+            val = evaluationValue(evaluator);
+        else if (hasParameterEquation())
+            val = parameterEquation().cevalParameter(evaluator, this, i);
+        else if (hasBindingExp())
+            val = getBindingExp().ceval(evaluator, i);
+        else
+            val = startAttributeCValue();
+        val = val.array().getCell(i);
+        if (isReal())
+            val = val.convertReal();
+        return val;
+    }
     
     eq FExternalObjectVariable.ceval(VariableEvaluator evaluator, Index i) {
         CValue val = super.ceval(evaluator, i);

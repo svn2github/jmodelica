@@ -155,7 +155,11 @@ FDiscrete : FTypePrefixVariability;
 /**
  * Parameter variability.
  */
-FParameter : FTypePrefixVariability;
+abstract FParameter : FTypePrefixVariability;
+
+FNonFixedParameter : FParameter;
+
+FFixedParameter : FParameter;
 
 /**
  * Parameter with known value variability

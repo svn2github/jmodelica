@@ -143,7 +143,7 @@ aspect FlatTypeCheck {
                     error("The guard expression of a conditional component should be a scalar expression");
                 if (!cond.type().isBoolean()) 
                     error("The guard expression of a conditional component should be a boolean expression");
-                if (!cond.variability().lessOrEqual(fParameter())) 
+                if (!cond.variability().parameterOrLess()) 
                     error("The guard expression of a conditional component should have parameter or constant variability");
             }
         }
@@ -302,7 +302,7 @@ aspect FlatTypeCheck {
     }
 
     public void FLinspace.typeError(ErrorCheckType checkType) {
-        boolean badVar = !getN().variability().lessOrEqual(fParameter());
+        boolean badVar = !getN().variability().parameterOrLess();
         boolean canCeval = getN().canCeval();
         boolean badVal = canCeval && getN().ceval().intValue() < 2;
         if (badVar || !canCeval || badVal) {
@@ -322,7 +322,7 @@ aspect FlatTypeCheck {
     }
 
     public void FIdentity.typeError(ErrorCheckType checkType) {
-        if (!getFExp().variability().lessOrEqual(fParameter())) 
+        if (!getFExp().variability().parameterOrLess()) 
             error("Argument of identity() must be a scalar parameter Integer expression\n    '%s' is of %s variability", 
                     getFExp(), getFExp().variability().toStringLiteral());
         else 
@@ -339,7 +339,7 @@ aspect FlatTypeCheck {
         if (hasDim()) {
             if (!getDim().type().isIntegerScalar())
                 return;  // Error is reported for argument in this case
-            boolean badVar = !getDim().variability().lessOrEqual(fParameter());
+            boolean badVar = !getDim().variability().parameterOrLess();
             boolean canCeval = getDim().canCeval();
             int dimVal = canCeval ? getDim().ceval().intValue() : 1;
             int ndims = getFExp().ndims();
@@ -467,6 +467,8 @@ aspect FlatTypeCheck {
             if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
                 error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
         }
+        getLeft().size().forceVariability(checkType, fStructParameter());
+        getRight().size().forceVariability(checkType, fStructParameter());
         super.typeCheck(checkType);
     }
 
@@ -525,7 +527,7 @@ aspect FlatTypeCheck {
       } else if (!type().isUnknown() && !getFExp().canBeComponentSize()) {
           error("Array size must be Integer expression, Boolean type or enumeration type: " + getFExp());
 	  } else if (!inFunction()) { 
-		  if (!getFExp().variability().lessOrEqual(fParameter())) {
+		  if (!getFExp().variability().parameterOrLess()) {
 			  error("Array size must be constant or parameter: " + getFExp());
 		  } else if (!checkType.allowIncompleteSizes()) {
 			  try {
@@ -701,7 +703,7 @@ aspect FlatTypeCheck {
   public void FCatExp.typeCheckFExps() {
 	  if (!getDim().type().isUnknown() && !fIntegerScalarType().typeCompatible(getDim().type()))
 		  error("Dimension argument of cat() is not compatible with Integer: " + getDim());
-	  else if (!getDim().type().isUnknown() && !getDim().variability().lessOrEqual(fParameter()))
+	  else if (!getDim().type().isUnknown() && !getDim().variability().parameterOrLess())
 		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
   
@@ -722,7 +724,7 @@ aspect FlatTypeCheck {
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = 
 		  fIntegerScalarType().typeCompatible(exp.type());
   syn boolean FInfArgsFunctionCall.variabilityOfArgIsOK(FExp exp) = 
-		  exp.variability().lessOrEqual(fParameter()) || inFunction();
+		  exp.variability().parameterOrLess() || inFunction();
   syn String FInfArgsFunctionCall.getOKArgTypeString()            = 
 		  "compatible with Integer";
   syn String FInfArgsFunctionCall.getOKArgVariabilityString()     = 

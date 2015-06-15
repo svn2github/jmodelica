@@ -1784,7 +1784,7 @@ aspect FlatExpressions {
         }
     }
     
-    syn boolean FTypePrefixVariability.extractNonParameterIndices(FTypePrefixVariability other) = !other.parameterOrLess();
+    syn boolean FTypePrefixVariability.extractNonParameterIndices(FTypePrefixVariability other) = !other.fixedParameterOrLess();
     eq FConstant.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
     eq FKnownParameter.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
@@ -2494,7 +2494,7 @@ aspect FlatExpressions {
 	abstract public FTypePrefixVariability TypePrefixVariability.flatten();
 	public FTypePrefixVariability Continuous.flatten() { return new FContinuous(); }
 	public FTypePrefixVariability Discrete.flatten()   { return new FDiscrete();   }
-	public FTypePrefixVariability Parameter.flatten()  { return new FParameter();  }
+	public FTypePrefixVariability Parameter.flatten()  { return new FFixedParameter();  }
 	public FTypePrefixVariability Constant.flatten()   { return new FConstant();   }
 
 }

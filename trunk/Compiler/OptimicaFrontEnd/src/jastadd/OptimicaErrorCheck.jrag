@@ -106,7 +106,7 @@ aspect OptimicaErrorCheck {
     }
 
     public void InstTimedVariable.typeError(ErrorCheckType checkType) {
-        boolean badVar  = !getArg().variability().lessOrEqual(fParameter());
+        boolean badVar  = !getArg().variability().parameterOrLess();
         boolean badType = !getArg().type().isRealScalar();
         if (badVar || badType) {
             String msg = "The argument of a timed variable must be a scalar parameter Real expression";
