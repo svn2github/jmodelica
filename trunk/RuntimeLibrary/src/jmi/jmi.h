@@ -499,6 +499,7 @@ int jmi_get_offsets(jmi_t* jmi, int* offs_real_ci, int* offs_real_cd,
  */
 int jmi_copy_pre_values(jmi_t *jmi);
 
+#if 0
 /**
  * \brief Reset the z vector to the last successful state.
  *
@@ -523,8 +524,10 @@ int jmi_reset_last_internal_successful_values(jmi_t *jmi);
  * @return Error code.
  */
 int jmi_save_last_successful_values(jmi_t *jmi);
+#endif
 
 /**
+
  * \brief Get a pointer to the z vector containing all variables.
  *
  * @param jmi The jmi_t struct.

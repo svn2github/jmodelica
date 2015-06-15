@@ -86,7 +86,16 @@ add_subdirectory(src/fmi1_me)
 include_directories(src/fmi1_me)
 add_subdirectory(src/fmi1_cs)
 
+#Add modules
+include_directories(src/jmi/module_include)
+add_subdirectory(src/modules)
 
 
-
+if(EXTRA_RUNTIME_MODULES)
+    set(index 1)
+    foreach(module ${EXTRA_RUNTIME_MODULES})
+        add_subdirectory(${module} "extra${index}")
+        math(EXPR index "${index}+1")
+    endforeach()
+endif()
 

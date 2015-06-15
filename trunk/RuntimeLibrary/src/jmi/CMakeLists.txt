@@ -113,6 +113,9 @@ set(STANDARDTABLESSources
     ${MSLCSOURCES}/zlib/uncompr.c
     ${MSLCSOURCES}/zlib/zutil.c
 )
+
+include_directories(module_include)
+
 #Build jmi library
 add_library(jmi STATIC ${JMISources})
 if(NOT MSVC)
