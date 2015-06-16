@@ -1879,4 +1879,66 @@ end VariabilityPropagationTests.FixedFalse5;
 ")})));
 end FixedFalse5;
 
+model EvalFail1
+    function f
+        output Real y = 1;
+    algorithm
+        assert(false,"nope");
+    end f;
+    
+    Real y = f();
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EvalFail1",
+            description="Test parameter from constant on fail to evaluate",
+            flatModel="
+fclass VariabilityPropagationTests.EvalFail1
+ parameter Real y;
+parameter equation
+ y = VariabilityPropagationTests.EvalFail1.f();
+
+public
+ function VariabilityPropagationTests.EvalFail1.f
+  output Real y;
+ algorithm
+  y := 1;
+  assert(false, \"nope\");
+  return;
+ end VariabilityPropagationTests.EvalFail1.f;
+
+end VariabilityPropagationTests.EvalFail1;
+")})));
+end EvalFail1;
+
+model EvalFail2
+    function f
+        output Real[1] y = {1};
+    algorithm
+        assert(false,"nope");
+    end f;
+    
+    Real[:] y = f();
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="EvalFail2",
+            description="Test parameter from constant on fail to evaluate",
+            flatModel="
+fclass VariabilityPropagationTests.EvalFail2
+ parameter Real y[1];
+parameter equation
+ ({y[1]}) = VariabilityPropagationTests.EvalFail2.f();
+
+public
+ function VariabilityPropagationTests.EvalFail2.f
+  output Real[1] y;
+ algorithm
+  y[1] := 1;
+  assert(false, \"nope\");
+  return;
+ end VariabilityPropagationTests.EvalFail2.f;
+
+end VariabilityPropagationTests.EvalFail2;
+")})));
+end EvalFail2;
+
 end VariabilityPropagationTests;

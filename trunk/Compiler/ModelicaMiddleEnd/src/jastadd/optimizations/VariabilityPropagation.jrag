@@ -274,9 +274,11 @@ aspect VariabilityPropagation {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
 			}
-		} else {
-			parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
 		}
+		
+        if (!solutionVariability.knownParameterOrLess()) {
+            parameterEquations.add(new FEquation(fVariable.createUseExp(), solution));
+        }
 
 		this.taggedByVProp = true;
 		fVariable.variabilityPropagation(worklist, solutionVariability, solution, parameterEquations);

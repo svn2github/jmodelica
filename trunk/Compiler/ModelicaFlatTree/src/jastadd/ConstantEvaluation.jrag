@@ -3273,6 +3273,16 @@ aspect ConstantEvaluation {
     }
     
     @Override
+    public void FAssert.evaluateCell(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        boolean val = getTest().ceval().booleanValue();
+        if (!val && (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))) {
+            String msg = "Assertion failed: " + getMsg().ceval().stringValue();
+            throw new ConstantEvaluationException(null , msg);
+        }
+    }
+    
+    
+    @Override
     public void FFunctionCall.evaluateCell(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
         myCommonCallable().evaluate(evaluator, values);
     }
