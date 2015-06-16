@@ -1,7 +1,7 @@
 RUNTIMELIBRARY_BUILD_DIR=$(abs_builddir)/build
 RUNTIMELIBRARY_BUILD_DIR64=$(abs_builddir)/build64
 RUNTIMELIBRARY_SRC_DIR=$(abs_top_srcdir)/RuntimeLibrary
-RUNTIMELIBRARY_COMMON_ARGS="-DCMAKE_INSTALL_DIR:PATH=$(refix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) -DEXTRA_RUNTIME_MODULES=$(EXTRA_RUNTIME_MODULES)"
+RUNTIMELIBRARY_COMMON_ARGS="-DCMAKE_INSTALL_DIR:PATH=$(prefix)" "$(RUNTIMELIBRARY_SRC_DIR)" "-DSUNDIALS_HOME=$(SUNDIALS_HOME)" "-DTOP_SRC=$(abs_top_srcdir)" "-DEXTRA_RUNTIME_MODULES=$(EXTRA_RUNTIME_MODULES)"
 
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed
