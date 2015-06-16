@@ -2290,7 +2290,7 @@ public class ModulesSettings {
         return libNames;
     }
     
-    private static ArrayList<ModuleContributor> CONTRIBUTORS;
+    private static ArrayList<ModuleContributor> CONTRIBUTORS = new ArrayList<ModuleContributor>();
     private static Hashtable<Module, HashSet<String>> libraryNames = new Hashtable<Module, HashSet<String>>();
     
     public abstract static class ModuleContributor {
@@ -2298,8 +2298,6 @@ public class ModulesSettings {
     }
     
     public static <T extends ModuleContributor> T addContributor(T contributor) {
-        if (CONTRIBUTORS == null) { CONTRIBUTORS = new ArrayList<ModuleContributor>(); }
-        
         CONTRIBUTORS.add(contributor);
         
         return contributor;
