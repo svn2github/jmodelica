@@ -1133,33 +1133,6 @@ int jmi_copy_pre_values(jmi_t *jmi) {
     return 0;
 }
 
-int jmi_save_last_successful_values(jmi_t *jmi) {
-    jmi_real_t* z;
-    jmi_real_t* z_last;
-    z = jmi_get_z(jmi);
-    z_last = jmi_get_z_last(jmi);
-    memcpy(z_last, z, jmi->n_z*sizeof(jmi_real_t));
-    return 0;
-}
-
-int jmi_reset_last_successful_values(jmi_t *jmi) {
-    jmi_real_t* z;
-    jmi_real_t* z_last;
-    z = jmi_get_z(jmi);
-    z_last = jmi_get_z_last(jmi);
-    memcpy(z, z_last, jmi->n_z*sizeof(jmi_real_t));
-    return 0;
-}
-
-int jmi_reset_last_internal_successful_values(jmi_t *jmi) {
-    jmi_real_t* z;
-    jmi_real_t* z_last;
-    z = jmi_get_z(jmi);
-    z_last = jmi_get_z_last(jmi);
-    memcpy(&z[jmi->offs_real_dx], &z_last[jmi->offs_real_dx], (jmi->n_z-jmi->offs_real_dx)*sizeof(jmi_real_t));
-    return 0;
-}
-
 int jmi_dae_init(jmi_t* jmi,
         jmi_residual_func_t F, int n_eq_F, jmi_jacobian_func_t sym_dF,
         int sym_dF_n_nz, int* sym_dF_row, int* sym_dF_col,

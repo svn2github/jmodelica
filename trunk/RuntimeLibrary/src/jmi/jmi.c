@@ -28,6 +28,7 @@
 #include "jmi_log.h"
 #include "jmi_delay_impl.h"
 #include "jmi_dynamic_state.h"
+#include "module_include/jmi_get_set.h"
 
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
@@ -208,8 +209,9 @@ int jmi_init(jmi_t** jmi,
     for (i=0;i<jmi_->n_z;i++) {
         jmi_->variable_scaling_factors[i] = 1.0;
         (*(jmi_->z))[i] = 0;
+        (*(jmi_->z_last))[i] = 0;
     }
-    jmi_save_last_successful_values(jmi_);
+    /* jmi_save_last_successful_values(jmi_); */
 
     for (i=0;i<jmi_->n_v;i++) {
         int j;
@@ -277,6 +279,9 @@ int jmi_init(jmi_t** jmi,
 
 int jmi_delete(jmi_t* jmi){
     int i;
+
+    jmi_me_delete_modules(jmi);
+
     if (jmi->dae != NULL) {
         jmi_func_delete(jmi->dae->F);
         jmi_func_delete(jmi->dae->R);

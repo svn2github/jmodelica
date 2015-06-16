@@ -1,6 +1,7 @@
 RUNTIMELIBRARY_BUILD_DIR=$(abs_builddir)/build
 RUNTIMELIBRARY_BUILD_DIR64=$(abs_builddir)/build64
 RUNTIMELIBRARY_SRC_DIR=$(abs_top_srcdir)/RuntimeLibrary
+RUNTIMELIBRARY_COMMON_ARGS="-DCMAKE_INSTALL_DIR:PATH=$(refix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) -DEXTRA_RUNTIME_MODULES=$(EXTRA_RUNTIME_MODULES)"
 
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed
@@ -12,11 +13,11 @@ $(RUNTIMELIBRARY_BUILD_DIR):
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
 	*-apple*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
+	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
 	*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir) ;; \
+	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
 	esac
 
 if JM_WIN64
@@ -24,7 +25,7 @@ if JM_WIN64
 $(RUNTIMELIBRARY_BUILD_DIR64):
 	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64)
 	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(RUNTIMELIBRARY_SRC_DIR) -DSUNDIALS_HOME=$(SUNDIALS_HOME) -DTOP_SRC=$(abs_top_srcdir)
+	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" $(RUNTIMELIBRARY_COMMON_ARGS)
 
 all-local: $(RUNTIMELIBRARY_BUILD_DIR) $(RUNTIMELIBRARY_BUILD_DIR64)
 	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
