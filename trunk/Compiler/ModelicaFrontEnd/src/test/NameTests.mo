@@ -3219,7 +3219,22 @@ Semantic error at line 3159, column 25:
 ")})));
 end ConditionalComponentTest13_Err;
 
+model ConditionalComponentTest14
+    record R
+        parameter Real x;
+    end R;
+    
+    parameter R r if false;
 
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalComponentTest14",
+            description="Flattening type of conditional component",
+            flatModel="
+fclass NameTests.ConditionalComponentTest14
+end NameTests.ConditionalComponentTest14;
+")})));
+end ConditionalComponentTest14;
 
 model AttributeDot1
   Real x=1;
