@@ -185,8 +185,15 @@ aspect ExternalConstantEvaluation {
         if (ext.includeDirectory() != null)
             incDirs.add(ext.includeDirectory());
         try {
-            target.getTemplates(getOptions()).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
-            executable = getCCompiler().compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
+            OptionRegistry options = getOptions();
+            ModulesSettings modulesSettings = createModulesSettings(options);
+            
+            target.getTemplates(options).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
+            
+            CCompilerDelegator ccompiler = getCCompiler();
+            ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
+            
+            executable = ccompiler.compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
             new File(sourceDir, source + ".c").delete();
             log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
         } catch (FileNotFoundException e) {

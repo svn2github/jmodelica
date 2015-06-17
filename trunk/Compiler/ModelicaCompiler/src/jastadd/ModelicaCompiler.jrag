@@ -2782,9 +2782,11 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         String buildPlatform = ModelicaCompiler.getPlatform();
         String make = getMake(buildPlatform);
         
-		for (String name : moduleLibNames) {
-		    ext_libs.add(name);
-		}
+        if (moduleLibNames != null) {
+            for (String name : moduleLibNames) {
+                ext_libs.add(name);
+            }
+        }
         
         Map<String, String> vars = new HashMap<String, String>();
         addFixedMakeVars(vars, fileName, jmodelicaHome, ext_libs, ext_incl_dirs);
