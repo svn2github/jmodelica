@@ -55,7 +55,8 @@ aspect Variability {
 	
     syn boolean FTypePrefixVariability.evalOrLess()       = lessOrEqual(fEvalParameter());
     syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
-    syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fParameter());
+    syn boolean FTypePrefixVariability.parameterOrLess()  = lessOrEqual(fNonFixedParameter());
+    syn boolean FTypePrefixVariability.fixedParameterOrLess() = lessOrEqual(fFixedParameter());
     syn boolean FTypePrefixVariability.discreteOrLess()   = lessOrEqual(fDiscrete());
     syn boolean FTypePrefixVariability.continuousOrLess() = lessOrEqual(fContinuous());
 
@@ -73,7 +74,8 @@ aspect Variability {
     protected int FStructParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
     protected int FEvalParameter.variabilityLevel()   { return VARIABILITY_LEVEL; }
     protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FParameter.variabilityLevel()       { return VARIABILITY_LEVEL; }
+    protected int FFixedParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+    protected int FNonFixedParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
     protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
@@ -81,7 +83,8 @@ aspect Variability {
     protected static final int FEvalParameter.VARIABILITY_LEVEL   = 3;
     protected static final int FStructParameter.VARIABILITY_LEVEL = 4;
     protected static final int FFinalParameter.VARIABILITY_LEVEL  = 5;
-    protected static final int FParameter.VARIABILITY_LEVEL       = 10;
+    protected static final int FFixedParameter.VARIABILITY_LEVEL  = 10;
+    protected static final int FNonFixedParameter.VARIABILITY_LEVEL = 11;
     protected static final int FDiscrete.VARIABILITY_LEVEL        = 20;
     protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
     
@@ -636,7 +639,8 @@ aspect VariabilitySingletons {
 
     public static final FContinuous      FContinuous.instance      = new FContinuous();
     public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
-    public static final FParameter       FParameter.instance       = new FParameter();
+    public static final FNonFixedParameter FNonFixedParameter.instance = new FNonFixedParameter();
+    public static final FFixedParameter  FFixedParameter.instance  = new FFixedParameter();
     public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
     public static final FEvalParameter   FEvalParameter.instance   = new FEvalParameter();
     public static final FStructParameter FStructParameter.instance = new FStructParameter();
@@ -650,8 +654,19 @@ aspect VariabilitySingletons {
         return FDiscrete.instance;
     }
 
+    /**
+     * @deprecated Delegates to fFixedParameter(). Use correct specific parameter sub-variability.
+     */
     public static FParameter ASTNode.fParameter() {
-        return FParameter.instance;
+        return fFixedParameter();
+    }
+    
+    public static FParameter ASTNode.fNonFixedParameter() {
+        return FNonFixedParameter.instance;
+    }
+    
+    public static FParameter ASTNode.fFixedParameter() {
+        return FFixedParameter.instance;
     }
     
     public static FFinalParameter ASTNode.fFinalParameter() {

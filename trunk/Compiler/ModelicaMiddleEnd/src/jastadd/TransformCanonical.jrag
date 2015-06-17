@@ -2043,7 +2043,7 @@ aspect TransformCanonical {
      * Rewrite derivatives of parameters to zeros.
      */
     rewrite FAbstractDerExp {
-        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().lessOrEqual(fParameter())) to FExp {
+        when (getFIdUse().myFV().isFVariable() && getFIdUse().myFV().variability().parameterOrLess()) to FExp {
             return new FRealLitExp(0.0);
         }
     }
@@ -3449,7 +3449,7 @@ aspect StateInitialEquations {
         
         for (FRealVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), new FParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fNonFixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else
@@ -3533,7 +3533,7 @@ aspect RuntimeOptions {
 	 */
 	public FVariable FClass.commonCreateRuntimeOptionParameter(FVariable v, String name, FExp bExp) {
 		v.setFVisibilityType(new FRuntimeOptionVisibilityType());
-		v.setFTypePrefixVariability(new FParameter());
+		v.setFTypePrefixVariability(fFixedParameter());
 		v.setBindingExp(bExp);
 		v.setFQName(new FQNameString(name));
 		return v;
@@ -3940,7 +3940,7 @@ aspect ArrayAccessRewrite {
      * Create delegate function for array access involving index that can not be calculated at compile time.
      */
     public FExp FSubscriptedExp.createSubscriptFunc() {
-        if (indexVariability().parameterOrLess() || inFunction())
+        if (indexVariability().fixedParameterOrLess() || inFunction())
             return this;
         List<FExp> args = new List<FExp>();
         List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
@@ -3974,7 +3974,7 @@ aspect ArrayAccessRewrite {
     }
 
     public void FExpSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
-        if (!variability().parameterOrLess()) {
+        if (!variability().fixedParameterOrLess()) {
             args.add(getFExp().fullCopy());
             String varName = "i_" + enumerator.next();
             funcVars.add(new FFunctionVariable(type(), varName, new FInput()));

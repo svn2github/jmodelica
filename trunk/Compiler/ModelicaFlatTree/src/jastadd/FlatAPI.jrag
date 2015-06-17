@@ -1373,7 +1373,7 @@ aspect FlatAPI {
      * Does not check context further than expressions.
      */
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
-            !variability().lessOrEqual(fParameter()) || (checkNonFixedParameters && containsNonFixedParameter());
+            !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
 
     syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
 

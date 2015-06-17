@@ -60,10 +60,12 @@ aspect InstVariability {
         FTypePrefixVariability v =  super.calcVariability();
         if (v.parameterVariability()) {
             
-            if (isEvalFixed()) {
-                v = v.combineDown(fEvalParameter());
+            if (isSetAsNonFixed()) {
+                return fNonFixedParameter();
+            } else if (isEvalFixed()) {
+                v = fEvalParameter();
             } else if (isFinalIndependent()) {
-                v = v.combineDown(fFinalParameter());
+                v = fFinalParameter();
             }
             
             v = v.combineDown(forcedVariability);
@@ -95,7 +97,7 @@ aspect InstVariability {
     syn boolean InstComponentDecl.valueIsFixed() = true;
     eq InstAssignable.valueIsFixed() {
         // TODO: hierarchical check for records?
-        if (isPrimitive() && attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && !fixedAttributeCValue().reduceBooleanAnd())
+        if (isSetAsNonFixed())
             return false;
         if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
             return false;
@@ -103,6 +105,10 @@ aspect InstVariability {
     }
     eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
     eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
+    
+    syn boolean InstAssignable.isSetAsNonFixed() = isPrimitive() && 
+            attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 
+            !fixedAttributeCValue().reduceBooleanAnd();
 
     syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
     eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
@@ -158,17 +164,18 @@ aspect InstVariability {
     public FTypePrefixVariability FParameter.combinePropagate(FTypePrefixVariability other) {
         // TODO: look over this after we have added "dependent parameter that is evaluated" variability
         if (other.parameterVariability()) {
-            return other.combineDown(this);
+            if (fixedParameterOrLess() && other.fixedParameterOrLess()) {
+                return other.combineDown(this);
+            } else {
+                return fNonFixedParameter();
+            }
         }
         return super.combinePropagate(other);
     }
     
     public FTypePrefixVariability FEvalParameter.combinePropagate(FTypePrefixVariability other) {
         // TODO: look over this after we have added "dependent parameter that is evaluated" variability
-        if (other.parameterVariability()) {
-            return other.combineDown(fStructParameter());
-        }
-        return super.combinePropagate(other);
+        return fStructParameter().combinePropagate(other);
     }
     
     public FTypePrefixVariability FCompositeVariability.combinePropagate(FTypePrefixVariability other) {

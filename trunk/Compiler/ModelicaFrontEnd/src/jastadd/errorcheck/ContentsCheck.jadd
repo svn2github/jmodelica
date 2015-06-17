@@ -357,7 +357,7 @@ aspect ContentCheck {
     public void FIfEquation.checkMayContainConnect(ErrorCheckType checkType, FConnectClause connect) {
         super.checkMayContainConnect(checkType, connect);
         FTypePrefixVariability v = getTest().variability();
-        if (!v.parameterOrLess() || (v.parameterVariability() && !getTest().valueIsFixed())) {
+        if (!v.fixedParameterOrLess()) {
             connect.error("Connect clauses are not allowed in if equations with non-parameter or non-fixed conditions");
         } else {
             if (!getTest().canCeval()) {

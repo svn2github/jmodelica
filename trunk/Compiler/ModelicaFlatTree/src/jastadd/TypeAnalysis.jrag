@@ -320,7 +320,7 @@ aspect FlatTypeAnalysis {
 
     eq FSizeExp.type() {
         if (hasDim()) {
-            if (!getDim().variability().lessOrEqual(fParameter()))
+            if (!getDim().variability().parameterOrLess())
                 return fUnknownType();
             if (!getDim().type().isIntegerScalar())
                 return fUnknownType();
@@ -357,7 +357,7 @@ aspect FlatTypeAnalysis {
     eq FLinspace.type() {
         // TODO: check that endpoints are real
         try {
-            if ((getN().variability().lessOrEqual(fParameter()) && getN().ceval().intValue() >= 2) || inFunction())
+            if ((getN().variability().parameterOrLess() && getN().ceval().intValue() >= 2) || inFunction())
                 return fRealArrayType(size());
         } catch (ConstantEvaluationException e) {
         }
@@ -547,7 +547,7 @@ aspect FlatTypeAnalysis {
     }
 
     eq FIdentity.type() {
-        if (!getFExp().variability().lessOrEqual(fParameter()) && !inFunction())
+        if (!getFExp().variability().parameterOrLess() && !inFunction())
             return fUnknownType();
         return fIntegerArrayType(size());
     }

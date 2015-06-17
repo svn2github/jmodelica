@@ -631,7 +631,7 @@ aspect Derivatives {
 	}
 
 	public FExp FDotDivExp.diff(String name) {
-		if (getRight().variability().lessOrEqual(fParameter())) {
+		if (getRight().variability().parameterOrLess()) {
 			return dynamicFExp(newFDivExp(
 			    getLeft().diff(name),
 				getRight().copySymbolic()));
