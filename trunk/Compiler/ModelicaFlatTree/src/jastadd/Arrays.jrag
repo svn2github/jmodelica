@@ -1304,7 +1304,26 @@ aspect Arrays {
     public FExp InstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
         return createSizeFExpForUse(varMap, myInstComponentDecl());
     }
-
+    
+    public FExp InstDot.createSizeFExp(Map<ASTNode, FExp> varMap) {
+        InstComponentDecl top = getFirstInstAccess().myInstComponentDecl();
+        if (varMap.get(top) != null) {
+            FExp exp = null;
+            for (InstAccess ia : getInstAccesss()) {
+                if (exp == null) {
+                    exp = varMap.get(top);
+                } else {
+                    exp = exp.extractRecordFExp(ia.name());
+                }
+                if (ia.hasFArraySubscripts()) {
+                    exp = exp.splitArrayExp(ia.getFArraySubscripts().createIndex());
+                }
+            }
+            varMap.put(myInstComponentDecl(), exp);
+        }
+        return super.createSizeFExp(varMap);
+    }
+    
     public FExp FIdUse.createSizeFExp(Map<ASTNode, FExp> varMap) {
         return createSizeFExpForUse(varMap, myFV());
     }

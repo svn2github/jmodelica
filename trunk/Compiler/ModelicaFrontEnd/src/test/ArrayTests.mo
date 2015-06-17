@@ -7735,6 +7735,69 @@ end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
 
+model ArraySizeInComp1
+    record R
+        Real[:] x = 1:n;
+        parameter Integer n;
+    end R;
+    
+    function f
+        input R r;
+        output Real[r.n] x = r.x;
+        algorithm
+    end f;
+    
+    R r1(n=2);
+    Real[:] x = f(r1);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_ArraySizeInComp1",
+            description="",
+            flatModel="
+fclass ArrayTests.Other.ArraySizeInComp1
+ constant Real r1.x[1] = 1;
+ constant Real r1.x[2] = 2;
+ structural parameter Integer r1.n = 2 /* 2 */;
+ constant Real x[1] = 0.0;
+ constant Real x[2] = 0.0;
+end ArrayTests.Other.ArraySizeInComp1;
+")})));
+end ArraySizeInComp1;
+
+model ArraySizeInComp2
+    record R
+        Real[:] x = 1:n;
+        parameter Integer n;
+    end R;
+    
+    function f
+        input R[:] r;
+        output Real[r[2].n] x = r[2].x;
+        algorithm
+    end f;
+    
+    R r1(n=2);
+    R r2(n=3);
+    Real[:] x = f({r1,r2});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Other_ArraySizeInComp2",
+            description="",
+            flatModel="
+fclass ArrayTests.Other.ArraySizeInComp2
+ constant Real r1.x[1] = 1;
+ constant Real r1.x[2] = 2;
+ structural parameter Integer r1.n = 2 /* 2 */;
+ constant Real r2.x[1] = 1;
+ constant Real r2.x[2] = 2;
+ constant Real r2.x[3] = 3;
+ structural parameter Integer r2.n = 3 /* 3 */;
+ constant Real x[1] = 0.0;
+ constant Real x[2] = 0.0;
+ constant Real x[3] = 0.0;
+end ArrayTests.Other.ArraySizeInComp2;
+")})));
+end ArraySizeInComp2;
 
 model ArraySimplify1
     Real x[2], y[2], z[2];

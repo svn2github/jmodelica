@@ -1111,6 +1111,10 @@ aspect TransformCanonical {
 		return new FIdUseExp(name);
 	}
 	
+    public FExp FInstAccessExp.extractRecordFExp(String suffix) {
+        return new FInstAccessExp(getInstAccess().copyAndAppend(suffix));
+    }
+	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
         return myArgFExp(suffix).fullCopy();
     }
