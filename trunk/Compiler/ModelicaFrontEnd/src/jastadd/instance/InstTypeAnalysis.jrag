@@ -210,7 +210,7 @@ aspect InstBindingType {
     eq InstModification.getChild().expectedSizeFromParent()  = expectedSize();
     eq InstComponentDecl.getChild().expectedSizeFromParent() = size();
     eq InstClassDecl.getChild().expectedSizeFromParent()     = size();
-    eq InstConstraining.getChild().expectedSizeFromParent()  = getClassName().myInstClassDecl().size();
+    eq InstConstrainingClass.getChild().expectedSizeFromParent() = getClassName().myInstClassDecl().size();
     eq InstRoot.getChild().expectedSizeFromParent() {
         throw new UnsupportedOperationException();
     }

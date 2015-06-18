@@ -3825,6 +3825,44 @@ end RedeclareTests.RedeclareTest54;
 ")})));
 end RedeclareTest54;
 
+model RedeclareTest55
+    model R1
+        Real x;
+    end R1;
+    
+    replaceable R1[2] r1 constrainedby R1(each x = time);
+
+    annotation(__JModelica(UnitTesting(tests={
+    
+        FlatteningTestCase(
+            name="RedeclareTest55",
+            description="Redeclare with each in constraining type",
+            flatModel="
+fclass RedeclareTests.RedeclareTest55
+ Real r1[1].x = time;
+ Real r1[2].x = time;
+end RedeclareTests.RedeclareTest55;
+")})));
+end RedeclareTest55;
+
+model RedeclareTest55_err
+    model R1
+        Real x;
+    end R1;
+
+    replaceable R1 r2 constrainedby R1(each x = time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest55_err",
+            description="Redeclare with each in constraining type",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 3850, column 40:
+  The 'each' keyword cannot be applied in a modification of a scalar component: each x = time
+")})));
+end RedeclareTest55_err;
 
 model RedeclareElement1
   model A
