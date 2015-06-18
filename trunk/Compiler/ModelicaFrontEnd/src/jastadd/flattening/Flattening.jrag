@@ -382,10 +382,11 @@ aspect Flattening {
             n = all.size();
             // We need a copy of all since it can be modified during iteration
             for (InstAssignable cons : all.toArray(new InstAssignable[n])) {
-                if (added.add(cons)) {
+                if (!added.contains(cons) && cons.hasBindingFExp()) {
                     cons.flattenInFunction(ffd, fc, true, this);
                     cons.flattenUsedFuncsAndEnums(fc);
                     all.remove(cons);
+                    added.add(cons);
                 }
             }
         }
@@ -586,7 +587,8 @@ aspect Flattening {
 	
 	public void InstAssignable.flattenInFunction(
 			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {
-		if (useConstant || !flattenAsFunctionConstant()) {
+		boolean isConstant = getComponentDecl().isConstant();
+		if (useConstant || !isConstant) {
 			InstClassDecl old = temporarilyInFunction;
 			temporarilyInFunction = func;
 			FExp e = flattenBindingFExp();
@@ -601,6 +603,7 @@ aspect Flattening {
 			if (isOutput())
 				ffv.setFTypePrefixInputOutput(new FOutput());
 			addAttributesToFV(ffv.getFAttributes());
+			// TODO: Mark var as constant if isConstant is true?
 			ffd.addFFunctionVariable(ffv);
 			myInstClass().flattenRecord(fc);
 			temporarilyInFunction = old;
@@ -1721,14 +1724,11 @@ aspect FlatExpressions {
                 // In this case, simply don't inline value if we aren't in a function
                 // TODO: Really? isn't this an error?
             }
-            if (ia.inFunction() && flattenAsFunctionConstant())
+            if (ia.inFunction())
                 return ia.topInstAssignable().flattenAccessToConstInFunction(prefix, ia);
         }
         return super.flattenAccess(prefix, iae);
     }
-    
-    syn boolean InstAssignable.flattenAsFunctionConstant() =
-            !isInput() && !isOutput() && variability().knownParameterOrLess();
 
     inh boolean FInstAccessExp.canInlineConstant();
     eq BaseNode.getChild().canInlineConstant() = true;
