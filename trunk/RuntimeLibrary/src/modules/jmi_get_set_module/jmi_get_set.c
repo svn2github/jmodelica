@@ -71,7 +71,10 @@ int jmi_set_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         /* jmi->recomputeVariables = 1; */
 
         if( needParameterUpdate ) {
-          jmi_init_eval_parameters(jmi);
+          if(jmi_init_eval_parameters(jmi) != 0) {
+                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                return -1;
+          }
         }
     }
 
@@ -109,7 +112,10 @@ int jmi_set_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         RECOMPUTE_VARIABLES_SET(jmi);
 
         if( needParameterUpdate ) {
-              jmi_init_eval_parameters(jmi);
+           if(jmi_init_eval_parameters(jmi) != 0) {
+                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                return -1;
+           }
         }
     }
     return 0;
@@ -144,7 +150,10 @@ int jmi_set_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
         RECOMPUTE_VARIABLES_SET(jmi);
 
         if( needParameterUpdate ) {
-              jmi_init_eval_parameters(jmi);
+           if(jmi_init_eval_parameters(jmi) != 0) {
+                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                return -1;
+           }
         }
     }
     return 0;

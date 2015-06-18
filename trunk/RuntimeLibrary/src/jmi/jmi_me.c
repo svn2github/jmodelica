@@ -176,8 +176,16 @@ int jmi_initialize(jmi_t* jmi) {
     }
     
     /* Evaluate parameters */
-    jmi_init_eval_parameters(jmi);
+    retval = jmi_init_eval_parameters(jmi);
     
+    if(retval != 0) { /* Error check */
+        jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters. Initialization failed.");
+        if (jmi->jmi_callbacks.log_options.log_level >= 4){
+            jmi_log_leave(jmi->log, top_node);
+        }
+        return -1;
+    }
+
     /* We are at the initial event TODO: is this really necessary? */
     jmi->atEvent   = JMI_TRUE;
     jmi->atInitial = JMI_TRUE;

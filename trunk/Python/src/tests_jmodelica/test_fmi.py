@@ -1109,6 +1109,34 @@ class Test_SetDependentParameterError:
         nose.tools.assert_raises(FMUException,self.m.set, 'pbd', True)
         nose.tools.assert_raises(FMUException,self.m.set, 'cb', True)
 
+class Test_DependentParameterEvaluationError:
+    """
+    Test that errors in evaluating dependent parameters results in exceptions
+    """
+
+    @classmethod
+    def setUpClass(self):
+        """
+        Sets up the test class.
+        """
+        self.fmu =  compile_fmu('Parameter.Error.DependentCheck',os.path.join(path_to_mofiles,'ParameterTests.mo'))
+
+    def setUp(self):
+        """
+        Sets up the test case.
+        """
+        self.m = load_fmu(self.fmu)
+
+    @testattr(fmi = True)
+    def test_dependent_parameter_eval(self):
+        """
+        Test that expeptions are thrown when dependent parameters evaluation fails.
+        """
+        nose.tools.assert_almost_equal( self.m.get('pd'),0.5) # test value after instantiate
+        self.m.set('p',0.6)
+        nose.tools.assert_almost_equal( self.m.get('pd'),0.6) # test value propagation
+        nose.tools.assert_raises(FMUException,self.m.set, 'p', 5) # test that assert triggers
+
 class Test_StructuralParameterError:
     """
     Test that setting structural independent parameters results in exception

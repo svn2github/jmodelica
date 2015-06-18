@@ -20,6 +20,22 @@ model Dependent
   constant Boolean cb = true;
 end Dependent;
 
+
+model DependentCheck
+function check_limits
+    input Real p;    
+    parameter Real lower = 0;
+    parameter Real upper = 1;
+    output Real pd;    
+algorithm
+    pd := p;
+    assert( p >= lower and p <= upper, "Input out of limits");
+end check_limits;
+  
+  parameter Real p = 0.5;
+  parameter Real pd = check_limits(p);
+end DependentCheck;
+
 model Structural
     type E = enumeration(A,B,C);
     parameter Real          a = 3;
@@ -32,5 +48,6 @@ model Structural
 end Structural;
 
 end Error;
+
 
 end Parameter;
