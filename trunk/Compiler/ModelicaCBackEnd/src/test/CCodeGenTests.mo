@@ -4335,7 +4335,7 @@ end CUnknownArray10;
 
 model CUnknownArray11
     record R
-        constant Real[:] x;
+        Real[:] x;
     end R;
     
     function f
@@ -4363,7 +4363,7 @@ void func_CCodeGenTests_CUnknownArray11_f_def0(jmi_ad_var_t* x_o) {
     r_v->x = tmp_1;
     jmi_array_ref_1(r_v->x, 1) = 1;
     jmi_array_ref_1(r_v->x, 2) = 2;
-    x_v = 1.0;
+    x_v = jmi_array_val_1(r_v->x, 1);
     JMI_RET(GEN, x_o, x_v)
     JMI_DYNAMIC_FREE()
     return;
@@ -5308,9 +5308,15 @@ model CRecordDecl17
         output Real o;
         A a;
     algorithm
-        o := i;
+        o := i + f2(a);
         annotation(Inline=false);
     end F;
+    
+    function f2
+        input A a;
+        output Integer i = 1;
+        algorithm
+    end f2;
  
     A x;
     Real r = F(time);
