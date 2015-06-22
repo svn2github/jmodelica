@@ -715,8 +715,9 @@ public class ModelicaCompiler {
         //Set options for the target.
         target.setDefaultOptions(options);
         
-        boolean doTearDown = trySetUp();
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp();
             return doCompileUnit(className, fileName, target, compileTo);
         } finally {
             tryTearDown(doTearDown);
@@ -970,8 +971,9 @@ public class ModelicaCompiler {
 	public SourceRoot parseModel(String names[]) 
 	  throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
 		hookCheckAbort();
-        boolean doTearDown = trySetUp();
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp();
             return doParseModel(names);
         } finally {
             tryTearDown(doTearDown);
@@ -1048,8 +1050,9 @@ public class ModelicaCompiler {
     public InstClassDecl instantiateModel(SourceRoot sr, String cl, TargetObject target) 
         throws ModelicaClassNotFoundException, CompilerException {
         hookCheckAbort();
-        boolean doTearDown = trySetUp(sr.getErrorHandler());
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp(sr.getErrorHandler());
             return doInstantiateModel(sr, cl, target);
         } finally {
             tryTearDown(doTearDown);
@@ -1126,8 +1129,9 @@ public class ModelicaCompiler {
     public FClass flattenModel(InstClassDecl icd, TargetObject target, String flatName) 
             throws CompilerException, ModelicaClassNotFoundException, IOException {
         hookCheckAbort();
-        boolean doTearDown = trySetUp(icd.root().getErrorHandler());
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp(icd.root().getErrorHandler());
             PassAndForget<InstClassDecl> buf = new PassAndForget<InstClassDecl>(icd);
             icd = null;
             return doFlattenModel(buf.pass(), target, flatName);
@@ -1307,8 +1311,9 @@ public class ModelicaCompiler {
 	 *             If either of the three template files can not be found.
 	 */
 	public void generateCode(FClass fc, TargetObject target) throws FileNotFoundException {
-        boolean doTearDown = trySetUp(fc.root().getErrorHandler());
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp(fc.root().getErrorHandler());
             doGenerateCode(fc, target);
         } finally {
             tryTearDown(doTearDown);
@@ -1970,8 +1975,9 @@ public class ModelicaCompiler {
      */
     public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        boolean doTearDown = trySetUp();
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp();
             return doCompileModel(name, cl, target, flatName);
         } finally {
             tryTearDown(doTearDown);
