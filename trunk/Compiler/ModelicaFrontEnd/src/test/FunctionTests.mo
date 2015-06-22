@@ -968,6 +968,75 @@ end FunctionTests.FunctionFlatten20;
 ")})));
 end FunctionFlatten20;
 
+model FunctionFlatten21
+    function f
+        constant Real x;
+        output Real y = x;
+        algorithm
+    end f;
+    
+    Real x = f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionFlatten21",
+            description="Flattening of constant in function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten21
+ Real x = FunctionTests.FunctionFlatten21.f();
+
+public
+ function FunctionTests.FunctionFlatten21.f
+  Real x;
+  output Real y := x;
+ algorithm
+  return;
+ end FunctionTests.FunctionFlatten21.f;
+
+end FunctionTests.FunctionFlatten21;
+
+")})));
+end FunctionFlatten21;
+
+model FunctionFlatten22
+    record R
+        constant Real x;
+    end R;
+    
+    function f
+        input R y;
+        output R z;
+    algorithm
+        z := y;
+    end f;
+    
+    R y = f(R(1));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionFlatten22",
+            description="Flattening of constant in function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten22
+ constant FunctionTests.FunctionFlatten22.R y = FunctionTests.FunctionFlatten22.R(1);
+
+public
+ function FunctionTests.FunctionFlatten22.f
+  input FunctionTests.FunctionFlatten22.R y;
+  output FunctionTests.FunctionFlatten22.R z;
+ algorithm
+  z := y;
+  return;
+ end FunctionTests.FunctionFlatten22.f;
+
+ record FunctionTests.FunctionFlatten22.R
+  constant Real x;
+ end FunctionTests.FunctionFlatten22.R;
+
+end FunctionTests.FunctionFlatten22;
+")})));
+end FunctionFlatten22;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
