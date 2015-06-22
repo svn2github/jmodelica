@@ -15,6 +15,9 @@ struct jmi_get_set_module_t {
 #define RECOMPUTE_VARIABLES_SET(j) (RECOMPUTE_VARIABLES(j) = 1)
 #define RECOMPUTE_VARIABLES_CLR(j) (RECOMPUTE_VARIABLES(j) = 0)
 
+static int
+jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr);
+
 int jmi_get_set_module_init(jmi_t *jmi) {
     jmi_get_set_module_t *module;
     int result = JMI_ERROR;
@@ -172,12 +175,15 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 }
 
 int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                 jmi_real_t value[], int eval_required) {
+                 jmi_real_t value[]) {
 
     int retval;
     jmi_value_reference i;
     jmi_value_reference index;
     jmi_real_t* z;
+    int eval_required;
+
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
 
     if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
 
@@ -205,12 +211,15 @@ int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 }
 
 int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                    jmi_int_t value[], int eval_required) {
+                    jmi_int_t value[]) {
 
     int retval;
     jmi_real_t* z;
     jmi_value_reference i;
     jmi_value_reference index;
+    int eval_required;
+
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
 
     if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
 
@@ -237,12 +246,15 @@ int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 }
 
 int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                    jmi_boolean value[], int eval_required) {
+                    jmi_boolean value[]) {
 
     int retval;
     jmi_real_t* z;
     jmi_value_reference i;
     jmi_value_reference index;
+    int eval_required;
+
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
 
     if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
 
@@ -269,10 +281,13 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 }
 
 int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                   jmi_string  value[], int eval_required) {
+                   jmi_string  value[]) {
 
     int retval;
     int i;
+    int eval_required;
+
+    eval_required = jmi_evaluation_required(jmi, vr, nvr);
 
     if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
 
@@ -333,21 +348,25 @@ int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size
     if (RECOMPUTE_VARIABLES(jmi) == 1 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-
+#if 0
             /* Store the current time and states */
             jmi_real_t time = *(jmi_get_t(jmi));
             jmi_real_t *x = (jmi_real_t*)jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
             memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
-
+#endif
             jmi_log_node(jmi->log, logWarning, "Warning",
                 "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
             /* If it failed, reset to the previous succesful values */
+
+            jmi_reset_internal_variables(jmi);
+#if 0
             jmi_reset_last_successful_values(jmi);
 
             /* Restore the current time and states */
             memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
             *(jmi_get_t(jmi)) = time;
             jmi->jmi_callbacks.free_memory(x);
+#endif
 
             /* Try again */
             retval = jmi_ode_derivatives(jmi);
@@ -498,7 +517,7 @@ int jmi_reset_internal_variables(jmi_t* jmi) {
     memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
     memcpy(u, jmi_get_real_u(jmi), jmi->n_real_u*sizeof(jmi_real_t));
 
-    jmi_reset_last_successful_values(jmi);
+    jmi_reset_last_internal_successful_values(jmi);
 
     /* Restore the current time and states */
     memcpy (jmi_get_real_u(jmi), u, jmi->n_real_u*sizeof(jmi_real_t));
@@ -518,4 +537,21 @@ int
 jmi_update_all(jmi_t* jmi)
 {
     return jmi_generic_func(jmi, jmi->dae->ode_derivatives);
+}
+
+static int
+jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
+{
+	jmi_value_reference i;
+
+    /* If all variables that are inquired are parameters or constants,
+     * then the solver should not be invoked.
+     */
+    for (i = 0; i < nvr; i++) {
+        if (get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
+			return 1;
+		}
+	}
+
+	return 0;
 }

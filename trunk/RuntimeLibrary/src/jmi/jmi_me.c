@@ -355,61 +355,32 @@ int jmi_set_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     return jmi_set_string_impl(jmi, vr, nvr, value);
 }
 
-static int
-jmi_is_parameter_or_constant(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
-{
-	jmi_value_reference i;
-
-    /* This is to make sure that if all variables that are inquired
-     * are parameters or constants, then the solver should not be invoked.
-     */
-	for (i = 0; i < nvr; i = i + 1) {
-		if (get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
-			return 1;
-		}
-	}
-
-	return 0;
-}
-
 int jmi_get_real(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                  jmi_real_t value[]) {
-    int eval_required;
-
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
 
     /* Transfer control to module */
-    return jmi_get_real_impl(jmi, vr, nvr, value, eval_required);
+    return jmi_get_real_impl(jmi, vr, nvr, value);
 }
 
 int jmi_get_integer(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     jmi_int_t value[]) {
-    int eval_required;
-
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
 
     /* Transfer control to module */
-    return jmi_get_integer_impl(jmi, vr, nvr, value, eval_required);
+    return jmi_get_integer_impl(jmi, vr, nvr, value);
 }
 
 int jmi_get_boolean(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                     jmi_boolean value[]) {
-    int eval_required;
 
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
-    
     /* Transfer control to module */
-    return jmi_get_boolean_impl(jmi, vr, nvr, value, eval_required);
+    return jmi_get_boolean_impl(jmi, vr, nvr, value);
 }
 
 int jmi_get_string(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    jmi_string value[]) {
-    int eval_required;
-
-    eval_required = jmi_is_parameter_or_constant(jmi, vr, nvr);
     
     /* Transfer control to module */
-    return jmi_get_string_impl(jmi, vr, nvr, value, eval_required);
+    return jmi_get_string_impl(jmi, vr, nvr, value);
 }
 
 int jmi_get_directional_derivative(jmi_t* jmi,

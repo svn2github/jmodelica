@@ -21,16 +21,16 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    const jmi_string value[]);
 
 int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                 jmi_real_t value[], int eval_required);
+                 jmi_real_t value[]);
 
 int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                    jmi_int_t value[], int eval_required);
+                    jmi_int_t value[]);
 
 int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                    jmi_boolean value[], int eval_required);
+                    jmi_boolean value[]);
 
 int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
-                   jmi_string  value[], int eval_required);
+                   jmi_string  value[]);
 
 int jmi_set_time_impl(jmi_t* jmi, jmi_real_t time);
 
