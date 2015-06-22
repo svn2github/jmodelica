@@ -1866,8 +1866,9 @@ public class ModelicaCompiler {
      */
     public FClass ModelicaCompiler.compileModel(String name[], String cl, TargetObject target, String flatName)
           throws ModelicaException, FileNotFoundException, IOException, beaver.Parser.Exception {
-        boolean doTearDown = trySetUp();
+        boolean doTearDown = true;
         try {
+            doTearDown = trySetUp();
             return doCompileModel(name, cl, target, flatName);
         } finally {
             tryTearDown(doTearDown);
