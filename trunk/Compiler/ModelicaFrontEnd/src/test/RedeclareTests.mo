@@ -6400,5 +6400,284 @@ Semantic error at line 5442, column 11:
 ")})));
 end RedeclarePrefix15;
 
+model RedeclareInRecord1
+    package P1
+        replaceable partial record R
+        end R;
+        
+        replaceable partial function f
+            input R r;
+            output Real x;
+        end f;
+    end P1;
+    
+    package P2
+        extends P1;
+        redeclare record extends R
+            Real x = time;
+        end R;
+        redeclare function extends f
+        algorithm
+            x := r.x;
+        end f;
+    end P2;
+    
+    record A
+        replaceable package P = P1;
+        P.R pr;
+        Real x = P.f(pr);
+    end A;
+    
+    A a(redeclare package P = P2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord1",
+            description="Redeclare package in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord1
+ RedeclareTests.RedeclareInRecord1:a a(pr(x = time),x = RedeclareTests.RedeclareInRecord1.P2.f(a.pr));
+
+public
+ function RedeclareTests.RedeclareInRecord1.P2.f
+  input RedeclareTests.RedeclareInRecord1.P2.R r(x = time);
+  output Real x;
+ algorithm
+  x := r.x;
+  return;
+ end RedeclareTests.RedeclareInRecord1.P2.f;
+
+ record RedeclareTests.RedeclareInRecord1.P2.R
+  Real x;
+ end RedeclareTests.RedeclareInRecord1.P2.R;
+
+ record RedeclareTests.RedeclareInRecord1:a
+  RedeclareTests.RedeclareInRecord1.P2.R pr(x = time);
+  Real x;
+ end RedeclareTests.RedeclareInRecord1:a;
+
+end RedeclareTests.RedeclareInRecord1;
+")})));
+end RedeclareInRecord1;
+
+model RedeclareInRecord2
+    partial record R1
+    end R1;
+
+    record R2
+        extends R1;
+        Real x = time;
+    end R2;
+    
+    record A
+        replaceable R1 pr;
+    end A;
+    
+    A a(redeclare R2 pr);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord2",
+            description="Redeclare record in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord2
+ RedeclareTests.RedeclareInRecord2:a a(pr(x = time));
+
+public
+ record RedeclareTests.RedeclareInRecord2.R2
+  Real x;
+ end RedeclareTests.RedeclareInRecord2.R2;
+
+ record RedeclareTests.RedeclareInRecord2:a
+  RedeclareTests.RedeclareInRecord2.R2 pr(x = time);
+ end RedeclareTests.RedeclareInRecord2:a;
+
+end RedeclareTests.RedeclareInRecord2;
+")})));
+end RedeclareInRecord2;
+
+model RedeclareInRecord3
+    partial record A1
+    end A1;
+
+    record A2
+        extends A1;
+        replaceable B1 b;
+    end A2;
+    
+    partial record B1
+    end B1;
+    
+    record B2
+        extends B1;
+        Real x = time;
+    end B2;
+    
+    record R
+        replaceable A1 a;
+    end R;
+    
+    R r(redeclare A2 a(redeclare B2 b));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord3",
+            description="Nested redeclarations in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord3
+ RedeclareTests.RedeclareInRecord3:r r(a(b(x = time)));
+
+public
+ record RedeclareTests.RedeclareInRecord3.B2
+  Real x;
+ end RedeclareTests.RedeclareInRecord3.B2;
+
+ record RedeclareTests.RedeclareInRecord3:r.a
+  RedeclareTests.RedeclareInRecord3.B2 b(x = time);
+ end RedeclareTests.RedeclareInRecord3:r.a;
+
+ record RedeclareTests.RedeclareInRecord3:r
+  RedeclareTests.RedeclareInRecord3:r.a a(b(x = time));
+ end RedeclareTests.RedeclareInRecord3:r;
+
+end RedeclareTests.RedeclareInRecord3;
+")})));
+end RedeclareInRecord3;
+
+model RedeclareInRecord4
+    partial record A1
+    end A1;
+
+    record A2
+        replaceable B1 b;
+    end A2;
+
+    partial record B1
+    end B1;
+    
+    record B2
+        extends B1;
+        Real x = time;
+    end B2;
+    
+    record R1
+        replaceable A1 a;
+    end R1;
+    
+    record R2
+        extends R1(redeclare A2 a(redeclare B2 b));
+    end R2;
+    
+    R2 r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord4",
+            description="Nested redeclarations in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord4
+ RedeclareTests.RedeclareInRecord4.R2 r(a(b(x = time)));
+
+public
+ record RedeclareTests.RedeclareInRecord4.B2
+  Real x;
+ end RedeclareTests.RedeclareInRecord4.B2;
+
+ record RedeclareTests.RedeclareInRecord4.R2:a
+  RedeclareTests.RedeclareInRecord4.B2 b(x = time);
+ end RedeclareTests.RedeclareInRecord4.R2:a;
+
+ record RedeclareTests.RedeclareInRecord4.R2
+  RedeclareTests.RedeclareInRecord4.R2:a a(b(x = time));
+ end RedeclareTests.RedeclareInRecord4.R2;
+
+end RedeclareTests.RedeclareInRecord4;
+")})));
+end RedeclareInRecord4;
+
+model RedeclareInRecord5
+    record B1
+        Real x = time+1;
+    end B1;
+    
+    record B2
+        extends B1(x=time+2);
+    end B2;
+    
+    record A1
+        replaceable B1 b;
+    end A1;
+    
+    record A2
+        extends A1(redeclare B2 b);
+    end A1;
+    
+    record A3
+        extends A1;
+        redeclare B2 b;
+    end A1;
+    
+    A1 a1(redeclare B2 b);
+    A2 a2;
+    A3 a3;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord5",
+            description="Redeclarations in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord5
+ RedeclareTests.RedeclareInRecord5:a1 a1(b(x = time + 2));
+ RedeclareTests.RedeclareInRecord5.A2 a2(b(x = time + 2));
+ RedeclareTests.RedeclareInRecord5.A3 a3(b(x = time + 2));
+
+public
+ record RedeclareTests.RedeclareInRecord5.B2
+  Real x;
+ end RedeclareTests.RedeclareInRecord5.B2;
+
+ record RedeclareTests.RedeclareInRecord5:a1
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+ end RedeclareTests.RedeclareInRecord5:a1;
+
+ record RedeclareTests.RedeclareInRecord5.A2
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+ end RedeclareTests.RedeclareInRecord5.A2;
+
+ record RedeclareTests.RedeclareInRecord5.A3
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+ end RedeclareTests.RedeclareInRecord5.A3;
+
+end RedeclareTests.RedeclareInRecord5;
+")})));
+end RedeclareInRecord5;
+
+model RedeclareInRecord6
+    type T = Real(min=1);
+
+    record B
+        Real x = time+1;
+    end B;
+    
+    B b(redeclare T x = time + 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord6",
+            description="Redeclare primitive in record",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord6
+ RedeclareTests.RedeclareInRecord6:b b(x = time + 2);
+
+public
+ record RedeclareTests.RedeclareInRecord6:b
+  RedeclareTests.RedeclareInRecord6.T x;
+ end RedeclareTests.RedeclareInRecord6:b;
+
+ type RedeclareTests.RedeclareInRecord6.T = Real(min = 1);
+end RedeclareTests.RedeclareInRecord6;
+")})));
+end RedeclareInRecord6;
+
 
 end RedeclareTests;

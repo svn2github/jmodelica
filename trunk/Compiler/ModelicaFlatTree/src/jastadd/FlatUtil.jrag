@@ -189,6 +189,9 @@ aspect FlatNames {
     syn String FQName.lastActualPartName() = lastPartName();
     eq FQNameString.lastActualPartName()   = getName().substring(getName().lastIndexOf('.') + 1);
 
+    syn String FQName.lastActualTypePartName() = lastPartName();
+    eq FQNameString.lastActualTypePartName()   = getName().substring(Math.max(getName().lastIndexOf('.'), getName().lastIndexOf(':')) + 1);
+    
     /**
      * Gets the prefix name parts. Considers FQNameString as having one part for each '.'-separated substring.
      */

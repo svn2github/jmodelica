@@ -967,7 +967,7 @@ aspect CCodeGen {
 	 */
 	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 	
-	syn String FRecordDecl.name_C()      = getFQName().lastActualPartName() + "_" + 
+	syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + 
 										       recordIndex() + "_" + C_SUFFIX_RECORD;
 	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
 	

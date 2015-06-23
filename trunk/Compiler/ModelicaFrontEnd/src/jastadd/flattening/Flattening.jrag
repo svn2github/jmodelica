@@ -138,13 +138,6 @@ aspect Flattening {
                 type().matchOverloadedZero().flattenFunction(fc);
         }
     }
-    
-    public void InstRecord.flattenUsedFuncsAndEnums(FClass fc) {
-        if (useInFlattening()) {
-            super.flattenUsedFuncsAndEnums(fc);
-            flattenMyType(fc);
-        }
-    }
 
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
         actualInstClass().flattenUsedFuncsAndEnums(fc);
@@ -482,27 +475,23 @@ aspect Flattening {
         icd.flattenThisRecord(fc);
     }
 
-    public void InstBaseClassDecl.flattenThisRecord(FClass fc) {
-        if (fc.lookupFRec(qualifiedName()) == null) {
+    public void InstNode.flattenThisRecord(FClass fc) {
+        String name = qualifiedTypeName();
+        if (fc.lookupFRec(name) == null) {
             FRecordDecl frd = new FRecordDecl();
-            frd.setFQName(new FQNameString(qualifiedName()));
+            frd.setFQName(new FQNameString(name));
             
             Set<String> names = new HashSet<String>();
-            actualInstClass().flattenComponentsInRecord(frd, fc, names);
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                icd.flattenInRecord(frd, fc, names);
+            }
             
             fc.addFRecordDecl(frd);
             
             flattenUsedFuncsAndEnums(fc);
         }
     }
-
-    public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
-        for (InstExtends ie : getInstExtendss())
-            ie.flattenComponentsInRecord(frd, fc, names);
-        for (InstComponentDecl icd : getInstComponentDecls())
-            icd.flattenInRecord(frd, fc, names);
-    }
-
+    
     public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
         return createStmt(func, prefix, true);
     }
@@ -814,7 +803,7 @@ aspect Flattening {
     public boolean FVariable.modifiableInRecord = true;
     public void InstAssignable.flattenInRecord(FRecordDecl frd, FClass fc, Set<String> names) {
         if (names.add(name())) {
-            FVariable fv = createFVariable(getFQName(), true);
+            FVariable fv = createFVariable(getFQName().copyLastSuffix(), true);
             fv.modifiableInRecord = isModifiable();
             frd.addFVariableNoTransform(fv);
             flattenMyType(fc);
@@ -836,9 +825,49 @@ aspect Flattening {
     }
 
     public void InstRecord.flattenMyType(FClass fc) {
-        myInstClass().flattenRecord(fc);
+        if (flattenRedeclaredType()) {
+            flattenThisRecord(fc);
+        } else {
+            myInstClass().flattenRecord(fc);
+        }
     }
-
+    
+    syn String InstNode.qualifiedTypeName() = qualifiedName();
+    eq InstRecord.qualifiedTypeName() {
+        if (flattenRedeclaredType()) {
+            return surroundingInstClass().qualifiedName() + ":" + qualifiedName();
+        } else {
+            return myInstClass().qualifiedName();
+        }
+    }
+    
+    syn boolean InstRecord.flattenRedeclaredType() = InstNode.containsRedeclared(this);
+    
+    syn boolean InstNode.containsRedeclared() = InstNode.containsRedeclared(this);
+    public static boolean InstNode.containsRedeclared(InstNode in) {
+        for (InstComponentDecl icd : in.getInstComponentDecls()) {
+            if (icd.containsRedeclared()) {
+                return true;
+            }
+        }
+        for (InstClassDecl icd : in.getInstClassDecls()) {
+            if (icd.containsRedeclared()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    eq InstReplacingComposite.containsRedeclared() = true;
+    eq InstReplacingRecord.containsRedeclared() = true;
+    eq InstReplacingPrimitive.containsRedeclared() = true;
+    
+    eq InstClassDecl.containsRedeclared() = false;
+    eq InstReplacingFullClassDecl.containsRedeclared() = true;
+    eq InstReplacingShortClassDecl.containsRedeclared() = true;
+    eq InstReplacingSimpleShortClassDecl.containsRedeclared() = true;
+    
+    
     public void InstEnum.flattenMyType(FClass fc) {
         myInstClass().flattenEnum(fc);
         flattenUsedFuncsAndEnums(fc);
@@ -902,7 +931,7 @@ aspect Flattening {
 	
 	public FVariable InstRecord.createEmptyFVariable() {
 		FRecordVariable rec = new FRecordVariable();
-		rec.setRecord(new FQNameString(myInstClass().qualifiedName()));
+        rec.setRecord(new FQNameString(qualifiedTypeName()));
 		return rec;
 	}
     

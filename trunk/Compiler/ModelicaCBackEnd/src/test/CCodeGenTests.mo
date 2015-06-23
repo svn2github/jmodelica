@@ -5427,6 +5427,68 @@ model CRecordDecl20
 ")})));
 end CRecordDecl20;
 
+model CRecordDecl21
+    type T = Real(min=1);
+
+    record B
+        Real x = time+1;
+    end B;
+    
+    function f
+        input B b;
+        output Real x = b.x;
+        algorithm
+    end f;
+    
+    B b(redeclare T x = time + 2);
+    Real x = f(b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CRecordDecl21",
+            description="Record with colon in name",
+            template="
+$C_records$
+$C_functions$
+$C_ode_derivatives$
+",
+            inline_functions="none",
+            generatedCode="
+typedef struct _b_0_r {
+    jmi_ad_var_t x;
+} b_0_r;
+JMI_ARRAY_TYPE(b_0_r, b_0_ra)
+
+
+void func_CCodeGenTests_CRecordDecl21_f_def0(b_0_r* b_v, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, x_v)
+    x_v = b_v->x;
+    JMI_RET(GEN, x_o, x_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CRecordDecl21_f_exp0(b_0_r* b_v) {
+    JMI_DEF(REA, x_v)
+    func_CCodeGenTests_CRecordDecl21_f_def0(b_v, &x_v);
+    return x_v;
+}
+
+    JMI_RECORD_STATIC(b_0_r, tmp_1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    _b_x_0 = _time + 2;
+    tmp_1->x = _b_x_0;
+    _x_1 = func_CCodeGenTests_CRecordDecl21_f_exp0(tmp_1);
+    /********* Write back reinits *******/
+")})));
+end CRecordDecl21;
+
 
 model RemoveCopyright
     input Real dummy;
