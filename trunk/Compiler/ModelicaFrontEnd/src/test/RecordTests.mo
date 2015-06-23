@@ -5545,6 +5545,41 @@ At line 4286, column 24:
 ")})));
 end RecordParam10;
 
+model RecordVariability1
+    record A1
+        Real x1 = time + p1;
+        parameter Real p1 = 1;
+    end A1;
+    
+    record A2
+        Real x2 = time + p2;
+        parameter Real p2 = 2;
+    end A2;
+    
+    record B
+        A1 a1;
+        A2 a2;
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordVariability1",
+            description="Nested composite variability calculations #4440",
+            flatModel="
+fclass RecordTests.RecordVariability1
+ Real b.a1.x1;
+ parameter Real b.a1.p1 = 1 /* 1 */;
+ Real b.a2.x2;
+ parameter Real b.a2.p2 = 2 /* 2 */;
+equation
+ b.a1.x1 = time + b.a1.p1;
+ b.a2.x2 = time + b.a2.p2;
+end RecordTests.RecordVariability1;
+")})));
+end RecordVariability1;
+
 
 model RecordMerge1
     record R1

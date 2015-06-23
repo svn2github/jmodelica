@@ -89,7 +89,7 @@ aspect Variability {
     protected static final int FContinuous.VARIABILITY_LEVEL      = 30;
     
     /**
-     * Combines component variabilities to a single primitive variability.
+     * Combines (up) component variabilities to a single primitive variability.
      */
     syn FTypePrefixVariability FTypePrefixVariability.combine() {
         return this;
@@ -99,6 +99,21 @@ aspect Variability {
         FTypePrefixVariability high = fConstant();
         for (FComponentVariability v : getComponents()) {
             high = high.combine(v.getVariability().combine());
+        }
+        return high;
+    }
+    
+    /**
+     * Combines (down) component variabilities to a single primitive variability.
+     */
+    syn FTypePrefixVariability FTypePrefixVariability.combineDown() {
+        return this;
+    }
+    
+    eq FCompositeVariability.combineDown() {
+        FTypePrefixVariability high = fConstant();
+        for (FComponentVariability v : getComponents()) {
+            high = high.combineDown(v.getVariability().combineDown());
         }
         return high;
     }
@@ -607,8 +622,8 @@ aspect Variability {
             FTypePrefixVariability nv = other.getPart(name);
             nv = v.combine(nv, combiner);
             l.add(new FComponentVariability(fcv.getName(), nv));
-            low = low.combineDown(nv);
-            high = high.combine(nv);
+            low = low.combineDown(nv.combineDown());
+            high = high.combine(nv.combine());
             containsComposite = containsComposite || nv.compositeVariability();
         }
         if (!containsComposite && low.equals(high))
