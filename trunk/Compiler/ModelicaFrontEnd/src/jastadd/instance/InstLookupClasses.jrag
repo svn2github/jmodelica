@@ -565,19 +565,23 @@ aspect InstLookupImport {
 
 aspect InstLookupClassesInModifications {
 
-    eq InstElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstClass(name);
-    eq InstClassRedeclare.getName().lookupInstClass(String name)      = lookupInstClassInInstClass(name);
+    eq InstElementModification.getName().lookupInstClass(String name) = lookupInstClassInInstElement(name);
+    eq InstClassRedeclare.getName().lookupInstClass(String name)      = lookupInstClassInInstElement(name);
 
-    inh InstLookupResult<InstClassDecl> InstElementModification.lookupInstClassInInstClass(String name);
-    inh InstLookupResult<InstClassDecl> InstClassRedeclare.lookupInstClassInInstClass(String name);
+    /**
+     * This attribute defines the lookup mechanism for left hand class references in modifications.
+     * They are looked up in the element that the modification is attached to, not the surrounding scope.
+     */
+    inh InstLookupResult<InstClassDecl> InstElementModification.lookupInstClassInInstElement(String name);
+    inh InstLookupResult<InstClassDecl> InstClassRedeclare.lookupInstClassInInstElement(String name);
 
-    eq InstArrayComponentDecl.getInstModification().lookupInstClassInInstClass(String name)  = instComponentDecl().memberInstClass(name);
-    eq InstComponentDecl.getInstModification().lookupInstClassInInstClass(String name)       = memberInstClass(name);
-    eq InstElementModification.getInstModification().lookupInstClassInInstClass(String name) = getName().myInstComponentDecl().memberInstClass(name);
-    eq InstNormalExtends.getInstClassModification().lookupInstClassInInstClass(String name)  = memberInstClass(name);
-    eq InstConstraining.getInstClassModification().lookupInstClassInInstClass(String name)   = getClassName().myInstClassDecl().memberInstClass(name);
-    eq InstRoot.getChild().lookupInstClassInInstClass(String name)                           = InstLookupResult.notFound();
-    eq FlatRoot.getChild().lookupInstClassInInstClass(String name)                           = InstLookupResult.notFound();
+    eq InstArrayComponentDecl.getInstModification().lookupInstClassInInstElement(String name)  = instComponentDecl().memberInstClass(name);
+    eq InstComponentDecl.getInstModification().lookupInstClassInInstElement(String name)       = memberInstClass(name);
+    eq InstElementModification.getInstModification().lookupInstClassInInstElement(String name) = getName().myInstComponentDecl().memberInstClass(name);
+    eq InstNormalExtends.getInstClassModification().lookupInstClassInInstElement(String name)  = memberInstClass(name);
+    eq InstConstraining.getInstClassModification().lookupInstClassInInstElement(String name)   = getInstNode().memberInstClass(name);
+    eq InstRoot.getChild().lookupInstClassInInstElement(String name)                           = InstLookupResult.notFound();
+    eq FlatRoot.getChild().lookupInstClassInInstElement(String name)                           = InstLookupResult.notFound();
 	
 }
 

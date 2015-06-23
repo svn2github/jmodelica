@@ -859,20 +859,23 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
    end D;
  
    model E
-     // Here is the error: B is not a subtype of C
      replaceable D d(redeclare replaceable B c constrainedby B);
    end E;
  
+   // Here is the error: B is not a subtype of C
    E e(redeclare replaceable D d(redeclare replaceable B c) constrainedby D(redeclare replaceable C c constrainedby C));
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RedeclareTest_Constr_17_Err",
-			description="Check that the declaration is a subtype of the constraining clause",
-			errorMessage="
-1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 884, column 34:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest_Constr_17_Err",
+            description="Check that the declaration is a subtype of the constraining clause",
+            errorMessage="
+2 errors found:
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 866, column 8:
+  In the declaration 'redeclare replaceable D d(redeclare replaceable B c) constrainedby D (redeclare replaceable C c constrainedby C)', the declared class is not a subtype of the constraining class
+Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Semantic error at line 866, column 34:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
@@ -3845,7 +3848,7 @@ end RedeclareTests.RedeclareTest55;
 ")})));
 end RedeclareTest55;
 
-model RedeclareTest55_err
+model RedeclareTest56_err
     model R1
         Real x;
     end R1;
@@ -3854,7 +3857,7 @@ model RedeclareTest55_err
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="RedeclareTest55_err",
+            name="RedeclareTest56_err",
             description="Redeclare with each in constraining type",
             errorMessage="
 1 errors found:
@@ -3862,7 +3865,181 @@ Error: in file '...':
 Semantic error at line 3850, column 40:
   The 'each' keyword cannot be applied in a modification of a scalar component: each x = time
 ")})));
-end RedeclareTest55_err;
+end RedeclareTest56_err;
+
+
+model RedeclareTest57
+    model A
+        parameter Integer n = 1;
+        parameter Real x[n];
+    end A;
+    
+    model B
+        replaceable A a(n = 2);
+    end B;
+    
+    model C
+        extends B(redeclare A a(x = 1:2));
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest57",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest57
+ structural parameter Integer c.a.n = 2 /* 2 */;
+ parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest57;
+")})));
+end RedeclareTest57;
+
+
+model RedeclareTest58
+    model A
+        parameter Integer n = 1;
+        parameter Real x[n];
+    end A;
+    
+    model B
+        replaceable model D = A(n = 2);
+        D d;
+    end B;
+    
+    model C
+        extends B(redeclare model D = A(x = 1:2));
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest58",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest58
+ structural parameter Integer c.d.n = 2 /* 2 */;
+ parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest58;
+")})));
+end RedeclareTest58;
+
+
+model RedeclareTest59
+    model A
+        parameter Integer n = 1;
+        parameter Real x[n];
+    end A;
+    
+    model B
+        replaceable A a constrainedby A(n = 2);
+    end B;
+    
+    model C
+        extends B(redeclare A a(x = 1:2));
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest59",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest59
+ structural parameter Integer c.a.n = 2 /* 2 */;
+ parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest59;
+")})));
+end RedeclareTest59;
+
+
+model RedeclareTest60
+    model A
+        parameter Integer n = 1;
+        parameter Real x[n];
+    end A;
+    
+    model B
+        replaceable model D = A constrainedby A(n = 2);
+        D d;
+    end B;
+    
+    model C
+        extends B(redeclare model D = A(x = 1:2));
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest60",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest60
+ structural parameter Integer c.d.n = 2 /* 2 */;
+ parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest60;
+")})));
+end RedeclareTest60;
+
+
+model RedeclareTest61
+    model A
+        parameter Real x[:] = {1};
+    end A;
+    
+    model B
+        replaceable A a constrainedby A(x = 1:2);
+    end B;
+    
+    model C
+        extends B(redeclare A a);
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest61",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest61
+ parameter Real c.a.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest61;
+")})));
+end RedeclareTest61;
+
+
+model RedeclareTest62
+    model A
+        parameter Real x[:] = {1};
+    end A;
+    
+    model B
+        replaceable model D = A constrainedby A(x = 1:2);
+        D d;
+    end B;
+    
+    model C
+        extends B(redeclare model D = A);
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest62",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest62
+ parameter Real c.d.x[2] = 1:2 /* { 1, 2 } */;
+end RedeclareTests.RedeclareTest62;
+")})));
+end RedeclareTest62;
+
 
 model RedeclareElement1
   model A
