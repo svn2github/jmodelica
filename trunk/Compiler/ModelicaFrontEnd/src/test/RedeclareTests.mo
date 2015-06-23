@@ -4041,6 +4041,64 @@ end RedeclareTests.RedeclareTest62;
 end RedeclareTest62;
 
 
+model RedeclareTest63
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        Real y;
+    end B;
+    
+    model C
+        extends A;
+        Real z;
+    end C;
+    
+    model D
+        extends A;
+        Real w;
+    end D;
+    
+    model E
+        replaceable model F = B constrainedby A;
+        model G = F;
+        G g;
+    end E;
+    
+    model H
+        extends E(redeclare model F = C);
+    end H;
+    
+    model I
+        extends E(redeclare model F = D);
+    end I;
+    
+    model J
+        replaceable H h constrainedby E;
+    end J;
+    
+    model K
+        extends J(redeclare I h);
+    end K;
+    
+    J j;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest63",
+            description="Test that modifications from constraining class are considered when error checking redeclares",
+            flatModel="
+fclass RedeclareTests.RedeclareTest63
+ Real j.h.g.z;
+ Real j.h.g.x;
+end RedeclareTests.RedeclareTest63;
+")})));
+end RedeclareTest63;
+
+
+
 model RedeclareElement1
   model A
     replaceable model B

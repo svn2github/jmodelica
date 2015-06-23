@@ -104,17 +104,27 @@ aspect Types {
     }
 
 
-    syn InstNode InstNode.constrainingInstType() = this;
-    eq InstClassDecl.constrainingInstType()      = hasInstConstraining() ? getInstConstraining().getInstNode() : this;
+    syn InstNode InstNode.constrainingInstType()       = this;
+    eq InstClassDecl.constrainingInstType()            = hasInstConstraining() ? getInstConstraining().getInstNode() : this;
+    eq InstSimpleShortClassDecl.constrainingInstType() = 
+        hasInstConstraining() ? getInstConstraining().getInstNode() : myTargetInstClassDecl().constrainingInstType();
     eq InstComponentDecl.constrainingInstType() { 
         InstComponentDecl icd = constrainingInstComponentDecl();
-        if (icd.myInstClass().hasInstConstraining())
+        if (icd.myInstClass().hasConstrainingInstType())
             return icd.myInstClass().constrainingInstType();
         return icd;
     }
 
+    syn boolean InstNode.hasConstrainingInstType()        = false;
+    eq InstClassDecl.hasConstrainingInstType()            = hasInstConstraining();
+    eq InstSimpleShortClassDecl.hasConstrainingInstType() = hasInstConstraining() || myTargetInstClassDecl().hasConstrainingInstType();
+    eq InstComponentDecl.hasConstrainingInstType() { 
+        InstComponentDecl icd = constrainingInstComponentDecl();
+        return (icd != this) || icd.myInstClass().hasConstrainingInstType();
+    }
+
     syn InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
-        hasInstConstraining() ? ((InstComponentDecl) getInstConstraining().getInstNode()) : this;
+        hasInstConstraining() ? (InstComponentDecl) getInstConstraining().getInstNode() : this;
 
 }
 
