@@ -463,6 +463,13 @@ aspect Constructors {
 	public FRangeExp.FRangeExp(FExp start, FExp step, FExp stop) {
 		this(new List().add(start).add(step).add(stop));
 	}
+    public FSmoothExp.FSmoothExp(int order, FExp exp) {
+        this(new FIntegerLitExp(order), exp);
+    }
+
+    /**
+     * Constructs an FSmoothExp with a literal Integer order.
+     */
 
     /**
      * Add this expression to another.

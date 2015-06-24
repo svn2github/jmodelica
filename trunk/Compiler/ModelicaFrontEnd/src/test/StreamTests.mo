@@ -67,16 +67,16 @@ end StreamTests.StreamTest1;
 ")})));
   end StreamTest1;
 
-  model StreamTest2
-     Reservoir r;
-     Real h = actualStream(r.fluidPort.h_outflow);
+model StreamTest2
+   Reservoir r;
+   Real h = actualStream(r.fluidPort.h_outflow);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest2",
-			description="Test of inside and outside stream connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest2",
+            description="Test of inside and outside stream connectors.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest2
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
@@ -87,10 +87,10 @@ fclass StreamTests.StreamTest2
 parameter equation
  r.fluidPort.p = r.p0;
  r.fluidPort.h_outflow = r.h0;
- h = noEvent(r.fluidPort.h_outflow);
+ h = r.fluidPort.h_outflow;
 end StreamTests.StreamTest2;
 ")})));
-  end StreamTest2;
+end StreamTest2;
 
   model StreamTest3
      Reservoir r1;
@@ -173,17 +173,18 @@ parameter equation
 end StreamTests.StreamTest4;
 ")})));
   end StreamTest4;
-	
-  model StreamTest5
-	 Reservoir r[2];
-	 Real h[2] = actualStream(r.fluidPort.h_outflow);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest5",
-			description="Using actualStream() on stream variables from array of connectors.",
-			eliminate_alias_variables=false,
-			flatModel="
+
+model StreamTest5
+    Reservoir r[2];
+    Real h[2] = actualStream(r.fluidPort.h_outflow);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest5",
+            description="Using actualStream() on stream variables from array of connectors.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest5
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
@@ -202,45 +203,42 @@ parameter equation
  r[1].fluidPort.h_outflow = r[1].h0;
  r[2].fluidPort.p = r[2].p0;
  r[2].fluidPort.h_outflow = r[2].h0;
- h[1] = noEvent(r[1].fluidPort.h_outflow);
- h[2] = noEvent(r[2].fluidPort.h_outflow);
+ h[1] = r[1].fluidPort.h_outflow;
+ h[2] = r[2].fluidPort.h_outflow;
 end StreamTests.StreamTest5;
 ")})));
-  end StreamTest5;
+end StreamTest5;
   
-  model StreamTest6
-	  connector A
-		 flow Real a;
-		 stream Real[2] b;
-		 Real c;
-	  end A;
-	  
-	  A d;
-	  Real f[2];
-  equation
-	  f = actualStream(d.b);
-	  f = {1,2};
-	  d.c = 0;
+model StreamTest6
+    connector A
+        flow Real a;
+        stream Real[2] b;
+        Real c;
+    end A;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamTest6",
-			description="Using actualStream() on array of stream variables.",
-			eliminate_alias_variables=false,
-			flatModel="
+    A d;
+    Real f[2];
+equation
+    f = actualStream(d.b);
+    f = {1,2};
+    d.c = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest6",
+            description="Using actualStream() on array of stream variables.",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass StreamTests.StreamTest6
  constant Real d.a = 0;
- Real d.b[1];
- Real d.b[2];
+ constant Real d.b[1] = 1.0;
+ constant Real d.b[2] = 2.0;
  constant Real d.c = 0;
  constant Real f[1] = 1;
  constant Real f[2] = 2;
-equation
- 1.0 = noEvent(d.b[1]);
- 2.0 = noEvent(d.b[2]);
 end StreamTests.StreamTest6;
 ")})));
-  end StreamTest6;
+end StreamTest6;
 
 
 model StreamTest7
@@ -259,8 +257,8 @@ model StreamTest7
 equation
     connect(g, f.e);
     h = actualStream(g.b);
-	g.b = time;
-	g.c = 2 / g.b;
+    g.b = time;
+    g.c = 2 / g.b;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -269,14 +267,12 @@ equation
             flatModel="
 fclass StreamTests.StreamTest7
  constant Real g.a = 0;
- Real g.b;
  Real g.c;
  Real h;
  constant Real f.e.a = 0;
 equation
- h = noEvent(g.b);
- g.b = time;
- g.c = 2 / g.b;
+ h = time;
+ g.c = 2 / h;
 end StreamTests.StreamTest7;
 ")})));
 end StreamTest7;
@@ -290,17 +286,17 @@ model StreamMinMax1
 equation
     connect(r.fluidPort,l.port_a);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamMinMax1",
-			description="Expansion of actualStream() with max on flow variable",
-			eliminate_alias_variables=false,
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamMinMax1",
+            description="Expansion of actualStream() with max on flow variable",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
 fclass StreamTests.StreamMinMax1
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- Real r[1].fluidPort.m_flow(min = - 1);
+ Real r[1].fluidPort.m_flow(min = -1);
  Real r[1].fluidPort.h_outflow;
  Real r[1].fluidPort.p;
  parameter Real r[2].p0 = 1 /* 1 */;
@@ -365,17 +361,17 @@ equation
  l[1].port_b.m_flow = 0;
  l[2].port_b.m_flow = 0;
  l[3].port_b.m_flow = 0;
- h[1] = noEvent(if r[1].fluidPort.m_flow > 0.0 then l[1].port_a.h_outflow else r[1].fluidPort.h_outflow);
- h[2] = noEvent(if r[2].fluidPort.m_flow > 0.0 then l[2].port_a.h_outflow else r[2].fluidPort.h_outflow);
+ h[1] = if r[1].fluidPort.m_flow > 0.0 then l[1].port_a.h_outflow else r[1].fluidPort.h_outflow;
+ h[2] = if r[2].fluidPort.m_flow > 0.0 then l[2].port_a.h_outflow else r[2].fluidPort.h_outflow;
  h[3] = l[3].port_a.h_outflow;
- g[1] = r[1].fluidPort.m_flow .* noEvent(if r[1].fluidPort.m_flow > 0.0 then l[1].port_a.h_outflow else r[1].fluidPort.h_outflow);
+ g[1] = r[1].fluidPort.m_flow .* smooth(0, if r[1].fluidPort.m_flow > 0.0 then l[1].port_a.h_outflow else r[1].fluidPort.h_outflow);
  g[2] = r[2].fluidPort.m_flow .* l[2].port_a.h_outflow;
  g[3] = r[3].fluidPort.m_flow .* l[3].port_a.h_outflow;
 end StreamTests.StreamMinMax1;
 ")})));
 end StreamMinMax1;
 
-    
+
 model StreamMinMax2
     Reservoir r[3](fluidPort(m_flow(max={-1,0,1})));
     LinearResistance l[3];
@@ -384,17 +380,17 @@ model StreamMinMax2
 equation
     connect(r.fluidPort,l.port_a);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="StreamMinMax2",
-			description="Expansion of actualStream() with max on flow variable",
-			eliminate_alias_variables=false,
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamMinMax2",
+            description="Expansion of actualStream() with max on flow variable",
+            eliminate_alias_variables=false,
+            variability_propagation=false,
+            flatModel="
 fclass StreamTests.StreamMinMax2
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- Real r[1].fluidPort.m_flow(max = - 1);
+ Real r[1].fluidPort.m_flow(max = -1);
  Real r[1].fluidPort.h_outflow;
  Real r[1].fluidPort.p;
  parameter Real r[2].p0 = 1 /* 1 */;
@@ -461,10 +457,10 @@ equation
  l[3].port_b.m_flow = 0;
  h[1] = r[1].fluidPort.h_outflow;
  h[2] = r[2].fluidPort.h_outflow;
- h[3] = noEvent(if r[3].fluidPort.m_flow > 0.0 then l[3].port_a.h_outflow else r[3].fluidPort.h_outflow);
+ h[3] = if r[3].fluidPort.m_flow > 0.0 then l[3].port_a.h_outflow else r[3].fluidPort.h_outflow;
  g[1] = r[1].fluidPort.m_flow .* r[1].fluidPort.h_outflow;
  g[2] = r[2].fluidPort.m_flow .* r[2].fluidPort.h_outflow;
- g[3] = r[3].fluidPort.m_flow .* noEvent(if r[3].fluidPort.m_flow > 0.0 then l[3].port_a.h_outflow else r[3].fluidPort.h_outflow);
+ g[3] = r[3].fluidPort.m_flow .* smooth(0, if r[3].fluidPort.m_flow > 0.0 then l[3].port_a.h_outflow else r[3].fluidPort.h_outflow);
 end StreamTests.StreamMinMax2;
 ")})));
 end StreamMinMax2;

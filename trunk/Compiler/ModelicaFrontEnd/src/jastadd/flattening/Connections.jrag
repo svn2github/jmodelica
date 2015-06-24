@@ -130,10 +130,10 @@ aspect Connections {
                 boolean constant = flowVar.isConstant();
                 double min = constant ? flowVar.ceval().realValue() : flowVar.minAttribute();
                 double max = constant ? min : flowVar.maxAttribute();
+                boolean multFlow = isMultipliedWith(flowVar);
                 boolean badMinMax = min > max;
                 boolean thenValid = badMinMax || max > 0.0;
-                boolean elseValid = badMinMax || min < 0.0 || 
-                        (min == 0.0 && thenValid && !isMultipliedWith(flowVar));
+                boolean elseValid = badMinMax || min < 0.0 || (min == 0.0 && !(thenValid && multFlow));
                 
                 // Generate the expression
                 FExp res = null, elseExp = null;
@@ -146,7 +146,9 @@ aspect Connections {
                     res = elseExp = var.createUseExp();
                 if (thenValid && elseValid) {
                     FExp guard = new FGtExp(flowVar.createUseExp(), new FRealLitExp(0.0));
-                    res = new FNoEventExp(new FIfExp(guard, thenExp, elseExp));
+                    res = new FIfExp(guard, thenExp, elseExp);
+                    if (multFlow)
+                        res = new FSmoothExp(0, res);
                 }
                 return res;
             }

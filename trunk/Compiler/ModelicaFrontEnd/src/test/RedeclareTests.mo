@@ -4088,7 +4088,7 @@ model RedeclareTest63
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="RedeclareTest63",
-            description="Test that modifications from constraining class are considered when error checking redeclares",
+            description="Redeclare with constraining type that contains a component of a short class decl that points to a replaceable class",
             flatModel="
 fclass RedeclareTests.RedeclareTest63
  Real j.h.g.z;

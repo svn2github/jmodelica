@@ -778,7 +778,7 @@ aspect Derivatives {
         if (order <= 1)
             diffExp.resetOriginalReferences();
         if (order > 0)
-            return new FSmoothExp(new FIntegerLitExp(order - 1), diffExp);
+            return new FSmoothExp(order - 1, diffExp);
         else
             return diffExp;
     }
