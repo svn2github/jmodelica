@@ -1216,9 +1216,20 @@ fclass ArrayTests.General.ArrayTest45
  Real b.x[2];
  parameter Integer b.j = 1 /* 1 */;
 equation
- b.x[1] = 1.0 + time;
- b.x[2] = 2.0 + 2 * time;
-end ArrayTests.General.ArrayTest45;
+ b.x[1] = temp_1(b.j, 1, {{1.0, 2.0}, {3.0, 4.0}}) + time;
+ b.x[2] = temp_1(b.j, 2, {{1.0, 2.0}, {3.0, 4.0}}) + 2 * time;
+
+public
+ function temp_1
+  input Integer i_0;
+  input Integer i_1;
+  input Real[2, 2] x;
+  output Real y;
+ algorithm
+  y := x[i_0,i_1];
+  return;
+ annotation(Inline = false);
+ end temp_1;end ArrayTests.General.ArrayTest45;
 ")})));
 end ArrayTest45;
 
@@ -6063,7 +6074,7 @@ equation
  r.t[1] = time;
  r.t[2] = time;
  r.x[1,1] = r.t[1] + r.t[1];
- r.x[2,1] = r.t[1] + r.t[1];
+ r.x[2,1] = r.t[1] + r.t[2];
 end ArrayTests.Constructors.Iterators.ArrayIterTest12;
 ")})));
 end ArrayIterTest12;
@@ -6325,7 +6336,7 @@ fclass ArrayTests.For.ForStructural1
  Real x[2];
 equation
  for i in 1:2 loop
-if ({true, false})[i] then
+  if ({true, false})[i] then
    x[i] = time;
   else
    x[i] = 1;
@@ -7482,7 +7493,20 @@ model ArrayConst4
 			flatModel="
 fclass ArrayTests.Other.ArrayConst4
  parameter Integer i = 1 /* 1 */;
- constant Real x = 1.0;
+ parameter Real x;
+parameter equation
+ x = temp_1(i, {1.0, 2.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
 end ArrayTests.Other.ArrayConst4;
 ")})));
 end ArrayConst4;

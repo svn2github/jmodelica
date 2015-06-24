@@ -3036,9 +3036,11 @@ aspect Scalarization {
 	}
 	
 	rewrite FQNameFullScalarize {
-		to FQName inFunction() ? new FQNameFull(getFQNamePartList()) : new FQNameString(scalarName());
+        to FQName inFunction() || !indexVariability().constantVariability() ? new FQNameFull(getFQNamePartList()) : new FQNameString(scalarName());
 	}
 	
+    syn FTypePrefixVariability FQNameFullScalarize.indexVariability() = hasFArraySubscripts() ? getFArraySubscripts().variability() : fConstant();
+    
     public FIdUse FIdUse.scalarize(Map<String,FExp> indexMap) {
     	return new FIdUse(getFQName().scalarize(indexMap));
     }

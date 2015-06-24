@@ -161,6 +161,8 @@ FNonFixedParameter : FParameter;
 
 FFixedParameter : FParameter;
 
+FIndexParameter : FParameter;
+
 /**
  * Parameter with known value variability
  */

@@ -1698,7 +1698,7 @@ aspect FlatExpressions {
             int i = parent.myCallInputs().indexOf(var);
             int d = findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && variability().extractNonParameterIndices(getInstAccess().indexVariability())) {
+        } else if (!inFunction() && variability().flattenExtractIndices(getInstAccess().indexVariability())) {
             FInstAccessExp copy = (FInstAccessExp) dynamicFExp(fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
             copy.getInstAccess().extractNonParameterIndices(sub, variability());
@@ -1792,7 +1792,7 @@ aspect FlatExpressions {
         FArraySubscripts fas = getFArraySubscripts();
         for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
             FSubscript fs = fas.getFSubscript(i);
-            if (v.extractNonParameterIndices(fs.variability())) {
+            if (v.flattenExtractIndices(fs.variability())) {
                 sub.add(fs);
                 fas.setFSubscript(new FColonSubscript(), i);
             } else if (fs.ndims() == 1) {
@@ -1815,9 +1815,9 @@ aspect FlatExpressions {
         }
     }
     
-    syn boolean FTypePrefixVariability.extractNonParameterIndices(FTypePrefixVariability other) = !other.fixedParameterOrLess();
-    eq FConstant.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
-    eq FKnownParameter.extractNonParameterIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
+    syn boolean FTypePrefixVariability.flattenExtractIndices(FTypePrefixVariability other) = !other.indexParameterOrLess();
+    eq FConstant.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
+    eq FKnownParameter.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
 	/**
 	 * Check if this access is in the binding expression of an input to a function 
@@ -2516,18 +2516,18 @@ aspect FlatExpressions {
         else 
             return prefix.copyAndAppend(name());
     }
-
-	/**
-	 * Flatten variability specifier.
+    
+    /**
+     * Flatten variability specifier.
      *
-	 * This is done during variability calculation to keep compatibility with FExp. 
-	 */
-	abstract public FTypePrefixVariability TypePrefixVariability.flatten();
-	public FTypePrefixVariability Continuous.flatten() { return new FContinuous(); }
-	public FTypePrefixVariability Discrete.flatten()   { return new FDiscrete();   }
-	public FTypePrefixVariability Parameter.flatten()  { return new FFixedParameter();  }
-	public FTypePrefixVariability Constant.flatten()   { return new FConstant();   }
-
+     * This is done during variability calculation to keep compatibility with FExp. 
+     */
+    abstract public FTypePrefixVariability TypePrefixVariability.flatten();
+    public FTypePrefixVariability Continuous.flatten()     { return new FContinuous();     }
+    public FTypePrefixVariability Discrete.flatten()       { return new FDiscrete();       }
+    public FTypePrefixVariability Parameter.flatten()      { return new FFixedParameter(); }
+    public FTypePrefixVariability IndexParameter.flatten() { return fIndexParameter();     }
+    public FTypePrefixVariability Constant.flatten()       { return new FConstant();       }
 }
 
 aspect InstantiatedExpressions {

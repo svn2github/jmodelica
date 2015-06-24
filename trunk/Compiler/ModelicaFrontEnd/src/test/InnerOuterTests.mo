@@ -466,7 +466,7 @@ model InnerOuterTest16
 fclass InnerOuterTests.InnerOuterTest16
  Real x[3] = {1, 2, 3} * time;
  parameter Integer a.y = 2 /* 2 */;
- Real a.z = x[a.y];
+ Real a.z = (x[1:3])[a.y];
 end InnerOuterTests.InnerOuterTest16;
 ")})));
 end InnerOuterTest16;

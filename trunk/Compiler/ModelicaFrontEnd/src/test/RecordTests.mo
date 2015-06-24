@@ -1476,7 +1476,7 @@ equation
  r.t[1] = time;
  r.t[2] = time + 1;
  r.x[1,1] = r.t[1] + r.t[1];
- r.x[2,1] = r.t[1] + r.t[1];
+ r.x[2,1] = r.t[1] + r.t[2];
 end RecordTests.RecordBinding27;
 ")})));
 end RecordBinding27;

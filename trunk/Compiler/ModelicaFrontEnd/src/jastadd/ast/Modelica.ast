@@ -257,6 +257,7 @@ abstract TypePrefixVariability : TypePrefix;
 Continuous : TypePrefixVariability;
 Discrete   : TypePrefixVariability;
 Parameter  : TypePrefixVariability;
+IndexParameter : Parameter;
 Constant   : TypePrefixVariability;
 abstract TypePrefixInputOutput : TypePrefix;
 Input      : TypePrefixInputOutput;
