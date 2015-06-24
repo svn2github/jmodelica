@@ -529,7 +529,10 @@ class CasadiCollocator(object):
                 Nonlinear programming solver execution time.
         """
         stats = self.solver_object.getStats()
-        return_status = stats['return_status']
+        #return_status = stats['return_status']
+        # 'Maximum_CPU_Time_Exceeded' fails to fill in stats['return_status'].
+        # Hopefully this is the only case
+        return_status = stats.get('return_status', 'Maximum_CPU_Time_Exceeded')
         nbr_iter = stats['iter_count']
         objective = float(self.solver_object.output(casadi.NLP_SOLVER_F))
         total_exec_time = stats['t_mainloop']
