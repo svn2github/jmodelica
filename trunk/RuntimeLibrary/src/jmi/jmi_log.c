@@ -64,6 +64,7 @@ static void reserve(buf_t *buf, int len) {
     if (buf->alloced < len) {
         buf->alloced = 2*len;
         buf->msg = (char *)realloc(buf->msg, buf->alloced+1); /* Allocate space for the null byte too */
+        buf->msg[buf->alloced] = 0;
     }    
 }
 
