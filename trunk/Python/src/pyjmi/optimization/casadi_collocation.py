@@ -26,6 +26,8 @@ import itertools
 import time
 import copy
 import types
+import math
+from os import system, path
 from operator import sub
 from collections import OrderedDict, Iterable
 from scipy.sparse import csc_matrix, csr_matrix
@@ -5606,6 +5608,169 @@ class LocalDAECollocator(CasadiCollocator):
         
         return (inds, i, k)
 
+    def enable_codegen(self, name=None):
+        """
+        Enables use of generated C code for the collocator. Generates and
+        compiles code for the NLP, gradient of f, Jacobian of g, and Hessian
+        of the Lagrangian of g Function objects, and then replaces the solver
+        object in the collocator with a new one that makes use of the
+        compiled functions as ExternalFunction objects.
+        
+        Parameters::
+        
+            name --
+                A string that if it is not None, tries to load existing files
+                nlp_[name].so, grad_f_[name].so, jac_g_[name].so and
+                hess_lag_[name].so as ExternalFunction objects to be used
+                by the solver rather than generating new code. If any of the
+                files don't exist, new files are generated with the above
+                names.
+                Default: None
+        """
+        enable_codegen(self, name)
+
+
+def _add_help_fcns(filename):
+    """
+    Adds the functions \"sq\" and \"sign\" to a generated .c file if
+    they don't already exist, since generateCode doesn't always generate
+    them. Help function to _to_external_function.
+    
+    Parameters:
+    
+        filename --
+            The name of the generated .c file to add the functions to,
+            including file extension.
+    """
+    with open(filename, 'r') as infile:
+        contents = infile.read()
+        
+        add_sq = False
+        add_sign = False
+    
+        if 'd sq(d x)' not in contents:
+            add_sq = True
+        if 'd sign(d x)' not in contents:
+            add_sign = True
+    
+    if add_sq or add_sign:
+        with open(filename, 'w') as outfile:
+            for line in contents.splitlines(True):
+                outfile.write(line)
+                if '#define d double' in line:
+                    if add_sq:
+                        outfile.write('\nd sq(d x) { return x*x;}\n')
+                    if add_sign:
+                        outfile.write('\nd sign(d x) { return x<0 ? -1 : x>0 ? 1 : x;}\n')
+
+def _to_external_function(fcn, name, use_existing=False):
+    """
+    Generates C code for a Function object using its generateCode member
+    function, compiles the generated code, and returns it as an
+    ExternalFunction object. Help function to enable_codegen.
+    
+    Parameters::
+    
+        fcn --
+            The Function object for which to generate code.
+            
+        name --
+            A string containing the file name to be used for the
+            generated code, without file extension.
+            
+        use_existing --
+            A boolean that if it is set, doesn't generate new code and
+            just returns name.so (where name is the function parameter)
+            as an ExternalFunction object.
+            Default: False
+    """
+    if not use_existing:
+        print 'Generating code for', name
+        fcn.generateCode(name + '.c')
+        _add_help_fcns(name + '.c')
+        system('gcc -fPIC -shared -O3 ' + name + '.c -o ' + name + '.so')
+    fcn_e = casadi.ExternalFunction('./' + name + '.so')
+    return fcn_e
+    
+def enable_codegen(coll, name=None):
+    """
+    Enables use of generated C code for a collocator. Generates and compiles
+    code for the NLP, gradient of f, Jacobian of g, and Hessian of the
+    Lagrangian of g Function objects, and then replaces the solver
+    object in the solver's collocator with a new one that makes use of
+    the compiled functions as ExternalFunction objects.
+    
+    Parameters::
+    
+        coll --
+            The LocalDAECollocator for which to enable use of generated code.
+            
+        name --
+            A string that if it is not None, tries to load existing files
+            nlp_[name].so, grad_f_[name].so, jac_g_[name].so and
+            hess_lag_[name].so as ExternalFunction objects to be used
+            by the solver rather than generating new code. If any of the
+            files don't exist, new files are generated with the above
+            names.
+            Default: None
+    """
+    old_solver = coll.solver_object
+    
+    nlp = old_solver.nlp()
+    nlp.init()
+    grad_f = old_solver.gradF()
+    grad_f.init()
+    jac_g = old_solver.jacG()
+    jac_g.init()
+    hess_lag = old_solver.hessLag()
+    hess_lag.init()
+    
+    existing = False
+    if name == None:
+        enable_codegen.times += 1
+        name = str(enable_codegen.times)
+    else:
+        if (path.isfile('nlp_'+name+'.so') and
+            path.isfile('grad_f_'+name+'.so') and
+            path.isfile('jac_g_'+name+'.so') and
+            path.isfile('hess_lag_'+name+'.so')):
+            existing = True
+    
+    nlp = _to_external_function(nlp, 'nlp_' + name, existing)
+    grad_f = _to_external_function(grad_f, 'grad_f_' + name, existing)
+    jac_g = _to_external_function(jac_g, 'jac_g_' + name, existing)
+    hess_lag = _to_external_function(hess_lag, 'hess_lag_' + name, existing)
+    
+    solver_cg = casadi.NlpSolver('ipopt', nlp)
+    
+    old_solver_options = old_solver.dictionary()
+    old_solver_options['expand'] = False
+    solver_cg.setOption(old_solver_options)
+    
+    solver_cg.setOption('grad_f', grad_f)
+    solver_cg.setOption('jac_g', jac_g)
+    solver_cg.setOption('hess_lag', hess_lag)
+    
+    solver_cg.init()
+    
+    lbx = old_solver.getInput('lbx')
+    ubx = old_solver.getInput('ubx')
+    lbg = old_solver.getInput('lbg')
+    ubg = old_solver.getInput('ubg')
+    x0 = old_solver.getInput('x0')
+    p = old_solver.getInput('p')
+    
+    solver_cg.setInput(lbx, 'lbx')
+    solver_cg.setInput(ubx, 'ubx')
+    solver_cg.setInput(lbg, 'lbg')
+    solver_cg.setInput(ubg, 'ubg')
+    solver_cg.setInput(x0, 'x0')
+    solver_cg.setInput(p, 'p')
+    
+    coll.solver_object = solver_cg
+    
+enable_codegen.times = 0
+
 
 class MeasurementData(object):
 
@@ -6561,3 +6726,24 @@ class OptimizationSolver(object):
         print "Nonfinite Jacobian entries:"
         print "---------------------------"
         self.print_jacobian_entries(self.find_nonfinite_jacobian_entries(point))
+    
+    def enable_codegen(self, name):
+        """
+        Enables use of generated C code for the solver's collocator.
+        Generates and compiles code for the NLP, gradient of f, Jacobian of g,
+        and Hessian of the Lagrangian of g Function objects, and then replaces
+        the solver object in the collocator with a new one that makes use of
+        the compiled functions as ExternalFunction objects.
+        
+        Parameters::
+        
+            name --
+                A string that if it is not None, tries to load existing files
+                nlp_[name].so, grad_f_[name].so, jac_g_[name].so and
+                hess_lag_[name].so as ExternalFunction objects to be used
+                by the solver rather than generating new code. If any of the
+                files don't exist, new files are generated with the above
+                names.
+                Default: None
+        """
+        self.collocator.enable_codegen(name)
