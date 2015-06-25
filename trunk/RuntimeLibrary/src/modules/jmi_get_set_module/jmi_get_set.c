@@ -348,25 +348,11 @@ int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size
     if (RECOMPUTE_VARIABLES(jmi) == 1 && jmi->user_terminate == 0) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-#if 0
-            /* Store the current time and states */
-            jmi_real_t time = *(jmi_get_t(jmi));
-            jmi_real_t *x = (jmi_real_t*)jmi->jmi_callbacks.allocate_memory(jmi->n_real_x, sizeof(jmi_real_t));
-            memcpy(x, jmi_get_real_x(jmi), jmi->n_real_x*sizeof(jmi_real_t));
-#endif
             jmi_log_node(jmi->log, logWarning, "Warning",
                 "Evaluating the derivatives failed while evaluating the event indicators at <t:%g>, retrying with restored values.", jmi_get_t(jmi)[0]);
             /* If it failed, reset to the previous succesful values */
 
             jmi_reset_internal_variables(jmi);
-#if 0
-            jmi_reset_last_successful_values(jmi);
-
-            /* Restore the current time and states */
-            memcpy (jmi_get_real_x(jmi), x, jmi->n_real_x*sizeof(jmi_real_t));
-            *(jmi_get_t(jmi)) = time;
-            jmi->jmi_callbacks.free_memory(x);
-#endif
 
             /* Try again */
             retval = jmi_ode_derivatives(jmi);
