@@ -38,7 +38,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstLibClassDecl:InstClassDecl*/
                                [Dummy:InstNode];          // Dummy node to prevent InstNode from being classified as root
 
-abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl>;
+abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[Annotation:InstClassModification]/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;
@@ -79,7 +79,10 @@ InstOperator            : InstRestriction;
 InstOperatorFunction    : InstFunction;
 InstOperatorRecord      : InstMRecord;
 
-InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
+InstExternal     : BaseNode ::= <ExternalClause:ExternalClause>
+                                [FExternalLanguage]
+                                [InstExternalCall]
+                                /[Annotation:InstClassModification]/;
 InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
 
 abstract InstImport : BaseNode ::= PackageName:InstAccess <ImportClause:ImportClause>;
@@ -99,7 +102,8 @@ abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess
                                               [InstModification] 
                                               [InstConstraining] 
                                               /FArraySubscripts/ 
-                                              [ConditionalAttribute:FExp];
+                                              [ConditionalAttribute:FExp]
+                                              /[Annotation:InstClassModification]/;
 InstComposite                 : InstComponentDecl;
 abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive                 : InstAssignable;
