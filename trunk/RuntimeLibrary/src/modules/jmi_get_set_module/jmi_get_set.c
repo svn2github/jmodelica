@@ -519,12 +519,6 @@ int jmi_reset_internal_variables(jmi_t* jmi) {
     return 0;
 }
 
-int
-jmi_update_all(jmi_t* jmi)
-{
-    return jmi_generic_func(jmi, jmi->dae->ode_derivatives);
-}
-
 static int
 jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
 {

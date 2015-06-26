@@ -48,6 +48,4 @@ int jmi_reset_last_internal_successful_values(jmi_t *jmi);
 
 int jmi_reset_internal_variables(jmi_t* jmi);
 
-int jmi_update_all(jmi_t* jmi);
-
 #endif /* _JMI_GET_SET_H_ */
