@@ -4479,7 +4479,7 @@ aspect CCodeGen {
 		int index = indexCounter.next();
 		if (forIndices == null || forIndices.contains(index)) {
 			if (!myFV().isReal()) 
-				throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable");
+				throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + myFV().name());
 			
 			// This variable is in the set of variables to generate code for.
 			str.print(indent);

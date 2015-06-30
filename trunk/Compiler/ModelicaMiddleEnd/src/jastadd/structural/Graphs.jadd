@@ -559,12 +559,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         @Override
         public int compare(AbstractVar<?,?> o1, AbstractVar<?,?> o2) {
-            boolean b1 = o1.getVariable().startAttributeSet() || hasExtraStartConditions.contains(o1.getVariable());
-            boolean b2 = o2.getVariable().startAttributeSet() || hasExtraStartConditions.contains(o2.getVariable());
+            FVariable v1 = o1.getVariable();
+            FVariable v2 = o2.getVariable();
+            boolean b1 = (v1.isDiscrete() && v1.isPreVariable() || v1.isContinuous()) && v1.startAttributeSet() || hasExtraStartConditions.contains(v1);
+            boolean b2 = (v2.isDiscrete() && v2.isPreVariable() || v2.isContinuous()) && v2.startAttributeSet() || hasExtraStartConditions.contains(v2);
             int diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
-            diff = (o1.getVariable().isPreVariable() ? 1 : 0) - (o2.getVariable().isPreVariable() ? 1 : 0);
+            diff = (v1.isPreVariable() ? 1 : 0) - (v2.isPreVariable() ? 1 : 0);
             if (diff != 0)
                 return diff;
             return o1.getName().compareTo(o2.getName());

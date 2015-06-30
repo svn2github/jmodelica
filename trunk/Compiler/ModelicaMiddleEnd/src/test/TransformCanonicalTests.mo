@@ -2574,6 +2574,43 @@ end TransformCanonicalTests.InitialEqTest19;
 ")})));
 end InitialEqTest19;
 
+model InitialEqTest20
+    discrete Integer i(start=0, fixed=true);
+    discrete Real t;
+algorithm
+    when {initial(), time > 1+t} then
+        t := time + 1;
+    end when;
+    i := integer(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEqTest20",
+            description="Test BiPGraph matching prioritazion for discrete variables (pre variables should be unmatched)",
+            flatModel="
+fclass TransformCanonicalTests.InitialEqTest20
+ discrete Integer i(start = 0,fixed = true);
+ discrete Real t;
+ discrete Integer temp_1;
+ Real temp_2;
+ discrete Boolean temp_3;
+initial equation 
+ pre(temp_1) = 0;
+ pre(i) = 0;
+ pre(t) = 0.0;
+ pre(temp_3) = false;
+algorithm
+ temp_2 := time - (1 + t);
+ temp_3 := time > 1 + t;
+ if initial() or temp_3 and not pre(temp_3) then
+  t := time + 1;
+ end if;
+ temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+ i := temp_1;
+end TransformCanonicalTests.InitialEqTest20;
+")})));
+end InitialEqTest20;
+
 model ParameterDerivativeTest
  Real x(start=1);
  Real y;
