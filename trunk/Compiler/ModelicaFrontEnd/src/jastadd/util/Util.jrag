@@ -1868,7 +1868,7 @@ aspect UtilInterface {
     /**
      * Provides easy access to non-ast utils via the AST root.
      */
-    class UtilInterface {
+    public class UtilInterface {
         
         private ModelicaCompiler mc;
         private OptionRegistry options;
@@ -1914,6 +1914,10 @@ aspect UtilInterface {
     
     public static UtilInterface UtilInterface.create(OptionRegistry options) {
         return create(null, options, new DefaultErrorHandler(), null);
+    }
+    
+    public static UtilInterface UtilInterface.create(OptionRegistry options, IErrorHandler eh) {
+        return create(null, options, eh, null);
     }
     
     private static UtilInterface UtilInterface.create(ModelicaCompiler mc, OptionRegistry options, 
