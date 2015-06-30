@@ -104,6 +104,13 @@ aspect AnnotationAPI {
      */
     public abstract class AnnotationNode implements Iterable<AnnotationNode> {
 
+		/**
+		 * Returns the value for a node that represents a list of strings.
+		 */
+		public ArrayList<String> stringList() {
+			return null;
+		}
+
         /**
          * Represents an annotation that does not exist.
          */
@@ -871,6 +878,13 @@ aspect AnnotationAPI {
                 return CValue.UNKNOWN;
             }
         }
+        
+        public ArrayList<String> stringList() {
+			if (exp() == null)
+				return super.stringList();
+			else
+				return exp().avalueStringList();
+		}
 
 	}
 	
@@ -1293,6 +1307,18 @@ aspect AnnotationAPI {
     syn Iterable<? extends ASTNode> FExp.annotationList() = new ArrayList<ASTNode>(0);
     eq FArray.annotationList()                            = getFExps();
     eq FFunctionCall.annotationList()                     = getArgs();
+    
+    syn String Exp.avalueString()  = null;
+	eq StringLitExp.avalueString() = unEscape();
+	eq AccessExp.avalueString()    = getAccess().name();
+    
+    syn ArrayList<String> Exp.avalueStringList() = null;
+	eq ArrayConstructor.avalueStringList() {
+		ArrayList<String> l = new ArrayList<String>(getFunctionArguments().getNumExp());
+		for (Exp e : getFunctionArguments().getExps())
+			l.add(e.avalueString());
+		return l.contains(null) ? null : l;
+	}
     
 }
 
