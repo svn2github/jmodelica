@@ -3944,7 +3944,7 @@ aspect ArrayAccessRewrite {
      * Create delegate function for array access involving index that can not be calculated at compile time.
      */
     public FExp FSubscriptedExp.createSubscriptFunc() {
-        if (indexVariability().knownParameterOrLess() || inFunction())
+        if (indexVariability().indexParameterOrLess() || inFunction())
             return this;
         List<FExp> args = new List<FExp>();
         List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
