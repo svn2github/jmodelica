@@ -5,8 +5,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.logging.units.LoggingUnit;
 
 public class ObjectStreamLogger extends PipeLogger {
     
@@ -41,22 +40,8 @@ public class ObjectStreamLogger extends PipeLogger {
     }
     
     @Override
-    protected void do_write(String logMessage) throws IOException {
+    protected void do_write(LoggingUnit logMessage) throws IOException {
         getStream().writeObject(logMessage);
-    }
-
-    @Override
-    protected void do_write(Throwable throwable) throws IOException {
-        getStream().writeObject(throwable);
-    }
-
-    @Override
-    protected void do_write(Problem problem) throws IOException {
-        getStream().writeObject(problem);
-    }
-
-    protected void do_write(CompiledUnit unit) throws IOException {
-        getStream().writeObject(unit);
     }
 
     private static ObjectOutputStream createStream(OutputStream stream) throws IOException {

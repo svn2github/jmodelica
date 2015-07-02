@@ -5,8 +5,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.logging.units.LoggingUnit;
 
 public abstract class PipeLogger extends ModelicaLogger {
 
@@ -85,7 +84,7 @@ public abstract class PipeLogger extends ModelicaLogger {
     }
 
     @Override
-    protected final void write(Level level, String logMessage) {
+    protected final void write(Level level, LoggingUnit logMessage) {
         if (!shouldWrite(level))
             return;
         try {
@@ -95,46 +94,7 @@ public abstract class PipeLogger extends ModelicaLogger {
         }
     }
 
-    protected abstract void do_write(String logMessage) throws IOException;
-
-    @Override
-    protected final void write(Level level, Throwable throwable) {
-        if (!shouldWrite(level))
-            return;
-        try {
-            do_write(throwable);
-        } catch (IOException e) {
-            exceptionOnWrite(e);
-        }
-    }
-
-    protected abstract void do_write(Throwable throwable) throws IOException;
-
-    @Override
-    protected final void write(Level level, Problem problem) {
-        if (!shouldWrite(level))
-            return;
-        try {
-            do_write(problem);
-        } catch (IOException e) {
-            exceptionOnWrite(e);
-        }
-    }
-
-    protected abstract void do_write(Problem problem) throws IOException;
-
-    @Override
-    protected final void write(Level level, CompiledUnit unit) {
-        if (!shouldWrite(level))
-            return;
-        try {
-            do_write(unit);
-        } catch (IOException e) {
-            exceptionOnWrite(e);
-        }
-    }
-
-    protected abstract void do_write(CompiledUnit unit) throws IOException;
+    protected abstract void do_write(LoggingUnit logMessage) throws IOException;
 
     private static enum State {
         ACTIVE, CLOSED, EXCEPTION,

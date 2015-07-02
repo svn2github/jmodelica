@@ -14,6 +14,9 @@ import org.jmodelica.util.streams.NullStream;
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.exceptions.CompilerException;
+import org.jmodelica.util.logging.units.LoggingUnit;
+import org.jmodelica.util.logging.units.StringLoggingUnit;
+import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
 
 /**
  * \brief Base class for logging messages from the tree.
@@ -40,13 +43,7 @@ public abstract class ModelicaLogger {
      */
     public abstract void close();
 
-    protected abstract void write(Level level, String logMessage);
-
-    protected abstract void write(Level level, Throwable throwable);
-
-    protected abstract void write(Level level, Problem problem);
-
-    protected abstract void write(Level level, CompiledUnit unit);
+    protected abstract void write(Level level, LoggingUnit logMessage);
 
     /**
      * Log <code>message</code> on log level <code>level</code>.
@@ -68,8 +65,17 @@ public abstract class ModelicaLogger {
     }
 
     private void log(Level level, Object obj) {
-        if (getLevel().shouldLog(level))
-            write(level, obj.toString());
+        if (!getLevel().shouldLog(level))
+            return;
+        
+        if (obj instanceof Throwable) {
+            write(level, new ThrowableLoggingUnit((Throwable) obj));
+        } else if (obj instanceof LoggingUnit) {
+            write(level, (LoggingUnit) obj);
+        } else {
+            //TODO: remove toString(). Own LoggingUnit?
+            write(level, new StringLoggingUnit(obj.toString()));
+        }
     }
 
     /**
@@ -95,32 +101,9 @@ public abstract class ModelicaLogger {
     }
 
     private void log(Level level, String format, Object... args) {
-        if (getLevel().shouldLog(level))
-            write(level, String.format(format, args));
-    }
-
-    /**
-     * Write an exception to the log.
-     */
-    public final void debug(Throwable t) {
-        log(Level.DEBUG, t);
-    }
-
-    public final void info(Throwable t) {
-        log(Level.INFO, t);
-    }
-
-    public final void warning(Throwable t) {
-        log(Level.WARNING, t);
-    }
-
-    public final void error(Throwable t) {
-        log(Level.ERROR, t);
-    }
-
-    private void log(Level level, Throwable throwable) {
-        if (getLevel().shouldLog(level))
-            write(level, throwable);
+        if (!getLevel().shouldLog(level))
+            return;
+        write(level, new StringLoggingUnit(format, args));
     }
 
     /**

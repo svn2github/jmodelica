@@ -1,7 +1,6 @@
 package org.jmodelica.util.logging;
 
-import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.logging.units.LoggingUnit;
 
 /**
  * TeeLogger splits the incoming log and writes it to several outher logs.
@@ -34,26 +33,9 @@ public class TeeLogger extends ModelicaLogger {
 	}
 
 	@Override
-	protected void write(Level level, String logMessage) {
+	protected void write(Level level, LoggingUnit logMessage) {
 		for (ModelicaLogger logger : loggers)
 			logger.write(level, logMessage);
 	}
-
-	@Override
-	protected void write(Level level, Throwable throwable) {
-		for (ModelicaLogger logger : loggers)
-			logger.write(level, throwable);
-	}
-
-	@Override
-	protected void write(Level level, Problem problem) {
-		for (ModelicaLogger logger : loggers)
-			logger.write(level, problem);
-	}
-
-    protected void write(Level level, CompiledUnit unit) {
-        for (ModelicaLogger logger : loggers)
-            logger.write(level, unit);
-    }
 
 }

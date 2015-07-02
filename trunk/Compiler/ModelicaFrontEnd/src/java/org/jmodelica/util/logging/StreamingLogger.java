@@ -4,12 +4,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
-import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.Problem;
-import org.jmodelica.util.exceptions.ModelicaException;
+import org.jmodelica.util.logging.units.LoggingUnit;
 
 public class StreamingLogger extends PipeLogger {
 
@@ -49,39 +45,9 @@ public class StreamingLogger extends PipeLogger {
     }
 
     @Override
-    protected void do_write(String logMessage) throws IOException {
-        write_raw(logMessage);
+    protected void do_write(LoggingUnit logMessage) throws IOException {
+        write_raw(logMessage.print(getLevel()));
         write_raw("\n");
     }
-
-    @Override
-    protected void do_write(Throwable throwable) throws IOException {
-        if (throwable instanceof ModelicaException) {
-            do_write(throwable.getMessage());
-        } else if (throwable instanceof FileNotFoundException) {
-            do_write("Could not find file: " + throwable.getMessage());
-        } else if (throwable instanceof OutOfMemoryError) {
-            do_write("Out of memory. Please set the memory limit of the JVM higher.");
-        } else {
-            StringBuilder sb = new StringBuilder();
-            sb.append("Unknown program error, " + throwable.getClass().getName());
-            if (throwable.getMessage() != null)
-                sb.append(": " + throwable.getMessage());
-            do_write(sb.toString());
-        }
-        if (getLevel().shouldLog(Level.DEBUG)) {
-            StringWriter str = new StringWriter();
-            PrintWriter print = new PrintWriter(str);
-            throwable.printStackTrace(print);
-            do_write(str.toString());
-        }
-    }
-
-    @Override
-    protected void do_write(Problem problem) throws IOException {
-        do_write(problem.toString());
-    }
-
-    protected void do_write(CompiledUnit unit) throws IOException {}
 
 }
