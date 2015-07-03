@@ -2011,7 +2011,7 @@ syn String StoredDefinition.findOutermostLibraryDir() {
     if (!hasWithin() || !getWithin().hasPackageName())
         return null;
     File me = new File(fileName()).getAbsoluteFile();
-    if (me.getName().equals(LibNode.PACKAGE_FILE))
+    if (LibNode.isPackageFile(me))
         me = me.getParentFile();
     File lib = getWithin().getPackageName().findOutermostLibraryDirForWithin(me);
     return (lib != null) ? lib.getPath() : null;
