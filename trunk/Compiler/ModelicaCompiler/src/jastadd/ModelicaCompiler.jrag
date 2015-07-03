@@ -51,6 +51,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
 import org.jmodelica.util.logging.ModelicaLogger;
+import org.jmodelica.util.logging.MemoryLogger;
 import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
@@ -1372,26 +1373,34 @@ public class ModelicaCompiler {
 		return res;
 	}
 	
-	/**
-	 * Executes the given command as a separate process, writing any output to the logger.
-	 */
-	public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
-		try {
-			String[] e = (env != null) ? convertEnv(env) : null;
-			Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
-			
-			// Eat any output
-			new StreamGobbler(proc.getErrorStream(), log.warningStream()).start();
-			new StreamGobbler(proc.getInputStream(), log.infoStream()).start();
-			
-			// Wait for process to finish and return result
-			return proc.waitFor();
-			
-		} catch (IOException e) {
-		} catch (InterruptedException e) {
-		}
-		return 1;
-	}
+    /**
+     * Executes the given command as a separate process, writing any output to the logger.
+     */
+    public static int loggedProcess(String[] cmd, Map<String,String> env, File workDir) {
+        MemoryLogger logger = log.memoryLogger(Level.WARNING);
+        try {
+            String[] e = (env != null) ? convertEnv(env) : null;
+            Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
+            
+            // Eat any output
+            new StreamGobbler(proc.getErrorStream(), logger.warningStream()).start();
+            new StreamGobbler(proc.getInputStream(), logger.infoStream()).start();
+            
+            // Wait for process to finish and return result
+            int code = proc.waitFor();
+            if (code > 0) {
+                logger.printCache();
+            }
+            return code;
+        } catch (IOException e) {
+            logger.printCache();
+        } catch (InterruptedException e) {
+            logger.printCache();
+        } finally {
+            logger.close();
+        }
+        return 1;
+    }
 
     private void setOptions(Arguments programarguments) {
         // Create option registry

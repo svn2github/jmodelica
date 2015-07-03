@@ -1,3 +1,18 @@
+/*
+    Copyright (C) 2015 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
@@ -62,8 +77,8 @@ public abstract class PipeLogger extends ModelicaLogger {
     /**
      * Check if a message on given level should be written.
      */
-    private boolean shouldWrite(Level level) {
-        if (!getLevel().shouldLog(level))
+    private boolean shouldWrite(Level level, Level alreadySentLevel) {
+        if (!getLevel().shouldLog(level, alreadySentLevel))
             return false;
         if (state == State.EXCEPTION)
             return false;
@@ -84,8 +99,8 @@ public abstract class PipeLogger extends ModelicaLogger {
     }
 
     @Override
-    protected final void write(Level level, LoggingUnit logMessage) {
-        if (!shouldWrite(level))
+    protected final void write(Level level, Level alreadySentLevel, LoggingUnit logMessage) {
+        if (!shouldWrite(level, alreadySentLevel))
             return;
         try {
             do_write(logMessage);

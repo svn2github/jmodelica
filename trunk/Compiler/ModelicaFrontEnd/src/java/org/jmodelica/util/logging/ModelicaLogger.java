@@ -1,3 +1,18 @@
+/*
+    Copyright (C) 2015 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
@@ -43,7 +58,11 @@ public abstract class ModelicaLogger {
      */
     public abstract void close();
 
-    protected abstract void write(Level level, LoggingUnit logMessage);
+    protected final void write(Level level, LoggingUnit logMessage) {
+        write(level, null, logMessage);
+    }
+
+    protected abstract void write(Level level, Level alreadySentLevel, LoggingUnit logMessage);
 
     /**
      * Log <code>message</code> on log level <code>level</code>.
@@ -196,6 +215,16 @@ public abstract class ModelicaLogger {
             return new LogOutputStream(level);
         else
             return NullStream.OUPUT;
+    }
+
+    /**
+     * Creates an memory logger which allows for continuous printing on one
+     * error level and optional printing afterwards on another level.
+     * @param postPrintLevel the log level used when sending logs afterwards
+     * @return a MemoryLogger
+     */
+    public final MemoryLogger memoryLogger(Level postPrintLevel) {
+        return new MemoryLogger(this, postPrintLevel);
     }
 
     private class LogOutputStream extends OutputStream {

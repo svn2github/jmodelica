@@ -175,7 +175,7 @@ public class DebugCompiler extends javax.swing.JFrame {
         }
 
         @Override
-        protected void write(Level level, LoggingUnit unit) {
+        protected void write(Level level, Level alreadySentLevel, LoggingUnit unit) {
             do_write(unit.print(level));
         }
 

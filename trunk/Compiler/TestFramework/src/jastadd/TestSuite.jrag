@@ -84,7 +84,7 @@ public class TestSuite implements GenericTestSuite {
         public void close() {}
 
         @Override
-        protected void write(Level level, LoggingUnit unit) {
+        protected void write(Level level, Level alreadySentLevel, LoggingUnit unit) {
             System.err.println(unit.print(level));
         }
 
