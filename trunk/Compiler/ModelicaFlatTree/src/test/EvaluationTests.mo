@@ -3907,7 +3907,7 @@ model ParameterMinMax1
             flatModel="
 fclass EvaluationTests.ParameterMinMax1
  structural parameter Integer n(min = 1) = 1 /* 1 */;
- Real x[1] = if 1 < 2 then {2} else 1:1;
+ Real x[1] = {2};
 end EvaluationTests.ParameterMinMax1;
 ")})));
 end ParameterMinMax1;
@@ -3924,7 +3924,7 @@ model ParameterMinMax2
             flatModel="
 fclass EvaluationTests.ParameterMinMax2
  structural parameter Integer n(min = 1,start = 2) = 2 /* 2 */;
- Real x[2] = if 2 < 2 then {2} else 1:2;
+ Real x[2] = 1:2;
 end EvaluationTests.ParameterMinMax2;
 ")})));
 end ParameterMinMax2;
@@ -3941,7 +3941,7 @@ model ParameterMinMax3
             flatModel="
 fclass EvaluationTests.ParameterMinMax3
  structural parameter Integer n(max = -1) = -1 /* -1 */;
- Real x[1] = if -1 > -2 then {2} else 1:1;
+ Real x[1] = {2};
 end EvaluationTests.ParameterMinMax3;
 ")})));
 end ParameterMinMax3;
@@ -3958,7 +3958,7 @@ model ParameterMinMax4
             flatModel="
 fclass EvaluationTests.ParameterMinMax4
  structural parameter Integer n(max = -1,start = -2) = -2 /* -2 */;
- Real x[2] = if -2 > -2 then {2} else 1:2;
+ Real x[2] = 1:2;
 end EvaluationTests.ParameterMinMax4;
 ")})));
 end ParameterMinMax4;

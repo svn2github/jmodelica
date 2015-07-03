@@ -6079,6 +6079,45 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest12;
 ")})));
 end ArrayIterTest12;
 
+model ArrayIterTest13
+    Integer[:] x0 = 1:8;
+    constant Integer[:,:,:] x1 = {{{1,2},{3,4}},{{5,6},{7,8}}};
+    Integer[:,:,:] x2 = {{{x0[x1[i,j,k]] for i in 1:2} for j in 1:2} for k in 1:2};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest13",
+            description="Nested iteration expressions",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
+ constant Integer x1[1,1,1] = 1;
+ constant Integer x1[1,1,2] = 2;
+ constant Integer x1[1,2,1] = 3;
+ constant Integer x1[1,2,2] = 4;
+ constant Integer x1[2,1,1] = 5;
+ constant Integer x1[2,1,2] = 6;
+ constant Integer x1[2,2,1] = 7;
+ constant Integer x1[2,2,2] = 8;
+ constant Integer x2[1,1,1] = 1;
+ constant Integer x2[1,1,2] = 5;
+ constant Integer x2[1,2,1] = 3;
+ constant Integer x2[1,2,2] = 7;
+ constant Integer x2[2,1,1] = 2;
+ constant Integer x2[2,1,2] = 6;
+ constant Integer x2[2,2,1] = 4;
+ constant Integer x2[2,2,2] = 8;
+ constant Integer x0[1] = 1;
+ constant Integer x0[2] = 2;
+ constant Integer x0[3] = 3;
+ constant Integer x0[4] = 4;
+ constant Integer x0[5] = 5;
+ constant Integer x0[6] = 6;
+ constant Integer x0[7] = 7;
+ constant Integer x0[8] = 8;
+end ArrayTests.Constructors.Iterators.ArrayIterTest13;
+")})));
+end ArrayIterTest13;
+
 model ArrayIterTestUnknown1
     function f
 		input Integer a;

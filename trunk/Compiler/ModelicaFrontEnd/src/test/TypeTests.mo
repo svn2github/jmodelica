@@ -2481,8 +2481,8 @@ model CircularIfExp1
             flatModel="
 fclass TypeTests.CircularIfExp1
  eval parameter Boolean a = true /* true */;
- parameter Real b = if true then 1 else c;
- parameter Real c = if true then b else 2;
+ parameter Real b = 1 /* 1 */;
+ parameter Real c = b;
 end TypeTests.CircularIfExp1;
 ")})));
 end CircularIfExp1;
@@ -2502,8 +2502,8 @@ model CircularIfExp2
 fclass TypeTests.CircularIfExp2
  eval parameter Boolean a = true /* true */;
  eval parameter Boolean b = true /* true */;
- parameter Real c = if true and true then 1 else d;
- parameter Real d = if true and true then c else 2;
+ parameter Real c = 1 /* 1 */;
+ parameter Real d = c;
 end TypeTests.CircularIfExp2;
 ")})));
 end CircularIfExp2;
@@ -2523,8 +2523,8 @@ model CircularIfExp3
 fclass TypeTests.CircularIfExp3
  eval parameter Boolean a = true /* true */;
  eval parameter Boolean b = true /* true */;
- parameter Real c = if true then 1 else d;
- parameter Real d = if true then c else 2;
+ parameter Real c = 1 /* 1 */;
+ parameter Real d = c;
 end TypeTests.CircularIfExp3;
 ")})));
 end CircularIfExp3;

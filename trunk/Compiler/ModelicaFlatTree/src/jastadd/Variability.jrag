@@ -414,6 +414,9 @@ aspect Variability {
     eq FInstAccessExp.variability() = getInstAccess().myInstComponentDecl().variability();
 
     eq FUnsupportedExp.expVariability() = fContinuous(); // Only here to avoid null pointer 
+    
+    eq FSubscriptedExp.expVariability() = super.expVariability().combine(indexVariability());
+    
 
     public static FTypePrefixVariability FExp.combineFExpListVariability(Iterable<? extends FExp> exps) {
         Iterator<? extends FExp> it = exps.iterator();

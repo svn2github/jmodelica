@@ -2178,6 +2178,15 @@ aspect FlatExpressions {
 	}
 
     public FExp FIfExp.flatten(FQName prefix) {
+        if (getIfExpNoTransform().variability().knownParameterOrLess()) {
+            try {
+                return getIfExpNoTransform().ceval().booleanValue() ? 
+                        getThenExp().flatten(prefix) : 
+                        getElseExp().flatten(prefix);
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
 		return new FIfExp(getIfExp().flatten(prefix),
 		                  getThenExp().flatten(prefix),
 		                  getElseExp().flatten(prefix));
