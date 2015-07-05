@@ -292,7 +292,22 @@ class TestResultCSVTextual:
         model_file = os.path.join(get_files_path(), 'Modelica', 'NegatedAlias.mo')
         name = compile_fmu("NegatedAlias", model_file)
         name = compile_fmu("NegatedAlias", model_file, target="cs", compile_to="NegatedAliasCS.fmu")
-
+        model_file = os.path.join(get_files_path(), 'Modelica', 'ParameterAlias.mo')
+        name = compile_fmu("ParameterAlias", model_file)
+    
+    @testattr(stddist = True)
+    def test_only_parameters(self):
+        model = load_fmu("ParameterAlias.fmu")
+        
+        opts = model.simulate_options()
+        opts["result_handling"] = "custom"
+        opts["result_handler"] = ResultHandlerCSV(model)
+        opts["filter"] = "p2"
+        
+        res = model.simulate(options=opts)
+        
+        nose.tools.assert_almost_equal(model.get("p2"), res["p2"][0])
+    
     @testattr(stddist = True)
     def test_variable_alias(self):
 
