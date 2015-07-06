@@ -515,11 +515,16 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public boolean canMatch(E e, V v) {
         if (e.isMeta())
             return false;
-        if (initialSystem)
-            return true;
         
         FAbstractEquation equation = e.getEquation();
         FVariable variable = v.getVariable();
+        
+        if (!variable.isReal() && !equation.isSolved(variable).isAnalyticallySolvable()) {
+            return false;
+        }
+        
+        if (initialSystem)
+            return true;
         
         if (equation instanceof FAlgorithm)
             return true;

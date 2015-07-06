@@ -6888,11 +6888,12 @@ equation
             description="Test error message given by BLT when non-real equations are unsolved",
             errorMessage="
 1 errors found:
-
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
+Error: in file '...':
 Semantic error at line 0, column 0:
-  Unable to solve variable 'i' from equation:
-42 * (i + 1) = temp_1
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     i
+  The following equation(s) could not be matched to any variable:
+    42 * (i + 1) = temp_1
 ")})));
 end BLTError1;
 
@@ -6900,7 +6901,7 @@ model BLTError2
     Integer i, j;
 equation
     i = j + integer(time);
-    i * j = 0;
+    j = 1/i;
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
@@ -6913,9 +6914,33 @@ Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
 Semantic error at line 0, column 0:
   Non-real equations contains an algebraic loop:
 i = j + temp_1
-i * j = 0
+j = 1 / i
 ")})));
 end BLTError2;
+
+model BLTError3
+    Real x;
+    Integer i;
+algorithm
+    x := i;
+equation
+    x = integer(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BLTError3",
+            description="Test error message given by BLT when non-real equations are unsolved",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 0, column 0:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     i
+  The following equation(s) could not be matched to any variable:
+    algorithm
+     x := i;
+")})));
+end BLTError3;
 
 model LinearBlockTest1
     Real x,y,z,a;
