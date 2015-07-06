@@ -1687,7 +1687,7 @@ aspect CCodeGen {
                     first = false;
                     use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
                 }
-                if (!use.inFunctionCallLeft()) 
+                if (!use.inFunctionCallLeftTop()) 
                     use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
             }
         }

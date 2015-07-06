@@ -10921,6 +10921,106 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest18;
 
+model BlockTest19
+    function f
+        input Real[:] x;
+        output Real[size(x,1)] y;
+    algorithm
+        y := x;
+    end f;
+    
+    Real[2] x;
+    Real y;
+    
+algorithm
+    x[1] := y;
+    x := f({time,time});
+equation
+    y = x[1] + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest19",
+            description="Function call equation in block",
+            inline_functions="none",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_DEF(REA, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    JMI_DEF(REA, tmp_6)
+    JMI_DEF(REA, tmp_7)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 3;
+        x[1] = 4;
+        x[2] = 1;
+        x[3] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_2;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_2 = x[0];
+        }
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+        jmi_array_ref_1(tmp_2, 1) = _time;
+        jmi_array_ref_1(tmp_2, 2) = _time;
+        tmp_4 = _x_1_0;
+        tmp_5 = _temp_1_1_3;
+        tmp_6 = _temp_1_2_4;
+        tmp_7 = _x_2_1;
+        _x_1_0 = _y_2;
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+        jmi_array_ref_1(tmp_2, 1) = _time;
+        jmi_array_ref_1(tmp_2, 2) = _time;
+        func_CCodeGenTests_BlockTest19_f_def0(tmp_2, tmp_1);
+        _temp_1_1_3 = (jmi_array_val_1(tmp_1, 1));
+        _temp_1_2_4 = (jmi_array_val_1(tmp_1, 2));
+        _x_1_0 = _temp_1_1_3;
+        _x_2_1 = _temp_1_2_4;
+        tmp_3 = _x_1_0;
+        _x_1_0 = tmp_4;
+        tmp_4 = tmp_3;
+        tmp_3 = _temp_1_1_3;
+        _temp_1_1_3 = tmp_5;
+        tmp_5 = tmp_3;
+        tmp_3 = _temp_1_2_4;
+        _temp_1_2_4 = tmp_6;
+        tmp_6 = tmp_3;
+        tmp_3 = _x_2_1;
+        _x_2_1 = tmp_7;
+        tmp_7 = tmp_3;
+        _temp_1_1_3 = (tmp_5);
+        _temp_1_2_4 = (tmp_6);
+        _x_2_1 = (tmp_7);
+        _x_1_0 = (tmp_4);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x_1_0 + 1 - (_y_2);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest19;
+
 model InactiveBlockSwitch1
     function F
         input Real i1[:];
