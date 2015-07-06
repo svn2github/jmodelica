@@ -1398,15 +1398,13 @@ aspect Flattening {
 				FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
 				FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
 				FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
-				boolean isEach = getComponentModification().hasEach();
-				boolean isFinal = getComponentModification().hasFinal();
 				if (getInstModification().hasInstValueMod()) {
 					InstValueModification ivm = im.getInstValueMod();
-					a.setValue(aer.retrieve(ivm, isEach).flatten(prefix));
+                    a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
 				}
-				if (isEach)
+				if (getComponentModification().hasEach())
 					a.setFEach(new FEach());
-				if (isFinal)
+				if (getComponentModification().hasFinal())
 					a.setFFinal(new FFinal());
 				im.collectAttributes(a.getFAttributes(), prefix, aer, cls);
 				attrs.add(a);

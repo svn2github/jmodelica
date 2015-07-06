@@ -2451,7 +2451,28 @@ end ModificationTests.ArrayModifications72;
 ")})));
 end ArrayModifications72;
 
+model ArrayModifications73
+    model M1
+        Real[2] x = 1:2;
+    end M1;
+    
+    model M2
+        M1 m1;
+    end M2;
 
+    M2[2] m2(each m1(x(start=3:4) = 5:6));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications73",
+            description="Start value nested in modification with each",
+            flatModel="
+fclass ModificationTests.ArrayModifications73
+ Real m2[1].m1.x[2](start = 3:4) = 5:6;
+ Real m2[2].m1.x[2](start = 3:4) = 5:6;
+end ModificationTests.ArrayModifications73;
+")})));
+end ArrayModifications73;
 
 /* ========= Modifications on type declarations ========= */
 
