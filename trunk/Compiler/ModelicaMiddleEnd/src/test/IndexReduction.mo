@@ -1404,6 +1404,83 @@ end IndexReduction.IndexReduction56;
 ")})));
 end IndexReduction56;
 
+model TemporaryVarStates1
+    function f
+        input Real x[2];
+        input Real A[2,2];
+        output Real y[2];
+    algorithm
+        y := A*x;
+    annotation(derivative=f_der,LateInline=true);
+    end f;
+
+    function f_der
+        input Real x[2];
+        input Real A[2,2];
+        input Real der_x[2];
+        input Real der_A[2,2];
+        output Real der_y[2];
+    algorithm
+        der_y := A*der_x;
+    annotation(LateInline=true);
+    end f_der;
+
+    parameter Real A[2,2] = {{1,2},{3,4}};
+    Real x1[2](each stateSelect=StateSelect.never),x2[2](each stateSelect=StateSelect.never);
+equation
+    der(x1) + der(x2) = {2,3};
+    x1 + f(x2,A) = {0,0};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TemporaryVarStates1",
+            description="Test so that the compiler handles temporary variables as states",
+            flatModel="
+fclass IndexReduction.TemporaryVarStates1
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 2 /* 2 */;
+ parameter Real A[2,1] = 3 /* 3 */;
+ parameter Real A[2,2] = 4 /* 4 */;
+ Real x1[1](stateSelect = StateSelect.never);
+ Real x1[2](stateSelect = StateSelect.never);
+ Real x2[1](stateSelect = StateSelect.never);
+ Real x2[2](stateSelect = StateSelect.never);
+ Real _der_x1[1];
+ Real _der_x2[1];
+ Real _der_x1[2];
+ Real _der_x2[2];
+ Real temp_4;
+ Real temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real temp_20;
+ Real temp_21;
+initial equation 
+ temp_4 = 0.0;
+ temp_5 = 0.0;
+equation
+ _der_x1[1] + _der_x2[1] = 2;
+ _der_x1[2] + _der_x2[2] = 3;
+ temp_4 = A[1,1] * temp_6 + A[1,2] * temp_7;
+ temp_5 = A[2,1] * temp_6 + A[2,2] * temp_7;
+ - x1[1] = temp_4;
+ - x1[2] = temp_5;
+ der(temp_4) = A[1,1] * temp_20 + A[1,2] * temp_21;
+ der(temp_5) = A[2,1] * temp_20 + A[2,2] * temp_21;
+ - _der_x1[1] = der(temp_4);
+ - _der_x1[2] = der(temp_5);
+ temp_6 = x2[1];
+ temp_7 = x2[2];
+ temp_20 = _der_x2[1];
+ temp_21 = _der_x2[2];
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.TemporaryVarStates1;
+")})));
+end TemporaryVarStates1;
+
 model IndexReduction57
     Real a_s;
     Real a_v(stateSelect = StateSelect.always);

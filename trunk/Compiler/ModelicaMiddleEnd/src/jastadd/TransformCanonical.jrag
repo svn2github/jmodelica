@@ -2081,17 +2081,18 @@ aspect TransformCanonical {
 		setFVariableList(new List(vars));
 	}
 
-	/**
-	 * Check if this is a temporary variable that should be eliminated.
-	 */
-	syn boolean FVariable.shouldEliminateTemporary() = 
-		isTemporary() && 
-		nonDefiningUses().size() <= 1 && 
-		definingUses().size() <= 1 && 
-		!usedAsFunctionCallLeft() && 
+    /**
+     * Check if this is a temporary variable that should be eliminated.
+     */
+    syn boolean FVariable.shouldEliminateTemporary() = 
+        isTemporary() && 
+        nonDefiningUses().size() <= 1 && 
+        definingUses().size() <= 1 && 
+        !usedAsFunctionCallLeft() && 
         !isPreVariable() && myPreVariable().isUnknown() && 
-		(definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents());
-	
+        (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
+        !isDifferentiatedVariable() && !isDerivativeVariable();
+
 	/**
 	 * Inline all non-defining uses of variable, and remove equation defining it.
 	 * 
