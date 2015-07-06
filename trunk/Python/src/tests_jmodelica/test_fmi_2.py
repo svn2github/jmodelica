@@ -754,7 +754,18 @@ class Test_FMUModelME2:
         coupled.enter_continuous_time_mode()
         res=coupled.simulate(options=opts)
         assert len(res['time']) > 250
+    
+    @testattr(fmi = True)
+    def test_simulate_no_state(self):
+        
+        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True})
 
+        model = load_fmu(name)
+
+        res = model.simulate(final_time=3)
+
+        assert res.final("integerStep.y") == 3.0
+    
     @testattr(fmi = True)
     def test_simulate(self):
         """
