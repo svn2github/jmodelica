@@ -35,7 +35,7 @@ public class StringLoggingUnit implements LoggingUnit {
      * expensive operation such as String.format() only is done once.
      */
     private void computeString() {
-        if (args != null) {
+        if (args != null && args.length > 0) {
             string = String.format(string, args);
             args = null;
         }
