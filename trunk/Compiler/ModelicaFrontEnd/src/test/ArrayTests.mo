@@ -1871,6 +1871,45 @@ end ArrayTests.Subscripts.EndSubscript1;
 ")})));
 end EndSubscript1;
 
+model EndSubscript2
+    record R
+        parameter Integer n;
+        Real[n] x;
+    end R;
+    
+    function f
+        input R r;
+        output Real x = r.x[end];
+        algorithm
+    end f;
+    
+    Real x = f(R(2,1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Subscripts_EndSubscript2",
+            description="Using end in record with parameter size in function",
+            flatModel="
+fclass ArrayTests.Subscripts.EndSubscript2
+ Real x = ArrayTests.Subscripts.EndSubscript2.f(ArrayTests.Subscripts.EndSubscript2.R(2, 1:2));
+
+public
+ function ArrayTests.Subscripts.EndSubscript2.f
+  input ArrayTests.Subscripts.EndSubscript2.R r(x(size() = {n}));
+  output Real x := r.x[r.n];
+ algorithm
+  return;
+ end ArrayTests.Subscripts.EndSubscript2.f;
+
+ record ArrayTests.Subscripts.EndSubscript2.R
+  parameter Integer n;
+  Real x[n];
+ end ArrayTests.Subscripts.EndSubscript2.R;
+
+end ArrayTests.Subscripts.EndSubscript2;
+")})));
+end EndSubscript2;
+
 
 end Subscripts;
 

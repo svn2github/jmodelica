@@ -2383,8 +2383,19 @@ aspect FlatExpressions {
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-    public FExp  FEndExp.flatten(FQName prefix)  { return dynamicFExp(mySize().createFExp(0)).flatten(prefix); }
+    public FExp  FEndExp.flatten(FQName prefix)  { 
+        Size s = mySize();
+        if (s.isUnknown()) {
+            prefix = prefix.copyAndAppend(flatPrefix());
+        }
+        return dynamicFExp(s.createFExp(0)).flatten(prefix);
+    }
 	
+    inh FQName FEndExp.flatPrefix();
+    eq InstArrayAccess.getChild().flatPrefix() = myInstComponentDecl().getFQName().copyPrefix();
+    eq InstNode.getChild().flatPrefix() = new FQNameEmpty();
+    eq FlatRoot.getChild().flatPrefix() = new FQNameEmpty();
+    
 	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
 		List args = new List();
         int i = 0;
