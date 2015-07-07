@@ -1193,7 +1193,7 @@ model Experiment2
 end Experiment2;
 
 model SpecialCharacter1
- Real xy = 1 "x & y";
+ Real xy(quantity="Test & comment", unit="kg & mJ") = 1 "x & y";
 
 	annotation(__JModelica(UnitTesting(tests={
 		XMLCodeGenTestCase(
@@ -1203,7 +1203,7 @@ model SpecialCharacter1
 			generatedCode="
 
 		<ScalarVariable name=\"xy\" valueReference=\"0\" description=\"x &amp; y\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
-			<Real relativeQuantity=\"false\" start=\"1.0\" />
+			<Real quantity=\"Test &amp; comment\" unit=\"kg &amp; mJ\"  relativeQuantity=\"false\" start=\"1.0\" />
 		</ScalarVariable>
 ")})));
 end SpecialCharacter1;

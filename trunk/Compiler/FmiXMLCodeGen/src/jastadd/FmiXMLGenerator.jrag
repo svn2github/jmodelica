@@ -596,11 +596,11 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				FRealVariable realvariable = (FRealVariable)variable;
 
                 if(realvariable.quantityAttributeSet())
-                    generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", realvariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
                 if(realvariable.unitAttributeSet())
-                    generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
+                    generateAttribute("unit", realvariable.unitXML(Fmi1XMLGenerator.this), genPrinter);
                 if(realvariable.displayUnitAttributeSet())
-                    generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+                    generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi1XMLGenerator.this), genPrinter);
                 
                 generateAttribute("relativeQuantity", false, genPrinter);
                 if(realvariable.minAttributeSet())
@@ -628,7 +628,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
                 if(integervariable.quantityAttributeSet())
-                    generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", integervariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
                 if(integervariable.minAttributeSet())
                     generateAttribute("min", integervariable.minAttribute(), genPrinter);
                 if(integervariable.maxAttributeSet())
@@ -684,7 +684,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
 
                 if(enumvariable.quantityAttributeSet())
-                    generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", enumvariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
                 if(enumvariable.minAttributeSet())
                     generateAttribute("min", enumvariable.minAttribute(), genPrinter);
                 if(enumvariable.maxAttributeSet())
@@ -1344,11 +1344,11 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				realvariable = (FRealVariable)variable;
 
                 if (realvariable.quantityAttributeSet())
-                    generateAttribute("quantity", realvariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", realvariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
                 if (realvariable.unitAttributeSet())
-                    generateAttribute("unit", realvariable.unitAttribute(), genPrinter);
+                    generateAttribute("unit", realvariable.unitXML(Fmi2XMLGenerator.this), genPrinter);
                 if (realvariable.displayUnitAttributeSet())
-                    generateAttribute("displayUnit", realvariable.displayUnitAttribute(), genPrinter);
+                    generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi2XMLGenerator.this), genPrinter);
                 
                 generateAttribute("relativeQuantity", false, genPrinter);
                 if (realvariable.minAttributeSet())
@@ -1392,7 +1392,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
                 if(integervariable.quantityAttributeSet())
-                    generateAttribute("quantity", integervariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", integervariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
                 if(integervariable.minAttributeSet())
                     generateAttribute("min", integervariable.minAttribute(), genPrinter);
                 if(integervariable.maxAttributeSet())
@@ -1450,7 +1450,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
 
                 if(enumvariable.quantityAttributeSet())
-                    generateAttribute("quantity", enumvariable.quantityAttribute(), genPrinter);
+                    generateAttribute("quantity", enumvariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
                 if(enumvariable.minAttributeSet())
                     generateAttribute("min", enumvariable.minAttribute(), genPrinter);
                 if(enumvariable.maxAttributeSet())
