@@ -551,14 +551,14 @@ fmi2Status fmi2_serialized_fmu_state_size(fmi2Component c, fmi2FMUstate FMUstate
     return fmi2Error;
 }
 
-fmi2Status fmi2_serialized_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
-                                     fmi2Byte serializedState[], size_t size) {
+fmi2Status fmi2_serialize_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
+                                    fmi2Byte serializedState[], size_t size) {
     return fmi2Error;
 }
 
-fmi2Status fmi2_de_serialized_fmu_state(fmi2Component c,
-                                        const fmi2Byte serializedState[],
-                                        size_t size, fmi2FMUstate* FMUstate) {
+fmi2Status fmi2_de_serialize_fmu_state(fmi2Component c,
+                                       const fmi2Byte serializedState[],
+                                       size_t size, fmi2FMUstate* FMUstate) {
     return fmi2Error;
 }
 

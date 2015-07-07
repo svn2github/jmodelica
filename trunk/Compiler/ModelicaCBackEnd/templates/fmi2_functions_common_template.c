@@ -132,15 +132,15 @@ FMI2_Export fmi2Status fmi2SerializedFMUstateSize(fmi2Component c, fmi2FMUstate 
     return fmi2_serialized_fmu_state_size(c, FMUstate, size);
 }
 
-FMI2_Export fmi2Status fmi2SerializedFMUstate(fmi2Component c, fmi2FMUstate FMUstate,
+FMI2_Export fmi2Status fmi2SerializeFMUstate(fmi2Component c, fmi2FMUstate FMUstate,
                                   fmi2Byte serializedState[], size_t size) {
-    return fmi2_serialized_fmu_state(c, FMUstate, serializedState, size);
+    return fmi2_serialize_fmu_state(c, FMUstate, serializedState, size);
 }
 
-FMI2_Export fmi2Status fmi2DeSerializedFMUstate(fmi2Component c,
+FMI2_Export fmi2Status fmi2DeSerializeFMUstate(fmi2Component c,
                                   const fmi2Byte serializedState[],
                                   size_t size, fmi2FMUstate* FMUstate) {
-    return fmi2_de_serialized_fmu_state(c, serializedState, size, FMUstate);
+    return fmi2_de_serialize_fmu_state(c, serializedState, size, FMUstate);
 }
 
 FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
