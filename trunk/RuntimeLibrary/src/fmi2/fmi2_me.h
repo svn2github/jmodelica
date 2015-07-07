@@ -311,8 +311,8 @@ fmi2Status fmi2_serialized_fmu_state_size(fmi2Component c, fmi2FMUstate FMUstate
  * @param size The size of the FMU state. 
  * @return Error code.
  */
-fmi2Status fmi2_serialized_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
-                                     fmi2Byte serializedState[], size_t size);
+fmi2Status fmi2_serialize_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
+                                    fmi2Byte serializedState[], size_t size);
 
 /**
  * \brief Deserialize a byte vector into a FMU state.
@@ -323,9 +323,9 @@ fmi2Status fmi2_serialized_fmu_state(fmi2Component c, fmi2FMUstate FMUstate,
  * @param FMUstate (Output) A FMU state.
  * @return Error code.
  */
-fmi2Status fmi2_de_serialized_fmu_state(fmi2Component c,
-                                        const fmi2Byte serializedState[],
-                                        size_t size, fmi2FMUstate* FMUstate);
+fmi2Status fmi2_de_serialize_fmu_state(fmi2Component c,
+                                       const fmi2Byte serializedState[],
+                                       size_t size, fmi2FMUstate* FMUstate);
 
 /**
  * \brief Evaluate directional derivative of ODE.
