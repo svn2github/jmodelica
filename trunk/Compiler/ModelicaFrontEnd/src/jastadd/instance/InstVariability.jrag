@@ -103,7 +103,6 @@ aspect InstVariability {
             return false;
         return true;
     }
-    eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
     eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
     
     syn boolean InstAssignable.isSetAsNonFixed() = isPrimitive() && 
@@ -231,7 +230,6 @@ aspect InstVariability {
      * If this is an instance tree access, return set containing accessed var, otherwise empty set.
      */
     syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
-    eq FInstAccessExp.accessedVarSet()               = getInstAccess().accessedVarSet();
     eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
 
     /**

@@ -580,11 +580,6 @@ aspect Environments {
 		getFIdUse().populateInstRecordModificationList(list, org, this);
 	}
 	
-	public void FInstAccessExp.populateInstRecordModificationList(
-			List<InstRecordModification> list, InstValueModification org) {
-		getInstAccess().populateInstRecordModificationList(list, org, this);
-	}
-	
 	public void FIdUse.populateInstRecordModificationList(
 			List<InstRecordModification> list, InstValueModification org, FExp exp) {}
 	
@@ -600,7 +595,7 @@ aspect Environments {
 			Modification mod = org.getModification();
 			for (FRecordComponentType comp : ((FRecordType) var.type()).getComponents()) {
 				String name = comp.getName();
-				FExp val = exp.dynamicFExp(new FInstAccessExp(copyAndAppend(name)));
+                FExp val = exp.dynamicFExp(new FIdUseExp(new FIdUseInstAccess(copyAndAppend(name))));
 				list.add(new InstRecordModification(mod, name, val));
 			}
 		}

@@ -1030,23 +1030,18 @@ aspect Slices {
 		}
 		return array && exp;
     }
-	
+    
+    
+    /**
+     * Check if this is a slice operation.
+     */
+    syn boolean FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    
     /**
      * Check if this is a slice operation.
      */
     syn boolean FIdUse.isSlice()  = getFQName().isSlice();
     eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-	
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FInstAccessExp.isSlice() = getInstAccess().isSlice();
-	
-    /**
-     * Check if this is a slice operation.
-     */
-    // TODO: change order
-    syn boolean FIdUseExp.isSlice() = getFIdUse().isSlice() && isArray();
     
 }
 

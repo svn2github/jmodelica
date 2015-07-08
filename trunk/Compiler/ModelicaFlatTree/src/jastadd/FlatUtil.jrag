@@ -345,7 +345,6 @@ aspect FlatNames {
     syn String FIdUseExp.name()        = getFIdUse().name();
     eq FAbstractDerExp.name()          = derName(order());
     eq FPreExp.name()                  = preName();
-    syn String FInstAccessExp.name()   = getInstAccessNoTransform().name();
     syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
     
     syn String FIdDecl.name() = getFQNameNoTransform().name();
@@ -1063,8 +1062,8 @@ aspect FlatNames {
     /**
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
-    public FInstAccessExp InstComponentDecl.createUseExp() {
-        return new FInstAccessExp(new InstComponentAccess(name()));
+    public FIdUseExp InstComponentDecl.createUseExp() {
+        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
     }
 
     /**
@@ -1072,8 +1071,8 @@ aspect FlatNames {
      */
     abstract public FExp CommonAccess.createFExp();
 
-    public FInstAccessExp InstAccess.createFExp() {
-        return new FInstAccessExp(this);
+    public FIdUseExp InstAccess.createFExp() {
+        return new FIdUseExp(new FIdUseInstAccess(this));
     }
 
     public FIdUseExp FIdUse.createFExp() {

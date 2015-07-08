@@ -1163,13 +1163,6 @@ InstHDerExp : InstDerExp ::= <Order:int>;
 FIdUseInstAccess : FIdUse ::= InstAccess;
 
 /**
- * Identifiers in instantiated expressions.
- *
- * Instantiated expressions occurs in the instance tree.
- */
-FInstAccessExp : FAbstractArrayExp ::= InstAccess;
-
-/**
  * Record constructor.
  */
 FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FType/;

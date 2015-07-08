@@ -155,10 +155,6 @@ aspect ComplianceCheck {
         }
     }
     
-	syn boolean FExp.isAccessToInnerOrOuter()  = false;
-	eq FInstAccessExp.isAccessToInnerOrOuter() = 
-        getInstAccess().myInstComponentDecl().isInner() || getInstAccess().myInstComponentDecl().isOuter();
-	
 	inh boolean FCardinality.inAssert();
 	eq FAssert.getChild().inAssert()  = true;
 	eq Root.getChild().inAssert()     = false;

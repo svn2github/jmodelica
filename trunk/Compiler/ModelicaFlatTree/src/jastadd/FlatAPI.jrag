@@ -829,8 +829,10 @@ aspect FlatAPI {
                 return true;
         return false;
     }
-    eq FIdUseExp.containsNonFixedParameter()      = myFV().isNonFixedParameter();
-    eq FInstAccessExp.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
+    eq FIdUseExp.containsNonFixedParameter() = getFIdUse().containsNonFixedParameter();
+    
+    syn boolean FIdUse.containsNonFixedParameter() = myFV().isNonFixedParameter();
+    eq FIdUseInstAccess.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
     
     syn boolean InstComponentDecl.isNonFixedParameter() = false;
     eq InstAssignable.isNonFixedParameter() {
@@ -3469,6 +3471,7 @@ aspect FlatAlgorithmAPI {
     eq FAssignStmt.getLeft().useIsAssignment()       = true;
     eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
     eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
+    eq FArraySubscripts.getChild().useIsAssignment() = false;
     eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
     eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();
     eq FExp.getChild().useIsAssignment()             = false;

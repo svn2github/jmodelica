@@ -2084,7 +2084,6 @@ aspect ConstantEvaluation {
     // Bypass for nodes with inherent support for constant evaluation of arrays.
     eq FFunctionCall.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
-    eq FInstAccessExp.cevalArray(VariableEvaluator evaluator, Index i)   = isSlice() ? super.cevalArray(evaluator, i) : getInstAccess().ceval(evaluator, i);
     eq FIdUseExp.cevalArray(VariableEvaluator evaluator, Index i)        = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
     eq FIfExp.cevalArray(VariableEvaluator evaluator, Index i)           = cevalSelectExp(evaluator).cevalArray(evaluator, i);
 
@@ -2455,8 +2454,6 @@ aspect ConstantEvaluation {
     }
     
     
-    eq FInstAccessExp.cevalCalc(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
-
     syn CValue InstAccess.ceval(VariableEvaluator evaluator)        = ceval(evaluator, Index.NULL);
     syn CValue InstAccess.ceval(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
     eq InstDot.ceval(VariableEvaluator evaluator, Index i)            = getLastInstAccess().ceval(evaluator, i);
@@ -4556,7 +4553,6 @@ aspect LiteralExpressions {
 	}
 	
 	eq FIdUseExp.hasOnlyLiterals()      = false;
-	eq FInstAccessExp.hasOnlyLiterals() = false;
 	eq FFunctionCall.hasOnlyLiterals()  = false;
 	
 }
@@ -4590,7 +4586,6 @@ aspect CircularExpressions {
 	private boolean FAbstractExp.inIsCircular = false; 
 	
 	eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular();
-	eq FInstAccessExp.isCircularCalc() = getInstAccess().myInstComponentDecl().isCircular();
 	
 	syn boolean FIdUse.isCircular()  = myFV().isCircular();
 	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
@@ -4616,7 +4611,6 @@ aspect CircularExpressions {
 
 	syn boolean FExp.isUnknownSizeVarUse()  = false;
 	eq FIdUseExp.isUnknownSizeVarUse()      = getFIdUse().isUnknownSizeVarUse();
-	eq FInstAccessExp.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();
 	
 	syn boolean FIdUse.isUnknownSizeVarUse()  = myFV().isUnknownSizeVar();
 	eq FIdUseInstAccess.isUnknownSizeVarUse() = getInstAccess().isUnknownSizeVarUse();

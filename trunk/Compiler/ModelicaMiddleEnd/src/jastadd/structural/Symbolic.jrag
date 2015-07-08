@@ -811,10 +811,6 @@ aspect Derivatives {
         return dynamicFExp(diffUseOrDerExp(name, name()));
     }
 
-    public FExp FInstAccessExp.diff(String name) {
-        return dynamicFExp(diffUseOrDerExp(name, name()));
-    }
-
     public FExp FPreExp.diff(String name) {
         if (name.equals(name())) {
             return new FRealLitExp(1);
@@ -893,7 +889,6 @@ aspect Derivatives {
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
     eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
-    eq FInstAccessExp.createDerExp(int order) = getInstAccess().createDerExp(order);
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 
     syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);
@@ -901,7 +896,7 @@ aspect Derivatives {
 	syn FExp FIdUseInstAccess.createDerExp(int order) = getInstAccess().createDerExp(order);
 	
 	syn InstDerExp InstAccess.createDerExp(int order) {
-		FExp use = new FInstAccessExp(fullCopy());
+        FExp use = new FIdUseExp(new FIdUseInstAccess(fullCopy()));
 		return (order == 1) ? new InstDerExp(use) : new InstHDerExp(use, order);
 	}
 	

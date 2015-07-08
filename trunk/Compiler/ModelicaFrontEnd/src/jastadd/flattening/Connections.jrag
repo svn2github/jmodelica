@@ -1106,8 +1106,8 @@ aspect OverconstrainedConnections {
 	
 	public void FConnBranch.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
 		if (connect) {
-			InstAccess left  = ((FInstAccessExp) getA()).getInstAccess();
-			InstAccess right = ((FInstAccessExp) getB()).getInstAccess();
+            InstAccess left  = getA().asInstAccess();
+            InstAccess right = getB().asInstAccess();
 			left.connectTo(right, prefix, csm, this);
 		}
 	}
@@ -1131,10 +1131,10 @@ aspect OverconstrainedConnections {
 	/**
 	 * Get the variable referenced by child A.
 	 * 
-	 * Assumes A is an FInstAccessExp.
+     * Assumes A is an FIdUseExp.
 	 */
 	syn InstComponentDecl FConnectionsOp.variableA() = 
-			((FInstAccessExp) getA()).getInstAccess().myInstComponentDecl();
+            getA().asInstAccess().myInstComponentDecl();
 	
 	
 	/**
@@ -1412,12 +1412,13 @@ aspect OverconstrainedConnections {
 		 */
 		public OpsResult ops(FExp e) {
 			OpsResult res = null;
-			if (e.isInstAccess()) {
-				InstComponentDecl var = ((FInstAccessExp) e).getInstAccess().myInstComponentDecl();
+            FIdUse u = ((FIdUseExp) e).getFIdUse();
+			if (u instanceof FIdUseInstAccess) {
+                InstComponentDecl var = ((FIdUseInstAccess) u).getInstAccess().myInstComponentDecl();
 				Node n = getNode(var);
 				res = (n == null) ? null : n.opsResult();
 			} else {
-				res = opsMap.get(((FIdUseExp) e).getFIdUse().name());
+                res = opsMap.get(u.name());
 			}
 			return (res == null) ? new OpsResult(false, false) : res;
 		}
@@ -2428,11 +2429,6 @@ aspect ExpandableConnectors {
         return true;
     }
     
-    public void FInstAccessExp.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
-        if (getInstAccess().isExpandableConnectorPart())
-            csm.getExpandable().addUse(getInstAccess());
-    }
-    
     public void FIdUseInstAccess.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
         if (getInstAccess().isExpandableConnectorPart())
             csm.getExpandable().addUse(getInstAccess());
@@ -2572,7 +2568,6 @@ aspect Cardinality {
         throw new UnsupportedOperationException();
     }
     eq FIdUseExp.cardinalityValue()      = getFIdUse().cardinalityValue();
-    eq FInstAccessExp.cardinalityValue() = 1;
 
     syn int FIdUse.cardinalityValue()      = myFClass().getConnectionSetManager().getCardinality(scalarName());
     eq FIdUseInstAccess.cardinalityValue() = 1;

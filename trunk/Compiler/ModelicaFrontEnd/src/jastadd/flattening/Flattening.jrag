@@ -207,7 +207,7 @@ aspect Flattening {
         getFExp().flattenUsedFuncsAndEnums(fc);
     }
 
-    public void FInstAccessExp.flattenUsedFuncsAndEnums(FClass fc) {
+    public void FIdUseInstAccess.flattenUsedFuncsAndEnums(FClass fc) {
         super.flattenUsedFuncsAndEnums(fc);
         InstAccess ia = getInstAccess();
         if (ia.myInstComponentDecl().isRecord() && ia.myInstComponentDecl().isConstant() && !ia.hasUnknownIndices()) 
@@ -538,7 +538,7 @@ aspect Flattening {
     public FExp FExp.externalArgCopy() {
         return fullCopy();
     }
-    public FExp FInstAccessExp.externalArgCopy() {
+    public FExp FIdUseExp.externalArgCopy() {
         return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
     }
     
@@ -1152,7 +1152,6 @@ aspect Flattening {
 	syn FExp FExp.splitArrayExp(int index)     = new FSubscriptedExp(unboundCopy(), index, ndims());
 	eq FArray.splitArrayExp(int index)         = isIterArray() ? getFExp(0).splitArrayExp(index) : getFExp(index - 1);
 	eq FIdUseExp.splitArrayExp(int index)      = createNode(getFIdUse().splitArrayAccess(index));
-	eq FInstAccessExp.splitArrayExp(int index) = new FInstAccessExp(getInstAccess().splitArrayAccess(index));
 	eq InstDerExp.splitArrayExp(int index)     = new InstDerExp(getFExp().splitArrayExp(index));
 	eq FArrayDimAsArgsExp.splitArrayExp(int index) {
 		if (getNumFExp() == 1)
@@ -1195,6 +1194,7 @@ aspect Flattening {
 	 * Note: Current implementation assumes that only last name part needs to be considered.
 	 */
 	syn FIdUse FIdUse.splitArrayAccess(int index) = new FIdUse(getFQName().splitArrayAccess(index));
+    eq FIdUseInstAccess.splitArrayAccess(int index) = new FIdUseInstAccess(getInstAccess().splitArrayAccess(index));
 	
 	/**
 	 * Return a new name that has index instead of the first array subscript with ndims() > 1.
@@ -1680,47 +1680,50 @@ aspect FlatExpressions {
     public FIdUse FIdUse.flatten(FQName prefix) {
         return (FIdUse)fullCopy();
     }
-
+    
     public FExp FIdUseExp.flatten(FQName prefix) {
-        // TODO: Replace with constant exp for constants? Do this for FExp in general instead?
-        return new FIdUseExp(getFIdUse().flatten(prefix));
+        return getFIdUse().flatten(prefix, this);
     }
-
-    public FExp FInstAccessExp.flatten(FQName prefix) {
+    
+    public FExp FIdUse.flatten(FQName prefix, FIdUseExp use) {
+        return new FIdUseExp(flatten(prefix));
+    }
+    
+    public FExp FIdUseInstAccess.flatten(FQName prefix, FIdUseExp use) {
         InstComponentDecl var = getInstAccess().myInstComponentDecl();
-        if (inDefaultArgument()) { // TODO: Handle default arguments of constructor args
+        if (use.inDefaultArgument()) {
             InstClassDecl parent = (InstClassDecl) var.containingEntity();
             int i = parent.myCallInputs().indexOf(var);
-            int d = findDepthOfNestledFunctionCalls();
+            int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
         } else if (!inFunction() && variability().flattenExtractIndices(getInstAccess().indexVariability())) {
-            FInstAccessExp copy = (FInstAccessExp) dynamicFExp(fullCopy());
+            FIdUseExp copy = (FIdUseExp) use.dynamicFExp(use.fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
-            copy.getInstAccess().extractNonParameterIndices(sub, variability());
-            FExp res = dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+            ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, variability());
+            FExp res = use.dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
             return res.flatten(prefix);
         } else {
-            return var.flattenAccess(prefix, this);
+            return var.flattenAccess(prefix, use);
         }
 	}
 
     /**
      * Flatten an access expression to this component.
      */
-    public FExp InstComponentDecl.flattenAccess(FQName prefix, FInstAccessExp exp) {
+    public FExp InstComponentDecl.flattenAccess(FQName prefix, FIdUseExp exp) {
         if (isEnumLiteral())
             return new FIdUseExp(getFQName().fullCopy());
-        InstAccess ia = exp.getInstAccess();
+        InstAccess ia = exp.asInstAccess();
         FQName fqn = inOrIsOuter() ? ia.flattenOuterAccess(prefix) : ia.flatten(prefix);
         return new FIdUseExp(fqn);
     }
 
-    public FExp InstAssignable.flattenAccess(FQName prefix, FInstAccessExp iae) {
+    public FExp InstAssignable.flattenAccess(FQName prefix, FIdUseExp iae) {
         // If the FInstAccess refers to a constant or string parameter, then inline expression
         // Checks in the instance tree ensures that constants always
         // have binding expressions, however, array subscripts may need to be 
         // flattened during error checks, when using qualifiedName()
-        InstAccess ia = iae.getInstAccess();
+        InstAccess ia = iae.asInstAccess();
         if (variability().knownParameterOrLess()) {
             try {
                 if (!size().isEmpty() && iae.canInlineConstant()) {
@@ -1754,9 +1757,11 @@ aspect FlatExpressions {
     syn boolean InstAssignable.flattenAsFunctionConstant() =
             !isInput() && !isOutput() && variability().knownParameterOrLess();
 
-    inh boolean FInstAccessExp.canInlineConstant();
-    eq BaseNode.getChild().canInlineConstant() = true;
-    eq InstExternalCall.getArg().canInlineConstant() = false;
+    syn boolean FIdUseExp.canInlineConstant() = !inExternalArg() && !inFunctionCallLeft();
+    
+    inh boolean FIdUseExp.inExternalArg();
+    eq BaseNode.getChild().inExternalArg() = false;
+    eq InstExternalCall.getArg().inExternalArg() = true;
 
     /**
      * Flatten an access to this constant in a function.
@@ -1819,8 +1824,8 @@ aspect FlatExpressions {
 	 * or component in a record class, and refers to an input in the same function 
 	 * or component in the same record class.
 	 */
-	syn boolean FInstAccessExp.inDefaultArgument() {
-		InstComponentDecl target = getInstAccess().myInstComponentDecl();
+    syn boolean FIdUseExp.inDefaultArgument() {
+		InstComponentDecl target = asInstAccess().myInstComponentDecl();
 		InstComponentDecl holder = findComponentWithThisBindingExp();
 		return holder != null && target.containingEntity() == holder.containingEntity() && 
 		       ((inFunction() && holder.isInput() && target.isInput()) || 
@@ -1840,6 +1845,7 @@ aspect FlatExpressions {
 	/**
 	 * Find the depth of nestled function calls in this expression.
 	 */
+	inh int FIdUseInstAccess.findDepthOfNestledFunctionCalls();
 	inh int FExp.findDepthOfNestledFunctionCalls();
 	eq InstModification.getChild().findDepthOfNestledFunctionCalls()   = 0;
 	eq InstNode.getChild().findDepthOfNestledFunctionCalls()           = 0;
@@ -2355,10 +2361,10 @@ aspect FlatExpressions {
 	public FExp FExp.flattenDer(FQName prefix, int order) {
 		return dynamicFExp(diff(TIME, order)).flatten(prefix);
 	}
-
-    public FDerExp FInstAccessExp.flattenDer(FQName prefix, int order) {
-        return new FDerExp(new FIdUse(getInstAccess().flatten(prefix)), order);
-    }
+	
+     public FDerExp FIdUseExp.flattenDer(FQName prefix, int order) {
+         return new FDerExp(getFIdUse().flatten(prefix), order);
+     }
 
 	public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {
 		List<FExp> l = new List<FExp>();
@@ -2777,7 +2783,7 @@ aspect InstantiatedExpressions {
 	
 
 	public FExp AccessExp.instantiate() {
-		return copyLocationTo(new FInstAccessExp(getAccess().newInstAccess()));
+        return copyLocationTo(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess())));
 	}
 
 

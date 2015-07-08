@@ -1106,13 +1106,16 @@ aspect TransformCanonical {
 		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
 	}
 	
-	public FExp FIdUseExp.extractRecordFExp(String suffix) {
-		FQName name = getFIdUse().getFQName().copyAsFQNameFull().append(suffix);
-		return new FIdUseExp(name);
-	}
-	
-    public FExp FInstAccessExp.extractRecordFExp(String suffix) {
-        return new FInstAccessExp(getInstAccess().copyAndAppend(suffix));
+    public FExp FIdUseExp.extractRecordFExp(String suffix) {
+        return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
+    }
+    
+    public FIdUse FIdUse.extractRecordFExp(String suffix) {
+        return new FIdUse(getFQName().copyAsFQNameFull().append(suffix));
+    }
+    
+    public FIdUse FIdUseInstAccess.extractRecordFExp(String suffix) {
+        return new FIdUseInstAccess(getInstAccess().copyAndAppend(suffix));
     }
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {

@@ -72,7 +72,7 @@ model EquivalentIfBranch3
             flatModel="
 fclass SymbolicTests.EquivalentIfBranch3
  Real x = time;
- Real y = if x > 1 then x else x;
+ Real y = x;
 end SymbolicTests.EquivalentIfBranch3;
 ")})));
 end EquivalentIfBranch3;

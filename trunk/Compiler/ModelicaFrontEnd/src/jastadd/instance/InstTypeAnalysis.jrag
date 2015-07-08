@@ -129,7 +129,6 @@ aspect InstTypeAnalysis {
     eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
     syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();
 
-    eq FInstAccessExp.type()   = getInstAccess().type();
     eq FIdUseInstAccess.type() = getInstAccess().type();
 
     syn lazy FType InstComponentDecl.type() = fUnknownType();

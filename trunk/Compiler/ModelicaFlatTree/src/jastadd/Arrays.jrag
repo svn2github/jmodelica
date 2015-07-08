@@ -182,7 +182,6 @@ aspect Arrays {
 	 */	
 	syn int FExp.ndims() = 0;
 	syn lazy int FAbstractArrayExp.ndims() = super.ndims();
-	eq FInstAccessExp.ndims() = getInstAccess().ndims();
 	eq FRangeExp.ndims() = 1;
 	eq FLinspace.ndims() = 1;
 	eq FArray.ndims() {
@@ -742,7 +741,6 @@ aspect Arrays {
 	 */
 	syn Size FExp.size() = Size.SCALAR;
 	syn lazy Size FAbstractArrayExp.size() = super.size();
-	eq FInstAccessExp.size() = getInstAccess().size();
 
     eq FBinExp.size()   = overloadSize();
     eq FUnaryExp.size() = overloadSize();
@@ -1293,10 +1291,6 @@ aspect Arrays {
         return getFIdUse().createSizeFExp(varMap);
     }
 
-    public FExp FInstAccessExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        return getInstAccess().createSizeFExp(varMap);
-    }
-
     public FExp FIdUseInstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
         return getInstAccess().createSizeFExp(varMap);
     }
@@ -1581,10 +1575,7 @@ aspect Arrays {
 	protected ASTNode ASTNode.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		return this;
 	}
-	protected ASTNode FInstAccessExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
-		FExp res = indexMap.get(name());
-		return (res == null) ? this : res;
-	}
+    
 	protected ASTNode FIdUseExp.replaceFromIndexMap(Map<String,FExp> indexMap) {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
@@ -1602,15 +1593,12 @@ aspect Arrays {
 		[new HashSet<CommonForIndex>()] with add root FExpSubscript;
 	FIdUse contributes myForIndex() when isForIndex()
 		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
-	FInstAccessExp contributes myForIndex() when isForIndex()
-		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
 	
 	/**
 	 * Return the FForIndex or InstForIndex that this variable belongs to, if any.
 	 */
 	syn CommonForIndex FIdUse.myForIndex()            = myFV().myForIndex();
 	syn CommonForIndex FIdUseInstAccess.myForIndex()  = getInstAccess().myInstComponentDecl().myForIndex();
-	syn CommonForIndex FInstAccessExp.myForIndex()    = getInstAccess().myInstComponentDecl().myForIndex();
 	inh CommonForIndex FAbstractVariable.myForIndex();
 	inh CommonForIndex InstComponentDecl.myForIndex();
 	eq FForIndex.getFVariable().myForIndex()        = this;
@@ -1623,7 +1611,6 @@ aspect Arrays {
 	 * Find the closest ancestor that is an FExpSubscript, if any.
 	 */
 	inh FExpSubscript FIdUse.surroundingFExpSubscript();
-	inh FExpSubscript FInstAccessExp.surroundingFExpSubscript();
 	inh FExpSubscript FExpSubscript.surroundingFExpSubscript();
 	eq FExpSubscript.getChild().surroundingFExpSubscript() = this;
 	eq Root.getChild().surroundingFExpSubscript()          = null;
@@ -1632,19 +1619,6 @@ aspect Arrays {
 	 * Find the all ancestors that are FExpSubscripts, if any.
 	 */
 	syn ArrayList<FExpSubscript> FIdUse.allSurroundingFExpSubscripts() {
-		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
-		FExpSubscript cur = surroundingFExpSubscript();
-		while (cur != null) {
-			list.add(cur);
-			cur = cur.surroundingFExpSubscript();
-		}
-		return list;
-	}
-	
-	/**
-	 * Find the all ancestors that are FExpSubscripts, if any.
-	 */
-	syn ArrayList<FExpSubscript> FInstAccessExp.allSurroundingFExpSubscripts() {
 		ArrayList<FExpSubscript> list = new ArrayList<FExpSubscript>();
 		FExpSubscript cur = surroundingFExpSubscript();
 		while (cur != null) {
@@ -2281,24 +2255,6 @@ aspect Arrays {
 		}
 	}
 	
-	eq FInstAccessExp.getArray() {
-		if (isArray()) {
-			/*
-			 * Based on an array access, say x, corresponding to the declaration
-			 * Real x[2], the array {x[1],x[2]} is generated. 
-			 */
-			Indices ind = indices();
-			Array array = new Array(ind);
-			for (Index i : ind) {
-				InstAccess ia = getInstAccess().specify(i);
-				array.set(i, new FInstAccessExp(ia));
-			}
-			return array;
-		} else {
-			return new ScalarAsArray(this);
-		}
-	}
-	
 	public void FExp.setScalarizedFlag() {
 		for (FExp child : childFExps())
 			child.setScalarizedFlag();
@@ -2556,7 +2512,6 @@ aspect Arrays {
 	syn Indices FExp.indices()                   = Indices.create(size());
 	syn lazy Indices FAbstractArrayExp.indices() = super.indices();
 	eq FIdUseExp.indices()                       = getFIdUse().indices();
-	eq FInstAccessExp.indices()                  = getInstAccess().indices();
 	eq FDimensionConvert.indices() {
 		int n = getFExp().ndims();
 		if (n == 0) {
