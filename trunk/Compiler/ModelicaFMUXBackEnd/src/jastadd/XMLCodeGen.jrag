@@ -631,7 +631,6 @@ aspect XMLTagBinding{
         eq FIntegerSubscript.xmlTag() = "IndexExpression";
         
         eq InstForStmt.xmlTag() = "For";
-        eq InstAssignStmt.xmlTag() = "Assign";
         eq FExternalStmt.xmlTag() = "External";
         eq FWhenStmt.xmlTag() = "When";
     	

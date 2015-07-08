@@ -3904,19 +3904,6 @@ aspect ConstantEvaluation {
     }
     
     /**
-     * Evaluate statement during function evaluation.
-     * 
-     * @param evaluator the evaluator used to evaluate the algorithm
-     */
-    @Override
-    public int InstAssignStmt.evaluate(AlgorithmEvaluator evaluator) {
-        getLeft().getInstAccess().assignToInFuncEval(evaluator, getRight().ceval(evaluator));
-        return EVAL_CONT;
-    }
-    
-    
-    
-    /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
      * @param evaluator the evaluator used to evaluate the algorithm

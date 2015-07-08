@@ -1358,12 +1358,6 @@ aspect FlatPrettyPrint {
 		p.print(getRight(), str, indent);
 	}
 	
-	public void InstAssignStmt.prettyPrint(Printer p, CodeStream str, String indent) {
-		p.print(getLeft(), str, indent);
-		str.print(" := ");
-		p.print(getRight(), str, indent);
-	}
-	
 	public void FFunctionCallStmt.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getNumLeft() > 0) {
 			str.print("(");

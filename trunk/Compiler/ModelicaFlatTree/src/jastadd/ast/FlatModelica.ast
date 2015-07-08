@@ -704,11 +704,6 @@ FDerivativeAlgorithm : FAlgorithm ::=  <Order:int>;
 abstract FStatement : BaseNode;
 
 /**
- * An assignment statement in the instance tree.
- */
-InstAssignStmt : FStatement ::= Left:FIdUseInstAccess Right:FExp;
-
-/**
  * A flattened assignment statement.
  */
 FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;

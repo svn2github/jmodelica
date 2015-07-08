@@ -1556,12 +1556,11 @@ aspect FlatExpressions {
 	}
 	
 	public abstract FStatement FStatement.flatten(FQName prefix);
-	
-	public FAssignStmt InstAssignStmt.flatten(FQName prefix) {
-		return new FAssignStmt(new FIdUseExp(getLeft().flatten(prefix)), 
-				               getRight().flatten(prefix));
-	}
-	
+    
+    public FAssignStmt FAssignStmt.flatten(FQName prefix) {
+        return new FAssignStmt((FIdUseExp)getLeft().flatten(prefix), getRight().flatten(prefix));
+    }
+    
 	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
 		return new FInitArrayStmt((FIdUseExp) getFIdUseExp().flatten(prefix));
 	}
@@ -1631,8 +1630,6 @@ aspect FlatExpressions {
 	public FBreakStmt FBreakStmt.flatten(FQName prefix)   { return new FBreakStmt(); }
 	public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
 	
-	public FAssignStmt FAssignStmt.flatten(FQName prefix)             { return null; }
-
     public FAttribute FAttribute.flatten(FQName prefix) {
         FAttribute flat = createEmptyNode();
         flat.setType(getType().fullCopy());
@@ -2679,12 +2676,12 @@ aspect InstantiatedExpressions {
 	protected FStatement AlgorithmAnnotation.instantiateStatement() {
 		return null;
 	}
-	
-	protected InstAssignStmt AssignStmt.instantiateStatement() {
-		FIdUseInstAccess left = new FIdUseInstAccess(getLeft().newInstAccess());
-		return new InstAssignStmt(left, getRight().instantiate());
-	}
-	
+    
+    protected FAssignStmt AssignStmt.instantiateStatement() {
+        FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
+        return new FAssignStmt(left, getRight().instantiate());
+    }
+    
 	protected FFunctionCallStmt FunctionCallStmt.instantiateStatement() {
 		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
 		for (FunctionCallLeft a : getLefts()) 

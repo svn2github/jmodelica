@@ -641,7 +641,7 @@ aspect FlatTypeCheck {
   }
   
   
-  public void InstAssignStmt.typeCheck(ErrorCheckType checkType) {
+    public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
 		  if (getLeft().isForIndex())
 			  error("Can not assign a value to a for loop index");
