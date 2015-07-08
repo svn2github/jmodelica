@@ -33,7 +33,11 @@ def result_distance(res1, res2, names):
 def test_code_gen():
     var_names = ('x1', 'x2', 'u')
     func_names = ['nlp_test', 'grad_f_test', 'jac_g_test', 'hess_lag_test']
-    exts = ['.c', '.so']
+    exts = ['.c']
+    if os.name == 'nt':
+        exts.append('.dll')
+    else:
+        exts.append('.so')
     
     file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
     op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)

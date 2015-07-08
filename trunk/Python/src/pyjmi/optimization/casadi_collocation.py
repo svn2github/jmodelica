@@ -27,6 +27,7 @@ import time
 import copy
 import types
 import math
+import os
 from os import system, path
 from operator import sub
 from collections import OrderedDict, Iterable
@@ -5687,12 +5688,16 @@ def _to_external_function(fcn, name, use_existing=False):
             as an ExternalFunction object.
             Default: False
     """
+    if os.name == 'nt':
+        ext = '.dll'
+    else:
+        ext = '.so'
     if not use_existing:
         print 'Generating code for', name
         fcn.generateCode(name + '.c')
         _add_help_fcns(name + '.c')
-        system('gcc -fPIC -shared -O3 ' + name + '.c -o ' + name + '.so')
-    fcn_e = casadi.ExternalFunction('./' + name + '.so')
+        system('gcc -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
+    fcn_e = casadi.ExternalFunction('./' + name + ext)
     return fcn_e
     
 def enable_codegen(coll, name=None):
@@ -5717,6 +5722,11 @@ def enable_codegen(coll, name=None):
             names.
             Default: None
     """
+    if os.name == 'nt':
+        ext = '.dll'
+    else:
+        ext = '.so'
+    
     old_solver = coll.solver_object
     
     nlp = old_solver.nlp()
@@ -5733,10 +5743,10 @@ def enable_codegen(coll, name=None):
         enable_codegen.times += 1
         name = str(enable_codegen.times)
     else:
-        if (path.isfile('nlp_'+name+'.so') and
-            path.isfile('grad_f_'+name+'.so') and
-            path.isfile('jac_g_'+name+'.so') and
-            path.isfile('hess_lag_'+name+'.so')):
+        if (path.isfile('nlp_'+name+ext) and
+            path.isfile('grad_f_'+name+ext) and
+            path.isfile('jac_g_'+name+ext) and
+            path.isfile('hess_lag_'+name+ext)):
             existing = True
     
     nlp = _to_external_function(nlp, 'nlp_' + name, existing)
