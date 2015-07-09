@@ -139,6 +139,10 @@ aspect Library {
         }
         return l.getPath();
     }
+    
+    static boolean LibNode.isPackageFile(File f) {
+        return f.getName().equals(LibNode.PACKAGE_FILE);
+    }
 	
 	public LibNode.LibNode(File loc, boolean structured) {
 		this(loc.getPath(), structured ? loc.getName() : fileBaseName(loc), structured);

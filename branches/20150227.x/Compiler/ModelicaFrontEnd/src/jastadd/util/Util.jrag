@@ -96,7 +96,7 @@ aspect Parsers {
                 String lib = null;
                 if (sr_tmp != null && sr_tmp.isFileInLibrary()) 
                     lib = sr_tmp.findOutermostLibraryDir();
-                else if (f.getName().equals(LibNode.PACKAGE_FILE))
+                else if (LibNode.isPackageFile(f))
                     lib = f.getParent();
                 if (lib != null) {
                     String type = f.isDirectory() ? "Directory" : "File";
