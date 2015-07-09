@@ -1,0 +1,324 @@
+/*
+    Copyright (C) 2014-2015 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
+import java.util.Set;
+import java.util.HashSet;
+import java.util.Collections;
+
+aspect InstVariability {
+
+    syn lazy TypePrefixVariability InstComponentDecl.definedVariability() = overrideVariability(localDefinedVariability());
+
+    syn lazy TypePrefixVariability InstComponentDecl.localDefinedVariability() {
+        ComponentDecl cd = getComponentDecl();
+        return cd.hasTypePrefixVariability() ? cd.getTypePrefixVariability() : noDefinedVariability();
+    }
+
+    syn TypePrefixVariability InstComponentDecl.noDefinedVariability() = continuous();
+    eq InstReplacingComposite.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
+    eq InstReplacingRecord.noDefinedVariability()    = getOriginalInstComponent().localDefinedVariability();
+    eq InstReplacingPrimitive.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
+
+    inh TypePrefixVariability InstNode.overrideVariability(TypePrefixVariability var);
+    eq InstBaseNode.getChild().overrideVariability(TypePrefixVariability var)  = var;
+    eq Root.getChild().overrideVariability(TypePrefixVariability var)          = var;
+    eq InstPrimitive.getChild().overrideVariability(TypePrefixVariability var) = var;
+    eq InstComponentDecl.getInstComponentDecl().overrideVariability(TypePrefixVariability var) =
+            var.combineDown(definedVariability());
+    eq InstComponentDecl.getInstExtends().overrideVariability(TypePrefixVariability var) =
+            var.combineDown(definedVariability());
+
+    syn boolean InstComponentDecl.isConstant()   = variability().constantVariability();
+    syn boolean InstComponentDecl.isParameter()  = variability().parameterVariability();
+    syn boolean InstComponentDecl.isDiscrete()   = variability().discreteVariability();
+    syn boolean InstComponentDecl.isContinuous() = variability().continuousVariability();
+    
+    // This attribute should only have one equation, sometimes we flush it manually.
+    syn lazy FTypePrefixVariability InstComponentDecl.variability() = calcVariability();
+    
+    syn FTypePrefixVariability InstComponentDecl.calcVariability() = definedVariability().flatten().combineDown(defaultVariability());
+    
+    eq InstEnumLiteral.calcVariability()                           = fConstant();
+    eq UnknownInstComponentDecl.calcVariability()                  = fConstant();
+    eq InstExternalObject.calcVariability()                        = fParameter();
+    
+    eq InstAssignable.calcVariability() {
+        FTypePrefixVariability v =  super.calcVariability();
+        if (v.parameterVariability()) {
+            
+            v = v.combineDown(forcedVariability);
+            
+            if (isEvalFixed()) {
+                v = v.combineDown(fEvalParameter());
+            } else if (isFinalIndependent()) {
+                v = v.combineDown(fFinalParameter());
+            }
+            
+            v = v.combineDown(forcedVariability);
+            v = bExpVariability().combinePropagate(v);
+        }
+        return v;
+    }
+    
+    eq InstRecord.calcVariability() {
+        InstComponentDecl rec = this;
+        for (int i = 0; i < ndims(); i++) {
+            if (rec.getNumInstComponentDecl() == 0)
+                return fContinuous();
+            rec = rec.getInstComponentDecl(0);
+        }
+        List<FComponentVariability> l = new List<FComponentVariability>();
+        for (InstComponentDecl icd : rec.allInstComponentDecls()) {
+            l.add(new FComponentVariability(icd.name(), icd.variability()));
+        }
+        return new FCompositeVariability(l).combineDown(super.calcVariability());
+    }
+    
+    syn boolean InstAssignable.isFinalIndependent() {
+        InstValueModification mod = myInstValueModTop();
+        return mod != null && mod.isFinal() && mod.getFExp().isIndependentParameterExp();
+    }
+    syn boolean InstAssignable.isEvalFixed() = annotation().forPath("Evaluate").bool() && valueIsFixed();
+    
+    syn boolean InstComponentDecl.valueIsFixed() = true;
+    eq InstAssignable.valueIsFixed() {
+        // TODO: hierarchical check for records?
+        if (isPrimitive() && attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && !fixedAttributeCValue().reduceBooleanAnd())
+            return false;
+        if (hasBindingFExp() && !getBindingFExp().valueIsFixed())
+            return false;
+        return true;
+    }
+    eq FInstAccessExp.valueIsFixed()   = getInstAccess().myInstComponentDecl().valueIsFixed();
+    eq FIdUseInstAccess.valueIsFixed() = getInstAccess().myInstComponentDecl().valueIsFixed();
+
+    syn FTypePrefixVariability InstComponentDecl.defaultVariability() = fContinuous();
+    eq InstArrayComponentDecl.defaultVariability()                    = parentDefaultVariability();
+    eq InstPrimitive.defaultVariability() {
+        if (isReal())
+            return fContinuous();
+        else if (isExternalObject())
+            return fParameter();
+        else
+            return fDiscrete();
+    }
+    eq InstRecord.defaultVariability() = fContinuous();
+    
+    // Parameters variabilities also depend on binding expressions since its nice
+    // to propagate known values, these include: 
+    // * Structural parameters, marked during error checking.
+    // * Evaluate=true parameters
+    // * Final independent parameters
+    //
+    // Since this is used before/during error checks and depend on expressions
+    // we have to guard agains circularity.
+    private boolean InstAssignable.circularVariability = false;
+    
+    syn FTypePrefixVariability InstComponentDecl.bExpVariability() = parentBExpVariability().getPart(name());
+    eq InstArrayComponentDecl.bExpVariability() = parentBExpVariability();
+    eq InstAssignable.bExpVariability() {
+        FTypePrefixVariability v = super.bExpVariability();
+        if (!circularVariability && v.continuousVariability()) {
+            InstValueModification ivm = myInstValueMod();
+            if (ivm != null && !ivm.getFExp().type().isUnknown()) {
+                circularVariability = true;
+                v = ivm.getFExp().variability();
+                circularVariability = false;
+            }
+        }
+        return v;
+    }
+    
+    inh FTypePrefixVariability InstComponentDecl.parentBExpVariability();
+    inh FTypePrefixVariability InstExtends.parentBExpVariability();
+    eq InstBaseNode.getChild().parentBExpVariability()  = fContinuous();
+    eq InstComponentDecl.getInstComponentDecl().parentBExpVariability() = bExpVariability();
+    eq InstComponentDecl.getInstExtends().parentBExpVariability() = bExpVariability();
+    
+    /**
+     * Combines variabilities with rules required for propagating variabilities.
+     */
+    public FTypePrefixVariability FTypePrefixVariability.combinePropagate(FTypePrefixVariability other) {
+        return other;
+    }
+    
+    public FTypePrefixVariability FParameter.combinePropagate(FTypePrefixVariability other) {
+        // TODO: look over this after we have added "dependent parameter that is evaluated" variability
+        if (other.parameterVariability()) {
+            return other.combineDown(this);
+        }
+        return super.combinePropagate(other);
+    }
+    
+    public FTypePrefixVariability FEvalParameter.combinePropagate(FTypePrefixVariability other) {
+        // TODO: look over this after we have added "dependent parameter that is evaluated" variability
+        if (other.parameterVariability()) {
+            return other.combineDown(fStructParameter());
+        }
+        return super.combinePropagate(other);
+    }
+    
+    public FTypePrefixVariability FCompositeVariability.combinePropagate(FTypePrefixVariability other) {
+        return combine(other, propagateCombiner);
+    }
+    
+    class FCompositeVariability {
+        protected static Combiner propagateCombiner = new Combiner() {
+            @Override
+            public FTypePrefixVariability combine(FTypePrefixVariability v1, FTypePrefixVariability v2) {
+                return v1.combinePropagate(v2);
+            }
+        };
+    }
+    
+    /**
+     * The variability of the surrounding component, if any (null otherwise).
+     */
+    inh FTypePrefixVariability InstComponentDecl.parentDefaultVariability();
+    eq InstComponentDecl.getChild().parentDefaultVariability() = variability();
+    eq InstClassDecl.getChild().parentDefaultVariability()     = null;
+    eq Root.getChild().parentDefaultVariability()              = null;
+    
+    
+    protected static Set<InstComponentDecl> FAbstractEquation.assignedSetFromEqns(List<FAbstractEquation> eqns) {
+        Set<InstComponentDecl> res = new HashSet<InstComponentDecl>();
+        for (FAbstractEquation eqn : eqns)
+            res.addAll(eqn.assignedSet());
+        return res;
+    }
+
+    /**
+     * Gives the set of components assigned in this equation.
+     * 
+     * Only works in instance tree.
+     * For if and when equations, only the first branch is considered.
+     */
+    syn lazy Set<InstComponentDecl> FAbstractEquation.assignedSet() = Collections.emptySet();
+    eq InstForClauseE.assignedSet()      = assignedSetFromEqns(getFAbstractEquations());
+    eq FIfWhenElseEquation.assignedSet() = assignedSetFromEqns(getFAbstractEquations());
+    eq FEquation.assignedSet()           = getLeft().accessedVarSet();
+    eq FFunctionCallEquation.assignedSet() {
+        LinkedHashSet<InstComponentDecl> s = new LinkedHashSet<InstComponentDecl>();
+        for (FFunctionCallLeft left : getLefts()) {
+            if (left.hasFExp()) {
+                s.addAll(left.getFExp().accessedVarSet());
+            }
+        }
+        return s;
+    }
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> FExp.accessedVarSet() = Collections.emptySet();
+    eq FInstAccessExp.accessedVarSet()               = getInstAccess().accessedVarSet();
+    eq FIdUseExp.accessedVarSet()                    = getFIdUse().accessedVarSet();
+
+    /**
+     * If this is an instance tree access, return set containing accessed var, otherwise empty set.
+     */
+    syn Set<InstComponentDecl> FIdUse.accessedVarSet() = Collections.emptySet();
+    eq FIdUseInstAccess.accessedVarSet()               = getInstAccess().accessedVarSet();
+
+    /**
+     * Get set containing accessed var.
+     */
+    syn Set<InstComponentDecl> InstAccess.accessedVarSet() = 
+        Collections.singleton(myInstComponentDecl());
+
+
+    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability();
+
+
+    eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
+
+    syn FTypePrefixVariability InstAccess.indexVariability() = fConstant();
+    eq InstArrayAccess.indexVariability()                    = getFArraySubscripts().variability();
+    eq InstDot.indexVariability() {
+        FTypePrefixVariability variability = fConstant();
+        for (InstAccess part : getInstAccesss())
+            variability = variability.combine(part.indexVariability());
+        return variability;
+    }
+
+}
+
+
+aspect SourceVariability {
+
+    syn boolean TypePrefixVariability.constantVariability() = false;
+    eq Constant.constantVariability() = true;   
+    syn boolean TypePrefixVariability.parameterVariability() = false;
+    eq Parameter.parameterVariability() = true; 
+    syn boolean TypePrefixVariability.discreteVariability() = false;
+    eq Discrete.discreteVariability() = true;   
+    syn boolean TypePrefixVariability.continuousVariability() = false;
+    eq Continuous.continuousVariability() = true;
+
+
+    /**
+     * An ordering of the variability types.
+     * 
+     * To be used by methods for comparing variabilities. 
+     * Should <em>never</em> be compared to literals, only to the return value from other 
+     * FTypePrefixVariability objects. This simplifies adding new variabilities.
+     *  
+     * Also used to determine the behaviour of {@link #combine(TypePrefixVariability)}.
+     */
+    abstract protected int TypePrefixVariability.variabilityLevel();
+    protected int Constant.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int Parameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
+    protected int Discrete.variabilityLevel()   { return VARIABILITY_LEVEL; }
+    protected int Continuous.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected static final int Constant.VARIABILITY_LEVEL   = 0;
+    protected static final int Parameter.VARIABILITY_LEVEL  = 10;
+    protected static final int Discrete.VARIABILITY_LEVEL   = 20;
+    protected static final int Continuous.VARIABILITY_LEVEL = 30;
+
+    syn int TypePrefixVariability.combineLevel() = variabilityLevel() * 10;
+
+    public TypePrefixVariability TypePrefixVariability.combine(TypePrefixVariability other) {
+        return (other.combineLevel() > combineLevel()) ? other : this;
+    }
+
+    public TypePrefixVariability TypePrefixVariability.combineDown(TypePrefixVariability other) {
+        return (other.combineLevel() < combineLevel()) ? other : this;
+    }
+
+
+    public static final Continuous Continuous.instance = new Continuous();
+    public static final Discrete   Discrete.instance   = new Discrete();
+    public static final Parameter  Parameter.instance  = new Parameter();
+    public static final Constant   Constant.instance   = new Constant();
+
+    public static Continuous ASTNode.continuous() {
+        return Continuous.instance;
+    }
+
+    public static Discrete ASTNode.discrete() {
+        return Discrete.instance;
+    }
+
+    public static Parameter ASTNode.parameter() {
+        return Parameter.instance;
+    }
+
+    public static Constant ASTNode.constant() {
+        return Constant.instance;
+    }
+
+}
