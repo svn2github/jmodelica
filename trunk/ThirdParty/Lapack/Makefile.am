@@ -52,10 +52,10 @@ all-local: $(LAPACK_BUILD_DIR)
 endif !JM_WIN64
 
 install-exec-local:
-	mkdir -p $(prefix)/lib/RuntimeLibrary
-	cp $(LAPACK_INSTALL_DIR)/* $(prefix)/lib/RuntimeLibrary
+	mkdir -p $(DESTDIR)$(prefix)/lib/RuntimeLibrary
+	cp $(LAPACK_INSTALL_DIR)/* $(DESTDIR)$(prefix)/lib/RuntimeLibrary
 if JM_WIN64
-	mkdir -p $(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(prefix)/lib/RuntimeLibrary64
+	mkdir -p $(DESTDIR)$(prefix)/lib/RuntimeLibrary64 && cp $(LAPACK_INSTALL_DIR64)/* $(DESTDIR)$(prefix)/lib/RuntimeLibrary64
 endif
 
 check-local:

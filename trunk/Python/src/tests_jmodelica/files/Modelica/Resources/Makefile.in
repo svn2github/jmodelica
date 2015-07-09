@@ -209,9 +209,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign Python/src/tests_jmodelica/files/Modelica/Resources/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Python/src/tests_jmodelica/files/Modelica/Resources/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
+	  $(AUTOMAKE) --gnu Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -276,7 +276,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile all-local
+all-am: Makefile
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -334,7 +334,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am:
+install-exec-am: install-exec-local
 
 install-html: install-html-am
 
@@ -376,17 +376,17 @@ uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
-.PHONY: all all-am all-local check check-am check-local clean \
-	clean-generic clean-libtool clean-local distclean \
-	distclean-generic distclean-libtool distdir dvi dvi-am html \
-	html-am info info-am install install-am install-data \
-	install-data-am install-dvi install-dvi-am install-exec \
-	install-exec-am install-html install-html-am install-info \
-	install-info-am install-man install-pdf install-pdf-am \
-	install-ps install-ps-am install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-generic \
-	mostlyclean-libtool pdf pdf-am ps ps-am uninstall uninstall-am
+.PHONY: all all-am check check-am check-local clean clean-generic \
+	clean-libtool clean-local distclean distclean-generic \
+	distclean-libtool distdir dvi dvi-am html html-am info info-am \
+	install install-am install-data install-data-am install-dvi \
+	install-dvi-am install-exec install-exec-am install-exec-local \
+	install-html install-html-am install-info install-info-am \
+	install-man install-pdf install-pdf-am install-ps \
+	install-ps-am install-strip installcheck installcheck-am \
+	installdirs maintainer-clean maintainer-clean-generic \
+	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
+	ps ps-am uninstall uninstall-am
 
 
 $(TESTLIBRARY_BUILD_DIR):
@@ -403,7 +403,7 @@ $(TESTLIBRARY_BUILD_DIR):
 	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	esac
 
-all-local: $(TESTLIBRARY_BUILD_DIR)
+install-exec-local: $(TESTLIBRARY_BUILD_DIR)
 	cd $(TESTLIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 
 check-local:

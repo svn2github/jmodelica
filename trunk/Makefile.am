@@ -65,8 +65,10 @@ export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
- 
-casadi_interface: casadi install_casadi $(MC_LIB) modelicacasadi_wrapper $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
+
+casadi_interface: install_casadi_interface
+build_casadi_interface: casadi modelicacasadi_wrapper
+install_casadi_interface: install_casadi $(MC_LIB) $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/modelica_casadi_transfer_wrapper.py
 	if [ "$(INSTALL_EXTRA_CASADI)" ]; then exec "$(INSTALL_EXTRA_CASADI)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 ifcasadi: casadi
@@ -119,7 +121,7 @@ $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasad
 PYTHON_LIB=
 PYTHON_INCLUDE=
 
-modelicacasadi_wrapper:
+modelicacasadi_wrapper: $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi # $(MC_LIB)
 	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
 	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
 	else \
@@ -149,14 +151,14 @@ modelicacasadi_wrapper:
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
 	echo "from modelicacasadi_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_wrapper/__init__.py
- 
+
  install_modelicacasadi_transfer: $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py 
 	mkdir -p $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 	rm -f $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	touch $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	echo "from modelica_casadi_transfer_wrapper import *" >> $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer/__init__.py
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-	
+
 build-python-packages:
 if WITH_SUNDIALS
 if WITH_SUPERLU
@@ -319,7 +321,7 @@ if JM_WIN64
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
 endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
-	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
+	cp -r $(DESTDIR)$(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD

@@ -15,7 +15,7 @@ $(TESTLIBRARY_BUILD_DIR):
 	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
 	esac
 
-all-local: $(TESTLIBRARY_BUILD_DIR)
+install-exec-local: $(TESTLIBRARY_BUILD_DIR)
 	cd $(TESTLIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
 
 check-local:

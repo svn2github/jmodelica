@@ -57,11 +57,11 @@ endif()
 
 
 #Make the directory for header files to be installed in. 
-file(MAKE_DIRECTORY ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)
+install(CODE "file(MAKE_DIRECTORY ${ENV}{DESTDIR}${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Include/)")
 
 #Make the directory for lib files to be installed in.
 set(TEST_LIBRARY_INSTALL_DIR ${JMODELICA_INSTALL_DIR}/Python/tests_jmodelica/files/Modelica/Resources/Library/${JM_PLATFORM})
-file(MAKE_DIRECTORY ${TEST_LIBRARY_INSTALL_DIR})
+install(CODE "file(MAKE_DIRECTORY  ${ENV}{DESTDIR}${TEST_LIBRARY_INSTALL_DIR})")
 
 if(NOT(WIN32 OR CYGWIN OR APPLE))
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_SHARED_LIBRARY_C_FLAGS}")
