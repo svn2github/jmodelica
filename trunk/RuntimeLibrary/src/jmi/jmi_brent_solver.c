@@ -99,7 +99,14 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
         inc = -inc;
         y = y0 + inc;
     }
-          
+    /* If function evaluation failed, try finite difference in other direction. */
+    if (ret) {
+        inc = -inc;
+        y = y0 + inc;
+        if ((y <= block->max[0]) && (y >= block->min[0])) {
+            ret = brentf(y, &ftemp, block);
+        }
+    }
     ret = brentf(y, &ftemp, block);
     if (ret) {
         jmi_log_t* log = block->log;
@@ -192,6 +199,7 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
 
 static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
     double x = *x0;
+    double x_tmp = x;
     double f = 0.0;
     double df = 0.0;
     double delta = 1e20;
@@ -206,6 +214,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     
     
     for (i = 0; i < BRENT_MAX_NEWTON; i++) {
+        x = x_tmp;
         flag = brentf(x, &f, block);
         if (flag) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
@@ -251,21 +260,21 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
             x,f,df,delta);
         }
         
-        x = x - delta;
+        x_tmp = x - delta;
         
         /* Clamping */
-        if (x < block->min[0]) {
+        if (x_tmp < block->min[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to minimum, <min: %f>",
-                    x,block->min[0]);
+                    x_tmp,block->min[0]);
             }
-            x = block->min[0];
-        } else if (x > block->max[0]) {
+            x_tmp = block->min[0];
+        } else if (x_tmp > block->max[0]) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "Clamping iteration variable <ivs: %f> to maximum, <max: %f>",
-                    x,block->max[0]);
+                    x_tmp,block->max[0]);
             }
-            x = block->max[0];
+            x_tmp = block->max[0];
         }
         
     }
