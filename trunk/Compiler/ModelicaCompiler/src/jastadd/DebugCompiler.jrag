@@ -147,12 +147,12 @@ public class DebugCompiler extends javax.swing.JFrame {
         
     }
 
-    public class OutputHandler extends ModelicaLogger {
+    public class OutputHandler extends StreamingLogger {
         
         private javax.swing.JTextArea target;
 
         public OutputHandler(javax.swing.JTextArea target, Level level) {
-            super(level);
+            super(level, (OutputStream) null);
             this.target = target;
         }
 
@@ -160,27 +160,23 @@ public class DebugCompiler extends javax.swing.JFrame {
             target.setText("");
         }
 
-        protected void writeException(Exception ex) {
-            if (ex instanceof CompilerException) {
-                do_write(ex.toString());
-            } else {
-                ByteArrayOutputStream buf = new ByteArrayOutputStream(512);
-                ex.printStackTrace(new PrintStream(buf));
-                do_write(buf.toString());
-            }
-        }
-
         @Override
-        public void close() {
-        }
-
-        @Override
-        protected void write(Level level, Level alreadySentLevel, LoggingUnit unit) {
-            do_write(unit.print(level));
-        }
-
-        protected void do_write(String message) {
+        protected void do_write(String message) throws IOException {
             target.append(message + "\n");
+        }
+
+        protected void writeException(Exception ex) {
+            try {
+                if (ex instanceof CompilerException) {
+                    do_write(ex.toString());
+                } else {
+                    ByteArrayOutputStream buf = new ByteArrayOutputStream(512);
+                    ex.printStackTrace(new PrintStream(buf));
+                    do_write(buf.toString());
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Could not write to text area.", e);
+            }
         }
 
     }

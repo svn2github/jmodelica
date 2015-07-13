@@ -1,26 +1,15 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
-import org.jmodelica.util.logging.units.LoggingUnit;
+import org.jmodelica.util.CompiledUnit;
+import org.jmodelica.util.Problem;
+import org.jmodelica.util.exceptions.ModelicaException;
 
 public class StreamingLogger extends PipeLogger {
 
@@ -60,9 +49,39 @@ public class StreamingLogger extends PipeLogger {
     }
 
     @Override
-    protected void do_write(LoggingUnit logMessage) throws IOException {
-        write_raw(logMessage.print(getLevel()));
+    protected void do_write(String logMessage) throws IOException {
+        write_raw(logMessage);
         write_raw("\n");
     }
+
+    @Override
+    protected void do_write(Throwable throwable) throws IOException {
+        if (throwable instanceof ModelicaException) {
+            do_write(throwable.getMessage());
+        } else if (throwable instanceof FileNotFoundException) {
+            do_write("Could not find file: " + throwable.getMessage());
+        } else if (throwable instanceof OutOfMemoryError) {
+            do_write("Out of memory. Please set the memory limit of the JVM higher.");
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Unknown program error, " + throwable.getClass().getName());
+            if (throwable.getMessage() != null)
+                sb.append(": " + throwable.getMessage());
+            do_write(sb.toString());
+        }
+        if (getLevel().shouldLog(Level.DEBUG)) {
+            StringWriter str = new StringWriter();
+            PrintWriter print = new PrintWriter(str);
+            throwable.printStackTrace(print);
+            do_write(str.toString());
+        }
+    }
+
+    @Override
+    protected void do_write(Problem problem) throws IOException {
+        do_write(problem.toString());
+    }
+
+    protected void do_write(CompiledUnit unit) throws IOException {}
 
 }

@@ -1,18 +1,3 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
@@ -20,7 +5,8 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 
-import org.jmodelica.util.logging.units.LoggingUnit;
+import org.jmodelica.util.CompiledUnit;
+import org.jmodelica.util.Problem;
 
 public class ObjectStreamLogger extends PipeLogger {
     
@@ -55,8 +41,22 @@ public class ObjectStreamLogger extends PipeLogger {
     }
     
     @Override
-    protected void do_write(LoggingUnit logMessage) throws IOException {
+    protected void do_write(String logMessage) throws IOException {
         getStream().writeObject(logMessage);
+    }
+
+    @Override
+    protected void do_write(Throwable throwable) throws IOException {
+        getStream().writeObject(throwable);
+    }
+
+    @Override
+    protected void do_write(Problem problem) throws IOException {
+        getStream().writeObject(problem);
+    }
+
+    protected void do_write(CompiledUnit unit) throws IOException {
+        getStream().writeObject(unit);
     }
 
     private static ObjectOutputStream createStream(OutputStream stream) throws IOException {

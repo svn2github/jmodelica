@@ -1,26 +1,14 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
+import org.jmodelica.util.CompiledUnit;
+import org.jmodelica.util.Problem;
 import org.jmodelica.util.XMLUtil;
-import org.jmodelica.util.logging.units.LoggingUnit;
 
 /**
  * XMLLogger converts the log into XML and output it to another logger.
@@ -47,20 +35,38 @@ public final class XMLLogger extends PipeLogger {
         super.do_close();
     }
 
-    protected void write_raw(String logMessage) throws IOException {
-        if (!started) {
-            started = true;
-            write_raw("<compilation>\n");
-        }
-        super.write_raw(logMessage);
+    @Override
+    protected void do_write(String logMessage) throws IOException {
+        write_raw(XMLUtil.escape(logMessage));
     }
 
     @Override
-    protected void do_write(LoggingUnit logMessage) throws IOException {
-        write_raw(logMessage.printXML(getLevel()));
+    protected void do_write(Throwable throwable) throws IOException {
+        StringWriter str = new StringWriter();
+        PrintWriter print = new PrintWriter(str);
+        throwable.printStackTrace(print);
+        write_node("Exception", 
+                   "kind",       throwable.getClass().getName(),
+                   "message",    throwable.getMessage() == null ? "" : throwable.getMessage(), 
+                   "stacktrace", str.toString());
     }
 
-    public static String write_node(String name, Object ... values) {
+    @Override
+    protected void do_write(Problem problem) throws IOException {
+        write_node(Problem.capitalize(problem.severity()), 
+                   "kind",    problem.kind().toString().toLowerCase(),
+                   "file",    problem.fileName(),
+                   "line",    problem.beginLine(),
+                   "column",  problem.beginColumn(),
+                   "message", problem.message());
+    }
+
+    protected void do_write(CompiledUnit unit) throws IOException {
+        write_node("CompilationUnit", 
+                   "file", unit.toString());
+    }
+
+    private void write_node(String name, Object... values) throws IOException {
         StringBuffer buf = new StringBuffer();
         buf.append('<');
         buf.append(name);
@@ -78,7 +84,15 @@ public final class XMLLogger extends PipeLogger {
         buf.append("</");
         buf.append(name);
         buf.append(">\n");
-        return buf.toString();
+        write_raw(buf.toString());
+    }
+
+    protected void write_raw(String logMessage) throws IOException {
+        if (!started) {
+            started = true;
+            write_raw("<compilation>\n");
+        }
+        super.write_raw(logMessage);
     }
 
 }

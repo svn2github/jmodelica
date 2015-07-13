@@ -1,18 +1,3 @@
-/*
-    Copyright (C) 2015 Modelon AB
-
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, version 3 of the License.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
 package org.jmodelica.util.logging;
 
 import java.io.File;
@@ -20,7 +5,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.jmodelica.util.logging.units.LoggingUnit;
+import org.jmodelica.util.CompiledUnit;
+import org.jmodelica.util.Problem;
 
 public abstract class PipeLogger extends ModelicaLogger {
 
@@ -77,8 +63,8 @@ public abstract class PipeLogger extends ModelicaLogger {
     /**
      * Check if a message on given level should be written.
      */
-    private boolean shouldWrite(Level level, Level alreadySentLevel) {
-        if (!getLevel().shouldLog(level, alreadySentLevel))
+    private boolean shouldWrite(Level level) {
+        if (!getLevel().shouldLog(level))
             return false;
         if (state == State.EXCEPTION)
             return false;
@@ -99,8 +85,8 @@ public abstract class PipeLogger extends ModelicaLogger {
     }
 
     @Override
-    protected final void write(Level level, Level alreadySentLevel, LoggingUnit logMessage) {
-        if (!shouldWrite(level, alreadySentLevel))
+    protected final void write(Level level, String logMessage) {
+        if (!shouldWrite(level))
             return;
         try {
             do_write(logMessage);
@@ -109,7 +95,46 @@ public abstract class PipeLogger extends ModelicaLogger {
         }
     }
 
-    protected abstract void do_write(LoggingUnit logMessage) throws IOException;
+    protected abstract void do_write(String logMessage) throws IOException;
+
+    @Override
+    protected final void write(Level level, Throwable throwable) {
+        if (!shouldWrite(level))
+            return;
+        try {
+            do_write(throwable);
+        } catch (IOException e) {
+            exceptionOnWrite(e);
+        }
+    }
+
+    protected abstract void do_write(Throwable throwable) throws IOException;
+
+    @Override
+    protected final void write(Level level, Problem problem) {
+        if (!shouldWrite(level))
+            return;
+        try {
+            do_write(problem);
+        } catch (IOException e) {
+            exceptionOnWrite(e);
+        }
+    }
+
+    protected abstract void do_write(Problem problem) throws IOException;
+
+    @Override
+    protected final void write(Level level, CompiledUnit unit) {
+        if (!shouldWrite(level))
+            return;
+        try {
+            do_write(unit);
+        } catch (IOException e) {
+            exceptionOnWrite(e);
+        }
+    }
+
+    protected abstract void do_write(CompiledUnit unit) throws IOException;
 
     private static enum State {
         ACTIVE, CLOSED, EXCEPTION,

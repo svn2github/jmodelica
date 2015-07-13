@@ -1,14 +1,11 @@
 package org.jmodelica.util;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
 
-import org.jmodelica.util.logging.Level;
-import org.jmodelica.util.logging.XMLLogger;
-import org.jmodelica.util.logging.units.LoggingUnit;
-
-public class Problem implements Comparable<Problem>, LoggingUnit {
+public class Problem implements Comparable<Problem>, Serializable {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem o) {
@@ -132,24 +129,22 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         sb.append(message);
         return sb.toString();
     }
-
-    @Override
-    public String print(Level level) {
-        return toString();
-    }
-
-    @Override
-    public String printXML(Level level) {
-        return XMLLogger.write_node(Problem.capitalize(severity()), 
-                "kind",    kind().toString().toLowerCase(),
-                "file",    fileName(),
-                "line",    beginLine(),
-                "column",  beginColumn(),
-                "message", message());
-    }
-
-    @Override
-    public void prepareForSerialization() {
-    }
+    
+//    public String toXML() {
+//        return String.format(
+//                "<%s>\n" +
+//                "    <value name=\"kind\">%s</value>\n" +
+//                "    <value name=\"file\">%s</value>\n" +
+//                "    <value name=\"line\">%s</value>\n" +
+//                "    <value name=\"column\">%s</value>\n" +
+//                "    <value name=\"message\">%s</value>\n" +
+//                "</%1$s>",
+//                XMLUtil.escape(name(severity)),
+//                XMLUtil.escape(kind.toString().toLowerCase()),
+//                XMLUtil.escape(fileName),
+//                beginLine, beginColumn,
+//                XMLUtil.escape(message)
+//        );
+//    }
 }
 
