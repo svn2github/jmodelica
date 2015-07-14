@@ -2950,6 +2950,33 @@ aspect CCodeGen {
             str.println(";");
         }
     }
+    
+    public void FSubscriptedExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        getFExp().type().printDecl_C(p, str, indent, getFExp().tempName_C(), this);
+    }
+    
+    public void FSubscriptedExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), this);
+        String name = getFExp().tempName_C();
+        String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
+        String pre = "jmi_array_" + type + "_" + getFExp().ndims() + "(" + name + ", ";
+        Array arr = getFExp().getArray();
+        for (Index i : getFExp().indices()) {
+            FExp e = arr.get(i);
+            String cellName = pre + i.toUnclosedString() + ")";
+            FStatement.printAssignStmt_C(str, indent, cellName, e.prettyPrint_C(""));
+        }
+    }
+    
+    public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        if (type().isString()) {
+            getFExp().type().printFree_C(str, indent, false, getFExp().tempName_C());
+        }
+    }
+    
+    public void FSubscriptedExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(getFArraySubscripts().genFunctionArrayUse_C(p, getFExp().tempName_C(), C_ARRAY_VALUE));
+    }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
 		// Generate temp arrays for all array inputs and outputs

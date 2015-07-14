@@ -3922,6 +3922,9 @@ aspect ConstantEvaluation {
         throw new ConstantEvaluationException();
     }
     
+    @Override
+    public abstract void FAssignableExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right);
+    
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
      * 
@@ -3932,6 +3935,13 @@ aspect ConstantEvaluation {
     public void FIdUseExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
         getFIdUse().assignToInFuncEval(evaluator, right);
     }
+    
+    @Override
+    public void FSubscriptedExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
+        ((FAssignableExp)select()).assignToInFuncEval(evaluator, right);
+    }
+    
+    syn FExp FSubscriptedExp.select() = getFExp().getArray().get(getFArraySubscripts().createIndex());
     
     /**
      * Evaluate an assignment with this as the left side during function evaluation.
