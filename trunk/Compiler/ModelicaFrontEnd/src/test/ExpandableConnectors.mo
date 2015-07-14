@@ -1936,6 +1936,38 @@ Semantic error at line 1314, column 17:
 ")})));
     end ExpandableErr21;
 
+model ExpandableErr22
+    connector A
+        Real x;
+    end A;
+    
+    connector B
+        Real x;
+        Real y;
+    end B;
+    
+    expandable connector C
+    end C;
+    
+    C c1, c2;
+    A a;
+    B b;
+equation
+    connect(a, c1.d);
+    connect(b, c2.d);
+    connect(c1, c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExpandableErr22",
+            description="",
+            errorMessage="
+1 errors found:
+Error: in file '...':
+Semantic error at line 1957, column 5:
+  Type of component introduced to external connector does not match other connections to same name in connection set or component declared in connector
+")})));
+end ExpandableErr22;
 
 
     model ExpandableCompliance3

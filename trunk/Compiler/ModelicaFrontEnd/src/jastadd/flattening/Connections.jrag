@@ -934,12 +934,15 @@ aspect Connections {
             } else {
                 SortedSet<InstComponentDecl> rightChildren = right.getVar().containedInstComponents();
                 for (InstComponentDecl leftComp : containedInstComponents()) {
-                    InstComponentDecl rightComp = rightChildren.tailSet(leftComp).first();
-                    FQName leftName  = leftComp.flattenedAccess(left.getFQName());
-                    FQName rightName = rightComp.flattenedAccess(right.getFQName());
-                    ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
-                    ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
-                    leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+                    SortedSet<InstComponentDecl> rightTail = rightChildren.tailSet(leftComp);
+                    if (rightTail.size() > 0) {
+                        InstComponentDecl rightComp = rightTail.first();
+                        FQName leftName  = leftComp.flattenedAccess(left.getFQName());
+                        FQName rightName = rightComp.flattenedAccess(right.getFQName());
+                        ConnectionSetEntry leftEntry = ConnectionSetEntry.create(leftComp, left.isOutside(), leftName);
+                        ConnectionSetEntry rightEntry = ConnectionSetEntry.create(rightComp, right.isOutside(), rightName);
+                        leftComp.connectTo(leftEntry, rightEntry, prefix, csm, source, buildGraph);
+                    }
                 }
             }
             csm.countCardinality(left.getFQName().scalarName());
