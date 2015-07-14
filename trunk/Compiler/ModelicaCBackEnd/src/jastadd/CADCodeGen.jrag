@@ -2422,7 +2422,7 @@ aspect CADCodeGen {
 
         if (shouldBeDifferentiated()) {
             str.print(indent);
-            str.print(((FIdUseExp)getLeft()).getFIdUse().toString_der_CAD(p));
+            str.print(getLeft().getFIdUse().toString_der_CAD(p));
             str.print(" = ");
             getRight().genDer_CAD(p, str, indent);
             str.print(";\n");

@@ -627,7 +627,7 @@ algorithm
         jmi_array_ref_1(tmp_1, 1) = _table_1_0;
         jmi_array_ref_1(tmp_1, 2) = _table_2_1;
         jmi_array_ref_1(tmp_1, 3) = _table_3_2;
-        _x_3 = jmi_array_val_1(tmp_1, _index_4);
+        _x_3 = func_temp_1_exp0(_index_4, tmp_1);
     } else {
         _x_3 = JMI_TRUE;
     }
@@ -16304,291 +16304,25 @@ model VariableArrayIndex1
         CCodeGenTestCase(
             name="VariableArrayIndex1",
             description="Test of variable array index access",
-            template="$C_ode_derivatives$",
+            template="$C_functions$",
             generatedCode="
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
-    }
-    _i_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2));
-    pre_i_2 = _i_2;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-    jmi_array_ref_1(tmp_1, 1) = 42.0;
-    jmi_array_ref_1(tmp_1, 2) = 3.14;
-    _x_3 = jmi_array_val_1(tmp_1, _i_2);
-    /********* Write back reinits *******/
+void func_temp_1_def0(jmi_ad_var_t i_0_v, jmi_array_t* x_a, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = jmi_array_val_1(x_a, i_0_v);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_temp_1_exp0(jmi_ad_var_t i_0_v, jmi_array_t* x_a) {
+    JMI_DEF(REA, y_v)
+    func_temp_1_def0(i_0_v, x_a, &y_v);
+    return y_v;
+}
+
 ")})));
 end VariableArrayIndex1;
-
-model VariableArrayIndex2
-    Real[:,:,:,:] x = fill(time,2,3,4,5);
-    Real[:,:] y = x[2,{i,j},2:4,k];
-    discrete Integer i,j,k;
-initial equation
-    i = 1;
-    j = 2;
-    k = 3;
-equation
-    when time > 1 then
-        i = 2;
-        j = 1;
-        k = 4;
-    end when;
-    
-    
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="VariableArrayIndex2",
-            description="Test of variable array index access",
-            template="$C_ode_derivatives$",
-            generatedCode="
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 15, 2)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 15, 2)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 15, 2)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 15, 2)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 15, 2)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 15, 2)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
-    _x_1_1_1_1_0 = _time;
-    _x_1_1_1_2_1 = _time;
-    _x_1_1_1_3_2 = _time;
-    _x_1_1_1_4_3 = _time;
-    _x_1_1_1_5_4 = _time;
-    _x_1_1_2_1_5 = _time;
-    _x_1_1_2_2_6 = _time;
-    _x_1_1_2_3_7 = _time;
-    _x_1_1_2_4_8 = _time;
-    _x_1_1_2_5_9 = _time;
-    _x_1_1_3_1_10 = _time;
-    _x_1_1_3_2_11 = _time;
-    _x_1_1_3_3_12 = _time;
-    _x_1_1_3_4_13 = _time;
-    _x_1_1_3_5_14 = _time;
-    _x_1_1_4_1_15 = _time;
-    _x_1_1_4_2_16 = _time;
-    _x_1_1_4_3_17 = _time;
-    _x_1_1_4_4_18 = _time;
-    _x_1_1_4_5_19 = _time;
-    _x_1_2_1_1_20 = _time;
-    _x_1_2_1_2_21 = _time;
-    _x_1_2_1_3_22 = _time;
-    _x_1_2_1_4_23 = _time;
-    _x_1_2_1_5_24 = _time;
-    _x_1_2_2_1_25 = _time;
-    _x_1_2_2_2_26 = _time;
-    _x_1_2_2_3_27 = _time;
-    _x_1_2_2_4_28 = _time;
-    _x_1_2_2_5_29 = _time;
-    _x_1_2_3_1_30 = _time;
-    _x_1_2_3_2_31 = _time;
-    _x_1_2_3_3_32 = _time;
-    _x_1_2_3_4_33 = _time;
-    _x_1_2_3_5_34 = _time;
-    _x_1_2_4_1_35 = _time;
-    _x_1_2_4_2_36 = _time;
-    _x_1_2_4_3_37 = _time;
-    _x_1_2_4_4_38 = _time;
-    _x_1_2_4_5_39 = _time;
-    _x_1_3_1_1_40 = _time;
-    _x_1_3_1_2_41 = _time;
-    _x_1_3_1_3_42 = _time;
-    _x_1_3_1_4_43 = _time;
-    _x_1_3_1_5_44 = _time;
-    _x_1_3_2_1_45 = _time;
-    _x_1_3_2_2_46 = _time;
-    _x_1_3_2_3_47 = _time;
-    _x_1_3_2_4_48 = _time;
-    _x_1_3_2_5_49 = _time;
-    _x_1_3_3_1_50 = _time;
-    _x_1_3_3_2_51 = _time;
-    _x_1_3_3_3_52 = _time;
-    _x_1_3_3_4_53 = _time;
-    _x_1_3_3_5_54 = _time;
-    _x_1_3_4_1_55 = _time;
-    _x_1_3_4_2_56 = _time;
-    _x_1_3_4_3_57 = _time;
-    _x_1_3_4_4_58 = _time;
-    _x_1_3_4_5_59 = _time;
-    _x_2_1_1_1_60 = _time;
-    _x_2_1_1_2_61 = _time;
-    _x_2_1_1_3_62 = _time;
-    _x_2_1_1_4_63 = _time;
-    _x_2_1_1_5_64 = _time;
-    _x_2_1_2_1_65 = _time;
-    _x_2_1_2_2_66 = _time;
-    _x_2_1_2_3_67 = _time;
-    _x_2_1_2_4_68 = _time;
-    _x_2_1_2_5_69 = _time;
-    _x_2_1_3_1_70 = _time;
-    _x_2_1_3_2_71 = _time;
-    _x_2_1_3_3_72 = _time;
-    _x_2_1_3_4_73 = _time;
-    _x_2_1_3_5_74 = _time;
-    _x_2_1_4_1_75 = _time;
-    _x_2_1_4_2_76 = _time;
-    _x_2_1_4_3_77 = _time;
-    _x_2_1_4_4_78 = _time;
-    _x_2_1_4_5_79 = _time;
-    _x_2_2_1_1_80 = _time;
-    _x_2_2_1_2_81 = _time;
-    _x_2_2_1_3_82 = _time;
-    _x_2_2_1_4_83 = _time;
-    _x_2_2_1_5_84 = _time;
-    _x_2_2_2_1_85 = _time;
-    _x_2_2_2_2_86 = _time;
-    _x_2_2_2_3_87 = _time;
-    _x_2_2_2_4_88 = _time;
-    _x_2_2_2_5_89 = _time;
-    _x_2_2_3_1_90 = _time;
-    _x_2_2_3_2_91 = _time;
-    _x_2_2_3_3_92 = _time;
-    _x_2_2_3_4_93 = _time;
-    _x_2_2_3_5_94 = _time;
-    _x_2_2_4_1_95 = _time;
-    _x_2_2_4_2_96 = _time;
-    _x_2_2_4_3_97 = _time;
-    _x_2_2_4_4_98 = _time;
-    _x_2_2_4_5_99 = _time;
-    _x_2_3_1_1_100 = _time;
-    _x_2_3_1_2_101 = _time;
-    _x_2_3_1_3_102 = _time;
-    _x_2_3_1_4_103 = _time;
-    _x_2_3_1_5_104 = _time;
-    _x_2_3_2_1_105 = _time;
-    _x_2_3_2_2_106 = _time;
-    _x_2_3_2_3_107 = _time;
-    _x_2_3_2_4_108 = _time;
-    _x_2_3_2_5_109 = _time;
-    _x_2_3_3_1_110 = _time;
-    _x_2_3_3_2_111 = _time;
-    _x_2_3_3_3_112 = _time;
-    _x_2_3_3_4_113 = _time;
-    _x_2_3_3_5_114 = _time;
-    _x_2_3_4_1_115 = _time;
-    _x_2_3_4_2_116 = _time;
-    _x_2_3_4_3_117 = _time;
-    _x_2_3_4_4_118 = _time;
-    _x_2_3_4_5_119 = _time;
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(_time - (1), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
-    }
-    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_1, 1,1) = _x_2_1_2_1_65;
-    jmi_array_ref_2(tmp_1, 1,2) = _x_2_1_2_2_66;
-    jmi_array_ref_2(tmp_1, 1,3) = _x_2_1_2_3_67;
-    jmi_array_ref_2(tmp_1, 1,4) = _x_2_1_2_4_68;
-    jmi_array_ref_2(tmp_1, 1,5) = _x_2_1_2_5_69;
-    jmi_array_ref_2(tmp_1, 2,1) = _x_2_2_2_1_85;
-    jmi_array_ref_2(tmp_1, 2,2) = _x_2_2_2_2_86;
-    jmi_array_ref_2(tmp_1, 2,3) = _x_2_2_2_3_87;
-    jmi_array_ref_2(tmp_1, 2,4) = _x_2_2_2_4_88;
-    jmi_array_ref_2(tmp_1, 2,5) = _x_2_2_2_5_89;
-    jmi_array_ref_2(tmp_1, 3,1) = _x_2_3_2_1_105;
-    jmi_array_ref_2(tmp_1, 3,2) = _x_2_3_2_2_106;
-    jmi_array_ref_2(tmp_1, 3,3) = _x_2_3_2_3_107;
-    jmi_array_ref_2(tmp_1, 3,4) = _x_2_3_2_4_108;
-    jmi_array_ref_2(tmp_1, 3,5) = _x_2_3_2_5_109;
-    _y_1_1_120 = jmi_array_val_2(tmp_1, _i_126, _k_128);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_2, 1,1) = _x_2_1_2_1_65;
-    jmi_array_ref_2(tmp_2, 1,2) = _x_2_1_2_2_66;
-    jmi_array_ref_2(tmp_2, 1,3) = _x_2_1_2_3_67;
-    jmi_array_ref_2(tmp_2, 1,4) = _x_2_1_2_4_68;
-    jmi_array_ref_2(tmp_2, 1,5) = _x_2_1_2_5_69;
-    jmi_array_ref_2(tmp_2, 2,1) = _x_2_2_2_1_85;
-    jmi_array_ref_2(tmp_2, 2,2) = _x_2_2_2_2_86;
-    jmi_array_ref_2(tmp_2, 2,3) = _x_2_2_2_3_87;
-    jmi_array_ref_2(tmp_2, 2,4) = _x_2_2_2_4_88;
-    jmi_array_ref_2(tmp_2, 2,5) = _x_2_2_2_5_89;
-    jmi_array_ref_2(tmp_2, 3,1) = _x_2_3_2_1_105;
-    jmi_array_ref_2(tmp_2, 3,2) = _x_2_3_2_2_106;
-    jmi_array_ref_2(tmp_2, 3,3) = _x_2_3_2_3_107;
-    jmi_array_ref_2(tmp_2, 3,4) = _x_2_3_2_4_108;
-    jmi_array_ref_2(tmp_2, 3,5) = _x_2_3_2_5_109;
-    _y_1_2_121 = jmi_array_val_2(tmp_2, _j_127, _k_128);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_3, 1,1) = _x_2_1_3_1_70;
-    jmi_array_ref_2(tmp_3, 1,2) = _x_2_1_3_2_71;
-    jmi_array_ref_2(tmp_3, 1,3) = _x_2_1_3_3_72;
-    jmi_array_ref_2(tmp_3, 1,4) = _x_2_1_3_4_73;
-    jmi_array_ref_2(tmp_3, 1,5) = _x_2_1_3_5_74;
-    jmi_array_ref_2(tmp_3, 2,1) = _x_2_2_3_1_90;
-    jmi_array_ref_2(tmp_3, 2,2) = _x_2_2_3_2_91;
-    jmi_array_ref_2(tmp_3, 2,3) = _x_2_2_3_3_92;
-    jmi_array_ref_2(tmp_3, 2,4) = _x_2_2_3_4_93;
-    jmi_array_ref_2(tmp_3, 2,5) = _x_2_2_3_5_94;
-    jmi_array_ref_2(tmp_3, 3,1) = _x_2_3_3_1_110;
-    jmi_array_ref_2(tmp_3, 3,2) = _x_2_3_3_2_111;
-    jmi_array_ref_2(tmp_3, 3,3) = _x_2_3_3_3_112;
-    jmi_array_ref_2(tmp_3, 3,4) = _x_2_3_3_4_113;
-    jmi_array_ref_2(tmp_3, 3,5) = _x_2_3_3_5_114;
-    _y_1_3_122 = jmi_array_val_2(tmp_3, _i_126, _k_128);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_4, 1,1) = _x_2_1_3_1_70;
-    jmi_array_ref_2(tmp_4, 1,2) = _x_2_1_3_2_71;
-    jmi_array_ref_2(tmp_4, 1,3) = _x_2_1_3_3_72;
-    jmi_array_ref_2(tmp_4, 1,4) = _x_2_1_3_4_73;
-    jmi_array_ref_2(tmp_4, 1,5) = _x_2_1_3_5_74;
-    jmi_array_ref_2(tmp_4, 2,1) = _x_2_2_3_1_90;
-    jmi_array_ref_2(tmp_4, 2,2) = _x_2_2_3_2_91;
-    jmi_array_ref_2(tmp_4, 2,3) = _x_2_2_3_3_92;
-    jmi_array_ref_2(tmp_4, 2,4) = _x_2_2_3_4_93;
-    jmi_array_ref_2(tmp_4, 2,5) = _x_2_2_3_5_94;
-    jmi_array_ref_2(tmp_4, 3,1) = _x_2_3_3_1_110;
-    jmi_array_ref_2(tmp_4, 3,2) = _x_2_3_3_2_111;
-    jmi_array_ref_2(tmp_4, 3,3) = _x_2_3_3_3_112;
-    jmi_array_ref_2(tmp_4, 3,4) = _x_2_3_3_4_113;
-    jmi_array_ref_2(tmp_4, 3,5) = _x_2_3_3_5_114;
-    _y_2_1_123 = jmi_array_val_2(tmp_4, _j_127, _k_128);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_5, 1,1) = _x_2_1_4_1_75;
-    jmi_array_ref_2(tmp_5, 1,2) = _x_2_1_4_2_76;
-    jmi_array_ref_2(tmp_5, 1,3) = _x_2_1_4_3_77;
-    jmi_array_ref_2(tmp_5, 1,4) = _x_2_1_4_4_78;
-    jmi_array_ref_2(tmp_5, 1,5) = _x_2_1_4_5_79;
-    jmi_array_ref_2(tmp_5, 2,1) = _x_2_2_4_1_95;
-    jmi_array_ref_2(tmp_5, 2,2) = _x_2_2_4_2_96;
-    jmi_array_ref_2(tmp_5, 2,3) = _x_2_2_4_3_97;
-    jmi_array_ref_2(tmp_5, 2,4) = _x_2_2_4_4_98;
-    jmi_array_ref_2(tmp_5, 2,5) = _x_2_2_4_5_99;
-    jmi_array_ref_2(tmp_5, 3,1) = _x_2_3_4_1_115;
-    jmi_array_ref_2(tmp_5, 3,2) = _x_2_3_4_2_116;
-    jmi_array_ref_2(tmp_5, 3,3) = _x_2_3_4_3_117;
-    jmi_array_ref_2(tmp_5, 3,4) = _x_2_3_4_4_118;
-    jmi_array_ref_2(tmp_5, 3,5) = _x_2_3_4_5_119;
-    _y_2_2_124 = jmi_array_val_2(tmp_5, _i_126, _k_128);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_6, 15, 2, 3, 5)
-    jmi_array_ref_2(tmp_6, 1,1) = _x_2_1_4_1_75;
-    jmi_array_ref_2(tmp_6, 1,2) = _x_2_1_4_2_76;
-    jmi_array_ref_2(tmp_6, 1,3) = _x_2_1_4_3_77;
-    jmi_array_ref_2(tmp_6, 1,4) = _x_2_1_4_4_78;
-    jmi_array_ref_2(tmp_6, 1,5) = _x_2_1_4_5_79;
-    jmi_array_ref_2(tmp_6, 2,1) = _x_2_2_4_1_95;
-    jmi_array_ref_2(tmp_6, 2,2) = _x_2_2_4_2_96;
-    jmi_array_ref_2(tmp_6, 2,3) = _x_2_2_4_3_97;
-    jmi_array_ref_2(tmp_6, 2,4) = _x_2_2_4_4_98;
-    jmi_array_ref_2(tmp_6, 2,5) = _x_2_2_4_5_99;
-    jmi_array_ref_2(tmp_6, 3,1) = _x_2_3_4_1_115;
-    jmi_array_ref_2(tmp_6, 3,2) = _x_2_3_4_2_116;
-    jmi_array_ref_2(tmp_6, 3,3) = _x_2_3_4_3_117;
-    jmi_array_ref_2(tmp_6, 3,4) = _x_2_3_4_4_118;
-    jmi_array_ref_2(tmp_6, 3,5) = _x_2_3_4_5_119;
-    _y_2_3_125 = jmi_array_val_2(tmp_6, _j_127, _k_128);
-    /********* Write back reinits *******/
-")})));
-end VariableArrayIndex2;
 
 
 model TestRelationalOp1
