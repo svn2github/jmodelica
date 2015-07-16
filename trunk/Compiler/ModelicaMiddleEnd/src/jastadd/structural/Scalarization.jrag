@@ -2060,16 +2060,19 @@ aspect Scalarization {
 	
 	public boolean FIfWhenStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 	    boolean breaker = false;
+	    boolean res = false;
 	    indexMap = new HashMap<String, FExp>(indexMap);
 		for (FIfWhenClause cl : getFIfWhenClauses())
 			cl.getTest().createArrayTemporaries(stmts, vars, indexMap);
 		FIfWhenStmt stmt = createEmptyNode();
         for (FIfWhenClause cl : getFIfWhenClauses()) {
-            breaker = breaker || cl.scalarize(vars, stmt.getFIfWhenClauses(), indexMap);
+            breaker = cl.scalarize(vars, stmt.getFIfWhenClauses(), indexMap);
+            res = res || breaker;
         }
-        breaker = breaker || scalarizeElse(vars, stmt, indexMap);
+        breaker = scalarizeElse(vars, stmt, indexMap);
+        res = res || breaker;
 		stmts.add(stmt);
-		return breaker;
+        return res;
 	}
 	
 	/**

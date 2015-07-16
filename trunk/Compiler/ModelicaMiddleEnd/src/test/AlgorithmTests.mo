@@ -90,6 +90,8 @@ algorithm
   x := x + 1;
   if noEvent(x > 2) then
    temp_1 := false;
+  else
+   x := x + 1;
   end if;
   if temp_1 then
    x := x + 1;
@@ -99,6 +101,8 @@ algorithm
   x := x + 1;
   if noEvent(x > 2) then
    temp_1 := false;
+  else
+   x := x + 1;
   end if;
   if temp_1 then
    x := x + 2;
