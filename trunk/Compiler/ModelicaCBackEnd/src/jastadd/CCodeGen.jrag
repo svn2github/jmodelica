@@ -2959,6 +2959,17 @@ aspect CCodeGen {
     public void FSubscriptedExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
         getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), this);
+        genWriteVars_C(p, str, indent, false);
+    }
+    
+    public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        super.genTempFree_C(p, str, indent);
+        if (isAssignedTo()) {
+            genWriteVars_C(p, str, indent, true);
+        }
+    }
+    
+    public void FSubscriptedExp.genWriteVars_C(CodePrinter p, CodeStream str, String indent, boolean back) {
         String name = getFExp().tempName_C();
         String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
         String pre = "jmi_array_" + type + "_" + getFExp().ndims() + "(" + name + ", ";
@@ -2966,14 +2977,11 @@ aspect CCodeGen {
         for (Index i : getFExp().indices()) {
             FExp e = arr.get(i);
             String cellName = pre + i.toUnclosedString() + ")";
-            FStatement.printAssignStmt_C(str, indent, cellName, e.prettyPrint_C(""));
-        }
-    }
-    
-    public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        super.genTempFree_C(p, str, indent);
-        if (type().isString()) {
-            getFExp().type().printFree_C(str, indent, false, getFExp().tempName_C());
+            if (back) {
+                FStatement.printAssignStmt_C(str, indent, e.prettyPrint_C(""), cellName);
+            } else {
+                FStatement.printAssignStmt_C(str, indent, cellName, e.prettyPrint_C(""));
+            }
         }
     }
     

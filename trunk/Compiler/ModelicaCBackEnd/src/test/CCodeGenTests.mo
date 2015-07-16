@@ -16560,6 +16560,137 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end VariableArrayIndex4;
 
+
+model VariableArrayIndex5
+    Real[3] y;
+    Real x = time;
+    Integer i = integer(time);
+algorithm
+    y[i] := x;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex5",
+            description="Test of variable array index in LHS of algorithm",
+            template="$C_ode_derivatives$",
+            generatedCode="
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (pre_i_4), _sw(0), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (pre_i_4 + AD_WRAP_LITERAL(1)), _sw(1), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _i_4 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_4);
+    pre_i_4 = _i_4;
+    _x_3 = _time;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
+    jmi_array_val_1(tmp_1, _i_4) = _x_3;
+    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    /********* Write back reinits *******/
+")})));
+end VariableArrayIndex5;
+
+model VariableArrayIndex6
+    Real[3] y;
+    Real[:] x = {time,time,time};
+    Integer i = integer(time);
+    Integer[:] is = {i-1,i-2,i-3};
+algorithm
+    y[is[i]] := x[is[i]];
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex6",
+            description="Test of variable array index in LHS of algorithm",
+            template="$C_ode_derivatives$",
+            generatedCode="
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (pre_i_6), _sw(0), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (pre_i_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _i_6 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_6);
+    pre_i_6 = _i_6;
+    _is_1_7 = _i_6 + -1;
+    pre_is_1_7 = _is_1_7;
+    _is_2_8 = _i_6 + -2;
+    pre_is_2_8 = _is_2_8;
+    _is_3_9 = _i_6 + -3;
+    pre_is_3_9 = _is_3_9;
+    _x_1_3 = _time;
+    _x_2_4 = _time;
+    _x_3_5 = _time;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
+    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
+    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
+    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
+    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
+    jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
+    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    /********* Write back reinits *******/
+")})));
+end VariableArrayIndex6;
+
 model TestRelationalOp1
 Real v1(start=-1);
 Real v2(start=-1);

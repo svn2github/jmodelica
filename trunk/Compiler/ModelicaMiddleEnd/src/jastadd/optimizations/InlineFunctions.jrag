@@ -947,8 +947,8 @@ aspect FunctionInlining {
                 return false;
         for (FFunctionVariable out : myOutputs()) {
             TrivialInlineCheck chk = out.createTrivialInlineCheck();
-            for (FIdUse use : out.assigningUses()) 
-                chk.check(use);
+            for (FIdUseExp use : out.assigningUses()) 
+                chk.check(use.getFIdUse());
             if (!chk.isOk())
                 return false;
         }

@@ -2011,7 +2011,7 @@ aspect TransformCanonical {
     }
 
     rewrite FAssignStmt {
-        when (rewriteAlias) to FAssignStmt {
+        when (rewriteAlias && getLeft() instanceof FIdUseExp) to FAssignStmt {
             FIdUseExp left = (FIdUseExp) getLeft();
             if (left.myFV().isFVariable() && left.myFV().isAlias()) {
                 FVariable fv = (FVariable) left.myFV();
