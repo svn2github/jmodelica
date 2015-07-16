@@ -2717,8 +2717,6 @@ aspect FVariableUses {
 
     FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
         FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
-    FAssignStmt contributes (FVariable) getLeft().myFV() when getLeft().myFV().isAlgebraicVariable() to 
-        FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
     syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
 
@@ -3465,12 +3463,12 @@ aspect FlatAlgorithmAPI {
         to FClass.myAlgorithms() for myFClass();
     
     inh boolean FIdUse.useIsAssignment();
-    inh boolean FIdUseExp.useIsAssignment();
+    inh boolean FAssignableExp.useIsAssignment();
     inh boolean FArray.useIsAssignment();
     inh boolean FRecordConstructor.useIsAssignment();
     eq FAssignStmt.getLeft().useIsAssignment()       = true;
     eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
-    eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
+    eq FAssignableExp.getChild().useIsAssignment()   = useIsAssignment();
     eq FArraySubscripts.getChild().useIsAssignment() = false;
     eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
     eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();

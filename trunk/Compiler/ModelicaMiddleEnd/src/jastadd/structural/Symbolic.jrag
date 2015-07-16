@@ -862,6 +862,10 @@ aspect Derivatives {
         }
         return super.diff(name);
     }
+    
+    public FExp FSubscriptedExp.diff(String name) {
+        return new FSubscriptedExp(getFExp().diff(name), getFArraySubscripts().treeCopy());
+    }
 
 
     public FExp FExp.diffUseOrDerExp(String name, String myName) {

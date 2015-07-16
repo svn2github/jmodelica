@@ -1216,20 +1216,9 @@ fclass ArrayTests.General.ArrayTest45
  Real b.x[2];
  parameter Integer b.j = 1 /* 1 */;
 equation
- b.x[1] = temp_1(b.j, 1, {{1.0, 2.0}, {3.0, 4.0}}) + time;
- b.x[2] = temp_1(b.j, 2, {{1.0, 2.0}, {3.0, 4.0}}) + 2 * time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Integer i_1;
-  input Real[2, 2] x;
-  output Real y;
- algorithm
-  y := x[i_0,i_1];
-  return;
- annotation(Inline = false);
- end temp_1;end ArrayTests.General.ArrayTest45;
+ b.x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,1] + time;
+ b.x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,2] + 2 * time;
+end ArrayTests.General.ArrayTest45;
 ")})));
 end ArrayTest45;
 
@@ -6710,19 +6699,7 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = temp_1(i, {42.0, 3.14});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x = ({42.0, 3.14})[i];
 end ArrayTests.VariableIndex.Equation;
 ")})));
 end Equation;
@@ -6748,19 +6725,7 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = temp_1(i, {2.0, 4.0});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x = ({2.0, 4.0})[i];
 end ArrayTests.VariableIndex.TwoDim1;
 ")})));
 end TwoDim1;
@@ -6786,19 +6751,7 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- x = temp_1(i, {1.0, 2.0});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x = ({1.0, 2.0})[i];
 end ArrayTests.VariableIndex.TwoDim2;
 ")})));
 end TwoDim2;
@@ -6828,20 +6781,7 @@ initial equation
 equation
  i1 = if time > 1 then 1 else 2;
  i2 = if time > 0.5 then 1 else 2;
- x = temp_1(i1, i2, {{1.0, 2.0}, {3.0, 4.0}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Integer i_1;
-  input Real[2, 2] x;
-  output Real y;
- algorithm
-  y := x[i_0,i_1];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x = ({{1.0, 2.0}, {3.0, 4.0}})[i1,i2];
 end ArrayTests.VariableIndex.TwoDim3;
 ")})));
 end TwoDim3;
@@ -6868,20 +6808,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[i_0,1];
-  y[2] := x[i_0,2];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x[1] = ({1.0, 3.0})[i];
+ x[2] = ({2.0, 4.0})[i];
 end ArrayTests.VariableIndex.TwoDim4;
 ")})));
 end TwoDim4;
@@ -6908,20 +6836,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- ({x[1], x[2]}) = temp_1(i, {{1.0, 2.0}, {3.0, 4.0}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0];
-  y[2] := x[2,i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x[1] = ({1.0, 2.0})[i];
+ x[2] = ({3.0, 4.0})[i];
 end ArrayTests.VariableIndex.TwoDim5;
 ")})));
 end TwoDim5;
@@ -6952,20 +6868,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- ({x[1], x[2]}) = temp_1(i, {{3.0, 4.0}, {5.0, 6.0}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0];
-  y[2] := x[2,i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x[1] = ({3.0, 4.0})[i];
+ x[2] = ({5.0, 6.0})[i];
 end ArrayTests.VariableIndex.TwoDim6;
 ")})));
 end TwoDim6;
@@ -6996,20 +6900,8 @@ initial equation
  pre(i) = 0;
 equation
  i = if time > 1 then 1 else 2;
- ({x[1], x[2]}) = temp_1(i, {{2.0, 3.0}, {6.0, 7.0}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[i_0,1];
-  y[2] := x[i_0,2];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x[1] = ({2.0, 6.0})[i];
+ x[2] = ({3.0, 7.0})[i];
 end ArrayTests.VariableIndex.TwoDim7;
 ")})));
 end TwoDim7;
@@ -7034,21 +6926,9 @@ fclass ArrayTests.VariableIndex.Algorithm
 initial equation 
  pre(i) = 0;
 algorithm
- x := temp_1(i, {table[1], table[2]});
+ x := ({table[1], table[2]})[i];
 equation
  i = if time > 1 then 1 else 2;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
 end ArrayTests.VariableIndex.Algorithm;
 ")})));
 end Algorithm;
@@ -7075,19 +6955,9 @@ initial equation
  pre(x) = ArrayTests.VariableIndex.Enum.ABC.A;
 equation
  i = if time > 1 then ArrayTests.VariableIndex.Enum.ABC.A else ArrayTests.VariableIndex.Enum.ABC.B;
- x = temp_1(i, {ArrayTests.VariableIndex.Enum.ABC.A, ArrayTests.VariableIndex.Enum.ABC.B, ArrayTests.VariableIndex.Enum.ABC.C});
-
+ x = ({ArrayTests.VariableIndex.Enum.ABC.A, ArrayTests.VariableIndex.Enum.ABC.B, ArrayTests.VariableIndex.Enum.ABC.C})[i];
+ 
 public
- function temp_1
-  input ArrayTests.VariableIndex.Enum.ABC i_0;
-  input ArrayTests.VariableIndex.Enum.ABC[3] x;
-  output ArrayTests.VariableIndex.Enum.ABC y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
  type ArrayTests.VariableIndex.Enum.ABC = enumeration(A, B, C);
 
 end ArrayTests.VariableIndex.Enum;
@@ -7115,19 +6985,7 @@ initial equation
  pre(x) = false;
 equation
  i = if time > 1 then false else true;
- x = temp_1(i, {true, false});
-
-public
- function temp_1
-  input Boolean i_0;
-  input Boolean[2] x;
-  output Boolean y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x = ({true, false})[i];
 end ArrayTests.VariableIndex.Bool;
 ")})));
 end Bool;
@@ -7148,19 +7006,7 @@ fclass ArrayTests.VariableIndex.ExpEquation
  discrete input Integer i;
  Real y;
 equation
- y = temp_1(i, {1.0, 2.0, 3.0});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[3] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ y = ({1.0, 2.0, 3.0})[i];
 end ArrayTests.VariableIndex.ExpEquation;
 ")})));
 end ExpEquation;
@@ -7182,24 +7028,388 @@ fclass ArrayTests.VariableIndex.ExpEquationArray
  Real y[1];
  Real y[2];
 equation
- ({y[1], y[2]}) = temp_1({i, i + 1}, {1.0, 2.0, 3.0});
-
-public
- function temp_1
-  input Integer[2] i_0;
-  input Real[3] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[i_0[1]];
-  y[2] := x[i_0[2]];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ y[1] = ({1.0, 2.0, 3.0})[i];
+ y[2] = ({1.0, 2.0, 3.0})[i + 1];
 end ArrayTests.VariableIndex.ExpEquationArray;
 ")})));
 end ExpEquationArray;
 
+model RecordArrayEquation1
+    record R
+        Real y = i + 1/2;
+        Integer i;
+    end R;
+    R[3] x = {R(i=i+1),R(i=i+2),R(i=i+3)};
+    Integer i = integer(time);
+    R r = x[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_RecordArrayEquation1",
+            description="Test of variable array index access",
+            flatModel="
+fclass ArrayTests.VariableIndex.RecordArrayEquation1
+ Real x[1].y;
+ discrete Integer x[1].i;
+ Real x[2].y;
+ discrete Integer x[2].i;
+ Real x[3].y;
+ discrete Integer x[3].i;
+ discrete Integer i;
+ Real r.y;
+ discrete Integer r.i;
+initial equation 
+ pre(i) = 0;
+ pre(x[1].i) = 0;
+ pre(x[2].i) = 0;
+ pre(x[3].i) = 0;
+ pre(r.i) = 0;
+equation
+ x[1].y = i + 1 + 0.5;
+ x[1].i = i + 1;
+ x[2].y = i + 2 + 0.5;
+ x[2].i = i + 2;
+ x[3].y = i + 3 + 0.5;
+ x[3].i = i + 3;
+ r.y = ({x[1].y, x[2].y, x[3].y})[i];
+ r.i = ({x[1].i, x[2].i, x[3].i})[i];
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end ArrayTests.VariableIndex.RecordArrayEquation1;
+")})));
+end RecordArrayEquation1;
+
+model RecordArrayEquation2
+    record R
+        Real x;
+    end R;
+    R[:,:] x = {{R(time) for i in 1:3}};
+    Integer i = integer(time);
+    R[1,2] y;
+    parameter Integer p = 1;
+equation
+    for k in 1:1 loop
+        for j in 1:2 loop
+            y[k,j+i] = x[k,j+p+i];
+        end for;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_RecordArrayEquation2",
+            description="Test of variable array index access",
+            flatModel="
+fclass ArrayTests.VariableIndex.RecordArrayEquation2
+ Real x[1,1].x;
+ Real x[1,2].x;
+ Real x[1,3].x;
+ discrete Integer i;
+ Real y[1,1].x;
+ Real y[1,2].x;
+ parameter Integer p = 1 /* 1 */;
+initial equation 
+ pre(i) = 0;
+equation
+ ({y[1,1].x, y[1,2].x})[1 + i] = ({x[1,1].x, x[1,2].x, x[1,3].x})[1 + p + i];
+ ({y[1,1].x, y[1,2].x})[2 + i] = ({x[1,1].x, x[1,2].x, x[1,3].x})[2 + p + i];
+ x[1,1].x = time;
+ x[1,2].x = time;
+ x[1,3].x = time;
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end ArrayTests.VariableIndex.RecordArrayEquation2;
+")})));
+end RecordArrayEquation2;
+
+model ExpEquationCombination
+    Real[:,:,:,:] x = fill(time,2,3,4,5);
+    Real[:,:] y = x[2,{i,j},2:4,k];
+    discrete Integer i,j,k;
+initial equation
+    i = 1;
+    j = 2;
+    k = 3;
+equation
+    when time > 1 then
+        i = 2;
+        j = 1;
+        k = 4;
+    end when;
+    
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_ExpEquationCombination",
+            description="Test of variable array index access",
+            flatModel="
+fclass ArrayTests.VariableIndex.ExpEquationCombination
+ Real x[1,1,1,1];
+ Real x[1,1,1,2];
+ Real x[1,1,1,3];
+ Real x[1,1,1,4];
+ Real x[1,1,1,5];
+ Real x[1,1,2,1];
+ Real x[1,1,2,2];
+ Real x[1,1,2,3];
+ Real x[1,1,2,4];
+ Real x[1,1,2,5];
+ Real x[1,1,3,1];
+ Real x[1,1,3,2];
+ Real x[1,1,3,3];
+ Real x[1,1,3,4];
+ Real x[1,1,3,5];
+ Real x[1,1,4,1];
+ Real x[1,1,4,2];
+ Real x[1,1,4,3];
+ Real x[1,1,4,4];
+ Real x[1,1,4,5];
+ Real x[1,2,1,1];
+ Real x[1,2,1,2];
+ Real x[1,2,1,3];
+ Real x[1,2,1,4];
+ Real x[1,2,1,5];
+ Real x[1,2,2,1];
+ Real x[1,2,2,2];
+ Real x[1,2,2,3];
+ Real x[1,2,2,4];
+ Real x[1,2,2,5];
+ Real x[1,2,3,1];
+ Real x[1,2,3,2];
+ Real x[1,2,3,3];
+ Real x[1,2,3,4];
+ Real x[1,2,3,5];
+ Real x[1,2,4,1];
+ Real x[1,2,4,2];
+ Real x[1,2,4,3];
+ Real x[1,2,4,4];
+ Real x[1,2,4,5];
+ Real x[1,3,1,1];
+ Real x[1,3,1,2];
+ Real x[1,3,1,3];
+ Real x[1,3,1,4];
+ Real x[1,3,1,5];
+ Real x[1,3,2,1];
+ Real x[1,3,2,2];
+ Real x[1,3,2,3];
+ Real x[1,3,2,4];
+ Real x[1,3,2,5];
+ Real x[1,3,3,1];
+ Real x[1,3,3,2];
+ Real x[1,3,3,3];
+ Real x[1,3,3,4];
+ Real x[1,3,3,5];
+ Real x[1,3,4,1];
+ Real x[1,3,4,2];
+ Real x[1,3,4,3];
+ Real x[1,3,4,4];
+ Real x[1,3,4,5];
+ Real x[2,1,1,1];
+ Real x[2,1,1,2];
+ Real x[2,1,1,3];
+ Real x[2,1,1,4];
+ Real x[2,1,1,5];
+ Real x[2,1,2,1];
+ Real x[2,1,2,2];
+ Real x[2,1,2,3];
+ Real x[2,1,2,4];
+ Real x[2,1,2,5];
+ Real x[2,1,3,1];
+ Real x[2,1,3,2];
+ Real x[2,1,3,3];
+ Real x[2,1,3,4];
+ Real x[2,1,3,5];
+ Real x[2,1,4,1];
+ Real x[2,1,4,2];
+ Real x[2,1,4,3];
+ Real x[2,1,4,4];
+ Real x[2,1,4,5];
+ Real x[2,2,1,1];
+ Real x[2,2,1,2];
+ Real x[2,2,1,3];
+ Real x[2,2,1,4];
+ Real x[2,2,1,5];
+ Real x[2,2,2,1];
+ Real x[2,2,2,2];
+ Real x[2,2,2,3];
+ Real x[2,2,2,4];
+ Real x[2,2,2,5];
+ Real x[2,2,3,1];
+ Real x[2,2,3,2];
+ Real x[2,2,3,3];
+ Real x[2,2,3,4];
+ Real x[2,2,3,5];
+ Real x[2,2,4,1];
+ Real x[2,2,4,2];
+ Real x[2,2,4,3];
+ Real x[2,2,4,4];
+ Real x[2,2,4,5];
+ Real x[2,3,1,1];
+ Real x[2,3,1,2];
+ Real x[2,3,1,3];
+ Real x[2,3,1,4];
+ Real x[2,3,1,5];
+ Real x[2,3,2,1];
+ Real x[2,3,2,2];
+ Real x[2,3,2,3];
+ Real x[2,3,2,4];
+ Real x[2,3,2,5];
+ Real x[2,3,3,1];
+ Real x[2,3,3,2];
+ Real x[2,3,3,3];
+ Real x[2,3,3,4];
+ Real x[2,3,3,5];
+ Real x[2,3,4,1];
+ Real x[2,3,4,2];
+ Real x[2,3,4,3];
+ Real x[2,3,4,4];
+ Real x[2,3,4,5];
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ discrete Integer i;
+ discrete Integer j;
+ discrete Integer k;
+ discrete Boolean temp_1;
+initial equation 
+ i = 1;
+ j = 2;
+ k = 3;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ i = if temp_1 and not pre(temp_1) then 2 else pre(i);
+ j = if temp_1 and not pre(temp_1) then 1 else pre(j);
+ k = if temp_1 and not pre(temp_1) then 4 else pre(k);
+ x[1,1,1,1] = time;
+ x[1,1,1,2] = time;
+ x[1,1,1,3] = time;
+ x[1,1,1,4] = time;
+ x[1,1,1,5] = time;
+ x[1,1,2,1] = time;
+ x[1,1,2,2] = time;
+ x[1,1,2,3] = time;
+ x[1,1,2,4] = time;
+ x[1,1,2,5] = time;
+ x[1,1,3,1] = time;
+ x[1,1,3,2] = time;
+ x[1,1,3,3] = time;
+ x[1,1,3,4] = time;
+ x[1,1,3,5] = time;
+ x[1,1,4,1] = time;
+ x[1,1,4,2] = time;
+ x[1,1,4,3] = time;
+ x[1,1,4,4] = time;
+ x[1,1,4,5] = time;
+ x[1,2,1,1] = time;
+ x[1,2,1,2] = time;
+ x[1,2,1,3] = time;
+ x[1,2,1,4] = time;
+ x[1,2,1,5] = time;
+ x[1,2,2,1] = time;
+ x[1,2,2,2] = time;
+ x[1,2,2,3] = time;
+ x[1,2,2,4] = time;
+ x[1,2,2,5] = time;
+ x[1,2,3,1] = time;
+ x[1,2,3,2] = time;
+ x[1,2,3,3] = time;
+ x[1,2,3,4] = time;
+ x[1,2,3,5] = time;
+ x[1,2,4,1] = time;
+ x[1,2,4,2] = time;
+ x[1,2,4,3] = time;
+ x[1,2,4,4] = time;
+ x[1,2,4,5] = time;
+ x[1,3,1,1] = time;
+ x[1,3,1,2] = time;
+ x[1,3,1,3] = time;
+ x[1,3,1,4] = time;
+ x[1,3,1,5] = time;
+ x[1,3,2,1] = time;
+ x[1,3,2,2] = time;
+ x[1,3,2,3] = time;
+ x[1,3,2,4] = time;
+ x[1,3,2,5] = time;
+ x[1,3,3,1] = time;
+ x[1,3,3,2] = time;
+ x[1,3,3,3] = time;
+ x[1,3,3,4] = time;
+ x[1,3,3,5] = time;
+ x[1,3,4,1] = time;
+ x[1,3,4,2] = time;
+ x[1,3,4,3] = time;
+ x[1,3,4,4] = time;
+ x[1,3,4,5] = time;
+ x[2,1,1,1] = time;
+ x[2,1,1,2] = time;
+ x[2,1,1,3] = time;
+ x[2,1,1,4] = time;
+ x[2,1,1,5] = time;
+ x[2,1,2,1] = time;
+ x[2,1,2,2] = time;
+ x[2,1,2,3] = time;
+ x[2,1,2,4] = time;
+ x[2,1,2,5] = time;
+ x[2,1,3,1] = time;
+ x[2,1,3,2] = time;
+ x[2,1,3,3] = time;
+ x[2,1,3,4] = time;
+ x[2,1,3,5] = time;
+ x[2,1,4,1] = time;
+ x[2,1,4,2] = time;
+ x[2,1,4,3] = time;
+ x[2,1,4,4] = time;
+ x[2,1,4,5] = time;
+ x[2,2,1,1] = time;
+ x[2,2,1,2] = time;
+ x[2,2,1,3] = time;
+ x[2,2,1,4] = time;
+ x[2,2,1,5] = time;
+ x[2,2,2,1] = time;
+ x[2,2,2,2] = time;
+ x[2,2,2,3] = time;
+ x[2,2,2,4] = time;
+ x[2,2,2,5] = time;
+ x[2,2,3,1] = time;
+ x[2,2,3,2] = time;
+ x[2,2,3,3] = time;
+ x[2,2,3,4] = time;
+ x[2,2,3,5] = time;
+ x[2,2,4,1] = time;
+ x[2,2,4,2] = time;
+ x[2,2,4,3] = time;
+ x[2,2,4,4] = time;
+ x[2,2,4,5] = time;
+ x[2,3,1,1] = time;
+ x[2,3,1,2] = time;
+ x[2,3,1,3] = time;
+ x[2,3,1,4] = time;
+ x[2,3,1,5] = time;
+ x[2,3,2,1] = time;
+ x[2,3,2,2] = time;
+ x[2,3,2,3] = time;
+ x[2,3,2,4] = time;
+ x[2,3,2,5] = time;
+ x[2,3,3,1] = time;
+ x[2,3,3,2] = time;
+ x[2,3,3,3] = time;
+ x[2,3,3,4] = time;
+ x[2,3,3,5] = time;
+ x[2,3,4,1] = time;
+ x[2,3,4,2] = time;
+ x[2,3,4,3] = time;
+ x[2,3,4,4] = time;
+ x[2,3,4,5] = time;
+ y[1,1] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[i,k];
+ y[1,2] = ({{x[2,1,2,1], x[2,1,2,2], x[2,1,2,3], x[2,1,2,4], x[2,1,2,5]}, {x[2,2,2,1], x[2,2,2,2], x[2,2,2,3], x[2,2,2,4], x[2,2,2,5]}, {x[2,3,2,1], x[2,3,2,2], x[2,3,2,3], x[2,3,2,4], x[2,3,2,5]}})[j,k];
+ y[1,3] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[i,k];
+ y[2,1] = ({{x[2,1,3,1], x[2,1,3,2], x[2,1,3,3], x[2,1,3,4], x[2,1,3,5]}, {x[2,2,3,1], x[2,2,3,2], x[2,2,3,3], x[2,2,3,4], x[2,2,3,5]}, {x[2,3,3,1], x[2,3,3,2], x[2,3,3,3], x[2,3,3,4], x[2,3,3,5]}})[j,k];
+ y[2,2] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[i,k];
+ y[2,3] = ({{x[2,1,4,1], x[2,1,4,2], x[2,1,4,3], x[2,1,4,4], x[2,1,4,5]}, {x[2,2,4,1], x[2,2,4,2], x[2,2,4,3], x[2,2,4,4], x[2,2,4,5]}, {x[2,3,4,1], x[2,3,4,2], x[2,3,4,3], x[2,3,4,4], x[2,3,4,5]}})[j,k];
+end ArrayTests.VariableIndex.ExpEquationCombination;
+")})));
+end ExpEquationCombination;
 
 model Slice1
     record R
@@ -7223,21 +7433,9 @@ fclass ArrayTests.VariableIndex.Slice1
  Real x[2].p;
  discrete input Integer i;
 equation
- y = if i == 0 then 1 else temp_1(i, {x[1].p, x[2].p});
+ y = if i == 0 then 1 else ({x[1].p, x[2].p})[i];
  x[1].p = time;
  x[2].p = 2 * time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
 end ArrayTests.VariableIndex.Slice1;
 ")})));
 end Slice1;
@@ -7278,24 +7476,12 @@ equation
  x[2,1,2] = 6 * time;
  x[2,2,1] = 7 * time;
  x[2,2,2] = 8 * time;
- ({{y[1,1], y[1,2], y[1,3]}, {y[2,1], y[2,2], y[2,3]}}) = temp_1(i, {{{x[1,2,1], x[1,2,2], x[1,2,2]}, {x[1,1,1], x[1,1,2], x[1,1,2]}}, {{x[2,2,1], x[2,2,2], x[2,2,2]}, {x[2,1,1], x[2,1,2], x[2,1,2]}}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2, 3] x;
-  output Real[2, 3] y;
- algorithm
-  y[1,1] := x[i_0,1,1];
-  y[1,2] := x[i_0,1,2];
-  y[1,3] := x[i_0,1,3];
-  y[2,1] := x[i_0,2,1];
-  y[2,2] := x[i_0,2,2];
-  y[2,3] := x[i_0,2,3];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ y[1,1] = ({x[1,2,1], x[2,2,1]})[i];
+ y[1,2] = ({x[1,2,2], x[2,2,2]})[i];
+ y[1,3] = ({x[1,2,2], x[2,2,2]})[i];
+ y[2,1] = ({x[1,1,1], x[2,1,1]})[i];
+ y[2,2] = ({x[1,1,2], x[2,1,2]})[i];
+ y[2,3] = ({x[1,1,2], x[2,1,2]})[i];
 end ArrayTests.VariableIndex.Slice2;
 ")})));
 end Slice2;
@@ -7328,20 +7514,8 @@ equation
  r[1].x[2] = 2 * time;
  r[2].x[1] = 3 * time;
  r[2].x[2] = 4 * time;
- ({x[1], x[2]}) = temp_1(i, {{r[1].x[1], r[1].x[2]}, {r[2].x[1], r[2].x[2]}});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0];
-  y[2] := x[2,i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
+ x[1] = ({r[1].x[1], r[1].x[2]})[i];
+ x[2] = ({r[2].x[1], r[2].x[2]})[i];
 end ArrayTests.VariableIndex.Slice3;
 ")})));
 end Slice3;
@@ -7369,21 +7543,9 @@ fclass ArrayTests.VariableIndex.Slice4
  Real x[2].z;
  discrete input Integer i;
 equation
- y = temp_1(i, {x[1].z, x[2].z});
+ y = ({x[1].z, x[2].z})[i];
  x[1].z = time;
  x[2].z = 2 * time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
 end ArrayTests.VariableIndex.Slice4;
 ")})));
 end Slice4;
@@ -7432,7 +7594,8 @@ fclass ArrayTests.VariableIndex.Slice5
  discrete input Integer i;
  discrete input Integer j;
 equation
- ({y[1], y[2]}) = temp_1(i, j, {{{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}}, {{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}}});
+ y[1] = ({{b[1,1].a[1,1].z, b[1,1].a[2,1].z}, {b[1,2].a[1,1].z, b[1,2].a[2,1].z}})[i,j];
+ y[2] = ({{b[2,1].a[1,1].z, b[2,1].a[2,1].z}, {b[2,2].a[1,1].z, b[2,2].a[2,1].z}})[i,j];
  b[1,1].a[1,1].z = time;
  b[1,1].a[1,2].z = time;
  b[1,1].a[2,1].z = time;
@@ -7449,20 +7612,6 @@ equation
  b[2,2].a[1,2].z = time;
  b[2,2].a[2,1].z = time;
  b[2,2].a[2,2].z = time;
-
-public
- function temp_1
-  input Integer i_0;
-  input Integer i_1;
-  input Real[2, 2, 2] x;
-  output Real[2] y;
- algorithm
-  y[1] := x[1,i_0,i_1];
-  y[2] := x[2,i_0,i_1];
-  return;
- annotation(Inline = false);
- end temp_1;
-
 end ArrayTests.VariableIndex.Slice5;
 ")})));
 end Slice5;
@@ -7573,18 +7722,7 @@ fclass ArrayTests.Other.ArrayConst4
  parameter Integer i = 1 /* 1 */;
  parameter Real x;
 parameter equation
- x = temp_1(i, {1.0, 2.0});
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[2] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
+ x = ({1.0, 2.0})[i];
 end ArrayTests.Other.ArrayConst4;
 ")})));
 end ArrayConst4;

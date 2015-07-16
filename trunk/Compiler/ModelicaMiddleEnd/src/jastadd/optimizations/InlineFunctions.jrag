@@ -627,7 +627,10 @@ aspect FunctionInlining {
         isInlinableFunctionCall(fi) || super.hasInlinableFunctions(fi);
     eq FIdUseExp.hasInlinableFunctions(AbstractFunctionInliner fi)     = 
         getFIdUse().getFQName().hasInlinableFunctions(fi);
-
+    eq FSubscriptedExp.hasInlinableFunctions(AbstractFunctionInliner fi) {
+        return getFArraySubscripts().hasInlinableFunctions(fi) || super.hasInlinableFunctions(fi);
+    }
+    
     /**
      * Check if any array subscripts contain any calls to functions that we can inline.
      */
@@ -647,6 +650,14 @@ aspect FunctionInlining {
     /**
      * Check if an array subscript contains any calls to functions that we can inline.
      */
+    syn boolean FArraySubscripts.hasInlinableFunctions(AbstractFunctionInliner fi) {
+        for (FSubscript fs : getFSubscripts()) {
+            if (fs.hasInlinableFunctions(fi)) {
+                return true;
+            }
+        }
+        return false;
+    }
     syn boolean FSubscript.hasInlinableFunctions(AbstractFunctionInliner fi) = false;
     eq FExpSubscript.hasInlinableFunctions(AbstractFunctionInliner fi)       = 
         getFExp().hasInlinableFunctions(fi);
@@ -752,7 +763,12 @@ aspect FunctionInlining {
     public void FIdUseExp.inlineFunctions(AbstractFunctionInliner fi) {
         getFIdUse().getFQName().inlineFunctions(fi);
     }
-
+    
+    public void FSubscriptedExp.inlineFunctions(AbstractFunctionInliner fi) {
+        super.inlineFunctions(fi);
+        getFArraySubscripts().inlineFunctions(fi);
+    }
+    
     /**
      * Inline all calls to functions that we can inline.
      */
@@ -761,13 +777,18 @@ aspect FunctionInlining {
     public void FQNameFull.inlineFunctions(AbstractFunctionInliner fi) {
         for (FQNamePart part : getFQNameParts())
             if (part.hasFArraySubscripts())
-                for (FSubscript sub : part.getFArraySubscripts().getFSubscripts())
-                    sub.inlineFunctions(fi);
+                getFArraySubscripts().inlineFunctions(fi);
     }
 
     /**
      * Inline all calls to functions that we can inline.
      */
+    public void FArraySubscripts.inlineFunctions(AbstractFunctionInliner fi) {
+        for (FSubscript fs : getFSubscripts()) {
+            fs.inlineFunctions(fi);
+        }
+    }
+    
     public void FSubscript.inlineFunctions(AbstractFunctionInliner fi) {}
 
     public void FExpSubscript.inlineFunctions(AbstractFunctionInliner fi) {
@@ -956,13 +977,17 @@ aspect FunctionInlining {
      * Helper method to unsupported statements in isTrivialInlinable().
      */
     syn boolean FStatement.isOkTrivialInlineInFor() = false;
-    eq FAssignStmt.isOkTrivialInlineInFor()         = getLeft().myFV().size().isUnknown();
+    eq FAssignStmt.isOkTrivialInlineInFor()         = getLeft().isOkTrivialInlineInFor();
     eq FForStmt.isOkTrivialInlineInFor() {
         for (FStatement stmt : getForStmts())
             if (!stmt.isOkTrivialInlineInFor())
                 return false;
         return true;
     }
+    
+    syn boolean FAssignableExp.isOkTrivialInlineInFor();
+    eq FIdUseExp.isOkTrivialInlineInFor() = myFV().size().isUnknown();
+    eq FSubscriptedExp.isOkTrivialInlineInFor() = false;
 
     /**
      * Create a TrivialInlineCheck object for this variable.
@@ -1330,7 +1355,7 @@ aspect FunctionInlining {
         try {
             FAssignStmt left = (FAssignStmt) leftStmt;
             FAssignStmt right = (FAssignStmt) rightStmt;
-            FIdUseExp lhs = ((left != null) ? left : right).getLeft().fullCopy();
+            FAssignableExp lhs = ((left != null) ? left : right).getLeft().fullCopy();
             FExp test = getTest().fullCopy(); // TODO: use temp var instead
             FExp leftExp = createIfElseExpBranch(left, lhs);
             FExp rightExp = createIfElseExpBranch(right, lhs);
@@ -1340,7 +1365,7 @@ aspect FunctionInlining {
         }
     }
 
-    private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FIdUseExp var) {
+    private FExp FIfWhenClause.createIfElseExpBranch(FAssignStmt ass, FAssignableExp var) {
         return (ass != null) ? ass.getRight().fullCopy() : var.fullCopy();
     }
 

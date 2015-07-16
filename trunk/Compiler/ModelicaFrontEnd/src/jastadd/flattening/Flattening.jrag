@@ -1566,7 +1566,7 @@ aspect FlatExpressions {
 	public abstract FStatement FStatement.flatten(FQName prefix);
     
     public FAssignStmt FAssignStmt.flatten(FQName prefix) {
-        return new FAssignStmt((FIdUseExp)getLeft().flatten(prefix), getRight().flatten(prefix));
+        return new FAssignStmt((FAssignableExp)getLeft().flatten(prefix), getRight().flatten(prefix));
     }
     
 	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
