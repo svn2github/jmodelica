@@ -37,7 +37,6 @@ aspect FlatNameBinding {
     syn FAbstractVariable FExp.myFVForUse() = null;
     eq FIdUseExp.myFVForUse()               = myFV();
 
-    syn FFunctionVariable FIdUseExp.myFuncVar() = getFIdUse().myFuncVar();
     syn FFunctionVariable FIdUse.myFuncVar() {
         FAbstractVariable fv = lookupOutermostFV(getFQName());
         return (fv instanceof FFunctionVariable) ? (FFunctionVariable) fv: null;

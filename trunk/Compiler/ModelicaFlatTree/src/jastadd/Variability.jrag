@@ -332,10 +332,6 @@ aspect Variability {
             e.makeContinuousVariablesDiscrete();
     }
     
-    public void FSubscriptedExp.makeContinuousVariablesDiscrete() {
-        getFExp().makeContinuousVariablesDiscrete();
-    }
-    
     /**
      * If this is a normal continous variable, convert it to a discrete variable.
      */

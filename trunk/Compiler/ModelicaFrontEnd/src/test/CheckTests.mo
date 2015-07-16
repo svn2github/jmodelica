@@ -1088,7 +1088,19 @@ fclass CheckTests.FixedFalseIndex1
  constant Real x[2] = 2;
 initial equation 
  p = 1;
- xp = ({1.0, 2.0})[p];
+ xp = temp_1(p, {1.0, 2.0});
+
+public
+ function temp_1
+  input Integer i_0;
+  input Real[2] x;
+  output Real y;
+ algorithm
+  y := x[i_0];
+  return;
+ annotation(Inline = false);
+ end temp_1;
+
 end CheckTests.FixedFalseIndex1;
 ")})));
 end FixedFalseIndex1;
