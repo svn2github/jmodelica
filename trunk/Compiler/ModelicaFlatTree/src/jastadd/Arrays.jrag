@@ -1540,10 +1540,19 @@ aspect Arrays {
     }
     
     protected FExp Array.createSubsetExp(FExp e, Map<String,FExp> indexMap, boolean scalarize) {
-        if (scalarize)
-            return e.dynamicFExp(e.scalarize(indexMap));
-        else
-            return e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
+        FExp res;
+        if (scalarize) {
+            res = e.dynamicFExp(e.scalarize(indexMap));
+            e.flushForScalarization();
+        } else {
+            res = e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
+        }
+        return res;
+    }
+    
+    public void ASTNode.flushForScalarization() {
+        flushAllRecursive();
+        flushTempVarNames();
     }
 	
 	/**

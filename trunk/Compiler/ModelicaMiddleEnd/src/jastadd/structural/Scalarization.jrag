@@ -2122,8 +2122,7 @@ aspect Scalarization {
 			        inner = FStatement.breakBlock(stmts, myBreakVar().createUseExp());
                 indices.fillIndexMap(myIndexMap, i, indexList);
                 FStatement.scalarizeStmtList(getForStmts(), inner, vars, myIndexMap);
-				getForStmts().flushAllRecursive(); // Throw calculated sizes/arrays
-				getForStmts().flushTempVarNames();
+                getForStmts().flushForScalarization();
 			}
             for (FForIndex fi : indexList)
                 fi.clearEvaluationValue();
@@ -2551,8 +2550,7 @@ aspect Scalarization {
 		for (Index i : indices) {
 			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
 			scalarizeList(getFAbstractEquations(), eqns, vars, myIndexMap);
-			getFAbstractEquations().flushAllRecursive(); // Throw calculated sizes/arrays
-			getFAbstractEquations().flushTempVarNames();
+            getFAbstractEquations().flushForScalarization();
 		}
         for (FForIndex fi : getFForIndexs())
             fi.clearEvaluationValue();
