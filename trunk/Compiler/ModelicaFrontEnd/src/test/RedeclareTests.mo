@@ -6679,5 +6679,32 @@ end RedeclareTests.RedeclareInRecord6;
 ")})));
 end RedeclareInRecord6;
 
+model RedeclareInRecord7
+    type T = Real(min=1);
+
+    record B
+        Real x = time+1;
+    end B;
+    
+    B[2] b(redeclare T x = time + 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord7",
+            description="Redeclare primitive in record array",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord7
+ RedeclareTests.RedeclareInRecord7:b b[2](each x = time + 2);
+
+public
+ record RedeclareTests.RedeclareInRecord7:b
+  RedeclareTests.RedeclareInRecord7.T x;
+ end RedeclareTests.RedeclareInRecord7:b;
+
+ type RedeclareTests.RedeclareInRecord7.T = Real(min = 1);
+end RedeclareTests.RedeclareInRecord7;
+")})));
+end RedeclareInRecord7;
+
 
 end RedeclareTests;

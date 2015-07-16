@@ -826,14 +826,22 @@ aspect Flattening {
 
     public void InstRecord.flattenMyType(FClass fc) {
         if (flattenRedeclaredType()) {
-            flattenThisRecord(fc);
+            InstComponentDecl rec = this;
+            for (int i = 0; i < ndims(); i++) {
+                if (rec.getNumInstComponentDecl() == 0) {
+                    break;
+                } else {
+                    rec = rec.getInstComponentDecl(0);
+                }
+            }
+            rec.flattenThisRecord(fc);
         } else {
             myInstClass().flattenRecord(fc);
         }
     }
     
     syn String InstNode.qualifiedTypeName() = qualifiedName();
-    eq InstRecord.qualifiedTypeName() {
+    eq InstComponentDecl.qualifiedTypeName() {
         if (flattenRedeclaredType()) {
             return surroundingInstClass().qualifiedName() + ":" + qualifiedName();
         } else {
@@ -841,7 +849,7 @@ aspect Flattening {
         }
     }
     
-    syn boolean InstRecord.flattenRedeclaredType() = InstNode.containsRedeclared(this);
+    syn boolean InstComponentDecl.flattenRedeclaredType() = InstNode.containsRedeclared(this);
     
     syn boolean InstNode.containsRedeclared() = InstNode.containsRedeclared(this);
     public static boolean InstNode.containsRedeclared(InstNode in) {
