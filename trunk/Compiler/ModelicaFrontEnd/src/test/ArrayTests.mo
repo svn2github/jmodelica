@@ -5949,7 +5949,7 @@ equation
  (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]);
  (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]);
  w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b));
- w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_2[2].a, temp_2[2].b));
+ w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b));
 
 public
  function ArrayTests.Constructors.Iterators.ArrayIterTest8.f2
@@ -6181,6 +6181,45 @@ equation
 end ArrayTests.Constructors.Iterators.ArrayIterTest14;
 ")})));
 end ArrayIterTest14;
+
+model ArrayIterTest15
+    record R
+        Real x;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y = R(x);
+        algorithm
+    end f1;
+    
+    function f2
+        input R x;
+        output Real y = x.x;
+        algorithm
+    end f2;
+    
+    parameter Integer n = 3;
+    Real[n] x = (1:n) .* time;
+    Real[n] z = {f2(f1(x[i])) for i in 1:n};
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTest15",
+            description="Varying size in iteration expression",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest15
+ structural parameter Integer n = 3 /* 3 */;
+ Real z[1];
+ Real z[2];
+ Real z[3];
+equation
+ z[1] = time;
+ z[2] = 2 .* time;
+ z[3] = 3 .* time;
+end ArrayTests.Constructors.Iterators.ArrayIterTest15;
+")})));
+end ArrayIterTest15;
 
 model ArrayIterTestUnknown1
     function f

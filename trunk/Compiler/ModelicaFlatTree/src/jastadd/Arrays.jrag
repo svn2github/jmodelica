@@ -1543,16 +1543,18 @@ aspect Arrays {
         FExp res;
         if (scalarize) {
             res = e.dynamicFExp(e.scalarize(indexMap));
-            e.flushForScalarization();
+            e.flushForScalarization(false);
         } else {
             res = e.dynamicFExp(e.fullCopy()).replaceIndices(indexMap);
         }
         return res;
     }
     
-    public void ASTNode.flushForScalarization() {
+    public void ASTNode.flushForScalarization(boolean removeTempNames) {
         flushAllRecursive();
-        flushTempVarNames();
+        if (removeTempNames) {
+            flushTempVarNames();
+        }
     }
 	
 	/**
