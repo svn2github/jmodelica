@@ -628,14 +628,17 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             else {
                 jmi_log_node(log, logError, "BrentBracketFailed", "Could not bracket the root in <block: %s>. Both lower and upper are at bounds.", block->label);
                 jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_ROOT_BRACKETING_FAILED);
+                /* Write initial guess back to model. */ 
+                block->x[0] = init;
+                block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
 #ifdef JMI_PROFILE_RUNTIME
                 if (block->parent_block) {
                     block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
                 }
 #endif
                 if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error) {
-                    block->x[0] = init;
-                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
+                    /*block->x[0] = init;
+                    block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK); */
                     return JMI_BRENT_SUCCESS;
                 }
                 else
@@ -679,6 +682,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         if (flag) {
             jmi_log_node(log, logError, "Error", "Function evaluation failed while iterating in <block: %s>", block->label);
             jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SYSFUNC_FAIL);
+             block->x[0] = init;
+             block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
 #ifdef JMI_PROFILE_RUNTIME
             if (block->parent_block) {
                 block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
