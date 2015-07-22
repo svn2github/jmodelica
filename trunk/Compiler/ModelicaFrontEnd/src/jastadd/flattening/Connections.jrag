@@ -657,10 +657,6 @@ aspect Connections {
 
         private ConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
             //log.debug("Created ConnectionSetEntry: " + cd.name());
-            if (cd.inOrIsOuter()) {
-                cd = cd.myInnerInstComponentDecl();
-                fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
-            }
             this.cd = cd;
             this.outside = outside;
             this.fqName = fqName;
@@ -769,6 +765,19 @@ aspect Connections {
          */
         public ConnectionSetEntry specifyCell(Index i) {
             return ConnectionSetEntry.create(cd.findCell(i, 0), outside, fqName.copyAndAddFas(i.createFArraySubscripts()));
+        }
+
+        /**
+         * If this entry points to an outer component (or a member of one), redirect it to point to the 
+         * corresponding inner component. 
+         * 
+         * This should only be done once, or "inner outer" declarations will not be handled correctly.
+         */
+        public void redirectInner() {
+            if (cd.inOrIsOuter()) {
+                cd = cd.myInnerInstComponentDecl();
+                fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
+            }
         }
 
         public boolean equals(Object o) {
@@ -958,6 +967,8 @@ aspect Connections {
 
     public void InstComponentDecl.connectToAsPrimitive(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
+        left.redirectInner();
+        right.redirectInner();
         if (left.equals(right)) {
             source.warning("Ignored connection from connector to itself");
         } else {
