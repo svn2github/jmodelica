@@ -2324,9 +2324,11 @@ aspect DeferredSubscripts {
 
 aspect InstanceAnnotations {
     
-    syn lazy Opt<InstClassModification> InstClassDecl.getAnnotationOpt() = new Opt();
-    syn lazy Opt<InstClassModification> InstComponentDecl.getAnnotationOpt() = new Opt();
-    syn lazy Opt<InstClassModification> InstExternal.getAnnotationOpt() = new Opt();
+    syn lazy Opt<InstClassModification> InstClassDecl.getClassAnnotationOpt() = new Opt<InstClassModification>();
+    syn lazy Opt<InstClassModification> InstComponentDecl.getClassAnnotationOpt() = new Opt<InstClassModification>();
+    syn lazy Opt<InstClassModification> InstExtends.getClassAnnotationOpt() = new Opt<InstClassModification>();
+    
+    syn lazy Opt<InstClassModification> InstComponentDecl.getAnnotationOpt() = new Opt<InstClassModification>();
     
 }
 

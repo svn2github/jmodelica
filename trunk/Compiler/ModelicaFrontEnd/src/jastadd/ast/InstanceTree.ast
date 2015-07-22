@@ -38,7 +38,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstLibClassDecl:InstClassDecl*/
                                [Dummy:InstNode];          // Dummy node to prevent InstNode from being classified as root
 
-abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[Annotation:InstClassModification]/;
+abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;
@@ -79,10 +79,7 @@ InstOperator            : InstRestriction;
 InstOperatorFunction    : InstFunction;
 InstOperatorRecord      : InstMRecord;
 
-InstExternal     : BaseNode ::= <ExternalClause:ExternalClause>
-                                [FExternalLanguage]
-                                [InstExternalCall]
-                                /[Annotation:InstClassModification]/;
+InstExternal     : BaseNode ::= <ExternalClause:ExternalClause> [FExternalLanguage] [InstExternalCall];
 InstExternalCall : BaseNode ::= [ReturnVar:InstAccess] <Name> Arg:FExp*;
 
 abstract InstImport : BaseNode ::= PackageName:InstAccess <ImportClause:ImportClause>;
@@ -103,7 +100,8 @@ abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess
                                               [InstConstraining] 
                                               /FArraySubscripts/ 
                                               [ConditionalAttribute:FExp]
-                                              /[Annotation:InstClassModification]/;
+                                              /[Annotation:InstClassModification]/
+                                              /[ClassAnnotation:InstClassModification]/;
 InstComposite                 : InstComponentDecl;
 abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
 InstPrimitive                 : InstAssignable;
@@ -135,7 +133,7 @@ InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNo
 InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
                                                                <InstComponentRedeclare:InstComponentRedeclare>;
 
-InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause>;
+InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> /[ClassAnnotation:InstClassModification]/;
 InstNormalExtends : InstExtends ::= [InstClassModification];
 InstExtendsShortClass : InstNormalExtends;
 InstInlineExtends     : InstNormalExtends;
