@@ -107,6 +107,7 @@ aspect TransformCanonical {
             if (transformations != null)
                 return;
             transformations = new ArrayList<Transformation>();
+            transformations.add(new enableIfEquationElimination());
             transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
@@ -2648,8 +2649,6 @@ aspect IfEquations {
     
     public class FClass {
         public class enableIfEquationElimination extends Transformation {
-            // Depends on MakeReinitedVarsStates when invoked after scalarize
-            
             public void perform() {
                 enableIfEquationElimination();
                 
