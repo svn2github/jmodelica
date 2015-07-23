@@ -106,7 +106,7 @@ aspect Parsers {
                 }
             }
             if (f.isDirectory()) {
-                if (!sr.getProgram().getLibraryList().addLibrary(name)) 
+                if (!sr.getProgram().getLibraryList().addLibrary(name, LibNode.LoadReason.COMMANDLINE)) 
                     ModelicaCompiler.log.error(String.format("Error: The directory '%s' is not a Modelica library.", name));
             } else {
                 for (StoredDefinition sd : sr_tmp.getProgram().getUnstructuredEntitys()) 
