@@ -1,9 +1,7 @@
 package org.jmodelica.util.test;
 
-public interface GenericTestCase {
+public interface GenericTestCase extends GenericTestTreeNode {
 
     public void testMe(Assert a);
-
-    public String getName();
 
 }

@@ -483,9 +483,6 @@
         <mkdir dir="${test_package_output}" />
         <echo file="${test_file}">package ${test_package};
 
-import org.junit.runner.RunWith;
-
-@RunWith(${jm_package}.junit.JModelicaRunner.class)
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
 
     public ${test_class_name}() { 

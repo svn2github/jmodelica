@@ -17,8 +17,8 @@
 aspect TestFramework {
     
     public boolean ASTNode.collectTestCases(TestSuite ts, String className) {
-        for (int i=0;i<getNumChild();i++)
-            if (getChild(i).collectTestCases(ts, className))
+        for (ASTNode n : this)
+            if (n.collectTestCases(ts, className))
                 return true;
         return false;
     }
@@ -43,14 +43,17 @@ aspect TestFramework {
     }
 
     public void ClassDecl.collectTestCases(TestSuite ts) {
+        ts.enterClass(name());
         AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
         if (a1.exists()) {
             for (AnnotationNode a2 : a1) 
                 generateTestCase(ts, a2);
-        } 
+        }
+        ts.exitClass();
     }
 
     public void FullClassDecl.collectTestCases(TestSuite ts) {
+        ts.enterClass(name());
         AnnotationNode a1 = annotation("__JModelica/UnitTesting/tests");
         if (a1.exists()) {
             for (AnnotationNode a2 : a1) 
@@ -58,6 +61,7 @@ aspect TestFramework {
         } else {
             getClassDeclList().collectTestCases(ts);
         }
+        ts.exitClass();
     }
 
     public void ClassDecl.generateTestCase(TestSuite ts, AnnotationNode a) {

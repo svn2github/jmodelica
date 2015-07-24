@@ -5,5 +5,6 @@ import java.util.List;
 public interface GenericTestSuite {
 
     public List<? extends GenericTestCase> getAll();
+    public TestTree getTree();
 
 }

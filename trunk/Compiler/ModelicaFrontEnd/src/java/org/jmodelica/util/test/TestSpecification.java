@@ -2,6 +2,9 @@ package org.jmodelica.util.test;
 
 import java.io.File;
 
+import org.junit.runner.RunWith;
+
+@RunWith(org.jmodelica.junit.TreeJModelicaRunner.class)
 public abstract class TestSpecification {
 
     private File[] dirs;

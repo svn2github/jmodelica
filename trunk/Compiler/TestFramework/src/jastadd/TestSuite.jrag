@@ -21,10 +21,13 @@ import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.test.GenericTestCase;
 import org.jmodelica.util.test.GenericTestSuite;
 import org.jmodelica.util.test.Assert;
+import org.jmodelica.util.test.TestTree;
 
 public class TestSuite implements GenericTestSuite {
     String name;
     private ArrayList<TestCase> l;
+    private TestTree tree = null;
+    private TestTree currentTree = null;
 
     public TestSuite() {
         l = new ArrayList<TestCase>();
@@ -45,11 +48,24 @@ public class TestSuite implements GenericTestSuite {
             asserter.fail("Error when parsing file: " + fileName + "\n" + e);
         }
         
-        sr.collectTestCases(this,className);
+        sr.collectTestCases(this, className);
     }
 
     public void add(TestCase tc) {
         l.add(tc);
+        currentTree.add(tc);
+    }
+
+    public void enterClass(String className) {
+        if (currentTree == null) {
+            currentTree = tree = new TestTree(className);
+        } else {
+            currentTree = currentTree.enter(className);
+        }
+    }
+
+    public void exitClass() {
+        currentTree = currentTree.exit();
     }
 
     public TestCase get(int i) {
@@ -58,6 +74,10 @@ public class TestSuite implements GenericTestSuite {
 
     public java.util.List<? extends GenericTestCase> getAll() {
         return l;
+    }
+
+    public TestTree getTree() {
+        return tree;
     }
 
     /**
@@ -102,5 +122,4 @@ public class TestSuite implements GenericTestSuite {
             write(level, unit.toString());
         }
     }
-
 }
