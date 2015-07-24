@@ -483,6 +483,9 @@
         <mkdir dir="${test_package_output}" />
         <echo file="${test_file}">package ${test_package};
 
+import org.junit.runner.RunWith;
+
+@RunWith(org.jmodelica.junit.TreeJModelicaRunner.class)
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
 
     public ${test_class_name}() { 
