@@ -25,10 +25,11 @@ public class TreeModuleRunner extends ParentRunner<TestTreeRunner> {
     public TreeModuleRunner(TestSpecification spec, File path) throws InitializationError {
         super(spec.getClass());
         children = new ArrayList<TestTreeRunner>();
-        desc = Description.createSuiteDescription(path.getName());
+        String name = path.getName();
+        desc = Description.createSuiteDescription(name);
         File testDir = new File(path, "src/test");
         for (File f : testDir.listFiles(MODELICA_FILES)) {
-            TestTreeRunner mod = new TestTreeRunner(spec, f);
+            TestTreeRunner mod = new TestTreeRunner(spec, f, name);
             children.add(mod);
             desc.addChild(mod.getDescription());
         }

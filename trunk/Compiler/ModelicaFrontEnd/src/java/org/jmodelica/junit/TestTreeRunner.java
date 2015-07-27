@@ -27,19 +27,21 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
     private TestSpecification spec;
     private File testFile;
 
-    public TestTreeRunner(TestSpecification spec, File testFile) throws InitializationError {
-        this(spec, null, testFile);
+    public TestTreeRunner(TestSpecification spec, File testFile, String parentName) throws InitializationError {
+        this(spec, null, parentName, testFile);
     }
 
-    public TestTreeRunner(TestSpecification spec, TestTree tree, File testFile) throws InitializationError {
+    public TestTreeRunner(TestSpecification spec, TestTree tree, String parentName, File testFile) throws InitializationError {
         super(spec.getClass());
-        String name; 
+        String name;
+        char sep;
         if (tree == null) {
             name = testFile.getName();
             tree = spec.createTestSuite(testFile).getTree();
         } else {
             name = tree.getName();
         }
+        String fullName = String.format("%s.%s", parentName, name);
         desc = Description.createSuiteDescription(name);
         this.spec = spec;
         this.testFile = testFile;
@@ -58,14 +60,14 @@ public class TestTreeRunner extends ParentRunner<GenericTestTreeNode> {
                 if (subTest != null && !(subTest instanceof TestTree)) {
                     test = subTest;
                 } else {
-                    TestTreeRunner runner = new TestTreeRunner(spec, subTree, testFile);
+                    TestTreeRunner runner = new TestTreeRunner(spec, subTree, fullName, testFile);
                     runners.put(subTree.getName(), runner);
                     chDesc = runner.getDescription();
                 }
             } 
             if (!(test instanceof TestTree)) {
                 // TODO: Upgrade JUnit version, then use createTestDescription(String, String) instead
-                String descStr = String.format("%s(%s)", testName, testFile);
+                String descStr = String.format("%s(%s)", testName, fullName);
                 chDesc = Description.createSuiteDescription(descStr);
                 caseDesc.put(test.getName(), chDesc);
             }
