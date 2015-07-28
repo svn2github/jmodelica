@@ -133,7 +133,9 @@ InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNo
 InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
                                                                <InstComponentRedeclare:InstComponentRedeclare>;
 
-InstExtends : InstNode ::= ClassName:InstAccess <ExtendsClause:ExtendsClause> /[ClassAnnotation:InstClassModification]/;
+InstExtends : InstNode ::=  ClassName:InstAccess <ExtendsClause:ExtendsClause>
+                            /[ClassAnnotation:InstClassModification]/
+                            /[ClassAnnotationExtends:InstClassModification]/;
 InstNormalExtends : InstExtends ::= [InstClassModification];
 InstExtendsShortClass : InstNormalExtends;
 InstInlineExtends     : InstNormalExtends;

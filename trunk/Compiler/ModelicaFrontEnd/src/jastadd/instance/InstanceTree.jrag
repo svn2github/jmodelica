@@ -2327,6 +2327,7 @@ aspect InstanceAnnotations {
     syn lazy Opt<InstClassModification> InstClassDecl.getClassAnnotationOpt() = new Opt<InstClassModification>();
     syn lazy Opt<InstClassModification> InstComponentDecl.getClassAnnotationOpt() = new Opt<InstClassModification>();
     syn lazy Opt<InstClassModification> InstExtends.getClassAnnotationOpt() = new Opt<InstClassModification>();
+    syn lazy Opt<InstClassModification> InstExtends.getClassAnnotationExtendsOpt() = new Opt<InstClassModification>();
     
     syn lazy Opt<InstClassModification> InstComponentDecl.getAnnotationOpt() = new Opt<InstClassModification>();
     
