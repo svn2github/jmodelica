@@ -1481,7 +1481,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
     """
     Options for optimizing CasADi models using a collocation algorithm. 
 
-    Collocation algorithm options::
+    Collocation algorithm standard options::
     
         n_e --
             Number of finite elements.
@@ -1503,18 +1503,10 @@ class LocalDAECollocationAlgOptions(OptionBase):
             "free": The element lengths become optimization variables and are
             optimized according to the algorithm option
             free_element_lengths_data.
-            WARNING: This option is very experimental and will not always give
+            WARNING: The "free" option is very experimental and will not always give
             desirable results.
             
             Type: None, iterable of floats or string
-            Default: None
-        
-        free_element_lengths_data --
-            Data used for optimizing the element lengths if they are free.
-            Should be None when hs != "free".
-            
-            Type: None or
-            pyjmi.optimization.casadi_collocation.FreeElementLengthsData
             Default: None
         
         n_cp --
@@ -1522,18 +1514,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: int
             Default: 3
-        
-        discr --
-            Determines the collocation scheme used to discretize the problem.
-            
-            Possible values: "LG" and "LGR".
-            
-            "LG": Gauss collocation (Legendre-Gauss).
-            
-            "LGR": Radau collocation (Legendre-Gauss-Radau).
-            
-            Type: str
-            Default: "LGR"
         
         expand_to_sx --
             Whether to expand the CasADi MX graphs to SX graphs. Possible
@@ -1552,6 +1532,103 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: str
             Default: "NLP"
+        
+        init_traj --
+            Variable trajectory data used for initialization of the NLP
+            variables.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual or
+                  pyjmi.common.algorithm_drivers.JMResultBase
+            Default: None
+        
+        nominal_traj --
+            Variable trajectory data used for scaling of the NLP variables.
+            This option is only applicable if variable scaling is enabled.
+            
+            Type: None or pyjmi.common.io.ResultDymolaTextual or
+                  pyjmi.common.algorithm_drivers.JMResultBase
+            Default: None
+        
+        blocking_factors --
+            Blocking factors are used to enforce piecewise constant inputs. The
+            inputs may only change values at some of the element boundaries.
+            The option is either None (disabled), given as an instance of
+            pyjmi.optimization.casadi_collocation.BlockingFactors or as a list
+            of blocking factors.
+
+            If the options is a list of blocking factors, then each element in
+            the list specifies the number of collocation elements for which all
+            of the inputs must be constant. For example, if blocking_factors ==
+            [2, 2, 1], then the inputs will attain 3 different values (number
+            of elements in the list), and it will change values between
+            collocation element number 2 and 3 as well as number 4 and 5. The
+            sum of all elements in the list must be the same as the number of
+            collocation elements and the length of the list determines the
+            number of separate values that the inputs may attain.
+
+            See the documentation of the BlockingFactors class for how to use
+            it.
+            
+            If blocking_factors is None, then the usual collocation polynomials
+            are instead used to represent the controls.
+            
+            Type: None, iterable of ints, or instance of
+                  pyjmi.optimization.casadi_collocation.BlockingFactors
+            Default: None
+        
+        external_data --
+            Data used to penalize, constrain or eliminate certain variables.
+            
+            Type: None or
+            pyjmi.optimization.casadi_collocation.ExternalData
+            Default: None
+
+        delayed_feedback --
+            Experimental feature used to add delay constraints to the
+            optimization problem.
+
+            If not None, should be a dict with mappings
+            'delayed_var': ('undelayed_var', delay_ne).
+            For each such pair, adds the the constraint that the variable
+            'delayed_var' equals the value of the variable 'undelayed_var'
+            delayed by delay_ne elements. The initial part of the trajectory
+            for 'delayed_var' is fixed to its initial guess given by the
+            init_traj option or the initialGuess attribute.
+
+            'delayed_var' will typically be an input.
+            This is an experimental feature and is subject to change.
+
+            Type: None or dict
+            Default: None
+
+        solver --
+            Specifies the nonlinear programming solver to be used. Possible
+            choices are 'IPOPT' and 'WORHP'.
+
+            Type: String
+            Default: 'IPOPT'
+
+    Collocation algorithm experimental/debug options::
+
+        free_element_lengths_data --
+            Data used for optimizing the element lengths if they are free.
+            Should be None when hs != "free".
+            
+            Type: None or
+            pyjmi.optimization.casadi_collocation.FreeElementLengthsData
+            Default: None
+
+        discr --
+            Determines the collocation scheme used to discretize the problem.
+            
+            Possible values: "LG" and "LGR".
+            
+            "LG": Gauss collocation (Legendre-Gauss).
+            
+            "LGR": Radau collocation (Legendre-Gauss-Radau).
+            
+            Type: str
+            Default: "LGR"
 
         named_vars --
             If enabled, the solver will create a duplicated set of NLP
@@ -1564,14 +1641,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
             Type: bool
             Default: False
-        
-        init_traj --
-            Variable trajectory data used for initialization of the NLP
-            variables.
-            
-            Type: None or pyjmi.common.io.ResultDymolaTextual or
-                  pyjmi.common.algorithm_drivers.JMResultBase
-            Default: None
 
         init_dual --
             Dictionary containing vectors of initial guess for NLP dual
@@ -1588,13 +1657,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: None or dict
             Default: None
 
-        variable_scaling --
-            Whether to scale the variables according to their nominal values or
-            the trajectories provided with the nominal_traj option.
-            
-            Type: bool
-            Default: True
-
         equation_scaling --
             Whether to scale the equations in collocated NLP.
             Many NLP solvers default to scaling the equations, but if it is
@@ -1602,14 +1664,13 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: False
-        
-        nominal_traj --
-            Variable trajectory data used for scaling of the NLP variables.
-            This option is only applicable if variable scaling is enabled.
+
+        variable_scaling --
+            Whether to scale the variables according to their nominal values or
+            the trajectories provided with the nominal_traj option.
             
-            Type: None or pyjmi.common.io.ResultDymolaTextual or
-                  pyjmi.common.algorithm_drivers.JMResultBase
-            Default: None
+            Type: bool
+            Default: True
         
         nominal_traj_mode --
             Mode for computing scaling factors for each variable based on
@@ -1632,14 +1693,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: {str: str}
             Default: {"_default_mode": "linear"}
-        
-        result_file_name --
-            Specifies the name of the file where the result is written. Setting
-            this option to an empty string results in a default file name that
-            is based on the name of the model class.
-
-            Type: str
-            Default: ""
 
         print_condition_numbers --
             Prints the condition numbers of the Jacobian of the constraints and
@@ -1657,6 +1710,14 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: False
+        
+        result_file_name --
+            Specifies the name of the file where the result is written. Setting
+            this option to an empty string results in a default file name that
+            is based on the name of the model class.
+
+            Type: str
+            Default: ""
         
         result_mode --
             Specifies the output format of the optimization result.
@@ -1687,33 +1748,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: int
             Default: 20
-        
-        blocking_factors --
-            Blocking factors are used to enforce piecewise constant inputs. The
-            inputs may only change values at some of the element boundaries.
-            The option is either None (disabled), given as an instance of
-            pyjmi.optimization.casadi_collocation.BlockingFactors or as a list
-            of blocking factors.
-
-            If the options is a list of blocking factors, then each element in
-            the list specifies the number of collocation elements for which all
-            of the inputs must be constant. For example, if blocking_factors ==
-            [2, 2, 1], then the inputs will attain 3 different values (number
-            of elements in the list), and it will change values between
-            collocation element number 2 and 3 as well as number 4 and 5. The
-            sum of all elements in the list must be the same as the number of
-            collocation elements and the length of the list determines the
-            number of separate values that the inputs may attain.
-
-            See the documentation of the BlockingFactors class for how to use
-            it.
-            
-            If blocking_factors is None, then the usual collocation polynomials
-            are instead used to represent the controls.
-            
-            Type: None, iterable of ints, or instance of
-                  pyjmi.optimization.casadi_collocation.BlockingFactors
-            Default: None
         
         quadrature_constraint --
             Whether to use quadrature continuity constraints. This option is
@@ -1779,13 +1813,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: False
-        
-        external_data --
-            Data used to penalize, constrain or eliminate certain variables.
-            
-            Type: None or
-            pyjmi.optimization.casadi_collocation.ExternalData
-            Default: None
 
         mutable_external_data --
             True: If the external_data option is used, the external data
@@ -1793,31 +1820,6 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
             Type: bool
             Default: True
-
-        delayed_feedback --
-            Experimental feature used to add delay constraints to the
-            optimization problem.
-
-            If not None, should be a dict with mappings
-            'delayed_var': ('undelayed_var', delay_ne).
-            For each such pair, adds the the constraint that the variable
-            'delayed_var' equals the value of the variable 'undelayed_var'
-            delayed by delay_ne elements. The initial part of the trajectory
-            for 'delayed_var' is fixed to its initial guess given by the
-            init_traj option or the initialGuess attribute.
-
-            'delayed_var' will typically be an input.
-            This is an experimental feature and is subject to change.
-
-            Type: None or dict
-            Default: None
-
-        solver --
-            Specifies the nonlinear programming solver to be used. Possible
-            choices are 'IPOPT' and 'WORHP'.
-
-            Type: String
-            Default: 'IPOPT'
 
         explicit_hessian --
             Explicitly construct the Lagrangian Hessian, rather than rely on
