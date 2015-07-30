@@ -527,7 +527,7 @@ abstract public class TestAnnotationizerHelper {
      * Performs the flattening step of the compilation.
      */
     protected FClass flatten(InstClassDecl icd) {
-        FClass fc = FClass.create(icd, filePath, null, null);
+        FClass fc = FClass.create(icd, null);
         Collection<Problem> problems = null;
         try {
             icd.flattenInstClassDecl(fc);
@@ -810,21 +810,22 @@ abstract public class TestAnnotationizerHelper {
 		public ErrorTestCase(ClassDecl cd, String filePath, String className) throws Exception {
 			super(cd, filePath, className);
 		}
-		
-		protected void process() throws Exception {
-			super.process();
-			try {
-				compile();
-				throw new ModelicaException(noExceptionMessage());
-			} catch (CompilerException e) {
-				StringBuilder str = new StringBuilder();
-				str.append(e.getProblems().size() + " errors found:\n");
-				for (Problem p : e.getProblems()) 
-					str.append(p.toString()+"\n");
-				message = prepare(str.toString());
-			}
-		}
-		
+
+        protected void process() throws Exception {
+            super.process();
+            try {
+                compile();
+                throw new ModelicaException(noExceptionMessage());
+            } catch (CompilerException e) {
+                StringBuilder str = new StringBuilder();
+                str.append(e.getProblems().size() + " errors found:\n\n");
+                for (Problem p : e.getProblems()) 
+                    str.append(p.toString() + "\n\n");
+                str.deleteCharAt(str.length() - 1);
+                message = prepare(str.toString());
+            }
+        }
+
 		/**
 		 * Returns an error message for when no errors were detected in test model.
 		 */

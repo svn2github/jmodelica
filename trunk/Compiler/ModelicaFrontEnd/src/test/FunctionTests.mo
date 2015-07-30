@@ -1090,15 +1090,15 @@ end FunctionBinding2;
 model FunctionBinding3
  Real x = TestFunction1(1, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding3",
-			description="Function call with too many arguments",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding3",
+            description="Function call with too many arguments",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1091, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction1(): too many positional arguments
 ")})));
 end FunctionBinding3;
@@ -1106,18 +1106,18 @@ end FunctionBinding3;
 model FunctionBinding4
  Real x = TestFunction3();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding4",
-			description="Function call with too few arguments: no arguments",
-			variability_propagation=false,
-			errorMessage="
-2 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding4",
+            description="Function call with too few arguments: no arguments",
+            variability_propagation=false,
+            errorMessage="
+2 errors found:
+
+Error at line 1107, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i1
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+
+Error at line 1107, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding4;
@@ -1125,15 +1125,15 @@ end FunctionBinding4;
 model FunctionBinding5
  Real x = TestFunction3(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding5",
-			description="Function call with too few arguments: one positional argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding5",
+            description="Function call with too few arguments: one positional argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1126, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding5;
@@ -1243,15 +1243,15 @@ end FunctionBinding9;
 model FunctionBinding10
  Real x = TestFunction3(1, i3=2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding10",
-			description="Function call with too few arguments: missing middle argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding10",
+            description="Function call with too few arguments: missing middle argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1244, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): missing argument for required input i2
 ")})));
 end FunctionBinding10;
@@ -1259,15 +1259,15 @@ end FunctionBinding10;
 model FunctionBinding11
  Real x = TestFunction2(i3=1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding11",
-			description="Function call with named arguments: non-existing input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding11",
+            description="Function call with named arguments: non-existing input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1260, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): no input matching named argument i3 found
 ")})));
 end FunctionBinding11;
@@ -1275,15 +1275,15 @@ end FunctionBinding11;
 model FunctionBinding12
  Real x = TestFunction2(o1=1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding12",
-			description="Function call with named arguments: using output as input",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding12",
+            description="Function call with named arguments: using output as input",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1276, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): no input matching named argument o1 found
 ")})));
 end FunctionBinding12;
@@ -1291,15 +1291,15 @@ end FunctionBinding12;
 model FunctionBinding13
  Real x = TestFunction2(1, 2, i1=3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding13",
-			description="Function call with named arguments: giving an input value twice",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding13",
+            description="Function call with named arguments: giving an input value twice",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1292, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 end FunctionBinding13;
@@ -1307,15 +1307,15 @@ end FunctionBinding13;
 model FunctionBinding14
  Real x = TestFunction2(1, 2, i1=3, i1=3, i1=3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionBinding14",
-			description="Function call with named arguments: giving an input value four times",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionBinding14",
+            description="Function call with named arguments: giving an input value four times",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1308, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): multiple arguments matches input i1
 ")})));
 end FunctionBinding14;
@@ -1581,18 +1581,18 @@ model BadFunctionCall1
   Real x = NonExistingFunction(1, 2);
   Real y = NonExistingFunction();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BadFunctionCall1",
-			description="Call to non-existing function",
-			variability_propagation=false,
-			errorMessage="
-2 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadFunctionCall1",
+            description="Call to non-existing function",
+            variability_propagation=false,
+            errorMessage="
+2 errors found:
+
+Error at line 1581, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find function declaration for NonExistingFunction()
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+
+Error at line 1582, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find function declaration for NonExistingFunction()
 ")})));
 end BadFunctionCall1;
@@ -1602,18 +1602,18 @@ model BadFunctionCall2
   Real x = notAFunction(1, 2);
   Real y = notAFunction();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BadFunctionCall2",
-			description="Call to component as function",
-			variability_propagation=false,
-			errorMessage="
-2 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadFunctionCall2",
+            description="Call to component as function",
+            variability_propagation=false,
+            errorMessage="
+2 errors found:
+
+Error at line 1602, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find function declaration for notAFunction()
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+
+Error at line 1603, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find function declaration for notAFunction()
 ")})));
 end BadFunctionCall2;
@@ -1626,18 +1626,18 @@ model BadFunctionCall3
   Real x = NotAFunctionClass(1, 2);
   Real y = NotAFunctionClass();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BadFunctionCall3",
-			description="Call to non-function class as function",
-			variability_propagation=false,
-			errorMessage="
-2 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BadFunctionCall3",
+            description="Call to non-function class as function",
+            variability_propagation=false,
+            errorMessage="
+2 errors found:
+
+Error at line 1626, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The class NotAFunctionClass is not a function
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+
+Error at line 1627, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The class NotAFunctionClass is not a function
 ")})));
 end BadFunctionCall3;
@@ -1665,8 +1665,8 @@ model BadFunctionCall4
             description="Call to function in replaceable package that is not present in constraining type",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1479, column 16:
+
+Error at line 1660, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot use function C.f(), because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end BadFunctionCall4;
@@ -1919,15 +1919,15 @@ end FunctionType1;
 model FunctionType2
  Integer x = TestFunction1(1.0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType2",
-			description="Function type checks: function with Real output as binding exp for Integer component",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType2",
+            description="Function type checks: function with Real output as binding exp for Integer component",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 1920, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end FunctionType2;
@@ -1994,8 +1994,8 @@ model FunctionType5
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1548, column 28:
+
+Error at line 1988, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'true' is Boolean
 ")})));
@@ -2012,8 +2012,8 @@ model FunctionType6
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1566, column 28:
+
+Error at line 2006, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'a' is Boolean
 ")})));
@@ -2059,8 +2059,8 @@ model FunctionType8
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1613, column 39:
+
+Error at line 2053, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
     type of 'true' is Boolean
 ")})));
@@ -2069,15 +2069,15 @@ end FunctionType8;
 model FunctionType9
  String x = TestFunctionString("test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionType9",
-			description="Function type checks: String literal arg, String input (error for now)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType9",
+            description="Function type checks: String literal arg, String input (error for now)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 1303, column 7:
+
+Compliance error at line 2069, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   String variables are not supported
 ")})));
 end FunctionType9;
@@ -2086,15 +2086,15 @@ model FunctionType10
  parameter String a = "test";
  String x = TestFunctionString(a);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionType10",
-			description="Function type checks: String component arg, String input (error for now)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionType10",
+            description="Function type checks: String component arg, String input (error for now)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Compliance error at line 1327, column 29:
+
+Compliance error at line 2086, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   String variables are not supported
 ")})));
 end FunctionType10;
@@ -2109,11 +2109,11 @@ model FunctionType11
             variability_propagation=false,
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Compliance error at line 1662, column 20:
+
+Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   String variables are not supported
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1663, column 32:
+
+Error at line 2103, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
     type of '1' is Integer
 ")})));
@@ -2125,15 +2125,15 @@ model FunctionType12
 equation
  (x, y) = TestFunction2(1, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType12",
-			description="Function type checks: 2 outputs, 2nd wrong type",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType12",
+            description="Function type checks: 2 outputs, 2nd wrong type",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2126, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of component y and output o2 are not compatible
 ")})));
 end FunctionType12;
@@ -2145,18 +2145,18 @@ model FunctionType13
 equation
  (x, y, z) = TestFunction3(1, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType13",
-			description="Function type checks: 3 outputs, 1st and 3rd wrong type",
-			variability_propagation=false,
-			errorMessage="
-2 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType13",
+            description="Function type checks: 3 outputs, 1st and 3rd wrong type",
+            variability_propagation=false,
+            errorMessage="
+2 errors found:
+
+Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): types of component x and output o1 are not compatible
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+
+Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
 end FunctionType13;
@@ -2168,15 +2168,15 @@ model FunctionType14
 equation
  (x, y, z) = TestFunction2(1, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType14",
-			description="Function type checks: 2 outputs, 3 components assigned",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType14",
+            description="Function type checks: 2 outputs, 3 components assigned",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2169, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Too many components assigned from function call: TestFunction2() has 2 output(s)
 ")})));
 end FunctionType14;
@@ -2187,15 +2187,15 @@ model FunctionType15
 equation
  (x, , z) = TestFunction3(1, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType15",
-			description="Function type checks: 3 outputs, 2nd skipped, 3rd wrong type",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType15",
+            description="Function type checks: 3 outputs, 2nd skipped, 3rd wrong type",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2188, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction3(): types of component z and output o3 are not compatible
 ")})));
 end FunctionType15;
@@ -2206,15 +2206,15 @@ model FunctionType16
 equation
  (x, y) = sin(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionType16",
-			description="Function type checks: assigning 2 components from sin()",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionType16",
+            description="Function type checks: assigning 2 components from sin()",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2207, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Too many components assigned from function call: sin() has 1 output(s)
 ")})));
 end FunctionType16;
@@ -2237,8 +2237,8 @@ model FunctionType17
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1784, column 8:
+
+Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type error in expression: x + y
     type of 'x' is Real[:, :]
     type of 'y' is Real[2, :]
@@ -2256,8 +2256,8 @@ model BuiltInCallType1
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1810, column 16:
+
+Error at line 2250, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sin(): types of positional argument 1 and input u are not compatible
     type of 'true' is Boolean
 ")})));
@@ -2273,8 +2273,8 @@ model BuiltInCallType2
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1827, column 17:
+
+Error at line 2267, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
     type of '\"test\"' is String
 ")})));
@@ -2299,15 +2299,15 @@ end BuiltInCallType3;
 model BuiltInCallType4
   Integer x = sqrt(9.0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType4",
-			description="Built-in type checks: using return value from sqrt() as Integer",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType4",
+            description="Built-in type checks: using return value from sqrt() as Integer",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2300, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end BuiltInCallType4;
@@ -2315,15 +2315,15 @@ end BuiltInCallType4;
 model BuiltInCallType5
   Real x = sin();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType5",
-			description="Built-in type checks: calling sin() without arguments",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType5",
+            description="Built-in type checks: calling sin() without arguments",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2316, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sin(): missing argument for required input u
 ")})));
 end BuiltInCallType5;
@@ -2331,15 +2331,15 @@ end BuiltInCallType5;
 model BuiltInCallType6
   Real x = atan2(9.0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType6",
-			description="Built-in type checks: calling atan2() with only one argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType6",
+            description="Built-in type checks: calling atan2() with only one argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2332, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function atan2(): missing argument for required input u2
 ")})));
 end BuiltInCallType6;
@@ -2354,8 +2354,8 @@ model BuiltInCallType7
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-Semantic error at line 1908, column 23:
+
+Error at line 2348, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
     type of '\"test\"' is String
 ")})));
@@ -2382,15 +2382,15 @@ end BuiltInCallType8;
 model BuiltInCallType9
    Real x[3] = zeros(3.0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType9",
-			description="Built-in type checks: calling zeros() with Real literal as argument",
-			variability_propagation=false,
-			errorMessage="
-1 error(s) found:
-Error: in file 'FunctionTests.mo':
-Semantic error at line 1, column 1:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType9",
+            description="Built-in type checks: calling zeros() with Real literal as argument",
+            variability_propagation=false,
+            errorMessage="
+1 errors found:
+
+Error at line 2383, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Argument of zeros() is not compatible with Integer: 3.0
 ")})));
 end BuiltInCallType9;
@@ -2398,18 +2398,18 @@ end BuiltInCallType9;
 model BuiltInCallType10
    Real x[3] = ones(3, "test");
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="BuiltInCallType10",
-			description="Built-in type checks: calling ones() with String literal as second argument",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="BuiltInCallType10",
+            description="Built-in type checks: calling ones() with String literal as second argument",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1234, column 9:
+
+Error at line 2399, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, \"test\"]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1223, column 24:
+
+Error at line 2399, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Argument of ones() is not compatible with Integer: \"test\"
 ")})));
 end BuiltInCallType10;
@@ -2862,15 +2862,15 @@ algorithm
   x := 1.0;
  end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeIf1",
-			description="Type checks in algorithms: Integer literal as test in if",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeIf1",
+            description="Type checks in algorithms: Integer literal as test in if",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1944, column 5:
+
+Error at line 2861, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf1;
@@ -2883,15 +2883,15 @@ algorithm
   x := 1.0;
  end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeIf2",
-			description="Type checks in algorithms: Integer component as test in if",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeIf2",
+            description="Type checks in algorithms: Integer component as test in if",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1382, column 5:
+
+Error at line 2882, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf2;
@@ -2904,15 +2904,15 @@ algorithm
   x := 1.0;
  end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeIf3",
-			description="Type checks in algorithms: arithmetic expression as test in if",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeIf3",
+            description="Type checks in algorithms: arithmetic expression as test in if",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1403, column 5:
+
+Error at line 2903, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf3;
@@ -2924,15 +2924,15 @@ algorithm
   x := 1.0;
  end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeIf4",
-			description="Type checks in algorithms: Boolean vector as test in if",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeIf4",
+            description="Type checks in algorithms: Boolean vector as test in if",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1422, column 5:
+
+Error at line 2923, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of if statement is not Boolean
 ")})));
 end AlgorithmTypeIf4;
@@ -2970,15 +2970,15 @@ algorithm
   x := 1.0;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhen1",
-			description="Type checks in algorithms: Integer literal as test in when",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhen1",
+            description="Type checks in algorithms: Integer literal as test in when",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1469, column 7:
+
+Error at line 2969, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen1;
@@ -2991,15 +2991,15 @@ algorithm
   x := 1.0;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhen2",
-			description="Type checks in algorithms: Integer component as test in when",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhen2",
+            description="Type checks in algorithms: Integer component as test in when",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1489, column 7:
+
+Error at line 2990, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen2;
@@ -3012,15 +3012,15 @@ algorithm
   x := 1.0;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhen3",
-			description="Type checks in algorithms: arithmetic expression as test in when",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhen3",
+            description="Type checks in algorithms: arithmetic expression as test in when",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1509, column 7:
+
+Error at line 3011, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Test expression of when statement isn't Boolean scalar or vector expression
 ")})));
 end AlgorithmTypeWhen3;
@@ -3080,15 +3080,15 @@ algorithm
   x := 1.0;
  end while;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhile1",
-			description="Type checks in algorithms: Integer literal as test in while",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhile1",
+            description="Type checks in algorithms: Integer literal as test in while",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1363, column 5:
+
+Error at line 3079, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile1;
@@ -3101,15 +3101,15 @@ algorithm
   x := 1.0;
  end while;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhile2",
-			description="Type checks in algorithms: Integer component as test in while",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhile2",
+            description="Type checks in algorithms: Integer component as test in while",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1382, column 5:
+
+Error at line 3100, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile2;
@@ -3122,15 +3122,15 @@ algorithm
   x := 1.0;
  end while;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhile3",
-			description="Type checks in algorithms: arithmetic expression as test in while",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhile3",
+            description="Type checks in algorithms: arithmetic expression as test in while",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1403, column 5:
+
+Error at line 3121, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile3;
@@ -3142,15 +3142,15 @@ algorithm
   x := 1.0;
  end while;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeWhile4",
-			description="Type checks in algorithms: Boolean vector as test in while",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeWhile4",
+            description="Type checks in algorithms: Boolean vector as test in while",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1422, column 5:
+
+Error at line 3141, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Type of test expression of while statement is not Boolean
 ")})));
 end AlgorithmTypeWhile4;
@@ -3184,15 +3184,15 @@ model AlgorithmTypeAssign1
 algorithm
  x := 1.0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeAssign1",
-			description="Type checks in algorithms: assign Real to Integer component",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeAssign1",
+            description="Type checks in algorithms: assign Real to Integer component",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1674, column 2:
+
+Error at line 3185, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Types of right and left side of assignment are not compatible
 ")})));
 end AlgorithmTypeAssign1;
@@ -3242,15 +3242,15 @@ model AlgorithmTypeAssign4
 algorithm
  x := "foo";
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeAssign4",
-			description="Type checks in algorithms: assign String to Real component",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeAssign4",
+            description="Type checks in algorithms: assign String to Real component",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1715, column 2:
+
+Error at line 3243, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Types of right and left side of assignment are not compatible
 ")})));
 end AlgorithmTypeAssign4;
@@ -3264,15 +3264,15 @@ algorithm
   x := i;
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeForIndex1",
-			description="Type checks in algorithms: assigning to for index",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeForIndex1",
+            description="Type checks in algorithms: assigning to for index",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1794, column 3:
+
+Error at line 3263, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Can not assign a value to a for loop index
 ")})));
 end AlgorithmTypeForIndex1;
@@ -3285,15 +3285,15 @@ algorithm
   (i, x) := TestFunction2(1, 2);
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AlgorithmTypeForIndex2",
-			description="Type checks in algorithms: assigning to for index (FunctionCallStmt)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AlgorithmTypeForIndex2",
+            description="Type checks in algorithms: assigning to for index (FunctionCallStmt)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 1815, column 3:
+
+Error at line 3285, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Can not assign a value to a for loop index
 ")})));
 end AlgorithmTypeForIndex2;
@@ -8076,15 +8076,15 @@ model UnknownArray6
  
  Real x[2] = f({1,2,3});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownArray6",
-			description="Using functions with unknown array sizes: wrong size",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray6",
+            description="Using functions with unknown array sizes: wrong size",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 3747, column 7:
+
+Error at line 8077, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end UnknownArray6;
@@ -8103,15 +8103,15 @@ model UnknownArray7
 equation
  (x, y) = f({1,2,3});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownArray7",
-			description="Using functions with unknown array sizes: wrong size",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray7",
+            description="Using functions with unknown array sizes: wrong size",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 3773, column 2:
+
+Error at line 8104, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function f(): array sizes of component y and output c are not compatible
 ")})));
 end UnknownArray7;
@@ -8127,18 +8127,18 @@ model UnknownArray8
  
  Real x[2] = f({1,2,3});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownArray8",
-			description="Using functions with unknown array sizes: circular size",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray8",
+            description="Using functions with unknown array sizes: circular size",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 3796, column 7:
+
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [:]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 3796, column 14:
+
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Could not evaluate array size of output b
 ")})));
 end UnknownArray8;
@@ -8629,21 +8629,21 @@ model UnknownArray19
  
  Real x[2,2] = f({{1,2}, {3,4}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownArray19",
-			description="Function inputs of unknown size: using size() of non-existent component",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray19",
+            description="Function inputs of unknown size: using size() of non-existent component",
+            variability_propagation=false,
+            errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4429, column 32:
+
+Error at line 8626, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find class or component declaration for b
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4433, column 7:
+
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, :]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4433, column 16:
+
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Could not evaluate array size of output c
 ")})));
 end UnknownArray19;
@@ -10351,15 +10351,15 @@ model IncompleteFunc1
  
  Real x = f(2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IncompleteFunc1",
-			description="Wrong contents of called function: neither algorithm nor external",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IncompleteFunc1",
+            description="Wrong contents of called function: neither algorithm nor external",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4251, column 11:
+
+Error at line 10352, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc1;
@@ -10377,15 +10377,15 @@ model IncompleteFunc2
  
  Real x = f(2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IncompleteFunc2",
-			description="Wrong contents of called function: 2 algorithm",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IncompleteFunc2",
+            description="Wrong contents of called function: 2 algorithm",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4276, column 11:
+
+Error at line 10378, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc2;
@@ -10402,15 +10402,15 @@ model IncompleteFunc3
  
  Real x = f(2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="IncompleteFunc3",
-			description="Wrong contents of called function: both algorithm and external",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="IncompleteFunc3",
+            description="Wrong contents of called function: both algorithm and external",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 4300, column 11:
+
+Error at line 10403, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end IncompleteFunc3;
@@ -10632,18 +10632,18 @@ model ExternalFunc7
  
  Real x = f(2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ExternalFunc7",
-			description="External functions: simple func, language \"C++\"",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExternalFunc7",
+            description="External functions: simple func, language \"C++\"",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 9444, column 2:
+
+Error at line 10627, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The external language specification \"C++\" is not supported
-Error: in file '...':
-Semantic error at line 9447, column 2:
+
+Error at line 10630, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The external language specification \"C++\" is not supported
 ")})));
 end ExternalFunc7;
@@ -10953,17 +10953,17 @@ model ExternalFuncError1
 	Real x;
 equation
 	x = f(x);
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ExternalFuncError1",
-			description="",
-			variability_propagation=false,
-			generate_block_jacobian=true,
-			errorMessage="
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExternalFuncError1",
+            description="",
+            variability_propagation=false,
+            generate_block_jacobian=true,
+            errorMessage="
 1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Unable to determine derivative function for function 'FunctionTests.ExternalFuncError1.f'
 ")})));
 end ExternalFuncError1;
@@ -11275,18 +11275,18 @@ model InputAsArraySize5
 	Integer n = 3;
 	Real x[3] = f(n);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InputAsArraySize5",
-			description="Input as array size of output in function: variable passed",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InputAsArraySize5",
+            description="Input as array size of output in function: variable passed",
+            variability_propagation=false,
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 5605, column 7:
+
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [n]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 5605, column 14:
+
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Could not evaluate array size of output x
 ")})));
 end InputAsArraySize5;
@@ -11302,15 +11302,15 @@ model InputAsArraySize6
 	
 	Real x[3] = f(4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InputAsArraySize6",
-			description="Input as array size of output in function: wrong value passed",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InputAsArraySize6",
+            description="Input as array size of output in function: wrong value passed",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/FunctionTests.mo':
-Semantic error at line 5631, column 7:
+
+Error at line 11303, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end InputAsArraySize6;
@@ -14307,21 +14307,21 @@ equation
   y = semiLinear(x,s[2],sb);
   y = semiLinear(x,s[2],sc);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SemiLinear6",
-			description="Test of the semiLinear() operator. Zero flow transformation error",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear6",
+            description="Test of the semiLinear() operator. Zero flow transformation error",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
 y = semiLinear(x, sa, s[1])
 y = semiLinear(x, s[1], s[2])
 y = semiLinear(x, s[2], sb)
 y = semiLinear(x, s[2], sc)
-			
+
 ")})));
 end SemiLinear6;
 
@@ -14410,8 +14410,8 @@ equation
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 12054, column 9:
+
+Error at line 14404, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
 ")})));
 end SemiLinear9;
@@ -14727,6 +14727,7 @@ package DerivativeAnnotation
             annotation(Inline=false, derivative);
         end F;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MissingReference1",
@@ -14734,8 +14735,7 @@ package DerivativeAnnotation
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14727, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Function name is missing in derivative annotation declaration
 ")})));
     end MissingReference1;
@@ -14749,6 +14749,7 @@ Semantic error at line 1, column 1:
             annotation(Inline=false, derivative=notAFunction);
         end F;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MissingDecl1",
@@ -14756,8 +14757,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14749, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find function declaration for notAFunction
 ")})));
     end MissingDecl1;
@@ -14771,6 +14771,7 @@ Semantic error at line 1, column 1:
             annotation(Inline=false, derivative=1+2);
         end F;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidDecl1",
@@ -14778,8 +14779,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14771, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Invalid derivative function reference
 ")})));
     end InvalidDecl1;
@@ -14796,6 +14796,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidDecl2",
@@ -14803,8 +14804,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14793, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   The class B is not a function
 ")})));
     end InvalidDecl2;
@@ -14828,6 +14828,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MultipleOrder1",
@@ -14835,8 +14836,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14818, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Multiple declarations of the order attribute
 ")})));
     end MultipleOrder1;
@@ -14860,6 +14860,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidOrder1",
@@ -14867,8 +14868,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14850, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Expecting integer typed expression for order attribute
 ")})));
     end InvalidOrder1;
@@ -14892,6 +14892,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidOrder2",
@@ -14899,8 +14900,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14882, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Order attribute must be greater or equal to one
 ")})));
     end InvalidOrder2;
@@ -14925,6 +14925,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time, 2);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MultipleVariableRestrictions1",
@@ -14932,8 +14933,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14915, column 64, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions1;
@@ -14958,6 +14958,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time, 2);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MultipleVariableRestrictions2",
@@ -14965,8 +14966,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14948, column 66, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions2;
@@ -14991,6 +14991,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time, 2);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_MultipleVariableRestrictions3",
@@ -14998,8 +14999,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 14981, column 64, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Multiple noDerivative or zeroDerivative declarations for x2
 ")})));
     end MultipleVariableRestrictions3;
@@ -15023,6 +15023,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidVariable1",
@@ -15030,8 +15031,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 15013, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Expecting variable reference for noDerivative annotation
 ")})));
     end InvalidVariable1;
@@ -15055,6 +15055,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidVariable2",
@@ -15062,8 +15063,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 15045, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Expecting variable reference for zeroDerivative annotation
 ")})));
     end InvalidVariable2;
@@ -15087,6 +15087,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidVariable3",
@@ -15094,8 +15095,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 15077, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable3;
@@ -15119,6 +15119,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_InvalidVariable4",
@@ -15126,8 +15127,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 15109, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Unable to find notAVar
 ")})));
     end InvalidVariable4;
@@ -15151,6 +15151,7 @@ Semantic error at line 1, column 1:
             Real y;
         end B;
         Real x = F(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DerivativeAnnotation_NonInputVariable1",
@@ -15158,8 +15159,7 @@ Semantic error at line 1, column 1:
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 15141, column 48, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   noDerivative annotation may only reference input variables
 ")})));
     end NonInputVariable1;

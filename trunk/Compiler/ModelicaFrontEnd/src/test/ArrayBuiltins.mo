@@ -109,8 +109,8 @@ model SizeExp6
             description="Size operator: too high variability of dim",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 104, column 11:
+
+Error at line 104, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     'd' is of discrete-time variability
 ")})));
@@ -126,8 +126,8 @@ model SizeExp7
             description="Size operator: array as dim",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 121, column 28:
+
+Error at line 122, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '{1, 2}' is Integer[2]
 ")})));
@@ -143,8 +143,8 @@ model SizeExp8
             description="Size operator: Real as dim",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 138, column 28:
+
+Error at line 140, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '1.0' is Real
 ")})));
@@ -160,8 +160,8 @@ model SizeExp9
             description="Size operator: too low dim",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 155, column 11:
+
+Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '0' evaluates to 0, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -177,8 +177,8 @@ model SizeExp10
             description="Size operator: too high dim",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 172, column 11:
+
+Error at line 176, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '3' evaluates to 3, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -319,14 +319,14 @@ end FillExp2;
 model FillExp3
  Real x = fill(1 + 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FillExp3",
-			description="Fill operator: no size args",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Fill_FillExp3",
+            description="Fill operator: no size args",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 892, column 11:
+
+Error at line 320, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Too few arguments to fill(), must have at least 2
 ")})));
 end FillExp3;
@@ -335,14 +335,14 @@ end FillExp3;
 model FillExp4
  Real x[2] = fill(1 + 2, 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FillExp4",
-			description="Fill operator:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Fill_FillExp4",
+            description="Fill operator:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 897, column 7:
+
+Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end FillExp4;
@@ -351,14 +351,14 @@ end FillExp4;
 model FillExp5
  Real x[2] = fill(1 + 2, 2.0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FillExp5",
-			description="Fill operator: Real size arg",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Fill_FillExp5",
+            description="Fill operator: Real size arg",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 897, column 26:
+
+Error at line 352, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Argument of fill() is not compatible with Integer: 2.0
 ")})));
 end FillExp5;
@@ -368,17 +368,17 @@ model FillExp6
  Integer n = 2;
  Real x[2] = fill(1 + 2, n);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FillExp6",
-			description="Fill operator: too high variability of size arg",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Fill_FillExp6",
+            description="Fill operator: too high variability of size arg",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1145, column 7:
+
+Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1145, column 26:
+
+Error at line 369, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Argument of fill() does not have constant or parameter variability: n
 ")})));
 end FillExp6;
@@ -387,17 +387,17 @@ end FillExp6;
 model FillExp7
  Real x[2] = fill();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FillExp7",
-			description="Fill operator: no arguments at all",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Fill_FillExp7",
+            description="Fill operator: no arguments at all",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1259, column 7:
+
+Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1259, column 14:
+
+Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function fill(): missing argument for required input s
 ")})));
 end FillExp7;
@@ -505,8 +505,8 @@ model MinExp5
             description="Min operator: mixed types",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 500, column 11:
+
+Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Type error in expression: min(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -523,12 +523,12 @@ model MinExp6
             description="Min operator: 2 array args",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 518, column 15:
+
+Error at line 518, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 518, column 22:
+
+Error at line 518, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
 ")})));
@@ -544,8 +544,8 @@ model MinExp7
             description="Min operator: 1 scalar arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 539, column 15:
+
+Error at line 539, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
 ")})));
@@ -587,17 +587,17 @@ end MinExp9;
 model MinExp10
  Real x = min(i * j for i in {{1,2},{3,4}}, j in 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="MinExp10",
-			description="Reduction-expression with min(): non-vector index expressions",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Min_MinExp10",
+            description="Reduction-expression with min(): non-vector index expressions",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 589, column 25:
+
+Error at line 588, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 589, column 45:
+
+Error at line 588, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MinExp10;
@@ -606,14 +606,14 @@ end MinExp10;
 model MinExp11
  Real x = min({i * j, 2} for i in 1:4, j in 2:5);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="MinExp11",
-			description="Reduction-expression with min(): non-scalar expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Min_MinExp11",
+            description="Reduction-expression with min(): non-scalar expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 645, column 11:
+
+Error at line 607, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The expression of a reduction-expression must be scalar, except for sum(): {i * j, 2} has 1 dimension(s)
 ")})));
 end MinExp11;
@@ -622,14 +622,14 @@ end MinExp11;
 model MinExp12
  Real x = min(false for i in 1:4, j in 2:5);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="MinExp12",
-			description="Reduction-expression with min(): wrong type in expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Min_MinExp12",
+            description="Reduction-expression with min(): wrong type in expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1193, column 7:
+
+Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MinExp12;
@@ -717,8 +717,8 @@ model MaxExp5
             description="Max operator: mixed types",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 712, column 11:
+
+Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Type error in expression: max(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -735,12 +735,12 @@ model MaxExp6
             description="Max operator: 2 array args",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 730, column 15:
+
+Error at line 730, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 730, column 22:
+
+Error at line 730, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
 ")})));
@@ -756,8 +756,8 @@ model MaxExp7
             description="Max operator: 1 scalar arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 751, column 15:
+
+Error at line 751, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
 ")})));
@@ -799,17 +799,17 @@ end MaxExp9;
 model MaxExp10
  Real x = max(i * j for i in {{1,2},{3,4}}, j in 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="MaxExp10",
-			description="Reduction-expression with max(): non-vector index expressions",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Max_MaxExp10",
+            description="Reduction-expression with max(): non-vector index expressions",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 812, column 25:
+
+Error at line 800, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 812, column 45:
+
+Error at line 800, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MaxExp10;
@@ -823,14 +823,14 @@ end MaxExp11;
 model MaxExp12
  Real x = max(false for i in 1:4, j in 2:5);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="MaxExp12",
-			description="Reduction-expression with max(): wrong type in expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Max_MaxExp12",
+            description="Reduction-expression with max(): wrong type in expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1462, column 7:
+
+Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MaxExp12;
@@ -920,8 +920,8 @@ model SumExp5
             description="sum() expressions: scalar input",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 915, column 15:
+
+Error at line 915, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function sum(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
 ")})));
@@ -1058,14 +1058,14 @@ end ProductExp4;
 model ProductExp5
  Real x = product();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Product_ProductExp5",
-			description="product() expressions: no input",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Product_ProductExp5",
+            description="product() expressions: no input",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1005, column 11:
+
+Error at line 1059, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function product(): missing argument for required input A
 ")})));
 end ProductExp5;
@@ -1079,8 +1079,8 @@ model ProductExp6
             description="product() expressions: scalar input",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1061, column 19:
+
+Error at line 1074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function product(): types of positional argument 1 and input A are not compatible
     type of '42' is Integer
 ")})));
@@ -1277,8 +1277,8 @@ equation
             description="Scalarization of transpose operator: too few dimensions of arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1272, column 15:
+
+Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
 ")})));
@@ -1294,8 +1294,8 @@ model Transpose6
             description="Scalarization of transpose operator: Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1289, column 24:
+
+Error at line 1289, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
 ")})));
@@ -1305,14 +1305,14 @@ end Transpose6;
 model Transpose7
  Integer x[2,1] = transpose({{1.0,2}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Transpose7",
-			description="Scalarization of transpose operator: Real[1,2] -> Integer[2,1]",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Transpose_Transpose7",
+            description="Scalarization of transpose operator: Real[1,2] -> Integer[2,1]",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 4892, column 10:
+
+Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Transpose7;
@@ -1604,8 +1604,8 @@ equation
             description="Scalarization of symmetric operator: too few dimensions of arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1580, column 15:
+
+Error at line 1599, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
 ")})));
@@ -1621,8 +1621,8 @@ model Symmetric6
             description="Scalarization of symmetric operator: Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1597, column 24:
+
+Error at line 1616, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
 ")})));
@@ -1632,14 +1632,14 @@ end Symmetric6;
 model Symmetric7
  Integer x[2,1] = symmetric({{1.0,2},{1,1}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Symmetric_Symmetric7",
-			description="Scalarization of symmetric operator: Real[1,2] -> Integer[2,1]",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Symmetric_Symmetric7",
+            description="Scalarization of symmetric operator: Real[1,2] -> Integer[2,1]",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 4892, column 10:
+
+Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Symmetric7;
@@ -1707,14 +1707,14 @@ end Cross2;
 model Cross3
  Integer x[3] = cross({1.0,2,3}, {4,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Cross3",
-			description="cross() operator: Real arg, assigning Integer component",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cross_Cross3",
+            description="cross() operator: Real arg, assigning Integer component",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6359, column 10:
+
+Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Cross3; 
@@ -1729,12 +1729,12 @@ model Cross4
             description="cross() operator: scalar arguments",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1721, column 20:
+
+Error at line 1724, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1721, column 23:
+
+Error at line 1724, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
 ")})));
@@ -1750,12 +1750,12 @@ model Cross5
             description="cross() operator: Integer[4] arguments",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1742, column 23:
+
+Error at line 1745, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1742, column 34:
+
+Error at line 1745, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{4, 5, 6, 7}' is Integer[4]
 ")})));
@@ -1771,12 +1771,12 @@ model Cross6
             description="cross() operator: String[3] arguments",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1741, column 22:
+
+Error at line 1766, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1741, column 37:
+
+Error at line 1766, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
 ")})));
@@ -1792,12 +1792,12 @@ model Cross7
             description="cross() operator: too many dims",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1762, column 25:
+
+Error at line 1787, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1762, column 52:
+
+Error at line 1787, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
 ")})));
@@ -1847,12 +1847,12 @@ model Skew2
             description="skew() operator: bad arg",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1816, column 24:
+
+Error at line 1841, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1817, column 26:
+
+Error at line 1842, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
 ")})));
@@ -1910,14 +1910,14 @@ end OuterProduct2;
 model OuterProduct3
  Integer x[3,3] = outerProduct({1.0,2,3}, {4,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		ErrorTestCase(
-			name="OuterProduct3",
-			description="outerProduct() operator: wrong numeric type",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="OuterProduct_OuterProduct3",
+            description="outerProduct() operator: wrong numeric type",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 1463, column 19:
+
+Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end OuterProduct3; 
@@ -1932,12 +1932,12 @@ model OuterProduct4
             description="outerProduct() operator: scalar arguments",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1902, column 27:
+
+Error at line 1927, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1902, column 30:
+
+Error at line 1927, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
 ")})));
@@ -1953,12 +1953,12 @@ model OuterProduct5
             description="outerProduct() operator: wrong type",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1923, column 31:
+
+Error at line 1948, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1923, column 46:
+
+Error at line 1948, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
 ")})));
@@ -1974,12 +1974,12 @@ model OuterProduct6
             description="outerProduct() operator: too many dims",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1944, column 36:
+
+Error at line 1969, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 1944, column 63:
+
+Error at line 1969, column 63, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
 ")})));
@@ -2057,14 +2057,14 @@ end ArrayCat3;
 model ArrayCat4
  Integer x[5,2] = cat(2, {{1,2},{3,4}}, {{5,6,0}}, {{7,8},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat4",
-			description="cat() operator: size mismatch",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat4",
+            description="cat() operator: size mismatch",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6656, column 19:
+
+Error at line 2058, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat4;
@@ -2073,14 +2073,14 @@ end ArrayCat4;
 model ArrayCat5
  Integer x[2,5] = cat(2, {{1,2},{6,7}}, {{3},{8},{0}}, {{4,5},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat5",
-			description="cat() operator: size mismatch",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat5",
+            description="cat() operator: size mismatch",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6672, column 19:
+
+Error at line 2074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat5;
@@ -2089,14 +2089,14 @@ end ArrayCat5;
 model ArrayCat6
  Integer x[2,5] = cat(2, {{1.0,2},{6,7}}, {{3},{8}}, {{4,5},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat6",
-			description="cat() operator: type mismatch",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat6",
+            description="cat() operator: type mismatch",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6688, column 10:
+
+Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ArrayCat6;
@@ -2105,14 +2105,14 @@ end ArrayCat6;
 model ArrayCat6b
  Integer x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{3},{8}}, {{4,5},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat6b",
-			description="cat() operator: type mismatch",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat6b",
+            description="cat() operator: type mismatch",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6704, column 19:
+
+Error at line 2106, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat6b;
@@ -2122,14 +2122,14 @@ model ArrayCat7
  Integer d = 1;
  Integer x[4] = cat(d, {1,2}, {4,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat7",
-			description="cat() operator: to high variability of dim",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat7",
+            description="cat() operator: to high variability of dim",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6721, column 17:
+
+Error at line 2123, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Dimension argument of cat() does not have constant variability: d
 ")})));
 end ArrayCat7;
@@ -2156,14 +2156,14 @@ end ArrayCat8;
 model ArrayCat9
  Integer x[4] = cat(1.0, {1,2}, {4,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat9",
-			description="cat() operator: non-Integer dim",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat9",
+            description="cat() operator: non-Integer dim",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6743, column 17:
+
+Error at line 2157, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Dimension argument of cat() is not compatible with Integer: 1.0
 ")})));
 end ArrayCat9;
@@ -2172,14 +2172,14 @@ end ArrayCat9;
 model ArrayCat10
   Real x[2] = cat(1, {1}, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayCat10",
-			description="Records:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayCat10",
+            description="Records:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6797, column 15:
+
+Error at line 2173, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat10;
@@ -2296,14 +2296,14 @@ end ArrayShortCat3;
 model ArrayShortCat4
  Real x[2,3] = [{{1,2,3}}; {{4,5}}];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayShortCat4",
-			description="Shorthand array concatenation operator:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayShortCat4",
+            description="Shorthand array concatenation operator:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6862, column 16:
+
+Error at line 2297, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat4;
@@ -2312,14 +2312,14 @@ end ArrayShortCat4;
 model ArrayShortCat5
  Real x[3,2] = [{1,2,3}, {4,5}];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayShortCat5",
-			description="Shorthand array concatenation operator:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Cat_ArrayShortCat5",
+            description="Shorthand array concatenation operator:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6878, column 17:
+
+Error at line 2313, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat5;
@@ -2355,14 +2355,14 @@ model ArrayEnd2
  Real x[4] = {1,2,3,4};
  Real y = 2 - end;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayEnd2",
-			description="End operator: using in wrong place",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="End_ArrayEnd2",
+            description="End operator: using in wrong place",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 6924, column 15:
+
+Error at line 2356, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The end operator may only be used in array subscripts
 ")})));
 end ArrayEnd2;
@@ -2431,12 +2431,12 @@ model Scalar2
             description="Scalar operator: bad size",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2372, column 21:
+
+Error at line 2424, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[1, 1, 2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2373, column 21:
+
+Error at line 2425, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of '{{{{3}, {4}}}}' is Integer[1, 1, 2, 1]
 ")})));
@@ -2495,12 +2495,12 @@ model Vector3
             description="Vector operator: bad size",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2437, column 24:
+
+Error at line 2489, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2438, column 24:
+
+Error at line 2490, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{{{{1}, {2}}}, {{{3}, {4}}}}}' is Integer[1, 2, 1, 2, 1]
 ")})));
@@ -2543,8 +2543,8 @@ model Matrix2
             description="Matrix operator: bad size",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2486, column 26:
+
+Error at line 2538, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function matrix(): types of positional argument 1 and input A are not compatible
     type of '{{{1, 2}, {3, 4}}}' is Integer[1, 2, 2]
 ")})));
@@ -2615,8 +2615,8 @@ model Linspace3
             description="Linspace operator: wrong type of n",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2551, column 29:
+
+Error at line 2610, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function linspace(): types of positional argument 3 and input n are not compatible
     type of 'c' is Real
 ")})));
@@ -2635,8 +2635,8 @@ model Linspace4
             description="Linspace operator: wrong variability of n",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2571, column 14:
+
+Error at line 2630, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' is of discrete-time variability
 ")})));
@@ -2646,14 +2646,14 @@ end Linspace4;
 model Linspace5
  Integer x[4] = linspace(1, 3, 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Linspace5",
-			description="Linspace operator: using result as Integer",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Linspace5",
+            description="Linspace operator: using result as Integer",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 7057, column 10:
+
+Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Linspace5;
@@ -2746,8 +2746,8 @@ model Linspace8
             description="Linspace operator: to low value for n",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2708, column 14:
+
+Error at line 2741, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' evaluates to 1
 ")})));
@@ -2921,14 +2921,14 @@ end Identity1;
 model Identity2
   parameter Real A = identity(3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Identity2",
-			description="identity() operator:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Identity2",
+            description="identity() operator:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 7207, column 18:
+
+Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
@@ -2944,8 +2944,8 @@ model Identity3
             description="identity() operator:",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2862, column 27:
+
+Error at line 2939, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Argument of identity() must be a scalar parameter Integer expression
     'n' is of discrete-time variability
 ")})));
@@ -2961,8 +2961,8 @@ model Identity4
             description="identity() operator:",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2879, column 36:
+
+Error at line 2956, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function identity(): types of positional argument 1 and input n are not compatible
     type of '3.0' is Real
 ")})));
@@ -3009,16 +3009,16 @@ model Diagonal2
             description="diagonal() operator: wrong type of arg",
             errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2925, column 28:
+
+Error at line 3002, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2926, column 28:
+
+Error at line 3003, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '1' is Integer
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2927, column 31:
+
+Error at line 3004, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{true, true}' is Boolean[2]
 ")})));
@@ -3051,8 +3051,8 @@ model ScalarSize2
             description="Size of scalar dotted access",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
-Semantic error at line 2969, column 15:
+
+Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Type error in expression: {1} + Modelica.Constants.pi
     type of '{1}' is Integer[1]
     type of 'Modelica.Constants.pi' is Real
@@ -3193,14 +3193,14 @@ end NonVectorizedSalarization3;
 model InfArgsWithNamed
 	Real x[2,2] = ones(2, 2, xxx = 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InfArgsWithNamed",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InfArgsWithNamed",
+            description="",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayBuiltins.mo':
-Semantic error at line 2720, column 27:
+
+Error at line 3194, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function ones(): no input matching named argument xxx found
 ")})));
 end InfArgsWithNamed;

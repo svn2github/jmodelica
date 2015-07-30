@@ -512,15 +512,15 @@ model RecordType2
 equation
  y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType2",
-			description="Records: non-equivalent types (component name)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordType2",
+            description="Records: non-equivalent types (component name)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 246, column 2:
+
+Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end RecordType2;
@@ -542,15 +542,15 @@ model RecordType3
 equation
  y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType3",
-			description="Records: non-equivalent types (component type)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordType3",
+            description="Records: non-equivalent types (component type)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 275, column 2:
+
+Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end RecordType3;
@@ -646,15 +646,15 @@ model RecordType5
 equation
  y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType5",
-			description="Records: non-equivalent nested types",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordType5",
+            description="Records: non-equivalent nested types",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 342, column 2:
+
+Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end RecordType5;
@@ -719,15 +719,15 @@ model RecordType7
 	
 	A a[:];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordType7",
-			description="",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordType7",
+            description="",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 458, column 7:
+
+Error at line 718, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -818,15 +818,15 @@ model RecordBinding3
  A x = y;
  B y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordBinding3",
-			description="Records: binding expression, wrong type (incompatible record)",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordBinding3",
+            description="Records: binding expression, wrong type (incompatible record)",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 466, column 4:
+
+Error at line 818, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end RecordBinding3;
@@ -841,15 +841,15 @@ model RecordBinding4
  A x = y;
  A y[2];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordBinding4",
-			description="Records: binding expression, wrong array size",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordBinding4",
+            description="Records: binding expression, wrong array size",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 499, column 4:
+
+Error at line 841, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
@@ -870,8 +870,8 @@ model RecordBinding5
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 507, column 8:
+
+Error at line 864, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
@@ -907,14 +907,14 @@ model RecordBinding7
  A x(a(start = y));
  Real y = time;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordBinding7",
-			description="Modification on attribute or record member with non-parameter expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordBinding7",
+            description="Modification on attribute or record member with non-parameter expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 664, column 16:
+
+Error at line 907, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: y
 ")})));
 end RecordBinding7;
@@ -2036,8 +2036,8 @@ model RecordConstructor4
             variability_propagation=false,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-Semantic error at line 1335, column 18:
+
+Error at line 2030, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Record constructor for A: types of positional argument 3 and input c are not compatible
     type of '3' is Integer
 ")})));
@@ -2053,15 +2053,15 @@ model RecordConstructor5
  
  A x = A(1.0, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordConstructor5",
-			description="Record constructors: too few args",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor5",
+            description="Record constructors: too few args",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 786, column 8:
+
+Error at line 2054, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Record constructor for A: missing argument for required input c
 ")})));
 end RecordConstructor5;
@@ -2076,15 +2076,15 @@ model RecordConstructor6
  
  A x = A(1.0, 2, "foo", 0);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordConstructor6",
-			description="Record constructors: too many args",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor6",
+            description="Record constructors: too many args",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 808, column 25:
+
+Error at line 2077, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Record constructor for A: too many positional arguments
 ")})));
 end RecordConstructor6;
@@ -5130,15 +5130,15 @@ model RecordWithColonArray2
 
 	A c;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="RecordWithColonArray2",
-			description="Variable with : size without binding exp",
-			variability_propagation=false,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordWithColonArray2",
+            description="Variable with : size without binding exp",
+            variability_propagation=false,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RecordTests.mo':
-Semantic error at line 2794, column 8:
+
+Error at line 5126, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;
@@ -5489,8 +5489,8 @@ model RecordParam8
             description="Check that extra warnings aren't generated about binding expressions for record parameters",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-At line 4233, column 29:
+
+Warning at line 5480, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -5511,8 +5511,8 @@ model RecordParam9
             description="Check that extra warnings aren't generated about binding expressions for record parameters, record has constuctor binding exp",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-At line 4258, column 28:
+
+Warning at line 5505, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -5539,8 +5539,8 @@ model RecordParam10
             description="Check that extra warnings aren't generated about binding expressions for record parameters, record has function call binding exp",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-At line 4286, column 24:
+
+Warning at line 5533, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;

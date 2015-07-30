@@ -23,13 +23,13 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="InnerOuterTest14_Err",
+            name="InnerOuter1",
             description="Check that error is not generated for outer without inner in check mode",
-            checkType="check",
+            checkType=check,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 22, column 5:
+
+Error at line 22, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end InnerOuter1;
@@ -48,14 +48,14 @@ model InnerOuter2
 	outer A a;
 	Real z = a.f(time);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuter2",
-			description="Check that no extra errors are generated for function called through outer withour inner",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuter2",
+            description="Check that no extra errors are generated for function called through outer withour inner",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 46, column 7:
+
+Error at line 46, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Cannot find inner declaration for outer a
 ")})));
 end InnerOuter2;
@@ -69,15 +69,15 @@ model ConditionalError1
 	A a if b;
 	parameter Boolean b = false;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalError1",
-			description="Check that errors in conditional components are found in check mode",
-            checkType="check",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalError1",
+            description="Check that errors in conditional components are found in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 40, column 12:
+
+Error at line 66, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ConditionalError1;
@@ -147,8 +147,8 @@ model ConditionalError4
             check_inactive_contitionals=true,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 111, column 12:
+
+Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ConditionalError4;
@@ -172,15 +172,15 @@ model ParamBinding1
 	A a(b = b2);
 	Integer y = 1.2; // Generate an error to be able to use error test case
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="ParamBinding1",
-			description="Check that no error messages are generated for structural parameters without binding expression in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ParamBinding1",
+            description="Check that no error messages are generated for structural parameters without binding expression in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 173, column 14:
+
+Error at line 173, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end ParamBinding1;
@@ -195,15 +195,15 @@ model ParamBinding2
 	constant Real p = f(1);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="ParamBinding2",
-			description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ParamBinding2",
+            description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 197, column 17:
+
+Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end ParamBinding2;
@@ -217,15 +217,15 @@ model ArraySize1
 	
     Integer e = 1.2; // Generate an error to be able to use error test case
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="ArraySize1",
-			description="Check that no error message is generated for incomplete array size in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ArraySize1",
+            description="Check that no error message is generated for incomplete array size in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 219, column 17:
+
+Error at line 218, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ArraySize1;
@@ -240,15 +240,15 @@ model FunctionNoAlgorithm1
     Real z = f(time);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionNoAlgorithm1",
-			description="Check that no error message is generated replaceable incomplete function in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionNoAlgorithm1",
+            description="Check that no error message is generated replaceable incomplete function in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 214, column 17:
+
+Error at line 241, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm1;
@@ -265,15 +265,15 @@ model FunctionNoAlgorithm2
     Real z = A.f(time);
     Integer y = 1.2; // Generate an error to be able to use error test case
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionNoAlgorithm2",
-			description="Check that no error message is generated incomplete function in replaceable package in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionNoAlgorithm2",
+            description="Check that no error message is generated incomplete function in replaceable package in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 239, column 17:
+
+Error at line 266, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm2;
@@ -287,15 +287,15 @@ model FunctionNoAlgorithm3
     
     Real z = f(time);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="FunctionNoAlgorithm3",
-			description="Check that errors are generated for use of incomplete non-replaceable function in check mode",
-			checkType=check,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FunctionNoAlgorithm3",
+            description="Check that errors are generated for use of incomplete non-replaceable function in check mode",
+            checkType=check,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/CheckTests.mo':
-Semantic error at line 261, column 14:
+
+Error at line 288, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function f(): can only call functions that have one algorithm section or external function specification
 ")})));
 end FunctionNoAlgorithm3;
@@ -321,8 +321,8 @@ model FunctionNoAlgorithm4
             checkType=check,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-Semantic error at line 315, column 17:
+
+Error at line 315, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm4;
@@ -351,8 +351,8 @@ model FunctionNoAlgorithm5
             checkType=check,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-Semantic error at line 345, column 17:
+
+Error at line 345, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FunctionNoAlgorithm5;
@@ -454,14 +454,15 @@ equation
     x = 1;
   end if;
   x = 2;
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="IfEquationElse3",
             description="Check error for imbalanced else clause with empty if clause.",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 384, column 3:
+
+Error at line 451, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   All branches in if equation with non-parameter tests must have the same number of equations
 ")})));
 end IfEquationElse3;
@@ -480,8 +481,9 @@ algorithm
             name="BreakWithoutLoop",
             description="Test errors for break statement without enclosing loop",
             errorMessage="
-Error: in file '...':
-Semantic error at line 16, column 5:
+1 errors found:
+
+Error at line 477, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Break statement must be inside while- or for-statement
 ")})));
 end BreakWithoutLoop;
@@ -501,9 +503,8 @@ model ComponentNameError1
             errorMessage="
 1 errors found:
 
-Error: in file '...',
-In component a
-Semantic error at line 1, column 1:
+Error at line 493, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo',
+In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ComponentNameError1;
@@ -524,11 +525,10 @@ model ComponentNameError2
             errorMessage="
 1 errors found:
 
-Error: in file '...',
+Error at line 514, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo',
 In components:
-  a1
-  a2
-Semantic error at line 1, column 1:
+    a1
+    a2
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ComponentNameError2;
@@ -575,11 +575,11 @@ model ExtObjConstructor
             description="Check that external object constructor is only allowed as binding expression",
             errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 497, column 21:
+
+Error at line 556, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Constructors for external objects can only be used as binding expressions
-Error: in file '...':
-Semantic error at line 511, column 17:
+
+Error at line 570, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Constructors for external objects can only be used as binding expressions
 ")})));
 end ExtObjConstructor;
@@ -606,12 +606,12 @@ model ExtObjConstructor2
     
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="ExtObjConstructor",
+            name="ExtObjConstructor2",
             description="No external object binding expression",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 603, column 11:
+
+Error at line 603, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Missing binding expression for external object
 ")})));
 end ExtObjConstructor2;
@@ -642,17 +642,18 @@ model PartialCall1
     end usePartFunc;
     
     Real y1 = usePartFunc(fullFunc(), time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional_PartialCall1",
             description="Check error when leaving out function key word",
             errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 554, column 27:
+
+Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function fullFunc(): missing argument for required input x
-Error: in file '...':
-Semantic error at line 554, column 27:
+
+Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is Real
 ")})));
@@ -680,17 +681,18 @@ model PartialCall2
     end usePartFunc;
     
     Real y1 = usePartFunc(function fullFunc(), time) + partFunc(time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional_PartialCall2",
             description="Check error when calling partial function declaration directly",
             errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 570, column 15:
+
+Error at line 680, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function partFunc(): can only call functions that have one algorithm section or external function specification
-Error: in file '...':
-Semantic error at line 570, column 15:
+
+Error at line 683, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function partFunc(): can only call functions that have one algorithm section or external function specification
 ")})));
 end PartialCall2;
@@ -719,23 +721,24 @@ model NumArgs1
     
     Real y1 = usePartFunc(function fullFunc(), time);
     Real y2 = usePartFunc(function fullFunc(x=y1,x2=y1), y1);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional_NumArgs1",
             description="Check missing and extra arguments for functional inputs",
             errorMessage="
-3 errors found:
-Error: in file '...':
-Semantic error at line 551, column 19:
+4 errors found:
+
+Error at line 719, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function pf(): too many positional arguments
-Error: in file '...':
-Semantic error at line 551, column 24:
+
+Error at line 719, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function pf(): missing argument for required input x
-Error: in file '...':
-Semantic error at line 554, column 26:
+
+Error at line 722, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Creating functional input argument fullFunc(): missing argument for required input x2
- Error: in file '...':
-Semantic error at line 555, column 45:
+
+Error at line 723, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Creating functional input argument fullFunc(): no input matching named argument x found
 ")})));
 end NumArgs1;
@@ -768,9 +771,9 @@ model Array1
             name="Functional_Array1",
             description="Check error when declaring as array",
             errorMessage="
-2 errors found:
-Error: in file '...':
-Compliance error at line 738, column 24:
+1 errors found:
+
+Compliance error at line 759, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Arrays of functional input arguments is currently not supported
 ")})));
 end Array1;
@@ -803,9 +806,9 @@ model Bind1
             name="Functional_Bind1",
             description="Check error when having input default value",
             errorMessage="
-2 errors found:
-Error: in file '...':
-Compliance error at line 738, column 24:
+1 errors found:
+
+Compliance error at line 794, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Creating functional input arguments from functions with default input arguments is currently not supported
 ")})));
 end Bind1;
@@ -842,23 +845,22 @@ model Bind2
             errorMessage="
 6 errors found:
 
-Error: in file '...':
-Compliance error at line 735, column 24:
+Compliance error at line 829, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Default values of functional input arguments is currently not supported
-Error: in file '...':
-Semantic error at line 736, column 30:
+
+Error at line 830, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable pf1 does not match the declared type of the variable
-Error: in file '...':
-Compliance error at line 736, column 31:
+
+Compliance error at line 830, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Default values of functional input arguments is currently not supported
-Error: in file '...':
-Semantic error at line 737, column 30:
+
+Error at line 831, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Illegal access to class in expression: fullFunc
-Error: in file '...':
-Compliance error at line 737, column 38:
+
+Compliance error at line 831, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Default values of functional input arguments is currently not supported
-Error: in file '...':
-Semantic error at line 738, column 30:
+
+Error at line 832, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Illegal access to class in expression: fullFunc
 ")})));
 end Bind2;
@@ -905,12 +907,12 @@ model Bind3
             name="Functional_Bind3",
             description="Check error when having record or array input/output",
             errorMessage="
-1 errors found:
-Error: in file '...':
-Compliance error at line 791, column 24:
+2 errors found:
+
+Compliance error at line 895, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Functional input arguments with record/array inputs/outputs is currently not supported
-Error: in file '...':
-Compliance error at line 791, column 24:
+
+Compliance error at line 896, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Functional input arguments with record/array inputs/outputs is currently not supported
 ")})));
 end Bind3;
@@ -942,14 +944,13 @@ model Duplicate1
             name="Functional_Duplicate1",
             description="Check error with duplicates",
             errorMessage="
-1 errors found:
-Error: in file '...':
-Semantic error at line 834, column 22:
-  Duplicate component in same class: input Real x1
-Error: in file '...':
-Semantic error at line 847, column 26:
-  Creating functional input argument fullFunc(): multiple arguments matches input x1
+2 errors found:
 
+Error at line 927, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Duplicate component in same class: input Real x1
+
+Error at line 940, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Creating functional input argument fullFunc(): multiple arguments matches input x1
 ")})));
 end Duplicate1;
 
@@ -980,8 +981,8 @@ model Vectorized1
             description="Check error with vectorized",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 884, column 29:
+
+Error at line 976, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc(x1={1})' is Real[1]
 ")})));
@@ -1008,8 +1009,8 @@ model FortranStrings
             description="Check error for strings to fortran. Should not trigger for MSL lapack functions",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 801, column 5:
+
+Error at line 994, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Passing strings to external fortran functions is not allowed
 ")})));
 end FortranStrings;
@@ -1032,8 +1033,8 @@ model SpatialDist1
             description="Check named arguments for spatialDistribution().",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 936, column 10:
+
+Error at line 1028, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function spatialDistribution(): missing argument for required input positiveVelocity
 ")})));
 end SpatialDist1;

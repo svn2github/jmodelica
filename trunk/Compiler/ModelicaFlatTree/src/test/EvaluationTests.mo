@@ -817,20 +817,20 @@ model FunctionEval23
 	
     constant Real p = f(3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="FunctionEval23",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionEval23",
+            description="",
+            errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
-Semantic error at line 792, column 9:
+
+Error at line 814, column 9, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Cannot find class or component declaration for z
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
-Semantic error at line 793, column 18:
+
+Error at line 815, column 18, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Cannot find class or component declaration for z
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
-Semantic error at line 796, column 23:
+
+Error at line 818, column 23, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'p': 'f(3)'
 ")})));
 end FunctionEval23;
@@ -845,17 +845,17 @@ model FunctionEval24
 	
 	constant Real z = f();
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		ErrorTestCase(
-			name="FunctionEval24",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionEval24",
+            description="",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
-Semantic error at line 846, column 20:
+
+Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Calling function f(): missing argument for required input x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EvaluationTests.mo':
-Semantic error at line 846, column 20:
+
+Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'z': 'f()'
 ")})));
 end FunctionEval24;
@@ -1568,12 +1568,12 @@ end EvaluationTests.EvaluateAnnotation2;
             name="EvaluateAnnotation2_Warn",
             description="Check that a warning is given when annotation(Evaluate=true) and fixed equals false",
             errorMessage="
-Warning: in file '...':
-At line 0, column 0:
+2 warnings found:
+
+Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 
-Warning: in file '...':
-At line 0, column 0:
+Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   The parameter p does not have a binding expression
 ")})));
 end EvaluateAnnotation2;

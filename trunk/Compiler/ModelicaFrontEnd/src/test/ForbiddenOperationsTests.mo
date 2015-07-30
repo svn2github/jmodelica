@@ -32,14 +32,14 @@ end WhenInFunction_Func;
 model WhenInFunction
  Real x = WhenInFunction_Func(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInFunction",
-			description="Content checks in algorithms: when in function",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInFunction",
+            description="Content checks in algorithms: when in function",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 60, column 2:
+
+Error at line 27, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed in functions
 ")})));
 end WhenInFunction;
@@ -53,14 +53,14 @@ algorithm
   end when;
  end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInBlocks1",
-			description="Content checks in algorithms: when inside if clause",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInBlocks1",
+            description="Content checks in algorithms: when inside if clause",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 84, column 3:
+
+Error at line 51, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks1;
@@ -74,14 +74,14 @@ algorithm
   end when;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInBlocks2",
-			description="Content checks in algorithms: when inside when clause",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInBlocks2",
+            description="Content checks in algorithms: when inside when clause",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 84, column 3:
+
+Error at line 72, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks2;
@@ -95,14 +95,14 @@ algorithm
   end when;
  end while;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInBlocks3",
-			description="Content checks in algorithms: when inside while clause",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInBlocks3",
+            description="Content checks in algorithms: when inside while clause",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 84, column 3:
+
+Error at line 93, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks3;
@@ -116,14 +116,14 @@ algorithm
   end when;
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInBlocks4",
-			description="Content checks in algorithms: when inside for clause",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInBlocks4",
+            description="Content checks in algorithms: when inside for clause",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 84, column 3:
+
+Error at line 114, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed inside if, for, while and when clauses
 ")})));
 end WhenInBlocks4;
@@ -139,17 +139,17 @@ initial equation
 	 y = 1;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenInInitial",
-			description="When in initial equation",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenInInitial",
+            description="When in initial equation",
+            errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 0, column 0:
+
+Error at line 134, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When statements are not allowed in initial algorithms
-Error: in file '...':
-Semantic error at line 0, column 0:
+
+Error at line 138, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   When equations are not allowed in initial equation sections
 ")})));
 end WhenInInitial;
@@ -158,14 +158,14 @@ model ReturnOutsideFunction
 algorithm
  return;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReturnOutsideFunction",
-			description="Content checks in algorithms: return outside function",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReturnOutsideFunction",
+            description="Content checks in algorithms: return outside function",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 166, column 2:
+
+Error at line 159, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   Return statements are only allowed in functions
 ")})));
 end ReturnOutsideFunction;
@@ -181,16 +181,16 @@ equation
  end if;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="IfEquTest_ComplErr",
-			description="",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="IfEquTest_ComplErr",
+            description="",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Compliance error at line 148, column 8:
+
+Compliance error at line 174, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end IfEquTest_ComplErr;
@@ -207,14 +207,14 @@ equation
 		x = 2;
 	end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenContents1",
-			description="Check contents of when clauses",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenContents1",
+            description="Check contents of when clauses",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 215, column 3:
+
+Error at line 206, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   Only assignment equations are allowed in when clauses
 ")})));
 end WhenContents1;
@@ -231,14 +231,14 @@ equation
 		y = 3;
 	end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenContents2",
-			description="Check contents of when clauses",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenContents2",
+            description="Check contents of when clauses",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 235, column 2:
+
+Error at line 227, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   All branches in when equation must assign the same variables
 ")})));
 end WhenContents2;
@@ -258,14 +258,14 @@ equation
 		end if;
 	end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="WhenContents3",
-			description="Check contents of when clauses",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="WhenContents3",
+            description="Check contents of when clauses",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 262, column 3:
+
+Error at line 254, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   All branches in if equation with non-parameter tests within when equation must assign the same variables
 ")})));
 end WhenContents3;
@@ -290,14 +290,14 @@ end LongIntConst1;
 model LongIntConst2
     Real x = 1000000000000;
 
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="LongIntConst2",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="LongIntConst2",
+            description="",
+            errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-At line 300, column 14:
+
+Warning at line 291, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   Integer literal \"1000000000000\" is too large to represent as 32-bit Integer, using Real instead.
 ")})));
 end LongIntConst2;
@@ -313,14 +313,14 @@ model TerminateInFunc
 	
 	Real x = f();
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="TerminateInFunc",
-			description="",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="TerminateInFunc",
+            description="",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ForbiddenOperationsTests.mo':
-Semantic error at line 287, column 3:
+
+Error at line 310, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ForbiddenOperationsTests.mo':
   The terminate() statement is not allowed in functions
 ")})));
 end TerminateInFunc;

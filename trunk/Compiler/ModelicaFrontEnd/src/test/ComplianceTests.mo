@@ -44,15 +44,16 @@ model IntegerVariable_ComplErr
 Integer i=1;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="IntegerVariable_ComplErr",
-			description="Compliance error for integer variables",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 42, column 30:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="IntegerVariable_ComplErr",
+            description="Compliance error for integer variables",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
+1 errors found:
+
+Compliance error at line 42, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Integer variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end IntegerVariable_ComplErr;
@@ -61,15 +62,16 @@ model BooleanVariable_ComplErr
  Boolean b=true;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="BooleanVariable_ComplErr",
-			description="Compliance error for boolean variables",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 60, column 30:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="BooleanVariable_ComplErr",
+            description="Compliance error for boolean variables",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
+1 errors found:
+
+Compliance error at line 61, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end BooleanVariable_ComplErr;
@@ -79,15 +81,16 @@ model EnumVariable_ComplErr
  A x = A.b;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="EnumVariable_ComplErr",
-			description="Compliance error for enumeration variables",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 78, column 31:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="EnumVariable_ComplErr",
+            description="Compliance error for enumeration variables",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
+1 errors found:
+
+Compliance error at line 80, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Enumeration variables are supported only when compiling FMUs (constants and parameters are always supported)
 ")})));
 end EnumVariable_ComplErr;
@@ -108,21 +111,19 @@ model ArrayOfRecords_Warn
  
  R x[2] = f(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		WarningTestCase(
-			name="ArrayOfRecords_Warn",
-			description="Compliance warning for arrays of records with index variability > parameter",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayOfRecords_Warn",
+            description="Compliance warning for arrays of records with index variability > parameter",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
 2 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 107, column 3:
+Compliance error at line 104, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Using arrays of records with indices of higher than parameter variability is currently only supported when compiling FMUs
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 107, column 5:
+Compliance error at line 104, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The integer() function-like operator is currently only supported when compiling FMUs
 ")})));
 end ArrayOfRecords_Warn;
@@ -173,67 +174,67 @@ model UnsupportedBuiltins2_ComplErr
   delay(3,3);
   spatialDistribution(1,1,1,true);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnsupportedBuiltins2_ComplErr",
-			description="Compliance error for builtins that are only supported for FMUs",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
-16 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 193, column 3:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnsupportedBuiltins2_ComplErr",
+            description="Compliance error for builtins that are only supported for FMUs",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
+18 errors found:
+
+Compliance error at line 156, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The sign() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 194, column 3:
+
+Compliance error at line 157, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The div() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 195, column 3:
+
+Compliance error at line 158, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The mod() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 196, column 3:
+
+Compliance error at line 159, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The rem() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 197, column 3:
+
+Compliance error at line 160, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The ceil() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 198, column 3:
+
+Compliance error at line 161, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The floor() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 199, column 3:
+
+Compliance error at line 162, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The integer() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 200, column 3:
+
+Compliance error at line 163, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The semiLinear() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 201, column 3:
+
+Compliance error at line 164, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The initial() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 202, column 3:
+
+Compliance error at line 165, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The sample() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 203, column 3:
+
+Compliance error at line 166, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 204, column 3:
+
+Compliance error at line 167, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The edge() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 205, column 3:
+
+Compliance error at line 168, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The change() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 206, column 3:
+
+Compliance error at line 169, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The terminate() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 208, column 3:
+
+Compliance error at line 171, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 209, column 5:
+
+Compliance error at line 172, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The reinit() function-like operator is currently only supported when compiling FMUs
-Error: in file '...':
-Compliance error at line 190, column 3:
+
+Compliance error at line 174, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The delay() function-like operator is currently only supported when compiling FMUs
-Error: in file '...':
-Compliance error at line 190, column 3:
+
+Compliance error at line 175, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The spatialDistribution() function-like operator is currently only supported when compiling FMUs
 ")})));
 end UnsupportedBuiltins2_ComplErr;
@@ -249,8 +250,8 @@ model UnsupportedBuiltins_WarnErr
             homotopy_type="homotopy",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 306, column 3:
+
+Warning at line 244, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.
 ")})));
 end UnsupportedBuiltins_WarnErr;
@@ -263,17 +264,17 @@ model ArrayCellMod_ComplErr
  A a(b[1] = 1, b[1](start=2));
  A a2(b[:] = {1,2}, b[:](start={2,3}));
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="ArrayCellMod_ComplErr",
-			description="Compliance error for modifiers of specific array elements",
-			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 361, column 8:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ArrayCellMod_ComplErr",
+            description="Compliance error for modifiers of specific array elements",
+            errorMessage="
+2 errors found:
+
+Error at line 264, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Semantic error at line 364, column 14:
+
+Error at line 264, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Modifiers of specific array elements are not allowed
 ")})));
 end ArrayCellMod_ComplErr;
@@ -297,8 +298,8 @@ model DuplicateVariables_Warn
             description="Check that duplicate components from extends generates warning",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-At line 0, column 0:
+
+Warning at line 289, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The component x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
 ")})));
 end DuplicateVariables_Warn;
@@ -327,46 +328,46 @@ x = pre(x) + 1.1;
 y = pre(y) + 1.1; 
 end when; 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="HybridNonFMU1",
-			description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="HybridNonFMU1",
+            description="Test that compliance warnings for hybrid elements are issued when not compiling FMU",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
 11 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 450, column 18:
+
+Compliance error at line 311, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 451, column 18:
+
+Compliance error at line 312, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 452, column 18:
+
+Compliance error at line 313, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Boolean variables are supported only when compiling FMUs (constants and parameters are always supported)
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 455, column 1:
+
+Compliance error at line 317, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 455, column 16:
+
+Compliance error at line 317, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 458, column 1:
+
+Compliance error at line 320, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 461, column 1:
+
+Compliance error at line 323, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 464, column 1:
+
+Compliance error at line 326, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 464, column 6:
+
+Compliance error at line 326, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The sample() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 465, column 5:
+
+Compliance error at line 327, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 466, column 5:
+
+Compliance error at line 328, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
 ")})));
 end HybridNonFMU1;
@@ -442,7 +443,6 @@ equation
  x = if temp_4 and not pre(temp_4) then pre(x) + 1.1 else pre(x);
  y = if temp_4 and not pre(temp_4) then pre(y) + 1.1 else pre(y);
 end ComplianceTests.HybridFMU1;
-			
 ")})));
 end HybridFMU1;
 
@@ -460,34 +460,34 @@ equation
  end when;
  z = floor(dummy);
 
-	annotation(__JModelica(UnitTesting(tests={ 
-		ComplianceErrorTestCase(
-			name="HybridNonFMU2",
-			description="",
-			generate_ode=false,
-			generate_dae=true,
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="HybridNonFMU2",
+            description="",
+            generate_ode=false,
+            generate_dae=true,
+            errorMessage="
 7 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 537, column 2:
+
+Compliance error at line 454, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 537, column 7:
+
+Compliance error at line 454, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The sample() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 538, column 8:
+
+Compliance error at line 455, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 540, column 2:
+
+Compliance error at line 457, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   When equations are currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 540, column 7:
+
+Compliance error at line 457, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The initial() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 541, column 8:
+
+Compliance error at line 458, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The pre() function-like operator is currently only supported when compiling FMUs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 543, column 6:
+
+Compliance error at line 460, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   The floor() function-like operator is currently only supported when compiling FMUs
 ")})));
 end HybridNonFMU2; 
@@ -589,14 +589,14 @@ end R;
   
   Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArraySizes_Error1",
-			description="Test that compliance errors are given.",
-			errorMessage="
-6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-Compliance error at line 689, column 6:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_Error1",
+            description="Test that compliance errors are given.",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Unknown size array as a for index is not supported in functions
 ")})));
 end Error1;
@@ -630,12 +630,12 @@ model Error2
             name="UnknownArraySizes_Error2",
             description="Test that compliance errors are given.",
             errorMessage="
-8 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 627, column 7:
+2 errors found:
+
+Compliance error at line 612, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Unknown sizes in operator symmetric() is not supported in functions
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-Compliance error at line 631, column 7:
+
+Compliance error at line 619, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Unknown sizes in operator ^ is not supported in functions
 ")})));
 end Error2;
@@ -643,21 +643,20 @@ end Error2;
 model ArrayIterTest
  Real x[1,1] = { i * j for i, j };
 
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="ArrayIterTest",
-			description="Array constructor with iterators: without in",
-			errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_ArrayIterTest",
+            description="Array constructor with iterators: without in",
+            errorMessage="
+3 errors found:
+
+Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
 
-Error: in file '...':
-Compliance error at line 0, column 0:
+Compliance error at line 643, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   For index without in expression isn't supported
 
-Error: in file '...':
-Compliance error at line 0, column 0:
+Compliance error at line 643, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   For index without in expression isn't supported
 ")})));
 end ArrayIterTest;
@@ -675,19 +674,18 @@ algorithm
 		x2[i] := i;
 	end for;
 	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="UnknownArrayIndex",
-			description="Test errors for unknown array for indices in algorithms and equations.",
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArrayIndex",
+            description="Test errors for unknown array for indices in algorithms and equations.",
+            errorMessage="
+2 errors found:
+
+Compliance error at line 668, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   For index with higher than parameter variability is not supported in equations and algorithms.
 
-Error: in file '...':
-Compliance error at line 0, column 0:
+Compliance error at line 672, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   For index with higher than parameter variability is not supported in equations and algorithms.
-			
 ")})));
 end UnknownArrayIndex;
 
@@ -698,16 +696,16 @@ algorithm
 		x := x - 1;
 	end while;
 	
-	annotation(__JModelica(UnitTesting(tests={
-		ComplianceErrorTestCase(
-			name="WhileStmt",
-			description="Test while statement in algorithm",
-			algorithms_as_functions=false,
-			errorMessage="
-Error: in file '...':
-Compliance error at line 0, column 0:
-  Event generating expressions are not supported in while statements: x > time
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="WhileStmt",
+            description="Test while statement in algorithm",
+            algorithms_as_functions=false,
+            errorMessage="
+1 errors found:
 
+Compliance error at line 694, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+  Event generating expressions are not supported in while statements: x > time
 ")})));
 end WhileStmt;
 
@@ -741,9 +739,9 @@ model FunctionalArgument
             generate_ode=false,
             generate_dae=true,
             errorMessage="
-3 errors found:
-Error: in file '...':
-Compliance error at line 764, column 3:
+1 errors found:
+
+Compliance error at line 712, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Using functional input arguments is currently only supported when compiling FMUs
 ")})));
 end FunctionalArgument;
@@ -775,8 +773,8 @@ model ExtObjInFunction
             description="Test compliance error for external object constructor in function",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Compliance error at line 804, column 20:
+
+Compliance error at line 763, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
   Constructors for external objects is not supported in functions
 ")})));
 end ExtObjInFunction;

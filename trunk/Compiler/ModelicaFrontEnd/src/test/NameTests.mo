@@ -82,17 +82,15 @@ end NameTests.NameTest2;
 A a;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest3_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest3_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 90, column 1:
+Error at line 82, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for A
-  
 ")})));
   end NameTest3_Err;
 
@@ -111,17 +109,15 @@ model NameTest4_Err
   M m;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest4_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest4_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 100, column 4:
+Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for B
-
 ")})));
   end NameTest4_Err;
 
@@ -138,19 +134,17 @@ model NameTest5_Err
 equation
   b.y = y + a.x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest5_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest5_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 2 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 151, column 5:
+Error at line 135, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for b
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 151, column 15:
+Error at line 135, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end NameTest5_Err;
@@ -166,15 +160,14 @@ model NameTest55_Err
   
   A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest55_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest55_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 181, column 11:
+Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end NameTest55_Err;
@@ -189,15 +182,14 @@ model NameTest6_Err
   
   A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest6_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest6_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 174, column 14:
+Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for y
 ")})));
 end NameTest6_Err;
@@ -212,17 +204,15 @@ model NameTest7_Err
   A a1;
   A a2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest7_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest7_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 196, column 4:
+Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for B
-
 ")})));
 end NameTest7_Err;
 
@@ -233,17 +223,15 @@ model NameTest8_Err
   
   C c;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest8_Err",
-			description="Basic test of name lookup",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest8_Err",
+            description="Basic test of name lookup",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 196, column 4:
+Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for D
-
 ")})));
 end NameTest8_Err;
 
@@ -271,8 +259,8 @@ model NameTest9_Err
             description="Test that names are looked up in constraining clauses.",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 265, column 9:
+
+Error at line 253, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
@@ -309,8 +297,8 @@ model NameTest10_Err
             description="Test that names are looked up in constraining clauses.",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 303, column 5:
+
+Error at line 291, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot use class B, because it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
@@ -325,15 +313,14 @@ Semantic error at line 303, column 5:
  A a(p1=p1);
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest11_Err",
-			description="Test that names are looked up correct.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest11_Err",
+            description="Test that names are looked up correct.",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 320, column 9:
+Error at line 313, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for p1
 ")})));
   end NameTest11_Err;
@@ -360,15 +347,14 @@ M m(redeclare B a);
 
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest12_Err",
-			description="Test that names are looked up correct.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest12_Err",
+            description="Test that names are looked up correct.",
+            errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 346, column 15:
+Error at line 346, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for B
 ")})));
 end NameTest12_Err;
@@ -403,29 +389,25 @@ end NameTest12_Err;
   PP.BB bb(y=6);
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest13_Err",
-			description="Test that names are looked up correct.",
-			errorMessage="
-3 errors found:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest13_Err",
+            description="Test that names are looked up correct.",
+            errorMessage="
+4 errors found:
 
-Error: in file '/src/test/NameTests.mo':
-Semantic error at line 399, column 31:
+Error at line 381, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for z
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 386, column 37:
+Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for C
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 386, column 39:
+Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for y
 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 389, column 39:
+Error at line 389, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for y
-  ")})));
+")})));
 end NameTest13_Err;
   
  model NameTest14_Err
@@ -458,26 +440,21 @@ end NameTest13_Err;
    PP.BB bb(z=pp);
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NameTest14_Err",
-			description="Test that names are looked up correct.",
-			errorMessage="
-2 errors found:
- 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 459, column 18:
-  Cannot find component declaration for z
- 
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 461, column 18:
-  Cannot find component declaration for z
-  
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 461, column 20:
-  Cannot find class or component declaration for pp
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NameTest14_Err",
+            description="Test that names are looked up correct.",
+            errorMessage="
+3 errors found:
 
- 
+Error at line 438, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+  Cannot find component declaration for z
+
+Error at line 440, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+  Cannot find component declaration for z
+
+Error at line 440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+  Cannot find class or component declaration for pp
 ")})));
 end NameTest14_Err;
   
@@ -796,8 +773,8 @@ model NameTest25_Err
             description="Check that member lookup is limited by constraining class when using redeclare replaceable",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 787, column 18:
+
+Error at line 768, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby B'
 ")})));
 end NameTest25_Err;
@@ -976,17 +953,17 @@ class ConstantLookup10
  import NameTests.ConstantLookup10.P.x;
  parameter Real p = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup10",
-			description="Constant lookup: trying to import non-constant component",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup10",
+            description="Constant lookup: trying to import non-constant component",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 904, column 2:
+
+Error at line 949, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Packages may only contain classes and constants
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 909, column 21:
+
+Error at line 954, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end ConstantLookup10;
@@ -1000,17 +977,17 @@ class ConstantLookup11
  import x2 = NameTests.ConstantLookup11.P.x;
  parameter Real p = x2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup11",
-			description="Constant lookup: trying to import non-constant component (named import)",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup11",
+            description="Constant lookup: trying to import non-constant component (named import)",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 931, column 2:
+
+Error at line 973, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Packages may only contain classes and constants
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 936, column 21:
+
+Error at line 978, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for x2
 ")})));
 end ConstantLookup11;
@@ -1025,14 +1002,14 @@ class ConstantLookup12
  import NameTests.ConstantLookup12.P.*;
  parameter Real p = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup12",
-			description="Constant lookup: trying to import non-constant component (unqualified import)",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup12",
+            description="Constant lookup: trying to import non-constant component (unqualified import)",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 740, column 21:
+
+Error at line 1003, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end ConstantLookup12;
@@ -1078,20 +1055,20 @@ model ConstantLookup16
 	constant Real[3] b = {1, 2, 3};
 	constant Integer c = d;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup16",
-			description="Using constant with bad value as array index",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup16",
+            description="Using constant with bad value as array index",
+            errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 797, column 16:
+
+Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'a': 'b[c]'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 799, column 23:
+
+Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for d
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 799, column 19:
+
+Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'c': 'd'
 ")})));
 end ConstantLookup16;
@@ -1109,14 +1086,14 @@ model ConstantLookup17
 	Real a = A.n;
 	Real b = B.n;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup17",
-			description="Illegal accesses of components in local classes",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup17",
+            description="Illegal accesses of components in local classes",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1039, column 2:
+
+Error at line 1078, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Packages may only contain classes and constants
 ")})));
 end ConstantLookup17;
@@ -1355,8 +1332,8 @@ model ConstantLookup23
             description="Trying to use member that does not exist in constraining class (but does in actual)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 1346, column 13:
+
+Error at line 1327, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot use component x, because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end ConstantLookup23;
@@ -1978,19 +1955,17 @@ model ConstantLookup39
     
     Real z = D.f;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConstantLookup39",
-			description="Error in constant used from other package",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantLookup39",
+            description="Error in constant used from other package",
+            errorMessage="
 2 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1930, column 23:
+Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for e
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1899, column 23:
+Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'f': 'e'
 ")})));
 end ConstantLookup39;
@@ -2069,16 +2044,15 @@ class ExtendsTest3
   extends C;
   extends D;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ExtendsTest3",
-			description="Test that local classes that becomes visible through inheritance can not be used as super classes",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ExtendsTest3",
+            description="Test that local classes that becomes visible through inheritance can not be used as super classes",
+            errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 164, column 11:
+
+Error at line 2045, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for D
-  
 ")})));
 end ExtendsTest3;
 
@@ -2195,17 +2169,16 @@ model ImportTest3
   B b;
   
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ImportTest3",
-			description="Test that only a class imported with qualified import is visible.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ImportTest3",
+            description="Test that only a class imported with qualified import is visible.",
+            errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 253, column 3:
+
+Error at line 2169, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for B
-  "
-  )})));
+")})));
 end ImportTest3;
 
 
@@ -2406,11 +2379,11 @@ model ImportTest12
             description="Check that error is generated properly for missing import",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 2396, column 17:
+
+Error at line 2373, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for NotHere
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 2397, column 5:
+
+Error at line 2374, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class declaration for SI
 ")})));
 end ImportTest12;
@@ -2505,19 +2478,18 @@ model ShortClassDeclTest35_Err
   MyReal x(start=3,t=5);
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ShortClassDeclTest35_Err",
-			description="Short class declaration of Real.",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ShortClassDeclTest35_Err",
+            description="Short class declaration of Real.",
+            errorMessage="
 2 errors found:
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 549, column 4:
-  Cannot find component declaration for q
-Error: in file 'src/test/modelica/NameTests.mo':
-Semantic error at line 550, column 4:
-  Cannot find component declaration for t
 
+Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+  Cannot find component declaration for q
+
+Error at line 2478, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+  Cannot find component declaration for t
 ")})));
 end ShortClassDeclTest35_Err;
 
@@ -2773,13 +2745,14 @@ equation
     x[i,j] = i + k;
   end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ForTest2_Err",
-			description="Test for equations.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1201, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ForTest2_Err",
+            description="Test for equations.",
+            errorMessage="
+1 errors found:
+
+Error at line 2745, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for k
 ")})));
 end ForTest2_Err;
@@ -2876,13 +2849,14 @@ end IndexLookup2;
 model ConditionalComponentTest1_Err
   parameter Real x = 1 if 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest1_Err",
-			description="Test of type checking of conditional components.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1939, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest1_Err",
+            description="Test of type checking of conditional components.",
+            errorMessage="
+1 errors found:
+
+Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2891,13 +2865,14 @@ model ConditionalComponentTest2_Err
   parameter Boolean b[2] = {true,true};
   parameter Real x = 1 if b;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest2_Err",
-			description="Test of type checking of conditional components.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1954, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest2_Err",
+            description="Test of type checking of conditional components.",
+            errorMessage="
+1 errors found:
+
+Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2906,16 +2881,17 @@ model ConditionalComponentTest3_Err
   parameter Integer b[2] = {1,1};
   parameter Real x = 1 if b;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest3_Err",
-			description="Test of type checking of conditional components.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1967, column 18:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest3_Err",
+            description="Test of type checking of conditional components.",
+            errorMessage="
+2 errors found:
+
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The guard expression of a conditional component should be a boolean expression
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 1967, column 18:
+
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -2962,13 +2938,14 @@ model ConditionalComponentTest6_Err
   parameter Real x = 1 if b;
   Real y = x;  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest6_Err",
-			description="Test of type checking of conditional components.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 2021, column 12:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest6_Err",
+            description="Test of type checking of conditional components.",
+            errorMessage="
+1 errors found:
+
+Error at line 2939, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The component x is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest6_Err;
@@ -2981,13 +2958,14 @@ model ConditionalComponentTest7_Err
   M m if b;
   Real y = m.x;  
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest7_Err",
-			description="Test of type checking of conditional components.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 2036, column 12:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest7_Err",
+            description="Test of type checking of conditional components.",
+            errorMessage="
+1 errors found:
+
+Error at line 2959, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The component m is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest7_Err;
@@ -3204,17 +3182,17 @@ model ConditionalComponentTest13_Err
     Real y2 if not b.flag;
 	B b(a1(x = y1), a2(x = y2));
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ConditionalComponentTest13_Err",
-			description="Using value of conditional component in modification for other conditional component",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConditionalComponentTest13_Err",
+            description="Using value of conditional component in modification for other conditional component",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3159, column 13:
+
+Error at line 3183, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The component y1 is conditional: Access of conditional components is only valid in connect statements
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3159, column 25:
+
+Error at line 3183, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   The component y2 is conditional: Access of conditional components is only valid in connect statements
 ")})));
 end ConditionalComponentTest13_Err;
@@ -3240,14 +3218,14 @@ model AttributeDot1
   Real x=1;
   parameter Real p = x.start;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="AttributeDot1",
-			description="Access to attribute with dot notation",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="AttributeDot1",
+            description="Access to attribute with dot notation",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 2442, column 22:
+
+Error at line 3219, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can not access attribute of primitive with dot notation: x.start
 ")})));
 end AttributeDot1;
@@ -3526,14 +3504,14 @@ model InheritInputTest3
     
     input A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InheritInputTest3",
-			description="Check that it isn't allowed to declare a component containing an input as input",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InheritInputTest3",
+            description="Check that it isn't allowed to declare a component containing an input as input",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3555, column 10:
+
+Error at line 3503, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritInputTest3;
@@ -3546,14 +3524,14 @@ model InheritInputTest4
     
     input A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InheritInputTest4",
-			description="Check that it isn't allowed to declare a component containing an output as input",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InheritInputTest4",
+            description="Check that it isn't allowed to declare a component containing an output as input",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3575, column 10:
+
+Error at line 3523, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritInputTest4;
@@ -3608,14 +3586,14 @@ model InheritOutputTest3
     
     output A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InheritOutputTest3",
-			description="Check that it isn't allowed to declare a component containing an output as output",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InheritOutputTest3",
+            description="Check that it isn't allowed to declare a component containing an output as output",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3637, column 10:
+
+Error at line 3585, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can't declare x as output, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest3;
@@ -3628,14 +3606,14 @@ model InheritOutputTest4
     
     output A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InheritOutputTest4",
-			description="Check that it isn't allowed to declare a component containing an input as output",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InheritOutputTest4",
+            description="Check that it isn't allowed to declare a component containing an input as output",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3657, column 10:
+
+Error at line 3605, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can't declare x as input, since it contains a component declared as input or output
 ")})));
 end InheritOutputTest4;
@@ -3682,14 +3660,14 @@ model InheritFlowTest2
     
     flow A a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InheritFlowTest2",
-			description="Check that it isn't allowed to declare a component containing an flow as flow",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InheritFlowTest2",
+            description="Check that it isn't allowed to declare a component containing an flow as flow",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/NameTests.mo':
-Semantic error at line 3711, column 10:
+
+Error at line 3659, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Can't declare x as flow, since it contains a component declared as flow
 ")})));
 end InheritFlowTest2;
@@ -3754,8 +3732,8 @@ model DuplicateVariables3
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3810, column 11:
+
+Error at line 3726, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables3;
@@ -3800,8 +3778,8 @@ model DuplicateVariables6
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3851, column 15:
+
+Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables6;
@@ -3817,14 +3795,14 @@ model BadEscape1
             description="Illegal escape sequences in string",
             errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3708, column 23:
+
+Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 1 in string: '\\q'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3708, column 23:
+
+Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 27 in string: '\\#'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3708, column 23:
+
+Error at line 3790, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 6 in string: '\\ '
 ")})));
 end BadEscape1;
@@ -3840,23 +3818,23 @@ model BadEscape2
             description="Illegal escape sequences in quoted identifier",
             errorMessage="
 6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3729, column 16:
+
+Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3729, column 16:
+
+Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3729, column 16:
+
+Error at line 3811, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3731, column 11:
+
+Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 2 in quoted identifier: '\\q'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3731, column 11:
+
+Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 28 in quoted identifier: '\\#'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-Semantic error at line 3731, column 11:
+
+Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 ")})));
 end BadEscape2;

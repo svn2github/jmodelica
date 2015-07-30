@@ -327,8 +327,8 @@ end OperatorRecordTests.OperatorOverload3;
             description="Basic type error test for operator records",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 322, column 19:
+
+Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Type error in expression: c1 - b
     type of 'c1' is OperatorRecordTests.Cplx
     type of 'b' is Boolean
@@ -540,8 +540,8 @@ end OperatorRecordTests.OperatorOverload8;
             description="Error for array multiplication cases not allowed for operator records: vector*vector",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 535, column 17:
+
+Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.OperatorOverload9.Op[2]
     type of 'c2' is OperatorRecordTests.OperatorOverload9.Op[2]
@@ -560,8 +560,8 @@ Semantic error at line 535, column 17:
             description="Error for array multiplication cases not allowed for operator records: vector*matrix",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 555, column 22:
+
+Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.Cplx[2]
     type of 'c2' is OperatorRecordTests.Cplx[2, 2]
@@ -1792,8 +1792,8 @@ end OperatorRecordTests.OperatorRecordConnect5;
             description="Check that operators are not allowed outside operator records",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1745, column 9:
+
+Error at line 1779, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator classes are only allowed in operator records and packages in operator records
 ")})));
     end OperatorLimitations1;
@@ -1869,8 +1869,8 @@ end OperatorRecordTests.OperatorLimitations2;
             description="Check that operators are not allowed outside operator records",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1814, column 13:
+
+Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator classes are only allowed in operator records and packages in operator records
 ")})));
     end OperatorLimitations3;
@@ -1899,8 +1899,8 @@ Semantic error at line 1814, column 13:
             description="Check that only the operators listed in the spec are legal to overload",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1848, column 13:
+
+Error at line 1883, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Invalid name for operator class: ':'
 ")})));
     end OperatorLimitations4;
@@ -1927,8 +1927,8 @@ Semantic error at line 1848, column 13:
             description="Check that only the operators listed in the spec are legal to overload",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1878, column 13:
+
+Error at line 1913, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Invalid name for operator class: f
 ")})));
     end OperatorLimitations5;
@@ -1963,11 +1963,11 @@ Semantic error at line 1878, column 13:
             description="Check that operator functions for non-constructors must have an argument of the record type",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1915, column 13:
+
+Error at line 1941, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions must have at least one argument that is of the type of the operator record the function belongs to
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1923, column 13:
+
+Error at line 1949, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   First argument of conversion operator functions must be of the type of the operator record the function belongs to
 ")})));
     end OperatorLimitations6;
@@ -1999,11 +1999,11 @@ Semantic error at line 1923, column 13:
             description="Check that operator functions for constructors must have a single output of the record type",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1955, column 29:
+
+Error at line 1981, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1961, column 46:
+
+Error at line 1987, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Output of operator record constructor must be of the type of the operator record the constructor belongs to
 ")})));
     end OperatorLimitations7;
@@ -2038,11 +2038,11 @@ Semantic error at line 1961, column 46:
             description="Check that operator functions must have a single output",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1990, column 13:
+
+Error at line 2016, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions must have exactly one output, but '*' has 0
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 1996, column 13:
+
+Error at line 2022, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions must have exactly one output, but '-' has 2
 ")})));
     end OperatorLimitations8;
@@ -2079,11 +2079,11 @@ Semantic error at line 1996, column 13:
             description="Check that operators must be encapsulated",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2032, column 13:
+
+Error at line 2055, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator classes must be encapsulated
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2042, column 13:
+
+Error at line 2065, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator classes must be encapsulated
 ")})));
     end OperatorLimitations9;
@@ -2158,14 +2158,14 @@ end OperatorRecordTests.OperatorLimitations10;
             description="Check for content that is not allowed in operator records",
             errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2092, column 34:
+
+Error at line 2139, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Components are not allowed in packages in operator records
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2095, column 17:
+
+Error at line 2142, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2100, column 13:
+
+Error at line 2147, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Classes other than operators, operator functions, functions and packages are not allowed in operator record classes
 ")})));
     end OperatorLimitations11;
@@ -2185,8 +2185,8 @@ Semantic error at line 2100, column 13:
             description="Extending operator record is only allowed in short class decl",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2153, column 13:
+
+Error at line 2176, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Extending operator records is only allowed as a short class declaration
 ")})));
     end OperatorLimitations12;
@@ -2204,8 +2204,8 @@ Semantic error at line 2153, column 13:
             description="Short class decl of operator record may only modify attributes",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2162, column 37:
+
+Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations13;
@@ -2244,8 +2244,8 @@ Semantic error at line 2162, column 37:
             description="Short class decl of operator record may only modify attributes",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2192, column 35:
+
+Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14;
@@ -2278,8 +2278,8 @@ Semantic error at line 2192, column 35:
             description="Short class decl of operator record may only modify attributes of record member",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2237, column 37:
+
+Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14b;
@@ -2401,8 +2401,8 @@ end OperatorRecordTests.OperatorLimitations15b;
             description="Short class decl of operator record may only modify attributes of record members in the record declaration (i.e. not in functions)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2229, column 46:
+
+Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations16;
@@ -2439,8 +2439,8 @@ Semantic error at line 2229, column 46:
             description="Circular overloaded conversion operators",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2315, column 26:
+
+Error at line 2415, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Ambiguous overloaded constructors in OperatorRecordTests.OperatorLimitations17.A and OperatorRecordTests.OperatorLimitations17.B
 ")})));
     end OperatorLimitations17;
@@ -2509,8 +2509,8 @@ end OperatorRecordTests.OperatorLimitations18;
             description="Zero constructor with input",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2396, column 13:
+
+Error at line 2496, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   The '0' operator record constructor may not have any inputs, but has 1
 ")})));
     end OperatorLimitations19;
@@ -2543,8 +2543,8 @@ Semantic error at line 2396, column 13:
             description="More than one zero constructor",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2423, column 13:
+
+Error at line 2523, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   The '0' operator may not contain more than one function, but has 2
 ")})));
     end OperatorLimitations20;
@@ -2570,8 +2570,8 @@ Semantic error at line 2423, column 13:
             description="'String' operator returning Real",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2457, column 13:
+
+Error at line 2557, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   'String' operator functions must have one output of type String, but returns Real
 ")})));
     end OperatorLimitations21;
@@ -2599,8 +2599,8 @@ Semantic error at line 2457, column 13:
             description="'String' operator returning array",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2484, column 13:
+
+Error at line 2585, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   'String' operator functions must have one output of type String, but a returns String[1]
 ")})));
     end OperatorLimitations22;
@@ -2630,8 +2630,8 @@ Semantic error at line 2484, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2525, column 21:
+
+Error at line 2625, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
 ")})));
     end OperatorLimitations23;
@@ -2771,8 +2771,8 @@ end OperatorRecordTests.OperatorLimitations25;
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2649, column 18:
+
+Error at line 2760, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined
 ")})));
     end OperatorLimitations26;
@@ -2798,8 +2798,8 @@ Semantic error at line 2649, column 18:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2686, column 13:
+
+Error at line 2785, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
 ")})));
     end OperatorLimitations27;
@@ -2827,8 +2827,8 @@ Semantic error at line 2686, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2713, column 13:
+
+Error at line 2812, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 3
 ")})));
     end OperatorLimitations28;
@@ -2855,8 +2855,8 @@ Semantic error at line 2713, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2742, column 13:
+
+Error at line 2841, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for binary operators must have exactly 2 inputs without default value, but '+' has 1
 ")})));
     end OperatorLimitations29;
@@ -2884,8 +2884,8 @@ Semantic error at line 2742, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2770, column 13:
+
+Error at line 2869, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations30;
@@ -2946,8 +2946,8 @@ end OperatorRecordTests.OperatorLimitations31;
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2833, column 13:
+
+Error at line 2932, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 2
 ")})));
     end OperatorLimitations32;
@@ -2972,9 +2972,9 @@ Semantic error at line 2833, column 13:
             name="OperatorLimitations33",
             description="",
             errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2850, column 13:
+1 errors found:
+
+Error at line 2960, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for unary operators must have exactly 1 input without default value, but 'not' has 0
 ")})));
     end OperatorLimitations33;
@@ -3001,8 +3001,8 @@ Semantic error at line 2850, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2866, column 13:
+
+Error at line 2987, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations34;
@@ -3063,8 +3063,8 @@ end OperatorRecordTests.OperatorLimitations35;
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2916, column 13:
+
+Error at line 3048, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   Operator functions for operators that are both unary and binary must have exactly 1 or 2 inputs without default value, but '-' has 3
 ")})));
     end OperatorLimitations36;
@@ -3092,8 +3092,8 @@ Semantic error at line 2916, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2934, column 13:
+
+Error at line 3077, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations37;
@@ -3120,8 +3120,8 @@ Semantic error at line 2934, column 13:
             description="",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
-Semantic error at line 2963, column 13:
+
+Error at line 3106, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
   All inputs without default value in operator function must be before all inputs with default value
 ")})));
     end OperatorLimitations38;

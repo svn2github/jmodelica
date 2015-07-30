@@ -361,12 +361,11 @@ equation
         ErrorTestCase(
             name="IndexReduction4_Err",
             description="Test error messages for unbalanced systems.",
-			inline_functions="none",
+            inline_functions="none",
             errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
+1 errors found:
 
-Error: in file '/var/folders/vr/vrYe4eKOEZa+6nbQYkr8vU++-ZQ/-Tmp-/jmc8802960033354722744out/sources/IndexReduction.IndexReduction4_Err.mof':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.IndexReduction4_Err.F(x2)' in equation:
    x1 + IndexReduction.IndexReduction4_Err.F(x2) = 1
 ")})));
@@ -392,10 +391,9 @@ equation
             name="IndexReduction5_Err",
             description="Test error messages for unbalanced systems.",
             errorMessage="
-2 error(s), 0 compliance error(s) and 0 warning(s) found:
+1 errors found:
 
-Error: in file 'IndexReduction.IndexReduction5_Err.mof':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.IndexReduction5_Err.F(x2)' in equation:
    (x1, x2) = IndexReduction.IndexReduction5_Err.F(x2)
 ")})));
@@ -452,12 +450,12 @@ P*V=m*R*T;
             description="Test error messages for unbalanced systems.",
             variability_propagation=false,
             errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+2 errors found:
+
+Error in flattened model:
   Index reduction failed: Maximum number of differentiations has been reached
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
     u = u_0 + c_v * (T - T_0)
 
@@ -1289,8 +1287,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Cannot differentiate call to function without derivative or smooth order annotation 'IndexReduction.SSPreferBackoff2.f(x)' in equation:
    0 = IndexReduction.SSPreferBackoff2.f(x)
 ")})));
@@ -1502,18 +1499,15 @@ equation
             description="Test warnings for state select.",
             automatic_tearing=false,
             errorMessage="
-3 warnings found:
+3 errors found:
 
-Warning: in file '...':
-At line 0, column 0:
+Warning in flattened model:
   Iteration variable \"b_v\" is missing start value!
 
-Warning: in file '...':
-At line 0, column 0:
+Warning in flattened model:
   Iteration variable \"v1\" is missing start value!
 
-Warning: in file '...':
-At line 0, column 0:
+Warning in flattened model:
   a_v has stateSelect=always, but could not be selected as state
 ")})));
 end IndexReduction57;
@@ -2585,12 +2579,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Index reduction failed: Maximum number of expressions in a single equation has been reached
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
      der(x2)
 

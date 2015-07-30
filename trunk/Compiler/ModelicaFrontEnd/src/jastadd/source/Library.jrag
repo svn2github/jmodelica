@@ -170,8 +170,8 @@ aspect Library {
         return bcd;
     }
 
-    public LibNode.LibNode(File fileName, String name, boolean structured, LoadReason reason) {
-        this(fileName.getPath(), name, structured, "", reason);
+    public LibNode.LibNode(File file, String name, boolean structured, LoadReason reason) {
+        this(file.getPath(), name, structured, "", reason);
     }
 
     public LibClassDecl.LibClassDecl(FullClassDecl fcd) {

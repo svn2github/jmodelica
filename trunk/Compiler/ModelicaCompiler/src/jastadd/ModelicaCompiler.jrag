@@ -1151,7 +1151,7 @@ public class ModelicaCompiler {
         
         String instName = icd.qualifiedName();
         File flatFile = new File(sourceDir, (flatName == null ? instName : flatName) + ".mof");
-        final FClass fc = FClass.create(icd, flatFile.getPath(), this, flatName);
+        final FClass fc = FClass.create(icd, flatName);
         
         ASTNode.beginStep("flatten()");
         log.info("Flattening model...");

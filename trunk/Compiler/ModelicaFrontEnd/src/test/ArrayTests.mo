@@ -440,14 +440,14 @@ end ArrayTests.General.ArrayTest14;
 model ArrayTest15_Err
    Real x[3] = {{2},{2},{3}};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayTest15_Err",
-			description="Test type checking of arrays",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="General_ArrayTest15_Err",
+            description="Test type checking of arrays",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 251, column 9:
+
+Error at line 441, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 end ArrayTest15_Err;
@@ -720,14 +720,14 @@ model ArrayTest27_Err
 equation
    der(x) = ones(3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayTest27_Err",
-			description="Test type checking of arrays",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="General_ArrayTest27_Err",
+            description="Test type checking of arrays",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 592, column 13:
+
+Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
@@ -1116,8 +1116,8 @@ model ArrayTest42
             description="Using noEvent on expression that gives ndims = -1",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1111, column 22:
+
+Error at line 1111, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Cannot find function declaration for f()
 ")})));
 end ArrayTest42;
@@ -1306,17 +1306,17 @@ end UnknownSize3;
 model UnknownSize4
  Real x[1,:] = {1,2};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownSize4",
-			description="Using unknown array sizes: too few dims",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 789, column 7:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownSize_UnknownSize4",
+            description="Using unknown array sizes: too few dims",
+            errorMessage="
+2 errors found:
+
+Error at line 1306, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Can not infer array size of the variable x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 789, column 7:
+
+Error at line 1307, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
 end UnknownSize4;
@@ -1325,14 +1325,14 @@ end UnknownSize4;
 model UnknownSize5
  Real x[1,:] = {{1,2},{3,4}};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownSize5",
-			description="Using unknown array sizes: one dim specified and does not match",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownSize_UnknownSize5",
+            description="Using unknown array sizes: one dim specified and does not match",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 805, column 7:
+
+Error at line 1326, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array size mismatch in declaration of x, size of declaration is [1, 2] and size of binding expression is [2, 2]
 ")})));
 end UnknownSize5;
@@ -1343,17 +1343,17 @@ model UnknownSize6
 equation
  x = {{1,2},{3,4}};
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="UnknownSize6",
-			description="Using unknown array sizes:",
-			errorMessage="
-1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 821, column 7:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownSize_UnknownSize6",
+            description="Using unknown array sizes:",
+            errorMessage="
+2 errors found:
+
+Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Can not infer array size of the variable x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 823, column 2:
+
+Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   The array sizes of right and left hand side of equation are not compatible
 ")})));
 end UnknownSize6;
@@ -1391,14 +1391,14 @@ model SubscriptExpression2
 equation
  x[0] = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SubscriptExpression2",
-			description="Type checking array subscripts: literal < 1",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_SubscriptExpression2",
+            description="Type checking array subscripts: literal < 1",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 737, column 4:
+
+Error at line 1392, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array index out of bounds: 0, index expression: 0
 ")})));
 end SubscriptExpression2;
@@ -1409,14 +1409,14 @@ model SubscriptExpression3
 equation
  x[5] = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SubscriptExpression3",
-			description="Type checking array subscripts: literal > end",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_SubscriptExpression3",
+            description="Type checking array subscripts: literal > end",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 754, column 4:
+
+Error at line 1410, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array index out of bounds: 5, index expression: 5
 ")})));
 end SubscriptExpression3;
@@ -1429,14 +1429,14 @@ equation
   x[i] = x[i-1] * 2;
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SubscriptExpression4",
-			description="Type checking array subscripts: expression < 1",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_SubscriptExpression4",
+            description="Type checking array subscripts: expression < 1",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1307, column 12:
+
+Error at line 1429, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array index out of bounds: 0, index expression: i - 1
 ")})));
 end SubscriptExpression4;
@@ -1449,14 +1449,14 @@ equation
   x[i] = x[i+1] * 2;
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SubscriptExpression5",
-			description="Type checking array subscripts: expression > end",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_SubscriptExpression5",
+            description="Type checking array subscripts: expression > end",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 769, column 12:
+
+Error at line 1449, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array index out of bounds: 5, index expression: i + 1
 ")})));
 end SubscriptExpression5;
@@ -1546,14 +1546,14 @@ equation
   x[i + j * max(i*(1:4))] = i + j * 2;
  end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="SubscriptExpression8",
-			description="Type checking array subscripts: complex expression, several bad indices",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_SubscriptExpression8",
+            description="Type checking array subscripts: complex expression, several bad indices",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1451, column 5:
+
+Error at line 1546, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Array index out of bounds: 5, index expression: i + j * max(i * (1:4))
 ")})));
 end SubscriptExpression8;
@@ -1684,14 +1684,14 @@ model NumSubscripts1
  Real x = 1;
  Real y = x[1];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NumSubscripts1",
-			description="Check number of array subscripts:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_NumSubscripts1",
+            description="Check number of array subscripts:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1928, column 12:
+
+Error at line 1685, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Too many array subscripts for access: 1 subscripts given, component has 0 dimensions
 ")})));
 end NumSubscripts1;
@@ -1701,14 +1701,14 @@ model NumSubscripts2
  Real x[1,1] = {{1}};
  Real y = x[1,1,1];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="NumSubscripts2",
-			description="Check number of array subscripts:",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Subscripts_NumSubscripts2",
+            description="Check number of array subscripts:",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1945, column 12:
+
+Error at line 1702, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Too many array subscripts for access: 3 subscripts given, component has 2 dimensions
 ")})));
 end NumSubscripts2;
@@ -1758,14 +1758,14 @@ model Enum2
             description="Check incompatible type index errors for enum.",
             errorMessage="
 3 errors found:
-Error: in file '...':
-Semantic error at line 1422, column 7:
+
+Error at line 1751, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Expected array index of type 'ArrayTests.Subscripts.Enum2.ShirtSizes' found 'Integer'
-Error: in file '...':
-Semantic error at line 1423, column 7:
+
+Error at line 1752, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Expected array index of type 'Integer' found 'ArrayTests.Subscripts.Enum2.ShirtSizes'
-Error: in file '...':
-Semantic error at line 1424, column 7:
+
+Error at line 1753, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Expected array index of type 'ArrayTests.Subscripts.Enum2.ShirtSizes' found 'ArrayTests.Subscripts.Enum2.ShirtSizesAnotherStandard'
 ")})));
 end Enum2;
@@ -1805,11 +1805,11 @@ model Bool2
             description="Check incompatible type index errors for bool.",
             errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 1466, column 8:
+
+Error at line 1799, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Expected array index of type 'Boolean' found 'Integer'
-Error: in file '...':
-Semantic error at line 1467, column 8:
+
+Error at line 1800, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Expected array index of type 'Integer' found 'Boolean'
 ")})));
 end Bool2;
@@ -2011,8 +2011,8 @@ equation
             description="Scalarization of addition: Real[2] + Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1653, column 6:
+
+Error at line 2006, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2032,8 +2032,8 @@ equation
             description="Scalarization of addition: Real[2,2] + Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1674, column 6:
+
+Error at line 2027, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2053,8 +2053,8 @@ equation
             description="Scalarization of addition: Real[2,2,2] + Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1695, column 6:
+
+Error at line 2048, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2074,8 +2074,8 @@ equation
             description="Scalarization of addition: Real + Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1716, column 6:
+
+Error at line 2069, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2095,8 +2095,8 @@ equation
             description="Scalarization of addition: Real + Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1737, column 6:
+
+Error at line 2090, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2116,8 +2116,8 @@ equation
             description="Scalarization of addition: Real + Integer[2,2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1758, column 6:
+
+Error at line 2111, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2137,8 +2137,8 @@ equation
             description="Scalarization of addition: Real[2] + Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1779, column 6:
+
+Error at line 2132, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2158,8 +2158,8 @@ equation
             description="Scalarization of addition: Real[2] + Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1800, column 6:
+
+Error at line 2153, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2179,8 +2179,8 @@ equation
             description="Scalarization of addition: Real[2] + String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 1821, column 6:
+
+Error at line 2174, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y + {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2427,8 +2427,8 @@ equation
             description="Scalarization of element-wise addition: Real[2] .+ Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2069, column 6:
+
+Error at line 2422, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .+ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2448,8 +2448,8 @@ equation
             description="Scalarization of element-wise addition: Real[2] .+ Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2090, column 6:
+
+Error at line 2443, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .+ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2469,8 +2469,8 @@ equation
             description="Scalarization of element-wise addition: Real[2] .+ String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2111, column 6:
+
+Error at line 2464, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .+ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2573,8 +2573,8 @@ equation
             description="Scalarization of subtraction: Real[2] - Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2215, column 6:
+
+Error at line 2568, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2594,8 +2594,8 @@ equation
             description="Scalarization of subtraction: Real[2,2] - Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2236, column 6:
+
+Error at line 2589, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2615,8 +2615,8 @@ equation
             description="Scalarization of subtraction: Real[2,2,2] - Integer",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2257, column 6:
+
+Error at line 2610, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2636,8 +2636,8 @@ equation
             description="Scalarization of subtraction: Real - Integer[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2278, column 6:
+
+Error at line 2631, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2657,8 +2657,8 @@ equation
             description="Scalarization of subtraction: Real - Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2299, column 6:
+
+Error at line 2652, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2678,8 +2678,8 @@ equation
             description="Scalarization of subtraction: Real - Integer[2,2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2320, column 6:
+
+Error at line 2673, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2699,8 +2699,8 @@ equation
             description="Scalarization of subtraction: Real[2] - Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2341, column 6:
+
+Error at line 2694, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2720,8 +2720,8 @@ equation
             description="Scalarization of subtraction: Real[2] - Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2362, column 6:
+
+Error at line 2715, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2741,8 +2741,8 @@ equation
             description="Scalarization of subtraction: Real[2] - String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2383, column 6:
+
+Error at line 2736, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y - {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2989,8 +2989,8 @@ equation
             description="Scalarization of element-wise subtraction: Real[2] .- Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2631, column 6:
+
+Error at line 2984, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .- {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3010,8 +3010,8 @@ equation
             description="Scalarization of element-wise subtraction: Real[2] .- Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2652, column 6:
+
+Error at line 3005, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .- {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3031,8 +3031,8 @@ equation
             description="Scalarization of element-wise subtraction: Real[2] .- String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2673, column 6:
+
+Error at line 3026, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .- {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3374,8 +3374,8 @@ equation
             description="Scalarization of multiplication: Real[2,2,2] * Integer[2,2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 2992, column 6:
+
+Error at line 3369, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real[2, 2, 2]
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -3395,8 +3395,8 @@ equation
             description="Scalarization of multiplication: Real[2] * Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3013, column 6:
+
+Error at line 3390, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3416,8 +3416,8 @@ equation
             description="Scalarization of multiplication: Real[2] * String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3034, column 6:
+
+Error at line 3411, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3437,8 +3437,8 @@ equation
             description="Scalarization of multiplication: Real[2,2] * Integer[3,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3055, column 6:
+
+Error at line 3432, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{10, 20}, {30, 40}, {50, 60}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}, {50, 60}}' is Integer[3, 2]
@@ -3458,8 +3458,8 @@ equation
             description="Scalarization of multiplication: Real[2,3] * Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3076, column 6:
+
+Error at line 3453, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3479,8 +3479,8 @@ equation
             description="Scalarization of multiplication: Real[2,3] * Integer[2,3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3097, column 6:
+
+Error at line 3474, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{10, 20, 30}, {40, 50, 60}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20, 30}, {40, 50, 60}}' is Integer[2, 3]
@@ -3500,8 +3500,8 @@ equation
             description="Scalarization of multiplication: Real[2,2] * Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3118, column 6:
+
+Error at line 3495, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2, 2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3521,8 +3521,8 @@ equation
             description="Scalarization of multiplication: Real[3] * Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3139, column 6:
+
+Error at line 3516, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3542,8 +3542,8 @@ equation
             description="Scalarization of multiplication: Real[2,2] * Integer[1,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3160, column 6:
+
+Error at line 3537, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y * {{10, 20}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}}' is Integer[1, 2]
@@ -3790,8 +3790,8 @@ equation
             description="Scalarization of element-wise multiplication: Real[2] .* Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3408, column 6:
+
+Error at line 3785, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .* {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3811,8 +3811,8 @@ equation
             description="Scalarization of element-wise multiplication: Real[2] .* Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3429, column 6:
+
+Error at line 3806, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .* {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3832,8 +3832,8 @@ equation
             description="Scalarization of element-wise multiplication: Real[2] .* String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3450, column 6:
+
+Error at line 3827, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .* {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3857,8 +3857,8 @@ equation
             description="Scalarization of division: Real[2] / Integer[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3475, column 6:
+
+Error at line 3852, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y / {10, 20}
     type of 'y' is Real[2]
     type of '{10, 20}' is Integer[2]
@@ -3878,8 +3878,8 @@ equation
             description="Scalarization of division: Real[2,2] / Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3496, column 6:
+
+Error at line 3873, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3978,8 +3978,8 @@ equation
             description="Scalarization of division: Real / Integer[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3596, column 6:
+
+Error at line 3973, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y / {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -3999,8 +3999,8 @@ equation
             description="Scalarization of division: Real / Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3617, column 6:
+
+Error at line 3994, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4020,8 +4020,8 @@ equation
             description="Scalarization of division: Real[2] / String",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3638, column 6:
+
+Error at line 4015, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y / {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4268,8 +4268,8 @@ equation
             description="Scalarization of element-wise division: Real[2] ./ Integer[3]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3886, column 6:
+
+Error at line 4263, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y ./ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4285,12 +4285,12 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="Algebra_Div_ArrayDotDiv11",
+            name="ArrayDotDiv11",
             description="Scalarization of element-wise division: Real[2] ./ Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3907, column 6:
+
+Error at line 4284, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y ./ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4310,8 +4310,8 @@ equation
             description="Scalarization of element-wise division: Real[2] ./ String[2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 3928, column 6:
+
+Error at line 4305, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y ./ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4561,8 +4561,8 @@ equation
             description="Scalarization of element-wise exponentiation:",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4179, column 6:
+
+Error at line 4556, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .^ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4582,8 +4582,8 @@ equation
             description="Scalarization of element-wise exponentiation:",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4200, column 6:
+
+Error at line 4577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .^ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4603,8 +4603,8 @@ equation
             description="Scalarization of element-wise exponentiation:",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4221, column 6:
+
+Error at line 4598, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: y .^ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4767,8 +4767,8 @@ model ArrayPow8
             description="Scalarization of element-wise exponentiation: Integer[2,2] ^ (negative Integer)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4385, column 16:
+
+Error at line 4762, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}} ^ -1
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '-1' is Integer
@@ -4785,8 +4785,8 @@ model ArrayPow9
             description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Real",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4403, column 16:
+
+Error at line 4780, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}} ^ 1.0
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '1.0' is Real
@@ -4803,8 +4803,8 @@ model ArrayPow10
             description="Scalarization of element-wise exponentiation: Integer[2,2] ^ Integer[2,2]",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4421, column 16:
+
+Error at line 4798, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}} ^ {{1, 2}, {3, 4}}
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
@@ -4821,8 +4821,8 @@ model ArrayPow11
             description="Scalarization of element-wise exponentiation: Integer[2,3] ^ 2",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4439, column 16:
+
+Error at line 4816, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}, {5, 6}} ^ 2
     type of '{{1, 2}, {3, 4}, {5, 6}}' is Integer[3, 2]
     type of '2' is Integer
@@ -4840,8 +4840,8 @@ model ArrayPow12
             description="Scalarization of element-wise exponentiation: Real[2,2] ^ Integer component",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4457, column 16:
+
+Error at line 4834, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4879,8 +4879,8 @@ model ArrayPow14
             description="Scalarization of element-wise exponentiation: Real[2,2] ^ parameter Integer component",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4496, column 16:
+
+Error at line 4873, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4912,8 +4912,8 @@ model ArrayPow16
             description="Scalarization of element-wise exponentiation: Integer[1] ^ 2",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4530, column 14:
+
+Error at line 4907, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {1} ^ 2
     type of '{1}' is Integer[1]
     type of '2' is Integer
@@ -5009,8 +5009,8 @@ model ArrayNeg4
             description="Scalarization of negation: -Boolean[2] (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4651, column 17:
+
+Error at line 5004, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: - {true, false}
     type of '{true, false}' is Boolean[2]
 ")})));
@@ -5027,8 +5027,8 @@ model ArrayNeg5
             description="Scalarization of negation: -Boolean[2] (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4668, column 17:
+
+Error at line 5021, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: - y
     type of 'y' is Boolean[2]
 ")})));
@@ -5087,8 +5087,8 @@ model ArrayAnd3
             description="Scalarization of logical and: different array sizes (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4729, column 17:
+
+Error at line 5082, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} and {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5106,8 +5106,8 @@ model ArrayAnd4
             description="Scalarization of logical and: different array sizes (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4748, column 17:
+
+Error at line 5101, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5124,8 +5124,8 @@ model ArrayAnd5
             description="Scalarization of logical and: array and scalar (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4766, column 17:
+
+Error at line 5119, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} and true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5143,8 +5143,8 @@ model ArrayAnd6
             description="Scalarization of logical and: array and scalar (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4785, column 17:
+
+Error at line 5138, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5161,8 +5161,8 @@ model ArrayAnd7
             description="Scalarization of logical and: Integer[2] and Integer[2] (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4803, column 17:
+
+Error at line 5156, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {1, 1} and {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5180,8 +5180,8 @@ model ArrayAnd8
             description="Scalarization of logical and: Integer[2] and Integer[2] (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4822, column 17:
+
+Error at line 5175, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {1, 1} and y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5258,8 +5258,8 @@ model ArrayOr3
             description="Scalarization of logical or: different array sizes (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4900, column 17:
+
+Error at line 5253, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} or {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5277,8 +5277,8 @@ model ArrayOr4
             description="Scalarization of logical or: different array sizes (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4919, column 17:
+
+Error at line 5272, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5295,8 +5295,8 @@ model ArrayOr5
             description="Scalarization of logical or: array and scalar (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4937, column 17:
+
+Error at line 5290, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} or true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5314,8 +5314,8 @@ model ArrayOr6
             description="Scalarization of logical or: array and scalar (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4956, column 17:
+
+Error at line 5309, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5332,8 +5332,8 @@ model ArrayOr7
             description="Scalarization of logical or: Integer[2] or Integer[2] (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4974, column 17:
+
+Error at line 5327, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {1, 1} or {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5351,8 +5351,8 @@ model ArrayOr8
             description="Scalarization of logical or: Integer[2] or Integer[2] (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 4993, column 17:
+
+Error at line 5346, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: {1, 1} or y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5449,8 +5449,8 @@ model ArrayNot4
             description="Scalarization of logical not: not Integer[2] (literal)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 5091, column 17:
+
+Error at line 5444, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: not {1, 0}
     type of '{1, 0}' is Integer[2]
 ")})));
@@ -5467,8 +5467,8 @@ model ArrayNot5
             description="Scalarization of logical or: not Integer[2] (component)",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 5108, column 17:
+
+Error at line 5461, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Type error in expression: not y
     type of 'y' is Integer[2]
 ")})));
@@ -5812,14 +5812,14 @@ model ArrayIterTest5
     
     Real x[3] = { f() for i in 1:3 };
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArrayIterTest5",
-			description="Iterated expression with bad size",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Constructors_Iterators_ArrayIterTest5",
+            description="Iterated expression with bad size",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1960, column 16:
+
+Error at line 5813, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Function f() has no outputs, but is used in expression
 ")})));
 end ArrayIterTest5;
@@ -6407,17 +6407,17 @@ equation
 		end if;
     end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="For_ForEquation5",
-			description="Test handling of if equation with parameter test using for index in expression in array index",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="For_ForEquation5",
+            description="Test handling of if equation with parameter test using for index in expression in array index",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Assertion failed: x[:2] should fall when x[:1] falls
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Assertion failed: x[:2] should rise when x[:1] rises
 ")})));
 end ForEquation5;
@@ -7546,17 +7546,17 @@ model CircularFunctionArg1
 	Real[:] c = f(d);
 	Real[:] d = f(c);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="CircularFunctionArg1",
-			description="Circular dependency when calculating size of function output",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_CircularFunctionArg1",
+            description="Circular dependency when calculating size of function output",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1528, column 14:
+
+Error at line 7546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 1529, column 14:
+
+Error at line 7547, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
 ")})));
 end CircularFunctionArg1;
@@ -7657,17 +7657,17 @@ end ArrayConst4;
 model ArraySize2
 	parameter Real x[:, size(x,1)];
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ArraySize2",
-			description="Size of variable: one dimension refering to another",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySize2",
+            description="Size of variable: one dimension refering to another",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 6365, column 17:
+
+Error at line 7657, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Can not infer array size of the variable x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ArrayTests.mo':
-Semantic error at line 6365, column 22:
+
+Error at line 7658, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size expression: size(x, 1)
 ")})));
 end ArraySize2;
@@ -7836,17 +7836,17 @@ equation
         (e, f) = f2(b);
     end if;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="Other_ArraySizeInIf2",
-			description="Test that array size errors don't lock if branches if not possible",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf2",
+            description="Test that array size errors don't lock if branches if not possible",
+            errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 6225, column 5:
+
+Error at line 7833, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   All branches in if equation with non-parameter tests must have the same number of equations
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-Semantic error at line 6226, column 9:
+
+Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   The array sizes of right and left hand side of equation are not compatible
 ")})));
 end ArraySizeInIf2;

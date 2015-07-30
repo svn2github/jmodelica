@@ -1010,11 +1010,13 @@ equation
             description="Test error messages for algorithms.",
             inline_functions="none",
             errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+1 errors found:
+
+Error in flattened model:
   Cannot differentate the equation:
    algorithm
  x1 := x2;
+
 ")})));
     end ErrorMessage1;
     
@@ -1551,14 +1553,14 @@ end Differentiation.DerivativeAnnotation.Order2;
             der(x1) + der(x2) = 1;
             x1 + usePartFunc(function fullFunc(x1=x2)) = 1;
 
-        annotation(__JModelica(UnitTesting(tests={
-            ErrorTestCase(
-                name="DerivativeAnnotation_Functional1",
-                description="Test failing differentiation of functional input arguments",
-                errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="DerivativeAnnotation_Functional1",
+            description="Test failing differentiation of functional input arguments",
+            errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Cannot differentiate call to function without derivative or smooth order annotation 'pf()' in equation:
    x1 + Differentiation.DerivativeAnnotation.Functional1.usePartFunc(function Differentiation.DerivativeAnnotation.Functional1.fullFunc(x2)) = 1
 ")})));

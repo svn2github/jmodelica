@@ -58,25 +58,18 @@ public class ErrorTestCase extends TestCase {
 			fail("No errors reported.");
 		return true;
 	}
-	
-	private static  Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
-	private static String introReplacement = "";
-	private static Pattern fileFilter = Pattern.compile("(in file )'([^'\\\\]|\\\\.)+(\\.[A-Za-z]+)?'([:,])");
-	private static String fileReplacement = "$1'...'$4";
-	private static Pattern lineFilter = Pattern.compile("([Aa]t line )[0-9]+");
-	private static String lineReplacement = "$10";
-	private static Pattern columnFilter = Pattern.compile("(column )[0-9]+");
-	private static String columnReplacement = "$10";
 
+    private static Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
+    private static String introReplacement = "";
+    private static Pattern posFilter = Pattern.compile("at line [0-9]+, column [0-9]+, in file '([^'\\\\]|\\\\.)+'([:,])");
+    private static String posReplacement = "at line 0, column 0, in file '...'$2";
 
-	public  String filterErrorMessages(String str) {
-		str = introFilter.matcher(str).replaceAll(introReplacement);
-		str = fileFilter.matcher(str).replaceAll(fileReplacement);
-		str = lineFilter.matcher(str).replaceAll(lineReplacement);
-		str = columnFilter.matcher(str).replaceAll(columnReplacement);
-		return str;
-	}
-	
+    public String filterErrorMessages(String str) {
+        str = introFilter.matcher(str).replaceAll(introReplacement);
+        str = posFilter.matcher(str).replaceAll(posReplacement);
+        return str;
+    }
+
 	/**
 	 * @return the errorMessage
 	 */

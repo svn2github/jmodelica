@@ -161,31 +161,30 @@ end OptimicaTests.ClassAttrTest4;
     x<=3;
     y>=3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ClassAttrTest5",
-			description="Variability of objective class attribute: continuous",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassAttrTest5",
+            description="Variability of objective class attribute: continuous",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
-Semantic error at line 108, column 31:
+
+Error at line 154, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   The class attribute 'objective' must have parameter or timed variability.
 ")})));
   end ClassAttrTest5;
 
   
   optimization ClassAttrTest6(objective=x,startTime=0,finalTime=1)
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ClassAttrTest6",
-			description="Using missing variable in class attribute",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassAttrTest6",
+            description="Using missing variable in class attribute",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
-Semantic error at line 179, column 41:
+
+Error at line 177, column 41, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   Cannot find class or component declaration for x
 ")})));
-
   end ClassAttrTest6;
 
   optimization ClassAttrTest7 (objectiveIntegrand=x(finalTime),startTime=3,finalTime=4)
@@ -198,14 +197,14 @@ Semantic error at line 179, column 41:
     x<=3;
     y>=3;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ClassAttrTest7",
-			description="Variability of objective class attribute: continuous",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ClassAttrTest7",
+            description="Variability of objective class attribute: continuous",
+            errorMessage="
 1 errors found:
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
-Semantic error at line 193, column 31:
+
+Error at line 190, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   The class attribute 'objectiveIntegrand' must not have timed variability.
 ")})));
   end ClassAttrTest7;
@@ -422,13 +421,14 @@ Input variables:
   equation
     x  + x(finalTime)=2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InstantValueTest3_Err",
-			description="Test that error messages are generated if timed variables are used in equations.",
-			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTests.mo':
-Semantic error at line 217, column 10:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InstantValueTest3_Err",
+            description="Test that error messages are generated if timed variables are used in equations.",
+            errorMessage="
+1 errors found:
+
+Error at line 422, column 10, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTests.mo':
   Timed variables are not allowed in equations
 ")})));
   end InstantValueTest3_Err;

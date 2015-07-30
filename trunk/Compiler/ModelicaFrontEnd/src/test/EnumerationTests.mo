@@ -92,14 +92,14 @@ end EnumerationTests.EnumerationTest3;
     type B = enumeration(a, c, b);
 	parameter A x = B.a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="EnumerationTest4",
-			description="Using incompatible enumerations: binding expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EnumerationTest4",
+            description="Using incompatible enumerations: binding expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 72, column 6:
+
+Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
   end EnumerationTest4;
@@ -112,14 +112,14 @@ Semantic error at line 72, column 6:
   equation
     x = B.a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="EnumerationTest5",
-			description="Using incompatible enumerations: equation",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EnumerationTest5",
+            description="Using incompatible enumerations: equation",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/EnumerationTests.mo':
-Semantic error at line 92, column 4:
+
+Error at line 113, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
   end EnumerationTest5;
@@ -257,16 +257,16 @@ end EnumerationTests.EnumerationTest10;
             description="Using the Integer() operator: wrong type of argument",
             errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
-Semantic error at line 250, column 35:
+
+Error at line 250, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '\"1\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
-Semantic error at line 251, column 35:
+
+Error at line 251, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1.0' is Real
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
-Semantic error at line 252, column 35:
+
+Error at line 252, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
 ")})));
