@@ -58,6 +58,8 @@ public class Problem implements Comparable<Problem>, Serializable {
     public String fileName() { return fileName; }
     public void setFileName(String fileName) { this.fileName = fileName; }
 
+    public boolean hasLocation() { return fileName != null; }
+
     protected final String message;
     public String message() { return message; }
 
