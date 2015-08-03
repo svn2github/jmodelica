@@ -180,11 +180,12 @@ aspect Scalarization {
 			setFAttributeList(list);
 		return !keep;
 	}
-
-    protected void FClass.scalarizationCleanup() {
-        flush();  // Must flush before traversing
-    }
-
+	
+	protected void FClass.scalarizationCleanup() {
+		flush();  // Must flush before traversing
+		enableStreamsRewrite();
+	}
+    
     public static List<FAbstractEquation> FAbstractEquation.scalarizeList(List<FAbstractEquation> fromList, List<FAbstractEquation> toList, List<FVariable> vars) {
         scalarizeList(fromList, toList, vars, Collections.<String,FExp>emptyMap());
         return toList;
