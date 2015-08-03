@@ -14,7 +14,6 @@ public class Problem implements Comparable<Problem>, Serializable {
                 return -1;
             if (other.fileName != null)
                 return 1;
-            return 0;
         } else {
             if (!fileName.equals(other.fileName))
                 return fileName.compareTo(other.fileName);
