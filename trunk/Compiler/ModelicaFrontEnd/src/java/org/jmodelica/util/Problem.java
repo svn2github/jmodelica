@@ -9,9 +9,12 @@ public class Problem implements Comparable<Problem>, Serializable {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem other) {
-        if (fileName == null) {
+        if (fileName == null || other.fileName == null) {
+            if (fileName != null)
+                return -1;
             if (other.fileName != null)
                 return 1;
+            return 0;
         } else {
             if (!fileName.equals(other.fileName))
                 return fileName.compareTo(other.fileName);
