@@ -6244,12 +6244,12 @@ model ArrayIterTestUnknown1
     
 	Real x[3] = f(6);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Constructors_Iterators_ArrayIterTestUnknown1",
-			description="Array constructor with iterators: vectors of length 1",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constructors_Iterators_ArrayIterTestUnknown1",
+            description="Array constructor with iterators: vectors of length 1",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1
  Real x[1];
  Real x[2];
@@ -6263,19 +6263,18 @@ public
   output Real[:] x;
   Real[:] temp_1;
  algorithm
-  size(x) := {max(integer(a / 2 - 1) + 1, 0)};
-  size(temp_1) := {max(integer(a / 2 - 1) + 1, 0)};
-  for i2 in 1:max(integer(a / 2 - 1) + 1, 0) loop
+  size(x) := {max(a / 2, 0)};
+  size(temp_1) := {max(a / 2, 0)};
+  for i2 in 1:max(a / 2, 0) loop
    temp_1[i2] := i2 ^ 2;
   end for;
-  for i1 in 1:max(integer(a / 2 - 1) + 1, 0) loop
+  for i1 in 1:max(a / 2, 0) loop
    x[i1] := temp_1[i1];
   end for;
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1.f;
 
 end ArrayTests.Constructors.Iterators.ArrayIterTestUnknown1;
-			
 ")})));
 end ArrayIterTestUnknown1;
 
