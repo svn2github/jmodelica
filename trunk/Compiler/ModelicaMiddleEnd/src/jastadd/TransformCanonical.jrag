@@ -107,13 +107,13 @@ aspect TransformCanonical {
             if (transformations != null)
                 return;
             transformations = new ArrayList<Transformation>();
-            transformations.add(new enableIfEquationElimination());
             transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
             transformations.add(new scalarize());
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
+            transformations.add(new enableStreamsRewrite());
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
@@ -2649,6 +2649,8 @@ aspect IfEquations {
     
     public class FClass {
         public class enableIfEquationElimination extends Transformation {
+            // Depends on MakeReinitedVarsStates when invoked after scalarize
+            
             public void perform() {
                 enableIfEquationElimination();
                 

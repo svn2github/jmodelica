@@ -2570,6 +2570,58 @@ Error at line 2555, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/Connec
 end StreamTest5;
 
 
+model StreamTest6
+    connector A
+        Real a;
+        flow Real b;
+        stream Real c;
+    end A;
+	
+	model B
+		A a;
+	end B;
+    
+    parameter Integer n = 2;
+    Real x;
+    A a[n];
+    B b[n];
+equation
+    connect(a, b.a);
+	a.a = (1:2) * time;
+	a.c = a.a * 2;
+    if n > 2 then
+        x = inStream(a[3].c) * time;
+    else
+        x = inStream(a[2].c) + time;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamTest6",
+            description="Check that inStream() using out-of-bounds array access does not cause crash when used in inactive if branch",
+            flatModel="
+fclass ConnectTests.StreamTest6
+ structural parameter Integer n = 2 /* 2 */;
+ Real x;
+ Real a[1].a;
+ constant Real a[1].b = 0;
+ Real a[1].c;
+ Real a[2].a;
+ constant Real a[2].b = 0;
+ Real a[2].c;
+ constant Real b[1].a.b = 0;
+ constant Real b[2].a.b = 0;
+equation
+ a[1].a = time;
+ a[2].a = 2 * time;
+ a[1].c = a[1].a * 2;
+ a[2].c = a[2].a * 2;
+ x = a[2].c + time;
+end ConnectTests.StreamTest6;
+")})));
+end StreamTest6;
+
+
 model Cardinality1
     connector A = Real;
 
@@ -2748,6 +2800,38 @@ Error in flattened model:
   Assertion failed: Failed for index: 2
 ")})));
 end Cardinality6;
+
+
+model Cardinality7
+    connector A = Real;
+
+    parameter Integer n = 2;
+    A x[n];
+    A y[n] = (1:n) * time;
+equation
+    connect(x[1], y[1]);
+    for i in 1:n loop
+        if cardinality(x[i]) == 0 then
+            x[n] = 0;
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cardinality7",
+            description="cardinality(): array test as test of if expression",
+            flatModel="
+fclass ConnectTests.Cardinality7
+ structural parameter Integer n = 2 /* 2 */;
+ Real x[1];
+ constant Real x[2] = 0;
+ Real y[2];
+equation
+ x[1] = time;
+ y[2] = 2 * time;
+end ConnectTests.Cardinality7;
+")})));
+end Cardinality7;
 
 
 model ConditionalNoErrTest1
