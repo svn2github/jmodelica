@@ -777,40 +777,38 @@ aspect Arrays {
         return s;
     }
 
-	syn boolean FRangeExp.hasStep() = getNumFExp() > 2;
-	
- 	eq FRangeExp.size() {
- 		MutableSize s = new MutableSize(1);
- 		FExp start = getFExp(0);
- 		FExp stop = getFExp(hasStep() ? 2 : 1);
- 		if (!hasStep() && start.isIntegerLiteral(1) && stop.type().isInteger()) {
- 			s.append(stop);
- 		} else {
- 			start = start.makeRangeSizeExp();
- 			stop = stop.makeRangeSizeExp();
- 	 		FExp step = hasStep() ? getFExp(1).fullCopy() : null;
- 			FExp exp = new FSubExp(stop, start);
- 			if (hasStep())
- 				exp = new FDivExp(exp, step);
- 			exp = new FAddExp(new FIntegerFuncExp(exp), new FIntegerLitExp(1));
- 			exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
- 			s.append(dynamicFExp(exp));
-		}
-		return s;
-	}
- 	
- 	/**
- 	 * Create a new expression suitable for use in an expression calculating the 
- 	 *        array size of a range expression.
- 	 */
- 	public FExp FExp.makeRangeSizeExp() {
- 		return type().wrapRangeSizeExp(fullCopy());
- 	}
- 	
+    syn boolean FRangeExp.hasStep() = getNumFExp() > 2;
+
+    eq FRangeExp.size() {
+        MutableSize s = new MutableSize(1);
+        FExp start = getFExp(0);
+        FExp stop = getFExp(hasStep() ? 2 : 1);
+        start = start.makeRangeSizeExp();
+        stop = stop.makeRangeSizeExp();
+        FExp exp = stop;
+        if (hasStep() || !start.isIntegerLiteral(1)) {
+            exp = new FSubExp(stop, start);
+            if (hasStep())
+                exp = new FDivExp(exp, getFExp(1).treeCopy());
+            exp = new FAddExp(new FIntegerFuncExp(exp), new FIntegerLitExp(1));
+        }
+        exp = new FMaxExp(exp, new Opt(new FIntegerLitExp(0)));
+        s.append(dynamicFExp(exp));
+        return s;
+    }
+
+    /**
+     * Create a new expression suitable for use in an expression calculating the 
+     *        array size of a range expression.
+     */
+    public FExp FExp.makeRangeSizeExp() {
+        return type().wrapRangeSizeExp(fullCopy());
+    }
+
     public FExp FEndExp.makeRangeSizeExp() {
         return type().wrapRangeSizeExp(mySize().createFExp(0));
     }
-    
+
  	/**
  	 * Wrap the given expression so it is suitable for use in an expression 
  	 *        calculating the array size of a range expression.

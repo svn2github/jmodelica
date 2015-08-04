@@ -1234,6 +1234,20 @@ public
 end ArrayTest45;
 
 
+model ArrayTest46
+    Real x[0] = 1:-1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="General_ArrayTest46",
+            description="Check that range exp with negative end is handled properly",
+            flatModel="
+fclass ArrayTests.General.ArrayTest46
+end ArrayTests.General.ArrayTest46;
+")})));
+end ArrayTest46;
+
+
 end General;
 
 
