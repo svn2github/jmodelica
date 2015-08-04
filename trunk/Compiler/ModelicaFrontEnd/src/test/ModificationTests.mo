@@ -544,14 +544,14 @@ model ArrayModifications2
  Real a(each start=3) = 0;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="ArrayModifications2",
             description="Modifications to arrays: [](start=[])",
             errorMessage="
-1 errors found:
+1 warning found:
 
-Error at line 544, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each start = 3
+Warning at line 544, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each start = 3
 ")})));
 end ArrayModifications2;
 
@@ -647,14 +647,14 @@ model ArrayModifications7
  B b(each y=2);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="ArrayModifications7",
             description="Modifications to arrays: each [] = []",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 647, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each y = 2
+Warning at line 647, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each y = 2
 ")})));
 end ArrayModifications7;
 
@@ -1829,10 +1829,10 @@ model ArrayModifications51
             name="ArrayModifications51",
             description="Test each on other level of modification",
             errorMessage="
-3 errors found:
+3 warnings found:
 
-Error at line 1824, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each b(c = 1)
+Warning at line 1824, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each b(c = 1)
 
 Warning at line 1824, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Assuming 'each' for the modification 'c = 1'
@@ -2165,17 +2165,16 @@ model ArrayModifications63
     end C;
     
     C c[2];
-    parameter Real d;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="ArrayModifications63",
             description="Test each on other levels of modification",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 2164, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each a(x = 1:3)
+Warning at line 2164, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each a(x = 1:3)
 ")})));
 end ArrayModifications63;
 
@@ -2196,14 +2195,14 @@ model ArrayModifications64
     C c(b(each a(x = 1:3)));
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="ArrayModifications64",
             description="Test each on other levels of modification",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 2196, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each a(x = 1:3)
+Warning at line 2196, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each a(x = 1:3)
 ")})));
 end ArrayModifications64;
 

@@ -3863,14 +3863,14 @@ model RedeclareTest56_err
     replaceable R1 r2 constrainedby R1(each x = time);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest56_err",
             description="Redeclare with each in constraining type",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 3853, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  The 'each' keyword cannot be applied in a modification of a scalar component: each x = time
+Warning at line 3853, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+  The 'each' keyword should not be applied to a modification of a scalar component: each x = time
 ")})));
 end RedeclareTest56_err;
 

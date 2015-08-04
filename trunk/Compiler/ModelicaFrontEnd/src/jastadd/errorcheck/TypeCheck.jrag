@@ -206,7 +206,7 @@ aspect FlatTypeCheck {
 
     public void InstArgument.typeCheck(ErrorCheckType checkType) {
         if (getEach() && expectedSizeFromParent() == Size.SCALAR) 
-            error("The 'each' keyword cannot be applied in a modification of a scalar component: " + this);
+            warning("The 'each' keyword should not be applied to a modification of a scalar component: " + this);
     }
 
     inh boolean InstNode.isInRedeclareMod();
@@ -1147,7 +1147,7 @@ aspect FlatTypeCheck {
           }
       } else if (eachSet) { 
           if (parentType.ndims() == 0) {
-              enabledExp.error("The 'each' keyword cannot be applied to attributes of scalar components");
+              enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
           } else if (enabledExp.ndims() > 0) {
               enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
           }
