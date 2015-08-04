@@ -64,10 +64,16 @@ aspect Types {
             return true;
         
         if (superType.isArray() != subType.isArray()) {
-            if (top && superType.isArray()) 
-                return compareCompositeTypes(superType.getInstComponentDecl(0), subType, true);
-            else
+            if (top && superType.isArray()) {
+                superType = superType.getInstComponentDecl(0);
+            } else if (superType.isClassDecl() || subType.isClassDecl()) {
+                if (superType.isClassDecl())
+                    subType = subType.getInstComponentDecl(0);
+                else
+                    superType = superType.getInstComponentDecl(0);
+            } else {
                 return false;
+            }
         }
         
         if (superType.isArray()) {

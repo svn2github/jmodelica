@@ -4105,6 +4105,64 @@ end RedeclareTests.RedeclareTest63;
 end RedeclareTest63;
 
 
+model RedeclareTest64
+    model A
+        Real x;
+    end A;
+    
+    model B
+        extends A;
+        Real y;
+    end B;
+    
+    model C
+        extends A;
+        Real z;
+    end C;
+    
+    model D
+        extends A;
+        Real w;
+    end D;
+    
+    model E
+        replaceable model F = B constrainedby A;
+        F f[2];
+    end E;
+    
+    model G
+        extends E(redeclare model F = C);
+    end G;
+    
+    model H
+        extends E(redeclare model F = D);
+    end H;
+    
+    model I
+        replaceable G g constrainedby E;
+    end I;
+    
+    model J
+        extends I(redeclare H g);
+    end J;
+    
+    I i;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest64",
+            description="Redeclare with constraining type that contains an array component of a replaceable class.",
+            flatModel="
+fclass RedeclareTests.RedeclareTest64
+ Real i.g.f[1].z;
+ Real i.g.f[1].x;
+ Real i.g.f[2].z;
+ Real i.g.f[2].x;
+end RedeclareTests.RedeclareTest64;
+")})));
+	end RedeclareTest64;
+
+
 
 model RedeclareElement1
   model A
