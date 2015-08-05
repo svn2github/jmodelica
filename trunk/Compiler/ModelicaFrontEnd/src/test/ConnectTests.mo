@@ -2576,24 +2576,26 @@ model StreamTest6
         flow Real b;
         stream Real c;
     end A;
-	
-	model B
-		A a;
-	end B;
-    
+
+    model B
+        A a;
+    end B;
+
     parameter Integer n = 2;
-    Real x;
+    Real x[n];
     A a[n];
     B b[n];
 equation
     connect(a, b.a);
-	a.a = (1:2) * time;
-	a.c = a.a * 2;
-    if n > 2 then
-        x = inStream(a[3].c) * time;
-    else
-        x = inStream(a[2].c) + time;
-    end if;
+    a.a = (1:2) * time;
+    a.c = a.a * 2;
+    for i in 1:n loop
+        if i < n then
+            x[i] = inStream(a[i + 1].c) * time;
+        else
+            x[i] = inStream(a[i].c) + time;
+        end if;
+    end for;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -2602,7 +2604,8 @@ equation
             flatModel="
 fclass ConnectTests.StreamTest6
  structural parameter Integer n = 2 /* 2 */;
- Real x;
+ Real x[1];
+ Real x[2];
  Real a[1].a;
  constant Real a[1].b = 0;
  Real a[1].c;
@@ -2616,7 +2619,8 @@ equation
  a[2].a = 2 * time;
  a[1].c = a[1].a * 2;
  a[2].c = a[2].a * 2;
- x = a[2].c + time;
+ x[1] = a[2].c * time;
+ x[2] = a[2].c + time;
 end ConnectTests.StreamTest6;
 ")})));
 end StreamTest6;
