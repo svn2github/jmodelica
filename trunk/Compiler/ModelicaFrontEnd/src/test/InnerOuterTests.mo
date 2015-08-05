@@ -419,7 +419,7 @@ end InnerOuterTest13_Err;
 
 model InnerOuterTest15
     model A
-        Real x[2];      
+        Real x[2];
     end A;
     
     model B
@@ -534,5 +534,108 @@ fclass InnerOuterTests.InnerOuterTest18
 end InnerOuterTests.InnerOuterTest18;
 ")})));
 end InnerOuterTest18;
+
+
+model InnerOuterTest19
+    model B
+        inner outer C c;
+    end B;
+    
+    model C
+        D d;
+    equation
+        d.a = time;
+    end C;
+    
+    model D
+        Real a;
+    end D;
+
+    B b;
+    inner C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest19",
+            description="Equation inside inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest19
+ Real b.c.d.a;
+ Real c.d.a;
+equation
+ b.c.d.a = time;
+ c.d.a = time;
+end InnerOuterTests.InnerOuterTest19;
+")})));
+end InnerOuterTest19;
+
+
+
+model NoInner1
+    model A
+        outer Real r = time;
+    end A;
+
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NoInner1",
+            description="Outer without inner",
+            errorMessage="
+1 errors found:
+
+Error at line 540, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
+")})));
+end NoInner1;
+
+
+model NoInner2
+    model A
+        outer Real r = time;
+    end A;
+
+    model B
+        extends A;
+    end B;
+	
+	B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NoInner2",
+            description="Outer without inner in extends",
+            errorMessage="
+1 errors found:
+
+Error at line 560, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
+")})));
+end NoInner2;
+
+
+model NoInner3
+    model A
+        inner outer Real r = time;
+    end A;
+
+    model B
+        extends A;
+    end B;
+	
+	B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NoInner3",
+            description="Inner outer without inner in extends",
+            errorMessage="
+1 errors found:
+
+Error at line 650, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
+")})));
+end NoInner3;
 
 end InnerOuterTests;

@@ -9,6 +9,8 @@ public class Problem implements Comparable<Problem>, Serializable {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem other) {
+        if (kind.order != other.kind.order)
+            return kind.order - other.kind.order;
         if (fileName == null || other.fileName == null) {
             if (fileName != null)
                 return -1;
@@ -28,14 +30,18 @@ public class Problem implements Comparable<Problem>, Serializable {
     public enum Severity { ERROR, WARNING }
 
     public enum Kind { 
-        OTHER, LEXICAL("Syntax"), SYNTACTIC("Syntax"), SEMANTIC, COMPLIANCE("Compliance");
+        OTHER(2), LEXICAL("Syntax", 1), SYNTACTIC("Syntax", 1), SEMANTIC(2), COMPLIANCE("Compliance", 2);
 
         private String desc = null;
+        public final int order;
 
-        private Kind() {}
+        private Kind(int order) {
+            this.order = order;
+        }
 
-        private Kind(String desc) {
+        private Kind(String desc, int order) {
             this.desc = desc;
+            this.order = order;
         }
 
         public void writeKindAndSeverity(StringBuilder sb, Severity sev) {

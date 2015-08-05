@@ -1989,7 +1989,7 @@ aspect FlatExpressions {
         InstComponentDecl inner = (o >= 0) ? getInstAccess(o).myInstComponentDecl().myInnerInstComponentDecl() : null;
         FQName base;
         if (inner == null) {
-            base = myInstComponentDecl().myInnerInstComponentDecl().getFQNamePrefix();
+            base = myInstComponentDecl().getFQNamePrefix();
         } else {
             base = inner.getFQName();
             FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(o), o < n - 1, inSizeExp());
@@ -1997,7 +1997,7 @@ aspect FlatExpressions {
                 base = base.copyAndAddFas(fas.flatten(subscriptPrefix));
         }
         if (o < n - 1)
-            return flattenName(subscriptPrefix, base, o + 1, n - 1);
+            return flattenName(subscriptPrefix, base, (o < 0) ? n - 1 : o + 1, n - 1);
         else
             return (FQName) base.unboundCopy();
     }
