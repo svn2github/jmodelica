@@ -1756,6 +1756,19 @@ aspect CCodeGen {
     eq FFillExp.replaceWithTemp()           = true;
     eq FArray.replaceWithTemp()             = true;
     eq FRecordConstructor.replaceWithTemp() = true;
+    eq FIdUseExp.replaceWithTemp() {
+        if (!isComposite() || !inFunctionCallLeftTop()) {
+            return super.replaceWithTemp();
+        }
+        FAbstractFunctionCall call = myFunctionCall();
+        FAbstractVariable var = myFV();
+        for (FExp exp : call.childFExps()) {
+            if (exp.isAccess() && exp.asFIdUseExp().myFV() == var) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     
 	
