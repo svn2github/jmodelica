@@ -336,8 +336,6 @@ aspect PredefinedTypes {
             + "  input Real x;\n"      // Type not used
             + "  output Integer y;\n"  // Type not used
             + "end cardinality;\n"
-            + "function isPresent end isPresent;\n"
-            + "function promote end promote;\n"
             + "function ndims\n"
             + "  input Real A;\n"      // Type not used
             + "  output Integer n;\n"

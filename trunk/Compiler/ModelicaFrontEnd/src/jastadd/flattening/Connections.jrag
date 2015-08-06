@@ -938,7 +938,7 @@ aspect Connections {
      */
     public void InstComponentDecl.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        if (isPresent() && right.getVar().isPresent()) {
+        if (!isDisabled() && !right.getVar().isDisabled()) {
             if (buildGraph && isOverconstrainedConnection(right.getVar())) {
                 csm.getGraph().addConnection(left, right, prefix, source);
             } else if (isArray()) {
@@ -970,7 +970,7 @@ aspect Connections {
 
     public void InstPrimitive.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
-        if (isPresent() && right.getVar().isPresent())
+        if (!isDisabled() && !right.getVar().isDisabled())
             connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
     }
 
@@ -1010,7 +1010,7 @@ aspect Connections {
     public void InstExpandableConnectorMember.connectTo(ConnectionSetEntry left, ConnectionSetEntry right, 
             FQName prefix, ConnectionSetManager csm, ConnectionEdge source, boolean buildGraph) {
         if (getCopyOf().isPrimitive()) {
-            if (isPresent() && right.getVar().isPresent())
+            if (!isDisabled() && !right.getVar().isDisabled())
                 connectToAsPrimitive(left, right, prefix, csm, source, buildGraph);
         } else {
             super.connectTo(left, right, prefix, csm, source, buildGraph);

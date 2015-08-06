@@ -1230,6 +1230,44 @@ end ConnectTests.ConnectTest27;
 end ConnectTest27;
 
 
+model ConnectTest28
+    connector C = input Real;
+    model A
+        C x;
+    equation
+        x = time;
+    end A;
+    
+    model B
+        extends A;
+        C x;
+        C y;
+    equation
+        connect(x, y);
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectTest28",
+            description="Check that connections to duplicate components work",
+            flatModel="
+fclass ConnectTests.ConnectTest28
+ ConnectTests.ConnectTest28.C b.y;
+ ConnectTests.ConnectTest28.C b.x;
+equation
+ b.x = time;
+ b.x = b.y;
+
+public
+ type ConnectTests.ConnectTest28.C = Real;
+end ConnectTests.ConnectTest28;
+")})));
+end ConnectTest28;
+
+
+
 model ConnectOuterTest1
     connector C = Real;
     
