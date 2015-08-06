@@ -107,25 +107,30 @@ aspect FlatNames {
     
     inh lazy FQName InstNode.retrieveFQName();
     inh FQName FExp.retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQName()                      = getFQName();
-    eq InstComponentDecl.getInstModification().retrieveFQName()           = retrieveFQName();
-    eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()    = retrieveFQName();
-    eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName() = retrieveFQName();
-    eq InstReplacingShortClassDecl.getChild().retrieveFQName()            = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
-    eq InstReplacingSimpleShortClassDecl.getChild().retrieveFQName()      = (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
-    eq InstClassDecl.getChild().retrieveFQName()                          = new FQNameEmpty();
-    eq InstValueModification.getChild().retrieveFQName()                  = retrieveFQNameFromModification();
-    eq InstForIndex.getChild().retrieveFQName()                           = new FQNameEmpty();
-    eq InstEnumClassDecl.getChild().retrieveFQName()                      = new FQNameString(qualifiedName());
-    eq InstRoot.getChild().retrieveFQName()                               = new FQNameEmpty();
-    eq SourceRoot.getProgram().retrieveFQName()                           = new FQNameEmpty();
-    eq FClass.getChild().retrieveFQName()                                 = null;
+    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName();
+    eq InstComponentDecl.getInstModification().retrieveFQName()                  = retrieveFQName();
+    eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()           = retrieveFQName();
+    eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingPrimitive.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingFullClassDecl.getOriginalInstClass().retrieveFQName()        = retrieveFQName();
+    eq InstReplacingShortClassDecl.getOriginalInstClass().retrieveFQName()       = retrieveFQName();
+    eq InstReplacingSimpleShortClassDecl.getOriginalInstClass().retrieveFQName() = retrieveFQName();
+    eq InstReplacingShortClassDecl.getChild().retrieveFQName()                   = 
+        (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstReplacingSimpleShortClassDecl.getChild().retrieveFQName()             = 
+        (isFunction() || isRecord()) ? new FQNameEmpty() : retrieveFQName();
+    eq InstClassDecl.getChild().retrieveFQName()                                 = new FQNameEmpty();
+    eq InstValueModification.getChild().retrieveFQName()                         = retrieveFQNameFromModification();
+    eq InstForIndex.getChild().retrieveFQName()                                  = new FQNameEmpty();
+    eq InstEnumClassDecl.getChild().retrieveFQName()                             = new FQNameString(qualifiedName());
+    eq InstRoot.getChild().retrieveFQName()                                      = new FQNameEmpty();
+    eq SourceRoot.getProgram().retrieveFQName()                                  = new FQNameEmpty();
+    eq FClass.getChild().retrieveFQName()                                        = null;
     
     inh FQName InstModification.retrieveFQNameFromModification();
-    eq InstClassDecl.getChild().retrieveFQNameFromModification()          = retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQNameFromModification()      = retrieveFQName();
-    eq InstRoot.getChild().retrieveFQNameFromModification()               = new FQNameEmpty();
+    eq InstClassDecl.getChild().retrieveFQNameFromModification()                 = retrieveFQName();
+    eq InstComponentDecl.getChild().retrieveFQNameFromModification()             = retrieveFQName();
+    eq InstRoot.getChild().retrieveFQNameFromModification()                      = new FQNameEmpty();
 
     /**
      * Get a string representation of a prefix of this name.

@@ -5550,6 +5550,65 @@ end RedeclareTests.RedeclareFunction4;
 end RedeclareFunction4;
 
 
+model RedeclareFunction5
+    model A
+      B b(redeclare replaceable function f4 = f3);
+      function f3 = f2(z = p1);
+      parameter Real p1 = 1;
+    end A;
+
+    model B
+      C c(redeclare function f5 = f4);
+      replaceable function f4 = f2(z = p2);
+      parameter Real p2 = 2;
+    end B;
+
+    model C
+      replaceable function f5 = f1;
+      Real y = f5(x);
+      Real x = time;
+    end C;
+    
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+        input Real z;
+    algorithm
+        y := x + z;
+    end f2;
+
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareFunction5",
+            description="Flattening of default value of function input from modification on constraining type",
+            flatModel="
+fclass RedeclareTests.RedeclareFunction5
+ Real a.b.c.y = RedeclareTests.RedeclareFunction5.a.b.f4(a.b.c.x, a.b.p2);
+ Real a.b.c.x = time;
+ parameter Real a.b.p2 = 2 /* 2 */;
+ parameter Real a.p1 = 1 /* 1 */;
+
+public
+ function RedeclareTests.RedeclareFunction5.a.b.f4
+  input Real x;
+  output Real y;
+  input Real z := a.b.p2;
+ algorithm
+  y := x + z;
+  return;
+ end RedeclareTests.RedeclareFunction5.a.b.f4;
+
+end RedeclareTests.RedeclareFunction5;
+")})));
+end RedeclareFunction5;
+
+
 
 model RedeclareEach1
 	model A
