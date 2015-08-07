@@ -1385,4 +1385,111 @@ end DynamicStates.Examples.Pendulum;
 ")})));
         end Pendulum;
     end Examples;
+    package Special
+        model FunctionDerivative1
+            function F
+                input Real x1;
+                input Real x2;
+                output Real y;
+            algorithm
+                y := x1 * x2;
+                annotation(Inline=false, derivative=F_d);
+            end F;
+            
+            function F_d
+                input Real x1;
+                input Real x2;
+                input Real x1_der;
+                input Real x2_der;
+                output Real y;
+            algorithm
+                y := x1 * x2_der + x1_der * x2;
+                annotation(Inline=false, derivative=F_dd);
+            end F_d;
+            
+            function F_dd
+                input Real x1;
+                input Real x2;
+                input Real x1_der;
+                input Real x2_der;
+                input Real x1_der_der;
+                input Real x2_der_der;
+                output Real y;
+            algorithm
+                y := 0; // Sort of
+                annotation(Inline=false);
+            end F_dd;
+            // a1 a2
+            // +  +
+            Real a1;
+            Real a2;
+            Real b;
+        equation
+            der(a1) = b;
+            der(a2) = b;
+            F(a1, a2) = 1;
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="FunctionDerivative1",
+                description="Ensure that the functions referenced in the coefficients are preserved",
+                flatModel="
+fclass DynamicStates.Special.FunctionDerivative1
+ Real a1;
+ Real a2;
+ Real b;
+ Real _ds.0.a0;
+ Real _ds.0.s0;
+ Real dynDer(a1);
+ Real dynDer(a2);
+initial equation 
+ _ds.0.s0 = 0.0;
+ a2 = 0.0;
+equation
+ dynDer(a1) = b;
+ dynDer(a2) = b;
+ DynamicStates.Special.FunctionDerivative1.F(ds(0, a1), ds(0, a2)) = 1;
+ DynamicStates.Special.FunctionDerivative1.F_d(ds(0, a1), ds(0, a2), dynDer(a1), dynDer(a2)) = 0;
+ der(_ds.0.s0) = dsDer(0, 0);
+
+public
+ function DynamicStates.Special.FunctionDerivative1.F
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := x1 * x2;
+  return;
+ annotation(derivative = DynamicStates.Special.FunctionDerivative1.F_d,Inline = false);
+ end DynamicStates.Special.FunctionDerivative1.F;
+
+ function DynamicStates.Special.FunctionDerivative1.F_d
+  input Real x1;
+  input Real x2;
+  input Real x1_der;
+  input Real x2_der;
+  output Real y;
+ algorithm
+  y := x1 * x2_der + x1_der * x2;
+  return;
+ annotation(derivative = DynamicStates.Special.FunctionDerivative1.F_dd,Inline = false);
+ end DynamicStates.Special.FunctionDerivative1.F_d;
+
+ function DynamicStates.Special.FunctionDerivative1.F_dd
+  input Real x1;
+  input Real x2;
+  input Real x1_der;
+  input Real x2_der;
+  input Real x1_der_der;
+  input Real x2_der_der;
+  output Real y;
+ algorithm
+  y := 0;
+  return;
+ annotation(Inline = false);
+ end DynamicStates.Special.FunctionDerivative1.F_dd;
+
+end DynamicStates.Special.FunctionDerivative1;
+")})));
+        end FunctionDerivative1;
+    end Special;
 end DynamicStates;

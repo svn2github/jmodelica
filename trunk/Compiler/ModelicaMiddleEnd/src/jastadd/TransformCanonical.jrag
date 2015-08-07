@@ -4197,6 +4197,7 @@ aspect FunctionAndRecordCleanup {
         getFInitialEquations().markUsedFunctionsAndRecords();
         getFParameterEquations().markUsedFunctionsAndRecords();
         getFAbstractEquations().markUsedFunctionsAndRecords();
+        getDynamicStateManager().markUsedFunctionsAndRecords();
         List<FFunctionDecl> funcs = new List<FFunctionDecl>();
         for (FFunctionDecl func : getFFunctionDecls())
             if (func.functionIsUsed())
