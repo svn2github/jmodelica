@@ -16,6 +16,7 @@ import org.jmodelica.util.FilteredIterator;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.logging.ObjectStreamLogger;
+import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
 
 public final class Compilation {
     
@@ -97,9 +98,9 @@ public final class Compilation {
                         problems.add((Problem) o);
                     } else if (o instanceof CompiledUnit) {
                         compiledUnit = (CompiledUnit) o;
-                    } else if (o instanceof Throwable) {
+                    } else if (o instanceof ThrowableLoggingUnit) {
                         if (exception == null)
-                            exception = (Throwable) o;
+                            exception = ((ThrowableLoggingUnit) o).getException();
                     } else {
                         throw new SeparateProcessException("Unknown object type '" + o.getClass().getName() + "' received on compiler log");
                     }

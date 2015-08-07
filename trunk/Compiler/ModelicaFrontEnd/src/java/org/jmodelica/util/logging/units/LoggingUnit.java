@@ -13,22 +13,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.util.logging;
+package org.jmodelica.util.logging.units;
 
-import org.jmodelica.util.exceptions.ModelicaException;
+import java.io.Serializable;
 
-@SuppressWarnings("serial")
-public class IllegalLogStringException extends ModelicaException {
-    
-    private final ModelicaLogger logger;
-    
-    public IllegalLogStringException(String message, ModelicaLogger logger) {
-        super(message);
-        this.logger = logger;
-    }
-    
-    public ModelicaLogger getLogger() {
-        return logger;
-    }
+import org.jmodelica.util.logging.Level;
 
+public interface LoggingUnit extends Serializable {
+    public String print(Level level);
+    public String printXML(Level level);
+    public void prepareForSerialization();
 }

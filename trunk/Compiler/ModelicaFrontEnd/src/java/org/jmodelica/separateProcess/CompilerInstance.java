@@ -218,13 +218,6 @@ public class CompilerInstance {
         return new Compilation(buildArgs(modelName, sourceFiles), jmodelicaHome);
     }
 
-    public static void main(String[] args) throws Throwable {
-        CompilerInstance ci = new CompilerInstance();
-        Compilation c = ci.compile("Modelica.Mechanics.Rotational.Examples.First");
-        c.join();
-        System.out.println(c.getCompiledUnit());
-    }
-
     private static String join(String delimiter, String... args) {
         if (args == null)
             return "";
