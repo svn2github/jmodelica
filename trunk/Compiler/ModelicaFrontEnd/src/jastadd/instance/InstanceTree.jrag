@@ -277,30 +277,22 @@ aspect InstModifications{
 
 aspect Environments {
 
-    syn lazy java.util.List<InstModification> InstNode.localInstModifications() = Collections.<InstModification>emptyList();
+    syn lazy ArrayList<InstModification> InstNode.localInstModifications() = new ArrayList<InstModification>();
 
     eq InstComponentDecl.localInstModifications() {
         ArrayList<InstModification> l = new ArrayList<InstModification>();
+        // Add modifications of the declaration itself
         if (hasInstModification())
             l.add(getInstModification());
-        l.addAll(instModificationsFromConstrainingType());
+        
+        // If there is a constraining clause, these modifications should be merged as well 
+        if (hasInstConstraining() && getInstConstraining().hasInstClassModification())
+            l.add(getInstConstraining().getInstClassModification());
+        
         l.addAll(myInstClass().classInstModifications());
         return l;
+        
     }
-
-    eq InstClassDecl.localInstModifications() {
-        ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstClassModification())
-            l.add(getInstClassModification());
-        l.addAll(instModificationsFromConstrainingType());
-        if (!isRecursiveExtends())
-            l.addAll(targetClassInstModifications());
-        return l;
-    }
-
-    syn java.util.List<InstModification> InstClassDecl.targetClassInstModifications() = Collections.<InstModification>emptyList();
-    eq InstShortClassDecl.targetClassInstModifications()       = myTargetInstClassDecl().classInstModifications();
-    eq InstSimpleShortClassDecl.targetClassInstModifications() = myTargetInstClassDecl().classInstModifications();
 
     syn java.util.List<InstModification> InstComponentDecl.instModificationsForConstraining() {
         if (hasInstConstraining()) {
@@ -324,13 +316,13 @@ aspect Environments {
         return Collections.<InstModification>emptyList();
     }
 
-    syn java.util.List<InstModification> InstNode.instModificationsFromConstrainingType() = Collections.<InstModification>emptyList();
-
+    syn java.util.List<InstModification> InstComponentDecl.instModificationsFromConstrainingType();
     eq InstComponentDecl.instModificationsFromConstrainingType()      = instModificationsForConstraining();
     eq InstReplacingComposite.instModificationsFromConstrainingType() = getOriginalInstComponent().instModificationsForConstraining();
     eq InstReplacingRecord.instModificationsFromConstrainingType()    = getOriginalInstComponent().instModificationsForConstraining();
     eq InstReplacingPrimitive.instModificationsFromConstrainingType() = getOriginalInstComponent().instModificationsForConstraining();
 
+    syn java.util.List<InstModification> InstClassDecl.instModificationsFromConstrainingType();
     eq InstClassDecl.instModificationsFromConstrainingType()                     = instModificationsForConstraining();
     eq InstReplacingFullClassDecl.instModificationsFromConstrainingType()        = getOriginalInstClass().instModificationsForConstraining();
     eq InstReplacingShortClassDecl.instModificationsFromConstrainingType()       = getOriginalInstClass().instModificationsForConstraining();
@@ -351,6 +343,39 @@ aspect Environments {
         else
             return Collections.<InstModification>emptyList();
     }
+
+    eq InstReplacingRecord.localInstModifications()    = localInstModificationsForReplacingComponent();
+    eq InstReplacingComposite.localInstModifications() = localInstModificationsForReplacingComponent();
+    eq InstReplacingPrimitive.localInstModifications() = localInstModificationsForReplacingComponent();
+
+    syn ArrayList<InstModification> InstComponentDecl.localInstModificationsForReplacingComponent() {
+        ArrayList<InstModification> l = new ArrayList<InstModification>();
+        l.addAll(instModificationsFromConstrainingType());
+        l.addAll(myInstClass().classInstModifications());
+        return l;
+    }
+
+    eq InstShortClassDecl.localInstModifications() {
+        ArrayList<InstModification> l = new ArrayList<InstModification>();
+        if (hasInstClassModification())
+            l.add(getInstClassModification());
+        if (hasInstConstraining() && getInstConstraining().hasInstClassModification()) 
+            l.add(getInstConstraining().getInstClassModification());
+        l.addAll(myTargetInstClassDecl().classInstModifications());
+        return l;
+    }
+
+    syn ArrayList<InstModification> InstClassDecl.localInstModificationsForReplacingClass() = 
+        new ArrayList<InstModification>(instModificationsFromConstrainingType());
+
+    eq InstReplacingShortClassDecl.localInstModifications() {
+        ArrayList<InstModification> l = localInstModificationsForReplacingClass();
+        l.addAll(myTargetInstClassDecl().classInstModifications());
+        return l;
+    }
+
+    eq InstReplacingSimpleShortClassDecl.localInstModifications() = localInstModificationsForReplacingClass();
+    eq InstReplacingFullClassDecl.localInstModifications()        = localInstModificationsForReplacingClass();
 
 	/**
 	 * Return OriginalInstClass for nodes that have it, null otherwise.
@@ -388,13 +413,13 @@ aspect Environments {
     syn boolean ClassDecl.hasClassModification() = false;
     eq ShortClassDecl.hasClassModification()     = getExtendsClauseShortClass().hasClassModification();
 
-    eq InstExtends.localInstModifications() {
-        ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstClassModification())
-            l.add(getInstClassModification());
-        l.addAll(myInstClass().localInstModifications());
-        return l;
-    }
+	eq InstExtends.localInstModifications() {
+		ArrayList<InstModification> l = new ArrayList<InstModification>();
+		if (hasInstClassModification())
+			l.add(getInstClassModification());
+        l.addAll(myInstClass().classInstModifications());
+		return l;
+	}
 
  	syn lazy ArrayList<InstModification> InstClassDecl.classInstModifications() = getMergedEnvironment().clone();
 
@@ -1439,7 +1464,7 @@ aspect InstanceTreeConstruction {
     eq InstReplacingShortClassDecl.shouldBeExpanded() =
         super.shouldBeExpanded() || 
         (hasInstConstraining() && getInstConstraining().hasInstClassModification()) || 
-        (isFunction() && !instModificationsFromConstrainingType().isEmpty());
+        (isFunction() && !localInstModificationsForReplacingClass().isEmpty());
 
 	syn boolean ClassDecl.hasTypePrefix() = false;
 	eq ShortClassDecl.hasTypePrefix()     = getExtendsClauseShortClass().hasTypePrefix();
@@ -1832,7 +1857,7 @@ aspect InstanceAST_API {
     eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isOrExtendsPrimitive();
     eq InstExtends.extendsPrimitive() {
         InstClassDecl icd = myInstClass();
-        return !isRecursiveExtends() && icd.isOrExtendsPrimitive();
+        return !isRecursive() && icd.isOrExtendsPrimitive();
     }
 
 	/**
@@ -1875,16 +1900,16 @@ aspect InstanceAST_API {
 	 * Check if this node is, is of, or extends a primitive type.
 	 */
 	syn boolean InstNode.isOrExtendsPrimitive() = isPrimitive() || extendsPrimitive();
-
-    /**
-     * Check if this class is or extends an enumeration.
-     */
-    syn boolean InstNode.extendsEnum()        = false;
-    eq InstClassDecl.extendsEnum()            = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
-    eq InstSimpleShortClassDecl.extendsEnum() = actualInstClass().extendsEnum();
-    eq InstEnumClassDecl.extendsEnum()        = true;
-    eq InstExtends.extendsEnum()              = !isRecursiveExtends() && myInstClass().extendsEnum();
-
+	
+	/**
+	 * Check if this class is or extends an enumeration.
+	 */
+	syn boolean InstNode.extendsEnum()        = false;
+	eq InstClassDecl.extendsEnum()            = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
+	eq InstSimpleShortClassDecl.extendsEnum() = actualInstClass().extendsEnum();
+	eq InstEnumClassDecl.extendsEnum()        = true;
+	eq InstExtends.extendsEnum()              = !isRecursive() && myInstClass().extendsEnum();
+	
 	syn InstClassDecl InstClassDecl.getBaseInstClass() = 
 		(getNumInstExtends() > 0) ? getInstExtends(0).getBaseInstClass() : this;
 	syn InstClassDecl InstExtends.getBaseInstClass()   = 
@@ -2229,7 +2254,7 @@ aspect InstArrays {
     eq InstFullClassDecl.myFSubscripts()                    = 
         (getNumInstExtends() == 1) ? getInstExtends(0).myFSubscripts() : super.myFSubscripts();
     eq InstExtends.myFSubscripts()                          = 
-        isRecursiveExtends() ? Collections.<FSubscript>emptyList() : myInstClass().myFSubscripts();
+		isRecursive() ? Collections.<FSubscript>emptyList() : myInstClass().myFSubscripts();
 	syn lazy java.util.List<FSubscript> InstShortClassDecl.myFSubscripts() {
 		java.util.List<FSubscript> l = new ArrayList<FSubscript>();
 		if (hasFArraySubscripts()) 

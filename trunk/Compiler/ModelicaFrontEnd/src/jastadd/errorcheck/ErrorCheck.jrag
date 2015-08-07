@@ -1249,45 +1249,42 @@ aspect InstanceErrorCheck {
     eq InstExtends.isRecursed()            = isWithin(myInstClass());
     eq InstArrayComponentDecl.isRecursed() = instComponentDecl().isRecursed();
 
-    /**
-     * Check if extends tree is recursive.
-     */
-    syn boolean InstNode.isRecursiveExtends() = false;
-    eq InstComponentDecl.isRecursiveExtends() = myInstClass().isRecursiveExtends();
-    eq InstClassDecl.isRecursiveExtends() {
-        for (InstExtends ie : getInstExtendss())
-            if (ie.isRecursiveExtends())
-                return true;
-        return false;
-    }
-    eq InstExtends.isRecursiveExtends() {
-        if (recursiveCache == RECURSIVE_UNKNOWN)
-            calcIsRecursive(new HashSet<InstNode>());
-        return recursiveCache == RECURSIVE_YES;
-    }
-    eq InstSimpleShortClassDecl.isRecursiveExtends() {
-        if (recursiveCache == RECURSIVE_UNKNOWN)
-            calcIsRecursive(new HashSet<InstNode>());
-        return recursiveCache == RECURSIVE_YES;
-    }
-
-    /**
-     * Examine extends tree to find recursive extends nodes.
-     */
-    public void InstExtends.calcIsRecursive(HashSet<InstNode> visited) {
-        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
-        visited.add(this);
-        if (recursiveCache == RECURSIVE_NO) 
-            myInstClass().calcIsRecursive(visited);
-    }
-
-    /**
-     * Examine extends tree to find recursive extends nodes.
-     */
-    public void InstClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
-        for (InstExtends ie : getInstExtendss())
-            ie.calcIsRecursive(visited);
-    }
+	// TODO: check if we realy need this in addition to isRecursed()
+	/**
+	 * Check if extends tree is recursive.
+	 */
+	public boolean InstExtends.isRecursive() {
+		if (recursiveCache == RECURSIVE_UNKNOWN)
+			calcIsRecursive(new HashSet<InstNode>());
+		return recursiveCache == RECURSIVE_YES;
+	}
+	
+	/**
+	 * Check if extends tree is recursive.
+	 */
+	public boolean InstSimpleShortClassDecl.isRecursive() {
+		if (recursiveCache == RECURSIVE_UNKNOWN)
+			calcIsRecursive(new HashSet<InstNode>());
+		return recursiveCache == RECURSIVE_YES;
+	}
+	
+	/**
+	 * Examine extends tree to find recursive extends nodes.
+	 */
+	public void InstExtends.calcIsRecursive(HashSet<InstNode> visited) {
+		recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+		visited.add(this);
+		if (recursiveCache == RECURSIVE_NO) 
+			myInstClass().calcIsRecursive(visited);
+	}
+	
+	/**
+	 * Examine extends tree to find recursive extends nodes.
+	 */
+	public void InstClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
+		for (InstExtends ie : getInstExtendss())
+			ie.calcIsRecursive(visited);
+	}
 
     public void InstSimpleShortClassDecl.calcIsRecursive(HashSet<InstNode> visited) {
         recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
