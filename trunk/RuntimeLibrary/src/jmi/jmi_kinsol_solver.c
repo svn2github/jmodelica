@@ -1676,6 +1676,33 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
     }
 }
 
+static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int flag;
+    jmi_log_node_t topnode;
+    
+    jmi_kinsol_solver_print_solve_start(block, &topnode);
+    flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+    if(flag == KIN_INITIAL_GUESS_OK) {
+        flag = KIN_SUCCESS;
+        /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
+             from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
+             value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
+             as a success. Commenting out this code since it causes problems.*/
+    } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
+        realtype fnorm;
+        KINGetFuncNorm(solver->kin_mem, &fnorm);
+        if(fnorm <= solver->kin_stol) {
+            flag = KIN_SUCCESS;
+        } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
+            jmi_kinsol_linesearch_nonconv_error_message(block);
+        }
+    }
+    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
+    
+    return flag;
+}
+
 
 int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     int flag;
@@ -1686,8 +1713,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     realtype curtime = block->cur_time;
     long int nniters = 0;
     int flagNonscaled;
-    realtype fnorm;
-    jmi_log_node_t topnode;
     jmi_log_t *log = block->log;
 
     if(block->n == 1) {
@@ -1724,32 +1749,13 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         KINSetNoResMon(solver->kin_mem,0);        
         solver->use_steepest_descent_flag = 1;
     }
-            
-    jmi_kinsol_solver_print_solve_start(block, &topnode);
-    flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+    
+    flag = jmi_kinsol_invoke_kinsol(block);
+    
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
         KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;
     }
-    if(flag != KIN_SUCCESS) {
-        if(flag == KIN_INITIAL_GUESS_OK) {
-            flag = KIN_SUCCESS;
-        } /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
-             from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
-             value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
-             as a success. Commenting out this code since it causes problems.*/
-        else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
-            realtype fnorm;
-            KINGetFuncNorm(solver->kin_mem, &fnorm);
-            if(fnorm < solver->kin_stol) { /* Kinsol returned nonconv but the residuals are converged */
-                flag = KIN_SUCCESS;
-            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
-                jmi_kinsol_linesearch_nonconv_error_message(block);
-            }
-
-        }
-    }
-    jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
     
     /* Brent is called for 1D to get higher accuracy. It is called independently on the KINSOL success */ 
     if((block->n == 1) && block->options->use_Brent_in_1d_flag) {
@@ -1804,19 +1810,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         /* Update the scaling  */
         jmi_update_f_scale(block);
         
-        jmi_kinsol_solver_print_solve_start(block, &topnode);
-        flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
-        if(flag == KIN_INITIAL_GUESS_OK) {
-            flag = KIN_SUCCESS;
-        } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
-            KINGetFuncNorm(solver->kin_mem, &fnorm);
-            if(fnorm <= solver->kin_stol) {
-                flag = KIN_SUCCESS;
-            } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
-                jmi_kinsol_linesearch_nonconv_error_message(block);
-            }
-        }
-        jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
+        flag = jmi_kinsol_invoke_kinsol(block);
         
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
@@ -1826,8 +1820,19 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                 jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
                              "re-scaled equations failed in <block: %s>", block->label); 
             } else {
-                jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
-                             block->label);
+                if (block->init) { /* Try perturbing the initial guess if bounded. */
+                    int i = 0;
+                    for (i = 0; i < block->n; i++) {
+                        N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] < block->max[i] ? block->nominal[i] : -block->nominal[i];
+                    }
+                    jmi_log_node(log, logInfo, "NominalsAsInitialGuess", "Failed to compute a solution using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
+                    
+                    flag = jmi_kinsol_invoke_kinsol(block);
+                }
+                if (flag != KIN_SUCCESS) {
+                    jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
+                                 block->label);
+                }
             }
 #ifdef JMI_KINSOL_PRINT_ON_FAIL
             {
