@@ -832,6 +832,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         if(step_ratio_i < min_step_ratio) {
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
+            solver->bound_limiting[i] = 2;
             solver->last_num_active_bounds++;
             xxd[index] = 0;
             /* distance to the bound */
@@ -890,8 +891,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             for (i=0; i < solver->num_bounds; i++) {
                 int index = solver->bound_vindex[i]; /* variable index */
                 
-                if (solver->bound_limiting[i] 
-                    && solver->active_bounds[index] != 0
+                if ((solver->bound_limiting[i] == 2) 
                     && solver->bound_kind[i] == kind) {
                     jmi_log_vref_(log, 'r', block->value_references[index]);
                 }
