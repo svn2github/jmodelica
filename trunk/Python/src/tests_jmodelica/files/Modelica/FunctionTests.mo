@@ -345,5 +345,30 @@ model StringArray1
     end when;
 end StringArray1;
 
+model FuncCallInputOutputArray1
+    function F1
+        input Integer n;
+        input Real x;
+        output Real[n] y;
+    algorithm
+        for i in 1:n loop
+            y[i] := x * i;
+        end for;
+        y := F2(y);
+    end F1;
+    
+    function F2
+        input Real[:] x;
+        output Real[size(x,1)] y;
+    algorithm
+        for i in 1:2 loop
+            y[i] := x[1] + x[2];
+        end for;
+    end F2;
+
+    parameter Real[2] p1 = F1(2,1) annotation(Evaluate=true);
+    parameter Real[2] p2 = F1(2,1);
+end FuncCallInputOutputArray1;
+
   annotation (uses(Modelica(version="3.1")));
 end FunctionTests;

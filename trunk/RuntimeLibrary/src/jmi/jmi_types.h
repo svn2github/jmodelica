@@ -97,6 +97,13 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
 /* Assign (copy) SRC to DEST */
 #define JMI_ASG(TYPE, DEST, SRC) \
     JMI_ASG_##TYPE(DEST, SRC)
+#define JMI_ASG_GEN_ARR(DEST, SRC) \
+    { \
+      int i; \
+      for (i = 1; i <= DEST->num_elems; i++) { \
+        jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
+      }\
+    }
 #define JMI_ASG_STR(DEST,SRC) \
     JMI_SET_STR(DEST, SRC) \
     JMI_DYNAMIC_ADD_POINTER(DEST)
