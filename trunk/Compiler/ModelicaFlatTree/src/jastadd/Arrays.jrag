@@ -1943,23 +1943,64 @@ aspect Arrays {
     syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), getFExp().myFClass() != null);
 	eq FIterExp.getArray() = copyArray();
 	
-	eq FSubscriptedExp.getArray() {
+    eq FSubscriptedExp.getArray() {
+        
+        Array old = getFExp().getArray();
         if (!isArray()) {
-            try {
-                Index i = getFArraySubscripts().createIndex();
-                return new ScalarAsArray(getFExp().getArray().get(i));
-            } catch (ConstantEvaluationException e) {
-                
-            }
-            return new ScalarAsArray(this);
+            return new ScalarAsArray(new FSubscriptedExp(old.buildFArray(), getFArraySubscripts().fullCopy()));
         }
-		Array arr = new Array(indices());
-		Array old = getFExp().getArray();
-		Indices ind = arr.indices();
-		for (Index i : ind)
-			arr.set(i, old.get(ind.translate(i)));
-		return arr;
-	}
+        
+        NonConsecutiveIndices ind = NonConsecutiveIndices.createFromFas(getFArraySubscripts());
+        Array arr = new Array(ind);
+        
+        if (indexVariability().indexParameterOrLess()) {
+            for (Index i : ind) {
+                arr.set(i, old.get(ind.translate(i)));
+            }
+            return arr;
+        }
+        
+        NonConsecutiveIndices expIs = ind.expIndices(getFArraySubscripts());
+        NonConsecutiveIndices fasIs = ind.fasIndices(getFArraySubscripts());
+        Iterator<Index> it = ind.iterator();
+        
+        for (Index i : expIs) {
+            FExp e;
+            if (i.ndims() == 0) {
+                e = old.buildFArray();
+            } else {
+                e = old.subArrayFExp(i, expIs);
+            }
+            for (Index j : fasIs) {
+                FArraySubscripts fas = getFArraySubscripts().specify(j);
+                arr.set(it.next(), new FSubscriptedExp(e.unboundCopy(), fas));
+            }
+        }
+        
+        return arr;
+    }
+    
+    /**
+     * Filter out known subscripts and copy to a new FArraySubscripts. 
+     * Unknown non-scalar subscripts will be specified
+     * by the corresponding position in index.
+     */
+    syn FArraySubscripts FArraySubscripts.specify(Index index) {
+        FArraySubscripts res = new FArraySubscripts();
+        int j = 0;
+        for (FSubscript fs : getFSubscripts()) {
+            if (!fs.variability().indexParameterOrLess()) {
+                if (fs.ndims() > 0) {
+                    fs = fs.specify(index.get(j));
+                } else {
+                    fs = fs.fullCopy();
+                }
+                j++;
+                res.addFSubscript(fs);
+            }
+        }
+        return res;
+    }
 	
 	eq FSmoothExp.getArray() {
 		if (!isArray())
@@ -3997,18 +4038,29 @@ aspect ArrayHelpers {
 	     * @see #buildLiteral(boolean)
 	     * @see #buildScalarized(java.util.Map,FExp)
 	     */
-	    protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
-	    	FArray arr = new FArray(new List<FExp>());
-	    	int n = size().get(dim);
-	    	if (dim < ndims() - 1) {
-	    		for (int i = 0; i < n; i++)
-	    			arr.addFExp(buildFArray(it, builder, dim + 1));
-	    	} else {
-	    		for (int i = 0; i < n; i++) 
-	    			arr.addFExp(builder.build(it.next()).unboundCopy());
-	    	}
-	    	return arr;
-	    }
+        protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim) {
+            return buildFArray(it, builder, dim, size(), null);
+        }
+        
+        protected FExp buildFArray(Iterator<FExp> it, ElementBuilder builder, int dim, Size size, boolean[] b) {
+            FArray arr = new FArray(new List<FExp>());
+            int n = size.get(dim);
+            if (b != null) {
+                if (dim >= b.length) {
+                    return builder.build(it.next().unboundCopy());
+                } else if (!b[dim]) {
+                    return buildFArray(it, builder, dim + 1, size, b);
+                }
+            }
+            if (dim < size.ndims() - 1) {
+                for (int i = 0; i < n; i++)
+                    arr.addFExp(buildFArray(it, builder, dim + 1, size, b));
+            } else {
+                for (int i = 0; i < n; i++) 
+                    arr.addFExp(builder.build(it.next()).unboundCopy());
+            }
+            return arr;
+        }
 		
 	    /**
 	     * Build an FArray describing this Array.
@@ -4032,6 +4084,10 @@ aspect ArrayHelpers {
 			}
 	    }
 	    
+        protected FExp buildFArray() {
+            return buildFArray(new IdentityBuilder());
+        }
+	    
 	    /**
 	     * Create an FExp describing the part of this array indicated by <code>i</code>.
 	     * 
@@ -4047,6 +4103,43 @@ aspect ArrayHelpers {
 	    	Iterator<FExp> it = new AIterator(start, 1, length - start);
 	    	return buildFArray(it, new IdentityBuilder(), ndims() - i.ndims());
 	    }
+	    
+        public FExp subArrayFExp(Index i, NonConsecutiveIndices indices) {
+            if (i.ndims() >= ndims())
+                return get(i).fullCopy();
+            
+            boolean[] b = new boolean[ndims()];
+            indices = indices.locked(i, b);
+            Iterator<FExp> it = new IndexIterator(indices);
+            return buildFArray(it, new IdentityBuilder(), 0, indices.size(), b);
+        }
+        
+        public class IndexIterator implements Iterator<FExp> {
+            
+            
+            private Iterator<Index> it;
+            private Indices indices;
+            
+            public IndexIterator(Indices indices) {
+                this.indices = indices;
+                this.it = indices.iterator();
+            }
+            
+            @Override
+            public boolean hasNext() {
+                return it.hasNext();
+            }
+
+            @Override
+            public FExp next() {
+                return get(indices.translate(it.next()));
+            }
+
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        }
 		
 		/**
 		 * Create an iterator that iterates over a row. Assumes the Array is a matrix.
@@ -4670,16 +4763,11 @@ aspect ArrayHelpers {
 		 * Create a NonConsecutiveIndices object based on FArraySubcripts.
 		 *        Use Indices.create(FArraySubscripts fas).
 		 */
-		public static NonConsecutiveIndices createFromFas(FArraySubscripts fas) {
+        public static NonConsecutiveIndices createFromFas(FArraySubscripts fas) {
 			int n = fas.getNumFSubscript();
 			ArrayList<int[]> ind = new ArrayList<int[]>(n);
 			boolean[] trim = new boolean[n];
-			
-			int i = 0;
-			for (FSubscript fs : fas.getFSubscripts()) { 
-				ind.add(fs.myIndices());
-				trim[i++] = fs.ndims() == 0;
-			}
+            createFromFas(Collections.singleton(fas), ind, trim);
 			return new NonConsecutiveIndices(ind, trim, 0);
 		}
 		
@@ -4693,17 +4781,20 @@ aspect ArrayHelpers {
 				n += fas.getNumFSubscript();
 			ArrayList<int[]> ind = new ArrayList<int[]>(n);
 			boolean[] trim = new boolean[n];
-			
-			int i = 0;
-			for (FArraySubscripts fas : fasl) {
-				for (FSubscript fs : fas.getFSubscripts()) {
-					ind.add(fs.myIndices());
-					trim[i++] = fs.ndims() == 0;
-				} 
-			}
+            createFromFas(fasl, ind, trim);
 			return new NonConsecutiveIndices(ind, trim, 0);
 		}
-
+        
+        private static void createFromFas(Iterable<FArraySubscripts> fasl, ArrayList<int[]> ind, boolean[] trim) {
+            int i = 0;
+            for (FArraySubscripts fas : fasl) {
+                for (FSubscript fs : fas.getFSubscripts()) { 
+                    ind.add(fs.myIndices());
+                    trim[i++] = fs.ndims() == 0;
+                }
+            }
+        }
+        
         /**
          * Create a NonConsecutiveIndices object based on a list of int arrays
          *        Use Indices.create(ArrayList<int[]> ind).
@@ -4784,6 +4875,9 @@ aspect ArrayHelpers {
 			for (boolean tr : trim)
 				if (!tr)
 					n++;
+            if (n == 0) {
+                return Size.SCALAR;
+            }
 			MutableSize size = new MutableSize(n + extra);
 			for (int i = 0; i < trim.length; i++)
 				if (!trim[i])
@@ -4793,6 +4887,80 @@ aspect ArrayHelpers {
 			return size;
 		}
 		
+        /**
+         * Create a new Indices object with the earlier active dimensions (trim=false)
+         * specified by the corresponding position in index and the earlier inactive
+         * dimensions enabled.
+         */
+        public NonConsecutiveIndices locked(Index index, boolean[] b) {
+            ArrayList<int[]> newInd = new ArrayList<int[]>();
+            boolean[] newTrim = new boolean[indices.size()];
+            int l = 0;
+            for (int k = 0; k < indices.size(); k++) {
+                if (trim[k]) {
+                    newInd.add(indices.get(k));
+                } else {
+                    int[] t = new int[1];
+                    t[0] = index.index()[l++];
+                    newInd.add(t);
+                }
+                b[k] = trim[k];
+                newTrim[k] = false;
+            }
+            return new NonConsecutiveIndices(newInd, newTrim, 0);
+        }
+        
+        /**
+         * Create a new Indices object with the earlier inactive dimensions 
+         * enabled and replaced using the surrounding size for the corresponding
+         * dimension in fas. 
+         */
+        public NonConsecutiveIndices expIndices(FArraySubscripts fas) {
+            ArrayList<int[]> newInd = new ArrayList<int[]>();
+            boolean[] newTrim = new boolean[indices.size()];
+            int l = 0;
+            for (int k = 0; k < indices.size(); k++) {
+                FSubscript fs = fas.getFSubscript(k);
+                if (fs.variability().indexParameterOrLess()) {
+                    newInd.add(indices.get(k));
+                    newTrim[k] = trim[k];
+                } else {
+                    newInd.add(ASTNode.range(fs.mySize().get(0)));
+                    newTrim[k] = true;
+                }
+            }
+            return new NonConsecutiveIndices(newInd, newTrim, 0);
+        }
+        
+        /**
+         * Create a new Indices object with the earlier inactive dimensions 
+         * enabled and replaced using subscript size for the corresponding
+         * dimension in fas. Earlier active dimensions are disabled.
+         */
+        public NonConsecutiveIndices fasIndices(FArraySubscripts fas) {
+            ArrayList<int[]> newInd = new ArrayList<int[]>();
+            boolean[] newTrim = new boolean[indices.size()];
+            int l = 0;
+            for (int k = 0; k < indices.size(); k++) {
+                FSubscript fs = fas.getFSubscript(k);
+                if (fs.ndims() == 0 || fs.variability().indexParameterOrLess()) {
+                    newInd.add(new int[0]);
+                    newTrim[k] = true;
+                } else {
+                    newInd.add(ASTNode.range(fs.size().numElements()));
+                    newTrim[k] = false;
+                }
+            }
+            return new NonConsecutiveIndices(newInd, newTrim, 0);
+        }
 	}
 	
+	
+    public static int[] ASTNode.range(int n) {
+        int[] res = new int[n];
+        for (int i = 0; i < n; i++) {
+            res[i] = i + 1;
+        }
+        return res;
+    }
 }

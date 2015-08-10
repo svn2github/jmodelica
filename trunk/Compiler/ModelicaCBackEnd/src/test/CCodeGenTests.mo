@@ -627,7 +627,7 @@ algorithm
         jmi_array_ref_1(tmp_1, 1) = _table_1_0;
         jmi_array_ref_1(tmp_1, 2) = _table_2_1;
         jmi_array_ref_1(tmp_1, 3) = _table_3_2;
-        _x_3 = func_temp_1_exp0(_index_4, tmp_1);
+        _x_3 = jmi_array_val_1(tmp_1, _index_4);
     } else {
         _x_3 = JMI_TRUE;
     }
@@ -16304,26 +16304,392 @@ model VariableArrayIndex1
         CCodeGenTestCase(
             name="VariableArrayIndex1",
             description="Test of variable array index access",
-            template="$C_functions$",
+            template="$C_ode_derivatives$",
             generatedCode="
-void func_temp_1_def0(jmi_ad_var_t i_0_v, jmi_array_t* x_a, jmi_ad_var_t* y_o) {
-    JMI_DYNAMIC_INIT()
-    JMI_DEF(REA, y_v)
-    y_v = jmi_array_val_1(x_a, i_0_v);
-    JMI_RET(GEN, y_o, y_v)
-    JMI_DYNAMIC_FREE()
-    return;
-}
-
-jmi_ad_var_t func_temp_1_exp0(jmi_ad_var_t i_0_v, jmi_array_t* x_a) {
-    JMI_DEF(REA, y_v)
-    func_temp_1_def0(i_0_v, x_a, &y_v);
-    return y_v;
-}
-
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (AD_WRAP_LITERAL(1)), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _i_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2));
+    pre_i_2 = _i_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_1, 1) = 42.0;
+    jmi_array_ref_1(tmp_1, 2) = 3.14;
+    _x_3 = jmi_array_val_1(tmp_1, _i_2);
+    /********* Write back reinits *******/
 ")})));
 end VariableArrayIndex1;
 
+model VariableArrayIndex2
+    Real[3] x = {time,time+1,time+2};
+    Real y = x[i];
+    Integer i = integer(y) + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex2",
+            description="Test of variable array index access in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435462;
+        x[1] = 268435461;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435461;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+        x[1] = jmi->offs_sw + 1;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_3;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 1 * sizeof(jmi_real_t));
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+        jmi_array_ref_1(tmp_1, 1) = 0.0;
+        jmi_array_ref_1(tmp_1, 2) = 0.0;
+        jmi_array_ref_1(tmp_1, 3) = 0.0;
+        residual[0] = 1.0 - jmi_array_val_1(tmp_1, _i_4);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_3 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_y_3 - (pre_temp_1_5), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(_y_3 - (pre_temp_1_5 + AD_WRAP_LITERAL(1)), _sw(1), jmi->events_epsilon, JMI_REL_GEQ);
+            }
+            _temp_1_5 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_y_3), pre_temp_1_5);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _i_4 = _temp_1_5 + 1;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+            jmi_array_ref_1(tmp_2, 1) = _x_1_0;
+            jmi_array_ref_1(tmp_2, 2) = _x_2_1;
+            jmi_array_ref_1(tmp_2, 3) = _x_3_2;
+            (*res)[0] = jmi_array_val_1(tmp_2, _i_4) - (_y_3);
+        }
+    }
+    return ef;
+}
+")})));
+end VariableArrayIndex2;
+
+model VariableArrayIndex3
+    Real[3] x = {time,time+1,time+2};
+    Real y;
+    Integer i = integer(y) + 1;
+algorithm
+    y := x[i];
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex3",
+            description="Test of variable array index access in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(REA, tmp_3)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435462;
+        x[1] = 268435461;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435461;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+        x[1] = jmi->offs_sw + 1;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_3;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_3 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_y_3 - (pre_temp_1_5), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(_y_3 - (pre_temp_1_5 + AD_WRAP_LITERAL(1)), _sw(1), jmi->events_epsilon, JMI_REL_GEQ);
+            }
+            _temp_1_5 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_y_3), pre_temp_1_5);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _i_4 = _temp_1_5 + 1;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+            jmi_array_ref_1(tmp_1, 1) = _x_1_0;
+            jmi_array_ref_1(tmp_1, 2) = _x_2_1;
+            jmi_array_ref_1(tmp_1, 3) = _x_3_2;
+            tmp_3 = _y_3;
+            JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+            jmi_array_ref_1(tmp_1, 1) = _x_1_0;
+            jmi_array_ref_1(tmp_1, 2) = _x_2_1;
+            jmi_array_ref_1(tmp_1, 3) = _x_3_2;
+            _y_3 = jmi_array_val_1(tmp_1, _i_4);
+            tmp_2 = _y_3;
+            _y_3 = tmp_3;
+            tmp_3 = tmp_2;
+            (*res)[0] = tmp_3 - (_y_3);
+        }
+    }
+    return ef;
+}
+")})));
+end VariableArrayIndex3;
+
+model VariableArrayIndex4
+    Integer t = integer(time);
+    Integer[3] x = {t+1,t+2,t+3};
+    Real y;
+    Integer i = integer(y) + 1;
+equation
+    y = x[x[i]];
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex4",
+            description="Test of variable array index access in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435463;
+        x[1] = 268435462;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435462;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+        x[1] = jmi->offs_sw + 1;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_4;
+    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 1 * sizeof(jmi_real_t));
+        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+        jmi_array_ref_1(tmp_1, 1) = _x_1_1;
+        jmi_array_ref_1(tmp_1, 2) = _x_2_2;
+        jmi_array_ref_1(tmp_1, 3) = _x_3_3;
+        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+        jmi_array_ref_1(tmp_2, 1) = 0;
+        jmi_array_ref_1(tmp_2, 2) = 0;
+        jmi_array_ref_1(tmp_2, 3) = 0;
+        residual[0] = 1.0 - jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_5));
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_4 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_y_4 - (pre_temp_1_6), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(1) = jmi_turn_switch(_y_4 - (pre_temp_1_6 + AD_WRAP_LITERAL(1)), _sw(1), jmi->events_epsilon, JMI_REL_GEQ);
+            }
+            _temp_1_6 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_y_4), pre_temp_1_6);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _i_5 = _temp_1_6 + 1;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+            jmi_array_ref_1(tmp_3, 1) = _x_1_1;
+            jmi_array_ref_1(tmp_3, 2) = _x_2_2;
+            jmi_array_ref_1(tmp_3, 3) = _x_3_3;
+            JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+            jmi_array_ref_1(tmp_4, 1) = _x_1_1;
+            jmi_array_ref_1(tmp_4, 2) = _x_2_2;
+            jmi_array_ref_1(tmp_4, 3) = _x_3_3;
+            (*res)[0] = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_5)) - (_y_4);
+        }
+    }
+    return ef;
+}
+")})));
+end VariableArrayIndex4;
+
+
+model VariableArrayIndex5
+    Real[3] y;
+    Real x = time;
+    Integer i = integer(time);
+algorithm
+    y[i] := x;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex5",
+            description="Test of variable array index in LHS of algorithm",
+            template="$C_ode_derivatives$",
+            generatedCode="
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (pre_i_4), _sw(0), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (pre_i_4 + AD_WRAP_LITERAL(1)), _sw(1), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _i_4 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_4);
+    pre_i_4 = _i_4;
+    _x_3 = _time;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
+    jmi_array_val_1(tmp_1, _i_4) = _x_3;
+    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    /********* Write back reinits *******/
+")})));
+end VariableArrayIndex5;
+
+model VariableArrayIndex6
+    Real[3] y;
+    Real[:] x = {time,time,time};
+    Integer i = integer(time);
+    Integer[:] is = {i-1,i-2,i-3};
+algorithm
+    y[is[i]] := x[is[i]];
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex6",
+            description="Test of variable array index in LHS of algorithm",
+            template="$C_ode_derivatives$",
+            generatedCode="
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    model_ode_guards(jmi);
+    /********* Initialize reinits *******/
+    /************* ODE section *********/
+    /************ Real outputs *********/
+    /****Integer and boolean outputs ***/
+    /**** Other variables ***/
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (pre_i_6), _sw(0), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (pre_i_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _i_6 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_6);
+    pre_i_6 = _i_6;
+    _is_1_7 = _i_6 + -1;
+    pre_is_1_7 = _is_1_7;
+    _is_2_8 = _i_6 + -2;
+    pre_is_2_8 = _is_2_8;
+    _is_3_9 = _i_6 + -3;
+    pre_is_3_9 = _is_3_9;
+    _x_1_3 = _time;
+    _x_2_4 = _time;
+    _x_3_5 = _time;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
+    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
+    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
+    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
+    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
+    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
+    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
+    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
+    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
+    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
+    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
+    jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
+    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
+    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
+    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    /********* Write back reinits *******/
+")})));
+end VariableArrayIndex6;
 
 model TestRelationalOp1
 Real v1(start=-1);

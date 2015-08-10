@@ -108,7 +108,6 @@ aspect TransformCanonical {
                 return;
             transformations = new ArrayList<Transformation>();
             transformations.add(new enableIfEquationElimination());
-            transformations.add(new enableArrayAccessRewrite());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
             transformations.add(new scalarize());
@@ -884,7 +883,7 @@ aspect TransformCanonical {
 	
 	
 	syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();
-	eq FAssignStmt.sortingAssignedNames()      = Collections.singleton(getLeft().name());
+    eq FAssignStmt.sortingAssignedNames()      = getLeft().sortingAssignedNames();
 	eq FInitArrayStmt.sortingAssignedNames()   = 
 		Collections.singleton("size(" + getFIdUseExp().name() + ")");
 	eq FForStmt.sortingAssignedNames()         = sortingAssignedNames(getForStmts());
@@ -914,6 +913,16 @@ aspect TransformCanonical {
 		return res;
 	}
 	
+    syn Set<String> FAssignableExp.sortingAssignedNames();
+    eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
+    eq FSubscriptedExp.sortingAssignedNames() {
+        Set<String> res = new LinkedHashSet<String>();
+        for (FIdUseExp use : findFIdUseExpsInTree()) {
+            res.add(use.name());
+        }
+        return res;
+    }
+    
 	
 	syn lazy Set<String> FStatement.sortingDependencies() = Collections.<String>emptySet();
 	eq FAssignStmt.sortingDependencies()       = 
@@ -2003,9 +2012,10 @@ aspect TransformCanonical {
     }
 
     rewrite FAssignStmt {
-        when (rewriteAlias) to FAssignStmt {
-            if (getLeft().myFV().isFVariable() && getLeft().myFV().isAlias()) {
-                FVariable fv = (FVariable) getLeft().myFV();
+        when (rewriteAlias && getLeft() instanceof FIdUseExp) to FAssignStmt {
+            FIdUseExp left = (FIdUseExp) getLeft();
+            if (left.myFV().isFVariable() && left.myFV().isAlias()) {
+                FVariable fv = (FVariable) left.myFV();
                 setLeft(fv.alias().createUseExp());
                 if (fv.isNegated()) 
                     setRight(new FNegExp(getRight()));
@@ -3909,96 +3919,6 @@ aspect SemiLinear {
 	FSemiLinearExp contributes this
 		to FClass.collectSemiLinearExps()
 		for myFClass();
-}
-
-aspect ArrayAccessRewrite {
-    public class FClass {
-        public class enableArrayAccessRewrite extends Transformation {
-            public void perform() {
-                enableArrayAccessRewrite();
-            }
-        }
-    }
-
-    public void ASTNode.enableArrayAccessRewrite() {
-        for (ASTNode n : this)
-            n.enableArrayAccessRewrite();
-    }
-    
-    public void FIdUseExp.enableArrayAccessRewrite() {
-        super.enableArrayAccessRewrite();
-        rewriteContinuousArrayAccess = true;
-        is$Final = false;
-    }
-    
-    public void FSubscriptedExp.enableArrayAccessRewrite() {
-        super.enableArrayAccessRewrite();
-        rewriteContinuousArrayAccess = true;
-        is$Final = false;
-    }
-    
-    private boolean FIdUseExp.rewriteContinuousArrayAccess       = false;
-    private boolean FSubscriptedExp.rewriteContinuousArrayAccess = false;
-
-    rewrite FSubscriptedExp {
-        when (rewriteContinuousArrayAccess) to FExp {
-            rewriteContinuousArrayAccess = false;
-            return createSubscriptFunc();
-        }
-    }
-
-    /**
-     * Create delegate function for array access involving index that can not be calculated at compile time.
-     */
-    public FExp FSubscriptedExp.createSubscriptFunc() {
-        if (indexVariability().indexParameterOrLess() || inFunction())
-            return this;
-        List<FExp> args = new List<FExp>();
-        List<FFunctionVariable> funcVars = new List<FFunctionVariable>();
-        FQNameFull arrayUse = new FQNameFull("x");
-        Enumerator enumerator = new Enumerator();
-        for (FSubscript sub : getFArraySubscripts().getFSubscripts()) {
-            sub.populateSubscriptFunc(args, funcVars, arrayUse, enumerator);
-        }
-        args.add(getFExp().fullCopy());
-        Size inputSize = getFExp().size();
-        String funcName = myFClass().nextTempFuncName();
-        FFunctionCall call = new FFunctionCall(new FIdUse(funcName), args, new Size[]{ size() });
-        funcVars.add(inputSize.createFunctionVariable("x", type(), new FInput()));
-        funcVars.add(size().createFunctionVariable("y", type(), new FOutput()));
-        FFunctionDecl funcDecl = new FFunctionDecl(funcName, funcVars, new FAssignStmt(new FIdUseExp("y"), new FIdUseExp(arrayUse)), new FReturnStmt());
-        funcDecl.annotation().forPath("Inline").setValue(new FBooleanLitExpFalse());
-        myFClass().addFFunctionDecl(funcDecl);
-        return call;
-    }
-
-    /**
-     * Calculate arguments needed due to this subscript for delegate function for array access involving index that can not be calculated at compile time.
-     * 
-     * @param args        list of arguments to add index argument expressions to
-     * @param funcVars    list of variables in the new function to add input parameters for index arguments to
-     * @param arrayUse    access to the array input in the new function to add index expressions to
-     * @param enumerator  used to number the names for input parameters for index arguments
-     */
-    public void FSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
-        arrayUse.addSubscript(fullCopy());
-    }
-
-    public void FExpSubscript.populateSubscriptFunc(List<FExp> args, List<FFunctionVariable> funcVars, FQNameFull arrayUse, Enumerator enumerator) {
-        if (!variability().knownParameterOrLess()) {
-            args.add(getFExp().fullCopy());
-            String varName = "i_" + enumerator.next();
-            funcVars.add(new FFunctionVariable(type(), varName, new FInput()));
-            FArraySubscripts fas = new FArraySubscripts();
-            for (int i = 0; i < ndims(); i++) {
-                fas.addFSubscript(size().rangeFSubscript(i));
-            }
-            arrayUse.addSubscript(new FExpSubscript(new FIdUseExp(varName, fas)));
-        } else {
-            arrayUse.addSubscript(fullCopy());
-        }
-    }
-
 }
 
 

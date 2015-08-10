@@ -706,7 +706,7 @@ abstract FStatement : BaseNode;
 /**
  * A flattened assignment statement.
  */
-FAssignStmt : FStatement ::= Left:FIdUseExp Right:FExp;
+FAssignStmt : FStatement ::= Left:FAssignableExp Right:FExp;
 
 /**
  * A flattened derivative assignment statement.
@@ -1095,15 +1095,24 @@ abstract CommonAccess : BaseNode;
 FIdUse : CommonAccess ::= FQName /ExpandedSubscripts:FArraySubscripts/;
 
 
+
 /**
  * Abstract FExp type for all FExps that describes a variable references.
  */
 abstract FVarRefExp : FAbstractArrayExp;
 
+
+abstract FAssignableExp : FVarRefExp;
+
+/**
+ * Generated expression that applies array subscripts to any expression.
+ */
+FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
+
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FVarRefExp ::= FIdUse;
+FIdUseExp : FAssignableExp ::= FIdUse;
 
 /**
  * A reference to a dynamic state
@@ -1208,11 +1217,6 @@ FMatrix : FAbstractCat;
  * Row in short form for array concatenation expression.
  */
 FMatrixRow : FAbstractCat;
-
-/**
- * Generated expression that applies array subscripts to any expression.
- */
-FSubscriptedExp : FAbstractArrayExp ::= FExp FArraySubscripts;
 
 /**
  * Generated expression referring to the value of another argument to the same function call.

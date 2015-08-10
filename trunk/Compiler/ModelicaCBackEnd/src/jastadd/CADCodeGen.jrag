@@ -1763,6 +1763,20 @@ aspect CADCodeGen {
     public void FArray.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
         getArray().genVarDecls_CAD(p, str, indent);
     }
+    
+    public void FSubscriptedExp.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
+        genVarDecls_C(p, str, indent);
+    }
+    
+    public void FSubscriptedExp.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
+        genTempVars_C(p, str, indent);
+    }
+    
+    public void FSubscriptedExp.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {
+        genTempFree_C(p, str, indent);
+    }
+    
+    syn boolean FSubscriptedExp.inlineVar_CAD() = true;
 
     /**
      * Generates temporary input variables for arrays and records.
@@ -2422,7 +2436,7 @@ aspect CADCodeGen {
 
         if (shouldBeDifferentiated()) {
             str.print(indent);
-            str.print(getLeft().getFIdUse().toString_der_CAD(p));
+            str.print(((FIdUseExp)getLeft()).getFIdUse().toString_der_CAD(p));
             str.print(" = ");
             getRight().genDer_CAD(p, str, indent);
             str.print(";\n");

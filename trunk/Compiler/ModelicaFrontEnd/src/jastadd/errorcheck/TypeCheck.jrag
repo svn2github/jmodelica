@@ -431,13 +431,17 @@ aspect FlatTypeCheck {
   }
   
 	public void FIdUse.typeCheck(ErrorCheckType checkType) {
-		if (inAlgorithm() && useIsAssignment() && variability().constantVariability()) {
-			error("Assignments to constants is not allowed in algorithms");
-		}
-		if (inAlgorithm() && useIsAssignment() && !(myFAlgorithm().getType() instanceof FInitialEquation) && 
-				variability().parameterVariability() && !isForIndex()) {
-			error("Assignments to parameters in algorithms is only allowed in initial algorithms");
-		}
+        if (inAlgorithm() && useIsAssignment()) {
+            if (variability().constantVariability()) {
+                error("Assignments to constants is not allowed in algorithms");
+            } else if (variability().parameterVariability()) {
+                if (isForIndex()) {
+                    error("Can not assign a value to a for loop index");
+                } else if (!(myFAlgorithm().getType() instanceof FInitialEquation)) {
+                    error("Assignments to parameters in algorithms is only allowed in initial algorithms");
+                }
+            }
+        }
 	}
 
   inh boolean FIdUseExp.accessToModelOK();
@@ -644,9 +648,7 @@ aspect FlatTypeCheck {
   
     public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-		  if (getLeft().isForIndex())
-			  error("Can not assign a value to a for loop index");
-		  else if (!getLeft().type().typeCompatible(getRight().type(), true)) 
+            if (!getLeft().type().typeCompatible(getRight().type(), true)) 
 			  error("Types of right and left side of assignment are not compatible");		  
 	  }
   }

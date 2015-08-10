@@ -2589,17 +2589,10 @@ aspect FVariableUses {
      * All uses of this variable that are the left-hand side of an assignment or 
      * function call statement. 
      */
-    coll HashSet<FIdUse> FFunctionVariable.assigningUses() [new HashSet<FIdUse>()] 
+    coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
         with add root FFunctionDecl;
-    FIdUse contributes this when isAssignedTo() && myFuncVar() != null
+    FIdUseExp contributes this when isAssignedTo() && myFuncVar() != null
         to FFunctionVariable.assigningUses() for myFuncVar();
-//  syn lazy Set<FIdUse> FAbstractVariable.assigningUses() {
-//      Set<FIdUseExp> res = new HashSet<FIdUseExp>();
-//      for (FIdUseExp use : uses())
-//          if (use.isAssignedTo())
-//              res.add(use);
-//      return res;
-//  }
     
     /**
      * Check if this is the left hand side of an equation.
@@ -2611,13 +2604,11 @@ aspect FVariableUses {
     /**
      * Check if this is the left hand side of an assignment or function call statement.
      */
-    inh boolean FIdUse.isAssignedTo();
-    inh boolean FIdUseExp.isAssignedTo();
+    inh boolean FAssignableExp.isAssignedTo();
     inh boolean FFunctionCallLeft.isAssignedTo();
     eq BaseNode.getChild().isAssignedTo()         = false;
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
     eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
-    eq FIdUseExp.getFIdUse().isAssignedTo()       = isAssignedTo();
     eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
     
     inh boolean FExp.inBindingExp();
@@ -2716,8 +2707,6 @@ aspect FVariableUses {
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
     FIdUseExp contributes (FVariable) myFV() when isAlgebraicVariableAccess() to 
-        FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
-    FAssignStmt contributes (FVariable) getLeft().myFV() when getLeft().myFV().isAlgebraicVariable() to 
         FAbstractEquation.algebraicVariables() for each enclosingEquationsIterator();
 
     syn boolean FIdUseExp.isAlgebraicVariableAccess() = inAlgebraicAccessLocation() && myFV().isAlgebraicVariable();
@@ -3465,12 +3454,12 @@ aspect FlatAlgorithmAPI {
         to FClass.myAlgorithms() for myFClass();
     
     inh boolean FIdUse.useIsAssignment();
-    inh boolean FIdUseExp.useIsAssignment();
+    inh boolean FAssignableExp.useIsAssignment();
     inh boolean FArray.useIsAssignment();
     inh boolean FRecordConstructor.useIsAssignment();
     eq FAssignStmt.getLeft().useIsAssignment()       = true;
     eq FFunctionCallLeft.getFExp().useIsAssignment() = true;
-    eq FIdUseExp.getFIdUse().useIsAssignment()       = useIsAssignment();
+    eq FAssignableExp.getChild().useIsAssignment()   = useIsAssignment();
     eq FArraySubscripts.getChild().useIsAssignment() = false;
     eq FArray.getFExp().useIsAssignment()            = useIsAssignment();
     eq FRecordConstructor.getArg().useIsAssignment() = useIsAssignment();

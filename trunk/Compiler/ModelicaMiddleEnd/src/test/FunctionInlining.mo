@@ -453,23 +453,10 @@ fclass FunctionInlining.BasicInline11
  Real y[2];
  Real y[3];
 equation
- x = temp_1(4 - e, {y[1], y[2], y[3]});
+ x = ({y[1], y[2], y[3]})[4 - e];
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
-
-public
- function temp_1
-  input Integer i_0;
-  input Real[3] x;
-  output Real y;
- algorithm
-  y := x[i_0];
-  return;
- annotation(Inline = false);
- end temp_1;
-
-
 end FunctionInlining.BasicInline11;
 ")})));
     end BasicInline11;
