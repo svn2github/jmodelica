@@ -214,6 +214,7 @@ class TestFuncCallInputOutputArray1(SimulationTest):
 
     @testattr(stddist = True)
     def setUp(self):
+        self.setup_base(start_time=0.0, final_time=1.0, time_step=0.01)
         self.run()
         
     @testattr(stddist = True)
