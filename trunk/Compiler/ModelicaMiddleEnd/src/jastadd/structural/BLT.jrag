@@ -108,7 +108,7 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            BiPGraph g = new BiPGraph(component.getMembers(), isInitial);
+            BiPGraph g = new BiPGraph(component.getMembers(), isInitial, false);
             Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options);
             
             errorCheckWhenEquations(subBlocks);
@@ -198,7 +198,7 @@ aspect BLT{
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
-                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
+                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial, false);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, options);
                     eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
@@ -2856,7 +2856,7 @@ aspect AutomaticTearing {
             }
             
             private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
-                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial);
+                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial, false);
                 if (isInitial)
                     g.setAsInitialSystem();
                 
@@ -2931,7 +2931,7 @@ aspect AutomaticTearing {
                             }
                         } else {
                             // Build Inner Graph and add info about iteration variables
-                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial);
+                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial, false);
                             // Build block-graph and look for interchangeable variables in SUMV
                             java.util.List<SolvingEq> eqs = new ArrayList<SolvingEq>();
                             boolean graphHasTear = false;
@@ -2984,11 +2984,11 @@ aspect AutomaticTearing {
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
                                         } else {
-                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial), eb);
+                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial, false), eb);
                                         }
                                     }
                                 } else {
-                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial), eb);
+                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial, false), eb);
                                 }
                             } else {
                                 // Reuse the already constructed graph
@@ -3026,7 +3026,7 @@ aspect AutomaticTearing {
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem()), eb);
+                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem(), false), eb);
                     }
                 }
             }

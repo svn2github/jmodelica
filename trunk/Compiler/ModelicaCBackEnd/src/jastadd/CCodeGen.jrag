@@ -4170,20 +4170,26 @@ aspect CCodeGen {
         genIfStart_C(p, str, indent);
         Iterator<FVariable> fvIt = forVariables.iterator();
         Iterator<Integer> fiIt = forIndices.iterator();
+        Map<Integer, FVariable> fiToFvMap = new HashMap<Integer, FVariable>();
+        while (fvIt.hasNext() && fiIt.hasNext()) {
+            fiToFvMap.put(fiIt.next(), fvIt.next());
+        }
         int i = 0;
-        int n = fiIt.hasNext() ? fiIt.next() : -1;
         for (FAbstractEquation equation : getFAbstractEquations()) {
             Collection<Integer> fis   = new ArrayList<Integer>();
             Collection<FVariable> fvs = new ArrayList<FVariable>();
-            while (n >= i && n < i + equation.numScalarEquations()) {
-                    fis.add(n - i);
-                    fvs.add(fvIt.next());
-                    n = fiIt.hasNext() ? fiIt.next() : -1;
+            int n = equation.numScalarEquations();
+            for (int k = 0; k < n; k++) {
+                FVariable var = fiToFvMap.get(k + i);
+                if (var != null) {
+                    fis.add(k);
+                    fvs.add(var);
+                }
             }
             if (forIndices.size() == 0 || fis.size() > 0) {
                 equation.genBlock_C(p, str, p.indent(indent), visited, fvs, fis);
             }
-            i += equation.numScalarEquations();
+            i += n;
         }
     }
     

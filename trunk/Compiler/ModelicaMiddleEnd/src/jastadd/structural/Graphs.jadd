@@ -45,7 +45,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public AbstractBiPGraph() {
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars) {
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars, boolean preserveGroupMembers) {
         for (E_OTHER oldE : eqs)
             addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.isMeta(), oldE.getName());
         for (V_OTHER oldV : vars)
@@ -57,11 +57,18 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 if (v != null)
                     addInsidence(e, v);
             }
+            if (preserveGroupMembers) {
+                for (E_OTHER oldOtherE : oldE.getGroupMembers()) {
+                    E otherE = getEquation(oldOtherE.getName());
+                    if (otherE != null)
+                        e.addGroupMember(otherE);
+                }
+            }
         }
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial) {
-        this(block, collectMatchingVariables(block));
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial, boolean preserveGroupMembers) {
+        this(block, collectMatchingVariables(block), preserveGroupMembers);
         initialSystem = isInitial;
         for (E_OTHER e : block) {
             if (!e.isMeta()) {
@@ -1251,12 +1258,12 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
         super();
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
+        super(block, isInitial, preserveGroupMembers);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
+        super(eqns, vars, preserveGroupMembers);
     }
 
     @Override
@@ -1294,12 +1301,12 @@ public class Var extends AbstractVar<Eq, Var> {
 
 public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCCBlock<SolvingEq, SolvingVar>> {
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars) {
-        super(eqns, vars);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
+        super(eqns, vars, preserveGroupMembers);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial) {
-        super(block, isInitial);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
+        super(block, isInitial, preserveGroupMembers);
     }
 
     @Override

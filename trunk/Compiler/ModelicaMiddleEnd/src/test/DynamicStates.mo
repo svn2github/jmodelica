@@ -1491,5 +1491,114 @@ public
 end DynamicStates.Special.FunctionDerivative1;
 ")})));
         end FunctionDerivative1;
+        model FunctionCallEquation1
+            record R
+                Real x;
+                Real y;
+            end R;
+            function F1
+                input Real x;
+                input R r;
+                output Real y;
+            algorithm
+                y := r.x + r.y + x;
+                annotation(Inline=false, derivative(noDerivative=r)=F1_d);
+            end F1;
+            function F1_d
+                input Real x;
+                input R r;
+                input Real x_der;
+                output Real y;
+            algorithm
+                y := r.x + r.y + x_der;
+                annotation(Inline=false, derivative(noDerivative=r)=F1_dd);
+            end F1_d;
+            
+            function F1_dd
+                input Real x;
+                input R r;
+                input Real x_der;
+                input Real x_der_der;
+                output Real y;
+            algorithm
+                y := r.x + r.y + x_der_der;
+                annotation(Inline=false);
+            end F1_dd;
+            
+            function F2
+                input Real x;
+                output R y;
+            algorithm
+                y.x := -x;
+                y.y := x;
+                annotation(Inline=false);
+            end F2;
+            
+            Real a1;
+            Real a2;
+            Real b;
+        equation
+            der(a1) = b;
+            der(a2) = b;
+            a1^2 + a2^2 = F1(a1, F2(a1));
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="FunctionCallEquation1",
+                description="Ensure that function call equations in dynamic blocks are keep together",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Dynamic state block ---
+  --- States: a2 ---
+    --- Torn system (Block 1(a2).0) of 1 iteration variables and 2 solved variables ---
+    Torn variables:
+      temp_1.x
+      temp_1.y
+
+    Iteration variables:
+      a1 ()
+
+    Torn equations:
+      (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+        Assigned variables: temp_1.x
+      (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+        Assigned variables: temp_1.y
+	
+    Residual equations:
+      ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y))
+        Iteration variables: a1
+    -------------------------------
+  --- States: a1 ---
+    --- Solved function call equation ---
+    (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+      Assigned variables: temp_1.x
+                          temp_1.y
+
+    --- Unsolved equation (Block 1(a1).0) ---
+    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y))
+      Computed variables: a2
+    -------------------------------
+
+--- Torn system (Block 2) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  b
+  dynDer(a2)
+
+Iteration variables:
+  dynDer(a1) ()
+
+Torn equations:
+  b := dynDer(a1)
+  dynDer(a2) := b
+
+Residual equations:
+  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = DynamicStates.Special.FunctionCallEquation1.F1_d(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y), dynDer(a1))
+    Iteration variables: dynDer(a1)
+
+--- Solved equation ---
+der(_ds.0.s0) := dsDer(0, 0)
+-------------------------------
+")})));
+        end FunctionCallEquation1;
     end Special;
 end DynamicStates;
