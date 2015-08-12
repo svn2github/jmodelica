@@ -181,67 +181,6 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
     JMI_ARRAY_INIT_24(dyn, type, arr, name, ne, nd, d1, d2, d3, d4, d5, d6, d7, d8, d9, d10, d11, d12, d13, d14, d15, d16, d17, d18, d19, d20, d21, d22, d23, d24)\
     name->size[24] = (int) (d25);
 
-/* Linked list for saving pointers to be freed at return */
-typedef struct _jmi_dynamic_list jmi_dynamic_list;
-struct _jmi_dynamic_list {
-    void* data;
-    jmi_dynamic_list* next;
-};
-
-#if 0
-/* Macro for declaring dynamic list variable - should be called at beginning of function */
-#define JMI_DYNAMIC_INIT() \
-    jmi_dynamic_list* jmi_dynamic_prev;\
-    jmi_dynamic_list* jmi_dynamic_cur;\
-    jmi_dynamic_list* jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-    jmi_dynamic_list* jmi_dynamic_last = jmi_dynamic_first;
-
-/* Macro for adding a pointer to dynamic list - only for use in other macros */
-#define JMI_DYNAMIC_ADD_POINTER(pointer) \
-    jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-    jmi_dynamic_last = jmi_dynamic_last->next;\
-    jmi_dynamic_last->data = pointer;
-
-/* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
-#define JMI_DYNAMIC_FREE() \
-    jmi_dynamic_prev = jmi_dynamic_first;\
-    for (jmi_dynamic_cur = jmi_dynamic_prev->next; jmi_dynamic_cur; jmi_dynamic_prev = jmi_dynamic_cur, jmi_dynamic_cur = jmi_dynamic_cur->next) {\
-        free(jmi_dynamic_prev);\
-        free(jmi_dynamic_cur->data);\
-    }\
-    free(jmi_dynamic_prev);
-
-#else
-
-/* Macro for declaring dynamic list variable - should be called at beginning of function */
-#define JMI_DYNAMIC_INIT() \
-    jmi_dynamic_list* jmi_dynamic_first = 0;\
-    jmi_dynamic_list* jmi_dynamic_last = 0;
-
-/* Macro for adding a pointer to dynamic list - used from generated code */
-#define JMI_DYNAMIC_ADD(pointer) \
-    JMI_DYNAMIC_ADD_POINTER(pointer)
-
-/* Macro for adding a pointer to dynamic list - only for use in other macros */
-#define JMI_DYNAMIC_ADD_POINTER(pointer) \
-    do { \
-       if(jmi_dynamic_first) {\
-          jmi_dynamic_last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-          jmi_dynamic_last = jmi_dynamic_last->next;\
-       }\
-       else jmi_dynamic_last = jmi_dynamic_first = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));\
-       jmi_dynamic_last->data = pointer; \
-    } while(0);
-
-/* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
-#define JMI_DYNAMIC_FREE() \
-    if(jmi_dynamic_first) jmi_dynamic_free(jmi_dynamic_first);
-
-/* Clean up the linked list */
-void jmi_dynamic_free(jmi_dynamic_list* jmi_dynamic_first);
-
-#endif
-
 /* Record array access macros */
 #define jmi_array_rec_1(arr, i1) (&((arr)->var[(int) _JMI_ARR_I_1(arr, i1)]))
 #define jmi_array_rec_2(arr, i1, i2) (&((arr)->var[(int) _JMI_ARR_I_2(arr, i1, i2)]))
