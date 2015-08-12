@@ -1183,7 +1183,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal zero?
      */
     syn boolean FExp.isLiteralZero() = false;
-    eq FLitExp.isLiteralZero()       = type().isNumericScalar() && ceval().realValue() == 0.0;
+    eq FNumericLitExp.isLiteralZero()= type().isScalar() && ceval().realValue() == 0.0;
     eq FDotAddExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
     eq FDotSubExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() && getRightNoTransform().isLiteralZero();
     eq FDotMulExp.isLiteralZero()    = getLeftNoTransform().isLiteralZero() || getRightNoTransform().isLiteralZero();
@@ -1194,7 +1194,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal one?
      */
     syn boolean FExp.isLiteralOne() = false;
-    eq FLitExp.isLiteralOne()       = type().isNumericScalar() && ceval().realValue() == 1.0;
+    eq FNumericLitExp.isLiteralOne()= type().isScalar() && ceval().realValue() == 1.0;
     eq FDotMulExp.isLiteralOne()    = getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
     eq FDotDivExp.isLiteralOne()    = getLeftNoTransform().isLiteralOne() && getRightNoTransform().isLiteralOne();
     eq FNegExp.isLiteralOne()       = getFExpNoTransform().isLiteralMinusOne();
@@ -1203,7 +1203,7 @@ aspect ExpressionSimplification {
      * Is this expression a literal minus one?
      */
     syn boolean FExp.isLiteralMinusOne() = false;
-    eq FLitExp.isLiteralMinusOne()       = type().isNumericScalar() && ceval().realValue() == -1.0;
+    eq FNumericLitExp.isLiteralMinusOne()= type().isScalar() && ceval().realValue() == -1.0;
     eq FNegExp.isLiteralMinusOne()       = getFExpNoTransform().isLiteralOne();
 
     /**
@@ -1261,18 +1261,10 @@ aspect ExpressionSimplification {
         return toString().equals(o.toString());
     }
 
-    eq FRealLitExp.equalsSymbolic(FExp other) {
-        if (!(other instanceof FRealLitExp))
+    eq FNumericLitExp.equalsSymbolic(FExp other) {
+        if (!(other instanceof FNumericLitExp) || !type().isScalar() || !other.type().isScalar())
             return false;
-        FRealLitExp o = (FRealLitExp) other;
-        return getValue() == o.getValue(); 
-    }
-
-    eq FIntegerLitExp.equalsSymbolic(FExp other) {
-        if (!(other instanceof FIntegerLitExp))
-            return false;
-        FIntegerLitExp o = (FIntegerLitExp) other;
-        return getValue() == o.getValue(); 
+        return ceval().equals(other.ceval());
     }
 
     eq FBooleanLitExpTrue.equalsSymbolic(FExp other)  = other instanceof FBooleanLitExpTrue;

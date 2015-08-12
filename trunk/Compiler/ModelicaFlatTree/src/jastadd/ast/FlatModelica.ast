@@ -1016,14 +1016,19 @@ FAndExp : FLogBinExp;
 abstract FLitExp : FExp;
 
 /**
+ * Base class for all numeric literal expressions
+ */
+abstract FNumericLitExp : FLitExp;
+
+/**
  * Real literal expression.
  */
-FRealLitExp : FLitExp ::= <Value:double>;
+FRealLitExp : FNumericLitExp ::= <Value:double>;
 
 /**
  * Integer literal expression.
  */
-FIntegerLitExp : FLitExp ::= <Value:int>;
+FIntegerLitExp : FNumericLitExp ::= <Value:int>;
 
 /**
  * Integer literal expression that is too large to actually fit in an int.
