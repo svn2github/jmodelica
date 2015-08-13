@@ -34,43 +34,45 @@ void jmi_dynamic_list_free(jmi_dynamic_list* head);
 
 /* Keeps pointers to the head and last elements of a list.
  * Might be tail in a longer list. */
-typedef struct jmi_dynamic_mem_t {
+typedef struct jmi_dyn_mem_t {
     jmi_dynamic_list* head;
     jmi_dynamic_list** last;
-} jmi_dynamic_mem_t;
+} jmi_dyn_mem_t;
 
 /**
  * Find the end of the memory list
  */
-jmi_dynamic_list** jmi_dynamic_mem_last();
+jmi_dynamic_list** jmi_dyn_mem_last();
 
-void jmi_dynamic_mem_add(jmi_dynamic_mem_t* mem, void* data);
+void jmi_dyn_mem_init(jmi_dyn_mem_t* mem, jmi_dynamic_list* head, jmi_dynamic_list** last);
 
-void jmi_dynamic_mem_free(jmi_dynamic_mem_t* mem);
+void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
+
+void jmi_dyn_mem_free(jmi_dyn_mem_t* mem);
 
 /* Macro for declaring dynamic list variable - should be called at beginning of function */
 #define JMI_DYNAMIC_INIT() \
-    jmi_dynamic_mem_t dynamic_mem = {NULL, NULL};
+    jmi_dyn_mem_t dyn_mem = {NULL, NULL};
 
 /* Macro for adding a pointer to dynamic list - used from generated code */
 #define JMI_DYNAMIC_ADD(pointer) \
     JMI_DYNAMIC_ADD_POINTER(pointer)
 
-void jmi_dynamic_add_pointer(jmi_dynamic_mem_t* mem, void* data);
+void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data);
 
 /* Macro for adding a pointer to dynamic list - only for use in other macros */
 #define JMI_DYNAMIC_ADD_POINTER(pointer) \
     do {\
-        if (!dynamic_mem.head) {\
-            dynamic_mem.last = jmi_dynamic_mem_last();\
-            dynamic_mem.head = *dynamic_mem.last;\
+        if (!dyn_mem.head) {\
+            jmi_dynamic_list** last = jmi_dyn_mem_last();\
+            jmi_dyn_mem_init(&dyn_mem, *last, last);\
         }\
-        jmi_dynamic_add_pointer(&dynamic_mem, pointer);\
+        jmi_dyn_mem_add(&dyn_mem, pointer);\
     } while (0);
 
 /* Dynamic deallocation of all dynamically allocated arrays and record arrays - should be called before return */
 #define JMI_DYNAMIC_FREE() \
-    if (dynamic_mem.head) jmi_dynamic_mem_free(&dynamic_mem);
+    if (dyn_mem.head) jmi_dyn_mem_free(&dyn_mem);
 
 
 #endif /* _JMI_DYN_MEM_H */

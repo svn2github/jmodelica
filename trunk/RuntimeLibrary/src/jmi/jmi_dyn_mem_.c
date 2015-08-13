@@ -27,6 +27,6 @@
  * constant evaluation.
  */
 
-jmi_dynamic_list** jmi_dynamic_mem_last() {
-    return &jmi_get_current()->dynamic_mem_last;
+jmi_dynamic_list** jmi_dyn_mem_last() {
+    return &jmi_get_current()->dyn_mem_last;
 }

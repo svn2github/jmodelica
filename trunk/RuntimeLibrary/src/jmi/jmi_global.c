@@ -165,7 +165,7 @@ void jmi_finalize_try(jmi_t* jmi, int depth) {
         fprintf(stderr, "jmi_finalize_try(): Unexpected try depth=%d, resetting to 0\n",depth);
         depth = 0;
     }
-    jmi_dynamic_list_free(&jmi->dynamic_mem_head);
+    jmi_dyn_mem_free(&jmi->dyn_mem);
     jmi->current_try_depth = depth;
     if (depth == 0) {
         jmi_set_current(NULL);

@@ -113,11 +113,11 @@ void jmi_throw()
     longjmp(jmceval_try_location, 1);
 }
 
-jmi_dynamic_list dynamic_mem_head = {NULL, NULL};
-jmi_dynamic_list* dynamic_mem_last = &dynamic_mem_head;
+jmi_dynamic_list dyn_mem_head = {NULL, NULL};
+jmi_dynamic_list* dyn_mem_last = &dyn_mem_head;
 
-jmi_dynamic_list** jmi_dynamic_mem_last() {
-    return &dynamic_mem_last;
+jmi_dynamic_list** jmi_dyn_mem_last() {
+    return &dyn_mem_last;
 }
 
 void JMCEVAL_setup() {

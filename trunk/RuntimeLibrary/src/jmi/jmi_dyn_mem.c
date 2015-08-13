@@ -21,14 +21,6 @@
 
 #include <stdlib.h>
 
-void jmi_dynamic_add_pointer(jmi_dynamic_mem_t* mem, void* data) {
-    jmi_dynamic_list** lastp = mem->last;
-    jmi_dynamic_list* last = *lastp;
-    last->next = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));
-    last = last->next;
-    last->data = data;
-    *lastp = last;
-}
 
 void jmi_dynamic_list_free(jmi_dynamic_list* head) {
     jmi_dynamic_list* next = head->next;
@@ -41,9 +33,23 @@ void jmi_dynamic_list_free(jmi_dynamic_list* head) {
     head->next = NULL;
 }
 
-void jmi_dynamic_mem_free(jmi_dynamic_mem_t* mem) {
+void jmi_dyn_mem_init(jmi_dyn_mem_t* mem, jmi_dynamic_list* head, jmi_dynamic_list** last) {
+    head->next = NULL;
+    head->data = NULL;
+    *last = head;
+    mem->head = head;
+    mem->last = last;
+}
+
+void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data) {
+    jmi_dynamic_list* l = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));
+    (*mem->last)->next = l;
+    l->data = data;
+    l->next = NULL;
+    *mem->last = l;
+}
+
+void jmi_dyn_mem_free(jmi_dyn_mem_t* mem) {
     jmi_dynamic_list_free(mem->head);
     *mem->last = mem->head;
-    mem->head = NULL;
-    mem->last = NULL;
 }
