@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "jmi.h"
-#include "jmi_dyn_mem.h"
 #include "ModelicaUtilities.h"
 #include <fcntl.h>
 
@@ -111,13 +110,6 @@ int JMCEVAL_try() {
 void jmi_throw()
 {
     longjmp(jmceval_try_location, 1);
-}
-
-jmi_dynamic_list dyn_mem_head = {NULL, NULL};
-jmi_dynamic_list* dyn_mem_last = &dyn_mem_head;
-
-jmi_dynamic_list** jmi_dyn_mem_last() {
-    return &dyn_mem_last;
 }
 
 void JMCEVAL_setup() {
