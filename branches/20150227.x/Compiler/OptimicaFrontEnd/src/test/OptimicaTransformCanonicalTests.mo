@@ -302,8 +302,7 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
 			description="Test type checking of class attributes in Optimica.",
 			errorMessage="
 1 errors found:
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
-Semantic error at line 271, column 27:
+Error at line 271, column 27, in file '/Users/jakesson/projects/JModelica/Compiler/OptimicaFrontEnd/src/test/modelica/OptimicaTransformCanonicalTests.mo':
   Array size mismatch for the attribute objective, size of declaration is scalar and size of objective expression is [2]
   
 ")})));
@@ -370,8 +369,8 @@ constraint
             description="Type checking timed variables: string arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
-Semantic error at line 365, column 7:
+
+Error at line 364, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
   The argument of a timed variable must be a scalar parameter Real expression
     type of '\"0\"' is String
 ")})));
@@ -390,8 +389,8 @@ constraint
             description="Type checking timed variables: continuous arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
-Semantic error at line 385, column 7:
+
+Error at line 384, column 7, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
   The argument of a timed variable must be a scalar parameter Real expression
     'y' is of continuous-time variability
 ")})));

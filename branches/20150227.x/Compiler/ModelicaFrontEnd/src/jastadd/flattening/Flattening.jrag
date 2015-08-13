@@ -30,9 +30,9 @@ aspect FlatTree {
      * @param icl   the class being flattened
      * @param file  the path to the file to report errors on
      */
-    public static FClass FClass.create(InstClassDecl icl, String file, ModelicaCompiler mc, String flatName) {
+    public static FClass FClass.create(InstClassDecl icl, String flatName) {
         FlatRoot flatRoot = new FlatRoot(icl.createFClass());
-        flatRoot.setFileName(file);
+        //flatRoot.setFileName(file);
         FClass fc = flatRoot.getFClass(); // make FClass final
         fc.userDefinedName = flatName;
         fc.root().transferRoot(icl.root());

@@ -26,8 +26,8 @@ package TypeTests
 			description="Basic expression type test.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 11, column 11:
+
+Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 	end TypeTest1;
@@ -44,8 +44,8 @@ Semantic error at line 11, column 11:
 			description="Basic expression type test.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/TypeTests.mo':
-Semantic error at line 35, column 4:
+
+Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 	end TypeTest2;
@@ -61,8 +61,8 @@ Semantic error at line 35, column 4:
             description="Basic expression type test.",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 56, column 16:
+
+Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -81,8 +81,8 @@ Semantic error at line 56, column 16:
             description="Basic expression type test.",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 76, column 4:
+
+Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -101,8 +101,8 @@ Semantic error at line 76, column 4:
             description="Basic expression type test.",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 96, column 4:
+
+Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -120,20 +120,21 @@ Semantic error at line 96, column 4:
 			name="TypeTest6",
 			description="Basic expression type test.",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 130, column 10:
+5 errors found:
+
+Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The type of the binding expression of the attribute start does not match the declared type of the variable
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 130, column 21:
+
+Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The type of the binding expression of the attribute unit does not match the declared type of the variable
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 130, column 28:
+
+Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The type of the binding expression of the attribute nominal does not match the declared type of the variable
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 130, column 40:
+
+Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The type of the binding expression of the attribute min does not match the declared type of the variable
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 130, column 49:
+
+Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The type of the binding expression of the attribute max does not match the declared type of the variable
 ")})));
 	end TypeTest6;
@@ -253,33 +254,33 @@ model TypeRel5
             description="Type checks of relational operators: Real[1]/Real[1]",
             errorMessage="
 6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 243, column 15:
+
+Error at line 244, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} == {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 244, column 15:
+
+Error at line 245, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} <> {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 245, column 15:
+
+Error at line 246, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} > {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 246, column 15:
+
+Error at line 247, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} >= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 247, column 15:
+
+Error at line 248, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} < {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 248, column 15:
+
+Error at line 249, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: {1.0} <= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
@@ -301,33 +302,33 @@ model TypeRel6
             description="Type checks of relational operators: Real/String",
             errorMessage="
 6 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 291, column 15:
+
+Error at line 292, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Equality comparisons do not allow real operands: 1.0 == \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 292, column 15:
+
+Error at line 293, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Equality comparisons do not allow real operands: 1.0 <> \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 293, column 15:
+
+Error at line 294, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: 1.0 > \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 294, column 15:
+
+Error at line 295, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: 1.0 >= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 295, column 15:
+
+Error at line 296, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: 1.0 < \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 296, column 15:
+
+Error at line 297, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Type error in expression: 1.0 <= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
@@ -421,8 +422,8 @@ model AbsType5
             description="abs() operator: String arg",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 416, column 27:
+
+Error at line 417, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): types of positional argument 1 and input v are not compatible
     type of '\"-1\"' is String
 ")})));
@@ -453,8 +454,8 @@ model AbsType7
 			description="abs() operator: too many args",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 348, column 17:
+
+Error at line 452, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): too many positional arguments
 ")})));
 end AbsType7;
@@ -469,8 +470,8 @@ model AbsType8
 			description="abs() operator: no args",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 364, column 11:
+
+Error at line 468, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): missing argument for required input v
 ")})));
 end AbsType8;
@@ -682,8 +683,8 @@ model RealEq1
             description="Equality comparisons for reals: == outside function",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 677, column 14:
+
+Error at line 681, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Equality comparisons do not allow real operands: 1.0 == 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -700,8 +701,8 @@ model RealEq2
             description="Equality comparisons for reals: <> outside function",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 695, column 14:
+
+Error at line 699, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Equality comparisons do not allow real operands: 1.0 <> 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -977,8 +978,8 @@ equation
 			description="Using component of model type as expression",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1010, column 8:
+
+Error at line 976, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Accesses to composite components other than records are not allowed: c
 ")})));
 end UnknownTypeAccess1;
@@ -1010,14 +1011,15 @@ model ExtObjType1
         end destructor;
     end E2;
     parameter E1 e = E2();
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="ExtObjType1",
             description="Check external object types",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 1012, column 22:
+
+Error at line 1016, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ExtObjType1;
@@ -1038,9 +1040,9 @@ model RecursiveStructure1
 			name="RecursiveStructure1",
 			description="Detect recursive class structures",
 			errorMessage="
-1 error found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1021, column 5:
+1 errors found:
+
+Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Recursive class structure
 ")})));
 end RecursiveStructure1;
@@ -1062,9 +1064,9 @@ model RecursiveStructure2
 			name="RecursiveStructure2",
 			description="Detect recursive class structures",
 			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1062, column 3:
+1 errors found:
+
+Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Recursive class structure
 ")})));
 end RecursiveStructure2;
@@ -1086,9 +1088,9 @@ model RecursiveStructure3
 			name="RecursiveStructure3",
 			description="Detect recursive class structures",
 			errorMessage="
-1 error found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1071, column 3:
+1 errors found:
+
+Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Recursive class structure
 ")})));
 end RecursiveStructure3;
@@ -1106,8 +1108,8 @@ model RecursiveStructure4
 			description="Detect recursive class structures",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1141, column 13:
+
+Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Recursive class structure
 ")})));
 end RecursiveStructure4;
@@ -1156,8 +1158,8 @@ equation
 			description="Using test expression of wrong type",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1100, column 2:
+
+Error at line 1154, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Test expression of when equation isn't Boolean scalar or vector expression
 ")})));
 end WhenType1;
@@ -1176,8 +1178,8 @@ equation
 			description="Using test expression with too many dimensions",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1120, column 2:
+
+Error at line 1174, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Test expression of when equation isn't Boolean scalar or vector expression
 ")})));
 end WhenType2;
@@ -1222,12 +1224,12 @@ model DivTest2
             description="Testing wrong input types of the div operator.",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1150, column 22:
+
+Error at line 1222, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1150, column 34:
+
+Error at line 1222, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
 ")})));
@@ -1276,12 +1278,12 @@ model ModTest2
             description="Testing wrong input types of the mod operator.",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1167, column 22:
+
+Error at line 1276, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1167, column 34:
+
+Error at line 1276, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
 ")})));
@@ -1327,12 +1329,12 @@ model RemTest2
             description="Testing wrong input types of the rem operator.",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1255, column 22:
+
+Error at line 1327, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1255, column 34:
+
+Error at line 1327, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
 ")})));
@@ -1356,8 +1358,8 @@ equation
 			description="Testing that continuous variables can't be accessed in pre expressions in normal equations",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1256, column 13:
+
+Error at line 1351, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling built-in operator pre() with a continuous variable access as argument can only be done in when clauses and initial equations
 ")})));
 end PreTest1;
@@ -1460,12 +1462,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 1458, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Only real typed expressions are allowed in der() operator
 
-Error: in file '...':
-Semantic error at line 1, column 1:
+Error at line 1459, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Only real typed expressions are allowed in der() operator
 ")})));
 end DerTest1;
@@ -1514,11 +1514,11 @@ equation
 			description="Testing that input to edge has to be boolean.",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1120, column 8:
+
+Error at line 1507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function edge(): argument must be a boolean variable access
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1123, column 10:
+
+Error at line 1510, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function edge(): argument must be a boolean variable access
 ")})));
 end EdgeTest1;
@@ -1539,8 +1539,8 @@ equation
 			description="Testing that continuous variables can be accessed in change expressions only inside when clauses.",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1147, column 7:
+
+Error at line 1534, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling built-in operator change() with a continuous variable access as argument can only be done in when clauses and initial equations
 ")})));
 end ChangeTest1;
@@ -1582,8 +1582,8 @@ model HomotopyTest1
 			description="Testing error when type of homotopy arguments differ",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1147, column 7:
+
+Error at line 1580, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function homotopy(): arguments must be same type
 ")})));
 end HomotopyTest1;
@@ -1622,8 +1622,8 @@ model IfExpType2
 			description="If expression errors: non-boolean test expression",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1217, column 17:
+
+Error at line 1620, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Test expression of if expression must be scalar boolean
 ")})));
 end IfExpType2;
@@ -1644,8 +1644,8 @@ model IfExpType3
 			description="If expression errors: incompatible types of branches",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1239, column 18:
+
+Error at line 1642, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Branches of if expression has incompatible types
 ")})));
 end IfExpType3;
@@ -1667,8 +1667,8 @@ model IfExpType4
 			description="If expression errors: non-parameter test expression",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TypeTests.mo':
-Semantic error at line 1262, column 18:
+
+Error at line 1665, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   If expression with branches that have different array sizes must have parameter test expression
 ")})));
 end IfExpType4;
@@ -1893,12 +1893,10 @@ model StringExpType1
             description="",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1802, column 30:
+Error at line 1802, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 1803, column 30:
+Error at line 1803, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
 ")})));
@@ -2014,21 +2012,21 @@ algorithm
 	b := time*time + 1;
 	r := noEvent(r > 2) and noEvent(r < 4);
 	i := if b then "one" else "two";
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmType3",
 			description="Incorrect types in algorithm",
 			errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+3 errors found:
+
+Error at line 2023, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Types of right and left side of assignment are not compatible
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 2024, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Types of right and left side of assignment are not compatible
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 2025, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Types of right and left side of assignment are not compatible
 ")})));
 end AlgorithmType3;
@@ -2047,23 +2045,22 @@ initial algorithm
 algorithm
 	x := 2;
 	y := 3;
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="AlgorithmType4",
 			description="Algorithm assigning to parameters and constants.",
 			errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+3 errors found:
+
+Error at line 2054, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Assignments to constants is not allowed in algorithms
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 2057, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Assignments to constants is not allowed in algorithms
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 2058, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Assignments to parameters in algorithms is only allowed in initial algorithms
-			
 ")})));
 end AlgorithmType4;
 
@@ -2129,17 +2126,18 @@ model Functional1
     
     Real[2] y1 = usePartFunc1({{function fullFunc(), function fullFunc()}}, time);
     Real[2] y2 = usePartFunc2({{function fullFunc(), function fullFunc()}}, time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional1",
             description="Check type error for functional input argument",
             errorMessage="
 2 errors found:
-Error: in file '...':
-Semantic error at line 554, column 27:
+
+Error at line 2138, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Array size mismatch in declaration of y1, size of declaration is [2] and size of binding expression is [1, 2]
-Error: in file '...':
-Semantic error at line 554, column 27:
+
+Error at line 2139, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Array size mismatch in declaration of y2, size of declaration is [2] and size of binding expression is [1, 2]
 ")})));
 end Functional1;
@@ -2167,14 +2165,15 @@ model Functional2
     end usePartFunc;
     
     Real y = usePartFunc(function fullFunc(x=time), time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional2",
             description="Check that duplicate component declaration is handled correctly",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 673, column 26:
+
+Error at line 2178, column 44, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument fullFunc(): no input matching named argument x found
 ")})));
 end Functional2;
@@ -2207,14 +2206,15 @@ model Functional3
     end usePartFunc;
     
     Real y = usePartFunc(function fullFunc(x=time), time);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Functional3",
             description="Check that duplicate component declaration is handled correctly",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 594, column 44:
+
+Error at line 2219, column 44, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument fullFunc(): no input matching named argument x found
 ")})));
 end Functional3;
@@ -2247,13 +2247,13 @@ model Functional4
             name="Functional4",
             description="Check type error",
             errorMessage="
-3 errors found:
-Error: in file '...':
-Semantic error at line 783, column 27:
+2 errors found:
+
+Error at line 2254, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'time' is Real
-Error: in file '...':
-Semantic error at line 783, column 33:
+
+Error at line 2254, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 2 and input x are not compatible
     type of 'fullFunc()' is ((Real y) = TypeTests.Functional4.fullFunc(Real x))
 ")})));
@@ -2288,13 +2288,13 @@ model Functional5
             name="Functional5",
             description="Check type error",
             errorMessage="
-3 errors found:
-Error: in file '...':
-Semantic error at line 783, column 27:
+2 errors found:
+
+Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is ((Real b) = TypeTests.Functional5.fullFunc())
-Error: in file '...':
-Semantic error at line 2234, column 27:
+
+Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument fullFunc(): missing argument for required input a
 ")})));
 end Functional5;
@@ -2327,8 +2327,8 @@ model Functional6
             description="Check type error",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 2274, column 27:
+
+Error at line 2333, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): too many positional arguments
 ")})));
 end Functional6;
@@ -2376,18 +2376,18 @@ model Functional7
             description="Check type error for functional arguments. Chained",
             errorMessage="
 4 errors found:
-Error: in file '...':
-Semantic error at line 2274, column 49:
+
+Error at line 2370, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x1 found
-Error: in file '...':
-Semantic error at line 2274, column 54:
+
+Error at line 2370, column 54, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): types of named argument x2 and input x2 are not compatible
     type of '\"string\"' is String
-Error: in file '...':
-Semantic error at line 2274, column 66:
+
+Error at line 2370, column 66, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x3 found
-Error: in file '...':
-Semantic error at line 2274, column 71:
+
+Error at line 2370, column 71, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x4 found
 ")})));
 end Functional7;
@@ -2398,6 +2398,7 @@ model Delay1
     Real d;
   equation
     {x1} = delay({x1}, {d,d}, 2);
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="Delay1",
@@ -2405,8 +2406,7 @@ model Delay1
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 2362, column 24:
+Error at line 2411, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function delay(): types of positional argument 2 and input delayTime are not compatible
     type of '{d, d}' is Real[2]
 ")})));
@@ -2418,23 +2418,24 @@ model SpatialDist1
     Real d;
   equation
     {x} = spatialDistribution({x}, d, {2}, {true}, {{0,0},{0,0}});
+
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="SpatialDist1",
             description="Check type error for spatialDistribution().",
             errorMessage="
-2 errors found:
-Error: in file '...':
-Semantic error at line 2381, column 11:
+4 errors found:
+
+Error at line 2431, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes
-Error: in file '...':
-Semantic error at line 2381, column 11:
+
+Error at line 2431, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): fourth argument 'positiveVelocity' cannot be vectorized
-Error: in file '...':
-Semantic error at line 2381, column 11:
+
+Error at line 2431, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): third argument 'x' cannot be vectorized
-Error: in file '...':
-Semantic error at line 2381, column 50:
+
+Error at line 2431, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): types of positional argument 5 and input initialPoints are not compatible
     type of '{{0, 0}, {0, 0}}' is Integer[2, 2]
 ")})));
@@ -2446,16 +2447,16 @@ model SpatialDist2
     Real[2] y2;
   equation
     (y1,y2) = spatialDistribution({1,2}, {3,4}, 2, true);
+
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
             name="SpatialDist2",
             description="Check type error for spatialDistribution().",
             errorMessage="
 1 errors found:
-Error: in file '...':
-Compliance error at line 2408, column 15:
-  The spatialDistribution() function-like operator is not supported vectorized in function call equations
 
+Compliance error at line 2460, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+  The spatialDistribution() function-like operator is not supported vectorized in function call equations
 ")})));
 end SpatialDist2;
 
@@ -2533,11 +2534,11 @@ model CircularIfExp4
             description="Circularity in binding expressions of parameters not resolved by Evaluate=true on only one of the parameters used in test",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 2497, column 24:
+
+Error at line 2539, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Circularity in binding expression of parameter: c = if a and b then 1 else d
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 2498, column 24:
+
+Error at line 2540, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Circularity in binding expression of parameter: d = if a and b then c else 2
 ")})));
 end CircularIfExp4;
@@ -2555,11 +2556,11 @@ model CircularIfExp5
             description="Circularity in binding expressions of parameters not resolved by Evaluate=true on parameters used in test, when actual value leads to circularity",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 2519, column 24:
+
+Error at line 2561, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Circularity in binding expression of parameter: c = if a then 1 else d
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 2520, column 24:
+
+Error at line 2562, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Circularity in binding expression of parameter: d = if b then c else 2
 ")})));
 end CircularIfExp5;
@@ -2574,8 +2575,8 @@ model CircularIfExp6
             description="Using circular parameter in if expression",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-Semantic error at line 2539, column 21:
+
+Error at line 2581, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Circularity in binding expression of parameter: a = if a < 2 then 3 else 1
 ")})));
 end CircularIfExp6;

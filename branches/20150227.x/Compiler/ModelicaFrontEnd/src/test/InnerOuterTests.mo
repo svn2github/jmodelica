@@ -320,14 +320,14 @@ model InnerOuterTest9
     outer parameter Real T = 5;
     Real x = T * 23;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuterTest9",
-			description="Missing inner declaration",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest9",
+            description="Missing inner declaration",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
-Semantic error at line 319, column 21:
+
+Error at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Cannot find inner declaration for outer T
 ")})));
 end InnerOuterTest9;
@@ -337,14 +337,14 @@ model InnerOuterTest10
     outer constant Real T = 5;
     constant Real x = T * 23;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuterTest10",
-			description="Missing inner declaration",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest10",
+            description="Missing inner declaration",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
-Semantic error at line 336, column 22:
+
+Error at line 336, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Cannot find inner declaration for outer T
 ")})));
 end InnerOuterTest10;
@@ -359,14 +359,14 @@ model InnerOuterTest11
     
     Real y = b.x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuterTest11",
-			description="Missing inner declaration",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest11",
+            description="Missing inner declaration",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
-Semantic error at line 356, column 10:
+
+Error at line 356, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Cannot find inner declaration for outer b
 ")})));
 end InnerOuterTest11;
@@ -404,14 +404,14 @@ end InnerOuterTest12;
 model InnerOuterTest13_Err
     outer Real x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="InnerOuterTest13_Err",
-			description="Check that error is generated for outer without inner",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest13_Err",
+            description="Check that error is generated for outer without inner",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/InnerOuterTests.mo':
-Semantic error at line 407, column 10:
+
+Error at line 404, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Cannot find inner declaration for outer x
 ")})));
 end InnerOuterTest13_Err;

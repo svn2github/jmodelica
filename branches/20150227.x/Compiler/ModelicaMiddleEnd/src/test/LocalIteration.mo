@@ -310,8 +310,7 @@ Jacobian:
                     errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 302, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
   The type of the enabled expression is not boolean
 ")})));
             end Error1;
@@ -329,10 +328,9 @@ Semantic error at line 0, column 0:
                     name="Annotation_Enabled_Error2",
                     description="Test of enabled annotation with unknown parameter expression",
                     errorMessage="
-2 errors found:
+1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 322, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
   Cannot find class or component declaration for unknownParameter3
 ")})));
             end Error2;
@@ -352,8 +350,7 @@ Semantic error at line 0, column 0:
                     errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error at line 342, column 72, in file 'Compiler/ModelicaMiddleEnd/src/test/LocalIteration.mo':
   Array size mismatch for the enabled attribute, size of component declaration is scalar and size of expression is [2]
 ")})));
             end Error3;

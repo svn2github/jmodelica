@@ -84,9 +84,9 @@ end ConnectTests.ConnectTest1;
 			name="ConnectTest2_Err",
 			description="Basic test of name lookup in connect clauses",
 			errorMessage="
-1 error(s) found:
-Error: in file 'src/test/modelica/ConnectTests.mo':
-Semantic error at line 53, column 15:
+1 errors found:
+
+Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Cannot find class or component declaration for cc
 ")})));
    end ConnectTest2_Err;
@@ -1162,8 +1162,8 @@ equation
 			description="Check that self-connections are allowed with a warning",
 			errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-At line 1152, column 5:
+
+Warning at line 1157, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Ignored connection from connector to itself
 ")})));
 end ConnectTest25;
@@ -1457,8 +1457,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1168, column 13:
+
+Error at line 1576, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest1;
@@ -1476,11 +1476,11 @@ equation
 			description="",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1187, column 13:
+
+Error at line 1595, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Connecting to an instance of a non-connector type is not allowed
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1187, column 16:
+
+Error at line 1595, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest2;
@@ -1507,8 +1507,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1218, column 5:
+
+Error at line 1626, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest3;
@@ -1545,8 +1545,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1256, column 5:
+
+Error at line 1664, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest4;
@@ -1572,8 +1572,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1272, column 5:
+
+Error at line 1691, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest5;
@@ -1594,8 +1594,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1294, column 5:
+
+Error at line 1713, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Sizes do not match in connection
 ")})));
 end ConnectErrTest6;
@@ -1621,8 +1621,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1332, column 5:
+
+Error at line 1740, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest7;
@@ -1648,8 +1648,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1359, column 5:
+
+Error at line 1767, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest8;
@@ -1675,8 +1675,8 @@ equation
 			description="",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1386, column 5:
+
+Error at line 1794, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest9;
@@ -1700,8 +1700,8 @@ equation
             description="Connect clause in else branch of if with non-parameter test",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 1129, column 9:
+
+Error at line 1818, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Connect clauses are not allowed in if equations with non-parameter conditions, or in when equations
 ")})));
 end ConnectErrTest10;
@@ -1731,8 +1731,8 @@ equation
             description="Bad connection where one access contains dot",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-Semantic error at line 1721, column 5:
+
+Error at line 1850, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Types of connected components do not match
 ")})));
 end ConnectErrTest11;
@@ -2236,11 +2236,11 @@ equation
 			description="Using inStream() and actualStream() on normal var in connector",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 930, column 6:
+
+Error at line 2500, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of inStream() must be a stream variable
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 931, column 6:
+
+Error at line 2501, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest3;
@@ -2266,11 +2266,11 @@ equation
 			description="Using inStream() and actualStream() on flow var",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 960, column 6:
+
+Error at line 2530, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of inStream() must be a stream variable
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 961, column 6:
+
+Error at line 2531, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest4;
@@ -2290,11 +2290,11 @@ equation
 			description="Using inStream() and actualStream() on normal var not in connector",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 984, column 6:
+
+Error at line 2554, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of inStream() must be a stream variable
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Semantic error at line 985, column 6:
+
+Error at line 2555, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   Argument of actualStream() must be a stream variable
 ")})));
 end StreamTest5;
@@ -2414,11 +2414,11 @@ model Cardinality3
 			description="cardinality(): deprecation warning and limitation on where it can be used",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-Compliance error at line 1815, column 9:
+
+Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ConnectTests.mo':
-At line 1815, column 9:
+
+Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;
@@ -2485,8 +2485,8 @@ equation
 			description="cardinality(): non scalar",
 			errorMessage="
 1 errors found:
-Error: in file '...':
-Semantic error at line 2350, column 20:
+
+Error at line 2710, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
   The argument of cardinality() must be a scalar reference to a connector
 			
 ")})));

@@ -34,6 +34,7 @@ end LibraryTest2;
 
 model LibraryTest3
         extends EmptyLib.M;
+
     annotation(__JModelica(UnitTesting(tests={
         WarningTestCase(
             name="LibraryTest3",
@@ -42,12 +43,10 @@ model LibraryTest3
             errorMessage="
 1 errors and 1 warnings found:
 
-Error: in file '...':
-Semantic error at line 36, column 26:
+Error at line 36, column 26, in file 'Compiler/ModelicaCompiler/src/test/LibraryTests.mo':
   Cannot find class declaration for M
 
-Warning: in file '...':
-At line 0, column 0:
+Warning at line 0, column 0, in file 'Compiler/ModelicaCompiler/src/test/EmptyLib':
   Empty structured entity, package is omitted
 ")})));
 end LibraryTest3;

@@ -113,7 +113,12 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode : SourceBaseNode ::= <FileName:String> <Name:String> <Structured:boolean> <Version:String> /StoredDefinition/;
+LibNode : SourceBaseNode ::= <FileName:String>
+                             <Name:String> 
+                             <Structured:boolean> 
+                             <Version:String> 
+                             <Reason:LibNode.LoadReason> 
+                             /StoredDefinition/;
 
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
                                       [TypePrefixVariability]

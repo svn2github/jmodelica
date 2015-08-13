@@ -23,14 +23,14 @@ equation
 	der(x) = 1;
 	reinit(x, 1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr1",
-			description="reinit() outside when",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr1",
+            description="reinit() outside when",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 24, column 2:
+
+Error at line 24, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   The reinit() operator is only allowed in when equations
 ")})));
 end ReinitErr1;
@@ -44,14 +44,14 @@ equation
         reinit(x+1, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr2",
-			description="reinit() with non access as var",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr2",
+            description="reinit() with non access as var",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 44, column 9:
+
+Error at line 44, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   First argument to reinit() must be an access to a Real variable
 ")})));
 end ReinitErr2;
@@ -65,14 +65,14 @@ equation
         reinit(x, true);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr3",
-			description="reinit() Boolean expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr3",
+            description="reinit() Boolean expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 65, column 9:
+
+Error at line 65, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr3;
@@ -86,14 +86,14 @@ equation
         reinit(x, "1");
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr4",
-			description="reinit() String expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr4",
+            description="reinit() String expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 86, column 9:
+
+Error at line 86, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr4;
@@ -110,14 +110,14 @@ equation
         reinit(x, 2);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr5",
-			description="several reinit() of same var",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr5",
+            description="several reinit() of same var",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   The variable x is assigned in reinit() clauses in more than one when clause:
     reinit(x, 1);
     reinit(x, 2);
@@ -134,14 +134,14 @@ equation
         reinit(x, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr6",
-			description="reinit() with wrong size expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr6",
+            description="reinit() with wrong size expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 120, column 9:
+
+Error at line 134, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr6;
@@ -155,14 +155,14 @@ equation
         reinit(x, 1:2);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr7",
-			description="reinit() with wrong size expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr7",
+            description="reinit() with wrong size expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 141, column 9:
+
+Error at line 155, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr7;
@@ -176,14 +176,14 @@ equation
         reinit(x, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr8",
-			description="reinit() with Integer variable",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr8",
+            description="reinit() with Integer variable",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 162, column 9:
+
+Error at line 176, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   First argument to reinit() must be an access to a Real variable
 ")})));
 end ReinitErr8;
@@ -197,14 +197,14 @@ equation
         reinit(x, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr9",
-			description="reinit() with discrete Real variable",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr9",
+            description="reinit() with discrete Real variable",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 183, column 9:
+
+Error at line 197, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Built-in operator reinit() must have a continuous variable access as its first argument
 ")})));
 end ReinitErr9;
@@ -220,14 +220,14 @@ equation
         x = 2;
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr10",
-			description="reinit() with (implicitly) discrete Real variable",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr10",
+            description="reinit() with (implicitly) discrete Real variable",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 203, column 9:
+
+Error at line 217, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Built-in operator reinit() must have a continuous variable access as its first argument
 ")})));
 end ReinitErr10;
@@ -242,14 +242,14 @@ algorithm
         reinit(x, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr11",
-			description="reinit() in when statement",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr11",
+            description="reinit() in when statement",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 206, column 9:
+
+Error at line 242, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   The reinit() operator is only allowed in when equations
 ")})));
 end ReinitErr11;
@@ -266,14 +266,14 @@ equation
         reinit(x[2], 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr12",
-			description="several reinit() of same cell of array",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr12",
+            description="several reinit() of same cell of array",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   The variable x[2] is assigned in reinit() clauses in more than one when clause:
     reinit(x[2], 1);
     reinit(x[2], 1);
@@ -291,14 +291,14 @@ equation
         y = reinit(x, 1);
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr13",
-			description="using reinit() as RHS of equation",
-			errorMessage="
-2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 278, column 9:
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr13",
+            description="using reinit() as RHS of equation",
+            errorMessage="
+1 errors found:
+
+Error at line 291, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end ReinitErr13;
@@ -312,14 +312,14 @@ equation
         reinit(x, zeros(3));
     end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		ErrorTestCase(
-			name="ReinitErr14",
-			description="reinit() with wrong size expression",
-			errorMessage="
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ReinitErr14",
+            description="reinit() with wrong size expression",
+            errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/WhenTests.mo':
-Semantic error at line 299, column 9:
+
+Error at line 312, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
   Arguments to reinit() must be of compatible types
 ")})));
 end ReinitErr14;

@@ -84,8 +84,8 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
 			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 71, column 8:
+
+Error at line 78, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx2_Err;
@@ -169,8 +169,8 @@ model RedeclareTestOx4_Err "Redeclare deeper into instance hierarchy."
 			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 159, column 10:
+
+Error at line 163, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx4_Err;
@@ -215,8 +215,8 @@ end RedeclareTests.RedeclareTestOx5;
 ")})));
 end RedeclareTestOx5;
  
+
 model RedeclareTestOx6_Err 
-    "Redeclare deeper into instance hierarchy and redeclaration of a replacing component, Errouneous?"
   model A
     Real x=1;
   end A;
@@ -238,11 +238,21 @@ model RedeclareTestOx6_Err
  
    model E
      D d(redeclare replaceable C a);
-     Real q = d.a.z; // This should not be ok since the constraining class of component a is A.
+     Real q = d.a.z;
    end E;
  
-   E e(d(redeclare B a)); // This redeclaration should be ok since B is a subtype of A!
+   E e(d(redeclare B a));
  
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTestOx6_Err",
+            description="Redeclare deeper into instance hierarchy and redeclaration of a replacing component",
+            errorMessage="
+1 errors found:
+
+Error at line 241, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+  Cannot find class or component declaration for z
+")})));
 end RedeclareTestOx6_Err;
 
  
@@ -278,8 +288,8 @@ model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redecl
 			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 276, column 10:
+
+Error at line 270, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a'
 ")})));
 end RedeclareTestOx65_Err;
@@ -320,8 +330,8 @@ model RedeclareTestOx7_Err
 			description="Using var not available in final type without explicit constrainedby",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 283, column 19:
+
+Error at line 312, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find class or component declaration for z
 ")})));
 end RedeclareTestOx7_Err;
@@ -392,8 +402,8 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
 			description="Test basic redeclares. Error caused by failed subtype test in component redeclaration.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 399, column 8:
+
+Error at line 386, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B'
 ")})));
 end RedeclareTestOx9_Err;
@@ -428,8 +438,8 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 450, column 10:
+
+Error at line 418, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
@@ -513,11 +523,10 @@ model RedeclareTestOx11_Err "Constraining clause example."
 			errorMessage="
 2 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 537, column 38:
+Error at line 503, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 541, column 8:
+
+Error at line 507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare D d(redeclare A c)', the replacing class is not a subtype of the constraining class from the declaration 'replaceable D d constrainedby D (redeclare replaceable B c constrainedby A)'
 ")})));
 end RedeclareTestOx11_Err;
@@ -562,8 +571,8 @@ Semantic error at line 431, column 32:
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 601, column 69:
+
+Error at line 553, column 81, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx115_Err;
@@ -609,8 +618,8 @@ Semantic error at line 470, column 58:
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 651, column 32:
+
+Error at line 600, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx116_Err;
@@ -751,8 +760,8 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 752, column 10:
+
+Error at line 741, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_14_Err;
@@ -791,8 +800,8 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 790, column 10:
+
+Error at line 782, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_15_Err;
@@ -831,8 +840,8 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 837, column 10:
+
+Error at line 825, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B'
 ")})));
 end RedeclareTest_Constr_16_Err;
@@ -871,8 +880,7 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/RedeclareTests.mo':
-Semantic error at line 884, column 34:
+Error at line 884, column 34, in file 'src/test/modelica/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
@@ -912,11 +920,11 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
 			description="Check that the declaration is a subtype of the constraining clause",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 940, column 20:
+
+Error at line 903, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 940, column 38:
+
+Error at line 906, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_18_Err;
@@ -1552,10 +1560,9 @@ model RedeclareTest95_Err
 			description="Basic redeclares.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 1609, column 7:
-  Cannot find component declaration for w
 
+Error at line 1544, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+  Cannot find component declaration for w
 ")})));
 end RedeclareTest95_Err;
 
@@ -1596,10 +1603,9 @@ model RedeclareTest97_Err
 			description="Basic redeclares.",
 			errorMessage="
 1 errors found:
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 1659, column 7:
-  Cannot find component declaration for w
 
+Error at line 1587, column 62, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+  Cannot find component declaration for w
 ")})));
 end RedeclareTest97_Err;
 
@@ -2933,8 +2939,8 @@ equation
             description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 2901, column 10:
+
+Error at line 2928, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot use component y, because it is not present in constraining type of declaration 'replaceable B a constrainedby A'
 ")})));
 end RedeclareTest31;
@@ -4957,8 +4963,8 @@ model ShortClassDeclEqu1
             description="Make sure equations in instances of short class decls are checked",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 4701, column 13:
+
+Error at line 5660, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find class or component declaration for y
 ")})));
 end ShortClassDeclEqu1;
@@ -4971,14 +4977,15 @@ equation
 end ShortClassDeclEqu2Extra;
 
 model ShortClassDeclEqu2 = ShortClassDeclEqu2Extra
+
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
 			name="ShortClassDeclEqu2",
 			description="Make sure equations in short class decls being instantiated are checked",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/RedeclareTests.mo':
-Semantic error at line 4724, column 9:
+
+Error at line 5683, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find class or component declaration for y
 ")})));
 
@@ -5387,11 +5394,11 @@ model RedeclarePrefix2
             description="Check that inner/outer can be changed in a redeclare",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5253, column 11:
+
+Error at line 6092, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5258, column 11:
+
+Error at line 6097, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
 ")})));
 end RedeclarePrefix2;
@@ -5642,11 +5649,11 @@ model RedeclarePrefix14
             description="Check that inner/outer can be changed in a redeclare",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5402, column 11:
+
+Error at line 6335, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5407, column 11:
+
+Error at line 6340, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
 ")})));
 end RedeclarePrefix14;
@@ -5675,11 +5682,11 @@ model RedeclarePrefix15
             description="Check that inner/outer can be changed in the middle level of a multi-level redeclare",
             errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5437, column 11:
+
+Error at line 6370, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-Semantic error at line 5442, column 11:
+
+Error at line 6375, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   Cannot find inner declaration for outer x
 ")})));
 end RedeclarePrefix15;

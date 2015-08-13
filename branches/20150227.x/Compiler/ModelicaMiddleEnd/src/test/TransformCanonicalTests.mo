@@ -88,18 +88,18 @@ end TransformCanonicalTests.TransformCanonicalTest2;
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
-			name="TransformCanonical3_Err",
+            name="TransformCanonicalTest3_Err",
 			description="Test parameter sorting.",
 			errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 69, column 24:
+
+Error at line 84, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p4 = p3 * p3
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 70, column 24:
+
+Error at line 85, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p3 = p2 + p1
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 71, column 24:
+
+Error at line 86, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p4 * p1
 ")})));
   end TransformCanonicalTest3_Err;
@@ -114,18 +114,18 @@ Semantic error at line 71, column 24:
 
 	annotation(__JModelica(UnitTesting(tests={
 		ErrorTestCase(
-			name="TransformCanonical4_Err",
+            name="TransformCanonicalTest4_Err",
 			description="Test parameter sorting.",
 			errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 95, column 24:
+
+Error at line 110, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p4 = p3 * p3
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 96, column 24:
+
+Error at line 111, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p3 = p2 + p1
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 97, column 24:
+
+Error at line 112, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p1 * p2
 ")})));
   end TransformCanonicalTest4_Err;
@@ -781,10 +781,8 @@ Alias sets:
 			errorMessage="
 1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
-
 ")})));
   end AliasTest16_Err;
 
@@ -802,10 +800,10 @@ Semantic error at line 0, column 0:
 			name="AliasTest17_Err",
 			description="Test alias error.",
 			errorMessage=" 
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
+1 errors found:
 
+Error in flattened model:
+  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
 ")})));
   end AliasTest17_Err;
 
@@ -823,10 +821,10 @@ Semantic error at line 0, column 0:
 			name="AliasTest18_Err",
 			description="Test alias error.",
 			errorMessage=" 
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
+1 errors found:
 
+Error in flattened model:
+  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
 ")})));
   end AliasTest18_Err;
 
@@ -844,10 +842,10 @@ Semantic error at line 0, column 0:
 			name="AliasTest19_Err",
 			description="Test alias error.",
 			errorMessage=" 
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
-  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
+1 errors found:
 
+Error in flattened model:
+  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
 ")})));
   end AliasTest19_Err;
 
@@ -1351,14 +1349,14 @@ equation
 			description="Test errors on impossible min/max combinations",
 			errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Variable a1 is part of alias set that results in min/max combination with no possible values, min = TransformCanonicalTests.AliasPropMinMax2.A.d, max = TransformCanonicalTests.AliasPropMinMax2.A.c
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Variable x2 is part of alias set that results in min/max combination with no possible values, min = 2.6, max = 2.5
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Variable y1 is part of alias set that results in min/max combination with no possible values, min = 3, max = 2
 ")})));
 end AliasPropMinMax2;
@@ -1573,10 +1571,9 @@ equation
             description="Test warnings for state select.",
             automatic_tearing=false,
             errorMessage="
-3 warnings found:
+1 errors found:
 
-Warning: in file '...':
-At line 0, column 0:
+Warning in flattened model:
   a_s2 has stateSelect=always, but could not be selected as state
 ")})));
 end AliasStateSelect2;
@@ -1658,8 +1655,9 @@ model ParameterBindingExpTest3_Warn
 			name="ParameterBindingExpTest3_Warn",
 			description="Test errors in binding expressions.",
 			errorMessage="
-Warning: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/ConstantEvalTests.mo':
-At line 110, column 18:
+1 errors found:
+
+Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
@@ -1677,8 +1675,9 @@ equation
 			name="AttributeBindingExpTest1_Err",
 			description="Test errors in binding expressions.",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1057, column 16:
+1 errors found:
+
+Error at line 1701, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 ")})));
 end AttributeBindingExpTest1_Err;
@@ -1696,8 +1695,9 @@ equation
 			name="AttributeBindingExpTest2_Err",
 			description="Test errors in binding expressions..",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1079, column 16:
+1 errors found:
+
+Error at line 1721, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2
 ")})));
 end AttributeBindingExpTest2_Err;
@@ -1714,11 +1714,12 @@ equation
 			name="AttributeBindingExpTest3_Err",
 			description="Test errors in binding expressions..",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1099, column 16:
+2 errors found:
+
+Error at line 1740, column 16, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1 + 2 + p
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1099, column 21:
+
+Error at line 1740, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Cannot find class or component declaration for p
 ")})));
 end AttributeBindingExpTest3_Err;
@@ -1737,14 +1738,15 @@ equation
 			name="AttributeBindingExpTest4_Err",
 			description="Test errors in binding expressions..",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1122, column 23:
+3 errors found:
+
+Error at line 1761, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p1 = p2
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1127, column 23:
+
+Error at line 1762, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Circularity in binding expression of parameter: p2 = p1
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1123, column 25:
+
+Error at line 1762, column 25, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Could not evaluate binding expression for attribute 'start' due to circularity: p1
 ")})));
 end AttributeBindingExpTest4_Err;
@@ -1764,11 +1766,12 @@ model AttributeBindingExpTest5_Err
 			name="AttributeBindingExpTest5_Err",
 			description="Test errors in binding expressions..",
 			errorMessage="
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1147, column 18:
+2 errors found:
+
+Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
-Error: in file '/Users/jakesson/projects/JModelica/Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 1151, column 15:
+
+Error at line 1794, column 15, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p2
 ")})));
 end AttributeBindingExpTest5_Err;
@@ -2577,11 +2580,11 @@ model UnbalancedTest1_Err
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
      z
+
 ")})));
 end UnbalancedTest1_Err;
 
@@ -2600,8 +2603,7 @@ equation
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
@@ -2623,8 +2625,7 @@ equation
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
     4.0 = 5
 ")})));
@@ -2641,8 +2642,7 @@ equation
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
      x
 ")})));
@@ -2662,8 +2662,7 @@ equation
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following equation(s) could not be matched to any variable:
     x = 0
 ")})));
@@ -2681,8 +2680,7 @@ initial equation
 			name="UnbalancedInitTest1",
 			description="Test error messages for unbalanced initial systems.",
 			errorMessage="
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The initialization system is structurally singular. The following varible(s) could not be matched to any equation:
      y
 
@@ -2767,10 +2765,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
-			
 ")})));
 end MatchingTest3;
 
@@ -4089,8 +4085,7 @@ equation
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Compliance error at line 0, column 0:
+Compliance error in flattened model:
   If equations that has non-parameter tests and contains function calls using multiple outputs must assign the same variables in all branches
 ")})));
   end IfEqu18;
@@ -4778,8 +4773,8 @@ equation
             state_initial_equations=true,
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 4684, column 21:
+
+Error at line 4839, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Could not evaluate binding expression for attribute 'start': 'f()'
 ")})));
 end StateInitialPars7;
@@ -5974,8 +5969,8 @@ model TestExternalObj2
 			description="Extending from external object",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9268, column 2:
+
+Error at line 6038, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Classed derived from ExternalObject can neither be used in an extends-clause nor in a short class defenition
 ")})));
 end TestExternalObj2;
@@ -5999,8 +5994,8 @@ model TestExternalObj3
 			description="Non-complete external object",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9293, column 24:
+
+Error at line 6063, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Cannot find function declaration for NoConstructor.constructor()
 ")})));
 end TestExternalObj3;
@@ -6024,8 +6019,8 @@ model TestExternalObj4
 			description="Non-complete external object",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9316, column 21:
+
+Error at line 6086, column 21, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Cannot find function declaration for NoDestructor.destructor()
 ")})));
 end TestExternalObj4;
@@ -6053,11 +6048,11 @@ model TestExternalObj5
 			description="Non-complete external object",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9337, column 3:
+
+Error at line 6107, column 3, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   An external object constructor must have exactly one output of the same type as the constructor
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9347, column 25:
+
+Error at line 6117, column 25, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   The class BadConstructor.constructor is not a function
 ")})));
 end TestExternalObj5;
@@ -6085,11 +6080,11 @@ model TestExternalObj6
 			description="Non-complete external object",
 			errorMessage="
 2 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9374, column 9:
+
+Error at line 6144, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9377, column 23:
+
+Error at line 6147, column 23, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   The class BadDestructor.destructor is not a function
 ")})));
 end TestExternalObj6;
@@ -6125,8 +6120,8 @@ model TestExternalObj7
 			description="External object with extra elements",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9392, column 5:
+
+Error at line 6168, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   External object classes may not contain any elements except the constructor and destructor
 ")})));
 end TestExternalObj7;
@@ -6157,8 +6152,8 @@ model TestExternalObj8
 			description="External object with extra elements",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9418, column 5:
+
+Error at line 6205, column 5, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   External object classes may not contain any elements except the constructor and destructor
 ")})));
 end TestExternalObj8;
@@ -6188,12 +6183,12 @@ model TestExternalObj9
 			name="TestExternalObj9",
 			description="Extra inputs/outputs to constructor/destructor",
 			errorMessage="
-3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9464, column 9:
+2 errors found:
+
+Error at line 6240, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   An external object constructor must have exactly one output of the same type as the constructor
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9470, column 9:
+
+Error at line 6246, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   An external object destructor must have exactly one input of the same type as the constructor, and no outputs
 ")})));
 end TestExternalObj9;
@@ -6211,14 +6206,14 @@ equation
 			description="",
 			errorMessage="
 3 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9477, column 26:
+
+Error at line 6272, column 26, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9479, column 2:
+
+Error at line 6274, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 9480, column 2:
+
+Error at line 6275, column 2, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Constructors and destructors for ExternalObjects can not be used directly
 ")})));
 end TestExternalObj10;
@@ -6497,8 +6492,8 @@ model GetInstanceName2
             description="Check that constant evaluation of getInstanceName() works",
             errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 6491, column 18:
+
+Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   The binding expression of the variable dummy does not match the declared type of the variable
 ")})));
 end GetInstanceName2;
@@ -6601,8 +6596,8 @@ equation
 			description="Test assertation evaluation: failed assert",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+
+Error in flattened model:
   Assertion failed: Test assertion
 ")})));
 end AssertEval2;
@@ -6739,10 +6734,8 @@ model IllegalWhen1_Err
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
-			
 ")})));
 end IllegalWhen1_Err;
 
@@ -6769,10 +6762,8 @@ model IllegalWhen2_Err
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
-			
 ")})));
 end IllegalWhen2_Err;
   
@@ -6796,8 +6787,7 @@ model IllegalWhen3_Err
 			errorMessage="
 1 errors found:
 
-Error: in file '...':
-Semantic error at line 0, column 0:
+Error in flattened model:
   The system is structurally singular. The following varible(s) could not be matched to any equation:
      z
 
@@ -6820,8 +6810,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Unable to solve variable 'i' from equation:
 42 * (i + 1) = temp_1
 ")})));
@@ -6840,8 +6829,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TransformCanonicalTests.mo':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Non-real equations contains an algebraic loop:
 i = j + temp_1
 i * j = 0

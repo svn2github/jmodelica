@@ -233,11 +233,11 @@ equation
 			automatic_tearing=true,
 			errorMessage="
 2 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-At line 0, column 0:
+
+Warning in flattened model:
   Iteration variable \"i2\" is missing start value!
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-At line 0, column 0:
+
+Warning in flattened model:
   Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest1;
@@ -269,8 +269,8 @@ equation
 			automatic_tearing=true,
 			errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/TearingTests.mo':
-At line 0, column 0:
+
+Warning in flattened model:
   Iteration variable \"i3\" is missing start value!
 ")})));
 end WarningTest2;
@@ -292,8 +292,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/TearingTests.mo':
-Semantic error at line 0, column 0:
+Error in flattened model:
   Non-real equation used as residual:
 i * j = 0
 ")})));

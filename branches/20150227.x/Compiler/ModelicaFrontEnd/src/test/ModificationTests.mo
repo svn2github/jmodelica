@@ -369,11 +369,10 @@ model ModTest13_Err
 			name="ModTest13_Err",
 			description="Test of lookup errors in modifications",
 			errorMessage="
-1 error(s) found:
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 351, column 7:
-  Cannot find component declaration for y
+1 errors found:
 
+Error at line 364, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+  Cannot find component declaration for y
 ")})));
 end ModTest13_Err;
  
@@ -392,10 +391,8 @@ model ModTest14_Err
 			errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 351, column 7:
+Error at line 384, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Cannot find component declaration for y
-
 ")})));
 end ModTest14_Err;
 
@@ -423,10 +420,8 @@ model ModTest15_Err
 			errorMessage="
 1 errors found:
 
-Error: in file 'src/test/modelica/ModificationTests.mo':
-Semantic error at line 404, column 7:
+Error at line 410, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Cannot find component declaration for z
-
 ")})));
 end ModTest15_Err;
 
@@ -554,8 +549,8 @@ model ArrayModifications2
 			description="Modifications to arrays: [](start=[])",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 712, column 9:
+
+Error at line 544, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The 'each' keyword cannot be applied to attributes of scalar components
 ")})));
 end ArrayModifications2;
@@ -570,8 +565,8 @@ model ArrayModifications3
 			description="Modifications to arrays: [3](start=[4])",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 728, column 11:
+
+Error at line 560, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [3] and size of start expression is [4]
 ")})));
 end ArrayModifications3;
@@ -586,8 +581,8 @@ model ArrayModifications4
 			description="Modifications to arrays: [3](each start=[2])",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 744, column 12:
+
+Error at line 576, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The attribute start is declared 'each' and the binding expression is not scalar
 ")})));
 end ArrayModifications4;
@@ -637,8 +632,8 @@ model ArrayModifications6
 			description="Modifications to arrays: [3] = [4]",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 792, column 8:
+
+Error at line 627, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end ArrayModifications6;
@@ -657,8 +652,8 @@ model ArrayModifications7
 			description="Modifications to arrays: each [] = []",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 813, column 8:
+
+Error at line 647, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The 'each' keyword cannot be applied to members of non-array components
 ")})));
 end ArrayModifications7;
@@ -949,8 +944,8 @@ model ArrayModifications16
 			description="Modifications to arrays: arrays of composites: bad size for 'each'",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1176, column 8:
+
+Error at line 939, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is scalar
 ")})));
 end ArrayModifications16;
@@ -973,8 +968,8 @@ model ArrayModifications17
 			description="Modifications to arrays: arrays of composites: bad size for 'each'",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1200, column 8:
+
+Error at line 963, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of each x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications17;
@@ -997,8 +992,8 @@ model ArrayModifications18
 			description="Modifications to arrays: arrays of composites: non-scalar attribute",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1231, column 13:
+
+Error at line 987, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The attribute start is declared 'each' and the binding expression is not scalar
 ")})));
 end ArrayModifications18;
@@ -1061,8 +1056,8 @@ model ArrayModifications20
 			description="Modifications to arrays: arrays of composites: wrong size of binding exp",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1248, column 8:
+
+Error at line 1051, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of z, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications20;
@@ -1085,8 +1080,8 @@ model ArrayModifications21
 			description="Modifications to arrays: arrays of composites: wrong size of attribute",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1279, column 12:
+
+Error at line 1075, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications21;
@@ -1110,8 +1105,8 @@ model ArrayModifications22
 			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through access)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1296, column 8:
+
+Error at line 1099, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of zc, size of declaration is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications22;
@@ -1135,8 +1130,8 @@ model ArrayModifications23
 			description="Modifications to arrays: arrays of composites: wrong size of attribute (through access)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1328, column 15:
+
+Error at line 1124, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications23;
@@ -1155,8 +1150,8 @@ model ArrayModifications24
 			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1346, column 8:
+
+Error at line 1145, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications24;
@@ -1177,8 +1172,8 @@ model ArrayModifications25
 			description="Modifications to arrays: arrays of composites: wrong size of binding exp (through expression with accesses)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1366, column 8:
+
+Error at line 1165, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of yb, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications25;
@@ -1291,8 +1286,8 @@ model ArrayModifications29
 			description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1510, column 11:
+
+Error at line 1281, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications29;
@@ -1313,8 +1308,8 @@ model ArrayModifications30
 			description="Modifications to arrays: arrays of composites: wrong size of attribute (through expression with accesses)",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1530, column 11:
+
+Error at line 1301, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications30;
@@ -1457,8 +1452,8 @@ model ArrayModifications35
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1687, column 8:
+
+Error at line 1440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications35;
@@ -1481,8 +1476,8 @@ model ArrayModifications36
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1711, column 8:
+
+Error at line 1464, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [2, 2]
 ")})));
 end ArrayModifications36;
@@ -1535,8 +1530,8 @@ model ArrayModifications38
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1759, column 8:
+
+Error at line 1522, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications38;
@@ -1559,8 +1554,8 @@ model ArrayModifications39
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1783, column 8:
+
+Error at line 1546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, 2, 2]
 ")})));
 end ArrayModifications39;
@@ -1583,8 +1578,8 @@ model ArrayModifications40
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1807, column 12:
+
+Error at line 1566, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [3]
 ")})));
 end ArrayModifications40;
@@ -1607,8 +1602,8 @@ model ArrayModifications41
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1831, column 12:
+
+Error at line 1590, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2] and size of start expression is [2, 2]
 ")})));
 end ArrayModifications41;
@@ -1631,8 +1626,7 @@ model ArrayModifications42
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1859, column 11:
+Error at line 1859, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2]
 ")})));
 end ArrayModifications42;
@@ -1655,8 +1649,8 @@ model ArrayModifications43
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1883, column 11:
+
+Error at line 1642, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications43;
@@ -1679,8 +1673,8 @@ model ArrayModifications44
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle, wrong size",
 			errorMessage="
 1 errors found:
-Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ModificationTests.mo':
-Semantic error at line 1907, column 11:
+
+Error at line 1666, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   Array size mismatch for the attribute start, size of declaration is [2, 2] and size of start expression is [2, 2, 2]
 ")})));
 end ArrayModifications44;
@@ -1792,8 +1786,8 @@ model ArrayModifications49
             description="Test each on attribute of sclar var in array of components",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1786, column 28:
+
+Warning at line 1779, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications49;
@@ -1837,8 +1831,7 @@ model ArrayModifications51
             description="Test each on other level of modification",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1819, column 21:
+Warning at line 1819, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications51;
@@ -1862,8 +1855,8 @@ model ArrayModifications52
             description="Test each on other level of modification",
             errorMessage="
 1 errors found:
-Warning: in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
-At line 1856, column 30:
+
+Warning at line 1855, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications52;
