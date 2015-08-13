@@ -49,14 +49,23 @@ model InnerOuter2
 	Real z = a.f(time);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        FlatteningTestCase(
             name="InnerOuter2",
             description="Check that no extra errors are generated for function called through outer withour inner",
-            errorMessage="
-1 errors found:
+            flatModel="
+fclass CheckTests.InnerOuter2
+ Real z = CheckTests.InnerOuter2.a.f(time);
 
-Error at line 46, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  Cannot find inner declaration for outer a
+public
+ function CheckTests.InnerOuter2.a.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end CheckTests.InnerOuter2.a.f;
+
+end CheckTests.InnerOuter2;
 ")})));
 end InnerOuter2;
 

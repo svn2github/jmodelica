@@ -21,7 +21,7 @@ import java.util.Set;
 
 import org.jmodelica.util.exceptions.BLTException;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.ChainedIterable;
+import org.jmodelica.util.collections.ChainedIterable;
 
 aspect BLT{
 

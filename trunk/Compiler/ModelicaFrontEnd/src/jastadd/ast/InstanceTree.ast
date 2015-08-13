@@ -36,7 +36,8 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInType:InstClassDecl*/   
                                /InstBuiltInFunction:InstClassDecl*/
                                /InstLibClassDecl:InstClassDecl*/
-                               [Dummy:InstNode];          // Dummy node to prevent InstNode from being classified as root
+                               [Dummy:InstNode]                // Dummy node to prevent InstNode from being classified as root
+                               [Dummy2:InstGeneratedInner];    // Dummy node to prevent InstGeneratedInner from being classified as root
 
 abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstraining] InstRestriction;
@@ -132,6 +133,10 @@ InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNo
 InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;
 InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
                                                                <InstComponentRedeclare:InstComponentRedeclare>;
+
+InstGeneratedInner : BaseNode ::= InstComponentDecl 
+                                  <CopiedOuter:InstComponentDecl> 
+                                  <MatchingNonInner:InstComponentDecl>;
 
 InstExtends : InstNode ::=  ClassName:InstAccess <ExtendsClause:ExtendsClause>
                             /[ClassAnnotation:InstClassModification]/
