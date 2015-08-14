@@ -51,7 +51,8 @@ aspect InnerOuterComponents {
     eq InstClassDecl.lookupInnerInstComponentNoLocal(InstComponentDecl outer, InstComponentDecl nonInner) {
         String name = outer.name();
         InstGeneratedInner res = null;
-        for (InstGeneratedInner node : getInstGeneratedInners()) {
+        List<InstGeneratedInner> inners = getInstGeneratedInners();
+        for (InstGeneratedInner node : inners) {
             if (node.matches(name)) {
                 res = node;
             }
@@ -61,7 +62,8 @@ aspect InnerOuterComponents {
             res.addOuter(outer);
         } else {
             res = new InstGeneratedInner(createInstComponentDecl(outer.getComponentDecl()), outer, nonInner);
-            getInstGeneratedInners().add(res);
+            inners.add(res);
+            inners.getChild(inners.getNumChild() - 1);  // Make sure res is final
         }
         return res.getInstComponentDecl();
     }

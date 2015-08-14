@@ -622,6 +622,7 @@ aspect InstanceErrorCheck {
                 getCopiedOuter().error("Can't generate missing inner declaration for %s, due to the outer declarations being of different types: %s", name(), sb);
             }
         }
+        getInstComponentDecl().collectErrors(checkType);
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {

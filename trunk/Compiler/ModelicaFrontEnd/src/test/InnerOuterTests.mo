@@ -860,6 +860,7 @@ end InnerOuterTests.NoInner11;
 ")})));
 end NoInner11;
 
+
 model NoInner12
     model A
         Real x = 1;
@@ -882,6 +883,47 @@ fclass InnerOuterTests.NoInner12
 end InnerOuterTests.NoInner12;
 ")})));
 end NoInner12;
+
+
+model NoInner13
+    connector C
+        Real x;
+        flow Real y;
+    end C;
+    
+    model A
+        C c1(x = time), c2(x = 2 * time);
+        B b;
+    equation
+        connect(c2, b.c);
+    end A;
+    
+    model B
+        C c;
+    end B;
+    
+    outer A a;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NoInner13",
+            description="Check that connectors in automatically generated inner components are handled correctly",
+            flatModel="
+fclass InnerOuterTests.NoInner13
+ Real a.c1.x = time;
+ Real a.c1.y;
+ Real a.c2.x = 2 * time;
+ Real a.c2.y;
+ Real a.b.c.x;
+ Real a.b.c.y;
+equation
+ a.b.c.x = a.c2.x;
+ a.b.c.y - a.c2.y = 0;
+ a.c1.y = 0;
+ a.c2.y = 0;
+end InnerOuterTests.NoInner13;
+")})));
+end NoInner13;
 
 
 end InnerOuterTests;
