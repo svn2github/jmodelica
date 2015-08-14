@@ -321,14 +321,14 @@ model InnerOuterTest9
     Real x = T * 23;
 
     annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
+        ErrorTestCase(
             name="InnerOuterTest9",
-            description="Missing inner declaration for parameter",
+            description="Missing inner declaration",
             errorMessage="
 1 errors found:
 
-Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  The parameter T does not have a binding expression
+Error at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer T
 ")})));
 end InnerOuterTest9;
 
@@ -338,16 +338,38 @@ model InnerOuterTest10
     constant Real x = T * 23;
 
     annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
+        ErrorTestCase(
             name="InnerOuterTest10",
-            description="Missing inner declaration for constant",
+            description="Missing inner declaration",
             errorMessage="
 1 errors found:
 
-Warning at line 336, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  The constant T does not have a binding expression
+Error at line 336, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer T
 ")})));
 end InnerOuterTest10;
+
+
+model InnerOuterTest11
+    model B
+        Real x;
+    end B;
+    
+    outer B b;
+    
+    Real y = b.x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest11",
+            description="Missing inner declaration",
+            errorMessage="
+1 errors found:
+
+Error at line 356, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer b
+")})));
+end InnerOuterTest11;
 
 
 model InnerOuterTest12
@@ -377,6 +399,22 @@ fclass InnerOuterTests.InnerOuterTest12
 end InnerOuterTests.InnerOuterTest12;
 ")})));
 end InnerOuterTest12;
+
+
+model InnerOuterTest13_Err
+    outer Real x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterTest13_Err",
+            description="Check that error is generated for outer without inner",
+            errorMessage="
+1 errors found:
+
+Error at line 404, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer x
+")})));
+end InnerOuterTest13_Err;
 
 
 model InnerOuterTest15
@@ -535,50 +573,44 @@ end InnerOuterTest19;
 
 model NoInner1
     model A
-        outer Real r;
-    equation
-        r = time;
+        outer Real r = time;
     end A;
 
     A a;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        ErrorTestCase(
             name="NoInner1",
-            description="Generating missing inner for outer in component",
-            flatModel="
-fclass InnerOuterTests.NoInner1
- Real r;
-equation
- r = time;
-end InnerOuterTests.NoInner1;
+            description="Outer without inner",
+            errorMessage="
+1 errors found:
+
+Error at line 540, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
 ")})));
 end NoInner1;
 
 
 model NoInner2
     model A
-        outer Real r;
-    equation
-        r = time;
+        outer Real r = time;
     end A;
 
     model B
         extends A;
     end B;
-    
-    B b;
+	
+	B b;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        ErrorTestCase(
             name="NoInner2",
-            description="Generating missing inner for outer in superclass of component",
-            flatModel="
-fclass InnerOuterTests.NoInner2
- Real r;
-equation
- r = time;
-end InnerOuterTests.NoInner2;
+            description="Outer without inner in extends",
+            errorMessage="
+1 errors found:
+
+Error at line 560, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
 ")})));
 end NoInner2;
 
@@ -586,302 +618,24 @@ end NoInner2;
 model NoInner3
     model A
         inner outer Real r = time;
-    equation
-        r = time;
     end A;
 
     model B
         extends A;
     end B;
-    
-    B b;
+	
+	B b;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        ErrorTestCase(
             name="NoInner3",
-            description="Generating missing inner for inner outer in superclass of component",
-            flatModel="
-fclass InnerOuterTests.NoInner3
- Real b.r = time;
- Real r;
-equation
- r = time;
-end InnerOuterTests.NoInner3;
+            description="Inner outer without inner in extends",
+            errorMessage="
+1 errors found:
+
+Error at line 650, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+  Cannot find inner declaration for outer r
 ")})));
 end NoInner3;
-
-
-model NoInner4
-    model A
-        Real x = time;
-        Real y;
-    end A;
-    
-    model B
-        outer A a;
-        Real z = a.y + 1;
-    end B;
-    
-    model C
-        B b;
-    equation
-        b.a.y = 2* time;
-    end C;
-    
-    B b;
-    C c;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NoInner4",
-            description="Generating missing inner for multiple composite outer of same type",
-            flatModel="
-fclass InnerOuterTests.NoInner4
- Real b.z = a.y + 1;
- Real c.b.z = a.y + 1;
- Real a.x = time;
- Real a.y;
-equation
- a.y = 2 * time;
-end InnerOuterTests.NoInner4;
-")})));
-end NoInner4;
-
-
-model NoInner5
-    outer Real x;
-equation
-    x = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NoInner5",
-            description="Generating missing inner for outer on top level",
-            flatModel="
-fclass InnerOuterTests.NoInner5
- Real x;
-equation
- x = time;
-end InnerOuterTests.NoInner5;
-")})));
-end NoInner5;
-
-
-model NoInner6
-    inner outer Real x;
-equation
-    x = time;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoInner6",
-            description="inner outer component on top level",
-            errorMessage="
-1 errors found:
-
-Error at line 670, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  Can not generate missing inner declaration for x, due to presence of component with same name on top level
-")})));
-end NoInner6;
-
-
-model NoInner7
-    model A
-        outer Real r;
-    equation
-        r = time;
-    end A;
-
-    A a;
-    Real r;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoInner7",
-            description="Missing inner with component on top level with same name as outer decl",
-            errorMessage="
-1 errors found:
-
-Error at line 689, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  Can not generate missing inner declaration for r, due to presence of component with same name on top level
-")})));
-end NoInner7;
-
-
-model NoInner8
-    partial model A
-        Real x;
-    end A;
-    
-    model B
-        outer A a;
-    end B;
-    
-    B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoInner8",
-            description="Missing inner for outer of partial type",
-            errorMessage="
-1 errors found:
-
-Error at line 716, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  Can not generate missing inner declaration for outer component a of partial type InnerOuterTests.NoInner8.A
-")})));
-end NoInner8;
-
-
-model NoInner9
-    model A
-        Real x = time;
-    end A;
-    
-    model B
-        Real x = time;
-    end B;
-    
-    model C
-        outer A a;
-    end C;
-    
-    model D
-        outer B a;
-    end D;
-    
-    C c;
-    D d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoInner9",
-            description="Missing inner for multiple outer with different types",
-            errorMessage="
-1 errors found:
-
-Error at line 744, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  Can't generate missing inner declaration for a, due to the outer declarations being of different types: 
-    InnerOuterTests.NoInner9.A c.a
-    InnerOuterTests.NoInner9.B d.a
-")})));
-end NoInner9;
-
-
-model NoInner10
-    model A
-        Real x = time;
-    end A;
-    
-    model B
-        Real x = time;
-    end B;
-    
-    model C
-        outer A a;
-    end C;
-    
-    model D
-        outer B a;
-    end D;
-    
-    model E
-        outer Real a;
-    end E;
-    
-    model F
-        C c;
-        D d;
-    end F;
-    
-    C c1, c2;
-    D d;
-    E e;
-    F f;
-    outer A a;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="NoInner10",
-            description="Missing inner for multiple outer with different types",
-            errorMessage="
-1 errors found:
-
-Error at line 779, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
-  Can't generate missing inner declaration for a, due to the outer declarations being of different types: 
-    InnerOuterTests.NoInner10.A a
-    InnerOuterTests.NoInner10.A c1.a
-    InnerOuterTests.NoInner10.A c2.a
-    InnerOuterTests.NoInner10.A f.c.a
-    InnerOuterTests.NoInner10.B d.a
-    InnerOuterTests.NoInner10.B f.d.a
-    Real e.a
-")})));
-end NoInner10;
-
-
-model NoInner11
-    model A
-        Real x = time;
-    end A;
-    
-    model B
-        Real y = z;
-        outer Real z;
-    end B;
-    
-    model C
-        outer A a;
-        outer Real z;
-    equation
-        z = a.x / 2;
-    end C;
-    
-    model D
-        outer A a;
-        outer B b;
-    end D;
-    
-    C c;
-    D d;
-    outer B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NoInner11",
-            description="Generating multiple missing inner, different types and names, multiple of each",
-            flatModel="
-fclass InnerOuterTests.NoInner11
- Real a.x = time;
- Real z;
- Real b.y = z;
-equation
- z = a.x / 2;
-end InnerOuterTests.NoInner11;
-")})));
-end NoInner11;
-
-model NoInner12
-    model A
-        Real x = 1;
-    end A;
-    
-    model B
-        inner outer A a(x(start = 2) = 3);
-    end B;
-    
-    B b;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="NoInner12",
-            description="Generating missing inner for inner outer with modifiers",
-            flatModel="
-fclass InnerOuterTests.NoInner12
- Real b.a.x(start = 2) = 3;
- Real a.x = 1;
-end InnerOuterTests.NoInner12;
-")})));
-end NoInner12;
-
 
 end InnerOuterTests;
