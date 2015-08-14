@@ -1,4 +1,4 @@
-package org.jmodelica.util.collections;
+package org.jmodelica.util;
 
 import java.util.Iterator;
 

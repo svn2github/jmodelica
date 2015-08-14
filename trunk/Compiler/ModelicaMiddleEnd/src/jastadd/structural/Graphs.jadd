@@ -28,10 +28,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
 import java.util.EnumSet;
-
-import org.jmodelica.util.collections.ListMap;
-import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.collections.FilteredIterator;
+import org.jmodelica.util.FilteredIterator;
 
 aspect Graphs {
 
@@ -41,7 +38,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     
     protected Map<String, V> variableMap = new LinkedHashMap<String, V>();
     protected Map<String, E> equationMap = new LinkedHashMap<String, E>();
-    protected ListMap<FAbstractEquation, E> equationIndexMap = new LinkedHashListMap<FAbstractEquation, E>();
+    protected Map<FAbstractEquation, java.util.List<E>> equationIndexMap = new LinkedHashMap<FAbstractEquation, java.util.List<E>>();
     private boolean initialSystem = false;
     private Enumerator enumerator = new Enumerator(1);
 
@@ -115,7 +112,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
     
     public java.util.List<E> getEquations(FAbstractEquation eqn) {
-        return equationIndexMap.getList(eqn);
+        java.util.List<E> list = equationIndexMap.get(eqn);
+        return (list == null) ? Collections.<E>emptyList() : list;
     }
 
     public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability) {
@@ -1079,11 +1077,24 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     public void insertIntoEquationIndexMap(FAbstractEquation eqn, E e) {
-        equationIndexMap.add(eqn, e);
+        java.util.List<E> l = equationIndexMap.get(eqn);
+        if (l==null) {
+            l = new ArrayList<E>();
+            equationIndexMap.put(eqn, l);
+        }
+        l.add(e);
     }
 
     public void removeFromEquationIndexMap(FAbstractEquation eqn, E e) {
-        equationIndexMap.remove(eqn, e);
+        java.util.List<E> l = equationIndexMap.get(eqn);
+        if (l!=null) {
+            for (E ee : l) {
+                if (e==ee) {
+                    l.remove(e);
+                    return;
+                }
+            }
+        }
     }
 
     public String printMatching() {

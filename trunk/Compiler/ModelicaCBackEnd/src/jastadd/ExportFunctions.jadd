@@ -14,11 +14,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Comparator;
-
-import org.jmodelica.util.collections.ListMap;
-import org.jmodelica.util.collections.LinkedHashListMap;
 
 aspect ExportFunctions {
 	
@@ -190,24 +189,28 @@ aspect ExportFunctions {
 		for (int i = 0; i < ndims(); i++)
 			str.format("%s%s_size[%d] = %s%d;\n", ind, name, i, name, i);
 	}
-
-
-    syn lazy java.util.List<java.util.List<FFunctionDecl>> FClass.exportWrapperGroups() {
-        ListMap<String,FFunctionDecl> map = new LinkedHashListMap<String,FFunctionDecl>();
-        for (FFunctionDecl f : getFFunctionDecls()) {
-            if (f.hasExportWrapper_C()) {
-                map.add(f.signatureString(), f);
-            }
-        }
-        
-        java.util.List<java.util.List<FFunctionDecl>> res = new ArrayList<java.util.List<FFunctionDecl>>();
-        for (java.util.List<FFunctionDecl> list : map.values()) {
-            Collections.sort(list, FFunctionDecl.UNAME_COMPARATOR);
-            res.add(list);
-        }
-        return res;
-    }
-
+	
+	
+	syn lazy ArrayList<ArrayList<FFunctionDecl>> FClass.exportWrapperGroups() {
+		Map<String,ArrayList<FFunctionDecl>> map = new LinkedHashMap<String,ArrayList<FFunctionDecl>>();
+		for (FFunctionDecl f : getFFunctionDecls()) {
+			if (f.hasExportWrapper_C()) {
+				String key = f.signatureString();
+				ArrayList<FFunctionDecl> list = map.get(key);
+				if (list == null) 
+					map.put(key, list = new ArrayList<FFunctionDecl>());
+				list.add(f);
+			}
+		}
+		
+		ArrayList<ArrayList<FFunctionDecl>> res = new ArrayList<ArrayList<FFunctionDecl>>();
+		for (ArrayList<FFunctionDecl> list : map.values()) {
+			Collections.sort(list, FFunctionDecl.UNAME_COMPARATOR);
+			res.add(list);
+		}
+		return res;
+	}
+	
 	public static final Comparator<FFunctionDecl> FFunctionDecl.UNAME_COMPARATOR = 
 		new Comparator<FFunctionDecl>() {
 		 public int compare(FFunctionDecl f1, FFunctionDecl f2) {

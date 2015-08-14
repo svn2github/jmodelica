@@ -32,10 +32,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Collections;
 import java.util.Iterator;
-
-import org.jmodelica.util.collections.ListMap;
-import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.collections.ParallelIterable;
+import org.jmodelica.util.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
 import org.jmodelica.util.munkres.MunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
@@ -3717,7 +3714,7 @@ aspect SemiLinear {
              * Applies zero flow transformations to a list of equations.
              */
             private List<FAbstractEquation> transform(List<FAbstractEquation> equations) {
-                ListMap<String, FEquation> rule1 = new LinkedHashListMap<String, FEquation>();
+                Map<String,ArrayList<FEquation>> rule1 = new HashMap<String,ArrayList<FEquation>>();
                 ArrayList<FEquation> rule2 = new ArrayList<FEquation>();
                 List<FAbstractEquation> newEquations = new List<FAbstractEquation>();
                 
@@ -3727,12 +3724,15 @@ aspect SemiLinear {
                         rule2.add((FEquation) equation);
                     } else if (equation.isZeroFlowForm()) {
                         FEquation e = (FEquation) equation;
-                        rule1.add(e.zeroFlowGetKey(), e);
+                        String key = e.zeroFlowGetKey();
+                        if (rule1.get(key) == null)
+                            rule1.put(key, new ArrayList<FEquation>());
+                        rule1.get(key).add(e);
                     }
                 }
                 
                 // Chained zero flow transformations (Rule 1)
-                for (java.util.List<FEquation> l : rule1.values()) {
+                for (ArrayList<FEquation> l : rule1.values()) {
                     if (l.size() > 1)
                         transformChain(newEquations, buildChain(l));
                 }
@@ -3753,7 +3753,7 @@ aspect SemiLinear {
              * the semiLinear expressions. If any equation cannot be ordered an
              * error is given.
              */
-            private ArrayList<FEquation> buildChain(java.util.List<FEquation> l) {
+            private ArrayList<FEquation> buildChain(ArrayList<FEquation> l) {
                 ArrayList<FEquation> chain = new ArrayList<FEquation>();
                 FEquation eq1 = l.remove(0);
                 chain.add(eq1);
