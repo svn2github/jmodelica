@@ -92,6 +92,8 @@ aspect Flattening {
         breakOnErrors();
         beginStep("flattenComponents()");
         flatten(fc, false);
+        // TODO: make separate func?
+        getInstGeneratedInners().flatten(fc, false);
         flattenUsedFuncsAndEnums(fc);
         flattenInstClassDeclExtra(fc);
         endStep("flattenComponents()");

@@ -1,6 +1,8 @@
-package org.jmodelica.util;
+package org.jmodelica.util.collections;
 
 import java.util.Iterator;
+
+import org.jmodelica.util.Criteria;
 
 public class FilteredIterator<T> implements Iterator<T> {
 	

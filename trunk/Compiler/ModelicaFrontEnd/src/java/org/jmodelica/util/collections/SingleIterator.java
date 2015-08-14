@@ -1,4 +1,4 @@
-package org.jmodelica.util;
+package org.jmodelica.util.collections;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

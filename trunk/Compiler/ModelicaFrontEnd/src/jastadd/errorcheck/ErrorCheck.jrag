@@ -15,9 +15,13 @@
 */
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.ArrayList;
+import java.util.Map;
 
+import org.jmodelica.util.collections.ListMap;
+import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.Problem;
 import org.jmodelica.util.ErrorCheckType;
 
@@ -567,8 +571,9 @@ aspect InstanceErrorCheck {
             if (hasInstConstraining())
                 getInstConstraining().collectErrors(checkType);
             getInstRestriction().collectErrors(checkType);
-            if (getBaseClassDecl() instanceof FullClassDecl) {  
-                FullClassDecl fcd = (FullClassDecl)getBaseClassDecl();
+            getInstGeneratedInners().collectErrors(checkType);
+            if (getBaseClassDecl() instanceof FullClassDecl) {
+                FullClassDecl fcd = (FullClassDecl) getBaseClassDecl();
                 if (!(fcd.getName().getID().equals(fcd.getEndDecl().getEndID()))) {
                     error("The declaration and end names of a class should be the same");
                 }
@@ -583,6 +588,39 @@ aspect InstanceErrorCheck {
             getInstExternalOpt().collectErrors(checkType);
             if (isFunction())
                 errorCheckDerivativeAnnotations(checkType);
+        }
+    }
+
+    public void InstGeneratedInner.collectErrors(ErrorCheckType checkType) {
+        // TODO: generate warning
+        if (getMatchingNonInner() != null) {
+            getCopiedOuter().error("Can not generate missing inner declaration for %s, due to presence of component with same name on top level", name());
+        } else {
+            ListMap<String, String> map = new LinkedHashListMap<String, String>();
+            for (InstComponentDecl outer : outers) {
+                if (outer.myInstClass().isPartial()) {
+                    outer.error("Can not generate missing inner declaration for outer component %s of partial type %s", 
+                            outer.name(), outer.myInstClass().qualifiedName());
+                } else {
+                    map.add(outer.myInstClass().actualInstClass().qualifiedName(), outer.qualifiedName());
+                }
+            }
+            if (map.size() > 1) {
+                StringBuilder sb = new StringBuilder();
+                java.util.List<String> classes = new ArrayList<String>(map.keySet());
+                Collections.sort(classes);
+                for (String cls : classes) {
+                    java.util.List<String> components = map.get(cls);
+                    Collections.sort(components);
+                    for (String outer : components) {
+                        sb.append("\n    ");
+                        sb.append(cls);
+                        sb.append(" ");
+                        sb.append(outer);
+                    }
+                }
+                getCopiedOuter().error("Can't generate missing inner declaration for %s, due to the outer declarations being of different types: %s", name(), sb);
+            }
         }
     }
 

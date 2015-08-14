@@ -281,7 +281,7 @@ aspect Environments {
 
     eq InstComponentDecl.localInstModifications() {
         ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstModification())
+        if (hasInstModification() && !isGeneratedInner())
             l.add(getInstModification());
         l.addAll(instModificationsFromConstrainingType());
         l.addAll(myInstClass().classInstModifications());
@@ -304,23 +304,25 @@ aspect Environments {
         isRecursive() ? Collections.<InstModification>emptyList() : myTargetInstClassDecl().classInstModifications();
 
     syn java.util.List<InstModification> InstComponentDecl.instModificationsForConstraining() {
-        if (hasInstConstraining()) {
-            if (getInstConstraining().hasInstClassModification())
-                return Collections.singletonList((InstModification) getInstConstraining().getInstClassModification());
-        } else {
-            if (hasInstModification())
+        if (isReplaceable()) {
+            if (hasInstConstraining()) {
+                if (getInstConstraining().hasInstClassModification())
+                    return Collections.singletonList((InstModification) getInstConstraining().getInstClassModification());
+            } else if (hasInstModification()) {
                 return Collections.singletonList(getInstModification());
+            }
         }
         return Collections.<InstModification>emptyList();
     }
 
     syn java.util.List<InstModification> InstClassDecl.instModificationsForConstraining() {
-        if (hasInstConstraining()) {
-            if (getInstConstraining().hasInstClassModification())
-                return Collections.singletonList((InstModification) getInstConstraining().getInstClassModification());
-        } else {
-            if (hasInstClassModification())
+        if (isReplaceable()) {
+            if (hasInstConstraining()) {
+                if (getInstConstraining().hasInstClassModification())
+                    return Collections.singletonList((InstModification) getInstConstraining().getInstClassModification());
+            } else if (hasInstClassModification()) {
                 return Collections.singletonList((InstModification) getInstClassModification());
+            }
         }
         return Collections.<InstModification>emptyList();
     }
@@ -393,7 +395,7 @@ aspect Environments {
         ArrayList<InstModification> l = new ArrayList<InstModification>();
         if (hasInstClassModification())
             l.add(getInstClassModification());
-        l.addAll(myInstClass().localInstModifications());
+        l.addAll(myInstClass().classInstModifications());
         return l;
     }
 
@@ -405,12 +407,7 @@ aspect Environments {
        to the children of the InstNode. It consists of the outer modifications
        in the environment (with the name of the InstNode itself, if any,
        removed) merged with potential local modifications.
-    
-       TODO: Should this attribute be lazy? Probably yes
-      
-    */   
-    
-    // TODO: merge also class redeclaration modifications    
+    */
     syn lazy Environment InstNode.getMergedEnvironment() = 
         filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModifications());
 
@@ -1358,7 +1355,7 @@ aspect InstanceTreeConstruction {
 	eq InstReplacingExtendsShortClass.getInstClassModification()     = getInstExtendsShortClass().getInstClassModification();
 
 	syn lazy InstProgramRoot Program.getInstProgramRoot() {
-		return new InstProgramRoot(this, new Opt());
+		return new InstProgramRoot(this, new Opt(), new Opt());
 	}
 
 	syn lazy InstClassDecl InstClassRedeclare.getInstClassDecl() {
@@ -1645,12 +1642,14 @@ aspect InstanceAST_API {
 	eq InstComponentDecl.nameScope() = true;
 	eq InstArrayComponentDecl.nameScope() = false;
     eq InstBaseClassDecl.nameScope() = true;
-    
+
     syn String InstNode.name() = "";
     eq InstComponentDecl.name() = getComponentDecl().name();
     eq InstBaseClassDecl.name() = getBaseClassDecl().name();
     eq InstBuiltInClassDecl.name() = getBuiltInClassDecl().name();
     eq InstExtends.name() = getClassName().name();
+    syn String InstGeneratedInner.name() = getCopiedOuter().name();
+
 	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
 	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
