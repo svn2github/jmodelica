@@ -501,11 +501,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 int nwritten;
 
                 if (nniters > 0 && solver->last_xnorm > 0) {
-                    lambda_max = solver->max_step_ratio;
+                    lambda_max = kin_mem->kin_mxnewtstep/solver->last_xnorm;
                     KINGetStepLength(kin_mem, &steplength);
                     lambda = steplength/solver->last_xnorm;
-                    if(solver->last_num_active_bounds > 0)
-                        lambda *= solver->max_step_ratio;
                 }
                 else {
                     lambda_max = lambda = 0;
@@ -723,13 +721,13 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     jmi_log_node_t outer;
     jmi_log_node_t inner;
 
-    /* MAX_NEWTON_STEP_RATIO is used just to ensure that full Newton step can 
+    /* MAX_NETON_STEP_RATIO is used just to ensure that full Newton step can 
     be taken when no bounds are present. 
     TODO: Consider addionally limiting the Newton step length set
     based on the nominal values of the IVs.
     Consider using block->options->step_limit_factor instead
     */
-#define MAX_NEWTON_STEP_RATIO 1.0
+#define MAX_NETON_STEP_RATIO 10.0
 
     xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
     solver->last_xnorm = xnorm;
@@ -740,7 +738,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     if((!block->options->enforce_bounds_flag) || (xnorm == 0.0)) 
     {
         /* make sure full newton step can be taken */
-        realtype maxstep = MAX_NEWTON_STEP_RATIO * xnorm;
+        realtype maxstep = MAX_NETON_STEP_RATIO * xnorm;
 #if 0
         if(maxstep > kin_mem->kin_mxnewtstep)
 #endif
@@ -751,7 +749,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     /*  Scale the step up so that step multiplier is 1.0 at the beginning.
         The "long" step is now saved into "b", pointed by "xd"
     */
-    N_VScale(MAX_NEWTON_STEP_RATIO, x, b);
+    N_VScale(MAX_NETON_STEP_RATIO, x, b);
     
     /* minimal/maximal allowed step multiplier */
     max_step_ratio = 1.0;
@@ -882,7 +880,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         }
         jmi_log_leave(log, outer);
     }
-    /* log the active bounds that we are following */
+    /* log the bounds that we are following */
     if (block->callbacks->log_options.log_level >= 5 && activeBounds) {        
         /* Print active bounds*/
         jmi_log_node_t outer = jmi_log_enter_(log, logInfo, "ActiveBounds");
@@ -904,10 +902,10 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     }
 
     /* 
-        Since analysis was done with x = MAX_NEWTON_STEP_RATIO * Newton step
-        the actual Newton step ration is also MAX_NEWTON_STEP_RATIO larger
+        Since analysis was done with x = MAX_NETON_STEP_RATIO * Newton step
+        the actual Newton step ration is also MAX_NETON_STEP_RATIO larger
     */
-    max_step_ratio *= MAX_NEWTON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
+    max_step_ratio *= MAX_NETON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
     
     /* If the step is limited by a bound or we're following the bound it
     should be allowed to take the full step length more than 5 times
@@ -916,7 +914,6 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         kin_mem->kin_ncscmx = 0; /* allow for more steps of kin_mxnewtstep length in this case */
     }
 
-    solver->max_step_ratio = max_step_ratio;
     if(!activeBounds) {
         /* bounds do not affect the base-line algorithm, only limit the step */
         kin_mem->kin_mxnewtstep = max_step_ratio * xnorm ;
@@ -950,7 +947,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     kin_mem->kin_mxnewtstep =  solver->last_xnorm;
 }
 
-/* Form regularized matrix Transpose(J).J */
+/* Form regualrized matrix Transpose(J).J */
 static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
     int i,j,k;
