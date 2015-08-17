@@ -7,8 +7,8 @@ rm -r .svn
 rm -r ModelicaTest
 rm -r ModelicaReference
 rm ObsoleteModelica3.mo
-rm Modelica/StateGraph.mo
-rm Modelica/Electrical/Digital.mo
-rm Modelica/Electrical/Machines.mo
-rm -r Modelica/Electrical/QuasiStationary
-rm -r Modelica/Fluid
+#rm Modelica/StateGraph.mo
+#rm Modelica/Electrical/Digital.mo
+#rm Modelica/Electrical/Machines.mo
+#rm -r Modelica/Electrical/QuasiStationary
+#rm -r Modelica/Fluid
