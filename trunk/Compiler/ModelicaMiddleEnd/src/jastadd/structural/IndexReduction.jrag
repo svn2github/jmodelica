@@ -220,7 +220,7 @@ aspect IndexReduction {
                         continue;
                     if (fv.isFDynamicStateVariable()) {
                         FDynamicStateVariable var = fv.asFDynamicStateVariable();
-                        if (var.getNumber() != 0)
+                        if (var.getNumber() != 1)
                             continue;
                         DynamicStateSet set = var.getSet();
                         sb.append(String.format("  Set of dynamic states with %d states and %d algebraics:\n", set.numStates(), set.numAlgebraics()));

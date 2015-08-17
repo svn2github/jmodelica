@@ -414,7 +414,7 @@ aspect CCodeGen {
                 str.format(", %d", var.valueReference());
             str.println(")) {");
             str.format("%s%s = ", innerIndent, tempName_C());
-            p.print(getUse(combination[getNumber()].dynamicStateVarIndex()), str, indent);
+            p.print(getUse(combination[getNumber() - 1].dynamicStateVarIndex() - 1), str, indent);
             str.println(";");
         }
         str.formatln("%s}", indent);
@@ -5008,7 +5008,7 @@ aspect CCodeGen {
         }
 	}
 
-    syn int DynamicStateSet.id_C() = id();
+    syn int DynamicStateSet.id_C() = id() - 1;
 
     public void DynamicStateSet.genDSCoefficientsFuncName_C(CodePrinter p, CodeStream str, String indent) {
         str.print("ds_coefficients");

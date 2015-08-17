@@ -37,16 +37,16 @@ aspect DynamicStateSelect{
 
     syn lazy FVariable[] DynamicStateSet.fVars() {
         FVariable[] vars = new FVariable[getNumVar()];
-        for (int i = 0; i < vars.length; i++)
-            vars[i] = getVar(i).myFV().asFVariable();
+        for (int i = 1; i <= vars.length; i++)
+            vars[i - 1] = getVar(i - 1).myFV().asFVariable();
         return vars;
     }
 
     syn lazy Map<FAbstractVariable, Integer> DynamicStateSet.varIndexMap() {
         Map<FAbstractVariable, Integer> map = new HashMap<FAbstractVariable, Integer>();
         FVariable[] vars = fVars();
-        for (int i = 0; i < numVars(); i++)
-            map.put(vars[i], i);
+        for (int i = 1; i <= numVars(); i++)
+            map.put(vars[i - 1], i);
         return map;
     }
 
@@ -107,13 +107,13 @@ aspect DynamicStateSelect{
         }
     }
 
-    syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
-    syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId());
+    syn DynamicStateSet FDSRefExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
+    syn DynamicStateSet FDSDerExp.mySet() = myFClass().getDynamicStateManager().getSet(getSetId() - 1);
 
     syn List<FIdUseExp> FDSRefExp.getUseList() {
         DynamicStateSet set = mySet();
         List<FIdUseExp> list = new List<FIdUseExp>();
-        for (int i = 0; i < set.numAlgebraics(); i++)
+        for (int i = 1; i <= set.numAlgebraics(); i++)
             list.add(new FIdUseExp("_ds." + set.id() + ".a" + i));
         return list;
     }
@@ -137,7 +137,7 @@ aspect DynamicStateSelect{
             exp.findFIdUseExpsInTree(set);
     }
     
-    private Enumerator DynamicStateManager.idEnumerator = new Enumerator(0);
+    private Enumerator DynamicStateManager.idEnumerator = new Enumerator(1);
     public int DynamicStateManager.nextId() {
         return idEnumerator.next();
     }
@@ -192,19 +192,19 @@ aspect DynamicStateSelect{
         if (sets.length == 1)
             return sets[0];
         Collection<FVariable[]> res = new ArrayList<FVariable[]>();
-        combineDSCombinations(sets, res, totalNumVars, new FVariable[totalNumVars], 0 , 0);
+        combineDSCombinations(sets, res, totalNumVars, new FVariable[totalNumVars], 0, 0);
         return res.toArray(new FVariable[res.size()][]);
     }
 
     private static void EquationBlockFactory.combineDSCombinations(FVariable[][][] sets, Collection<FVariable[]> res, int totalNumVars, FVariable[] current, int set, int offset) {
-        for (int i = 0; i < sets[set].length; i++) {
-            System.arraycopy(sets[set][i], 0, current, offset, sets[set][i].length);
+        for (int i = 1; i <= sets[set].length; i++) {
+            System.arraycopy(sets[set][i - 1], 0, current, offset, sets[set][i - 1].length);
             if (sets.length == set + 1) {
                 FVariable[] copy = new FVariable[totalNumVars];
                 System.arraycopy(current, 0, copy, 0, totalNumVars);
                 res.add(copy);
             } else {
-                combineDSCombinations(sets, res, totalNumVars, current, set + 1, offset + sets[set][i].length);
+                combineDSCombinations(sets, res, totalNumVars, current, set + 1, offset + sets[set][i - 1].length);
             }
         }
     }
@@ -233,16 +233,16 @@ aspect DynamicStateSelect{
             }
             DynamicStateSet set = new DynamicStateSet(manager.nextId(), resSet.eqns.size(), varList, coffList, null, null);
             FDynamicAlgebraicVariable[] algebraicVars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
-            for (int i = 0; i < set.numAlgebraics(); i++) {
+            for (int i = 1; i <= set.numAlgebraics(); i++) {
                 FDynamicAlgebraicVariable var = new FDynamicAlgebraicVariable(set, i);
-                algebraicVars[i] = var;
+                algebraicVars[i - 1] = var;
                 addFVariable(var);
             }
             set.setAlgebraicVars(algebraicVars);
             FDynamicStateVariable[] stateVars = new FDynamicStateVariable[set.numStates()];
-            for (int i = 0; i < set.numStates(); i++) {
+            for (int i = 1; i <= set.numStates(); i++) {
                 FDynamicStateVariable var = new FDynamicStateVariable(set, i);
-                stateVars[i] = var;
+                stateVars[i - 1] = var;
                 addFVariable(var);
                 addFEquation(new FEquation(new FDerExp(var.createFIdUse()), new FDSDerExp(set.id(), i)));
             }
@@ -660,16 +660,16 @@ aspect DynamicStateSelect{
                 }
                 FDynamicAlgebraicVariable var = fVar.asFDynamicAlgebraicVariable();
                 DynamicStateSet set = var.getSet();
-                if (var.getNumber() >= set.numAlgebraics() || var.getNumber() < 0)
+                if (var.getNumber() - 1 >= set.numAlgebraics() || var.getNumber() - 1 < 0)
                     throw new BLTException(var.name() + " has illegal dynamic state variable number, set size is " + set.numAlgebraics());
                 FDynamicAlgebraicVariable[] vars = setVarMap.get(set);
                 if (vars == null) {
                     vars = new FDynamicAlgebraicVariable[set.numAlgebraics()];
                     setVarMap.put(set, vars);
                 }
-                if (vars[var.getNumber()] != null)
+                if (vars[var.getNumber() - 1] != null)
                     throw new BLTException("There are two instances of " + var.name() + " in the same BLT block!");
-                vars[var.getNumber()] = var;
+                vars[var.getNumber() - 1] = var;
             }
             if (setVarMap.isEmpty())
                 throw new BLTException("No dynamic state variables were found in the BLT block");
@@ -682,8 +682,8 @@ aspect DynamicStateSelect{
                 boolean allSet = true;
                 DynamicStateSet set = entry.getKey();
                 FDynamicAlgebraicVariable[] DSVars = entry.getValue();
-                for (int i = 0; i < DSVars.length; i++) {
-                    if (DSVars[i] == null) {
+                for (int i = 1; i <= DSVars.length; i++) {
+                    if (DSVars[i - 1] == null) {
                         allSet = false;
                     }
                 }
@@ -691,8 +691,8 @@ aspect DynamicStateSelect{
                     StringBuilder sb = new StringBuilder();
                     sb.append("Not all dynamic state variables resides in the same block, index ");
                     boolean first = true;
-                    for (int i = 0; i < DSVars.length; i++) {
-                        if (DSVars[i] != null)
+                    for (int i = 1; i <= DSVars.length; i++) {
+                        if (DSVars[i - 1] != null)
                             continue;
                         if (!first)
                             sb.append(", ");

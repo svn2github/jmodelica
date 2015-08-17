@@ -37,11 +37,11 @@ package DynamicStates
 --- Dynamic state block ---
   --- States: a1 ---
     --- Solved equation ---
-    a2 := 1 / ds(0, a1)
+    a2 := 1 / ds(1, a1)
     -------------------------------
   --- States: a2 ---
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
 
 --- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
@@ -58,16 +58,16 @@ Torn equations:
   dynDer(a1) := b
 
 Residual equations:
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 0
     Iteration variables: dynDer(a2)
 
 Jacobian:
   |-1.0, 0.0, 1.0|
   |-1.0, 1.0, 0.0|
-  |0.0, ds(0, a2), ds(0, a1)|
+  |0.0, ds(1, a2), ds(1, a1)|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end TwoDSOneEq;
@@ -92,12 +92,12 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a2 ---
     --- Unsolved equation (Block 1(a2).0) ---
-    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = 1
+    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
       Computed variables: a1
     -------------------------------
   --- States: a1 ---
     --- Unsolved equation (Block 1(a1).0) ---
-    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = 1
+    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
       Computed variables: a2
     -------------------------------
 
@@ -115,16 +115,16 @@ Torn equations:
   dynDer(a2) := b
 
 Residual equations:
-  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = 0
+  2 * ds(1, a1) * dynDer(a1) + 2 * ds(1, a2) * dynDer(a2) = 0
     Iteration variables: dynDer(a1)
 
 Jacobian:
   |-1.0, 0.0, 1.0|
   |-1.0, 1.0, 0.0|
-  |0.0, 2 * ds(0, a2), 2 * ds(0, a1)|
+  |0.0, 2 * ds(1, a2), 2 * ds(1, a1)|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end TwoDSOneEqUnsolved;
@@ -151,15 +151,15 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a2, a1 ---
     --- Solved equation ---
-    a3 := 1 / (ds(0, a1) * ds(0, a2))
+    a3 := 1 / (ds(1, a1) * ds(1, a2))
     -------------------------------
   --- States: a3, a1 ---
     --- Solved equation ---
-    a2 := 1 / (ds(0, a1) * ds(0, a3))
+    a2 := 1 / (ds(1, a1) * ds(1, a3))
     -------------------------------
   --- States: a3, a2 ---
     --- Solved equation ---
-    a1 := 1 / (ds(0, a2) * ds(0, a3))
+    a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
 
 --- Torn linear system (Block 2) of 1 iteration variables and 3 solved variables ---
@@ -178,20 +178,20 @@ Torn equations:
   dynDer(a1) := b
 
 Residual equations:
-  ds(0, a1) * ds(0, a2) * dynDer(a3) + (ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)) * ds(0, a3) = 0
+  ds(1, a1) * ds(1, a2) * dynDer(a3) + (ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2)) * ds(1, a3) = 0
     Iteration variables: dynDer(a3)
 
 Jacobian:
   |-1.0, 0.0, 0.0, 1.0|
   |-1.0, 1.0, 0.0, 0.0|
   |-1.0, 0.0, 1.0, 0.0|
-  |0.0, ds(0, a1) * ds(0, a3), ds(0, a2) * ds(0, a3), ds(0, a1) * ds(0, a2)|
+  |0.0, ds(1, a1) * ds(1, a3), ds(1, a2) * ds(1, a3), ds(1, a1) * ds(1, a2)|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 
 --- Solved equation ---
-der(_ds.0.s1) := dsDer(0, 1)
+der(_ds.1.s2) := dsDer(1, 2)
 -------------------------------
 ")})));
         end ThreeDSOneEq;
@@ -219,24 +219,24 @@ der(_ds.0.s1) := dsDer(0, 1)
 --- Dynamic state block ---
   --- States: a1 ---
     --- Solved equation ---
-    a2 := 1 / ds(0, a1)
+    a2 := 1 / ds(1, a1)
 
     --- Solved equation ---
-    a3 := 1 / ds(0, a2)
+    a3 := 1 / ds(1, a2)
     -------------------------------
   --- States: a2 ---
     --- Solved equation ---
-    a3 := 1 / ds(0, a2)
+    a3 := 1 / ds(1, a2)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a3 ---
     --- Solved equation ---
-    a2 := 1 / ds(0, a3)
+    a2 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
 
 --- Torn linear system (Block 2) of 2 iteration variables and 2 solved variables ---
@@ -254,19 +254,19 @@ Torn equations:
   dynDer(a1) := b + 1
 
 Residual equations:
-  ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3) = 0
+  ds(1, a2) * dynDer(a3) + dynDer(a2) * ds(1, a3) = 0
     Iteration variables: dynDer(a2)
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 0
     Iteration variables: dynDer(a3)
 
 Jacobian:
   |-1.0, 0.0, 1.0, 1.0|
   |-1.0, 1.0, 0.0, 0.0|
-  |0.0, 0.0, ds(0, a3), ds(0, a2)|
-  |0.0, ds(0, a2), ds(0, a1), 0.0|
+  |0.0, 0.0, ds(1, a3), ds(1, a2)|
+  |0.0, ds(1, a2), ds(1, a1), 0.0|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end ThreeDSTwoEq;
@@ -296,24 +296,24 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a2, a1 ---
     --- Solved equation ---
-    a3 := 1 / (ds(0, a1) * ds(0, a2))
+    a3 := 1 / (ds(1, a1) * ds(1, a2))
 
     --- Solved equation ---
-    a4 := 1 / (ds(0, a2) * ds(0, a3))
+    a4 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
   --- States: a3, a1 ---
     --- Solved equation ---
-    a2 := 1 / (ds(0, a1) * ds(0, a3))
+    a2 := 1 / (ds(1, a1) * ds(1, a3))
 
     --- Solved equation ---
-    a4 := 1 / (ds(0, a2) * ds(0, a3))
+    a4 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
   --- States: a3, a2 ---
     --- Solved equation ---
-    a4 := 1 / (ds(0, a2) * ds(0, a3))
+    a4 := 1 / (ds(1, a2) * ds(1, a3))
 
     --- Solved equation ---
-    a1 := 1 / (ds(0, a2) * ds(0, a3))
+    a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
   --- States: a4, a1 ---
     --- Unsolved system (Block 1(a4, a1).0) of 2 variables ---
@@ -322,24 +322,24 @@ der(_ds.0.s0) := dsDer(0, 0)
       a3 ()
 
     Equations:
-      ds(0, a1) * ds(0, a2) * ds(0, a3) = 1
+      ds(1, a1) * ds(1, a2) * ds(1, a3) = 1
         Iteration variables: a2
-      ds(0, a2) * ds(0, a3) * ds(0, a4) = 1
+      ds(1, a2) * ds(1, a3) * ds(1, a4) = 1
         Iteration variables: a3
     -------------------------------
   --- States: a4, a2 ---
     --- Solved equation ---
-    a3 := 1 / (ds(0, a2) * ds(0, a4))
+    a3 := 1 / (ds(1, a2) * ds(1, a4))
 
     --- Solved equation ---
-    a1 := 1 / (ds(0, a2) * ds(0, a3))
+    a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
   --- States: a4, a3 ---
     --- Solved equation ---
-    a2 := 1 / (ds(0, a3) * ds(0, a4))
+    a2 := 1 / (ds(1, a3) * ds(1, a4))
 
     --- Solved equation ---
-    a1 := 1 / (ds(0, a2) * ds(0, a3))
+    a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
 
 --- Torn linear system (Block 2) of 2 iteration variables and 3 solved variables ---
@@ -359,23 +359,23 @@ Torn equations:
   dynDer(a1) := b + 1
 
 Residual equations:
-  ds(0, a2) * ds(0, a3) * dynDer(a4) + (ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3)) * ds(0, a4) = 0
+  ds(1, a2) * ds(1, a3) * dynDer(a4) + (ds(1, a2) * dynDer(a3) + dynDer(a2) * ds(1, a3)) * ds(1, a4) = 0
     Iteration variables: dynDer(a3)
-  ds(0, a1) * ds(0, a2) * dynDer(a3) + (ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2)) * ds(0, a3) = 0
+  ds(1, a1) * ds(1, a2) * dynDer(a3) + (ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2)) * ds(1, a3) = 0
     Iteration variables: dynDer(a4)
 
 Jacobian:
   |-1.0, 0.0, 0.0, 1.0, 1.0|
   |-1.0, 1.0, 0.0, 0.0, 0.0|
   |-1.0, 0.0, 1.0, 0.0, 0.0|
-  |0.0, ds(0, a3) * ds(0, a4), 0.0, ds(0, a2) * ds(0, a4), ds(0, a2) * ds(0, a3)|
-  |0.0, ds(0, a1) * ds(0, a3), ds(0, a2) * ds(0, a3), ds(0, a1) * ds(0, a2), 0.0|
+  |0.0, ds(1, a3) * ds(1, a4), 0.0, ds(1, a2) * ds(1, a4), ds(1, a2) * ds(1, a3)|
+  |0.0, ds(1, a1) * ds(1, a3), ds(1, a2) * ds(1, a3), ds(1, a1) * ds(1, a2), 0.0|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 
 --- Solved equation ---
-der(_ds.0.s1) := dsDer(0, 1)
+der(_ds.1.s2) := dsDer(1, 2)
 -------------------------------
 ")})));
         end FourDSTwoEq;
@@ -433,43 +433,43 @@ der(_ds.0.s1) := dsDer(0, 1)
 --- Dynamic state block ---
   --- States: a3 ---
     --- Solved equation ---
-    a4 := 1 / ds(0, a3)
+    a4 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a2 := - ds(0, a3) + 1
+    a2 := - ds(1, a3) + 1
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a1 ---
     --- Solved equation ---
-    a2 := 1 / ds(0, a1)
+    a2 := 1 / ds(1, a1)
 
     --- Solved equation ---
-    a3 := - ds(0, a2) + 1
+    a3 := - ds(1, a2) + 1
 
     --- Solved equation ---
-    a4 := 1 / ds(0, a3)
+    a4 := 1 / ds(1, a3)
     -------------------------------
   --- States: a2 ---
     --- Solved equation ---
-    a3 := - ds(0, a2) + 1
+    a3 := - ds(1, a2) + 1
 
     --- Solved equation ---
-    a4 := 1 / ds(0, a3)
+    a4 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a4 ---
     --- Solved equation ---
-    a3 := 1 / ds(0, a4)
+    a3 := 1 / ds(1, a4)
 
     --- Solved equation ---
-    a2 := - ds(0, a3) + 1
+    a2 := - ds(1, a3) + 1
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
 
 --- Torn linear system (Block 2) of 2 iteration variables and 3 solved variables ---
@@ -489,20 +489,20 @@ Torn equations:
   dynDer(a1) := - dynDer(a4) + b
 
 Residual equations:
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 0
     Iteration variables: dynDer(a2)
-  ds(0, a3) * dynDer(a4) + dynDer(a3) * ds(0, a4) = 0
+  ds(1, a3) * dynDer(a4) + dynDer(a3) * ds(1, a4) = 0
     Iteration variables: dynDer(a4)
 
 Jacobian:
   |1.0, 0.0, 0.0, 1.0, 0.0|
   |1.0, -1.0, 0.0, 1.0, 0.0|
   |0.0, -1.0, 1.0, 0.0, 1.0|
-  |0.0, 0.0, ds(0, a2), ds(0, a1), 0.0|
-  |ds(0, a4), 0.0, 0.0, 0.0, ds(0, a3)|
+  |0.0, 0.0, ds(1, a2), ds(1, a1), 0.0|
+  |ds(1, a4), 0.0, 0.0, 0.0, ds(1, a3)|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end TwoDSSetMerge;
@@ -539,68 +539,68 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a4 ---
     --- Solved equation ---
-    a5 := 1 / ds(0, a4)
+    a5 := 1 / ds(1, a4)
 
     --- Solved equation ---
-    a3 := - ds(0, a4) + 1
+    a3 := - ds(1, a4) + 1
 
     --- Solved equation ---
-    a2 := 1 / ds(0, a3)
+    a2 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a1 ---
     --- Solved equation ---
-    a2 := 1 / ds(0, a1)
+    a2 := 1 / ds(1, a1)
 
     --- Solved equation ---
-    a3 := 1 / ds(0, a2)
+    a3 := 1 / ds(1, a2)
 
     --- Solved equation ---
-    a4 := - ds(0, a3) + 1
+    a4 := - ds(1, a3) + 1
 
     --- Solved equation ---
-    a5 := 1 / ds(0, a4)
+    a5 := 1 / ds(1, a4)
     -------------------------------
   --- States: a2 ---
     --- Solved equation ---
-    a3 := 1 / ds(0, a2)
+    a3 := 1 / ds(1, a2)
 
     --- Solved equation ---
-    a4 := - ds(0, a3) + 1
+    a4 := - ds(1, a3) + 1
 
     --- Solved equation ---
-    a5 := 1 / ds(0, a4)
+    a5 := 1 / ds(1, a4)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a3 ---
     --- Solved equation ---
-    a4 := - ds(0, a3) + 1
+    a4 := - ds(1, a3) + 1
 
     --- Solved equation ---
-    a5 := 1 / ds(0, a4)
+    a5 := 1 / ds(1, a4)
 
     --- Solved equation ---
-    a2 := 1 / ds(0, a3)
+    a2 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
   --- States: a5 ---
     --- Solved equation ---
-    a4 := 1 / ds(0, a5)
+    a4 := 1 / ds(1, a5)
 
     --- Solved equation ---
-    a3 := - ds(0, a4) + 1
+    a3 := - ds(1, a4) + 1
 
     --- Solved equation ---
-    a2 := 1 / ds(0, a3)
+    a2 := 1 / ds(1, a3)
 
     --- Solved equation ---
-    a1 := 1 / ds(0, a2)
+    a1 := 1 / ds(1, a2)
     -------------------------------
 
 --- Torn linear system (Block 2) of 3 iteration variables and 3 solved variables ---
@@ -621,26 +621,26 @@ Torn equations:
   dynDer(a1) := - dynDer(a4) + b
 
 Residual equations:
-  ds(0, a4) * dynDer(a5) + dynDer(a4) * ds(0, a5) = 0
+  ds(1, a4) * dynDer(a5) + dynDer(a4) * ds(1, a5) = 0
     Iteration variables: dynDer(a2)
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 0
     Iteration variables: dynDer(a3)
-  ds(0, a2) * dynDer(a3) + dynDer(a2) * ds(0, a3) = 0
+  ds(1, a2) * dynDer(a3) + dynDer(a2) * ds(1, a3) = 0
     Iteration variables: dynDer(a5)
 
 Jacobian:
   |-1.0, 0.0, 0.0, 1.0, 1.0, 1.0|
   |0.0, 1.0, 0.0, 0.0, 1.0, 0.0|
   |-1.0, 1.0, 1.0, 0.0, 0.0, 0.0|
-  |0.0, ds(0, a5), 0.0, 0.0, 0.0, ds(0, a4)|
-  |0.0, 0.0, ds(0, a2), ds(0, a1), 0.0, 0.0|
-  |0.0, 0.0, 0.0, ds(0, a3), ds(0, a2), 0.0|
+  |0.0, ds(1, a5), 0.0, 0.0, 0.0, ds(1, a4)|
+  |0.0, 0.0, ds(1, a2), ds(1, a1), 0.0, 0.0|
+  |0.0, 0.0, 0.0, ds(1, a3), ds(1, a2), 0.0|
 
 --- Solved equation ---
-a6 := 1 / ds(0, a5)
+a6 := 1 / ds(1, a5)
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end TwoBigDSSetMerge;
@@ -671,11 +671,11 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a4 ---
     --- Solved equation ---
-    a5 := 1 / ds(0, a4)
+    a5 := 1 / ds(1, a4)
     -------------------------------
   --- States: a5 ---
     --- Solved equation ---
-    a4 := 1 / ds(0, a5)
+    a4 := 1 / ds(1, a5)
     -------------------------------
 
 --- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
@@ -692,25 +692,25 @@ Torn equations:
   dynDer(a5) := - _der_a1 + (- dynDer(a4))
 
 Residual equations:
-  ds(0, a4) * dynDer(a5) + dynDer(a4) * ds(0, a5) = 0
+  ds(1, a4) * dynDer(a5) + dynDer(a4) * ds(1, a5) = 0
     Iteration variables: _der_a1
 
 Jacobian:
   |1.0, 0.0, 1.0|
   |1.0, 1.0, 1.0|
-  |ds(0, a5), ds(0, a4), 0.0|
+  |ds(1, a5), ds(1, a4), 0.0|
 
 --- Solved equation ---
-a1 := - ds(0, a4) + 1
+a1 := - ds(1, a4) + 1
 
 --- Dynamic state block ---
   --- States: a2 ---
     --- Solved equation ---
-    a3 := (- a1) / (- ds(1, a2))
+    a3 := (- a1) / (- ds(2, a2))
     -------------------------------
   --- States: a3 ---
     --- Solved equation ---
-    a2 := (- a1) / (- ds(1, a3))
+    a2 := (- a1) / (- ds(2, a3))
     -------------------------------
 
 --- Torn linear system (Block 4) of 1 iteration variables and 1 solved variables ---
@@ -725,18 +725,18 @@ Torn equations:
   dynDer(a2) := - dynDer(a3)
 
 Residual equations:
-  _der_a1 = ds(1, a2) * dynDer(a3) + dynDer(a2) * ds(1, a3)
+  _der_a1 = ds(2, a2) * dynDer(a3) + dynDer(a2) * ds(2, a3)
     Iteration variables: dynDer(a3)
 
 Jacobian:
   |1.0, 1.0|
-  |- ds(1, a3), - ds(1, a2)|
+  |- ds(2, a3), - ds(2, a2)|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 
 --- Solved equation ---
-der(_ds.1.s0) := dsDer(1, 0)
+der(_ds.2.s1) := dsDer(2, 1)
 -------------------------------
 ")})));
         end TwoDSSetForced;
@@ -767,26 +767,26 @@ der(_ds.1.s0) := dsDer(1, 0)
 --- Dynamic state block ---
   --- States: a3 ---
     --- Solved equation ---
-    a2 := sin(ds(0, a3))
+    a2 := sin(ds(1, a3))
 
     --- Solved equation ---
-    a1 := time / ds(0, a2)
+    a1 := time / ds(1, a2)
     -------------------------------
   --- States: a1 ---
     --- Solved equation ---
-    a2 := time / ds(0, a1)
+    a2 := time / ds(1, a1)
 
     --- Unsolved equation (Block 1(a1).0) ---
-    ds(0, a2) = sin(ds(0, a3))
+    ds(1, a2) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
   --- States: a2 ---
     --- Unsolved equation (Block 1(a2).0) ---
-    ds(0, a2) = sin(ds(0, a3))
+    ds(1, a2) = sin(ds(1, a3))
       Computed variables: a3
 
     --- Solved equation ---
-    a1 := time / ds(0, a2)
+    a1 := time / ds(1, a2)
     -------------------------------
 
 --- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
@@ -799,23 +799,23 @@ Iteration variables:
   dynDer(a3)
 
 Torn equations:
-  dynDer(a2) := cos(ds(0, a3)) * dynDer(a3)
+  dynDer(a2) := cos(ds(1, a3)) * dynDer(a3)
   dynDer(a1) := - dynDer(a2) + dynDer(a3)
 
 Residual equations:
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 1.0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 1.0
     Iteration variables: dynDer(a3)
 
 Jacobian:
-  |1.0, 0.0, (- cos(ds(0, a3)))|
+  |1.0, 0.0, (- cos(ds(1, a3)))|
   |1.0, 1.0, -1.0|
-  |ds(0, a1), ds(0, a2), 0.0|
+  |ds(1, a1), ds(1, a2), 0.0|
 
 --- Solved equation ---
 b := dynDer(a3)
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end OneLeaf;
@@ -846,48 +846,48 @@ der(_ds.0.s0) := dsDer(0, 0)
 --- Dynamic state block ---
   --- States: a4 ---
     --- Solved equation ---
-    a2 := sin(ds(0, a4))
+    a2 := sin(ds(1, a4))
 
     --- Solved equation ---
-    a1 := time / ds(0, a2)
+    a1 := time / ds(1, a2)
 
     --- Unsolved equation (Block 1(a4).0) ---
-    ds(0, a1) = sin(ds(0, a3))
+    ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
   --- States: a3 ---
     --- Solved equation ---
-    a1 := sin(ds(0, a3))
+    a1 := sin(ds(1, a3))
 
     --- Solved equation ---
-    a2 := time / ds(0, a1)
+    a2 := time / ds(1, a1)
 
     --- Unsolved equation (Block 1(a3).0) ---
-    ds(0, a2) = sin(ds(0, a4))
+    ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
     -------------------------------
   --- States: a1 ---
     --- Solved equation ---
-    a2 := time / ds(0, a1)
+    a2 := time / ds(1, a1)
 
     --- Unsolved equation (Block 1(a1).0) ---
-    ds(0, a2) = sin(ds(0, a4))
+    ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
 
     --- Unsolved equation (Block 1(a1).1) ---
-    ds(0, a1) = sin(ds(0, a3))
+    ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
   --- States: a2 ---
     --- Unsolved equation (Block 1(a2).0) ---
-    ds(0, a2) = sin(ds(0, a4))
+    ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
 
     --- Solved equation ---
-    a1 := time / ds(0, a2)
+    a1 := time / ds(1, a2)
 
     --- Unsolved equation (Block 1(a2).1) ---
-    ds(0, a1) = sin(ds(0, a3))
+    ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
 
@@ -903,25 +903,25 @@ Iteration variables:
   dynDer(a3)
 
 Torn equations:
-  dynDer(a1) := cos(ds(0, a3)) * dynDer(a3)
-  dynDer(a2) := cos(ds(0, a4)) * dynDer(a4)
+  dynDer(a1) := cos(ds(1, a3)) * dynDer(a3)
+  dynDer(a2) := cos(ds(1, a4)) * dynDer(a4)
   b := dynDer(a2) + dynDer(a3)
 
 Residual equations:
   dynDer(a1) + dynDer(a4) = b
     Iteration variables: dynDer(a4)
-  ds(0, a1) * dynDer(a2) + dynDer(a1) * ds(0, a2) = 1.0
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 1.0
     Iteration variables: dynDer(a3)
 
 Jacobian:
-  |1.0, 0.0, 0.0, 0.0, (- cos(ds(0, a3)))|
-  |0.0, 1.0, 0.0, (- cos(ds(0, a4))), 0.0|
+  |1.0, 0.0, 0.0, 0.0, (- cos(ds(1, a3)))|
+  |0.0, 1.0, 0.0, (- cos(ds(1, a4))), 0.0|
   |0.0, 1.0, -1.0, 0.0, 1.0|
   |1.0, 0.0, -1.0, 1.0, 0.0|
-  |ds(0, a2), ds(0, a1), 0.0, 0.0, 0.0|
+  |ds(1, a2), ds(1, a1), 0.0, 0.0, 0.0|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end TwoLeafs;
@@ -1182,32 +1182,32 @@ a1 := - a2 * a3 + 1
 --- Dynamic state block ---
   --- States: y ---
     --- Unsolved equation (Block 1(y).0) ---
-    ds(1, x) ^ 2 + ds(1, y) ^ 2 = L
+    ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
       Computed variables: x
     -------------------------------
   --- States: x ---
     --- Unsolved equation (Block 1(x).0) ---
-    ds(1, x) ^ 2 + ds(1, y) ^ 2 = L
+    ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
       Computed variables: y
     -------------------------------
 
 --- Dynamic state block ---
   --- States: _der_y ---
     --- Solved equation ---
-    dynDer(y) := ds(0, _der_y)
+    dynDer(y) := ds(1, _der_y)
 
     --- Solved equation ---
-    dynDer(x) := (- 2 * ds(1, y) * dynDer(y)) / (2 * ds(1, x))
+    dynDer(x) := (- 2 * ds(2, y) * dynDer(y)) / (2 * ds(2, x))
 
     --- Solved equation ---
     _der_x := dynDer(x)
     -------------------------------
   --- States: _der_x ---
     --- Solved equation ---
-    dynDer(x) := ds(0, _der_x)
+    dynDer(x) := ds(1, _der_x)
 
     --- Solved equation ---
-    dynDer(y) := (- 2 * ds(1, x) * dynDer(x)) / (2 * ds(1, y))
+    dynDer(y) := (- 2 * ds(2, x) * dynDer(x)) / (2 * ds(2, y))
 
     --- Solved equation ---
     _der_y := dynDer(y)
@@ -1231,27 +1231,27 @@ Iteration variables:
   lambda
 
 Torn equations:
-  _der_vy := lambda * ds(1, y) + (- g)
+  _der_vy := lambda * ds(2, y) + (- g)
   dynDer(_der_y) := _der_vy
-  _der_vx := lambda * ds(1, x)
+  _der_vx := lambda * ds(2, x)
   dynDer(_der_x) := _der_vx
 
 Residual equations:
-  2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
+  2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
     Iteration variables: lambda
 
 Jacobian:
-  |1.0, 0.0, 0.0, 0.0, - ds(1, y)|
+  |1.0, 0.0, 0.0, 0.0, - ds(2, y)|
   |-1.0, 1.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 1.0, 0.0, (- ds(1, x))|
+  |0.0, 0.0, 1.0, 0.0, (- ds(2, x))|
   |0.0, 0.0, -1.0, 1.0, 0.0|
-  |0.0, 2 * ds(1, y), 0.0, 2 * ds(1, x), 0.0|
+  |0.0, 2 * ds(2, y), 0.0, 2 * ds(2, x), 0.0|
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 
 --- Solved equation ---
-der(_ds.1.s0) := dsDer(1, 0)
+der(_ds.2.s1) := dsDer(2, 1)
 -------------------------------
 "),FClassMethodTestCase(
                 name="DynamicStates_Examples_Pendulum_initBLT",
@@ -1263,17 +1263,17 @@ der(_ds.1.s0) := dsDer(1, 0)
 _der_y := 0.0
 
 --- Solved equation ---
-dynDer(y) := ds(0, _der_y)
+dynDer(y) := ds(1, _der_y)
 
 --- Solved equation ---
 x := L
 
 --- Unsolved equation (Block 1) ---
-ds(1, x) ^ 2 + ds(1, y) ^ 2 = L
+ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
   Computed variables: y
 
 --- Solved equation ---
-dynDer(x) := (- 2 * ds(1, y) * dynDer(y)) / (2 * ds(1, x))
+dynDer(x) := (- 2 * ds(2, y) * dynDer(y)) / (2 * ds(2, x))
 
 --- Solved equation ---
 vx := dynDer(x)
@@ -1293,36 +1293,36 @@ Iteration variables:
   lambda
 
 Torn equations:
-  _der_vy := lambda * ds(1, y) + (- g)
+  _der_vy := lambda * ds(2, y) + (- g)
   dynDer(_der_y) := _der_vy
-  _der_vx := lambda * ds(1, x)
+  _der_vx := lambda * ds(2, x)
   dynDer(_der_x) := _der_vx
 
 Residual equations:
-  2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
+  2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0
     Iteration variables: lambda
 
 Jacobian:
-  |1.0, 0.0, 0.0, 0.0, - ds(1, y)|
+  |1.0, 0.0, 0.0, 0.0, - ds(2, y)|
   |-1.0, 1.0, 0.0, 0.0, 0.0|
-  |0.0, 0.0, 1.0, 0.0, (- ds(1, x))|
+  |0.0, 0.0, 1.0, 0.0, (- ds(2, x))|
   |0.0, 0.0, -1.0, 1.0, 0.0|
-  |0.0, 2 * ds(1, y), 0.0, 2 * ds(1, x), 0.0|
+  |0.0, 2 * ds(2, y), 0.0, 2 * ds(2, x), 0.0|
 
 --- Solved equation ---
 _der_x := dynDer(x)
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 
 --- Solved equation ---
-der(_ds.1.s0) := dsDer(1, 0)
+der(_ds.2.s1) := dsDer(2, 1)
 
 --- Solved equation ---
-_ds.0.s0 := 0.0
+_ds.1.s1 := 0.0
 
 --- Solved equation ---
-_ds.1.s0 := 0.0
+_ds.2.s1 := 0.0
 -------------------------------
 "),FClassMethodTestCase(
                 name="DynamicStates_Examples_Pendulum_States",
@@ -1354,33 +1354,33 @@ fclass DynamicStates.Examples.Pendulum
  Real _der_vy;
  Real _der_x;
  Real _der_y;
- Real _ds.0.a0;
- Real _ds.0.s0;
- Real _ds.1.a0;
- Real _ds.1.s0;
+ Real _ds.1.a1;
+ Real _ds.1.s1;
+ Real _ds.2.a1;
+ Real _ds.2.s1;
  Real dynDer(x);
  Real dynDer(y);
  Real dynDer(_der_x);
  Real dynDer(_der_y);
 initial equation 
- _ds.0.s0 = 0.0;
- _ds.1.s0 = 0.0;
+ _ds.1.s1 = 0.0;
+ _ds.2.s1 = 0.0;
  x = L;
  _der_y = 0.0;
 equation
  dynDer(x) = vx;
  dynDer(y) = vy;
- _der_vx = lambda * ds(1, x);
- _der_vy = lambda * ds(1, y) - g;
- ds(1, x) ^ 2 + ds(1, y) ^ 2 = L;
- 2 * ds(1, x) * dynDer(x) + 2 * ds(1, y) * dynDer(y) = 0.0;
+ _der_vx = lambda * ds(2, x);
+ _der_vy = lambda * ds(2, y) - g;
+ ds(2, x) ^ 2 + ds(2, y) ^ 2 = L;
+ 2 * ds(2, x) * dynDer(x) + 2 * ds(2, y) * dynDer(y) = 0.0;
  dynDer(_der_x) = _der_vx;
  dynDer(_der_y) = _der_vy;
- 2 * ds(1, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(1, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
- ds(0, _der_x) = dynDer(x);
- ds(0, _der_y) = dynDer(y);
- der(_ds.0.s0) = dsDer(0, 0);
- der(_ds.1.s0) = dsDer(1, 0);
+ 2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
+ ds(1, _der_x) = dynDer(x);
+ ds(1, _der_y) = dynDer(y);
+ der(_ds.1.s1) = dsDer(1, 1);
+ der(_ds.2.s1) = dsDer(2, 1);
 end DynamicStates.Examples.Pendulum;
 ")})));
         end Pendulum;
@@ -1437,19 +1437,19 @@ fclass DynamicStates.Special.FunctionDerivative1
  Real a1;
  Real a2;
  Real b;
- Real _ds.0.a0;
- Real _ds.0.s0;
+ Real _ds.1.a1;
+ Real _ds.1.s1;
  Real dynDer(a1);
  Real dynDer(a2);
 initial equation 
- _ds.0.s0 = 0.0;
+ _ds.1.s1 = 0.0;
  a2 = 0.0;
 equation
  dynDer(a1) = b;
  dynDer(a2) = b;
- DynamicStates.Special.FunctionDerivative1.F(ds(0, a1), ds(0, a2)) = 1;
- DynamicStates.Special.FunctionDerivative1.F_d(ds(0, a1), ds(0, a2), dynDer(a1), dynDer(a2)) = 0;
- der(_ds.0.s0) = dsDer(0, 0);
+ DynamicStates.Special.FunctionDerivative1.F(ds(1, a1), ds(1, a2)) = 1;
+ DynamicStates.Special.FunctionDerivative1.F_d(ds(1, a1), ds(1, a2), dynDer(a1), dynDer(a2)) = 0;
+ der(_ds.1.s1) = dsDer(1, 1);
 
 public
  function DynamicStates.Special.FunctionDerivative1.F
@@ -1561,23 +1561,23 @@ end DynamicStates.Special.FunctionDerivative1;
       a1 ()
 
     Torn equations:
-      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(1, a1))
         Assigned variables: t.x
-      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(1, a1))
         Assigned variables: t.y
-	
+
     Residual equations:
-      ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
+      ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
         Iteration variables: a1
     -------------------------------
   --- States: a1 ---
     --- Solved function call equation ---
-    (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+    (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(1, a1))
       Assigned variables: t.x
                           t.y
 
     --- Unsolved equation (Block 1(a1).0) ---
-    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
+    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
       Computed variables: a2
     -------------------------------
 
@@ -1594,11 +1594,11 @@ Torn equations:
   dynDer(a2) := b
 
 Residual equations:
-  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = DynamicStates.Special.FunctionCallEquation1.F1_d(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y), dynDer(a1))
+  2 * ds(1, a1) * dynDer(a1) + 2 * ds(1, a2) * dynDer(a2) = DynamicStates.Special.FunctionCallEquation1.F1_d(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y), dynDer(a1))
     Iteration variables: dynDer(a1)
 
 --- Solved equation ---
-der(_ds.0.s0) := dsDer(0, 0)
+der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end FunctionCallEquation1;
