@@ -61,12 +61,15 @@ public class ErrorTestCase extends TestCase {
 
     private static Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
     private static String introReplacement = "";
-    private static Pattern posFilter = Pattern.compile("at line [0-9]+, column [0-9]+, in file '([^'\\\\]|\\\\.)+'([:,])");
-    private static String posReplacement = "at line 0, column 0, in file '...'$2";
+    private static Pattern posFilter = Pattern.compile("at line [0-9]+, column [0-9]+");
+    private static Pattern fileFilter = Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])");
+    private static String posReplacement = "at line 0, column 0";
+    private static String fileReplacement = "in $1 '...'$3";
 
     public String filterErrorMessages(String str) {
         str = introFilter.matcher(str).replaceAll(introReplacement);
         str = posFilter.matcher(str).replaceAll(posReplacement);
+        str = fileFilter.matcher(str).replaceAll(fileReplacement);
         return str;
     }
 
