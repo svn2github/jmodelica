@@ -2211,16 +2211,21 @@ aspect Arrays {
 
     eq FFunctionCall.getArray() {
         FClass fc = myFClass();
-        if (!isArray() || fc == null)
+        if (!isComposite() || fc == null) {
             return super.getArray();
+        }
         
-        if (variability().knownParameterOrLess() && inKeptBExp()) {
+        if (isArray() && variability().knownParameterOrLess() && inKeptBExp()) {
             Array arr = new Array(indices());
             CValueArray carr = (CValueArray) cevalArray(Index.NULL);
             for (Index i : arr.indices()) {
                 arr.set(i, carr.getCell(i).buildLiteral());
             }
             return arr;
+        }
+        
+        if (isFunctionCallArg()) {
+            return super.getArray();
         }
         
         FArraySubscripts fas = collectIterExpSubscripts();

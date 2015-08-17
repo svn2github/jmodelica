@@ -1628,31 +1628,13 @@ fclass ArrayTests.Subscripts.SubscriptExpression10
  parameter Real c[1] = 1 /* 1 */;
  parameter Real c[2] = 2 /* 2 */;
  parameter Real c[3] = 3 /* 3 */;
- parameter Real temp_1.a;
- parameter Real temp_2.a;
- parameter Real temp_3.a;
- parameter Real temp_4.a;
- parameter Real temp_5.a;
- parameter Real temp_6.a;
- parameter Real temp_7.a;
- parameter Real temp_8.a;
- parameter Real temp_9.a;
  parameter Real m[1].b;
  parameter Real m[2].b;
  parameter Real m[3].b;
 parameter equation
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_2.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_3.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_4.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_6.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_7.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_8.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]);
- (ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a)) = ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]);
- m[1].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_1.a));
- m[2].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_5.a));
- m[3].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.R(temp_9.a));
+ m[1].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[1]));
+ m[2].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[2]));
+ m[3].b = ArrayTests.Subscripts.SubscriptExpression10.f1(ArrayTests.Subscripts.SubscriptExpression10.f2(c[3]));
 
 public
  function ArrayTests.Subscripts.SubscriptExpression10.f1
@@ -5942,18 +5924,12 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest8
  Real z[2];
  Real w[1];
  Real w[2];
- Real temp_1[1].a;
- Real temp_1[1].b;
- Real temp_1[2].a;
- Real temp_1[2].b;
 equation
  z[1] = time;
  z[2] = time * 2;
- (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]);
- (ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b)) = ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]);
- w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[1].a, temp_1[1].b));
- w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.R(temp_1[2].a, temp_1[2].b));
-
+ w[1] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[1]));
+ w[2] = ArrayTests.Constructors.Iterators.ArrayIterTest8.f2(ArrayTests.Constructors.Iterators.ArrayIterTest8.f1(z[2]));
+ 
 public
  function ArrayTests.Constructors.Iterators.ArrayIterTest8.f2
   input ArrayTests.Constructors.Iterators.ArrayIterTest8.R x;

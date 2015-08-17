@@ -1191,11 +1191,11 @@ aspect Scalarization {
     /**
      * Should this expression be extracted into its own statement?
      */
-    syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray() && canAcceptArray();
+    syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray(true) && canAcceptArray();
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
-    eq FFunctionCall.extractTemp() = isComposite() && !isFunctionCallClause();
+    eq FFunctionCall.extractTemp() = !isFunctionCallArg() && isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
     eq FIdentity.extractTemp()     = size().isUnknown() || inUnknownSize();
@@ -2970,20 +2970,24 @@ aspect Scalarization {
 		return res;
 	}
 	
-	syn boolean FExp.buildScalarArray() = !size().isUnknown() && isArray() && !keepAsArray();
+	syn boolean FExp.buildScalarArray() = !size().isUnknown() && isArray() && !keepAsArray(true);
 	eq FArray.buildScalarArray() = false;
 	
-	syn boolean FExp.keepAsArray() =  canKeepAsArray() && canAcceptArray();
+	syn boolean FExp.keepAsArray() = keepAsArray(false);
+	syn boolean FExp.keepAsArray(boolean scal) = canKeepAsArray(scal) && canAcceptArray();
 
-	syn boolean FExp.canKeepAsArray() = false;
-	eq FIdUseExp.canKeepAsArray()     = !isSlice();
-	eq FFunctionCall.canKeepAsArray() = true;
+	syn boolean FExp.canKeepAsArray(boolean scal) = false;
+	eq FIdUseExp.canKeepAsArray(boolean scal)     = !isSlice();
+	eq FFunctionCall.canKeepAsArray(boolean scal) = scal;
 	
 	inh boolean FExp.canAcceptArray();
 	eq BaseNode.getChild().canAcceptArray()         = false;
 	eq FFunctionCallLeft.getFExp().canAcceptArray() = inFunction();
-	eq FFunctionCall.getArg().canAcceptArray()      = inFunction();
+	eq FFunctionCall.getArg(int i).canAcceptArray() = getArg(i).isFFunctionCall() || inFunction();
 	eq FSizeExp.getFExp().canAcceptArray()          = inFunction();
+	
+	syn boolean FExp.isFFunctionCall() = false;
+	eq FFunctionCall.isFFunctionCall() = true;
 	
 	/**
 	 * Scalarize expressions.
@@ -3074,7 +3078,7 @@ aspect Scalarization {
     
 	inh boolean FExp.wantsRecordCon();
 	eq BaseNode.getChild().wantsRecordCon()         = false;
-	eq FFunctionCall.getArg().wantsRecordCon()      = !inFunction();
+	eq FFunctionCall.getArg(int i).wantsRecordCon() = !getArg(i).isFFunctionCall() && !inFunction();
 	eq FRecordConstructor.getArg().wantsRecordCon() = wantsRecordCon();
 	eq FArray.getFExp().wantsRecordCon()            = wantsRecordCon();
  

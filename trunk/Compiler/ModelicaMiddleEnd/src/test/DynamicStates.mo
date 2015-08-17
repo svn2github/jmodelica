@@ -1537,10 +1537,12 @@ end DynamicStates.Special.FunctionDerivative1;
             Real a1;
             Real a2;
             Real b;
+            R t;
         equation
             der(a1) = b;
             der(a2) = b;
-            a1^2 + a2^2 = F1(a1, F2(a1));
+            t = F2(a1);
+            a1^2 + a2^2 = F1(a1, t);
         annotation(__JModelica(UnitTesting(tests={
             FClassMethodTestCase(
                 name="FunctionCallEquation1",
@@ -1552,30 +1554,30 @@ end DynamicStates.Special.FunctionDerivative1;
   --- States: a2 ---
     --- Torn system (Block 1(a2).0) of 1 iteration variables and 2 solved variables ---
     Torn variables:
-      temp_1.x
-      temp_1.y
+      t.x
+      t.y
 
     Iteration variables:
       a1 ()
 
     Torn equations:
-      (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
-        Assigned variables: temp_1.x
-      (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
-        Assigned variables: temp_1.y
+      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+        Assigned variables: t.x
+      (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+        Assigned variables: t.y
 	
     Residual equations:
-      ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y))
+      ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
         Iteration variables: a1
     -------------------------------
   --- States: a1 ---
     --- Solved function call equation ---
-    (DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
-      Assigned variables: temp_1.x
-                          temp_1.y
+    (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(0, a1))
+      Assigned variables: t.x
+                          t.y
 
     --- Unsolved equation (Block 1(a1).0) ---
-    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y))
+    ds(0, a1) ^ 2 + ds(0, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
       Computed variables: a2
     -------------------------------
 
@@ -1592,7 +1594,7 @@ Torn equations:
   dynDer(a2) := b
 
 Residual equations:
-  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = DynamicStates.Special.FunctionCallEquation1.F1_d(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(temp_1.x, temp_1.y), dynDer(a1))
+  2 * ds(0, a1) * dynDer(a1) + 2 * ds(0, a2) * dynDer(a2) = DynamicStates.Special.FunctionCallEquation1.F1_d(ds(0, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y), dynDer(a1))
     Iteration variables: dynDer(a1)
 
 --- Solved equation ---

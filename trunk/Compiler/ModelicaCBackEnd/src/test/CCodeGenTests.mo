@@ -3925,10 +3925,10 @@ model CUnknownArray3
 void func_CCodeGenTests_CUnknownArray3_f1_def0(jmi_array_t* x1_a, jmi_ad_var_t* y1_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y1_v)
-    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
-    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(x1_a, 0), 1, jmi_array_size(x1_a, 0))
-    func_CCodeGenTests_CUnknownArray3_f2_def2(x1_a, temp_1_a);
-    y1_v = func_CCodeGenTests_CUnknownArray3_f3_exp1(temp_1_a);
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, jmi_array_size(x1_a, 0), 1, jmi_array_size(x1_a, 0))
+    func_CCodeGenTests_CUnknownArray3_f2_def2(x1_a, tmp_1);
+    y1_v = func_CCodeGenTests_CUnknownArray3_f3_exp1(tmp_1);
     JMI_RET(GEN, y1_o, y1_v)
     JMI_DYNAMIC_FREE()
     return;

@@ -3619,23 +3619,13 @@ model RecordScalarize37
             variability_propagation=false,
             flatModel="
 fclass RecordTests.RecordScalarize37
- Real a1.x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_1.x)));
- Real a2[1].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_2.x)));
- Real a2[2].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.A(temp_5.x)));
- Real temp_1.x;
- Real temp_2.x;
- Real temp_3.x;
- Real temp_4.x;
- Real temp_5.x;
+ Real a1.x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.AA(3)));
+ Real a2[1].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.AA(4)));
+ Real a2[2].x(start = RecordTests.RecordScalarize37.f(RecordTests.RecordScalarize37.AA(5)));
 equation
  a1.x = 4;
  a2[1].x = 4;
  a2[2].x = 4;
- (RecordTests.RecordScalarize37.A(temp_1.x)) = RecordTests.RecordScalarize37.AA(3);
- (RecordTests.RecordScalarize37.A(temp_2.x)) = RecordTests.RecordScalarize37.AA(4);
- (RecordTests.RecordScalarize37.A(temp_3.x)) = RecordTests.RecordScalarize37.AA(5);
- (RecordTests.RecordScalarize37.A(temp_4.x)) = RecordTests.RecordScalarize37.AA(4);
- (RecordTests.RecordScalarize37.A(temp_5.x)) = RecordTests.RecordScalarize37.AA(5);
 
 public
  function RecordTests.RecordScalarize37.f
@@ -4708,8 +4698,6 @@ end RecordTests.RecordInput2;
 ")})));
 end RecordInput2;
 
-
-// TODO: Dont create temporary here, just send the returned array into the next function (cf. arrays)
 model RecordInput3
  record A
   Real x;
@@ -4740,11 +4728,8 @@ model RecordInput3
 			flatModel="
 fclass RecordTests.RecordInput3
  Real x;
- Real temp_1.x;
- Real temp_1.y;
 equation
- (RecordTests.RecordInput3.A(temp_1.x, temp_1.y)) = RecordTests.RecordInput3.f1();
- x = RecordTests.RecordInput3.f2(RecordTests.RecordInput3.A(temp_1.x, temp_1.y));
+ x = RecordTests.RecordInput3.f2(RecordTests.RecordInput3.f1());
 
 public
  function RecordTests.RecordInput3.f2

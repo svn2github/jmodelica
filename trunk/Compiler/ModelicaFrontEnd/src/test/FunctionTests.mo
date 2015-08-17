@@ -7263,11 +7263,9 @@ public
  function FunctionTests.ArrayOutputScalarization17.f1
   output Real o;
   Real[2] y;
-  Real[2] temp_1;
  algorithm
   o := 2;
-  (temp_1) := FunctionTests.ArrayOutputScalarization17.f2({1, 2});
-  (y) := FunctionTests.ArrayOutputScalarization17.f2(temp_1);
+  (y) := FunctionTests.ArrayOutputScalarization17.f2(FunctionTests.ArrayOutputScalarization17.f2({1, 2}));
   return;
  end FunctionTests.ArrayOutputScalarization17.f1;
 
@@ -9277,14 +9275,8 @@ fclass FunctionTests.UnknownArray33
  Real x;
  Real y.x[1];
  Real y.x[2];
- Real temp_1[1];
- Real temp_1[2];
- Real temp_2[1];
- Real temp_2[2];
 equation
- ({temp_1[1], temp_1[2]}) = FunctionTests.UnknownArray33.f2({time, time * 2});
- ({temp_2[1], temp_2[2]}) = FunctionTests.UnknownArray33.f2({temp_1[1], temp_1[2]});
- (x, FunctionTests.UnknownArray33.R({y.x[1], y.x[2]})) = FunctionTests.UnknownArray33.f({temp_2[1], temp_2[2]});
+ (x, FunctionTests.UnknownArray33.R({y.x[1], y.x[2]})) = FunctionTests.UnknownArray33.f(FunctionTests.UnknownArray33.f2(FunctionTests.UnknownArray33.f2({time, time * 2})));
 
 public
  function FunctionTests.UnknownArray33.f
@@ -9292,13 +9284,11 @@ public
   output Real b;
   output FunctionTests.UnknownArray33.R c;
   Real[2] temp_1;
-  Real[2] temp_2;
  algorithm
   b := a[1];
-  (temp_1) := FunctionTests.UnknownArray33.f2(a);
-  (temp_2) := FunctionTests.UnknownArray33.f2(temp_1);
-  c.x[1] := temp_2[1];
-  c.x[2] := temp_2[2];
+  (temp_1) := FunctionTests.UnknownArray33.f2(FunctionTests.UnknownArray33.f2(a));
+  c.x[1] := temp_1[1];
+  c.x[2] := temp_1[2];
   return;
  end FunctionTests.UnknownArray33.f;
 

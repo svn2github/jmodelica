@@ -1659,6 +1659,7 @@ aspect FlatFunctionUtils {
      eq InstNode.getChild().functionCallIsExp()             = true;
      eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
      eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
+     eq FFunctionCall.getArg(int i).functionCallIsExp()     = !getArg(i).isComposite();
      
      inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
      eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();

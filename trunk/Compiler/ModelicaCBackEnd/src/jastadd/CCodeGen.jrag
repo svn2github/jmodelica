@@ -530,10 +530,13 @@ aspect CCodeGen {
         int lefts = myLefts().size();
         for (int i = 0; i < outputs; i++) {
             str.print(sep);
-            if (i < lefts)
+            if (i < lefts) {
                 myLefts().get(i).genArgument_C(str);
-            else
+            } else if (i == 0 && lefts == 0 && isFunctionCallArg()) {
+                str.print(tempName_C());
+            } else {
                 str.print("NULL");
+            }
             sep = ", ";
         }
     }
@@ -3283,11 +3286,22 @@ aspect CCodeGen {
     
 	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray()) {
-			String name = tempName_C();
-            type().print(p.createInitPrinter(str), indent, name, this, false);
-			type().genTempInputAssigns_C(p, str, indent, name, this);
+            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
+            genTempInputAssigns_C(p, str, indent);
 		}
 	}
+    
+    public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
+        type().genTempInputAssigns_C(p, str, indent, tempName_C(), this);
+    }
+    
+    public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            prettyPrintCall_C(p, str, indent);
+        } else {
+            super.genTempInputAssigns_C(p, str, indent);
+        }
+    }
     
     public void FPartialFunctionCall.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
         if (myFCallable().isPartialFunction()) {

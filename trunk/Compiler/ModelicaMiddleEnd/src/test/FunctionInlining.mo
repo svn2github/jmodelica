@@ -2016,8 +2016,10 @@ model MultipleOutputsInline4
     function f1
         input Real x;
         output Real y;
+        R r;
       algorithm
-        y := f2(f3(x));
+        r := f3(x);
+        y := f2(r);
         annotation (Inline=true);
     end f1;
     Real x,y;
@@ -2034,18 +2036,18 @@ model MultipleOutputsInline4
 fclass FunctionInlining.MultipleOutputsInline4
  Real x;
  Real y;
- discrete String temp_4;
- discrete Integer temp_5;
- discrete Boolean temp_6;
- discrete FunctionInlining.MultipleOutputsInline4.E temp_7;
+ discrete String temp_3;
+ discrete Integer temp_4;
+ discrete Boolean temp_5;
+ discrete FunctionInlining.MultipleOutputsInline4.E temp_6;
 initial equation 
- pre(temp_4) = \"\";
- pre(temp_5) = 0;
- pre(temp_6) = false;
- pre(temp_7) = FunctionInlining.MultipleOutputsInline4.E.E1;
+ pre(temp_3) = \"\";
+ pre(temp_4) = 0;
+ pre(temp_5) = false;
+ pre(temp_6) = FunctionInlining.MultipleOutputsInline4.E.E1;
 equation
  x = 1;
- (FunctionInlining.MultipleOutputsInline4.R(y, temp_4, temp_5, temp_6, temp_7)) = FunctionInlining.MultipleOutputsInline4.f3(x);
+ (FunctionInlining.MultipleOutputsInline4.R(y, temp_3, temp_4, temp_5, temp_6)) = FunctionInlining.MultipleOutputsInline4.f3(x);
 
 public
  function FunctionInlining.MultipleOutputsInline4.f3
@@ -2346,10 +2348,8 @@ equation
 fclass FunctionInlining.IfEquationInline7
  Real x;
  Real y;
- Real temp_1.p;
 equation
- temp_1.p = if time > 0 then 0.0 else time;
- x = if time > 0 then 4 else temp_1.p;
+ x = if time > 0 then 4 else time;
  0.0 = if time > 0 then y - 2 else time - (y + 1);
 end FunctionInlining.IfEquationInline7;
 ")})));
@@ -3605,5 +3605,305 @@ initial equation
 end FunctionInlining.InitialSystemInlining1;
 ")})));
 end InitialSystemInlining1;
+
+model ChainedCallInlining1
+    record R
+        Real x;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y = R(x);
+        algorithm
+    end f1;
+    
+    function f2
+        input R x;
+        output Real y = x.x;
+        algorithm
+    end f2;
+    
+    Real y = f2(f1(time));
+annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining1",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining1
+ Real y;
+equation
+ y = time;
+end FunctionInlining.ChainedCallInlining1;
+")})));
+end ChainedCallInlining1;
+
+model ChainedCallInlining2
+    record R
+        Real x;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y = R(x);
+        algorithm
+    end f1;
+    
+    function f2
+        input R x;
+        output Real y = x.x;
+        algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    Real y = f2(f1(time));
+annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining2",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining2
+ Real y;
+equation
+ y = FunctionInlining.ChainedCallInlining2.f2(FunctionInlining.ChainedCallInlining2.R(time));
+
+public
+ function FunctionInlining.ChainedCallInlining2.f2
+  input FunctionInlining.ChainedCallInlining2.R x;
+  output Real y;
+ algorithm
+  y := x.x;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ChainedCallInlining2.f2;
+
+ record FunctionInlining.ChainedCallInlining2.R
+  Real x;
+ end FunctionInlining.ChainedCallInlining2.R;
+
+end FunctionInlining.ChainedCallInlining2;
+")})));
+end ChainedCallInlining2;
+
+model ChainedCallInlining3
+    record R
+        Real x;
+    end R;
+    
+    function f1
+        input Real x;
+        output R y = R(x);
+        algorithm
+        annotation(Inline=false);
+    end f1;
+    
+    function f2
+        input R x;
+        output Real y = x.x;
+        algorithm
+    end f2;
+    
+    Real y = f2(f1(time));
+annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining3",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining3
+ Real y;
+equation
+ (FunctionInlining.ChainedCallInlining3.R(y)) = FunctionInlining.ChainedCallInlining3.f1(time);
+
+public
+ function FunctionInlining.ChainedCallInlining3.f1
+  input Real x;
+  output FunctionInlining.ChainedCallInlining3.R y;
+ algorithm
+  y.x := x;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ChainedCallInlining3.f1;
+
+ record FunctionInlining.ChainedCallInlining3.R
+  Real x;
+ end FunctionInlining.ChainedCallInlining3.R;
+
+end FunctionInlining.ChainedCallInlining3;
+")})));
+end ChainedCallInlining3;
+
+model ChainedCallInlining4
+    record R1
+        Real x1;
+        Real[2] x2;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+        Real[2] z1;
+    end R2;
+    
+    function f1
+        input Real x;
+        output R2[:] y = {R2({R1(x,{x+1,x+2}),R1(x+3,{x+4,x+5})}, {x+6, x+7})};
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R2[:] x;
+        output Real y;
+        algorithm
+            y := sum(x[1].r1[2].x2[1:2]);
+    end f2;
+      
+      Real y = f2(f1(time));
+annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining4",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining4
+ Real y;
+ Real temp_11;
+equation
+ y = temp_11 + 4 + (temp_11 + 5);
+ temp_11 = time;
+end FunctionInlining.ChainedCallInlining4;
+")})));
+end ChainedCallInlining4;
+
+model ChainedCallInlining5
+    record R1
+        Real x1;
+        Real[2] x2;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+        Real[2] z1;
+    end R2;
+    
+    function f1
+        input Real x;
+        output R2[1] y = {R2({R1(x,{x+1,x+2}),R1(x+3,{x+4,x+5})}, {x+6, x+7})};
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R2[1] x;
+        output Real y;
+        algorithm
+            y := x[1].r1[2].x2[1] / x[1].r1[2].x2[2];
+    end f2;
+      
+      Real y = f2(f1(time));
+annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining5",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining5
+ Real y;
+ Real temp_11;
+equation
+ y = (temp_11 + 4) / (temp_11 + 5);
+ temp_11 = time;
+end FunctionInlining.ChainedCallInlining5;
+")})));
+end ChainedCallInlining5;
+
+model ChainedCallInlining6
+    record R1
+        Real x1;
+        Real[2] x2;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+        Real[2] z1;
+    end R2;
+    
+    function f1
+        input Real x;
+        output R2[1] y = {R2({R1(x,{x+1,x+2}),R1(x+3,{x+4,x+5})}, {x+6, x+7})};
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R2[1] x;
+        output Real y;
+        algorithm
+            y := x[1].r1[2].x2[1] / x[1].r1[2].x2[2];
+    end f2;
+      
+      Real y = f2(f1(f2(f1(time))));
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining6",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining6
+ Real y;
+ Real temp_11;
+ Real temp_30;
+equation
+ y = (temp_11 + 4) / (temp_11 + 5);
+ temp_11 = (temp_30 + 4) / (temp_30 + 5);
+ temp_30 = time;
+end FunctionInlining.ChainedCallInlining6;
+")})));
+end ChainedCallInlining6;
+
+model ChainedCallInlining7
+    record R1
+        Real x1;
+        Real[2] x2;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+        Real[2] z1;
+    end R2;
+    
+    function f1
+        input Real x;
+        output R2[1] y = {R2({R1(x,{x+1,x+2}),R1(x+3,{x+4,x+5})}, {x+6, x+7})};
+        algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R2[1] x;
+        output Real y;
+        algorithm
+            y := x[1].r1[2].x2[1] / x[1].r1[2].x2[2];
+    end f2;
+    
+    function f3
+        input Real x;
+        output Real y;
+    algorithm
+        y := f2(f1(f2(f1(x))));
+    end f3;
+      
+      Real y = f3(time);
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining7",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining7
+ Real y;
+ Real temp_13;
+ Real temp_32;
+equation
+ y = (temp_13 + 4) / (temp_13 + 5);
+ temp_13 = (temp_32 + 4) / (temp_32 + 5);
+ temp_32 = time;
+end FunctionInlining.ChainedCallInlining7;
+")})));
+end ChainedCallInlining7;
 
 end FunctionInlining;
