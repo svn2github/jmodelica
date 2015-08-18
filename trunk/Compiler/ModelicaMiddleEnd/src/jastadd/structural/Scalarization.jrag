@@ -2979,6 +2979,7 @@ aspect Scalarization {
 	syn boolean FExp.canKeepAsArray(boolean scal) = false;
 	eq FIdUseExp.canKeepAsArray(boolean scal)     = !isSlice();
 	eq FFunctionCall.canKeepAsArray(boolean scal) = scal;
+    eq FVectorFunctionCall.canKeepAsArray(boolean scal) = false;
 	
 	inh boolean FExp.canAcceptArray();
 	eq BaseNode.getChild().canAcceptArray()         = false;
