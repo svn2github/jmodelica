@@ -19,6 +19,7 @@
 Module containing the CasADi interface Python wrappers.
 """
 
+import struct
 import logging
 import codecs
 import operator
@@ -5696,7 +5697,8 @@ def _to_external_function(fcn, name, use_existing=False):
         print 'Generating code for', name
         fcn.generateCode(name + '.c')
         _add_help_fcns(name + '.c')
-        system('gcc -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
+        bitness_flag = '-m32' if struct.calcsize('P') == 4 else '-m64'
+        system('gcc ' + bitness_flag + ' -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
     fcn_e = casadi.ExternalFunction('./' + name + ext)
     return fcn_e
     
