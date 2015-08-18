@@ -1301,6 +1301,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         for(i = 0; i < N; i++) {
             if(solver->residual_nominal[i] != 0.0) {
                 if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
+                    jmi_log_node_t node;
                     solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
                     jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
                                  "<equation: %I> since specified residual nominal is too small.", block->label, i);
@@ -1369,16 +1370,26 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         /* check that scaling factors has reasonable magnitude */
         for(i = 0; i < N; i++) {
             if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
+                jmi_log_node_t node; 
                 scale_ptr[i] = bsop->max_residual_scaling_factor; /* Singular Jacobian? */
                 solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
-                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
-                             "<equation: %I> Consider rescaling in the model.", block->label, i);
+                node = jmi_log_enter_fmt(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to",
+                    block->label, i);
+                jmi_log_vrefs(block->log, node, logWarning, "Iter", 'r', block->value_references, block->n);
+                jmi_log_reals(block->log, node, logWarning, "dRes_dIter", block->dres, block->n);
+                jmi_log_leave(block->log, node);
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
+                jmi_log_node_t node; 
                 scale_ptr[i] = bsop->min_residual_scaling_factor;
                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
-                jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
-                             "<equation: %I> Consider rescaling in the model.", block->label, i);
+                 node = jmi_log_enter_fmt(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to",
+                    block->label, i);
+                jmi_log_vrefs(block->log, node, logWarning, "Iter", 'r', block->value_references, block->n);
+                jmi_log_reals(block->log, node, logWarning, "dRes_dIter", block->dres, block->n);
+                jmi_log_leave(block->log, node);
             }
             else
                 scale_ptr[i] = 1/scale_ptr[i];
