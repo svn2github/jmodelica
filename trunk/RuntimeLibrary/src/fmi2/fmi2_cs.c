@@ -221,6 +221,9 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
 
 /* Helper method for fmi2_free_instance. */
 void fmi2_cs_free_instance(fmi2Component c) {
+    if (((fmi2_cs_t *)c)->ode_problem->ode_solver) {
+        jmi_delete_ode_solver(((fmi2_cs_t *)c)->ode_problem);
+    }
     jmi_free_ode_problem(((fmi2_cs_t*)c) -> ode_problem);
 	fmi2_me_free_instance(c);
 }

@@ -272,6 +272,28 @@ int jmi_ode_cvode_new(jmi_ode_cvode_t** integrator_ptr, jmi_ode_solver_t* solver
 void jmi_ode_cvode_delete(jmi_ode_solver_t* solver) {
     
     if((jmi_ode_cvode_t*)(solver->integrator)){
+        jmi_ode_cvode_t* integrator = (jmi_ode_cvode_t*)solver->integrator;
+        jmi_ode_problem_t* problem = solver -> ode_problem;
+        jmi_log_node_t node;
+        long int nsteps = 0, nfevals = 0, nlinsetups = 0, netfails = 0;
+        long int nniters = 0, nncfails = 0;
+        int qcur = 0, qlast = 0;
+        realtype hinused = 0.0, hlast = 0.0, hcur = 0.0, tcur = 0.0;
+        
+        /* Get statistics */
+        CVodeGetIntegratorStats(integrator->cvode_mem, &nsteps, &nfevals, &nlinsetups, &netfails, &qlast,
+                                           &qcur, &hinused, &hlast, &hcur, &tcur);
+        CVodeGetNonlinSolvStats(integrator->cvode_mem, &nniters, &nncfails);
+        
+        node = jmi_log_enter_fmt(problem->log, logInfo, "CVodeStatistics", 
+                                     "Simulation statistics");
+        jmi_log_fmt(problem->log, node, logInfo, "<nsteps: %d>", nsteps);
+        jmi_log_fmt(problem->log, node, logInfo, "<nfevals: %d>", nfevals);
+        jmi_log_fmt(problem->log, node, logInfo, "<nerrfails: %d>", netfails);
+        jmi_log_fmt(problem->log, node, logInfo, "<nniters: %d>", nniters);
+        jmi_log_fmt(problem->log, node, logInfo, "<nnfails: %d>", nncfails);
+        jmi_log_leave(problem->log, node);
+        
         /*Deallocate work vectors.*/
         N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->y_work));
         N_VDestroy_Serial((((jmi_ode_cvode_t*)(solver->integrator))->atol));
