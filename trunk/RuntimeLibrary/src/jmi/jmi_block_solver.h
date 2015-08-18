@@ -84,7 +84,6 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_steepest_descent = 1,
     jmi_block_solver_experimental_steepest_descent_first = 2,
     jmi_block_solver_experimental_Brent = 4,
-    jmi_block_solver_experimental_Brent_ignore_error = 8,
     jmi_block_solver_experimental_Brent_with_newton = 16
 } jmi_block_solver_experimental_mode_t;
 
@@ -220,6 +219,7 @@ struct jmi_block_solver_options_t {
     int rescale_after_singular_jac_flag;    /**< \brief If scaling should be updated after singular jac was detected (only active if residual_equation_scaling_mode is not "none") */
 
     int check_jac_cond_flag;       /**< \brief Flag if the solver should check Jacobian condition number and log it. */
+    int brent_ignore_error_flag;   /**< \brief Flag if the solver should ignore errors in Brent solve. */
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
     double events_epsilon;         /**< \brief The event epsilon used for event indicators and switches. */
     int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */

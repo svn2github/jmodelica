@@ -507,7 +507,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
         }
 #endif
-        if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error)
+        if(block->options->brent_ignore_error_flag)
             return JMI_BRENT_SUCCESS;
         else
             return JMI_BRENT_FIRST_SYSFUNC_ERR;
@@ -636,7 +636,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                     block->parent_block->time_in_brent += ((double)clock() - t) / CLOCKS_PER_SEC;
                 }
 #endif
-                if(block->options->experimental_mode & jmi_block_solver_experimental_Brent_ignore_error) {
+                if(block->options->brent_ignore_error_flag) {
                     /*block->x[0] = init;
                     block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK); */
                     return JMI_BRENT_SUCCESS;
