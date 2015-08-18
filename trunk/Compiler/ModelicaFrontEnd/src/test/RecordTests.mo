@@ -3737,6 +3737,66 @@ end RecordTests.RecordScalarize40;
 ")})));
 end RecordScalarize40;
 
+model RecordScalarize41
+    record R
+        Real a;
+        Real b;
+    end R;
+
+    input R r1;
+    output R r2 = r1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize41",
+            description="Scalarization of input/output records",
+            flatModel="
+fclass RecordTests.RecordScalarize41
+ input Real r1.a;
+ input Real r1.b;
+ output Real r2.a;
+ output Real r2.b;
+equation
+ r2.a = r1.a;
+ r2.b = r1.b;
+end RecordTests.RecordScalarize41;
+")})));
+end RecordScalarize41;
+
+model RecordScalarize42
+    record R
+        Real c;
+        R2 r;
+    end R;
+
+    record R2
+        Real a;
+        Real b;
+    end R2;
+
+    input R r1;
+    output R r2 = r1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize42",
+            description="Scalarization of input/output records",
+            flatModel="
+fclass RecordTests.RecordScalarize42
+ input Real r1.c;
+ input Real r1.r.a;
+ input Real r1.r.b;
+ output Real r2.c;
+ output Real r2.r.a;
+ output Real r2.r.b;
+equation
+ r2.c = r1.c;
+ r2.r.a = r1.r.a;
+ r2.r.b = r1.r.b;
+end RecordTests.RecordScalarize42;
+")})));
+end RecordScalarize42;
+
 
 model RecordFunc1
  record A

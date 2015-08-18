@@ -458,27 +458,32 @@ aspect Scalarization {
         private Map<String, FAttribute> mattrs; 
         
         // Full name of this variable
-        private FQName name; 
+        private FQName name;
+        
+        // input/output prefix of top-level variable
+        private Opt<FTypePrefixInputOutput> inputOutput;
         
         private Index index;
         
         private ScalarizingVariableInstance(FQName n, Map<String, FAttribute> mattrs, FExp be,
-                int bd, FTypePrefixVariability variability, Index i)  {
+                int bd, FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
             bExp = be;
             bExpDims = bd;
             name = n;
             index = i;
             this.mattrs = mattrs;
             this.variability = variability;
+            this.inputOutput = inputOutput;
         }
         
         private ScalarizingVariableInstance(FQName n, List<FAttribute> attrs, FExp be,
-                int bd, FTypePrefixVariability variability, Index i)  {
-            this(n, ScalarizingVariableInstance.mapped(attrs), be, bd, variability, i);
+                int bd, FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
+            this(n, ScalarizingVariableInstance.mapped(attrs), be, bd, variability, inputOutput, i);
         }
         
         public ScalarizingVariableInstance(FVariable fv) {
-            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.ndims(), fv.variability(), Index.NULL);
+            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.ndims(), fv.variability(), 
+                    fv.getFTypePrefixInputOutputOpt(), Index.NULL);
         }
         
         private static Map<String, FAttribute> mapped(List<FAttribute> as) {
@@ -511,7 +516,8 @@ aspect Scalarization {
                 nbexp = bExp.extractArrayCell(Collections.<String,FExp>emptyMap(), ni);
                 nbexp = bExp.dynamicFExp(nbexp);
             }
-            return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), mattrs, nbexp, -1, variability, ti);
+            return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), 
+                    mattrs, nbexp, -1, variability, inputOutput, ti);
         }
         
         public ScalarizingVariableInstance create(Scalarizer scalarizer, FVariable comp) {
@@ -547,7 +553,7 @@ aspect Scalarization {
                 }
             }
             
-            return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbexpdims, nv, index);
+            return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbexpdims, nv, inputOutput, index);
         }
         
         public void createScalarized(Scalarizer scalarizer, FVariable comp) {
@@ -564,6 +570,7 @@ aspect Scalarization {
                 fv.setBindingExpOpt(new Opt());
             }
             fv.setFTypePrefixVariability(variability);
+            fv.setFTypePrefixInputOutputOpt(inputOutput.treeCopy());
             inheritMerge(scalarizer, fv.getFAttributeList(), mattrs);
             fv.addArrayAttributesFromType(myCell(), comp.myFDerivedType());
             scalarizer.add(fv);
