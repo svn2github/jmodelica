@@ -403,6 +403,7 @@ aspect FExpToCasADi {
     eq FNegExp.toMX() = getFExp().toMX().__neg__();
     eq FPreExp.toMX() = myFV().asMXVariable();
     eq FNoEventExp.toMX() = getFExp().toMX();
+    eq FSmoothExp.toMX() = getFExp().toMX();
     
     eq FArray.toMXVector() {
         MXVector MXVec = new MXVector();
