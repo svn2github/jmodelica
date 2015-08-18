@@ -2679,4 +2679,102 @@ end Differentiation.AlgorithmDifferentiation.SelfReference_FunctionCall;
 
     end AlgorithmDifferentiation;
 
+model TempDiff
+    function f
+        input Real x1;
+        input Real[:] x2;
+        output Real y = sum(cat(1, {x1}, x2));
+        algorithm
+        annotation(Inline=false, smoothOrder=2);
+    end f;
+    
+    Real x,y;
+equation
+    x = f(y, {time});
+    der(y) = der(x);
+    
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="TempDiff",
+                description="Test differentiation of temporary array from scalarization",
+                flatModel="
+fclass Differentiation.TempDiff
+ Real x;
+ Real y;
+ Real _der_x;
+initial equation 
+ y = 0.0;
+equation
+ x = Differentiation.TempDiff.f(y, {time});
+ der(y) = _der_x;
+ _der_x = Differentiation.TempDiff._der_f(y, {time}, der(y), {1.0});
+
+public
+ function Differentiation.TempDiff.f
+  input Real x1;
+  input Real[:] x2;
+  output Real y;
+  Real temp_1;
+  Real[:] temp_2;
+  Real[1] temp_3;
+ algorithm
+  size(temp_2) := {1 + size(x2, 1)};
+  temp_3[1] := x1;
+  for i2 in 1:1 loop
+   temp_2[i2] := temp_3[i2];
+  end for;
+  for i2 in 1:size(x2, 1) loop
+   temp_2[i2 + 1] := x2[i2];
+  end for;
+  temp_1 := 0.0;
+  for i1 in 1:1 + size(x2, 1) loop
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  y := temp_1;
+  return;
+ annotation(Inline = false,smoothOrder = 2,derivative(order = 1) = Differentiation.TempDiff._der_f);
+ end Differentiation.TempDiff.f;
+
+ function Differentiation.TempDiff._der_f
+  input Real x1;
+  input Real[:] x2;
+  input Real _der_x1;
+  input Real[:] _der_x2;
+  output Real _der_y;
+  Real y;
+  Real temp_1;
+  Real _der_temp_1;
+  Real[:] temp_2;
+  Real[:] _der_temp_2;
+  Real[1] temp_3;
+  Real[1] _der_temp_3;
+ algorithm
+  size(temp_2) := {1 + size(x2, 1)};
+  size(_der_temp_2) := {1 + size(x2, 1)};
+  _der_temp_3[1] := _der_x1;
+  temp_3[1] := x1;
+  for i2 in 1:1 loop
+   _der_temp_2[i2] := _der_temp_3[i2];
+   temp_2[i2] := temp_3[i2];
+  end for;
+  for i2 in 1:size(x2, 1) loop
+   _der_temp_2[i2 + 1] := _der_x2[i2];
+   temp_2[i2 + 1] := x2[i2];
+  end for;
+  _der_temp_1 := 0.0;
+  temp_1 := 0.0;
+  for i1 in 1:1 + size(x2, 1) loop
+   _der_temp_1 := _der_temp_1 + _der_temp_2[i1];
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  _der_y := _der_temp_1;
+  y := temp_1;
+  return;
+ annotation(smoothOrder = 1,derivative(order = 2) = Differentiation.TempDiff._der_der_f);
+ end Differentiation.TempDiff._der_f;
+
+end Differentiation.TempDiff;
+")})));
+end TempDiff;
+
 end Differentiation;
