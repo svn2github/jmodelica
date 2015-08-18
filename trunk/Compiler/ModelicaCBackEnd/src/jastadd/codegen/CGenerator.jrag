@@ -846,7 +846,7 @@ public class CGenerator extends GenericGenerator {
 			//       easier to support other platforms with special needs
 			int i = 0;
 			String ind = ASTNode.printer_C.indent("");
-			for (ArrayList<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
+            for (java.util.List<FFunctionDecl> grp : fclass.exportWrapperGroups()) {
 				FFunctionDecl first = grp.get(0);
 				String type = first.exportWrapperType_C();
 				String name = "select_vba_" + (++i);

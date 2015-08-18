@@ -1053,7 +1053,12 @@ aspect Connections {
 		getInstComponentDeclList().buildConnectionSets(prefix, csm, connect);
 		getInstExtendsList().buildConnectionSets(prefix, csm, connect);
 	}
-	
+
+    public void InstClassDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
+        super.buildConnectionSets(prefix, csm, connect);
+        getInstGeneratedInners().buildConnectionSets(prefix, csm, connect);
+    }
+
 	public void InstComponentDecl.buildConnectionSets(FQName prefix, ConnectionSetManager csm, boolean connect) {
 		if (useInFlattening()) 
 			super.buildConnectionSets(prefix, csm, connect);

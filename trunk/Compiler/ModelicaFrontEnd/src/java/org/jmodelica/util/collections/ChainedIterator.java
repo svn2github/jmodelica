@@ -13,36 +13,35 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.util;
+
+package org.jmodelica.util.collections;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-/**
- * \brief Generic iterator over a single value.
- */
-public class SingleIterator<T> implements Iterator<T> {
+public class ChainedIterator<E> implements Iterator<E> {
 	
-	protected T elem;
-	protected boolean ok;
+	private Iterator<? extends E>[] its;
+	private int i;
 	
-	public SingleIterator(T e) {
-		elem = e;
-		ok = true;
+	public ChainedIterator(Iterator<? extends E>... its) {
+		this.its = its;
 	}
-	
+
 	public boolean hasNext() {
-		return ok;
+		while (i < its.length && !its[i].hasNext())
+			i++;
+		return i < its.length;
 	}
-	
-	public T next() {
-		if (!ok)
+
+	public E next() {
+		if (!hasNext())
 			throw new NoSuchElementException();
-		ok = false;
-		return elem;
+		return its[i].next();
 	}
-	
+
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
+
 }

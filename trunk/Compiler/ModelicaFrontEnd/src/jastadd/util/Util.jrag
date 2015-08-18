@@ -1327,7 +1327,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared inner.
      */
-    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner();
+    syn boolean InstComponentDecl.isInner() = getComponentDecl().isInner() || isGeneratedInner();
     eq InstReplacingComposite.isInner()     = 
         getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isInner() : getOriginalDecl().isInner();
     eq InstReplacingRecord.isInner()        = 
@@ -1338,7 +1338,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is declared outer.
      */
-    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter();
+    syn boolean InstComponentDecl.isOuter() = getComponentDecl().isOuter() && !isGeneratedInner();
     eq InstReplacingComposite.isOuter()     = 
         getComponentDecl().hasInnerOrOuter() ? getComponentDecl().isOuter() : getOriginalDecl().isOuter();
     eq InstReplacingRecord.isOuter()        = 

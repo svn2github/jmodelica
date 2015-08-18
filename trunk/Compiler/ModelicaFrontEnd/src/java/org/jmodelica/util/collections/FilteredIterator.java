@@ -13,9 +13,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.util;
+
+package org.jmodelica.util.collections;
 
 import java.util.Iterator;
+
+import org.jmodelica.util.Criteria;
 
 public class FilteredIterator<T> implements Iterator<T> {
 	

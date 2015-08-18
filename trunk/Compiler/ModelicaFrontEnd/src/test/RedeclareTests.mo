@@ -6310,33 +6310,33 @@ end RedeclarePrefix1;
 
 model RedeclarePrefix2
     model A
-        inner replaceable Real x = 2;
+        inner replaceable Real x;
         B b;
     end A;
     
     model B
         outer Real x;
+    equation
+        x = time;
     end B;
     
     model C
         extends A;
-        redeclare outer Real x=1;
+        redeclare outer Real x;
     end C;
     
     C c;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        FlatteningTestCase(
             name="RedeclarePrefix2",
             description="Check that inner/outer can be changed in a redeclare",
-            errorMessage="
-2 errors found:
-
-Error at line 6092, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
-
-Error at line 6097, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix2
+ Real x;
+equation
+ x = time;
+end RedeclareTests.RedeclarePrefix2;
 ")})));
 end RedeclarePrefix2;
 
@@ -6569,29 +6569,29 @@ model RedeclarePrefix14
     
     model B
         outer Real x;
+    equation
+        x = time;
     end B;
     
     model C = A(replaceable Real x);
     
     model D
         extends C;
-        redeclare outer Real x=1;
+        redeclare outer Real x;
     end D;
     
     D d;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        FlatteningTestCase(
             name="RedeclarePrefix14",
             description="Check that inner/outer can be changed in a redeclare",
-            errorMessage="
-2 errors found:
-
-Error at line 6335, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
-
-Error at line 6340, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix14
+ Real x;
+equation
+ x = time;
+end RedeclareTests.RedeclarePrefix14;
 ")})));
 end RedeclarePrefix14;
 
@@ -6604,27 +6604,27 @@ model RedeclarePrefix15
     
     model B
         outer Real x;
+    equation
+        x = time;
     end B;
     
     model C
         extends A;
-        redeclare outer Real x=1;
+        redeclare outer Real x;
     end C;
     
-    C c(redeclare Real x=1);
+    C c(redeclare Real x = 1);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        FlatteningTestCase(
             name="RedeclarePrefix15",
             description="Check that inner/outer can be changed in the middle level of a multi-level redeclare",
-            errorMessage="
-2 errors found:
-
-Error at line 6370, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
-
-Error at line 6375, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot find inner declaration for outer x
+            flatModel="
+fclass RedeclareTests.RedeclarePrefix15
+ Real x;
+equation
+ x = time;
+end RedeclareTests.RedeclarePrefix15;
 ")})));
 end RedeclarePrefix15;
 

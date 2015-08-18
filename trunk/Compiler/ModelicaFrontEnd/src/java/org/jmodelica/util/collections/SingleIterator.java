@@ -13,33 +13,37 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.util;
+
+package org.jmodelica.util.collections;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
- * \brief Generic iterator over constant array.
+ * \brief Generic iterator over a single value.
  */
-public class ConstArrayIterator<T> implements Iterator<T> {
+public class SingleIterator<T> implements Iterator<T> {
 	
-	protected T[] elems;
-	protected int i;
+	protected T elem;
+	protected boolean ok;
 	
-	public ConstArrayIterator(T[] arr) {
-		elems = arr;
-		i = 0;
+	public SingleIterator(T e) {
+		elem = e;
+		ok = true;
 	}
 	
 	public boolean hasNext() {
-		return i < elems.length;
+		return ok;
 	}
 	
 	public T next() {
-		return elems[i++];
+		if (!ok)
+			throw new NoSuchElementException();
+		ok = false;
+		return elem;
 	}
 	
 	public void remove() {
 		throw new UnsupportedOperationException();
 	}
-	
 }
