@@ -1062,7 +1062,7 @@ aspect FlatPrettyPrint {
 			try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
-				str.print("evalutation error");
+                str.print("evaluation error");
 			}
 			str.print(" */");
 		}
@@ -2117,7 +2117,7 @@ aspect PrettyPrint_MC {
 	    	try {
 				str.print(getBindingExp().ceval());
 			} catch (ConstantEvaluationException e){
-				str.print("evalutation error");
+                str.print("evaluation error");
 			}
 	    	str.print(" */");
 	    }

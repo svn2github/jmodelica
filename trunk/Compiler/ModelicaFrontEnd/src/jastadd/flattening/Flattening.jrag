@@ -980,8 +980,11 @@ aspect Flattening {
 	
 	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
 		super.addAttributesToFV(attr);
-        generateAdditionalAttributes(attr, hasBindingFExp() || variability().knownParameterOrLess(), false);
+        generateAdditionalAttributes(attr, addAttributesToFVAsBound(), false);
     }
+    
+    syn boolean InstRecord.addAttributesToFVAsBound() = hasBindingFExp() 
+            || ((!inFunction() || isInput() || isOutput()) && variability().knownParameterOrLess());
     
     public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound, boolean array) {
         if (isArray()) {

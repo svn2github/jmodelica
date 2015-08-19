@@ -1045,7 +1045,7 @@ aspect TransformCanonical {
                 setBindingExpOpt(new Opt());
                 hasBindingAssignment = true;
             } else if (hasFAttribute() && isRecord()) {
-                type().genBindingAssignments(stmts, getFQName().fullCopy(), getFAttributes());
+                type().genBindingAssignments(stmts, getFQName().asFQNameFull(), getFAttributes());
             }
         }
         

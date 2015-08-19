@@ -1037,6 +1037,57 @@ end FunctionTests.FunctionFlatten22;
 ")})));
 end FunctionFlatten22;
 
+model FunctionFlatten23
+    record R
+        constant Integer n = 1;
+        constant Real a[n] = {3.14};
+    end R;
+    
+    function f
+        input Real x;
+        output Real y;
+        R r;
+    algorithm
+        for i in 1:r.n loop
+            y := r.a[i] * x;
+        end for;
+    end f;
+    
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten23",
+            description="Flattening of constant in function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten23
+ Real y;
+equation
+ y = FunctionTests.FunctionFlatten23.f(time);
+
+public
+ function FunctionTests.FunctionFlatten23.f
+  FunctionTests.FunctionFlatten23.R r;
+  input Real x;
+  output Real y;
+ algorithm
+  r.n := 1;
+  r.a[1] := 3.14;
+  for i in 1:1 loop
+   y := r.a[i] * x;
+  end for;
+  return;
+ end FunctionTests.FunctionFlatten23.f;
+
+ record FunctionTests.FunctionFlatten23.R
+  constant Integer n;
+  constant Real a[1];
+ end FunctionTests.FunctionFlatten23.R;
+
+end FunctionTests.FunctionFlatten23;
+")})));
+end FunctionFlatten23;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
