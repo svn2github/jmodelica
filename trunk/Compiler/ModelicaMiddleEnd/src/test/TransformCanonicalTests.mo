@@ -1236,6 +1236,47 @@ Alias sets:
 ")})));
   end AliasTest33;
 
+model AliasTest34
+  Real x(start = 0.1);
+  Real y;
+  discrete Real switchTime(start=-1e60, fixed=true);
+  parameter Boolean yOn = true;
+  
+  initial equation
+    pre(x) + pre(y) = 2 * switchTime ^2;
+    pre(x) = pre(y);
+  
+  equation
+    when yOn then
+      switchTime = time;
+    end when;
+    x = y;
+    der(x) = x * (time - switchTime);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AliasTest34",
+            methodName="printDAEInitBLT",
+            description="Test so that initial equations which link two alias variables are removed. In this case it is important that switchTime = pre(switchTime)",
+            methodResult="
+--- Solved equation ---
+pre(switchTime) := -1.0E60
+
+--- Solved equation ---
+switchTime := pre(switchTime)
+
+--- Solved equation ---
+x := 0.1
+
+--- Solved equation ---
+der(x) := x * (time - switchTime)
+
+--- Solved equation ---
+pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
+-------------------------------
+")})));
+  end AliasTest34;
+
 model AliasFuncTest1
     function f
         input Real a;
@@ -3450,6 +3491,7 @@ initial equation
  x_c = pre(x_c);
  x_p = 1;
  pre(sampleTrigger) = false;
+ pre(x_c) = 0.0;
  pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
@@ -3609,6 +3651,37 @@ pre(temp_1) := false
 -------------------------------
 ")})));
 end WhenEqu14;
+
+model WhenEqu16
+    Boolean a;
+initial equation
+    pre(a) = a;
+    a = if time > 1 then true else false;
+equation
+    when time > 2 then
+        a = true;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="WhenEqu16",
+            description="Test of when equation and initial equation assigning to pre variable",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+temp_1 := time > 2
+
+--- Solved equation ---
+a := if time > 1 then true else false
+
+--- Solved equation ---
+pre(a) := a
+
+--- Solved equation ---
+pre(temp_1) := false
+-------------------------------
+")})));
+end WhenEqu16;
 
 model IntialWhenAlgorithm1
     Boolean a;

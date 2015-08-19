@@ -623,8 +623,14 @@ aspect TransformCanonical {
             }
         }
         
-        Map<FAbstractVariable, FAbstractEquation> prePropagationEquations = new HashMap<FAbstractVariable, FAbstractEquation>();
+        Set<FAbstractVariable> existingPrePropagationLikeInitialEquations = new HashSet<FAbstractVariable>();
+        for (FAbstractEquation eqn : initialEquations()) {
+            FAbstractVariable var = eqn.isPrePropagationEquation();
+            if (var != null)
+                existingPrePropagationLikeInitialEquations.add(var);
+        }
         
+        Map<FAbstractVariable, FAbstractEquation> prePropagationEquations = new HashMap<FAbstractVariable, FAbstractEquation>();
         // Loop over all equations to replace
         for (FAbstractEquation equationToReplace : equationsToReplace) {
             
@@ -636,10 +642,13 @@ aspect TransformCanonical {
             java.util.List<FAbstractEquation> newEquations_ = new ArrayList<FAbstractEquation>();
             for (FAbstractEquation e : newEquations) {
                 FAbstractVariable var = e.isPrePropagationEquation();
-                if (var == null)
+                if (var == null) {
                     newEquations_.add(e);
-                else
-                    prePropagationEquations.put(var, e);
+                } else {
+                    if (!existingPrePropagationLikeInitialEquations.contains(var)) {
+                        prePropagationEquations.put(var, e);
+                    }
+                }
             }
             
             // - equationToReplace is an FAbstractEquation that should be replaced
@@ -699,7 +708,8 @@ aspect TransformCanonical {
             log.info(g.printMatchingObj());
         }
         
-        numIgnoredPrePropagationEquations = prePropagationEquations.size();
+        numIgnoredPrePropagationEquations = prePropagationEquations.size() 
+                + existingPrePropagationLikeInitialEquations.size();
         
         for (Var var : g.getUnmatchedVariables()) {
             daeInitUnmatchedVariables.add(var.getVariable());
@@ -1680,6 +1690,7 @@ aspect TransformCanonical {
                 removeUnusedTemporaries();
                 mergeEquivalentRecords();
                 insertTempsInLHS();
+                remoteRedundantInitialEquations();
                 change();
             }
         }
@@ -2400,6 +2411,22 @@ aspect TransformCanonical {
 		for (FExp fExp : getArgs())
 			fExp.insertTempsInLHS(fClass);
 	}
+	
+    public void FClass.remoteRedundantInitialEquations() {
+        ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        // Remove alias equations.
+        for (FAbstractEquation equation : getFInitialEquations()) {
+            if (!equation.isSameVariableEquality()) {
+                eqns.add(equation);
+            }
+        }
+        setFInitialEquationList(new List(eqns));
+    }
+    
+    syn boolean FAbstractEquation.isSameVariableEquality() = false;
+    eq FEquation.isSameVariableEquality() = getLeft().isAccess() && getRight().isAccess()
+            && getLeft().asFIdUseExp().myFV() == getRight().asFIdUseExp().myFV()
+            && !getLeft().asFIdUseExp().myFV().isUnknown();
 	
 }
 

@@ -7386,45 +7386,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 
-static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Init block: 1 *****/
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
-    } else if (evaluation_mode == JMI_BLOCK_START) {
-    } else if (evaluation_mode == JMI_BLOCK_MIN) {
-    } else if (evaluation_mode == JMI_BLOCK_MAX) {
-    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
-        x[1] = 11;
-    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
-    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
-    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
-    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
-    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
-    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
-    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = pre_x_c_3;
-        x[1] = _x_c_3;
-    } else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {
-        memset(residual, 0, 4 * sizeof(jmi_real_t));
-        residual[0] = -1.0;
-        residual[1] = -1.0;
-        residual[2] = 1.0;
-        residual[3] = 1.0;
-    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
-        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
-            pre_x_c_3 = x[0];
-            _x_c_3 = x[1];
-        }
-        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = pre_x_c_3 - (_x_c_3);
-            (*res)[1] = pre_x_c_3 - (_x_c_3);
-        }
-    }
-    return ef;
-}
-
-
     model_ode_guards(jmi);
     /********* Initialize reinits *******/
     /************* ODE section *********/
@@ -7437,7 +7398,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /********* Write back reinits *******/
 
     model_ode_guards(jmi);
-    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+    pre_x_c_3 = 0.0;
+    _x_c_3 = pre_x_c_3;
     _u_p_2 = _c_c_10 * _x_c_3;
     _x_p_1 = 1;
     _der_x_p_17 = _a_p_5 * _x_p_1 + _b_p_6 * _u_p_2;
