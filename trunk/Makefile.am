@@ -356,8 +356,8 @@ endif
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML schemas"  || cp  $(abs_top_srcdir)/XML/*.xsd $(DESTDIR)$(prefix)/XML
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy XML LICENSE"  || cp  $(abs_top_srcdir)/XML/LICENSE $(DESTDIR)$(prefix)/XML
 	cp  $(abs_builddir)/version.txt $(DESTDIR)$(prefix)
-	cp jm_tests $(DESTDIR)$(prefix)/jm_tests
-	chmod ugo+x $(DESTDIR)$(prefix)/jm_tests
+	chmod ugo+x jm_tests
+	cp -p jm_tests $(DESTDIR)$(prefix)/jm_tests
 	if [ "$(INSTALL_EXTRA)" ]; then exec "$(INSTALL_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
 
 bindistdir: install
