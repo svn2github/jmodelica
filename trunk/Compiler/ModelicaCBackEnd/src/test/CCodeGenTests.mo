@@ -617,10 +617,6 @@ algorithm
     }
     _index_4 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_index_4);
     pre_index_4 = _index_4;
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    jmi_array_ref_1(tmp_1, 1) = _table_1_0;
-    jmi_array_ref_1(tmp_1, 2) = _table_2_1;
-    jmi_array_ref_1(tmp_1, 3) = _table_3_2;
     _x_3 = pre_x_3;
     if (COND_EXP_LT(_index_4, 4, JMI_TRUE, JMI_FALSE)) {
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
@@ -11107,10 +11103,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _y_2 = x[0];
         }
-        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
-        jmi_array_ref_1(tmp_2, 1) = _time;
-        jmi_array_ref_1(tmp_2, 2) = _time;
         tmp_4 = _x_1_0;
         tmp_5 = _temp_1_1_3;
         tmp_6 = _temp_1_2_4;
@@ -12245,10 +12237,6 @@ void func_CCodeGenTests_Algorithm9_fw_def1(R_0_r* r_v) {
     /****Integer and boolean outputs ***/
     /**** Other variables ***/
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
-    tmp_3->a = tmp_4;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_1);
     _temp_2_1_8 = (jmi_array_val_1(tmp_1, 1));
     _temp_2_2_9 = (jmi_array_val_1(tmp_1, 2));
@@ -12373,11 +12361,6 @@ void func_CCodeGenTests_Algorithm10_f_def1(jmi_array_t* i_a, jmi_array_t* o_a, j
     /************ Real outputs *********/
     /****Integer and boolean outputs ***/
     /**** Other variables ***/
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
-    jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(1);
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1, 5)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
@@ -12568,12 +12551,6 @@ $C_DAE_event_indicator_residuals$
     /****Integer and boolean outputs ***/
     /**** Other variables ***/
     _y_1 = _time;
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_y_1 - (_x_0 * 3), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
-    }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_y_1 - 1 - (_x_0), _sw(1), jmi->events_epsilon, JMI_REL_LT);
-    }
     _x_0 = 1;
     _temp_1_3 = _y_1 - _x_0 * 3;
     _temp_2_4 = _y_1 - 1 - _x_0;
@@ -12630,18 +12607,6 @@ $C_DAE_event_indicator_residuals$
     /************ Real outputs *********/
     /****Integer and boolean outputs ***/
     /**** Other variables ***/
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(_time - (0.5), _sw(0), jmi->events_epsilon, JMI_REL_GT);
-    }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(_time - (1), _sw(1), jmi->events_epsilon, JMI_REL_GT);
-    }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch(_time - (0.7), _sw(2), jmi->events_epsilon, JMI_REL_GT);
-    }
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw(3) = jmi_turn_switch(_time - (1.5), _sw(3), jmi->events_epsilon, JMI_REL_GT);
-    }
     _r1_0 = 0.0;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_time - (0.5), _sw(0), jmi->events_epsilon, JMI_REL_GT);
@@ -13141,9 +13106,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _c_2 = x[0];
         }
-        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
-        jmi_array_ref_1(tmp_3, 1) = - _c_2;
-        jmi_array_ref_1(tmp_3, 2) = _time;
         tmp_1 = _a_0;
         tmp_2 = _b_1;
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
@@ -16722,14 +16684,7 @@ algorithm
     jmi_array_ref_1(tmp_1, 1) = _y_1_0;
     jmi_array_ref_1(tmp_1, 2) = _y_2_1;
     jmi_array_ref_1(tmp_1, 3) = _y_3_2;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
-    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
-    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
     jmi_array_val_1(tmp_1, _i_4) = _x_3;
-    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
     _y_1_0 = jmi_array_ref_1(tmp_1, 1);
     _y_2_1 = jmi_array_ref_1(tmp_1, 2);
     _y_3_2 = jmi_array_ref_1(tmp_1, 3);
@@ -16793,26 +16748,7 @@ algorithm
     jmi_array_ref_1(tmp_4, 1) = _x_1_3;
     jmi_array_ref_1(tmp_4, 2) = _x_2_4;
     jmi_array_ref_1(tmp_4, 3) = _x_3_5;
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
-    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
-    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
-    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
-    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
-    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
-    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
-    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
-    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
-    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
-    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
-    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
     jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
-    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
     _y_1_0 = jmi_array_ref_1(tmp_2, 1);
     _y_2_1 = jmi_array_ref_1(tmp_2, 2);
     _y_3_2 = jmi_array_ref_1(tmp_2, 3);

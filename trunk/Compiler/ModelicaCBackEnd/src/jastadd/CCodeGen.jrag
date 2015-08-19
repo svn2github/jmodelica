@@ -4170,12 +4170,10 @@ aspect CCodeGen {
         boolean firstVisit = visited == null ? true : visited.add(this);
         boolean sideEffect = forVariables.size() == uniqueFIdUseExpsInLHS().size();
         if (firstVisit) {
-            p.printPreSteps(this, str, indent);
             if (sideEffect)
                 p.print(this, str, indent);
             else
                 prettyPrintNoSideEffect_C(str, indent);
-            p.printPostSteps(this, str, indent);
         }
    }
     
