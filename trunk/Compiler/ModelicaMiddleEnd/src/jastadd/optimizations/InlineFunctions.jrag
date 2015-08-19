@@ -445,7 +445,7 @@ aspect FunctionInlining {
             }
             fi.setSizeOf(oldName, size());
             String tempName = fi.nextTempVarName();
-            FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
+            FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName, "");
             List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
             l.add(new FFunctionCallLeft(new Opt<FExp>(exp)));
             fi.addEquation(new FFunctionCallEquation(l, fullCopy()), v, v.parameterVariability() && !valueIsFixed());
@@ -468,20 +468,32 @@ aspect FunctionInlining {
     }
 
     public FExp FType.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName) {
+            FExp src, String tempName, String suffix) {
         if (isArray()) {
+            return addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix, 0, indices().iterator());
+        } else {
+            return addInliningVarsAndEqnsCell(fi, oldName, noEvent, src, tempName, suffix);
+        }
+    }
+    
+    public FExp FType.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent,
+            FExp src, String tempName, String suffix, int dim, Iterator<Index> indices) {
+        if (dim < size().ndims()) {
             FArray a = new FArray();
-            for (Index i : indices()) {
-                a.addFExp(addInliningVarsAndEqnsCell(fi, oldName + i, noEvent, src, tempName + i));
+            for (int i = 0; i < size().get(dim); i++) {
+                a.addFExp(addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix, dim + 1, indices));
             }
             return a;
         } else {
-            return addInliningVarsAndEqnsCell(fi, oldName, noEvent, src, tempName);
+            suffix = suffix + indices.next();
+            return addInliningVarsAndEqnsCell(fi, oldName, noEvent, src, tempName, suffix);
         }
     }
     
     public FExp FType.addInliningVarsAndEqnsCell(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName) {
+            FExp src, String tempName, String suffix) {
+        tempName = tempName + suffix;
+        oldName = oldName + suffix;
         FExp e = src.dynamicFExp(new FIdUseExp(tempName));
         FTypePrefixVariability v = src.variability();
         boolean f = src.valueIsFixed();
@@ -492,10 +504,10 @@ aspect FunctionInlining {
     }
     
     public FExp FRecordType.addInliningVarsAndEqnsCell(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName) {
+            FExp src, String tempName, String suffix) {
         FRecordConstructor frc = new FRecordConstructor(getName());
         for (FRecordComponentType frct : getComponents()) {
-            frc.addArg(frct.getFType().addInliningVarsAndEqns(fi, oldName + "." + frct.getName(), noEvent, src, tempName + "." + frct.getName()));
+            frc.addArg(frct.getFType().addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix + "." + frct.getName()));
         }
         return frc;
     }
