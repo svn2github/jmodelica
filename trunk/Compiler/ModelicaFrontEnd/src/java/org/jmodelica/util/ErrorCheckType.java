@@ -19,7 +19,7 @@ public enum ErrorCheckType {
     COMPILE, 
     CHECK;
     
-    public boolean allowOuterWithoutInner() {
+    public boolean allowBadGeneratedInner() {
         return this == CHECK;
     }
     

@@ -592,43 +592,45 @@ aspect InstanceErrorCheck {
     }
 
     public void InstGeneratedInner.collectErrors(ErrorCheckType checkType) {
-        boolean error = false;
-        if (getMatchingNonInner() != null) {
-            getCopiedOuter().error("Can not generate missing inner declaration for %s, due to presence of component with same name on top level", name());
-            error = true;
-        } else {
-            ListMap<String, String> map = new LinkedHashListMap<String, String>();
-            for (InstComponentDecl outer : outers) {
-                if (outer.myInstClass().isPartial()) {
-                    outer.error("Can not generate missing inner declaration for outer component %s of partial type %s", 
-                            outer.name(), outer.myInstClass().qualifiedName());
-                    error = true;
-                } else {
-                    map.add(outer.myInstClass().actualInstClass().qualifiedName(), outer.qualifiedName());
-                }
-            }
-            if (map.size() > 1) {
-                StringBuilder sb = new StringBuilder();
-                java.util.List<String> classes = new ArrayList<String>(map.keySet());
-                Collections.sort(classes);
-                for (String cls : classes) {
-                    java.util.List<String> components = map.get(cls);
-                    Collections.sort(components);
-                    for (String outer : components) {
-                        sb.append("\n    ");
-                        sb.append(cls);
-                        sb.append(" ");
-                        sb.append(outer);
+        if (!checkType.allowBadGeneratedInner()) {
+            boolean error = false;
+            if (getMatchingNonInner() != null) {
+                getCopiedOuter().error("Can not generate missing inner declaration for %s, due to presence of component with same name on top level", name());
+                error = true;
+            } else {
+                ListMap<String, String> map = new LinkedHashListMap<String, String>();
+                for (InstComponentDecl outer : outers) {
+                    if (outer.myInstClass().isPartial()) {
+                        outer.error("Can not generate missing inner declaration for outer component %s of partial type %s", 
+                                outer.name(), outer.myInstClass().qualifiedName());
+                        error = true;
+                    } else {
+                        map.add(outer.myInstClass().actualInstClass().qualifiedName(), outer.qualifiedName());
                     }
                 }
-                getCopiedOuter().error("Can't generate missing inner declaration for %s, due to the outer declarations being of different types: %s", name(), sb);
-                error = true;
+                if (map.size() > 1) {
+                    StringBuilder sb = new StringBuilder();
+                    java.util.List<String> classes = new ArrayList<String>(map.keySet());
+                    Collections.sort(classes);
+                    for (String cls : classes) {
+                        java.util.List<String> components = map.get(cls);
+                        Collections.sort(components);
+                        for (String outer : components) {
+                            sb.append("\n    ");
+                            sb.append(cls);
+                            sb.append(" ");
+                            sb.append(outer);
+                        }
+                    }
+                    getCopiedOuter().error("Can't generate missing inner declaration for %s, due to the outer declarations being of different types: %s", name(), sb);
+                    error = true;
+                }
             }
-        }
-        if (!error) {
-            getInstComponentDecl().collectErrors(checkType);
-            // TODO: Use missingInnerMessage annotation
-            getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
+            if (!error) {
+                getInstComponentDecl().collectErrors(checkType);
+                // TODO: Use missingInnerMessage annotation
+                getCopiedOuter().warning("Generated missing inner declaration for '%s'", getCopiedOuter());
+            }
         }
     }
 
@@ -717,15 +719,10 @@ aspect InstanceErrorCheck {
     public void InstComponentDecl.collectErrors(ErrorCheckType checkType) {
         if (!errorChecked) {
             errorChecked = true;
-            boolean checkInner = isOuter() && 
-                    !(myInnerInstComponentDecl().isUnknown() && checkType.allowOuterWithoutInner());
             if (isRecursed()) {
                 error("Recursive class structure");
-            } else if (checkInner) {
-                if (myInnerInstComponentDecl().isUnknown())
-                    error("Cannot find inner declaration for outer " + name());
-                else
-                    myInnerInstComponentDecl().collectErrors(checkType);
+            } else if (isOuter()) {
+                myInnerInstComponentDecl().collectErrors(checkType);
             } else if (inOuter()) {
                 surroundingOuterComponentDecl().collectErrors(checkType);
             } else {

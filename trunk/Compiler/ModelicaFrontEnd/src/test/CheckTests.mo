@@ -15,59 +15,131 @@
 */
 
 package CheckTests
-	
+
 model InnerOuter1
-    outer Real x;
+    partial model A
+        Real x;
+    end A;
+    
+    outer A a;
 equation
-    x = true; // To generate another error to show up in an error check
+    a.x = true; // To generate another error to show up in an error check
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="InnerOuter1",
-            description="Check that error is not generated for outer without inner in check mode",
+            description="Check that error is not generated for partial outer without inner in check mode",
             checkType=check,
             errorMessage="
 1 errors found:
 
-Error at line 22, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Error at line 26, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The right and left expression types of equation are not compatible
 ")})));
 end InnerOuter1;
 
 
 model InnerOuter2
-	model A
-		function f
-			input Real x;
-			output Real y;
-		algorithm
-			y := x + 1;
-		end f;
-	end A;
-	
-	outer A a;
-	Real z = a.f(time);
+    partial model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x + 1;
+        end f;
+    end A;
+    
+    outer A a;
+    Real z = a.f(time);
+    Real w = true; // To generate another error to show up in an error check
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        ErrorTestCase(
             name="InnerOuter2",
             description="Check that no extra errors are generated for function called through outer withour inner",
-            flatModel="
-fclass CheckTests.InnerOuter2
- Real z = CheckTests.InnerOuter2.a.f(time);
+            checkType=check,
+            errorMessage="
+1 errors found:
 
-public
- function CheckTests.InnerOuter2.a.f
-  input Real x;
-  output Real y;
- algorithm
-  y := x + 1;
-  return;
- end CheckTests.InnerOuter2.a.f;
-
-end CheckTests.InnerOuter2;
+Error at line 54, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The binding expression of the variable w does not match the declared type of the variable
 ")})));
 end InnerOuter2;
+
+
+model InnerOuter3
+    model A
+        outer Real x;
+    end A;
+    
+    Real x;
+    A a;
+    Real w = true; // To generate another error to show up in an error check
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuter3",
+            description="Check that error is not generated in check mode for outer without inner and component on top level with same name",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 77, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The binding expression of the variable w does not match the declared type of the variable
+")})));
+end InnerOuter3;
+
+
+model InnerOuter4
+    model A
+        outer Real x;
+    end A;
+    
+    model B
+        outer Integer x;
+    end B;
+    
+    A a;
+    B b;
+    Real w = true; // To generate another error to show up in an error check
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuter4",
+            description="Check that error is not generated for multiple outers without inner with same name but different types in check mode",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 104, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The binding expression of the variable w does not match the declared type of the variable
+")})));
+end InnerOuter4;
+
+
+model InnerOuter5
+    model A
+        outer Real x;
+    equation
+        x = time;
+    end A;
+    
+    A a;
+    parameter Real w; // To generate another warning to show up in an error check
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="InnerOuter5",
+            description="Check that warning is not generated for outer without inner in check mode",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Warning at line 127, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The parameter w does not have a binding expression
+")})));
+end InnerOuter5;
+
 
 
 model ConditionalError1
