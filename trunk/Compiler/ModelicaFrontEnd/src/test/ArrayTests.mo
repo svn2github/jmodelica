@@ -7689,12 +7689,18 @@ model CircularFunctionArg1
             name="Other_CircularFunctionArg1",
             description="Circular dependency when calculating size of function output",
             errorMessage="
-2 errors found:
+4 errors found:
 
-Error at line 7546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+  Can not infer array size of the variable c
+
+Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
 
-Error at line 7547, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+  Can not infer array size of the variable d
+
+Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   Could not evaluate array size of output b
 ")})));
 end CircularFunctionArg1;
@@ -7718,8 +7724,8 @@ fclass ArrayTests.Other.ArrayConst1
 end ArrayTests.Other.ArrayConst1;
 ")})));
 end ArrayConst1;
-								   
-   
+
+
 model ArrayConst2
 	Real x[2];
 equation

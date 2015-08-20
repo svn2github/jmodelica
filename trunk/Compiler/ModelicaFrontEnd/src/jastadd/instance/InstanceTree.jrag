@@ -559,20 +559,23 @@ aspect Environments {
 			List<InstRecordModification> list, InstValueModification org, FExp exp) {
 		getInstAccess().populateInstRecordModificationList(list, org, exp);
 	}
-	
-	public void InstAccess.populateInstRecordModificationList(
-			List<InstRecordModification> list, InstValueModification org, FExp exp) {
-		InstComponentDecl var = myInstComponentDecl();
-		if (var.isRecord()) {
-			Modification mod = org.getModification();
-			for (FRecordComponentType comp : ((FRecordType) var.type()).getComponents()) {
-				String name = comp.getName();
+
+    public void InstAccess.populateInstRecordModificationList(
+            List<InstRecordModification> list, InstValueModification org, FExp exp) {
+        InstComponentDecl var = myInstComponentDecl();
+        if (var.isRecord()) {
+            Modification mod = org.getModification();
+            while (var.isArray()) {
+                var = var.getInstComponentDecl(0);
+            }
+            for (InstComponentDecl comp : var.getInstComponentDecls()) {
+                String name = comp.name();
                 FExp val = exp.dynamicFExp(new FIdUseExp(new FIdUseInstAccess(copyAndAppend(name))));
-				list.add(new InstRecordModification(mod, name, val));
-			}
-		}
-	}
-	
+                list.add(new InstRecordModification(mod, name, val));
+            }
+        }
+    }
+
 	/**
 	 * Find the InstModification containing this expression, if any.
 	 */
