@@ -162,13 +162,9 @@ fclass NonFixedParameterPropagation.FunctionCall1
  parameter Real p[1](fixed = false);
  parameter Real p[2](fixed = false);
  parameter Real x(fixed = false);
- parameter Real temp_1[1](fixed = false);
- parameter Real temp_1[2](fixed = false);
 initial equation 
  x = time;
- ({temp_1[1], temp_1[2]}) = NonFixedParameterPropagation.FunctionCall1.F(x);
- p[2] = temp_1[2];
- p[1] = temp_1[1];
+ ({p[1], p[2]}) = NonFixedParameterPropagation.FunctionCall1.F(x);
 
 public
  function NonFixedParameterPropagation.FunctionCall1.F

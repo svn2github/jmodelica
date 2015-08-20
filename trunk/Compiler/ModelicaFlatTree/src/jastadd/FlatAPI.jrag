@@ -2543,7 +2543,7 @@ aspect FVariableUses {
      * Check if this variable is used on the left hand side of a function call equation or statement.
      */
     syn lazy boolean FAbstractVariable.usedAsFunctionCallLeft() {
-        for (FExp e : nonDefiningUses()) 
+        for (FExp e : definingUses()) 
             if (e.inFunctionCallLeft())
                 return true;
         return false;
@@ -2598,9 +2598,12 @@ aspect FVariableUses {
     /**
      * Check if this is the left hand side of an equation.
      */
-    inh boolean FIdUseExp.isLeftHandSide();
+    inh boolean FExp.isLeftHandSide();
     eq BaseNode.getChild().isLeftHandSide()    = false;
     eq FEquation.getLeft().isLeftHandSide()    = true;
+    eq FFunctionCallLeft.getChild().isLeftHandSide()  = true;
+    eq FArray.getChild().isLeftHandSide()             = isLeftHandSide();
+    eq FRecordConstructor.getChild().isLeftHandSide() = isLeftHandSide();
     
     /**
      * Check if this is the left hand side of an assignment or function call statement.

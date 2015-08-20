@@ -2089,10 +2089,9 @@ aspect TransformCanonical {
 		while (temps.size() < oldSize) {
 			ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
 			for (FVariable fv : temps) {
-				if (fv.shouldEliminateTemporary())
-					fv.inlineUses();
-				else
+                if (!fv.inlineUses()) {
 					temps2.add(fv);
+                }
 			}
 			oldSize = temps.size();
 			temps = temps2;
@@ -2116,7 +2115,6 @@ aspect TransformCanonical {
         isTemporary() && 
         nonDefiningUses().size() <= 1 && 
         definingUses().size() <= 1 && 
-        !usedAsFunctionCallLeft() && 
         !isPreVariable() && myPreVariable().isUnknown() && 
         (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
         !isDifferentiatedVariable() && !isDerivativeVariable();
@@ -2126,18 +2124,25 @@ aspect TransformCanonical {
 	 * 
 	 * NB: This assumes that the variable and any equations marked for removal will be removed.
 	 */
-	public void FVariable.inlineUses() {
+    public boolean FVariable.inlineUses() {
+        if (!shouldEliminateTemporary()) {
+            return false;
+        }
 		FExp value;
 		if (hasBindingExp()) {
 			value = getBindingExp();
 		} else {
 			if (definingUses().isEmpty())
-				return;
+                return nonDefiningUses().isEmpty();
 			FAbstractEquation eqn = definingUses().iterator().next().myFEquation();
-			if (!(eqn instanceof FEquation)) 
-				return;
-			value = ((FEquation) eqn).getRight();
-			eqn.markedForRemoval = true;
+            if (eqn instanceof FEquation) {
+                value = ((FEquation) eqn).getRight();
+                eqn.markForRemoval();
+            } else if (eqn instanceof FFunctionCallEquation) {
+                return inlineUsesFunctionCallLeft();
+            } else {
+                return false;
+            }
 		}
 		
 		if (nonDefiningUses().isEmpty())
@@ -2146,12 +2151,40 @@ aspect TransformCanonical {
 		
 		for (FIdUseExp use : nonDefiningUses())
 			use.replaceMe(value.unboundCopy());
+        return true;
 	}
 	
+    public boolean FVariable.inlineUsesFunctionCallLeft() {
+        FIdUseExp defineUse = definingUses().iterator().next();
+        FExp value;
+        if (nonDefiningUses().size() > 0) {
+            FIdUseExp nonDefineUse = nonDefiningUses().iterator().next();
+            value = nonDefineUse.inlineUsesFunctionCallLeft();
+            if (value == null) {
+                return false;
+            }
+            value.myFEquation().markForRemoval();
+        } else {
+            value = new FNoExp();
+        }
+        
+        definingUses().remove(defineUse);
+        defineUse.replaceMe(value);
+        return true;
+    }
+    
+    inh FIdUseExp FIdUseExp.inlineUsesFunctionCallLeft();
+    eq BaseNode.getChild().inlineUsesFunctionCallLeft()  = null;
+    eq FEquation.getRight().inlineUsesFunctionCallLeft() = getLeft() instanceof FIdUseExp ? (FIdUseExp)getLeft() : null;
+    
 	/**
 	 * Flag for removing equation.
 	 */
 	public boolean FAbstractEquation.markedForRemoval = false;
+	
+    public void FAbstractEquation.markForRemoval() {
+        markedForRemoval = true;
+    }
 	
 	/**
 	 * Remove all uses in an expression from the uses lists of their respective variables.

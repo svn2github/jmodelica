@@ -1615,15 +1615,13 @@ fclass IndexReduction.Variability1
  Real a;
  Real _der_x;
  Real _der_y;
- Real temp_3;
  Real temp_4;
 initial equation 
  a = 0.0;
 equation
  (x, p) = IndexReduction.Variability1.F1(y + a);
  _der_x = _der_y * 2;
- (temp_3, temp_4) = IndexReduction.Variability1.F1((y + a) * (_der_y + der(a)));
- _der_x = temp_3;
+ (_der_x, temp_4) = IndexReduction.Variability1.F1((y + a) * (_der_y + der(a)));
  0.0 = temp_4;
 
 public
@@ -3380,8 +3378,6 @@ fclass IndexReduction.FunctionInlining.Test8
  Real _der_der_x;
  Real _der_der_y;
  Real _der_der_b;
- Real temp_5;
- Real temp_10;
 initial equation 
  y = 0.0;
  vy = 0.0;
@@ -3392,13 +3388,11 @@ equation
  der(vy) = a * y;
  (b, ) = IndexReduction.FunctionInlining.Test8.F(x, y);
  b = time;
- (temp_5, ) = IndexReduction.FunctionInlining.Test8.F(_der_x, der(y));
- _der_b = temp_5;
+ (_der_b, ) = IndexReduction.FunctionInlining.Test8.F(_der_x, der(y));
  _der_b = 1.0;
  _der_der_x = _der_vx;
  _der_der_y = der(vy);
- (temp_10, ) = IndexReduction.FunctionInlining.Test8.F(_der_der_x, _der_der_y);
- _der_der_b = temp_10;
+ (_der_der_b, ) = IndexReduction.FunctionInlining.Test8.F(_der_der_x, _der_der_y);
  _der_der_b = 0.0;
 
 public

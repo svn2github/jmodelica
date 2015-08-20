@@ -6941,12 +6941,8 @@ equation
 fclass FunctionTests.ArrayOutputScalarization9
  Real x[1];
  Real x[2];
- Real temp_1[1];
- Real temp_1[2];
 equation
- ({temp_1[1],temp_1[2]}) = FunctionTests.ArrayOutputScalarization9.f();
- x[1] = temp_1[1];
- x[2] = temp_1[2];
+ ({x[1], x[2]}) = FunctionTests.ArrayOutputScalarization9.f();
 
 public
  function FunctionTests.ArrayOutputScalarization9.f
@@ -13151,27 +13147,8 @@ fclass FunctionTests.UnknownSize.Misc.Misc1
  Real y[4];
  Real y[5];
  Real y[6];
- discrete Integer temp_1[1];
- discrete Integer temp_1[2];
- discrete Integer temp_1[3];
- discrete Integer temp_1[4];
- discrete Integer temp_1[5];
- discrete Integer temp_1[6];
-initial equation 
- pre(temp_1[1]) = 0;
- pre(temp_1[2]) = 0;
- pre(temp_1[3]) = 0;
- pre(temp_1[4]) = 0;
- pre(temp_1[5]) = 0;
- pre(temp_1[6]) = 0;
 equation
- ({temp_1[1], temp_1[2], temp_1[3], temp_1[4], temp_1[5], temp_1[6]}) = FunctionTests.UnknownSize.Misc.Misc1.f(3);
- y[1] = temp_1[1];
- y[2] = temp_1[2];
- y[3] = temp_1[3];
- y[4] = temp_1[4];
- y[5] = temp_1[5];
- y[6] = temp_1[6];
+ ({y[1], y[2], y[3], y[4], y[5], y[6]}) = FunctionTests.UnknownSize.Misc.Misc1.f(3);
 
 public
  function FunctionTests.UnknownSize.Misc.Misc1.f
@@ -13186,7 +13163,6 @@ public
  end FunctionTests.UnknownSize.Misc.Misc1.f;
 
 end FunctionTests.UnknownSize.Misc.Misc1;
-
 ")})));
 end Misc1;
 
@@ -13213,18 +13189,8 @@ fclass FunctionTests.UnknownSize.Misc.Misc2
  Real y[1];
  Real y[2];
  Real y[3];
- discrete Integer temp_1[1];
- discrete Integer temp_1[2];
- discrete Integer temp_1[3];
-initial equation 
- pre(temp_1[1]) = 0;
- pre(temp_1[2]) = 0;
- pre(temp_1[3]) = 0;
 equation
- ({temp_1[1], temp_1[2], temp_1[3]}) = FunctionTests.UnknownSize.Misc.Misc2.f({1, 2, 3});
- y[1] = temp_1[1];
- y[2] = temp_1[2];
- y[3] = temp_1[3];
+ ({y[1], y[2], y[3]}) = FunctionTests.UnknownSize.Misc.Misc2.f({1, 2, 3});
 
 public
  function FunctionTests.UnknownSize.Misc.Misc2.f
@@ -13239,7 +13205,6 @@ public
  end FunctionTests.UnknownSize.Misc.Misc2.f;
 
 end FunctionTests.UnknownSize.Misc.Misc2;
-
 ")})));
 end Misc2;
 

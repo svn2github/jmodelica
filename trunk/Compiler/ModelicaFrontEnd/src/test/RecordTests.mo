@@ -3399,11 +3399,9 @@ model RecordScalarize32
             variability_propagation=false,
             flatModel="
 fclass RecordTests.RecordScalarize32
- parameter Real temp_1.x;
  parameter Real pb.a.x;
 parameter equation
- (RecordTests.RecordScalarize32.A(temp_1.x)) = RecordTests.RecordScalarize32.f(2);
- pb.a.x = temp_1.x;
+ (RecordTests.RecordScalarize32.A(pb.a.x)) = RecordTests.RecordScalarize32.f(2);
 
 public
  function RecordTests.RecordScalarize32.f
@@ -3450,11 +3448,9 @@ model RecordScalarize33
             flatModel="
 fclass RecordTests.RecordScalarize33
  Real b.a1.x;
- parameter Real temp_2.x;
  parameter Real b.a2.x;
 parameter equation
- (RecordTests.RecordScalarize33.A(temp_2.x)) = RecordTests.RecordScalarize33.f(2);
- b.a2.x = temp_2.x;
+ (RecordTests.RecordScalarize33.A(b.a2.x)) = RecordTests.RecordScalarize33.f(2);
 equation
  (RecordTests.RecordScalarize33.A(b.a1.x)) = RecordTests.RecordScalarize33.f(time);
 
@@ -4369,12 +4365,8 @@ model RecordOutput1
 fclass RecordTests.RecordOutput1
  Real z.y;
  Real z.x;
- Real temp_1.y;
- Real temp_1.x;
 equation
- (RecordTests.RecordOutput1.A(temp_1.y, temp_1.x)) = RecordTests.RecordOutput1.f();
- z.y = temp_1.y;
- z.x = temp_1.x;
+ (RecordTests.RecordOutput1.A(z.y, z.x)) = RecordTests.RecordOutput1.f();
 
 public
  function RecordTests.RecordOutput1.f
@@ -5348,15 +5340,11 @@ model RecordParam3
 			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam3
- parameter Real temp_1[1];
- parameter Real temp_1[2];
- Real a1.y;
  parameter Real a1.x[1];
  parameter Real a1.x[2];
+ Real a1.y;
 parameter equation
- ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam3.f(1);
- a1.x[1] = temp_1[1];
- a1.x[2] = temp_1[2];
+ ({a1.x[1], a1.x[2]}) = RecordTests.RecordParam3.f(1);
 equation
  a1.y = 2;
 
@@ -5453,10 +5441,6 @@ model RecordParam6
 			inline_functions="none",
 			flatModel="
 fclass RecordTests.RecordParam6
- parameter Real temp_1[1];
- parameter Real temp_1[2];
- parameter Real temp_2[1];
- parameter Real temp_2[2];
  parameter Real a1.x[1];
  parameter Real a1.x[2];
  parameter Real a2.x[1];
@@ -5466,12 +5450,8 @@ fclass RecordTests.RecordParam6
  parameter Real a2.y[1];
  parameter Real a2.y[2];
 parameter equation
- ({temp_1[1], temp_1[2]}) = RecordTests.RecordParam6.f();
- ({temp_2[1], temp_2[2]}) = RecordTests.RecordParam6.f();
- a1.x[1] = temp_1[1];
- a1.x[2] = temp_1[2];
- a2.x[1] = temp_2[1];
- a2.x[2] = temp_2[2];
+ ({a1.x[1], a1.x[2]}) = RecordTests.RecordParam6.f();
+ ({a2.x[1], a2.x[2]}) = RecordTests.RecordParam6.f();
  a1.y[1] = a1.x[1];
  a1.y[2] = a1.x[2];
  a2.y[1] = a2.x[1];

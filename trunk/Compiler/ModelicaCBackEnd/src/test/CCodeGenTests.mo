@@ -6711,8 +6711,7 @@ void model_init_eval_parameters_0(jmi_t* jmi) {
     _p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp0((_p2_1*sf(2))))/sf(4);
     tmp_2->x = (_r2_x_2*sf(3));
     func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def1(tmp_2, tmp_1);
-    _temp_1_x_5 = (tmp_1->x)/sf(5);
-    _r3_x_6 = ((_temp_1_x_5*sf(5)))/sf(6);
+    _r3_x_5 = (tmp_1->x)/sf(5);
 }
 
 void model_init_eval_parameters_base(jmi_t* jmi) {
@@ -12200,32 +12199,30 @@ void func_CCodeGenTests_Algorithm9_fw_def1(R_0_r* r_v) {
     /**** Other variables ***/
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_1);
-    _temp_2_1_8 = (jmi_array_val_1(tmp_1, 1));
-    _temp_2_2_9 = (jmi_array_val_1(tmp_1, 2));
-    _r_a_1_0 = 2 * _temp_2_1_8;
-    _r_a_2_1 = 2 * _temp_2_2_9;
+    _temp_2_1_6 = (jmi_array_val_1(tmp_1, 1));
+    _temp_2_2_7 = (jmi_array_val_1(tmp_1, 2));
+    _r_a_1_0 = 2 * _temp_2_1_6;
+    _r_a_2_1 = 2 * _temp_2_2_7;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_2);
-    _temp_3_1_10 = (jmi_array_val_1(tmp_2, 1));
-    _temp_3_2_11 = (jmi_array_val_1(tmp_2, 2));
-    _r_a_2_1 = _temp_3_1_10;
-    _r_a_3_2 = _temp_3_2_11;
+    _temp_3_1_8 = (jmi_array_val_1(tmp_2, 1));
+    _temp_3_2_9 = (jmi_array_val_1(tmp_2, 2));
+    _r_a_2_1 = _temp_3_1_8;
+    _r_a_3_2 = _temp_3_2_9;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
     tmp_3->a = tmp_4;
     func_CCodeGenTests_Algorithm9_fw_def1(tmp_3);
-    _temp_4_a_1_12 = (jmi_array_val_1(tmp_3->a, 1));
-    _temp_4_a_2_13 = (jmi_array_val_1(tmp_3->a, 2));
-    _temp_4_a_3_14 = (jmi_array_val_1(tmp_3->a, 3));
-    _r_a_1_0 = _temp_4_a_1_12;
-    _r_a_2_1 = _temp_4_a_2_13;
-    _r_a_3_2 = _temp_4_a_3_14;
+    _temp_4_a_1_10 = (jmi_array_val_1(tmp_3->a, 1));
+    _temp_4_a_2_11 = (jmi_array_val_1(tmp_3->a, 2));
+    _temp_4_a_3_12 = (jmi_array_val_1(tmp_3->a, 3));
+    _r_a_1_0 = _temp_4_a_1_10;
+    _r_a_2_1 = _temp_4_a_2_11;
+    _r_a_3_2 = _temp_4_a_3_12;
     _re_a_1_3 = 1;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_5);
-    _temp_1_1_6 = (jmi_array_val_1(tmp_5, 1));
-    _temp_1_2_7 = (jmi_array_val_1(tmp_5, 2));
-    _re_a_2_4 = _temp_1_1_6;
-    _re_a_3_5 = _temp_1_2_7;
+    _re_a_2_4 = (jmi_array_val_1(tmp_5, 1));
+    _re_a_3_5 = (jmi_array_val_1(tmp_5, 2));
     /********* Write back reinits *******/
 ")})));
 end Algorithm9;

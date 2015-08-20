@@ -2036,18 +2036,9 @@ model MultipleOutputsInline4
 fclass FunctionInlining.MultipleOutputsInline4
  Real x;
  Real y;
- discrete String temp_3;
- discrete Integer temp_4;
- discrete Boolean temp_5;
- discrete FunctionInlining.MultipleOutputsInline4.E temp_6;
-initial equation 
- pre(temp_3) = \"\";
- pre(temp_4) = 0;
- pre(temp_5) = false;
- pre(temp_6) = FunctionInlining.MultipleOutputsInline4.E.E1;
 equation
  x = 1;
- (FunctionInlining.MultipleOutputsInline4.R(y, temp_3, temp_4, temp_5, temp_6)) = FunctionInlining.MultipleOutputsInline4.f3(x);
+ (FunctionInlining.MultipleOutputsInline4.R(y, , , , )) = FunctionInlining.MultipleOutputsInline4.f3(x);
 
 public
  function FunctionInlining.MultipleOutputsInline4.f3
@@ -3290,19 +3281,15 @@ fclass FunctionInlining.InlineAnnotation10
  Real z;
  discrete Integer t;
  Real _der_x;
- Real temp_6;
- discrete Integer temp_7;
 initial equation 
  pre(t) = 0;
  y = 0.0;
- pre(temp_7) = 0;
 equation
  _der_x = time;
- x = temp_6;
  z = der(y);
  t = if time < pre(t) or time >= pre(t) + 1 or initial() then integer(time) else pre(t);
  _der_x = y * der(y);
- (temp_6, temp_7) = FunctionInlining.InlineAnnotation10.f2(y);
+ (x, ) = FunctionInlining.InlineAnnotation10.f2(y);
 
 public
  function FunctionInlining.InlineAnnotation10.f2
