@@ -7172,5 +7172,51 @@ end TransformCanonicalTests.Sample2;
 ")})));
 end Sample2;
 
+model InsertTempLHS1
+    record R
+        Real x;
+    end R;
+    
+    function f
+        input Real x;
+        output R r = R(x);
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real x,y;
+equation
+    R(-y) = f(x);
+    y = 0;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InsertTempLHS1",
+            description="Test temps in lhs of function call equation",
+            flatModel="
+fclass TransformCanonicalTests.InsertTempLHS1
+ Real x;
+ constant Real y = 0;
+ Real temp_3;
+equation
+ (TransformCanonicalTests.InsertTempLHS1.R(temp_3)) = TransformCanonicalTests.InsertTempLHS1.f(x);
+ -0.0 = temp_3;
+
+public
+ function TransformCanonicalTests.InsertTempLHS1.f
+  input Real x;
+  output TransformCanonicalTests.InsertTempLHS1.R r;
+ algorithm
+  r.x := x;
+  return;
+ annotation(Inline = false);
+ end TransformCanonicalTests.InsertTempLHS1.f;
+
+ record TransformCanonicalTests.InsertTempLHS1.R
+  Real x;
+ end TransformCanonicalTests.InsertTempLHS1.R;
+
+end TransformCanonicalTests.InsertTempLHS1;
+")})));
+end InsertTempLHS1;
 
 end TransformCanonicalTests;

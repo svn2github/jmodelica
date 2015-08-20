@@ -2426,7 +2426,7 @@ aspect TransformCanonical {
 	
 	public void FExp.insertTempsInLHS(FClass fClass) {
 		String tempName = calcTempVarName();
-		fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), variability()));
+        fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), type().funcOutputVariability()));
 		replaceMe(new FIdUseExp(tempName));
 		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
 	}
