@@ -6,8 +6,8 @@ CMAKE_PYTHON_LIBRARY=
 CMAKE_PYTHON_INCLUDE_DIR=
 SWIGCHECK_SRC_DIR=$(abs_top_srcdir)/ThirdParty/CasADi/
 
+# Make sure that SWIG is installed by trying to generate CMakeLists.txt
 swigcheck:
-	# Make sure that SWIG is installed by trying to generate CMakeLists.txt
 	mkdir -p $(SWIGCHECK_BUILD_DIR) && \
 	cd $(SWIGCHECK_BUILD_DIR) && \
 	case $(build) in \
