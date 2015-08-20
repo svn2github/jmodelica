@@ -4,13 +4,27 @@ CASADI_INST_DIR=$(DESTDIR)$(prefix)/ThirdParty/CasADi
 CASADI_PLUGIN_INST_DIR=$(CASADI_INST_DIR)/lib
 CMAKE_PYTHON_LIBRARY=
 CMAKE_PYTHON_INCLUDE_DIR=
+SWIGCHECK_SRC_DIR=$(abs_top_srcdir)/ThirdParty/CasADi/
+
+swigcheck:
+	# Make sure that SWIG is installed by trying to generate CMakeLists.txt
+	mkdir -p $(SWIGCHECK_BUILD_DIR) && \
+	cd $(SWIGCHECK_BUILD_DIR) && \
+	case $(build) in \
+	*-cygwin*) \
+	cmake $(SWIGCHECK_SRC_DIR) -G "MSYS Makefiles" ;; \
+	*-mingw*) \
+	cmake $(SWIGCHECK_SRC_DIR) -G "MSYS Makefiles" ;; \
+	*) \
+	cmake $(SWIGCHECK_SRC_DIR) ;; \
+	esac
 
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed
 # in order to trigger a complete install, local in the build
 # directory, early in the build process.
 
-$(CASADI_BUILD_DIR):
+$(CASADI_BUILD_DIR): swigcheck
 	if [ "$(CMAKE_PYTHON_LIBRARY)" ] && [ "$(CMAKE_PYTHON_INCLUDE_DIR)" ]; then \
 		CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(CMAKE_PYTHON_LIBRARY) -DPYTHON_INCLUDE_DIR=$(CMAKE_PYTHON_INCLUDE_DIR)"; \
 	else \
@@ -42,3 +56,5 @@ check-local:
 clean-local:
 	cd $(CASADI_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
 
+
+.PHONY: swigcheck

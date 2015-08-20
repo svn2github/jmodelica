@@ -58,6 +58,7 @@ MC_COMPILERS_DIR=$(MC_BUILD)/JModelica.org
 MC_LIB=$(DESTDIR)$(prefix)/lib/casadi_interface
 
 CASADI_BUILD_DIR=$(abs_builddir)/casadi_build
+SWIGCHECK_BUILD_DIR=$(abs_builddir)/swig_check
 
 
 # The CMake for ModelicaCasADi needs these variables.
