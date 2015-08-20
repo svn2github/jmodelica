@@ -6236,7 +6236,7 @@ class OptimizationSolver(object):
         rinds, time, i, k = self.get_nlp_constraint_indices(eqtype)
         return time, i, k
 
-    def get_residuals(self, eqtype, inds=None, point='opt', raw=False, scaled=False, tik=True):
+    def get_residuals(self, eqtype, inds=None, point='opt', raw=False, scaled=False, tik=False):
         """
         Get the residuals for a given equation type.
 
@@ -6303,7 +6303,7 @@ class OptimizationSolver(object):
         else:
             return residuals
 
-    def get_constraint_duals(self, eqtype, inds=None, scaled=False, tik=True):
+    def get_constraint_duals(self, eqtype, inds=None, scaled=False, tik=False):
         """
         Get the dual variables at the optimization solution for a given equation type.
 
@@ -6430,7 +6430,7 @@ class OptimizationSolver(object):
         inds, time, i, k = self.get_nlp_variable_indices(var)
         return time, i, k
 
-    def get_bound_duals(self, var, tik=True):
+    def get_bound_duals(self, var, tik=False):
         """
         Get the dual variables at the optimization solution for the bounds on the given variable.
 
@@ -6441,7 +6441,7 @@ class OptimizationSolver(object):
 
             tik:
                 If True, return (duals, time, i, k),
-                otherwise return just duals. (Use get_constraint_points
+                otherwise return just duals. (Use get_variable_points
                 to get (time, i, k)).
 
         Returns::
