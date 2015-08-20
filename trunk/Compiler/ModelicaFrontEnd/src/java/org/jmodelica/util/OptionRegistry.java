@@ -554,6 +554,11 @@ abstract public class OptionRegistry {
             runtime, 
             false,
             "NLE solver should check Jacobian condition number and log it."),
+		NLE_SOLVER_BRENT_IGNORE_ERROR
+            ("nle_brent_ignore_error",
+            runtime, 
+            false,
+            "Brent solver should ignore convergence failures."),
         NLE_SOLVER_MIN_TOL
             ("nle_solver_min_tol",
                 runtime,

@@ -872,6 +872,16 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   NLE solver should check Jacobian condition number and log
                   it.</entry>
                 </row>
+				
+				<row>
+                  <entry><literal>nle_brent_ignore_error</literal></entry>
+
+                  <entry><literal>boolean / false</literal></entry>
+
+                  <entry>If this option is set to <literal>true</literal>, the
+                  Brent solver will ignore convergence failures and only report the error in the log.
+                  </entry>
+                </row>
 
                 <row>
                   <entry><literal>nle_solver_default_tol</literal></entry>
