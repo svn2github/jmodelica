@@ -1408,6 +1408,62 @@ $C_ode_derivatives$
     /********* Write back reinits *******/
 ")})));
     end PartiallyKnownComposite8;
+    
+    model PartiallyKnownComposite9
+        record R
+            Real x,y,z;
+        end R;
+        function f1
+            input Real x,y,z;
+            output R r = R(x,y,z);
+            algorithm
+            annotation(Inline=false);
+        end f1;
+        function f2
+            input R r;
+            output Real x = r.x;
+            output Real y = r.y;
+            algorithm
+            annotation(Inline=true);
+        end f2;
+        
+        Real x,y;
+    equation
+        (x,y) = f2(f1(3,time,time));
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite9",
+            description="Test propagation to FNoExp in lhs",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite9
+ constant Real x = 3;
+ Real y;
+equation
+ (VariabilityPropagationTests.PartiallyKnownComposite9.R(, y, )) = VariabilityPropagationTests.PartiallyKnownComposite9.f1(3, time, time);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite9.f1
+  input Real x;
+  input Real y;
+  input Real z;
+  output VariabilityPropagationTests.PartiallyKnownComposite9.R r;
+ algorithm
+  r.x := x;
+  r.y := y;
+  r.z := z;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.PartiallyKnownComposite9.f1;
+
+ record VariabilityPropagationTests.PartiallyKnownComposite9.R
+  Real x;
+  Real y;
+  Real z;
+ end VariabilityPropagationTests.PartiallyKnownComposite9.R;
+
+end VariabilityPropagationTests.PartiallyKnownComposite9;
+")})));
+    end PartiallyKnownComposite9;
 
 model ConstantRecord1
 	record A

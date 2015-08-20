@@ -121,6 +121,7 @@ aspect VariabilityPropagation {
 	syn boolean FExp.canPropagate() {
 		throw new UnsupportedOperationException();
 	}
+    eq FNoExp.canPropagate() = true;
 	eq FRecordConstructor.canPropagate() {
 		for (FExp exp : getArgs()) {
 			if (!exp.canPropagate()) {
@@ -349,7 +350,14 @@ aspect VariabilityPropagation {
 		
 		throw new UnsupportedOperationException();
 	}
-	
+    
+    public boolean FNoExp.variabilityPropagation(
+            LinkedHashSet<FAbstractEquation> worklist,
+            CValue value,
+            List<FAbstractEquation> parameterEquations) {
+        return true;
+    }
+    
 	public boolean FRecordConstructor.variabilityPropagation(
 			LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
