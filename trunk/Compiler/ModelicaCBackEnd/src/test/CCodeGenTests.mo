@@ -11103,6 +11103,72 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest19;
 
+model BlockTest20
+    record R
+        Real x;
+        Boolean b;
+    end R;
+    
+    function f_b 
+        input Real x;
+        output R r = R(x,x>1);
+    algorithm
+        annotation(Inline=false);
+    end f_b;
+    
+    function f_u
+        input R r;
+        output Real y1 = if r.b then r.x*r.x else r.x;
+    algorithm
+        annotation(Inline=false,LateInline=true);
+    end f_u;
+    
+    Real y;
+ equation
+    (y) = f_u(f_b(time + y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest20",
+            description="Non real temporary in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_0;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_0 = x[0];
+        }
+        func_CCodeGenTests_BlockTest20_f_b_def0(_time + _y_0, tmp_1);
+        _temp_2_1 = (tmp_1->x);
+        _temp_1_b_2 = (tmp_1->b);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = (COND_EXP_EQ(_temp_1_b_2, JMI_TRUE, _temp_2_1 * _temp_2_1, _temp_2_1)) - (_y_0);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest20;
+
 model InactiveBlockSwitch1
     function F
         input Real i1[:];

@@ -3407,7 +3407,7 @@ aspect CCodeGen {
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator nonRealEnumerator = new Enumerator();
-        for (FVariable fv : localNonRealVariables())
+        for (FVariable fv : nonRealVariables_C())
             str.format("%sx[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
         
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {\n");
@@ -3573,7 +3573,7 @@ aspect CCodeGen {
                 if (equation().isMixed()) {
                     equation().genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
                 }
-                if (equation().shouldProduceNonRealGuard_C()) {
+                if (equation().shouldProduceNonRealGuard_C(forVariables)) {
                     str.format("%sif (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {\n", indent);
                     equation().genBlock_C(p, str, p.indent(indent), visited, forVariables, forIndices);
                     str.format("%s}\n", indent);
@@ -3588,7 +3588,8 @@ aspect CCodeGen {
         }
     }
 
-    syn boolean FAbstractEquation.shouldProduceNonRealGuard_C() = !isSampleEquation();
+    syn boolean FAbstractEquation.shouldProduceNonRealGuard_C(Collection<FVariable> fv) =
+            !isSampleEquation() && !fv.iterator().next().isTemporary();
 
     @Override
     public void MetaEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
@@ -3848,7 +3849,7 @@ aspect CCodeGen {
 			str.print("NULL, ");
 		str.print(localUnsolvedVariables().size() + ", "); // Rename to realIterationVariables() and nonRealIterationVariables()?
 		str.print(localSolvedRealVariables().size() + ", ");
-		str.print(localNonRealVariables().size() + ", ");
+		str.print(nonRealVariables_C().size() + ", ");
 		str.print(directlyImpactingNonReals_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(directlyActiveSwitches_C().size() + ", ");
@@ -3946,6 +3947,19 @@ aspect CCodeGen {
     }
     
     /**
+     * Returns all non real non temporary variables in the block.
+     */
+    public Collection<FVariable> AbstractEquationBlock.nonRealVariables_C() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : localNonRealVariables()) {
+            if (!fv.isTemporary()) {
+                l.add(fv);
+            }
+        }
+        return l;
+    }
+    
+    /**
      * Returns all directly affecting non reals in the block. A non real is
      * considered directly affecting in a block if is solved in the block and 
      * is used in a continuous equation.
@@ -3967,7 +3981,7 @@ aspect CCodeGen {
         directlyImpactingNonReals_C = new LinkedHashSet<FVariable>();
         
         Set<FAbstractEquation> realEqns = new HashSet<FAbstractEquation>(localRealEquations());
-        Set<FVariable> nonRealVars = new HashSet<FVariable>(localNonRealVariables());
+        Set<FVariable> nonRealVars = new HashSet<FVariable>(nonRealVariables_C());
         Set<FVariable> allVariables = new HashSet<FVariable>(allLocalVariables());
         for (FAbstractEquation equation : allLocalEquations()) {
             boolean realEqn = realEqns.contains(equation);
