@@ -5036,7 +5036,8 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Set up sections
             num_vars = len(op.getAllVariables()) + 1
-            #num_vars -= len(op.getEliminatedVariables())
+            if result is not None:
+                num_vars -= len(op.getEliminatedVariables())
             name_section = []
             description_section = []
             data_info_section = []
