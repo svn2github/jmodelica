@@ -289,6 +289,7 @@ MC_BUILD = $(abs_builddir)/ModelicaCasADiInterfaceBuild
 MC_COMPILERS_DIR = $(MC_BUILD)/JModelica.org
 MC_LIB = $(DESTDIR)$(prefix)/lib/casadi_interface
 CASADI_BUILD_DIR = $(abs_builddir)/casadi_build
+SWIGCHECK_BUILD_DIR = $(abs_builddir)/swig_check
 
 # Hook for using a specific Python installation
 PYTHON_LIB = 
@@ -827,6 +828,7 @@ export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
+export SWIGCHECK_BUILD_DIR
 
 casadi_interface: install_casadi_interface
 build_casadi_interface: casadi modelicacasadi_wrapper

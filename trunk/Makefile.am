@@ -66,6 +66,7 @@ export MODELICA_CASADI_HOME= $(MC_INTERFACE)
 export MC_BUILD
 export IPOPT_HOME
 export CASADI_BUILD_DIR
+export SWIGCHECK_BUILD_DIR
 
 casadi_interface: install_casadi_interface
 build_casadi_interface: casadi modelicacasadi_wrapper
