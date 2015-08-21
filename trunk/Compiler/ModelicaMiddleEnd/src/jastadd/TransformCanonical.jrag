@@ -2399,7 +2399,7 @@ aspect TransformCanonical {
     
     public void FRecordType.transferSizes(FType t) {
         super.transferSizes(t);
-        if (!t.isUnknown()) {
+        if (!t.isUnknown() && !t.isNoType()) {
             FRecordType rt = (FRecordType) t;
             for (int i = 0; i < getNumComponent(); i++) {
                 getComponent(i).getFType().transferSizes(rt.getComponent(i).getFType());
