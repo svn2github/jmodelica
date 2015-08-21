@@ -432,6 +432,19 @@ aspect FunctionInlining {
         fi.addVarAndEqn(oldName, this, noEvent);
     }
     
+    public void FArray.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
+        fi.setSizeOf(oldName, size());
+        Array arr = getArray();
+        for (Index i : indices())
+            arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
+    }
+
+    public void FRecordConstructor.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
+        oldName += ".";
+        for (FRecordComponentType part : ((FRecordType) type()).getComponents())
+            myArgFExp(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
+    }
+    
     public void FFunctionCall.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
         if (isComposite()) {
             FTypePrefixVariability v = variability();
@@ -445,7 +458,7 @@ aspect FunctionInlining {
             }
             fi.setSizeOf(oldName, size());
             String tempName = fi.nextTempVarName();
-            FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName, "");
+            FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
             List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
             l.add(new FFunctionCallLeft(new Opt<FExp>(exp)));
             fi.addEquation(new FFunctionCallEquation(l, fullCopy()), v, v.parameterVariability() && !valueIsFixed());
@@ -453,64 +466,23 @@ aspect FunctionInlining {
             super.addInliningVarsAndEqns(fi, oldName, noEvent);
         }
     }
-
-    public void FArray.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        fi.setSizeOf(oldName, size());
-        Array arr = getArray();
-        for (Index i : indices())
-            arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
-    }
-
-    public void FRecordConstructor.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        oldName += ".";
-        for (FRecordComponentType part : ((FRecordType) type()).getComponents())
-            myArgFExp(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
-    }
-
-    public FExp FType.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName, String suffix) {
-        if (isArray()) {
-            return addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix, 0, indices().iterator());
-        } else {
-            return addInliningVarsAndEqnsCell(fi, oldName, noEvent, src, tempName, suffix);
-        }
-    }
     
-    public FExp FType.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName, String suffix, int dim, Iterator<Index> indices) {
-        if (dim < size().ndims()) {
-            FArray a = new FArray();
-            for (int i = 0; i < size().get(dim); i++) {
-                a.addFExp(addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix, dim + 1, indices));
-            }
-            return a;
-        } else {
-            suffix = suffix + indices.next();
-            return addInliningVarsAndEqnsCell(fi, oldName, noEvent, src, tempName, suffix);
-        }
-    }
-    
-    public FExp FType.addInliningVarsAndEqnsCell(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName, String suffix) {
-        tempName = tempName + suffix;
-        oldName = oldName + suffix;
-        FExp e = src.dynamicFExp(new FIdUseExp(tempName));
-        FTypePrefixVariability v = src.variability();
-        boolean f = src.valueIsFixed();
-        FType type = scalarType();
-        fi.addVarAndEqn(oldName, e, noEvent, type, v, f);
-        fi.addVar(new FQNameString(tempName), v, type, v.parameterVariability() && !f);
-        return e.fullCopy();
-    }
-    
-    public FExp FRecordType.addInliningVarsAndEqnsCell(AbstractFunctionInliner fi, String oldName, boolean noEvent,
-            FExp src, String tempName, String suffix) {
-        FRecordConstructor frc = new FRecordConstructor(getName());
-        for (FRecordComponentType frct : getComponents()) {
-            frc.addArg(frct.getFType().addInliningVarsAndEqns(fi, oldName, noEvent, src, tempName, suffix + "." + frct.getName()));
-        }
-        return frc;
-    }
+    public FExp FType.addInliningVarsAndEqns(final AbstractFunctionInliner fi, final String old, final boolean noEvent,
+            final FExp src, final String temp) {
+        ExpFromTypeBuilder b = new ExpFromTypeBuilder() {
+            public FExp build(String suffix, FType type) {
+                String tempName = temp + suffix;
+                String oldName = old + suffix;
+                FExp e = src.dynamicFExp(new FIdUseExp(tempName));
+                FTypePrefixVariability v = src.variability();
+                boolean f = src.valueIsFixed();
+                fi.addVarAndEqn(oldName, e, noEvent, type, v, f);
+                fi.addVar(new FQNameString(tempName), v, type, v.parameterVariability() && !f);
+                return e.fullCopy();
+             }
+        };
+        return buildFExp(b, "");
+     }
     
     /**
      * Should expressions of this type generate new varriables during inlining?
@@ -827,35 +799,57 @@ aspect FunctionInlining {
     public void FFunctionCall.inlineFunctions(AbstractFunctionInliner fi) {
         if (isInlinableFunctionCall(fi)) {
             inline(fi);
-            replaceMe(type().replaceInlined(fi, this, myCallOutputs().get(0).name()));
+            replaceMe(type().replaceInlined(fi, myCallOutputs().get(0).name()));
         } else {
             super.inlineFunctions(fi);
         }
     }
     
-    public FExp FType.replaceInlined(AbstractFunctionInliner fi, FExp src, String name) {
-        if (isArray()) {
+    public FExp FType.replaceInlined(final AbstractFunctionInliner fi, final String name) {
+        ExpFromTypeBuilder b = new ExpFromTypeBuilder() {
+            public FExp build(String suffix, FType type) {
+                return fi.getReplacementExp(name + suffix).fullCopy();
+            }
+        };
+        return buildFExp(b, "");
+    }
+    
+    public interface ExpFromTypeBuilder {
+        public FExp build(String suffix, FType type);
+    }
+    
+    public FExp FType.buildFExp(ExpFromTypeBuilder b, String suffix) {
+         if (isArray()) {
+            return buildFExp(b, suffix, 0, indices().iterator());
+        } else {
+            return buildFExpCell(b, suffix);
+        }
+    }
+    
+    public FExp FType.buildFExp(ExpFromTypeBuilder b, String suffix, int dim, Iterator<Index> indices) {
+        if (dim < size().ndims()) {
             FArray a = new FArray();
-            for (Index i : indices()) {
-                a.addFExp(replaceInlinedCell(fi, src, name + i));
+            for (int i = 0; i < size().get(dim); i++) {
+               a.addFExp(buildFExp(b, suffix, dim + 1, indices));
             }
             return a;
         } else {
-            return replaceInlinedCell(fi, src, name);
+            return buildFExpCell(b, suffix + indices.next());
         }
     }
+     
+    public FExp FType.buildFExpCell(ExpFromTypeBuilder b, String suffix) {
+        return b.build(suffix, scalarType());
+     }
+     
+    public FExp FRecordType.buildFExpCell(ExpFromTypeBuilder b, String suffix) {
+         FRecordConstructor frc = new FRecordConstructor(getName());
+         for (FRecordComponentType frct : getComponents()) {
+             frc.addArg(frct.getFType().buildFExp(b, suffix + "." + frct.getName()));
+         }
+         return frc;
+     }
     
-    public FExp FType.replaceInlinedCell(AbstractFunctionInliner fi, FExp src, String name) {
-        return fi.getReplacementExp(name).fullCopy();
-    }
-    
-    public FExp FRecordType.replaceInlinedCell(AbstractFunctionInliner fi, FExp src, String name) {
-        FRecordConstructor frc = new FRecordConstructor(getName());
-        for (FRecordComponentType frct : getComponents()) {
-            frc.addArg(frct.getFType().replaceInlined(fi, src, name + "." + frct.getName()));
-        }
-        return frc;
-    }
 
     public void FIdUseExp.inlineFunctions(AbstractFunctionInliner fi) {
         getFIdUse().getFQName().inlineFunctions(fi);

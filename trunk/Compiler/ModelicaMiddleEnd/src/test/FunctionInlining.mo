@@ -4008,4 +4008,50 @@ end FunctionInlining.ChainedCallInlining10;
 ")})));
 end ChainedCallInlining10;
 
+model ChainedCallInlining11
+    function f1
+        input Real x;
+        output Real[:,:] y = {{x}};
+    algorithm
+    annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input Real[:,:] x;
+        output Real[:,:] y = x;
+    algorithm
+    annotation(Inline=false);
+    end f2;
+  
+    Real[:,:] y = f2(f1(time));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining11",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining11
+ Real y[1,1];
+equation
+ ({{y[1,1]}}) = FunctionInlining.ChainedCallInlining11.f2({{time}});
+
+public
+ function FunctionInlining.ChainedCallInlining11.f2
+  input Real[:, :] x;
+  output Real[:,:] y;
+ algorithm
+  size(y) := {size(x, 1), size(x, 2)};
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:size(x, 2) loop
+    y[i1,i2] := x[i1,i2];
+   end for;
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ChainedCallInlining11.f2;
+
+end FunctionInlining.ChainedCallInlining11;
+")})));
+end ChainedCallInlining11;
+
 end FunctionInlining;
