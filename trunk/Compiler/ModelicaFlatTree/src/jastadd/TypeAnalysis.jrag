@@ -184,8 +184,6 @@ aspect FlatTypeAnalysis {
 
     syn FType FExp.type() = fUnknownType();
     
-    eq FNoExp.type() = fNoType();
-    
     syn lazy FType FAbstractArrayExp.type() = super.type();
 
     eq FUnaryExp.type()   = 
@@ -486,30 +484,28 @@ aspect FlatTypeAnalysis {
             return getFExp(0).type();
         
         // Check that the types of the elements are consistent
-        int n = getNumFExp();
-        FType t = n > 0 ? getFExp(0).type() : fUnknownType();
+        FType t = null;
         boolean func = inFunction();
-        for (int i = 1; i < n && !t.isUnknown(); i++) {
-            t = mergeArrayCellTypes(t, getFExp(i).type(), func);
+        for (int i = 0; i < getNumFExp(); i++) {
+            if (getFExp(i).isNoExp())
+                continue;
+            if (t == null) {
+                t = getFExp(i).type();
+            } else {
+                if (!t.equivalentTo(getFExp(i).type(), func)) 
+                    return fUnknownType();
+                if (t.isNumeric()) 
+                    t = t.numericPromotion(getFExp(i).type(), func, null);
+            }
+        }
+        if (t == null) {
+            t = fUnknownType();
         }
         return t.arrayType(size());
     }
     
-    syn FType FArray.mergeArrayCellTypes(FType t1, FType t2, boolean func) {
-        if (t1.isNoType()) {
-            return t2;
-        } else if (t2.isNoType()) {
-            return t1;
-        } else {
-            return t1.typePromotion(t2, func, null);
-        }
-    }
-    
     syn boolean FExp.isNoExp() = false;
     eq FNoExp.isNoExp() = true;
-    
-    syn boolean FType.isNoType() = false;
-    eq FNoType.isNoType() = true;
 
     eq FAbstractCat.type() {
         if (!dimensionIsOk())
@@ -1090,6 +1086,7 @@ aspect BuiltInFlatTypes {
         return copy;
     }
     eq FUnknownType.arrayType(Size size)        = this;
+    eq FNoType.arrayType(Size size)             = this;
 
     /**
      * Create a literal with the zero value for this type, if applicable.

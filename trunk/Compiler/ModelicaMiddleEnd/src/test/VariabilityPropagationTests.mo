@@ -1465,47 +1465,6 @@ end VariabilityPropagationTests.PartiallyKnownComposite9;
 ")})));
     end PartiallyKnownComposite9;
 
-    model PartiallyKnownComposite10
-        record R
-            Real x,y,z;
-        end R;
-        function f1
-            input Real x;
-            output Real[:,:] r = {{x,x},{x,x}};
-            algorithm
-            annotation(Inline=false);
-        end f1;
-        function f2
-            input Real[:,:] r;
-            output Real[:] y = r[1,:];
-            algorithm
-            annotation(Inline=true);
-        end f2;
-        
-        Real[:] x = f2(f1(time));
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="PartiallyKnownComposite10",
-            description="Test cleanup of record/array outputs",
-            template="
-$C_ode_derivatives$
-",
-            generatedCode="
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
-    func_VariabilityPropagationTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
-    _x_1_0 = (jmi_array_val_2(tmp_1, 1,1));
-    _x_2_1 = (jmi_array_val_2(tmp_1, 1,2));
-    /********* Write back reinits *******/
-")})));
-    end PartiallyKnownComposite10;
-
 model ConstantRecord1
 	record A
 		Real a[:];
