@@ -2175,7 +2175,12 @@ aspect TransformCanonical {
     
     inh FIdUseExp FIdUseExp.inlineUsesFunctionCallLeft();
     eq BaseNode.getChild().inlineUsesFunctionCallLeft()  = null;
-    eq FEquation.getRight().inlineUsesFunctionCallLeft() = getLeft() instanceof FIdUseExp ? (FIdUseExp)getLeft() : null;
+    eq FEquation.getRight().inlineUsesFunctionCallLeft() = getLeft().getEquationLeftInlineUse();
+    
+    syn FIdUseExp FExp.getEquationLeftInlineUse() = null;
+    eq FIdUseExp.getEquationLeftInlineUse()       = this;
+    eq FAbstractDerExp.getEquationLeftInlineUse() = null;
+    eq FPreExp.getEquationLeftInlineUse()         = null;
     
 	/**
 	 * Flag for removing equation.
