@@ -1481,62 +1481,6 @@ end RecordTests.RecordBinding27;
 ")})));
 end RecordBinding27;
 
-model RecordBinding28
-    record B
-        Real[:] a;
-    end B;
-    
-    model C
-        B b = B({1});
-    end C;
-    
-    model D
-        extends C (b = b);
-    end D;
-    
-    D d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecordBinding28",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  Can not infer array size of the variable a
-")})));
-end RecordBinding28;
-
-model RecordBinding29
-	type A = enumeration(a1, a2);
-	
-    record B
-        A a;
-    end B;
-    
-    model C
-        parameter B b = B(A.a1);
-    end C;
-    
-    model D
-        extends C (b = b);
-    end D;
-    
-    D d;
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="RecordBinding29",
-            description="",
-            errorMessage="
-1 errors found:
-
-Error at line 1523, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  Circularity in binding expression of parameter: d.b.a = b.a
-")})));
-end RecordBinding29;
-
 
 model UnmodifiableComponent1
     record R
