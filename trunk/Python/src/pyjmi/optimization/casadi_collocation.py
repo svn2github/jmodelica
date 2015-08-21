@@ -5275,7 +5275,7 @@ class LocalDAECollocator(CasadiCollocator):
         if not scaled:
             return self.dual_opt['g']
         else:
-            if not self.collocator.equation_scaling:
+            if not self.equation_scaling:
                 raise CasadiCollocatorException("Must enable the " +
                     "equation_scaling option to get scaled residuals")
             return self._inv_scale_residuals(self.dual_opt['g'])
