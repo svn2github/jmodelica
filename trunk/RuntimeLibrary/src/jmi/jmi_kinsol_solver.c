@@ -692,8 +692,18 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* evaluate the function at initial */
     ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
     if(ef) {
-        jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
+        jmi_log_node(block->log, logWarning, "Warning", "Residual function evaluation failed at initial point for "
                      "<block: %s>", block->label);
+        for (i = 0; i < block->n; i++) {
+            N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] < block->max[i] ? block->nominal[i] : -block->nominal[i];
+        }
+        jmi_log_node(block->log, logInfo, "NominalsAsInitialGuess", "Failed to evaluate the residual using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
+        
+        ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
+        if(ef) {
+            jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
+                     "<block: %s>", block->label);
+        }
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
     /* evaluate Jacobian at initial */
@@ -1180,6 +1190,11 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             }
 
             gnorm = N_VWL2Norm(x, kin_mem->kin_uscale);
+            if((block->callbacks->log_options.log_level >= 5)) {
+                jmi_log_node(block->log, logInfo, "Gradient", 
+                    "Singular point with gradient (<norm:%g>) in <block: %s>.",
+                        gnorm, block->label);
+            }
             if(gnorm < solver->kin_stol) {
                 /*near zero  gradient */
                 realtype* uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
