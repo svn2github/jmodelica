@@ -365,10 +365,8 @@ class ModelicaTransfer(object):
     def test_ModelicaFunctionCallEquationForParameterBinding(self):
         model =  self.load_model("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
         model.calculateValuesForDependentParameters()
-        expected = ("parameter Real temp_1[1](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}, evaluatedBindingExpression = 2) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}/* 2 */;\n"
-                    "parameter Real temp_1[2](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}, evaluatedBindingExpression = 4) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}/* 4 */;\n"
-                    "parameter Real p2[1](bindingExpression = temp_1[1], evaluatedBindingExpression = 2) = temp_1[1]/* 2 */;\n"
-                    "parameter Real p2[2](bindingExpression = temp_1[2], evaluatedBindingExpression = 4) = temp_1[2]/* 4 */;\n")
+        expected = ("parameter Real p2[1](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}, evaluatedBindingExpression = 2) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}/* 2 */;\n"
+                    "parameter Real p2[2](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}, evaluatedBindingExpression = 4) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}/* 4 */;\n")
         actual = ""
         for var in model.getVariables(Model.REAL_PARAMETER_DEPENDENT):
             actual += str(var) + "\n"
