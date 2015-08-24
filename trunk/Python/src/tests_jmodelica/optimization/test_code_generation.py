@@ -23,7 +23,10 @@ OptimizationSolver.
 import os
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
+try:
+    from pyjmi import transfer_optimization_problem
+except (NameError, ImportError):
+    pass
 
 def result_distance(res1, res2, names):
     assert N.array_equal(res1['time'], res2['time'])

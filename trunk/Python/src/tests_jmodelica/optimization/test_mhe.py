@@ -19,12 +19,16 @@
 import os
 import nose
 import numpy as N
-from pyjmi.optimization.mhe.mhe import MHEOptions, MHE
-from casadi import substitute, MX
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
 from collections import Iterable
-import modelicacasadi_wrapper as mc
+
+try:
+    from casadi import substitute, MX
+    from pyjmi import transfer_optimization_problem
+    import modelicacasadi_wrapper as mc
+    from pyjmi.optimization.mhe.mhe import MHEOptions, MHE
+except (NameError, ImportError):
+    pass
 
 
 class TestMHE:

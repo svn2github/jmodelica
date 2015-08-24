@@ -21,8 +21,12 @@ import os
 from collections import OrderedDict
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
-from pyjmi.optimization.casadi_collocation import ExternalData
+
+try:
+    from pyjmi import transfer_optimization_problem
+    from pyjmi.optimization.casadi_collocation import ExternalData
+except (NameError, ImportError):
+    pass
 
 def set_warm_start_options(solver, push=1e-4, mu_init=1e-1):    
     solver.set_solver_option('IPOPT', 'warm_start_init_point', 'yes')

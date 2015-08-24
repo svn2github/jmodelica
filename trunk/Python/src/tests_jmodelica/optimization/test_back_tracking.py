@@ -20,8 +20,11 @@
 import os
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
-from pyjmi import transfer_optimization_problem
-from pyjmi.optimization.casadi_collocation import BlockingFactors
+try:
+    from pyjmi import transfer_optimization_problem
+    from pyjmi.optimization.casadi_collocation import BlockingFactors
+except (NameError, ImportError):
+    pass
 
 def check_roundtrip(solver):
     coll = solver.collocator

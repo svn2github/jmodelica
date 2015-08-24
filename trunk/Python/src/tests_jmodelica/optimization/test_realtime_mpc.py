@@ -24,8 +24,13 @@ import math
 
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
-from pyjmi.optimization.realtimecontrol import ParameterChanges, MPCSimBase
-from pyjmi.optimization.casadi_collocation import BlockingFactors
+
+try:
+    from pyjmi.optimization.realtimecontrol import ParameterChanges, MPCSimBase
+    from pyjmi.optimization.casadi_collocation import BlockingFactors
+except (NameError, ImportError):
+    pass
+
 
 def check_result(results, ref):
     for key in ref:

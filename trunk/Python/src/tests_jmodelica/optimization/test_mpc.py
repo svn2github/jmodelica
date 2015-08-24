@@ -24,9 +24,6 @@
 #~ import numpy as N
 #~ from scipy.io.matlab.mio import loadmat
 #~ 
-#~ from pyjmi.optimization.mpc import MPC
-#~ from pyjmi.optimization.casadi_collocation import BlockingFactors
-#~ 
 #~ from tests_jmodelica import testattr, get_files_path
 #~ from pyjmi.common.io import ResultDymolaTextual
 #~ from pymodelica import compile_fmu
@@ -37,6 +34,8 @@
     #~ from pyjmi import transfer_to_casadi_interface
     #~ from pyjmi.optimization.casadi_collocation import *
     #~ import casadi
+    #~ from pyjmi.optimization.mpc import MPC
+    #~ from pyjmi.optimization.casadi_collocation import BlockingFactors
 #~ except (NameError, ImportError):
     #~ pass
 #~ 
