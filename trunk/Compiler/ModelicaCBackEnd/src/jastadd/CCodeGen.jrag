@@ -1739,19 +1739,19 @@ aspect CCodeGen {
     
     public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFExp() && getFExp().replaceWithTemp()) {
-            getFExp().type().printDecl_C(p, str, indent, name_C(), getFExp());
+            type().printDecl_C(p, str, indent, name_C(), getFExp());
         }
     }
     
     public void FFunctionCallLeft.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFExp() && getFExp().replaceWithTemp()) {
-            getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), getFExp());
+            type().printInit_C(p, str, indent, getFExp().tempName_C(), getFExp());
         }
     }
     
     public void FFunctionCallLeft.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         if (hasFExp() && getFExp().replaceWithTemp()) {
-            getFExp().type().printFree_C(str, indent, false, getFExp().tempName_C());
+            type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
     
@@ -4525,9 +4525,6 @@ aspect CCodeGen {
 	}
 	
 	public void FType.genWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        if (exp.isNoExp()) {
-            return;
-        }
 		if (isArray()) {
 			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
 			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
@@ -4540,7 +4537,11 @@ aspect CCodeGen {
 			genCellWriteBackResidual_C(str, indent, name, exp, enumerator, forIndices, indexCounter);
 		}
 	}
-	
+    
+    public void FNoType.genWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        
+    }
+    
 	public void FType.genCellWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		exp.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
 	}
@@ -4559,9 +4560,11 @@ aspect CCodeGen {
 	public void FExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		throw new UnsupportedOperationException();
 	}
+    
     public void FNoExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         
     }
+    
 	public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
 		int index = indexCounter.next();
 		if (forIndices == null || forIndices.contains(index)) {
@@ -4586,9 +4589,6 @@ aspect CCodeGen {
 	}
 	
 	public void FType.genWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        if (exp.isNoExp()) {
-            return;
-        }
 		if (isArray()) {
             if (size().isUnknown()) {
                  str.format("%sJMI_ASG(%s, ", indent, macroType());
@@ -4607,7 +4607,11 @@ aspect CCodeGen {
 			genCellWriteBackAssignment_C(str, indent, name, exp, forVariables);
 		}
 	}
-	
+    
+    public void FNoType.genWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
+        
+    }
+    
 	public void FType.genCellWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
 		exp.genWriteBackAssignment_C(str, indent, name, forVariables);
 	}
@@ -4624,7 +4628,7 @@ aspect CCodeGen {
 	}
 
 	public void FExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-		throw new UnsupportedOperationException();
+		throw new UnsupportedOperationException("Cannot generate write back assignment for FExp of type '" + getClass().getName() + "'");
 	}
 	
     public void FNoExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {

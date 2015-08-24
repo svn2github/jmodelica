@@ -18081,7 +18081,7 @@ void func_CCodeGenTests_StringOperations11_f2_def0(jmi_ad_var_t x_v, jmi_ad_var_
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         JMI_ASG(STR, jmi_array_ref_1(s_a, i1_1i), jmi_array_val_1(temp_1_a, i1_1i))
     }
-    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, jmi_max(n_v, AD_WRAP_LITERAL(0)), 1, jmi_max(n_v, AD_WRAP_LITERAL(0)))
+    JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_1, n_v, 1, n_v)
     func_CCodeGenTests_StringOperations11_f1_def1(s_a, tmp_1);
     JMI_ASG(STR_ARR, s_a, tmp_1)
     jmi_free_str_arr(tmp_1);
