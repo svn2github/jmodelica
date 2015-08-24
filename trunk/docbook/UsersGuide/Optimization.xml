@@ -1617,8 +1617,9 @@ print('T = %f' % T_0_B)
             problem is formulated and what the objective is.</para>
 
             <para>Direct collocation methods often require good initial
-            guesses in order to ensure robust convergence. Since initial
-            guesses are needed for all discretized variables along the
+            guesses in order to ensure robust convergence. Also, if the
+            problem is non-convex, initialization is even more critical. Since
+            initial guesses are needed for all discretized variables along the
             optimization interval, simulation provides a convenient means to
             generate state and derivative profiles given an initial guess for
             the control input(s). It is then convenient to set up a dedicated
@@ -1717,25 +1718,9 @@ op.set('cstr.c_init', float(c_0_A))
 op.set('cstr.T_init', float(T_0_A))
 </programlisting>
 
-            <para>Collocation-based optimization algorithms often require a
-            good initial guess in order to achieve fast convergence. Also, if
-            the problem is non-convex, initialization is even more critical.
-            Initial guesses can be provided in Optimica by the
-            <literal>initialGuess</literal> attribute, see the
-            <filename>CSTR.mop</filename> file for an example for this. Notice
-            that initialization in the case of collocation-based optimization
-            methods means initialization of all the control and state profiles
-            as a function of time. In some cases, it is sufficient to use
-            constant profiles. For this purpose, the
-            <literal>initialGuess</literal> attribute works well. In more
-            difficult cases, however, it may be necessary to initialize the
-            profiles using simulation data, where an initial guess for the
-            input(s) has been used to generate the profiles for the dependent
-            variables. This approach for initializing the optimization problem
-            is used in this tutorial.</para>
-
             <para>We are now ready to solve the actual optimization problem.
-            This is done by invoking the method optimize:</para>
+            This is done by invoking the method
+            <literal>optimize</literal>:</para>
 
             <programlisting language="python"># Set options
 opt_opts = op.optimize_options()
@@ -3614,7 +3599,7 @@ all_eqs = solver.get_equations(eqtype)        # all equations of the given type
         <para><programlisting>t, i, k = solver.get_constraint_points(eqtype)
 </programlisting>where <literal>t</literal>, <literal>i</literal>, and
         <literal>k</literal> are vectors that give the time, element index,
-        and collocation point index for each instantiation. </para>
+        and collocation point index for each instantiation.</para>
 
         <para>To get an overview of which residuals are the largest,</para>
 
