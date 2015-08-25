@@ -1171,16 +1171,16 @@ aspect Arrays {
     syn Size InstAccess.size()   = Size.SCALAR;
     eq InstScalarAccess.size()   = myInstComponentDecl().size();
     eq InstArrayAccess.size()    = getFArraySubscripts().accessSize();
-			
-	/**
-	 * Get the array sizes. 
-	 */
-	eq InstAssignable.size() {
-		Size s = declaredSize();
-		if (hasBindingFExp() && s.isUnknown() && (!isInput() || !inFunction()))
-			s = s.createKnown(getBindingFExp());
-		return s;
-	}
+
+    /**
+     * Get the array sizes. 
+     */
+    eq InstAssignable.size() {
+        Size s = declaredSize();
+        if (s.isUnknown() && hasBindingFExp() && (!isInput() || !inFunction()) && !getBindingFExp().isCircular())
+            s = s.createKnown(getBindingFExp());
+        return s;
+    }
 
     /**
      * Get the array sizes as declared. May be unknown. 
