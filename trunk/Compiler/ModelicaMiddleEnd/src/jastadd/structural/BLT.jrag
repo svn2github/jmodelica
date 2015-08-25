@@ -2860,10 +2860,10 @@ aspect AutomaticTearing {
                 if (isInitial)
                     g.setAsInitialSystem();
                 
-                ASTNode.log.info("Starting automatic tearing");
-                ASTNode.log.info(g);
-                ASTNode.log.info("Initial matching");
-                ASTNode.log.info(g.printMatchingObj());
+                ASTNode.log.verbose("Starting automatic tearing");
+                ASTNode.log.verbose(g);
+                ASTNode.log.verbose("Initial matching");
+                ASTNode.log.verbose(g.printMatchingObj());
                 
                 // Obtain Maximum Solvable Matching in two steps (greedy and augmenting paths)
                 g.greedyMatching();
@@ -2879,8 +2879,8 @@ aspect AutomaticTearing {
                     SUME.add(eqn);
                 }
 
-                ASTNode.log.info("Matching after initial manipulation");
-                ASTNode.log.info(g.printMatchingObj());
+                ASTNode.log.verbose("Matching after initial manipulation");
+                ASTNode.log.verbose(g.printMatchingObj());
                 // Now we have a Maximum Solvable Matching
 
                 if (SUME.isEmpty()) { // If: there exist a Pefect Solvable Matching
@@ -3002,7 +3002,7 @@ aspect AutomaticTearing {
                         tearings.add(v);
                     }
                     for (int i = 0; i < tearings.size(); i++) {
-                        ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
+                        ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", residuals.get(i).getEquation(), tearings.get(i).getName());
                         eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(residuals.get(i), tearings.get(i), AUTOMATIC_TEARING_BLOCK_PRODUCER));
                     }
                 }
@@ -3018,7 +3018,7 @@ aspect AutomaticTearing {
                 SolvingEq res = bestIter.getMatching();
                 bestIter.isIter(true);
                 res.isRes(true);
-                ASTNode.log.info("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
+                ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
                 Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan();
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {

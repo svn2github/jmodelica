@@ -97,15 +97,16 @@ aspect ModelicaCompilerMain {
  * <code>org.jmodelica.applications.ModelicaCompiler myModels/models.mo models.model1
  * XMLtemplate1.xml XMLtemplate2.xml cppTemplate.cpp</code>
  * <p>
- * Logging can be set with the optional argument -log=i, w or e where:
+ * Logging can be set with the optional argument -log=d, v, i, w or e where:
  * <p>
- *  - -d : log debug, info, warning and error messages
- *  - -i : log info, warning and error messages
- *  - -w : log warning and error messages
- *  - -e : log error messages only (default if the log option is not used)
+ *  - d : log debug, verbose, info, warning and error messages
+ *  - v : log verbose, info, warning and error messages
+ *  - i : log info, warning and error messages
+ *  - w : log warning and error messages
+ *  - e : log error messages only (default if the log option is not used)
  * <p>
  * Example with log level set to INFO: <br>
- * <code>org.jmodelica.applications.ModelicaCompiler -i myModels/models.mo 
+ * <code>org.jmodelica.applications.ModelicaCompiler -log=i myModels/models.mo 
  * models.model1</code>
  * <p>
  * The logs will be printed to standard out.
@@ -1177,8 +1178,8 @@ public class ModelicaCompiler {
             log.debug("... raw .mof file created.");
         }
 
-        log.info("Raw flattened model:");
-        log.info(fc);
+        log.verbose("Raw flattened model:");
+        log.verbose(fc);
         ASTNode.endStep("prettyPrintRawFlat()");
 
         if (fc.myOptions().getBooleanOption("generate_html_diagnostics") && getDiagnosticsGenerator()!=null) {
@@ -1206,15 +1207,15 @@ public class ModelicaCompiler {
             log.debug("... transformed .mof file created.");
         }
         
-        log.info("Diagnostics for transformed flattened model:");
-        log.info(new Object() {
+        log.verbose("Diagnostics for transformed flattened model:");
+        log.verbose(new Object() {
             public String toString() {
                 return fc.diagnostics();
             };
         });
         
-        log.info("Transformed flattened model:");
-        log.info(fc);
+        log.verbose("Transformed flattened model:");
+        log.verbose(fc);
         
         ASTNode.endStep("prettyPrintFlat()");
         
@@ -1384,7 +1385,7 @@ public class ModelicaCompiler {
             
             // Eat any output
             new StreamGobbler(proc.getErrorStream(), logger.warningStream()).start();
-            new StreamGobbler(proc.getInputStream(), logger.infoStream()).start();
+            new StreamGobbler(proc.getInputStream(), logger.verboseStream()).start();
             
             // Wait for process to finish and return result
             int code = proc.waitFor();

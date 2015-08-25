@@ -116,8 +116,8 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
         compiler_log_level --
             Set the logging for the compiler. Takes a comma separated list with
             log outputs. Log outputs start with a flag :'warning'/'w',
-            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
-            by appended flag with a colon and file name.
+            'error'/'e', 'verbose'/'v', 'info'/'i' or 'debug'/'d'. The log can
+            be written to file by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -201,8 +201,8 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
         compiler_log_level --
             Set the logging for the compiler. Takes a comma separated list with
             log outputs. Log outputs start with a flag :'warning'/'w',
-            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
-            by appended flag with a colon and file name.
+            'error'/'e', 'verbose'/'v', 'info'/'i' or 'debug'/'d'. The log can
+            be written to file by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -288,8 +288,8 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
         compiler_log_level --
             Set the logging for the compiler. Takes a comma separated list with
             log outputs. Log outputs start with a flag :'warning'/'w',
-            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
-            by appended flag with a colon and file name.
+            'error'/'e', 'verbose'/'v', 'info'/'i' or 'debug'/'d'. The log can
+            be written to file by appended flag with a colon and file name.
             Default: 'warning'
         
         separate_process --
@@ -409,8 +409,8 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         compiler_log_level --
             Set the logging for the compiler. Takes a comma separated list with
             log outputs. Log outputs start with a flag :'warning'/'w',
-            'error'/'e', 'info'/'i' or 'debug'/'d'. The log can be written to file
-            by appended flag with a colon and file name.
+            'error'/'e', 'verbose'/'v', 'info'/'i' or 'debug'/'d'. The log can
+            be written to file by appended flag with a colon and file name.
             Default: 'warning'
         
         jvm_args --

@@ -289,8 +289,8 @@ aspect DynamicStateSelect{
             initialMatching.put(var, var.getMatching());
         
         
-        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, false));
-        ASTNode.log.info(printCoefficientsObj(coefficientsMatrix, true));
+        ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, false));
+        ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, true));
         Set<DSSet> dsSets = new LinkedHashSet<DSSet>();
         Map<IndexReductionEq, DSSet> dsLookup = new HashMap<IndexReductionEq, DSSet>();
         Queue<IndexReductionEq> worklist = new ArrayDeque<IndexReductionEq>();
@@ -415,14 +415,14 @@ aspect DynamicStateSelect{
         boolean skipDynamicStates = false;
         for (DSSet set : dsSets) {
             if (set.eqns.size() > 8 || set.vars.size() > 8) {
-                ASTNode.log.info("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
-                ASTNode.log.info(set);
+                ASTNode.log.verbose("Too big dynamic state set, %d equations and %d variables!", set.eqns.size(), set.vars.size());
+                ASTNode.log.verbose(set);
                 skipDynamicStates = true;
             }
         }
         
         if (skipDynamicStates) {
-            ASTNode.log.info("Resetting matchings");
+            ASTNode.log.verbose("Resetting matchings");
             for (Map.Entry<IndexReductionVar, IndexReductionEq> entry : initialMatching.entrySet()) {
                 IndexReductionVar var = entry.getKey();
                 IndexReductionEq eqn = entry.getValue();
@@ -452,7 +452,7 @@ aspect DynamicStateSelect{
                 }
                 i++;
             }
-            ASTNode.log.info(set);
+            ASTNode.log.verbose(set);
             result.addDSSet(set);
             vars.addAll(set.vars);
         }
@@ -738,7 +738,7 @@ aspect DynamicStateSelect{
                 if (graph.isComplete()) {
                     blt = graph.computeBLT(options, producer, blt);
                 } else {
-                    ASTNode.log.info("  This combination does not have a valid solution!");
+                    ASTNode.log.verbose("  This combination does not have a valid solution!");
                     ASTNode.log.debug(graph.printMatchingObj());
                 }
                 ASTNode.log.debug(blt);

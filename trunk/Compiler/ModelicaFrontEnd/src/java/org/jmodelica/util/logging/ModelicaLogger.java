@@ -71,6 +71,10 @@ public abstract class ModelicaLogger {
         log(Level.DEBUG, obj);
     }
 
+    public final void verbose(Object obj) {
+        log(Level.VERBOSE, obj);
+    }
+    
     public final void info(Object obj) {
         log(Level.INFO, obj);
     }
@@ -107,6 +111,10 @@ public abstract class ModelicaLogger {
         log(Level.DEBUG, format, args);
     }
 
+    public final void verbose(String format, Object... args) {
+        log(Level.VERBOSE, format, args);
+    }
+    
     public final void info(String format, Object... args) {
         log(Level.INFO, format, args);
     }
@@ -174,6 +182,18 @@ public abstract class ModelicaLogger {
         return logStream(Level.DEBUG);
     }
 
+    /**
+     * Creates an output stream that writes to the log on the verbose log level.
+     * 
+     * Note that while this class tries to log entire lines separately, it
+     * only handles the line break representations "\n", "\r" and "\r\n",
+     * and assumes that the character encoding used encodes both '\n' and '\r'
+     * like ASCII & UTF-8 does.
+     */
+    public final OutputStream verboseStream() {
+        return logStream(Level.VERBOSE);
+    }
+    
     /**
      * Creates an output stream that writes to the log on the info log level.
      * 
@@ -356,6 +376,8 @@ public abstract class ModelicaLogger {
                     logLevel = Level.WARNING;
                 } else if ("i".equals(logLevelString) || "info".equals(logLevelString)) {
                     logLevel = Level.INFO;
+                } else if ("v".equals(logLevelString) || "verbose".equals(logLevelString)) {
+                    logLevel = Level.VERBOSE;
                 } else if ("d".equals(logLevelString) || "debug".equals(logLevelString)) {
                     logLevel = Level.DEBUG;
                 } else {

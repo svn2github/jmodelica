@@ -649,7 +649,7 @@ aspect ExternalProcessCommunication {
                 if (warning != 0)
                     ModelicaCompiler.log.warning("%s: " + format, name, value);
                 else
-                    ModelicaCompiler.log.info("%s: " + format, name, value);
+                    ModelicaCompiler.log.verbose("%s: " + format, name, value);
                 line = getLine();
             }
             buffLine(line);

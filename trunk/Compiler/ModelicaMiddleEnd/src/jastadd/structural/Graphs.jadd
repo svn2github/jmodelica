@@ -339,7 +339,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         public void addEdges(E eqn, boolean log) {
             for (V var : vars) {
                 if (log) {
-                    ASTNode.log.info("*** %s", var);
+                    ASTNode.log.verbose("*** %s", var);
                 }
                 addEdge(eqn, var);
             }

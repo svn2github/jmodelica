@@ -22,6 +22,7 @@ public enum Level {
     ERROR,
     WARNING,
     INFO,
+    VERBOSE,
     DEBUG;
     
     public Level union(Level other) {

@@ -673,8 +673,8 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   <entry><literal>integer / 5000</literal></entry>
 
                   <entry>Time limit (ms) when evaluating constant calls to
-				  external functions during compilation. 0 indicates no
-				  evaluation. -1 indicates no time limit.</entry>
+                  external functions during compilation. 0 indicates no
+                  evaluation. -1 indicates no time limit.</entry>
                 </row>
 
                 <row>
@@ -683,11 +683,11 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   <entry><literal>integer / 10</literal></entry>
 
                   <entry>The maximum number of processes kept alive for
-				  evaluation of external functions during compilation. If the
-				  value of this option is less than 1, no processes will be
-				  kept alive, i.e. this feature is turned off. Using this
-				  feature may reduce compilation time if external functions
-				  use external objects.</entry>
+                  evaluation of external functions during compilation. If the
+                  value of this option is less than 1, no processes will be
+                  kept alive, i.e. this feature is turned off. Using this
+                  feature may reduce compilation time if external functions
+                  use external objects.</entry>
                 </row>
 
                 <row>
@@ -848,8 +848,8 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
 
                   <entry><literal>integer / 4</literal></entry>
 
-                  <entry>Maximum number of processes allowed to use
-                  when compiling generated c source code</entry>
+                  <entry>Maximum number of processes allowed to use when
+                  compiling generated c source code</entry>
                 </row>
 
                 <row>
@@ -872,15 +872,15 @@ my_fmu = compile_fmu(model_name, mo_file, compiler_options={"enable_variable_sca
                   NLE solver should check Jacobian condition number and log
                   it.</entry>
                 </row>
-				
-				<row>
+
+                <row>
                   <entry><literal>nle_brent_ignore_error</literal></entry>
 
                   <entry><literal>boolean / false</literal></entry>
 
                   <entry>If this option is set to <literal>true</literal>, the
-                  Brent solver will ignore convergence failures and only report the error in the log.
-                  </entry>
+                  Brent solver will ignore convergence failures and only
+                  report the error in the log.</entry>
                 </row>
 
                 <row>
@@ -1335,11 +1335,13 @@ rlc_circuit.set(vars, values)
       <literal>compile_jmu</literal> and also
       <literal>transfer_optimization_problem</literal>). The available log
       levels are <literal>'warning'</literal> (default),
-      <literal>'error'</literal>, <literal>'info'</literal> and
+      <literal>'error'</literal>,
+      <literal>'info'</literal>,<literal>'verbose'</literal> and
       <literal>'debug'</literal> which can also be written as
-      <literal>'w'</literal>, <literal>'e'</literal>, <literal>'i'</literal>
-      and <literal>'d'</literal> respectively. The following example
-      demonstrates setting the log level to <literal>'info'</literal>:</para>
+      <literal>'w'</literal>, <literal>'e'</literal>,
+      <literal>'i'</literal>,<literal>'v'</literal> and <literal>'d'</literal>
+      respectively. The following example demonstrates setting the log level
+      to <literal>'info'</literal>:</para>
 
       <para><programlisting># Set compiler log level to 'info'
 compile_fmu('myModel', 'myModels.mo', compiler_log_level='info')
