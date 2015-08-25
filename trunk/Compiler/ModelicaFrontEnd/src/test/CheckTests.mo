@@ -235,6 +235,29 @@ Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
 end ConditionalError4;
 
 
+model ConditionalError5
+    model A
+        parameter Integer n = 1;
+        Real x[n] = (1:n) * time;
+        Real y = x[1] + 1;
+    end A;
+    
+    parameter Integer n = 0;
+    A a(n=n) if n > 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalError5",
+            description="Check that array bounds errors are allowed in disabled conditionals in check mode",
+            checkType=check,
+            flatModel="
+fclass CheckTests.ConditionalError5
+ structural parameter Integer n = 0 /* 0 */;
+end CheckTests.ConditionalError5;
+")})));
+end ConditionalError5;
+
+
 model ParamBinding1
 	type B = enumeration(a,b,c);
 	model A

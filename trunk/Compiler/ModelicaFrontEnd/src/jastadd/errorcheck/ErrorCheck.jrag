@@ -341,6 +341,7 @@ aspect ErrorCheck {
   inh boolean FExp.lockBranch(ErrorCheckType checkType);
   inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
   inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
   inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
@@ -348,8 +349,9 @@ aspect ErrorCheck {
   eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
   eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled() || lockBranch(checkType);
   eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled() || lockBranch(checkType);
-  eq InstComponentDecl.getInstModification().lockBranch(ErrorCheckType checkType) = isDisabled();
-  eq InstNode.getChild().lockBranch(ErrorCheckType checkType)                     = false;
+  eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)            = isDisabled() || lockBranch(checkType);
+  eq InstClassDecl.getChild().lockBranch(ErrorCheckType checkType)                = false;
+  eq InstRoot.getChild().lockBranch(ErrorCheckType checkType)                     = false;
   eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
   
   /**
