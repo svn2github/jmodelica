@@ -53,10 +53,10 @@ optimization CSTR_Opt(objective=(cost(finalTime)),
                       startTime=0.0,
                       finalTime=150)
  
-  input Real u(start = 350,initialGuess=350)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
+  input Real u(start = 350)=cstr.Tc; 
+  CSTR cstr;
 
-  Real cost(start=0,fixed=true,initialGuess=500);
+  Real cost(start=0,fixed=true);
   parameter Real c_ref = 500;
   parameter Real T_ref = 320;
   parameter Real Tc_ref = 300;
@@ -77,8 +77,8 @@ optimization CSTR_Opt2(objectiveIntegrand=1e-4*(q_c*(c_ref-cstr.c)^2 + q_T*(T_re
                       startTime=0.0,
                       finalTime=150)
  
-  input Real u(start = 350,initialGuess=350,min=230,max=370)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300, max=350),Tc(initialGuess=350));
+  input Real u(start = 350,min=230,max=370)=cstr.Tc; 
+  CSTR cstr;
 
   parameter Real c_ref = 500;
   parameter Real T_ref = 320;
@@ -93,10 +93,10 @@ optimization CSTR_Opt_MPC(objective=(cost(finalTime)),
                       startTime=0.0,
                       finalTime=50)
  
-  input Real u(start = 350,initialGuess=350)=cstr.Tc; 
-  CSTR cstr(c(initialGuess=300),T(initialGuess=300),Tc(initialGuess=350));
+  input Real u(start = 350)=cstr.Tc; 
+  CSTR cstr;
 
-  Real cost(start=0,fixed=true,initialGuess=500);
+  Real cost(start=0,fixed=true);
   parameter Real c_ref = 500;
   parameter Real T_ref = 320;
   parameter Real Tc_ref = 300;
@@ -132,7 +132,7 @@ optimization CSTR_MPC_Parameter(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 +
 
 extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
 
-parameter Real p(free=true, min=1, initialGuess=2);
+parameter Real p(free=true, min=1);
 
 end CSTR_MPC_Parameter;
 

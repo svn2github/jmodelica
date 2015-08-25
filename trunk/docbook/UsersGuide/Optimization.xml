@@ -1718,8 +1718,14 @@ op.set('cstr.c_init', float(c_0_A))
 op.set('cstr.T_init', float(T_0_A))
 </programlisting>
 
-            <para>We are now ready to solve the actual optimization problem.
-            This is done by invoking the method
+            <para>We will also set some optimization options. In this case, we
+            decrease the number of finite elements in the mesh from 50 to 19,
+            to be able to illustrate that simulation and optimization might
+            not give the exact same result. This is done by setting the
+            corresponding option and providing it as an argument to the
+            <literal>optimize</literal> method. We also lower the tolerance of
+            IPOPT to get a more accurate result. We are now ready to solve the
+            actual optimization problem. This is done by invoking the method
             <literal>optimize</literal>:</para>
 
             <programlisting language="python"># Set options
@@ -1733,17 +1739,12 @@ opt_opts['IPOPT_options']['tol'] = 1e-10
 res = op.optimize(options=opt_opts)
 </programlisting>
 
-            <para>In this case, we would like to increase the number of finite
-            elements in the mesh from 50 to 100. This is done by setting the
-            corresponding option and provide it as an argument to the
-            <literal>optimize</literal> method. We also lower the tolerance of
-            IPOPT to get a more accurate result. You should see the output of
-            IPOPT in the Python shell as the algorithm iterates to find the
-            optimal solution. IPOPT should terminate with a message like
-            'Optimal solution found' or 'Solved to acceptable level' in order
-            for an optimum to have been found. The optimization result object
-            is returned and the optimization data are stored in
-            <literal>res</literal>.</para>
+            <para>You should see the output of IPOPT in the Python shell as
+            the algorithm iterates to find the optimal solution. IPOPT should
+            terminate with a message like 'Optimal solution found' or 'Solved
+            to acceptable level' in order for an optimum to have been found.
+            The optimization result object is returned and the optimization
+            data are stored in <literal>res</literal>.</para>
 
             <para>We can now retrieve the trajectories of the variables that
             we intend to plot:</para>
@@ -1837,7 +1838,7 @@ plt.show()
           simulation:</para>
 
           <programlisting># Compile model
-sim_fmu = compile_fmu("CSTR.CSTR", file_path)
+sim_fmu = compile_fmu("CSTR.CSTR", "CSTR.mop")
 
 # Load model
 sim_model = load_fmu(sim_fmu)
