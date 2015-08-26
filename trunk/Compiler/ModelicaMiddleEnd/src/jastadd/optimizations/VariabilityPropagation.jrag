@@ -522,7 +522,7 @@ aspect VariabilityPropagation {
         
         // Alias variables
         if (aliasSet() != null) {
-            AliasManager.AliasVariable thisAlias = aliasSet().getIterationVariable();
+            AliasManager.AliasVariable thisAlias = aliasSet().getModelVariable();
             for (AliasManager.AliasVariable av : aliasSet()) {
                 FVariable fv = av.getFVariable();
                 boolean neg = av.isNegated() ^ thisAlias.isNegated();

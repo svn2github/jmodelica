@@ -298,7 +298,7 @@ public class DiagnosticsGenerator {
                 if (eb instanceof TornEquationBlock)
                     vars.addAll(eb.unsolvedVariables());
             for (AliasManager.AliasSet as : fc.getAliasManager().getAliasSets())
-                if (vars.contains(as.getIterationVariable().getFVariable()))
+                if (vars.contains(as.getModelVariable().getFVariable()))
                     out.println(as.toStringWithStart());
             out.print("</pre>\n");
         }
