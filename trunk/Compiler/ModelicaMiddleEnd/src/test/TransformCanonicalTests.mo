@@ -6744,6 +6744,73 @@ Error in flattened model:
 ")})));
 end AssertEval2;
 
+model AssertEval3
+    Real x = time;
+equation
+    when initial() then
+        assert(true, "Test assertion");
+    end when;
+    when initial() then
+        assert(true, "Test assertion");
+    elsewhen time > 1 then
+        assert(true, "Test assertion");
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AssertEval3",
+            description="Test assertation evaluation: in when equation",
+            flatModel="
+fclass TransformCanonicalTests.AssertEval3
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 1;
+ x = time;
+end TransformCanonicalTests.AssertEval3;
+")})));
+end AssertEval3;
+
+model AssertEval4
+    Real x = time;
+equation
+    when initial() then
+        assert(false, "Test assertion");
+    end when;
+    when initial() then
+        assert(true, "Test assertion");
+    elsewhen time > 1 then
+        assert(false, "Test assertion");
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AssertEval4",
+            description="Test assertation evaluation: in when equation",
+            flatModel="
+fclass TransformCanonicalTests.AssertEval4
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ pre(temp_1) = false;
+equation
+ if initial() then
+  assert(false, \"Test assertion\");
+ end if;
+ temp_1 = time > 1;
+ if initial() then
+ else
+  if temp_1 and not pre(temp_1) then
+   assert(false, \"Test assertion\");
+  end if;
+ end if;
+ x = time;
+end TransformCanonicalTests.AssertEval4;
+")})));
+end AssertEval4;
+
 model MetaEqn1
     function F
         input Real i1[:];

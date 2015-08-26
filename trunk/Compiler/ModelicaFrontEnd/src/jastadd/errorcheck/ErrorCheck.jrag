@@ -1374,12 +1374,12 @@ aspect AssertEval {
          */
         public class evaluateAsserts extends Transformation {
             public void perform() {
-                for (FAbstractEquation eqn : getFAbstractEquations())
-                    eqn.evaluateAsserts();
                 List<FAbstractEquation> l = new List<FAbstractEquation>();
-                for (FAbstractEquation eqn : getFAbstractEquations())
-                    if (!eqn.markedForRemoval)
+                for (FAbstractEquation eqn : getFAbstractEquations()) {
+                    if (!eqn.evaluateAsserts(true)) {
                         l.add(eqn);
+                    }
+                }
                 setFAbstractEquationList(l);
             }
         }
@@ -1388,12 +1388,37 @@ aspect AssertEval {
     /**
      * Try to evaluate asserts with constant tests in this equation.
      * 
-     * If this equation should be removed, <code>markedForRemoval</code> is set.
+     * If this equation should be removed, returns true.
      */
-    public void FAbstractEquation.evaluateAsserts() {}
+    public boolean FAbstractEquation.evaluateAsserts(boolean inClause) {
+        return false;
+    }
     
-    public void FFunctionCallEquation.evaluateAsserts() {
-        markedForRemoval = getCall().evaluateAsserts();
+    @Override
+    public boolean FFunctionCallEquation.evaluateAsserts(boolean inClause) {
+        return getCall().evaluateAsserts(inClause);
+    }
+    
+    @Override
+    public boolean FIfWhenEquation.evaluateAsserts(boolean inClause) {
+        boolean res = super.evaluateAsserts(inClause);
+        if (hasElse())
+            res = res && getElse().evaluateAsserts(inClause);
+        return res;
+    }
+    
+    @Override
+    public boolean FIfWhenElseEquation.evaluateAsserts(boolean inClause) {
+        boolean res = true;
+        List<FAbstractEquation> l = new List<FAbstractEquation>();
+        for (FAbstractEquation eqn : getFAbstractEquations()) {
+            if (!eqn.evaluateAsserts(false)) {
+                l.add(eqn);
+                res = false;
+            }
+        }
+        setFAbstractEquationList(l);
+        return res;
     }
     
     /**
@@ -1401,25 +1426,25 @@ aspect AssertEval {
      * 
      * @return  <code>true</code> if this is an assert that should be removed
      */
-    public boolean FAbstractFunctionCall.evaluateAsserts() {
+    public boolean FAbstractFunctionCall.evaluateAsserts(boolean error) {
         return false;
     }
     
     private static final String FAssert.LEVEL_ERROR = "error";
     
-    public boolean FAssert.evaluateAsserts() {
+    public boolean FAssert.evaluateAsserts(boolean error) {
         boolean remove = false;
         if (getTest().isConstantExp()) {
             try {
                 boolean val = getTest().ceval().booleanValue();
-                if (!val) {
+                if (error && !val) {
                     String msg = "Assertion failed: " + getMsg().ceval().stringValue();
                     if (!hasLevel() || getLevel().ceval().stringValue().equals(LEVEL_ERROR))
                         error(msg);
                     else
                         warning(msg);
                 }
-                remove = true;
+                remove = val || error;
             } catch (ConstantEvaluationException e) {}
         }
         return remove;
