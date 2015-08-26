@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /*
     Copyright (C) 2009 Modelon AB
 
@@ -115,7 +117,7 @@ public abstract class DAETag extends AbstractTag {
 		instantiateTags(getClass(), map, this, myGenerator, fclass);
 	}
 
-    public abstract class CodeSplitter<T extends ASTNode> {
+    public abstract class CodeSplitter<T> {
         private int itemIndex = 0;
         private int itemLimit = 1000;
         private int splitCount = 0;
@@ -149,27 +151,44 @@ public abstract class DAETag extends AbstractTag {
         
         private int numSplits() {
             int s = elements.size();
-            if (s > 0) {
+            if (s < itemLimit) {
+                s = 0;
+            } else if (s > 0) {
                 s = 1 + ((s-1) / itemLimit);
             }
             return s;
         }
         
+        public void printStatusDecl() {
+            str.print(indent + "int ef = 0;\n");
+        }
+        
+        public void printStatusReturn() {
+            str.print(indent + "return ef;\n");
+        }
+        
         public void genFuncs() {
             for (int split = 0; split < numSplits(); split++) {
-                str.print("void ");
+                str.print("int ");
                 str.print(funcName);
                 str.print(split);
                 str.print("(jmi_t* jmi) {\n");
+                printStatusDecl();
                 int n = Math.min(itemLimit, elements.size()-split*itemLimit);
                 gen(split*itemLimit, n);
+                printStatusReturn();
                 str.print("}\n\n");
             }
         }
         
         public void genCalls() {
-            for (int split = 0; split < numSplits(); split++) {
+            int n = numSplits();
+            if (n == 0) {
+                gen(0, elements.size());
+            }
+            for (int split = 0; split < n; split++) {
                 str.print(indent);
+                str.print("ef |= ");
                 str.print(funcName);
                 str.print(split);
                 str.print("(jmi);\n");
@@ -178,13 +197,14 @@ public abstract class DAETag extends AbstractTag {
         
         protected void gen(int start, int n) {
             for (int i = start; i < start + n; i++) {
-                p.printVarDecls(elements.get(i), str, indent);
+                genDecl(elements.get(i));
             }
             for (int i = start; i < start + n; i++) {
                 gen(elements.get(i));
             }
         }
         
+        public abstract void genDecl(T element);
         public abstract void gen(T element);
     }
 

@@ -1391,21 +1391,18 @@ end VariabilityPropagationTests.PartiallyKnownComposite7;
 $C_ode_derivatives$
 ",
             generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
     JMI_RECORD_STATIC(R1_1_r, tmp_1)
     JMI_RECORD_STATIC(R2_0_r, tmp_2)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
     tmp_2->y1 = tmp_3;
     tmp_1->r2 = tmp_2;
     func_VariabilityPropagationTests_PartiallyKnownComposite8_f_def0(AD_WRAP_LITERAL(1), _time, tmp_1);
     _r_y2_2 = (tmp_1->y2);
-    /********* Write back reinits *******/
+    return ef;
+}
 ")})));
     end PartiallyKnownComposite8;
     
@@ -1491,18 +1488,15 @@ end VariabilityPropagationTests.PartiallyKnownComposite9;
 $C_ode_derivatives$
 ",
             generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     func_VariabilityPropagationTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
     _x_1_0 = (jmi_array_val_2(tmp_1, 1,1));
     _x_2_1 = (jmi_array_val_2(tmp_1, 1,2));
-    /********* Write back reinits *******/
+    return ef;
+}
 ")})));
     end PartiallyKnownComposite10;
     
@@ -1531,19 +1525,16 @@ $C_ode_derivatives$
 $C_ode_derivatives$
 ",
             generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
     JMI_RECORD_STATIC(R_0_r, tmp_1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
-    model_ode_guards(jmi);
-    /********* Initialize reinits *******/
-    /************* ODE section *********/
-    /************ Real outputs *********/
-    /****Integer and boolean outputs ***/
-    /**** Other variables ***/
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
     tmp_1->z = tmp_2;
     func_VariabilityPropagationTests_PartiallyKnownComposite11_f_def0(_time, AD_WRAP_LITERAL(3), tmp_1);
     _r_x_0 = (tmp_1->x);
-    /********* Write back reinits *******/
+    return ef;
+}
 ")})));
     end PartiallyKnownComposite11;
 

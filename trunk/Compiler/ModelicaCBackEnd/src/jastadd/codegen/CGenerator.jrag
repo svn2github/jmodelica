@@ -316,6 +316,10 @@ public class CGenerator extends GenericGenerator {
             CodeSplitter<FAbstractEquation> cs1 = new CodeSplitter<FAbstractEquation>(p, str, next, 
                     "model_init_eval_parameters_", fclass.getFParameterEquations().toArrayList()) {
                 @Override
+                public void genDecl(FAbstractEquation element) {
+                    p.printVarDecls(element, str, indent);
+                }
+                @Override
                 public void gen(FAbstractEquation element) {
                     element.genAssignment_C(p, str, indent);
                 }
@@ -323,8 +327,10 @@ public class CGenerator extends GenericGenerator {
             
             cs1.genFuncs();
             
-            str.print("void model_init_eval_parameters_base(jmi_t* jmi) {\n");
+            str.print("int model_init_eval_parameters_base(jmi_t* jmi) {\n");
+            cs1.printStatusDecl();
             cs1.genCalls();
+            cs1.printStatusReturn();
             str.print("}\n");
 		}
 	
@@ -656,16 +662,51 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_derivatives(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_derivatives", myGenerator, fclass);
-            addOptions("generate_ode");
 		}
 
-		public void generate(CodeStream genPrinter) {
+        public void generate(CodeStream str) {
 			if (fclass.onlyInitBLT()) {
-				genPrinter.print(INDENT + "ef = model_ode_initialize(jmi);\n");
+				str.print(INDENT + "ef = model_ode_initialize(jmi);\n");
 			} else {
-				fclass.getDAEStructuredBLT().genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
-				genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks(ASTNode.printer_C, genPrinter, INDENT);
+                CodePrinter p = ASTNode.printer_C.initialSystemPrinter();
+                String indent = "";
+                String next = p.indent(indent);
+                
+                if (!fclass.myOptions().getBooleanOption("generate_ode")) {
+                    str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
+                    str.print(next);
+                    str.print("return 0;");
+                    str.print("}\n");
+                    return;
+                }
+                
+                CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_derivatives_") {
+                    @Override
+                    public void genDecl(AbstractEquationBlock element) {
+                        element.genVarDecls_C(p, str, indent);
+                    }
+                    @Override
+                    public void gen(AbstractEquationBlock element) {
+                        element.genBlock_C(p, str, indent, false);
+                    }
+                };
+                
+                java.util.List<AbstractEquationBlock> blocks = fclass.getDAEStructuredBLT().getAllBlocks();
+                cs.add(blocks);
+                cs.genFuncs();
+                
+                str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
+                cs.printStatusDecl();
+                for (AbstractEquationBlock eb : blocks) {
+                    eb.genReinitTempInits_C(p, str, next);
+                }
+                cs.genCalls();
+                for (AbstractEquationBlock eb : blocks) {
+                    eb.genReinitWritebacks_C(p, next, str);
+                }
+                cs.printStatusReturn();
+                str.print("}\n");
+                
 			}
 		}
 	}
@@ -680,17 +721,43 @@ public class CGenerator extends GenericGenerator {
 		
 		public DAETag_C_ode_initialization(AbstractGenerator myGenerator, FClass fclass) {
 			super("C_ode_initialization", myGenerator, fclass);
-            addOptions("generate_ode");
 		}
 
-		public void generate(CodeStream genPrinter) {
-            CodePrinter printer = ASTNode.printer_C.initialSystemPrinter();
-			fclass.getDAEInitBLT().genVarDecls_C(printer, genPrinter, INDENT);
-			genPrinter.print(INDENT + "model_ode_guards(jmi);\n");
-			for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-				block.genBlock_C(printer, genPrinter, printer.indent(""), true);
-		}
-	}
+        public void generate(CodeStream str) {
+            
+            CodePrinter p = ASTNode.printer_C.initialSystemPrinter();
+            String indent = "";
+            String next = p.indent(indent);
+            
+            if (!fclass.myOptions().getBooleanOption("generate_ode")) {
+                str.print("int model_ode_initialize_base(jmi_t* jmi) {\n");
+                str.print(next);
+                str.print("return 0;");
+                str.print("}\n");
+                return;
+            }
+            
+            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_initialize_") {
+                @Override
+                public void genDecl(AbstractEquationBlock element) {
+                    element.genVarDecls_C(p, str, indent);
+                }
+                @Override
+                public void gen(AbstractEquationBlock element) {
+                    element.genBlock_C(p, str, indent, true);
+                }
+            };
+            
+            cs.add(fclass.getDAEInitBLT());
+            cs.genFuncs();
+            
+            str.print("int model_ode_initialize_base(jmi_t* jmi) {\n");
+            cs.printStatusDecl();
+            cs.genCalls();
+            cs.printStatusReturn();
+            str.print("}\n");
+        }
+    }
 
 	/**
 	 * Generates code for solving the BLT blocks for computing the outputs
@@ -994,6 +1061,10 @@ public class CGenerator extends GenericGenerator {
             
             CodeSplitter<FVariable> cs1 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_0_") {
                 @Override
+                public void genDecl(FVariable element) {
+                    p.printVarDecls(element, str, indent);
+                }
+                @Override
                 public void gen(FVariable element) {
                     element.genStartValue_C(p, str, indent);
                 }
@@ -1005,7 +1076,12 @@ public class CGenerator extends GenericGenerator {
             cs1.add(fclass.independentParameters());
             cs1.genFuncs();
             
+            
             CodeSplitter<FVariable> cs2 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_1_") {
+                @Override
+                public void genDecl(FVariable element) {
+                    p.printVarDecls(element, str, indent);
+                }
                 @Override
                 public void gen(FVariable element) {
                     element.genStartValue_C(p, str, indent);
@@ -1020,11 +1096,13 @@ public class CGenerator extends GenericGenerator {
             cs2.add(fclass.discretePreVariables());
             cs2.genFuncs();
             
-            str.print("void jmi_set_start_values_base(jmi_t* jmi) {\n");
+            str.print("int jmi_set_start_values_base(jmi_t* jmi) {\n");
+            cs1.printStatusDecl();
             cs1.genCalls();
             str.print(next);
             str.print("model_init_eval_parameters(jmi);\n");
             cs2.genCalls();
+            cs1.printStatusReturn();
             str.print("}\n");
         }
 	}

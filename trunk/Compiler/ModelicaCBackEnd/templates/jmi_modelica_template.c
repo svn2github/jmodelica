@@ -186,9 +186,10 @@ $C_ode_time_events$
   return 0;
 }
 
+$C_ode_derivatives$
+
 static int model_ode_derivatives(jmi_t* jmi) {
-  $C_ode_derivatives$
-  return 0;
+    return model_ode_derivatives_base(jmi);
 }
 
 static int model_ode_derivatives_dir_der(jmi_t* jmi) {
@@ -206,9 +207,10 @@ static int model_ode_guards_init(jmi_t* jmi) {
   return 0;
 }
 
+$C_ode_initialization$
+
 static int model_ode_initialize(jmi_t* jmi) {
-  $C_ode_initialization$
-  return 0;
+    return model_ode_initialize_base(jmi);
 }
 
 /*

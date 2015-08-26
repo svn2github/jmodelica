@@ -26,10 +26,10 @@ $C_dae_init_add_blocks_residual_functions$
 $CAD_dae_init_add_blocks_residual_functions$
 }
 
-int model_ode_initialize(jmi_t* jmi) {
-    int ef = 0;
 $C_ode_initialization$
-    return ef;
+
+int model_ode_initialize(jmi_t* jmi) {
+    return model_ode_initialize_base(jmi);
 }
 
 int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
