@@ -1432,7 +1432,7 @@ aspect Flattening {
 }
 
 aspect FlatteningDebug {
-	coll HashSet<InstAccess> FClass.collectInstAccesses() [new HashSet<InstAccess>()] with add root FlatRoot;
+	coll HashSet<InstAccess> FClass.collectInstAccesses() [new HashSet<InstAccess>()] with add root FClass;
 	InstAccess contributes
  		this 
 	to FClass.collectInstAccesses() for myFClass();

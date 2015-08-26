@@ -349,39 +349,39 @@ aspect FlatAPI {
 
     syn int FClass.numReals() = reals().size();
     coll ArrayList<FRealVariable> FClass.reals() 
-      [new ArrayList<FRealVariable>()] with add root FlatRoot;
+      [new ArrayList<FRealVariable>()] with add root FClass;
     FRealVariable contributes this when shouldContribute() to FClass.reals() for myFClass();
 
     syn int FClass.numIntegers() = integers().size();
     coll ArrayList<FIntegerVariable> FClass.integers() 
-      [new ArrayList<FIntegerVariable>()] with add root FlatRoot;
+      [new ArrayList<FIntegerVariable>()] with add root FClass;
     FIntegerVariable contributes this when shouldContribute() to FClass.integers() for myFClass();
 
     syn int FClass.numEnums() = enums().size();
     coll ArrayList<FEnumVariable> FClass.enums() 
-      [new ArrayList<FEnumVariable>()] with add root FlatRoot;
+      [new ArrayList<FEnumVariable>()] with add root FClass;
     FEnumVariable contributes this when shouldContribute() to FClass.enums() for myFClass();
 
     syn int FClass.numBooleans() = booleans().size();
     coll ArrayList<FBooleanVariable> FClass.booleans() 
-      [new ArrayList<FBooleanVariable>()] with add root FlatRoot;
+      [new ArrayList<FBooleanVariable>()] with add root FClass;
     FBooleanVariable contributes this when shouldContribute() to FClass.booleans() for myFClass();
 
     syn int FClass.numStrings() = strings().size();
     coll ArrayList<FStringVariable> FClass.strings() 
-      [new ArrayList<FStringVariable>()] with add root FlatRoot;
+      [new ArrayList<FStringVariable>()] with add root FClass;
     FStringVariable contributes this when shouldContribute() to FClass.strings() for myFClass();
 
     syn int FClass.numIndependentConstants() = independentConstants().size();
     coll ArrayList<FVariable> FClass.independentConstants() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes this 
       when isIndependentConstant() && shouldContribute() 
       to FClass.independentConstants() for myFClass();
 
     syn int FClass.numExternalObjectVariables() = externalObjectVariables().size();
     coll ArrayList<FExternalObjectVariable> FClass.externalObjectVariables()
-      [new ArrayList<FExternalObjectVariable>()] with add root FlatRoot;
+      [new ArrayList<FExternalObjectVariable>()] with add root FClass;
     FExternalObjectVariable contributes this when shouldContribute() to FClass.externalObjectVariables() for myFClass();
 
     syn int FClass.numIndependentRealConstants() = independentRealConstants().size();
@@ -409,7 +409,7 @@ aspect FlatAPI {
     syn ArrayList<FVariable> FClass.dependentConstants() = new ArrayList<FVariable>(0);
 // This collection would never contain anything, replacing with just an empty list.
 //  coll ArrayList<FVariable> FClass.dependentConstants() 
-//    [new ArrayList<FVariable>()] with add root FlatRoot;
+//    [new ArrayList<FVariable>()] with add root FClass;
 //  FVariable contributes
 //      this when false
 //  to FClass.dependentConstants() for myFClass();
@@ -510,7 +510,7 @@ aspect FlatAPI {
     
     syn int FClass.numRegularIndependentParameters() = regularIndependentParameters().size();
     coll ArrayList<FVariable> FClass.regularIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isRegularIndependentParameter() && shouldContribute()
     to FClass.regularIndependentParameters() for myFClass();
@@ -537,7 +537,7 @@ aspect FlatAPI {
     
     syn int FClass.numStructuralIndependentParameters() = structuralIndependentParameters().size();
     coll ArrayList<FVariable> FClass.structuralIndependentParameters() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isStructuralIndependentParameter() && shouldContribute()
     to FClass.structuralIndependentParameters() for myFClass();
@@ -564,7 +564,7 @@ aspect FlatAPI {
     
     syn int FClass.numFinalIndependentParameters() = finalIndependentParameters().size();
     coll ArrayList<FVariable> FClass.finalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isFinalIndependentParameter() && shouldContribute()
     to FClass.finalIndependentParameters() for myFClass();
@@ -591,7 +591,7 @@ aspect FlatAPI {
     
     syn int FClass.numEvalIndependentParameters() = evalIndependentParameters().size();
     coll ArrayList<FVariable> FClass.evalIndependentParameters()
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isEvalIndependentParameter() && shouldContribute()
     to FClass.evalIndependentParameters() for myFClass();
@@ -618,7 +618,7 @@ aspect FlatAPI {
     
     syn int FClass.numDependentParameters() = dependentParameters().size();
     coll ArrayList<FVariable> FClass.dependentParameters() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isDependentParameter() && shouldContribute()
     to FClass.dependentParameters() for myFClass();
@@ -666,7 +666,7 @@ aspect FlatAPI {
     syn int FClass.numDifferentiatedRealVariables() = differentiatedRealVariables().size();
     // The LinkedHashSet is used here to avoid duplicates.
     coll LinkedHashSet<FRealVariable> FClass.allDifferentiatedRealVariables() 
-      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+      [new LinkedHashSet<FRealVariable>()] with add root FClass;
     FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.allDifferentiatedRealVariables() for myFClass();
     FDerivativeVariable contributes
@@ -699,7 +699,7 @@ aspect FlatAPI {
      * the original model.
      */
     coll LinkedHashSet<FRealVariable> FClass.dynamicStates()
-      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+      [new LinkedHashSet<FRealVariable>()] with add root FClass;
     FRealVariable contributes this when (isDynamicState())
       to FClass.dynamicStates() for myFClass();
     syn int FClass.numDynamicStates() = dynamicStates().size();
@@ -710,7 +710,7 @@ aspect FlatAPI {
      * contains all the actual states.
      */
     coll LinkedHashSet<FDynamicStateVariable> FClass.dynamicStateVariables()
-      [new LinkedHashSet<FDynamicStateVariable>()] with add root FlatRoot;
+      [new LinkedHashSet<FDynamicStateVariable>()] with add root FClass;
     FDynamicStateVariable contributes this 
       to FClass.dynamicStateVariables() for myFClass();
     syn int FClass.numDynamicStateVariables() = dynamicStateVariables().size();
@@ -720,7 +720,7 @@ aspect FlatAPI {
      * compiler.
      */
     coll LinkedHashSet<FDynamicAlgebraicVariable> FClass.dynamicAlgebraicVariables()
-    [new LinkedHashSet<FDynamicAlgebraicVariable>()] with add root FlatRoot;
+    [new LinkedHashSet<FDynamicAlgebraicVariable>()] with add root FClass;
       FDynamicAlgebraicVariable contributes this 
     to FClass.dynamicAlgebraicVariables() for myFClass();
     syn int FClass.numDynamicAlgebraicVariables() = dynamicAlgebraicVariables().size();
@@ -730,7 +730,7 @@ aspect FlatAPI {
      * uses that were not introduced because of stateselect.
      */
     coll LinkedHashSet<FRealVariable> FClass.differentiatedRealVariablesFilteredSet() 
-      [new LinkedHashSet<FRealVariable>()] with add root FlatRoot;
+      [new LinkedHashSet<FRealVariable>()] with add root FClass;
     FDerExp contributes (FRealVariable) getFIdUse().myFV() when getFIdUse().myFV().isFVariable() && !inDeadIfBranch()
     to FClass.differentiatedRealVariablesFilteredSet() for myFClass();
     FDerivativeVariable contributes
@@ -744,7 +744,7 @@ aspect FlatAPI {
      * or kept as a component.
      */
     coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartial() 
-        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
+        [new LinkedHashSet<FFunctionDecl>()] with add root FClass;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartial() for myFClass();
     FFunctionVariable contributes myFCallable().actualFFunctionDecl() when type().isFunction()
         to FClass.myFFunctionDeclsPartial() for myFClass();
@@ -753,17 +753,17 @@ aspect FlatAPI {
      * \brief Collection of all FFunctionDecls called by a partial function call.
      */
     coll LinkedHashSet<FFunctionDecl> FClass.myFFunctionDeclsPartialCalled() 
-        [new LinkedHashSet<FFunctionDecl>()] with add root FlatRoot;
+        [new LinkedHashSet<FFunctionDecl>()] with add root FClass;
     FPartialFunctionCall contributes myFCallable().actualFFunctionDecl() to FClass.myFFunctionDeclsPartialCalled() for myFClass();
 
     coll ArrayList<FDelayExp> FClass.myDelayExps()
-        [new ArrayList<FDelayExp>()] with add root FlatRoot;
+        [new ArrayList<FDelayExp>()] with add root FClass;
     FDelayExp contributes this to FClass.myDelayExps() for myFClass();
     
     syn lazy int FDelayExp.myDelayIndex() = myFClass().myDelayExps().indexOf(originalFExp());
     
     coll ArrayList<FSpatialDistExp> FClass.mySpatialDistExps()
-        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
+        [new ArrayList<FSpatialDistExp>()] with add root FClass;
     FSpatialDistExp contributes this to FClass.mySpatialDistExps() for myFClass();
     
     syn lazy int FSpatialDistExp.mySpatialDistIndex() = myFClass().mySpatialDistExps().indexOf(originalFExp());
@@ -782,21 +782,21 @@ aspect FlatAPI {
 
     syn int FClass.numDerivativeVariables() = derivativeVariables().size();
     coll ArrayList<FDerivativeVariable> FClass.derivativeVariables() 
-      [new ArrayList<FDerivativeVariable>()] with add root FlatRoot;
+      [new ArrayList<FDerivativeVariable>()] with add root FClass;
     FDerivativeVariable contributes
         this when (shouldContribute())
     to FClass.derivativeVariables() for myFClass();
     
     syn int FClass.numVariables() = variables().size();
     coll ArrayList<FVariable> FClass.variables() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when !isParameter() && !isConstant() && !isPreVariable() && shouldContribute()
     to FClass.variables() for myFClass();
 
     syn int FClass.numDiscreteVariables() = discreteVariables().size();
     coll ArrayList<FVariable> FClass.discreteVariables() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FRealVariable contributes
         this when isDiscrete() && !isInput() && !isPreVariable() && shouldContribute()
     to FClass.discreteVariables() for myFClass();   
@@ -815,7 +815,7 @@ aspect FlatAPI {
 
     syn int FClass.numNonFixedParameters() = nonFixedParameters().size();
     coll ArrayList<FVariable> FClass.nonFixedParameters()
-        [new ArrayList<FVariable>()] with add root FlatRoot;
+        [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes this when isNonFixedParameter() && shouldContribute()
     to FClass.nonFixedParameters() for myFClass();
 
@@ -874,7 +874,7 @@ aspect FlatAPI {
     
     syn int FClass.numAliasVariables() = aliasVariables().size();
     coll ArrayList<FVariable> FClass.aliasVariables() 
-      [new ArrayList<FVariable>()] with add root FlatRoot;
+      [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when  !isParameter() && !isConstant() && isAlias()
     to FClass.aliasVariables() for myFClass();
@@ -893,7 +893,7 @@ aspect FlatAPI {
 
     syn int FClass.numTempVariables() = tempVariables().size();
     coll ArrayList<FVariable> FClass.tempVariables() 
-        [new ArrayList<FVariable>()] with add root FlatRoot;
+        [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isTemporary() && shouldContribute()
     to FClass.tempVariables() for myFClass();
@@ -986,7 +986,7 @@ aspect FlatAPI {
     
     syn int FClass.numVariablesWithBindingExp() = variablesWithBindingExp().size();
     coll ArrayList<FVariable> FClass.variablesWithBindingExp() 
-        [new ArrayList<FVariable>()] with add root FlatRoot;
+        [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes this when 
         !isParameter() && !isConstant() && hasBindingExp() && shouldContribute()
         to FClass.variablesWithBindingExp() for myFClass();
@@ -1013,7 +1013,7 @@ aspect FlatAPI {
      
     syn int FClass.numInputs() = inputs().size();
     coll ArrayList<FVariable> FClass.inputs() 
-        [new ArrayList<FVariable>()] with add root FlatRoot;
+        [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isInput() && shouldContribute()
     to FClass.inputs() for myFClass();
@@ -1043,7 +1043,7 @@ aspect FlatAPI {
 
     syn int FClass.numOutputs() = outputs().size();
     coll ArrayList<FVariable> FClass.outputs() 
-        [new ArrayList<FVariable>()] with add root FlatRoot;
+        [new ArrayList<FVariable>()] with add root FClass;
     FVariable contributes
         this when isOutput() && shouldContribute()
     to FClass.outputs() for myFClass();
@@ -1276,19 +1276,19 @@ aspect FlatAPI {
     }
     
     coll ArrayList<FSampleExp> FClass.sampleExpsWithTimeEvent() 
-        [new ArrayList<FSampleExp>()] with add root FlatRoot;
+        [new ArrayList<FSampleExp>()] with add root FClass;
     FSampleExp contributes this when generatesEventInDAE()
         to FClass.sampleExpsWithTimeEvent() for myFClass();
     
     syn int FClass.numSpatialDistSwitches() = spatialDistExpsWithStateEvent().size();
     coll ArrayList<FSpatialDistExp> FClass.spatialDistExpsWithStateEvent() 
-        [new ArrayList<FSpatialDistExp>()] with add root FlatRoot;
+        [new ArrayList<FSpatialDistExp>()] with add root FClass;
     FSpatialDistExp contributes this when generatesEventInDAE()
         to FClass.spatialDistExpsWithStateEvent() for myFClass();
     
     syn int FClass.numDelaySwitches() = 2*delayExpsWithStateEvent().size();
     coll ArrayList<FDelayExp> FClass.delayExpsWithStateEvent() 
-        [new ArrayList<FDelayExp>()] with add root FlatRoot;
+        [new ArrayList<FDelayExp>()] with add root FClass;
     FDelayExp contributes this when generatesEventInDAE() && !isTimeEventGenerating()
         to FClass.delayExpsWithStateEvent() for myFClass();
     
@@ -1392,7 +1392,7 @@ aspect FlatAPI {
             && originalFExp()==this && generatesEvent(true);
     
     coll ArrayList<FRelExp> FClass.relExpsWithEvent() 
-        [new ArrayList<FRelExp>()] with add root FlatRoot;
+        [new ArrayList<FRelExp>()] with add root FClass;
     FRelExp contributes this when generatesEventInDAE() 
         to FClass.relExpsWithEvent() for myFClass();
     
@@ -1469,7 +1469,7 @@ aspect FlatAPI {
     
     syn int FClass.numRelExpInInitialEquations() = relExpInInitialEquations().size();
     coll ArrayList<FRelExp> FClass.relExpInInitialEquations()
-        [new ArrayList<FRelExp>()] with add root FlatRoot;
+        [new ArrayList<FRelExp>()] with add root FClass;
     FRelExp contributes this when generatesEventInInitDAE()
     to FClass.relExpInInitialEquations() for myFClass();
 
@@ -1481,12 +1481,12 @@ aspect FlatAPI {
     syn int FRelExp.relExpInInitialEquationsIndex()  = checkIndex(myFClass().relExpInInitialEquations().indexOf(originalFExp()));
 /*  
 
-    coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FlatRoot;
+    coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FClass;
     FIdUseExp contributes
         (FVariable)myFV() when inArraySubscripts()
     to FClass.structuralParameters() for myFClass();
 
-    coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FlatRoot;
+    coll ArrayList<FEquation> FVariable.variableIncidence() [new ArrayList<FEquation>()] with add root FClass;
     FIdUseExp contributes
         myFEquation() when inFEquation()
     to FVariable.variableIncidence() for (FVariable)myFV();
@@ -2507,7 +2507,7 @@ aspect FVariableUses {
      * Collection attribute returning all variable uses in expressions.
      */
     coll HashSet<FIdUseExp> FAbstractVariable.uses() [new LinkedHashSet<FIdUseExp>()] 
-        with add root FlatRoot;
+        with add root FClass;
     
     FIdUseExp contributes this to FAbstractVariable.uses() for myFV();
     

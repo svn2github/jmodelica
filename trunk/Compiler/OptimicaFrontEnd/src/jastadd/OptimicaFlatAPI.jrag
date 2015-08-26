@@ -484,7 +484,7 @@ aspect OptimicaFlatAPI {
      * Get a list of all constraints.
      */
 	coll ArrayList<FConstraint> FOptClass.constraints() 
-	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	  [new ArrayList<FConstraint>()] with add root FClass;
 	FRelationConstraint contributes this to FOptClass.constraints() for myFClass();
 	
 	/**
@@ -496,7 +496,7 @@ aspect OptimicaFlatAPI {
      * Get a list of equality constraints.
      */
     coll ArrayList<FConstraint> FOptClass.eqConstraints() 
-	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	  [new ArrayList<FConstraint>()] with add root FClass;
 	FConstraint contributes
  		this when isEqConstraint()
 	to FOptClass.eqConstraints() for myFClass();
@@ -510,7 +510,7 @@ aspect OptimicaFlatAPI {
 	 * Get a list of LEQ constraints.
 	 */
     coll ArrayList<FConstraint> FOptClass.leqConstraints() 
-	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	  [new ArrayList<FConstraint>()] with add root FClass;
 	FConstraint contributes
  		this when isLeqConstraint()
 	to FOptClass.leqConstraints() for myFClass();
@@ -524,7 +524,7 @@ aspect OptimicaFlatAPI {
 	 * Get the number of GEQ constraints.
 	 */
     coll ArrayList<FConstraint> FOptClass.geqConstraints() 
-	  [new ArrayList<FConstraint>()] with add root FlatRoot;
+	  [new ArrayList<FConstraint>()] with add root FClass;
 	FConstraint contributes
  		this when isGeqConstraint()
 	to FOptClass.geqConstraints() for myFClass();	
@@ -696,7 +696,7 @@ aspect OptimicaFlatAPI {
      * Get the a list of timed variables.
      */
 	coll ArrayList<FTimedVariable> FOptClass.timedVariables() 
-		[new ArrayList<FTimedVariable>()] with add root FlatRoot;
+		[new ArrayList<FTimedVariable>()] with add root FClass;
 	FTimedVariable contributes
 	    this
 	to FOptClass.timedVariables() for myFClass();
@@ -835,7 +835,7 @@ aspect OptimicaFVariableUses {
 	 */
 	coll HashSet<FTimedVariable> FVariable.usesTimedVariables() 
 	  [new HashSet<FTimedVariable>()] 
-	   with add root FlatRoot;
+	   with add root FClass;
 	
 	FTimedVariable contributes this to 
 	   FVariable.usesTimedVariables() for getName().myFV();
@@ -1030,7 +1030,7 @@ aspect OptimicaFreeParameters {
     syn int FClass.numFreeIndependentParameters() = 
     	freeIndependentParameters().size();
 	coll ArrayList<FVariable> FClass.freeIndependentParameters() 
-	  [new ArrayList<FVariable>()] with add root FlatRoot;
+	  [new ArrayList<FVariable>()] with add root FClass;
 	FVariable contributes
  		this when freeAttribute() && isIndependentParameter() && shouldContribute()
 	to FClass.freeIndependentParameters() for myFClass();
