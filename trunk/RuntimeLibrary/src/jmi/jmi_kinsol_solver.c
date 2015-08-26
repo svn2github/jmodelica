@@ -388,39 +388,82 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_log_fmt(block->log, node, category, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
                     fnorm, snorm, solver->kin_stol);
         jmi_log_leave(block->log, node);
+
+        if(block->options->check_jac_cond_flag) {
+            char norm = 'I';
+            double Jnorm = 1.0, Jcond = 1.0;
+            int i, info, N = block->n;
+            realtype tol = solver->kin_stol;
+            realtype *scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
+            for(i = 0; i < N; i++){
+                int j;
+                realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype* col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype xscale = RAbs(block->nominal[i]);
+                realtype x = RAbs(block->x[i]);
+                if(x < xscale) x = xscale;
+                if(x < tol) x = tol;
+                for(j = 0; j < N; j++){
+                    scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+                }
+            }
+            dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
+            if(info > 0) {
+                jmi_log_node(block->log, logWarning, "SingularJacobian",
+                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
+            }
+            else {
+                dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
+
+                if(tol * Jcond < UNIT_ROUNDOFF) {
+                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
+                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+                    if (block->callbacks->log_options.log_level >= 4) {
+                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
+                    }
+                    jmi_log_leave(block->log, node);
+
+                }
+                else {
+                    jmi_log_node(block->log, logInfo, "JacobianCondition",
+                        "<JacobianInverseConditionEstimate:%E>", Jcond);
+                }
+            }
+        }
     }
+
     /* todo: remove? */
     /*
-  {
-        int i,j;
-      jmi_simple_newton_jac(block);
-      
-        jmi_log(block->jmi, category, buffer);
-        
-        buffer[0] = 0;
-        for(i=0; i<block->n; i++) {
-            sprintf(buffer + strlen(buffer), "%12.12f ", block->x[i]);
-         }
-        jmi_log(block->jmi, category, buffer);
-        
-        block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
-        
-        buffer[0] = 0;
-        for(i=0; i<block->n; i++) {
-            sprintf(buffer + strlen(buffer), "%12.12f ", block->res[i]);
-         }
-        jmi_log(block->jmi, category, buffer);
-        
-        buffer[0] = 0;
-        for(i=0; i<block->n; i++) {
-            for(j=0; j<block->n; j++) {
-                sprintf(buffer + strlen(buffer), "%12.12f ", block->jac[j*(block->n) + i]);
-            }
-            sprintf(buffer + strlen(buffer), "\n");
-        }
-        jmi_log(block->jmi, category, buffer);
+    {
+    int i,j;
+    jmi_simple_newton_jac(block);
+
+    jmi_log(block->jmi, category, buffer);
+
+    buffer[0] = 0;
+    for(i=0; i<block->n; i++) {
+    sprintf(buffer + strlen(buffer), "%12.12f ", block->x[i]);
     }
-*/
+    jmi_log(block->jmi, category, buffer);
+
+    block->F(block->jmi,block->x,block->res,JMI_BLOCK_EVALUATE);
+
+    buffer[0] = 0;
+    for(i=0; i<block->n; i++) {
+    sprintf(buffer + strlen(buffer), "%12.12f ", block->res[i]);
+    }
+    jmi_log(block->jmi, category, buffer);
+
+    buffer[0] = 0;
+    for(i=0; i<block->n; i++) {
+    for(j=0; j<block->n; j++) {
+    sprintf(buffer + strlen(buffer), "%12.12f ", block->jac[j*(block->n) + i]);
+    }
+    sprintf(buffer + strlen(buffer), "\n");
+    }
+    jmi_log(block->jmi, category, buffer);
+    }
+    */
 }
 
 /* Logging callback used by KINSOL to report progress att higher log levels */
@@ -1312,24 +1355,24 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     if(  block->init && 
         (  (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
         || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))) {
-        block->F(block->problem_data,dummy, solver->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL) ;
-        for(i = 0; i < N; i++) {
-            if(solver->residual_nominal[i] != 0.0) {
-                if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
-                    solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
-                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
-                                 "<equation: %I> since specified residual nominal is too small.", block->label, i);
+            block->F(block->problem_data,dummy, solver->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL) ;
+            for(i = 0; i < N; i++) {
+                if(solver->residual_nominal[i] != 0.0) {
+                    if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
+                        solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
+                        jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
+                            "<equation: %I> since specified residual nominal is too small.", block->label, i);
+                    }
+                    else if(solver->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
+                        solver->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
+                        jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
+                            "<equation: %I> since specified residual nominal is too big.", block->label, i);
+                    }
                 }
-                else if(solver->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
-                    solver->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
-                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
-                             "<equation: %I> since specified residual nominal is too big.", block->label, i);
+                else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+                    solver->residual_nominal[i] = 1.0;
                 }
             }
-            else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
-                solver->residual_nominal[i] = 1.0;
-            }
-        }
     }
 
     if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
@@ -1341,42 +1384,42 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
     if((bsop->residual_equation_scaling_mode != jmi_residual_scaling_none)
-            || bsop->check_jac_cond_flag){
+        || bsop->check_jac_cond_flag){
 
-        for(i = 0; i < N; i++){
-            int j;
-            /* column scaling is formed by max(nominal, actual_value) */
-            realtype xscale = RAbs(block->nominal[i]);
-            realtype x = RAbs(block->x[i]);
-            if(x < xscale) x = xscale;
-            if(x < tol) x = tol;
-            col_ptr = DENSE_COL(solver->J, i);
-            scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+            for(i = 0; i < N; i++){
+                int j;
+                /* column scaling is formed by max(nominal, actual_value) */
+                realtype xscale = RAbs(block->nominal[i]);
+                realtype x = RAbs(block->x[i]);
+                if(x < xscale) x = xscale;
+                if(x < tol) x = tol;
+                col_ptr = DENSE_COL(solver->J, i);
+                scaled_col_ptr = DENSE_COL(solver->J_scale, i);
 
-            /* row scaling is product of Jac entry and column scaling */
-            for(j = 0; j < N; j++){
-                realtype dres = col_ptr[j];
-                realtype fscale;
-                fscale = dres * x;
-                scaled_col_ptr[j] = fscale;
-                if( (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto)
-                    || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
-                )
-                {
-                    scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+                /* row scaling is product of Jac entry and column scaling */
+                for(j = 0; j < N; j++){
+                    realtype dres = col_ptr[j];
+                    realtype fscale;
+                    fscale = dres * x;
+                    scaled_col_ptr[j] = fscale;
+                    if( (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto)
+                        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+                        )
+                    {
+                        scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+                    }
                 }
             }
-        }
     }
-    
+
     /* put in manual non-zero scales in hybrid & manual cases */
     if(    (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
         || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))    {
-        for(i = 0; i < N; i++) {
-            if(solver->residual_nominal[i] != 0) {
-                scale_ptr[i] = solver->residual_nominal[i];
+            for(i = 0; i < N; i++) {
+                if(solver->residual_nominal[i] != 0) {
+                    scale_ptr[i] = solver->residual_nominal[i];
+                }
             }
-        }
     }
 
     if(use_scaling_flag) {
@@ -1410,8 +1453,8 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                         maxInJacIndex = j;
                     }
                 }
-               /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
-                 jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
+                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
+                jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
                     "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_diTer_scaled: %g>).",
                     block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
 
@@ -1431,7 +1474,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             jmi_log_leave(block->log, outer);
         }
     }
-    
+
     if (solver->using_max_min_scaling_flag && !solver->J_is_singular_flag) {
         realtype cond = jmi_calculate_jacobian_condition_number(block);
 
@@ -1446,10 +1489,10 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             solver->J_is_singular_flag = 1;
         }
     }
-    
-    
+
+
     /* estimate condition number of the scaled jacobian 
-        and scale function tolerance with it. */
+    and scale function tolerance with it. */
     if((N > 1) && bsop->check_jac_cond_flag){
         realtype* scaled_col_ptr;
         char norm = 'I';
@@ -1467,14 +1510,14 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
         if(info > 0) {
             jmi_log_node(block->log, logWarning, "SingularJacobian",
-                         "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
+                "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
         }
         else {
             dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-            
+
             if(tol * Jcond < UNIT_ROUNDOFF) {
                 jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                             "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+                    "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
                 if (block->callbacks->log_options.log_level >= 4) {
                     jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
                 }
@@ -1483,7 +1526,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
             else {
                 jmi_log_node(block->log, logInfo, "JacobianCondition",
-                             "<JacobianInverseConditionEstimate:%E>", Jcond);
+                    "<JacobianInverseConditionEstimate:%E>", Jcond);
             }
         }
     }
@@ -1735,6 +1778,49 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block) {
             flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
             jmi_kinsol_linesearch_nonconv_error_message(block);
+        }
+
+        if(block->options->check_jac_cond_flag) {
+            int i, info, N = block->n;
+            realtype* scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
+            realtype tol = solver->kin_stol;
+            for(i = 0; i < N; i++){
+                int j;
+                realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype* col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype xscale = RAbs(block->nominal[i]);
+                realtype x = RAbs(block->x[i]);
+                if(x < xscale) x = xscale;
+                if(x < tol) x = tol;
+                for(j = 0; j < N; j++){
+                    scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+                }
+            }
+
+            dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
+            if(info > 0) {
+                jmi_log_node(block->log, logWarning, "SingularJacobian",
+                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
+            }
+            else {
+                char norm = 'I';
+                double Jnorm = 1.0, Jcond = 1.0;
+                dgecon_(&norm, &N, solver->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
+
+                if(tol * Jcond < UNIT_ROUNDOFF) {
+                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
+                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+                    if (block->callbacks->log_options.log_level >= 4) {
+                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
+                    }
+                    jmi_log_leave(block->log, node);
+
+                }
+                else {
+                    jmi_log_node(block->log, logInfo, "JacobianCondition",
+                        "<JacobianInverseConditionEstimate:%E>", Jcond);
+                }
+            }
         }
     }
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
