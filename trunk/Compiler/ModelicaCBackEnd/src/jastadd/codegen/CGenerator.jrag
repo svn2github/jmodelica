@@ -314,7 +314,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FAbstractEquation> cs1 = new CodeSplitter<FAbstractEquation>(p, str, next, 
-                    "model_init_eval_parameters_", fclass.getFParameterEquations().toArrayList()) {
+                    true, "model_init_eval_parameters_", fclass.getFParameterEquations().toArrayList()) {
                 @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
@@ -669,7 +669,8 @@ public class CGenerator extends GenericGenerator {
             String indent = "";
             String next = p.indent(indent);
             
-            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_derivatives_") {
+            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
+                    "model_ode_derivatives_") {
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls_C(p, str, indent);
@@ -722,7 +723,8 @@ public class CGenerator extends GenericGenerator {
             String indent = "";
             String next = p.indent(indent);
             
-            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_initialize_") {
+            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
+                    "model_ode_initialize_") {
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls_C(p, str, indent);
@@ -1047,7 +1049,8 @@ public class CGenerator extends GenericGenerator {
             String indent = "";
             String next = p.indent(indent);
             
-            CodeSplitter<FVariable> cs1 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_0_") {
+            CodeSplitter<FVariable> cs1 = new CodeSplitter<FVariable>(p, str, next, false,
+                    "jmi_set_start_values_0_") {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);
@@ -1058,14 +1061,13 @@ public class CGenerator extends GenericGenerator {
                 }
             };
             
-            
             cs1.add(fclass.independentConstants());
             cs1.add(fclass.dependentConstants());
             cs1.add(fclass.independentParameters());
             cs1.genFuncs();
             
-            
-            CodeSplitter<FVariable> cs2 = new CodeSplitter<FVariable>(p, str, next, "jmi_set_start_values_1_") {
+            CodeSplitter<FVariable> cs2 = new CodeSplitter<FVariable>(p, str, next, false,
+                    "jmi_set_start_values_1_") {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);

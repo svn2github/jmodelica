@@ -1079,11 +1079,23 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
     return ef;
 }
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _x_0 = (1)/sf(0);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _dummy_3 = (0.0)/sf(3);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 ")})));
@@ -1205,7 +1217,7 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 }
 
 ---
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _reg1_0 = (1);
     _reg2_1 = (1);
@@ -1226,6 +1238,12 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     _eval3_17 = (1);
     _eval4_18 = (JMI_TRUE);
     _n_22 = (2);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     return ef;
 }
@@ -2394,11 +2412,15 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_DAE_initial_guess_equation_residuals$
 ",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _p1_1_0 = (1);
     _p1_2_1 = (2);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
@@ -2411,6 +2433,14 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     _w_5 = (func_CCodeGenTests_CFunctionTest15_f_exp0(tmp_2));
     _der_z_6 = (0.0);
     _der_w_7 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 
@@ -13220,14 +13250,26 @@ equation
             variability_propagation=false,
             template="$C_set_start_values$",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _y_1 = (2);
     _z_2 = (3);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _x_0 = (1);
     _q_3 = (0.0);
     _der_x_4 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 ")})));
@@ -13255,12 +13297,16 @@ equation
             variability_propagation=false,
             template="$C_set_start_values$",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _pr_0 = (1.5);
     _pi_1 = (2);
     _pb_2 = (JMI_TRUE);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _r_3 = (5.5);
     _i_4 = (10);
     _b_5 = (JMI_FALSE);
@@ -13269,6 +13315,14 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     pre_i_4 = (10);
     pre_b_5 = (JMI_FALSE);
     pre_temp_1_6 = (0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 ")})));
@@ -15868,16 +15922,28 @@ $C_DAE_initial_dependent_parameter_assignments$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _myEO1_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _myEO2_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _z1_8 = (5);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _y1_4 = (0.0);
     _y2_5 = (0.0);
     _y3_6 = (0.0);
     _y4_7 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 
@@ -16011,11 +16077,17 @@ $C_set_start_values$
 $C_destruct_external_object$
 ",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _r_eo_0 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _r_eos_1_1 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     return ef;
 }
@@ -16217,7 +16289,7 @@ const int fmi_runtime_options_map_length = 28;
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define pre_x_0 ((*(jmi->z))[jmi->offs_pre_real_w+0])
 
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     __block_jacobian_check_1 = (JMI_FALSE);
     __block_jacobian_check_tol_2 = (1.0E-6);
@@ -16247,8 +16319,20 @@ int jmi_set_start_values_base(jmi_t* jmi) {
     __use_Brent_in_1d_26 = (JMI_TRUE);
     __use_jacobian_equilibration_27 = (JMI_FALSE);
     __use_newton_for_brent_28 = (JMI_TRUE);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _x_0 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 ")})));
@@ -18271,12 +18355,24 @@ $C_ode_initialization$
 ",
             generatedCode="
 set_start
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     _y_3 = (4);
-    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
     _x2_1 = (_z_4);
     _x3_2 = (1);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 
@@ -18313,15 +18409,21 @@ model CFixedFalseParam3
             description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
             template="$C_set_start_values$",
             generatedCode="
-int jmi_set_start_values_base(jmi_t* jmi) {
+int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
-    model_init_eval_parameters(jmi);
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
     return ef;
 }
 ")})));

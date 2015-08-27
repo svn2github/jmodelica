@@ -125,20 +125,22 @@ public abstract class DAETag extends AbstractTag {
         protected CodeStream str;
         protected CodePrinter p;
         protected String indent;
+        protected boolean allowDirect;
         
         private ArrayList<T> elements = new ArrayList<T>();
         
-        public CodeSplitter(CodePrinter p, CodeStream str, String indent, String funcName) {
-            this(p, str, indent, funcName, new ArrayList<T>());
+        public CodeSplitter(CodePrinter p, CodeStream str, String indent, boolean allowDirect, String funcName) {
+            this(p, str, indent, allowDirect, funcName, new ArrayList<T>());
         }
         
         public CodeSplitter(CodePrinter p, CodeStream str, String indent,
-                String funcName, ArrayList<T> elements) {
+                boolean allowDirect, String funcName, ArrayList<T> elements) {
             this.funcName = funcName;
             this.str = str;
             this.p = p;
             this.indent = indent;
             this.elements = elements;
+            this.allowDirect = allowDirect;
         }
         
         public Collection<T> getElements() {
@@ -155,7 +157,7 @@ public abstract class DAETag extends AbstractTag {
         
         private int numSplits() {
             int s = elements.size();
-            if (s < itemLimit) {
+            if (allowDirect && s < itemLimit) {
                 s = 0;
             } else if (s > 0) {
                 s = 1 + ((s-1) / itemLimit);
