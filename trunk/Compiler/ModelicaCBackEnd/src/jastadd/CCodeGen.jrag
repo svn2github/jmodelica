@@ -3986,21 +3986,23 @@ aspect CCodeGen {
         for (FAbstractEquation equation : allLocalEquations()) {
             boolean realEqn = realEqns.contains(equation);
             for (FRelExp relExp : equation.relExpInInitialEquation()) {
-                if (relExp.dependsOn(allVariables)) {
-                    activeInitialSwitches_C.add(relExp);
+                FRelExp orig = relExp.originalFExp();
+                if (orig.dependsOn(allVariables)) {
+                    activeInitialSwitches_C.add(orig);
                     if (realEqn)
-                        directlyActiveSwitches_C.add(relExp);
+                        directlyActiveSwitches_C.add(orig);
                 } else {
-                    inactiveInitialSwitches_C.add(relExp);
+                    inactiveInitialSwitches_C.add(orig);
                 }
             }
             for (FRelExp relExp : equation.relExpInEquation()) {
-                if (relExp.dependsOn(allVariables)) {
-                    activeSwitches_C.add(relExp);
+                FRelExp orig = relExp.originalFExp();
+                if (orig.dependsOn(allVariables)) {
+                    activeSwitches_C.add(orig);
                     if (realEqn)
-                        directlyActiveSwitches_C.add(relExp);
+                        directlyActiveSwitches_C.add(orig);
                 } else {
-                    inactiveSwitches_C.add(relExp);
+                    inactiveSwitches_C.add(orig);
                 }
             }
             if (realEqn) {

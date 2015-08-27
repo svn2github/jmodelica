@@ -1386,10 +1386,13 @@ aspect FlatAPI {
     eq FDelayExp.hasEventGeneratingType()     = true;
     eq FSampleExp.hasEventGeneratingType()    = true;
     
-    syn boolean FExp.generatesEventInDAE() = inEquationSection() && originalFExp()==this && generatesEvent(false);
-    syn boolean FRelExp.generatesEventInInitDAE() =
+    syn boolean FExp.generatesEventInDAE() = generatesEventInDAE(originalFExp());
+    syn boolean FRelExp.generatesEventInInitDAE() = generatesEventInInitDAE(originalFExp());
+    
+    syn boolean FExp.generatesEventInDAE(FExp orig) = inEquationSection() && orig==this && generatesEvent(false);
+    syn boolean FRelExp.generatesEventInInitDAE(FExp orig) =
             (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
-            && originalFExp()==this && generatesEvent(true);
+            && orig==this && generatesEvent(true);
     
     coll ArrayList<FRelExp> FClass.relExpsWithEvent() 
         [new ArrayList<FRelExp>()] with add root FClass;
@@ -1418,7 +1421,7 @@ aspect FlatAPI {
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInDAE()
+    FRelExp contributes this when generatesEventInDAE(this)
     to FAbstractEquation.relExpInEquation() for myFEquation();
 
     coll ArrayList<FRelExp> FStatement.relExpInStmt() 
@@ -1475,7 +1478,7 @@ aspect FlatAPI {
 
     coll ArrayList<FRelExp> FAbstractEquation.relExpInInitialEquation() 
         [new ArrayList<FRelExp>()] with add root FAbstractEquation;
-    FRelExp contributes this when generatesEventInInitDAE()
+    FRelExp contributes this when generatesEventInInitDAE(this)
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
     
     syn int FRelExp.relExpInInitialEquationsIndex()  = checkIndex(myFClass().relExpInInitialEquations().indexOf(originalFExp()));
