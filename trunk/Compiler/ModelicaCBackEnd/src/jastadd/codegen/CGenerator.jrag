@@ -665,52 +665,45 @@ public class CGenerator extends GenericGenerator {
 		}
 
         public void generate(CodeStream str) {
-			if (fclass.onlyInitBLT()) {
-				str.print(INDENT + "ef = model_ode_initialize(jmi);\n");
-			} else {
-                CodePrinter p = ASTNode.printer_C.initialSystemPrinter();
-                String indent = "";
-                String next = p.indent(indent);
-                
-                if (!fclass.myOptions().getBooleanOption("generate_ode")) {
-                    str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
-                    str.print(next);
-                    str.print("return 0;");
-                    str.print("}\n");
-                    return;
+            CodePrinter p = ASTNode.printer_C.initialSystemPrinter();
+            String indent = "";
+            String next = p.indent(indent);
+            
+            CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_derivatives_") {
+                @Override
+                public void genDecl(AbstractEquationBlock element) {
+                    element.genVarDecls_C(p, str, indent);
                 }
-                
-                CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_derivatives_") {
-                    @Override
-                    public void genDecl(AbstractEquationBlock element) {
-                        element.genVarDecls_C(p, str, indent);
-                    }
-                    @Override
-                    public void gen(AbstractEquationBlock element) {
-                        element.genBlock_C(p, str, indent, false);
-                    }
-                };
-                
-                java.util.List<AbstractEquationBlock> blocks = fclass.getDAEStructuredBLT().getAllBlocks();
-                cs.add(blocks);
-                cs.genFuncs();
-                
-                str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
-                cs.printStatusDecl();
-                for (AbstractEquationBlock eb : blocks) {
+                @Override
+                public void gen(AbstractEquationBlock element) {
+                    element.genBlock_C(p, str, indent, false);
+                }
+            };
+            
+            if (!fclass.onlyInitBLT() && fclass.myOptions().getBooleanOption("generate_ode")) {
+                cs.add(fclass.getDAEStructuredBLT().getAllBlocks());
+            }
+            
+            cs.genFuncs();
+            
+            str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
+            cs.printStatusDecl();
+            if (fclass.onlyInitBLT()) {
+                str.print(next + "ef = model_ode_initialize(jmi);\n");
+            } else {
+                for (AbstractEquationBlock eb : cs.getElements()) {
                     eb.genReinitTempInits_C(p, str, next);
                 }
                 cs.genCalls();
-                for (AbstractEquationBlock eb : blocks) {
+                for (AbstractEquationBlock eb : cs.getElements()) {
                     eb.genReinitWritebacks_C(p, next, str);
                 }
-                cs.printStatusReturn();
-                str.print("}\n");
-                
-			}
-		}
-	}
-
+            }
+            cs.printStatusReturn();
+            str.print("}\n");
+        }
+    }
+    
 	/**
 	 * Generates code for solving the BLT blocks in the initialization system
 	 */
@@ -729,14 +722,6 @@ public class CGenerator extends GenericGenerator {
             String indent = "";
             String next = p.indent(indent);
             
-            if (!fclass.myOptions().getBooleanOption("generate_ode")) {
-                str.print("int model_ode_initialize_base(jmi_t* jmi) {\n");
-                str.print(next);
-                str.print("return 0;");
-                str.print("}\n");
-                return;
-            }
-            
             CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, "model_ode_initialize_") {
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
@@ -748,7 +733,10 @@ public class CGenerator extends GenericGenerator {
                 }
             };
             
-            cs.add(fclass.getDAEInitBLT());
+            if (fclass.myOptions().getBooleanOption("generate_ode")) {
+                cs.add(fclass.getDAEInitBLT());
+            }
+            
             cs.genFuncs();
             
             str.print("int model_ode_initialize_base(jmi_t* jmi) {\n");

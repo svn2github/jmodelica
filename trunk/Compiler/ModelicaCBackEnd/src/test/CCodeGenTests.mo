@@ -479,7 +479,11 @@ $C_DAE_event_indicator_residuals$
 $C_ode_initialization$
 ",
             generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
     ef = model_ode_initialize(jmi);
+    return ef;
+}
 
   model_ode_guards_init(jmi);
 

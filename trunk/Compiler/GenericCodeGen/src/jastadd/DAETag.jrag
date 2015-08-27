@@ -140,6 +140,10 @@ public abstract class DAETag extends AbstractTag {
             this.indent = indent;
             this.elements = elements;
         }
+        
+        public Collection<T> getElements() {
+            return elements;
+        }
 
         public void add(Collection<T> coll) {
             elements.addAll(coll);
