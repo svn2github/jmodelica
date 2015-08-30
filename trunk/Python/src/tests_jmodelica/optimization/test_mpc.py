@@ -1,74 +1,178 @@
- #!/usr/bin/env python 
- # -*- coding: utf-8 -*-
- 
- # Copyright (C) 2014 Modelon AB
- #
- # This program is free software: you can redistribute it and/or modify
- # it under the terms of the GNU General Public License as published by
- # the Free Software Foundation, version 3 of the License.
- #
- # This program is distributed in the hope that it will be useful,
- # but WITHOUT ANY WARRANTY; without even the implied warranty of
- # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- # GNU General Public License for more details.
- #
- # You should have received a copy of the GNU General Public License
- # along with this program. If not, see <http://www.gnu.org/licenses/>.
- 
-"""Tests the mpc module."""
- 
-import os
-import nose
-
-from collections import OrderedDict
-import numpy as N
-from scipy.io.matlab.mio import loadmat
-
-from pyjmi.optimization.mpc import MPC
-from pyjmi.optimization.casadi_collocation import BlockingFactors
-
-from tests_jmodelica import testattr, get_files_path
-from pyjmi.common.io import ResultDymolaTextual
-from pymodelica import compile_fmu
-from pyfmi import load_fmu
-from IPython.core.debugger import Tracer; dh = Tracer()
- 
-try:
-    from pyjmi import transfer_to_casadi_interface
-    from pyjmi.optimization.casadi_collocation import *
-    import casadi
-except (NameError, ImportError):
-    pass
-from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
-#Check to see if pyfmi is installed so that we also catch the error generated
-#from that package
-try:
-    from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
-    VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
-except ImportError:
-    VariableNotFoundError = jmiVariableNotFoundError
-
-path_to_mos = os.path.join(get_files_path(), 'Modelica')
-path_to_data = os.path.join(get_files_path(), 'Data')
-
-def assert_results(res, input_name, u_norm_ref, u_norm_rtol=1e-4):
-    """Helper function for asserting optimization results."""
-    u = res[input_name]
-    u_norm = N.linalg.norm(u) / N.sqrt(len(u))
-    N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
-
-class TestMPCClass(object):
-    """
-    Tests pyjmi.optimization.mpc.
-    """
-    @classmethod
-    def setUpClass(self):
-        """Compile the test models."""
-        self.cstr_file_path = os.path.join(get_files_path(), 'Modelica', 
-                                                                  'CSTR.mop')
-
-        self.c_0_A = 956.271352
-        self.T_0_A = 250.051971
+#~ #!/usr/bin/env python 
+#~ # -*- coding: utf-8 -*-
+#~ 
+#~ # Copyright (C) 2014 Modelon AB
+#~ #
+#~ # This program is free software: you can redistribute it and/or modify
+#~ # it under the terms of the GNU General Public License as published by
+#~ # the Free Software Foundation, version 3 of the License.
+#~ #
+#~ # This program is distributed in the hope that it will be useful,
+#~ # but WITHOUT ANY WARRANTY; without even the implied warranty of
+#~ # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#~ # GNU General Public License for more details.
+#~ #
+#~ # You should have received a copy of the GNU General Public License
+#~ # along with this program. If not, see <http://www.gnu.org/licenses/>.
+#~ 
+#~ """Tests the mpc module."""
+#~ 
+#~ import os
+#~ import nose
+#~ 
+#~ from collections import OrderedDict
+#~ import numpy as N
+#~ from scipy.io.matlab.mio import loadmat
+#~ 
+#~ from pyjmi.optimization.mpc import MPC
+#~ from pyjmi.optimization.casadi_collocation import BlockingFactors
+#~ 
+#~ from tests_jmodelica import testattr, get_files_path
+#~ from pyjmi.common.io import ResultDymolaTextual
+#~ from pymodelica import compile_fmu
+#~ from pyfmi import load_fmu
+#~ from IPython.core.debugger import Tracer; dh = Tracer()
+#~ 
+#~ try:
+    #~ from pyjmi import transfer_to_casadi_interface
+    #~ from pyjmi.optimization.casadi_collocation import *
+    #~ import casadi
+#~ except (NameError, ImportError):
+    #~ pass
+#~ 
+#~ from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
+#~ #Check to see if pyfmi is installed so that we also catch the error generated
+#~ #from that package
+#~ try:
+    #~ from pyfmi.common.io import VariableNotFoundError as fmiVariableNotFoundError
+    #~ VariableNotFoundError = (jmiVariableNotFoundError, fmiVariableNotFoundError)
+#~ except ImportError:
+    #~ VariableNotFoundError = jmiVariableNotFoundError
+#~ 
+#~ path_to_mos = os.path.join(get_files_path(), 'Modelica')
+#~ path_to_data = os.path.join(get_files_path(), 'Data')
+#~ 
+#~ def assert_results(res, input_name, u_norm_ref, u_norm_rtol=1e-4):
+    #~ """Helper function for asserting optimization results."""
+    #~ u = res[input_name]
+    #~ u_norm = N.linalg.norm(u) / N.sqrt(len(u))
+    #~ N.testing.assert_allclose(u_norm, u_norm_ref, u_norm_rtol)
+#~ 
+#~ class TestMPCClass(object):
+    #~ """
+    #~ Tests pyjmi.optimization.mpc.
+    #~ """
+    #~ @classmethod
+    #~ def setUpClass(self):
+        #~ """Compile the test models."""
+        #~ self.cstr_file_path = os.path.join(get_files_path(), 'Modelica', 
+                                                                    #~ 'CSTR.mop')
+#~ 
+        #~ self.c_0_A = 956.271352
+        #~ self.T_0_A = 250.051971
+        #~ 
+        #~ self.algorithm = "LocalDAECollocationAlg"
+          #~ 
+    #~ def optimize_options(self, op, alg=None):
+        #~ if alg is None:
+            #~ return op.optimize_options()
+        #~ else:
+            #~ return op.optimize_options(alg)
+#~ 
+    #~ @testattr(casadi = True)
+    #~ def test_auto_bl_factors(self):
+        #~ """
+        #~ Test blocking factors generated in the mpc-class.
+        #~ """
+        #~ op = transfer_to_casadi_interface("CSTR.CSTR_MPC", 
+                                        #~ self.cstr_file_path,
+                            #~ compiler_options={"state_initial_equations":True})
+        #~ 
+        #~ # Set options collocation
+        #~ n_e = 50
+        #~ opt_opts = op.optimize_options()
+        #~ opt_opts['n_e'] = n_e
+        #~ opt_opts['IPOPT_options']['print_level'] = 0
+          #~ 
+        #~ # Define some MPC-options
+        #~ sample_period = 3
+        #~ horizon = 50
+        #~ 
+        #~ # Create MPC-object
+        #~ MPC_object = MPC(op, opt_opts, sample_period, horizon)
+#~ 
+        #~ bf = [1]*horizon
+        #~ bf_auto = MPC_object.options['blocking_factors'].factors['Tc']
+        #~ 
+        #~ # Assert that bf and bf_auto are equal
+        #~ N.testing.assert_array_equal(bf, bf_auto)
+        #~ 
+        #~ ##RUN OPTIMATION##
+        #~ 
+    #~ @testattr(casadi = True)
+    #~ def test_du_quad_pen(self):
+        #~ """
+        #~ Test with blocking_factor du_quad_pen.
+        #~ """
+        #~ op = transfer_to_casadi_interface("CSTR.CSTR_MPC", 
+                                        #~ self.cstr_file_path,
+                            #~ compiler_options={"state_initial_equations":True})
+        #~ op.set('_start_c', float(self.c_0_A))
+        #~ op.set('_start_T', float(self.T_0_A))
+        #~ 
+        #~ # Set options collocation
+        #~ n_e = 50
+        #~ opt_opts = op.optimize_options()
+        #~ opt_opts['n_e'] = n_e
+        #~ opt_opts['IPOPT_options']['print_level'] = 0  
+        #~ 
+        #~ # Define some MPC-options
+        #~ sample_period = 3
+        #~ horizon = 50
+        #~ seed = 7
+        #~ 
+        #~ # Define blocking factors
+        #~ bl_list = [1]*horizon
+        #~ factors = {'Tc': bl_list}
+        #~ du_quad_pen = {'Tc': 50}
+        #~ bf = BlockingFactors(factors = factors, du_quad_pen=du_quad_pen)
+        #~ opt_opts['blocking_factors'] = bf
+        #~ 
+        #~ 
+        #~ # Create MPC-object
+        #~ MPC_object = MPC(op, opt_opts, sample_period, horizon, noise_seed=seed,
+                            #~ initial_guess='trajectory')
+        #~ 
+        #~ # Find timed variable Tc(startTime)
+        #~ timed = op.getTimedVariables()
+        #~ for var in timed:
+            #~ if var.getBaseVariable().getName() == 'Tc':
+                    #~ timed_name = var.getName()
+                    #~ 
+                    #~ 
+        #~ # Assert that the correct term has been added to the objective            
+        #~ obj = op.getObjective()   
+        #~ obj_string = obj.getRepresentation()    
+        #~ find = obj_string.find('(Tc_du_quad_pen*(%s-Tc_0))*(%s-Tc_0)' 
+                            #~ %(timed_name, timed_name))
+        #~ N.testing.assert_(find != -1)
+        #~ N.testing.assert_allclose(op.get('Tc_du_quad_pen'), 0.0)
+        #~ 
+        #~ MPC_object.update_state()
+        #~ u_k1 = MPC_object.sample()
+        #~ MPC_object.update_state()
+        #~ 
+        #~ #Assert that Tc_0 equals u_k1
+        #~ Tc_0 = MPC_object.collocator._par_vals[MPC_object.index['Tc_0']] 
+        #~ N.testing.assert_equal(Tc_0, u_k1[1](0)[0])
+        #~ 
+        #~ # Assert that Tc_du_quad_pen is changed at start of second sample
+        #~ u_k2 = MPC_object.sample()
+        #~ dqp =\
+            #~ MPC_object.collocator._par_vals[MPC_object.index['Tc_du_quad_pen']] 
+        #~ N.testing.assert_equal(dqp, du_quad_pen['Tc'])
+        #~ 
+        #~ ##RUN OPTIMIZATION##
         
         self.algorithm = "LocalDAECollocationAlg"
          
