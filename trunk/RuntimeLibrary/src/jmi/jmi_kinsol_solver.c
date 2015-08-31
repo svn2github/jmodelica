@@ -808,7 +808,10 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     
     /* minimal/maximal allowed step multiplier */
     max_step_ratio = 1.0;
-    min_step_ratio = 2*solver->kin_stol;
+    if(block->options->experimental_mode & jmi_block_solver_experimental_active_bounds_threshold)
+        min_step_ratio = block->options->active_bounds_threshold;
+    else
+        min_step_ratio = 2*solver->kin_stol;
 
     /*
         Go over the iteration vars and reduce max_step_ratio

@@ -84,7 +84,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_steepest_descent = 1,
     jmi_block_solver_experimental_steepest_descent_first = 2,
     jmi_block_solver_experimental_Brent = 4,
-    jmi_block_solver_experimental_Brent_with_newton = 16
+    jmi_block_solver_experimental_Brent_with_newton = 16,
+    jmi_block_solver_experimental_active_bounds_threshold = 32
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -223,6 +224,7 @@ struct jmi_block_solver_options_t {
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
     double events_epsilon;         /**< \brief The event epsilon used for event indicators and switches. */
     int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */
+    double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds.
     
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */

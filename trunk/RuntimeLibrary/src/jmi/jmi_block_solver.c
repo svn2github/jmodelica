@@ -618,6 +618,8 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
 
+    bsop->active_bounds_threshold = 0; /** < \brief Threshold for when at active bound. */
+
     bsop->enforce_bounds_flag = 1;  /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     bsop->use_jacobian_equilibration_flag = 0; 
     bsop->use_Brent_in_1d_flag = 0;            /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
