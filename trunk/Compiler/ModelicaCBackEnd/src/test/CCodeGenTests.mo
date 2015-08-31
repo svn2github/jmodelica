@@ -8818,6 +8818,123 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end ReinitCTest3;
 
+model ReinitCTest4
+    function f
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real x;
+equation
+    der(x) = f({time});
+    when time > 2 then
+        reinit(x, f({1}));
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest4",
+            description="",
+            variability_propagation=false,
+            relational_time_events=false,
+            template="
+$C_reinit_temp_decls$
+-----
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+static jmi_ad_var_t tmp_1;
+
+-----
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
+    tmp_1 = _x_0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = _time;
+    _der_x_3 = func_CCodeGenTests_ReinitCTest4_f_exp0(tmp_2);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (2), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    if (tmp_1 != _x_0) {
+        _x_0 = tmp_1;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+
+-----
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = _time;
+    _der_x_3 = func_CCodeGenTests_ReinitCTest4_f_exp0(tmp_2);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_time - (2), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    _temp_1_1 = _sw(0);
+    _x_0 = 0.0;
+    pre_temp_1_1 = JMI_FALSE;
+    return ef;
+}
+
+-----
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1)
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+    } else if (evaluation_mode == JMI_BLOCK_MAX) {
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_time - (2), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+            }
+            _temp_1_1 = _sw(0);
+        }
+        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1, 1)
+        jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+        if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
+            JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1, 1)
+            jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+            tmp_1 = func_CCodeGenTests_ReinitCTest4_f_exp0(tmp_3);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    return ef;
+}
+
+
+-----
+")})));
+end ReinitCTest4;
+
 
 
 model NoDAEGenerationTest1

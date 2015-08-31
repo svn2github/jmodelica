@@ -206,12 +206,20 @@ public abstract class DAETag extends AbstractTag {
                 genDecl(elements.get(i));
             }
             for (int i = start; i < start + n; i++) {
+                genPre(elements.get(i));
+            }
+            for (int i = start; i < start + n; i++) {
                 gen(elements.get(i));
+            }
+            for (int i = start; i < start + n; i++) {
+                genPost(elements.get(i));
             }
         }
         
         public abstract void genDecl(T element);
+        public void genPre(T element) {}
         public abstract void gen(T element);
+        public void genPost(T element) {}
     }
 
 }

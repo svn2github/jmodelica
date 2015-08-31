@@ -676,8 +676,16 @@ public class CGenerator extends GenericGenerator {
                     element.genVarDecls_C(p, str, indent);
                 }
                 @Override
+                public void genPre(AbstractEquationBlock element) {
+                    element.genReinitTempInits_C(p, str, indent);
+                }
+                @Override
                 public void gen(AbstractEquationBlock element) {
                     element.genBlock_C(p, str, indent, false);
+                }
+                @Override
+                public void genPost(AbstractEquationBlock element) {
+                    element.genReinitWritebacks_C(p, indent, str);
                 }
             };
             
@@ -692,13 +700,7 @@ public class CGenerator extends GenericGenerator {
             if (fclass.onlyInitBLT()) {
                 str.print(next + "ef = model_ode_initialize(jmi);\n");
             } else {
-                for (AbstractEquationBlock eb : cs.getElements()) {
-                    eb.genReinitTempInits_C(p, str, next);
-                }
                 cs.genCalls();
-                for (AbstractEquationBlock eb : cs.getElements()) {
-                    eb.genReinitWritebacks_C(p, next, str);
-                }
             }
             cs.printStatusReturn();
             str.print("}\n");

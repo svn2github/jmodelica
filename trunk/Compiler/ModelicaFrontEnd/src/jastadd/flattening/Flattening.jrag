@@ -243,6 +243,7 @@ aspect Flattening {
 
     public void FReinit.flattenUsedFuncsAndEnums(FClass fc) {
         containingInstNode().flattenStateSelect(fc);
+        getFExp().flattenUsedFuncsAndEnums(fc);
     }
 
     public void InstNode.flattenStateSelect(FClass fc) {
