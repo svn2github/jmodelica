@@ -470,58 +470,58 @@ class TestMPCClass(object):
         N.testing.assert_equal(sample_period, result2['time'][0])
         N.testing.assert_equal(sample_period*(horizon+1), result2['time'][-1])
 
-    @testattr(casadi = True)
-    def test_set(self):
-        """
-        Test the set function for single parameter, list of parameters and 
-        array of parameters.
-        """
-        op = transfer_to_casadi_interface("CSTR.CSTR_MPC", 
-                                        self.cstr_file_path,
-                            compiler_options={"state_initial_equations":True})
-        # Set options collocation
-        n_e = 10
-        opt_opts = op.optimize_options()
-        opt_opts['n_e'] = n_e
-        opt_opts['IPOPT_options']['print_level'] = 0
+    #~ @testattr(casadi = True)
+    #~ def test_set(self):
+        #~ """
+        #~ Test the set function for single parameter, list of parameters and 
+        #~ array of parameters.
+        #~ """
+        #~ op = transfer_to_casadi_interface("CSTR.CSTR_MPC", 
+                                        #~ self.cstr_file_path,
+                            #~ compiler_options={"state_initial_equations":True})
+        #~ # Set options collocation
+        #~ n_e = 10
+        #~ opt_opts = op.optimize_options()
+        #~ opt_opts['n_e'] = n_e
+        #~ opt_opts['IPOPT_options']['print_level'] = 0
           
-        # Define some MPC-options and create MPC object
-        sample_period = 3
-        horizon = 10
-        MPC_object = MPC(op, opt_opts, sample_period, horizon, initial_guess = 'trajectory')
+        #~ # Define some MPC-options and create MPC object
+        #~ sample_period = 3
+        #~ horizon = 10
+        #~ MPC_object = MPC(op, opt_opts, sample_period, horizon, initial_guess = 'trajectory')
         
-        # Set single parameter
-        MPC_object.set('c_ref', 0)
+        #~ # Set single parameter
+        #~ MPC_object.set('c_ref', 0)
 
-        MPC_object.update_state()
-        MPC_object.sample()
+        #~ MPC_object.update_state()
+        #~ MPC_object.sample()
+        #~ dh()
+        #~ ind_c_ref = MPC_object.collocator.var_indices['c_ref']
+        #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_c_ref], 0)
         
-        ind_c_ref = MPC_object.collocator.var_indices['c_ref']
-        N.testing.assert_equal(MPC_object.collocator._par_vals[ind_c_ref], 0)
+        #~ # Set array of parameters
+        #~ names = N.array(['T_ref', 'Tc_ref'])
+        #~ values = N.array([7, 5])
+        #~ MPC_object.set(names, values)
         
-        # Set array of parameters
-        names = N.array(['T_ref', 'Tc_ref'])
-        values = N.array([7, 5])
-        MPC_object.set(names, values)
+        #~ MPC_object.update_state()
+        #~ MPC_object.sample()
         
-        MPC_object.update_state()
-        MPC_object.sample()
+        #~ ind_T_ref = MPC_object.collocator.var_indices['T_ref']
+        #~ ind_Tc_ref = MPC_object.collocator.var_indices['Tc_ref']
+        #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_T_ref], 7)
+        #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_Tc_ref], 5)
         
-        ind_T_ref = MPC_object.collocator.var_indices['T_ref']
-        ind_Tc_ref = MPC_object.collocator.var_indices['Tc_ref']
-        N.testing.assert_equal(MPC_object.collocator._par_vals[ind_T_ref], 7)
-        N.testing.assert_equal(MPC_object.collocator._par_vals[ind_Tc_ref], 5)
+        #~ # Set list of parameters
+        #~ names = ['T_ref', 'Tc_ref']
+        #~ values = [0, 0]
+        #~ MPC_object.set(names, values)
         
-        # Set list of parameters
-        names = ['T_ref', 'Tc_ref']
-        values = [0, 0]
-        MPC_object.set(names, values)
+        #~ MPC_object.update_state()
+        #~ MPC_object.sample()
         
-        MPC_object.update_state()
-        MPC_object.sample()
-        
-        N.testing.assert_equal(MPC_object.collocator._par_vals[ind_T_ref], 0)
-        N.testing.assert_equal(MPC_object.collocator._par_vals[ind_Tc_ref], 0)
+        #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_T_ref], 0)
+        #~ N.testing.assert_equal(MPC_object.collocator._par_vals[ind_Tc_ref], 0)
 
         
     #~ @testattr(casadi = True)
