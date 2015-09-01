@@ -322,18 +322,6 @@ aspect CCodeGen {
 		p.print(getY(), str, indent);
 		str.print(")");
 	}
-	
-	public void FAbstractDerExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
-			str.print("(");
-			str.print(myFV().name_C());
-			str.print("*sf(");
-			str.print(myFV().valueReference());
-			str.print("))");
-		} else {
-			str.print(myFV().name_C());
-		}
-	}
 
     public void FPreExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         FAbstractVariable fv = myFV();
@@ -378,16 +366,24 @@ aspect CCodeGen {
 			if (type().isReal() && !inFunction() && 
 					myOptions().getBooleanOption("enable_variable_scaling")) {
 				str.print("(");
-				p.print(getFIdUse(), str, indent);
+				genAssignedRef_C(p, str, indent);
 				str.print("*sf(");
 				str.print(myFV().valueReference());
 				str.print("))");
 			} else {
-				p.print(getFIdUse(), str, indent);
+				genAssignedRef_C(p, str, indent);
 			}
 		}
 	}
-	
+    
+    public void FIdUseExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+        p.print(getFIdUse(), str, "");
+    }
+    
+    public void FAbstractDerExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+        str.print(myFV().name_C());
+    }
+    
     public void FDSRefExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         p.print(getOrg(), str, indent);
     }
@@ -4662,14 +4658,14 @@ aspect CCodeGen {
 			return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
             str.format("%sJMI_ASG(STR, ", indent);
-            printer_C.print(getFIdUse(), str, "");
+            genAssignedRef_C(ASTNode.printer_C, str, indent);
             str.print(", ");
             str.print(name);
             str.println(")");
             return;
         }
 		str.print(indent);
-		printer_C.print(getFIdUse(), str, "");
+        genAssignedRef_C(ASTNode.printer_C, str, indent);
 		str.print(" = (");
 		str.print(name);
 		str.print(")");

@@ -2641,6 +2641,43 @@ void func_CCodeGenTests_CFunctionTest18_F2_def1(R_0_r* x_v, R_0_r* y_v) {
 ")})));
 end CFunctionTest18;
 
+model CFunctionTest19
+    record R
+        Real x;
+    end R;
+    
+    function f
+        input Real x;
+        output R y = R(x);
+    algorithm
+        annotation(Inline=false,smoothOrder=1);
+    end f;
+    
+    R y;
+    Real x;
+ equation
+    y = f(time);
+    der(y.x) = der(x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest19",
+            description="Derivative in solved function call left",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_RECORD_STATIC(R_0_r, tmp_2)
+    func_CCodeGenTests_CFunctionTest19__der_f_def1(_time, 1.0, tmp_1);
+    _der_y_x_2 = (tmp_1->x);
+    _der_x_3 = _der_y_x_2;
+    func_CCodeGenTests_CFunctionTest19_f_def0(_time, tmp_2);
+    _y_x_0 = (tmp_2->x);
+    return ef;
+}
+")})));
+end CFunctionTest19;
 
 model CForLoop1
  function f
