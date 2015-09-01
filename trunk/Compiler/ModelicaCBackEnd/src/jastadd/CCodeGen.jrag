@@ -3416,6 +3416,15 @@ aspect CCodeGen {
         for (FVariable fv : directlyImpactingNonReals_C())
             str.format("%sx[%d] = %d;\n", nextIndent, directImpactNonRealEnumerator.next(), fv.valueReference());
         
+        Collection<FVariable> nonRealTemps = nonRealTempVariables_C();
+        if (nonRealTemps.size() > 0) {
+            str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE) {\n");
+            // Loop over all non-real temporary variables and write their position in the z-vector
+            Enumerator nonRealTempEnumerator = new Enumerator();
+            for (FVariable fv : nonRealTemps)
+                str.format("%sx[%d] = %d;\n", nextIndent, nonRealTempEnumerator.next(), fv.valueReference());
+        }
+        
         str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {\n");
         // Loop over all non-real variables and write their position in the z-vector
         Enumerator relExpEnumerator = new Enumerator();
@@ -3851,6 +3860,7 @@ aspect CCodeGen {
 		str.print(localSolvedRealVariables().size() + ", ");
 		str.print(nonRealVariables_C().size() + ", ");
 		str.print(directlyImpactingNonReals_C().size() + ", ");
+        str.print(nonRealTempVariables_C().size() + ", ");
 		str.print((activeSwitches_C().size() + activeInitialSwitches_C().size()) + ", ");
 		str.print(directlyActiveSwitches_C().size() + ", ");
 		str.print(variability().genJMIVariabilityConstant_C() + ", ");
@@ -3953,6 +3963,16 @@ aspect CCodeGen {
         Collection<FVariable> l = new ArrayList<FVariable>();
         for (FVariable fv : localNonRealVariables()) {
             if (!fv.isTemporary()) {
+                l.add(fv);
+            }
+        }
+        return l;
+    }
+    
+    public Collection<FVariable> AbstractEquationBlock.nonRealTempVariables_C() {
+        Collection<FVariable> l = new ArrayList<FVariable>();
+        for (FVariable fv : localNonRealVariables()) {
+            if (fv.isTemporary()) {
                 l.add(fv);
             }
         }
