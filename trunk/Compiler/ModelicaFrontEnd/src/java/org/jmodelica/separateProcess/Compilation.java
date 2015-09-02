@@ -31,6 +31,7 @@ import org.jmodelica.util.Problem;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.logging.ObjectStreamLogger;
+import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
 
 public final class Compilation {
@@ -116,6 +117,8 @@ public final class Compilation {
                     } else if (o instanceof ThrowableLoggingUnit) {
                         if (exception == null)
                             exception = ((ThrowableLoggingUnit) o).getException();
+                    } else if (o instanceof LoggingUnit) {
+                        // Ignore these... E.g. sometimes we get StringLoggingUnits here...
                     } else {
                         throw new SeparateProcessException("Unknown object type '" + o.getClass().getName() + "' received on compiler log");
                     }
