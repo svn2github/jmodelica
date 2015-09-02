@@ -52,8 +52,8 @@ DIST_COMMON = $(am__configure_deps) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(srcdir)/jm_tests.in $(top_srcdir)/Python/jm_ipython.sh.in \
 	$(top_srcdir)/Python/jm_python.sh.in $(top_srcdir)/configure \
-	$(top_srcdir)/docbook/UsersGuide/Makefile.in INSTALL \
-	config.guess config.sub depcomp install-sh ltmain.sh missing
+	INSTALL config.guess config.sub depcomp install-sh ltmain.sh \
+	missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
 	$(top_srcdir)/m4/ltoptions.m4 $(top_srcdir)/m4/ltsugar.m4 \
@@ -65,8 +65,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES = docbook/UsersGuide/Makefile Python/jm_ipython.sh \
-	Python/jm_python.sh jm_tests
+CONFIG_CLEAN_FILES = Python/jm_ipython.sh Python/jm_python.sh jm_tests
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -306,6 +305,11 @@ JAVA_BUILD_DIR = $(abs_builddir)/java
 COMPILER_DIR = $(abs_top_srcdir)/Compiler
 JAVA_MC_ANT_FILE = $(COMPILER_DIR)/ModelicaCompiler/build.xml
 JAVA_OC_ANT_FILE = $(COMPILER_DIR)/OptimicaCompiler/build.xml
+JAVA_EXEC_CP = $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
+
+# Paths for doc
+DOC_BUILD_DIR = $(abs_builddir)/docbook/UsersGuide
+DOC_SRC_DIR = $(abs_top_srcdir)/docbook/UsersGuide
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -361,8 +365,6 @@ $(srcdir)/config.h.in:  $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
-docbook/UsersGuide/Makefile: $(top_builddir)/config.status $(top_srcdir)/docbook/UsersGuide/Makefile.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 Python/jm_ipython.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_ipython.sh.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 Python/jm_python.sh: $(top_builddir)/config.status $(top_srcdir)/Python/jm_python.sh.in
@@ -1000,15 +1002,23 @@ install-python-packages: build-python-packages
 	[ -e $(DESTDIR)$(prefix)/bin/jm_ipython.sh  ] && echo "File exists, don't jm_ipython.sh" || cp Python/jm_ipython.sh $(DESTDIR)$(prefix)/bin/jm_ipython.sh
 	chmod ugo+x $(DESTDIR)$(prefix)/bin/jm_*.sh
 
-all-local: build-python-packages
+all-local: build-python-packages build-compiler prepare-doc-src
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
+	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+
+build-compiler:
 @HAVE_ANT_TRUE@	mkdir -p $(JAVA_BUILD_DIR)
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 @HAVE_ANT_TRUE@	cd $(JAVA_BUILD_DIR); \
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
-@HAVE_ANT_TRUE@	java -cp "$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter "$(abs_builddir)/DefaultOptions.xml"
-	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
-	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+@HAVE_ANT_TRUE@	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
+
+prepare-doc-src: build-compiler
+	mkdir -p "$(DOC_BUILD_DIR)"
+	cp -rT "$(DOC_SRC_DIR)" "$(DOC_BUILD_DIR)"
+	rm "$(DOC_BUILD_DIR)/Options.xml" "$(DOC_BUILD_DIR)/JModelicaUsersGuide.pdf"
+	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -t "$(DOC_SRC_DIR)/Options.xml" -d "$(DOC_BUILD_DIR)/Options.xml"
 
 install-exec-local: install-python-packages
 @HAVE_ANT_TRUE@	cp $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar $(DESTDIR)$(prefix)/lib/
@@ -1157,9 +1167,6 @@ docs:
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html
-
-docbook-docs:
-	cd docbook/UsersGuide; $(MAKE) all
 
 .PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
 

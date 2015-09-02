@@ -451,7 +451,6 @@ AC_CONFIG_FILES([
  external/FMILibrary/Makefile
  JMI/src/Makefile
  JMI/Makefile
- docbook/UsersGuide/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
  Python/src/tests_jmodelica/files/Modelica/Resources/Makefile

@@ -264,18 +264,31 @@ JAVA_BUILD_DIR=$(abs_builddir)/java
 COMPILER_DIR=$(abs_top_srcdir)/Compiler
 JAVA_MC_ANT_FILE=$(COMPILER_DIR)/ModelicaCompiler/build.xml
 JAVA_OC_ANT_FILE=$(COMPILER_DIR)/OptimicaCompiler/build.xml
+JAVA_EXEC_CP=$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
 
-all-local: build-python-packages
+all-local: build-python-packages build-compiler prepare-doc-src
+	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
+	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+
+build-compiler:
 if HAVE_ANT
 	mkdir -p $(JAVA_BUILD_DIR)
 	cd $(JAVA_BUILD_DIR); \
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_MC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 	cd $(JAVA_BUILD_DIR); \
 	$(ANT_OPTS) $(ANT) -f "$(JAVA_OC_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
-	java -cp "$(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter "$(abs_builddir)/DefaultOptions.xml"
+	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -x "$(abs_builddir)/DefaultOptions.xml"
 endif
-	$(abs_top_srcdir)/get_version.sh $(abs_top_srcdir) https://svn.jmodelica.org > $(abs_builddir)/version.txt
-	if [ "$(BUILD_EXTRA)" ]; then exec "$(BUILD_EXTRA)" "$(abs_top_srcdir)" "$(DESTDIR)$(prefix)"; fi
+
+# Paths for doc
+DOC_BUILD_DIR=$(abs_builddir)/docbook/UsersGuide
+DOC_SRC_DIR=$(abs_top_srcdir)/docbook/UsersGuide
+
+prepare-doc-src: build-compiler
+	mkdir -p "$(DOC_BUILD_DIR)"
+	cp -rT "$(DOC_SRC_DIR)" "$(DOC_BUILD_DIR)"
+	rm "$(DOC_BUILD_DIR)/Options.xml" "$(DOC_BUILD_DIR)/JModelicaUsersGuide.pdf"
+	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -t "$(DOC_SRC_DIR)/Options.xml" -d "$(DOC_BUILD_DIR)/Options.xml"
 
 install-exec-local: install-python-packages
 if HAVE_ANT
@@ -441,9 +454,6 @@ docs:
 	cd $(abs_top_srcdir); doxygen doc/ModelicaCompiler/modelica_compiler_doxydoc.conf
 	cd $(abs_top_srcdir); doxygen doc/OptimicaCompiler/optimica_compiler_doxydoc.conf
 	make -C $(abs_top_srcdir)/doc/PyJMI html
-
-docbook-docs:
-	cd docbook/UsersGuide; $(MAKE) all
 
 
 .PHONY: modelicacasadi_wrapper ifcasadi install_modelicacasadi_transfer install_modelicacasadi_wrapper
