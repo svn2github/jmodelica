@@ -528,6 +528,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "Controls whether dynamic states should be calculated and generated."),
+        MODELICAPATH
+            ("MODELICAPATH",
+             OptionType.compiler,
+             Category.internal,
+             "",
+             "The MODELICAPATH to use during compilation."),
 
         // Runtime options
         /*
