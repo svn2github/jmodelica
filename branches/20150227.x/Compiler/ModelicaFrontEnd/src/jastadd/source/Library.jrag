@@ -232,15 +232,11 @@ aspect Library {
         protected Set<LibraryDef> set;
         
         public LibraryList() {
-            set = new HashSet<LibraryDef>();
+            set = new LinkedHashSet<LibraryDef>();
         }
         
         public void reset() {
             set.clear();
-        }
-        
-        public Set<LibraryDef> loadedLibraries() {
-            return availableLibraries();
         }
         
         public Set<LibraryDef> availableLibraries() {
@@ -249,10 +245,7 @@ aspect Library {
         
         public List<LibNode> createLibNodeList() {
             List<LibNode> res = new List<LibNode>();
-            Set<LibraryDef> libs = loadedLibraries();
-            LibraryDef[] sorted = libs.toArray(new LibraryDef[libs.size()]);
-            Arrays.sort(sorted);
-            for (LibraryDef def : sorted)
+            for (LibraryDef def : availableLibraries())
                 res.add(def.createLibNode());
             return res;
         }
@@ -349,8 +342,11 @@ aspect Library {
         
         protected boolean add(LibraryDef def) {
             boolean res = def != null;
-            if (res)
-                set.add(def);
+            if (res) {
+                if (!set.contains(def)) {
+                    set.add(def);
+                }
+            }
             return res;
         }
         
