@@ -1761,13 +1761,13 @@ void jmi_kinsol_solver_print_solve_end(jmi_block_solver_t * block, const jmi_log
     }
 }
 
-static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block) {
+static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
     jmi_kinsol_solver_t* solver = block->solver;
     int flag;
     jmi_log_node_t topnode;
     
     jmi_kinsol_solver_print_solve_start(block, &topnode);
-    flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
+    flag = KINSol(solver->kin_mem, solver->kin_y, strategy, solver->kin_y_scale, solver->kin_f_scale);
     if(flag == KIN_INITIAL_GUESS_OK) {
         flag = KIN_SUCCESS;
         /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
@@ -1878,7 +1878,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         solver->use_steepest_descent_flag = 1;
     }
     
-    flag = jmi_kinsol_invoke_kinsol(block);
+    flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
     
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
         KINSetNoResMon(solver->kin_mem,1);
@@ -1938,7 +1938,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         /* Update the scaling  */
         jmi_update_f_scale(block);
         
-        flag = jmi_kinsol_invoke_kinsol(block);
+        flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
         
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
@@ -1955,7 +1955,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                     }
                     jmi_log_node(log, logInfo, "NominalsAsInitialGuess", "Failed to compute a solution using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
                     
-                    flag = jmi_kinsol_invoke_kinsol(block);
+                    flag = jmi_kinsol_invoke_kinsol(block, KIN_NONE);
                 }
                 if (flag != KIN_SUCCESS) {
                     jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
