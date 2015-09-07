@@ -273,6 +273,10 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->nbr_event_iter = 0;
 
+    jmi_->dyn_mem_head.next = NULL;
+    jmi_->dyn_mem_head.data = NULL;
+    jmi_dyn_mem_init(&jmi_->dyn_mem, &jmi_->dyn_mem_head, &jmi_->dyn_mem_last);
+
     return 0;
 
 }

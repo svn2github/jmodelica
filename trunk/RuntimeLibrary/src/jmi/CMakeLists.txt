@@ -42,6 +42,8 @@ set(JMISources
     jmi_global.c
     jmi.c
     jmi_array_none.c
+    jmi_dyn_mem.c
+    jmi_dyn_mem_.c
     jmi_block_residual.c
     jmi_cs.c
     jmi_me.c
