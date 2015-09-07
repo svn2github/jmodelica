@@ -35,6 +35,8 @@
 #include "jmi_log.h"
 #include "jmi_block_solver.h"
 
+#include "jmi_dyn_mem.h"
+
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
  * interface.
@@ -1271,6 +1273,10 @@ struct jmi_t {
     jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
 
     jmi_modules_t modules;               /**< \brief Interchangable modules struct */
+
+    jmi_dynamic_list dyn_mem_head;   /**< \brief List of pointers to memory allocated during function evaluations. */
+    jmi_dynamic_list* dyn_mem_last;  /**< \brief List of pointers to memory allocated during function evaluations. */
+    jmi_dyn_mem_t dyn_mem;
 };
 
 /**
