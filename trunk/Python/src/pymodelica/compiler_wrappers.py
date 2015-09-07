@@ -44,7 +44,7 @@ class ModelicaCompiler(object):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
-        options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
+        options.setStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = pym._create_compiler(ModelicaCompilerInterface, options)
         
@@ -619,7 +619,7 @@ class OptimicaCompiler(ModelicaCompiler):
         except jpype.JavaException as ex:
             self._handle_exception(ex)
             
-        options.addStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
+        options.setStringOption('MODELICAPATH',pym.environ['MODELICAPATH'])
         
         self._compiler = pym._create_compiler(OptimicaCompilerInterface, options)
 
