@@ -655,6 +655,8 @@ static int jmi_delaybuffer_new(jmi_t *jmi, jmi_delaybuffer_t *buffer) {
 static int jmi_delaybuffer_delete(jmi_delaybuffer_t *buffer) {
     free(buffer->buf);
     buffer->buf = NULL;
+    free(buffer->event_buf);
+    buffer->event_buf = NULL;
     buffer->capacity = 0;
     return 0;
 }
