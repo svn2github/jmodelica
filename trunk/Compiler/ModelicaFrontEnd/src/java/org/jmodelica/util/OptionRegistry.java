@@ -141,78 +141,75 @@ abstract public class OptionRegistry {
         GENERATE_ONLY_INITIAL_SYSTEM 
             ("generate_only_initial_system", 
              OptionType.compiler, 
-             Category.uncommon,
+             Category.user,
              false, 
-             "If this option is set to true (default is false), only the initial equation system will be generated."),
+             "If enabled, then only the initial equation system will be generated."),
         DIVIDE_BY_VARS_IN_TEARING 
             ("divide_by_vars_in_tearing", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
-             "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
-             "such divisions are made during tearing."),
+             "If enabled, a less restrictive strategy is used for solving equations in the tearing algorithm. " +
+             "Specifically, division by parameters and variables is permitted, by default no such divisions are " +
+             "made during tearing."),
         LOCAL_ITERATION_IN_TEARING 
             ("local_iteration_in_tearing", 
              OptionType.compiler, 
-             Category.user,
+             Category.uncommon,
              LocalIteration.OFF, 
-             "This option controls whether equations can be solved local in tearing. Possible options are: " +
-             "'off', local iterations are not used (default). " +
-             "'annotation', only equations that are annotated are candidates. " +
-             "'all', all equations are candidates.",
+             "This option controls whether equations can be solved local in tearing. Possible options are: 'off', " +
+             "local iterations are not used (default). 'annotation', only equations that are annotated are " +
+             "candidates. 'all', all equations are candidates.",
              LocalIteration.OFF, LocalIteration.ANNOTATION, LocalIteration.ALL),
         AUTOMATIC_TEARING
             ("automatic_tearing", 
              OptionType.compiler, 
              Category.user,
              true, 
-             "If this option is set to true (default is true), automatic tearing of equation systems is performed."),
+             "If enabled, then automatic tearing of equation systems is performed."),
         CONV_FREE_DEP_PAR_TO_ALGS
             ("convert_free_dependent_parameters_to_algebraics", 
              OptionType.compiler, 
              Category.user,
              true, 
-             "If this option is set to true (default is true), free dependent parameters are" +
-             "converted to algebraic variables."),
+             "If enabled, then free dependent parameters are converted to algebraic variables."),
         GEN_DAE
             ("generate_dae", 
              OptionType.compiler, 
              Category.internal,
              false, 
-             "If this option is set to true (default is false), code for solving DAEs are generated."),
+             "If enabled, then code for solving DAEs are generated."),
         GEN_DAE_JAC
             ("generate_dae_jacobian", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "If this option is set to true (default is false), code for computing DAE Jacobians are generated."),
+             "If enabled, then code for computing DAE Jacobians are generated."),
         GEN_ODE_JAC
             ("generate_ode_jacobian", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), code for computing ODE Jacobians are generated."),
+             "If enabled, then code for computing ODE Jacobians are generated."),
         GEN_BLOCK_JAC
             ("generate_block_jacobian", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), code for computing block Jacobians is generated. "+
+             "If tenabled, then code for computing block Jacobians is generated. "+
              "If blocks are needed to compute ODE jacobians they will be generated anyway"),
         GEN_ODE
             ("generate_ode", 
              OptionType.compiler, 
              Category.internal,
              true, 
-             "If this option is set to true (default is true), code for solving ODEs are generated. "),
+             "If enabled, then code for solving ODEs are generated. "),
         GEN_MOF_FILES
             ("generate_mof_files", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), flat model before and after" +
-             " transformations will be generated."),
+             "If enabled, then flat model before and after transformations will be generated."),
         EXTRA_LIB
             ("extra_lib_dirs", 
              OptionType.compiler, 
@@ -225,17 +222,15 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.user,
              false, 
-             "This option enables the user to specify if initial equations should be " + 
-             "generated automatically for differentiated variables even though the fixed " +
-             "attribute is equal to fixed. Setting this option to true is, however, often " +
+             "If enabled, then initial equations are generated automatically for differentiated variables even " +
+             "though the fixed attribute is equal to fixed. Setting this option to true is, however, often " +
              "practical in optimization problems."),
         ELIM_ALIAS
             ("eliminate_alias_variables", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is set to true (default), then alias variables are " +
-             "eliminated from the model."),
+             "If enabled, then alias variables are eliminated from the model."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 
@@ -271,30 +266,27 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.internal,
              false, 
-             "If this option is true, then model equations are generated in XML format. " + 
-             "Default is false."),
+             "If enabled, then model equations are generated in XML format."),
         INDEX_RED
             ("index_reduction", 
              OptionType.compiler, 
-             Category.uncommon,
+             Category.user,
              true, 
-             // NB: this description used in a Python test 
-             "If this option is true (default is true), index reduction is performed."),
+             "If enabled, then index reduction is performed."),
         PROPAGATE_DERIVATIVES
             ("propagate_derivatives", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is true (default is true), the compiler will try " +
-             "to replace ordinary variable references with derivative " +
-             "references. This is done by first finding equations on the form " +
-             "x = der(y). If possible, uses of x will the be replaced with der(x)."),
+             "If enabled, the compiler will try to replace ordinary variable references with derivative " +
+             "references. This is done by first finding equations on the form x = der(y). If possible, uses of x" +
+             " will the be replaced with der(x)."),
         EQU_SORT
             ("equation_sorting", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is true (default is true), equations are sorted using the BLT algorithm."),
+             "If enabled, equations are sorted using the BLT algorithm."),
         XML_FMI_ME
             ("generate_fmi_me_xml", 
              OptionType.compiler, 
@@ -359,15 +351,15 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.user,
              false, 
-             "When this option is set to true (default is false), the compiler will include the name of " +
-             "the component where the error was found, if applicable."),
+             "If enabled, the compiler will include the name of the component where the error was found, if " +
+             "applicable."),
         GEN_HTML_DIAG 
             ("generate_html_diagnostics", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
-             "This includes the flattened model, connection sets, alias sets and BLT form."), 
+             "If enabled, model diagnostics is generated in HTML format. This includes the flattened model, " +
+             "connection sets, alias sets and BLT form."), 
         DIAGNOSTICS_LIMIT 
             ("diagnostics_limit", 
              OptionType.compiler, 
@@ -423,8 +415,8 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.debug,
              false,
-             "Debug option, if the option is set to true (default false), GC will be invoked between the different " +
-             "steps during model compilation. This makes it possible to output accurate memory measurements."),
+             "Debug option, if enabled, GC will be invoked between the different steps during " +
+             "model compilation. This makes it possible to output accurate memory measurements."),
         DEBUG_DUP_GEN 
             ("debug_duplicate_generated", 
              OptionType.compiler, 
@@ -437,7 +429,7 @@ abstract public class OptionRegistry {
              Category.debug,
              "none",
              "Options for debugging the different transformation steps. If enabled, diagnostics files are written " +
-             "after each transformation step. Allowed values are 'none' (default), 'diag' (only model diagnostics), " +
+             "after each transformation step. Allowed values are 'none', 'diag' (only model diagnostics), " +
              "'full' (write diagnostics and flat tree).",
              "none", "diag", "full"),
         RUNTIME_PARAM
@@ -451,9 +443,9 @@ abstract public class OptionRegistry {
              OptionType.compiler,
              Category.uncommon,
              false,
-             "If the option is set to true (default is false), two text files containing one iteration variable" +
-             "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
-             "DAE initialization system respectively. The files are outputed to the resource directory"),
+             "If enabled, two text files containing one iteration variable name per row is written to disk. The " +
+             "files contains the iteration variables for the DAE and the DAE initialization system respectively. " +
+             "The files are outputed to the resource directory"),
         ALG_FUNCS
              ("algorithms_as_functions",
               OptionType.compiler,
@@ -465,16 +457,16 @@ abstract public class OptionRegistry {
              OptionType.compiler,
              Category.uncommon,
              false,
-             "If the option is set to true (default is false), two text files containing tearing pairs " +
-             "is written to disk. The files contains the tearing pairs for the DAE and the " +
-             "DAE initialization system respectively. The files are outputed to the working directory."),
+             "If enabled, two text files containing tearing pairs is written to disk. The files contains the " +
+             "tearing pairs for the DAE and the DAE initialization system respectively. The files are outputed to " +
+             "the working directory."),
         CHECK_INACTIVE
             ("check_inactive_contitionals",
              OptionType.compiler,
              Category.user,
              false,
              "Check for errors in inactive conditional components when compiling. When checking a class, " +
-             "this is always done. Default is false."),
+             "this is always done."),
         IGNORE_WITHIN
             ("ignore_within",
              OptionType.compiler,
@@ -494,20 +486,20 @@ abstract public class OptionRegistry {
              Category.experimental,
              true,
              "Controls whether event generating expressions should generate switches in the c-code. " +
-             "Setting this option to false can give unexpected results. Default is true."),
+             "Setting this option to false can give unexpected results."),
         RELATIONAL_TIME_EVENTS
             ("relational_time_events",
              OptionType.compiler,
              Category.user,
              true,
-             "Controls whether relational operators should be able to generate time events. Default is true."),
+             "Controls whether relational operators should be able to generate time events."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
              OptionType.compiler,
              Category.user,
              false,
              "Looks for function calls in blocks. If a function call in a block doesn't depend on " + 
-             "the block in question, it is extracted."),
+             "the block in question, it is extracted from the block."),
         FUNCTION_INCIDENCE_CALC
             ("function_incidence_computation",
              OptionType.compiler,
@@ -527,7 +519,7 @@ abstract public class OptionRegistry {
              OptionType.compiler,
              Category.uncommon,
              true,
-             "Controls whether dynamic states should be calculated and generated."),
+             "If enabled, dynamic states will be calculated and generated."),
         MODELICAPATH
             ("MODELICAPATH",
              OptionType.compiler,
