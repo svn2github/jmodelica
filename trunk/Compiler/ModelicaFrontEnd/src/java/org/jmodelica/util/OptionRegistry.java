@@ -238,6 +238,13 @@ abstract public class OptionRegistry {
              true,
              "If this option is set to true (default), then variabilities are " +
              "propagated through the model."),
+        COMMON_SUBEXP_ELIM
+            ("common_subexp_elim", 
+             OptionType.compiler, 
+             Category.uncommon,
+             true,
+             "If this option is set to true (default), then identical function calls are "
+             + " extracted into a common equation."),
         EXT_CEVAL
             ("external_constant_evaluation", 
              OptionType.compiler, 

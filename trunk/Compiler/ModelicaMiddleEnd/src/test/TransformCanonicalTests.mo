@@ -4492,9 +4492,12 @@ equation
 fclass TransformCanonicalTests.IfEqu25
  Real x;
  Real y;
+ parameter Real temp_1;
+parameter equation
+ temp_1 = TransformCanonicalTests.IfEqu25.f(2);
 equation
- x = if TransformCanonicalTests.IfEqu25.f(2) > 0 then time else 2;
- y = if TransformCanonicalTests.IfEqu25.f(2) > 0 then x else x * x;
+ x = if temp_1 > 0 then time else 2;
+ y = if temp_1 > 0 then x else x * x;
 
 public
  function TransformCanonicalTests.IfEqu25.f

@@ -12641,6 +12641,7 @@ package FuncCallInSize
             description="Scalarization of functions: Function call from other package in declaration size",
             variability_propagation=false,
             inline_functions="none",
+            common_subexp_elim=false,
             flatModel="
 fclass FunctionTests.UnknownSize.FuncCallInSize.FromOtherPackage
  Real y1[1];
