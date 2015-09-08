@@ -549,13 +549,13 @@ abstract public class OptionRegistry {
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              false,
              "If enabled, jacobian equilibration will be utilized in the equation block solvers to improve linear solver accuracy."),
         USE_NEWTON_FOR_BRENT
             ("use_newton_for_brent",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              true,
              "If enabled, a few Newton steps are computed to get a better initial guess for Brent."),
         ITERATION_VARIABLE_SCALING
