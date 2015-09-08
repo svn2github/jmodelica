@@ -236,15 +236,15 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.uncommon,
              true,
-             "If this option is set to true (default), then variabilities are " +
-             "propagated through the model."),
+             "If enabled, the compiler performs a global analysis on the equation system and reduces variables to"
+             + " constants and parameters where applicable."),
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 
              Category.uncommon,
              true,
-             "If this option is set to true (default), then identical function calls are "
-             + " extracted into a common equation."),
+             "If enabled, the compiler performs a global analysis on the equation system and extraxt identical"
+             + " function calls into common equations."),
         EXT_CEVAL
             ("external_constant_evaluation", 
              OptionType.compiler, 
@@ -458,7 +458,7 @@ abstract public class OptionRegistry {
               OptionType.compiler,
               Category.experimental,
               false,
-              "Convert algorithm sections to function calls"),
+              "If enabled, convert algorithm sections to function calls"),
         WRITE_TEARING_PAIRS
             ("write_tearing_pairs_to_file",
              OptionType.compiler,
@@ -499,7 +499,7 @@ abstract public class OptionRegistry {
              OptionType.compiler,
              Category.user,
              true,
-             "Controls whether relational operators should be able to generate time events."),
+             "If enabled, then relational operators are allowed to generate time events."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
              OptionType.compiler,
