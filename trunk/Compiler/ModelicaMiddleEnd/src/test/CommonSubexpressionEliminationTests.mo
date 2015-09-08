@@ -248,4 +248,39 @@ end CommonSubexpressionEliminationTests.FunctionCall6;
 ")})));
 end FunctionCall6;
 
+model FunctionCall7
+
+    function f2
+        input Real x;
+    algorithm
+        assert(x > 0, "msg");
+        annotation(Inline=false);
+    end f2;
+
+equation
+    f2(time);
+    f2(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionCall7",
+            description="Elimination of duplicate function call",
+            flatModel="
+fclass CommonSubexpressionEliminationTests.FunctionCall7
+equation
+ CommonSubexpressionEliminationTests.FunctionCall7.f2(time);
+
+public
+ function CommonSubexpressionEliminationTests.FunctionCall7.f2
+  input Real x;
+ algorithm
+  assert(x > 0, \"msg\");
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.FunctionCall7.f2;
+
+end CommonSubexpressionEliminationTests.FunctionCall7;
+")})));
+end FunctionCall7;
+
 end CommonSubexpressionEliminationTests;

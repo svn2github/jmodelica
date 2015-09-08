@@ -77,7 +77,7 @@ aspect CommonSubexpressionElimination {
                         merge();
                         
                         FAbstractEquation fae;
-                        if (res.getNumChild() > 1 || fc.isComposite()) {
+                        if (res.getNumChild() != 1 || fc.isComposite()) {
                             add(new FFunctionCallEquation(res, fcCopy));
                         } else {
                             add(new FEquation(res.getChild(0).getFExp(), fcCopy));
