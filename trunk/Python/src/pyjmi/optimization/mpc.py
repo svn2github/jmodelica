@@ -152,17 +152,17 @@ class MPC(object):
             self.n_e_s = self.options['n_e']/self.horizon
         
         # Check if nominal trajectories provided
-      #  if self.options['nominal_traj'] != None:
-       #     print('Warning: Nominal trajectories will not work as intended '+\
-        #         'with the MPC class. The trajectories will not shift with '+\
-         #        'the shifting optimization horizon.') 
-        #
+        if self.options['nominal_traj'] != None:
+            print('Warning: Nominal trajectories will not work as intended '+\
+                 'with the MPC class. The trajectories will not shift with '+\
+                 'the shifting optimization horizon.') 
+        
         # Check if external data provided
-        #if self.options['external_data'] != None:
-         #   print('Warning: Using external_data to provide reference '+\
-          #       'trajectories will not work as intended with the MPC class.'+\
-           #      'The trajectories do not shift with the shifting '+\
-            #     'optimization horizon.') 
+        if self.options['external_data'] != None:
+            print('Warning: Using external_data to provide reference '+\
+                 'trajectories will not work as intended with the MPC class.'+\
+                 'The trajectories do not shift with the shifting '+\
+                 'optimization horizon.') 
                  
         # Soften variable bounds and add u0-parameters for blockingfactors 
         self.extra_param = []
