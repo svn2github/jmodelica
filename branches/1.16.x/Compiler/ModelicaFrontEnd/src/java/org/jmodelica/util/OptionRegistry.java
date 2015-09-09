@@ -131,6 +131,10 @@ abstract public class OptionRegistry {
         public static final String FMI20  = "2.0";
         public static final String FMI20a = "2.0alpha";
     }
+    public interface FunctionIncidenceCalc {
+        public static final String NONE  = "none";
+        public static final String ALL = "all";
+    }
 
     public enum OptionType { compiler, runtime }
 
@@ -141,166 +145,156 @@ abstract public class OptionRegistry {
         GENERATE_ONLY_INITIAL_SYSTEM 
             ("generate_only_initial_system", 
              OptionType.compiler, 
-             Category.uncommon,
+             Category.user,
              false, 
-             "If this option is set to true (default is false), only the initial equation system will be generated."),
+             "If enabled, then only the initial equation system will be generated."),
         DIVIDE_BY_VARS_IN_TEARING 
             ("divide_by_vars_in_tearing", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "If this option is set to true (default is false), a less restrictive strategy is used for solving equations " +
-             "in the tearing algorithm. Specifically, division by parameters and variables is permitted, by default no " +
-             "such divisions are made during tearing."),
+             "If enabled, a less restrictive strategy is used for solving equations in the tearing algorithm. " +
+             "Specifically, division by parameters and variables is permitted, by default no such divisions are " +
+             "made during tearing."),
         LOCAL_ITERATION_IN_TEARING 
             ("local_iteration_in_tearing", 
              OptionType.compiler, 
-             Category.user,
+             Category.uncommon,
              LocalIteration.OFF, 
-             "This option controls whether equations can be solved local in tearing. Possible options are: " +
-             "'off', local iterations are not used (default). " +
-             "'annotation', only equations that are annotated are candidates. " +
-             "'all', all equations are candidates.",
+             "This option controls whether equations can be solved local in tearing. Possible options are: 'off', " +
+             "local iterations are not used (default). 'annotation', only equations that are annotated are " +
+             "candidates. 'all', all equations are candidates.",
              LocalIteration.OFF, LocalIteration.ANNOTATION, LocalIteration.ALL),
         AUTOMATIC_TEARING
             ("automatic_tearing", 
              OptionType.compiler, 
              Category.user,
              true, 
-             "If this option is set to true (default is true), automatic tearing of equation systems is performed."),
+             "If enabled, then automatic tearing of equation systems is performed."),
         CONV_FREE_DEP_PAR_TO_ALGS
             ("convert_free_dependent_parameters_to_algebraics", 
              OptionType.compiler, 
              Category.user,
              true, 
-             "If this option is set to true (default is true), free dependent parameters are" +
-             "converted to algebraic variables."),
+             "If enabled, then free dependent parameters are converted to algebraic variables."),
         GEN_DAE
             ("generate_dae", 
              OptionType.compiler, 
              Category.internal,
              false, 
-             "If this option is set to true (default is false), code for solving DAEs are generated."),
+             "If enabled, then code for solving DAEs are generated."),
         GEN_DAE_JAC
             ("generate_dae_jacobian", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "If this option is set to true (default is false), code for computing DAE Jacobians are generated."),
+             "If enabled, then code for computing DAE Jacobians are generated."),
         GEN_ODE_JAC
             ("generate_ode_jacobian", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), code for computing ODE Jacobians are generated."),
+             "If enabled, then code for computing ODE Jacobians are generated."),
         GEN_BLOCK_JAC
             ("generate_block_jacobian", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), code for computing block Jacobians is generated. "+
+             "If enabled, then code for computing block Jacobians is generated. "+
              "If blocks are needed to compute ODE jacobians they will be generated anyway"),
         GEN_ODE
             ("generate_ode", 
              OptionType.compiler, 
              Category.internal,
              true, 
-             "If this option is set to true (default is true), code for solving ODEs are generated. "),
+             "If enabled, then code for solving ODEs are generated. "),
         GEN_MOF_FILES
             ("generate_mof_files", 
              OptionType.compiler, 
              Category.user,
              false,
-             "If this option is set to true (default is false), flat model before and after" +
-             " transformations will be generated."),
+             "If enabled, then flat model before and after transformations will be generated."),
         EXTRA_LIB
             ("extra_lib_dirs", 
              OptionType.compiler, 
              Category.internal,
              "", 
-             "The value of this option is appended to the value of the MODELICAPATH environment " +
-             "variable for determining in what directories to search for libraries."),
+             "The value of this option is appended to the MODELICAPATH " +
+             "when searching for libraries. Decrepated."),
         START_FIX
             ("state_start_values_fixed", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "This option enables the user to specify if initial equations should be " + 
-             "generated automatically for differentiated variables even though the fixed " +
-             "attribute is equal to fixed. Setting this option to true is, however, often " +
+             "If enabled, then initial equations are generated automatically for differentiated variables even " +
+             "though the fixed attribute is equal to fixed. Setting this option to true is, however, often " +
              "practical in optimization problems."),
         ELIM_ALIAS
             ("eliminate_alias_variables", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is set to true (default), then alias variables are " +
-             "eliminated from the model."),
+             "If enabled, then alias variables are eliminated from the model."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 
              Category.uncommon,
              true,
-             "If this option is set to true (default), then variabilities are " +
-             "propagated through the model."),
+             "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
+             "constants and parameters where applicable."),
         EXT_CEVAL
             ("external_constant_evaluation", 
              OptionType.compiler, 
              Category.user,
              5000,
-             "Time limit (ms) when evaluating constant calls to external functions during compilation. "
-             + "0 indicates no evaluation. -1 indicates no time limit. Default is 5000."),
+             "Time limit (ms) when evaluating constant calls to external functions during compilation. " +
+             "0 indicates no evaluation. -1 indicates no time limit."),
         EXT_CEVAL_MAX_PROC
             ("external_constant_evaluation_max_proc",
              OptionType.compiler,
              Category.uncommon,
              10,
-             "The maximum number of processes kept alive for evaluation of external functions during compilation, the"
-             + " default value is 10. If the value of this option is less than 1, no processes will be kept alive,"
-             + " i.e. this feature is turned off. Using this feature may reduce compilation time if external functions"
-             + " use external objects."),
+             "The maximum number of processes kept alive for evaluation of external functions during compilation. " +
+             "This speeds up evaluation of functions using external objects during compilation." + 
+             "If less than 1, no processes will be kept alive, i.e. this feature is turned off. "),
         HALT_WARN
             ("halt_on_warning", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "If this option is set to false (default) one or more compiler " +
-             "warnings will not stop compilation of the model."),
+             "If enabled, compilation warnings will cause compilation to abort."),
         XML_EQU
             ("generate_xml_equations", 
              OptionType.compiler, 
              Category.internal,
              false, 
-             "If this option is true, then model equations are generated in XML format. " + 
-             "Default is false."),
+             "If enabled, then model equations are generated in XML format."),
         INDEX_RED
             ("index_reduction", 
              OptionType.compiler, 
-             Category.uncommon,
+             Category.user,
              true, 
-             // NB: this description used in a Python test 
-             "If this option is true (default is true), index reduction is performed."),
+             "If enabled, then index reduction is performed for high-index systems."),
         PROPAGATE_DERIVATIVES
             ("propagate_derivatives", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is true (default is true), the compiler will try " +
-             "to replace ordinary variable references with derivative " +
-             "references. This is done by first finding equations on the form " +
-             "x = der(y). If possible, uses of x will the be replaced with der(x)."),
+             "If enabled, the compiler will try to replace ordinary variable references with derivative " +
+             "references. This is done by first finding equations on the form x = der(y). If possible, uses of x " +
+             "will then be replaced with der(x)."),
         EQU_SORT
             ("equation_sorting", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "If this option is true (default is true), equations are sorted using the BLT algorithm."),
+             "If enabled, then the equation system is separated into minimal blocks that can be solved sequentially."),
         XML_FMI_ME
             ("generate_fmi_me_xml", 
              OptionType.compiler, 
              Category.internal,
              true, 
-             "If this option is true (default is true) the model description part of the XML variables file " + 
+             "If enabled, the model description part of the XML variables file " + 
              "will be FMI for model exchange compliant. To generate an XML which will " + 
              "validate with FMI schema the option generate_xml_equations must also be false."),
         XML_FMI_CS 
@@ -308,7 +302,7 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.internal,
              false, 
-             "If this option is true (default is false) the model description part of the XML variables file " + 
+             "If enabled, the model description part of the XML variables file " + 
              "will be FMI for co simulation compliant. To generate an XML which will " + 
              "validate with FMI schema the option generate_xml_equations must also be false."),
         FMI_VER 
@@ -316,65 +310,62 @@ abstract public class OptionRegistry {
              OptionType.compiler, 
              Category.internal,
              FMIVersion.FMI10, 
-             "Version of the FM1 specification to generate FMU for.", 
+             "Version of the FMI specification to generate FMU for.", 
              FMIVersion.FMI10, FMIVersion.FMI20, FMIVersion.FMI20a /* Temporary alpha version for FMI 2.0. TODO: remove */),
         VAR_SCALE 
             ("enable_variable_scaling", 
              OptionType.compiler, 
              Category.uncommon,
              false, 
-             "If this option is true (default is false), then the \"nominal\" attribute will " + 
-             "be used to scale variables in the model."),
+             "If enabled, then the 'nominal' attribute will be used to scale variables in the model."),
         MIN_T_TRANS 
             ("normalize_minimum_time_problems", 
              OptionType.compiler, 
-             Category.user,
+             Category.uncommon,
              true, 
-             "When this option is set to true (default is true) then minimum time " +
-             "optimal control problems encoded in Optimica are converted to fixed " + 
-             "interval problems by scaling of the derivative variables."),
+             "If enabled, then minimum time optimal control problems encoded in Optimica are converted to fixed " + 
+             "interval problems by scaling of the derivative variables. Has no effect for Modelica models."),
         STRUCTURAL_DIAGNOSIS 
             ("enable_structural_diagnosis", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "Enable this option to invoke the structural error diagnosis based on the matching algorithm."),
+             "If enabled, structural error diagnosis based on matching of equations to variables is used."),
         ADD_INIT_EQ 
             ("automatic_add_initial_equations", 
              OptionType.compiler, 
              Category.uncommon,
              true, 
-             "When this option is set to true (default is true), then additional initial " +
-             "equations are added to the model based on a the result of a matching algorithm. " +
+             "If enabled, then additional initial equations are added to the model based equation matching. " +
              "Initial equations are added for states that are not matched to an equation."), 
         COMPL_WARN 
             ("compliance_as_warning", 
              OptionType.compiler, 
              Category.internal,
              false, 
-             "When this option is set to true (default is false), then compliance errors are treated " + 
-             "as warnings instead. This can lead to the compiler or solver crashing. Use with caution!"),
+             "If enabled, then compliance errors are treated as warnings instead. " + 
+             "This can lead to the compiler or solver crashing. Use with caution!"),
         COMPONENT_NAMES_IN_ERRORS 
             ("component_names_in_errors", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "When this option is set to true (default is false), the compiler will include the name of " +
-             "the component where the error was found, if applicable."),
+             "If enabled, the compiler will include the name of the component where the error was found, if applicable."),
         GEN_HTML_DIAG 
             ("generate_html_diagnostics", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "When this option is set to true (default is false) model diagnostics is generated in HTML format. " +
-             "This includes the flattened model, connection sets, alias sets and BLT form."), 
+             "If enabled, model diagnostics are generated in HTML format. This includes the flattened model, " +
+             "connection sets, alias sets and BLT form."), 
         DIAGNOSTICS_LIMIT 
             ("diagnostics_limit", 
              OptionType.compiler, 
              Category.uncommon,
              500, 
-             "This option specifies the maximum size of the equation system before the compiler will start to reduce " +
-             "model diagnostics. This option only affect diagnostic output which grows in non-linear fashion.",
+             "This option specifies the equation system size at which the compiler will start to reduce " +
+             "model diagnostics. This option only affects diagnostic output that grows faster than linear " + 
+             "with the number of equations.",
              0, Integer.MAX_VALUE), 
         EXPORT_FUNCS 
             ("export_functions", 
@@ -382,152 +373,157 @@ abstract public class OptionRegistry {
              Category.uncommon,
              false, 
              "Export used Modelica functions to generated C code in a manner that is compatible with the " +
-             "external C interface in the Modelica Language Specification (default is false)"),
+             "external C interface in the Modelica Language Specification."),
         EXPORT_FUNCS_VBA 
             ("export_functions_vba", 
              OptionType.compiler, 
              Category.uncommon,
              false, 
-             "Create VBA-compatible wrappers for exported functions (default is false). Requires export_functions"), 
+             "Create VBA-compatible wrappers for exported functions. Requires the option export_functions."), 
         STATE_INIT_EQ 
             ("state_initial_equations", 
              OptionType.compiler, 
              Category.user,
              false, 
-             "Neglect initial equations in the model and add initial equations, and parameters, for the states." +
+             "If enabled, the compiler ignores initial equations in the model and adds parameters for controlling " + 
+             "intitial values of states." +
              "Default is false."),
         INLINE_FUNCS 
             ("inline_functions", 
              OptionType.compiler, 
              Category.uncommon,
              Inlining.TRIVIAL, 
-             "Perform function inlining on model after flattening (allowed values are none, trivial or all, default is trivial)", 
+             "Controlles what function calls are inlined. " + 
+             "'none' - no function calls are inlined. " + 
+             "'trivial' - inline function calls that will not increase the number of variables in the system. " + 
+             "'all' - inline all function calls that are possible.", 
              Inlining.NONE, Inlining.TRIVIAL, Inlining.ALL),
         HOMOTOPY 
             ("homotopy_type", 
              OptionType.compiler, 
              Category.uncommon,
              Homotopy.ACTUAL, 
-             "Decides how homotopy expressions are interpreted during compilation. Default value is 'actual'. " + 
-             "Can be set to either 'simplified' or 'actual' which will compile the model using the simplified or " + 
-             "actual expressions.", 
+             "Decides how homotopy expressions are interpreted during compilation. " + 
+             "Can be set to either 'simplified' or 'actual' which will compile the model using only the simplified " + 
+             "or actual expressions of the homotopy() operator.", 
              Homotopy.HOMOTOPY, Homotopy.ACTUAL, Homotopy.SIMPLIFIED),
         DEBUG_CSV_STEP_INFO 
             ("debug_csv_step_info", 
              OptionType.compiler, 
              Category.debug,
              false,
-             "Debug option, outputs a csv file containing profiling recorded during compilation. Default is false."),
+             "Debug option, outputs a csv file containing profiling recorded during compilation."),
         DEBUG_INVOKE_GC 
             ("debug_invoke_gc", 
              OptionType.compiler, 
              Category.debug,
              false,
-             "Debug option, if the option is set to true (default false), GC will be invoked between the different " +
-             "steps during model compilation. This makes it possible to output accurate memory measurements."),
+             "Debug option, if enabled, GC will be invoked between the different steps during " +
+             "model compilation. This makes it possible to output accurate memory measurements."),
         DEBUG_DUP_GEN 
             ("debug_duplicate_generated", 
              OptionType.compiler, 
              Category.debug,
              false,
-             "Debug option, duplicates generated files to stdout. Default is false."),
+             "Debug option, duplicates any generated files to stdout."),
          DEBUG_TRANSFORM_STEPS
             ("debug_transformation_steps",
              OptionType.compiler,
              Category.debug,
              "none",
              "Options for debugging the different transformation steps. If enabled, diagnostics files are written " +
-             "after each transformation step. Allowed values are 'none' (default), 'diag' (only model diagnostics), " +
+             "after each transformation step. Allowed values are 'none', 'diag' (only fixed-size model diagnostics), " +
              "'full' (write diagnostics and flat tree).",
              "none", "diag", "full"),
         RUNTIME_PARAM
             ("generate_runtime_option_parameters",
              OptionType.compiler,
-             Category.uncommon,
+             Category.internal,
              true,
-             "Generate parameters for runtime options. For internal use, should always be true for normal compilation."),
+             "If enabled, generate parameters for runtime options. Should always be true for normal compilation."),
         WRITE_ITER_VARS
             ("write_iteration_variables_to_file",
              OptionType.compiler,
              Category.uncommon,
              false,
-             "If the option is set to true (default is false), two text files containing one iteration variable" +
-             "name per row is written to disk. The files contains the iteration variables for the DAE and the" +
-             "DAE initialization system respectively. The files are outputed to the resource directory"),
+             "If enabled, two text files containing one iteration variable name per row is written to disk. The " +
+             "files contains the iteration variables for the DAE and the DAE initialization system respectively. " +
+             "The files are output to the resource directory of the FMU."),
         ALG_FUNCS
              ("algorithms_as_functions",
               OptionType.compiler,
               Category.experimental,
               false,
-              "Convert algorithm sections to function calls"),
+              "If enabled, convert algorithm sections to function calls."),
         WRITE_TEARING_PAIRS
             ("write_tearing_pairs_to_file",
              OptionType.compiler,
              Category.uncommon,
              false,
-             "If the option is set to true (default is false), two text files containing tearing pairs " +
-             "is written to disk. The files contains the tearing pairs for the DAE and the " +
-             "DAE initialization system respectively. The files are outputed to the working directory."),
+             "If enabled, two text files containing tearing pairs is written to disk. The files contains the " +
+             "tearing pairs for the DAE and the DAE initialization system respectively. The files are output to " +
+             "the working directory."),
         CHECK_INACTIVE
             ("check_inactive_contitionals",
              OptionType.compiler,
              Category.user,
              false,
-             "Check for errors in inactive conditional components when compiling. When checking a class, " +
-             "this is always done. Default is false."),
+             "If enabled, check for errors in inactive conditional components when compiling. When using check mode, " +
+             "this is always done."),
         IGNORE_WITHIN
             ("ignore_within",
              OptionType.compiler,
-             Category.user,
+             Category.uncommon,
              false,
-             "Ignore within clauses, both when reading input files and when error-checking. Default is false."),
+             "If enabled, ignore within clauses both when reading input files and when error-checking."),
         NLE_SOLVER
             ("nonlinear_solver",
              OptionType.compiler,
              Category.user,
              NonlinearSolver.KINSOL,
-             "Decides which nonlinear equation solver that will be used. Default is kinsol.",
+             "Decides which nonlinear equation solver to use. Alternatives are 'kinsol or 'minpack'.",
              NonlinearSolver.KINSOL, NonlinearSolver.MINPACK),
         GENERATE_EVENT_SWITCHES
             ("generate_event_switches",
              OptionType.compiler,
              Category.experimental,
              true,
-             "Controls whether event generating expressions should generate switches in the c-code. " +
-             "Setting this option to false can give unexpected results. Default is true."),
+             "If enabled, event generating expressions generates switches in the c-code. " +
+             "Setting this option to false can give unexpected results."),
         RELATIONAL_TIME_EVENTS
             ("relational_time_events",
              OptionType.compiler,
              Category.user,
              true,
-             "Controls whether relational operators should be able to generate time events. Default is true."),
+             "If enabled, then relational operators are allowed to generate time events."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
              OptionType.compiler,
              Category.user,
              false,
              "Looks for function calls in blocks. If a function call in a block doesn't depend on " + 
-             "the block in question, it is extracted."),
+             "the block in question, it is extracted from the block."),
         FUNCTION_INCIDENCE_CALC
             ("function_incidence_computation",
              OptionType.compiler,
              Category.uncommon,
-             "none",
+             FunctionIncidenceCalc.NONE,
              "Controls how matching algorithm computes incidences for function call equations. " + 
              "Possible values: 'none', 'all'. With 'none' all outputs are assumed to depend " + 
-             "on all inputs. With 'all' the compiler analyses the function to determine dependencies."),
+             "on all inputs. With 'all' the compiler analyses the function to determine dependencies.",
+             FunctionIncidenceCalc.NONE, FunctionIncidenceCalc.ALL),
         MAX_N_PROC
             ("max_n_proc",
              OptionType.compiler,
              Category.uncommon,
              4,
-             "The maximum number of processes used during c-code compilation"),
+             "The maximum number of processes used during c-code compilation."),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,
              Category.uncommon,
              true,
-             "Controls whether dynamic states should be calculated and generated."),
+             "If enabled, dynamic states will be calculated and generated."),
         MODELICAPATH
             ("MODELICAPATH",
              OptionType.compiler,
@@ -553,34 +549,35 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.user,
              true,
-             "Enforce min-max bounds on variables in the equation blocks."),
+             "If enabled, min / max bounds on variables are enforced in the equation blocks."),
         USE_JACOBIAN_EQUILIBRATION
             ("use_jacobian_equilibration",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              false,
-             "If jacobian equilibration should be utilized in equation block solvers to improve linear solver accuracy."),
+             "If enabled, jacobian equilibration will be utilized in the equation block solvers to improve linear solver accuracy."),
         USE_NEWTON_FOR_BRENT
             ("use_newton_for_brent",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              true,
-             "If a few Newton steps are to be performed to get a better initial guess for Brent."),
+             "If enabled, a few Newton steps are computed to get a better initial guess for Brent."),
         ITERATION_VARIABLE_SCALING
             ("iteration_variable_scaling",
              OptionType.runtime, 
              Category.user,
              1,
-             "Iteration variables scaling mode in equation block solvers:"+
-             "0 - no scaling, 1 - scaling based on nominals only (default), 2 - utilize heuristict to guess nominal based on min,max,start, etc.",
-             0,2),
+             "Scaling mode for the iteration variables in the equation block solvers: "+
+             "0 - no scaling, 1 - scaling based on nominals, 2 - utilize heuristic to guess nominal based on min, max, start, etc.",
+             0, 2),
         RESIDUAL_EQUATION_SCALING
             ("residual_equation_scaling",
              OptionType.runtime, 
              Category.user,
              1,
-             "Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling, 3-hybrid",
-			 0,3),
+             "Equations scaling mode in equation block solvers: " +
+             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid.",
+             0, 3),
         NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
             ("nle_solver_min_residual_scaling_factor",
              OptionType.runtime, 
@@ -600,25 +597,25 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.user,
              false,
-             "Scaling should be updated at every step (only active if use_automatic_scaling is on)."),
+             "If enabled, scaling will be updated at every step (only active if automatic scaling is used)."),
         RESCALE_AFTER_SINGULAR_JAC
             ("rescale_after_singular_jac",
              OptionType.runtime, 
              Category.user,
              true,
-             "If scaling should be updated after singular jac was detected (only active if use_automatic_scaling is set)."),
+             "If enabled, scaling will be updated after a singular jacobian was detected (only active if automatic scaling is used)."),
         USE_BRENT_IN_1D
             ("use_Brent_in_1d",
              OptionType.runtime, 
              Category.user,
              true,
-             "Use Brent search to improve accuracy in solution of 1D non-linear equations."),
+             "If enabled, Brent search will be used to improve accuracy in solution of 1D non-linear equations."),
         BLOCK_SOLVER_EXPERIMENTAL_MODE
             ("block_solver_experimental_mode",
              OptionType.runtime, 
-             Category.user,
+             Category.experimental,
              0,
-             "Activate experimental features of equation block solvers",
+             "Activates experimental features of equation block solvers",
              0, 255),
         NLE_SOLVER_DEFAULT_TOL
             ("nle_solver_default_tol",
@@ -630,75 +627,75 @@ abstract public class OptionRegistry {
         NLE_SOLVER_CHECK_JAC_COND
             ("nle_solver_check_jac_cond",
              OptionType.runtime, 
-             Category.user, 
+             Category.uncommon, 
              false,
-             "NLE solver should check Jacobian condition number and log it."),
-		NLE_SOLVER_BRENT_IGNORE_ERROR
+             "If enabled, the equation block solver computes and log the jacobian condition number."),
+             NLE_SOLVER_BRENT_IGNORE_ERROR
             ("nle_brent_ignore_error",
              OptionType.runtime, 
-             Category.user, 
+             Category.uncommon, 
              false,
-             "Brent solver should ignore convergence failures."),
+             "If enabled, the Brent solver will ignore convergence failures."),
         NLE_SOLVER_MIN_TOL
             ("nle_solver_min_tol",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              1e-12,
-             "Minimum tolerance for the equation block solver. Note that, for instance, default Kinsol tolerance is machine precision pwr 1/3, i.e., 1e-6."+
-             "Tighter tolerance is default in JModelica.", 
+             "Minimum tolerance for the equation block solver. Note that, e.g. default Kinsol tolerance is machine precision pwr 1/3, i.e. 1e-6.", 
              1e-14, 1e-6),
         NLE_SOLVER_TOL_FACTOR
             ("nle_solver_tol_factor",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              0.0001,
-             "Tolerance safety factor for the non-linear equation block solver. Used when external solver specifies relative tolerance.",
+             "Tolerance safety factor for the equation block solver. Used when external solver specifies relative tolerance.",
              1e-6, 1.0),
         NLE_SOLVER_MAX_ITER
             ("nle_solver_max_iter",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              100,
-             "Maximum number of iterations for the equation block solver before failure",
+             "Maximum number of iterations for the equation block solver.",
              2, 500),
         NLE_SOLVER_STEP_LIMIT_FACTOR
             ("nle_solver_step_limit_factor",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              10,
-             "Factor limiting the step-size taken by the nonlinear solver",
+             "Factor limiting the step-size taken by the nonlinear solver.",
              0, 1e10),
         NLE_SOLVER_REGULARIZATION_TOLERANCE
             ("nle_solver_regularization_tolerance",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              -1,
-             "Tolerance for deciding when regularization should kick in (i.e. when condition number > reg tol)",
+             "Tolerance for deciding when regularization should be activated (i.e. when condition number > reg tol).",
              -1, 1e20),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
               1e-10,
               "Default tolerance for the event iterations.",
               1e-14, 1e-2),
         EVENTS_TOL_FACTOR
             ("events_tol_factor",
              OptionType.runtime, 
-             Category.user,
+             Category.uncommon,
              0.0001,
-             "Tolerance safety factor for the event iterations. Used when external solver specifies relative tolerance.",
+             "Tolerance safety factor for the event indicators. Used when external solver specifies relative tolerance.",
              1e-6, 1.0),
         BLOCK_JACOBIAN_CHECK
             ("block_jacobian_check",
              OptionType.runtime, 
-             Category.user,
+             Category.debug,
              false,
-             "Compares the analytic block jacobians with the finite difference block jacobians during block evaluation. An error is given if the relative error is to big."),
+             "Compares the analytic block jacobians with the finite difference block jacobians during block evaluation. " + 
+             "An error is given if the relative error is to big."),
         BLOCK_JACOBIAN_CHECK_TOL
             ("block_jacobian_check_tol",
              OptionType.runtime, 
-             Category.user,
+             Category.debug,
              1e-6,
              "Specifies the relative tolerance for block jacobian check.",
              1e-12, 1.0),
@@ -707,27 +704,27 @@ abstract public class OptionRegistry {
              OptionType.runtime, 
              Category.user,
              0,
-             "Specifies the internal solver used in co-simulation. 0 == CVode, 1 == Euler",
+             "Specifies the internal solver used in Co-Simulation. 0 - CVode, 1 - Euler.",
              0, 1),
         CS_REL_TOL
             ("cs_rel_tol",
              OptionType.runtime, 
              Category.user,
              1e-6,
-             "Default tolerance for the adaptive solvers in the CS case.",
+             "Tolerance for the adaptive solvers in the Co-Simulation case.",
              1e-14, 1.0),
         CS_STEP_SIZE
             ("cs_step_size",
              OptionType.runtime, 
              Category.user,
              1e-3,
-             "Default step-size for the non-adaptive solvers in the CS case."),
+             "Step-size for the fixed-step solvers in the Co-Simulation case."),
         RUNTIME_LOG_TO_FILE
             ("runtime_log_to_file",
              OptionType.runtime, 
              Category.user,
              false,
-             "Enable to write log messages from the runtime directly to a file, besides passing it to the FMU loader (e.g. FMIL). " +
+             "If enabled, log messages from the runtime are written directly to a file, besides passing it through the FMU interface. " +
              "The log file name is generated based on the FMU name."),
         ;
 
