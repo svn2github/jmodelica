@@ -197,9 +197,9 @@ def _get_options(compiler_options):
     options_wrapper = CompilerOptionsWrapper()
 
     if not compiler_options.has_key("MODELICAPATH"):
-        options_wrapper.addStringOption("MODELICAPATH", os.path.join(os.environ['JMODELICA_HOME'],'ThirdParty','MSL'))
+        options_wrapper.setStringOption("MODELICAPATH", os.path.join(os.environ['JMODELICA_HOME'],'ThirdParty','MSL'))
     else:
-        options_wrapper.addStringOption("MODELICAPATH", compiler_options["MODELICAPATH"])
+        options_wrapper.setStringOption("MODELICAPATH", compiler_options["MODELICAPATH"])
         
     #Makes equation_sorting false by default in casadi_interface
     if not compiler_options.has_key("equation_sorting"):

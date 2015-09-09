@@ -541,7 +541,7 @@ public class ModelicaCompiler {
 	 * @param path The new modelicapath.
 	 */
 	public void setModelicapath(String path) {
-		options.addStringOption("MODELICAPATH", path);
+		options.setStringOption("MODELICAPATH", path);
 	}
 
 	protected final static int NUM_USED_MEMORY_SLOTS = 6;
@@ -1505,7 +1505,7 @@ public class ModelicaCompiler {
             else
                 modelicapath = String.format("%s%sThirdParty%sMSL", jmodelicaHome, File.separator, File.separator);
         }
-        options.addStringOption("MODELICAPATH", modelicapath);
+        options.setStringOption("MODELICAPATH", modelicapath);
     }
     
     public OptionRegistry getOptions() {

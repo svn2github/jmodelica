@@ -61,7 +61,7 @@ abstract public class TestCase implements GenericTestCase {
 		OptionRegistry or = ModelicaCompiler.createOptions();
 		String modelica_path = System.getenv("JMODELICA_HOME") + File.separator + 
 				"ThirdParty" + File.separator + "MSL";
-		or.addStringOption("MODELICAPATH", modelica_path);
+		or.setStringOption("MODELICAPATH", modelica_path);
 		or.setBooleanOption("generate_runtime_option_parameters", false);
 		return or;
 	}
