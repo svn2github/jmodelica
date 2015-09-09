@@ -11,6 +11,141 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.16</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para><itemizedlist>
+          <listitem>
+            <para>Strong focus on Modelica/MSL compliance</para>
+          </listitem>
+
+          <listitem>
+            <para>A number of improvements to the CasADi tool chain for
+            optimization</para>
+          </listitem>
+        </itemizedlist></para>
+    </section>
+
+    <section>
+      <title>Compiler</title>
+
+      <section>
+        <title>Compliance</title>
+
+        <para>For this release, there has been a strong emphasis on improving
+        Modelica/MSL compliance. In several MSL subpackages almost all example
+        models now simulate with a correct result. Complete compliance reports
+        can be found on JModelica.org public <link
+        xlink:href="http://jmodelica.org:8080">Jenkins</link>.</para>
+
+        <para>Especially, compliance improvements have been made in the
+        following subpackages: </para>
+
+        <para><itemizedlist>
+            <listitem>
+              <para>Modelica.Mechanics.MultiBody</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Blocks</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Electrical.Analog</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Electrical.Digital</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Electrical.QuasiStationary</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Electrical.Spice3</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Magnetic</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Mechanics.Rotational</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Media</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Thermal</para>
+            </listitem>
+
+            <listitem>
+              <para>Modelica.Math</para>
+            </listitem>
+          </itemizedlist></para>
+
+        <para>Further, the following operators are now supported:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para>delay</para>
+          </listitem>
+
+          <listitem>
+            <para>spatialDistribution</para>
+          </listitem>
+        </itemizedlist>
+      </section>
+
+      <section>
+        <title>Support for dynamic state select</title>
+
+        <para>JModelica.org now does dynamic state selection, when
+        necessary.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Optimization</title>
+
+      <para>Several additions and improvements in the CasADi tool chain for
+      optimization have been made. Among the most important are:</para>
+
+      <itemizedlist>
+        <listitem>
+          <para>Warm starting - descretize an optimization problem once, solve
+          it multiple times with different parameters, inputs, and initial
+          guesses</para>
+        </listitem>
+
+        <listitem>
+          <para>Classes for Model Predictive Control and Moving Horizon
+          Estimation</para>
+        </listitem>
+
+        <listitem>
+          <para>Back tracking from discretized problem to original. Trace back
+          residuals, dual variables, and troublesome Jacobian entries to the
+          original model's equations and variables</para>
+        </listitem>
+
+        <listitem>
+          <para>Possible to inspect equation scaling</para>
+        </listitem>
+
+        <listitem>
+          <para>Checkpointing option to reduce discretization work</para>
+        </listitem>
+      </itemizedlist>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.15</title>
 
     <section>
@@ -842,8 +977,8 @@
         (<literal>JMResultBase</literal>) has two new functions,
         <literal>initial</literal> and <literal>final</literal>, which will
         always return initial and final value of the simulation/optimization
-        as scalar values. See both <xref linkend="ch_simulation" /> and <xref
-        linkend="ch_optimization" /> for plotting code examples.</para>
+        as scalar values. See both <xref linkend="ch_simulation"/> and <xref
+        linkend="ch_optimization"/> for plotting code examples.</para>
       </section>
 
       <section>
@@ -868,7 +1003,7 @@ print r.warnings</programlisting>
         <para>FMUs and JMUs created with JModelica.org now produce logs in a
         structured XML format, which can be either parsed using tools in the
         Python module <literal>pyjmi.log</literal> or using general purpose
-        XML tools. See <xref linkend="sec_models_debug_nonlinear" /> for code
+        XML tools. See <xref linkend="sec_models_debug_nonlinear"/> for code
         examples.</para>
       </section>
     </section>
@@ -2360,7 +2495,7 @@ yres = res['y']
                     </m:mfenced>
                   </m:mrow>
 
-                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex" />
+                  <m:mspace depth="0.5ex" height="0.5ex" width="1ex"/>
 
                   <m:mtext>dt</m:mtext>
                 </m:mrow>

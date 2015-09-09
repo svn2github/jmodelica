@@ -11,9 +11,9 @@
   <info>
     <title><productname>JModelica.org</productname> User Guide</title>
 
-    <subtitle>Version <productnumber>1.15b1</productnumber></subtitle>
+    <subtitle>Version <productnumber>1.16</productnumber></subtitle>
 
-    <pubdate>2014-11-04</pubdate>
+    <pubdate>2015-09-09</pubdate>
 
     <copyright>
       <year>2014</year>
@@ -53,9 +53,9 @@
   <xi:include href="Options.xml" xpointer="element(/1)"/>
 
   <xi:include href="ReleaseNotes.xml" xpointer="element(/1)"/>
-  
+
   <xi:include href="Initialization.xml" xpointer="element(/1)"/>
-  
+
   <xi:include href="DynamicOptimizationJMU.xml" xpointer="element(/1)"/>
 
   <bibliography>

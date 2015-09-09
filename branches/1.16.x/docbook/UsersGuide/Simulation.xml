@@ -365,9 +365,9 @@ input_object = (['u1','u2'],input_function)
                 <entry>None</entry>
 
                 <entry>A filter for choosing which variables to actually store
-                result for. The syntax can be found in <link
-                xlink:href="???">http://en.wikipedia.org/wiki/Glob_%28programming%29</link>
-                . An example is filter = "*der" , store all variables ending
+                result for. The syntax can be found <link
+                xlink:href="https://en.wikipedia.org/wiki/Glob_%28programming%29">here</link>.
+                An example is filter = "*der" , store all variables ending
                 with 'der' and filter = ["*der*", "summary*"], store all
                 variables with "der" in the name and all variables starting
                 with "summary".</entry>
