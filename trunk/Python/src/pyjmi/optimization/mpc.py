@@ -491,7 +491,7 @@ class MPC(object):
                 self.collocator.solver_object.setOption(key,\
                                                 self.warm_start_options[key])
 
-            self.collocator.solver_object.setOption('expand', 'no')
+            self.collocator.solver_object.setOption('expand', False)
              
         elif self.options['solver'] == 'WORHP':
             self.collocator.solver_object.setOption('NLPprint', 0)
