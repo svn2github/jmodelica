@@ -274,7 +274,7 @@ def run_demo(with_plots=True):
     opts = op.optimize_options()
     opts['init_traj'] = ref_res
     opts['nominal_traj'] = ref_res
-    opts['n_e'] = 20
+    opts['n_e'] = 15
     opts['IPOPT_options']['linear_solver'] = "ma27"
     opts['IPOPT_options']['mu_init'] = 1e-3
     opt_res = op.optimize(options=opts)
