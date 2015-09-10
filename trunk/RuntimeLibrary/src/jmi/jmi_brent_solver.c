@@ -493,6 +493,14 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 block->x[0] = block->max[0];
             }
         }
+        if(flag && (block->x[0] != block->nominal[0]) && (block->nominal[0] != solver->originalStart)) {
+            jmi_log_node(log, logWarning, "Warning",  "Residual function evaluation failed at initial point for "
+                         "<block: %s>, will try <initial_guess: %g>", block->label, block->nominal[0]);        
+            flag = brentf(block->nominal[0], &f, block);
+            if(!flag) {
+                block->x[0] = block->nominal[0];
+            }
+        }
     }
 
     jmi_log_fmt(log, topnode, BRENT_EXTENDED_LOG_LEVEL, "<initial_f:%g>", f);
