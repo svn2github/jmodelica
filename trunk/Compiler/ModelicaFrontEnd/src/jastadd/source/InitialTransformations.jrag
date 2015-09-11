@@ -437,9 +437,9 @@
                                                        getFinalOpt(),
                                                        getName().stripFirstAccess(),
                                                        getModificationOpt(),
-                                                    getStringCommentOpt()))),
+                                                    getComment()))),
                                                    new Opt())),
-                                           new Opt());
+                                           new Comment(new Opt(), new Opt()));
             e.getModification().setLocationNoTree(this);
             ((CompleteModification)e.getModification()).getClassModification().setLocationNoTree(this);
             ClassModification cm = ((CompleteModification)e.getModification()).getClassModification();

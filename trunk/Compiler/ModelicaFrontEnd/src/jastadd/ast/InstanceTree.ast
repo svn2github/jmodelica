@@ -186,7 +186,7 @@ InstArrayModification : InstValueModification ::= <Cell:FExp>;
 
 abstract InstArgument            : InstModification      ::= <Each:boolean> <Final:boolean>;
 abstract InstNamedModification   : InstArgument          ::= Name:InstAccess;
-abstract InstElementModification : InstNamedModification ::= [InstModification];
+abstract InstElementModification : InstNamedModification ::= [InstModification] /[Annotation:InstClassModification]/;
 abstract InstElementRedeclare    : InstNamedModification;
 InstComponentModification : InstElementModification; 
 InstClassRedeclare        : InstElementRedeclare ::= /InstClassDecl/;

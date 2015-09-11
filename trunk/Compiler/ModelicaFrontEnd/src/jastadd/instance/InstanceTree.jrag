@@ -2308,6 +2308,7 @@ aspect InstanceAnnotations {
     
     syn lazy Opt<InstClassModification> InstComponentDecl.getAnnotationOpt() = new Opt<InstClassModification>();
     
+    syn lazy Opt<InstClassModification> InstElementModification.getAnnotationOpt() = new Opt<InstClassModification>();
 }
 
 aspect InstanceDumpTree {

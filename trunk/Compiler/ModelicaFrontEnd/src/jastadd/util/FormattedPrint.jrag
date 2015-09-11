@@ -1429,9 +1429,7 @@ aspect FormattedPrint {
 		if (hasModification()) {
 			getModification().doPrettyPrintFormatted(printer, printStream);
 		}
-		if (hasStringComment()) {
-			getStringComment().doPrettyPrintFormatted(printer, printStream);
-		}
+		getComment().doPrettyPrintFormatted(printer, printStream);
 	}
 
 	void ClassRedeclare.prettyPrintFormattedHelper(Printer printer, CodeStream printStream) {
