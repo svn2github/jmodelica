@@ -3683,6 +3683,84 @@ pre(temp_1) := false
 ")})));
 end WhenEqu16;
 
+model WhenEqu17
+    Real a;
+    Real b (start = 2);
+    Real c;
+    Real d;
+    Real e;
+    Real f;
+    Real g;
+initial equation
+    pre(a) = -1;
+    c = 1;
+equation
+    when time > 2 then
+        a = time;
+    end when;
+    0 = if time > 2 then b + a else b;
+    c = der(d) + b + e;
+    der(d) * time = 0;
+    e = f + time;
+    f * g = 0;
+    when time > pre(g) then
+        g = time + 1;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="WhenEqu17",
+            description="Ensure that the pre propagation equations are inserted in the first init BiPGraph if necessary (e.g. all other matchings for that variables are bad)",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+temp_1 := time > 2
+
+--- Solved equation ---
+pre(a) := -1
+
+--- Solved equation ---
+a := pre(a)
+
+--- Unsolved equation (Block 1) ---
+0 = if time > 2 then b + a else b
+  Computed variables: b
+
+--- Solved equation ---
+c := 1
+
+--- Unsolved equation (Block 2) ---
+der(d) * time = 0
+  Computed variables: der(d)
+
+--- Solved equation ---
+e := c - der(d) - b
+
+--- Solved equation ---
+f := e - time
+
+--- Unsolved equation (Block 3) ---
+f * g = 0
+  Computed variables: g
+
+--- Solved equation ---
+pre(g) := g
+
+--- Solved equation ---
+temp_2 := time > pre(g)
+
+--- Solved equation ---
+d := 0.0
+
+--- Solved equation ---
+pre(temp_1) := false
+
+--- Solved equation ---
+pre(temp_2) := false
+-------------------------------
+")})));
+end WhenEqu17;
+
 model IntialWhenAlgorithm1
     Boolean a;
     Boolean x;

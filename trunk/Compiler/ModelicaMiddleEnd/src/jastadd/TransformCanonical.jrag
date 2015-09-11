@@ -646,9 +646,23 @@ aspect TransformCanonical {
                 if (var == null) {
                     newEquations_.add(e);
                 } else {
-                    if (!existingPrePropagationLikeInitialEquations.contains(var)) {
-                        prePropagationEquations.put(var, e);
+                    if (existingPrePropagationLikeInitialEquations.contains(var))
+                        continue;
+                    boolean hasOthers = false;
+                    boolean assignedInAllBranches = false;
+                    for (FIdUseExp exp : var.uses()) {
+                        FAbstractEquation eqn = exp.myFEquation();
+                        if (eqn == null || eqn == e || eqn == equationToReplace || !(eqn.inEquationSection() || eqn.inInitialEquationSection()))
+                            continue;
+                        hasOthers = true;
+                        if (eqn.assignedInAllBranches(var))
+                            assignedInAllBranches = true;
                     }
+                    
+                    if (!hasOthers || assignedInAllBranches)
+                        prePropagationEquations.put(var, e);
+                    else
+                        newEquations_.add(e);
                 }
             }
             

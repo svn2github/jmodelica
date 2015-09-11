@@ -2126,6 +2126,48 @@ aspect ReferencedVariables {
     syn Set<FVariable> FFunctionCallEquation.referencedParametersInLHS() = parametersInSet(referencedFVariablesInLHS());
     syn Set<FVariable> FExp.referencedParametersInFExp()                 = parametersInSet(referencedFVariablesInFExp());
 
+    syn boolean FAbstractEquation.assignedInAllBranches(FAbstractVariable var) = true;
+    eq FEquation.assignedInAllBranches(FAbstractVariable var) = assignedInAllBranchesVariables().contains(var.name());
+
+    syn lazy Set<String> FEquation.assignedInAllBranchesVariables() {
+        Set<String> res = new HashSet<String>();
+        getLeft().assignedInAllBranchesVariables(res);
+        getRight().assignedInAllBranchesVariables(res);
+        return res;
+    }
+
+    public final Set<String> FExp.assignedInAllBranchesVariables() {
+        Set<String> res = new HashSet<String>();
+        assignedInAllBranchesVariables(res);
+        return res;
+    }
+
+    public void FExp.assignedInAllBranchesVariables(Set<String> res) {
+        for (FExp exp : childFExps())
+            exp.assignedInAllBranchesVariables(res);
+    }
+
+    @Override
+    public void FIdUseExp.assignedInAllBranchesVariables(Set<String> res) {
+        res.add(name());
+    }
+
+    @Override
+    public void FIfExp.assignedInAllBranchesVariables(Set<String> res) {
+        getIfExp().assignedInAllBranchesVariables(res);
+        Set<String> a = getThenExp().assignedInAllBranchesVariables();
+        Set<String> b = getElseExp().assignedInAllBranchesVariables();
+        if (a.size() > b.size()) {
+            Set<String> tmp = a;
+            a = b;
+            b = tmp;
+        }
+        for (String name : a) {
+            if (b.contains(name)) {
+                res.add(name);
+            }
+        }
+    }
 }
 
 
