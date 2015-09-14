@@ -494,11 +494,15 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             }
         }
         if(flag && (block->x[0] != block->nominal[0]) && (block->nominal[0] != solver->originalStart)) {
+            double nom_guess = block->nominal[0];
+            if( block->nominal[0] > block->max[0] ) {
+               nom_guess *=-1;
+            }
             jmi_log_node(log, logWarning, "Warning",  "Residual function evaluation failed at initial point for "
-                         "<block: %s>, will try <initial_guess: %g>", block->label, block->nominal[0]);        
-            flag = brentf(block->nominal[0], &f, block);
+                "<block: %s>, will try <initial_guess: %g>", block->label, nom_guess);        
+            flag = brentf(nom_guess, &f, block);
             if(!flag) {
-                block->x[0] = block->nominal[0];
+                block->x[0] = nom_guess;
             }
         }
     }
@@ -508,7 +512,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     if (flag) {
 
         jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
-                     "<block: %s>", block->label);
+            "<block: %s> <Iter: #r%d#>", block->label, block->value_references[0]);
         jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_FIRST_SYSFUNC_ERR);
 #ifdef JMI_PROFILE_RUNTIME
         if (block->parent_block) {
