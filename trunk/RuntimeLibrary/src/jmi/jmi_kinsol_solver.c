@@ -398,7 +398,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
             for(i = 0; i < N; i++){
                 int j;
                 realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-                realtype* col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype* col_ptr = DENSE_COL(solver->J, i);
                 realtype xscale = RAbs(block->nominal[i]);
                 realtype x = RAbs(block->x[i]);
                 if(x < xscale) x = xscale;
@@ -1391,7 +1391,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
             for(i = 0; i < N; i++){
                 int j;
-                /* column scaling is formed by max(nominal, actual_value) */
+                /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
                 realtype xscale = RAbs(block->nominal[i]);
                 realtype x = RAbs(block->x[i]);
                 if(x < xscale) x = xscale;
@@ -1790,7 +1790,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
             for(i = 0; i < N; i++){
                 int j;
                 realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-                realtype* col_ptr = DENSE_COL(solver->J_scale, i);
+                realtype* col_ptr = DENSE_COL(solver->J, i);
                 realtype xscale = RAbs(block->nominal[i]);
                 realtype x = RAbs(block->x[i]);
                 if(x < xscale) x = xscale;
