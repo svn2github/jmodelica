@@ -350,7 +350,10 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     for (i = 0; i < n_x; i++) {
         /* Unrecoverable error*/
         if ( solver->rhs[i] - solver->rhs[i] != 0) {
-            jmi_log_node(block->log, logError, "NaNOutput", "Not a number in <rhs: %I> from <block: %s>", 
+            /* Close the LinearSolve log node and generate the Error/Warning node and return. */
+            if((block->callbacks->log_options.log_level >= 5)) jmi_log_leave(block->log, destnode);
+            
+            jmi_log_node(block->log, logError, "NaNOutput", "Not a number in block <rhs: %I> from <block: %s>", 
                          i, block->label);
             return -1;
         }
