@@ -875,12 +875,12 @@ $(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar
 	esac 
 
 mc_modelica: ifcasadi
-	cd $(MC_SRC); $(ANT_OPTS) $(ANT)
+	cd $(MC_SRC); $(ANT_OPTS) $(ANT) "-Dcompiler=$(COMPILER_DIR)"
 
 mc_optimica: ifcasadi
 	mkdir -p $(OC_SRC)/src/java-generated
 	cp -pr $(MC_SRC)/src/java-generated/ifcasadi $(OC_SRC)/src/java-generated
-	cd $(OC_SRC); $(ANT_OPTS) $(ANT)
+	cd $(OC_SRC); $(ANT_OPTS) $(ANT) "-Dcompiler=$(COMPILER_DIR)"
 
 $(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
 $(MC_SRC)/bin/util.jar:             mc_modelica
