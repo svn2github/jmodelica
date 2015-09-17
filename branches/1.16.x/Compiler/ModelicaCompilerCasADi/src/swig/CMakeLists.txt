@@ -40,7 +40,7 @@ include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
 include_directories(${CASADI_BUILD_DIR})
 
-set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_LIST_DIR}/../java-generated/ifcasadi)
+set(CMAKE_SWIG_OUTDIR "$ENV{IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)
