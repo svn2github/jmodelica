@@ -1108,18 +1108,45 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     dgetrf_(  &N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
     
     if(info != 0 ) {
-        jmi_log_t *log = block->log;
-        jmi_log_node_t node = jmi_log_enter_fmt(log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
-                     "Will try to regularize the equations in <block: %s>", block->label);
-        if (block->callbacks->log_options.log_level >= 3) {
-            jmi_log_reals(log, node, logWarning, "ivs",  N_VGetArrayPointer(solver->kin_y), N);
-        }
-        jmi_log_leave(log, node);
+        if (N > 1) {
+            if (solver->J_is_singular_flag && (block->options->experimental_mode & jmi_block_solver_experimental_nle_min_norm_and_reg)) {
+                solver->handling_of_singular_jacobian_flag = JMI_MINIMUM_NORM;
+            } else {
+                solver->handling_of_singular_jacobian_flag = JMI_REGULARIZATION;
+            }
+            
+            if(block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner_node;
+                inner_node = jmi_log_enter_fmt(block->log, logInfo, "SingularJacobian", 
+                                    "Singular Jacobian detected when factorizing in linear solver "
+                                    "in <block: %s>", block->label);
+                jmi_log_leave(block->log, inner_node);
+            }
 
-        solver->J_is_singular_flag = 1;
-        if(N > 1) {
-            jmi_kinsol_reg_matrix(block);
-            dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+            if (solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
+                jmi_log_t *log = block->log;
+                jmi_log_node_t node = jmi_log_enter_fmt(log, logWarning, "Regularization", "Singular Jacobian detected when factorizing in linear solver. "
+                             "Will try to regularize the equations in <block: %s>", block->label);
+                if (block->callbacks->log_options.log_level >= 3) {
+                    jmi_log_reals(log, node, logWarning, "ivs",  N_VGetArrayPointer(solver->kin_y), N);
+                }
+                jmi_log_leave(log, node);
+                
+                if(N > 1) {
+                    jmi_kinsol_reg_matrix(block);
+                    dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+                }
+            } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
+                jmi_log_node(block->log, logWarning, "MinimumNorm", "Singular Jacobian detected when factorizing in linear solver. "
+                             "Will try to find the minimum norm solution in <block: %s>", block->label);
+                SetToZero(solver->J_sing);
+                DenseCopy(solver->J, solver->J_sing);
+            } else {
+                /* Error */
+                return -1;
+            }
+            
+            solver->J_is_singular_flag = 1;
         }
     } else {
         /* if (solver->using_max_min_scaling_flag) {
@@ -1136,10 +1163,10 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
         update the residual scales if corresponding option is set
        */
         solver->force_new_J_flag = 0;
-        if(block->options->rescale_after_singular_jac_flag)
+        if(block->options->rescale_after_singular_jac_flag) /* && solver->J_is_singular_flag == 0) */
             jmi_update_f_scale(block);
-    }    
-        
+    }
+    
     return 0;
         
 }
@@ -1222,10 +1249,12 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         ret = 0;
     }
     else if(solver->J_is_singular_flag) {
-        /* solve the regularized problem */
-        
         realtype** jac = solver->J->cols;
-        if(N > 1) {
+        if (N == 1) {
+            xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
+            ret = 0;
+        } else if (solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
+            /* solve the regularized problem */
             int i,j;
             realtype * fscale_data = N_VGetArrayPointer(solver->kin_f_scale);
             realtype gnorm;/*gradient norm*/
@@ -1258,10 +1287,33 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             i = 1;
             dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
             solver->force_new_J_flag = 1;
-        }
-        else {
-            xd[0] = block->nominal[0] * 0.1 *((bd[0] > 0)?1:-1) * ((jac[0][0] > 0)?1:-1);
-            ret = 0;
+            
+        } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
+            /*
+             *   DGELSS - compute the minimum norm solution to	a real 
+             *   linear least squares problem
+             * 
+             * SUBROUTINE DGELSS( M, N, NRHS, A, LDA, B, LDB, S, RCOND, RANK,WORK, LWORK, INFO )
+             *
+             */
+            int nrhs = 1; /* One rhs to solve for */ 
+            double rcond = -1.0;
+            int rank = 0;
+            int iwork = 5*N;
+            
+            N_VScale(ONE, b, x);
+
+            dgelss_(&N, &N, &nrhs, solver->J_sing->data, &N, xd, &N ,solver->singular_values, &rcond, &rank, solver->dgelss_rwork, &iwork, &ret);
+            solver->force_new_J_flag = 1;
+            
+            if(block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner_node;
+                inner_node =jmi_log_enter_fmt(block->log, logInfo, "MinimumNorm", 
+                                "Found the minimum norm solution.");
+                jmi_log_reals(block->log, inner_node, logInfo, "singular_values", solver->singular_values, N);
+                jmi_log_fmt(block->log, inner_node, logInfo, "<rank:%d>", rank);
+                jmi_log_leave(block->log, inner_node);
+            }
         }
 
         /* Evaluate discrete variables after a regularization. */
@@ -1484,7 +1536,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         jmi_log_node(block->log, logInfo, "Regularization",
             "Calculated condition number in <block: %s>. Regularizing if <cond: %E> is greater than <regtol: %E>", block->label, cond, solver->kin_reg_tol);
         if (cond > solver->kin_reg_tol) {
-            if(N > 1) {
+            if(N > 1 && solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
                 int info;
                 jmi_kinsol_reg_matrix(block);
                 dgetrf_(  &block->n, &block->n, solver->JTJ->data, &block->n, solver->lapack_ipiv, &info);
@@ -1572,6 +1624,10 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->JTJ = NewDenseMat(n ,n);
     solver->J_LU = NewDenseMat(n ,n);
     solver->J_scale = NewDenseMat(n ,n);
+    solver->J_sing = NewDenseMat(n, n);
+    solver->J_SVD_U = NewDenseMat(n, n);
+    solver->J_SVD_VT = NewDenseMat(n, n);
+    solver->J_is_singular_flag = 0;
 
     solver->equed = 'N';
     solver->rScale = (realtype*)calloc(n+1,sizeof(realtype));
@@ -1582,6 +1638,13 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
     solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
     solver->lapack_ipiv = (int *)calloc(n+2, sizeof(int));
+
+    solver->dgesdd_lwork = 7*n*n+4*n;
+    solver->dgesdd_work  = (realtype*)calloc(solver->dgesdd_lwork,sizeof(realtype));
+    solver->dgesdd_iwork = (int*)calloc(8*n,sizeof(int));
+    
+    solver->dgelss_rwork = (realtype*)calloc(5*n,sizeof(realtype));
+    solver->singular_values = (realtype*)calloc(n,sizeof(realtype));
 
     kin_reset_char_log(solver);
 
@@ -1672,6 +1735,9 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     DestroyMat(solver->JTJ);
     DestroyMat(solver->J_LU);
     DestroyMat(solver->J_scale);
+    DestroyMat(solver->J_sing);
+    DestroyMat(solver->J_SVD_U);
+    DestroyMat(solver->J_SVD_VT);
     free(solver->cScale);
     free(solver->rScale);
     free(solver->range_limits);
@@ -1679,6 +1745,11 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     free(solver->lapack_work);
     free(solver->lapack_iwork);
     free(solver->lapack_ipiv);
+    free(solver->dgelss_rwork);
+    free(solver->singular_values);
+
+    free(solver->dgesdd_work);
+    free(solver->dgesdd_iwork);
     
     if(solver->num_bounds > 0) {
         free(solver->bound_vindex);

@@ -39,6 +39,9 @@
 
 #include <kinsol/kinsol.h>
 
+#define JMI_REGULARIZATION 1
+#define JMI_MINIMUM_NORM 2
+
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
 
 /**< \brief Kinsol solver constructor function */
@@ -77,8 +80,12 @@ struct jmi_kinsol_solver_t {
     int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
     int using_max_min_scaling_flag; /**< \brief A flag indicating if either the maximum scaling is used of the minimum */
     int updated_jacobian_flag;      /**< \brief A flag indicating if an updated Jacobian is used to solve the system */
+    int handling_of_singular_jacobian_flag; /**< \brief A flag for determining how singular systems should be treated */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
+    DlsMat J_sing;                  /**< \brief Jacobian matrix/it's right singular vectors */
+    DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
+    DlsMat J_SVD_VT;                /**< \brief The right singular vectors */
 
     char equed;                     /**< \brief Type of Jac scaling used */
     realtype* rScale;               /**< \brief Row scale factors */
@@ -87,6 +94,13 @@ struct jmi_kinsol_solver_t {
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
     int * lapack_ipiv;            /**< \brief work vector for lapack */
+    
+    realtype* dgesdd_work;          /**< \brief Work vector for desdd */
+    int dgesdd_lwork;               /**< \brief Work vector for desdd */
+    int* dgesdd_iwork;              /**< \brief Work vector for desdd */
+    
+    realtype* dgelss_rwork;
+    realtype* singular_values;
     
     int num_bounds;
     int* bound_vindex;             /**< \brief variable index for a bound */
@@ -119,8 +133,14 @@ struct jmi_kinsol_solver_t {
 /* Utilized Lapack routines */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);
+extern void dgelss_(int* M, int* N, int* NRHS, double* A, int* LDA, double* B, int* LDB,double* S,double* RCOND,int* RANK,double* WORK,int* LWORK, int* INFO);
 extern void dgecon_(char *norm, int *n, double *a, int *lda, double *anorm, double *rcond, 
              double *work, int *iwork, int *info);
+extern void dgesdd_(char* JOBZ, int* M, int* N, double* A, int* LDA, 
+            double* S, double* U, int* LDU, double* VT, int* LDVT, 
+            double* WORK, int* LWORK, int* IWORK, int* INFO);
+extern double dlamch_(char *cmach);
+
 extern double dlange_(char *norm, int *m, int *n, double *a, int *lda,
              double *work);
 extern int dgeequ_(int *m, int *n, double *a, int *
