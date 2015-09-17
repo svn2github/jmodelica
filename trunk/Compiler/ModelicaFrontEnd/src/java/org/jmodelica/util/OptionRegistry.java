@@ -681,6 +681,12 @@ abstract public class OptionRegistry {
              -1,
              "Tolerance for deciding when regularization should be activated (i.e. when condition number > reg tol).",
              -1, 1e20),
+        NLE_SOLVER_NOMINALS_AS_FALLBACK
+            ("nle_solver_use_nominals_as_fallback",
+             OptionType.runtime, 
+             Category.uncommon,
+             false,
+             "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               OptionType.runtime, 

@@ -843,6 +843,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_min_residual_scaling_factor");
     if(index)
         bsop->min_residual_scaling_factor = z[index];
+        
+    index = get_option_index("_nle_solver_use_nominals_as_fallback");
+    if(index)
+        bsop->use_nominals_as_fallback_in_init = z[index];
     
     index = get_option_index("_nle_solver_max_residual_scaling_factor");
     if(index)
