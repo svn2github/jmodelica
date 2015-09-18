@@ -856,7 +856,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 solver->range_limited[i] = 0;
                 continue;
             }
-            solver->last_bounding_index = i;
+
             solver->range_limited[i] = 1;
             rangeLimited = TRUE;
 
@@ -864,6 +864,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
 
             if(max_step_ratio > step_ratio) {
                 max_step_ratio = step_ratio;
+                solver->last_bounding_index = i;
             }
         }
 
@@ -871,6 +872,15 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             jmi_log_leave(log, inner);
             jmi_log_leave(log, outer);
         }
+    }
+
+    if(max_step_ratio < min_step_ratio) {
+        jmi_log_node(block->log, logWarning, "RangeLimitation", "Range limitations for step length is causing <lambda_max: %g>"
+            " to be smaller than <active_bounds_threshold: %g>. Most reducing IV is <Iter: #r%d#>", max_step_ratio, min_step_ratio, block->value_references[solver->last_bounding_index]);
+    }
+
+    if (block->callbacks->log_options.log_level >= 5) {
+        jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max: %g>", max_step_ratio);
     }
     /* 
         Go over the list of bounds and reduce "max_step_ratio" 
@@ -892,7 +902,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         solver->bound_limiting[i] = 1 ;
         limitingBounds = TRUE ;
         solver->last_num_limiting_bounds++;
-        step_ratio_i =pbi/pi;   /* step ration to bound */
+        step_ratio_i =pbi/pi;   /* step ratio to bound */
+
         if(step_ratio_i < min_step_ratio) {
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
