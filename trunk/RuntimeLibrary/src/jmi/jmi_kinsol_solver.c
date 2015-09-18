@@ -874,11 +874,6 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         }
     }
 
-    if(max_step_ratio < min_step_ratio) {
-        jmi_log_node(block->log, logWarning, "RangeLimitation", "Range limitations for step length is causing <lambda_max: %g>"
-            " to be smaller than <active_bounds_threshold: %g>. Most reducing IV is <Iter: #r%d#>", max_step_ratio, min_step_ratio, block->value_references[solver->last_bounding_index]);
-    }
-
     if (block->callbacks->log_options.log_level >= 5) {
         jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max: %g>", max_step_ratio);
     }
