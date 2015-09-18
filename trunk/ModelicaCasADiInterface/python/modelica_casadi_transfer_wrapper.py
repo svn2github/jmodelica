@@ -77,6 +77,8 @@ def transfer_model(model, class_name, file_name=[],
         files = [file_name]
     else: 
         files = file_name
+    # Work around that the JVM might not be aware of the current working directory
+    files = map(os.path.abspath, files)
     if has_mop_file(files):
         return modelicacasadi_wrapper.transferModelFromOptimicaCompiler(model, class_name, files,
             _get_options(compiler_options), compiler_log_level)
@@ -146,6 +148,8 @@ def transfer_optimization_problem(ocp, class_name,
         files = [file_name]
     else: 
         files = file_name
+    # Work around that the JVM might not be aware of the current working directory
+    files = map(os.path.abspath, files)
     if has_mop_file(files):
         if not accept_model:
             return _transfer_optimica(ocp, class_name, files,
