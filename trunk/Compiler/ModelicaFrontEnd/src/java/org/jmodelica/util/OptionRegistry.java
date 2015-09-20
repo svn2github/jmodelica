@@ -624,7 +624,7 @@ abstract public class OptionRegistry {
             ("block_solver_experimental_mode",
              OptionType.runtime, 
              Category.experimental,
-             64,
+             0,
              "Activates experimental features of equation block solvers",
              0, 255),
         NLE_SOLVER_DEFAULT_TOL
