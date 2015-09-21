@@ -103,6 +103,7 @@ struct jmi_kinsol_solver_t {
     realtype* singular_values;
     
     int num_bounds;
+    int range_most_limiting;       /**< \bried Flag indicating if the Newton step length is most limited by range */
     int* bound_vindex;             /**< \brief variable index for a bound */
     int* bound_kind;               /**< \brief +1 for max, -1 for min */    
     int* bound_limiting;           /**< \brief 1 if bound is limitng stepsize, 0 otherwise*/    

@@ -566,9 +566,16 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if (nniters > 0 && nwritten >= 0) {
                     char *buffer = message + nwritten;
                     if (solver->last_bounding_index >= 0) {
-                        sprintf(buffer, "  %4d %4d  %11.4e:%4d %11.4e",
+                        if(solver->range_most_limiting) {
+                            sprintf(buffer, "  %4d %4d  %11.4e:%4dr %11.4e",
                                 solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                                 lambda_max, solver->last_bounding_index+1, lambda);
+                        }
+                        else {
+                            sprintf(buffer, "  %4d %4d  %11.4e:%4d %11.4e",
+                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                                lambda_max, solver->last_bounding_index+1, lambda);
+                        }
                     }
                     else {
                         sprintf(buffer, "  %4d %4d  %11.4e      %11.4e",
@@ -795,6 +802,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     solver->last_bounding_index = -1;
     solver->last_num_limiting_bounds = 0;
     solver->last_num_active_bounds = 0;
+    solver->range_most_limiting = FALSE;
 
     if((!block->options->enforce_bounds_flag) || (xnorm == 0.0)) 
     {
@@ -865,6 +873,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             if(max_step_ratio > step_ratio) {
                 max_step_ratio = step_ratio;
                 solver->last_bounding_index = i;
+                solver->range_most_limiting = TRUE;
             }
         }
 
@@ -877,6 +886,12 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     if (block->callbacks->log_options.log_level >= 5) {
         jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max: %g>", max_step_ratio);
     }
+
+    /*if(max_step_ratio < min_step_ratio) {
+        min_step_ratio = max_step_ratio;
+    }*/
+
+
     /* 
         Go over the list of bounds and reduce "max_step_ratio" 
     */
@@ -913,6 +928,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 /* reduce the step */
                 max_step_ratio = step_ratio_i;
                 solver->last_bounding_index = index;
+                solver->range_most_limiting = FALSE;
             }
         }
     }
@@ -1646,6 +1662,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->cScale = (realtype*)calloc(n+1,sizeof(realtype));
     solver->range_limits = (realtype*)calloc(n+1,sizeof(realtype));
     solver->range_limited = (int*)calloc(n+1,sizeof(int));
+    solver->range_most_limiting = 0;
 
     solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
     solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
