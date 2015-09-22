@@ -2069,7 +2069,7 @@ public class ModelicaCompiler {
      * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
      */
     protected void ModelicaCompiler.tearDown() {
-        getExternalFunctionCache().tearDown(getOptions());
+        createUtilInterface().tearDown();
         setErrorHandler(null);
         isSetUp = false;
     }

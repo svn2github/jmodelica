@@ -1927,11 +1927,19 @@ aspect UtilInterface {
     }
     
     public void UtilInterface.transferRoot(Root root) {
+        clean();
+        root.setUtilInterface(UtilInterface.create(this));
+    }
+    
+    public void UtilInterface.tearDown() {
+        clean();
+    }
+    
+    public void UtilInterface.clean() {
         ExternalFunctionCache efc = getExternalFunctionCache();
         if (efc != null) {
             efc.destroyProcesses(getOptionRegistry());
         }
-        root.setUtilInterface(UtilInterface.create(this));
     }
     
 }
