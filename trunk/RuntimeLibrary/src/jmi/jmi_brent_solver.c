@@ -498,11 +498,13 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
             if( block->nominal[0] > block->max[0] ) {
                nom_guess *=-1;
             }
-            jmi_log_node(log, logWarning, "Warning",  "Residual function evaluation failed at initial point for "
-                "<block: %s>, will try <initial_guess: %g>", block->label, nom_guess);        
-            flag = brentf(nom_guess, &f, block);
-            if(!flag) {
-                block->x[0] = nom_guess;
+            if(nom_guess < block->max[0] && nom_guess > block->min[0]) { /* Only try if nominal is within bounds */
+                jmi_log_node(log, logWarning, "Warning",  "Residual function evaluation failed at initial point for "
+                    "<block: %s>, will try <initial_guess: %g>", block->label, nom_guess);        
+                flag = brentf(nom_guess, &f, block);
+                if(!flag) {
+                    block->x[0] = nom_guess;
+                }
             }
         }
     }
