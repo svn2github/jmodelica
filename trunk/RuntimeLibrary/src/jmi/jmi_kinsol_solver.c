@@ -572,7 +572,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                                 lambda_max, solver->last_bounding_index+1, lambda);
                         }
                         else {
-                            sprintf(buffer, "  %4d %4d  %11.4e:%4d %11.4e",
+                            sprintf(buffer, "  %4d %4d  %11.4e:%4d  %11.4e",
                                 solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                                 lambda_max, solver->last_bounding_index+1, lambda);
                         }
@@ -887,9 +887,10 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max: %g>", max_step_ratio);
     }
 
-    /*if(max_step_ratio < min_step_ratio) {
+    /* Make sure that we are not projecting if step length already small enough */
+    if(max_step_ratio < min_step_ratio) {
         min_step_ratio = max_step_ratio;
-    }*/
+    }
 
 
     /* 
