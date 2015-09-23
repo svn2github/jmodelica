@@ -50,7 +50,7 @@ public class LinkedHashListMap<K, V> extends LinkedHashMap<K, List<V>> implement
         return (list == null) ? Collections.<V>emptyList() : list;
     }
 
-    public boolean remove(K key, V value) {
+    public boolean removeFirst(K key, V value) {
         java.util.List<V> l = get(key);
         if (l != null) {
             Iterator<V> li = l.iterator();

@@ -39,5 +39,5 @@ public interface ListMap<K, V> extends Map<K, List<V>> {
      * 
      * @return  true if any element was removed
      */
-    public boolean remove(K key, V value);
+    public boolean removeFirst(K key, V value);
 }

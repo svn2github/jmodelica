@@ -1088,7 +1088,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     public void removeFromEquationIndexMap(FAbstractEquation eqn, E e) {
-        equationIndexMap.remove(eqn, e);
+        equationIndexMap.removeFirst(eqn, e);
     }
 
     public String printMatching() {
