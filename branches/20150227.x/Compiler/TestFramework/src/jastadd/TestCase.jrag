@@ -306,10 +306,18 @@ abstract public class TestCase implements GenericTestCase {
 
     public void performTest() throws ParserException, beaver.Parser.Exception, 
                 IOException, ModelicaClassNotFoundException {
+        UtilInterface uif = UtilInterface.create(options);
+        try {
+            performTest(uif);
+        } finally {
+            uif.tearDown();
+        }
+    }
+    
+    public void performTest(UtilInterface uif) throws ParserException, beaver.Parser.Exception, 
+                IOException, ModelicaClassNotFoundException {
         if (exception != null)
             fail(exception);
-        
-        UtilInterface uif = UtilInterface.create(options);
         
         // Parse
         SourceRoot sr;
