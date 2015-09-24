@@ -52,31 +52,31 @@ set(EXTERNALFUNCTIONSFORTRAN_Sources
 #Build addNumbers library
 add_library(addNumbers STATIC ${ADDNUMBERS_Sources})
 if(NOT MSVC)
-    set_target_properties(addNumbers PROPERTIES COMPILE_FLAGS "-Wall -g -Werror -O2")
+    set_target_properties(addNumbers PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build arrayFunctions library
 add_library(arrayFunctions STATIC ${ARRAYFUNCTIONS_Sources})
 if(NOT MSVC)
-    set_target_properties(arrayFunctions PROPERTIES COMPILE_FLAGS "-Wall -g -Werror -O2")
+    set_target_properties(arrayFunctions PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build externalFunctionsC library
 add_library(externalFunctionsC STATIC ${EXTERNALFUNCTIONSC_Sources})
 if(NOT MSVC)
-    set_target_properties(externalFunctionsC PROPERTIES COMPILE_FLAGS "-Wall -g -Werror -O2")
+    set_target_properties(externalFunctionsC PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build extObjects library
 add_library(extObjects STATIC ${EXTOBJECTS_Sources})
 if(NOT MSVC)
-    set_target_properties(extObjects PROPERTIES COMPILE_FLAGS "-Wall -g -Werror -O2")
+    set_target_properties(extObjects PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build useModelicaError library
 add_library(useModelicaError STATIC ${USEMODELICAERROR_Sources})
 if(NOT MSVC)
-    set_target_properties(useModelicaError PROPERTIES COMPILE_FLAGS "-Wall -g -Werror -O2")
+    set_target_properties(useModelicaError PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
 #Build externalFunctionsFortran library
@@ -90,7 +90,3 @@ install(TARGETS extObjects DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS useModelicaError DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS externalFunctionsFortran DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 
-#Install header files
-#install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
-#    DESTINATION "${TEST_LIBRARY_INSTALL_DIR}/../Include"
-#    FILES_MATCHING PATTERN "*.h")

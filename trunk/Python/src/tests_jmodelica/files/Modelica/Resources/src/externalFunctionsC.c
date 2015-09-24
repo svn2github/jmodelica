@@ -52,7 +52,7 @@ const char* fStringScalar(const char* in)
 void fStringArray(const char** in, size_t in_d1, const char** out, size_t out_d1)
 {
 	size_t i;
-	char* temp[in_d1];
+	char **temp = malloc(sizeof(char*) * in_d1);
 	
 	for (i = 0; i < in_d1; i++)
 		temp[i] = ModelicaAllocateString(strlen(in[i]));
@@ -62,6 +62,7 @@ void fStringArray(const char** in, size_t in_d1, const char** out, size_t out_d1
 		temp[i][1] = temp[0][1];
 	for (i = 0; i < in_d1; i++)
 		out[i] = temp[i];
+	free(temp);
 }
 
 int fEnumScalar(int in)
