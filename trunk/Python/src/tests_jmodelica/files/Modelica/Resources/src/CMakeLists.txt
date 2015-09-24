@@ -45,9 +45,12 @@ set(USEMODELICAERROR_Sources
     ../Include/useModelicaError.h
 )
 
-set(EXTERNALFUNCTIONSFORTRAN_Sources
-    externalFunctionsFortran.f
-)
+#Don't build Fortran lib if MSVC
+if(NOT MSVC)
+    set(EXTERNALFUNCTIONSFORTRAN_Sources
+        externalFunctionsFortran.f
+    )
+endif()
 
 #Build addNumbers library
 add_library(addNumbers STATIC ${ADDNUMBERS_Sources})
@@ -79,8 +82,10 @@ if(NOT MSVC)
     set_target_properties(useModelicaError PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -O2")
 endif()
 
-#Build externalFunctionsFortran library
-add_library(externalFunctionsFortran STATIC ${EXTERNALFUNCTIONSFORTRAN_Sources})
+#Build externalFunctionsFortran library (if not MSVC)
+if(NOT MSVC)
+    add_library(externalFunctionsFortran STATIC ${EXTERNALFUNCTIONSFORTRAN_Sources})
+endif()
 
 #Install the libraries
 install(TARGETS addNumbers DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
@@ -88,5 +93,7 @@ install(TARGETS arrayFunctions DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS externalFunctionsC DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS extObjects DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
 install(TARGETS useModelicaError DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
-install(TARGETS externalFunctionsFortran DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+if(NOT MSVC)
+    install(TARGETS externalFunctionsFortran DESTINATION "${TEST_LIBRARY_INSTALL_DIR}")
+endif()
 

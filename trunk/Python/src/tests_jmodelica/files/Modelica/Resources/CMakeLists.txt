@@ -20,7 +20,14 @@
 # interface changes). CMake 2.8.4 and 2.8.5 are not tested.
 cmake_minimum_required (VERSION 2.8.6 FATAL_ERROR)
 
-project (TestLibraries C Fortran)
+project (TestLibraries)
+
+#Enable Fortran if not MSVC
+if(NOT MSVC)
+  enable_language(Fortran)
+else()
+  message(STATUS "No Fortran support")
+endif()
 
 #Inputs through flags
 add_definitions(-DTOP_SRC)
