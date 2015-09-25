@@ -150,20 +150,19 @@
           </author>
 
           <author>
-            <personname><firstname>Karl-Erik Årén</firstname></personname>
+            <personname><firstname>Karl-Erik</firstname><surname>Årzén</surname></personname>
           </author>
 
           <author>
-            <personname><firstname>Magnus
-            Gäfvert</firstname><surname/></personname>
+            <personname><firstname>Magnus</firstname><surname>Gäfvert</surname></personname>
           </author>
 
           <author>
-            <orgname>Tove Bergdahl</orgname>
+            <personname><firstname>Tove</firstname><surname>Bergdahl</surname></personname>
           </author>
 
           <author>
-            <orgname>Hubertus Tummescheit</orgname>
+            <personname><firstname>Hubertus</firstname><surname>Tummescheit</surname></personname>
           </author>
         </authorgroup>
 
