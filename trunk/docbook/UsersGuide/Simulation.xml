@@ -58,7 +58,7 @@ end VDP;
     <para>Create a new file in your working directory called
     <literal>VDP.mo</literal> and save the model.</para>
 
-    <para>Next, create a Python script file and write or (copy paste) the
+    <para>Next, create a Python script file and write (or copy paste) the
     commands for compiling and loading a model:</para>
 
     <programlisting language="python"># Import the function for compilation of models and the load_fmu method
@@ -175,9 +175,9 @@ plt.show()
     <section>
       <title>Convenience method, load_fmu</title>
 
-      <para>As that the FMI standard contains different specifications for
-      Model exchange and Co-Simulation and will also differ between its own
-      version, a convenience method, <literal>load_fmu</literal> has been
+      <para>Since there are different FMI specifications for
+      Model exchange and Co-Simulation and also differences between
+      versions, a convenience method, <literal>load_fmu</literal> has been
       created. This method is the preferred access point for loading an FMU
       and will return an instance of the appropriate underlying
       <literal>FMUModel(CS/ME)*</literal> class.</para>
@@ -904,7 +904,7 @@ P.show()
     <section>
       <title>Simulation of an Engine model with inputs</title>
 
-      <para>In this example the model is rather larger then the previous. It
+      <para>In this example the model is larger than the previous. It
       is a slightly modified version of the model EngineV6_analytic from the
       Multibody library in the Modelica Standard Library. The modification
       consists of a replaced load with a user defined load. This has been done
@@ -1201,7 +1201,7 @@ while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
         the FMU reported that the simulation is to be terminated. At the start
         of the loop the derivatives of the continuous states are retrieved and
         then the simulation time is incremented by the step-size and set to
-        the model. It could also be the case that the model is depended on
+        the model. It could also be the case that the model depends on
         inputs which can be set using the <literal>set_(real/...)</literal>
         methods.</para>
 
@@ -1227,7 +1227,7 @@ while time &lt; Tend and not bouncing_fmu.get_event_info().terminateSimulation:
 </programlisting>
 
         <para>Events can be, time, state or step events. The time events are
-        checked by continuously monitor the current time and the next time
+        checked by continuously monitoring the current time and the next time
         event (<literal>Tnext</literal>). State events are checked against
         sign changes of the event functions. Step events are monitored in the
         FMU, in the method <literal>completed_integrator_step()</literal> and
@@ -1324,8 +1324,8 @@ P.show()
     <section>
       <title>Simulation of Co-Simulation FMUs</title>
 
-      <para>Simulation of an Co-Simulation FMU follow the same workflow as
-      simulation of an Model Exchange FMU. The model we would like to simulate
+      <para>Simulation of a Co-Simulation FMU follows the same workflow as
+      simulation of a Model Exchange FMU. The model we would like to simulate
       is a model of a bouncing ball, the file
       <literal>bouncingBall.fmu</literal> is located in the examples folder in
       the JModelica.org installation,
