@@ -99,6 +99,9 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
         inc = -inc;
         y = y0 + inc;
     }
+
+    ret = brentf(y, &ftemp, block);
+
     /* If function evaluation failed, try finite difference in other direction. */
     if (ret) {
         inc = -inc;
@@ -107,7 +110,7 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
             ret = brentf(y, &ftemp, block);
         }
     }
-    ret = brentf(y, &ftemp, block);
+
     if (ret) {
         jmi_log_t* log = block->log;
         jmi_log_node_t node = 

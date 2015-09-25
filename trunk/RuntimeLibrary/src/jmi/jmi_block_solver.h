@@ -87,7 +87,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Brent = 4,
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
-    jmi_block_solver_experimental_nle_min_norm_and_reg = 64
+    jmi_block_solver_experimental_nle_min_norm_and_reg = 64,
+    jmi_block_solver_experimental_nom_in_active_bounds = 128
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {

@@ -903,7 +903,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         realtype pi = xd[index];            /* solved step length for the variable*/
         realtype bound = solver->bounds[i]; 
         realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
-        realtype step_ratio_i;
+        realtype step_ratio_i;        
+        int nom_criteria = FALSE;
+
         if(    ((kind == 1)&& (pbi >= pi))
             || ((kind == -1)&& (pbi <= pi))) {
             solver->bound_limiting[i] = 0 ;
@@ -914,8 +916,23 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         limitingBounds = TRUE ;
         solver->last_num_limiting_bounds++;
         step_ratio_i =pbi/pi;   /* step ratio to bound */
-
-        if(step_ratio_i < min_step_ratio) {
+        if(jmi_block_solver_experimental_nom_in_active_bounds & block->options->experimental_mode) {
+            realtype nom_step_ratio_i;
+            realtype nom_i = RAbs(block->nominal[index]);
+            double eps = solver->kin_stol;
+            nom_step_ratio_i = (eps*kind*nom_i+ui-bound)/-pi; /* The fraction delta of the step so that (bound-(ui+pi*delta))*kind=stol*nom */
+            if(nom_step_ratio_i < min_step_ratio) {
+                nom_criteria = TRUE;
+            }
+            if( (kind == 1 && ui > bound-eps*nom_i && ui <= bound) ||
+                (kind== -1 && ui < bound+eps*nom_i && ui >= bound)) {
+                    nom_criteria = TRUE;
+            }
+            if( (kind == 1 && ui+pi < bound+eps*nom_i) || (kind==-1 && ui+pi > bound-eps*nom_i) ) {
+                nom_criteria = TRUE;
+            }
+        }
+        if(step_ratio_i < min_step_ratio || (jmi_block_solver_experimental_nom_in_active_bounds & block->options->experimental_mode && nom_criteria)) {
             /* this bound is active (we need to follow it) */
             activeBounds = TRUE;
             solver->bound_limiting[i] = 2;
