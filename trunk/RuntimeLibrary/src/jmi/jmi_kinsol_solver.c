@@ -540,13 +540,14 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
                 char message[256];
                 realtype lambda_max;
-                realtype lambda, steplength;
+                realtype lambda;
                 int nwritten;
 
                 if (nniters > 0 && solver->last_xnorm > 0) {
-                    lambda_max = solver->max_step_ratio;
-                    /* KINGetStepLength(kin_mem, &steplength);
+                    /*  realtype steplength;
+                        KINGetStepLength(kin_mem, &steplength);
                        lambda = steplength/solver->last_xnorm; */
+                    lambda_max = solver->max_step_ratio;
                     if(solver->sJpnorm == 0) {
                         lambda = 1.0;
                     } else {
