@@ -545,8 +545,13 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
 
                 if (nniters > 0 && solver->last_xnorm > 0) {
                     lambda_max = solver->max_step_ratio;
-                    KINGetStepLength(kin_mem, &steplength);
-                    lambda = steplength/solver->last_xnorm;
+                    /* KINGetStepLength(kin_mem, &steplength);
+                       lambda = steplength/solver->last_xnorm; */
+                    if(solver->sJpnorm == 0) {
+                        lambda = 1.0;
+                    } else {
+                        lambda = kin_mem->kin_sJpnorm / solver->sJpnorm;
+                    }
                     if(solver->last_num_active_bounds > 0)
                         lambda *= solver->max_step_ratio;
                 }
@@ -557,7 +562,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
                 else if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
 
-                nwritten = sprintf(message, "%4d%-4s%11.4e  %11.4e:%4d",
+                nwritten = sprintf(message, "%4d%-4s%11.4e % 11.4e:%4d",
                                    (int)nniters+1, solver->char_log,
                                    kin_mem->kin_fnorm, max_residual, max_index+1);
 
@@ -683,7 +688,10 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
-    
+
+    /* Test to enable residual monitoring based Jac update */
+    KINSetNoResMon(solver->kin_mem,(block->options->experimental_mode & jmi_block_solver_experimental_residual_monitoring)?0:1);
+
     /* set tolerances */
     if((block->n > 1) || !block->options->use_Brent_in_1d_flag) {
         solver->kin_stol = block->options->res_tol;
@@ -1041,6 +1049,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         /* reduce the norms of Jp. This is only approximate since active bounds are not accounted for.*/
         kin_mem->kin_sfdotJp *= max_step_ratio;
         kin_mem->kin_sJpnorm *= max_step_ratio;
+        solver->sJpnorm = kin_mem->kin_sJpnorm;
     }
     /* The maximum newton step leads to the bound  
     -> store the "x" and set maximum step to be L2 norm of x */
@@ -1252,6 +1261,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     }
   
     kin_mem->kin_sJpnorm = N_VWL2Norm(b,solver->kin_f_scale);
+    solver->sJpnorm = kin_mem->kin_sJpnorm;
     N_VProd(b, solver->kin_f_scale, x);
     N_VProd(x, solver->kin_f_scale, x);
     
@@ -1736,10 +1746,6 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     /* Max number of iters */
     KINSetNumMaxIters(solver->kin_mem, block->options->max_iter);
     
-    /* Disable residual monitoring (since inexact solution is given sometimes by 
-    the linear solver) */
-    KINSetNoResMon(solver->kin_mem,1);
-
     /*Verbosity*/
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
     
@@ -2041,8 +2047,11 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     
     /* First time scaling is always recomputed - initial guess may be "far away" and give bad scaling 
        TODO: we should probably rescale after event as well.
+       TODO: Not sure if rescaling needs to happen in manual mode. Alternative is to have condition:
+       ((block->options->residual_equation_scaling_mode == jmi_residual_scaling_auto ) ||
+        (block->options->residual_equation_scaling_mode == jmi_residual_scaling_hybrid )
     */
-    if(    (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none ) 
+    if( (block->options->residual_equation_scaling_mode != jmi_residual_scaling_none )
         && (block->init || (flag != KIN_SUCCESS))) {
         jmi_log_node(log, logInfo, "Rescaling", "Attempting rescaling in <block:%s>", block->label);
 
