@@ -395,7 +395,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     }
     
     if (handle_discrete_changes) {
-        int iter, non_reals_changed_flag;
+        int iter, non_reals_changed_flag = 0;
         jmi_log_node_t top_node = jmi_log_enter_fmt(log, logInfo, "BlockEventIterations",
                                       "Starting block (local) event iteration at <t:%E> in <block:%s>",
                                       cur_time, block_solver->label);
@@ -436,7 +436,11 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 block_solver->init = 0;
             }
 
-            if (ef!=0){ jmi_log_leave(log, iter_node); break; }
+            if (ef!=0){ 
+                jmi_log_leave(log, iter_node); 
+                if(ef > 0) ef = -1;
+                break; 
+            }
             
             ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
             
@@ -458,6 +462,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 converged = 1;
                 jmi_log_leave(log, iter_node);
                 break;
+            }
+            else {
+                jmi_log_fmt(log, iter_node, logInfo, "Detected discrete variables change in <block:%s, iter:%I> at <t:%E>",
+                            block_solver->label, iter, cur_time);
             }
 
             jmi_log_leave(log, iter_node);
