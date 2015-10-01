@@ -45,7 +45,7 @@ algorithm
             template="$XML_vendorAnnotations$",
             generatedCode="
 <VendorAnnotations>
-        <Tool name=\"JModelica\">
+        <Tool name=\"JModelica.org\">
             <Annotation name=\"Library\" value=\"external1\"/>
             <Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
             <Annotation name=\"LibraryDirectory\" value=\"/Library\"/>
@@ -71,7 +71,7 @@ algorithm
 			filter=true,
 			generatedCode="
 <VendorAnnotations>
-		<Tool name=\"JModelica\">
+		<Tool name=\"JModelica.org\">
 			<Annotation name=\"Library\" value=\"external1\"/>
 			<Annotation name=\"Include\" value=\"#include &quot;external1.h&quot;\"/>
 			<Annotation name=\"LibraryDirectory\" value=\"%dir%/Resources/Library\"/>
