@@ -124,7 +124,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 			//genPrinter.print("description=\"String\" ");
 			//genPrinter.print("author=\"String\" ");
 			//genPrinter.print("version=\"0.0\" ");
-			genPrinter.print("generationTool=\"JModelica.org\" ");
+			genPrinter.print("generationTool=\"" + ASTNode.vendorName() + "\" ");
 			// Todays date for now
 			SimpleDateFormat dateformat = new SimpleDateFormat(df);
 			genPrinter.print("generationDateAndTime=\""+dateformat.format(new Date())+"\" ");
@@ -325,7 +325,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 		 */
 		public void generate(CodeStream genPrinter) {
 			genPrinter.print("<VendorAnnotations>");
-			genPrinter.print("\n\t\t<Tool name=\"JModelica\">");
+			genPrinter.print("\n\t\t<Tool name=\"" + ASTNode.vendorName() + "\">");
 			HashSet<String> extLibraries = fclass.externalLibraries();
 			HashSet<String> extIncludes = fclass.externalIncludes();
 			HashSet<String> extLibDirs = fclass.externalLibraryDirectories();

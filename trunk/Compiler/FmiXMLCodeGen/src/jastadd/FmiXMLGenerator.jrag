@@ -133,7 +133,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		public String[] children() { return new String[] {"annotation"}; }
 		
 		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", "JModelica.org", genPrinter);
+			generateAttribute("name", ASTNode.vendorName(), genPrinter);
 		}
 	}
 	
@@ -355,7 +355,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             generateAttribute("modelName",                fclass.name(),                           genPrinter);
             generateAttribute("modelIdentifier",          fclass.nameUnderscore(),                 genPrinter);
             generateAttribute("guid",                     fclass.guid(),                           genPrinter);
-            generateAttribute("generationTool",           "JModelica.org",                         genPrinter);
+            generateAttribute("generationTool",           ASTNode.vendorName(),                    genPrinter);
             generateAttribute("generationDateAndTime",    dateformat.format(new Date()),           genPrinter);
             generateAttribute("variableNamingConvention", "structured",                            genPrinter);
             generateAttribute("numberOfContinuousStates", fclass.numDifferentiatedRealVariables(), genPrinter);
@@ -945,7 +945,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             generateAttribute("fmiVersion",               "2.0",                           genPrinter);
             generateAttribute("modelName",                fclass.name(),                   genPrinter);
             generateAttribute("guid",                     fclass.guid(),                   genPrinter);
-            generateAttribute("generationTool",           "JModelica.org",                 genPrinter);
+            generateAttribute("generationTool",           ASTNode.vendorName(),            genPrinter);
             generateAttribute("generationDateAndTime",    dateformat.format(new Date()),   genPrinter);
             generateAttribute("variableNamingConvention", "structured",                    genPrinter);
             generateAttribute("numberOfEventIndicators",  numberOfEventIndicators(fclass), genPrinter);
