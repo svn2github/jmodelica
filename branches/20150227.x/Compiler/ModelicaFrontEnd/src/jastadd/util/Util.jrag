@@ -42,6 +42,9 @@ import org.jmodelica.util.AbstractModelicaScanner;
 aspect RootAccess {
 
     syn String SourceRoot.language() = "Modelica";
+    public static String ASTNode.vendorName() {
+        return "JModelica.org";
+    }
 
     inh Root ASTNode.retrieveRoot();
     eq Root.getChild().retrieveRoot() = this;
