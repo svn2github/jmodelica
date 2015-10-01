@@ -357,6 +357,21 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
     jmi_log_leave(block->log, node);
 }
 
+static void jmi_kinsol_small_step_nonconv_error_message(jmi_block_solver_t * block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    jmi_log_node_t node = jmi_log_enter(block->log, logError, "KinsolError");
+    realtype fnorm, snorm;
+    KINGetFuncNorm(solver->kin_mem, &fnorm);
+    KINGetStepLength(solver->kin_mem, &snorm);
+    
+    jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
+        "KINSol", block->cur_time, block->label);
+    jmi_log_fmt(block->log, node, logError, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
+    jmi_log_fmt(block->log, node, logError, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+                fnorm, snorm, solver->kin_stol);
+    jmi_log_leave(block->log, node);
+}
+
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category = logWarning;
@@ -1906,6 +1921,9 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
             flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
             jmi_kinsol_linesearch_nonconv_error_message(block);
+        } 
+        else {
+            jmi_kinsol_small_step_nonconv_error_message(block);
         }
 
         if(block->options->check_jac_cond_flag) {
@@ -1952,7 +1970,6 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         }
     }
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
-    
     return flag;
 }
 
@@ -2002,7 +2019,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         KINSetNoResMon(solver->kin_mem,0);        
         solver->use_steepest_descent_flag = 1;
     }
-    
+
     flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
     
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
@@ -2037,12 +2054,12 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                      "jmi_kinsol_solver", block->label, "Attempting steepest descent iterations");        
 
         solver->use_steepest_descent_flag = 1;
-        KINSetNoResMon(solver->kin_mem,0);
+        
         flag = KINSol(solver->kin_mem, solver->kin_y, KIN_LINESEARCH, solver->kin_y_scale, solver->kin_f_scale);
         if(flag == KIN_INITIAL_GUESS_OK) {
             flag = KIN_SUCCESS;
         }
-        KINSetNoResMon(solver->kin_mem,1);
+        
         solver->use_steepest_descent_flag = 0;
     }
     
@@ -2059,14 +2076,19 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
-        if(flagNonscaled < 0) {
+        if(flagNonscaled != 0) {
             jmi_log_node(log, logWarning, "NonConverge", "The equations with initial scaling didn't converge to a "
                          "solution in <block: %s>", block->label);
         }
         /* Update the scaling  */
         jmi_update_f_scale(block);
         
+        /* For the second solve set tight tolerance on the step and specified tolerance on the residual */
+        KINSetScaledStepTol(solver->kin_mem, solver->kin_ftol);
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_stol);
         flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
+        KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
         
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
