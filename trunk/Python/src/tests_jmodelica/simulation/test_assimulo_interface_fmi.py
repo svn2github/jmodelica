@@ -451,6 +451,9 @@ class Test_Singular_Systems:
         compile_fmu("Singular.Linear2", file_name)
         compile_fmu("Singular.LinearEvent1", file_name)
         compile_fmu("Singular.LinearEvent2", file_name)
+        compile_fmu("Singular.NonLinear1", file_name)
+        compile_fmu("Singular.NonLinear4", file_name)
+        compile_fmu("Singular.NonLinear5", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -505,6 +508,81 @@ class Test_Singular_Systems:
         
         model.set("b[1]", N.inf)
         nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_nonlinear_1(self):
+        
+        model = load_fmu("Singular_NonLinear1.fmu")
+        model.set("a33", 0)
+        model.set("b[3]", 0)
+        
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
+        nose.tools.assert_almost_equal(model.get("y") ,2.000000000)
+        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
+        
+    @testattr(stddist = True)
+    def test_nonlinear_2(self):
+        
+        model = load_fmu("Singular_NonLinear1.fmu")
+        model.set("a33", 0)
+        model.set("b[3]", 3)
+        
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_nonlinear_3(self):
+        
+        model = load_fmu("Singular_NonLinear1.fmu")
+        model.set("a33", 0)
+        model.set("a22", 1e-5)
+        model.set("b[3]", 0)
+        
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
+        nose.tools.assert_almost_equal(model.get("y") ,200000.0000)
+        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
+        
+    @testattr(stddist = True)
+    def test_nonlinear_4(self):
+        
+        model = load_fmu("Singular_NonLinear1.fmu")
+        model.set("a33", 0)
+        model.set("a22", 1e10)
+        model.set("b[3]", 0)
+        
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x") ,1.000000000)
+        nose.tools.assert_almost_equal(model.get("y") ,2e-10)
+        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
+        
+    @testattr(stddist = True)
+    def test_nonlinear_6(self):
+        
+        model = load_fmu("Singular_NonLinear5.fmu")
+        
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x") ,5)
+        nose.tools.assert_almost_equal(model.get("y") ,0)
+        nose.tools.assert_almost_equal(model.get("z") ,0.000000000)
+    
+    @testattr(stddist = True)
+    def test_nonlinear_5(self):
+        model = load_fmu("Singular_NonLinear4.fmu")
+
+        model.set("b[3]", 0)
+        model.set("a31", 1)
+        model.set("a32", -0.5)
+
+        res = model.simulate()
+        
+        nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
+        nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
+
 
 class Test_FMI_ODE:
     """

@@ -1180,7 +1180,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     
     if(info != 0 ) {
         if (N > 1) {
-            if (solver->J_is_singular_flag && (block->options->experimental_mode & jmi_block_solver_experimental_nle_min_norm_and_reg)) {
+            if (solver->J_is_singular_flag) { /* If the previous Jacobian update was singular, use minimum norm */
                 solver->handling_of_singular_jacobian_flag = JMI_MINIMUM_NORM;
             } else {
                 solver->handling_of_singular_jacobian_flag = JMI_REGULARIZATION;
