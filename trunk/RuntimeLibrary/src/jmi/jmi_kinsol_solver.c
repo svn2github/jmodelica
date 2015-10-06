@@ -599,7 +599,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                         }
                     }
                     else {
-                        sprintf(buffer, "  %4d %4d  %11.4e      %11.4e",
+                        sprintf(buffer, "  %4d %4d  %11.4e       %11.4e",
                                 solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                                 lambda_max, lambda);
                     }
