@@ -536,8 +536,8 @@ class CasadiCollocator(object):
         # Hopefully this is the only case
         return_status = stats.get('return_status', 'Maximum_CPU_Time_Exceeded')
         nbr_iter = stats['iter_count']
-        objective = float(self.solver_object.output(casadi.NLP_SOLVER_F))
-        total_exec_time = stats['t_mainloop']
+        objective = float(self.solver_object.getOutput('f'))
+        total_exec_time = stats['t_mainloop.proc']
         return (return_status, nbr_iter, objective, total_exec_time)
 
     def _update_equation_scaling(self):
@@ -584,16 +584,16 @@ class CasadiCollocator(object):
         if self.warm_start:
             # Initialize primal variables and set parameters
             self.solver_object.setInput(self.get_xx_init(),
-                                        casadi.NLP_SOLVER_X0)
-            self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+                                        'x0')
+            self.solver_object.setInput(self._par_vals, 'p')
 
             # Initialize dual variables
             # The stored dual variables are unscaled, so that we can change
             # the scaling without invalidating them
             self.solver_object.setInput(self._inv_scale_residuals(self.dual_opt['g']),
-                                        casadi.NLP_SOLVER_LAM_G0)
+                                        'lam_g0')
             self.solver_object.setInput(self.dual_opt['x'],
-                                        casadi.NLP_SOLVER_LAM_X0)
+                                        'lam_x0')
         else:
             self._init_and_set_solver_inputs()
         # Solve the problem
@@ -603,13 +603,13 @@ class CasadiCollocator(object):
         self.solver_object.evaluate()
 
         # Get the result
-        primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
+        primal_opt = N.array(self.solver_object.getOutput('x'))
         self.primal_opt = primal_opt.reshape(-1)
-        dual_g_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
+        dual_g_opt = N.array(self.solver_object.getOutput('lam_g'))
         # The stored dual variables are unscaled, so that we can change
         # the scaling without invalidating them
         dual_g_opt = self._scale_residuals(dual_g_opt.reshape(-1))
-        dual_x_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_X))
+        dual_x_opt = N.array(self.solver_object.getOutput('lam_x'))
         dual_x_opt = dual_x_opt.reshape(-1)
         self.dual_opt = {'g': dual_g_opt, 'x': dual_x_opt}
         sol_time = time.clock() - t0
@@ -643,23 +643,23 @@ class CasadiCollocator(object):
         # self.solver_object.init() # Already done in LocalDAECollocationAlg constructor
 
         # Primal initial guess and parameter values
-        self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
-        self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+        self.solver_object.setInput(self.get_xx_init(), 'x0')
+        self.solver_object.setInput(self._par_vals, 'p')
 
         # Dual initial guess
         if self.init_dual is not None:
             self.solver_object.setInput(self.init_dual['g'],
-                                        casadi.NLP_SOLVER_LAM_G0)
+                                        'lam_g0')
             self.solver_object.setInput(self.init_dual['x'],
-                                        casadi.NLP_SOLVER_LAM_X0)
+                                        'lam_x0')
 
         # Bounds on x
-        self.solver_object.setInput(self.get_xx_lb(), casadi.NLP_SOLVER_LBX)
-        self.solver_object.setInput(self.get_xx_ub(), casadi.NLP_SOLVER_UBX)
+        self.solver_object.setInput(self.get_xx_lb(), 'lbx')
+        self.solver_object.setInput(self.get_xx_ub(), 'ubx')
 
         # Bounds on the constraints
-        self.solver_object.setInput(self._scale_residuals(self.gllb), casadi.NLP_SOLVER_LBG)
-        self.solver_object.setInput(self._scale_residuals(self.glub), casadi.NLP_SOLVER_UBG)
+        self.solver_object.setInput(self._scale_residuals(self.gllb), 'lbg')
+        self.solver_object.setInput(self._scale_residuals(self.glub), 'ubg')
 
 
 def _create_trajectory_function(data):
@@ -946,8 +946,8 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Get start and final time
         if self._normalize_min_time:
-            self.t0 = op.getStartTime().getValue()
-            self.tf = op.getFinalTime().getValue()
+            self.t0 = float(op.getStartTime())
+            self.tf = float(op.getFinalTime())
         else:
             self.t0 = op.get_attr(t0, "_value")
             self.tf = op.get_attr(tf, "_value")
@@ -2184,7 +2184,7 @@ class LocalDAECollocator(CasadiCollocator):
             cnstr_points_f.setInput(0., 0)
             cnstr_points_f.setInput(1., 1)
             cnstr_points_f.evaluate()
-            constraint_points = cnstr_points_f.output().toArray().reshape(-1)
+            constraint_points = cnstr_points_f.getOutput().toArray().reshape(-1)
             constraint_points = sorted(set(constraint_points))
         else:
             constraint_points = sorted(set([self.op.evaluateExpression(expr)
@@ -3046,7 +3046,7 @@ class LocalDAECollocator(CasadiCollocator):
                     s_sym_input_no_der.append(self.mvar_struct[vk])
 
         # Mayer term
-        if not self.mterm.isConstant() or self.mterm.getValue() != 0.:
+        if not self.mterm.isConstant() or float(self.mterm) != 0.:
             # Create function for evaluation of Mayer term
             s_mterm_input = s_sym_input_no_der + self._timed_variables
             mterm_fcn = self._FXFunction(s_mterm_input, [self.mterm])
@@ -3055,7 +3055,7 @@ class LocalDAECollocator(CasadiCollocator):
             self.mterm_l0_fcn = mterm_fcn
 
         # Lagrange term
-        if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+        if not self.lterm.isConstant() or float(self.lterm) != 0.:
             # Create function for evaluation of Lagrange integrand
             if self.eliminate_der_var:
                 print "TODO lagrange input no derivative mode"
@@ -3204,7 +3204,7 @@ class LocalDAECollocator(CasadiCollocator):
                         [h_i] + dx_i_col[k]
                     [coll_k] = self.coll_l0_eq_fcn.call(input_l0_coll_fcn)
                     output_coll_element.append(coll_k)
-                    if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+                    if not self.lterm.isConstant() or float(self.lterm) != 0.:
                         # Call level0 lagrange
                         input_l0_fcn += self._timed_variables
                         [lag_k] = self.lterm_l0_fcn.call(input_l0_fcn)
@@ -3229,7 +3229,7 @@ class LocalDAECollocator(CasadiCollocator):
                 coll_eq_l1_fcn.init()                
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn
 
-                if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+                if not self.lterm.isConstant() or float(self.lterm) != 0.:
                     # Define Lagrange term level1
                     lagTerms= casadi.horzcat(lagTerms)
                     output_lag_element = casadi.mul(lagTerms, sym_g_weights)
@@ -3286,7 +3286,7 @@ class LocalDAECollocator(CasadiCollocator):
                     [coll_k] = self.coll_l0_eq_fcn.call(input_l0_coll_fcn)
                     output_coll_element.append(coll_k)
 
-                    if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+                    if not self.lterm.isConstant() or float(self.lterm) != 0.:
                         #call level0 lagrange
                         input_l0_fcn = time_col[k]+no_boundaries_x_col[k]\
                             +dx_col[k]+unu_col[k]+w_col[k]+elu_col[k]+p_fixed+p_opt\
@@ -3333,7 +3333,7 @@ class LocalDAECollocator(CasadiCollocator):
                 coll_eq_l1_fcn.init() 
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn 
 
-                if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+                if not self.lterm.isConstant() or float(self.lterm) != 0.:
                     # Define Lagrange term level1    
                     lagTerms= casadi.horzcat(lagTerms)
                     output_lag_element = casadi.mul(lagTerms, sym_g_weights)
@@ -3673,7 +3673,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Calculate cost
         self.cost_mayer = 0
-        if not self.mterm.isConstant() or self.mterm.getValue() != 0.:
+        if not self.mterm.isConstant() or float(self.mterm) != 0.:
             # Evaluate Mayer term
             s_z = self._get_z_l0(1, 0, with_der=False)
             s_mterm_fcn_input = s_z
@@ -3746,7 +3746,7 @@ class LocalDAECollocator(CasadiCollocator):
 
 
         self.cost_lagrange = 0        
-        if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+        if not self.lterm.isConstant() or float(self.lterm) != 0.:
             # Get start and final time
             t0_var = self.op.getVariable('startTime')
             tf_var = self.op.getVariable('finalTime')
@@ -3922,7 +3922,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Lagrange term with check point
         self.cost_lagrange = 0       
-        if not self.lterm.isConstant() or self.lterm.getValue() != 0.:
+        if not self.lterm.isConstant() or float(self.lterm) != 0.:
             # Get start and final time
             t0_var = self.op.getVariable('startTime')
             tf_var = self.op.getVariable('finalTime')
@@ -4023,7 +4023,7 @@ class LocalDAECollocator(CasadiCollocator):
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)
         cp_f.evaluate()
-        return cp_f.output().toScalar()
+        return float(cp_f.getOutput())
 
     def _get_affine_scaling(self, name, i, k):
         """
@@ -5326,7 +5326,7 @@ class LocalDAECollocator(CasadiCollocator):
             raise ValueError("Unkonwn point value: " + repr(point))
         nlp_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         nlp_fcn.evaluate()
-        return (nlp_fcn.output(0).getValue(), nlp_fcn.output(1).toArray().ravel())
+        return (float(nlp_fcn.getOutput(0)), nlp_fcn.getOutput(1).toArray().ravel())
 
     def get_J(self, point="fcn", scaled_residuals=False, dense=True):
         """
@@ -5370,7 +5370,7 @@ class LocalDAECollocator(CasadiCollocator):
             raise ValueError("Unkonwn point value: " + repr(point))
         J_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         J_fcn.evaluate()
-        result = J_fcn.output(0)
+        result = J_fcn.getOutput(0)
         if dense: result = result.toArray()
         else: result = result.toCsc_matrix()
         return result
@@ -5440,7 +5440,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         H_fcn.evaluate()
-        return H_fcn.output(0).toArray()
+        return H_fcn.getOutput(0).toArray()
 
     def get_KKT(self, point="fcn", scaled_residuals=False):
         """
@@ -5521,7 +5521,7 @@ class LocalDAECollocator(CasadiCollocator):
         grad_fcn.setInput(self.xx_init, 0)
         grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
         grad_fcn.evaluate()
-        grad = grad_fcn.output(0).toArray()
+        grad = grad_fcn.getOutput(0).toArray()
         sigma_inv = N.linalg.norm(grad, N.inf)
         if sigma_inv < 1000.:
             return 1.

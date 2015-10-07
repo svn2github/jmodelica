@@ -395,7 +395,7 @@ class TestMHE:
         timed_var_names = [var.getName() for var in timed_variables]
 
         values = [value_dict[name] for name in timed_var_names]
-        o_value = substitute(objective, timed_vars, values)[0].getValue()
+        o_value = float(substitute(objective, timed_vars, values)[0])
 
 
         base_variables = [var.getBaseVariable() for var in timed_variables]
@@ -407,9 +407,9 @@ class TestMHE:
         o_i_value = substitute(objective_integrand, 
                                       base_vars, 
                                       values)
-        o_i_value = substitute(o_i_value, 
+        o_i_value = float(substitute(o_i_value, 
                                       [mask_var], 
-                                      [value_dict['_MHE_mask']])[0].getValue()
+                                      [value_dict['_MHE_mask']])[0])
         return (o_value, o_i_value)
 
     @testattr(casadi = True)

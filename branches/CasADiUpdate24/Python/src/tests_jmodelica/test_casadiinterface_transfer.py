@@ -15,6 +15,7 @@
 import os
 from tests_jmodelica import testattr, get_files_path
 try:
+    from casadi import isEqual
     from modelicacasadi_transfer import *
     # Common variables used in the tests
     x1 = MX.sym("x1")
@@ -192,7 +193,7 @@ class ModelicaTransfer(object):
         constVars =  model.getVariables(Model.REAL_CONSTANT)
         assert strnorm(constVars[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
+        assertNear(float(constVars[0].getAttribute("bindingExpression")), 3.14, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaRealIndependentParameter(self):
@@ -200,7 +201,7 @@ class ModelicaTransfer(object):
         indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
         assert strnorm(indepParam[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
+        assertNear(float(indepParam[0].getAttribute("bindingExpression")), 3.14, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaRealDependentParameter(self):
@@ -250,7 +251,7 @@ class ModelicaTransfer(object):
         constVars =  model.getVariables(Model.INTEGER_CONSTANT)
         assert strnorm(constVars[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
+        assertNear( float(constVars[0].getAttribute("bindingExpression")), 3, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaIntegerIndependentParameter(self):
@@ -258,7 +259,7 @@ class ModelicaTransfer(object):
         indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
         assert strnorm(indepParam[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
+        assertNear( float(indepParam[0].getAttribute("bindingExpression")), 3, 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaIntegerDependentConstants(self):
@@ -288,7 +289,7 @@ class ModelicaTransfer(object):
         constVars =  model.getVariables(Model.BOOLEAN_CONSTANT)
         assert strnorm(constVars[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
+        assertNear( float(constVars[0].getAttribute("bindingExpression")), float(MX(True)), 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaBooleanIndependentParameter(self):
@@ -296,7 +297,7 @@ class ModelicaTransfer(object):
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
         assert strnorm(indepParam[0].getVar()) ==\
                strnorm(MX.sym("pi"))
-        assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
+        assertNear( float(indepParam[0].getAttribute("bindingExpression")), float(MX(True)), 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaBooleanDependentParameter(self):
@@ -357,9 +358,9 @@ class ModelicaTransfer(object):
         model =  self.load_model("atomicModelDependentParameter", modelFile)
         model.calculateValuesForDependentParameters()
         depVars = model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
-        assert depVars[0].getAttribute("evaluatedBindingExpression").getValue() == 20
-        assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
-        assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
+        assert float(depVars[0].getAttribute("evaluatedBindingExpression")) == 20
+        assert float(depVars[1].getAttribute("evaluatedBindingExpression")) == 20
+        assert float(depVars[2].getAttribute("evaluatedBindingExpression")) == 200
 
     @testattr(casadi = True)
     def test_ModelicaFunctionCallEquationForParameterBinding(self):
@@ -379,7 +380,7 @@ class ModelicaTransfer(object):
         model = self.load_model("atomicModelTime", modelFile)
         t = model.getTimeVariable()
         eq = model.getDaeResidual()
-        assert eq[1].getDep(1).getDep(1).isEqual(t) and eq[0].getDep(1).isEqual(t)
+        assert isEqual(eq[1].getDep(1).getDep(1), t) and isEqual(eq[0].getDep(1), t)
 
     ##############################################
     #                                            # 
@@ -425,7 +426,7 @@ class ModelicaTransfer(object):
         x1_eq = model.getDaeResidual()[1].getDep(1)
         x1_var = model.getVariables(Model.DIFFERENTIATED)[0].getVar()
         x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
-        assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
+        assert isEqual(x1_var, x1_eq) and isEqual(x2_var, x2_eq)
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunction1(self):
@@ -1496,25 +1497,25 @@ def test_OptimicaTimedVariables():
     tv3 = timedVars[2].getVar()
     tv4 = timedVars[3].getVar()
 
-    assert tp1.getDep(1).isEqual(startTime.getVar())
-    assert tp2.getDep(1).isEqual(startTime.getVar())
-    assert tp3.getDep(0).isEqual(finalTime.getVar())
-    assert tp4.isEqual(finalTime.getVar())
+    assert isEqual(tp1.getDep(1), startTime.getVar())
+    assert isEqual(tp2.getDep(1), startTime.getVar())
+    assert isEqual(tp3.getDep(0), finalTime.getVar())
+    assert isEqual(tp4, finalTime.getVar())
 
-    assert tv1.isEqual(point_constraints[0].getLhs())
-    assert tv2.isEqual(path_constraints[0].getLhs())
-    assert tv3.isEqual(path_constraints[1].getLhs())
-    assert tv4.isEqual(optProblem.getObjective())
+    assert isEqual(tv1, point_constraints[0].getLhs())
+    assert isEqual(tv2, path_constraints[0].getLhs())
+    assert isEqual(tv3, path_constraints[1].getLhs())
+    assert isEqual(tv4, optProblem.getObjective())
 
 @testattr(casadi = True)
 def test_OptimicaStartTime():
     optProblem =  load_optimization_problem("atomicOptimizationStart5", optproblemsFile)
-    assert( optProblem.getStartTime().getValue() == 5)
+    assert( float(optProblem.getStartTime()) == 5)
     
 @testattr(casadi = True)    
 def test_OptimicaFinalTime():
     optProblem =  load_optimization_problem("atomicOptimizationFinal10", optproblemsFile)
-    assert( optProblem.getFinalTime().getValue() == 10)
+    assert( float(optProblem.getFinalTime()) == 10)
 
 @testattr(casadi = True)
 def test_OptimicaObjectiveIntegrand():
