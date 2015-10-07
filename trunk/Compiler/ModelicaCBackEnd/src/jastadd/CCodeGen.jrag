@@ -3488,7 +3488,9 @@ aspect CCodeGen {
         // Equation nominal values
         if (hasEquationNominal_C()) {
             genOpenEvalMode_C(str, indent, "JMI_BLOCK_EQUATION_NOMINAL");
-            p.C_blockResidualAttributePrinter.printEquationNominal(p, str, nextIndent, this);
+            Map<FAbstractEquation,FExp> nominalMap = new HashMap<FAbstractEquation,FExp>();
+            genEquationNominalVarDecl_C(p, str, p.indent(indent), nominalMap);
+            genEquationNominal_C(p, str, p.indent(indent), nominalMap);
             genCloseEvalMode_C(str, indent);
         }
         
@@ -3701,10 +3703,6 @@ aspect CCodeGen {
             public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
                 str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");
             }
-            
-            public void printEquationNominal(CodePrinter p, CodeStream str, String indent, AbstractEquationBlock block) {
-                block.genEquationNominal_C(p, str, indent);
-            }
         }
     }
     
@@ -3721,46 +3719,65 @@ aspect CCodeGen {
     public boolean DynamicStateBlock.hasEquationNominal_C() { return true; } // To trigger error message
     
     
-    public abstract void AbstractEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent);
+    public abstract void AbstractEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap);
     
     @Override
-    public void EquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent) {
+    public void EquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
+        for (SimpleEquationBlock block : unsolvedBlocks())
+            block.genEquationNominalVarDecl_C(p, str, indent, nominalMap);
+    }
+    
+    @Override
+    public void DynamicStateBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
+        throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominalVarDecl_C() is not implemented!");
+    }
+    
+    public void SimpleEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
+        FExp nom = equation().equationNominal_C();
+        nominalMap.put(equation(), nom);
+        p.printVarDecls(nom, str, indent);
+    }
+    
+    public abstract void AbstractEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap);
+    
+    @Override
+    public void EquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
         Enumerator e = new Enumerator();
         for (SimpleEquationBlock block : unsolvedBlocks()) {
-            block.genEquationNominal_C(p, str, indent, e);
+            block.genEquationNominal_C(p, str, indent, nominalMap, e);
         }
     }
 
     @Override
-    public void DynamicStateBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent) {
+    public void DynamicStateBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
         throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominal_C() is not implemented!");
     }
 
     @Override
-    public void SimpleEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent) {
-        genEquationNominal_C(p, str, indent, new Enumerator());
+    public void SimpleEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap) {
+        genEquationNominal_C(p, str, indent, nominalMap, new Enumerator());
     }
     
-    public void SimpleEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Enumerator e) {
+    public void SimpleEquationBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent, Map<FAbstractEquation,FExp> nominalMap, Enumerator e) {
+        FExp nom = nominalMap.get(equation());
         for (int i = 0; i < realVariables().size(); i++) {
-            str.format("%s(*res)[%d] = ", indent, e.next());
-            equation().genEquationNominal_C(p, str, indent);
-            str.print(";\n");
-        }
-    }
-    
-    public void FAbstractEquation.genEquationNominal_C(CodePrinter p, CodeStream str, String indent) { str.print("1"); }
-    public void FEquation.genEquationNominal_C(CodePrinter p, CodeStream str, String indent) {
-        FExp nom = nominal();
-        if (nom.variability().knownParameterOrLess()) {
-            try {
-                nom = getLeft().dynamicFExp(nom.ceval().buildLiteral());
-            } catch (ConstantEvaluationException e) {
-                
+            int num = e.next();
+            if (i == 0) {
+                p.printPreSteps(nom, str, indent);
+                str.format("%s(*res)[%d] = ", indent, num);
+                p.print(nom, str, indent);
+                p.printPostSteps(nom, str, indent);
+                str.print(";\n");
+            } else {
+                str.format("%s(*res)[%d] = (*res)[%d];\n", indent, num, num - 1);
             }
         }
-        p.print(nom, str, indent);
     }
+    
+    public FExp FAbstractEquation.equationNominal_C() {
+        return nominal();
+    }
+    
     
 	public void FVariable.genBlockResidualValuref_C(CodePrinter p, CodeStream str, String indent, 
 	        Map<FVariable,String> solverArrayMap) {

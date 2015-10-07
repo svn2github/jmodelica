@@ -10955,6 +10955,64 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end BlockTest21;
 
+model BlockTest22
+    
+    record R
+        Real y;
+    end R;
+    
+    function f
+        input R x;
+        output Real y = x.y;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    function f2
+        input Real x;
+        output Real y = x;
+    algorithm
+        annotation(Inline=false);
+    end f2;
+    
+    parameter R p = R(3);
+    Real x(nominal=f(p));
+equation
+    x = f2(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest22",
+            description="Start value in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_NOMINAL) {
+        x[0] = 3.0;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
+        JMI_RECORD_STATIC(R_0_r, tmp_1)
+        tmp_1->y = _p_y_0;
+        (*res)[0] = jmi_max(jmi_abs(func_CCodeGenTests_BlockTest22_f_exp0(tmp_1)), AD_WRAP_LITERAL(1));
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = func_CCodeGenTests_BlockTest22_f2_exp1(_x_1) - (_x_1);
+        }
+    }
+    return ef;
+}
+")})));
+end BlockTest22;
+
 model InactiveBlockSwitch1
     function F
         input Real i1[:];
@@ -11333,7 +11391,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[2] = 2;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = (*res)[0];
         (*res)[2] = 3;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
@@ -11378,7 +11436,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         x[2] = 2;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = (*res)[0];
         (*res)[2] = 3;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_0;
@@ -15105,7 +15163,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = (*res)[0];
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _y_1;
         x[1] = _x_0;
@@ -20682,7 +20740,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 4;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {
         (*res)[0] = 1;
-        (*res)[1] = 1;
+        (*res)[1] = (*res)[0];
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x2_1;
         x[1] = _x1_0;

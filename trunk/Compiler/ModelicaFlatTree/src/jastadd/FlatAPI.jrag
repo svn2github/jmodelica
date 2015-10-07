@@ -2547,7 +2547,22 @@ aspect Attributes {
 }
 
 aspect Nominals {
-    syn FExp FEquation.nominal() = getLeft().dynamicFExp(FExp.nominalMax(getLeft(), getRight()));
+    syn FExp FAbstractEquation.nominal() {
+        FExp nom = FExp.nominalDefault();
+        nom.setParent(this);
+        return nom;
+    }
+    eq FEquation.nominal() {
+        FExp nom = getLeft().dynamicFExp(FExp.nominalMax(getLeft(), getRight()));
+        if (nom.variability().knownParameterOrLess()) {
+            try {
+                nom = getLeft().dynamicFExp(nom.ceval().buildLiteral());
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
+        return nom;
+    }
     
     public static FExp FExp.nominalMax(FExp e1, FExp e2) {
         return new FMaxExp(e1.nominal(), new Opt<FExp>(e2.nominal()));
