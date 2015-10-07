@@ -3351,6 +3351,15 @@ aspect CCodeGen {
         return myArgFExp(name);
     }
     
+    void AbstractEquationBlock.genOpenEvalMode_C(CodeStream str, String indent, String mode) {
+        str.print("if (evaluation_mode == ");
+        str.print(mode);
+        str.print(") {\n");
+    }
+    
+    void AbstractEquationBlock.genCloseEvalMode_C(CodeStream str, String indent) {
+        str.print(indent + "} else ");
+    }
     
     public void AbstractEquationBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
         if (!hasResidualFunction_C())
@@ -3373,83 +3382,132 @@ aspect CCodeGen {
         genBlockResidualFunction_jacobianDecls_C(p, str, indent);
         genVarDecls_C(p, str, indent, null);
         
+        str.print(indent);
+        
         // Nominal values
-        str.print(indent + "if (evaluation_mode == JMI_BLOCK_NOMINAL) {\n");
-        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.NOMINAL, solverArrayMap);
+        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.NOMINAL, solverArrayMap)) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_NOMINAL");
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.NOMINAL, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Start values
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_START) {\n");
-        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.START, solverArrayMap);
+        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.START, solverArrayMap)) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START");
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.START, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START_SET");
+            p.C_blockResidualAttributePrinter.printSet(p, str, nextIndent, FAttribute.START, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Min values
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MIN) {\n");
-        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MIN, solverArrayMap);
+        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.MIN, solverArrayMap)) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_MIN");
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MIN, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Max values
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_MAX) {\n");
-        p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MAX, solverArrayMap);
+        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.MAX, solverArrayMap)) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_MAX");
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.MAX, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Variable value references
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {\n");
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualValuref_C(p, str, nextIndent, solverArrayMap);
+        if (localUnsolvedVariables().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_VALUE_REFERENCE");
+            for (FVariable fv : localUnsolvedVariables()) {
+                fv.genBlockResidualValuref_C(p, str, nextIndent, solverArrayMap);
+            }
+            genCloseEvalMode_C(str, indent);
+        }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
-        Enumerator realEnumerator = new Enumerator();
-        for (FVariable fv : localSolvedRealVariables())
-            str.format("%sx[%d] = %d;\n", nextIndent, realEnumerator.next(), fv.valueReference());
+        if (localSolvedRealVariables().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE");
+            Enumerator realEnumerator = new Enumerator();
+            for (FVariable fv : localSolvedRealVariables()) {
+                str.format("%sx[%d] = %d;\n", nextIndent, realEnumerator.next(), fv.valueReference());
+            }
+            genCloseEvalMode_C(str, indent);
+        }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
-        Enumerator nonRealEnumerator = new Enumerator();
-        for (FVariable fv : nonRealVariables_C())
-            str.format("%sx[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
+        if (nonRealVariables_C().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE");
+            Enumerator nonRealEnumerator = new Enumerator();
+            for (FVariable fv : nonRealVariables_C()) {
+                str.format("%sx[%d] = %d;\n", nextIndent, nonRealEnumerator.next(), fv.valueReference());
+            }
+            genCloseEvalMode_C(str, indent);
+        }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {\n");
         // Loop over all non-real variables and write their position in the z-vector
-        Enumerator directImpactNonRealEnumerator = new Enumerator();
-        for (FVariable fv : directlyImpactingNonReals_C())
-            str.format("%sx[%d] = %d;\n", nextIndent, directImpactNonRealEnumerator.next(), fv.valueReference());
+        if (directlyImpactingNonReals_C().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE");
+            Enumerator directImpactNonRealEnumerator = new Enumerator();
+            for (FVariable fv : directlyImpactingNonReals_C()) {
+                str.format("%sx[%d] = %d;\n", nextIndent, directImpactNonRealEnumerator.next(), fv.valueReference());
+            }
+            genCloseEvalMode_C(str, indent);
+        }
         
+        // Loop over all non-real temporary variables and write their position in the z-vector
         Collection<FVariable> nonRealTemps = nonRealTempVariables_C();
         if (nonRealTemps.size() > 0) {
-            str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE) {\n");
-            // Loop over all non-real temporary variables and write their position in the z-vector
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE");
             Enumerator nonRealTempEnumerator = new Enumerator();
             for (FVariable fv : nonRealTemps)
                 str.format("%sx[%d] = %d;\n", nextIndent, nonRealTempEnumerator.next(), fv.valueReference());
+            genCloseEvalMode_C(str, indent);
         }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {\n");
         // Loop over all non-real variables and write their position in the z-vector
-        Enumerator relExpEnumerator = new Enumerator();
-        for (FRelExp relExp : activeSwitches_C())
-            relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
-        for (FRelExp relExp : activeInitialSwitches_C())
-            relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
+        if (activeSwitches_C().size() > 0 || activeInitialSwitches_C().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_ACTIVE_SWITCH_INDEX");
+            Enumerator relExpEnumerator = new Enumerator();
+            for (FRelExp relExp : activeSwitches_C())
+                relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
+            for (FRelExp relExp : activeInitialSwitches_C())
+                relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, relExpEnumerator);
+            genCloseEvalMode_C(str, indent);
+        }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX) {\n");
         // Loop over all non-real variables and write their position in the z-vector
-        Enumerator directlyActiveSwitchEnumerator = new Enumerator();
-        for (FRelExp relExp : directlyActiveSwitches_C())
-            relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, directlyActiveSwitchEnumerator);
+        if (directlyActiveSwitches_C().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_DIRECTLY_ACTIVE_SWITCH_INDEX");
+            Enumerator directlyActiveSwitchEnumerator = new Enumerator();
+            for (FRelExp relExp : directlyActiveSwitches_C()) {
+                relExp.genBlockResidualFunction_printSwitchIndex_C(p, str, nextIndent, directlyActiveSwitchEnumerator);
+            }
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Equation nominal values
         if (hasEquationNominal_C()) {
-            str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL) {\n");
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EQUATION_NOMINAL");
             p.C_blockResidualAttributePrinter.printEquationNominal(p, str, nextIndent, this);
+            genCloseEvalMode_C(str, indent);
         }
         
-        str.print(indent + "} else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {\n");
         // Loop over all active variables and write their value to x	
-        for (FVariable fv : localUnsolvedVariables()) 
-            fv.genBlockResidualInit_C(p, str, nextIndent, solverArrayMap);
+        if (localUnsolvedVariables().size() > 0) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_INITIALIZE");
+            for (FVariable fv : localUnsolvedVariables()) 
+                fv.genBlockResidualInit_C(p, str, nextIndent, solverArrayMap);
+            genCloseEvalMode_C(str, indent);
+        }
         
         // Generate code for Jacobian
-        genBlockResidualFunction_jacobian_C(p, str, indent);
+        if (jacobian != null) {
+            genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
+            genBlockResidualFunction_jacobian_C(p, str, indent);
+            genCloseEvalMode_C(str, indent);
+        }
         
-        str.print(indent + "} else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
+        str.print("if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {\n");
         // Loop over all active variables and write the values in x to the z vector
         str.print(nextIndent + "if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {\n"); // TODO: remove guard when correct x is given to JMI_BLOCK_EVALUATE_NON_REALS
         for (FVariable fv : localUnsolvedVariables()) 
@@ -3619,14 +3677,31 @@ aspect CCodeGen {
                 }
             }
             
+            public void printSet(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
+                for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
+                    if (attributeSet(iterEntry.getKey(),attr)) {
+                        str.format("%s%s = 1;\n", indent, iterEntry.getValue());
+                    }
+                }
+            }
+            
+            public boolean attributeSet(String attr, Map<FVariable, String> iterVarMap) {
+                for (FVariable fv : iterVarMap.keySet()) {
+                    if (attributeSet(fv, attr)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            
             public boolean attributeSet(FVariable var, String attr) {
                 return var.attributeSet(attr);
             }
-
+            
             public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
                 str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");
             }
-
+            
             public void printEquationNominal(CodePrinter p, CodeStream str, String indent, AbstractEquationBlock block) {
                 block.genEquationNominal_C(p, str, indent);
             }
@@ -3786,7 +3861,6 @@ aspect CCodeGen {
         if (jacobian == null)
             return;
         String innerIndent = p.indent(indent);
-        str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", indent);
         FExp[][] jacobian = jacobian();
         int rows = jacobian.length;
         int cols = jacobian.length;
@@ -3812,7 +3886,6 @@ aspect CCodeGen {
         String outerIndent = indent;
         indent = p.indent(indent);
         String innerIndent = p.indent(indent);
-        str.format("%s} else if (evaluation_mode==JMI_BLOCK_EVALUATE_JACOBIAN) {\n", outerIndent);
         FExp[][] jacobian = jacobian();
         int n1 = localSolvedRealBlocks().size();
         int n2 = unsolvedBlocks().size();
