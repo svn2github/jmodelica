@@ -14,7 +14,7 @@
 
 add_subdirectory(jcc)
 
-set(CXX_FLAGS "")
+set(CXX_FLAGS "-std=c++11")
 # Switch flag to debug for debuggind purposes 
 set(CMAKE_BUILD_TYPE Release)
 
@@ -106,19 +106,19 @@ make_paths_absolute(MC_HPP "${MC_HPP}")
 
 # compiler options
 if(CMAKE_COMPILER_IS_GNUCXX)
-  set(CXX_FLAGS ${CXX_FLAGS} -fPIC)
+  set(CXX_FLAGS "${CXX_FLAGS} -fPIC")
 endif(CMAKE_COMPILER_IS_GNUCXX)
 
 set_source_files_properties(${JCC_GEN_DIR}/__wrap__.cpp PROPERTIES
   GENERATED ON)
 
 add_library(ModelicaCasADi ${MC_CPP} ${MC_HPP})
-set_target_properties(ModelicaCasADi PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
+set_target_properties(ModelicaCasADi PROPERTIES COMPILE_FLAGS "${CXX_FLAGS}")
 set_target_properties(ModelicaCasADi PROPERTIES COMPILE_DEFINITIONS MODELICACASADI_WITH_SWIG)
 add_dependencies(ModelicaCasADi jcc_gen)
 
 add_executable(develope_interface ${MC_CPP} ${MC_HPP} develope_interface.cpp)
-set_target_properties(develope_interface PROPERTIES COMPILE_FLAGS ${CXX_FLAGS})
+set_target_properties(develope_interface PROPERTIES COMPILE_FLAGS "${CXX_FLAGS}")
 add_dependencies(develope_interface jcc_gen)
 target_link_libraries(develope_interface ${CASADI_DLL})
 target_link_libraries(develope_interface pthread)
