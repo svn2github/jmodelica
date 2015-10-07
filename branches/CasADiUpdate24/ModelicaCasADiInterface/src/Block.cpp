@@ -148,6 +148,14 @@ void Block::moveAllEquationsToUnsolvable() {
     }
 }
 
+// Wrapper to access CasADi's substitute function, which is only available through
+// argument-dependent name lookup. Since Block has a member function called substitute,
+// ADL cannot be used to refer to CasADi's substitute function directly from
+// within it.
+inline std::vector<casadi::MX> casadi_substitute(const std::vector<casadi::MX>& ex, const std::vector<casadi::MX>& v,
+        const std::vector<casadi::MX>& vdef) {
+    return substitute(ex, v, vdef);
+}
 
 void Block::computeJacobianCasADi() {
     symbolicVariables = casadi::MX::sym("symVars",variables_.size());
@@ -163,7 +171,7 @@ void Block::computeJacobianCasADi() {
         vars.push_back(it->first->getVar());
         varsSubstitue.push_back(symbolicVariables(it->second));
     }
-    std::vector<casadi::MX> Expressions = casadi::substitute(residuals,
+    std::vector<casadi::MX> Expressions = casadi_substitute(residuals,
         vars,
         varsSubstitue);
     casadi::MX symbolicResidual;
@@ -175,7 +183,7 @@ void Block::computeJacobianCasADi() {
     f.init();
     jacobian=f.jac();
     
-    linear_flag = !casadi::dependsOn(jacobian,std::vector< casadi::MX >(1,symbolicVariables));
+    linear_flag = !dependsOn(jacobian, symbolicVariables);
     
     //This makes printing of the jacobian of linear systems less convoluted. It shows a matrix and not a bunch of symbolics
     /*casadi::MXFunction df(std::vector<casadi::MX>(1,symbolicVariables),std::vector<casadi::MX>(1,jacobian));    
@@ -194,7 +202,7 @@ void Block::computeJacobianCasADi() {
     
     //Make the substitution back to variables.This will only matter if the block is nonlinear
     /*if(!isLinear()){
-        Expressions = casadi::substitute(std::vector<casadi::MX>(1,jacobian),
+        Expressions = casadi_substitute(std::vector<casadi::MX>(1,jacobian),
             varsSubstitue,
             vars);
         jacobian = Expressions.front();
@@ -212,7 +220,7 @@ void Block::solveLinearSystem() {
             residuals.push_back((*it)->getLhs()-(*it)->getRhs());
         }
         std::vector<casadi::MX> zeros(getNumVariables(),casadi::MX(0.0));
-        std::vector<casadi::MX> b_ = casadi::substitute(residuals,
+        std::vector<casadi::MX> b_ = casadi_substitute(residuals,
             variablesVector(),
             zeros);
         casadi::MX b;
@@ -220,7 +228,7 @@ void Block::solveLinearSystem() {
         it!=b_.end();++it) {
             b.append(*it);
         }
-        casadi::MX xsolution = casadi::solve(jacobian,-b);
+        casadi::MX xsolution = solve(jacobian,-b);
         /*casadi::MXFunction dummy = casadi::MXFunction(std::vector<casadi::MX>(),std::vector<casadi::MX>(1,xsolution));
         dummy.init();
         casadi::DMatrix output;
@@ -232,7 +240,7 @@ void Block::solveLinearSystem() {
         
         for(std::set<const Variable*>::const_iterator it = variables_.begin();
         it != variables_.end(); ++it) {
-            //if(output.isEmpty()){
+            //if(output.isempty()){
                 addSolutionToVariable(*it, xsolution[variableToIndex_[*it]]);
             //}
             //else{
@@ -253,7 +261,7 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
     std::vector<casadi::MX> Expressions;
     for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToExpression.begin();
     it!=variableToExpression.end();++it) {
-        if(isExternal(it->first) && !it->first->getVar().isEmpty() && !it->second.isEmpty()) {
+        if(isExternal(it->first) && !it->first->getVar().isempty() && !it->second.isempty()) {
             varstoSubstitute.push_back(it->first->getVar());
             expforsubstitutition.push_back(it->second);
         }
@@ -281,7 +289,7 @@ void Block::substitute(const std::map<const Variable*, casadi::MX>& variableToEx
         Expressions.push_back((*it)->getLhs());
         Expressions.push_back((*it)->getRhs());
     }
-    std::vector<casadi::MX> subExpressions = casadi::substitute(Expressions,varstoSubstitute,expforsubstitutition);
+    std::vector<casadi::MX> subExpressions = casadi_substitute(Expressions,varstoSubstitute,expforsubstitutition);
     
     //retrive substitutions to constainers
     for(int i=0;i<keys.size();++i) {

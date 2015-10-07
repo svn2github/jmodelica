@@ -163,7 +163,7 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
             while(iter4.hasNext() && !found) {
                 FVar jv2(iter4.next().this$);
                 casadi::MX v2 = toMX(jv2.asMXVariable());
-                if(v1.isEqual(v2)) {
+                if(isEqual(v1, v2)) {
                     found=true;
                 }
             }

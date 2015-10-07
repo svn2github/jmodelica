@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define _MODELICACASADI_BLOCK
 
 #include <iostream>
+#define WITH_DEPRECATED_FEATURES
 #include "casadi/casadi.hpp"
 #include "Variable.hpp"
 #include "RealVariable.hpp"

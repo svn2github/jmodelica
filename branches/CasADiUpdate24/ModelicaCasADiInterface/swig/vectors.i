@@ -4,7 +4,7 @@
 // -------- Typemaps for vector< double > --------
 
 %typemap(in) const std::vector< double > & (std::vector< double > vec) {
-    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_DOUBLE, 1, 1, NPY_IN_ARRAY);
+    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_DOUBLE, 1, 1, NPY_ARRAY_IN_ARRAY);
     if (!array) SWIG_fail;
     
     size_t size = PyArray_DIM(array, 0);
@@ -28,10 +28,10 @@
 
 %typemap(out) std::vector< double > {
     size_t size = $1.size();
-    PyObject *array;
+    PyArrayObject *array;
 
-    npy_intp shape[1] = {size};
-    array = PyArray_SimpleNew(1, shape, NPY_DOUBLE);
+    npy_intp shape[1] = {(npy_intp)size};
+    array = (PyArrayObject *)PyArray_SimpleNew(1, shape, NPY_DOUBLE);
     if (!array) SWIG_fail;
     
     double *data = (double *)PyArray_DATA(array);
@@ -47,7 +47,7 @@
 // -------- Typemaps for vector< std::string > --------
 
 %typemap(in) const std::vector< std::string > & (std::vector< std::string > vec) {
-    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_OBJECT, 1, 1, NPY_IN_ARRAY);
+    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_OBJECT, 1, 1, NPY_ARRAY_IN_ARRAY);
     if (!array) SWIG_fail;
     
     size_t size =  PyArray_DIM(array, 0);
@@ -77,10 +77,10 @@
 
 %typemap(out) std::vector< std::string > {
     size_t size = $1.size();
-    PyObject *array;
+    PyArrayObject *array;
 
-    npy_intp shape[1] = {size};
-    array = PyArray_SimpleNew(1, shape, NPY_OBJECT);
+    npy_intp shape[1] = {(npy_intp)size};
+    array = (PyArrayObject *)PyArray_SimpleNew(1, shape, NPY_OBJECT);
     if (!array) SWIG_fail;
     
     PyObject **data = (PyObject **)PyArray_DATA(array);

@@ -107,7 +107,7 @@ void *T::_get_swig_p_type() {
 %typemap(in) const std::vector< RefT > & (std::vector< RefT > vec) {
     PyArray_Descr *dtype = PyArray_DescrFromType(NPY_OBJECT);
     PyArrayObject *array = (PyArrayObject *)PyArray_FromAny($input, dtype, 
-        1, 1, NPY_IN_ARRAY, NULL);
+        1, 1, NPY_ARRAY_IN_ARRAY, NULL);
     if (!array) SWIG_fail;
     
     size_t size =  PyArray_DIM(array, 0);
@@ -137,10 +137,10 @@ void *T::_get_swig_p_type() {
 
 %typemap(out) std::vector< RefT > {
     size_t size = $1.size();
-    PyObject *array;
+    PyArrayObject *array;
 
-    npy_intp shape[1] = {size};
-    array = PyArray_SimpleNew(1, shape, NPY_OBJECT);
+    npy_intp shape[1] = {(npy_intp)size};
+    array = (PyArrayObject *)PyArray_SimpleNew(1, shape, NPY_OBJECT);
     if (!array) SWIG_fail;
     
     PyObject **data = (PyObject **)PyArray_DATA(array);
@@ -155,7 +155,7 @@ void *T::_get_swig_p_type() {
         data[k] = $result;
     }
 
-    $result = array;
+    $result = (PyObject *)array;
 }
 
 

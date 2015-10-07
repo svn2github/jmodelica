@@ -133,7 +133,7 @@ namespace ModelicaCasADi
             bool foundCorrespondingVar = false;
             for  (int j = 0; j < allVars.size(); ++j) {
                 // todo: Replace with something better than linear search!
-                if (timedMXFVars[i].isEqual(allVars[j]->getVar())) {
+                if (isEqual(timedMXFVars[i], allVars[j]->getVar())) {
                     m->addTimedVariable(new TimedVariable(m.getNode(), timedMXVars[i], allVars[j], timedMXTimePoints[i]));
                     foundCorrespondingVar = true;
                     break;
