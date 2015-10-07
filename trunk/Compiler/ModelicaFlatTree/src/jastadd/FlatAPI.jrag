@@ -2546,6 +2546,66 @@ aspect Attributes {
 
 }
 
+aspect Nominals {
+    syn FExp FEquation.nominal() = getLeft().dynamicFExp(FExp.nominalMax(getLeft(), getRight()));
+    
+    public static FExp FExp.nominalMax(FExp e1, FExp e2) {
+        return new FMaxExp(e1.nominal(), new Opt<FExp>(e2.nominal()));
+    }
+    public static FExp FExp.nominalDefault() {
+        return new FIntegerLitExp(1);
+    }
+    
+    syn FExp FExp.nominal() = FExp.nominalDefault();
+    eq FLitExp.nominal()    = new FAbsExp(fullCopy());
+    
+    eq FDotAddExp.nominal() = FExp.nominalMax(getLeft(), getRight());
+    eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());
+    eq FDotMulExp.nominal() = new FMulExp(getLeft().nominal(), getRight().nominal());
+    eq FDotDivExp.nominal() = new FDivExp(getLeft().nominal(), getRight().nominal());
+    eq FDotPowExp.nominal() = new FPowExp(getLeft().nominal(), getRight().nominal());
+    eq FNegExp.nominal()    = getFExp().nominal();
+    eq FAbsExp.nominal()    = getFExp().nominal();
+    eq FMinMaxExp.nominal() = hasY() ? FExp.nominalMax(getX(), getY()) : getX().nominal();
+    
+    eq FExpExp.nominal()    = new FExpExp(getFExp().nominal());
+    eq FLogExp.nominal()    = new FLogExp(getFExp().nominal());
+    eq FLog10Exp.nominal()  = new FLog10Exp(getFExp().nominal());
+    
+    eq FIfExp.nominal()     = FExp.nominalMax(getThenExp(), getElseExp());
+    
+    eq FNoEventExp.nominal() = getFExp().nominal();
+    eq FSmoothExp.nominal()  = getFExp().nominal();
+    
+    eq FHomotopyExp.nominal()    = FExp.nominalMax(getActual(), getSimplified());
+    eq FSpatialDistExp.nominal() = FExp.nominalMax(getIn0(), getIn1());
+    eq FDelayExp.nominal()       = getFExp().nominal();
+    
+    eq FFunctionCall.nominal()   = FExp.nominalDefault();
+    
+    eq FIdUseExp.nominal() = myFV().nominal();
+    
+    syn FExp FAbstractVariable.nominal() {
+        if (variability().parameterOrLess() && valueIsFixed()) {
+            return new FAbsExp(createUseExp());
+        } else {
+            return variableNominal();
+        }
+    }
+    
+    syn FExp FAbstractVariable.variableNominal() {
+        return FExp.nominalDefault();
+    }
+    
+    eq FRealVariable.variableNominal() {
+        if (nominalAttributeSet()) {
+            return new FAbsExp(nominalAttributeExp().unboundCopy());
+        } else {
+            return super.variableNominal();
+        }
+    }
+}
+
 aspect FVariableUses {
     
     /**
