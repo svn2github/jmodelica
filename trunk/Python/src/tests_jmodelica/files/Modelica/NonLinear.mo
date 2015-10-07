@@ -725,5 +725,38 @@ package NonLinear
       connect(cLPANL[i].pin_n1, cLPANL[i+1].pin_n);
     end for;
   end MultiSystems;
+  
+  model NominalStart1
+    Real x(start=1), y;
+equation
+    sin(x/y) = 0;
+    x*y = 0;
+end NominalStart1;
+
+model NominalStart2
+    Real x(start=1), y(start=0);
+equation
+    sin(x/y) = 0;
+    x*y = 0;
+end NominalStart2;
+
+model NominalStart3
+    Real x(nominal=2);
+equation
+x^3-3*x^2+x=1;
+end NominalStart3;
+
+model NominalStart4
+    Real x(start=1);
+equation
+x^3-3*x^2+x=1;
+end NominalStart4;
+
+model NominalStart5
+    Real x(start=1, nominal=2);
+equation
+x^3-3*x^2+x=1;
+end NominalStart5;
+
 end NonLinear;
 

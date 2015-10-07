@@ -438,6 +438,63 @@ class Test_Relations:
         nose.tools.assert_almost_equal(N.interp(7.00,res["time"],res["der(v2)"]),0.0,places=3)
         nose.tools.assert_almost_equal(N.interp(7.20,res["time"],res["der(v2)"]),1.0,places=3)
 
+class Test_NonLinear_Systems:
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'NonLinear.mo')
+
+        compile_fmu("NonLinear.NominalStart1", file_name)
+        compile_fmu("NonLinear.NominalStart2", file_name)
+        compile_fmu("NonLinear.NominalStart3", file_name)
+        compile_fmu("NonLinear.NominalStart4", file_name)
+        compile_fmu("NonLinear.NominalStart5", file_name)
+    
+    @testattr(stddist = True)
+    def test_nominals_fallback_1(self):
+        model = load_fmu("NonLinear_NominalStart1.fmu")
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.initialize()
+    
+    @testattr(stddist = True)
+    def test_nominals_fallback_2(self):
+        model = load_fmu("NonLinear_NominalStart1.fmu")
+        model.set("_nle_solver_use_nominals_as_fallback", False)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_nominals_fallback_3(self):
+        model = load_fmu("NonLinear_NominalStart2.fmu")
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_nominals_fallback_4(self):
+        model = load_fmu("NonLinear_NominalStart4.fmu")
+        model.set("_use_Brent_in_1d", False)
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        nose.tools.assert_raises(FMUException, model.initialize)
+
+    @testattr(stddist = True)
+    def test_nominals_fallback_5(self):
+        model = load_fmu("NonLinear_NominalStart5.fmu")
+        model.set("_use_Brent_in_1d", False)
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        nose.tools.assert_raises(FMUException, model.initialize)
+        
+    @testattr(stddist = True)
+    def test_nominals_fallback_6(self):
+        model = load_fmu("NonLinear_NominalStart3.fmu")
+        model.set("_use_Brent_in_1d", False)
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
+    
+
 class Test_Singular_Systems:
     
     @classmethod

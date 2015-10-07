@@ -770,18 +770,25 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
             jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
                      "<block: %s>", block->label);
         } else {
-            jmi_log_node(block->log, logWarning, "Warning", "Residual function evaluation failed at initial point for "
-                     "<block: %s>", block->label);
+            int changed_start = 0;
                      
             for (i = 0; i < block->n; i++) {
-                N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
+                if (block->start_set[i] == 0) {
+                    changed_start = 1;
+                    N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
+                }
             }
-            jmi_log_node(block->log, logInfo, "NominalsAsInitialGuess", "Failed to evaluate the residual using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
+            if (changed_start) {
+                jmi_log_node(block->log, logWarning, "Warning", "Residual function evaluation failed at initial point for "
+                     "<block: %s>", block->label);
+                     
+                jmi_log_node(block->log, logInfo, "NominalsAsInitialGuess", "Failed to evaluate the residual using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
             
-            ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
-            if(ef) {
-                jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
-                         "<block: %s>", block->label);
+                ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
+                if(ef) {
+                    jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
+                             "<block: %s>", block->label);
+                }
             }
         }
     }
@@ -2100,12 +2107,18 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
             } else {
                 if (block->init && block->options->use_nominals_as_fallback_in_init) { /* Try perturbing the initial guess if bounded. */
                     int i = 0;
+                    int changed_start = 0;
                     for (i = 0; i < block->n; i++) {
-                        N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
+                        if (block->start_set[i] == 0) { /* If start is not set */
+                            changed_start = 1;
+                            N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
+                        }
                     }
-                    jmi_log_node(log, logInfo, "NominalsAsInitialGuess", "Failed to compute a solution using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
+                    if (changed_start) {
+                        jmi_log_node(log, logInfo, "NominalsAsInitialGuess", "Failed to compute a solution using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
                     
-                    flag = jmi_kinsol_invoke_kinsol(block, KIN_NONE);
+                        flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
+                    }
                 }
                 if (flag != KIN_SUCCESS) {
                     jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
