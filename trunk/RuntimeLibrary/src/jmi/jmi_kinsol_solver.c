@@ -611,11 +611,11 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     }
                 }
 
-                jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
-                jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s><nonewline:%d>",
                              "jmi_kinsol_solver", block->label, message,1);
                 jmi_log_leave(log, node);
+                jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
+                jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
             }
         }
         
