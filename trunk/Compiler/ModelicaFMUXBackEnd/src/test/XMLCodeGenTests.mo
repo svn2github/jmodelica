@@ -929,7 +929,7 @@ end DirectDependencyTest1;
             generate_fmi_me_xml=false,
             template="$XML_variables$",
             generatedCode="
-        <ScalarVariable name=\"b\" valueReference=\"536870916\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
+        <ScalarVariable name=\"b\" valueReference=\"536870917\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
             <Boolean />
             <DirectDependency>
                 <Name>x</Name>
@@ -937,7 +937,7 @@ end DirectDependencyTest1;
             <isLinear>true</isLinear>
             <VariableCategory>algebraic</VariableCategory>
         </ScalarVariable>
-        <ScalarVariable name=\"i\" valueReference=\"268435458\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
+        <ScalarVariable name=\"i\" valueReference=\"268435459\" variability=\"discrete\" causality=\"output\" alias=\"noAlias\">
             <Integer />
             <DirectDependency>
                 <Name>x</Name>
@@ -945,7 +945,7 @@ end DirectDependencyTest1;
             <isLinear>true</isLinear>
             <VariableCategory>algebraic</VariableCategory>
         </ScalarVariable>
-        <ScalarVariable name=\"temp_1\" valueReference=\"268435459\" variability=\"discrete\" causality=\"internal\" alias=\"noAlias\">
+        <ScalarVariable name=\"temp_1\" valueReference=\"268435460\" variability=\"discrete\" causality=\"internal\" alias=\"noAlias\">
             <Integer />
             <isLinear>true</isLinear>
             <VariableCategory>algebraic</VariableCategory>

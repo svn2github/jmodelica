@@ -125,14 +125,6 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("The sign() function-like operator is");
 	}
 	
-	public void FHomotopyExp.complianceCheck(ErrorCheckType checkType) {
-		if (myOptions().getStringOption("homotopy_type") == OptionRegistry.Homotopy.HOMOTOPY) {
-			warning("The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.");
-			myOptions().setStringOption("homotopy_type", OptionRegistry.Homotopy.ACTUAL);
-			
-		}
-	}
-	
 	public void FSemiLinearExp.complianceCheck(ErrorCheckType checkType) {
 		complianceOnlyFMU("The semiLinear() function-like operator is");
 	}

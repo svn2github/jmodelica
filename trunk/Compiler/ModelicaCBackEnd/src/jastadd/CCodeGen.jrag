@@ -2608,13 +2608,21 @@ aspect CCodeGen {
 		p.print(getX(), str, indent);
 		str.print(")");
 	}
-	
-	public void FHomotopyExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.print("(");
-		p.print(getActual(), str, indent);
-		str.print(")");
-	}
-	
+
+    public void FHomotopyExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (p.inInitialSystem()) {
+            str.print("((__homotopy_lambda * (");
+            p.print(getActual(), str, indent);
+            str.print(") + (1 - __homotopy_lambda) * (");
+            p.print(getSimplified(), str, indent);
+            str.print("))");
+        } else {
+            str.print("(");
+            p.print(getActual(), str, indent);
+            str.print(")");
+        }
+    }
+
 	public void FFloorFuncExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print("floor(");
 		p.print(getX(), str, indent);

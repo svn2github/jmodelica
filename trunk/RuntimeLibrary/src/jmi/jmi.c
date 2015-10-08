@@ -50,7 +50,8 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks) {
+        int scaling_method, int n_ext_objs,
+        int homotopy_block, jmi_callbacks_t* jmi_callbacks) {
     jmi_t* jmi_ ;
     int i;
     
@@ -146,9 +147,11 @@ int jmi_init(jmi_t** jmi,
     jmi_->offs_real_x = jmi_->offs_real_dx + n_real_dx;
     jmi_->offs_real_u = jmi_->offs_real_x + n_real_x;
     jmi_->offs_real_w = jmi_->offs_real_u + n_real_u;
-    jmi_->offs_t = jmi_->offs_real_w + n_real_w;
 
-    jmi_->offs_real_d = jmi_->offs_t + 1;
+    jmi_->offs_t = jmi_->offs_real_w + n_real_w;
+    jmi_->offs_homotopy_lambda = jmi_->offs_t + 1;
+
+    jmi_->offs_real_d = jmi_->offs_homotopy_lambda + 1;
 
     jmi_->offs_integer_d = jmi_->offs_real_d + n_real_d;
     jmi_->offs_integer_u = jmi_->offs_integer_d + n_integer_d;
@@ -180,8 +183,8 @@ int jmi_init(jmi_t** jmi,
     jmi_->offs_pre_guards = jmi_->offs_pre_sw_init + n_sw_init;
     jmi_->offs_pre_guards_init = jmi_->offs_pre_guards + n_guards;
 
-    jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 1;
-    jmi_->n_z = jmi_->offs_real_dx + 2*(jmi_->n_v) - 1 + 
+    jmi_->n_v = n_real_dx + n_real_x + n_real_u + n_real_w + 2;
+    jmi_->n_z = jmi_->offs_real_dx + 2*(jmi_->n_v) - 2 + 
         2*(n_real_d + n_integer_d + n_integer_u + n_boolean_d + n_boolean_u) + 
         2*n_sw + 2*n_sw_init + 2*n_guards + 2*n_guards_init;
 

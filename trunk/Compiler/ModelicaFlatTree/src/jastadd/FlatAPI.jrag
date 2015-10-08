@@ -125,6 +125,10 @@ aspect FlatAPI {
         // 'time' variable is stored in this position
         map.incIndex();
         
+        // Need to increase the index counter by one since the
+        // '_homotopy_lambda' variable is stored in this position
+        map.incIndex();
+        
         map.add(discreteRealVariables());
         
         map.setType(1);
@@ -255,9 +259,12 @@ aspect FlatAPI {
         algebraicContinousRealVariablesOffset() + 
         numAlgebraicContinousRealVariables();
 
-    syn int FClass.discreteRealVariablesOffset() = 
+    syn int FClass.homotopyLambdaOffset() =
         timeOffset() + 1;
-        
+
+    syn int FClass.discreteRealVariablesOffset() = 
+        homotopyLambdaOffset() + 1;
+
     syn int FClass.discreteIntegerVariablesOffset() = 
         discreteRealVariablesOffset() + 
         numDiscreteRealVariables();
@@ -859,6 +866,23 @@ aspect FlatAPI {
     }
     eq FTimeExp.containsFTimeExp() = true;
     syn lazy boolean FAbstractEquation.containsFTimeExp() = super.containsFTimeExp();
+    
+    syn boolean ASTNode.containsFHomotopyExp() {
+        for (ASTNode child : this)
+            if (child.containsFHomotopyExp())
+                return true;
+        return false;
+    }
+    eq FHomotopyExp.containsFHomotopyExp() = true;
+    syn lazy boolean FAbstractEquation.containsFHomotopyExp() = super.containsFHomotopyExp();
+    public boolean AbstractEquationBlock.containsFHomotopyExp() {
+        for (FAbstractEquation eqn : allEquations()) {
+            if (eqn.containsFHomotopyExp()) {
+                return true;
+            }
+        }
+        return false;
+    }
     
     syn int FClass.numDiscretePreVariables() = discretePreVariables().size();
     syn lazy ArrayList<FVariable> FClass.discretePreVariables() {
@@ -1997,87 +2021,117 @@ aspect FlatAPI {
 }
 
 aspect ReferencedVariables {
+    
+    public interface FIdUseExpLookupVisitor {
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set);
+    }
+    
+    public class DefaultFidUseExpLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new DefaultFidUseExpLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.findFIdUseExpsInTree(set, this);
+        }
+    }
+    
     public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree() {
+        return findFIdUseExpsInTree(DefaultFidUseExpLookupVisitor.instance);
+    }
+    
+    public Set<FIdUseExp> ASTNode.findFIdUseExpsInTree(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> set = new LinkedHashSet<FIdUseExp>();
-        findFIdUseExpsInTree(set);
+        visitor.visit(this, set);
         return set;
     }
     
-    public void ASTNode.findFIdUseExpsInTree(Set<FIdUseExp> set) {
-        for (ASTNode n : this)
-            n.findFIdUseExpsInTree(set);
+    public void ASTNode.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        for (ASTNode n : this) {
+            visitor.visit(n, set);
+        }
     }
     
-    public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+    @Override
+    public void FIdUseExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         set.add(this);
-        super.findFIdUseExpsInTree(set);
+        super.findFIdUseExpsInTree(set, visitor);
     }
     
-    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+    @Override
+    public void FAttribute.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
     }
-    
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = Collections.emptySet();
-    eq FEquation.FIdUseExpsInRHS()                         = getRight().findFIdUseExpsInTree();
-    eq FFunctionCallEquation.FIdUseExpsInRHS()             = getCall().findFIdUseExpsInTree();
-    eq FAlgorithm.FIdUseExpsInRHS() {
+
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
+
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
+    eq FEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)                         = getRight().findFIdUseExpsInTree(visitor);
+    eq FFunctionCallEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor)             = getCall().findFIdUseExpsInTree(visitor);
+    eq FAlgorithm.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FIdUseExpsInRHS());
+            res.addAll(stmt.FIdUseExpsInRHS(visitor));
         return res;
     }
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() {
+
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS() = FIdUseExpsInRHS(DefaultFidUseExpLookupVisitor.instance);
+
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-        for (FIdUseExp use : findFIdUseExpsInTree())
+        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
             if (!use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
-        res.removeAll(FIdUseExpsInLHS());
+        res.removeAll(FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInRHS() {
+    eq FIfWhenElseEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FIdUseExpsInRHS());
+            res.addAll(fae.FIdUseExpsInRHS(visitor));
         return res;
     }
     
-    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInRHS() {
-        Set<FIdUseExp> res = super.FIdUseExpsInRHS();
-        getTest().findFIdUseExpsInTree(res);
+    eq FIfWhenEquation.FIdUseExpsInRHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = super.FIdUseExpsInRHS(visitor);
+        getTest().findFIdUseExpsInTree(res, visitor);
         if (hasElse())
-            res.addAll(getElse().FIdUseExpsInRHS());
+            res.addAll(getElse().FIdUseExpsInRHS(visitor));
         return res;
     }
     
-    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = Collections.emptySet();
-    eq FEquation.FIdUseExpsInLHS()                         = getLeft().findFIdUseExpsInTree();
-    eq FFunctionCallEquation.FIdUseExpsInLHS()             = getLefts().findFIdUseExpsInTree();
-    eq FAlgorithm.FIdUseExpsInLHS() {
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
+    
+    syn Set<FIdUseExp> FAbstractEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) = Collections.emptySet();
+    eq FEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)                         = getLeft().findFIdUseExpsInTree(visitor);
+    eq FFunctionCallEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor)             = getLefts().findFIdUseExpsInTree(visitor);
+    eq FAlgorithm.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FStatement stmt : getFStatements())
-            res.addAll(stmt.FIdUseExpsInLHS());
+            res.addAll(stmt.FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() {
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS() = FIdUseExpsInLHS(DefaultFidUseExpLookupVisitor.instance);
+    
+    syn Set<FIdUseExp> FStatement.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
-        for (FIdUseExp use : findFIdUseExpsInTree())
+        for (FIdUseExp use : findFIdUseExpsInTree(visitor))
             if (use.useIsAssignment() && !use.myFV().isForIndex())
                 res.add(use);
         return res;
     }
     
-    syn Set<FIdUseExp> FIfWhenElseEquation.FIdUseExpsInLHS() {
+    eq FIfWhenElseEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
         Set<FIdUseExp> res = new LinkedHashSet<FIdUseExp>();
         for (FAbstractEquation fae : getFAbstractEquations())
-            res.addAll(fae.FIdUseExpsInLHS());
+            res.addAll(fae.FIdUseExpsInLHS(visitor));
         return res;
     }
     
-    syn Set<FIdUseExp> FIfWhenEquation.FIdUseExpsInLHS() {
-        Set<FIdUseExp> res = super.FIdUseExpsInLHS();
+    eq FIfWhenEquation.FIdUseExpsInLHS(FIdUseExpLookupVisitor visitor) {
+        Set<FIdUseExp> res = super.FIdUseExpsInLHS(visitor);
         if (hasElse())
-            res.addAll(getElse().FIdUseExpsInLHS());
+            res.addAll(getElse().FIdUseExpsInLHS(visitor));
         return res;
     }
     

@@ -5012,16 +5012,16 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         return 0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         dz = jmi->dz_active_variables;
-        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[0];
+        (*dz)[ jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = dx[0];
         _y_1 = x[0];
-        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[1];
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[1];
         _x_0 = x[1];
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
         dz = jmi->dz;
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         dz = jmi->dz;
-        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[0];
-        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[1];
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[1];
     } else {
         return -1;
     }
@@ -5050,8 +5050,8 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         } else {
           (*res)[1] = pre_x_0 - (_x_0);
         }
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = 0;
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
-        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
     }
     return ef;
 }

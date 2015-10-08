@@ -239,23 +239,6 @@ Compliance error at line 175, column 3, in file 'Compiler/ModelicaFrontEnd/src/t
 ")})));
 end UnsupportedBuiltins2_ComplErr;
 
-model UnsupportedBuiltins_WarnErr
- equation
-  homotopy(1,1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="UnsupportedBuiltins_WarnErr",
-            description="Compliance error for unsupported builtins",
-            homotopy_type="homotopy",
-            errorMessage="
-1 errors found:
-
-Warning at line 244, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
-  The 'homotopy' setting of the homotopy_type option is not supported. Setting to 'actual'.
-")})));
-end UnsupportedBuiltins_WarnErr;
-
 model ArrayCellMod_ComplErr
  model A
   Real b[2];

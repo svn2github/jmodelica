@@ -118,10 +118,11 @@ aspect DynamicStateSelect{
         return list;
     }
 
-    public void FDSRefExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+    @Override
+    public void FDSRefExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         for (FIdUseExp exp : getUses())
             set.add(exp);
-        getOrg().findFIdUseExpsInTree(set);
+        visitor.visit(getOrg(), set);
     }
 
     syn List<FExp> FDSDerExp.getUseList() {
@@ -132,9 +133,10 @@ aspect DynamicStateSelect{
         return list;
     }
 
-    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set) {
+    @Override
+    public void FDSDerExp.findFIdUseExpsInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
         for (FExp exp : getUses())
-            exp.findFIdUseExpsInTree(set);
+            visitor.visit(exp, set);
     }
     
     private Enumerator DynamicStateManager.idEnumerator = new Enumerator(1);

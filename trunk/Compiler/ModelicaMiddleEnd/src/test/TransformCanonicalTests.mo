@@ -7367,4 +7367,49 @@ end TransformCanonicalTests.InsertTempLHS1;
 ")})));
 end InsertTempLHS1;
 
+package Operators
+    package Homotopy
+        model Simple1
+            Real x,y;
+        equation
+            x = homotopy(x * x,time);
+            y = homotopy(y * x,time);
+        annotation(__JModelica(UnitTesting(tests={
+	        FClassMethodTestCase(
+	            name="Operators.Homotopy.Simple1.DAE",
+	            description="Simple test that tests DAE BLT generation for homotopy",
+                homotopy_type="homotopy",
+	            methodName="printDAEBLT",
+	            methodResult="
+--- Unsolved equation (Block 1) ---
+x = homotopy(x * x, time)
+  Computed variables: x
+
+--- Unsolved equation (Block 2) ---
+y = homotopy(y * x, time)
+  Computed variables: y
+-------------------------------
+"),FClassMethodTestCase(
+                name="Operators.Homotopy.Simple1.DAEInit",
+                description="Simple test that tests DAE init BLT generation for homotopy",
+                homotopy_type="homotopy",
+                methodName="printDAEInitBLT",
+                methodResult="
+--- Unsolved system (Block 1) of 2 variables ---
+Unknown variables:
+  y ()
+  x ()
+
+Equations:
+  y = homotopy(y * x, time)
+    Iteration variables: y
+  x = homotopy(x * x, time)
+    Iteration variables: x
+-------------------------------
+")})));
+        end Simple1;
+        
+    end Homotopy;
+end Operators;
+
 end TransformCanonicalTests;

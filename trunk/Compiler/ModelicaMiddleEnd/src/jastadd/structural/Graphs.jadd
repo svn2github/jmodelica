@@ -108,6 +108,11 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 
     public void setAsInitialSystem() {
         initialSystem = true;
+        for (E eqn : getEquations()) {
+            for (V var : lookupVarsInSet(eqn.getEquation().findInitUniqueDAEVarUsesInTree())) {
+                addEdge(eqn, var);
+            }
+        }
     }
 
     public boolean isInitialSystem() {
@@ -317,6 +322,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
+    protected FIdUseExpLookupVisitor getFIdUseExpLookupVisitor() {
+        if (isInitialSystem()) {
+            return InitDAEVarUseLookupVisitor.instance;
+        } else {
+            return DAEVarUseLookupVisitor.instance;
+        }
+    }
+    
     /**
      * Handles incidences between variables in an FAbstractEquation.
      * The base case is a scalar equation where all variables are 
@@ -328,7 +341,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         public IncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
             equation = e;
-            vars = lookupVarsInSet(equation.findFIdUseExpsInTree());
+            vars = lookupVarsInSet(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
             vars.addAll(additionalDeps);
         }
         
@@ -360,7 +373,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
             super(e, additionalDeps);
-            lhsUses = equation.FIdUseExpsInLHS();
+            lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
             lhs = new HashMap<Integer, V>();
         }
         
@@ -961,6 +974,31 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
+    private static final HomotopyContributor HOMOTOPY_CONTRIBUTOR = addSCCContributor(new HomotopyContributor());
+    
+    /**
+     * Contributor that ensures that all equations with homotopy are computed in the same block.
+     */
+    private static class HomotopyContributor extends SCCContributor {
+        
+        private static final Collection<? extends Object> memberSets = Arrays.asList("homotopy");
+        
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            return Collections.emptyList();
+        }
+        
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            if (!graph.isInitialSystem() || !equation.getEquation().containsFHomotopyExp()) {
+                return Collections.emptyMap();
+            }
+            Map<E, Collection<? extends Object>> eqsIdentMap = new HashMap<E, Collection<? extends Object>>();
+            eqsIdentMap.put(equation, memberSets);
+            return eqsIdentMap;
+        }
+    }
+    
     protected abstract C createComponentBlock();
 
     public Collection<C> tarjan() {
@@ -1195,6 +1233,64 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return map;
     }
 }
+
+    public class DAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new DAEVarUseLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.findDAEVarUsesInTree(set, this);
+        }
+    }
+
+    public class InitDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new InitDAEVarUseLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.findInitDAEVarUsesInTree(set, this);
+        }
+    }
+    
+    public class InitUniqueDAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new InitUniqueDAEVarUseLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.findInitUniqueDAEVarUsesInTree(set, this);
+        }
+    }
+    
+
+    public void ASTNode.findDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        findFIdUseExpsInTree(set, visitor);
+    }
+
+    @Override
+    public void FHomotopyExp.findDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        visitor.visit(getActual(), set);
+    }
+
+    public void ASTNode.findInitDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        findFIdUseExpsInTree(set, visitor);
+    }
+
+    public Set<FIdUseExp> ASTNode.findInitUniqueDAEVarUsesInTree() {
+        return findFIdUseExpsInTree(InitUniqueDAEVarUseLookupVisitor.instance);
+    }
+
+    public void ASTNode.findInitUniqueDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        for (ASTNode n : this) {
+            visitor.visit(n, set);
+        }
+    }
+
+    public void FHomotopyExp.findInitUniqueDAEVarUsesInTree(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        visitor.visit(getActual(), set);
+        DefaultFidUseExpLookupVisitor.instance.visit(getSimplified(), set);
+    }
+    
+
 
 /**
  * This class represent a component result from Tarjan's strongly connected
