@@ -2632,14 +2632,9 @@ aspect Nominals {
     eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());
     eq FDotMulExp.nominal() = new FMulExp(getLeft().nominal(), getRight().nominal());
     eq FDotDivExp.nominal() = new FDivExp(getLeft().nominal(), getRight().nominal());
-    eq FDotPowExp.nominal() = new FPowExp(getLeft().nominal(), getRight().nominal());
     eq FNegExp.nominal()    = getFExp().nominal();
     eq FAbsExp.nominal()    = getFExp().nominal();
     eq FMinMaxExp.nominal() = hasY() ? FExp.nominalMax(getX(), getY()) : getX().nominal();
-    
-    eq FExpExp.nominal()    = new FExpExp(getFExp().nominal());
-    eq FLogExp.nominal()    = new FLogExp(getFExp().nominal());
-    eq FLog10Exp.nominal()  = new FLog10Exp(getFExp().nominal());
     
     eq FIfExp.nominal()     = FExp.nominalMax(getThenExp(), getElseExp());
     
@@ -2649,8 +2644,6 @@ aspect Nominals {
     eq FHomotopyExp.nominal()    = FExp.nominalMax(getActual(), getSimplified());
     eq FSpatialDistExp.nominal() = FExp.nominalMax(getIn0(), getIn1());
     eq FDelayExp.nominal()       = getFExp().nominal();
-    
-    eq FFunctionCall.nominal()   = FExp.nominalDefault();
     
     eq FIdUseExp.nominal() = myFV().nominal();
     
