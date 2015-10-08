@@ -228,7 +228,7 @@ aspect Arrays {
 	eq FEventGenExp.ndims()               = getX().ndims();
 	eq FMathematicalFunctionCall.ndims()  = getFExp().ndims();
 	
-	eq FHomotopyExp.ndims()   = getActual().ndims();
+	eq FHomotopyExp.ndims()   = vectorizedNdims();
 	eq FSemiLinearExp.ndims() = size().ndims();
 
     eq FDelayExp.ndims()       = vectorizedNdims();
@@ -993,7 +993,7 @@ aspect Arrays {
 	
 	eq FEventGenExp.size()              = getX().size();
 	eq FMathematicalFunctionCall.size() = getFExp().size();
-	eq FHomotopyExp.size()              = getActual().size();
+	eq FHomotopyExp.size()              = vectorizedSize();
 	eq FSemiLinearExp.size()            = vectorizedSize();
 
     eq FDelayExp.size()                 = vectorizedSize();
@@ -1036,7 +1036,10 @@ aspect Arrays {
         }
     }
     
-	
+    eq FHomotopyExp.myArgs() {
+        return new FExp[] {getActual(), getSimplified()};
+    }
+
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())
 			return Size.SCALAR;
