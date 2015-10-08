@@ -516,10 +516,16 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_reals(log, topnode, logInfo, "actual_step", N_VGetArrayPointer(kin_mem->kin_pp), block->n);
+            }
+            
             jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%I>", (int)nniters);
             if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             }
+
+
             jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
             jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", N_VWL2Norm(kin_mem->kin_pp, kin_mem->kin_uscale));
 
@@ -605,7 +611,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     }
                 }
 
-
+                jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
+                jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
                 jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s><nonewline:%d>",
                              "jmi_kinsol_solver", block->label, message,1);
                 jmi_log_leave(log, node);
@@ -676,7 +683,8 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
         else {
             solver->range_limits[i] = BIG_REAL;
         }
-
+        if(block->max[i] == block->min[i])
+            jmi_log_node(block->log, logWarning, "MinAndMaxEqual", "Min and max equal for <Iter: #r%d#>.", i);
     }
 
     return 0;
@@ -1459,7 +1467,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_leave(block->log, topnode);
         }
 
-        if(solver->last_num_active_bounds > 0) {
+        if(solver->last_num_active_bounds > 0 && block->options->experimental_mode & jmi_block_solver_experimental_check_descent_direction) {
             realtype*  gd = N_VGetArrayPointer(solver->gradient);
             double xg = 0; /*scalar product of gradient and projected step */
             int i;
