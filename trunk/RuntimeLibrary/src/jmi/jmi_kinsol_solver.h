@@ -66,12 +66,13 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    N_Vector gradient;              /**< \brief Steepest descent direction */
     realtype* residual_nominal;      /**< \brief Vector for reading in manual scaling factors for f  */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
     realtype kin_stol;             /**< \brief Tolerance for Step-size */
-    realtype kin_reg_tol;
+    realtype kin_reg_tol;          /**< \brief Regularization tolerance */
     
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */

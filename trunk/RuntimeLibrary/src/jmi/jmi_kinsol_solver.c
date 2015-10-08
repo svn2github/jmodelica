@@ -838,7 +838,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     if((!block->options->enforce_bounds_flag) || (xnorm == 0.0)) 
     {
         /* make sure full newton step can be taken */
-        realtype maxstep = MAX_NEWTON_STEP_RATIO * xnorm;
+        realtype maxstep = 2.0 * xnorm;
 #if 0
         if(maxstep > kin_mem->kin_mxnewtstep)
 #endif
@@ -1296,35 +1296,28 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             bd[i] *= solver->rScale[i];
         }
     }
-    if(solver->use_steepest_descent_flag) {
+    if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
+        /* calculate steepest descent direction */
         /* Make step in steepest descent direction and not Newton*/
         realtype **jac = solver->J->cols;
+        realtype*  gd = N_VGetArrayPointer(solver->gradient);
         int N = block->n;
         int j;
         
-#if 1
         /*  Step = Transpose(J) W*W F, 
             where W is the diagonal matix of residual scaling factors. 
             W*W F is effectively calculated above in "x" as a part of kin_sfdotJp calculation.
             Step is saved in "b" and then copied into "x" */
         for (i=0;i<N;i++) {
-            bd[i] = 0;
+            gd[i] = 0;
             for (j=0;j<N;j++){
-                bd[i] += jac[i][j] * xd[j];
+                gd[i] += jac[i][j] * xd[j];
             }
         }
-        N_VScale(ONE, b, x);
-#else
-        /* Test steepest descent without scaling */
-        for (i=0;i<N;i++) {
-            xd[i] = 0;
-            for (j=0;j<N;j++){
-/*                printf("x[%d] += jac[%d][%d] * b[%d], %g += %g * %g\n",
-                       i,i,j,j,xd[i], jac[i][j], bd[j]);*/
-                xd[i] += jac[i][j] * bd[j];
-            }
-        }
-#endif
+    }
+    if(solver->use_steepest_descent_flag) {
+        N_VScale(ONE, solver->gradient, x);
+
         ret = 0;
     }
     else if(solver->J_is_singular_flag) {
@@ -1440,8 +1433,12 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     if((solver->equed == 'C') || (solver->equed == 'B')) {
         /* scale solution if the Jacobian was equilibrated */
         int i;
+        realtype*  gd = N_VGetArrayPointer(solver->gradient);
         for(i = 0; i < block->n; i++) {
             xd[i] *= solver->cScale[i];
+            if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
+                gd[i] *= solver->cScale[i];
+            }
         }
     }
 
@@ -1455,6 +1452,19 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         if(block->callbacks->log_options.log_level >= 5) {
             jmi_log_reals(block->log, topnode, logInfo, "bounded_step", xd, block->n);
             jmi_log_leave(block->log, topnode);
+        }
+
+        if(solver->last_num_active_bounds > 0) {
+            realtype*  gd = N_VGetArrayPointer(solver->gradient);
+            double xg = 0; /*scalar product of gradient and projected step */
+            int i;
+            for( i = 0;  i < block->n; i++) {
+                xg += xd[i]*gd[i]*Ith(solver->kin_y_scale,i)*Ith(solver->kin_y_scale,i);
+            }
+            if(xg <= 0) {
+                jmi_log_node(block->log, logWarning, "StepNotDescent", 
+                    "Projected Newton step is not descent in <block: %s>, scaled scalar product with gradient <spxg: %g>", block->label, xg);
+            }
         }
     }
     return 0;
@@ -1589,7 +1599,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 }
                 /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
                 jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
-                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_diTer_scaled: %g>).",
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
                     block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
 
             }
@@ -1689,6 +1699,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_y = N_VMake_Serial(n, block->x);
     solver->kin_y_scale = N_VNew_Serial(n);
     solver->kin_f_scale = N_VNew_Serial(n);
+    solver->gradient  = N_VNew_Serial(n);
     solver->residual_nominal = (realtype*)calloc(n+1,sizeof(realtype));
     solver->kin_scale_update_time = -1.0;
     solver->kin_jac_update_time = -1.0;
@@ -1725,6 +1736,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     
     solver->dgelss_rwork = (realtype*)calloc(5*n,sizeof(realtype));
     solver->singular_values = (realtype*)calloc(n,sizeof(realtype));
+    solver->max_step_ratio = 1.0;
 
     kin_reset_char_log(solver);
 
@@ -1806,6 +1818,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     N_VDestroy_Serial(solver->kin_y);
     N_VDestroy_Serial(solver->kin_y_scale);
     N_VDestroy_Serial(solver->kin_f_scale);
+    N_VDestroy_Serial(solver->gradient);
     free(solver->residual_nominal);
     DestroyMat(solver->J);
     DestroyMat(solver->JTJ);
