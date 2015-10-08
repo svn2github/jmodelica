@@ -606,8 +606,8 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 }
 
 
-                jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s>",
-                             "jmi_kinsol_solver", block->label, message);
+                jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s><nonewline:%d>",
+                             "jmi_kinsol_solver", block->label, message,1);
                 jmi_log_leave(log, node);
             }
         }
@@ -676,6 +676,7 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
         else {
             solver->range_limits[i] = BIG_REAL;
         }
+
     }
 
     return 0;
@@ -1450,7 +1451,11 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
         jmi_kinsol_limit_step(kin_mem, x, b);
         if(block->callbacks->log_options.log_level >= 5) {
-            jmi_log_reals(block->log, topnode, logInfo, "bounded_step", xd, block->n);
+            double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
+            for(i = 0; i < block->n; i++) {
+                bd[i] = xd[i]*step_factor;
+            }
+            jmi_log_reals(block->log, topnode, logInfo, "projected_step", bd, block->n);
             jmi_log_leave(block->log, topnode);
         }
 
