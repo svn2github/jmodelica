@@ -14755,8 +14755,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
             _x_0 = x[1];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = ((__homotopy_lambda * (_y_1 * _x_0) + (1 - __homotopy_lambda) * (_time)) - (_y_1);
-            (*res)[1] = ((__homotopy_lambda * (_x_0 * _x_0) + (1 - __homotopy_lambda) * (_time)) - (_x_0);
+            (*res)[0] = (__homotopy_lambda * (_y_1 * _x_0) + (1 - __homotopy_lambda) * (_time)) - (_y_1);
+            (*res)[1] = (__homotopy_lambda * (_x_0 * _x_0) + (1 - __homotopy_lambda) * (_time)) - (_x_0);
         }
     }
     return ef;

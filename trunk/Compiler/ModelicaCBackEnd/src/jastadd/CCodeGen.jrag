@@ -2611,7 +2611,7 @@ aspect CCodeGen {
 
     public void FHomotopyExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (p.inInitialSystem()) {
-            str.print("((__homotopy_lambda * (");
+            str.print("(__homotopy_lambda * (");
             p.print(getActual(), str, indent);
             str.print(") + (1 - __homotopy_lambda) * (");
             p.print(getSimplified(), str, indent);
