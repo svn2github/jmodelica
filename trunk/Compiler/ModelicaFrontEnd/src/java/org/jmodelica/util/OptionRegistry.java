@@ -685,7 +685,7 @@ abstract public class OptionRegistry {
             ("nle_solver_use_nominals_as_fallback",
              OptionType.runtime, 
              Category.uncommon,
-             false,
+             true,
              "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",

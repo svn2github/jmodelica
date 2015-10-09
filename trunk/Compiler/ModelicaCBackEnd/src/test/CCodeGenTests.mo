@@ -16113,7 +16113,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __nle_solver_regularization_tolerance_19 = (-1.0);
     __nle_solver_step_limit_factor_20 = (10.0);
     __nle_solver_tol_factor_21 = (1.0E-4);
-    __nle_solver_use_nominals_as_fallback_22 = (JMI_FALSE);
+    __nle_solver_use_nominals_as_fallback_22 = (JMI_TRUE);
     __rescale_after_singular_jac_23 = (JMI_TRUE);
     __rescale_each_step_24 = (JMI_FALSE);
     __residual_equation_scaling_25 = (1);
