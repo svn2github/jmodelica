@@ -684,7 +684,7 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
             solver->range_limits[i] = BIG_REAL;
         }
         if(block->max[i] == block->min[i])
-            jmi_log_node(block->log, logWarning, "MinAndMaxEqual", "Min and max equal for <Iter: #r%d#>.", i);
+            jmi_log_node(block->log, logWarning, "MinAndMaxEqual", "Min and max equal for <Iter: #r%d#>.", block->value_references[i]);
     }
 
     return 0;
