@@ -1586,7 +1586,7 @@ model HomotopyTest1
             errorMessage="
 1 errors found:
 
-Error at line 1580, column 15, in file 'C:\Users\jon_041\workspace_dev1\JModelica\Compiler\ModelicaFrontEnd\src\test\TypeTests.mo':
+Error at line 1, column 1, in file '...':
   Mismatching sizes in homotopy. All non-scalar arguments need matching sizes
 ")})));
 end HomotopyTest1;
