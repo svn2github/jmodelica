@@ -14,7 +14,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import ifcasadi.ifcasadi;
-import ifcasadi.GenericType;
 import ifcasadi.MX;
 import ifcasadi.MXFunction;
 import ifcasadi.MXVector;
@@ -44,8 +43,7 @@ aspect FExpToCasADi {
      */
     syn lazy MXFunction FFunctionDecl.toMXFunction() {  
         MXVector finalExpressions = generateFinalExpressionVector();
-        MXFunction f = new MXFunction(generateInputVector(),pickMXCorrespondingToOutputs(finalExpressions));
-        f.setOption("name",new GenericType(name()));
+        MXFunction f = new MXFunction(name(), generateInputVector(),pickMXCorrespondingToOutputs(finalExpressions));
         f.init();
         return f; 
     }
