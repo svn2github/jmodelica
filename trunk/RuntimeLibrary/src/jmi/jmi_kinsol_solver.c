@@ -516,7 +516,7 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             /* Get the number of iterations */
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
-            if (block->callbacks->log_options.log_level >= 5) {
+            if (block->callbacks->log_options.log_level >= 5 && nniters > 0) {
                 jmi_log_reals(log, topnode, logInfo, "actual_step", N_VGetArrayPointer(kin_mem->kin_pp), block->n);
             }
             
