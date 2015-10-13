@@ -725,8 +725,6 @@ aspect InstanceErrorCheck {
                 error("Recursive class structure");
             } else if (isOuter()) {
                 myInnerInstComponentDecl().collectErrors(checkType);
-            } else if (inOuter()) {
-                surroundingOuterComponentDecl().collectErrors(checkType);
             } else {
                 collectErrorsInClassName(checkType);
                 myInstClass().checkRestriction(checkType);

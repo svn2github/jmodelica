@@ -377,7 +377,7 @@ model InnerOuterTest12
 			description="Constant evaluation of inner/outer",
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest12
- parameter Integer c.b = 1 /* 1 */;
+ structural parameter Integer c.b = 1 /* 1 */;
  structural parameter Integer f.e = 1 /* 1 */;
  Real f.x[1] = zeros(1);
 end InnerOuterTests.InnerOuterTest12;
@@ -536,6 +536,136 @@ equation
 end InnerOuterTests.InnerOuterTest19;
 ")})));
 end InnerOuterTest19;
+
+model InnerOuterTest20
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        A a;
+        inner outer R r;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest20",
+            description="Equation inside inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest20
+ Real c.b.r.y;
+ Real c.r.y;
+equation
+ c.b.r.y = 1;
+ c.r.y = 1;
+end InnerOuterTests.InnerOuterTest20;
+")})));
+end InnerOuterTest20;
+
+
+
+model InnerOuterNested1
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        Real t;
+        outer A a;
+        inner outer R r;
+    equation
+        t = a.r.y;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+    end C;
+    
+    C c;
+    inner A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterNested1",
+            description="Equation inside nested inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterNested1
+ Real c.b.t;
+ Real c.b.r.y;
+ Real c.r.y;
+ Real r.y;
+equation
+ c.b.t = r.y;
+ c.b.r.y = 1;
+ c.r.y = 1;
+ r.y = 1;
+end InnerOuterTests.InnerOuterNested1;
+")})));
+end InnerOuterNested1;
+
+model InnerOuterNested2
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        Real t;
+        outer A a;
+        inner outer R r;
+    equation
+        t = a.r.y;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+        inner A a;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterNested2",
+            description="Equation inside nested inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterNested2
+ Real c.b.t;
+ Real c.b.r.y;
+ Real c.r.y;
+equation
+ c.b.t = c.r.y;
+ c.b.r.y = 1;
+ c.r.y = 1;
+end InnerOuterTests.InnerOuterNested2;
+")})));
+end InnerOuterNested2;
 
 
 

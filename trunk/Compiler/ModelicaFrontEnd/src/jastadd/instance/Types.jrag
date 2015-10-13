@@ -85,7 +85,7 @@ aspect Types {
         } else {
             // Check that all elements (here: components) in superType are in subType 
             for (InstComponentDecl superTypeChild : superType.containedInstComponents()) {
-                InstComponentDecl subTypeChild = subType.memberInstComponent(superTypeChild.name()).targetOrNull();
+                InstComponentDecl subTypeChild = subType.memberInstComponent(superTypeChild.name(), false).targetOrNull();
                 if (subTypeChild == null || !subTypeChild.subType(superTypeChild.constrainingInstType(), false))
                     return false;
             }

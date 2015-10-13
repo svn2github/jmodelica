@@ -783,8 +783,7 @@ aspect Connections {
          * This should only be done once, or "inner outer" declarations will not be handled correctly.
          */
         public void redirectInner() {
-            if (cd.inOrIsOuter()) {
-                cd = cd.myInnerInstComponentDecl();
+            if (cd.inOrIsInner()) {
                 fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
             }
         }

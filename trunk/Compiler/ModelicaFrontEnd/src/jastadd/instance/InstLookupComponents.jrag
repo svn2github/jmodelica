@@ -382,8 +382,9 @@ aspect InstLookupComponents {
         return lookupInstComponent(name);
     }
 
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) {
-        InstLookupResult<InstComponentDecl> res = memberInstComponent(name);
+    syn InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) = genericLookupInstComponent(name, true);
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name, boolean resolveOuter) {
+        InstLookupResult<InstComponentDecl> res = memberInstComponent(name, resolveOuter);
         if (res.successful())
             return res;
         for (InstImport ii : instImports()) {
@@ -400,23 +401,24 @@ aspect InstLookupComponents {
     eq InstExtends.genericLookupInstConstant(String name)                                   = myInstClass().lookupInstConstant(name);
 
 
-    syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, int ndims) {
+    syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, boolean resolveOuter, int ndims) {
         if (ndims == 0) 
-            return memberInstComponent(name);
-        return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
+            return memberInstComponent(name, resolveOuter);
+        return getInstComponentDecl(0).arrayMemberInstComponent(name, resolveOuter, ndims - 1);
     }
-    eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
+    eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, boolean resolveOuter, int ndims) = actualInstClass().arrayMemberInstComponent(name, resolveOuter, ndims);
 
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
+    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) = memberInstComponent(name, true);
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name, boolean resolveOuter)  {
         if (isArray()) {
-            return arrayMemberInstComponent(name, ndims());
+            return arrayMemberInstComponent(name, resolveOuter, ndims());
         } else {    
             for (InstComponentDecl ic : instComponentDecls()) 
                 if (ic.matches(name))
-                    return InstLookupResult.found(ic);
+                    return InstLookupResult.found(resolveOuter ? findInnerComponentIfAny(ic) : ic);
 
             for (InstExtends ie : instExtends()) {
-                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
+                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name, resolveOuter);
                 if (res.successful())
                     return res;
             }
@@ -424,11 +426,18 @@ aspect InstLookupComponents {
             return InstLookupResult.notFound();
         }
     }
-    eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
-
-//    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponentConstrained(String name) = 
-//        isArray() ? memberInstComponent(name) : constrainMemberInstComponent(name, memberInstComponent(name));
-
+    eq InstSimpleShortClassDecl.memberInstComponent(String name, boolean resolveOuter) = actualInstClass().memberInstComponent(name, resolveOuter);
+    
+    public InstComponentDecl InstNode.findInnerComponentIfAny(InstComponentDecl icd) {
+        if (icd.isOuter()) {
+            InstComponentDecl inner = icd.myInnerInstComponentDecl();
+            if (inner != null) 
+                icd = inner;
+        }
+        return icd;
+    }
+    
+    
     inh lazy InstLookupResult<InstComponentDecl> InstNode.lookupInstConstant(String name);
     eq Root.getChild().lookupInstConstant(String name)     = InstLookupResult.notFound();
     eq InstNode.getChild().lookupInstConstant(String name) = memberInstConstantFirst(name);
@@ -491,9 +500,9 @@ aspect InstLookupComponents {
 
     // This is needed since the member components of InstPrimitive:s (which are attributes)
     // are not instantiated
-    eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
-    eq InstExtends.memberInstComponent(String name)   = 
-        extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
+    eq InstPrimitive.memberInstComponent(String name, boolean resolveOuter) = myInstClass().memberInstComponent(name, resolveOuter);
+    eq InstExtends.memberInstComponent(String name, boolean resolveOuter)   = 
+        extendsPrimitive() ? myInstClass().memberInstComponent(name, resolveOuter) : super.memberInstComponent(name, resolveOuter);
 
     eq InstComponentDecl.matches(String str) = name().equals(str);
     eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);
@@ -547,12 +556,12 @@ aspect LookupInstComponentsInModifications {
     inh InstLookupResult<InstComponentDecl> InstNamedModification.lookupInstComponentInInstElement(String name);
     inh InstLookupResult<InstComponentDecl> InstComponentRedeclare.lookupInstComponentInInstElement(String name);
 
-    eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name)     = getInstNode().memberInstComponent(name);
-    eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name);
-    eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = memberInstComponent(name);
-    eq InstNode.getElementInstModification().lookupInstComponentInInstElement(String name)                = memberInstComponent(name);
+    eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name)     = getInstNode().memberInstComponent(name, false);
+    eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name, false);
+    eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = memberInstComponent(name, false);
+    eq InstNode.getElementInstModification().lookupInstComponentInInstElement(String name)                = memberInstComponent(name, false);
     eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name)        = getName().qualifiedLookupInstComponent(name);
-    eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = memberInstComponent(name);
+    eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = memberInstComponent(name, false);
     eq InstComponentRedeclare.getName().lookupInstComponent(String name)                                  = lookupInstComponentInInstElement(name);
     eq InstRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
     eq FlatRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
@@ -565,7 +574,7 @@ aspect LookupInstComponentsInModifications {
 
     inh InstLookupResult<InstComponentDecl> InstComponentRedeclare.lookupInstReplacingComponent(String name);
     eq InstNamedModification.getChild().lookupInstReplacingComponent(String name) = getName().qualifiedLookupInstComponent(name);
-    eq InstNode.getChild().lookupInstReplacingComponent(String name)              = memberInstComponent(name);
+    eq InstNode.getChild().lookupInstReplacingComponent(String name)              = memberInstComponent(name, false);
 
 }
 
@@ -583,5 +592,3 @@ aspect SimpleLookupInstComponentDecl {
         return null;
     }
 }
-
-  

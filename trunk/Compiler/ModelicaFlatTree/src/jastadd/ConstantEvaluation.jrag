@@ -2466,11 +2466,6 @@ aspect ConstantEvaluation {
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
           InstAssignable var = (InstAssignable) myInstComponentDecl();
-          if (!var.inFunction()) {
-              InstComponentDecl inner = var.myInnerInstComponentDecl();
-              if (!inner.isUnknown())
-                  var = (InstAssignable) inner;
-          }
           
           if (hasFArraySubscripts()) {
               FArraySubscripts fas = getFArraySubscripts();
