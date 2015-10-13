@@ -481,6 +481,64 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
     */
 }
 
+static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidualOnlyFlag) {
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
+    jmi_log_t *log = block->log;
+    struct KINMemRec* kin_mem = (struct KINMemRec*)solver->kin_mem;
+    long nniters;
+    char message[256];
+
+    if (block->callbacks->log_options.log_level < 4) return;
+    KINGetNumNonlinSolvIters(kin_mem, &nniters);
+    /* Only print header first iteration */
+    if (nniters == 0) {
+        jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
+            "jmi_kinsol_solver",
+            "iter       res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
+            1);
+    }
+    if(logResidualOnlyFlag) {
+        /* last log in the solve trace - use (nniter+1)*/
+        nniters = nniters + 1;
+    }
+    if (nniters > 0) {
+        int nwritten = 0;
+        /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
+        jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
+        
+        nwritten = sprintf(message, "%4d%-4s%11.4e % 11.4e:%4d", (int)nniters, solver->char_log,
+            solver->last_fnorm, solver->last_max_residual, solver->last_max_residual_index+1);
+        kin_reset_char_log(solver);
+        if(!logResidualOnlyFlag) {
+            char*  buffer = message + nwritten;
+            if (solver->last_bounding_index >= 0) {
+                if(solver->range_most_limiting) {
+                    sprintf(buffer, "  %4d %4d  %11.4e:%4dr %11.4e",
+                        solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                        solver->lambda_max, solver->last_bounding_index+1, solver->lambda);
+                }
+                else {
+                    sprintf(buffer, "  %4d %4d  %11.4e:%4d  %11.4e",
+                        solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                        solver->lambda_max, solver->last_bounding_index+1, solver->lambda);
+                }
+            }
+            else {
+                sprintf(buffer, "  %4d %4d  %11.4e       %11.4e",
+                    solver->last_num_limiting_bounds, solver->last_num_active_bounds,
+                    solver->lambda_max, solver->lambda);
+            }
+            jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s>",
+                "jmi_kinsol_solver", block->label, message);
+
+        }
+        jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s>",
+            "jmi_kinsol_solver", block->label, message);
+        jmi_log_leave(log, node);
+    }
+    return;
+}
+
 /* Logging callback used by KINSOL to report progress att higher log levels */
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
     int i;
@@ -505,7 +563,9 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
         jmi_log_fmt(log, topnode, logInfo, "<calling_function:%s>", function);
         jmi_log_fmt(log, topnode, logInfo, "<message:%s>", msg);
         
-        if ((((strcmp("KINSolInit",function)==0) ||
+        if (strcmp("KINStop",function)==0) {
+            solver->iterationProgressFlag = 1;
+        } else if ((((strcmp("KINSolInit",function)==0) ||
               (strcmp("KINSol",function)==0)) && (strncmp("nni",msg,3)==0))) {
             realtype* f = N_VGetArrayPointer(kin_mem->kin_fval);
             long int nniters;
@@ -524,7 +584,6 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             if (block->callbacks->log_options.log_level >= 5) {
                 jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
             }
-
 
             jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
             jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", N_VWL2Norm(kin_mem->kin_pp, kin_mem->kin_uscale));
@@ -547,73 +606,42 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
             }
 
-            {
-                /* Only print header first iteration */
-                if (nniters == 0) {
-                    jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
-                                 "jmi_kinsol_solver",
-                                 "iter       res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
-                                 1);
-                }
-            }
-            {
-                /* Keep the progress message on a single line by using jmi_log_enter_, jmi_log_fmt_ etc. */
-                jmi_log_node_t node = jmi_log_enter_(log, logInfo, "Progress");
-                char message[256];
-                realtype lambda_max;
-                realtype lambda;
-                int nwritten;
 
-                if (nniters > 0 && solver->last_xnorm > 0) {
-                    /*  realtype steplength;
-                        KINGetStepLength(kin_mem, &steplength);
-                       lambda = steplength/solver->last_xnorm; */
+            {
+                /* Extract lambda_max and lambda for logging */
+                realtype lambda_max = 0.0;
+                realtype lambda = 0.0;
+
+                if (nniters > 0 && solver->last_xnorm > 0 ) {
                     lambda_max = solver->max_step_ratio;
-                    if(solver->sJpnorm == 0) {
-                        lambda = 1.0;
+                    if(solver->iterationProgressFlag) {
+                        if(solver->sJpnorm == 0) {
+                            lambda = 1.0;
+                        } else {
+                            lambda = kin_mem->kin_sJpnorm / solver->sJpnorm;
+                        }
+                        if(solver->last_num_active_bounds > 0)
+                            lambda *= solver->max_step_ratio;
                     } else {
-                        lambda = kin_mem->kin_sJpnorm / solver->sJpnorm;
+                        lambda = 0;
                     }
-                    if(solver->last_num_active_bounds > 0)
-                        lambda *= solver->max_step_ratio;
                 }
                 else {
                     lambda_max = lambda = 0;
                 }
+                solver->lambda = lambda;
+                solver->lambda_max = lambda_max;
+                solver->iterationProgressFlag = 0;
 
                 if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
-                else if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
+                if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
 
-                nwritten = sprintf(message, "%4d%-4s%11.4e % 11.4e:%4d",
-                                   (int)nniters+1, solver->char_log,
-                                   kin_mem->kin_fnorm, max_residual, max_index+1);
+                jmi_kinsol_print_progress(block, 0);
 
-                kin_reset_char_log(solver);
+                solver->last_fnorm = kin_mem->kin_fnorm;
+                solver->last_max_residual= max_residual;
+                solver->last_max_residual_index = max_index;
 
-                if (nniters > 0 && nwritten >= 0) {
-                    char *buffer = message + nwritten;
-                    if (solver->last_bounding_index >= 0) {
-                        if(solver->range_most_limiting) {
-                            sprintf(buffer, "  %4d %4d  %11.4e:%4dr %11.4e",
-                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
-                                lambda_max, solver->last_bounding_index+1, lambda);
-                        }
-                        else {
-                            sprintf(buffer, "  %4d %4d  %11.4e:%4d  %11.4e",
-                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
-                                lambda_max, solver->last_bounding_index+1, lambda);
-                        }
-                    }
-                    else {
-                        sprintf(buffer, "  %4d %4d  %11.4e       %11.4e",
-                                solver->last_num_limiting_bounds, solver->last_num_active_bounds,
-                                lambda_max, lambda);
-                    }
-                }
-
-                jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s><nonewline:%d>",
-                             "jmi_kinsol_solver", block->label, message,1);
-                jmi_log_leave(log, node);
                 jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
                 jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
             }
@@ -1941,6 +1969,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
     
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, strategy, solver->kin_y_scale, solver->kin_f_scale);
+    jmi_kinsol_print_progress(block, 1);
     if(flag == KIN_INITIAL_GUESS_OK) {
         flag = KIN_SUCCESS;
         /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
