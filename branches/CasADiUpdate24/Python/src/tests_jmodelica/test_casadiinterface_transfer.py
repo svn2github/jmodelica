@@ -15,6 +15,7 @@
 import os
 from tests_jmodelica import testattr, get_files_path
 try:
+    import casadi
     from casadi import isEqual
     from modelicacasadi_transfer import *
     # Common variables used in the tests
@@ -275,7 +276,7 @@ class ModelicaTransfer(object):
         model =  self.load_model("atomicModelBooleanDependentParameter", modelFile)    
         depParam =  model.getVariables(Model.BOOLEAN_PARAMETER_DEPENDENT)  
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-        check_strnorm( indepParam[0].getVar().logic_and(MX(True)) , depParam[0].getAttribute("bindingExpression"))
+        check_strnorm( casadi.logic_and(indepParam[0].getVar(), (MX(True))), depParam[0].getAttribute("bindingExpression"))
 
     @testattr(casadi = True)
     def test_ModelicaBooleanDiscrete(self):
@@ -377,17 +378,18 @@ class ModelicaTransfer(object):
     @testattr(casadi = True)
     def test_ConstructBooleanExpressions(self):
         dae = self.load_model("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
-        expected = ("MX(vertcat((der(x1)-((x2?1:0)+((!x2)?2:0))), " + 
-                    "(x2-(0<x1)), (x3-(0<=x1)), (x4-(x1<0)), " + 
+#        expected = ("MX(vertcat((der(x1)-if_else(x2,1,2){0}, " +
+        expected = ("MX(vertcat((der(x1)-if_else(x2){0}), " + # expecting this instead because of CasADi #1618
+                    "(x2-(0<x1)), (x3-(0<=x1)), (x4-(x1<0)), " +
                     "(x5-(x1<=0)), (x6-(x5==x4)), (x7-(x6!=x5)), (x8-(x6&&x5)), (x9-(x6||x5))))")
         check_strnorm(repr(dae), expected)
 
     @testattr(casadi = True)
     def test_ConstructMisc(self):
         model = self.load_model("AtomicModelMisc", modelFile)
-        expected = (
-        "MX(vertcat((der(x1)-1.11), (x2-(((1<x1)?3:0)+((!(1<x1))?4:0))), (x3-(1||(1<x2))), (x4-(0||x3))))"     
-         "MX(vertcat(x1, pre(x2), pre(x3), pre(x4)))")
+#        expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1),3,4){0}), " +
+        expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1)){0}), " + # expecting this instead because of CasADi #1618
+            "(x3-(1||(1<x2))), (x4-(0||x3))))MX(vertcat(repmat(x1, 1), repmat(pre(x2), 1), repmat(pre(x3), 1), repmat(pre(x4), 1)))")
         check_strnorm(repr(model.getDaeResidual()) + repr(model.getInitialResidual()), expected)
 
 
@@ -833,22 +835,23 @@ class ModelicaTransfer(object):
             #y1 := if(x > 2) then 1 else 5
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 2\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0<@1)\n"
-                    "@2 = 1\n"
-                    "@2 = (@0?@2:0)\n"
-                    "@0 = (!@0)\n"
-                    "@3 = 5\n"
-                    "@0 = (@0?@3:0)\n"
-                    "@2 = (@2+@0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
+        expected = ("""
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = 2
+            @1 = input[0][0]
+            @0 = (@0<@1)
+""" +
+#"@2 = if_else(@0,5,1)" +
+"@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
+"""
+            output[0] = @2
+            output[1] = @1
+""")
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
@@ -860,17 +863,19 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
@@ -881,11 +886,15 @@ class ModelicaTransfer(object):
             #return
             #y := 2*x
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
@@ -894,12 +903,16 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicRealFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
@@ -909,12 +922,16 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicRealFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
@@ -927,15 +944,19 @@ class ModelicaTransfer(object):
             #internal := sin(y)
             #y := x + internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = sin(@0)\n"
-                    "@1 = (@0*@1)\n"
-                    "@1 = sin(@1)\n"
-                    "@0 = (@0+@1)\n"
-                    "output[0] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = sin(@0)
+            @1 = (@0*@1)
+            @1 = sin(@1)
+            @0 = (@0+@1)
+            output[0] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
@@ -952,18 +973,19 @@ class ModelicaTransfer(object):
             #y2 := internal2 + x1
             #y2 := 1
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOutInternal"), expected)
 
 
@@ -1017,22 +1039,23 @@ class ModelicaTransfer(object):
             #y1 := if(x > 2) then 1 else 5
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 2\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0<@1)\n"
-                    "@2 = 1\n"
-                    "@2 = (@0?@2:0)\n"
-                    "@0 = (!@0)\n"
-                    "@3 = 5\n"
-                    "@0 = (@0?@3:0)\n"
-                    "@2 = (@2+@0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
+        expected = ("""
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = 2
+            @1 = input[0][0]
+            @0 = (@0<@1)
+""" +
+#"@2 = if_else(@0,5,1)" +
+"@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
+"""
+            output[0] = @2
+            output[1] = @1
+""")
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
@@ -1044,17 +1067,19 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
@@ -1065,11 +1090,15 @@ class ModelicaTransfer(object):
             #return
             #y := 2*x
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
@@ -1078,12 +1107,16 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicIntegerFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
@@ -1093,12 +1126,16 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicIntegerFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
@@ -1111,17 +1148,21 @@ class ModelicaTransfer(object):
             #internal := 1+y
             #y := x + internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = 3\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0*@1)\n"
-                    "@0 = (@1*@0)\n"
-                    "@2 = 1\n"
-                    "@2 = (@2+@0)\n"
-                    "@1 = (@1+@2)\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = 3
+            @1 = input[0][0]
+            @0 = (@0*@1)
+            @0 = (@1*@0)
+            @2 = 1
+            @2 = (@2+@0)
+            @1 = (@1+@2)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
@@ -1138,18 +1179,19 @@ class ModelicaTransfer(object):
             #y2 := internal2 + x1
             #y2 := 1
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal"), expected)
 
 
@@ -1201,18 +1243,21 @@ class ModelicaTransfer(object):
             #y1 := if(x) then false else (x or false)
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 0\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0||@1)\n"
-                    "@2 = (!@1)\n"
-                    "@2 = (@2?@0:0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
+        expected = ("""
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            """ +
+            #"@1 = if_else(@0, 0, @0)" +
+            "@1 = if_else(@0, @0)" + # expecting this instead because of CasADi #1618
+            """
+            output[0] = @1
+            output[1] = @0
+            """)
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
@@ -1224,17 +1269,19 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
@@ -1245,11 +1292,15 @@ class ModelicaTransfer(object):
             #return
             #y := x or false
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
@@ -1258,12 +1309,16 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicBooleanFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
@@ -1273,12 +1328,16 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicBooleanFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
@@ -1291,16 +1350,20 @@ class ModelicaTransfer(object):
             #internal := false or y
             #y := false or internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@0 = (@0&&@0)\n"
-                    "@1 = 0\n"
-                    "@1 = (@1||@0)\n"
-                    "@0 = 0\n"
-                    "@0 = (@0||@1)\n"
-                    "output[0] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @0 = (@0&&@0)
+            @1 = 0
+            @1 = (@1||@0)
+            @0 = 0
+            @0 = (@0||@1)
+            output[0] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
@@ -1317,18 +1380,19 @@ class ModelicaTransfer(object):
             #y2 := internal2 or x1
             #y2 := true
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal"), expected)
 
     @testattr(casadi = True)
