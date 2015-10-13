@@ -3286,19 +3286,44 @@ aspect CCodeGen {
     eq FClass.getChild().myCodeGenContext() = codeGenContext;
     eq FFunctionDecl.getChild().myCodeGenContext() = codeGenContext;
     eq FExternalStmt.getChild().myCodeGenContext() = getCodeGenContext();
-    
-    
-	public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
-		if (isComposite() && !keepAsArray()) {
+
+    public abstract class CodePrinter {
+        protected final FuncCallInArgPrinter funcCallInArgPrinter = new FuncCallInArgPrinter();
+        
+        public class FuncCallInArgPrinter extends CodeFuncCallInOutArgPrinter {
+            @Override
+            public String arrayAccessConst() {
+                return ASTNode.C_ARRAY_REFERENCE;
+            }
+
+            @Override
+            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+                exp.genTempInputCellAssigns_C(CodePrinter.this, str, indent, name);
+            }
+        }
+
+        public abstract void printTempInputAssigns(CodeStream str, String indent, FExp exp);
+    }
+
+    public class CPrettyPrinter {
+        
+        @Override
+        public void printTempInputAssigns(CodeStream str, String indent, FExp exp) {
+            funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
+        }
+    }
+
+    public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite() && !keepAsArray()) {
             type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
             genTempInputAssigns_C(p, str, indent);
-		}
-	}
-    
-    public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        type().genTempInputAssigns_C(p, str, indent, tempName_C(), this);
+        }
     }
-    
+
+    public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
+        p.printTempInputAssigns(str, indent, this);
+    }
+
     public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
         if (isComposite()) {
             prettyPrintCall_C(p, str, indent);
@@ -3306,43 +3331,18 @@ aspect CCodeGen {
             super.genTempInputAssigns_C(p, str, indent);
         }
     }
-    
+
     public void FPartialFunctionCall.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
         if (myFCallable().isPartialFunction()) {
-            type().genTempInputAssigns_C(p, str, indent, tempName_C(), this);
+            p.printTempInputAssigns(str, indent, this);
             str.formatln("%sJMI_DYNAMIC_ADD(%s)", indent, tempName_C());
         }
     }
-	
-	public void FType.genTempInputAssigns_C(
-			CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-		if (isArray()) {
-			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
-			String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
-			Array arr = exp.getArray();
-			for (Index i : arr.indices()) {
-				String cellName = pre + i.toUnclosedString() + ")";
-				genTempInputCellAssigns_C(p, str, indent, cellName, arr.get(i));
-			}
-		} else {
-			genTempInputCellAssigns_C(p, str, indent, name, exp);
-		}
-	}
-	
-	public void FType.genTempInputCellAssigns_C(
-			CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
+
+	public void FExp.genTempInputCellAssigns_C(CodePrinter p, CodeStream str, String indent, String name) {
 		str.print(indent + name + " = ");
-		p.print(exp, str, indent);
+		p.print(this, str, indent);
 		str.print(";\n");
-	}
-	
-	public void FRecordType.genTempInputCellAssigns_C(
-			CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-		for (FRecordComponentType comp : getComponents()) {
-			String compName = name + "->" + comp.getName();
-			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genTempInputAssigns_C(p, str, indent, compName, compExp);
-		}
 	}
 	
 	// TODO: maybe this should be moved to front-end
@@ -4692,125 +4692,121 @@ aspect CCodeGen {
 		}
 	}
 	
-	public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-		if (hasFExp()) 
-			getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, forIndices, indexCounter);
-	}
-	
-	public void FType.genWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-		if (isArray()) {
-			String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-			String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-			Array arr = exp.getArray();
-			for (Index i : arr.indices()) {
-				String cellName = pre + i.toUnclosedString() + ")";
-				genCellWriteBackResidual_C(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
-			}
-		} else {
-			genCellWriteBackResidual_C(str, indent, name, exp, enumerator, forIndices, indexCounter);
-		}
-	}
-    
-    public void FNoType.genWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        
-    }
-    
-	public void FType.genCellWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-		exp.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
-	}
-	
-	public void FRecordType.genCellWriteBackResidual_C(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        if (exp.isNoExp()) {
-            return;
-        }
-		for (FRecordComponentType comp : getComponents()) {
-			String compName = name + "->" + comp.getName();
-			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBackResidual_C(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
-		}
-	}
-	
-	public void FExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-		throw new UnsupportedOperationException();
-	}
-    
-    public void FNoExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-        
-    }
-    
-	public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
-		int index = indexCounter.next();
-		if (forIndices == null || forIndices.contains(index)) {
-			if (!myFV().isReal()) 
-				throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + myFV().name());
-			
-			// This variable is in the set of variables to generate code for.
-			str.print(indent);
-			str.print("(*res)[");
-			str.print(enumerator.next());
-			str.print("] = ");
-			str.print(name);
-			str.print(" - (");
-			prettyPrint_C(str, "");
-			str.print(");\n");
-		}
-	}
-	
-	public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
-		if (hasFExp() && getFExp().replaceWithTemp())
-			getFExp().type().genWriteBackAssignment_C(str, indent, name_C(), getFExp(), forVariables);
-	}
-	
-	public void FType.genWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-		if (isArray()) {
-            if (size().isUnknown()) {
-                 str.format("%sJMI_ASG(%s, ", indent, macroType());
-                 ASTNode.printer_C.print(exp, str, indent);
-                 str.formatln(", %s)", name);
-            } else {
-                String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-                String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-                Array arr = exp.getArray();
-                for (Index i : arr.indices()) {
-                    String cellName = pre + i.toUnclosedString() + ")";
-                    genCellWriteBackAssignment_C(str, indent, cellName, arr.get(i), forVariables);
-                }
+    public class CodePrinter {
+        public abstract class FuncCallOutArgPrinter extends CodeFuncCallInOutArgPrinter {
+            @Override
+            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+                exp.genFuncCallOutArg_C(this, str, indent, name);
             }
-		} else {
-			genCellWriteBackAssignment_C(str, indent, name, exp, forVariables);
-		}
-	}
-    
-    public void FNoType.genWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        
-    }
-    
-	public void FType.genCellWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-		exp.genWriteBackAssignment_C(str, indent, name, forVariables);
-	}
-	
-	public void FRecordType.genCellWriteBackAssignment_C(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        if (exp.isNoExp()) {
-            return;
-        }
-		for (FRecordComponentType comp : getComponents()) {
-			String compName = name + "->" + comp.getName();
-			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genWriteBackAssignment_C(str, indent, compName, compExp, forVariables);
-		}
-	}
 
-	public void FExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-		throw new UnsupportedOperationException("Cannot generate write back assignment for FExp of type '" + getClass().getName() + "'");
-	}
-	
-    public void FNoExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        
+            @Override
+            public String arrayAccessConst() {
+                return ASTNode.C_ARRAY_VALUE;
+            }
+
+            public abstract void printUse(CodeStream str, String indent, FIdUseExp use, String name);
+        }
     }
-	
-	public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-		if (forVariables != null && !forVariables.contains(myFV()))
-			return; // This variable is not in the set of variables to generate code for.
+
+    public void FExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+        throw new UnsupportedOperationException("No implementation for FExp.genFuncCallOutArg_C for type '" + getClass().getName() + "'. Printer is " + p.getClass().getName());
+    }
+
+    @Override
+    public void FNoExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {}
+
+    @Override
+    public void FIdUseExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+        p.printUse(str, indent, this, name);
+    }
+
+    public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
+        if (hasFExp() && getFExp().replaceWithTemp())
+            printer_C.printWriteBackAssignment(str, indent, this, forVariables);
+    }
+
+    public abstract class CodePrinter {
+        public class WriteBackResidualPrinter extends FuncCallOutArgPrinter {
+            protected final Enumerator enumerator;
+            protected final Set<Integer> forIndices;
+            protected final Enumerator indexCounter;
+    
+            protected WriteBackResidualPrinter(Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+                this.enumerator = enumerator;
+                this.forIndices = forIndices;
+                this.indexCounter = indexCounter;
+            }
+
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
+            }
+        }
+
+        public abstract void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
+                Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter);
+    }
+    
+    public class CPrettyPrinter {
+        @Override
+        public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
+                Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+            WriteBackResidualPrinter p = new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
+            p.print(str, indent, left.getFExp().type(), left.name_C(), left.getFExp());
+        }
+    }
+
+    public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        if (hasFExp()) 
+            printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
+    }
+
+    public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        int index = indexCounter.next();
+        if (forIndices == null || forIndices.contains(index)) {
+            if (!myFV().isReal()) 
+                throw new UnsupportedOperationException("Cannot generate real residual write back for non real variable " + myFV().name());
+
+            // This variable is in the set of variables to generate code for.
+            str.print(indent);
+            str.print("(*res)[");
+            str.print(enumerator.next());
+            str.print("] = ");
+            str.print(name);
+            str.print(" - (");
+            prettyPrint_C(str, "");
+            str.print(");\n");
+        }
+    }
+
+    public abstract class CodePrinter {
+        public class WriteBackAssignmentPrinter extends FuncCallOutArgPrinter {
+            protected Collection<FVariable> forVariables;
+
+            protected WriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
+                this.forVariables = forVariables;
+            }
+
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackAssignment_C(str, indent, name, forVariables);
+            }
+        }
+        
+        public abstract void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
+                Collection<FVariable> forVariables);
+    }
+    public class CPrettyPrinter {
+        @Override
+        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left, Collection<FVariable> forVariables) {
+            WriteBackAssignmentPrinter p = new WriteBackAssignmentPrinter(forVariables);
+            p.print(str, indent, left.getFExp().type(), left.name_C(), left.getFExp());
+        }
+    }
+
+    public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+        if (forVariables != null && !forVariables.contains(myFV()))
+            return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
             str.format("%sJMI_ASG(STR, ", indent);
             genAssignedRef_C(ASTNode.printer_C, str, indent);
@@ -4819,19 +4815,19 @@ aspect CCodeGen {
             str.println(")");
             return;
         }
-		str.print(indent);
+        str.print(indent);
         genAssignedRef_C(ASTNode.printer_C, str, indent);
-		str.print(" = (");
-		str.print(name);
-		str.print(")");
-		if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
-			str.print("/sf(");
-			str.print(myFV().valueReference());
-			str.print(")");
-		}
-		str.print(";\n");
-	}
-	
+        str.print(" = (");
+        str.print(name);
+        str.print(")");
+        if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
+            str.print("/sf(");
+            str.print(myFV().valueReference());
+            str.print(")");
+        }
+        str.print(";\n");
+    }
+
 	public void FExp.genArgument_C(CodePrinter p, CodeStream str, String indent) {
 		if (isComposite() && !keepAsArray())
 			str.print(tempName_C());
@@ -5266,5 +5262,59 @@ aspect CCodeGen {
         
         str.formatln("%s}", outerIndent);
         str.println();
+    }
+    
+    /**
+     * Abstract class for handling all the cases where either a function call
+     * input or output needs to be printed. This handles records and arrays
+     * variables. Using this class and pattern minimizes the amout of
+     * duplicated code and bugs.
+     */
+    public abstract class CodeFuncCallInOutArgPrinter {
+        public void print(CodeStream str, String indent, FType type, String name, FExp exp) {
+            type.genFuncCallInOutArg_C(this, str, indent, name, exp);
+        }
+        public abstract void printCell(CodeStream str, String indent, String name, FExp exp);
+        public abstract String arrayAccessConst();
+    }
+    
+    public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
+        if (isArray()) {
+            if (size().isUnknown()) {
+                // Works for now!
+                str.format("%sJMI_ASG(%s, ", indent, macroType());
+                ASTNode.printer_C.print(exp, str, indent);
+                str.formatln(", %s)", name);
+            } else {
+                String type = isRecord() ? C_ARRAY_RECORD : p.arrayAccessConst();
+                String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
+                Array arr = exp.getArray();
+                for (Index i : arr.indices()) {
+                    String cellName = pre + i.toUnclosedString() + ")";
+                    genFuncCallCellInOutArg_C(p, str, indent, cellName, arr.get(i));
+                }
+            }
+        } else {
+            genFuncCallCellInOutArg_C(p, str, indent, name, exp);
+        }
+    }
+
+    @Override
+    public void FNoType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {}
+
+    public void FType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
+        p.printCell(str, indent, name, exp);
+    }
+    
+    @Override
+    public void FRecordType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
+        if (exp.isNoExp()) {
+            return;
+        }
+        for (FRecordComponentType comp : getComponents()) {
+            String compName = name + "->" + comp.getName();
+            FExp compExp = exp.extractRecordComponentExp(comp.getName());
+            comp.getFType().genFuncCallInOutArg_C(p, str, indent, compName, compExp);
+        }
     }
 }

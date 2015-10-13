@@ -232,7 +232,7 @@ aspect CADCodeGen {
 		str.print("(");
 		str.print(name);
 		str.print(", ");
-		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+		getFSubscripts().prettyPrintWithSep(printer_C, str, "", ", ");
 		str.print(")");
 		return os.toString();
 	}
@@ -259,7 +259,7 @@ aspect CADCodeGen {
 		str.print("(");
 		str.print(name);
 		str.print(", ");
-		getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+		getFSubscripts().prettyPrintWithSep(printer_C, str, "", ", ");
 		str.print(")");
 		return os.toString();
 	}
@@ -740,6 +740,11 @@ aspect CADCodeGen {
 						myLefts().get(i).genArgument_var_CAD(str);
 					else
 						myLefts().get(i).genArgument_C(str);
+                } else if (i == 0 && lefts == 0 && isFunctionCallArg()) {
+                    if (outputs.get(i).shouldBeDifferentiated())
+                        str.print(tempName_var_CAD());
+                    else
+                        str.print(tempName_C());
 				} else {
 					str.print("NULL");
 				}
@@ -751,6 +756,8 @@ aspect CADCodeGen {
 				str.print(sep);
 				if (i < lefts)
 					myLefts().get(i).genArgument_der_CAD(str);
+                else if (i == 0 && lefts == 0 && isFunctionCallArg())
+                    str.print(tempName_der_CAD());
 				else
 					str.print("NULL");
 				sep = ", ";
@@ -805,10 +812,10 @@ aspect CADCodeGen {
      * @param visited     A list that contains all visisted equations.
      *    Used by FFunctionCallEquation so that only one function call is generated.
      */
-    public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {}
+    public void FAbstractEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {}
 
     @Override
-    public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+    public void FEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         boolean firstVisit = visited == null ? true : visited.add(this);
         if(!shouldBeDifferentiated()){
             genResidual_C(printer_C, str, indent, enumerator, null, null);
@@ -845,7 +852,7 @@ aspect CADCodeGen {
      * @see FAbstractEquation#genResidual_CAD(Enumerator, String, CodeStream, Set, Collection)
      */
     @Override
-    public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+    public void FFunctionCallEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         boolean firstVisit = visited == null ? true : visited.add(this);
         if (!getCall().isIgnored()) {
             if (firstVisit) {
@@ -857,28 +864,27 @@ aspect CADCodeGen {
         }
     }
 
-
-    public void FIfWhenElseEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+    @Override
+    public void FIfWhenElseEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         genIfStart_C(printer_CAD, str, indent);
-        if (forIndices == null)
-            forIndices = Collections.emptySet();
         Iterator<Integer> fiIt = forIndices.iterator();
         int i = 0;
         int n = fiIt.hasNext() ? fiIt.next() : -1;
         for (FAbstractEquation equation : getFAbstractEquations()) {
-            ArrayList<Integer> fis = new ArrayList<Integer>();
+            Set<Integer> fis = new HashSet<Integer>();
             while (n >= i && n < i + equation.numScalarEquations()) {
                 fis.add(n - i);
                 n = fiIt.hasNext() ? fiIt.next() : -1;
             }
             if (forIndices.size() == 0 || fis.size() > 0) {
-                equation.genResidual_CAD(enumerator, indent + "  ", str, visited, fis);
+                equation.genResidual_CAD(enumerator, printer_CAD.indent(indent), str, visited, fis);
             }
             i += equation.numScalarEquations();
         }
     }
-    
-    public void FIfWhenEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Collection<Integer> forIndices) {
+
+    @Override
+    public void FIfWhenEquation.genResidual_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
         if (!isElse()) {
             boolean firstVisit = visited == null ? true : visited.add(this);
             if (firstVisit)
@@ -1142,7 +1148,7 @@ aspect CADCodeGen {
 
     @Override
     public void SimpleEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices());
+        equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
     /**
@@ -1241,67 +1247,47 @@ aspect CADCodeGen {
             printer_CAD.printPostSteps(this, str, indent);
     }
 
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
+    public class CADPrettyPrinter {
+        @Override
+        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
+                Collection<FVariable> forVariables) {
+            WriteBackAssignmentPrinter var_p = new WriteBackAssignmentPrinter_var(forVariables);
+            WriteBackAssignmentPrinter der_p = new WriteBackAssignmentPrinter_der(forVariables);
+            var_p.print(str, indent, left.getFExp().type(), left.varName_CAD(), left.getFExp());
+            der_p.print(str, indent, left.getFExp().type(), left.derName_CAD(), left.getFExp());
+        }
+
+        public class WriteBackAssignmentPrinter_var extends CodePrinter.WriteBackAssignmentPrinter {
+            
+            protected WriteBackAssignmentPrinter_var(Collection<FVariable> forVariables) {
+                super(forVariables);
+            }
+
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
+            }
+        }
+
+        public class WriteBackAssignmentPrinter_der extends CodePrinter.WriteBackAssignmentPrinter {
+
+            protected WriteBackAssignmentPrinter_der(Collection<FVariable> forVariables) {
+                super(forVariables);
+            }
+    
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
+            }
+        }
+    }
+    
     public void FFunctionCallLeft.genWriteBackAssignment_CAD(CodeStream str, String indent, Collection<FVariable> forVariables){
         if (hasFExp()) {
-            getFExp().type().genWriteBackAssignment_var_CAD(str, indent, varName_CAD(), getFExp(), forVariables);
-            getFExp().type().genWriteBackAssignment_der_CAD(str, indent, derName_CAD(), getFExp(), forVariables);
+            printer_CAD.printWriteBackAssignment(str, indent, this, forVariables);
         }
     }
 
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-            String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genCellWriteBackAssignment_var_CAD(str, indent, cellName, arr.get(i), forVariables);
-            }
-        } else {
-            genCellWriteBackAssignment_var_CAD(str, indent, name, exp, forVariables);
-        }
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-            String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genCellWriteBackAssignment_der_CAD(str, indent, cellName, arr.get(i), forVariables);
-            }
-        } else {
-            genCellWriteBackAssignment_der_CAD(str, indent, name, exp, forVariables);
-        }
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genCellWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        exp.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FExp.genWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        throw new UnsupportedOperationException();
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
     public void FIdUseExp.genWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
         if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
@@ -1311,23 +1297,6 @@ aspect CADCodeGen {
         str.print(name + ";\n");
     }
 
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genCellWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        exp.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FExp.genWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        throw new UnsupportedOperationException();
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
     public void FIdUseExp.genWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
         if (forVariables != null && !forVariables.contains(myFV()) || !shouldBeDifferentiated())
             return; // This variable is not in the set of variables to generate code for.
@@ -1335,29 +1304,6 @@ aspect CADCodeGen {
         str.print(derName_CAD());
         str.print(" = ");
         str.print(name + ";\n");
-    }
-
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FRecordType.genCellWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        for (FRecordComponentType comp : getComponents()) {
-            String compName = name + "->" + comp.getName();
-            FExp compExp = exp.extractRecordComponentExp(comp.getName());
-            comp.getFType().genCellWriteBackAssignment_var_CAD(str, indent, compName, compExp, forVariables);
-        }
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FRecordType.genCellWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, FExp exp, Collection<FVariable> forVariables) {
-        for (FRecordComponentType comp : getComponents()) {
-            String compName = name + "->" + comp.getName();
-            FExp compExp = exp.extractRecordComponentExp(comp.getName());
-            comp.getFType().genCellWriteBackAssignment_der_CAD(str, indent, compName, compExp, forVariables);
-        }
     }
 
     /**
@@ -1634,6 +1580,9 @@ aspect CADCodeGen {
             getFExp().genTempOutputs_CAD(p, str, indent);
     }
 
+    @Override
+    public void FArraySubscripts.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {}
+    
     /**
      * TODO: This method is a duplicate from c-codegen. Should be refactored!
      * 
@@ -1960,6 +1909,23 @@ aspect CADCodeGen {
 		return tmpNbr_der++;
 	}
 
+    public class CADPrettyPrinter {
+        
+        @Override
+        public void printTempInputAssigns(CodeStream str, String indent, FExp exp) {
+            funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_var_CAD(), exp);
+            funcCallInArgPrinter_der.print(str, indent, exp.type(), exp.tempName_der_CAD(), exp);
+        }
+        
+        protected final FuncCallInArgPrinter funcCallInArgPrinter_der = new FuncCallInArgPrinter_der();
+        
+        public class FuncCallInArgPrinter_der extends FuncCallInArgPrinter {
+            @Override
+            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+                exp.genTempInputCellAssigns_der_CAD(CADPrettyPrinter.this, str, indent, name);
+            }
+        }
+    }
 
     /**
      * Functions containing expressions/records/array as arguments need
@@ -1975,101 +1941,34 @@ aspect CADCodeGen {
      */
     public void FExp.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
         if (isComposite() && !keepAsArray()) {
-            String name = tempName_var_CAD();
-            type().printInit_C(p, str, indent, name, this);
-            type().genTempInputAssigns_var_CAD(p, str, indent, name, this);
-            name = tempName_der_CAD();
-            type().printInit_C(p, str, indent, name, this);
-            type().genTempInputAssigns_der_CAD(p, str, indent, name, this);
+            type().printInit_C(p, str, indent, tempName_var_CAD(), this);
+            type().printInit_C(p, str, indent, tempName_der_CAD(), this);
+            genTempInputAssigns_CAD(p, str, indent);
         }
     }
 
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genTempInputAssigns_var_CAD(CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
-            String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genTempInputCellAssigns_var_CAD(p, str, indent, cellName, arr.get(i));
-            }
-        } else {
-            genTempInputCellAssigns_var_CAD(p, str, indent, name, exp);
+    public void FExp.genTempInputAssigns_CAD(CodePrinter p, CodeStream str, String indent) {
+        p.printTempInputAssigns(str, indent, this);
+    }
+
+    public void FFunctionCall.genTempInputAssigns_CAD(CodePrinter p, CodeStream str, String indent) {
+        if (!isComposite()) {
+            super.genTempInputAssigns_CAD(p, str, indent);
         }
     }
 
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genTempInputAssigns_der_CAD(
-            CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
-            String pre = "jmi_array_" + type + "_" + ndims() + "(" + name + ", ";
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genTempInputCellAssigns_der_CAD(p, str, indent, cellName, arr.get(i));
-            }
-        } else {
-            genTempInputCellAssigns_der_CAD(p, str, indent, name, exp);
+    public void FPartialFunctionCall.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
+        if (myFCallable().isPartialFunction()) {
+            p.printTempInputAssigns(str, indent, this);
+            str.formatln("%sJMI_DYNAMIC_ADD(%s)", indent, tempName_var_CAD());
+            str.formatln("%sJMI_DYNAMIC_ADD(%s)", indent, tempName_der_CAD());
         }
     }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genTempInputCellAssigns_var_CAD(CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
+    public void FExp.genTempInputCellAssigns_der_CAD(
+            CodePrinter p, CodeStream str, String indent, String name) {
         str.print(indent + name + " = ");
-        p.print(exp, str, indent);
+        genDer_CAD(p, str, indent);
         str.print(";\n");
-    }
-
-    /**
-     * Functions containing expressions/records/array as arguments need
-     * to handle the arguments before. For expressions this usually means AD-code
-     * and for records/array temporary records/arrays are constructed and filled
-     * and passed on as input.
-     * 
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     * 
-     * @param p  use CADPrettyPrinter for p.print to call prettyPrint_CAD
-     * @param str  the c-code is written to this stream 
-     * @param indent  used to get a consistently formated c-code
-     */
-
-	@Override
-	public void FRecordType.genTempInputCellAssigns_var_CAD(CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-		for (FRecordComponentType comp : getComponents()) {
-			String compName = name + "->" + comp.getName();
-			FExp compExp = exp.extractRecordComponentExp(comp.getName());
-			comp.getFType().genTempInputAssigns_var_CAD(p, str, indent, compName, compExp);
-		}
-	}
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    public void FType.genTempInputCellAssigns_der_CAD(
-            CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-        str.print(indent + name + " = ");
-        exp.genDer_CAD(p, str, indent);
-        str.print(";\n");
-    }
-
-    /*
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     */
-    @Override
-    public void FRecordType.genTempInputCellAssigns_der_CAD(CodePrinter p, CodeStream str, String indent, String name, FExp exp) {
-        for (FRecordComponentType comp : getComponents()) {
-            String compName = name + "->" + comp.getName();
-            FExp compExp = exp.extractRecordComponentExp(comp.getName());
-            comp.getFType().genTempInputAssigns_der_CAD(p, str, indent, compName, compExp);
-        }
     }
 
 	syn String FFunctionCallLeft.varName_CAD() {
@@ -2177,6 +2076,41 @@ aspect CADCodeGen {
         }
     }
 
+    public class CADPrettyPrinter {
+        @Override
+        public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
+                Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+            WriteBackResidualPrinter var_p = new WriteBackResidualPrinter_var(enumerator, forIndices, indexCounter);
+            WriteBackResidualPrinter der_p = new WriteBackResidualPrinter_der(enumerator.copy(), forIndices, indexCounter.copy());
+            var_p.print(str, indent, left.getFExp().type(), left.varName_CAD(), left.getFExp());
+            der_p.print(str, indent, left.getFExp().type(), left.derName_CAD(), left.getFExp());
+        }
+
+        public class WriteBackResidualPrinter_var extends CodePrinter.WriteBackResidualPrinter {
+            
+            protected WriteBackResidualPrinter_var(Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+                super(enumerator, forIndices, indexCounter);
+            }
+
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackResidual_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
+            }
+        }
+
+        public class WriteBackResidualPrinter_der extends CodePrinter.WriteBackResidualPrinter {
+
+            protected WriteBackResidualPrinter_der(Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+                super(enumerator, forIndices, indexCounter);
+            }
+    
+            @Override
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+                use.genWriteBackResidual_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
+            }
+        }
+    }
+
     /**
      * Used when generating the residual for a FFunctionCallEquation. The equationindex
      * determines which entry in the residual, res[], and directional derivative, dF[], that
@@ -2185,136 +2119,17 @@ aspect CADCodeGen {
      * @param str  the c-code is written to this stream
      * @param indent  used to get a consistently formated c-code
      */
-    public void FFunctionCallLeft.genWriteBack_CAD(CodeStream str, String indent, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+    public void FFunctionCallLeft.genWriteBack_CAD(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         if (hasFExp()) {
             if (getFExp().type().shouldBeDifferentiated()) {
-                Enumerator enumeratorCopy = enumerator.copy();
-                Enumerator indexCounterCopy = indexCounter.copy();
-                getFExp().type().genWriteBack_var_CAD(str, indent, varName_CAD(), getFExp(), enumerator, forIndices, indexCounter);
-                getFExp().type().genWriteBack_der_CAD(str, indent, derName_CAD(), getFExp(), enumeratorCopy, forIndices, indexCounterCopy);
+                printer_CAD.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
             } else {
-                getFExp().type().genWriteBackResidual_C(str, indent, name_C(), getFExp(), enumerator, new LinkedHashSet<Integer>(forIndices), indexCounter);
+                printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
             }
         }
     }
 
-    /**
-     * Used to generate residuals for the expression in the argument. It is assumed that  this type
-     * corresponds to the arguments type. If this is an array then the expressions are extracted and
-     * a residual is generated for each expression, otherwise the residual is generated for the expression
-     * directly. 
-     * 
-     * @param str     the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name    corresponds to the name of the variable that the residual is generated for. 
-     * @param exp    corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FType.genWriteBack_var_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-            String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genCellWriteBack_var_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
-            }
-        } else {
-            genCellWriteBack_var_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
-        }
-    }
-
-    /**
-     * Used to generate derivative residual for the expression in the argument. It is assumed that this type
-     * corresponds to the arguments type. If this is an array then the expressions are extracted and
-     * a derivative residual is generated for each expression, otherwise the derivative residual is generated 
-     * for the expression directly. 
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     * @param exp corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FType.genWriteBack_der_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        if (isArray()) {
-            String type = isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE;
-            String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
-            Array arr = exp.getArray();
-            for (Index i : arr.indices()) {
-                String cellName = pre + i.toUnclosedString() + ")";
-                genCellWriteBack_der_CAD(str, indent, cellName, arr.get(i), enumerator, forIndices, indexCounter);
-            }
-        } else {
-            genCellWriteBack_der_CAD(str, indent, name, exp, enumerator, forIndices, indexCounter);
-        }
-    }
-
-    /**
-     * Calls a function that generates the residual for the expression in the argument.
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     * @param exp corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FType.genCellWriteBack_var_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        exp.genWriteBack_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
-    }
-
-    /**
-     * Used when generating residuals when variables in records are used. 
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     * @param exp corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FRecordType.genCellWriteBack_var_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        for (FRecordComponentType comp : getComponents()) {
-            String compName = name + "->" + comp.getName();
-            FExp compExp = exp.extractRecordComponentExp(comp.getName());
-            comp.getFType().genCellWriteBack_var_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
-        }
-    }
-
-    /**
-     * Used when generating derivative residuals when variables in records are used. 
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     * @param exp corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FRecordType.genCellWriteBack_der_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        for (FRecordComponentType comp : getComponents()) {
-            String compName = name + "->" + comp.getName();
-            FExp compExp = exp.extractRecordComponentExp(comp.getName());
-            comp.getFType().genCellWriteBack_der_CAD(str, indent, compName, compExp, enumerator, forIndices, indexCounter);
-        }
-    }
-
-    /**
-     * Calls a function that generates the derivative residual for the expression in the argument.
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     * @param exp corresponds to the new value for the  variable that the residual is generated for. 
-     */
-    public void FType.genCellWriteBack_der_CAD(CodeStream str, String indent, String name, FExp exp, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        exp.genWriteBack_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
-    }
-
-
-    /**
-     * Fills the residual vector at place index with the difference between
-     * this variable and the variable that name corresponds to.
-     * 
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     */
-    public void FExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        throw new UnsupportedOperationException();
-    }
-    public void FNoExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        
-    }
-    public void FIdUseExp.genWriteBack_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+    public void FIdUseExp.genWriteBackResidual_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices.size() == 0 || forIndices.contains(index)) {
             // This variable is in the set of variables to generate code for.
@@ -2329,21 +2144,7 @@ aspect CADCodeGen {
         }
     }
 
-    /**
-     * Fills the direction derivative residual vector at place index with the difference between
-     * this derivative variable and the variable that name corresponds to.
-     * 
-     * @param str  the c-code is written to this stream
-     * @param indent  used to get a consistently formated c-code
-     * @param name  corresponds to the name of the variable that the residual is generated for. 
-     */
-    public void FExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        throw new UnsupportedOperationException();
-    }
-    public void FNoExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
-        
-    }
-    public void FIdUseExp.genWriteBack_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Collection<Integer> forIndices, Enumerator indexCounter) {
+    public void FIdUseExp.genWriteBackResidual_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if ((forIndices.size() == 0 || forIndices.contains(index)) && shouldBeDifferentiated()) {
             str.print(indent);
