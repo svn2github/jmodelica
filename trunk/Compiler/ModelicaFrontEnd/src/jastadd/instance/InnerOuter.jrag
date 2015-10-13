@@ -52,7 +52,7 @@ aspect InnerOuterComponents {
         lookupInnerInstComponent(outer, firstScope);
 
     eq InstNode.getChild().lookupInnerInstComponent(InstComponentDecl outer, boolean firstScope) {
-        InstComponentDecl res = genericLookupInstComponent(outer.name(), false).targetOrNull();
+        InstComponentDecl res = genericLookupInstComponent(outer.name()).unresolved().targetOrNull();
         if (!firstScope && res != null && res.isInner()) {
             return res;
         } else if (res != null && res.isOuter() && !res.isInner()) {

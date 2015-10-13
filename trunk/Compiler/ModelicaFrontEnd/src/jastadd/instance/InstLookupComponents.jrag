@@ -57,6 +57,13 @@ aspect InstLookupComponents {
         public static <T extends InstNode> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
             return res.isError() ? res : new Constrained(res.target(), constr);
         }
+        
+        /**
+         * Indicates that the target was found as an outer, target() returns the corresponding inner.
+         */
+        public static InstLookupResult<InstComponentDecl> outer(InstComponentDecl outer) {
+            return new Outer(outer);
+        }
 
         /**
          * Did the lookup succeed?
@@ -87,7 +94,14 @@ aspect InstLookupComponents {
         public T targetOrNull() {
             return null;
         }
-
+        
+        /**
+         * Returns the outer for outer lookup results, this for rest.
+         */
+        public InstLookupResult<T> unresolved() {
+            return this;
+        }
+        
         /**
          * Get the found class or component, if any.
          * 
@@ -172,6 +186,30 @@ aspect InstLookupComponents {
 
             public void error(ASTNode src, String kind, String name) {
                 src.error("Cannot use %s %s, because it is not present in constraining type of declaration '%s'", kind, name, constr);
+            }
+        }
+        
+        private static class Outer extends Found<InstComponentDecl> {
+            
+            public Outer(InstComponentDecl target) {
+                super(target);
+            }
+            
+            public InstComponentDecl target() {
+                InstComponentDecl outer = super.target();
+                InstComponentDecl inner = outer.myInnerInstComponentDecl();
+                if (inner == null) {
+                    return outer.unknownInstComponentDecl();
+                }
+                return inner;
+            }
+
+            public InstComponentDecl targetOrNull() {
+                return target();
+            }
+            
+            public InstLookupResult<InstComponentDecl> unresolved() {
+                return InstLookupResult.found(super.target());
             }
         }
     }
@@ -382,9 +420,8 @@ aspect InstLookupComponents {
         return lookupInstComponent(name);
     }
 
-    syn InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) = genericLookupInstComponent(name, true);
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name, boolean resolveOuter) {
-        InstLookupResult<InstComponentDecl> res = memberInstComponent(name, resolveOuter);
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) {
+        InstLookupResult<InstComponentDecl> res = memberInstComponent(name);
         if (res.successful())
             return res;
         for (InstImport ii : instImports()) {
@@ -401,24 +438,23 @@ aspect InstLookupComponents {
     eq InstExtends.genericLookupInstConstant(String name)                                   = myInstClass().lookupInstConstant(name);
 
 
-    syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, boolean resolveOuter, int ndims) {
+    syn InstLookupResult<InstComponentDecl> InstNode.arrayMemberInstComponent(String name, int ndims) {
         if (ndims == 0) 
-            return memberInstComponent(name, resolveOuter);
-        return getInstComponentDecl(0).arrayMemberInstComponent(name, resolveOuter, ndims - 1);
+            return memberInstComponent(name);
+        return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
     }
-    eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, boolean resolveOuter, int ndims) = actualInstClass().arrayMemberInstComponent(name, resolveOuter, ndims);
+    eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
 
-    syn InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name) = memberInstComponent(name, true);
-    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name, boolean resolveOuter)  {
+    syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
         if (isArray()) {
-            return arrayMemberInstComponent(name, resolveOuter, ndims());
+            return arrayMemberInstComponent(name, ndims());
         } else {    
             for (InstComponentDecl ic : instComponentDecls()) 
                 if (ic.matches(name))
-                    return InstLookupResult.found(resolveOuter ? findInnerComponentIfAny(ic) : ic);
+                    return findInnerComponentIfAny(ic);
 
             for (InstExtends ie : instExtends()) {
-                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name, resolveOuter);
+                InstLookupResult<InstComponentDecl> res = ie.memberInstComponent(name);
                 if (res.successful())
                     return res;
             }
@@ -426,15 +462,13 @@ aspect InstLookupComponents {
             return InstLookupResult.notFound();
         }
     }
-    eq InstSimpleShortClassDecl.memberInstComponent(String name, boolean resolveOuter) = actualInstClass().memberInstComponent(name, resolveOuter);
+    eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
     
-    public InstComponentDecl InstNode.findInnerComponentIfAny(InstComponentDecl icd) {
+    public InstLookupResult InstNode.findInnerComponentIfAny(InstComponentDecl icd) {
         if (icd.isOuter()) {
-            InstComponentDecl inner = icd.myInnerInstComponentDecl();
-            if (inner != null) 
-                icd = inner;
+            return InstLookupResult.outer(icd);
         }
-        return icd;
+        return InstLookupResult.found(icd);
     }
     
     
@@ -500,9 +534,9 @@ aspect InstLookupComponents {
 
     // This is needed since the member components of InstPrimitive:s (which are attributes)
     // are not instantiated
-    eq InstPrimitive.memberInstComponent(String name, boolean resolveOuter) = myInstClass().memberInstComponent(name, resolveOuter);
-    eq InstExtends.memberInstComponent(String name, boolean resolveOuter)   = 
-        extendsPrimitive() ? myInstClass().memberInstComponent(name, resolveOuter) : super.memberInstComponent(name, resolveOuter);
+    eq InstPrimitive.memberInstComponent(String name) = myInstClass().memberInstComponent(name);
+    eq InstExtends.memberInstComponent(String name)   = 
+        extendsPrimitive() ? myInstClass().memberInstComponent(name) : super.memberInstComponent(name);
 
     eq InstComponentDecl.matches(String str) = name().equals(str);
     eq InstForIndex.matches(String str)      = getInstPrimitive().matches(str);
@@ -531,15 +565,19 @@ aspect InstLookupComponents {
     syn InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
     eq InstDot.myInstComponentDecl()                       = getLastInstAccess().myInstComponentDecl();
     eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
-    syn lazy InstComponentDecl InstComponentAccess.myInstComponentDecl() { 
+    
+    syn InstComponentDecl InstComponentAccess.myInstComponentDecl() = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
+    syn InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
+    
+    syn lazy InstLookupResult<InstComponentDecl> InstComponentAccess.myInstLookup() { 
         InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
         lookupError = res.isError();
-        return res.target(INST_UNKNOWN_COMPONENT, this);
+        return res;
     }
-    syn lazy InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() {
+    syn lazy InstLookupResult<InstComponentDecl> InstComponentArrayAccess.myInstLookup() {
         InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
         lookupError = res.isError();
-        return res.target(INST_UNKNOWN_COMPONENT, this);
+        return res;
     }
     syn InstComponentDecl FIdUseInstAccess.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
 }
@@ -556,12 +594,12 @@ aspect LookupInstComponentsInModifications {
     inh InstLookupResult<InstComponentDecl> InstNamedModification.lookupInstComponentInInstElement(String name);
     inh InstLookupResult<InstComponentDecl> InstComponentRedeclare.lookupInstComponentInInstElement(String name);
 
-    eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name)     = getInstNode().memberInstComponent(name, false);
-    eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name, false);
-    eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = memberInstComponent(name, false);
-    eq InstNode.getElementInstModification().lookupInstComponentInInstElement(String name)                = memberInstComponent(name, false);
+    eq InstConstrainingClass.getInstClassModification().lookupInstComponentInInstElement(String name)     = getInstNode().memberInstComponent(name).unresolved();
+    eq InstConstrainingComponent.getInstClassModification().lookupInstComponentInInstElement(String name) = getInstNode().memberInstComponent(name).unresolved();
+    eq InstComponentDecl.getInstModification().lookupInstComponentInInstElement(String name)              = memberInstComponent(name).unresolved();
+    eq InstNode.getElementInstModification().lookupInstComponentInInstElement(String name)                = memberInstComponent(name).unresolved();
     eq InstElementModification.getInstModification().lookupInstComponentInInstElement(String name)        = getName().qualifiedLookupInstComponent(name);
-    eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = memberInstComponent(name, false);
+    eq InstNormalExtends.getInstClassModification().lookupInstComponentInInstElement(String name)         = memberInstComponent(name).unresolved();
     eq InstComponentRedeclare.getName().lookupInstComponent(String name)                                  = lookupInstComponentInInstElement(name);
     eq InstRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
     eq FlatRoot.getChild().lookupInstComponentInInstElement(String name)                                  = InstLookupResult.notFound();
@@ -574,7 +612,7 @@ aspect LookupInstComponentsInModifications {
 
     inh InstLookupResult<InstComponentDecl> InstComponentRedeclare.lookupInstReplacingComponent(String name);
     eq InstNamedModification.getChild().lookupInstReplacingComponent(String name) = getName().qualifiedLookupInstComponent(name);
-    eq InstNode.getChild().lookupInstReplacingComponent(String name)              = memberInstComponent(name, false);
+    eq InstNode.getChild().lookupInstReplacingComponent(String name)              = memberInstComponent(name).unresolved();
 
 }
 
