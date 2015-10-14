@@ -3324,7 +3324,15 @@ aspect Scalarization {
 			exps.add(e.scalarize(indexMap));
 		return new FRangeExp(exps);
 	}
-	
+
+    public FExInStream FExInStream.scalarizeExp(Map<String,FExp> indexMap) {
+        FExInStream res = new FExInStream(getDefault().scalarize(indexMap), getEps().scalarize(indexMap), new List<FExp>());
+        for (FExp e : getVars()) {
+            res.addVarNoTransform(e.scalarize(indexMap));
+        }
+        return res;
+    }
+
 	public void ConnectionSetManager.scalarize() {
 		for (ConnectionSet set : list)
 			set.scalarize();

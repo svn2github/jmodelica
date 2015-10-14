@@ -2559,6 +2559,63 @@ aspect Attributes {
     
     
     /**
+     * Return the maximum numeric value that this expression can take, considering min/max values of variables.
+     * 
+     * Only implemented for a small subset of expressions:
+     *  - flat access to Real or Integer
+     *  - numeric literal
+     *  - negation
+     */
+    syn double FExp.maxRealValue() {
+        throw new UnsupportedOperationException();
+    }
+    
+    /**
+     * Return the minimum numeric value that this expression can take, considering min/max values of variables.
+     * 
+     * Only implemented for a small subset of expressions:
+     *  - flat access to Real or Integer
+     *  - numeric literal
+     *  - negation
+     */
+    syn double FExp.minRealValue() {
+        throw new UnsupportedOperationException();
+    }
+    
+    eq FRealLitExp.maxRealValue()    = getValue();
+    eq FRealLitExp.minRealValue()    = getValue();
+    eq FIntegerLitExp.maxRealValue() = getValue();
+    eq FIntegerLitExp.minRealValue() = getValue();
+    eq FNegExp.maxRealValue()        = -getFExp().minRealValue();
+    eq FNegExp.minRealValue()        = -getFExp().maxRealValue();
+    eq FIdUseExp.maxRealValue()      = getFIdUse().myFV().maxRealValue();
+    eq FIdUseExp.minRealValue()      = getFIdUse().myFV().minRealValue();
+
+    /**
+     * Return the maximum numeric value that this variable can take.
+     * 
+     * Only implemented for Real and Integer variables.
+     */
+    syn double FAbstractVariable.maxRealValue() {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Return the minimum numeric value that this variable can take.
+     * 
+     * Only implemented for Real and Integer variables.
+     */
+    syn double FAbstractVariable.minRealValue() {
+        throw new UnsupportedOperationException();
+    }
+    
+    eq FRealVariable.maxRealValue()    = variability().knownParameterOrLess() ? ceval().realValue() : maxAttribute();
+    eq FRealVariable.minRealValue()    = variability().knownParameterOrLess() ? ceval().realValue() : minAttribute();
+    eq FIntegerVariable.maxRealValue() = variability().knownParameterOrLess() ? ceval().intValue() : maxAttribute();
+    eq FIntegerVariable.minRealValue() = variability().knownParameterOrLess() ? ceval().intValue() : minAttribute();
+    
+    
+    /**
      * Check if this attribute is in an FVariable.
      */
     inh boolean FAttribute.isInFV();

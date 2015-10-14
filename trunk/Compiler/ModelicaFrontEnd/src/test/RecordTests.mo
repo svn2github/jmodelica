@@ -17,6 +17,33 @@
 package RecordTests
 
 
+model Test
+    model A
+        replaceable package C = D constrainedby E;
+        C.F f;
+    end A;
+    
+    model B
+        extends A(redeclare package C = E);
+    end B;
+    
+    package D
+        model F
+            Real x = 1;
+            Real y = 2;
+        end F;
+    end D;
+    
+    package E
+        model F
+            Real x = 3;
+        end F;
+    end E;
+    
+    replaceable B b constrainedby A;
+end Test;
+
+
 model RecordFlat1
  record A
   Real a;
