@@ -575,6 +575,56 @@ end InnerOuterTests.InnerOuterTest20;
 ")})));
 end InnerOuterTest20;
 
+model InnerOuterTest21
+    model O
+        partial function f
+            input Real[:] x;
+            output Real[size(x,1)] y;
+        end f;
+    end O;
+    
+    model M
+        function f
+            input Real[2] x;
+            output Real[size(x,1)] y;
+        algorithm
+            y := x;
+        end f;
+    end M;
+    
+    model A
+        outer M m;
+        Real[:] y = m.f({time,time});
+    end A;
+    
+    model B
+        A a;
+        inner M m;
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest21",
+            description="Flattening array acces in function in inner",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest21
+ Real b.a.y[2] = InnerOuterTests.InnerOuterTest21.b.m.f({time, time});
+
+public
+ function InnerOuterTests.InnerOuterTest21.b.m.f
+  input Real[2] x;
+  output Real[2] y;
+ algorithm
+  y := x;
+  return;
+ end InnerOuterTests.InnerOuterTest21.b.m.f;
+
+end InnerOuterTests.InnerOuterTest21;
+")})));
+end InnerOuterTest21;
+
 model InnerOuterAccess1
     record R_0
         

@@ -21,11 +21,13 @@ aspect InnerOuterComponents {
     inh boolean InstNode.inOuter();
     eq InstRoot.getChild().inOuter()          = false;
     eq Root.getChild().inOuter()              = false;
+    eq InstClassDecl.getChild().inOuter()     = false;
     eq InstComponentDecl.getChild().inOuter() = inOrIsOuter();
     
     inh boolean InstNode.inInner();
     eq InstRoot.getChild().inInner()          = false;
     eq Root.getChild().inInner()              = false;
+    eq InstClassDecl.getChild().inInner()     = false;
     eq InstComponentDecl.getChild().inInner() = inOrIsInner();
 
     inh InstComponentDecl InstComponentDecl.surroundingOuterComponentDecl();
@@ -113,9 +115,6 @@ aspect InnerOuterComponents {
 }
 
 aspect InnerOuterClasses {
-
-    eq InstClassDecl.getChild().inOuter() = inOrIsOuter();
-    eq InstClassDecl.getChild().inInner() = inOrIsInner();
 
     syn boolean InstClassDecl.inOrIsOuter() = isOuter() || inOuter();
     syn boolean InstClassDecl.inOrIsInner() = isInner() || inInner();
