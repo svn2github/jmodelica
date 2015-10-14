@@ -528,8 +528,6 @@ static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidual
                     solver->last_num_limiting_bounds, solver->last_num_active_bounds,
                     solver->lambda_max, solver->lambda);
             }
-            jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s>",
-                "jmi_kinsol_solver", block->label, message);
 
         }
         jmi_log_fmt_(log, node, logInfo, "<source:%s><block:%s><message:%s>",
@@ -577,35 +575,22 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
     
             if (block->callbacks->log_options.log_level >= 5 && nniters > 0) {
-                jmi_log_reals(log, topnode, logInfo, "actual_step", N_VGetArrayPointer(kin_mem->kin_pp), block->n);
+                if(solver->iterationProgressFlag) {
+                    jmi_log_reals(log, topnode, logInfo, "actual_step", N_VGetArrayPointer(kin_mem->kin_pp), block->n);
+                } else {
+                    jmi_log_node_t node= jmi_log_enter_vector_(log, topnode, logInfo, "actual_step");
+                    for( i=0; i<block->n; i++) {
+                        jmi_log_real_(log, 0.0);
+                    }
+                    jmi_log_leave(log, node);
+                }
             }
             
             jmi_log_fmt(log, topnode, logInfo, "<iteration_index:%I>", (int)nniters);
-            if (block->callbacks->log_options.log_level >= 5) {
-                jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
-            }
-
-            jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
-            jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", N_VWL2Norm(kin_mem->kin_pp, kin_mem->kin_uscale));
-
-            if (block->callbacks->log_options.log_level >= 5) {
-                jmi_log_node_t node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
-                for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
-                jmi_log_leave(log, node);
-            }
-            if (block->n >= 1) {
-                max_residual = f[0]*residual_scaling_factors[0];
-                for (i=1;i<block->n;i++) {
-                    realtype res = f[i]*residual_scaling_factors[i];
-                    if (RAbs(res) > RAbs(max_residual)) {
-                        max_residual = res;
-                        max_index = i;
-                    }
-                }
-                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
-                jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
-            }
-
+            if(solver->iterationProgressFlag) 
+                jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", N_VWL2Norm(kin_mem->kin_pp, kin_mem->kin_uscale));       
+            else
+                jmi_log_fmt(log, topnode, logInfo, "<scaled_step_norm:%E>", 0.0);
 
             {
                 /* Extract lambda_max and lambda for logging */
@@ -631,20 +616,46 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 }
                 solver->lambda = lambda;
                 solver->lambda_max = lambda_max;
-                solver->iterationProgressFlag = 0;
 
                 if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
                 if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
 
                 jmi_kinsol_print_progress(block, 0);
+                if (nniters > 0) {
+                    jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
+                    jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
+                }
+
+            }
+
+            jmi_log_reals(log, topnode, logInfo, "ivs", N_VGetArrayPointer(kin_mem->kin_uu), block->n);
+            if(solver->iterationProgressFlag || nniters == 0) {
+                jmi_log_fmt(log, topnode, logInfo, "<scaled_residual_norm:%E>", kin_mem->kin_fnorm);
+                if (block->callbacks->log_options.log_level >= 5) {
+                    jmi_log_node_t node;
+                    node = jmi_log_enter_vector_(log, topnode, logInfo, "scaled_residuals");
+                    for (i=0;i<block->n;i++) jmi_log_real_(log, f[i]*residual_scaling_factors[i]);
+                    jmi_log_leave(log, node);
+                }
+                if (block->n >= 1) {
+                    max_residual = f[0]*residual_scaling_factors[0];
+                    for (i=1;i<block->n;i++) {
+                        realtype res = f[i]*residual_scaling_factors[i];
+                        if (RAbs(res) > RAbs(max_residual)) {
+                            max_residual = res;
+                            max_index = i;
+                        }
+                    }
+                    jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
+                    jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
+                }
 
                 solver->last_fnorm = kin_mem->kin_fnorm;
                 solver->last_max_residual= max_residual;
                 solver->last_max_residual_index = max_index;
+            } 
 
-                jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
-                jmi_log_fmt(log, topnode, logInfo, "<lambda:%E>", lambda);
-            }
+            solver->iterationProgressFlag = 0;
         }
         
         jmi_log_leave(log, topnode);
