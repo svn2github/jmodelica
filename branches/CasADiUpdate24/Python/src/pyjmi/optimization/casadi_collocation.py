@@ -5696,11 +5696,11 @@ def _to_external_function(fcn, name, use_existing=False):
         ext = '.so'
     if not use_existing:
         print 'Generating code for', name
-        fcn.generateCode(name + '.c')
+        fcn.generate(name)
         _add_help_fcns(name + '.c')
         bitness_flag = '-m32' if struct.calcsize('P') == 4 else '-m64'
         system('gcc ' + bitness_flag + ' -fPIC -shared -O3 ' + name + '.c -o ' + name + ext)
-    fcn_e = casadi.ExternalFunction('./' + name + ext)
+    fcn_e = casadi.ExternalFunction(name)
     return fcn_e
     
 def enable_codegen(coll, name=None):
@@ -5746,16 +5746,16 @@ def enable_codegen(coll, name=None):
         enable_codegen.times += 1
         name = str(enable_codegen.times)
     else:
-        if (path.isfile('nlp_'+name+ext) and
-            path.isfile('grad_f_'+name+ext) and
-            path.isfile('jac_g_'+name+ext) and
-            path.isfile('hess_lag_'+name+ext)):
+        if (path.isfile('__func_nlp_'+name+ext) and
+            path.isfile('__func_grad_f_'+name+ext) and
+            path.isfile('__func_jac_g_'+name+ext) and
+            path.isfile('__func_hess_lag_'+name+ext)):
             existing = True
     
-    nlp = _to_external_function(nlp, 'nlp_' + name, existing)
-    grad_f = _to_external_function(grad_f, 'grad_f_' + name, existing)
-    jac_g = _to_external_function(jac_g, 'jac_g_' + name, existing)
-    hess_lag = _to_external_function(hess_lag, 'hess_lag_' + name, existing)
+    nlp = _to_external_function(nlp, '__func_nlp_' + name, existing)
+    grad_f = _to_external_function(grad_f, '__func_grad_f_' + name, existing)
+    jac_g = _to_external_function(jac_g, '__func_jac_g_' + name, existing)
+    hess_lag = _to_external_function(hess_lag, '__func_hess_lag_' + name, existing)
     
     solver_cg = casadi.NlpSolver('ipopt', nlp)
     
