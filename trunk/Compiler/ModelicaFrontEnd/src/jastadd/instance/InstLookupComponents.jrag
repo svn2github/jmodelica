@@ -103,6 +103,19 @@ aspect InstLookupComponents {
         }
         
         /**
+         * @param target The new target
+         * @return a copy of this InstLookupResult with a new target.
+         */
+        public abstract InstLookupResult<T> create(InstComponentDecl target);
+        
+        /**
+         * @param name Name of target subcomponent
+         * @return <code>this</code> if <code>this</code> is an error, else lookup 
+         *         result of member <code>name</code> in <code>target()</code>
+         */
+        public abstract InstLookupResult<InstComponentDecl> memberInstComponent(String name);
+        
+        /**
          * Get the found class or component, if any.
          * 
          * @throws UnsupportedOperationException  if lookup was not successful.
@@ -139,6 +152,11 @@ aspect InstLookupComponents {
         private final static InstLookupResult NOT_FOUND = new NotFound(); 
 
         private static class NotFound<T extends InstNode> extends InstLookupResult<T> {
+            
+            public InstLookupResult<T> create(InstComponentDecl target) {
+                return notFound();
+            }
+            
             public void error(ASTNode src, String kind, String name) {
                 src.error("Cannot find %s declaration for %s", kind, name);
             }
@@ -150,11 +168,19 @@ aspect InstLookupComponents {
             public boolean isError() {
                 return true;
             }
+            
+            public InstLookupResult<InstComponentDecl> memberInstComponent(String name) {
+                return (InstLookupResult<InstComponentDecl>) this;
+            }
         }
 
         private static class Found<T extends InstNode> extends InstLookupResult<T> {
             private T target;
 
+            public InstLookupResult<T> create(InstComponentDecl target) {
+                return new Found(target);
+            }
+            
             public Found(T target) {
                 this.target = target;
             }
@@ -170,11 +196,19 @@ aspect InstLookupComponents {
             public T targetOrNull() {
                 return target;
             }
+            
+            public InstLookupResult<InstComponentDecl> memberInstComponent(String name) {
+                return target().memberInstComponent(name);
+            }
         }
 
         private static class Constrained<T extends InstNode> extends Found<T> {
             private InstNode constr;
 
+            public InstLookupResult<T> create(InstComponentDecl target) {
+                return new Constrained(target, constr);
+            }
+            
             public Constrained(T target, InstNode constr) {
                 super(target);
                 this.constr = constr;
@@ -191,15 +225,21 @@ aspect InstLookupComponents {
         
         private static class Outer extends Found<InstComponentDecl> {
             
+            private InstLookupResult<InstComponentDecl> outer;
+            
+            public InstLookupResult<InstComponentDecl> create(InstComponentDecl target) {
+                return new Outer(target);
+            }
+            
             public Outer(InstComponentDecl target) {
                 super(target);
+                this.outer = InstLookupResult.found(target);
             }
             
             public InstComponentDecl target() {
-                InstComponentDecl outer = super.target();
-                InstComponentDecl inner = outer.myInnerInstComponentDecl();
+                InstComponentDecl inner = outer.target().myInnerInstComponentDecl();
                 if (inner == null) {
-                    return outer.unknownInstComponentDecl();
+                    return outer.target().unknownInstComponentDecl();
                 }
                 return inner;
             }
@@ -209,7 +249,33 @@ aspect InstLookupComponents {
             }
             
             public InstLookupResult<InstComponentDecl> unresolved() {
-                return InstLookupResult.found(super.target());
+                return outer;
+            }
+            
+            public InstLookupResult<InstComponentDecl> memberInstComponent(String name) {
+                InstLookupResult<InstComponentDecl> res = super.memberInstComponent(name);
+                if (!res.isError() && !outer.target().memberInstComponent(name).successful())
+                    return new OuterError(res.target());
+                return res;
+            }
+            
+            private class OuterError extends Found<InstComponentDecl> {
+                
+                public InstLookupResult<InstComponentDecl> create(InstComponentDecl target) {
+                    return new OuterError(target);
+                }
+                
+                public OuterError(InstComponentDecl target) {
+                    super(target);
+                }
+                
+                public boolean isError() {
+                    return true;
+                }
+                
+                public void error(ASTNode src, String kind, String name) {
+                    src.error("Cannot use %s %s in inner '%s', because it is not present in outer '%s'", kind, name, Outer.this.target(), outer.target());
+                }
             }
         }
     }
@@ -268,9 +334,9 @@ aspect InstLookupComponents {
     eq InstClassAccess.qualifiedLookupInstComponentUnconstrained(String name)                                 = 
         myInstClassDecl().memberInstComponent(name);
     eq InstComponentAccess.qualifiedLookupInstComponentUnconstrained(String name)                             = 
-        lookupArrayElement(myInstComponentDecl()).memberInstComponent(name);
+        lookupArrayElement(myInstLookup()).memberInstComponent(name);
     eq InstComponentArrayAccess.qualifiedLookupInstComponentUnconstrained(String name)                        = 
-        lookupArrayElement(myInstComponentDecl()).memberInstComponent(name);
+        lookupArrayElement(myInstLookup()).memberInstComponent(name);
 
     syn InstNode InstAccess.lookupConstrainingInstNode()     = null;
     eq InstComponentAccess.lookupConstrainingInstNode()      = 
@@ -371,6 +437,18 @@ aspect InstLookupComponents {
             }
         }
         return array;
+    }
+    
+    public InstLookupResult<InstComponentDecl> InstAccess.lookupArrayElement(InstLookupResult<InstComponentDecl> array) {
+        if (array.isError()) {
+            return array;
+        }
+        
+        InstComponentDecl icd = lookupArrayElement(array.unresolved().target());
+        if (icd == array.unresolved().target()) {
+            return array;
+        }
+        return array.create(icd);
     }
 
     /**

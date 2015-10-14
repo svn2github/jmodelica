@@ -575,6 +575,111 @@ end InnerOuterTests.InnerOuterTest20;
 ")})));
 end InnerOuterTest20;
 
+model InnerOuterAccess1
+    record R_0
+        
+    end R_0;
+    
+    record R
+        Real y;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.y = time;
+    end A;
+    
+    A a;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess1",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+1 errors found:
+Error at line 590, column 11, in file '...':
+  Cannot use component y in inner 'inner R r', because it is not present in outer 'outer R_0 r'
+
+")})));
+end InnerOuterAccess1;
+
+model InnerOuterAccess2
+    record R_0
+        
+    end R_0;
+    
+    record R
+        Real y;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.y = time;
+    end A;
+    
+    model B
+        inner outer R_0 r;
+        A a;
+    equation
+        r.y = time;
+    end B;
+    
+    B b;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess2",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+2 errors found:
+
+Error at line 622, column 11, in file '...':
+  Cannot find class or component declaration for y
+
+Error at line 629, column 11, in file '...':
+  Cannot use component y in inner 'inner R r', because it is not present in outer 'inner outer R_0 r'
+
+")})));
+end InnerOuterAccess2;
+
+model InnerOuterAccess3
+    record K
+        Real y;
+    end K;
+    
+    record R_0
+        
+    end R_0;
+    
+    record R
+        K k;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.k.y = time;
+    end A;
+    
+    A a;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess3",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+1 errors found:
+
+Error at line 665, column 11, in file '...':
+  Cannot use component k in inner 'inner R r', because it is not present in outer 'outer R_0 r'
+")})));
+end InnerOuterAccess3;
+
 
 
 model InnerOuterNested1
