@@ -42,7 +42,6 @@ using namespace std;
 
 %casadi_wrap(casadi::PrintableObject)
 %casadi_wrap(casadi::SharedObject)
-%casadi_wrap(casadi::GenericType)
 %casadi_wrap(casadi::OptionsFunctionality)
 %casadi_wrap(casadi::MX)
 %casadi_wrap(casadi::Function)
@@ -67,7 +66,6 @@ using namespace std;
 
 %include "casadi/core/printable_object.hpp"
 %include "casadi/core/shared_object.hpp"
-%include "casadi/core/generic_type.hpp"
 %include "casadi/core/options_functionality.hpp"
 %include "casadi/core/mx/mx.hpp"
 %include "casadi/core/function/function.hpp"
