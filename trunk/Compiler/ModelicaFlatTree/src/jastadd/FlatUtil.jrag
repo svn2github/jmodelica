@@ -1546,10 +1546,17 @@ aspect FlatFunctionUtils {
      inh boolean FSubscript.inFunction();
      inh boolean FFunctionCallLeft.inFunction();
      inh boolean FAttribute.inFunction();
+     inh boolean InstExtends.inFunction();
      eq InstBaseClassDecl.getChild().inFunction() = isFunction();
      eq FFunctionDecl.getChild().inFunction()     = true;
      eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
      eq Root.getChild().inFunction()              = false;
+     eq InstNormalExtends.getInstClassModification().inFunction() = extendsInFunction();
+     
+     inh boolean InstExtends.extendsInFunction();
+     eq Root.getChild().extendsInFunction()                     = false;
+     eq InstBaseClassDecl.getChild().extendsInFunction()        = isFunction();
+     eq InstShortClassDecl.getInstExtends().extendsInFunction() = false;
      
      /**
       * Get the containing FFunctionDecl.
