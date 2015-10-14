@@ -1110,6 +1110,7 @@ aspect Connections {
 			}
 			for (FAbstractEquation equ : getFAbstractEquations())
 			    equ.buildConnectionSets(prefix, csm, connect);
+			getFAbstractEquations().flushAllRecursive();
 		}
 		for (InstForIndex fi : getInstForIndexs()) {
 			fi.getInstPrimitive().setLocalCachedEvaluationValue(null);
