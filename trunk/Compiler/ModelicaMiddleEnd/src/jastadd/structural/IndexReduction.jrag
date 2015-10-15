@@ -278,8 +278,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability, isMeta);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            return new IndexReductionEq(name, eqn, groupNumber, variability, type, isMeta);
         }
 
         @Override
@@ -306,8 +306,8 @@ aspect IndexReduction {
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, boolean isMeta) {
-            super(name, eqn, groupNumber, variability, isMeta);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            super(name, eqn, groupNumber, variability, type, isMeta);
         }
 
         public int numDifferentiations() {
@@ -777,7 +777,7 @@ aspect IndexReduction {
                 IndexReductionEq original = eqnIt.next();
                 ASTNode.log.verbose("About to add equation: %s", newEqn);
                 // Add the differentiated equation
-                IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), original.getName() + "_d");
+                IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), incMap.type(i), original.getName() + "_d");
                 
                 incMap.addEdges(diffedEqn, true);
                 

@@ -706,4 +706,90 @@ Residual equations:
 ")})));
 end InitialTearingMatchingTest1;
 
+model TypeComputation1
+    Real Zc;
+    Real p(min=0,max=1.0E8,start=5.0,nominal=100000.0);
+    Real a;
+    R r;
+    Real q1(start = 5.0);
+
+    parameter Real p1 = 1;
+    parameter Real p2 = 2;
+    parameter Real p3 = 3;
+    parameter Real p4 = 4;
+
+    function f
+        input Real x1;
+        input Real x2;
+        output R r;
+    algorithm
+        r.d := if x1 > 0.5 then 4 else 3;
+        r.r1 := x2 * x2;
+        r.r2 := x2 * r.r1;
+        r.r3 := x2 + x2;
+        r.r4 := x2 + r.r3;
+    annotation(Inline=false);
+    end f;
+
+    record R
+        Integer d;
+        Real r1;
+        Real r2;
+        Real r3;
+        Real r4;
+    end R;
+
+equation
+    Zc = r.r1 * a / p1;
+    p = p2 + Zc * q1;
+    r = f(p, p3);
+    a = noEvent(if r.d == 3 then  r.r1 * r.r1 + r.r2 * r.r3 * r.r4 else r.r1);
+    p4 = q1 * r.r1;
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="TypeComputation1",
+            description="Test type computation bug where all BiP equations was considered non-real since one group member was integer",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed system (Block 1) of 2 iteration variables and 6 solved variables ---
+Torn variables:
+  r.r4
+  r.r3
+  r.r2
+  r.r1
+  a
+  Zc
+
+Iteration variables:
+  p (min=0,max=1.0E8,start=5.0,nominal=100000.0)
+  q1 (start=5.0)
+
+Solved discrete variables:
+  r.d
+
+Torn equations:
+  (TearingTests.TypeComputation1.R(r.d, r.r1, r.r2, r.r3, r.r4)) = TearingTests.TypeComputation1.f(p, p3)
+    Assigned variables: r.r4
+  (TearingTests.TypeComputation1.R(r.d, r.r1, r.r2, r.r3, r.r4)) = TearingTests.TypeComputation1.f(p, p3)
+    Assigned variables: r.r3
+  (TearingTests.TypeComputation1.R(r.d, r.r1, r.r2, r.r3, r.r4)) = TearingTests.TypeComputation1.f(p, p3)
+    Assigned variables: r.r2
+  (TearingTests.TypeComputation1.R(r.d, r.r1, r.r2, r.r3, r.r4)) = TearingTests.TypeComputation1.f(p, p3)
+    Assigned variables: r.r1
+  a := noEvent(if r.d == 3 then r.r1 * r.r1 + r.r2 * r.r3 * r.r4 else r.r1)
+  Zc := r.r1 * a / p1
+
+Continuous residual equations:
+  p = p2 + Zc * q1
+    Iteration variables: p
+  p4 = q1 * r.r1
+    Iteration variables: q1
+
+Discrete equations:
+  (TearingTests.TypeComputation1.R(r.d, r.r1, r.r2, r.r3, r.r4)) = TearingTests.TypeComputation1.f(p, p3)
+    Assigned variables: r.d
+-------------------------------
+")})));
+end TypeComputation1;
+
 end TearingTests;
