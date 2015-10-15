@@ -371,7 +371,7 @@ class RealTimeMPCBase(RealTimeBase):
     
         op = transfer_optimization_problem(opt_name, file_path,
                                            compiler_options = {'state_initial_equations' : True})
-        op.set(par_values.keys(), N.array(par_values.values()))
+        op.set(par_values.keys(), par_values.values())
                                            
         opt_opts = op.optimize_options()
         opt_opts['n_e'] = n_e
@@ -493,7 +493,7 @@ class RealTimeMPCBase(RealTimeBase):
         for k in range(self.n_steps):
             new_pars = self.par_changes.get_new_pars(k*self.dt)
             if new_pars != None:
-                self.solver.op.set(new_pars.keys(), N.array(new_pars.values()))
+                self.solver.op.set(new_pars.keys(), new_pars.values())
             
             self.solver.update_state(x_k)
             u_k = self.solver.sample()
