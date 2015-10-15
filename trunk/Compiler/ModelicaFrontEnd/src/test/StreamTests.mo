@@ -1618,6 +1618,238 @@ end StreamTests.StreamWithConst3;
 end StreamWithConst3;
 
 
+model StreamWithArrays1
+    connector C
+        Real p;
+        flow Real f;
+        stream Real s[0];
+    end C;
+
+    model A
+        C c1, c2, c3;
+        Real x1[0], x2[0], x3[0];
+    equation
+        connect(c1, c2);
+        connect(c2, c3);
+        x1 = inStream(c1.s);
+        x2 = inStream(c2.s);
+        x3 = inStream(c3.s);
+    end A;
+    
+    model B
+        C c(p = 1);
+    end B;
+
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamWithArrays1",
+            description="Test handling of outer stream connectors with arrays",
+            flatModel="
+fclass StreamTests.StreamWithArrays1
+ constant Real a.c1.p = 1;
+ constant Real a.c1.f = -0.0;
+ constant Real a.c2.f = 0;
+ constant Real a.c3.f = 0;
+ constant Real a.c2.p = 1;
+ constant Real a.c3.p = 1;
+ constant Real b.c.p = 1;
+ constant Real b.c.f = -0.0;
+end StreamTests.StreamWithArrays1;
+")})));
+end StreamWithArrays1;
+
+
+model StreamWithArrays2
+    connector C
+        Real p;
+        flow Real f;
+        stream Real s[2];
+    end C;
+
+    model A
+        C c1, c2, c3;
+        Real x1[2], x2[2], x3[2];
+    equation
+        connect(c1, c2);
+        connect(c2, c3);
+        x1 = inStream(c1.s);
+        x2 = inStream(c2.s);
+        x3 = inStream(c3.s);
+    end A;
+    
+    model B
+        C c(p = 1, s = {1,2});
+    end B;
+
+    A a;
+    B b;
+equation
+    connect(a.c1, b.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamWithArrays2",
+            description="Test handling of outer stream connectors with arrays",
+            flatModel="
+fclass StreamTests.StreamWithArrays2
+ constant Real a.c1.p = 1;
+ constant Real a.c1.f = -0.0;
+ Real a.c1.s[1];
+ Real a.c1.s[2];
+ constant Real a.c2.f = 0;
+ constant Real a.c3.f = 0;
+ constant Real a.x1[1] = 1;
+ constant Real a.x1[2] = 2;
+ Real a.x2[1];
+ Real a.x2[2];
+ Real a.x3[1];
+ Real a.x3[2];
+ constant Real a.c2.p = 1;
+ constant Real a.c3.p = 1;
+ constant Real b.c.p = 1;
+ constant Real b.c.f = -0.0;
+ constant Real b.c.s[1] = 1;
+ constant Real b.c.s[2] = 2;
+equation
+ a.c1.s[1] = 0.0;
+ a.c1.s[2] = 0.0;
+ a.x2[1] = 0.0;
+ a.x2[2] = 0.0;
+ a.x3[1] = 0.0;
+ a.x3[2] = 0.0;
+end StreamTests.StreamWithArrays2;
+")})));
+end StreamWithArrays2;
+
+
+model StreamWithArrays3
+    connector C
+        Real p;
+        flow Real f;
+        stream Real s[2];
+    end C;
+
+    model A
+        C c1[2], c2[2], c3[2];
+    equation
+        connect(c1, c2);
+        connect(c2, c3);
+    end A;
+    
+    model B
+        C c[2](p = {1,2}, s = {{1,2},{3,4}});
+    end B;
+
+    A a[2];
+    B b[2];
+equation
+    connect(a.c1, b.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamWithArrays3",
+            description="Test handling of outer stream connectors with arrays",
+            flatModel="
+fclass StreamTests.StreamWithArrays3
+ constant Real a[1].c1[1].p = 1;
+ constant Real a[1].c1[1].f = -0.0;
+ Real a[1].c1[1].s[1];
+ Real a[1].c1[1].s[2];
+ constant Real a[1].c1[2].p = 2;
+ constant Real a[1].c1[2].f = -0.0;
+ Real a[1].c1[2].s[1];
+ Real a[1].c1[2].s[2];
+ constant Real a[1].c2[1].f = 0;
+ Real a[1].c2[1].s[1];
+ Real a[1].c2[1].s[2];
+ constant Real a[1].c2[2].f = 0;
+ Real a[1].c2[2].s[1];
+ Real a[1].c2[2].s[2];
+ constant Real a[1].c3[1].f = 0;
+ Real a[1].c3[1].s[1];
+ Real a[1].c3[1].s[2];
+ constant Real a[1].c3[2].f = 0;
+ Real a[1].c3[2].s[1];
+ Real a[1].c3[2].s[2];
+ constant Real a[2].c1[1].p = 1;
+ constant Real a[2].c1[1].f = -0.0;
+ Real a[2].c1[1].s[1];
+ Real a[2].c1[1].s[2];
+ constant Real a[2].c1[2].p = 2;
+ constant Real a[2].c1[2].f = -0.0;
+ Real a[2].c1[2].s[1];
+ Real a[2].c1[2].s[2];
+ constant Real a[2].c2[1].f = 0;
+ Real a[2].c2[1].s[1];
+ Real a[2].c2[1].s[2];
+ constant Real a[2].c2[2].f = 0;
+ Real a[2].c2[2].s[1];
+ Real a[2].c2[2].s[2];
+ constant Real a[2].c3[1].f = 0;
+ Real a[2].c3[1].s[1];
+ Real a[2].c3[1].s[2];
+ constant Real a[2].c3[2].f = 0;
+ Real a[2].c3[2].s[1];
+ Real a[2].c3[2].s[2];
+ constant Real b[1].c[1].s[1] = 1;
+ constant Real b[1].c[1].s[2] = 2;
+ constant Real b[1].c[2].s[1] = 3;
+ constant Real b[1].c[2].s[2] = 4;
+ constant Real b[2].c[1].s[1] = 1;
+ constant Real b[2].c[1].s[2] = 2;
+ constant Real b[2].c[2].s[1] = 3;
+ constant Real b[2].c[2].s[2] = 4;
+ constant Real a[1].c2[1].p = 1;
+ constant Real a[1].c2[2].p = 2;
+ constant Real a[1].c3[1].p = 1;
+ constant Real a[1].c3[2].p = 2;
+ constant Real a[2].c2[1].p = 1;
+ constant Real a[2].c2[2].p = 2;
+ constant Real a[2].c3[1].p = 1;
+ constant Real a[2].c3[2].p = 2;
+ constant Real b[1].c[1].p = 1;
+ constant Real b[1].c[1].f = -0.0;
+ constant Real b[1].c[2].p = 2;
+ constant Real b[1].c[2].f = -0.0;
+ constant Real b[2].c[1].p = 1;
+ constant Real b[2].c[1].f = -0.0;
+ constant Real b[2].c[2].p = 2;
+ constant Real b[2].c[2].f = -0.0;
+equation
+ a[1].c1[1].s[1] = 0.0;
+ a[1].c1[1].s[2] = 0.0;
+ a[1].c2[1].s[1] = 0.0;
+ a[1].c2[1].s[2] = 0.0;
+ a[1].c3[1].s[1] = 0.0;
+ a[1].c3[1].s[2] = 0.0;
+ a[1].c1[2].s[1] = 0.0;
+ a[1].c1[2].s[2] = 0.0;
+ a[1].c2[2].s[1] = 0.0;
+ a[1].c2[2].s[2] = 0.0;
+ a[1].c3[2].s[1] = 0.0;
+ a[1].c3[2].s[2] = 0.0;
+ a[2].c1[1].s[1] = 0.0;
+ a[2].c1[1].s[2] = 0.0;
+ a[2].c2[1].s[1] = 0.0;
+ a[2].c2[1].s[2] = 0.0;
+ a[2].c3[1].s[1] = 0.0;
+ a[2].c3[1].s[2] = 0.0;
+ a[2].c1[2].s[1] = 0.0;
+ a[2].c1[2].s[2] = 0.0;
+ a[2].c2[2].s[1] = 0.0;
+ a[2].c2[2].s[2] = 0.0;
+ a[2].c3[2].s[1] = 0.0;
+ a[2].c3[2].s[2] = 0.0;
+end StreamTests.StreamWithArrays3;
+")})));
+end StreamWithArrays3;
+
+
 // TODO: Add error tests (e.g. stream connector without flow)
 
 end StreamTests;

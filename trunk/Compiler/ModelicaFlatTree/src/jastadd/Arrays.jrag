@@ -295,7 +295,11 @@ aspect Arrays {
 	 * True if any operand is scalar.
 	 */
 	syn boolean FMulExp.isElementWise() = (getLeft().ndims() * getRight().ndims() == 0);
-	
+
+    eq FExInStream.ndims() = expDefiningSize().ndims();
+
+    syn FExp FExInStream.expDefiningSize() = (numVars() > 0) ? streamExp(0) : getDefault();
+
 	/**
 	 * Get array dimensions.
 	 * 
@@ -1000,6 +1004,8 @@ aspect Arrays {
     eq FSpatialDistExp.size()           = vectorizedSize();
     
     eq FStringExp.size()                = getValue().size();
+
+    eq FExInStream.size()               = expDefiningSize().size();
 
     syn Size FBuiltInFunctionCall.vectorizedSize() {
         for (FExp e : myArgs())
@@ -2172,7 +2178,22 @@ aspect Arrays {
         }
         return arr;
     }
-    
+
+    eq FExInStream.getArray() {
+        if (!isArray()) {
+            return super.getArray();
+        }
+        Array arr = new Array(indices());
+        for (Index i : arr.indices()) {
+            FExInStream cell = new FExInStream(getDefault().getArray().get(i).treeCopy(), getEps().treeCopy(), new List<FExp>());
+            for (FExp e : getVars()) {
+                Index j = (e.ndims() < i.ndims()) ? i.partIndex(0, e.ndims()) : i;
+                cell.addVarNoTransform(e.getArray().get(j).treeCopy());
+            }
+            arr.set(i, cell);
+        }
+        return arr;
+    }
 
 	/**
 	 * Add a copy of this expression to arr at position i. 
