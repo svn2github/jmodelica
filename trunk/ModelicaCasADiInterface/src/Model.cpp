@@ -460,7 +460,7 @@ namespace ModelicaCasADi
 
         using std::endl;
         os << "------------------------------- Variables -------------------------------\n" << endl;
-        if (!timeVar.isEmpty()) {
+        if (!timeVar.isempty()) {
             os << "Time variable: ";
             os << ModelicaCasADi::normalizeMXRespresentation(timeVar);
             os << endl;

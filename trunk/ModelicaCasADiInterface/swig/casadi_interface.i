@@ -16,14 +16,39 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %module modelicacasadi_wrapper
 
+
+// Pull in numpy
+// WORKAROUNDS BEGINS: Due to Python-related issues in casadi.i
+#define CASADI_NOT_IN_DERIVED
+#ifdef SWIGPYTHON
+%{
+// to perhaps play more nicely with numpy.i
+#define SWIG_FILE_WITH_INIT
+#include "python/numpy.hpp"
+#define SWIG_PYTHON_CAST_MODE 1
+%}
+
+%init %{
+// initialize numpy, should only be done once?
+import_array();
+%}
+#endif // SWIGPYTHON
+// WORKAROUNDS END
+
+
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
-%include "vectors.i"
+
+%include "exception.i" // Must be before %import "casadi.i"
+
+%import "casadi.i"
+
+// Clear typemaps defined by CasADi, where we want to use our own typemaps in vectors.i instead
+%clear std::vector<double>;
+%clear std::vector<string>;
+%include "vectors.i" // Must be after %import "casadi.i"
 
 %include "std_string.i"
 %include "std_vector.i"
-%include "exception.i"
-
-%import "casadi_core.i"
 
 
 %{
@@ -46,14 +71,3 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 %include "ModelicaCasADi.i"
-
-
-// Pull in numpy
-%{
-// to perhaps play more nicely with numpy.i
-#define SWIG_FILE_WITH_INIT
-%}
-%init %{
-// initialize numpy, should only be done once?
-import_array();
-%}

@@ -14,7 +14,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 import ifcasadi.ifcasadi;
-import ifcasadi.GenericType;
 import ifcasadi.MX;
 import ifcasadi.MXFunction;
 import ifcasadi.MXVector;
@@ -44,8 +43,7 @@ aspect FExpToCasADi {
      */
     syn lazy MXFunction FFunctionDecl.toMXFunction() {  
         MXVector finalExpressions = generateFinalExpressionVector();
-        MXFunction f = new MXFunction(generateInputVector(),pickMXCorrespondingToOutputs(finalExpressions));
-        f.setOption("name",new GenericType(name()));
+        MXFunction f = new MXFunction(name(), generateInputVector(),pickMXCorrespondingToOutputs(finalExpressions));
         f.init();
         return f; 
     }
@@ -164,7 +162,7 @@ aspect FExpToCasADi {
                 }
             }
         }
-        MXVector updatedRhsExpressions = ifcasadi.substitute(getCall().toMXVector(), allVars, expressions);
+        MXVector updatedRhsExpressions = ifcasadi.subst(getCall().toMXVector(), allVars, expressions);
         for (int i = 0; i < lhsVec.size(); ++i) {
             expressions.set(findIndexOfMXInMXVector(lhsVec.get(i), allVars), updatedRhsExpressions.get(i));    
         }
@@ -182,7 +180,7 @@ aspect FExpToCasADi {
         lhsVec.add(getLeft().toMX());
         MXVector rhsVec = getRight().toMXVector();
         
-        MX updatedRhsExpression = ifcasadi.substitute(rhsVec, allVars, expressions).get(0);
+        MX updatedRhsExpression = ifcasadi.subst(rhsVec, allVars, expressions).get(0);
         int indexInAllCurrVars = findIndexOfMXInMXVector(lhsVec.get(0), allVars);
         expressions.set(indexInAllCurrVars, updatedRhsExpression);
         return expressions;
@@ -290,7 +288,7 @@ aspect FExpToCasADi {
     eq FExpExp.toMX() = getFExp().toMX().exp();
     
     // Boolean expressions
-    eq FIfExp.toMX() =  ifcasadi.if_else(getIfExp().toMX(), getThenExp().toMX(), getElseExp().toMX());
+    eq FIfExp.toMX() =  getIfExp().toMX().if_else(getThenExp().toMX(), getElseExp().toMX());
     eq FGeqExp.toMX() = getRight().toMX().__le__(getLeft().toMX());
     eq FGtExp.toMX() = getRight().toMX().__lt__(getLeft().toMX());
     eq FLeqExp.toMX() = getLeft().toMX().__le__(getRight().toMX());
@@ -318,7 +316,7 @@ aspect FExpToCasADi {
             }
         }
         // To handle the case where some outputs are not used. 
-        return  myLefts().size() > 0 ? retrieveUsedOutputsFromMXFunctionCall(f.call(argVec)) : f.call(argVec);
+        return  myLefts().size() > 0 ? retrieveUsedOutputsFromMXFunctionCall(f.__call__(argVec)) : f.__call__(argVec);
     }
         
     /** @return A MXVector with the used MX outputs for this function call */

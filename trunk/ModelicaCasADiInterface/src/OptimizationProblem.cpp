@@ -56,7 +56,7 @@ namespace ModelicaCasADi
         Model::print(os);
         os << "----------------------- Optimization information ------------------------\n\n";
         os << "Start time = ";
-        if (startTime.isEmpty()) {
+        if (startTime.isempty()) {
             os << "not set";
         }
         else {
@@ -64,7 +64,7 @@ namespace ModelicaCasADi
         }
     
         os << "\nFinal time = ";
-        if (finalTime.isEmpty()) {
+        if (finalTime.isempty()) {
             os << "not set";
         }
         else {
@@ -92,7 +92,7 @@ namespace ModelicaCasADi
         }
     
         os << "\n-- Objective integrand term --\n";
-        if (objectiveIntegrand.isEmpty()) {
+        if (objectiveIntegrand.isempty()) {
             os << "not set";
         }
         else {
@@ -100,7 +100,7 @@ namespace ModelicaCasADi
         }
     
         os << "\n-- Objective term --\n";
-        if (objective.isEmpty()) {
+        if (objective.isempty()) {
             os << "not set";
         }
         else {
@@ -204,7 +204,7 @@ namespace ModelicaCasADi
                 }
             }
     
-            std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes);
+            std::vector<casadi::MX> subtitutedExpressions = substitute(expressions,eliminatedMXs,subtitutes);
     
             int counter=0;
             startTime = subtitutedExpressions[counter++];
@@ -303,7 +303,7 @@ namespace ModelicaCasADi
             std::vector<casadi::MX> subtitutes;
             for(std::map<const Variable*,casadi::MX>::const_iterator it=eliminatedVariableToSolution.begin();
             it!=eliminatedVariableToSolution.end();++it) {
-                if(!it->second.isEmpty()) {
+                if(!it->second.isempty()) {
                     eliminatedMXs.push_back(it->first->getVar());
                     subtitutes.push_back(it->second);
                     
@@ -346,7 +346,7 @@ namespace ModelicaCasADi
                 }
             }
         
-            std::vector<casadi::MX> subtitutedExpressions = casadi::substitute(expressions,eliminatedMXs,subtitutes);
+            std::vector<casadi::MX> subtitutedExpressions = substitute(expressions,eliminatedMXs,subtitutes);
         
             int counter=0;
             startTime = subtitutedExpressions[counter++];
@@ -591,11 +591,11 @@ namespace ModelicaCasADi
         allVarsPY.insert(allVarsPY.end(), pyomoIndParams.begin(), pyomoIndParams.end());
         allVarsPY.insert(allVarsPY.end(), pyomoTimedVars.begin(), pyomoTimedVars.end());
 
-        std::vector<casadi::MX> pyLHS = casadi::substitute(daeLHS,
+        std::vector<casadi::MX> pyLHS = substitute(daeLHS,
         allVarsJM,
         allVarsPY);
 
-        std::vector<casadi::MX> pyRHS = casadi::substitute(daeRHS,
+        std::vector<casadi::MX> pyRHS = substitute(daeRHS,
         allVarsJM,
         allVarsPY);
         modelFile << "\n################## Constraints ##################\n\n";
@@ -618,11 +618,11 @@ namespace ModelicaCasADi
             dae_initRHS.push_back(casadi::MX((*it)->getRhs()));
         }
 
-        std::vector<casadi::MX> pyinitLHS = casadi::substitute(dae_initLHS,
+        std::vector<casadi::MX> pyinitLHS = substitute(dae_initLHS,
         allVarsJM,
         allVarsPY);
 
-        std::vector<casadi::MX> pyinitRHS = casadi::substitute(dae_initRHS,
+        std::vector<casadi::MX> pyinitRHS = substitute(dae_initRHS,
         allVarsJM,
         allVarsPY);
 
@@ -645,11 +645,11 @@ namespace ModelicaCasADi
             path_RHS.push_back(casadi::MX((*it)->getRhs()));
         }
 
-        std::vector<casadi::MX> pypathLHS = casadi::substitute(path_LHS,
+        std::vector<casadi::MX> pypathLHS = substitute(path_LHS,
         allVarsJM,
         allVarsPY);
 
-        std::vector<casadi::MX> pypathRHS = casadi::substitute(path_RHS,
+        std::vector<casadi::MX> pypathRHS = substitute(path_RHS,
         allVarsJM,
         allVarsPY);
 
@@ -679,11 +679,11 @@ namespace ModelicaCasADi
             point_RHS.push_back(casadi::MX((*it)->getRhs()));
         }
 
-        std::vector<casadi::MX> pypointLHS = casadi::substitute(point_LHS,
+        std::vector<casadi::MX> pypointLHS = substitute(point_LHS,
         allVarsJM,
         allVarsPY);
 
-        std::vector<casadi::MX> pypointRHS = casadi::substitute(point_RHS,
+        std::vector<casadi::MX> pypointRHS = substitute(point_RHS,
         allVarsJM,
         allVarsPY);
 
@@ -708,7 +708,7 @@ namespace ModelicaCasADi
         Boltza.push_back(casadi::MX(objectiveIntegrand));
         Boltza.push_back(casadi::MX(objective));
         
-        std::vector<casadi::MX> pyObjective = casadi::substitute(Boltza,
+        std::vector<casadi::MX> pyObjective = substitute(Boltza,
         allVarsJM,
         allVarsPY);
 

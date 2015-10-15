@@ -40,6 +40,19 @@ namespace ModelicaCasADi
         return vars;
     }
 
+    // Wrapper to access CasADi's substitute function, which is only available through
+    // argument-dependent name lookup. Since Block has a member function called substitute,
+    // ADL cannot be used to refer to CasADi's substitute function directly from
+    // within it.
+    inline std::vector<casadi::MX> casadi_substitute(const std::vector<casadi::MX>& ex, const std::vector<casadi::MX>& v,
+            const std::vector<casadi::MX>& vdef) {
+        return substitute(ex, v, vdef);
+    }
+    inline casadi::MX casadi_substitute(const casadi::MX& ex, const casadi::MX& v, const casadi::MX& vdef) {
+      return substitute(ex, v, vdef);
+    }
+
+
     void BLT::getSubstitues(const Variable* eliminable, std::map<const Variable*,casadi::MX>& storageMap) const
     {
         bool found=0;
@@ -60,13 +73,13 @@ namespace ModelicaCasADi
                 for(std::map<const Variable*,casadi::MX>::const_iterator it_prev=storageMap.begin(); it_prev!=storageMap.end();++it_prev) {
                     int ndeps =tmp_subs.getNdeps();
                     for(int j=0;j<ndeps;++j) {
-                        if(tmp_subs.getDep(j).isEqual(it_prev->first->getVar(),0) && !it_prev->second.isEmpty()) {
+                        if(isEqual(tmp_subs.getDep(j), it_prev->first->getVar(), 0) && !it_prev->second.isempty()) {
                             inner_subs.push_back(it_prev->second);
                             inner_elim.push_back(it_prev->first->getVar());
                         }
                     }
                 }
-                std::vector<casadi::MX> subExp = casadi::substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
+                std::vector<casadi::MX> subExp = casadi_substitute(std::vector<casadi::MX>(1,tmp_subs),inner_elim,inner_subs);
                 storageMap.insert(std::pair<const Variable*,casadi::MX>(eliminable,subExp.front()));
                 inner_subs.clear();
                 inner_elim.clear();
@@ -92,7 +105,7 @@ namespace ModelicaCasADi
             it_var2!=eliminables.rend();++it_var2) {
                 casadi::MX tmp = solution;
 
-                solution = casadi::substitute(tmp,
+                solution = casadi_substitute(tmp,
                     it_var2->second->getVar(),
                     blt[it_var2->first]->getSolutionOfVariable(it_var2->second));
             }

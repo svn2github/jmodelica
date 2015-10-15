@@ -39,7 +39,7 @@ install_casadi: casadi
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
 	## temp fix
-	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
+	cp $(abs_builddir)/casadi_build/swig/python/casadi.py $(DESTDIR)$(prefix)/Python/casadi
 
 ## Install for CasADiInterface, Variables and targets. 
 ## MC_interface installs the system with Python. 

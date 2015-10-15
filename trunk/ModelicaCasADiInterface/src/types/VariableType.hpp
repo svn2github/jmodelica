@@ -22,6 +22,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 
 //Other
+#define WITH_DEPRECATED_FEATURES
 #include "casadi/casadi.hpp"
 #include "boost/flyweight.hpp"
 

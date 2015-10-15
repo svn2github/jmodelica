@@ -15,6 +15,8 @@
 import os
 from tests_jmodelica import testattr, get_files_path
 try:
+    import casadi
+    from casadi import isEqual
     from modelicacasadi_transfer import *
     # Common variables used in the tests
     x1 = MX.sym("x1")
@@ -43,7 +45,12 @@ def strnorm(StringnotNorm):
     for c in caracters:
         StringnotNorm = StringnotNorm.replace(c, '')
     return StringnotNorm
-    
+
+def check_strnorm(got, expected):
+    got, expected = str(got), str(expected)
+    if strnorm(got) != strnorm(expected):
+        raise AssertionError("Expected:\n" + expected + "\ngot:\n" + got + "\n");
+
 def assertNear(val1, val2, tol):
     assert abs(val1 - val2) < tol
     
@@ -61,34 +68,26 @@ class ModelicaTransfer(object):
         model = self.load_model("atomicModelAlias", modelFile)
         assert not model.getVariable("x").isNegated()
         assert model.getVariable("z").isNegated()
-        assert strnorm(model.getVariable("x")) ==\
-               strnorm("Real x(alias: y);")
-        assert strnorm(model.getModelVariable("x")) ==\
-               strnorm("Real y;")
-        assert strnorm(model.getVariable("y")) ==\
-               strnorm("Real y;")
-        assert strnorm(model.getModelVariable("y")) ==\
-               strnorm("Real y;")
-        assert strnorm(model.getVariable("z")) ==\
-               strnorm("Real z(alias: y);")
-        assert strnorm(model.getModelVariable("z")) ==\
-               strnorm("Real y;")
+        check_strnorm(model.getVariable("x"), "Real x(alias: y);")
+        check_strnorm(model.getModelVariable("x"), "Real y;")
+        check_strnorm(model.getVariable("y"), "Real y;")
+        check_strnorm(model.getModelVariable("y"), "Real y;")
+        check_strnorm(model.getVariable("z"), "Real z(alias: y);")
+        check_strnorm(model.getModelVariable("z"), "Real y;")
     
 
     @testattr(casadi = True)
     def test_ModelicaSimpleEquation(self):
-        assert strnorm(self.load_model("AtomicModelSimpleEquation", modelFile).getDaeResidual()) ==\
-               strnorm(der_x1 - x1) 
+        check_strnorm(self.load_model("AtomicModelSimpleEquation", modelFile).getDaeResidual(), der_x1 - x1) 
 
     @testattr(casadi = True)
     def test_ModelicaSimpleInitialEquation(self):
-        assert strnorm(self.load_model("AtomicModelSimpleInitialEquation", modelFile).getInitialResidual()) == strnorm(x1 - MX(1))
+        check_strnorm(self.load_model("AtomicModelSimpleInitialEquation", modelFile).getInitialResidual(), x1 - MX(1))
 
     @testattr(casadi = True)
     def test_ModelicaFunctionCallEquations(self):
-        assert( strnorm(repr(self.load_model("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual())) == 
-                    strnorm("MX(vertcat((der(x1)-x1), (vertcat(x2, x3)-vertcat(function(\"AtomicModelFunctionCallEquation.f\")" + 
-                    ".call([der(x1)]){0}, function(\"AtomicModelFunctionCallEquation.f\").call([der(x1)]){1}))))") )  
+        check_strnorm(repr(self.load_model("AtomicModelFunctionCallEquation", modelFile, compiler_options={"inline_functions":"none"}).getDaeResidual()),
+            "MX(@1=AtomicModelFunctionCallEquation.f(der(x1)), vertcat((der(x1)-x1), (vertcat(x2, x3)-vertcat(@1{0}, @1{1}))))")
 
     @testattr(casadi = True)
     def test_ModelicaBindingExpression(self):
@@ -97,75 +96,66 @@ class ModelicaTransfer(object):
         independent =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
         actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))
         expected = str(MX(2)) + str(MX.sym("p1"))
-        assert strnorm(actual) == strnorm(expected)
+        check_strnorm(actual, expected)
 
     @testattr(casadi = True)
     def test_ModelicaUnit(self):
         model =  self.load_model("AtomicModelAttributeUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("unit")) ==\
-               strnorm(MX.sym("kg"))
+        check_strnorm(diffs[0].getAttribute("unit"), MX.sym("kg"))
 
     @testattr(casadi = True)
     def test_ModelicaQuantity(self):
         model =  self.load_model("AtomicModelAttributeQuantity", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("quantity")) ==\
-               strnorm(MX.sym("kg")) 
+        check_strnorm(diffs[0].getAttribute("quantity"), MX.sym("kg")) 
 
     @testattr(casadi = True)
     def test_ModelicaDisplayUnit(self):
         model =  self.load_model("AtomicModelAttributeDisplayUnit", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("displayUnit")) ==\
-               strnorm(MX.sym("kg")) 
+        check_strnorm(diffs[0].getAttribute("displayUnit"), MX.sym("kg")) 
 
     @testattr(casadi = True)
     def test_ModelicaMin(self):
         model =  self.load_model("AtomicModelAttributeMin", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm((diffs[0].getAttribute("min"))) ==\
-               strnorm(MX(0)) 
+        check_strnorm((diffs[0].getAttribute("min")), MX(0)) 
 
     @testattr(casadi = True)
     def test_ModelicaMax(self):
         model =  self.load_model("AtomicModelAttributeMax", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("max")) == strnorm(MX(100))
+        check_strnorm(diffs[0].getAttribute("max"), MX(100))
 
     @testattr(casadi = True)
     def test_ModelicaStart(self):
         model =  self.load_model("AtomicModelAttributeStart", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("start"))  ==\
-               strnorm(MX(0.0005))
+        check_strnorm(diffs[0].getAttribute("start"), MX(0.0005))
 
     @testattr(casadi = True)
     def test_ModelicaFixed(self):
         model =  self.load_model("AtomicModelAttributeFixed", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("fixed")) ==\
-               strnorm(MX(True))
+        check_strnorm(diffs[0].getAttribute("fixed"), MX(True))
 
     @testattr(casadi = True)
     def test_ModelicaNominal(self):
         model =  self.load_model("AtomicModelAttributeNominal", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("nominal")) ==\
-               strnorm(MX(0.1))
+        check_strnorm(diffs[0].getAttribute("nominal"), MX(0.1))
 
     @testattr(casadi = True)
     def test_ModelicaComment(self):
         model =  self.load_model("AtomicModelComment", modelFile)
         diffs =  model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diffs[0].getAttribute("comment")) ==\
-               strnorm(MX.sym("I am x1's comment"))
+        check_strnorm(diffs[0].getAttribute("comment"), MX.sym("I am x1's comment"))
 
     @testattr(casadi = True)
     def test_ModelicaRealDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedRealTypeVoltage", modelFile)
-        assert strnorm(model.getVariableType("Voltage")) ==\
-               strnorm("Voltage type = Real (quantity = ElectricalPotential, unit = V);")
+        check_strnorm(model.getVariableType("Voltage"), "Voltage type = Real (quantity = ElectricalPotential, unit = V);")
 
     @testattr(casadi = True)
     def test_ModelicaDerivedTypeDefaultType(self):
@@ -177,201 +167,187 @@ class ModelicaTransfer(object):
     @testattr(casadi = True)
     def test_ModelicaIntegerDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedIntegerTypeSteps", modelFile)
-        assert strnorm(model.getVariableType("Steps")) ==\
-               strnorm("Steps type = Integer (quantity = steps);")
+        check_strnorm(model.getVariableType("Steps"), "Steps type = Integer (quantity = steps);")
 
     @testattr(casadi = True)
     def test_ModelicaBooleanDeclaredType(self):
         model =  self.load_model("AtomicModelDerivedBooleanTypeIsDone", modelFile)
-        assert strnorm(model.getVariableType("IsDone")) ==\
-               strnorm("IsDone type = Boolean (quantity = Done);")
+        check_strnorm(model.getVariableType("IsDone"), "IsDone type = Boolean (quantity = Done);")
 
     @testattr(casadi = True)
     def test_ModelicaRealConstant(self):
         model =  self.load_model("atomicModelRealConstant", modelFile)
         constVars =  model.getVariables(Model.REAL_CONSTANT)
-        assert strnorm(constVars[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear(constVars[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
+        check_strnorm(constVars[0].getVar(), MX.sym("pi"))
+        assertNear(float(constVars[0].getAttribute("bindingExpression")), 3.14, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaRealIndependentParameter(self):
         model =  self.load_model("atomicModelRealIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
-        assert strnorm(indepParam[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear(indepParam[0].getAttribute("bindingExpression").getValue(), 3.14, 0.0000001)
+        check_strnorm(indepParam[0].getVar(), MX.sym("pi"))
+        assertNear(float(indepParam[0].getAttribute("bindingExpression")), 3.14, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaRealDependentParameter(self):
         model =  self.load_model("atomicModelRealDependentParameter", modelFile)
         depParam =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
         indepParam =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
-        assert strnorm(2*(indepParam[0].getVar())) ==\
-               strnorm(depParam[0].getAttribute("bindingExpression"))
+        check_strnorm(2*(indepParam[0].getVar()), depParam[0].getAttribute("bindingExpression"))
 
     @testattr(casadi = True)
     def test_ModelicaDerivative(self):
         model =  self.load_model("atomicModelRealDerivative", modelFile)
-        assert strnorm(model.getVariables(Model.DERIVATIVE)[0].getVar()) ==\
-               strnorm(der_x1)
+        check_strnorm(model.getVariables(Model.DERIVATIVE)[0].getVar(), der_x1)
 
     @testattr(casadi = True)
     def test_ModelicaDifferentiated(self):
         model = self.load_model("atomicModelRealDifferentiated", modelFile)
         diff = model.getVariables(Model.DIFFERENTIATED)
-        assert strnorm(diff[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(diff[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaRealInput(self):
         model =  self.load_model("atomicModelRealInput", modelFile)
         ins =  model.getVariables(Model.REAL_INPUT)
-        assert strnorm(ins[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(ins[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaAlgebraic(self):
         model =  self.load_model("atomicModelRealAlgebraic", modelFile)
         alg =  model.getVariables(Model.REAL_ALGEBRAIC)
-        assert strnorm(alg[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(alg[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaRealDisrete(self):
         model =  self.load_model("atomicModelRealDiscrete", modelFile)
         realDisc =  model.getVariables(Model.REAL_DISCRETE)
-        assert strnorm(realDisc[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(realDisc[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaIntegerConstant(self):
         model =  self.load_model("atomicModelIntegerConstant", modelFile)
         constVars =  model.getVariables(Model.INTEGER_CONSTANT)
-        assert strnorm(constVars[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear( constVars[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001)
+        check_strnorm(constVars[0].getVar(), MX.sym("pi"))
+        assertNear( float(constVars[0].getAttribute("bindingExpression")), 3, 0.0000001)
 
     @testattr(casadi = True)
     def test_ModelicaIntegerIndependentParameter(self):
         model =  self.load_model("atomicModelIntegerIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
-        assert strnorm(indepParam[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), 3, 0.0000001 )
+        check_strnorm(indepParam[0].getVar(), MX.sym("pi"))
+        assertNear( float(indepParam[0].getAttribute("bindingExpression")), 3, 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaIntegerDependentConstants(self):
         model =  self.load_model("atomicModelIntegerDependentParameter", modelFile)    
         depParam =  model.getVariables(Model.INTEGER_PARAMETER_DEPENDENT)
         indepParam =  model.getVariables(Model.INTEGER_PARAMETER_INDEPENDENT)
-        assert strnorm(2*(indepParam[0].getVar())) ==\
-               strnorm(depParam[0].getAttribute("bindingExpression"))
+        check_strnorm(2*(indepParam[0].getVar()), depParam[0].getAttribute("bindingExpression"))
 
     @testattr(casadi = True)
     def test_ModelicaIntegerDiscrete(self):
         model =  self.load_model("atomicModelIntegerDiscrete", modelFile)
         intDisc =  model.getVariables(Model.INTEGER_DISCRETE)
-        assert strnorm(intDisc[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(intDisc[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaIntegerInput(self):
         model =  self.load_model("atomicModelIntegerInput", modelFile)    
         intIns =  model.getVariables(Model.INTEGER_INPUT)
-        assert strnorm(intIns[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(intIns[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaBooleanConstant(self):
         model =  self.load_model("atomicModelBooleanConstant", modelFile)
         constVars =  model.getVariables(Model.BOOLEAN_CONSTANT)
-        assert strnorm(constVars[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear( constVars[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
+        check_strnorm(constVars[0].getVar(), MX.sym("pi"))
+        assertNear( float(constVars[0].getAttribute("bindingExpression")), float(MX(True)), 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaBooleanIndependentParameter(self):
         model =  self.load_model("atomicModelBooleanIndependentParameter", modelFile)
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-        assert strnorm(indepParam[0].getVar()) ==\
-               strnorm(MX.sym("pi"))
-        assertNear( indepParam[0].getAttribute("bindingExpression").getValue(), MX(True).getValue(), 0.0000001 )
+        check_strnorm(indepParam[0].getVar(), MX.sym("pi"))
+        assertNear( float(indepParam[0].getAttribute("bindingExpression")), float(MX(True)), 0.0000001 )
 
     @testattr(casadi = True)
     def test_ModelicaBooleanDependentParameter(self):
         model =  self.load_model("atomicModelBooleanDependentParameter", modelFile)    
         depParam =  model.getVariables(Model.BOOLEAN_PARAMETER_DEPENDENT)  
         indepParam =  model.getVariables(Model.BOOLEAN_PARAMETER_INDEPENDENT)
-        assert strnorm( indepParam[0].getVar().logic_and(MX(True)) ) ==\
-               strnorm(depParam[0].getAttribute("bindingExpression"))
+        check_strnorm( casadi.logic_and(indepParam[0].getVar(), (MX(True))), depParam[0].getAttribute("bindingExpression"))
 
     @testattr(casadi = True)
     def test_ModelicaBooleanDiscrete(self):
         model =  self.load_model("atomicModelBooleanDiscrete", modelFile)        
         boolDisc =  model.getVariables(Model.BOOLEAN_DISCRETE)
-        assert strnorm(boolDisc[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(boolDisc[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaBooleanInput(self):
         model =  self.load_model("atomicModelBooleanInput", modelFile)
         boolIns =  model.getVariables(Model.BOOLEAN_INPUT)
-        assert strnorm(boolIns[0].getVar()) ==\
-               strnorm(x1)
+        check_strnorm(boolIns[0].getVar(), x1)
 
     @testattr(casadi = True)
     def test_ModelicaModelFunction(self):
         model =  self.load_model("simpleModelWithFunctions", modelFile)
-        expectedPrint = ("ModelFunction : function(\"simpleModelWithFunctions.f\")\n Inputs (2):\n"
-                                "  0. 1-by-1 (dense)\n"
-                                "  1. 1-by-1 (dense)\n"
-                                " Outputs (2):\n"
-                                "  0. 1-by-1 (dense)\n"
-                                "  1. 1-by-1 (dense)\n"
-                                "@0 = input[0]\n"
-                                "@1 = input[1]\n"
-                                "{@2, @3} = function(\"simpleModelWithFunctions.f2\").call([@0, @1])\n"
-                                "output[0] = @2\n"
-                                "output[1] = @3\n"
-                                "ModelFunction : function(\"simpleModelWithFunctions.f2\")\n Inputs (2):\n"
-                                "  0. 1-by-1 (dense)\n"
-                                "  1. 1-by-1 (dense)\n"
-                                " Outputs (2):\n"
-                                "  0. 1-by-1 (dense)\n"
-                                "  1. 1-by-1 (dense)\n" 
-                                "@0 = 0.5\n"
-                                "@1 = input[0]\n"
-                                "@0 = (@0*@1)\n"
-                                "output[0] = @0\n"
-                                "@1 = input[1]\n"
-                                "@1 = (@1+@0)\n"
-                                "output[1] = @1\n")
+        expected = """
+            ModelFunction : simpleModelWithFunctions.f
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = input[1][0]
+            {@2, @3} = simpleModelWithFunctions.f2(@0, @1)
+            output[0] = @2
+            output[1] = @3
+
+            ModelFunction : simpleModelWithFunctions.f2
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = 0.5
+            @1 = input[0][0]
+            @0 = (@0*@1)
+            output[0] = @0
+            @1 = input[1][0]
+            @1 = (@1+@0)
+            output[1] = @1
+            """
         mf_1 = model.getModelFunction("simpleModelWithFunctions.f")
         mf_2 = model.getModelFunction("simpleModelWithFunctions.f2")
         actual = str(mf_1) + str(mf_2)
-        assert strnorm(expectedPrint) == strnorm(actual)
+        check_strnorm(actual, expected)
 
     @testattr(casadi = True)
     def test_ModelicaDependentParametersCalculated(self):
         model =  self.load_model("atomicModelDependentParameter", modelFile)
         model.calculateValuesForDependentParameters()
         depVars = model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
-        assert depVars[0].getAttribute("evaluatedBindingExpression").getValue() == 20
-        assert depVars[1].getAttribute("evaluatedBindingExpression").getValue() == 20
-        assert depVars[2].getAttribute("evaluatedBindingExpression").getValue() == 200
+        assert float(depVars[0].getAttribute("evaluatedBindingExpression")) == 20
+        assert float(depVars[1].getAttribute("evaluatedBindingExpression")) == 20
+        assert float(depVars[2].getAttribute("evaluatedBindingExpression")) == 200
 
     @testattr(casadi = True)
     def test_ModelicaFunctionCallEquationForParameterBinding(self):
         model =  self.load_model("atomicModelPolyOutFunctionCallForDependentParameter", modelFile, compiler_options={"inline_functions":"none"})
         model.calculateValuesForDependentParameters()
-        expected = ("parameter Real p2[1](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}, evaluatedBindingExpression = 2) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){0}/* 2 */;\n"
-                    "parameter Real p2[2](bindingExpression = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}, evaluatedBindingExpression = 4) = function(\"atomicModelPolyOutFunctionCallForDependentParameter.f\").call([p1]){1}/* 4 */;\n")
+        expected = """
+            parameter Real p2[1](bindingExpression = atomicModelPolyOutFunctionCallForDependentParameter.f(p1){0}, evaluatedBindingExpression = 2) = atomicModelPolyOutFunctionCallForDependentParameter.f(p1){0}/* 2 */;
+            parameter Real p2[2](bindingExpression = atomicModelPolyOutFunctionCallForDependentParameter.f(p1){1}, evaluatedBindingExpression = 4) = atomicModelPolyOutFunctionCallForDependentParameter.f(p1){1}/* 4 */;
+            """        
         actual = ""
         for var in model.getVariables(Model.REAL_PARAMETER_DEPENDENT):
             actual += str(var) + "\n"
-        print expected, "\n", actual
-        assert strnorm(actual) == strnorm(expected)
+        check_strnorm(actual, expected)
 
 
     @testattr(casadi = True)
@@ -379,7 +355,7 @@ class ModelicaTransfer(object):
         model = self.load_model("atomicModelTime", modelFile)
         t = model.getTimeVariable()
         eq = model.getDaeResidual()
-        assert eq[1].getDep(1).getDep(1).isEqual(t) and eq[0].getDep(1).isEqual(t)
+        assert isEqual(eq[1].getDep(1).getDep(1), t) and isEqual(eq[0].getDep(1), t)
 
     ##############################################
     #                                            # 
@@ -391,30 +367,30 @@ class ModelicaTransfer(object):
     def test_ConstructElementaryExpression(self):
         dae = self.load_model("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
         expected ="MX(vertcat((der(x1)-(2+x1)), (der(x2)-(x2-x1)), (der(x3)-(x3*x2)), (der(x4)-(x4/x3))))"
-        assert strnorm(repr(dae)) == strnorm(expected) 
+        check_strnorm(repr(dae), expected) 
 
     @testattr(casadi = True)
     def test_ConstructElementaryFunctions(self):
         dae = self.load_model("AtomicModelElementaryFunctions", modelFile).getDaeResidual()
         expected = ("MX(vertcat((der(x1)-pow(x1,5)), (der(x2)-fabs(x2)), (der(x3)-fmin(x3,x2)), (der(x4)-fmax(x4,x3)), (der(x5)-sqrt(x5)), (der(x6)-sin(x6)), (der(x7)-cos(x7)), (der(x8)-tan(x8)), (der(x9)-asin(x9)), (der(x10)-acos(x10)), (der(x11)-atan(x11)), (der(x12)-atan2(x12,x11)), (der(x13)-sinh(x13)), (der(x14)-cosh(x14)), (der(x15)-tanh(x15)), (der(x16)-exp(x16)), (der(x17)-log(x17)), (der(x18)-(0.434294*log(x18))), (der(x19)+x18)))")# CasADi converts log10 to log with constant.
-        assert strnorm(repr(dae)) == strnorm(expected)
+        check_strnorm(repr(dae), expected)
 
     @testattr(casadi = True)
     def test_ConstructBooleanExpressions(self):
         dae = self.load_model("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
-        expected = ("MX(vertcat((der(x1)-((x2?1:0)+((!x2)?2:0))), " + 
-                    "(x2-(0<x1)), (x3-(0<=x1)), (x4-(x1<0)), " + 
+#        expected = ("MX(vertcat((der(x1)-if_else(x2,1,2){0}, " +
+        expected = ("MX(vertcat((der(x1)-if_else(x2){0}), " + # expecting this instead because of CasADi #1618
+                    "(x2-(0<x1)), (x3-(0<=x1)), (x4-(x1<0)), " +
                     "(x5-(x1<=0)), (x6-(x5==x4)), (x7-(x6!=x5)), (x8-(x6&&x5)), (x9-(x6||x5))))")
-        assert strnorm(repr(dae)) == strnorm(expected)
+        check_strnorm(repr(dae), expected)
 
     @testattr(casadi = True)
     def test_ConstructMisc(self):
         model = self.load_model("AtomicModelMisc", modelFile)
-        expected = (
-        "MX(vertcat((der(x1)-1.11), (x2-(((1<x1)?3:0)+((!(1<x1))?4:0))), (x3-(1||(1<x2))), (x4-(0||x3))))"     
-         "MX(vertcat(x1, pre(x2), pre(x3), pre(x4)))")
-        assert strnorm(repr(model.getDaeResidual()) + repr(model.getInitialResidual()))  ==\
-               strnorm(expected)
+#        expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1),3,4){0}), " +
+        expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1)){0}), " + # expecting this instead because of CasADi #1618
+            "(x3-(1||(1<x2))), (x4-(0||x3))))MX(vertcat(repmat(x1, 1), repmat(pre(x2), 1), repmat(pre(x3), 1), repmat(pre(x4), 1)))")
+        check_strnorm(repr(model.getDaeResidual()) + repr(model.getInitialResidual()), expected)
 
 
 
@@ -425,380 +401,387 @@ class ModelicaTransfer(object):
         x1_eq = model.getDaeResidual()[1].getDep(1)
         x1_var = model.getVariables(Model.DIFFERENTIATED)[0].getVar()
         x2_var = model.getVariables(Model.DIFFERENTIATED)[1].getVar()
-        assert x1_var.isEqual(x1_eq) and x2_var.isEqual(x2_eq)
+        assert isEqual(x1_var, x1_eq) and isEqual(x2_var, x2_eq)
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunction1(self):
         model = self.load_model("AtomicModelVector1", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelVector1.f\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@0 = (-@0)\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "@0 = (-@0)\n"
-                    "output[1] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelVector1.f")) == strnorm(expected)
-        expected = ("MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector1.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector1.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))")
-        assert strnorm(model.getDaeResidual()) == strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelVector1.f
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @0 = (-@0)
+            output[0] = @0
+            @0 = input[1][0]
+            @0 = (-@0)
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelVector1.f"), expected)
+        expected = "@1=AtomicModelVector1.f(A[1], A[2]), vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(@1{0}, @1{1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2]))"
+        check_strnorm(model.getDaeResidual(), expected)
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunction2(self):
         model = self.load_model("AtomicModelVector2", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelVector2.f\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = input[1]\n"
-                    "{@2, @3} = function(\"AtomicModelVector2.f2\").call([@0, @1])\n"
-                    "output[0] = @2\n"
-                    "output[1] = @3\n")
-        assert strnorm(model.getModelFunction("AtomicModelVector2.f")) == strnorm(expected)
-        expected = "MX(vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(function(\"AtomicModelVector2.f\").call([A[1], A[2]]){0}, function(\"AtomicModelVector2.f\").call([A[1], A[2]]){1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2])))"
-        assert strnorm(model.getDaeResidual()) == strnorm(expected)
-
-
+        expected = """
+            ModelFunction : AtomicModelVector2.f
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = input[1][0]
+            {@2, @3} = AtomicModelVector2.f2(@0, @1)
+            output[0] = @2
+            output[1] = @3
+            """
+        check_strnorm(model.getModelFunction("AtomicModelVector2.f"), expected)
+        expected = "@1=AtomicModelVector2.f(A[1], A[2]), vertcat((vertcat(temp_1[1], temp_1[2])-vertcat(@1{0}, @1{1})), (der(A[1])-temp_1[1]), (der(A[2])-temp_1[2]))"
+        check_strnorm(model.getDaeResidual(), expected)
 
     @testattr(casadi = True)
     def test_ConstructArrayInOutFunctionCallEquation(self):
         model = self.load_model("AtomicModelVector3", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
-        expected = ("ModelFunction : function(\"AtomicModelVector3.f\")\n"
-                    " Inputs (4):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    " Outputs (4):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@0 = (-@0)\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "@0 = (-@0)\n"
-                    "output[1] = @0\n"
-                    "@0 = input[2]\n"
-                    "@0 = (2.*@0)\n"
-                    "output[2] = @0\n"
-                    "@0 = input[3]\n"
-                    "@0 = (2.*@0)\n"
-                    "output[3] = @0\n")
-        assert str(model.getModelFunction("AtomicModelVector3.f")).replace('\n','') == expected.replace('\n','')
-        expected = "MX((vertcat(A[1], A[2], B[1], B[2])-vertcat(function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){0}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){1}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){2}, function(\"AtomicModelVector3.f\").call([A[1], A[2], 1, 2]){3})))"
-        assert str(model.getDaeResidual()).replace('\n','') == expected.replace('\n','')
-
+        expected = """
+            ModelFunction : AtomicModelVector3.f
+             Number of inputs: 4
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
+              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
+             Number of outputs: 4
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @0 = (-@0)
+            output[0] = @0
+            @0 = input[1][0]
+            @0 = (-@0)
+            output[1] = @0
+            @0 = input[2][0]
+            @0 = (2.*@0)
+            output[2] = @0
+            @0 = input[3][0]
+            @0 = (2.*@0)
+            output[3] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelVector3.f"), expected)
+        expected = "@1=AtomicModelVector3.f(A[1], A[2], 1, 2), (vertcat(A[1], A[2], B[1], B[2])-vertcat(@1{0}, @1{1}, @1{2}, @1{3}))"
+        check_strnorm(model.getDaeResidual(), expected)
 
     @testattr(casadi = True)
     def test_FunctionCallEquationOmittedOuts(self):
         model = self.load_model("atomicModelFunctionCallEquationIgnoredOuts", modelFile, compiler_options={"inline_functions":"none", "variability_propagation":False})
-        expected = "MX(vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){0}, function(\"atomicModelFunctionCallEquationIgnoredOuts.f\").call([1, x3]){2}))))"
-        assert strnorm(model.getDaeResidual()) == strnorm(expected)  
+        expected = "@1=atomicModelFunctionCallEquationIgnoredOuts.f(1, x3), vertcat((der(x2)-(x1+x2)), (vertcat(x1, x2)-vertcat(@1{0}, @1{2})))"
+        check_strnorm(model.getDaeResidual(), expected)  
 
     @testattr(casadi = True)
     def test_FunctionCallStatementOmittedOuts(self):
         model = self.load_model("atomicModelFunctionCallStatementIgnoredOuts", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredOuts.f2\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = 10\n"
-                    "@1 = input[0]\n"
-                    "{NULL, NULL, @2} = function(\"atomicModelFunctionCallStatementIgnoredOuts.f\").call([@0, @1])\n"
-                    "output[0] = @2\n")
-        assert strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2")) == strnorm(expected)
+        expected = """
+            ModelFunction : atomicModelFunctionCallStatementIgnoredOuts.f2
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = 10
+            @1 = input[0][0]
+            {NULL, NULL, @2} = atomicModelFunctionCallStatementIgnoredOuts.f(@0, @1)
+            output[0] = @2"""
+        check_strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2"), expected)
 
     @testattr(casadi = True)
     def test_OmittedArrayRecordOuts(self):
         model = self.load_model("atomicModelFunctionCallStatementIgnoredArrayRecordOuts", modelFile, compiler_options={"inline_functions":"none"})
-        expectedFunctionPrint = ("ModelFunction : function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\")\n"
-                                " Input: 1-by-1 (dense)\n"
-                                " Outputs (6):\n"
-                                "  0. 1-by-1 (dense)\n"
-                                "  1. 1-by-1 (dense)\n"
-                                "  2. 1-by-1 (dense)\n"
-                                "  3. 1-by-1 (dense)\n"
-                                "  4. 1-by-1 (dense)\n"
-                                "  5. 1-by-1 (dense)\n"
-                                "@0 = 10\n"
-                                "@1 = input[0]\n"
-                                "{@2, @3, @4, NULL, NULL, @5, @6, @7} = function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f\").call([@0, @1])\n"
-                                "output[0] = @2\n"
-                                "output[1] = @3\n"
-                                "output[2] = @4\n"
-                                "output[3] = @5\n"
-                                "output[4] = @6\n"
-                                "output[5] = @7\n")
-        expectedResidualPrint = "MX((vertcat(x1, x2)-vertcat(function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){2}, function(\"atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2\").call([x1]){5})))"
-        assert strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2")) ==\
-               strnorm(expectedFunctionPrint)
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expectedResidualPrint)
+        expectedFunction = """
+            ModelFunction : atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 6
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
+              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+            @0 = 10
+            @1 = input[0][0]
+            {@2, @3, @4, NULL, NULL, @5, @6, @7} = atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f(@0, @1)
+            output[0] = @2
+            output[1] = @3
+            output[2] = @4
+            output[3] = @5
+            output[4] = @6
+            output[5] = @7
+            """
+        expectedResidual = "@1=atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2(x1), (vertcat(x1, x2)-vertcat(@1{2}, @1{5}))"
+        check_strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2"), expectedFunction)
+        check_strnorm(model.getDaeResidual(), expectedResidual)
 
     @testattr(casadi = True)
     def test_ConstructFunctionMatrix(self):
         model = self.load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none","variability_propagation":False})
-        expected = ("ModelFunction : function(\"AtomicModelMatrix.f\")\n"
-                    " Inputs (4):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[2]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[3]\n"
-                    "output[1] = @0\n"
-                    "@0 = input[0]\n"
-                    "@1 = input[1]\n")
-
-        assert strnorm(model.getModelFunction("AtomicModelMatrix.f")) ==\
-               strnorm(expected)
-        expected = "MX(vertcat((vertcat(temp_1[1,1],temp_1[1,2])-vertcat(function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){0},function(\"AtomicModelMatrix.f\").call([A[1,1],A[1,2],X[1,1],X[2,1]]){1})),(der(A[1,1])+temp_1[1,1]),(der(A[1,2])+temp_1[1,2]),(vertcat(temp_2[1,1],temp_2[1,2],temp_2[2,1],temp_2[2,2])-vertcat(function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){0},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){1},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){2},function(\"AtomicModelMatrix.f2\").call([dx[1,1],dx[1,2],dx[2,1],dx[2,2]]){3})),(der(dx[1,1])+temp_2[1,1]),(der(dx[1,2])+temp_2[1,2]),(der(dx[2,1])+temp_2[2,1]),(der(dx[2,2])+temp_2[2,2]),(X[1,1]-0.1),(X[2,1]-0.3)))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected)
+        expected = """ModelFunction : AtomicModelMatrix.f
+             Number of inputs: 4
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
+              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[2][0]
+            output[0] = @0
+            @0 = input[3][0]
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelMatrix.f"), expected)
+        expected = "@1=AtomicModelMatrix.f(A[1,1], A[1,2], X[1,1], X[2,1]), @2=AtomicModelMatrix.f2(dx[1,1], dx[1,2], dx[2,1], dx[2,2]), vertcat((vertcat(temp_1[1,1], temp_1[1,2])-vertcat(@1{0}, @1{1})), (der(A[1,1])+temp_1[1,1]), (der(A[1,2])+temp_1[1,2]), (vertcat(temp_2[1,1], temp_2[1,2], temp_2[2,1], temp_2[2,2])-vertcat(@2{0}, @2{1}, @2{2}, @2{3})), (der(dx[1,1])+temp_2[1,1]), (der(dx[1,2])+temp_2[1,2]), (der(dx[2,1])+temp_2[2,1]), (der(dx[2,2])+temp_2[2,2]), (X[1,1]-0.1), (X[2,1]-0.3))"
+        check_strnorm(model.getDaeResidual(), expected)
 
     @testattr(casadi = True)
     def test_ConstructFunctionMatrixDimsGreaterThanTwo(self):
         model = self.load_model("AtomicModelLargerThanTwoDimensionArray", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelLargerThanTwoDimensionArray.f\")\n"
-                    " Inputs (6):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "  4. 1-by-1 (dense)\n"
-                    "  5. 1-by-1 (dense)\n"
-                    " Outputs (6):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "  4. 1-by-1 (dense)\n"
-                    "  5. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@0 = (-@0)\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "@0 = (-@0)\n"
-                    "output[1] = @0\n"
-                    "@0 = input[2]\n"
-                    "@0 = (-@0)\n"
-                    "output[2] = @0\n"
-                    "@0 = input[3]\n"
-                    "@0 = (-@0)\n"
-                    "output[3] = @0\n"
-                    "@0 = input[4]\n"
-                    "@0 = (-@0)\n"
-                    "output[4] = @0\n"
-                    "@0 = 10\n"
-                    "output[5] = @0\n"
-                    "@0 = input[5]\n")
-        assert strnorm(model.getModelFunction("AtomicModelLargerThanTwoDimensionArray.f")) ==\
-               strnorm(expected)
-        expected = "MX(vertcat((vertcat(temp_1[1,1,1], temp_1[1,1,2], temp_1[1,1,3], temp_1[1,2,1], temp_1[1,2,2], temp_1[1,2,3])-vertcat(function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){0}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){1}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){2}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){3}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){4}, function(\"AtomicModelLargerThanTwoDimensionArray.f\").call([A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]]){5})), (der(A[1,1,1])-temp_1[1,1,1]), (der(A[1,1,2])-temp_1[1,1,2]), (der(A[1,1,3])-temp_1[1,1,3]), (der(A[1,2,1])-temp_1[1,2,1]), (der(A[1,2,2])-temp_1[1,2,2]), (der(A[1,2,3])-temp_1[1,2,3])))"
-        assert strnorm(model.getDaeResidual()).replace('\n','') ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelLargerThanTwoDimensionArray.f
+             Number of inputs: 6
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
+              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
+              Input 4, a.k.a. "i4", 1-by-1 (dense), No description available
+              Input 5, a.k.a. "i5", 1-by-1 (dense), No description available
+             Number of outputs: 6
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
+              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @0 = (-@0)
+            output[0] = @0
+            @0 = input[1][0]
+            @0 = (-@0)
+            output[1] = @0
+            @0 = input[2][0]
+            @0 = (-@0)
+            output[2] = @0
+            @0 = input[3][0]
+            @0 = (-@0)
+            output[3] = @0
+            @0 = input[4][0]
+            @0 = (-@0)
+            output[4] = @0
+            @0 = 10
+            output[5] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelLargerThanTwoDimensionArray.f"), expected)
+        expected = "@1=AtomicModelLargerThanTwoDimensionArray.f(A[1,1,1], A[1,1,2], A[1,1,3], A[1,2,1], A[1,2,2], A[1,2,3]), vertcat((vertcat(temp_1[1,1,1], temp_1[1,1,2], temp_1[1,1,3], temp_1[1,2,1], temp_1[1,2,2], temp_1[1,2,3])-vertcat(@1{0}, @1{1}, @1{2}, @1{3}, @1{4}, @1{5})), (der(A[1,1,1])-temp_1[1,1,1]), (der(A[1,1,2])-temp_1[1,1,2]), (der(A[1,1,3])-temp_1[1,1,3]), (der(A[1,2,1])-temp_1[1,2,1]), (der(A[1,2,2])-temp_1[1,2,2]), (der(A[1,2,3])-temp_1[1,2,3]))"
+        check_strnorm(model.getDaeResidual(), expected)
 
     @testattr(casadi = True)
     def test_ConstructNestedRecordFunctions(self):
         model = self.load_model("AtomicModelRecordNestedArray",  modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelRecordNestedArray.generateCurves\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (8):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "  4. 1-by-1 (dense)\n"
-                    "  5. 1-by-1 (dense)\n"
-                    "  6. 1-by-1 (dense)\n"
-                    "  7. 1-by-1 (dense)\n"
-                    "@0 = 0\n"
-                    "output[0] = @0\n"
-                    "@0 = input[0]\n"
-                    "output[1] = @0\n"
-                    "@0 = 2\n"
-                    "output[2] = @0\n"
-                    "@1 = 3\n"
-                    "output[3] = @1\n"
-                    "@2 = 6\n"
-                    "output[4] = @2\n"
-                    "@2 = 7\n"
-                    "output[5] = @2\n"
-                    "output[6] = @0\n"
-                    "output[7] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelRecordNestedArray.generateCurves")) ==\
-               strnorm(expected)
-        expected ="MX(vertcat((vertcat(compCurve.curves[1].path[1].point[1], compCurve.curves[1].path[1].point[2], compCurve.curves[1].path[2].point[1], compCurve.curves[1].path[2].point[2], compCurve.curves[2].path[1].point[1], compCurve.curves[2].path[1].point[2], compCurve.curves[2].path[2].point[1], compCurve.curves[2].path[2].point[2])-vertcat(function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){0}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){1}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){2}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){3}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){4}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){5}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){6}, function(\"AtomicModelRecordNestedArray.generateCurves\").call([a]){7})), (der(a)-compCurve.curves[1].path[1].point[2])))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelRecordNestedArray.generateCurves
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 8
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
+              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
+              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
+            @0 = 0
+            output[0] = @0
+            @0 = input[0][0]
+            output[1] = @0
+            @0 = 2
+            output[2] = @0
+            @1 = 3
+            output[3] = @1
+            @2 = 6
+            output[4] = @2
+            @2 = 7
+            output[5] = @2
+            output[6] = @0
+            output[7] = @1
+            """        
+        check_strnorm(model.getModelFunction("AtomicModelRecordNestedArray.generateCurves"), expected)
+        expected ="@1=AtomicModelRecordNestedArray.generateCurves(a), vertcat((vertcat(compCurve.curves[1].path[1].point[1], compCurve.curves[1].path[1].point[2], compCurve.curves[1].path[2].point[1], compCurve.curves[1].path[2].point[2], compCurve.curves[2].path[1].point[1], compCurve.curves[2].path[1].point[2], compCurve.curves[2].path[2].point[1], compCurve.curves[2].path[2].point[2])-vertcat(@1{0}, @1{1}, @1{2}, @1{3}, @1{4}, @1{5}, @1{6}, @1{7})), (der(a)-compCurve.curves[1].path[1].point[2]))"
+        check_strnorm(model.getDaeResidual(), expected)
 
 
     @testattr(casadi = True)
     def test_ConstructRecordInFunctionInFunction(self):
         model = self.load_model("AtomicModelRecordInOutFunctionCallStatement", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelRecordInOutFunctionCallStatement.f1\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = 2\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0+@1)\n"
-                    "{@2, @3} = function(\"AtomicModelRecordInOutFunctionCallStatement.f2\").call([@1, @0])\n"
-                    "@2 = (@2*@3)\n"
-                    "output[0] = @2\n"
-                    "ModelFunction : function(\"AtomicModelRecordInOutFunctionCallStatement.f2\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 10\n"
-                    "@1 = input[1]\n"
-                    "@0 = (@0*@1)\n" 
-                    "output[1] = @0\n")
+        expected = """
+            ModelFunction : AtomicModelRecordInOutFunctionCallStatement.f1
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = 2
+            @1 = input[0][0]
+            @0 = (@0+@1)
+            {@2, @3} = AtomicModelRecordInOutFunctionCallStatement.f2(@1, @0)
+            @2 = (@2*@3)
+            output[0] = @2
+
+            ModelFunction : AtomicModelRecordInOutFunctionCallStatement.f2
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 10
+            @1 = input[1][0]
+            @0 = (@0*@1)
+            output[1] = @0
+            """
         funcStr = str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f1")) + str(model.getModelFunction("AtomicModelRecordInOutFunctionCallStatement.f2"))
-        assert strnorm(funcStr) == strnorm(expected)
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm("MX((der(a)+function(\"AtomicModelRecordInOutFunctionCallStatement.f1\").call([a]){0}))")
+        check_strnorm(funcStr, expected)
+        check_strnorm(model.getDaeResidual(), "(der(a)+AtomicModelRecordInOutFunctionCallStatement.f1(a){0})")
 
 
 
     @testattr(casadi = True)
     def test_ConstructRecordArbitraryDimension(self):
         model = self.load_model("AtomicModelRecordArbitraryDimension", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelRecordArbitraryDimension.f\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (8):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "  4. 1-by-1 (dense)\n"
-                    "  5. 1-by-1 (dense)\n"
-                    "  6. 1-by-1 (dense)\n"
-                    "  7. 1-by-1 (dense)\n"
-                    "@0 = 1\n"
-                    "output[0] = @0\n"
-                    "@0 = 2\n"
-                    "output[1] = @0\n"
-                    "@0 = 3\n"
-                    "output[2] = @0\n"
-                    "@0 = 4\n"
-                    "output[3] = @0\n"
-                    "@0 = 5\n"
-                    "output[4] = @0\n"
-                    "@0 = 6\n"
-                    "output[5] = @0\n"
-                    "@0 = input[0]\n"
-                    "output[6] = @0\n"
-                    "@0 = (2.*@0)\n"
-                    "output[7] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelRecordArbitraryDimension.f")) ==\
-               strnorm(expected)
-        expected = "MX(vertcat((der(a)+a), (vertcat(r.A[1,1,1], r.A[1,1,2], r.A[1,2,1], r.A[1,2,2], r.A[2,1,1], r.A[2,1,2], r.A[2,2,1], r.A[2,2,2])-vertcat(function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){0}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){1}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){2}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){3}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){4}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){5}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){6}, function(\"AtomicModelRecordArbitraryDimension.f\").call([a]){7}))))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelRecordArbitraryDimension.f
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 8
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
+              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
+              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
+            @0 = 1
+            output[0] = @0
+            @0 = 2
+            output[1] = @0
+            @0 = 3
+            output[2] = @0
+            @0 = 4
+            output[3] = @0
+            @0 = 5
+            output[4] = @0
+            @0 = 6
+            output[5] = @0
+            @0 = input[0][0]
+            output[6] = @0
+            @0 = (2.*@0)
+            output[7] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelRecordArbitraryDimension.f"), expected)
+        expected = "@1=AtomicModelRecordArbitraryDimension.f(a), vertcat((der(a)+a), (vertcat(r.A[1,1,1], r.A[1,1,2], r.A[1,2,1], r.A[1,2,2], r.A[2,1,1], r.A[2,1,2], r.A[2,2,1], r.A[2,2,2])-vertcat(@1{0}, @1{1}, @1{2}, @1{3}, @1{4}, @1{5}, @1{6}, @1{7})))"
+        check_strnorm(model.getDaeResidual(), expected)
 
 
 
     @testattr(casadi = True)
     def test_ConstructArrayFlattening(self):
         model =  self.load_model("atomicModelSimpleArrayIndexing", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"atomicModelSimpleArrayIndexing.f\")\n"
-                    " Inputs (0):\n"
-                    " Outputs (4):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "@0 = 1\n"
-                    "output[0] = @0\n"
-                    "@0 = 2\n"
-                    "output[1] = @0\n"
-                    "@0 = 3\n"
-                    "output[2] = @0\n"
-                    "@0 = 4\n"
-                    "output[3] = @0\n")
-        assert strnorm(model.getModelFunction("atomicModelSimpleArrayIndexing.f")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : atomicModelSimpleArrayIndexing.f
+             Number of inputs: 0
+             Number of outputs: 4
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+            @0 = 1
+            output[0] = @0
+            @0 = 2
+            output[1] = @0
+            @0 = 3
+            output[2] = @0
+            @0 = 4
+            output[3] = @0
+            """
+        check_strnorm(model.getModelFunction("atomicModelSimpleArrayIndexing.f"), expected)
 
     @testattr(casadi = True)
     def test_ConstructRecordNestedSeveralVars(self):
         model = self.load_model("AtomicModelRecordSeveralVars", modelFile, compiler_options={"inline_functions":"none"})
-        expected = ("ModelFunction : function(\"AtomicModelRecordSeveralVars.f\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (10):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "  2. 1-by-1 (dense)\n"
-                    "  3. 1-by-1 (dense)\n"
-                    "  4. 1-by-1 (dense)\n"
-                    "  5. 1-by-1 (dense)\n"
-                    "  6. 1-by-1 (dense)\n"
-                    "  7. 1-by-1 (dense)\n"
-                    "  8. 1-by-1 (dense)\n"
-                    "  9. 1-by-1 (dense)\n"
-                    "@0 = 1\n"
-                    "output[0] = @0\n"
-                    "@0 = 2\n"
-                    "output[1] = @0\n"
-                    "@0 = 3\n"
-                    "output[2] = @0\n"
-                    "@0 = 4\n"
-                    "output[3] = @0\n"
-                    "@0 = 5\n"
-                    "output[4] = @0\n"
-                    "@0 = 6\n"
-                    "output[5] = @0\n"
-                    "@0 = 7\n"
-                    "output[6] = @0\n"
-                    "@0 = 8\n"
-                    "output[7] = @0\n"
-                    "@0 = 9\n"
-                    "output[8] = @0\n"
-                    "@0 = input[0]\n"
-                    "output[9] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelRecordSeveralVars.f")).replace('\n','') ==\
-               strnorm(expected)
-        expected = "MX(vertcat((der(a)+a), (vertcat(r.r1.A, r.r1.B, r.rArr[1].A, r.rArr[1].B, r.rArr[2].A, r.rArr[2].B, r.matrix[1,1], r.matrix[1,2], r.matrix[2,1], r.matrix[2,2])-vertcat(function(\"AtomicModelRecordSeveralVars.f\").call([a]){0}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){1}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){2}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){3}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){4}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){5}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){6}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){7}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){8}, function(\"AtomicModelRecordSeveralVars.f\").call([a]){9}))))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelRecordSeveralVars.f
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 10
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
+              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
+              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
+              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
+              Output 8, a.k.a. "o8", 1-by-1 (dense), No description available
+              Output 9, a.k.a. "o9", 1-by-1 (dense), No description available
+            @0 = 1
+            output[0] = @0
+            @0 = 2
+            output[1] = @0
+            @0 = 3
+            output[2] = @0
+            @0 = 4
+            output[3] = @0
+            @0 = 5
+            output[4] = @0
+            @0 = 6
+            output[5] = @0
+            @0 = 7
+            output[6] = @0
+            @0 = 8
+            output[7] = @0
+            @0 = 9
+            output[8] = @0
+            @0 = input[0][0]
+            output[9] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelRecordSeveralVars.f"), expected)
+        expected = "@1=AtomicModelRecordSeveralVars.f(a), vertcat((der(a)+a), (vertcat(r.r1.A, r.r1.B, r.rArr[1].A, r.rArr[1].B, r.rArr[2].A, r.rArr[2].B, r.matrix[1,1], r.matrix[1,2], r.matrix[2,1], r.matrix[2,2])-vertcat(@1{0}, @1{1}, @1{2}, @1{3}, @1{4}, @1{5}, @1{6}, @1{7}, @1{8}, @1{9})))"
+        check_strnorm(model.getDaeResidual(), expected)
 
 
 
     @testattr(casadi = True)
     def test_ConstructFunctionsInRhs(self):
         model = self.load_model("AtomicModelAtomicRealFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "MX(vertcat((der(x1)-sin(function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([x1]){0})), (der(x2)-function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\").call([x1, x2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){0}, function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([x2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\").call([x1, x2]){1})), (der(x7)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\").call([x7]){0}), (der(x8)-function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\").call([x8]){0}), (der(x9)-function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\").call([x9]){0}), (der(x10)-function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\").call([x10]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){0}, function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\").call([x9, x10]){1}))))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected)
+        expected = "@1=AtomicModelAtomicRealFunctions.monoInPolyOut(x2), @2=AtomicModelAtomicRealFunctions.polyInPolyOut(x1, x2), @3=AtomicModelAtomicRealFunctions.polyInPolyOutInternal(x9, x10), vertcat((der(x1)-sin(AtomicModelAtomicRealFunctions.monoInMonoOut(x1){0})), (der(x2)-AtomicModelAtomicRealFunctions.polyInMonoOut(x1, x2){0}), (vertcat(x3, x4)-vertcat(@1{0}, @1{1})), (vertcat(x5, x6)-vertcat(@2{0}, @2{1})), (der(x7)-AtomicModelAtomicRealFunctions.monoInMonoOutReturn(x7){0}), (der(x8)-AtomicModelAtomicRealFunctions.functionCallInFunction(x8){0}), (der(x9)-AtomicModelAtomicRealFunctions.functionCallEquationInFunction(x9){0}), (der(x10)-AtomicModelAtomicRealFunctions.monoInMonoOutInternal(x10){0}), (vertcat(x11, x12)-vertcat(@3{0}, @3{1})))"
+        check_strnorm(model.getDaeResidual(), expected)
 
 
         model = self.load_model("AtomicModelAtomicIntegerFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "MX(vertcat((x1-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\").call([u1, u2]){1}))))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected) 
+        expected = "@1=AtomicModelAtomicIntegerFunctions.monoInPolyOut(u2), @2=AtomicModelAtomicIntegerFunctions.polyInPolyOut(u1, u2), @3=AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal(u1, u2), vertcat((x1-AtomicModelAtomicIntegerFunctions.monoInMonoOut(u1){0}), (x2-AtomicModelAtomicIntegerFunctions.polyInMonoOut(u1, u2){0}), (vertcat(x3, x4)-vertcat(@1{0}, @1{1})), (vertcat(x5, x6)-vertcat(@2{0}, @2{1})), (x7-AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn(u1){0}), (x8-AtomicModelAtomicIntegerFunctions.functionCallInFunction(u2){0}), (x9-AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction(u1){0}), (x10-AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal(u2){0}), (vertcat(x11, x12)-vertcat(@3{0}, @3{1})))"
+        check_strnorm(model.getDaeResidual(), expected) 
 
 
         model = self.load_model("AtomicModelAtomicBooleanFunctions", modelFile, compiler_options={"inline_functions":"none"})
-        expected = "MX(vertcat((x1-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([u1]){0}), (x2-function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\").call([u1, u2]){0}), (vertcat(x3, x4)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([u2]){1})), (vertcat(x5, x6)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\").call([u1, u2]){1})), (x7-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\").call([u1]){0}), (x8-function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\").call([u2]){0}), (x9-function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\").call([u1]){0}), (x10-function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\").call([u2]){0}), (vertcat(x11, x12)-vertcat(function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){0}, function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\").call([u1, u2]){1}))))"
-        assert strnorm(model.getDaeResidual()) ==\
-               strnorm(expected) 
+        expected = "@1=AtomicModelAtomicBooleanFunctions.monoInPolyOut(u2), @2=AtomicModelAtomicBooleanFunctions.polyInPolyOut(u1, u2), @3=AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal(u1, u2), vertcat((x1-AtomicModelAtomicBooleanFunctions.monoInMonoOut(u1){0}), (x2-AtomicModelAtomicBooleanFunctions.polyInMonoOut(u1, u2){0}), (vertcat(x3, x4)-vertcat(@1{0}, @1{1})), (vertcat(x5, x6)-vertcat(@2{0}, @2{1})), (x7-AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn(u1){0}), (x8-AtomicModelAtomicBooleanFunctions.functionCallInFunction(u2){0}), (x9-AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction(u1){0}), (x10-AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal(u2){0}), (vertcat(x11, x12)-vertcat(@3{0}, @3{1})))"
+        check_strnorm(model.getDaeResidual(), expected) 
 
 
 
@@ -811,13 +794,16 @@ class ModelicaTransfer(object):
         #algorithm
             #y := x
         #end monoInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOut"))==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOut"), expected) 
 
         #function polyInMonoOut
             #input Real x1
@@ -827,17 +813,19 @@ class ModelicaTransfer(object):
             #y := x1+x2
         #end polyInMonoOut
         #end monoInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInMonoOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = input[1]\n"
-                    "@0 = (@0+@1)\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInMonoOut")) ==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.polyInMonoOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = input[1][0]
+            @0 = (@0+@1)
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInMonoOut"), expected) 
 
         #function monoInPolyOut
             #input Real x
@@ -847,24 +835,24 @@ class ModelicaTransfer(object):
             #y1 := if(x > 2) then 1 else 5
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 2\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0<@1)\n"
-                    "@2 = 1\n"
-                    "@2 = (@0?@2:0)\n"
-                    "@0 = (!@0)\n"
-                    "@3 = 5\n"
-                    "@0 = (@0?@3:0)\n"
-                    "@2 = (@2+@0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInPolyOut")) ==\
-               strnorm(expected)
+        expected = ("""
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = 2
+            @1 = input[0][0]
+            @0 = (@0<@1)
+""" +
+#"@2 = if_else(@0,5,1)" +
+"@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
+"""
+            output[0] = @2
+            output[1] = @1
+""")
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
             #input Real x1
@@ -875,19 +863,20 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOut")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
             #input Real x
@@ -897,13 +886,16 @@ class ModelicaTransfer(object):
             #return
             #y := 2*x
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutReturn")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
             #input Real x
@@ -911,14 +903,17 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicRealFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallInFunction")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicRealFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
             #input Real x
@@ -927,14 +922,17 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicRealFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallEquationInFunction")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicRealFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
             #input Real x
@@ -946,17 +944,20 @@ class ModelicaTransfer(object):
             #internal := sin(y)
             #y := x + internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = sin(@0)\n"
-                    "@1 = (@0*@1)\n"
-                    "@1 = sin(@1)\n"
-                    "@0 = (@0+@1)\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutInternal")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = sin(@0)
+            @1 = (@0*@1)
+            @1 = sin(@1)
+            @0 = (@0+@1)
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
             #input Real x1
@@ -972,20 +973,20 @@ class ModelicaTransfer(object):
             #y2 := internal2 + x1
             #y2 := 1
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicRealFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOutInternal")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicRealFunctions.polyInPolyOutInternal"), expected)
 
 
     @testattr(casadi = True)
@@ -997,13 +998,16 @@ class ModelicaTransfer(object):
         #algorithm
             #y := x
         #end monoInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOut")) ==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOut"), expected) 
 
         #function polyInMonoOut
             #input Integer x1
@@ -1013,17 +1017,19 @@ class ModelicaTransfer(object):
             #y := x1+x2
         #end polyInMonoOut
         #end monoInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInMonoOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = input[1]\n"
-                    "@0 = (@0+@1)\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInMonoOut"))==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.polyInMonoOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = input[1][0]
+            @0 = (@0+@1)
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInMonoOut"), expected) 
 
         #function monoInPolyOut
             #input Integer x
@@ -1033,24 +1039,24 @@ class ModelicaTransfer(object):
             #y1 := if(x > 2) then 1 else 5
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 2\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0<@1)\n"
-                    "@2 = 1\n"
-                    "@2 = (@0?@2:0)\n"
-                    "@0 = (!@0)\n"
-                    "@3 = 5\n"
-                    "@0 = (@0?@3:0)\n"
-                    "@2 = (@2+@0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInPolyOut")) ==\
-               strnorm(expected)
+        expected = ("""
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = 2
+            @1 = input[0][0]
+            @0 = (@0<@1)
+""" +
+#"@2 = if_else(@0,5,1)" +
+"@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
+"""
+            output[0] = @2
+            output[1] = @1
+""")
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
             #input Integer x1
@@ -1061,19 +1067,20 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOut")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
             #input Integer x
@@ -1083,13 +1090,16 @@ class ModelicaTransfer(object):
             #return
             #y := 2*x
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
             #input Integer x
@@ -1097,14 +1107,17 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallInFunction")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicIntegerFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
             #input Integer x
@@ -1113,14 +1126,17 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicIntegerFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicIntegerFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
             #input Integer x
@@ -1132,19 +1148,22 @@ class ModelicaTransfer(object):
             #internal := 1+y
             #y := x + internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = 3\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0*@1)\n"
-                    "@0 = (@1*@0)\n"
-                    "@2 = 1\n"
-                    "@2 = (@2+@0)\n"
-                    "@1 = (@1+@2)\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = 3
+            @1 = input[0][0]
+            @0 = (@0*@1)
+            @0 = (@1*@0)
+            @2 = 1
+            @2 = (@2+@0)
+            @1 = (@1+@2)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
             #input Integer x1
@@ -1160,20 +1179,20 @@ class ModelicaTransfer(object):
             #y2 := internal2 + x1
             #y2 := 1
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal"), expected)
 
 
     @testattr(casadi = True)
@@ -1185,13 +1204,15 @@ class ModelicaTransfer(object):
         #algorithm
             #y := x
         #end monoInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOut")) ==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0"""
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOut"), expected) 
 
         #function polyInMonoOut
             #input Boolean x1
@@ -1200,17 +1221,19 @@ class ModelicaTransfer(object):
         #algorithm
             #y := x1 and x2
         #end polyInMonoOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInMonoOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = input[1]\n"
-                    "@0 = (@0&&@1)\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInMonoOut")) ==\
-               strnorm(expected) 
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.polyInMonoOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = input[1][0]
+            @0 = (@0&&@1)
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInMonoOut"), expected) 
 
         #function monoInPolyOut
             #input Boolean x
@@ -1220,20 +1243,22 @@ class ModelicaTransfer(object):
             #y1 := if(x) then false else (x or false)
             #y2 := x
         #end monoInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = 0\n"
-                    "@1 = input[0]\n"
-                    "@0 = (@0||@1)\n"
-                    "@2 = (!@1)\n"
-                    "@2 = (@2?@0:0)\n"
-                    "output[0] = @2\n"
-                    "output[1] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInPolyOut")) ==\
-               strnorm(expected)
+        expected = ("""
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInPolyOut
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            """ +
+            #"@1 = if_else(@0, 0, @0)" +
+            "@1 = if_else(@0, @0)" + # expecting this instead because of CasADi #1618
+            """
+            output[0] = @1
+            output[1] = @0
+            """)
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInPolyOut"), expected)
 
         #function polyInPolyOut
             #input Boolean x1
@@ -1244,19 +1269,20 @@ class ModelicaTransfer(object):
             #y1 := x1
             #y2 := x2
         #end polyInPolyOut
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOut\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = input[1]\n"
-                    "output[1] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOut")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOut
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = input[1][0]
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOut"), expected)
 
         #function monoInMonoOutReturn
             #input Boolean x
@@ -1266,13 +1292,16 @@ class ModelicaTransfer(object):
             #return
             #y := x or false
         #end monoInMonoOutReturn
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn"), expected)
 
         #function functionCallInFunction
             #input Boolean x
@@ -1280,14 +1309,17 @@ class ModelicaTransfer(object):
         #algorithm
             #y := monoInMonoOut(x)
         #end functionCallInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@1 = function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallInFunction")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @1 = AtomicModelAtomicBooleanFunctions.monoInMonoOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallInFunction"), expected)
 
         #function functionCallEquationInFunction
             #input Boolean x
@@ -1296,14 +1328,17 @@ class ModelicaTransfer(object):
         #algorithm
             #(y,internal) := monoInPolyOut(x)
         #end functionCallEquationInFunction
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "{@1, NULL} = function(\"AtomicModelAtomicBooleanFunctions.monoInPolyOut\").call([@0])\n"
-                    "output[0] = @1\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction"))==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            {@1, NULL} = AtomicModelAtomicBooleanFunctions.monoInPolyOut(@0)
+            output[0] = @1
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction"), expected)
 
         #function monoInMonoOutInternal
             #input Boolean x
@@ -1315,18 +1350,21 @@ class ModelicaTransfer(object):
             #internal := false or y
             #y := false or internal
         #end monoInMonoOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal\")\n"
-                    " Input: 1-by-1 (dense)\n"
-                    " Output: 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "@0 = (@0&&@0)\n"
-                    "@1 = 0\n"
-                    "@1 = (@1||@0)\n"
-                    "@0 = 0\n"
-                    "@0 = (@0||@1)\n"
-                    "output[0] = @0\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal")) ==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal
+             Number of inputs: 1
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             Number of outputs: 1
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            @0 = (@0&&@0)
+            @1 = 0
+            @1 = (@1||@0)
+            @0 = 0
+            @0 = (@0||@1)
+            output[0] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal"), expected)
 
         #function polyInPolyOutInternal
             #input Boolean x1
@@ -1342,20 +1380,20 @@ class ModelicaTransfer(object):
             #y2 := internal2 or x1
             #y2 := true
         #end polyInPolyOutInternal
-        expected = ("ModelFunction : function(\"AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal\")\n"
-                    " Inputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    " Outputs (2):\n"
-                    "  0. 1-by-1 (dense)\n"
-                    "  1. 1-by-1 (dense)\n"
-                    "@0 = input[0]\n"
-                    "output[0] = @0\n"
-                    "@0 = 1\n"
-                    "output[1] = @0\n"
-                    "@0 = input[1]\n")
-        assert strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal"))==\
-               strnorm(expected)
+        expected = """
+            ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal
+             Number of inputs: 2
+              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             Number of outputs: 2
+              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+            @0 = input[0][0]
+            output[0] = @0
+            @0 = 1
+            output[1] = @0
+            """
+        check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal"), expected)
 
     @testattr(casadi = True)
     def test_TransferVariableType(self):
@@ -1406,60 +1444,51 @@ def computeStringRepresentationForContainer(myContainer):
 def test_OptimicaLessThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQ", optproblemsFile)
     expected = str(x1.getName()) + " <= " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints()), expected)
 
 @testattr(casadi = True)
 def test_OptimicaGreaterThanPathConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQ", optproblemsFile)
     expected = str(x1.getName()) + " >= " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints()), expected)
     
 @testattr(casadi = True)    
 def test_OptimicaSevaralPathConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQ", optproblemsFile)
     expected = str(x2.getName()) + " <= " + str(1) +  str(x1.getName()) + " >= " + str(1) 
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
-            strnorm(expected))    
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints()), expected)    
 
 @testattr(casadi = True)
 def test_OptimicaEqualityPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " = " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints()), expected)
     
 @testattr(casadi = True)    
 def test_OptimicaLessThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationLEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " <= " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints()), expected)
 
 @testattr(casadi = True)
 def test_OptimicaGreaterThanPointConstraint():
     optProblem =  load_optimization_problem("atomicOptimizationGEQpoint", optproblemsFile)
     expected = str(MX.sym("x1(finalTime)").getName()) + " >= " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints()), expected)
     
 @testattr(casadi = True)    
 def test_OptimicaSevaralPointConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationGEQandLEQandEQpoint", optproblemsFile)
     expected = str(MX.sym("x2(startTime + 1)").getName()) + " <= " + str(1) +  str(MX.sym("x1(startTime + 1)").getName()) + " >= " + str(1) + str(MX.sym("x2(finalTime + 1)").getName()) + " = " + str(1)
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
-            strnorm(expected))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints()), expected)
     
 @testattr(casadi = True)    
 def test_OptimicaMixedConstraints():
     optProblem =  load_optimization_problem("atomicOptimizationMixedConstraints", optproblemsFile)
     expectedPath = str(MX.sym("x3(startTime + 1)").getName()) + " <= " + str(x1.getName())
     expectedPoint =  str(MX.sym("x2(startTime + 1)").getName()) + " <= " + str(1) +  str(MX.sym("x1(startTime + 1)").getName()) + " >= " + str(1) 
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints())) ==\
-            strnorm(expectedPath))
-    assert( strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints())) ==\
-            strnorm(expectedPoint))
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPathConstraints()), expectedPath)
+    check_strnorm(computeStringRepresentationForContainer(optProblem.getPointConstraints()), expectedPoint)
     
 @testattr(casadi = True)    
 def test_OptimicaTimedVariables():
@@ -1496,25 +1525,25 @@ def test_OptimicaTimedVariables():
     tv3 = timedVars[2].getVar()
     tv4 = timedVars[3].getVar()
 
-    assert tp1.getDep(1).isEqual(startTime.getVar())
-    assert tp2.getDep(1).isEqual(startTime.getVar())
-    assert tp3.getDep(0).isEqual(finalTime.getVar())
-    assert tp4.isEqual(finalTime.getVar())
+    assert isEqual(tp1.getDep(1), startTime.getVar())
+    assert isEqual(tp2.getDep(1), startTime.getVar())
+    assert isEqual(tp3.getDep(0), finalTime.getVar())
+    assert isEqual(tp4, finalTime.getVar())
 
-    assert tv1.isEqual(point_constraints[0].getLhs())
-    assert tv2.isEqual(path_constraints[0].getLhs())
-    assert tv3.isEqual(path_constraints[1].getLhs())
-    assert tv4.isEqual(optProblem.getObjective())
+    assert isEqual(tv1, point_constraints[0].getLhs())
+    assert isEqual(tv2, path_constraints[0].getLhs())
+    assert isEqual(tv3, path_constraints[1].getLhs())
+    assert isEqual(tv4, optProblem.getObjective())
 
 @testattr(casadi = True)
 def test_OptimicaStartTime():
     optProblem =  load_optimization_problem("atomicOptimizationStart5", optproblemsFile)
-    assert( optProblem.getStartTime().getValue() == 5)
+    assert( float(optProblem.getStartTime()) == 5)
     
 @testattr(casadi = True)    
 def test_OptimicaFinalTime():
     optProblem =  load_optimization_problem("atomicOptimizationFinal10", optproblemsFile)
-    assert( optProblem.getFinalTime().getValue() == 10)
+    assert( float(optProblem.getFinalTime()) == 10)
 
 @testattr(casadi = True)
 def test_OptimicaObjectiveIntegrand():
@@ -1555,5 +1584,4 @@ def test_OptimicaNormalizedTimeFlag():
 @testattr(casadi = True)    
 def test_ModelIdentifier():
     optProblem = load_optimization_problem("identifierTest.identfierTestModel", optproblemsFile)
-    assert strnorm(optProblem.getIdentifier()) ==\
-           strnorm("identifierTest_identfierTestModel")
+    check_strnorm(optProblem.getIdentifier(), "identifierTest_identfierTestModel")
