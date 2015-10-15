@@ -1575,11 +1575,6 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     solver->kin_scale_update_time = curtime;
     kin_char_log(solver, 's');
-
-    /* Read manual scaling from annotations and put them in residual_nominal & scale_ptr*/
-    if (block->init) {
-        jmi_setup_f_residual_scaling(block);
-    }
     
     if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
         /* Zero out the scales initially if we're modify this. */
@@ -2074,6 +2069,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     }
     
     if(block->init) {
+        jmi_setup_f_residual_scaling(block);
         flag = jmi_kinsol_init(block);
         if(flag) return flag;
     }
