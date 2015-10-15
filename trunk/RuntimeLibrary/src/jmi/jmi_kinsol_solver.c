@@ -100,6 +100,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     n = NV_LENGTH_S(ff);
     {
         jmi_log_node_t node;
+        jmi_kinsol_solver_t* solver = block->solver;
 
         for (i=0;i<n;i++) {
             double v = Ith(ff,i);
@@ -124,7 +125,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
                     jmi_log_node(block->log, logWarning, "INFOutput", 
                         "Infinity in <output: %I> from <block: %s>", i, block->label);
                 }
-            } else if (v > JMI_LIMIT_VALUE || v < -JMI_LIMIT_VALUE) {
+            } else if ((block->options->experimental_mode != jmi_block_solver_experimental_scaling_from_nominal_heuristics && (v > JMI_LIMIT_VALUE || v < -JMI_LIMIT_VALUE)) ||
+                       (block->options->experimental_mode == jmi_block_solver_experimental_scaling_from_nominal_heuristics && (v > JMI_LIMIT_VALUE * solver->residual_heuristic_nominal[i] || v < -JMI_LIMIT_VALUE * solver->residual_heuristic_nominal[i]))) {
                 if(ret == 0) {
                     ret = 1;
                     node = jmi_log_enter_fmt(block->log, logWarning, "LimitingValues", 
@@ -1556,6 +1558,9 @@ static void jmi_setup_f_residual_scaling(jmi_block_solver_t *block) {
             }
         }
     }
+    
+    block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL_AUTO);
+    block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL);
 }
 
 /* 
@@ -1628,34 +1633,63 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                 int j, maxInJacIndex = 0;
                 realtype **jac = solver->J_scale->cols;
                 realtype maxInJac = RAbs(jac[0][i]); 
-                scale_ptr[i] = bsop->max_residual_scaling_factor; /* Singular Jacobian? */
-                solver->using_max_min_scaling_flag = 1; /* Using maximum scaling */
+                solver->using_max_min_scaling_flag = 1; /* Using maximum scaling, singular Jacobian? */
                 for(j = 0; j < N; j++) {
                     if(RAbs(maxInJac) < RAbs(jac[j][i])) {
                         maxInJac = jac[j][i];
                         maxInJacIndex = j;
                     }
                 }
-                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
-                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                    block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                
+                if (bsop->experimental_mode == jmi_block_solver_experimental_scaling_from_nominal_heuristics) {
+                    if (scale_ptr[i] > solver->residual_heuristic_nominal[i]/bsop->min_residual_scaling_factor) {
+                        scale_ptr[i] = bsop->max_residual_scaling_factor/solver->residual_heuristic_nominal[i];
+                        jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                    } else {
+                        scale_ptr[i] = 1/scale_ptr[i];
+                        jmi_log_node(block->log, logWarning, "MaxScalingExceeded", "Poor scaling in <block: %s> but will allow it based on structure of block. "
+                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                    }
+                } else {
+                    scale_ptr[i] = bsop->max_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                }
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
                 realtype **jac = solver->J_scale->cols;
-                realtype maxInJac = RAbs(jac[0][i]); 
-                scale_ptr[i] = bsop->min_residual_scaling_factor;
+                realtype maxInJac = RAbs(jac[0][i]);
+                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
                 for(j = 0; j < N; j++) {
                     if(RAbs(maxInJac) < RAbs(jac[j][i])) {
                         maxInJac = jac[j][i];
                         maxInJacIndex = j;
                     }
                 }
-                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
-                jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
-                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                    block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-
+                
+                if (bsop->experimental_mode == jmi_block_solver_experimental_scaling_from_nominal_heuristics) {
+                    if (scale_ptr[i] > solver->residual_heuristic_nominal[i]/bsop->min_residual_scaling_factor) {
+                        scale_ptr[i] = bsop->min_residual_scaling_factor/solver->residual_heuristic_nominal[i];
+                        jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
+                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                    } else {
+                        scale_ptr[i] = 1/scale_ptr[i];
+                        jmi_log_node(block->log, logWarning, "MinScalingExceeded", "Poor scaling in <block: %s> but will allow it based on structure of block. "
+                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                    }
+                } else {
+                    scale_ptr[i] = bsop->min_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
+                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
+                }
             }
             else
                 scale_ptr[i] = 1/scale_ptr[i];
@@ -1755,6 +1789,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_f_scale = N_VNew_Serial(n);
     solver->gradient  = N_VNew_Serial(n);
     solver->residual_nominal = (realtype*)calloc(n+1,sizeof(realtype));
+    solver->residual_heuristic_nominal = (realtype*)calloc(n+1,sizeof(realtype));
     solver->kin_scale_update_time = -1.0;
     solver->kin_jac_update_time = -1.0;
     /*NOTE: it'd be nice to use "jmi->newton_tolerance" here
@@ -1874,6 +1909,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     N_VDestroy_Serial(solver->kin_f_scale);
     N_VDestroy_Serial(solver->gradient);
     free(solver->residual_nominal);
+    free(solver->residual_heuristic_nominal);
     DestroyMat(solver->J);
     DestroyMat(solver->JTJ);
     DestroyMat(solver->J_LU);

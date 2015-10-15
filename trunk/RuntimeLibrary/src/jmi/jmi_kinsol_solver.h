@@ -68,6 +68,7 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     N_Vector gradient;              /**< \brief Steepest descent direction */
     realtype* residual_nominal;      /**< \brief Vector for reading in manual scaling factors for f  */
+    realtype* residual_heuristic_nominal; /**< \brief Vector for reading in heuristic scaling factors for f  */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
