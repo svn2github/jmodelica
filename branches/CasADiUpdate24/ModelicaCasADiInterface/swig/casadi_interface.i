@@ -37,7 +37,7 @@ import_array();
 
 
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
-%include "vectors.i"
+//%include "vectors.i"
 
 %include "std_string.i"
 %include "std_vector.i"
