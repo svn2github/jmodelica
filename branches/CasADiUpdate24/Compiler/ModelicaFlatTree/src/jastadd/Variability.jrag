@@ -565,6 +565,22 @@ aspect Variability {
     eq FZeros.expVariability()     = fConstant();
     eq FFillExp.expVariability()   = getFillExp().variability();
 
+    eq FExInStream.expVariability() {
+        FTypePrefixVariability stream = getDefault().variability();
+        FTypePrefixVariability total = fConstant();
+        int n = 0;
+        for (InStreamPart cont : contributors()) {
+            stream = cont.stream.variability();
+            total = total.combine(stream).combine(cont.flow.variability());
+            n++;
+        }
+        if (n < 2) {
+            return stream;
+        } else {
+            return total;
+        }
+    }
+
     eq FEdgeExp.expVariability()   = getFExp().variability().combineDown(fDiscrete());
     eq FChangeExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
     eq FLoadResource.expVariability() = fParameter();

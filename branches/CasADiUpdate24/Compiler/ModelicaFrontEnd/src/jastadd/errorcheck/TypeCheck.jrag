@@ -825,12 +825,19 @@ aspect FlatTypeCheck {
 		if (hasFormat() && (hasMinimumLength() || hasLeftJustified() || hasSignificantDigits()))
 			error("Calling function String(): named argument format can not be used together with minimumLength, leftJustified or significantDigits");
 	}
-  
-  public void FHomotopyExp.typeCheck(ErrorCheckType checkType) {
-    if (!getActual().type().equivalentTo(getSimplified().type())) {
-      error("Calling function homotopy(): arguments must be same type");
+
+    public void FHomotopyExp.typeCheck(ErrorCheckType checkType) {
+      if (isArray()) {
+          Size s = size();
+          for (FExp arg : myArgs()) {
+              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
+                  error("Mismatching sizes in homotopy. All non-scalar arguments need matching sizes");
+                  break;
+              }
+          }
+      }
+      super.typeCheck(checkType);
     }
-  }
   
     public void InstDerExp.typeCheck(ErrorCheckType checkType) {
         FType type = getFExp().type();
@@ -1093,8 +1100,8 @@ aspect FlatTypeCheck {
     eq FStringExp.getChild().argumentTypeValid(FType type)                = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
     eq FInfArgsFunctionCall.getChild().argumentTypeValid(FType type)      = true;  // Type checked in FInfArgsFunctionCall.typeCheck()
     eq FReinit.getChild().argumentTypeValid(FType type)                   = true;  // Type checked in Reinit.typeCheck()
+    eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
     // All types allowed for these:
-    eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = true;
     eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
     eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
 

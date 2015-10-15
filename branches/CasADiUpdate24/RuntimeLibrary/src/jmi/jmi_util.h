@@ -859,6 +859,7 @@ struct jmi_simple_color_info_t {
  * @param n_relations Number of relational operators in the DAE equations.
  * @param relations Kind of relational operators in the DAE equations. One of: JMI_REL_GT, JMI_REL_GEQ, JMI_REL_LT, JMI_REL_LEQ.
  * @param scaling_method Scaling method. Options are JMI_SCALING_NONE or JMI_SCALING_VARIABLES.
+ * @param homotopy_block Block number of the block which contains homotopy operators, -1 if none.
  * @param jmi_callbacks A jmi_callback_t struct.
  * @return Error code.
  */
@@ -882,7 +883,8 @@ int jmi_init(jmi_t** jmi,
         int n_initial_relations, int* initial_relations,
         int n_relations, int* relations, int n_dynamic_state_sets,
         jmi_real_t* nominals,
-        int scaling_method, int n_ext_objs, jmi_callbacks_t* jmi_callbacks);
+        int scaling_method, int n_ext_objs, int homotopy_block,
+        jmi_callbacks_t* jmi_callbacks);
 
 /**
  * \brief Allocates a jmi_dae_t struct.
@@ -1169,6 +1171,7 @@ struct jmi_t {
     int offs_real_u;                     /**< \brief  Offset of the input real vector in \f$z\f$. */
     int offs_real_w;                     /**< \brief  Offset of the algebraic real variables vector in \f$z\f$. */
     int offs_t;                          /**< \brief  Offset of the time entry in \f$z\f$. */
+    int offs_homotopy_lambda;            /**< \brief  Offset of the homotopy lambda entry in \f$z\f$. */
 
     int offs_real_d;                     /**< \brief  Offset of the discrete real variable vector in \f$z\f$. */
 

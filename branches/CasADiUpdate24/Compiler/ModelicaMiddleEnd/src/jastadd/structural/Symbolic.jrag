@@ -783,9 +783,9 @@ aspect Derivatives {
             return diffExp;
     }
 
-	public FExp FHomotopyExp.diff(String name) {
-		return dynamicFExp(getActual().diff(name));
-	}
+    public FExp FHomotopyExp.diff(String name) {
+        return dynamicFExp(new FHomotopyExp(getActual().diff(name), getSimplified().diff(name)));
+    }
 	
 	public FExp FNoEventExp.diff(String name) {
 		return new FNoEventExp(getFExp().diff(name));

@@ -91,6 +91,8 @@ static const int N_outputs = $n_outputs$;
 
 static const int Scaling_method = $C_DAE_scaling_method$;
 
+static const int Homotopy_block = $C_DAE_INIT_homotopy_block$;
+
 const char *C_GUID = $C_guid$;
 
 $C_DAE_output_vrefs$
@@ -194,7 +196,7 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
              N_initial_relations, (int (*))DAE_initial_relations,
              N_relations, (int (*))DAE_relations, N_dynamic_state_sets,
              (jmi_real_t *) DAE_nominals,
-             Scaling_method, N_ext_objs, jmi_callbacks);
+             Scaling_method, N_ext_objs, Homotopy_block, jmi_callbacks);
 
 $C_dynamic_state_add_call$
 

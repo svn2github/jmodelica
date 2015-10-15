@@ -71,28 +71,166 @@ aspect Connections {
             // Depends on enableIfEquationElimination being done
             public void perform() {
                 enableStreamsRewrite();
+                change();
             }
         }
     }
 
     /**
-     * Rewrite the inSteam operator to equations. 
+     * Rewrite the inSteam operator to expanded form.
      */
     rewrite FInStream {
-        when (rewriteStreams) to FExp {
-            // Always create expression from the connection set where the variable is an inside connector. 
-            return expandInStreamExp();
-        }
+        when (rewriteStreams) to FExp expandInStreamExp();
     }
-    
+
     protected FExp FInStream.expandInStreamExp() {
+        // Always create expression from the connection set where the variable is an inside connector. 
         String name = ((FIdUseExp) getFExp()).getFIdUse().getFQName().fullCopy().name();
         ConnectionSet cs = myFClass().getConnectionSetManager().getStreamConnectionSet(name, false);
-        return cs.createInStreamExp(name);
+        return cs.expandInStreamExp(name);
     }
-    
+
     protected FExp FDerInStream.expandInStreamExp() {
+        // TODO: This looks wrong, it just takes the derivative of the argument
         return getFExp().diff(FExp.TIME);
+    }
+
+
+    public void ASTNode.enableExpandedInStreamRewrite() {
+        for (ASTNode n : this)
+            n.enableExpandedInStreamRewrite();
+    }
+
+    public void FExInStream.enableExpandedInStreamRewrite() {
+        super.enableExpandedInStreamRewrite();
+        rewriteExpandedInStream = true;
+        is$Final = false;
+    }
+
+    protected boolean FExInStream.rewriteExpandedInStream = false;
+
+    public class FClass {
+        public class enableExpandedInStreamRewrite extends Transformation {
+            // Depends on variabilityPropagationIfSet and the following aliasEliminationIfSet being done
+            public void perform() {
+                enableExpandedInStreamRewrite();
+                change();
+            }
+        }
+    }
+
+    /**
+     * Rewrite the expanded form of the inSteam operator to resulting expression.
+     */
+    rewrite FExInStream {
+        when (rewriteExpandedInStream) to FExp {
+            FExp stream = getDefault().treeCopy();
+            FExp sum = null;
+            FExp div = null;
+            FExp eps = getEps();
+            int n = 0;
+            for (InStreamPart cont : contributors()) {
+                stream = cont.stream.treeCopy();
+                FExp flow = cont.flow.treeCopy();
+                if (!cont.outside) {
+                    flow = new FNegExp(flow);
+                }
+                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopy()));
+                FExp sumP = new FMulExp(divP.treeCopy(), stream);
+                if (sum == null) {
+                    sum = sumP;
+                    div = divP;
+                } else {
+                    sum = new FAddExp(sum, sumP);
+                    div = new FAddExp(div, divP);
+                }
+                n++;
+            }
+            if (n < 2) {
+                return stream;
+            } else {
+                return new FDivExp(sum, div);
+            }
+        }
+    }
+
+
+    syn int FExInStream.numVars() = getNumVar() / 3;
+
+    syn FExp FExInStream.flowExp(int i) = getVar(i * 3);
+
+    syn FExp FExInStream.streamExp(int i) = getVar(i * 3 + 1);
+
+    syn FExp FExInStream.isOutsideExp(int i) = getVar(i * 3 + 2);
+
+    syn boolean FExInStream.isOutside(int i) = isOutsideExp(i).ceval().booleanValue();
+
+    public class FExInStream {
+        /**
+         * An iterable over all stream/flow pairs that contribute to this inStream().
+         */
+        public Iterable<InStreamPart> contributors() {
+            return new ContributorIterable();
+        }
+        
+        public class InStreamPart {
+            public final FExp flow;
+            public final FExp stream;
+            public final boolean outside;
+
+            public InStreamPart(int i) {
+                flow = flowExp(i);
+                stream = streamExp(i);
+                outside = isOutside(i);
+            }
+
+            public boolean contributes() {
+                if (outside) {
+                    return flow.maxRealValue() > 0;
+                } else {
+                    return flow.minRealValue() < 0;
+                }
+            }
+        }
+
+        private class ContributorIterable implements Iterable<InStreamPart> {
+            private int n = numVars();
+            
+            public Iterator<InStreamPart> iterator() {
+                return new ContributorIterator();
+            }
+
+            private class ContributorIterator implements Iterator<InStreamPart> {
+                private int i;
+                private InStreamPart next;
+
+                public ContributorIterator() {
+                    i = -1;
+                    step();
+                }
+
+                public boolean hasNext() {
+                    return i < n;
+                }
+
+                public InStreamPart next() {
+                    InStreamPart res = next;
+                    step();
+                    return res;
+                }
+                
+                public void remove() {
+                    throw new UnsupportedOperationException();
+                }
+
+                private void step() {
+                    do {
+                        i++;
+                        next = (i < n) ? new InStreamPart(i) : null;
+                    } while (i < n && !next.contributes());
+                }
+            }
+        }
     }
 
 	/**
@@ -233,7 +371,7 @@ aspect Connections {
 		 * 
 		 * @param name  the name of the variable to generate name for
 		 */
-		public FExp createInStreamExp(String name) {
+		public FExp expandInStreamExp(String name) {
 			throw new UnsupportedOperationException();
 		}
 		
@@ -329,9 +467,7 @@ aspect Connections {
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
                     FExp left = e.createFIdUseExp();
-                    FExp right = createInStreamExp(e, null);
-                    if (right == null) 
-                        right = new FIntegerLitExp(0);
+                    FExp right = expandInStreamExp(e, null, new FIntegerLitExp(0));
                     eqns.add(new FEquation(left, right));
                 }
             }
@@ -342,11 +478,9 @@ aspect Connections {
          * 
          * @param name  the name of the variable to generate name for
          */
-        public FExp createInStreamExp(String name) {
+        public FExp expandInStreamExp(String name) {
             ConnectionSetEntry e = getConnectionSetEntry(name, false);
-            FExp exp = createInStreamExp(e, name);
-            if (exp == null)
-                exp = new FIdUseExp(name);
+            FExp exp = expandInStreamExp(e, name, new FIdUseExp(name));
             exp.enableStreamsRewrite();
             return exp;
         }
@@ -355,43 +489,62 @@ aspect Connections {
          * Create an expression for the inStream() of the given entry.
          * 
          * Used for inStream() for inside entries and for additional equations for outside entries.
-         * Returns null if there are no contributors, since this is handled differently in the two cases.
          * 
          * @param cse   the entry to generate the expression for
          * @param name  the name of the scalar var to generate the stream access for, 
          *              of null for the entire array (in scalar case they are equivalent)
+         * @param def   expression to use when there are no contributing streams
          */
-        private FExp createInStreamExp(ConnectionSetEntry cse, String name) {
-            FExp stream = null;
-            FExp sum = null;
-            FExp div = null;
-            int numContributors = 0;
-            final boolean ignoreMinMax = size() == 2;
+        private FExp expandInStreamExp(ConnectionSetEntry cse, String name, FExp def) {
+            FExp stream = def;
+            List<FExp> vars = new List<FExp>();
             for (ConnectionSetEntry e : this) {
-                if (cse != e && (ignoreMinMax || e.contributesToStream())) {
-                    numContributors++;
-                    FExp flow = e.createFlowFIdUseExp();
+                if (cse != e) {
                     stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
                     if (e.isOutside()) 
                         stream = new FInStream(stream);
-                    else
-                        flow = new FNegExp(flow);
-                    FExp divP = new FMaxExp(flow, new Opt(new FRealLitExp(eps)));
-                    FExp sumP = new FMulExp(divP.fullCopy(), stream);
-                    if (sum == null) {
-                        sum = sumP;
-                        div = divP;
-                    } else {
-                        sum = new FAddExp(sum, sumP);
-                        div = new FAddExp(div, divP);
-                    }
+                    vars.add(e.createFlowFIdUseExp());
+                    vars.add(stream);
+                    vars.add(FBooleanLitExp.create(e.isOutside()));
                 }
             }
             
-            if (numContributors < 2) 
+            if (vars.getNumChildNoTransform() < 6) {
                 return stream;
-            else 
-                return new FDivExp(sum, div);
+            } else {
+                return new FExInStream(def, new FRealLitExp(eps), vars);
+            }
+
+//            FExp stream = null;
+//            FExp sum = null;
+//            FExp div = null;
+//            int numContributors = 0;
+//            final boolean ignoreMinMax = size() == 2;
+//            for (ConnectionSetEntry e : this) {
+//                if (cse != e && (ignoreMinMax || e.contributesToStream())) {
+//                    numContributors++;
+//                    FExp flow = e.createFlowFIdUseExp();
+//                    stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
+//                    if (e.isOutside()) 
+//                        stream = new FInStream(stream);
+//                    else
+//                        flow = new FNegExp(flow);
+//                    FExp divP = new FMaxExp(flow, new Opt(new FRealLitExp(eps)));
+//                    FExp sumP = new FMulExp(divP.fullCopy(), stream);
+//                    if (sum == null) {
+//                        sum = sumP;
+//                        div = divP;
+//                    } else {
+//                        sum = new FAddExp(sum, sumP);
+//                        div = new FAddExp(div, divP);
+//                    }
+//                }
+//            }
+//            
+//            if (numContributors < 2) 
+//                return stream;
+//            else 
+//                return new FDivExp(sum, div);
         }
 
     }
@@ -783,8 +936,7 @@ aspect Connections {
          * This should only be done once, or "inner outer" declarations will not be handled correctly.
          */
         public void redirectInner() {
-            if (cd.inOrIsOuter()) {
-                cd = cd.myInnerInstComponentDecl();
+            if (cd.inOrIsInner()) {
                 fqName = cd.getFQName().copyPrefix().asFQNameFull().append(fqName.copyLastSuffix());
             }
         }
@@ -848,7 +1000,7 @@ aspect Connections {
                 InstComponentDecl flow = cd.myFlowVar();
                 flowExp = new FIdUseExp(flow.flattenedAccess());
                 try {
-                    eps *= flow.nominalAttributeCValue().realValue();
+                    eps *= Math.abs(flow.nominalAttributeCValue().realValue());
                 } catch (ConstantEvaluationException e) {}
                 try {
                     contribute = isOutside() ? 
@@ -1016,20 +1168,39 @@ aspect Connections {
             super.connectTo(left, right, prefix, csm, source, buildGraph);
         }
     }
-	
-	syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
-		isOverconstrainedType() && right.isOverconstrainedType();
-	
-	/**
-	 * Retrieve the specific cell for a given index from an array component.
-	 * 
-	 * The dimension of i that refers to the children of this component is given by j.
-	 */
-	syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) = 
-		(j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCell(i, j + 1) : this;
-	eq InstPrimitive.findCell(Index i, int j)                        = this;
-	eq InstExpandableConnectorMember.findCell(Index i, int j)        = 
-        getCopyOf().isPrimitive() ? this : super.findCell(i, j);
+
+    syn boolean InstComponentDecl.isOverconstrainedConnection(InstComponentDecl right) =
+            isOverconstrainedType() && right.isOverconstrainedType();
+
+    /**
+     * Retrieve the specific cell for a given index from an array component.
+     * 
+     * What dimension of i that refers to the children of this component is given by j.
+     */
+    syn InstComponentDecl InstComponentDecl.findCell(Index i, int j) =
+         ((j > 0) ? findCellUp(i, j, this) : this).findCellDown(i, j);
+
+    inh InstComponentDecl InstComponentDecl.findCellUp(Index i, int j, InstComponentDecl src);
+    eq InstComponentDecl.getChild().findCellUp(Index i, int j, InstComponentDecl src) {
+        if (j > 0) {
+            if (isArray()) {
+                return findCellUp(i, j - 1, this).getInstComponentDecl(i.get(j - 1) - 1);
+            } else {
+                return findCellUp(i, j, this).memberInstComponent(src.name()).target();
+            }
+        }
+        return src;
+    }
+    eq InstClassDecl.getChild().findCellUp(Index i, int j, InstComponentDecl src) = src;
+    eq Root.getChild().findCellUp(Index i, int j, InstComponentDecl src) {
+        throw new UnsupportedOperationException();
+    }
+
+    syn InstComponentDecl InstComponentDecl.findCellDown(Index i, int j) = 
+        (j < i.ndims()) ? getInstComponentDecl(i.get(j) - 1).findCellDown(i, j + 1) : this;
+    eq InstPrimitive.findCellDown(Index i, int j)                        = this;
+    eq InstExpandableConnectorMember.findCellDown(Index i, int j)        = 
+        getCopyOf().isPrimitive() ? this : super.findCellDown(i, j);
 
 	syn boolean InstAccess.isOutsideConnector() = getFirstInstAccess().myInstComponentDecl().isConnector();
 	
@@ -1111,6 +1282,7 @@ aspect Connections {
 			}
 			for (FAbstractEquation equ : getFAbstractEquations())
 			    equ.buildConnectionSets(prefix, csm, connect);
+			getFAbstractEquations().flushAllRecursive();
 		}
 		for (InstForIndex fi : getInstForIndexs()) {
 			fi.getInstPrimitive().setLocalCachedEvaluationValue(null);

@@ -1266,6 +1266,37 @@ end ConnectTests.ConnectTest28;
 ")})));
 end ConnectTest28;
 
+model ConnectTest29
+    connector C
+        Real a;
+    end C;
+    
+    parameter Boolean[2] b = {true,false};
+    C[2] x,y;
+equation
+    for i in 1:2 loop
+        if b[i] then
+            connect(x[i],y[i]);
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectTest29",
+            description="Connect in if in for",
+            flatModel="
+fclass ConnectTests.ConnectTest29
+ structural parameter Boolean b[2] = {true, false} /* { true, false } */;
+ Real x[1].a;
+ Real x[2].a;
+ Real y[1].a;
+ Real y[2].a;
+equation
+ x[1].a = y[1].a;
+end ConnectTests.ConnectTest29;
+")})));
+end ConnectTest29;
+
 
 
 model ConnectOuterTest1

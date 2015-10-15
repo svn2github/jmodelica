@@ -14119,6 +14119,34 @@ x
 	  
 end Homotopy2;
 
+model Homotopy3
+    function F
+        input R i;
+        output Real o;
+    algorithm
+        o := i.x;
+    end F;
+    record R
+        Real x;
+    end R;
+    R x;
+equation
+    x.x = homotopy(F(x), time);
+
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_Homotopy3",
+            description="Test homotopy operator with records",
+            homotopy_type="homotopy",
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.Homotopy3
+ Real x.x;
+equation
+ x.x = homotopy(x.x, time);
+end FunctionTests.FunctionLike.Special.Homotopy3;
+")})));
+      end Homotopy3;
+
 model SemiLinear1
   Real x = semiLinear(sin(time*10),2,-10);
   Real y[2] = semiLinear({sin(time*10),time},{2,2},{-10,3});

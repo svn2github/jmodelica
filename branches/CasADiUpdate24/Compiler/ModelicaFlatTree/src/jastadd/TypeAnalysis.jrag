@@ -429,6 +429,8 @@ aspect FlatTypeAnalysis {
 
     eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
 
+    eq FExInStream.type() = fRealType(size());
+
     eq FSmoothExp.type() = getFExp().type();
 
     eq FConnectionsOp.type() = fNoType();

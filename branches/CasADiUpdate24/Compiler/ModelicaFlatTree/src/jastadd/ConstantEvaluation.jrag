@@ -2466,11 +2466,6 @@ aspect ConstantEvaluation {
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
           InstAssignable var = (InstAssignable) myInstComponentDecl();
-          if (!var.inFunction()) {
-              InstComponentDecl inner = var.myInnerInstComponentDecl();
-              if (!inner.isUnknown())
-                  var = (InstAssignable) inner;
-          }
           
           if (hasFArraySubscripts()) {
               FArraySubscripts fas = getFArraySubscripts();
@@ -2611,6 +2606,35 @@ aspect ConstantEvaluation {
     eq FExpExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.exp(getFExp().ceval(evaluator).realValue()));
     eq FLogExp.cevalCalc(VariableEvaluator evaluator)   = new CValueReal(StrictMath.log(getFExp().ceval(evaluator).realValue()));
     eq FLog10Exp.cevalCalc(VariableEvaluator evaluator) = new CValueReal(StrictMath.log10(getFExp().ceval(evaluator).realValue()));
+
+    eq FExInStream.cevalCalc(VariableEvaluator evaluator) {
+        double eps = -1.0;
+        double val = 0.0;
+        double sum = 0.0;
+        double div = 0.0;
+        int numContributors = 0;
+        for (int i = 0, n = numVars(); i < n; i++) {
+            boolean outside = isOutsideExp(i).ceval(evaluator).booleanValue();
+            double flow = flowExp(i).ceval(evaluator).realValue();
+            if (!outside)
+                flow = -flow;
+            if (flow > 0.0) {
+                numContributors++;
+                if (eps < 0.0)
+                    eps = getEps().ceval(evaluator).realValue();
+                val = streamExp(i).ceval(evaluator).realValue();
+                flow = Math.max(flow, eps);
+                sum += flow * val;
+                div += flow;
+            }
+        }
+        if (numContributors == 0) {
+            val = getDefault().ceval(evaluator).realValue();
+        } else if (numContributors > 1) {
+            val = sum / div;
+        }
+        return new CValueReal(val);
+    }
 
     syn CValue FSubscript.ceval() = ceval(defaultVariableEvaluator());
 	syn CValue FSubscript.ceval(VariableEvaluator evaluator) = CValue.UNSUPPORTED;

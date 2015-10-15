@@ -1577,7 +1577,7 @@ end ChangeTest2;
 
 
 model HomotopyTest1
-  Real x = homotopy(1, {1});
+  Real x[2] = homotopy({1,2}, {1});
 
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
@@ -1586,8 +1586,8 @@ model HomotopyTest1
             errorMessage="
 1 errors found:
 
-Error at line 1580, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Calling function homotopy(): arguments must be same type
+Error at line 1, column 1, in file '...':
+  Mismatching sizes in homotopy. All non-scalar arguments need matching sizes
 ")})));
 end HomotopyTest1;
 

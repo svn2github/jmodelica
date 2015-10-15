@@ -377,7 +377,7 @@ model InnerOuterTest12
 			description="Constant evaluation of inner/outer",
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest12
- parameter Integer c.b = 1 /* 1 */;
+ structural parameter Integer c.b = 1 /* 1 */;
  structural parameter Integer f.e = 1 /* 1 */;
  Real f.x[1] = zeros(1);
 end InnerOuterTests.InnerOuterTest12;
@@ -536,6 +536,336 @@ equation
 end InnerOuterTests.InnerOuterTest19;
 ")})));
 end InnerOuterTest19;
+
+model InnerOuterTest20
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        A a;
+        inner outer R r;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest20",
+            description="Equation inside inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest20
+ Real c.b.r.y;
+ Real c.r.y;
+equation
+ c.b.r.y = 1;
+ c.r.y = 1;
+end InnerOuterTests.InnerOuterTest20;
+")})));
+end InnerOuterTest20;
+
+model InnerOuterTest21
+    model O
+        partial function f
+            input Real[:] x;
+            output Real[size(x,1)] y;
+        end f;
+    end O;
+    
+    model M
+        function f
+            input Real[2] x;
+            output Real[size(x,1)] y;
+        algorithm
+            y := x;
+        end f;
+    end M;
+    
+    model A
+        outer M m;
+        Real[:] y = m.f({time,time});
+    end A;
+    
+    model B
+        A a;
+        inner M m;
+    end B;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest21",
+            description="Flattening array access in function in inner",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest21
+ Real b.a.y[2] = InnerOuterTests.InnerOuterTest21.b.m.f({time, time});
+
+public
+ function InnerOuterTests.InnerOuterTest21.b.m.f
+  input Real[2] x;
+  output Real[2] y;
+ algorithm
+  y := x;
+  return;
+ end InnerOuterTests.InnerOuterTest21.b.m.f;
+
+end InnerOuterTests.InnerOuterTest21;
+")})));
+end InnerOuterTest21;
+
+model InnerOuterTest22
+    model M
+        record R
+            Real[2] x;
+        end R;
+        function f
+            input Real[:] x;
+            output Real[size(x,1)] y = x;
+            algorithm
+        end f;
+        
+        function f2 = f(x=X);
+        
+        Real[2] y = f2();
+        Real[2] X = {time,time};
+    end M;
+    
+    model A
+        outer M m;
+    end A;
+    
+    A a;
+    inner M m;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterTest22",
+            description="Flattening array access in short class decl in inner",
+            flatModel="
+fclass InnerOuterTests.InnerOuterTest22
+ Real m.y[2] = InnerOuterTests.InnerOuterTest22.m.f2(m.X[1:2]);
+ Real m.X[2] = {time, time};
+
+public
+ function InnerOuterTests.InnerOuterTest22.m.f2
+  input Real[:] x := m.X[2];
+  output Real[size(x, 1)] y := x;
+ algorithm
+  return;
+ end InnerOuterTests.InnerOuterTest22.m.f2;
+
+end InnerOuterTests.InnerOuterTest22;
+")})));
+end InnerOuterTest22;
+
+model InnerOuterAccess1
+    record R_0
+        
+    end R_0;
+    
+    record R
+        Real y;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.y = time;
+    end A;
+    
+    A a;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess1",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+1 errors found:
+Error at line 590, column 11, in file '...':
+  Cannot use component y in inner 'inner R r', because it is not present in outer 'outer R_0 r'
+
+")})));
+end InnerOuterAccess1;
+
+model InnerOuterAccess2
+    record R_0
+        
+    end R_0;
+    
+    record R
+        Real y;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.y = time;
+    end A;
+    
+    model B
+        inner outer R_0 r;
+        A a;
+    equation
+        r.y = time;
+    end B;
+    
+    B b;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess2",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+2 errors found:
+
+Error at line 622, column 11, in file '...':
+  Cannot find class or component declaration for y
+
+Error at line 629, column 11, in file '...':
+  Cannot use component y in inner 'inner R r', because it is not present in outer 'inner outer R_0 r'
+
+")})));
+end InnerOuterAccess2;
+
+model InnerOuterAccess3
+    record K
+        Real y;
+    end K;
+    
+    record R_0
+        
+    end R_0;
+    
+    record R
+        K k;
+    end R;
+    
+    model A
+        outer R_0 r;
+    equation
+        r.k.y = time;
+    end A;
+    
+    A a;
+    inner R r;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="InnerOuterAccess3",
+            description="Access to component in outer that only exist in inner",
+            errorMessage="
+1 errors found:
+
+Error at line 665, column 11, in file '...':
+  Cannot use component k in inner 'inner R r', because it is not present in outer 'outer R_0 r'
+")})));
+end InnerOuterAccess3;
+
+
+
+model InnerOuterNested1
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        Real t;
+        outer A a;
+        inner outer R r;
+    equation
+        t = a.r.y;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+    end C;
+    
+    C c;
+    inner A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterNested1",
+            description="Equation inside nested inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterNested1
+ Real c.b.t;
+ Real c.b.r.y;
+ Real c.r.y;
+ Real r.y;
+equation
+ c.b.t = r.y;
+ c.b.r.y = 1;
+ c.r.y = 1;
+ r.y = 1;
+end InnerOuterTests.InnerOuterNested1;
+")})));
+end InnerOuterNested1;
+
+model InnerOuterNested2
+    model R
+        Real y;
+    equation
+        y = 1;
+    end R;
+    
+    model A
+        outer R r;
+    end A;
+    
+    model B
+        Real t;
+        outer A a;
+        inner outer R r;
+    equation
+        t = a.r.y;
+    end B;
+    
+    model C
+        B b;
+        inner R r;
+        inner A a;
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InnerOuterNested2",
+            description="Equation inside nested inner outer component",
+            flatModel="
+fclass InnerOuterTests.InnerOuterNested2
+ Real c.b.t;
+ Real c.b.r.y;
+ Real c.r.y;
+equation
+ c.b.t = c.r.y;
+ c.b.r.y = 1;
+ c.r.y = 1;
+end InnerOuterTests.InnerOuterNested2;
+")})));
+end InnerOuterNested2;
 
 
 

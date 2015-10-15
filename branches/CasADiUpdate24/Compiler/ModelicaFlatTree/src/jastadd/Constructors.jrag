@@ -1091,45 +1091,46 @@ aspect InheritedFactoryMethods {
 	public FExpExp   FExpExp.createEmptyNode()   { return new FExpExp();   }
 	public FLogExp   FLogExp.createEmptyNode()   { return new FLogExp();   }
 	public FLog10Exp FLog10Exp.createEmptyNode() { return new FLog10Exp(); }
-	
-	// Built-in function calls and function call-like operators
-	public FNdimsExp       FNdimsExp.createEmptyNode()       { return new FNdimsExp();       }
-	public FSizeExp        FSizeExp.createEmptyNode()        { return new FSizeExp();        }
-	public FAbsExp         FAbsExp.createEmptyNode()         { return new FAbsExp();         }
-	public FSignExp        FSignExp.createEmptyNode()        { return new FSignExp();        }
-	public FSqrtExp        FSqrtExp.createEmptyNode()        { return new FSqrtExp();        }
-	public FEnumIntegerExp FEnumIntegerExp.createEmptyNode() { return new FEnumIntegerExp(); }
-	public FStringExp      FStringExp.createEmptyNode()      { return new FStringExp();      }
-	public FDivFuncExp     FDivFuncExp.createEmptyNode()     { return new FDivFuncExp();     }
-	public FModFuncExp     FModFuncExp.createEmptyNode()     { return new FModFuncExp();     }
-	public FRemFuncExp     FRemFuncExp.createEmptyNode()     { return new FRemFuncExp();     }
-	public FCeilFuncExp    FCeilFuncExp.createEmptyNode()    { return new FCeilFuncExp();    }
-	public FFloorFuncExp   FFloorFuncExp.createEmptyNode()   { return new FFloorFuncExp();   }
-	public FIntegerFuncExp FIntegerFuncExp.createEmptyNode() { return new FIntegerFuncExp(); }
-	public FScalarExp      FScalarExp.createEmptyNode()      { return new FScalarExp();      }
-	public FVectorExp      FVectorExp.createEmptyNode()      { return new FVectorExp();      }
-	public FMatrixExp      FMatrixExp.createEmptyNode()      { return new FMatrixExp();      }
-	public FTranspose      FTranspose.createEmptyNode()      { return new FTranspose();      }
-	public FSymmetric      FSymmetric.createEmptyNode()      { return new FSymmetric();      }
-	public FCross          FCross.createEmptyNode()          { return new FCross();          }
-	public FSkew           FSkew.createEmptyNode()           { return new FSkew();           }
-	public FOuterProduct   FOuterProduct.createEmptyNode()   { return new FOuterProduct();   }
-	public FIdentity       FIdentity.createEmptyNode()       { return new FIdentity();       }
-	public FDiagonal       FDiagonal.createEmptyNode()       { return new FDiagonal();       }
-	public FOnes           FOnes.createEmptyNode()           { return new FOnes();           }
-	public FZeros          FZeros.createEmptyNode()          { return new FZeros();          }
-	public FFillExp        FFillExp.createEmptyNode()        { return new FFillExp();        }
-	public FMinExp         FMinExp.createEmptyNode()         { return new FMinExp();         }
-	public FMaxExp         FMaxExp.createEmptyNode()         { return new FMaxExp();         }
-	public FSumExp         FSumExp.createEmptyNode()         { return new FSumExp();         }
-	public FProductExp     FProductExp.createEmptyNode()     { return new FProductExp();     }
-	public FHomotopyExp    FHomotopyExp.createEmptyNode()    { return new FHomotopyExp();    }
-	public FSemiLinearExp  FSemiLinearExp.createEmptyNode()  { return new FSemiLinearExp();  }
-	public FInStream       FInStream.createEmptyNode()       { return new FInStream();       }
-	public FDerInStream    FDerInStream.createEmptyNode()    { return new FDerInStream();    }
-	public FActualStream   FActualStream.createEmptyNode()   { return new FActualStream();   }
-	public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
-	
+
+    // Built-in function calls and function call-like operators
+    public FNdimsExp        FNdimsExp.createEmptyNode()        { return new FNdimsExp();        }
+    public FSizeExp         FSizeExp.createEmptyNode()         { return new FSizeExp();         }
+    public FAbsExp          FAbsExp.createEmptyNode()          { return new FAbsExp();          }
+    public FSignExp         FSignExp.createEmptyNode()         { return new FSignExp();         }
+    public FSqrtExp         FSqrtExp.createEmptyNode()         { return new FSqrtExp();         }
+    public FEnumIntegerExp  FEnumIntegerExp.createEmptyNode()  { return new FEnumIntegerExp();  }
+    public FStringExp       FStringExp.createEmptyNode()       { return new FStringExp();       }
+    public FDivFuncExp      FDivFuncExp.createEmptyNode()      { return new FDivFuncExp();      }
+    public FModFuncExp      FModFuncExp.createEmptyNode()      { return new FModFuncExp();      }
+    public FRemFuncExp      FRemFuncExp.createEmptyNode()      { return new FRemFuncExp();      }
+    public FCeilFuncExp     FCeilFuncExp.createEmptyNode()     { return new FCeilFuncExp();     }
+    public FFloorFuncExp    FFloorFuncExp.createEmptyNode()    { return new FFloorFuncExp();    }
+    public FIntegerFuncExp  FIntegerFuncExp.createEmptyNode()  { return new FIntegerFuncExp();  }
+    public FScalarExp       FScalarExp.createEmptyNode()       { return new FScalarExp();       }
+    public FVectorExp       FVectorExp.createEmptyNode()       { return new FVectorExp();       }
+    public FMatrixExp       FMatrixExp.createEmptyNode()       { return new FMatrixExp();       }
+    public FTranspose       FTranspose.createEmptyNode()       { return new FTranspose();       }
+    public FSymmetric       FSymmetric.createEmptyNode()       { return new FSymmetric();       }
+    public FCross           FCross.createEmptyNode()           { return new FCross();           }
+    public FSkew            FSkew.createEmptyNode()            { return new FSkew();            }
+    public FOuterProduct    FOuterProduct.createEmptyNode()    { return new FOuterProduct();    }
+    public FIdentity        FIdentity.createEmptyNode()        { return new FIdentity();        }
+    public FDiagonal        FDiagonal.createEmptyNode()        { return new FDiagonal();        }
+    public FOnes            FOnes.createEmptyNode()            { return new FOnes();            }
+    public FZeros           FZeros.createEmptyNode()           { return new FZeros();           }
+    public FFillExp         FFillExp.createEmptyNode()         { return new FFillExp();         }
+    public FMinExp          FMinExp.createEmptyNode()          { return new FMinExp();          }
+    public FMaxExp          FMaxExp.createEmptyNode()          { return new FMaxExp();          }
+    public FSumExp          FSumExp.createEmptyNode()          { return new FSumExp();          }
+    public FProductExp      FProductExp.createEmptyNode()      { return new FProductExp();      }
+    public FHomotopyExp     FHomotopyExp.createEmptyNode()     { return new FHomotopyExp();     }
+    public FSemiLinearExp   FSemiLinearExp.createEmptyNode()   { return new FSemiLinearExp();   }
+    public FInStream        FInStream.createEmptyNode()        { return new FInStream();        }
+    public FDerInStream     FDerInStream.createEmptyNode()     { return new FDerInStream();     }
+    public FActualStream    FActualStream.createEmptyNode()    { return new FActualStream();    }
+    public FExInStream      FExInStream.createEmptyNode()      { return new FExInStream();      }
+    public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
+
 	// Operators for overconstrained connection graphs
 	public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
 	public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }

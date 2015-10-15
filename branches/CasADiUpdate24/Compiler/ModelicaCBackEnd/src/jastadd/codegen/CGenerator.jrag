@@ -406,6 +406,7 @@ public class CGenerator extends GenericGenerator {
             generateVarList(genPrinter, "real_u",     fclass.realInputs());
             generateVarList(genPrinter, "real_w",     fclass.algebraicContinousRealVariables());
             genPrinter.print("#define _time ((*(jmi->z))[jmi->offs_t])\n"); 
+            genPrinter.print("#define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])\n"); 
             generateVarList(genPrinter, "real_d",     fclass.discreteRealVariables());
             generateVarList(genPrinter, "integer_d",  fclass.discreteIntegerVariables(), fclass.discreteEnumVariables());
             generateVarList(genPrinter, "integer_u",  fclass.integerInputs(),            fclass.enumInputs());
@@ -1032,6 +1033,33 @@ public class CGenerator extends GenericGenerator {
 			genPrinter.print("\""+fclass.guid()+"\"");
 		}
 	}
+
+    /**
+     * C: block number for the block that contains homotopy
+     */
+    public class DAETag_C_DAE_INIT_homotopy_block extends DAETag {
+        
+        public DAETag_C_DAE_INIT_homotopy_block(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_DAE_INIT_homotopy_block", myGenerator, fclass);
+        }
+    
+        public void generate(CodeStream genPrinter) {
+            int num = -1;
+            if (fclass.myOptions().getBooleanOption("generate_ode")) {
+                for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
+                    if (block.containsFHomotopyExp()) {
+                        if (num != -1) {
+                            throw new UnsupportedOperationException("There is more than one block which contains homotopy operator, this should not be possible!");
+                        } else {
+                            num = block.getSequenceNumber();
+                        }
+                    }
+                }
+            }
+            genPrinter.print(num);
+        }
+    
+    }
 
 	/**
 	 * Generates start values.

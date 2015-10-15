@@ -81,6 +81,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+    block_solver->start_set = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->value_references = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));
 #if 0
     block_solver->message_buffer = (char*)calloc(n*500+2000,sizeof(char));
@@ -197,6 +198,7 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->nominal);
     free(block_solver->initial);
     free(block_solver->value_references);
+    free(block_solver->start_set);
     free(block_solver->message_buffer);
     free(block_solver);
 
@@ -280,6 +282,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         block_solver->F(block_solver->problem_data,block_solver->max,block_solver->res,JMI_BLOCK_MAX);
         block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
         block_solver->F(block_solver->problem_data,real_vrs,block_solver->res,JMI_BLOCK_VALUE_REFERENCE);
+        block_solver->F(block_solver->problem_data,block_solver->start_set,block_solver->res,JMI_BLOCK_START_SET);
 
         for (i=0;i<block_solver->n;i++) {
             block_solver->value_references[i] = (int)real_vrs[i];

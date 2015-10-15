@@ -626,7 +626,7 @@ abstract public class OptionRegistry {
              Category.experimental,
              0,
              "Activates experimental features of equation block solvers",
-             0, 255),
+             0, Integer.MAX_VALUE),
         NLE_SOLVER_DEFAULT_TOL
             ("nle_solver_default_tol",
              OptionType.runtime, 
@@ -685,7 +685,7 @@ abstract public class OptionRegistry {
             ("nle_solver_use_nominals_as_fallback",
              OptionType.runtime, 
              Category.uncommon,
-             false,
+             true,
              "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",

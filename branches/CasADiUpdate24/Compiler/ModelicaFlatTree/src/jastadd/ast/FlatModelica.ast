@@ -1038,7 +1038,7 @@ FOverflowIntLitExp : FRealLitExp ::= <String>;
 /**
  * Boolean literal expression.
  */
-abstract FBooleanLitExp : FLitExp ::=;
+abstract FBooleanLitExp : FLitExp;
 
 /**
  * True boolean literal expression.
@@ -1705,7 +1705,7 @@ abstract FStreamBuiltIn : FVectUnaryBuiltIn;
 FInStream : FStreamBuiltIn;
 
 /**
- * Derivative of instream. Temporary expression created by der(inStream()) rewrites
+ * Derivative of inStream(). Temporary expression created by der(inStream()) rewrites
  * and removed after connection sets are built.
  */
 FDerInStream : FInStream;
@@ -1714,6 +1714,16 @@ FDerInStream : FInStream;
  * ActualStream built-in function.
  */
 FActualStream : FStreamBuiltIn;
+
+/**
+ * Expanded version of FInStream, used temporarily during symbolic manipulations.
+ *
+ * Var list contains triples of: 
+ *  - flow var access
+ *  - stream contribution (inStream() expression or var access)
+ *  - is this connection to an outside connector (bool literal)
+ */
+FExInStream : FBuiltInFunctionCall ::= Default:FExp Eps:FExp Var:FExp*;
 
 /**
  * getInstanceName built-in function.

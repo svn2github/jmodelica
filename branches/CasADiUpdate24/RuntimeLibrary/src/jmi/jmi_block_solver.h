@@ -47,6 +47,7 @@
 #define JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE                   32768
 #define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 65536
 #define JMI_BLOCK_START_SET                                     131072
+#define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -89,7 +90,9 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
-    jmi_block_solver_experimental_residual_monitoring = 256
+    jmi_block_solver_experimental_residual_monitoring = 256,
+    jmi_block_solver_experimental_check_descent_direction = 512,
+    jmi_block_solver_experimental_scaling_from_nominal_heuristics = 1024
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {

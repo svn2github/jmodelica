@@ -188,8 +188,6 @@ aspect Flattening {
 	
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
         InstCallable target = myInstCallable();
-        if (target.asInstClassDecl().inOrIsOuter()) 
-		    target = target.asInstClassDecl().myInnerInstClassDecl();
 		target.flattenFunction(fc);
 		getArgs().flattenUsedFuncsAndEnums(fc);
 	}
@@ -1727,7 +1725,7 @@ aspect FlatExpressions {
         if (isEnumLiteral())
             return new FIdUseExp(getFQName().fullCopy());
         InstAccess ia = exp.asInstAccess();
-        FQName fqn = inOrIsOuter() ? ia.flattenOuterAccess(prefix) : ia.flatten(prefix);
+        FQName fqn = inOrIsInner() ? ia.flattenOuterAccess(prefix) : ia.flatten(prefix);
         return new FIdUseExp(fqn);
     }
 
@@ -1980,7 +1978,7 @@ aspect FlatExpressions {
     }
 
     public FQName InstAccess.flattenOuterAccess(FQName subscriptPrefix) { 
-        FQName name = myInstComponentDecl().myInnerInstComponentDecl().getFQName().fullCopy();
+        FQName name = myInstComponentDecl().getFQName().fullCopy();
         FArraySubscripts fas = filterFASForFlatten(allFArraySubscripts().get(0), true, inSizeExp());
         if (fas != null)
             name = name.copyAndAddFas(fas.flatten(subscriptPrefix));
@@ -1991,7 +1989,7 @@ aspect FlatExpressions {
         int o;
         int n = getNumInstAccess();
         for (o = n - 1; o >= 0 && !getInstAccess(o).myInstComponentDecl().isOuter(); o--);
-        InstComponentDecl inner = (o >= 0) ? getInstAccess(o).myInstComponentDecl().myInnerInstComponentDecl() : null;
+        InstComponentDecl inner = (o >= 0) ? getInstAccess(o).myInstComponentDecl() : null;
         FQName base;
         if (inner == null) {
             base = myInstComponentDecl().getFQNamePrefix();
@@ -2453,8 +2451,6 @@ aspect FlatExpressions {
 		for (InstFunctionArgument e : getArgs()) 
 			args.add(e.flatten(prefix));
         InstCallable target = myInstCallable().actualInstCallable();
-        if (target.asInstClassDecl().inOrIsOuter()) 
-            target = target.asInstClassDecl().myInnerInstClassDecl();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
 		Size[] sizes = new Size[myCallOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);

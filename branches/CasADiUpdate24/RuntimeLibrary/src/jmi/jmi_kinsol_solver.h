@@ -66,12 +66,14 @@ struct jmi_kinsol_solver_t {
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
+    N_Vector gradient;              /**< \brief Steepest descent direction */
     realtype* residual_nominal;      /**< \brief Vector for reading in manual scaling factors for f  */
+    realtype* residual_heuristic_nominal; /**< \brief Vector for reading in heuristic scaling factors for f  */
     realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
     realtype kin_stol;             /**< \brief Tolerance for Step-size */
-    realtype kin_reg_tol;
+    realtype kin_reg_tol;          /**< \brief Regularization tolerance */
     
     DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
@@ -119,10 +121,16 @@ struct jmi_kinsol_solver_t {
     realtype f_neg_max_1d;
 
     realtype last_xnorm;           /**< \brief Last norm of Newton step before limiting */
+    realtype last_fnorm;            /**< \brief Last fnorm before step is taken */
+    realtype last_max_residual;     /**< \brief Last max residual before step is taken */
+    int last_max_residual_index;    /**< \brief Last max residual index before step is taken */
+
     realtype sJpnorm;               /**< \brief Scalar product of J*p norm */
     int last_bounding_index;       /**< \brief Index of the variable that most limited Newton step, or -1 if none */
     int last_num_limiting_bounds;  /**< \brief Number of limiting bounds at last jmi_kinsol_limit_step */
     int last_num_active_bounds;    /**< \brief Number of active bounds at last jmi_kinsol_limit_step */
+    double lambda, lambda_max;     /**< \brief lambda and lambda_max for logging */
+    int iterationProgressFlag;     /**< \brief Flag indicating that KINStop was called and so there was some progress */
 
     realtype max_step_ratio;        /**< \brief Max ratio of the Newton step */
 
