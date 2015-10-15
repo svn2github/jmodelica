@@ -1526,20 +1526,49 @@ double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver) {
     return N_VGetArrayPointer(solver->kin_f_scale);
 }
 
+static void jmi_setup_f_residual_scaling(jmi_block_solver_t *block) {
+    jmi_block_solver_options_t* bsop = block->options;
+    jmi_kinsol_solver_t* solver = block->solver;
+    int i, N = block->n;
+    realtype* dummy = 0;
+    
+    /* Read manual scaling from annotations and propagated nominal values for
+     * residuals and put them in residual_nominal & scale_ptr*/
+    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+    {
+        block->F(block->problem_data,dummy, solver->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL);
+        for (i = 0; i < N; i++) {
+            if(solver->residual_nominal[i] != 0.0) {
+                if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
+                    solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
+                        "<equation: %I> since specified residual nominal is too small.", block->label, i);
+                }
+                else if(solver->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
+                    solver->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
+                        "<equation: %I> since specified residual nominal is too big.", block->label, i);
+                }
+            }
+            else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+                solver->residual_nominal[i] = 1.0;
+            }
+        }
+    }
+}
+
 /* 
     Compute appropriate equation scaling and function tolerance based on Jacobian J,
     nominal values (block->nominal) and current point (block->x).
     Store result in solver->kin_f_scale.
 */
 static void jmi_update_f_scale(jmi_block_solver_t *block) {
-    realtype* dummy = 0;
     jmi_kinsol_solver_t* solver = block->solver; 
     int i, N = block->n;
     realtype tol = solver->kin_stol;
     realtype curtime = block->cur_time;
     realtype* scale_ptr = 0;
-    realtype* col_ptr;
-    realtype* scaled_col_ptr;
     jmi_block_solver_options_t* bsop = block->options;
     int use_scaling_flag = bsop->residual_equation_scaling_mode;
 
@@ -1548,29 +1577,10 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     kin_char_log(solver, 's');
 
     /* Read manual scaling from annotations and put them in residual_nominal & scale_ptr*/
-    if(  block->init && 
-        (  (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
-        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))) {
-            block->F(block->problem_data,dummy, solver->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL) ;
-            for(i = 0; i < N; i++) {
-                if(solver->residual_nominal[i] != 0.0) {
-                    if(solver->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
-                        solver->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
-                        jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
-                            "<equation: %I> since specified residual nominal is too small.", block->label, i);
-                    }
-                    else if(solver->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
-                        solver->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
-                        jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
-                            "<equation: %I> since specified residual nominal is too big.", block->label, i);
-                    }
-                }
-                else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
-                    solver->residual_nominal[i] = 1.0;
-                }
-            }
+    if (block->init) {
+        jmi_setup_f_residual_scaling(block);
     }
-
+    
     if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
         /* Zero out the scales initially if we're modify this. */
         N_VConst_Serial(0,solver->kin_f_scale);
@@ -1579,33 +1589,30 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
-    if((bsop->residual_equation_scaling_mode != jmi_residual_scaling_none)
-        || bsop->check_jac_cond_flag){
+    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+    {
+        for (i = 0; i < N; i++) {
+            int j;
+            /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
+            realtype xscale = RAbs(block->nominal[i]);
+            realtype x = RAbs(block->x[i]);
+            realtype* col_ptr;
+            realtype* scaled_col_ptr;
+            if(x < xscale) x = xscale;
+            if(x < tol) x = tol;
+            col_ptr = DENSE_COL(solver->J, i);
+            scaled_col_ptr = DENSE_COL(solver->J_scale, i);
 
-            for(i = 0; i < N; i++){
-                int j;
-                /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
-                realtype xscale = RAbs(block->nominal[i]);
-                realtype x = RAbs(block->x[i]);
-                if(x < xscale) x = xscale;
-                if(x < tol) x = tol;
-                col_ptr = DENSE_COL(solver->J, i);
-                scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-
-                /* row scaling is product of Jac entry and column scaling */
-                for(j = 0; j < N; j++){
-                    realtype dres = col_ptr[j];
-                    realtype fscale;
-                    fscale = dres * x;
-                    scaled_col_ptr[j] = fscale;
-                    if( (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto)
-                        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
-                        )
-                    {
-                        scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
-                    }
-                }
+            /* row scaling is product of Jac entry and column scaling */
+            for (j = 0; j < N; j++) {
+                realtype dres = col_ptr[j];
+                realtype fscale;
+                fscale = dres * x;
+                scaled_col_ptr[j] = fscale;
+                scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
             }
+        }
     }
 
     /* put in manual non-zero scales in hybrid & manual cases */
