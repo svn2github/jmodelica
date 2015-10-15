@@ -37,13 +37,18 @@ import_array();
 
 
 %include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
-//%include "vectors.i"
+
+%include "exception.i" // Must be before %import "casadi.i"
+
+%import "casadi.i"
+
+// Clear typemaps defined by CasADi, where we want to use our own typemaps in vectors.i instead
+%clear std::vector<double>;
+%clear std::vector<string>;
+%include "vectors.i" // Must be after %import "casadi.i"
 
 %include "std_string.i"
 %include "std_vector.i"
-%include "exception.i"
-
-%import "casadi.i"
 
 
 %{

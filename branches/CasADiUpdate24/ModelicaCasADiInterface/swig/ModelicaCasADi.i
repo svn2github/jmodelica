@@ -66,14 +66,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 %ignore ModelicaCasADi::decRefNode;
 
 
-%include "Ref.i" // Must be before %include "std_vector.i". Includes Ref.hpp
-//%include "vectors.i"
-
 %include "doc.i"
-
-
-%include "std_string.i"
-%include "std_vector.i"
 
 
 // Instantiate Ref<T> and vector<Ref<T>> along with apropriate typemaps.

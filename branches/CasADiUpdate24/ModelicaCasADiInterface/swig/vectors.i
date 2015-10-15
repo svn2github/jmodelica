@@ -21,9 +21,9 @@
 }
 
 %typemap(typecheck, precedence=SWIG_TYPECHECK_VECTOR) const std::vector< double > &{
-    // Assume that anything that is iterable or is a sequence can be
+    // Assume that any non-string that is iterable or is a sequence can be
     // converted to a vector
-    $1 = PyIter_Check($input) || PySequence_Check($input);
+    $1 = !PyString_Check($input) && (PyIter_Check($input) || PySequence_Check($input));
 }
 
 %typemap(out) std::vector< double > {
@@ -40,7 +40,7 @@
         data[k] = $1[k];
     }
 
-    $result = array;
+    $result = (PyObject *)array;
 }
 
 
@@ -70,9 +70,9 @@
 }
 
 %typemap(typecheck, precedence=SWIG_TYPECHECK_VECTOR) const std::vector< std::string > &{
-    // Assume that anything that is iterable or is a sequence can be
+    // Assume that any non-string that is iterable or is a sequence can be
     // converted to a vector
-    $1 = PyIter_Check($input) || PySequence_Check($input);
+    $1 = !PyString_Check($input) && (PyIter_Check($input) || PySequence_Check($input));
 }
 
 %typemap(out) std::vector< std::string > {
@@ -95,5 +95,5 @@
         data[k] = $result;
     }
 
-    $result = array;
+    $result = (PyObject *)array;
 }
