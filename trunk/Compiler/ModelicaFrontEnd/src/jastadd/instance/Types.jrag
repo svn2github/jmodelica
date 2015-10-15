@@ -50,13 +50,15 @@ aspect Types {
 
     syn boolean InstNode.isPrimitiveType() = false;
     eq InstPrimitive.isPrimitiveType()     = true;
-    eq InstClassDecl.isPrimitiveType()     = isPrimitive();
+    eq InstClassDecl.isPrimitiveType()     = isOrExtendsPrimitive();
 
     public static boolean InstNode.comparePrimitiveTypes(InstNode superType, InstNode subType, boolean top) {
         if (subType == superType) 
             return true;
         return subType.baseClassName().equals(superType.baseClassName()) && 
-                (subType.ndims() == superType.ndims() || top && subType.ndims() == 0);
+                (subType.ndims() == superType.ndims() || 
+                 top && subType.ndims() == 0 || 
+                 superType.isClassDecl() && subType.ndims() > superType.ndims());
     }
 
     public static boolean InstNode.compareCompositeTypes(InstNode superType, InstNode subType, boolean top) {
@@ -110,27 +112,40 @@ aspect Types {
     }
 
 
-    syn InstNode InstNode.constrainingInstType()       = this;
-    eq InstClassDecl.constrainingInstType()            = hasInstConstraining() ? getInstConstraining().getInstNode() : this;
-    eq InstSimpleShortClassDecl.constrainingInstType() = 
-        hasInstConstraining() ? getInstConstraining().getInstNode() : myTargetInstClassDecl().constrainingInstType();
+    syn InstNode InstNode.constrainingInstType() = this;
+    eq InstClassDecl.constrainingInstType()      = 
+        hasInstConstraining() ? getInstConstraining().getInstNode() : findConstrainingInstType();
     eq InstComponentDecl.constrainingInstType() { 
-        InstComponentDecl icd = constrainingInstComponentDecl();
-        if (icd.myInstClass().hasConstrainingInstType())
-            return icd.myInstClass().constrainingInstType();
-        return icd;
+        InstComponentDecl forCmp = constrainingInstComponentDecl();
+        InstNode forClass = forCmp.constrainingTypeOfMyClass();
+        return (forClass != forCmp.myInstClass()) ? forClass : forCmp;
     }
 
-    syn boolean InstNode.hasConstrainingInstType()        = false;
-    eq InstClassDecl.hasConstrainingInstType()            = hasInstConstraining();
-    eq InstSimpleShortClassDecl.hasConstrainingInstType() = hasInstConstraining() || myTargetInstClassDecl().hasConstrainingInstType();
-    eq InstComponentDecl.hasConstrainingInstType() { 
-        InstComponentDecl icd = constrainingInstComponentDecl();
-        return (icd != this) || icd.myInstClass().hasConstrainingInstType();
-    }
+    syn InstNode InstClassDecl.findConstrainingInstType()           = this;
+    eq InstSimpleShortClassDecl.findConstrainingInstType()          = myTargetInstClassDecl().constrainingInstType();
+    eq InstReplacingFullClassDecl.findConstrainingInstType()        = getOriginalInstClass().constrainingInstType();
+    eq InstReplacingShortClassDecl.findConstrainingInstType()       = getOriginalInstClass().constrainingInstType();
+    eq InstReplacingSimpleShortClassDecl.findConstrainingInstType() = getOriginalInstClass().constrainingInstType();
+
 
     syn InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
         hasInstConstraining() ? (InstComponentDecl) getInstConstraining().getInstNode() : this;
+
+    syn InstNode InstComponentDecl.constrainingTypeOfMyClass() = getClassName().constrainingTypeOfClass();
+
+    syn InstNode InstAccess.constrainingTypeOfClass() = myInstClassDecl().constrainingInstType();
+    eq InstDot.constrainingTypeOfClass() {
+        InstNode cur = getInstAccess(0).constrainingTypeOfClass();
+        for (int i = 1, n = getNumInstAccess(); i < n; i++) {
+            InstLookupResult<InstClassDecl> res = cur.memberInstClass(getInstAccess(i).name());
+            if (res.successful()) {
+                cur = res.target().constrainingInstType();
+            } else {
+                cur = getInstAccess(i).constrainingTypeOfClass();
+            }
+        }
+        return cur;
+    }
 
 }
 

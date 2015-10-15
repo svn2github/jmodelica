@@ -4266,6 +4266,43 @@ end RedeclareTests.RedeclareTest68;
 end RedeclareTest68;
 
 
+model RedeclareTest69
+    model A
+        replaceable package C = D constrainedby E;
+        C.F f;
+    end A;
+    
+    model B
+        extends A(redeclare package C = E);
+    end B;
+    
+    package D
+        model F
+            Real x = 1;
+            Real y = 2;
+        end F;
+    end D;
+    
+    package E
+        model F
+            Real x = 3;
+        end F;
+    end E;
+    
+    replaceable B b constrainedby A;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest69",
+            description="Replaceable package in constraining type",
+            flatModel="
+fclass RedeclareTests.RedeclareTest69
+ Real b.f.x = 3;
+end RedeclareTests.RedeclareTest69;
+")})));
+end RedeclareTest69;
+
+
 
 model RedeclareElement1
   model A
