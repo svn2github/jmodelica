@@ -1586,6 +1586,12 @@ static void jmi_setup_f_residual_scaling(jmi_block_solver_t *block) {
     
     block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL_AUTO);
     block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL);
+    for (i = 0; i < N; i++) {
+        if (solver->residual_heuristic_nominal[i] == 0.0) {
+            /* TODO: This information could be used to see that the system is structually singular */
+            solver->residual_heuristic_nominal[i] = 1.0;
+        }
+    }
 }
 
 /* 
@@ -1666,24 +1672,10 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                     }
                 }
                 
-                if (bsop->experimental_mode == jmi_block_solver_experimental_scaling_from_nominal_heuristics) {
-                    if (scale_ptr[i] > solver->residual_heuristic_nominal[i]/bsop->min_residual_scaling_factor) {
-                        scale_ptr[i] = bsop->max_residual_scaling_factor/solver->residual_heuristic_nominal[i];
-                        jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
-                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                    } else {
-                        scale_ptr[i] = 1/scale_ptr[i];
-                        jmi_log_node(block->log, logWarning, "MaxScalingExceeded", "Poor scaling in <block: %s> but will allow it based on structure of block. "
-                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                    }
-                } else {
-                    scale_ptr[i] = bsop->max_residual_scaling_factor;
-                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
-                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                }
+                scale_ptr[i] = bsop->max_residual_scaling_factor;
+                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                    block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
