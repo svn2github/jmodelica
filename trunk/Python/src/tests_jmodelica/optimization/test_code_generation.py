@@ -59,7 +59,7 @@ def test_code_gen():
     file_ctimes = {}
     for func_name in func_names:
         for ext in exts:
-            file_name = "__func_" + func_name + ext
+            file_name = func_name + ext
             assert os.path.isfile(file_name)
             file_ctimes[file_name] = os.stat(file_name).st_ctime
     
@@ -72,7 +72,7 @@ def test_code_gen():
     # Check that files weren't modified
     for func_name in func_names:
         for ext in exts:
-            file_name = "__func_" + func_name + ext
+            file_name = func_name + ext
             assert file_ctimes[file_name] == os.stat(file_name).st_ctime
     
     res2 = solver2.optimize()

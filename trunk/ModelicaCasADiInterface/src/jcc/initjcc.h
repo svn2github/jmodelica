@@ -5,7 +5,7 @@
 #include "JCCEnv.h"
 
 
-#ifdef __linux__
+#ifdef linux
 #define CLASSPATH_SEP ":"
 #endif
 #if defined(_MSC_VER) || defined(__WIN32)

@@ -22,7 +22,7 @@ namespace ModelicaCasADi
 {
  
 vector<MX> ModelFunction::call(const vector<MX> &arg) {
-    return myFunction(arg);
+    return myFunction.call(arg);
 }
 
 string ModelFunction::getName() const {

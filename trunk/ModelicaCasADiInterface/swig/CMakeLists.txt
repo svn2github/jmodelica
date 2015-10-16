@@ -24,7 +24,7 @@ include_directories(${PYTHON_INCLUDE_PATH})
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../ThirdParty/CasADi/CasADi/cmake)
 find_package(NUMPY REQUIRED)
-include_directories("${NUMPY_PATH}/.." ${NUMPY_PATH}) # ${NUMPY_PATH} points to include/numpy/, we want just include/
+include_directories("${NUMPY_PATH}/..") # ${NUMPY_PATH} points to include/numpy/, we want just include/
 
 set(CMAKE_SWIG_FLAGS "")
 
@@ -47,7 +47,5 @@ add_custom_target(modelicacasadi_wrapper
   DEPENDS ${SWIG_MODULE_${MODULE_NAME}_REAL_NAME})
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
   PROPERTIES LINK_FLAGS -shared)
-set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME} 
+  set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME} 
   PROPERTIES COMPILE_DEFINITIONS MODELICACASADI_WITH_SWIG)
-set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME} 
-  PROPERTIES COMPILE_FLAGS "-std=c++11")

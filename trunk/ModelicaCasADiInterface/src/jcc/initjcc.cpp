@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#ifdef __linux__
+#ifdef linux
 #include <dlfcn.h>
 #endif
 #include <jni.h>
@@ -64,7 +64,7 @@ jint initJVM(const char *classpath, const char *libpath)
 #endif
 
     //     ---------------- Linux ----------------
-#ifdef __linux__
+#ifdef linux
     string jvmpath = string(getenv_checked("JAVA_HOME")) + "/jre/lib/i386/server/libjvm.so";
 
     void* handle = dlopen(jvmpath.data(), RTLD_LAZY);

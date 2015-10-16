@@ -13,7 +13,7 @@ set(CASADI_HOME $ENV{CASADI_HOME})
 set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
 
 find_library(CASADI_DLL
-  NAMES libcasadi.so libcasadi.dll
+  NAMES libcasadi_core.so libcasadi_core.dll
   PATHS ${CASADI_BUILD_DIR}/lib
   NO_DEFAULT_PATH
 )
@@ -60,8 +60,6 @@ endif(WIN32)
   
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
   PROPERTIES LINK_FLAGS "${LINKFLAGS}")
-set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
-  PROPERTIES COMPILE_FLAGS "-std=c++11")
 
 
 # Expose the SWIG module under a nicely named build target

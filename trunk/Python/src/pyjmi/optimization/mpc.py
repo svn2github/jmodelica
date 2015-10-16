@@ -335,7 +335,7 @@ class MPC(object):
             if nominal.isSymbolic():
                 nominal = self.op.get(nominal.getName())
             else:
-                nominal = float(nominal)
+                nominal = nominal.getValue()
 
             if nominal == 0:
                 print("Warning: Nominal value of base variable is 0. Setting \

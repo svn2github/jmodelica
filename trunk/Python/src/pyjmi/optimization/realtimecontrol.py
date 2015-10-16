@@ -364,7 +364,7 @@ class RealTimeMPCBase(RealTimeBase):
         self.range_ = []
         for i, name in enumerate(self.inputs):
             var = self.solver.op.getVariable(name)
-            self.range_.append((float(var.getMin()), float(var.getMax())))
+            self.range_.append((var.getMin().getValue(), var.getMax().getValue()))
         
     def _setup_MPC_solver(self, file_path, opt_name, dt, horizon, n_e,
                          par_values, constr_viol_costs={}, mpc_options={}):
@@ -595,9 +595,9 @@ class RealTimeMPCBase(RealTimeBase):
         if not self._already_run:
             raise RuntimeError(
                 'Stats can only be printed after run() has been called')
-        stat_names = ['t_callback_fun.proc', 't_callback_prepare.proc', 't_eval_f.proc',
-                      't_eval_g.proc', 't_eval_grad_f.proc', 't_eval_h.proc', 't_eval_jac_g.proc',
-                      't_mainloop.proc']
+        stat_names = ['t_callback_fun', 't_callback_prepare', 't_eval_f',
+                      't_eval_g', 't_eval_grad_f', 't_eval_h', 't_eval_jac_g',
+                      't_mainloop']
                       
         total_times = {}
         for name in stat_names:
@@ -607,7 +607,7 @@ class RealTimeMPCBase(RealTimeBase):
             for name in stat_names:
                 total_times[name] += stat[name]
 
-        t_total = total_times['t_mainloop.proc']
+        t_total = total_times['t_mainloop']
         print 'Total times:'
         for name in stat_names:
             print("%19s: %6.4f s (%7.3f%%)" %(name, total_times[name], total_times[name]/t_total*100))

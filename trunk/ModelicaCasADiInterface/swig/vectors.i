@@ -4,7 +4,7 @@
 // -------- Typemaps for vector< double > --------
 
 %typemap(in) const std::vector< double > & (std::vector< double > vec) {
-    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_DOUBLE, 1, 1, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_DOUBLE, 1, 1, NPY_IN_ARRAY);
     if (!array) SWIG_fail;
     
     size_t size = PyArray_DIM(array, 0);
@@ -21,17 +21,17 @@
 }
 
 %typemap(typecheck, precedence=SWIG_TYPECHECK_VECTOR) const std::vector< double > &{
-    // Assume that any non-string that is iterable or is a sequence can be
+    // Assume that anything that is iterable or is a sequence can be
     // converted to a vector
-    $1 = !PyString_Check($input) && (PyIter_Check($input) || PySequence_Check($input));
+    $1 = PyIter_Check($input) || PySequence_Check($input);
 }
 
 %typemap(out) std::vector< double > {
     size_t size = $1.size();
-    PyArrayObject *array;
+    PyObject *array;
 
-    npy_intp shape[1] = {(npy_intp)size};
-    array = (PyArrayObject *)PyArray_SimpleNew(1, shape, NPY_DOUBLE);
+    npy_intp shape[1] = {size};
+    array = PyArray_SimpleNew(1, shape, NPY_DOUBLE);
     if (!array) SWIG_fail;
     
     double *data = (double *)PyArray_DATA(array);
@@ -40,14 +40,14 @@
         data[k] = $1[k];
     }
 
-    $result = (PyObject *)array;
+    $result = array;
 }
 
 
 // -------- Typemaps for vector< std::string > --------
 
 %typemap(in) const std::vector< std::string > & (std::vector< std::string > vec) {
-    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_OBJECT, 1, 1, NPY_ARRAY_IN_ARRAY);
+    PyArrayObject *array = (PyArrayObject *)PyArray_FROMANY($input, NPY_OBJECT, 1, 1, NPY_IN_ARRAY);
     if (!array) SWIG_fail;
     
     size_t size =  PyArray_DIM(array, 0);
@@ -70,17 +70,17 @@
 }
 
 %typemap(typecheck, precedence=SWIG_TYPECHECK_VECTOR) const std::vector< std::string > &{
-    // Assume that any non-string that is iterable or is a sequence can be
+    // Assume that anything that is iterable or is a sequence can be
     // converted to a vector
-    $1 = !PyString_Check($input) && (PyIter_Check($input) || PySequence_Check($input));
+    $1 = PyIter_Check($input) || PySequence_Check($input);
 }
 
 %typemap(out) std::vector< std::string > {
     size_t size = $1.size();
-    PyArrayObject *array;
+    PyObject *array;
 
-    npy_intp shape[1] = {(npy_intp)size};
-    array = (PyArrayObject *)PyArray_SimpleNew(1, shape, NPY_OBJECT);
+    npy_intp shape[1] = {size};
+    array = PyArray_SimpleNew(1, shape, NPY_OBJECT);
     if (!array) SWIG_fail;
     
     PyObject **data = (PyObject **)PyArray_DATA(array);
@@ -95,5 +95,5 @@
         data[k] = $result;
     }
 
-    $result = (PyObject *)array;
+    $result = array;
 }
