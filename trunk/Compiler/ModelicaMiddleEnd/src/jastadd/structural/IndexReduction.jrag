@@ -562,9 +562,9 @@ aspect IndexReduction {
         }
 
         @Override
-        protected  FAbstractEquation handleInlinedFunctionCallEquation(FFunctionCallEquation original, Collection<FEquation> result2) {
+        protected Collection<FAbstractEquation> handleInlinedFunctionCallEquation(FFunctionCallEquation original, Collection<FAbstractEquation> result2) {
             lastSplitFFCE.clear();
-            for (FEquation eqn : result2) {
+            for (FAbstractEquation eqn : result2) {
                 lastSplitFFCE.add(eqn);
                 resolver.dynamicEquation(eqn);
                 newEquations.add(eqn);
@@ -703,7 +703,7 @@ aspect IndexReduction {
                 inliner.reset();
                 FAbstractEquation fEqn = inlineStack.pop();
                 ASTNode.log.debug("  Performing function inlining on %s", fEqn);
-                FAbstractEquation inlinedFEqn = fEqn.inlineFunctions(inliner);
+                Collection<FAbstractEquation> inlinedFEqns = fEqn.inlineFunctions(inliner);
                 
                 for (FAbstractEquation spawnedFExp : inliner.getNewEquations()) {
                     ASTNode.log.debug("Additional equation introduced, %s", spawnedFExp);
@@ -718,7 +718,7 @@ aspect IndexReduction {
                     temporaryVarsMap.put(var.name(), var);
                 }
                 
-                if (inlinedFEqn == null) {
+                if (inlinedFEqns == null) {
                     if (originalDiffedFEqns.contains(fEqn)) {
                         ASTNode.log.debug("Inlining done, original equation has been split into multiple equations");
                         originalDiffedFEqns.remove(fEqn); // Remove the original equation if it has been split
@@ -729,11 +729,13 @@ aspect IndexReduction {
                     }
                     
                 } else {
-                    ASTNode.log.debug("Equation inlined, got %s", inlinedFEqn);
-                    if (inlinedFEqn.hasInlinableFunctions(inliner)) {
-                        inlineStack.add(inlinedFEqn);
-                    } else if (!originalDiffedFEqns.contains(inlinedFEqn)) {
-                        newExtraEquations.add(inlinedFEqn);
+                    for (FAbstractEquation inlinedFEqn : inlinedFEqns) {
+                        ASTNode.log.debug("Equation inlined, got %s", inlinedFEqn);
+                        if (inlinedFEqn.hasInlinableFunctions(inliner)) {
+                            inlineStack.add(inlinedFEqn);
+                        } else if (!originalDiffedFEqns.contains(inlinedFEqn)) {
+                            newExtraEquations.add(inlinedFEqn);
+                        }
                     }
                 }
             }
