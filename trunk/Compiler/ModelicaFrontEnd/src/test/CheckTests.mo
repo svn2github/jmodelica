@@ -257,6 +257,31 @@ end CheckTests.ConditionalError5;
 ")})));
 end ConditionalError5;
 
+model ConditionalError6
+    model A
+        outer Real x;
+    equation
+        x = time;
+    end A;
+    
+    A a;
+    inner Real x if p;
+    parameter Boolean p = false;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConditionalError6",
+            description="Conditional inner. This should probably give an error. See #4631.",
+            checkType=check,
+            flatModel="
+fclass CheckTests.ConditionalError6
+ parameter Boolean p = false /* false */;
+equation
+ x = time;
+end CheckTests.ConditionalError6;
+")})));
+end ConditionalError6;
+
 
 model ParamBinding1
 	type B = enumeration(a,b,c);
