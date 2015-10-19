@@ -4456,7 +4456,19 @@ aspect ConstantEvaluation {
 	  CValue.UNKNOWN;
   eq FBooleanType.not(CValue v) = 
 	  new CValueBoolean(!v.booleanValue());
-  
+    
+    /* Machine epsilon */
+    public static double FRealType.MACHINE_EPSILON = 2.2204460492503131e-16;
+    
+    /* Epsilon used for Real-type comparisons */
+    public static double FRealType.ALMOST_EPSILON = MACHINE_EPSILON * 100;
+    
+    syn boolean FRealType.almostZero(double op)   = almostLtZero(op) && almostGtZero(op);
+    syn boolean FRealType.almostLtZero(double op) = op <= ALMOST_EPSILON;
+    syn boolean FRealType.almostGtZero(double op) = op >= -ALMOST_EPSILON;
+    syn boolean FRealType.surelyLtZero(double op) = op < -ALMOST_EPSILON;
+    syn boolean FRealType.surelyGtZero(double op) = op > ALMOST_EPSILON;
+    
   /**
    * Equals comparison for constant values.
    * 
@@ -4467,7 +4479,7 @@ aspect ConstantEvaluation {
   syn CValue FType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() == v2.intValue());
   eq FRealType.equ(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() == v2.realValue());
+        new CValueBoolean(almostZero(v1.realValue() - v2.realValue()));
   eq FStringType.equ(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) == 0);
   eq CValueUnknown.equ(CValue v1, CValue v2) = 
@@ -4483,7 +4495,7 @@ aspect ConstantEvaluation {
   syn CValue FType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() != v2.intValue());
   eq FRealType.neq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() != v2.realValue());
+        new CValueBoolean(!almostZero(v1.realValue() - v2.realValue()));
   eq FStringType.neq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) != 0);
   eq CValueUnknown.neq(CValue v1, CValue v2) = 
@@ -4499,7 +4511,7 @@ aspect ConstantEvaluation {
   syn CValue FType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() >= v2.intValue());
   eq FRealType.geq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() >= v2.realValue());
+        new CValueBoolean(almostGtZero(v1.realValue() - v2.realValue()));
   eq FStringType.geq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) >= 0);
   eq CValueUnknown.geq(CValue v1, CValue v2) = 
@@ -4515,7 +4527,7 @@ aspect ConstantEvaluation {
   syn CValue FType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() > v2.intValue());
   eq FRealType.gt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() > v2.realValue());
+	  new CValueBoolean(surelyGtZero(v1.realValue() - v2.realValue()));
   eq FStringType.gt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) > 0);
   eq CValueUnknown.gt(CValue v1, CValue v2) = 
@@ -4531,7 +4543,7 @@ aspect ConstantEvaluation {
   syn CValue FType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() <= v2.intValue());
   eq FRealType.leq(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() <= v2.realValue());
+        new CValueBoolean(almostLtZero(v1.realValue() - v2.realValue()));
   eq FStringType.leq(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) <= 0);
   eq CValueUnknown.leq(CValue v1, CValue v2) = 
@@ -4547,7 +4559,7 @@ aspect ConstantEvaluation {
   syn CValue FType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.intValue() < v2.intValue());
   eq FRealType.lt(CValue v1, CValue v2) = 
-	  new CValueBoolean(v1.realValue() < v2.realValue());
+        new CValueBoolean(surelyLtZero(v1.realValue() - v2.realValue()));
   eq FStringType.lt(CValue v1, CValue v2) = 
 	  new CValueBoolean(v1.stringValue().compareTo(v2.stringValue()) < 0);
   eq CValueUnknown.lt(CValue v1, CValue v2) = 
