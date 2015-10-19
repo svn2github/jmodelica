@@ -1472,6 +1472,64 @@ end StreamTests.InStreamDer1;
 end InStreamDer1;
 
 
+model InStreamDer2
+    model A
+        StreamConnector c1(p = 7, f = time, s = 4);
+        StreamConnector c2(s = 5);
+        StreamConnector c3(s = 6, f = 2 * time);
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    end A;
+    
+    A a;
+    
+    Real y1 = der(inStream(a.c1.s));
+    Real y2 = der(der(inStream(a.c1.s)));
+equation
+    connect(a.c1, a.c2);
+    connect(a.c1, a.c3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InStreamDer2",
+            description="Test handling of derivative of inStream()",
+            flatModel="
+fclass StreamTests.InStreamDer2
+ constant Real a.c1.p = 7;
+ Real a.c1.f;
+ constant Real a.c1.s = 4;
+ Real a.c2.f;
+ constant Real a.c2.s = 5;
+ Real a.c3.f;
+ constant Real a.c3.s = 6;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real y1;
+ Real y2;
+ constant Real a.c2.p = 7;
+ constant Real a.c3.p = 7;
+ Real a.c2._der_f;
+ Real a.c3._der_f;
+ Real a.c1._der_f;
+equation
+ a.c1.f + a.c2.f + a.c3.f = 0;
+ a.c1.f = time;
+ a.c3.f = 2 * time;
+ a.x1 = (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) / (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8));
+ a.x2 = (max(- a.c1.f, 1.0E-8) * 4.0 + max(- a.c3.f, 1.0E-8) * 6.0) / (max(- a.c1.f, 1.0E-8) + max(- a.c3.f, 1.0E-8));
+ a.x3 = (max(- a.c1.f, 1.0E-8) * 4.0 + max(- a.c2.f, 1.0E-8) * 5.0) / (max(- a.c1.f, 1.0E-8) + max(- a.c2.f, 1.0E-8));
+ y1 = ((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0))) / (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2;
+ y2 = (((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)) + (noEvent(if - a.c2.f > 1.0E-8 then - der(a.c2._der_f) else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - der(a.c3._der_f) else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - ((max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - der(a.c2._der_f) else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - der(a.c3._der_f) else 0.0)) + (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)))) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2 - ((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0))) * (2 * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)))) / ((max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2) ^ 2;
+ a.c1._der_f + a.c2._der_f + a.c3._der_f = 0;
+ a.c1._der_f = 1.0;
+ a.c3._der_f = 2;
+end StreamTests.InStreamDer2;
+")})));
+end InStreamDer2;
+
+
 model StreamWithConst1
     model A
         StreamConnector c;
