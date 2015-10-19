@@ -2588,8 +2588,8 @@ aspect Attributes {
     eq FIntegerLitExp.minRealValue() = getValue();
     eq FNegExp.maxRealValue()        = -getFExp().minRealValue();
     eq FNegExp.minRealValue()        = -getFExp().maxRealValue();
-    eq FIdUseExp.maxRealValue()      = getFIdUse().myFV().maxRealValue();
-    eq FIdUseExp.minRealValue()      = getFIdUse().myFV().minRealValue();
+    eq FIdUseExp.maxRealValue()      = myFV().maxRealValue();
+    eq FIdUseExp.minRealValue()      = myFV().minRealValue();
 
     /**
      * Return the maximum numeric value that this variable can take.

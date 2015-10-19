@@ -1850,6 +1850,70 @@ end StreamTests.StreamWithArrays3;
 end StreamWithArrays3;
 
 
+model StreamDerAlias1
+    model A
+        StreamConnector c;
+    end A;
+
+    A a1(c(f = time * time, p = 0, s = 2 * time));
+    A a2(c(f = 2 * time * time, s = 3 * time));
+    A a3(c(s = 4 * time));
+    Real x1, x2, x3;
+    Real y1(min = 0), y2(min = 0), y3(min = 0);
+equation
+    connect(a1.c, a2.c);
+    connect(a2.c, a3.c);
+    x1 = inStream(a1.c.s);
+    x2 = inStream(a2.c.s);
+    x3 = inStream(a3.c.s);
+    a1.c.f = der(y1);
+    a2.c.f = der(y2);
+    a3.c.f = der(y3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamDerAlias1",
+            description="Check expansion of inStream() when flow variables are alias eliminated against derivative variable",
+            flatModel="
+fclass StreamTests.StreamDerAlias1
+ constant Real a1.c.p = 0;
+ Real a1.c.f;
+ Real a1.c.s;
+ Real a2.c.f;
+ Real a2.c.s;
+ Real a3.c.f;
+ Real a3.c.s;
+ Real x1;
+ Real x2;
+ Real x3;
+ Real y1(min = 0);
+ Real y2(min = 0);
+ Real y3(min = 0);
+ constant Real a2.c.p = 0;
+ constant Real a3.c.p = 0;
+initial equation 
+ y1 = 0.0;
+ y2 = 0.0;
+ y3 = 0.0;
+equation
+ x1 = (max(- der(y2), 1.0E-8) * a2.c.s + max(- der(y3), 1.0E-8) * a3.c.s) / (max(- der(y2), 1.0E-8) + max(- der(y3), 1.0E-8));
+ x2 = (max(- der(y1), 1.0E-8) * a1.c.s + max(- der(y3), 1.0E-8) * a3.c.s) / (max(- der(y1), 1.0E-8) + max(- der(y3), 1.0E-8));
+ x3 = (max(- der(y1), 1.0E-8) * a1.c.s + max(- der(y2), 1.0E-8) * a2.c.s) / (max(- der(y1), 1.0E-8) + max(- der(y2), 1.0E-8));
+ a1.c.f = der(y1);
+ a2.c.f = der(y2);
+ a3.c.f = der(y3);
+ der(y1) + der(y2) + der(y3) = 0;
+ der(y1) = time * time;
+ a1.c.s = 2 * time;
+ der(y2) = 2 * time * time;
+ a2.c.s = 3 * time;
+ a3.c.s = 4 * time;
+end StreamTests.StreamDerAlias1;
+")})));
+end StreamDerAlias1;
+
+
+
 // TODO: Add error tests (e.g. stream connector without flow)
 
 end StreamTests;
