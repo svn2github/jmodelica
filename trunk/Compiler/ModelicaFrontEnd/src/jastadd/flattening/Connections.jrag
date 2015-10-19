@@ -135,8 +135,8 @@ aspect Connections {
                 if (!cont.outside) {
                     flow = new FNegExp(flow);
                 }
-                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopy()));
-                FExp sumP = new FMulExp(divP.treeCopy(), stream);
+                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopyNoTransform()));
+                FExp sumP = new FMulExp(divP.treeCopyNoTransform(), stream);
                 if (sum == null) {
                     sum = sumP;
                     div = divP;
