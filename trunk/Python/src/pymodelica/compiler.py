@@ -429,7 +429,7 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
     cmd.append('-cp')
     cmd.append(pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar'))
     
-    for jvm_arg in jvm_args.split() + pym.environ['JVM_ARGS'].split():
+    for jvm_arg in pym.environ['JVM_ARGS'].split() + jvm_args.split():
         cmd.append(jvm_arg)
         
     if _which_compiler(file_name, compiler) is 'MODELICA':
