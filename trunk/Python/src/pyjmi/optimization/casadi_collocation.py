@@ -906,10 +906,21 @@ class LocalDAECollocator(CasadiCollocator):
     """Solves a dynamic optimization problem using local collocation."""
 
     def __init__(self, op, options):
+        # Check if init_traj is a JMResult
+        try:
+            options['init_traj'] = options['init_traj'].result_data
+        except AttributeError:
+            pass
+
+        # Check if nominal_traj is a JMResult
+        try:
+            options['nominal_traj'] = options['nominal_traj'].result_data
+        except AttributeError:
+            pass
+
         # Get the options
         self.__dict__.update(options)
         self.options = options # save the options for the result object
-
         self.times = {}
         t0_init = time.clock()
 
@@ -931,18 +942,6 @@ class LocalDAECollocator(CasadiCollocator):
             self._normalize_min_time = True
         else:
             self._normalize_min_time = False
-
-        # Check if init_traj is a JMResult
-        try:
-            self.init_traj = self.init_traj.result_data
-        except AttributeError:
-            pass
-
-        # Check if nominal_traj is a JMResult
-        try:
-            self.nominal_traj = self.nominal_traj.result_data
-        except AttributeError:
-            pass
 
         # Get start and final time
         if self._normalize_min_time:
