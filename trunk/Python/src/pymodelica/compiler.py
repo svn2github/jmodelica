@@ -422,47 +422,42 @@ def compile_separate_process(class_name, file_name=[], compiler='auto', target='
         A CompilerResult object with the name of the generated unit (or 'None' if no unit was generated) 
         and a list of warnings given by the compiler.
     """
-    JVM_PATH = _get_separate_JVM()
-        
-    JAVA_CLASS_PATH = pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar')
- 
-    comp = _which_compiler(file_name, compiler)
-    if comp is 'MODELICA':
-        COMPILER = pym._modelica_class
-    else: 
-        COMPILER = pym._optimica_class
+    cmd = []
     
-    if jvm_args:
-        JVM_ARGS = jvm_args
-    else:
-        JVM_ARGS = pym.environ['JVM_ARGS']
+    cmd.append(_get_separate_JVM())
+    
+    cmd.append('-cp')
+    cmd.append(pym.environ['COMPILER_JARS'] + os.pathsep + os.path.join(pym.environ['BEAVER_PATH'],'beaver-rt.jar'))
+    
+    for jvm_arg in jvm_args.split() + pym.environ['JVM_ARGS'].split():
+        cmd.append(jvm_arg)
         
+    if _which_compiler(file_name, compiler) is 'MODELICA':
+        cmd.append(pym._modelica_class)
+    else: 
+        cmd.append(pym._optimica_class)
+    
+    cmd.append('-log=' + _gen_log_level(compiler_log_level))
+    
+    if compiler_options:
+        cmd.append('-opt=' + _gen_compiler_options(compiler_options))
+    
+    cmd.append("-target=" + target)
+    
+    cmd.append("-version=" + str(version))  # str() in case it is None
+    
+    
     if platform == 'auto':
         platform = _get_platform()
-        
-    LOG = '-log=' + _gen_log_level(compiler_log_level)
-
-    OPTIONS = '-opt=' + _gen_compiler_options(compiler_options)
+    cmd.append("-platform=" + platform)
     
-    TARGET = "-target=" + target
+    cmd.append("-out=" + compile_to)
     
-    VERSION = "-version=" + str(version) #In case it is None
+    cmd.append("-modelicapath=" + pym.environ['MODELICAPATH'])
     
-    PLATFORM = "-platform=" + platform
+    cmd.append(",".join(file_name))
     
-    OUT = "-out=" + compile_to
-    
-    MODELICAPATH = "-modelicapath=" + pym.environ['MODELICAPATH']
-    
-    MODEL_FILES = ",".join(file_name)
-    
-    MODELICA_CLASS = class_name
-        
-    # create cmd
-    if compiler_options:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, OPTIONS, TARGET, VERSION, PLATFORM, OUT, MODELICAPATH, MODEL_FILES, MODELICA_CLASS]
-    else:
-        cmd = [JVM_PATH, "-cp", JAVA_CLASS_PATH, JVM_ARGS, COMPILER, LOG, TARGET, VERSION, PLATFORM, OUT, MODELICAPATH, MODEL_FILES, MODELICA_CLASS]
+    cmd.append(class_name)
     
     process = Popen(cmd, stderr=PIPE)
     log = CompilerLogHandler()

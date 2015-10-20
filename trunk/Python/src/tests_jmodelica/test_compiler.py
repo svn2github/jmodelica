@@ -21,6 +21,7 @@
 
 import os, os.path
 import sys
+import shutil
 
 import nose
 import nose.tools
@@ -425,6 +426,34 @@ class Test_Compiler_functions:
         err = pym.compiler_exceptions.CompilerError
         nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(wrong_name=2)', path)
         nose.tools.assert_raises(err, pym.compile_fmu, 'Diode(===)', path)
+
+    @testattr(stddist = True)
+    def test_compile_fmu_separate_process_options(self):
+        """
+        Test that it is possible to call separate process compilation with compiler options
+        """
+        fmuname = compile_fmu(Test_Compiler_functions.cpath_mc, Test_Compiler_functions.fpath_mc, compiler_options={'generate_html_diagnostics':True})
+        (diag_name, _) = os.path.splitext(fmuname)
+        diag_name += '_html_diagnostics'
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        assert os.access(diag_name, os.F_OK) == True, \
+               diag_name+" was not created."
+        os.remove(fmuname)
+        shutil.rmtree(diag_name)
+    
+
+    @testattr(stddist = True)
+    def test_compile_fmu_separate_process_jvm_args(self):
+        """
+        Test that it is possible to call separate process compilation with multiple jvm args
+        """
+        fmuname = compile_fmu(Test_Compiler_functions.cpath_mc, Test_Compiler_functions.fpath_mc, jvm_args='-Xmx100m -Xss2m')
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        os.remove(fmuname)
 
 # 64-bit FMUs no longer supported by SDK
 #    @testattr(windows = True)
