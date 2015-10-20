@@ -709,8 +709,6 @@ aspect CADCodeGen {
 	 * FFunctionCallLeft belonging to this function. For unused outputs NULL argument is used.  
 	 */
 	public void FFunctionCall.genADStatement_CAD(CodePrinter p, CodeStream str, String indent) {
-		for (FExp arg : getArgs())
-			arg.genTempInputs_CAD(p, str, indent);
 		boolean exp = functionCallIsExp();
 		
 		str.print(indent);
@@ -1545,6 +1543,8 @@ aspect CADCodeGen {
      */
     @Override
     public void FFunctionCall.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
+        for (FExp arg : getArgs())
+            arg.genTempInputs_CAD(p, str, indent);
         p.printPreSteps(getArgs(), str, indent);
         genADStatement_CAD(p, str, indent);
         p.printPostSteps(getArgs(), str, indent);
