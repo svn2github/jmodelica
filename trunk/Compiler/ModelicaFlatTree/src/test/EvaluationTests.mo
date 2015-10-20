@@ -4110,6 +4110,7 @@ model RelExpAlmost1
     constant Boolean b2 = 1 <= 1 - eps;
     constant Boolean b3 = 1 > 1 - eps;
     constant Boolean b4 = 1 < 1 - eps;
+    constant Boolean b5 = 0 < 1e-15;
     
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -4122,6 +4123,7 @@ fclass EvaluationTests.RelExpAlmost1
  constant Boolean b2 = true;
  constant Boolean b3 = false;
  constant Boolean b4 = false;
+ constant Boolean b5 = true;
 end EvaluationTests.RelExpAlmost1;
 ")})));
 end RelExpAlmost1;

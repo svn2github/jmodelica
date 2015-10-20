@@ -4461,7 +4461,7 @@ aspect ConstantEvaluation {
     public static double FRealType.MACHINE_EPSILON = 2.2204460492503131e-16;
     
     /* Epsilon used for Real-type comparisons */
-    public static double FRealType.ALMOST_EPSILON = MACHINE_EPSILON * 100;
+    public static double FRealType.ALMOST_EPSILON = MACHINE_EPSILON;
     
     syn boolean FRealType.almostZero(double op)   = almostLtZero(op) && almostGtZero(op);
     syn boolean FRealType.almostLtZero(double op) = op <= ALMOST_EPSILON;
