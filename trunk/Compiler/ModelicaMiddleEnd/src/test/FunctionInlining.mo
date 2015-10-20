@@ -3593,6 +3593,47 @@ end FunctionInlining.InitialSystemInlining1;
 ")})));
 end InitialSystemInlining1;
 
+model InitialSystemInlining2
+    function F1
+        input Real a[2];
+        output Real b;
+    algorithm
+        b := sin(a[1])*cos(a[2]) + cos(a[1])*sin(a[2]);
+    annotation(InlineAfterIndexReduction=true);
+    end F1;
+    
+    function F2
+        input Real a;
+        output Real b[2];
+    algorithm
+        b[1] := a - 3.14;
+        b[2] := a + 3.14;
+    annotation(InlineAfterIndexReduction=true);
+    end F2;
+    
+    parameter Real x(fixed=false);
+initial equation
+    x = F1(F2(time + 1));
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemInlining2",
+            description="Test inlining in the initial system. This test ensures that F2 is inlined correctly",
+            flatModel="
+fclass FunctionInlining.InitialSystemInlining2
+ parameter Real x(fixed = false);
+ Real temp_2;
+ Real temp_3;
+ Real temp_5;
+initial equation 
+ x = sin(temp_2) * cos(temp_3) + cos(temp_2) * sin(temp_3);
+equation
+ temp_2 = temp_5 - 3.14;
+ temp_3 = temp_5 + 3.14;
+ temp_5 = time + 1;
+end FunctionInlining.InitialSystemInlining2;
+")})));
+end InitialSystemInlining2;
+
 model ChainedCallInlining1
     record R
         Real x;

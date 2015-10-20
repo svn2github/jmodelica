@@ -444,19 +444,18 @@ aspect FunctionInlining {
          */
         public void inline() {
             List<FAbstractEquation> oldInitialEqns = initialEqns;
-            List<FAbstractEquation> oldNormalEqns = normalEqns;
-            List<FAbstractEquation> oldParamEqns = paramEqns;
-            
             initialEqns = new List<FAbstractEquation>();
-            normalEqns = new List<FAbstractEquation>();
-            paramEqns = new List<FAbstractEquation>();
-            
             fc.setFInitialEquationList(initialEqns);
-            fc.setFAbstractEquationList(normalEqns);
-            fc.setFParameterEquationList(paramEqns);
-            
             inlineFCList(oldInitialEqns, initialEqns);
+            
+            List<FAbstractEquation> oldNormalEqns = normalEqns;
+            normalEqns = new List<FAbstractEquation>();
+            fc.setFAbstractEquationList(normalEqns);
             inlineFCList(oldNormalEqns, normalEqns);
+            
+            List<FAbstractEquation> oldParamEqns = paramEqns;
+            paramEqns = new List<FAbstractEquation>();
+            fc.setFParameterEquationList(paramEqns);
             inlineFCList(oldParamEqns, paramEqns);
         }
         
