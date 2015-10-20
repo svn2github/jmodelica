@@ -231,7 +231,13 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             
         /* Save pointer to the array in tmp2 */
         tmp2_data = N_VGetArrayPointer(tmp2);
-      
+        
+        /* Make sure that the residual values are up to date */
+        ret = kin_f(u, fu, block);
+        if(ret != 0) {
+            return ret;
+        }
+
         /* Rename work vectors for readibility */
         ftemp = tmp1; 
         jthCol = tmp2;
