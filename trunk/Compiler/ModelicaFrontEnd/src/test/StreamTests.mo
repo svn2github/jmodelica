@@ -1635,7 +1635,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="StreamWithConst3",
-            description="",
+            description="Test array stream connectors connected N=2, M=2, with some constant flows",
             flatModel="
 fclass StreamTests.StreamWithConst3
  constant Real a1[1].c.f = 1;
@@ -1674,6 +1674,48 @@ equation
 end StreamTests.StreamWithConst3;
 ")})));
 end StreamWithConst3;
+
+
+model StreamWithConst4
+    model A
+        StreamConnector c;
+    end A;
+        
+    A a1(c(f = 0, p = 0, s = 2 * time)), a2(c(f = time, s = 3)), a3(c(s = 4));
+    Real x1, x2, x3;
+equation
+    connect(a1.c, a2.c);
+    connect(a2.c, a3.c);
+    x1 = inStream(a1.c.s);
+    x2 = inStream(a2.c.s);
+    x3 = inStream(a3.c.s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamWithConst4",
+            description="Constant evaluation of inStream() where only one constant stream variable with a non-constant flow contributes to the result",
+            flatModel="
+fclass StreamTests.StreamWithConst4
+ constant Real a1.c.p = 0;
+ constant Real a1.c.f = 0;
+ Real a1.c.s;
+ Real a2.c.f;
+ constant Real a2.c.s = 3;
+ constant Real a3.c.s = 4;
+ Real x1;
+ Real x2;
+ Real x3;
+ constant Real a2.c.p = 0;
+ constant Real a3.c.p = 0;
+equation
+ x1 = (max(- a2.c.f, 1.0E-8) * 3.0 + max(a2.c.f, 1.0E-8) * 4.0) / (max(- a2.c.f, 1.0E-8) + max(a2.c.f, 1.0E-8));
+ x2 = 4.0;
+ x3 = 3.0;
+ a1.c.s = 2 * time;
+ a2.c.f = time;
+end StreamTests.StreamWithConst4;
+")})));
+end StreamWithConst4;
 
 
 model StreamWithArrays1
