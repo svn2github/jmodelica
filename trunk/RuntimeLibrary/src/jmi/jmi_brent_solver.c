@@ -227,7 +227,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
         }
         
         /* Iteration terminates successfully */
-        if (JMI_ABS(f) < UNIT_ROUNDOFF) { 
+        if (JMI_ABS(f) <= DBL_MIN) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "The residual meets the tolerance requirement <res: %f>. Stopping Newton.", f);
             }
@@ -285,7 +285,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
     
     /* If the function value was significantly decreased during Newton, return successful together with the values, x, f and the last step */
-    if (JMI_ABS(f) < JMI_ABS(*f0) * BRENT_SIGNIFICANT_DECREASE) {
+    if (delta != 0 && (JMI_ABS(f) < JMI_ABS(*f0) * BRENT_SIGNIFICANT_DECREASE || JMI_ABS(f) < UNIT_ROUNDOFF)) {
         *x0 = x;
         *f0 = f;
         *d = delta >= 0 ? delta : -delta;
