@@ -396,7 +396,7 @@ end FunctionInlining.BasicInline9;
             d := a * b[c];
             end f;
         
-        parameter Integer e = 2;
+        constant Integer e = 2;
         Real x = f(y, z, e);
         Real y = 2.2;
         Real[:] z = { 1, 2, 3 };
@@ -409,7 +409,7 @@ end FunctionInlining.BasicInline9;
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.BasicInline10
- parameter Integer e = 2 /* 2 */;
+ constant Integer e = 2 /* 2 */;
  Real x;
  Real y;
  Real z[1];
@@ -4094,5 +4094,152 @@ public
 end FunctionInlining.ChainedCallInlining11;
 ")})));
 end ChainedCallInlining11;
+
+
+model InputAsIndex1
+    function f
+        input Integer u;
+        input Real map[:];
+        output Real y;
+    algorithm
+      y := map[u];
+    end f;
+    
+    Real y;
+    Integer i = integer(time);
+equation
+    y = f(i, {1,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsIndex1",
+            description="",
+            flatModel="
+fclass FunctionInlining.InputAsIndex1
+ Real y;
+ discrete Integer i;
+initial equation 
+ pre(i) = 0;
+equation
+ y = ({1, 2})[i];
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end FunctionInlining.InputAsIndex1;
+")})));
+end InputAsIndex1;
+
+
+model InputAsIndex2
+    function f
+        input Integer u;
+        input Integer v;
+        input Real map[:,:];
+        output Real y;
+    algorithm
+      y := map[u,v];
+    end f;
+    
+    Real y;
+    Integer i = integer(time);
+equation
+    y = f(i, 1, {{1,2},{3,4}});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsIndex2",
+            description="",
+            flatModel="
+fclass FunctionInlining.InputAsIndex2
+ Real y;
+ discrete Integer i;
+initial equation 
+ pre(i) = 0;
+equation
+ y = ({1, 3})[i];
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end FunctionInlining.InputAsIndex2;
+")})));
+end InputAsIndex2;
+
+
+model InputAsIndex3
+    record R
+        Real x;
+    end R;
+    
+    function f
+        input Integer u;
+        input R map[:];
+        output Real y;
+    algorithm
+      y := map[u].x;
+    end f;
+    
+    Real y;
+    Integer i = integer(time);
+    R r[2] = {R(time),R(2 * time)};
+equation
+    y = f(i, r);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsIndex3",
+            description="",
+            flatModel="
+fclass FunctionInlining.InputAsIndex3
+ Real y;
+ discrete Integer i;
+ Real r[1].x;
+ Real r[2].x;
+initial equation 
+ pre(i) = 0;
+equation
+ y = ({r[1].x, r[2].x})[i];
+ r[1].x = time;
+ r[2].x = 2 * time;
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end FunctionInlining.InputAsIndex3;
+")})));
+end InputAsIndex3;
+
+
+model InputAsIndex4
+    record R
+        Real x[2];
+    end R;
+    
+    function f
+        input Integer u;
+        input R map[:];
+        output Real y;
+    algorithm
+      y := map[u].x[u];
+    end f;
+    
+    Real y;
+    Integer i = integer(time);
+    R r[2] = {R({1,2}),R({3,4})};
+equation
+    y = f(i, r);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InputAsIndex4",
+            description="",
+            flatModel="
+fclass FunctionInlining.InputAsIndex4
+ Real y;
+ discrete Integer i;
+ constant Real r[1].x[1] = 1;
+ constant Real r[1].x[2] = 2;
+ constant Real r[2].x[1] = 3;
+ constant Real r[2].x[2] = 4;
+initial equation 
+ pre(i) = 0;
+equation
+ y = ({{1.0, 2.0}, {3.0, 4.0}})[i,i];
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+end FunctionInlining.InputAsIndex4;
+")})));
+end InputAsIndex4;
 
 end FunctionInlining;

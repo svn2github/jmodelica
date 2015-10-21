@@ -1544,25 +1544,127 @@ aspect FunctionInlining {
 
     public FExp FIdUseExp.replaceReferences(AbstractFunctionInliner fi) {
         replaceReferencesInSubscripts(fi);
-        FExp exp = fi.getReplacementExp(scalarName());
-        if (exp != null) {
-            exp = dynamicFExp(exp.fullCopy());
+        if (fi.isReplacementVar(name())) {
+            return this;
+        }
+        FExp exp = null;
+        if (getFIdUse().hasNonLiteralSubscripts()) {
+            exp = dynamicFExp(copyWithNonLiteralSubscriptsAsColon());
+            exp = exp.getArray().buildWithReplacedReferences(fi, this);
+            exp = new FSubscriptedExp(exp, getFIdUse().copyNonLiteralSubscripts());
         } else {
-            if (fi.isReplacementVar(name())) {
-                exp = this;
-            } else if (isArray() && !size().isUnknown()) { 
-                exp = getArray().buildWithReplacedReferences(fi, this);
-            } else if (type().isRecord()) {
-                exp = dynamicFExp(type().createRecordConstructor(getFIdUse().getFQName()));
-                exp = exp.replaceReferences(fi);
+            exp = fi.getReplacementExp(scalarName());
+            if (exp != null) {
+                exp = dynamicFExp(exp.treeCopyNoTransform());
             } else {
-                exp = type().zeroLiteral();
+                if (isArray() && !size().isUnknown()) { 
+                    exp = getArray().buildWithReplacedReferences(fi, this);
+                } else if (type().isRecord()) {
+                    exp = dynamicFExp(type().createRecordConstructor(getFIdUse().getFQName()));
+                    exp = exp.replaceReferences(fi);
+                } else {
+                    exp = type().zeroLiteral();
+                }
             }
         }
-        if (exp != this)
-            replaceMe(exp);
+        replaceMe(exp);
         return exp;
     }
+
+
+    public FIdUseExp FIdUseExp.copyWithNonLiteralSubscriptsAsColon() {
+        return createNode(getFIdUse().copyWithNonLiteralSubscriptsAsColon());
+    }
+
+    public FIdUse FIdUse.copyWithNonLiteralSubscriptsAsColon() {
+        return new FIdUse(getFQName().copyWithNonLiteralSubscriptsAsColon());
+    }
+
+    public FIdUse FIdUseInstAccess.copyWithNonLiteralSubscriptsAsColon() {
+        throw new UnsupportedOperationException();
+    }
+
+    public FQName FQName.copyWithNonLiteralSubscriptsAsColon() {
+        return treeCopyNoTransform();
+    }
+
+    public FQName FQNameFull.copyWithNonLiteralSubscriptsAsColon() {
+        FQNameFull res = new FQNameFull();
+        for (FQNamePart p : getFQNameParts()) {
+            res.addFQNamePartNoTransform(p.copyWithNonLiteralSubscriptsAsColon());
+        }
+        return res;
+    }
+
+    public FQNamePart FQNamePart.copyWithNonLiteralSubscriptsAsColon() {
+        return treeCopyNoTransform();
+    }
+
+    public FQNamePart FQNamePartArray.copyWithNonLiteralSubscriptsAsColon() {
+        return new FQNamePartArray(getName(), getFArraySubscripts().copyWithNonLiteralSubscriptsAsColon());
+    }
+
+    public FArraySubscripts FArraySubscripts.copyWithNonLiteralSubscriptsAsColon() {
+        FArraySubscripts res = new FArraySubscripts();
+        for (FSubscript s : getFSubscripts()) {
+            res.addFSubscriptNoTransform(s.copyWithNonLiteralSubscriptsAsColon());
+        }
+        return res;
+    }
+
+    public FSubscript FSubscript.copyWithNonLiteralSubscriptsAsColon() {
+        return treeCopyNoTransform();
+    }
+
+    public FSubscript FExpSubscript.copyWithNonLiteralSubscriptsAsColon() {
+        return new FColonSubscript();
+    }
+
+
+    public FArraySubscripts FIdUseExp.copyNonLiteralSubscripts() {
+        return getFIdUse().copyNonLiteralSubscripts();
+    }
+
+    public FArraySubscripts FIdUse.copyNonLiteralSubscripts() {
+        return getFQName().copyNonLiteralSubscripts();
+    }
+
+    public FArraySubscripts FIdUseInstAccess.copyNonLiteralSubscripts() {
+        throw new UnsupportedOperationException();
+    }
+
+    public FArraySubscripts FQName.copyNonLiteralSubscripts() {
+        return new FArraySubscripts();
+    }
+
+    public FArraySubscripts FQNameFull.copyNonLiteralSubscripts() {
+        FArraySubscripts fas = new FArraySubscripts();
+        for (FQNamePart p : getFQNameParts()) {
+            p.copyNonLiteralSubscriptsTo(fas);
+        }
+        return fas;
+    }
+
+    public void FQNamePart.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    }
+
+    public void FQNamePartArray.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+        getFArraySubscripts().copyNonLiteralSubscriptsTo(fas);
+    }
+
+    public void FArraySubscripts.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+        for (FSubscript s : getFSubscripts()) {
+            s.copyNonLiteralSubscriptsTo(fas);
+        }
+    }
+
+    public void FSubscript.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+    }
+
+    public void FExpSubscript.copyNonLiteralSubscriptsTo(FArraySubscripts fas) {
+        fas.addFSubscriptNoTransform(treeCopyNoTransform());
+    }
+
 
     public FExp FFunctionCall.replaceReferences(AbstractFunctionInliner fi) {
         super.replaceReferences(fi);
@@ -1607,6 +1709,11 @@ aspect FunctionInlining {
 
     public void FExpSubscript.replaceReferencesInSubscripts(AbstractFunctionInliner fi) {
         getFExp().replaceReferences(fi);
+        if (isConstant()) {
+            try {
+                replaceMe(getFExp().ceval().createFSubscript());
+            } catch (ConstantEvaluationException e) {}
+        }
     }
 
     /**
