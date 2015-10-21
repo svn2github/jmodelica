@@ -1919,6 +1919,28 @@ aspect InstanceAST_API {
     eq InstNode.getChild().instNodeParent() = this;
     eq Root.getChild().instNodeParent()     = null;
     
+    syn InstNode InstNode.matchingAncestor(InstNode node) {
+        if (node.isClassDecl()) {
+            int dims = node.nTypeDims();
+            for (InstNode mine : instAncestors()) {
+                if (mine.myInstClass() == node) {
+                    if (dims == 0) {
+                        return mine;
+                    }
+                    dims = dims - 1;
+                }
+            }
+            return null;
+        } else {
+            return commonAncestor(node);
+        }
+    }
+    
+    syn int InstNode.nTypeDims()      = 0;
+    eq InstShortClassDecl.nTypeDims() = (hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0) 
+            + getInstExtends(0).nTypeDims();
+    eq InstExtends.nTypeDims()        = myInstClass().nTypeDims();
+    
 	/**
 	 * Find the component that this access should be evaluated in.
 	 */
