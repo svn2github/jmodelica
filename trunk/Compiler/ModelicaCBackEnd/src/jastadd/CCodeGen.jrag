@@ -2677,7 +2677,15 @@ aspect CCodeGen {
 
     syn String FRelExp.op_C() = op();
     eq FNeqExp.op_C() = " != ";
-
+    
+    @Override
+    public void FRelExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        if (generatesEvent(p.inInitialSystem())) {
+            printIndicatorDecls_C(p, str, indent);
+        }
+    }
+    
     @Override
     public void FRelExp.genTempVars_C(CodePrinter p, CodeStream str, String outerIndent) {
         super.genTempVars_C(p, str, outerIndent);
@@ -2692,6 +2700,7 @@ aspect CCodeGen {
             str.println(") {");
             
             String indent = p.indent(outerIndent);
+            printIndicatorPre_C(p, str, indent);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
             boolean time = isTimeEventGenerating();
@@ -2720,6 +2729,7 @@ aspect CCodeGen {
             }
             
             str.formatln(");");
+            printIndicatorPost_C(p, str, indent);
             str.formatln("%s}", outerIndent);
         }
     }
@@ -4941,8 +4951,33 @@ aspect CCodeGen {
             p.printPostSteps(getPositiveVelocity(), str, indent);
         }
     }
-	
+    
+    private void FRelExp.printIndicatorDecls_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printVarDecls(getIndicatorNominal(), str, indent);
+        }
+    }
+    
+    private void FRelExp.printIndicatorPre_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printPreSteps(getIndicatorNominal(), str, indent);
+        }
+    }
+    
+    private void FRelExp.printIndicatorPost_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printPostSteps(getIndicatorNominal(), str, indent);
+        }
+    }
+    
     private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            str.print("(");
+        }
         if (hasIndicator()) {
             p.print(getIndicator(), str, indent);
         } else {
@@ -4950,6 +4985,10 @@ aspect CCodeGen {
             str.print(" - (");
             p.print(getRight(), str, indent);
             str.print(")");
+        }
+        if (scale) {
+            str.print(") / ");
+            p.print(getIndicatorNominal(), str, indent);
         }
     }
     

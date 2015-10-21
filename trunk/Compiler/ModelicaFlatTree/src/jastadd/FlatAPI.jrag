@@ -2685,6 +2685,8 @@ aspect Nominals {
     syn FExp FExp.nominal() = FExp.nominalDefault();
     eq FLitExp.nominal()    = new FAbsExp(fullCopy());
     
+    syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
+    
     eq FDotAddExp.nominal() = FExp.nominalMax(getLeft(), getRight());
     eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());
     eq FDotMulExp.nominal() = new FMulExp(getLeft().nominal(), getRight().nominal());

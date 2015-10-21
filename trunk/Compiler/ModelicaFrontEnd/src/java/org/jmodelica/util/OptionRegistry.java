@@ -328,6 +328,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              false, 
              "If enabled, then the 'nominal' attribute will be used to scale variables in the model."),
+        EVENT_SCALE
+            ("event_indicator_scaling", 
+             OptionType.compiler, 
+             Category.experimental,
+             false, 
+             "If enabled, event indicators will be scaled with nominal heuristics"),
         MIN_T_TRANS 
             ("normalize_minimum_time_problems", 
              OptionType.compiler, 

@@ -1434,8 +1434,15 @@ aspect TransformCanonical {
 	/**
 	 * Creates an assign statement for the indicator
 	 */
-	syn FStatement FRelExp.indicatorStmt() =
-			new FAssignStmt(getIndicator().fullCopy(), new FSubExp(getLeft(), getRight()));
+    syn FStatement FRelExp.indicatorStmt() = new FAssignStmt(getIndicator().fullCopy(), indicatorExp());
+    
+    syn FExp FRelExp.indicatorExp() {
+        FExp res = new FSubExp(getLeft(), getRight());
+        if (myOptions().getBooleanOption("event_indicator_scaling")) {
+            res = new FDivExp(res, nominal());
+        }
+        return res;
+    }
 	
 	/**
 	 * Replace one equation with another.

@@ -17111,6 +17111,46 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end TestRelationalOp9;
 
+model TestRelationalOp10
+    function f
+        input Real[:] x;
+        output Real y;
+      algorithm
+        y := max(x);
+    end f;
+    parameter Real p = 0.1;
+    Real x(nominal = f({0.1,0.5})) = 1 - time;
+    Boolean b1 = time + p > x;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp10",
+            description="Scaling event indicator",
+            variability_propagation=false,
+            inline_functions="none",
+            common_subexp_elim=false,
+            event_indicator_scaling=true,
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    _x_1 = 1 + (- _time);
+    if (jmi->atInitial || jmi->atEvent) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+        jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(0.1);
+        jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(0.5);
+        _sw(0) = jmi_turn_switch((_time + _p_0 - (_x_1)) / jmi_max(jmi_max(AD_WRAP_LITERAL(1), jmi_abs(_p_0)), jmi_abs(func_CCodeGenTests_TestRelationalOp10_f_exp0(tmp_1))), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+    }
+    _b1_2 = _sw(0);
+    pre_b1_2 = _b1_2;
+    return ef;
+}
+")})));
+end TestRelationalOp10;
+
 model StringOperations1
 	type E = enumeration(a, bb, ccc);
 	
