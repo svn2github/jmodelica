@@ -5030,6 +5030,32 @@ static const int CAD_dae_nz_cols[42] = {0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,
 ")})));
 end SparseJacTest5;
 
+model SparseJacTest6
+    parameter String s = "string";
+    Real x;
+equation
+    der(x) = time;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="SparseJacTest6",
+            description="Test that sparsity information is generated correctly. #4644.",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            template="$C_DAE_equation_sparsity$",
+            generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 1;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 0;
+static int CAD_dae_n_nz = 1;
+static const int CAD_dae_nz_rows[1] = {0};
+static const int CAD_dae_nz_cols[1] = {0};
+")})));
+end SparseJacTest6;
+
 model TestExtObject1
 	class ExtObjectwInput
 		extends ExternalObject;
