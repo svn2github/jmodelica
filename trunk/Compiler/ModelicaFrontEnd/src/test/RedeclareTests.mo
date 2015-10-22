@@ -4302,6 +4302,76 @@ end RedeclareTests.RedeclareTest69;
 ")})));
 end RedeclareTest69;
 
+model RedeclareTest70
+    model A
+        Real[:,2] x = {{1,2}};
+    end A;
+    
+    model B
+        replaceable model A2 = A;
+        A2[2] a;
+    end B;
+    
+    model C
+        replaceable model A3 = A;
+        B b1(redeclare model A2 = A(x={{3,4}}));
+        B b2(redeclare model A2 = A);
+        B b3(redeclare model A2 = A3);
+    end C;
+    
+    C c(redeclare model A3 = A(x={{5,6}}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest70",
+            description="Replaceable array class binding expression",
+            flatModel="
+fclass RedeclareTests.RedeclareTest70
+ Real c.b1.a[1].x[1,2] = {{3, 4}};
+ Real c.b1.a[2].x[1,2] = {{3, 4}};
+ Real c.b2.a[1].x[1,2] = {{1, 2}};
+ Real c.b2.a[2].x[1,2] = {{1, 2}};
+ Real c.b3.a[1].x[1,2] = {{5, 6}};
+ Real c.b3.a[2].x[1,2] = {{5, 6}};
+end RedeclareTests.RedeclareTest70;
+")})));
+end RedeclareTest70;
+
+model RedeclareTest71
+    model A
+        Real[:,2] x = {{1,2}};
+    end A;
+    
+    model B
+        replaceable model A2 = A;
+        A2[2] a;
+    end B;
+    
+    model C
+        replaceable model A3 = A;
+        B b1(redeclare model A2 = A[2](x={{{3,4}},{{5,6}}}));
+        B b3(redeclare model A2 = A3);
+    end C;
+    
+    C c(redeclare model A3 = A[2](x={{{7,8}},{{9,0}}}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest71",
+            description="Replaceable array class binding expression",
+            flatModel="
+fclass RedeclareTests.RedeclareTest71
+ Real c.b1.a[1,1].x[1,2] = {{3, 4}};
+ Real c.b1.a[1,2].x[1,2] = {{5, 6}};
+ Real c.b1.a[2,1].x[1,2] = {{3, 4}};
+ Real c.b1.a[2,2].x[1,2] = {{5, 6}};
+ Real c.b3.a[1,1].x[1,2] = {{7, 8}};
+ Real c.b3.a[1,2].x[1,2] = {{9, 0}};
+ Real c.b3.a[2,1].x[1,2] = {{7, 8}};
+ Real c.b3.a[2,2].x[1,2] = {{9, 0}};
+end RedeclareTests.RedeclareTest71;
+")})));
+end RedeclareTest71;
 
 
 model RedeclareElement1

@@ -1141,6 +1141,13 @@ aspect Flattening {
         (node == this) ? fe : splitBindingFExp(fe, node);
     eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
         (node == this) ? fe : fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
+    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) {
+        FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node);
+        for (int i = 0; i < nTypeDims(); i++) {
+            nfe = fe.dynamicFExp(nfe).splitArrayExp(size().get(i));
+        }
+        return nfe;
+    }
 	
 	/**
 	 * \Return the expression corresponding to the given index in this array expression. 
