@@ -35,9 +35,9 @@ import modelicacasadi_wrapper as mc
 from scipy.stats import chi2
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
-from IPython.core.debugger import Tracer; dh = Tracer() #DELETTE BEFORE COMMIT
 from pyjmi import transfer_optimization_problem
-
+from IPython.core.debugger import Tracer; dh = Tracer() #DELETTE BEFORE COMMIT
+# TODO: CHECK IF ALL THESE ARE NEEDED??
 #Check to see if pyfmi is installed so that we also catch the error generated
 #from that package
 from pymodelica.common.io import VariableNotFoundError as \
@@ -137,7 +137,7 @@ class GreyBox(object):
                 # Add log term and first measurement to objective
                 timed_var = self._add_timed_variable(var,time[0])
                 obj = self.op.getObjective()
-                self.op.setObjective(obj + (N_meas-1)*log(r.getVar())+(timed_var.getVar()-measurements[var][0])**2/r.getVar())
+                self.op.setObjective(obj + (N_meas)*log(r.getVar())+(timed_var.getVar()-measurements[var][0])**2/r.getVar())
                 
         elif costType =="sum":
             
@@ -169,7 +169,6 @@ class GreyBox(object):
             warning("costType not implemented")
             
         self._create_external_data()
-        
         
     def _create_external_data(self):
         """
@@ -266,33 +265,26 @@ class GreyBox(object):
         self.op.addTimedVariable(timed_var)
         return timed_var
         
-    def optimize(self):
+    def identify(self):
         """
         Prints the parameters that are currently free and solves the optimization problem.
         If the solver fails to converge the cost returned will be Inf.
         
         """
         # print currently free parameters
-        print ('Free parameters:')
+        print ('Identifying with free parameters:')
         print self.free_parameters
         res = self.op.optimize(options=self.options)
         
         # optimize
         returnStatus = res.solver.get_solver_statistics()[0]
         if (returnStatus == 'Solve_Succeeded') or (returnStatus=='Solved_To_Acceptable_Level'):
-            self.cost = res.solver.get_solver_statistics()[2]
+            cost = res.solver.get_solver_statistics()[2]
         else:
-            self.cost = Inf
+            cost = Inf
         
-        # calculate and print cost, costred and risk
-        self.costred = self.nullCost-self.cost
-        self.risk =  self.calculate_risk(self.costred, self.df, self.n) 
-        print("Cost: %f" % self.cost)
-        print("Cost red: %f" % self.costred)
-        print("Risk: %f" % self.risk)
-        
-        # return result object
-        return res
+        # return identification object
+        return IdentificationObject(self, frozenset(self.free_parameters), res, cost)
         
     def set_free_parameters(self, parameters):
         """
@@ -321,72 +313,7 @@ class GreyBox(object):
          # update free_parameters to parameters
         self.free_parameters = parameters.copy()
          
-    def set_dof(self, df):
-        """
-        Set degrees of freedom. Used for risk calculation.
-        
-        Parameters::
-            df --
-                Degrees of freedom.
-        """
-        self.df = df 
-        
-    def set_n(self,n):    
-        """
-        Set number of combinations to test. Used for risk calculation.
-        
-        Parameters::
-            n --
-                Number of combinations.
-        """
-        self.n = n
-        
-    def set_null_cost(self, nullCost):
-        """
-        Defines the cost of the null model. Used for risk calculation.
-        
-        Parameters::
-            nullCost --
-                Cost of the null model.
-        """
-        self.nullCost = nullCost 
-        
-    def get_cost_reduction(self):
-        """
-        Returns the costreduction of the last optimization compared to the cost 
-        supplied (null model) when calling optimize.
-        """    
-        return self.costred
-        
-    def get_cost(self):  
-        """
-        Returns the cost of the last optimization.
-        """   
-        return self.cost
-    
-    def get_risk(self):  
-        """
-        Returns the risk of the last optimization.
-        
-        """   
-        return self.risk
-        
-    def calculate_risk(self, costred, df, n):  
-        """
-        Calculates and returns the risk of the last optimization.
-        
-        Parameters::
-            costred --
-                Cost reduction.
-            df --
-                Degrees of freedom.
-            n --
-                Number of combinations.
-                
-       """  
-        risk = 1-chi2.cdf(costred,df)**n    
-        return risk
-        
+ 
     def print_optimial_parameters(self, res):  
         """
         Extracts the free parameters values from res and prints them.
@@ -397,7 +324,7 @@ class GreyBox(object):
         """  
         print(extract_parameter_values(res,self.free_parameters))
         
-    def set_initial_guess(self, result):
+    def set_initial_trajectory(self, result):
         """
         Sets the initial guess to use for optimizations.
         
@@ -460,3 +387,77 @@ class GreyBox(object):
 
         return est_parameters
         
+
+
+class IdentificationObject(object):
+
+    """
+	GREYBOX FRAMEWORK
+    """
+
+    def __init__(self, greybox, free_parameters, result, cost):
+        """
+
+        """
+        self.greybox = greybox
+        self.free_parameters = free_parameters
+        self.result = result
+        self.cost = cost
+        
+        greybox.set_initial_trajectory(result)
+        
+    def release(self, parameters):
+
+        # make new set with parameters to be free
+        param = self.free_parameters.union(parameters)
+        self.greybox.set_free_parameters(param)
+        
+        return self.greybox.identify()
+    
+    def compare(self, idObj):
+        
+        nbrFreeNull = len(self.free_parameters)
+        cases = len(idObj)
+        resultDict = {}
+        for obj in idObj:
+            additionalFree = []
+            for par in obj.free_parameters:
+				if par not in self.free_parameters:
+					additionalFree.append(par)
+            dof = len(additionalFree)
+            
+            print("Additional free parameter/-s:")
+            for par in additionalFree:
+				print(par)
+            print("Cost: %f" % obj.cost)
+            costred = self.cost-obj.cost
+            print("Cost red: %f" % costred)
+            risk= self.calculate_risk(costred, dof, cases)
+            print("Risk: %f" % risk )
+            print("")
+            
+            if dof == 1:
+				name = additionalFree.pop()
+				resultDict[name] = {}
+				resultDict[name]['cost'] = obj.cost
+				resultDict[name]['costred'] = costred
+				resultDict[name]['risk'] = risk
+				
+        return resultDict
+        
+    def calculate_risk(self, costred, df, n):  
+        """
+        Calculates and returns the risk of the last optimization.
+        
+        Parameters::
+            costred --
+                Cost reduction.
+            df --
+                Degrees of freedom.
+            n --
+                Number of combinations.
+                
+       """  
+        risk = 1-chi2.cdf(costred,df)**n    
+        return risk
+       
