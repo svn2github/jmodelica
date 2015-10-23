@@ -2302,7 +2302,10 @@ aspect CADCodeGen {
             if(ffv.shouldBeDifferentiated()) {
                 str.print(sep);
                 sep = ", ";
-                str.print("&" + ffv.derName_CAD());
+                if (!ffv.isComposite()) {
+                    str.print("&");
+                }
+                str.print(ffv.derName_CAD());
             }
         }
         str.print(");\n");
@@ -2343,10 +2346,14 @@ aspect CADCodeGen {
         for (FFunctionVariable ffv : myOutputs()){
             str.print(sep);
             sep = ", ";
-            if(ffv.shouldBeDifferentiated())
-                str.print("&" + ffv.varName_CAD());
-            else
-                str.print("&" + ffv.name_C());
+            if (!ffv.isComposite()) {
+                str.print("&");
+            }
+            if(ffv.shouldBeDifferentiated()) {
+                str.print(ffv.varName_CAD());
+            } else {
+                str.print(ffv.name_C());
+            }
         }
         str.print(");\n");
     }

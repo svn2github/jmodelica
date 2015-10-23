@@ -2234,6 +2234,86 @@ void func_CADCodeGenTests_CADFunction11_F2_der_AD2(jmi_array_t* X_var_a, jmi_arr
 ")})));
 end CADFunction11;
 
+model CADFunction12
+    function F1
+        input Real x;
+        output Real[2] y;
+    algorithm
+        y[1] := x;
+        y[2] := -x;
+    annotation(derivative=F1_der, Inline=false);
+    end F1;
+
+    function F1_der
+        input Real x;
+        input Real x_der;
+        output Real[2] y;
+    algorithm
+        y[1] := x_der;
+        y[2] := -x_der;
+    annotation(Inline=false);
+    end F1_der;
+
+
+    Real x;
+    Real y;
+    Real z;
+equation
+    {x, y} = F1(z);
+    y * x = z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="CADFunction12",
+            description="Test code gen bug including function call with derivative annoation and non-scalar output",
+            generate_dae_jacobian=true,
+            template="
+$C_functions$
+$CAD_functions$
+",
+            generatedCode="
+void func_CADCodeGenTests_CADFunction12_F1_def0(jmi_ad_var_t x_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(y_a, 1) = x_v;
+    jmi_array_ref_1(y_a, 2) = - x_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADFunction12_F1_der_def1(jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(y_a, 1) = x_der_v;
+    jmi_array_ref_1(y_a, 2) = - x_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+void func_CADCodeGenTests_CADFunction12_F1_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_array_t* y_var_a, jmi_array_t* y_der_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_var_an, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_der_an, 2, 1)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADFunction12_F1_def0(x_var_v, y_var_a);
+    func_CADCodeGenTests_CADFunction12_F1_der_def1(x_var_v, x_der_v, y_der_a);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+")})));
+end CADFunction12;
+
 model FunctionDiscreteInputTest1
 	function f
 		input Integer i;
