@@ -206,6 +206,7 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     double f = 0.0;
     double df = 0.0;
     double delta = 1e20;
+    double delta_prev = delta;
     int flag;
     int i = 0;
     jmi_log_node_t node;
@@ -279,6 +280,16 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
             }
             x_tmp = block->max[0];
         }
+        
+        /* Check if Newton is making good progress */
+        if (i > 1 && JMI_ABS(delta) > 2*JMI_ABS(delta_prev)) {
+            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
+                jmi_log_fmt(block->log, node, logInfo, "Not making progress with Newton. Stopping Newton.");
+            }
+            break;
+        }
+        
+        delta_prev = delta;
         
     }
     
