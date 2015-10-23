@@ -2805,6 +2805,176 @@ jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f_der_exp1(jmi_ad_var_t x1_v, jmi_
 ")})));
 end CADDerAnno2;
 
+model CADDerAnno3
+    
+    function f
+        input Real x;
+        output Real y = 3 * x^3;
+    algorithm
+        annotation(Inline=false,derivative=fd);
+    end f;
+    
+    function fd
+        input Real x;
+        input Real dx;
+        output Real dy = 6 * dx^2;
+    algorithm
+        annotation(Inline=false,derivative=fdd);
+    end fd;
+    
+    function fdd
+        input Real x;
+        input Real dx;
+        input Real ddx;
+        output Real y = 12 * ddx^1;
+    algorithm
+        annotation(Inline=false);
+    end fdd;
+    
+    Real x,y,dx,dy;
+equation
+    der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 2;
+    dx + dy = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="CADDerAnno3",
+            description="",
+            generate_ode_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_function_headers$
+$CAD_functions$
+$C_functions$
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+void func_CADCodeGenTests_CADDerAnno3_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(jmi_ad_var_t x_v, jmi_ad_var_t dx_var_v, jmi_ad_var_t dx_der_v, jmi_ad_var_t* dy_var_o, jmi_ad_var_t* dy_der_o);
+
+void func_CADCodeGenTests_CADDerAnno3_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_var_v)
+    JMI_DEF(REA, y_der_v)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADDerAnno3_f_def0(x_var_v, &y_var_v);
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_var_v, x_der_v, &y_der_v);
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(jmi_ad_var_t x_v, jmi_ad_var_t dx_var_v, jmi_ad_var_t dx_der_v, jmi_ad_var_t* dy_var_o, jmi_ad_var_t* dy_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, dy_var_v)
+    JMI_DEF(REA, dy_der_v)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_v, dx_var_v, &dy_var_v);
+    func_CADCodeGenTests_CADDerAnno3_fdd_def2(x_v, dx_var_v, dx_der_v, &dy_der_v);
+    if (dy_var_o != NULL) *dy_var_o = dy_var_v;
+    if (dy_der_o != NULL) *dy_der_o = dy_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+void func_CADCodeGenTests_CADDerAnno3_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = 3 * (1.0 * (x_v) * (x_v) * (x_v));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_f_exp0(jmi_ad_var_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CADCodeGenTests_CADDerAnno3_f_def0(x_v, &y_v);
+    return y_v;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fd_def1(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t* dy_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, dy_v)
+    dy_v = 6 * (1.0 * (dx_v) * (dx_v));
+    JMI_RET(GEN, dy_o, dy_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_fd_exp1(jmi_ad_var_t x_v, jmi_ad_var_t dx_v) {
+    JMI_DEF(REA, dy_v)
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_v, dx_v, &dy_v);
+    return dy_v;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fdd_def2(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t ddx_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = 12 * (1.0 * (ddx_v));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_fdd_exp2(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t ddx_v) {
+    JMI_DEF(REA, y_v)
+    func_CADCodeGenTests_CADDerAnno3_fdd_def2(x_v, dx_v, ddx_v, &y_v);
+    return y_v;
+}
+
+
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _der_2_x_5;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[0];
+        _der_2_x_5 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    v_0 = - _der_2_x_5;
+    d_0 = - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
+    func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(_time, 1.0, AD_WRAP_LITERAL(0), &v_1, &d_1);
+    _der_2_y_6 = v_0 + v_1;
+    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = d_0 + d_1;
+    _der_dy_9 = _der_2_y_6;
+    (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+    v_2 = - _der_dy_9;
+    d_2 = - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    _der_dx_4 = v_2 + 2;
+    (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] = d_2 + AD_WRAP_LITERAL(0);
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = _der_dx_4 - (_der_2_x_5);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+")})));
+end CADDerAnno3;
+
 model CADIfStmtTest1
 	function f
 		input Real x;

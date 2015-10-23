@@ -219,10 +219,26 @@ aspect DerivativeFunctions {
 
     syn AnnotationNode FFunctionDecl.derivativeAnnotation() = annotation().forPath("derivative");
     syn FFunctionDecl FFunctionDecl.derivativeFunction() {
-        if (derivativeAnnotation().exists())
-            return derivativeAnnotation().fExp().asFIdUse().myFCallable().asFFunctionDecl();
-        else
+        if (derivativeAnnotation().exists()) {
+            FCallable fc = derivativeAnnotation().fExp().asFIdUse().myFCallable();
+            return fc == null ? null : fc.asFFunctionDecl();
+        } else
             return null;
+    }
+    
+    inh FFunctionDecl FFunctionDecl.myDifferentiatedFunction();
+    eq Root.getChild().myDifferentiatedFunction() = null;
+    eq FClass.getFFunctionDecl(int i).myDifferentiatedFunction() = differentiatedFunctions().get(getFFunctionDecl(i));
+    
+    syn lazy Map<FFunctionDecl, FFunctionDecl> FClass.differentiatedFunctions() {
+        HashMap<FFunctionDecl, FFunctionDecl> res = new HashMap<FFunctionDecl, FFunctionDecl>();
+        for (FFunctionDecl ffd : getFFunctionDecls()) {
+            FFunctionDecl der = ffd.derivativeFunction();
+            if (der != null) {
+                res.put(der, ffd);
+            }
+        }
+        return res;
     }
 
     inh boolean FFunctionVariable.delegateShouldBeDifferentiated();
@@ -257,14 +273,24 @@ aspect DerivativeFunctions {
             List<FFunctionVariable> vars = getFFunctionVariables();
             cachedShouldBeDifferentiated = new boolean[vars.getNumChild()];
             
+            Set<String> dfin = new HashSet<String>();
+            FFunctionDecl differentiatedFunction = myDifferentiatedFunction();
+            if (differentiatedFunction != null) {
+                for (FFunctionVariable ffv : differentiatedFunction.myInputs()) {
+                    dfin.add(ffv.name());
+                }
+            }
+            
             // Type
             boolean[] okType = new boolean[cachedShouldBeDifferentiated.length];
             boolean[] input = new boolean[cachedShouldBeDifferentiated.length];
+            boolean[] alreadyDiffed = new boolean[cachedShouldBeDifferentiated.length];
             int n = 0;
             int k = 0;
             for (FFunctionVariable var : vars) {
                 okType[k] = var.type().shouldBeDifferentiated();
                 input[k] = var.isInput();
+                alreadyDiffed[k] = dfin.contains(var.name());
                 if (okType[k] && input[k]) 
                     n++;
                 k++;
@@ -303,7 +329,7 @@ aspect DerivativeFunctions {
                 if (okType[k]) { 
                     if (input[k]) {
                         if (j >= ignore && hasDerivative[j])
-                            cachedShouldBeDifferentiated[k] = true;
+                            cachedShouldBeDifferentiated[k] = !alreadyDiffed[k];
                         j++;
                     } else {
                         cachedShouldBeDifferentiated[k] = true;

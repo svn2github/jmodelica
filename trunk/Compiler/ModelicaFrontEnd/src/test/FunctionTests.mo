@@ -15297,4 +15297,59 @@ end FunctionTests.UnusedFunction1;
 ")})));
 end UnusedFunction1;
 
+model UnusedFunction2
+    function f
+        input Real x;
+        output Real y = 3 * x^3;
+    algorithm
+        annotation(Inline=false,derivative=fd);
+    end f;
+    
+    function fd
+        input Real x;
+        input Real dx;
+        output Real dy = 6 * dx^2;
+    algorithm
+        annotation(Inline=false,derivative=fdd);
+    end fd;
+    
+    function fdd
+        input Real x;
+        input Real dx;
+        input Real ddx;
+        output Real y = 12 * ddx^1;
+    algorithm
+        annotation(Inline=false);
+    end fdd;
+    
+    Real x;
+equation
+    x = f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnusedFunction2",
+            description="Test behaviour with unused derivative functions",
+            flatModel="
+fclass FunctionTests.UnusedFunction2
+ Real x;
+equation
+ x = FunctionTests.UnusedFunction2.f(time);
+
+public
+ function FunctionTests.UnusedFunction2.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := 3 * x ^ 3;
+  return;
+ annotation(derivative = FunctionTests.UnusedFunction2.fd,Inline = false);
+ end FunctionTests.UnusedFunction2.f;
+
+end FunctionTests.UnusedFunction2;
+")})));
+end UnusedFunction2;
+
+
+
 end FunctionTests;
