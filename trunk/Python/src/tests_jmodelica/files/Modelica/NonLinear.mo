@@ -758,5 +758,12 @@ equation
 x^3-3*x^2+x=1;
 end NominalStart5;
 
+model DoubleRoot1
+    Real x(start=p);
+    parameter Real p=1.5;
+equation
+    0=(x-1.5)^2-1e-7;
+end DoubleRoot1;
+
 end NonLinear;
 
