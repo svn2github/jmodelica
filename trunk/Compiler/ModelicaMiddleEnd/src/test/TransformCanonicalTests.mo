@@ -7395,19 +7395,77 @@ y = homotopy(y * x, time)
                 homotopy_type="homotopy",
                 methodName="printDAEInitBLT",
                 methodResult="
---- Unsolved system (Block 1) of 2 variables ---
-Unknown variables:
-  y ()
-  x ()
+--- Homotopy block ---
+  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  Unknown variables:
+    y ()
+    x ()
 
-Equations:
+  Equations:
+    y = homotopy(y * x, time)
+      Iteration variables: y
+    x = homotopy(x * x, time)
+      Iteration variables: x
+
+  -------------------------------
+  --- Unsolved equation (Block 1(Simplified).1) ---
   y = homotopy(y * x, time)
-    Iteration variables: y
+    Computed variables: y
+
+  --- Unsolved equation (Block 1(Simplified).2) ---
   x = homotopy(x * x, time)
-    Iteration variables: x
+    Computed variables: x
+  -------------------------------
 -------------------------------
 ")})));
         end Simple1;
+        
+        model SuccessorMerge1
+            Real x,y,a,b;
+        equation
+            x = homotopy(x * x,time);
+            y = homotopy(y * x,time);
+            b = time * 2;
+            a = x + y * b;
+            
+        annotation(__JModelica(UnitTesting(tests={
+	        FClassMethodTestCase(
+                name="Operators.Homotopy.SuccessorMerge1",
+                description="Simple test that tests DAE init BLT generation for homotopy",
+                homotopy_type="homotopy",
+                methodName="printDAEInitBLT",
+                methodResult="
+--- Solved equation ---
+b := time * 2
+
+--- Homotopy block ---
+  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  Unknown variables:
+    y ()
+    x ()
+
+  Equations:
+    y = homotopy(y * x, time)
+      Iteration variables: y
+    x = homotopy(x * x, time)
+      Iteration variables: x
+
+  a := x + y * b
+  -------------------------------
+  --- Unsolved equation (Block 1(Simplified).1) ---
+  y = homotopy(y * x, time)
+    Computed variables: y
+
+  --- Unsolved equation (Block 1(Simplified).2) ---
+  x = homotopy(x * x, time)
+    Computed variables: x
+
+  --- Solved equation ---
+  a := x + y * b
+  -------------------------------
+-------------------------------
+")})));
+        end SuccessorMerge1;
         
     end Homotopy;
 end Operators;

@@ -1086,8 +1086,8 @@ aspect CADCodeGen {
     }
 
     @Override
-    public void DynamicStateBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunctionBeforeEqns_CAD() is not implemented!");
+    public void AbstractSubBLTBlock.genBlockResidualFunctionBeforeEqns_CAD(String indent, CodeStream str, boolean inInitial, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunctionBeforeEqns_CAD() is not implemented!");
     }
 
     @Override
@@ -1140,8 +1140,8 @@ aspect CADCodeGen {
     }
 
     @Override
-    public void DynamicStateBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunctionEqns_CAD() is not implemented!");
+    public void AbstractSubBLTBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunctionEqns_CAD() is not implemented!");
     }
 
     @Override

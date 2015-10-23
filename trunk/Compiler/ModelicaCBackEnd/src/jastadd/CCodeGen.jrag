@@ -3552,8 +3552,8 @@ aspect CCodeGen {
         str.print(outerIndent + "}\n\n");
     }
 
-    public void DynamicStateBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
-        for (DynamicStateBLT blt : subBLTs)
+    public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
+        for (T blt : subBLTs)
             for (AbstractEquationBlock block : blt)
                 block.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
     }
@@ -3599,9 +3599,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
             Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
     }
     
     @Override
@@ -3648,9 +3648,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
+    public void AbstractSubBLTBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
             CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_solvedEqn_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunction_solvedEqn_C() is not implemented!");
     }
     
     @Override
@@ -3744,7 +3744,7 @@ aspect CCodeGen {
     public boolean SimpleEquationBlock.hasEquationNominal_C(boolean auto) { 
         return realVariables().size() > 0 && equation().equationNominal_C(auto) != null;
     }
-    public boolean DynamicStateBlock.hasEquationNominal_C(boolean auto) { return true; } // To trigger error message
+    public boolean AbstractSubBLTBlock.hasEquationNominal_C(boolean auto) { return true; } // To trigger error message
     
     
     public abstract void AbstractEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
@@ -3758,9 +3758,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
             boolean auto, Map<FAbstractEquation,FExp> nominalMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominalVarDecl_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genEquationNominalVarDecl_C() is not implemented!");
     }
     
     public void SimpleEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
@@ -3786,9 +3786,9 @@ aspect CCodeGen {
     }
 
     @Override
-    public void DynamicStateBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent,
             boolean auto, Map<FAbstractEquation,FExp> nominalMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominal_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genEquationNominal_C() is not implemented!");
     }
 
     @Override
@@ -4025,7 +4025,7 @@ aspect CCodeGen {
         return getLabel() != null;
     }
 
-    public boolean DynamicStateBlock.hasResidualFunction_C() {
+    public boolean AbstractSubBLTBlock.hasResidualFunction_C() {
         return false;
     }
 
@@ -4057,8 +4057,8 @@ aspect CCodeGen {
 		str.print(parentBlockNumber + ");\n");
 	}
 
-    public void DynamicStateBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
-        for (DynamicStateBLT blt : subBLTs)
+    public void AbstractSubBLTBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
+        for (T blt : subBLTs)
             for (AbstractEquationBlock block : blt)
                 block.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver, parentBlockNumber);
     }
@@ -4284,54 +4284,51 @@ aspect CCodeGen {
             str.formatln("%s}", indent);
         }
         boolean first = true;
-        for (DynamicStateBLT blt : subBLTs) {
+        for (DynamicStateBLT blt : subBLTs()) {
             if (first)
                 str.format("%sif (", indent);
             else
                 str.format("%s} else if(", indent);
             first = false;
-            DynamicStateSet previousSet = null;
-            for (FVariable var : blt.states()) {
-                DynamicStateSet set = var.dynamicStateSet();
-                if (set != previousSet) {
-                    if (previousSet != null)
-                        str.print(") && ");
-                    previousSet = set;
-                    str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
-                }
-                str.format(", %d", var.valueReference());
-            }
-            str.println(")) {");
+            blt.genSubBLTTest_C(p, str);
+            str.println(") {");
             blt.genVarDecls_C(p, str, innerIndent);
-            DynamicStateSet lastSet = null;
-            int i = 0;
-            for (FVariable state : blt.states()) {
-                DynamicStateSet set = state.dynamicStateSet();
-                if (lastSet != set) {
-                    i = 0;
-                    lastSet = set;
-                } else {
-                    i++;
-                }
-                str.formatln("%s%s = %s;", innerIndent, state.name_C(), set.getStateVars()[i].name_C());
-            }
             blt.genOdeDerivativeBlocks(p, str, innerIndent);
-            lastSet = null;
-            i = 0;
-            for (FVariable algebraic : blt.algebraics()) {
-                DynamicStateSet set = algebraic.dynamicStateSet();
-                if (lastSet != set) {
-                    i = 0;
-                    lastSet = set;
-                } else {
-                    i++;
-                }
-                str.formatln("%s%s = %s;", innerIndent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
-            }
         }
         str.formatln("%s}", indent);
     }
+    
+    public void DynamicStateBLT.genSubBLTTest_C(CodePrinter p, CodeStream str) {
+        DynamicStateSet previousSet = null;
+        for (FVariable var : states()) {
+            DynamicStateSet set = var.dynamicStateSet();
+            if (set != previousSet) {
+                if (previousSet != null)
+                    str.print(" && ");
+                previousSet = set;
+                str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
+            }
+            str.format(", %d", var.valueReference());
+        }
+        str.print(")");
+    }
  
+    @Override
+    public void HomotopyBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        str.formatln("%s/* Start of section for simplified version of homotopy*/", indent);
+        for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
+            block.genBlock_C(p, str, indent, inInitial); 
+        }
+        str.formatln("%s/* End of section for simplified version of homotopy*/", indent);
+        homotopySubBlock.genBlock_C(p, str, indent, inInitial);
+    }
+
+    @Override
+    public void HomotopySubBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+        str.format("%sef |= jmi_solve_block_with_homotopy_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
+    }
+
     /**
      * Generate block code for equations
      * 
@@ -5233,6 +5230,11 @@ aspect CCodeGen {
         }
     }
 
+    @Override
+    public void HomotopyBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        subBLTs()[SIMPLIFIED_BLT_POS].genVarDecls_C(p, str, indent);
+    }
+    
 	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
         str.formatln("%s/********* Initialize reinits *******/", indent);
         for (AbstractEquationBlock eb : getAllBlocks()) {
@@ -5260,6 +5262,35 @@ aspect CCodeGen {
             eb.genReinitWritebacks_C(p, indent, str);
         }
 	}
+	
+    public void DynamicStateBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
+        DynamicStateSet lastSet = null;
+        int i = 0;
+        for (FVariable state : states()) {
+            DynamicStateSet set = state.dynamicStateSet();
+            if (lastSet != set) {
+                i = 0;
+                lastSet = set;
+            } else {
+                i++;
+            }
+            str.formatln("%s%s = %s;", indent, state.name_C(), set.getStateVars()[i].name_C());
+        }
+        super.genOdeDerivativeBlocks(p, str, indent);
+        lastSet = null;
+        i = 0;
+        for (FVariable algebraic : algebraics()) {
+            DynamicStateSet set = algebraic.dynamicStateSet();
+            if (lastSet != set) {
+                i = 0;
+                lastSet = set;
+            } else {
+                i++;
+            }
+            str.formatln("%s%s = %s;", indent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
+        }
+    }
+	
 
     syn int DynamicStateSet.id_C() = id() - 1;
 

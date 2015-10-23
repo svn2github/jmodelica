@@ -91,12 +91,12 @@ der(_ds.1.s1) := dsDer(1, 1)
                 methodResult="
 --- Dynamic state block ---
   --- States: a2 ---
-    --- Unsolved equation (Block 1(a2).0) ---
+    --- Unsolved equation (Block 1(a2).1) ---
     ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
       Computed variables: a1
     -------------------------------
   --- States: a1 ---
-    --- Unsolved equation (Block 1(a1).0) ---
+    --- Unsolved equation (Block 1(a1).1) ---
     ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
       Computed variables: a2
     -------------------------------
@@ -316,7 +316,7 @@ der(_ds.1.s1) := dsDer(1, 1)
     a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
   --- States: a4, a1 ---
-    --- Unsolved system (Block 1(a4, a1).0) of 2 variables ---
+    --- Unsolved system (Block 1(a4, a1).1) of 2 variables ---
     Unknown variables:
       a2 ()
       a3 ()
@@ -776,12 +776,12 @@ der(_ds.2.s1) := dsDer(2, 1)
     --- Solved equation ---
     a2 := time / ds(1, a1)
 
-    --- Unsolved equation (Block 1(a1).0) ---
+    --- Unsolved equation (Block 1(a1).1) ---
     ds(1, a2) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
   --- States: a2 ---
-    --- Unsolved equation (Block 1(a2).0) ---
+    --- Unsolved equation (Block 1(a2).1) ---
     ds(1, a2) = sin(ds(1, a3))
       Computed variables: a3
 
@@ -851,7 +851,7 @@ der(_ds.1.s1) := dsDer(1, 1)
     --- Solved equation ---
     a1 := time / ds(1, a2)
 
-    --- Unsolved equation (Block 1(a4).0) ---
+    --- Unsolved equation (Block 1(a4).1) ---
     ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
@@ -862,7 +862,7 @@ der(_ds.1.s1) := dsDer(1, 1)
     --- Solved equation ---
     a2 := time / ds(1, a1)
 
-    --- Unsolved equation (Block 1(a3).0) ---
+    --- Unsolved equation (Block 1(a3).1) ---
     ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
     -------------------------------
@@ -870,23 +870,23 @@ der(_ds.1.s1) := dsDer(1, 1)
     --- Solved equation ---
     a2 := time / ds(1, a1)
 
-    --- Unsolved equation (Block 1(a1).0) ---
+    --- Unsolved equation (Block 1(a1).1) ---
     ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
 
-    --- Unsolved equation (Block 1(a1).1) ---
+    --- Unsolved equation (Block 1(a1).2) ---
     ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
   --- States: a2 ---
-    --- Unsolved equation (Block 1(a2).0) ---
+    --- Unsolved equation (Block 1(a2).1) ---
     ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
 
     --- Solved equation ---
     a1 := time / ds(1, a2)
 
-    --- Unsolved equation (Block 1(a2).1) ---
+    --- Unsolved equation (Block 1(a2).2) ---
     ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
@@ -1181,12 +1181,12 @@ a1 := - a2 * a3 + 1
                 methodResult="
 --- Dynamic state block ---
   --- States: y ---
-    --- Unsolved equation (Block 1(y).0) ---
+    --- Unsolved equation (Block 1(y).1) ---
     ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
       Computed variables: x
     -------------------------------
   --- States: x ---
-    --- Unsolved equation (Block 1(x).0) ---
+    --- Unsolved equation (Block 1(x).1) ---
     ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
       Computed variables: y
     -------------------------------
@@ -1552,7 +1552,7 @@ end DynamicStates.Special.FunctionDerivative1;
                 methodResult="
 --- Dynamic state block ---
   --- States: a2 ---
-    --- Torn system (Block 1(a2).0) of 1 iteration variables and 2 solved variables ---
+    --- Torn system (Block 1(a2).1) of 1 iteration variables and 2 solved variables ---
     Torn variables:
       t.x
       t.y
@@ -1576,7 +1576,7 @@ end DynamicStates.Special.FunctionDerivative1;
       Assigned variables: t.x
                           t.y
 
-    --- Unsolved equation (Block 1(a1).0) ---
+    --- Unsolved equation (Block 1(a1).1) ---
     ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
       Computed variables: a2
     -------------------------------
