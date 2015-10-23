@@ -200,10 +200,10 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
     }
 }
 
-static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
+int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
     double x = *x0;
     double x_tmp = x;
-    double f = 0.0;
+    double f = *f0;
     double df = 0.0;
     double delta = 1e20;
     double delta_prev = delta;
@@ -219,12 +219,14 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     
     for (i = 0; i < BRENT_MAX_NEWTON; i++) {
         x = x_tmp;
-        flag = brentf(x, &f, block);
-        if (flag) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
-            jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed during Newton for block "
-                    "<block: %s>", block->label);
-            return -1;
+        if (i > 0) { /* First call is unnecessary due to an updated f is provided to the method */
+            flag = brentf(x, &f, block);
+            if (flag) {
+                if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
+                jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed during Newton for block "
+                        "<block: %s>", block->label);
+                return -1;
+            }
         }
         
         /* Iteration terminates successfully */
