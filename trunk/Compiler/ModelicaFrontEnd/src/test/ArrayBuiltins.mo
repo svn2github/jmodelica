@@ -2679,11 +2679,9 @@ fclass ArrayBuiltins.Linspace6
  parameter Real b = 1.5 /* 1.5 */;
  parameter Real c = 3 /* 3 */;
  structural parameter Integer d = 3 /* 3 */;
- parameter Real a[1].x;
  parameter Real a[2].x;
  parameter Real a[3].x;
 parameter equation
- a[1].x = b;
  a[2].x = b + (c - b) / 2;
  a[3].x = b + 2 * ((c - b) / 2);
 end ArrayBuiltins.Linspace6;

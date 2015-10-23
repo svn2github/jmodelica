@@ -132,22 +132,19 @@ end IndexReduction.IndexReduction1b_PlanarPendulum;
 			flatModel="
 fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
- parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
- parameter Modelica.SIunits.MomentOfInertia Jmotor(min = 0) = 0.1 \"Motor inertia\" /* 0.1 */;
- parameter Modelica.SIunits.MomentOfInertia Jload(min = 0) = 2 \"Load inertia\" /* 2 */;
- parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
- parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
+ parameter Modelica.SIunits.Frequency freqHz(start = 1) = 5 \"Frequency of driving torque\" /* 5 */;
+ parameter Modelica.SIunits.MomentOfInertia Jmotor(min = 0,start = 1) = 0.1 \"Motor inertia\" /* 0.1 */;
+ parameter Modelica.SIunits.MomentOfInertia Jload(min = 0,start = 1) = 2 \"Load inertia\" /* 2 */;
+ parameter Real ratio(start = 1) = 10 \"Gear ratio\" /* 10 */;
+ parameter Real damping(final min = 0,start = 0) = 10 \"Damping in bearing of gear\" /* 10 */;
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  Modelica.Blocks.Interfaces.RealInput torque.tau(unit = \"N.m\") \"Accelerating torque acting at flange (= -flange.tau)\";
  eval parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
- parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
- parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia1.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
  eval parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
@@ -165,12 +162,10 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.tau \"Torque between flanges (= flange_b.tau)\";
  constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0 \"Cut torque in the flange\";
- parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Real sine.amplitude \"Amplitude of sine wave\";
  Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
@@ -179,17 +174,10 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
  eval parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
- parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
- parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
  constant Real sine.pi = 3.141592653589793;
- parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
- parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
- parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
- parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
- parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  Real inertia1._der_phi;
  Real inertia1._der_w;
  Real inertia2._der_phi;
@@ -206,27 +194,14 @@ initial equation
  inertia2.w = 0;
  spring.phi_rel = 0;
  inertia3.w = 0;
-parameter equation
- inertia1.J = Jmotor;
- idealGear.ratio = ratio;
- inertia3.J = Jload;
- damper.d = damping;
- sine.amplitude = amplitude;
- sine.freqHz = freqHz;
- torque.phi_support = fixed.phi0;
- damper.flange_b.phi = torque.phi_support;
- fixed.flange.phi = torque.phi_support;
- idealGear.support.phi = torque.phi_support;
- torque.support.phi = torque.phi_support;
- idealGear.phi_support = torque.phi_support;
 equation
  inertia1.w = inertia1._der_phi;
  inertia1.a = inertia1._der_w;
- inertia1.J * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
- idealGear.phi_a = inertia1.phi - torque.phi_support;
- idealGear.phi_b = inertia2.phi - torque.phi_support;
- idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
- 0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
+ Jmotor * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
+ idealGear.phi_a = inertia1.phi - fixed.phi0;
+ idealGear.phi_b = inertia2.phi - fixed.phi0;
+ idealGear.phi_a = ratio * idealGear.phi_b;
+ 0 = ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
  inertia2.a = inertia2._der_w;
  inertia2.J * inertia2._der_w = - idealGear.flange_b.tau + inertia2.flange_b.tau;
@@ -234,24 +209,24 @@ equation
  spring.phi_rel = inertia3.phi - inertia2.phi;
  inertia3.w = der(inertia3.phi);
  inertia3.a = der(inertia3.w);
- inertia3.J * der(inertia3.w) = - spring.tau;
- damper.tau = damper.d * der(damper.phi_rel);
+ Jload * der(inertia3.w) = - spring.tau;
+ damper.tau = damping * der(damper.phi_rel);
  damper.lossPower = damper.tau * der(damper.phi_rel);
- damper.phi_rel = torque.phi_support - inertia2.phi;
+ damper.phi_rel = fixed.phi0 - inertia2.phi;
  damper.w_rel = der(damper.phi_rel);
  damper.a_rel = der(damper.w_rel);
- torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
+ torque.tau = sine.offset + (if time < sine.startTime then 0 else amplitude * sin(6.283185307179586 * freqHz * (time - sine.startTime) + sine.phase));
  - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0;
  damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
  idealGear._der_phi_a = inertia1._der_phi;
  idealGear._der_phi_b = inertia2._der_phi;
- idealGear._der_phi_a = idealGear.ratio * idealGear._der_phi_b;
+ idealGear._der_phi_a = ratio * idealGear._der_phi_b;
  inertia1._der_w = inertia1._der_der_phi;
  inertia2._der_w = inertia2._der_der_phi;
  idealGear._der_der_phi_a = inertia1._der_der_phi;
  idealGear._der_der_phi_b = inertia2._der_der_phi;
- idealGear._der_der_phi_a = idealGear.ratio * idealGear._der_der_phi_b;
+ idealGear._der_der_phi_a = ratio * idealGear._der_der_phi_b;
  der(damper.phi_rel) = - inertia2._der_phi;
  der(damper.w_rel) = damper._der_der_phi_rel;
  damper._der_der_phi_rel = - inertia2._der_der_phi;
@@ -3467,15 +3442,10 @@ fclass IndexReduction.FunctionInlining.Test9
  Real _der_vx;
  Real _der_der_x;
  Real _der_der_y;
- parameter Real temp_1;
  Real temp_2;
- parameter Real temp_5;
 initial equation 
  y = 0.0;
  vy = 0.0;
-parameter equation
- temp_1 = p[1];
- temp_5 = temp_1;
 equation
  _der_x = vx;
  der(y) = vy;
@@ -3483,10 +3453,10 @@ equation
  der(vy) = a * y;
  x + y = IndexReduction.FunctionInlining.Test9.F({p[1]}, time);
  temp_2 = time;
- _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({temp_1}, temp_1 + temp_2 * temp_1);
+ _der_x + der(y) = IndexReduction.FunctionInlining.Test9.F({p[1]}, p[1] + temp_2 * p[1]);
  _der_der_x = _der_vx;
  _der_der_y = der(vy);
- _der_der_x + _der_der_y = IndexReduction.FunctionInlining.Test9.F({temp_5}, temp_1 * temp_5 + (temp_1 + temp_2 * temp_1) * temp_5);
+ _der_der_x + _der_der_y = IndexReduction.FunctionInlining.Test9.F({p[1]}, p[1] * p[1] + (p[1] + temp_2 * p[1]) * p[1]);
 
 public
  function IndexReduction.FunctionInlining.Test9.F

@@ -436,6 +436,7 @@ model Fmi1Aliases1
         FmiXMLCodeGenTestCase(
             name="Fmi1Aliases1",
             description="FMI 1.0 alias test for parameters",
+            eliminate_alias_variables=false,
             fmi_version="1.0",
             template="
 $modelVariables$",
@@ -500,6 +501,7 @@ model Fmi2Aliases1
         FmiXMLCodeGenTestCase(
             name="Fmi2Aliases1",
             description="FMI 2.0 alias test for parameters",
+            eliminate_alias_variables=false,
             fmi_version="2.0",
             template="
 $modelVariables$

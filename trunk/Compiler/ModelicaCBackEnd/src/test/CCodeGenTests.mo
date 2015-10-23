@@ -117,6 +117,7 @@ $C_DAE_initial_guess_equation_residuals$
         CCodeGenTestCase(
             name="CCodeGenTest3",
             description="Test of code generation",
+            eliminate_alias_variables=false,
             variability_propagation=false,
             generate_ode=false,
             generate_dae=true,
@@ -393,6 +394,7 @@ model CCodeGenTest13
             name="CCodeGenTest13",
             description="Code generation for enumerations: variable aliases",
             variability_propagation=false,
+            eliminate_alias_variables=false,
             template="$C_variable_aliases$",
             generatedCode="
 #define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
@@ -1026,29 +1028,26 @@ $C_DAE_equation_residuals$
 #define _c1_0 ((*(jmi->z))[jmi->offs_real_ci+0])
 #define _c2_1 ((*(jmi->z))[jmi->offs_real_ci+1])
 #define _p1_2 ((*(jmi->z))[jmi->offs_real_pi+0])
-#define _p2_3 ((*(jmi->z))[jmi->offs_real_pd+0])
-#define _ci1_7 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _ci2_8 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _pi1_9 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _pi2_10 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _cb1_12 ((*(jmi->z))[jmi->offs_boolean_ci+0])
-#define _cb2_13 ((*(jmi->z))[jmi->offs_boolean_ci+1])
-#define _pb1_14 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _pb2_15 ((*(jmi->z))[jmi->offs_boolean_pd+0])
-#define _der_x_20 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _x_5 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _w_6 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _ci1_6 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _ci2_7 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _pi1_8 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _cb1_10 ((*(jmi->z))[jmi->offs_boolean_ci+0])
+#define _cb2_11 ((*(jmi->z))[jmi->offs_boolean_ci+1])
+#define _pb1_12 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define _der_x_17 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _x_4 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _w_5 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _rd2_4 ((*(jmi->z))[jmi->offs_real_d+0])
-#define _rid2_11 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _rbd2_16 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define _rd2_3 ((*(jmi->z))[jmi->offs_real_d+0])
+#define _rid2_9 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _rbd2_13 ((*(jmi->z))[jmi->offs_boolean_d+0])
 
-    (*res)[0] = - _x_5 - (_der_x_20);
-    (*res)[1] = 4 - (_rd2_4);
-    (*res)[2] = 4 - (_w_6);
-    (*res)[3] = 4 - (_rid2_11);
-    (*res)[4] = JMI_FALSE - (_rbd2_16);
+    (*res)[0] = - _x_4 - (_der_x_17);
+    (*res)[1] = 4 - (_rd2_3);
+    (*res)[2] = 4 - (_w_5);
+    (*res)[3] = 4 - (_rid2_9);
+    (*res)[4] = JMI_FALSE - (_rbd2_13);
 ")})));
 end CCodeGenDiscreteVariables1;
 
@@ -1072,6 +1071,7 @@ model CCodeGenParameters1
             generate_dae=true,
             enable_variable_scaling=true,
             variability_propagation=false,
+            eliminate_alias_variables=false,
             template="
 $C_DAE_initial_dependent_parameter_assignments$
 $C_set_start_values$
@@ -6743,11 +6743,10 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
     JMI_RECORD_STATIC(R_0_r, tmp_1)
     JMI_RECORD_STATIC(R_0_r, tmp_2)
     _p2_1 = (3 * (_p1_0*sf(0)))/sf(2);
-    _r2_x_2 = ((_r_x_3*sf(1)))/sf(3);
-    _p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp0((_p2_1*sf(2))))/sf(4);
-    tmp_2->x = (_r2_x_2*sf(3));
+    tmp_2->x = (_r_x_3*sf(1));
     func_CCodeGenTests_DependentParametersWithScalingTest1_FR_def1(tmp_2, tmp_1);
-    _r3_x_5 = (tmp_1->x)/sf(5);
+    _r3_x_2 = (tmp_1->x)/sf(3);
+    _p3_4 = (func_CCodeGenTests_DependentParametersWithScalingTest1_F_exp0((_p2_1*sf(2))))/sf(4);
     return ef;
 }
 ")})));
@@ -18185,6 +18184,7 @@ equation
         CCodeGenTestCase(
             name="CFixedFalseParam1",
             description="Test of C code generation of parameters with fixed = false.",
+            eliminate_alias_variables=false,
             template="
 ***Derivatives:
 $C_ode_derivatives$
@@ -18232,6 +18232,7 @@ initial equation
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="CFixedFalseParam2",
+            eliminate_alias_variables=false,
             description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
             template="
 set_start

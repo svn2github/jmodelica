@@ -28,6 +28,7 @@ package NonFixedParameterPropagation
         TransformCanonicalTestCase(
             name="Simple1",
             description="Test propagation of non-fixed parameter attribute",
+            eliminate_alias_variables=false,
             flatModel="
 fclass NonFixedParameterPropagation.Simple1
  parameter Real x(fixed = false,start = 3.14);
@@ -52,6 +53,7 @@ end NonFixedParameterPropagation.Simple1;
         TransformCanonicalTestCase(
             name="Simple2",
             description="Test propagation of non-fixed parameter attribute",
+            eliminate_alias_variables=false,
             flatModel="
 fclass NonFixedParameterPropagation.Simple2
  parameter Real x(fixed = false,start = 3.14);
@@ -77,6 +79,7 @@ end NonFixedParameterPropagation.Simple2;
         TransformCanonicalTestCase(
             name="Simple3",
             description="Test propagation of non-fixed parameter attribute",
+            eliminate_alias_variables=false,
             flatModel="
 fclass NonFixedParameterPropagation.Simple3
  parameter Real x(fixed = false,start = 3.14);
@@ -102,6 +105,7 @@ end NonFixedParameterPropagation.Simple3;
         TransformCanonicalTestCase(
             name="Simple4",
             description="Test propagation of non-fixed parameter attribute",
+            eliminate_alias_variables=false,
             flatModel="
 fclass NonFixedParameterPropagation.Simple4
  parameter Real x(fixed = false,start = 3.14);

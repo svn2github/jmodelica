@@ -3326,13 +3326,10 @@ equation
             description="Check that function call with LateInline=true in start value is propagated correctly",
             flatModel="
 fclass FunctionInlining.InlineAnnotation11
- Real x[1](start = temp_1[1],fixed = true);
+ Real x[1](start = p,fixed = true);
  parameter Real p = 2 /* 2 */;
- parameter Real temp_1[1];
 initial equation 
- x[1] = temp_1[1];
-parameter equation
- temp_1[1] = p;
+ x[1] = p;
 equation
  der(x[1]) = time * 2;
 end FunctionInlining.InlineAnnotation11;
