@@ -273,16 +273,20 @@ aspect FunctionInlining {
                 boolean nonFixedParam = variability.parameterVariability() && !fixed;
                 FVariable var = addVar(oldName, variability, type, nonFixedParam);
                 if (variability.constantVariability()) {
-                    value = value.ceval().buildLiteral();
-                    var.setBindingExp(value);
-                    replMap.put(oldName, value);
-                } else {
-                    if (noEvent)
-                        value = value.preventEvents();
-                    FEquationType eqnType = nonFixedParam ? new FInitialEquation() : new FNormalEquation();
-                    FEquation eqn = new FEquation(eqnType, var.createUseExp(), value);
-                    addEquation(eqn, variability, nonFixedParam);
+                    try {
+                        value = value.ceval().buildLiteral();
+                        var.setBindingExp(value);
+                        replMap.put(oldName, value);
+                        return;
+                    } catch (ConstantEvaluationException e) {
+                        
+                    }
                 }
+                if (noEvent)
+                    value = value.preventEvents();
+                FEquationType eqnType = nonFixedParam ? new FInitialEquation() : new FNormalEquation();
+                FEquation eqn = new FEquation(eqnType, var.createUseExp(), value);
+                addEquation(eqn, variability, nonFixedParam);
             } else {
                 replMap.put(oldName, value);
             }
