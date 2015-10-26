@@ -118,7 +118,7 @@ aspect CADCodeGen {
 		if (inFunction())
 			return getFIdUse().derName_CAD();
 		else if (!shouldBeDifferentiated())
-			return "AD_WRAP_LITERAL(0)";
+			return zeroValue_CAD();
 		else
 			return String.format("%s[jmi_get_index_from_value_ref(%d)-jmi->offs_real_dx]", getSeedName(), myFV().valueReference());
 	}
@@ -133,6 +133,8 @@ aspect CADCodeGen {
 	syn String FIdUse.varName_CAD() = toString_var_CAD(printer_CAD);
 	
 	syn String FIdUse.derName_CAD() = toString_der_CAD(printer_CAD);
+	
+	syn String FExp.zeroValue_CAD() = type().isString() ? "\"\"" : "AD_WRAP_LITERAL(0)";
 	
 	/**
 	 *Print CAD code for value for record use in statement in function. 
@@ -329,7 +331,7 @@ aspect CADCodeGen {
 	 */
 	public void FExp.genDer_CAD(CodePrinter p, CodeStream str, String indent) {
 		if (!shouldBeDifferentiated())
-			str.print("AD_WRAP_LITERAL(0)");
+			str.print(zeroValue_CAD());
 		else if (inlineDer_CAD())
 			genDerExp_CAD(p, str, indent);
 		else

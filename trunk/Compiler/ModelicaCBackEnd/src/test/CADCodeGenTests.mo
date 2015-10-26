@@ -6054,4 +6054,74 @@ equation
 ")})));
 end IfEqu4;
 
+model StringZeroValue1
+    record R
+        Real x;
+        parameter String s;
+    end R;
+    function F1
+        input R r;
+        output Real y;
+    algorithm
+        y := r.x;
+    annotation(Inline=false);
+    end F1;
+
+    R r = R(x, "Jon was here");
+    Real x;
+    Real y;
+equation
+    y = F1(r);
+    y * x = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="StringZeroValue1",
+            description="Test code gen for zero value of string expressions",
+            generate_ode_jacobian=true,
+            template="$CAD_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    JMI_RECORD_STATIC(R_0_r, tmp_var_0)
+    JMI_RECORD_STATIC(R_0_r, tmp_der_0)
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = dx[0];
+        _x_1 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    tmp_var_0->x = _x_1;
+    tmp_var_0->s = \"Jon was here\";
+    tmp_der_0->x = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    tmp_der_0->s = \"\";
+    func_CADCodeGenTests_StringZeroValue1_F1_der_AD0(tmp_var_0, tmp_der_0, &v_0, &d_0);
+    _y_2 = v_0;
+    (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_0;
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = 0 - (_y_2 * _x_1);
+        (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x_1 + _y_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+")})));
+end StringZeroValue1;
+
 end CADCodeGenTests;
