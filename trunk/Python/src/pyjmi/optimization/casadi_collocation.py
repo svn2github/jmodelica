@@ -5034,14 +5034,11 @@ class LocalDAECollocator(CasadiCollocator):
                 alias_map[alias.getName()].append(alias_var)
 
             # Set up sections
-            num_vars = len(op.getAllVariables()) + 1
-            if result is not None:
-                num_vars -= len(op.getEliminatedVariables())
-            name_section = []
-            description_section = []
-            data_info_section = []
-            data_info_section.append('int dataInfo(%d,%d)\n' % (num_vars, 4))
-            data_info_section.append('0 1 0 -1 # time\n')
+            # Put exactly one entry per variable in name_section etc
+            # - its length is used to determine num_vars
+            name_section = ['time\n']
+            description_section = ['Time in [s]\n']
+            data_info_section = ['0 1 0 -1 # time\n']
 
             # Collect meta information
             n_variant = 1
@@ -5098,16 +5095,6 @@ class LocalDAECollocator(CasadiCollocator):
                         data_info_section.append('2 %d 0 -1 # %s\n' %
                                                  (neg*n_variant, name))
 
-            # Define section headers
-            name_section.append('\n')
-            name_section = ['char name(%d,%d)\n' % (num_vars, max_name_length),
-                            'time\n'] + name_section
-            description_section.append('\n')
-            description_section = ['char description(%d,%d)\n' %
-                                   (num_vars, max_desc_length),
-                                   'Time in [s]\n'] + description_section
-            data_info_section.append('\n')
-
             # Collect parameter data (data_1)
             data_1 = []
             for par in mvar_vectors['p_opt']:
@@ -5130,17 +5117,25 @@ class LocalDAECollocator(CasadiCollocator):
             f.write('1.1\n')
             f.write('\n')
 
+            num_vars = len(name_section)
+
             # Write names
+            f.write('char name(%d,%d)\n' % (num_vars, max_name_length))
             for name in name_section:
                 f.write(name)
+            f.write('\n')
 
             # Write descriptions
+            f.write('char description(%d,%d)\n' % (num_vars, max_desc_length))
             for description in description_section:
                 f.write(description)
+            f.write('\n')
 
             # Write dataInfo
+            f.write('int dataInfo(%d,%d)\n' % (num_vars, 4))
             for data_info in data_info_section:
                 f.write(data_info)
+            f.write('\n')
 
             # Write data_1
             n_parameters = (len(mvar_vectors['p_opt']) +
