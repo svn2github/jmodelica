@@ -536,7 +536,6 @@ aspect VariabilityPropagation {
             }
             myFClass().getAliasManager().unAlias(this);
         }
-        
     }
 	
     inh FExp FExp.myTopFactorFExp();

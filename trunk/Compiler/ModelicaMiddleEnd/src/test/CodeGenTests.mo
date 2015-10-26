@@ -70,7 +70,6 @@ package CodeGenTests
             name="CodeGenTest1",
             description="Test of code generation",
             variability_propagation=false,
-            eliminate_alias_variables=false,
             automatic_add_initial_equations=false,
             enable_structural_diagnosis=false,
             index_reduction=false,
@@ -209,7 +208,6 @@ n_initial_equations: 0
             name="CodeGenTest5",
             description="Code generation for enumerations: number of enum vars of different types",
             variability_propagation=false,
-            eliminate_alias_variables=false,
             template="
 n_enum_ci: $n_enum_ci$
 n_enum_cd: $n_enum_cd$

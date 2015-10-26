@@ -871,16 +871,6 @@ aspect AliasVariables {
         if (isInput())
             score += 1;
         
-        // Parameter
-        score *= 10;
-        if (variability().parameterOrLess()) {
-            score += 1;
-            if (isConstant())
-                score += 1;
-            if (hasBindingExp())
-                score += 2;
-        }
-        
         // Stateselect level
         score *= 100;
         FAttribute stateSelectAttribute = findAttribute(FAttribute.STATE_SELECT);
@@ -961,7 +951,6 @@ aspect DerivativeRewriting {
         } else {
             return;
         }
-        //aliasClass = AliasClass.DER_ALIAS;
         myFClass().getAliasManager().addDerivativeBindingPair(var, derVar.getMeIntegrated());
     }
 

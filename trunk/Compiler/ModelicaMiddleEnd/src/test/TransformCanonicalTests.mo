@@ -61,7 +61,6 @@ end TransformCanonicalTests.TransformCanonicalTest1;
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest2",
 			description="Test parameter sorting",
-            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest2
  parameter Real p6;
@@ -146,7 +145,6 @@ Error at line 112, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/Trans
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest5",
 			description="Test parameter sorting",
-            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest5
  parameter Real p11;
@@ -998,10 +996,13 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest26
  parameter Real p = 1 /* 1 */;
+ parameter Real x;
  parameter Real y;
 parameter equation
- y = p + 3;
+ x = p;
+ y = x + 3;
 end TransformCanonicalTests.AliasTest26;
+			
 ")})));
 end AliasTest26;
 
@@ -1047,11 +1048,14 @@ equation
 			description="Test elimination of alias variables.",
 			flatModel="
 fclass TransformCanonicalTests.AliasTest28
+ parameter Real x;
  parameter Real y;
  parameter Real p = 1 /* 1 */;
 parameter equation
- y = - p + 1;
+ x = - p;
+ y = x + 1;
 end TransformCanonicalTests.AliasTest28;
+			
 ")})));
 end AliasTest28;
 
@@ -1150,8 +1154,11 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
+ parameter Real x(start = 3,fixed = true);
  constant Real y = -0.0;
- parameter Real p(start = 3,fixed = true) = 5 /* 5 */;
+ parameter Real p = 5 /* 5 */;
+parameter equation
+ x = p;
 end TransformCanonicalTests.AliasTest30;
 ")})));
 end AliasTest30;
@@ -2662,8 +2669,11 @@ equation
 			description="Test that derivatives of parameters are translated into zeros.",
 			flatModel="
 fclass TransformCanonicalTests.ParameterDerivativeTest
+ parameter Real x(start = 1);
  constant Real y = 0.0;
- parameter Real p(start = 1) = 2 /* 2 */;
+ parameter Real p = 2 /* 2 */;
+parameter equation
+ x = p;
 end TransformCanonicalTests.ParameterDerivativeTest;
 ")})));
 end ParameterDerivativeTest;

@@ -195,8 +195,6 @@ model FunctionEval6
 		EvalTestCase(
 			name="FunctionEval6",
 			description="Constant evaluation of functions: array output",
-            inline_functions="none",
-            eliminate_alias_variables=false,
 			variables="
 x[1]
 x[2]
@@ -223,8 +221,6 @@ model FunctionEval7
 		EvalTestCase(
 			name="FunctionEval7",
 			description="Constant evaluation of functions: array output, unknown size",
-            inline_functions="none",
-            eliminate_alias_variables=false,
 			variables="
 x[1]
 x[2]
@@ -1499,7 +1495,6 @@ x = if a[1,1] > a[1,2] then true else false;
 		TimeTestCase(
 			name="ParameterEval1",
 			description="Make sure time complexity of evaluation of array parameters is of an acceptable order",
-            eliminate_alias_variables=false,
 			maxTime=2.0
  )})));
 end ParameterEval1;
@@ -1855,7 +1850,6 @@ model EvaluateAnnotation11
         TransformCanonicalTestCase(
             name="EvaluateAnnotation11",
             description="Evaluate annotation on record with mixed variabilities",
-            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation11
  eval parameter Integer a1[1].n = 1 /* 1 */;
@@ -2246,7 +2240,6 @@ model ParameterEvalAnnotation2
 		TransformCanonicalTestCase(
 			name="ParameterEvalAnnotation2",
 			description="Test constant evaluation Evaluate parameter",
-            eliminate_alias_variables=false,
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation2
  parameter Real p;
