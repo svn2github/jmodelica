@@ -59,13 +59,17 @@ aspect CCodeGen {
                 return providers;
         }
         
+        private final boolean inBlock;
         private final boolean inInitialSystem;
+        private final Homotopy homotopyType;
 
-        public CodePrinter(boolean inInitialSystem) {
+        public CodePrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
             super("    ");
             for (CodeGeneratorProvider provider : getProviders())
                 provider.provide(this);
+            this.inBlock = inBlock;
             this.inInitialSystem = inInitialSystem;
+            this.homotopyType = homotopyType;
         }
         
         /**
@@ -110,23 +114,42 @@ aspect CCodeGen {
         
         public abstract void printPostSteps(ASTNode node, CodeStream str, String indent);
 
-        public boolean insideBlock() {
-            return false;
+        public boolean inBlock() {
+            return inBlock;
         }
-        
+
+        protected abstract CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType);
+
         public final CodePrinter initialSystemPrinter() {
             if (inInitialSystem())
                 return this;
             else
-                return getInitialSystemPrinter();
+                return createPrinter(inBlock, true, homotopyType);
         }
-        
-        protected abstract CodePrinter getInitialSystemPrinter();
+
+        public final CodePrinter homotopySimplifiedPrinter() {
+            if (homotopyType == Homotopy.SIMPLIFIED)
+                return this;
+            else
+                return createPrinter(inBlock, inInitialSystem, Homotopy.SIMPLIFIED);
+        }
         
         public boolean inInitialSystem() {
             return inInitialSystem;
         }
+        
+        protected static enum Homotopy {
+            HOMOTOPY, SIMPLIFIED, ACTUAL
+        }
+        
+        public boolean inHomotopySimplified() {
+            return homotopyType == Homotopy.SIMPLIFIED;
+        }
 
+        public boolean inHomotopyActual() {
+            return homotopyType == Homotopy.ACTUAL;
+        }
+        
         @Override
         public String op(FBinExp e) { return e.op_C(); }
 
@@ -137,19 +160,21 @@ aspect CCodeGen {
     
     public class CPrettyPrinter extends CodePrinter {
 
-        private static CPrettyPrinter INITIAL_SYSTEM_PRINTER = new CPrettyPrinter(true);
-
         public CPrettyPrinter() {
             this(false);
         }
+        
+        public CPrettyPrinter(boolean inBlock) {
+            this(inBlock, false, Homotopy.HOMOTOPY);
+        }
 
-        protected CPrettyPrinter(boolean inInitialSystem) {
-            super(inInitialSystem);
+        protected CPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            super(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
-        protected CodePrinter getInitialSystemPrinter() {
-            return INITIAL_SYSTEM_PRINTER;
+        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            return new CPrettyPrinter(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
@@ -172,48 +197,24 @@ aspect CCodeGen {
             node.genTempFree_C(this, str, indent);
         }
 
+        @Override
         public TypePrinter_C createDeclPrinter(CodeStream str) {
             return new DeclPrinter_C(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitPrinter(CodeStream str) {
             return new InitPrinter_C(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitSetPrinter(CodeStream str) {
             return new InitSetPrinter_C(this, str);
         }
     }
 	
-    /**
-     * Just like CPrettyPrinter but it is used inside of blocks
-     */
-    public class CBlockPrettyPrinter extends CPrettyPrinter {
-
-        private static CBlockPrettyPrinter INITIAL_SYSTEM_PRINTER = new CBlockPrettyPrinter(true);
-
-        public CBlockPrettyPrinter() {
-            this(false);
-        }
-
-        private CBlockPrettyPrinter(boolean inInitialSystem) {
-            super(inInitialSystem);
-        }
-
-        @Override
-        protected CodePrinter getInitialSystemPrinter() {
-            return INITIAL_SYSTEM_PRINTER;
-        }
-
-        @Override
-        public boolean insideBlock() {
-            return true; 
-        }
-
-    }
-    
     static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
-    static CPrettyPrinter ASTNode.blockPrinter_C = new CBlockPrettyPrinter();
+    static CPrettyPrinter ASTNode.blockPrinter_C = new CPrettyPrinter(true);
 	
 	public String ASTNode.prettyPrint_C(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -2611,11 +2612,17 @@ aspect CCodeGen {
 
     public void FHomotopyExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (p.inInitialSystem()) {
-            str.print("(__homotopy_lambda * (");
-            p.print(getActual(), str, indent);
-            str.print(") + (1 - __homotopy_lambda) * (");
-            p.print(getSimplified(), str, indent);
-            str.print("))");
+            if (p.inHomotopySimplified()) {
+                str.print("(");
+                p.print(getSimplified(), str, indent);
+                str.print(")");
+            } else {
+                str.print("(__homotopy_lambda * (");
+                p.print(getActual(), str, indent);
+                str.print(") + (1 - __homotopy_lambda) * (");
+                p.print(getSimplified(), str, indent);
+                str.print("))");
+            }
         } else {
             str.print("(");
             p.print(getActual(), str, indent);
@@ -2693,7 +2700,7 @@ aspect CCodeGen {
             return;
         if (generatesEvent(p.inInitialSystem())) {
             str.format("%sif (", outerIndent);
-            if (p.insideBlock())
+            if (p.inBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
             else
                 str.print("jmi->atInitial || jmi->atEvent");
@@ -3552,10 +3559,19 @@ aspect CCodeGen {
         str.print(outerIndent + "}\n\n");
     }
 
+    @Override
     public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
         for (T blt : subBLTs)
             for (AbstractEquationBlock block : blt)
                 block.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
+    }
+
+    @Override
+    public void HomotopyBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
+        homotopySubBlock.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
+        CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
+        for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS])
+            block.genBlockResidualFunction_C(simplifiedPrinter, str, outerIndent, inInitial);
     }
     /*
      * Various dispatch methods used in genBlockResidualFunction_C():
@@ -4316,8 +4332,9 @@ aspect CCodeGen {
     @Override
     public void HomotopyBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
         str.formatln("%s/* Start of section for simplified version of homotopy*/", indent);
+        CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
         for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
-            block.genBlock_C(p, str, indent, inInitial); 
+            block.genBlock_C(simplifiedPrinter, str, indent, inInitial); 
         }
         str.formatln("%s/* End of section for simplified version of homotopy*/", indent);
         homotopySubBlock.genBlock_C(p, str, indent, inInitial);

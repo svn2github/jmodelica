@@ -35,19 +35,17 @@ aspect CADCodeGen {
 
     public class CADPrettyPrinter extends CodePrinter {
 
-        private static CADPrettyPrinter INITIAL_SYSTEM_PRINTER = new CADPrettyPrinter(true);
-
         public CADPrettyPrinter() {
-            this(false);
+            this(false, false, Homotopy.HOMOTOPY);
         }
 
-        private CADPrettyPrinter(boolean inInitialSystem) {
-            super(inInitialSystem);
+        private CADPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            super(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
-        protected CodePrinter getInitialSystemPrinter() {
-            return INITIAL_SYSTEM_PRINTER;
+        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            return new CADPrettyPrinter(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
@@ -70,14 +68,17 @@ aspect CADCodeGen {
             node.genTempFree_CAD(this, str, indent);
         }
         
+        @Override
         public TypePrinter_C createDeclPrinter(CodeStream str) {
             return new DeclPrinter_CAD(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitPrinter(CodeStream str) {
             return new InitPrinter_CAD(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitSetPrinter(CodeStream str) {
             return createInitPrinter(str);
         }
