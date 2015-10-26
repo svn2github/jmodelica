@@ -652,7 +652,7 @@ aspect DynamicStateSelect{
     
     public class EquationBlockFactory {
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
-            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new HashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
+            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
                 FVariable fVar = eqn.getMatching().getVariable();

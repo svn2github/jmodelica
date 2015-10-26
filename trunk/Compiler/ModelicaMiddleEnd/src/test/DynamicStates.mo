@@ -741,6 +741,226 @@ der(_ds.2.s1) := dsDer(2, 1)
 ")})));
         end TwoDSSetForced;
 
+        model TwoDSSetSameBlock
+            /*
+            a1 a2 a3 a4 a5 a6 a7 a8 a9
+            +  +        *     *     * 
+            +  +           *     *  * 
+                  +  +  *     *     * 
+                  +  +     *     *  * 
+                                    * 
+                        *     *       
+                           *     *    
+            */
+            Real a1;
+            Real a2;
+            Real a3;
+            Real a4;
+            Real a5;
+            Real a6;
+            Real a7;
+            Real a8;
+            Real a9;
+        equation
+            der(a1) + der(a4) + der(a5) + der(a8) + der(a9) = 0;
+            der(a2) + der(a3) + der(a7) + der(a6) = 0;
+            a1 * a2 = a5 + a7 + a9;
+            a1 * a2 = a6 + a8 + a9;
+            a3 * a4 = a5 + a7 + a9;
+            a3 * a4 = a6 + a8 + a9;
+            a7 = time;
+            a5 + a7 = 1;
+            a6 - a8 = time;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="DynamicStates_Basic_TwoDSSetSameBlock",
+                description="Two dynamic states sets in the same DAE block",
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+a7 := time
+
+--- Solved equation ---
+a5 := - a7 + 1
+
+--- Dynamic state block ---
+  --- States: a1, a3 ---
+    --- Torn linear system (Block 1(a1, a3).1) of 3 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+    Torn variables:
+      a9
+      a8
+
+    Iteration variables:
+      a6
+      a2
+      a4
+
+    Torn equations:
+      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a8 := a6 - time
+
+    Residual equations:
+      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+        Iteration variables: a6
+      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+        Iteration variables: a2
+      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+        Iteration variables: a4
+
+    Jacobian:
+      |-1.0, 0.0, 0.0, ds(1, a1), 0.0|
+      |0.0, -1.0, 1.0, 0.0, 0.0|
+      |-1.0, -1.0, -1.0, 0.0, ds(2, a3)|
+      |-1.0, 0.0, 0.0, 0.0, ds(2, a3)|
+      |-1.0, -1.0, -1.0, ds(1, a1), 0.0|
+    -------------------------------
+  --- States: a1, a4 ---
+    --- Torn linear system (Block 1(a1, a4).1) of 3 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+    Torn variables:
+      a9
+      a8
+
+    Iteration variables:
+      a6
+      a2
+      a3
+
+    Torn equations:
+      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a8 := a6 - time
+
+    Residual equations:
+      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+        Iteration variables: a6
+      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+        Iteration variables: a2
+      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+        Iteration variables: a3
+
+    Jacobian:
+      |-1.0, 0.0, 0.0, ds(1, a1), 0.0|
+      |0.0, -1.0, 1.0, 0.0, 0.0|
+      |-1.0, -1.0, -1.0, 0.0, ds(2, a4)|
+      |-1.0, 0.0, 0.0, 0.0, ds(2, a4)|
+      |-1.0, -1.0, -1.0, ds(1, a1), 0.0|
+    -------------------------------
+  --- States: a2, a3 ---
+    --- Torn linear system (Block 1(a2, a3).1) of 3 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+    Torn variables:
+      a9
+      a8
+
+    Iteration variables:
+      a6
+      a1
+      a4
+
+    Torn equations:
+      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a8 := a6 - time
+
+    Residual equations:
+      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+        Iteration variables: a6
+      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+        Iteration variables: a1
+      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+        Iteration variables: a4
+
+    Jacobian:
+      |-1.0, 0.0, 0.0, ds(1, a2), 0.0|
+      |0.0, -1.0, 1.0, 0.0, 0.0|
+      |-1.0, -1.0, -1.0, 0.0, ds(2, a3)|
+      |-1.0, 0.0, 0.0, 0.0, ds(2, a3)|
+      |-1.0, -1.0, -1.0, ds(1, a2), 0.0|
+    -------------------------------
+  --- States: a2, a4 ---
+    --- Torn linear system (Block 1(a2, a4).1) of 3 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+    Torn variables:
+      a9
+      a8
+
+    Iteration variables:
+      a6
+      a1
+      a3
+
+    Torn equations:
+      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a8 := a6 - time
+
+    Residual equations:
+      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+        Iteration variables: a6
+      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+        Iteration variables: a1
+      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+        Iteration variables: a3
+
+    Jacobian:
+      |-1.0, 0.0, 0.0, ds(1, a2), 0.0|
+      |0.0, -1.0, 1.0, 0.0, 0.0|
+      |-1.0, -1.0, -1.0, 0.0, ds(2, a4)|
+      |-1.0, 0.0, 0.0, 0.0, ds(2, a4)|
+      |-1.0, -1.0, -1.0, ds(1, a2), 0.0|
+    -------------------------------
+
+--- Solved equation ---
+_der_a7 := 1.0
+
+--- Solved equation ---
+_der_a5 := - _der_a7
+
+--- Torn linear system (Block 2) of 3 iteration variables and 4 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  _der_a9
+  _der_a8
+  dynDer(a4)
+  dynDer(a3)
+
+Iteration variables:
+  _der_a6
+  dynDer(a1)
+  dynDer(a2)
+
+Torn equations:
+  _der_a9 := ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) - _der_a5 - _der_a7
+  _der_a8 := _der_a6 - 1.0
+  dynDer(a4) := - dynDer(a1) + (- _der_a5) + (- _der_a8) + (- _der_a9)
+  dynDer(a3) := - dynDer(a2) + (- _der_a7) + (- _der_a6)
+
+Residual equations:
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = _der_a6 + _der_a8 + _der_a9
+    Iteration variables: _der_a6
+  ds(2, a3) * dynDer(a4) + dynDer(a3) * ds(2, a4) = _der_a6 + _der_a8 + _der_a9
+    Iteration variables: dynDer(a1)
+  ds(2, a3) * dynDer(a4) + dynDer(a3) * ds(2, a4) = _der_a5 + _der_a7 + _der_a9
+    Iteration variables: dynDer(a2)
+
+Jacobian:
+  |-1.0, 0.0, 0.0, 0.0, 0.0, ds(1, a2), ds(1, a1)|
+  |0.0, -1.0, 0.0, 0.0, 1.0, 0.0, 0.0|
+  |1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0|
+  |0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0|
+  |-1.0, -1.0, 0.0, 0.0, -1.0, ds(1, a2), ds(1, a1)|
+  |-1.0, -1.0, ds(2, a3), ds(2, a4), -1.0, 0.0, 0.0|
+  |-1.0, 0.0, ds(2, a3), ds(2, a4), 0.0, 0.0, 0.0|
+
+--- Solved equation ---
+der(_ds.1.s1) := dsDer(1, 1)
+
+--- Solved equation ---
+der(_ds.2.s1) := dsDer(2, 1)
+-------------------------------
+")})));
+        end TwoDSSetSameBlock;
+
     end Basic;
     
     package Leafs

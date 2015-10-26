@@ -4304,7 +4304,7 @@ aspect CCodeGen {
             DynamicStateSet set = var.dynamicStateSet();
             if (set != previousSet) {
                 if (previousSet != null)
-                    str.print(" && ");
+                    str.print(") && ");
                 previousSet = set;
                 str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
             }

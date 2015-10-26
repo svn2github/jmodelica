@@ -21300,6 +21300,148 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
         end Pendulum;
+        model TwoDSSetSameBlock
+            /*
+            a1 a2 a3 a4 a5 a6 a7 a8 a9
+            +  +        *     *     * 
+            +  +           *     *  * 
+                  +  +  *     *     * 
+                  +  +     *     *  * 
+                                    * 
+                        *     *       
+                           *     *    
+            */
+            Real a1;
+            Real a2;
+            Real a3;
+            Real a4;
+            Real a5;
+            Real a6;
+            Real a7;
+            Real a8;
+            Real a9;
+        equation
+            der(a1) + der(a4) + der(a5) + der(a8) + der(a9) = 0;
+            der(a2) + der(a3) + der(a7) + der(a6) = 0;
+            a1 * a2 = a5 + a7 + a9;
+            a1 * a2 = a6 + a8 + a9;
+            a3 * a4 = a5 + a7 + a9;
+            a3 * a4 = a6 + a8 + a9;
+            a7 = time;
+            a5 + a7 = 1;
+            a6 - a8 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="DynamicStates_TwoDSSetSameBlock",
+            description="Test code gen for two dynamic state sets in the same DAE bock",
+            template="
+n_real_x = $n_real_x$
+n_dynamic_sets = $dynamic_state_n_sets$
+$C_dynamic_state_coefficients$
+$C_dynamic_state_add_call$
+$C_ode_derivatives$
+",
+            generatedCode="
+n_real_x = 2
+n_dynamic_sets = 2
+static void ds_coefficients_0(jmi_t* jmi, jmi_real_t* res) {
+    memset(res, 0, 2 * sizeof(jmi_real_t));
+    res[0] = _a1_0;
+    res[1] = _a2_1;
+}
+
+static void ds_coefficients_1(jmi_t* jmi, jmi_real_t* res) {
+    memset(res, 0, 2 * sizeof(jmi_real_t));
+    res[0] = _a3_2;
+    res[1] = _a4_3;
+}
+
+
+    {
+        int* ds_var_value_refs = calloc(2, sizeof(int));
+        int* ds_state_value_refs = calloc(1, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(1, sizeof(int));
+        ds_var_value_refs[0] = 5; /* a2 */
+        ds_var_value_refs[1] = 4; /* a1 */
+        ds_state_value_refs[0] = 2; /* _ds.1.s1 */
+        ds_algebraic_value_refs[0] = 18; /* _ds.1.a1 */
+        jmi_dynamic_state_add_set(*jmi, 0, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_0);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
+    }
+    {
+        int* ds_var_value_refs = calloc(2, sizeof(int));
+        int* ds_state_value_refs = calloc(1, sizeof(int));
+        int* ds_algebraic_value_refs = calloc(1, sizeof(int));
+        ds_var_value_refs[0] = 7; /* a4 */
+        ds_var_value_refs[1] = 6; /* a3 */
+        ds_state_value_refs[0] = 3; /* _ds.2.s1 */
+        ds_algebraic_value_refs[0] = 19; /* _ds.2.a1 */
+        jmi_dynamic_state_add_set(*jmi, 1, 2, 1, ds_var_value_refs, ds_state_value_refs, ds_algebraic_value_refs, ds_coefficients_1);
+        free(ds_var_value_refs);
+        free(ds_state_value_refs);
+        free(ds_algebraic_value_refs);
+    }
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    jmi_ad_var_t tmp_1;
+    jmi_ad_var_t tmp_2;
+    _a7_6 = _time;
+    _a5_4 = - _a7_6 + 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        jmi_dynamic_state_update_states(jmi, 0);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        jmi_dynamic_state_update_states(jmi, 1);
+    }
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 4) && jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
+        _a1_0 = __ds_1_s1_15;
+        _a3_2 = __ds_2_s1_17;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+        __ds_1_a1_14 = _a2_1;
+        __ds_2_a1_16 = _a4_3;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 4) && jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
+        _a1_0 = __ds_1_s1_15;
+        _a4_3 = __ds_2_s1_17;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[1]);
+        __ds_1_a1_14 = _a2_1;
+        __ds_2_a1_16 = _a3_2;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 5) && jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
+        _a2_1 = __ds_1_s1_15;
+        _a3_2 = __ds_2_s1_17;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[2]);
+        __ds_1_a1_14 = _a1_0;
+        __ds_2_a1_16 = _a4_3;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 5) && jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
+        _a2_1 = __ds_1_s1_15;
+        _a4_3 = __ds_2_s1_17;
+        ef |= jmi_solve_block_residual(jmi->dae_block_residuals[3]);
+        __ds_1_a1_14 = _a1_0;
+        __ds_2_a1_16 = _a3_2;
+    }
+    _der_a7_12 = 1.0;
+    _der_a5_9 = - _der_a7_12;
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
+    if (jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
+        tmp_1 = _der_a1_20;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 0, 5)) {
+        tmp_1 = _der_a2_22;
+    }
+    _der__ds_1_s1_18 = tmp_1;
+    if (jmi_dynamic_state_check_is_state(jmi, 1, 6)) {
+        tmp_2 = _der_a3_23;
+    } else if(jmi_dynamic_state_check_is_state(jmi, 1, 7)) {
+        tmp_2 = _der_a4_21;
+    }
+    _der__ds_2_s1_19 = tmp_2;
+    return ef;
+}
+
+")})));
+        end TwoDSSetSameBlock;
     end DynamicStates;
 
 end CCodeGenTests;
