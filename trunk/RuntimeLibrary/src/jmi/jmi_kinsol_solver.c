@@ -2153,7 +2153,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     }
 
     /* update the scaling only once per time step */
-    if(block->init || (block->options->rescale_each_step_flag && (curtime > solver->kin_scale_update_time) || block->force_rescaling)) {
+    if(block->init || (block->options->rescale_each_step_flag && (curtime > solver->kin_scale_update_time)) || block->force_rescaling) {
         jmi_update_f_scale(block);
     }
     
