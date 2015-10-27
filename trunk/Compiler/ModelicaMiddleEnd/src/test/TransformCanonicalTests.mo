@@ -7396,7 +7396,7 @@ y = homotopy(y * x, time)
                 methodName="printDAEInitBLT",
                 methodResult="
 --- Homotopy block ---
-  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  --- Unsolved system (Block 1(Homotopy).1) of 2 variables ---
   Unknown variables:
     y ()
     x ()
@@ -7439,7 +7439,7 @@ y = homotopy(y * x, time)
 b := time * 2
 
 --- Homotopy block ---
-  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  --- Unsolved system (Block 1(Homotopy).1) of 2 variables ---
   Unknown variables:
     y ()
     x ()
@@ -7449,7 +7449,7 @@ b := time * 2
       Iteration variables: y
     x = homotopy(x * x, time)
       Iteration variables: x
-
+  --- Solved equation ---
   a := x + y * b
   -------------------------------
   --- Unsolved equation (Block 1(Simplified).1) ---
@@ -7466,6 +7466,35 @@ b := time * 2
 -------------------------------
 ")})));
         end SuccessorMerge1;
+        
+        model SubBlocks1
+            Real x,y;
+        equation
+            y = time;
+            0 = homotopy(x * y, x);
+        
+        annotation(__JModelica(UnitTesting(tests={
+	        FClassMethodTestCase(
+                name="Operators.Homotopy.SubBlocks1",
+                description="Tests a bug where block numbers for sub-blocks in homotopy part was generated wrong",
+                homotopy_type="homotopy",
+                methodName="printDAEInitBLT",
+                methodResult="
+--- Solved equation ---
+y := time
+
+--- Homotopy block ---
+  --- Unsolved equation (Block 1(Homotopy).1) ---
+  0 = homotopy(x * y, x)
+    Computed variables: x
+  -------------------------------
+  --- Unsolved equation (Block 1(Simplified).1) ---
+  0 = homotopy(x * y, x)
+    Computed variables: x
+  -------------------------------
+-------------------------------
+")})));
+        end SubBlocks1;
         
     end Homotopy;
 end Operators;

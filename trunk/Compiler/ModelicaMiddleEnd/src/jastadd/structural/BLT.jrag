@@ -1156,7 +1156,9 @@ aspect BLT{
 
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
             if (needLabel(inSubBlock)) {
-                if (prefix == null) {
+                if (nestedEnum == null) { // Used for HomotopySubBlock
+                    label = String.valueOf(prefix);
+                } else if (prefix == null) {
                     label = String.valueOf(nestedEnum.next());
                 } else {
                     label = prefix + '.' + nestedEnum.next();
@@ -1606,6 +1608,10 @@ aspect BLT{
         @Override
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
             super.setLabel(prefix, inSubBlock, nestedEnum, seqEnum);
+            setSubLabels(prefix, seqEnum);
+        }
+        
+        protected void setSubLabels(String prefix, Enumerator seqEnum) {
             Enumerator subNestedEnum = new Enumerator(1);
             String label = getLabel();
             for (AbstractEquationBlock eb : solvedBlocks())
@@ -1648,6 +1654,19 @@ aspect BLT{
         public HomotopySubBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<AbstractEquationBlock> solvedBlocks) {
             super(producer, blockDependency, solvedBlocks, Collections.<SimpleEquationBlock>emptyList());
         }
+
+        @Override
+        protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
+            super.setLabel(prefix, inSubBlock, null, seqEnum);
+        }
+
+        @Override
+        protected void setSubLabels(String prefix, Enumerator seqEnum) {
+            Enumerator subNestedEnum = new Enumerator(1);
+            for (AbstractEquationBlock eb : solvedBlocks())
+                eb.setLabel(prefix, false, subNestedEnum, seqEnum);
+        }
+        
         
     }
     
@@ -1762,7 +1781,7 @@ aspect BLT{
         
         @Override
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
-            super.setLabel(prefix, inSubBlock, nestedEnum, seqEnum);
+            super.setLabel(prefix, false, nestedEnum, seqEnum);
             for (T blt : subBLTs)
                 blt.setLabels(getLabel() + '(' + computeLabel(blt) + ')', new Enumerator(1), seqEnum);
         }
@@ -2665,7 +2684,7 @@ aspect BLTPrettyPrinting {
     @Override
     public void HomotopySubBlock.prettyPrint(Printer p, CodeStream str, String indent) {
         for (AbstractEquationBlock aeb : solvedBlocks())
-            aeb.prettyPrintSub(p, str, indent);
+            aeb.prettyPrint(p, str, indent);
     }
 
     @Override
