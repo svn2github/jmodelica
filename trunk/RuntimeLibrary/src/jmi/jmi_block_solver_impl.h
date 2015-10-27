@@ -64,6 +64,7 @@ struct jmi_block_solver_t {
     int* value_references; /**< \brief Iteration variable value references. **/
 
     double cur_time;        /**< \brief Current time send in jmi_block_solver_solve(). Used for logging and controling rescaling. */
+    int force_rescaling;            /**< \brief A flag indicating that residual scaling should be updated */
 
     void * solver;
     jmi_block_solver_solve_func_t solve;
@@ -86,6 +87,7 @@ struct jmi_block_solver_t {
     char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 
     double canari; /* for debugging */
+
 } ;
 
 extern const double jmi_block_solver_canari;

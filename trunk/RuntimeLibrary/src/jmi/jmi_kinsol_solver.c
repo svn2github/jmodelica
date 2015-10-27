@@ -1318,19 +1318,20 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     }
     
     if(solver->force_new_J_flag ) {
-        /* If the Jacobian was caluclated due to the singularity in the previous point
+        /* If the Jacobian was calculated due to the singularity in the previous point
         update the residual scales if corresponding option is set
        */
         solver->force_new_J_flag = 0;
-        if(block->options->rescale_after_singular_jac_flag) /* && solver->J_is_singular_flag == 0) */
-            jmi_update_f_scale(block);
     }
+
+    if(block->force_rescaling)
+        jmi_update_f_scale(block);
     
     return 0;
         
 }
 
-/* Callback from KINSOL to solver linear system and calculate the step */
+/* Callback from KINSOL to solve linear system and calculate the step */
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -1440,6 +1441,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             i = 1;
             dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
             solver->force_new_J_flag = 1;
+            if(block->options->rescale_after_singular_jac_flag)
+                block->force_rescaling = 1;
             
         } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
             /*
@@ -1458,6 +1461,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
             dgelss_(&N, &N, &nrhs, solver->J_sing->data, &N, xd, &N ,solver->singular_values, &rcond, &rank, solver->dgelss_rwork, &iwork, &ret);
             solver->force_new_J_flag = 1;
+            if(block->options->rescale_after_singular_jac_flag)
+                block->force_rescaling = 1;
             
             if(block->callbacks->log_options.log_level >= 5) {
                 jmi_log_node_t inner_node;
@@ -1616,6 +1621,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
 
     solver->kin_scale_update_time = curtime;
+    block->force_rescaling = 0;
     kin_char_log(solver, 's');
     
     if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
@@ -2143,10 +2149,18 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                          "when reading initial guess.", flag, block->label);
             return flag;
         }
+        if(solver->force_new_J_flag ) { /* New Jacobian forced due to solver failure in previous solve call */
+            struct KINMemRec * kin_mem = solver->kin_mem; 
+            if(jmi_kin_lsetup(kin_mem)) {
+                jmi_log_node(block->log, logError, "Error", "Jacobian evaluation failed at initial point for "
+                     "<block: %s>", block->label);
+                return -1;
+            }
+        }
     }
 
     /* update the scaling only once per time step */
-    if(block->init || (block->options->rescale_each_step_flag && (curtime > solver->kin_scale_update_time))) {
+    if(block->init || (block->options->rescale_each_step_flag && (curtime > solver->kin_scale_update_time) || block->force_rescaling)) {
         jmi_update_f_scale(block);
     }
     
@@ -2228,7 +2242,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
             solver->force_new_J_flag = 1;
-            
+            block->force_rescaling = 1;            
+
             if (flagNonscaled == 0) {
                 jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
                              "re-scaled equations failed in <block: %s>", block->label); 
