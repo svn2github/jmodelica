@@ -765,5 +765,29 @@ equation
     0=(x-1.5)^2-1e-7;
 end DoubleRoot1;
 
+model ResidualHeuristicScaling1
+  function fluid_function
+    input Real x;
+    output Real y;
+  algorithm
+    y:=x*x;
+    return;
+  end fluid_function;
+  
+  parameter Real A_mean = Modelica.Constants.pi*10^60;
+  Real state_a_p(start=1000.0);
+  Real state_a_d;
+  Real dp_fg;
+  Real F_p;
+  
+  equation
+    //Block 1
+    state_a_d = fluid_function(state_a_p);  //Torn variable
+    dp_fg = fluid_function(state_a_d);      //Torn variable
+    F_p = A_mean * dp_fg;                   //Torn variable
+    
+    F_p = A_mean * (100000.0 - state_a_p);  //Residual equation
+end ResidualHeuristicScaling1;
+
 end NonLinear;
 

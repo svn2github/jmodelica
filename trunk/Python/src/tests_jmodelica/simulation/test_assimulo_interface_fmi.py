@@ -453,6 +453,7 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
+        compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
     
     @testattr(stddist = True)
     def test_Brent_double_root1(self):
@@ -516,6 +517,13 @@ class Test_NonLinear_Systems:
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
+        
+    @testattr(stddist = True)
+    def test_residual_scaling_heuristics(self):
+        model = load_fmu("NonLinear_ResidualHeuristicScaling1.fmu")
+        model.set("_use_Brent_in_1d", False)
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('state_a_p'), 17.78200351)
     
 
 class Test_Singular_Systems:
