@@ -304,6 +304,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     jmi_ode_method_t ode_method;
     jmi_real_t ode_step_size;
     jmi_real_t ode_rel_tol;
+    int        ode_experimental_mode;
     fmiBoolean toleranceControlled = fmiTrue;
     fmiReal relativeTolerance = 1e-6;
     fmiStatus retval;
@@ -333,12 +334,13 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
                          fmi1_cs_root_fcn, fmi1_cs_completed_integrator_step);
     
     /* These options for the solver need to be found in a better way. */
-    ode_method    = fmi1_me->jmi.options.cs_solver;
-    ode_step_size = fmi1_me->jmi.options.cs_step_size;
-    ode_rel_tol   = fmi1_me->jmi.options.cs_rel_tol;
+    ode_method            = fmi1_me->jmi.options.cs_solver;
+    ode_step_size         = fmi1_me->jmi.options.cs_step_size;
+    ode_rel_tol           = fmi1_me->jmi.options.cs_rel_tol;
+    ode_experimental_mode = fmi1_me->jmi.options.cs_experimental_mode;
     
     /* Create solver */
-    retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol);
+    retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, ode_experimental_mode);
     if (retval != fmiOK){ return fmiError; }
     
     return fmiOK;

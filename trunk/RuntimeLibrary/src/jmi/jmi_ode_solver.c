@@ -25,7 +25,7 @@
 
 
 int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
-                       jmi_real_t step_size, jmi_real_t rel_tol){
+                       jmi_real_t step_size, jmi_real_t rel_tol, int experimental_mode){
     int flag = 0;
     jmi_ode_solver_t* solver = (jmi_ode_solver_t*)calloc(1,sizeof(jmi_ode_solver_t));
 
@@ -34,6 +34,7 @@ int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
     solver->ode_problem = problem;
     solver->step_size = step_size;
     solver->rel_tol = rel_tol;
+    solver->experimental_mode = experimental_mode;
     problem->ode_solver = solver;
 
     switch(method) {

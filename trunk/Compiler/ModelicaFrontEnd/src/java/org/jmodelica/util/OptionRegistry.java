@@ -747,6 +747,13 @@ abstract public class OptionRegistry {
              Category.user,
              1e-3,
              "Step-size for the fixed-step solvers in the Co-Simulation case."),
+        CS_EXPERIMENTAL_MODE
+            ("cs_experimental_mode",
+             OptionType.runtime, 
+             Category.experimental,
+             0,
+             "Activates experimental features of CS ode solvers",
+             0, Integer.MAX_VALUE),
         RUNTIME_LOG_TO_FILE
             ("runtime_log_to_file",
              OptionType.runtime, 

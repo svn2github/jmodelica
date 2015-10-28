@@ -146,7 +146,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
             return fmi2Error;
         } else if (retval == JMI_ODE_EVENT) {
-            fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finnished with an event -> new discrete states needed. */
+            fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finished with an event -> new discrete states needed. */
         }
     }
     
