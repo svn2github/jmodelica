@@ -1504,7 +1504,7 @@ class TestLocalDAECollocator(object):
         assert_results(res_default, cost_ref_default, u_norm_ref_default)
 
         # Test dependent parameter setting
-        # N.testing.assert_raises(RuntimeError, op.set, 'cstr.F', 500)
+        N.testing.assert_raises(RuntimeError, op.set, 'cstr.F', 500)
 
     @testattr(casadi = True)
     def test_blocking_factors(self):

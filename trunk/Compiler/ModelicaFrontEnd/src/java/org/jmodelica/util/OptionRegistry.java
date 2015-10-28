@@ -238,6 +238,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true, 
              "If enabled, then alias variables are eliminated from the model."),
+        ELIM_ALIAS_PARAM
+            ("eliminate_alias_parameters", 
+             OptionType.compiler, 
+             Category.uncommon,
+             false, 
+             "If enabled, then alias parameters are eliminated from the model."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 

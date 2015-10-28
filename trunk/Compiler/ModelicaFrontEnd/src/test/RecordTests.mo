@@ -1002,7 +1002,6 @@ model RecordBinding9
 		TransformCanonicalTestCase(
 			name="RecordBinding9",
 			description="Record containing constant as binding expression",
-            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordBinding9
  constant Real x.a = 1;
@@ -1150,7 +1149,6 @@ model RecordBinding15
         TransformCanonicalTestCase(
             name="RecordBinding15",
             description="Flattening use of component in same record",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding15
  parameter Real r1.y1 = 50 /* 50 */;
@@ -1184,7 +1182,6 @@ model RecordBinding16
         TransformCanonicalTestCase(
             name="RecordBinding16",
             description="Flattening use of component in same record",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding16
  parameter Real r1.y1 = 52 /* 52 */;
@@ -1221,7 +1218,6 @@ model RecordBinding17
         TransformCanonicalTestCase(
             name="RecordBinding17",
             description="Flattening use of component in same record",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding17
  parameter Real r1.y1 = 52 /* 52 */;
@@ -1389,7 +1385,6 @@ model RecordBinding23
         TransformCanonicalTestCase(
             name="RecordBinding23",
             description="Final parameter record component",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding23
  parameter Real r1.x = 1 /* 1 */;
@@ -1422,7 +1417,6 @@ model RecordBinding24
         TransformCanonicalTestCase(
             name="RecordBinding24",
             description="Final parameter record component",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
@@ -5197,7 +5191,6 @@ model RecordWithParam2
 			name="RecordWithParam2",
 			description="Record with dependent parameter getting value from modification",
 			variability_propagation=false,
-            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordWithParam2
  parameter Real c.a;
@@ -5467,7 +5460,6 @@ model RecordParam4
 			name="RecordParam4",
 			description="Parameter with default value in record",
 			variability_propagation=false,
-            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordParam4
  parameter Real a1.x = 1 /* 1 */;
@@ -5496,7 +5488,6 @@ model RecordParam5
 			name="RecordParam5",
 			description="Parameter with default value in record",
 			variability_propagation=false,
-            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordParam5
  parameter Real a1.x = 1 /* 1 */;
@@ -5531,7 +5522,6 @@ model RecordParam6
 			description="",
 			variability_propagation=false,
 			inline_functions="none",
-            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordParam6
  parameter Real a1.x[1];
@@ -6070,7 +6060,6 @@ model RecordModification2
         TransformCanonicalTestCase(
             name="RecordModification2",
             description="Modification on record array",
-            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordModification2
  parameter Real a1[1].x = 1 /* 1 */;

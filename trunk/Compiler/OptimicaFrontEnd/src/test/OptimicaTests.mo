@@ -249,7 +249,6 @@ end OptimicaTests.ClassAttrTest8;
 			name="FreeDependentParametersTest1",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-            eliminate_alias_variables=false,
 			description="Test that free dependent parameters are computed correctly.", 
             methodResult="
 Free independent parameters:
@@ -277,7 +276,6 @@ p3
 			name="FreeDependentParametersTest2",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-            eliminate_alias_variables=false,
 			description="Test that free dependent parameters are computed correctly.", 
             methodResult="  
 Free independent parameters:
@@ -306,7 +304,6 @@ x3
 			name="FreeDependentParametersTest3",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-            eliminate_alias_variables=false,
 			description="Test that free dependent parameters are computed correctly.", 
             methodResult="
 Free independent parameters:
@@ -333,7 +330,6 @@ x3
 			name="FreeDependentParametersTest4",
 			methodName="freeParametersDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-            eliminate_alias_variables=false,
 			description="Test that free dependent parameters are computed correctly.", 
             methodResult="
 Free independent parameters:
@@ -360,7 +356,6 @@ x3
 			name="FreeDependentParametersTest5",
 			methodName="variableDiagnostics",
 			convert_free_dependent_parameters_to_algebraics=false,
-            eliminate_alias_variables=false,
 			description="Test linearity of free dependent parameters.", 
             methodResult="
 Independent constants: 

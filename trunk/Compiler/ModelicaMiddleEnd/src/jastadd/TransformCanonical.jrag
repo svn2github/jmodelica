@@ -1873,10 +1873,12 @@ aspect TransformCanonical {
 			if (equation.isAliasEquation()) 
 				aliasManager.addAliasVariables(equation.aliasVariables());
 		}
-        for (FAbstractEquation equation : getFParameterEquations()) {
-            equation.aliasClassified = false; 
-            if (equation.isAliasEquation()) 
-                aliasManager.addAliasVariables(equation.aliasVariables());
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getFParameterEquations()) {
+                equation.aliasClassified = false; 
+                if (equation.isAliasEquation()) 
+                    aliasManager.addAliasVariables(equation.aliasVariables());
+            }
         }
 		aliasManager.reportAliasErrors(this);
 		//flush();
@@ -1916,10 +1918,14 @@ aspect TransformCanonical {
 		for (FAbstractEquation equation : getFAbstractEquations()) 
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
-        for (FAbstractEquation equation : getFParameterEquations()) 
-            if (!equation.isAliasEquation()) 
-                pEqns.add(equation);
-
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getFParameterEquations()) { 
+                if (!equation.isAliasEquation()) {
+                    pEqns.add(equation);
+                }
+            }
+        }
+        
         // Collect derivative binding equations, however only if we are going
         // to perform index reduction!
         if (myOptions().getBooleanOption("propagate_derivatives")) {
@@ -1931,7 +1937,9 @@ aspect TransformCanonical {
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
-        setFParameterEquationList(new List(pEqns));
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            setFParameterEquationList(new List(pEqns));
+        }
 		
 		aliasVariablesEliminated = true;
 		enableAliasRewrite();
