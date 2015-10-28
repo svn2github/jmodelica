@@ -652,7 +652,7 @@ aspect DynamicStateSelect{
     
     public class EquationBlockFactory {
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> DynamicStateBlock computeDynamicStateBlock(SCCBlock<E, V> component, BlockProducer producer, OptionRegistry options) {
-            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new HashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
+            Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
                 FVariable fVar = eqn.getMatching().getVariable();
@@ -713,11 +713,13 @@ aspect DynamicStateSelect{
             }
             if (totalNumCombinations > 42)
                 throw new BLTException("Ouch! There are more than 42 combinations for the dynamic states, there were " + totalNumCombinations + " combinations!");
-            Collection<DynamicStateBLT> blts = new ArrayList<DynamicStateBLT>();
-            for (FVariable[] combination : combineDSCombinations(setCombinations, totalNumAlgebraics)) {
+            FVariable[][] combinations = combineDSCombinations(setCombinations, totalNumAlgebraics);
+            DynamicStateBLT[] blts = new DynamicStateBLT[combinations.length];
+            for (int i = 0; i < combinations.length; i++) {
+                FVariable[] combination = combinations[i];
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < combination.length; i++) {
-                    sb.append(combination[i].name() + " ");
+                for (int j = 0; j < combination.length; j++) {
+                    sb.append(combination[j].name() + " ");
                 }
                 ASTNode.log.debug("Generating BLT for: %s", sb);
                 BiPGraph graph = new BiPGraph(component.getMembers(), otherVars, true);
@@ -738,15 +740,15 @@ aspect DynamicStateSelect{
                         states.add(var);
                 DynamicStateBLT blt = new DynamicStateBLT(setVarMap.keySet(), states, algebraics);
                 if (graph.isComplete()) {
-                    blt = graph.computeBLT(options, producer, blt);
+                    blt = graph.computeBLT(options, producer, blt, false);
                 } else {
                     ASTNode.log.verbose("  This combination does not have a valid solution!");
                     ASTNode.log.debug(graph.printMatchingObj());
                 }
                 ASTNode.log.debug(blt);
-                blts.add(blt);
+                blts[i] = blt;
             }
-            return new DynamicStateBlock(producer, component.computeBlockDependency(), setVarMap.keySet(), blts);
+            return new DynamicStateBlock(producer, component.computeBlockDependency(), blts, setVarMap.keySet());
         }
     }
     

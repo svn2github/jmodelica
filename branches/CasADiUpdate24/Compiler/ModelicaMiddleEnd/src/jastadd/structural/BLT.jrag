@@ -303,6 +303,58 @@ aspect BLT{
             }
         }
         
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
+        T computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
+                boolean handleHomotopy, Collection<? extends SCCBlock<E, V>> components) {
+            Set<SCCBlock<E,V>> homotopyComponents = Collections.emptySet();
+            if (inInitial && handleHomotopy) {
+                ASTNode.log.verbose("Initial system contains homotopy, computing homotopy block components...");
+                homotopyComponents = computeHomotopyComponents(components);
+                ASTNode.log.verbose("... block components computed: %s", homotopyComponents);
+            }
+            int homotopyCounter = 0;
+            for (SCCBlock<E,V> component : components) {
+                if (homotopyComponents.contains(component)) {
+                    if (++homotopyCounter < homotopyComponents.size()) {
+                        continue;
+                    }
+                    blt.add(computeHomotopyBlock(homotopyComponents, producer, options));
+                } else {
+                    blt.add(createEquationBlock(component, producer, options, inInitial));
+                }
+            }
+            blt.setLabels();
+            return blt;
+        }
+
+        
+        
+        public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
+        Set<SCCBlock<E, V>> computeHomotopyComponents(Collection<? extends SCCBlock<E, V>> components) {
+            Set<E> eqsInHomotopyComponent = new HashSet<E>();
+            Set<SCCBlock<E, V>> homotopyComponents = new LinkedHashSet<SCCBlock<E, V>>();
+            for (SCCBlock<E, V> component : components) {
+                boolean add = component.containsHomotopy();
+                if (!add) {
+                    for (E eqn : component.getPredecessors()) {
+                        if (eqsInHomotopyComponent.contains(eqn)) {
+                            add = true;
+                            break;
+                        }
+                    }
+                }
+                if (!add) {
+                    continue;
+                }
+                homotopyComponents.add(component);
+                for (E eqn : component) {
+                    eqsInHomotopyComponent.add(eqn);
+                }
+            }
+            return homotopyComponents;
+        }
+        
+        
 	}
 	
 	/**
@@ -366,14 +418,11 @@ aspect BLT{
         }
     }
 
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, Collection<SCCContributor> extraContributors) {
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy, Collection<SCCContributor> extraContributors) {
         ASTNode.beginStep("computeBLT()");
         try {
             Collection<C> components = tarjan(options, extraContributors);
-            for (C bl : components)
-                blt.add(EquationBlockFactory.createEquationBlock(bl, producer, options, isInitialSystem()));
-            blt.setLabels();
-            return blt;
+            return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, components);
         } finally {
             ASTNode.endStep("computeBLT()");
         }
@@ -384,11 +433,11 @@ aspect BLT{
     }
 
     public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, Collection<SCCContributor> extraContributors) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), extraContributors);
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, extraContributors);
     }
     
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy) {
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, handleHomotopy, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
     public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
@@ -415,6 +464,79 @@ aspect BLT{
         }
         return blocks;
     }
+
+    public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
+        AbstractEquationBlock EquationBlockFactory.computeHomotopyBlock(Collection<SCCBlock<E, V>> components,
+        BlockProducer producer, OptionRegistry options) {
+        SCCBlock<E, V> mergedComponent = new SCCBlock<E, V>();
+        for (SCCBlock<E, V> component : components) {
+            for (E eqn : component) {
+                mergedComponent.addMember(eqn);
+            }
+            mergedComponent.addPredecessors(component.getPredecessors());
+        }
+        
+        BLT homotopyBLT = computeBLT(options, producer, new BLT(), true, false, components);
+        HomotopySubBlock homotopySubBlock = new HomotopySubBlock(producer, mergedComponent.computeBlockDependency(), homotopyBLT);
+        ASTNode.log.debug("Homotopy sub block:");
+        ASTNode.log.debug(homotopySubBlock);
+        
+        BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true, true);
+        graph.setAsHomotopySimplified();
+        graph.maximumMatching(true);
+        BLT simplifiedBLT = graph.computeBLT(options, producer, new BLT(), false);
+        ASTNode.log.debug("Simplified BLT:");
+        ASTNode.log.debug(simplifiedBLT);
+        
+        return new HomotopyBlock(producer, mergedComponent.computeBlockDependency(), homotopySubBlock, simplifiedBLT);
+    }
+
+    public class HomotopySimplifiedVarUseLookupVisitor implements FIdUseExpLookupVisitor {
+        public static final FIdUseExpLookupVisitor instance = new HomotopySimplifiedVarUseLookupVisitor();
+        
+        @Override
+        public void visit(ASTNode<? extends ASTNode> node, Set<FIdUseExp> set) {
+            node.homotopySimplifiedVarUseLookupVisitor(set, this);
+        }
+    }
+
+    public Set<FIdUseExp> ASTNode.homotopySimplifiedVarUseLookupVisitor() {
+        return findFIdUseExpsInTree(HomotopySimplifiedVarUseLookupVisitor.instance);
+    }
+
+    public void ASTNode.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        findFIdUseExpsInTree(set, visitor);
+    }
+
+    @Override
+    public void FHomotopyExp.homotopySimplifiedVarUseLookupVisitor(Set<FIdUseExp> set, FIdUseExpLookupVisitor visitor) {
+        visitor.visit(getSimplified(), set);
+    }
+
+    public void AbstractBiPGraph.removeHomotopyActualIncidences() {
+        for (E eqn : getEquations()) {
+            if (eqn.getEquation().containsFHomotopyExp()) {
+                eqn.removeIncidencesNotInSet(lookupVarsInSet(eqn.getEquation().homotopySimplifiedVarUseLookupVisitor()));
+            }
+        }
+        
+    }
+    
+    
+    
+    private boolean AbstractBiPGraph.insideHomotopySimplified = false;
+    
+    public void AbstractBiPGraph.setAsHomotopySimplified() {
+        insideHomotopySimplified = true;
+        removeHomotopyActualIncidences();
+    }
+    
+    public boolean AbstractBiPGraph.insideHomotopySimplified() {
+        return insideHomotopySimplified;
+    }
+    
+    
+    
 
     public class BLT extends ArrayList<AbstractEquationBlock> {
         
@@ -448,9 +570,13 @@ aspect BLT{
         public void setLabels() {
             Enumerator nestedEnum = new Enumerator(1);
             Enumerator seqEnum = new Enumerator(0);
-            for (AbstractEquationBlock eb : this)
-                eb.setLabel(nestedEnum, seqEnum);
+            setLabels(null, nestedEnum, seqEnum);
             numLabledBlocks = seqEnum.peek();
+        }
+        
+        protected void setLabels(String prefix, Enumerator nestedEnum, Enumerator seqEnum) {
+            for (AbstractEquationBlock eb : this)
+                eb.setLabel(prefix, false, nestedEnum, seqEnum);
         }
         
         public int getNumLabledBlocks() {
@@ -658,7 +784,7 @@ aspect BLT{
 //			return str.toString();
 //		}
 	}
-    
+
     public class DynamicStateBLT extends BLT {
         private final Collection<DynamicStateSet> sets;
         private final Collection<FVariable> states;
@@ -669,15 +795,7 @@ aspect BLT{
             this.sets = sets;
             this.states = states;
             this.algebraics = algebraics;
-            StringBuilder sb = new StringBuilder();
-            boolean first = true;
-            for (FVariable var : this.states) {
-                if (!first)
-                    sb.append(", ");
-                first = false;
-                sb.append(var.name());
-            }
-            label = sb.toString();
+            this.label = computeLabel(states);
         }
         
         public Collection<FVariable> states() {
@@ -688,13 +806,20 @@ aspect BLT{
             return algebraics;
         }
         
-        public String label() {
-            return label;
+        private static String computeLabel(Collection<FVariable> states) {
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (FVariable var : states) {
+                if (!first)
+                    sb.append(", ");
+                first = false;
+                sb.append(var.name());
+            }
+            return sb.toString();
         }
         
-        public void setLabels(String prefix, Enumerator nestedEnum, Enumerator seqEnum) {
-            for (AbstractEquationBlock eb : this)
-                eb.setLabel(prefix, false, nestedEnum, seqEnum);
+        public String label() {
+            return label;
         }
     }
 
@@ -1023,19 +1148,23 @@ aspect BLT{
         }
 
         protected abstract boolean needLabel(boolean inSubBlock);
+        protected abstract boolean needSequenceNumber(boolean inSubBlock);
 
         public final void setLabel(Enumerator nestedEnum, Enumerator seqEnum) {
             setLabel(null, false, nestedEnum, seqEnum);
         }
 
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
-            if (!needLabel(inSubBlock))
-                return;
-            sequenceNumber = seqEnum.next();
-            if (prefix == null)
-                label = String.valueOf(nestedEnum.next());
-            else
-                label = prefix + '.' + nestedEnum.next();
+            if (needLabel(inSubBlock)) {
+                if (prefix == null) {
+                    label = String.valueOf(nestedEnum.next());
+                } else {
+                    label = prefix + '.' + nestedEnum.next();
+                }
+            }
+            if (needSequenceNumber(inSubBlock)) {
+                sequenceNumber = seqEnum.next();
+            }
         }
 
         /**
@@ -1172,7 +1301,7 @@ aspect BLT{
             super(producer, blockDependency);
         }
         
-        public EquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+        public EquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<? extends AbstractEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
             super(producer, blockDependency);
             this.solvedBlocks.addAll(solvedBlocks);
             this.unsolvedBlocks.addAll(unsolvedBlocks);
@@ -1464,10 +1593,16 @@ aspect BLT{
                 seb.errorCheck();
         }
 
+        @Override
         protected boolean needLabel(boolean inSubBlock) {
             return true;
         }
 
+        @Override
+        protected boolean needSequenceNumber(boolean inSubBlock) {
+            return true;
+        }
+        
         @Override
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
             super.setLabel(prefix, inSubBlock, nestedEnum, seqEnum);
@@ -1503,40 +1638,33 @@ aspect BLT{
         }
 
     }
-    
-    public class DynamicStateBlock extends AbstractEquationBlock {
-        private Collection<DynamicStateBLT> subBLTs;
-        private Collection<DynamicStateSet> sets;
+
+    /**
+     * PrePropagationEquationBlock represents an equation block resulting from
+     * algebraic loops that only exists when pre variables are considered.
+     */
+    public class HomotopySubBlock extends EquationBlock {
         
-        private final int numVars;
-        private final int numStates;
-        private final int numAlgebraics;
-
-        public DynamicStateBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<DynamicStateSet> sets, Collection<DynamicStateBLT> subBLTs) {
-            super(producer, blockDependency);
-            this.sets = sets;
-            this.subBLTs = subBLTs;
-            int numVars = 0;
-            for (DynamicStateSet set : sets)
-                numVars += set.numVars();
-            this.numVars = numVars;
-            int numStates = 0;
-            for (DynamicStateSet set : sets)
-                numStates += set.numStates();
-            this.numStates = numStates;
-            int numAlgebraics = 0;
-            for (DynamicStateSet set : sets)
-                numAlgebraics += set.numAlgebraics();
-            this.numAlgebraics = numAlgebraics;
-
+        public HomotopySubBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<AbstractEquationBlock> solvedBlocks) {
+            super(producer, blockDependency, solvedBlocks, Collections.<SimpleEquationBlock>emptyList());
         }
-
+        
+    }
+    
+    public abstract class AbstractSubBLTBlock<T extends BLT> extends AbstractEquationBlock {
+        private final T[] subBLTs;
+        
+        public AbstractSubBLTBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, T[] subBLTs) {
+            super(producer, blockDependency);
+            this.subBLTs = subBLTs;
+            
+        }
         @Override
         public Collection<FAbstractEquation> realEquations() {
             Set<FAbstractEquation> res = new LinkedHashSet<FAbstractEquation>();
-            for (DynamicStateBLT blt : subBLTs)
+            for (T blt : subBLTs)
                 for (AbstractEquationBlock block : blt)
-                res.addAll(block.realEquations());
+                    res.addAll(block.realEquations());
             return res;
         }
 
@@ -1548,9 +1676,9 @@ aspect BLT{
         @Override
         public Collection<FAbstractEquation> nonRealEquations() {
             Set<FAbstractEquation> res = new LinkedHashSet<FAbstractEquation>();
-            for (DynamicStateBLT blt : subBLTs)
+            for (T blt : subBLTs)
                 for (AbstractEquationBlock block : blt)
-                res.addAll(block.nonRealEquations());
+                    res.addAll(block.nonRealEquations());
             return res;
         }
 
@@ -1572,9 +1700,9 @@ aspect BLT{
         @Override
         public Collection<FVariable> realVariables() {
             Set<FVariable> res = new LinkedHashSet<FVariable>();
-            for (DynamicStateBLT blt : subBLTs)
+            for (T blt : subBLTs)
                 for (AbstractEquationBlock block : blt)
-                res.addAll(block.realVariables());
+                    res.addAll(block.realVariables());
             return res;
         }
 
@@ -1586,9 +1714,9 @@ aspect BLT{
         @Override
         public Collection<FVariable> nonRealVariables() {
             Set<FVariable> res = new LinkedHashSet<FVariable>();
-            for (DynamicStateBLT blt : subBLTs)
+            for (T blt : subBLTs)
                 for (AbstractEquationBlock block : blt)
-                res.addAll(block.nonRealVariables());
+                    res.addAll(block.nonRealVariables());
             return res;
         }
 
@@ -1628,17 +1756,55 @@ aspect BLT{
         }
 
         @Override
+        protected boolean needSequenceNumber(boolean inSubBlock) {
+            return false;
+        }
+        
+        @Override
         protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
             super.setLabel(prefix, inSubBlock, nestedEnum, seqEnum);
-            for (DynamicStateBLT blt : subBLTs)
-                blt.setLabels(getLabel() + '(' + blt.label() + ')', new Enumerator(), seqEnum);
+            for (T blt : subBLTs)
+                blt.setLabels(getLabel() + '(' + computeLabel(blt) + ')', new Enumerator(1), seqEnum);
         }
+
+        protected abstract String computeLabel(T blt);
 
         @Override
         public void errorCheck() {
-            for (DynamicStateBLT blt : subBLTs)
+            for (T blt : subBLTs)
                 blt.errorCheck();
             
+        }
+        
+        protected T[] subBLTs() {
+            return subBLTs;
+        }
+
+    }
+
+    public class DynamicStateBlock extends AbstractSubBLTBlock<DynamicStateBLT> {
+        private final Collection<DynamicStateSet> sets;
+        
+        private final int numVars;
+        private final int numStates;
+        private final int numAlgebraics;
+
+        public DynamicStateBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, DynamicStateBLT[] subBLTs, Collection<DynamicStateSet> sets) {
+            super(producer, blockDependency, subBLTs);
+            this.sets = sets;
+            int numVars = 0;
+            for (DynamicStateSet set : sets)
+                numVars += set.numVars();
+            this.numVars = numVars;
+            int numStates = 0;
+            for (DynamicStateSet set : sets)
+                numStates += set.numStates();
+            this.numStates = numStates;
+            int numAlgebraics = 0;
+            for (DynamicStateSet set : sets)
+                numAlgebraics += set.numAlgebraics();
+            this.numAlgebraics = numAlgebraics;
+
         }
 
         public int numVars() {
@@ -1652,6 +1818,40 @@ aspect BLT{
         public int numAlgebraics() {
             return numAlgebraics;
         }
+
+        @Override
+        protected String computeLabel(DynamicStateBLT blt) {
+            return blt.label();
+        }
+
+    }
+    
+    public class HomotopyBlock extends AbstractSubBLTBlock<BLT> {
+        
+        private static final int HOMOTOPY_BLT_POS   = 0;
+        private static final int SIMPLIFIED_BLT_POS = 1;
+        
+        private final HomotopySubBlock homotopySubBlock;
+        
+        public HomotopyBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, HomotopySubBlock homotopySubBlock, BLT simplifiedBLT) {
+            super(producer, blockDependency, new BLT[]{createHomotopyBLT(homotopySubBlock), simplifiedBLT});
+            this.homotopySubBlock = homotopySubBlock;
+        }
+
+        @Override
+        protected String computeLabel(BLT blt) {
+            if (blt == subBLTs()[HOMOTOPY_BLT_POS])
+                return "Homotopy";
+            else
+                return "Simplified";
+        }
+        
+        private static BLT createHomotopyBLT(EquationBlock homotopyBlock) {
+            BLT blt = new BLT();
+            blt.add(homotopyBlock);
+            return blt;
+        }
+
     }
 
 
@@ -1795,9 +1995,13 @@ aspect BLT{
         public void errorCheck() {}
 
         protected boolean needLabel(boolean inSubBlock) {
-            return !inSubBlock && !isSolvable();
+            return needSequenceNumber(inSubBlock);
         }
 
+        protected boolean needSequenceNumber(boolean inSubBlock) {
+            return !inSubBlock && !isSolvable();
+        }
+        
         @Override
         public boolean isSimple() {
             return true;
@@ -1932,6 +2136,11 @@ aspect BLT{
             return true;
         }
 
+        @Override
+        protected boolean needSequenceNumber(boolean inSubBlock) {
+            return true;
+        }
+        
         @Override
         public Collection<FAbstractEquation> localUnsolvedEquations() {
             return allLocalEquations();
@@ -2454,21 +2663,39 @@ aspect BLTPrettyPrinting {
     }
 
     @Override
+    public void HomotopySubBlock.prettyPrint(Printer p, CodeStream str, String indent) {
+        for (AbstractEquationBlock aeb : solvedBlocks())
+            aeb.prettyPrintSub(p, str, indent);
+    }
+
+    @Override
     public void EquationBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
         prettyPrint(p, str, indent);
         str.println();
     }
 
     @Override
-    public void DynamicStateBlock.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.formatln("%s--- Dynamic state block ---", indent);
+    public void AbstractSubBLTBlock.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.formatln("%s--- %s block ---", indent, blockTypeTitle());
         String innerIndent = p.indent(indent);
-        for (DynamicStateBLT blt : subBLTs)
+        for (T blt : subBLTs)
             blt.prettyPrint(p, str, innerIndent);
+    }
+    
+    public abstract String AbstractSubBLTBlock.blockTypeTitle();
+
+    @Override
+    public String DynamicStateBlock.blockTypeTitle() {
+        return "Dynamic state";
     }
 
     @Override
-    public void DynamicStateBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
+    public String HomotopyBlock.blockTypeTitle() {
+        return "Homotopy";
+    }
+
+    @Override
+    public void AbstractSubBLTBlock.prettyPrintSub(Printer p, CodeStream str, String indent) {
         prettyPrint(p, str, indent);
         str.println();
     }
@@ -2705,8 +2932,8 @@ aspect BLTPrettyPrinting {
     }
 
     @Override
-    public void DynamicStateBlock.prettyPrintActiveVariables(Printer p, CodeStream str, String indent, boolean printAttributes, boolean printLabel) {
-        throw new UnsupportedOperationException("DynamicStateBlock.prettyPrintActiveVariables() is not implemented!");
+    public void AbstractSubBLTBlock.prettyPrintActiveVariables(Printer p, CodeStream str, String indent, boolean printAttributes, boolean printLabel) {
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.prettyPrintActiveVariables() is not implemented!");
     }
 
     @Override

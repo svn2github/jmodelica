@@ -73,10 +73,14 @@ aspect InstanceNameCheck {
         //log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
         if (hasLookupError()) 
             lookupInstComponent(name()).error(this, "component", qualifiedName());
-        if (!inConnectClause() && !isModificationName() && myInstComponentDecl().hasConditionalAttribute()) {
+        if (!inConnectClause() && !isModificationName() && isConditional()) {
             error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
         }
     }
+    
+    syn boolean InstAccess.isConditional()      = myInstComponentDecl().hasConditionalAttribute();
+    eq InstComponentAccess.isConditional()      = myInstLookup().unresolved().target().hasConditionalAttribute();
+    eq InstComponentArrayAccess.isConditional() = myInstLookup().unresolved().target().hasConditionalAttribute();
 
     public void InstClassAccess.nameCheck(ErrorCheckType checkType) {
         //log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());

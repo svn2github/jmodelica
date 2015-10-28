@@ -25,9 +25,8 @@
     <para><itemizedlist>
         <listitem>
           <para><emphasis role="bold">PyModelica</emphasis> Interface to the
-          compilers. Compile Modelica and Optimica code into model units, FMUs
-          and JMUs. See <xref linkend="ch_models"/> for more
-          information.</para>
+          compilers. Compile Modelica and Optimica code into model units,
+          FMUs. See <xref linkend="ch_models"/> for more information.</para>
         </listitem>
 
         <listitem>
@@ -39,9 +38,10 @@
 
         <listitem>
           <para><emphasis role="bold">PyJMI</emphasis> Work with models that
-          have been compiled into JMUs. This package is mainly used for
-          solving optimization problems. See <xref linkend="ch_optimization"/>
-          for more information.</para>
+          are represented in symbolic form based no the automatic
+          differentiation tool CasADi. This package is mainly used for solving
+          optimization problems. See <xref linkend="ch_optimization"/> for
+          more information.</para>
         </listitem>
       </itemizedlist></para>
   </section>
@@ -55,7 +55,7 @@
     <section>
       <title>Windows</title>
 
-      <para>If you are on Windows, there are three different Python shells are
+      <para>If you are on Windows, there are three different Python shells
       available under the JModelica.org start menu.<itemizedlist>
           <listitem>
             <para><emphasis role="bold">Python</emphasis> Normal command shell
@@ -89,7 +89,7 @@
   </section>
 
   <section>
-    <title>Run an example</title>
+    <title>Running an example</title>
 
     <para>The Python packages <literal>pyfmi</literal> and
     <literal>pyjmi</literal> each contain a folder called
@@ -115,7 +115,7 @@ RLC.run_demo()</programlisting></para>
   </section>
 
   <section>
-    <title>Check your installation</title>
+    <title>Checking your installation</title>
 
     <para>The JModelica.org Python packages require some third-party Python
     packages in order to run. Use the function

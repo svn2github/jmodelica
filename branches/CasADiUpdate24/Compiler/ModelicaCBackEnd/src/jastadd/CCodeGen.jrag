@@ -59,13 +59,17 @@ aspect CCodeGen {
                 return providers;
         }
         
+        private final boolean inBlock;
         private final boolean inInitialSystem;
+        private final Homotopy homotopyType;
 
-        public CodePrinter(boolean inInitialSystem) {
+        public CodePrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
             super("    ");
             for (CodeGeneratorProvider provider : getProviders())
                 provider.provide(this);
+            this.inBlock = inBlock;
             this.inInitialSystem = inInitialSystem;
+            this.homotopyType = homotopyType;
         }
         
         /**
@@ -110,23 +114,42 @@ aspect CCodeGen {
         
         public abstract void printPostSteps(ASTNode node, CodeStream str, String indent);
 
-        public boolean insideBlock() {
-            return false;
+        public boolean inBlock() {
+            return inBlock;
         }
-        
+
+        protected abstract CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType);
+
         public final CodePrinter initialSystemPrinter() {
             if (inInitialSystem())
                 return this;
             else
-                return getInitialSystemPrinter();
+                return createPrinter(inBlock, true, homotopyType);
         }
-        
-        protected abstract CodePrinter getInitialSystemPrinter();
+
+        public final CodePrinter homotopySimplifiedPrinter() {
+            if (homotopyType == Homotopy.SIMPLIFIED)
+                return this;
+            else
+                return createPrinter(inBlock, inInitialSystem, Homotopy.SIMPLIFIED);
+        }
         
         public boolean inInitialSystem() {
             return inInitialSystem;
         }
+        
+        protected static enum Homotopy {
+            HOMOTOPY, SIMPLIFIED, ACTUAL
+        }
+        
+        public boolean inHomotopySimplified() {
+            return homotopyType == Homotopy.SIMPLIFIED;
+        }
 
+        public boolean inHomotopyActual() {
+            return homotopyType == Homotopy.ACTUAL;
+        }
+        
         @Override
         public String op(FBinExp e) { return e.op_C(); }
 
@@ -137,19 +160,21 @@ aspect CCodeGen {
     
     public class CPrettyPrinter extends CodePrinter {
 
-        private static CPrettyPrinter INITIAL_SYSTEM_PRINTER = new CPrettyPrinter(true);
-
         public CPrettyPrinter() {
             this(false);
         }
+        
+        public CPrettyPrinter(boolean inBlock) {
+            this(inBlock, false, Homotopy.HOMOTOPY);
+        }
 
-        protected CPrettyPrinter(boolean inInitialSystem) {
-            super(inInitialSystem);
+        protected CPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            super(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
-        protected CodePrinter getInitialSystemPrinter() {
-            return INITIAL_SYSTEM_PRINTER;
+        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+            return new CPrettyPrinter(inBlock, inInitialSystem, homotopyType);
         }
 
         @Override
@@ -172,48 +197,24 @@ aspect CCodeGen {
             node.genTempFree_C(this, str, indent);
         }
 
+        @Override
         public TypePrinter_C createDeclPrinter(CodeStream str) {
             return new DeclPrinter_C(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitPrinter(CodeStream str) {
             return new InitPrinter_C(this, str);
         }
         
+        @Override
         public TypePrinter_C createInitSetPrinter(CodeStream str) {
             return new InitSetPrinter_C(this, str);
         }
     }
 	
-    /**
-     * Just like CPrettyPrinter but it is used inside of blocks
-     */
-    public class CBlockPrettyPrinter extends CPrettyPrinter {
-
-        private static CBlockPrettyPrinter INITIAL_SYSTEM_PRINTER = new CBlockPrettyPrinter(true);
-
-        public CBlockPrettyPrinter() {
-            this(false);
-        }
-
-        private CBlockPrettyPrinter(boolean inInitialSystem) {
-            super(inInitialSystem);
-        }
-
-        @Override
-        protected CodePrinter getInitialSystemPrinter() {
-            return INITIAL_SYSTEM_PRINTER;
-        }
-
-        @Override
-        public boolean insideBlock() {
-            return true; 
-        }
-
-    }
-    
     static CPrettyPrinter ASTNode.printer_C = new CPrettyPrinter();
-    static CPrettyPrinter ASTNode.blockPrinter_C = new CBlockPrettyPrinter();
+    static CPrettyPrinter ASTNode.blockPrinter_C = new CPrettyPrinter(true);
 	
 	public String ASTNode.prettyPrint_C(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -2611,11 +2612,17 @@ aspect CCodeGen {
 
     public void FHomotopyExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         if (p.inInitialSystem()) {
-            str.print("(__homotopy_lambda * (");
-            p.print(getActual(), str, indent);
-            str.print(") + (1 - __homotopy_lambda) * (");
-            p.print(getSimplified(), str, indent);
-            str.print("))");
+            if (p.inHomotopySimplified()) {
+                str.print("(");
+                p.print(getSimplified(), str, indent);
+                str.print(")");
+            } else {
+                str.print("(__homotopy_lambda * (");
+                p.print(getActual(), str, indent);
+                str.print(") + (1 - __homotopy_lambda) * (");
+                p.print(getSimplified(), str, indent);
+                str.print("))");
+            }
         } else {
             str.print("(");
             p.print(getActual(), str, indent);
@@ -2677,7 +2684,15 @@ aspect CCodeGen {
 
     syn String FRelExp.op_C() = op();
     eq FNeqExp.op_C() = " != ";
-
+    
+    @Override
+    public void FRelExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        super.genVarDecls_C(p, str, indent);
+        if (generatesEvent(p.inInitialSystem())) {
+            printIndicatorDecls_C(p, str, indent);
+        }
+    }
+    
     @Override
     public void FRelExp.genTempVars_C(CodePrinter p, CodeStream str, String outerIndent) {
         super.genTempVars_C(p, str, outerIndent);
@@ -2685,13 +2700,14 @@ aspect CCodeGen {
             return;
         if (generatesEvent(p.inInitialSystem())) {
             str.format("%sif (", outerIndent);
-            if (p.insideBlock())
+            if (p.inBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
             else
                 str.print("jmi->atInitial || jmi->atEvent");
             str.println(") {");
             
             String indent = p.indent(outerIndent);
+            printIndicatorPre_C(p, str, indent);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
             boolean time = isTimeEventGenerating();
@@ -2720,6 +2736,7 @@ aspect CCodeGen {
             }
             
             str.formatln(");");
+            printIndicatorPost_C(p, str, indent);
             str.formatln("%s}", outerIndent);
         }
     }
@@ -3542,10 +3559,19 @@ aspect CCodeGen {
         str.print(outerIndent + "}\n\n");
     }
 
-    public void DynamicStateBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
-        for (DynamicStateBLT blt : subBLTs)
+    @Override
+    public void AbstractSubBLTBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
+        for (T blt : subBLTs)
             for (AbstractEquationBlock block : blt)
                 block.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
+    }
+
+    @Override
+    public void HomotopyBlock.genBlockResidualFunction_C(CodePrinter p, CodeStream str, String outerIndent, boolean inInitial) {
+        homotopySubBlock.genBlockResidualFunction_C(p, str, outerIndent, inInitial);
+        CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
+        for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS])
+            block.genBlockResidualFunction_C(simplifiedPrinter, str, outerIndent, inInitial);
     }
     /*
      * Various dispatch methods used in genBlockResidualFunction_C():
@@ -3589,9 +3615,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
             Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
     }
     
     @Override
@@ -3638,9 +3664,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
+    public void AbstractSubBLTBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p,
             CodeStream str, String indent, boolean inInitial, Set<FAbstractEquation> visited) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genBlockResidualFunction_solvedEqn_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunction_solvedEqn_C() is not implemented!");
     }
     
     @Override
@@ -3734,7 +3760,7 @@ aspect CCodeGen {
     public boolean SimpleEquationBlock.hasEquationNominal_C(boolean auto) { 
         return realVariables().size() > 0 && equation().equationNominal_C(auto) != null;
     }
-    public boolean DynamicStateBlock.hasEquationNominal_C(boolean auto) { return true; } // To trigger error message
+    public boolean AbstractSubBLTBlock.hasEquationNominal_C(boolean auto) { return true; } // To trigger error message
     
     
     public abstract void AbstractEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
@@ -3748,9 +3774,9 @@ aspect CCodeGen {
     }
     
     @Override
-    public void DynamicStateBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
             boolean auto, Map<FAbstractEquation,FExp> nominalMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominalVarDecl_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genEquationNominalVarDecl_C() is not implemented!");
     }
     
     public void SimpleEquationBlock.genEquationNominalVarDecl_C(CodePrinter p, CodeStream str, String indent,
@@ -3776,9 +3802,9 @@ aspect CCodeGen {
     }
 
     @Override
-    public void DynamicStateBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent,
+    public void AbstractSubBLTBlock.genEquationNominal_C(CodePrinter p, CodeStream str, String indent,
             boolean auto, Map<FAbstractEquation,FExp> nominalMap) {
-        throw new UnsupportedOperationException("DynamicStateBlock.genEquationNominal_C() is not implemented!");
+        throw new UnsupportedOperationException("AbstractSubBLTBlock.genEquationNominal_C() is not implemented!");
     }
 
     @Override
@@ -4015,7 +4041,7 @@ aspect CCodeGen {
         return getLabel() != null;
     }
 
-    public boolean DynamicStateBlock.hasResidualFunction_C() {
+    public boolean AbstractSubBLTBlock.hasResidualFunction_C() {
         return false;
     }
 
@@ -4047,8 +4073,8 @@ aspect CCodeGen {
 		str.print(parentBlockNumber + ");\n");
 	}
 
-    public void DynamicStateBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
-        for (DynamicStateBLT blt : subBLTs)
+    public void AbstractSubBLTBlock.genBlockAddCall_C(CodePrinter p, CodeStream str, String indent, boolean dirDer, boolean inInit, String nleSolver, int parentBlockNumber) {
+        for (T blt : subBLTs)
             for (AbstractEquationBlock block : blt)
                 block.genBlockAddCall_C(p, str, indent, dirDer, inInit, nleSolver, parentBlockNumber);
     }
@@ -4274,54 +4300,52 @@ aspect CCodeGen {
             str.formatln("%s}", indent);
         }
         boolean first = true;
-        for (DynamicStateBLT blt : subBLTs) {
+        for (DynamicStateBLT blt : subBLTs()) {
             if (first)
                 str.format("%sif (", indent);
             else
                 str.format("%s} else if(", indent);
             first = false;
-            DynamicStateSet previousSet = null;
-            for (FVariable var : blt.states()) {
-                DynamicStateSet set = var.dynamicStateSet();
-                if (set != previousSet) {
-                    if (previousSet != null)
-                        str.print(") && ");
-                    previousSet = set;
-                    str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
-                }
-                str.format(", %d", var.valueReference());
-            }
-            str.println(")) {");
+            blt.genSubBLTTest_C(p, str);
+            str.println(") {");
             blt.genVarDecls_C(p, str, innerIndent);
-            DynamicStateSet lastSet = null;
-            int i = 0;
-            for (FVariable state : blt.states()) {
-                DynamicStateSet set = state.dynamicStateSet();
-                if (lastSet != set) {
-                    i = 0;
-                    lastSet = set;
-                } else {
-                    i++;
-                }
-                str.formatln("%s%s = %s;", innerIndent, state.name_C(), set.getStateVars()[i].name_C());
-            }
             blt.genOdeDerivativeBlocks(p, str, innerIndent);
-            lastSet = null;
-            i = 0;
-            for (FVariable algebraic : blt.algebraics()) {
-                DynamicStateSet set = algebraic.dynamicStateSet();
-                if (lastSet != set) {
-                    i = 0;
-                    lastSet = set;
-                } else {
-                    i++;
-                }
-                str.formatln("%s%s = %s;", innerIndent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
-            }
         }
         str.formatln("%s}", indent);
     }
+    
+    public void DynamicStateBLT.genSubBLTTest_C(CodePrinter p, CodeStream str) {
+        DynamicStateSet previousSet = null;
+        for (FVariable var : states()) {
+            DynamicStateSet set = var.dynamicStateSet();
+            if (set != previousSet) {
+                if (previousSet != null)
+                    str.print(") && ");
+                previousSet = set;
+                str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
+            }
+            str.format(", %d", var.valueReference());
+        }
+        str.print(")");
+    }
  
+    @Override
+    public void HomotopyBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        str.formatln("%s/* Start of section for simplified version of homotopy*/", indent);
+        CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
+        for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
+            block.genBlock_C(simplifiedPrinter, str, indent, inInitial); 
+        }
+        str.formatln("%s/* End of section for simplified version of homotopy*/", indent);
+        homotopySubBlock.genBlock_C(p, str, indent, inInitial);
+    }
+
+    @Override
+    public void HomotopySubBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
+        String var = inInitial ? "dae_init_block_residuals" : "dae_block_residuals";
+        str.format("%sef |= jmi_solve_block_with_homotopy_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
+    }
+
     /**
      * Generate block code for equations
      * 
@@ -4941,8 +4965,33 @@ aspect CCodeGen {
             p.printPostSteps(getPositiveVelocity(), str, indent);
         }
     }
-	
+    
+    private void FRelExp.printIndicatorDecls_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printVarDecls(getIndicatorNominal(), str, indent);
+        }
+    }
+    
+    private void FRelExp.printIndicatorPre_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printPreSteps(getIndicatorNominal(), str, indent);
+        }
+    }
+    
+    private void FRelExp.printIndicatorPost_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            p.printPostSteps(getIndicatorNominal(), str, indent);
+        }
+    }
+    
     private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
+        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
+        if (scale) {
+            str.print("(");
+        }
         if (hasIndicator()) {
             p.print(getIndicator(), str, indent);
         } else {
@@ -4950,6 +4999,10 @@ aspect CCodeGen {
             str.print(" - (");
             p.print(getRight(), str, indent);
             str.print(")");
+        }
+        if (scale) {
+            str.print(") / ");
+            p.print(getIndicatorNominal(), str, indent);
         }
     }
     
@@ -5194,6 +5247,11 @@ aspect CCodeGen {
         }
     }
 
+    @Override
+    public void HomotopyBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        subBLTs()[SIMPLIFIED_BLT_POS].genVarDecls_C(p, str, indent);
+    }
+    
 	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
         str.formatln("%s/********* Initialize reinits *******/", indent);
         for (AbstractEquationBlock eb : getAllBlocks()) {
@@ -5221,6 +5279,35 @@ aspect CCodeGen {
             eb.genReinitWritebacks_C(p, indent, str);
         }
 	}
+	
+    public void DynamicStateBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
+        DynamicStateSet lastSet = null;
+        int i = 0;
+        for (FVariable state : states()) {
+            DynamicStateSet set = state.dynamicStateSet();
+            if (lastSet != set) {
+                i = 0;
+                lastSet = set;
+            } else {
+                i++;
+            }
+            str.formatln("%s%s = %s;", indent, state.name_C(), set.getStateVars()[i].name_C());
+        }
+        super.genOdeDerivativeBlocks(p, str, indent);
+        lastSet = null;
+        i = 0;
+        for (FVariable algebraic : algebraics()) {
+            DynamicStateSet set = algebraic.dynamicStateSet();
+            if (lastSet != set) {
+                i = 0;
+                lastSet = set;
+            } else {
+                i++;
+            }
+            str.formatln("%s%s = %s;", indent, set.getAlgebraicVars()[i].name_C(), algebraic.name_C());
+        }
+    }
+	
 
     syn int DynamicStateSet.id_C() = id() - 1;
 

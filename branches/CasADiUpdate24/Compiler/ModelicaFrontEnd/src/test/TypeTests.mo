@@ -2636,4 +2636,79 @@ end TypeTests.DivType1;
 ")})));
 end DivType1;
 
+
+model NominalValue1
+    Real x(nominal=0, start=2, fixed=true);
+equation
+    der(x) = -x / time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NominalValue1",
+            description="Error for nominal=0",
+            errorMessage="
+1 errors found:
+
+Error at line 2641, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+  The attribute nominal for the variable x is set to 0, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
+")})));
+end NominalValue1;
+
+
+model NominalValue2
+	parameter Real p1 = 2;
+	parameter Real p2 = 1 + 1;
+    Real x(nominal=p1 - p2, start=2, fixed=true);
+equation
+    der(x) = -x / time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NominalValue2",
+            description="Error for nominal value that evaluates to 0",
+            errorMessage="
+1 errors found:
+
+Error at line 2661, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+  The attribute nominal for the variable x is set to p1 - p2, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
+")})));
+end NominalValue2;
+
+
+model NominalValue3
+    Real x(nominal=1e-200, start=2, fixed=true);
+equation
+    der(x) = -x / time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NominalValue3",
+            description="No error for nominal value very close to 0",
+            flatModel="
+fclass TypeTests.NominalValue3
+ Real x(nominal = 1.0E-200,start = 2,fixed = true);
+equation
+ der(x) = (- x) / time;
+end TypeTests.NominalValue3;
+")})));
+end NominalValue3;
+
+
+model NominalValue4
+    Real x[4](nominal={1,0,2,0}, each start=2, each fixed=true);
+equation
+    der(x) = -x / time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NominalValue4",
+            description="Error for array nominal value where some cells evaluate to 0",
+            errorMessage="
+1 errors found:
+
+Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+  The attribute nominal for the variable x is set to {1, 0, 2, 0}, where element [2] evaluates to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
+")})));
+end NominalValue4;
+
 end TypeTests;

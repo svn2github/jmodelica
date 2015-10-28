@@ -186,17 +186,13 @@ aspect FlatAPI {
     syn int FClass.independentEnumConstantsOffset() =
         independentIntegerConstantsOffset() +     
         numIndependentIntegerConstants();   
-    syn int FClass.IndependentBooleanConstantsOffset() =
+    syn int FClass.independentBooleanConstantsOffset() =
         independentEnumConstantsOffset() +    
         numIndependentEnumConstants();  
-    syn int FClass.independentStringConstantsOffset() = 
-        numIndependentRealConstants() + 
-        numIndependentIntegerConstants()
-        + numIndependentBooleanConstants();
         
     syn int FClass.dependentRealConstantsOffset() = 
-        independentStringConstantsOffset() + 
-        numIndependentStringConstants();
+        independentBooleanConstantsOffset() + 
+        numIndependentBooleanConstants();
     syn int FClass.dependentIntegerConstantsOffset() =
         dependentRealConstantsOffset() +     
         numDependentRealConstants();    
@@ -206,13 +202,10 @@ aspect FlatAPI {
     syn int FClass.dependentBooleanConstantsOffset() =
         dependentEnumConstantsOffset() +      
         numDependentEnumConstants();    
-    syn int FClass.dependentStringConstantsOffset() = 
-        dependentBooleanConstantsOffset() +       
-        + numDependentBooleanConstants();
 
     syn int FClass.independentRealParametersOffset() = 
-        dependentStringConstantsOffset() + 
-        numDependentStringConstants();
+        dependentBooleanConstantsOffset() + 
+        numDependentBooleanConstants();
     syn int FClass.independentIntegerParametersOffset() =
         independentRealParametersOffset() +      
         numIndependentRealParameters(); 
@@ -222,13 +215,10 @@ aspect FlatAPI {
     syn int FClass.independentBooleanParametersOffset() =
         independentEnumParametersOffset() +       
         numIndependentEnumParameters(); 
-    syn int FClass.independentStringParametersOffset() = 
-        independentBooleanParametersOffset() +    
-        + numIndependentBooleanParameters();
         
     syn int FClass.dependentRealParametersOffset() = 
-        independentStringParametersOffset() + 
-        numIndependentStringParameters();
+        independentBooleanParametersOffset() + 
+        numIndependentBooleanParameters();
     syn int FClass.dependentIntegerParametersOffset() =
         dependentRealParametersOffset() +    
         numDependentRealParameters();   
@@ -238,13 +228,10 @@ aspect FlatAPI {
     syn int FClass.dependentBooleanParametersOffset() =
         dependentEnumParametersOffset() +     
         numDependentEnumParameters();   
-    syn int FClass.dependentStringParametersOffset() = 
-        dependentBooleanParametersOffset() +      
-        + numDependentBooleanParameters();
 
     syn int FClass.derivativeVariablesOffset() = 
-        dependentStringParametersOffset() + 
-        numDependentStringParameters();
+        dependentBooleanParametersOffset() + 
+        numDependentBooleanParameters();
     syn int FClass.differentiatedRealVariablesOffset() = 
         derivativeVariablesOffset() + 
         numDerivativeVariables();
@@ -2588,8 +2575,8 @@ aspect Attributes {
     eq FIntegerLitExp.minRealValue() = getValue();
     eq FNegExp.maxRealValue()        = -getFExp().minRealValue();
     eq FNegExp.minRealValue()        = -getFExp().maxRealValue();
-    eq FIdUseExp.maxRealValue()      = getFIdUse().myFV().maxRealValue();
-    eq FIdUseExp.minRealValue()      = getFIdUse().myFV().minRealValue();
+    eq FIdUseExp.maxRealValue()      = myFV().maxRealValue();
+    eq FIdUseExp.minRealValue()      = myFV().minRealValue();
 
     /**
      * Return the maximum numeric value that this variable can take.
@@ -2684,6 +2671,8 @@ aspect Nominals {
     
     syn FExp FExp.nominal() = FExp.nominalDefault();
     eq FLitExp.nominal()    = new FAbsExp(fullCopy());
+    
+    syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
     
     eq FDotAddExp.nominal() = FExp.nominalMax(getLeft(), getRight());
     eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());

@@ -39,7 +39,7 @@
     Consider the optimal control problem for the Van der Pol oscillator
     model:</para>
 
-    <programlisting language="optimica">optimization VDP_Opt (objective = cost(finalTime),
+    <programlisting language="optimica">optimization VDP_Opt (objectiveIntegrand = x1^2 + x2^2 + u^2,
                       startTime = 0,
                       finalTime = 20)
 
@@ -50,12 +50,9 @@
   // The control signal
   input Real u;
 
-  Real cost(start=0,fixed=true);
-
 equation
   der(x1) = (1 - x2^2) * x1 - x2 + u;
   der(x2) = x1;
-  der(cost) = x1^2 + x2^2 + u^2;
 constraint 
    u&lt;=0.75;
 end VDP_Opt;
@@ -73,7 +70,7 @@ end VDP_Opt;
     following commands:</para>
 
     <programlisting language="python"># Import the function for transfering a model to CasADiInterface
-from pyjmi import transfer_to_casadi_interface
+from pyjmi import transfer_optimization_problem
 
 # Import the plotting library
 import matplotlib.pyplot as plt
@@ -82,14 +79,14 @@ import matplotlib.pyplot as plt
     <para>Next, we transfer the model:</para>
 
     <programlisting language="python"># Transfer the optimization problem to casadi
-	op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
+	op = transfer_optimization_problem("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
 </programlisting>
 
-    <para>The function <literal>transfer_to_casadi_interface</literal> invokes
-    the CasADiInterface library to transfer the optimization problem and
-    express it's components in terms of CasADi variables. This object
-    represents the compiled model and is used to invoke the optimization
-    algorithm:</para>
+    <para>The function <literal>transfer_optimization_problem</literal>
+    transfers the optimization problem into Python and expresses it's
+    variables, equations, etc., using the automatic differentiation tool
+    CasADi. This object represents the compiled model and is used to invoke
+    the optimization algorithm:</para>
 
     <programlisting language="python">res = op.optimize()
 </programlisting>
@@ -105,7 +102,7 @@ u=res['u']
 t=res['time']
 </programlisting>
 
-    <para>The variable trajectories are returned as numpy arrays and can be
+    <para>The variable trajectories are returned as NumPy arrays and can be
     used for further analysis of the optimization result or for
     visualization:</para>
 
@@ -164,11 +161,12 @@ plt.show()
         collocation with CasADi.</emphasis> This algorithm is the default
         algorithm for solving optimal control and parameter estimation
         problems. It is implemented in Python, uses CasADi for computing
-        function derivatives and IPOPT or WORHP for solving the resulting NLP.
-        In terms of functionality, this algorithm is very similar to the
-        default JMU-based algorithm, but offers significant performance
-        improvements in several regards. It is however still in a state of
-        development, and is not as mature as the default algorithm.</para>
+        function derivatives and the nonlinear programming solvers IPOPT or
+        WORHP for solving the resulting NLP. In terms of functionality, this
+        algorithm is very similar to the deprecated JMU-based algorithm, but
+        offers significant performance improvements in several regards. Use
+        this method if your model is a DAE and does not contain
+        discontinuities.</para>
       </listitem>
 
       <listitem>
@@ -177,9 +175,10 @@ plt.show()
         parameter optimization and model calibration problems and is based on
         FMUs. The algorithm is implemented in Python and relies on a
         Nelder-Mead derivative free optimization algorithm. Use this method if
-        your model is of large scale and/or contains discontinuities or hybrid
-        elements. Note that this algorithm is applicable to models which have
-        been exported as FMUs also by other tools than JModelica.org.</para>
+        your model is of large scale and has a modest number of parameters to
+        calibrate and/or contains discontinuities or hybrid elements. Note
+        that this algorithm is applicable to models which have been exported
+        as FMUs also by other tools than JModelica.org.</para>
       </listitem>
 
       <listitem>
@@ -187,18 +186,15 @@ plt.show()
         collocation with JMUs (Deprecated in JModelica.org 1.15)</emphasis>.
         This algorithm is implemented in C, uses CppAD for computing function
         derivatives and IPOPT for solving the resulting nonlinear program
-        (NLP). Functions and records in models are supported by this
-        algorithm. Use this method if your model is a DAE and does not contain
-        discontinuities.</para>
+        (NLP). </para>
       </listitem>
     </itemizedlist>
 
     <para>To illustrate how to solve optimization problems the Van der Pol
-    problem presented above is used. First, the model is transfered to
-    CasadiInterface</para>
+    problem presented above is used. First, the model is transferred into
+    Python</para>
 
-    <programlisting language="python">
-op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
+    <programlisting language="python">op = transfer_optimization_problem("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
 </programlisting>
 
     <para>All operations that can be performed on the model are available as
@@ -219,7 +215,7 @@ op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
       </listitem>
 
       <listitem>
-        <para>Writes the result to file</para>
+        <para>Writes the result to a file</para>
       </listitem>
 
       <listitem>
@@ -271,9 +267,8 @@ op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
         A result object, subclass of algorithm_drivers.ResultBase.
 </programlisting>
 
-    <para>Again, note that the parameters differs for different model classes.
-    The optimize method can be invoked without any arguments, in which case
-    the default optimization algorithm, with default options, is
+    <para>The optimize method can be invoked without any arguments, in which
+    case the default optimization algorithm, with default options, is
     invoked:</para>
 
     <programlisting>res = vdp.optimize()
@@ -284,7 +279,7 @@ op = transfer_to_casadi_interface("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
     <literal>options</literal> argument to the <literal>optimize</literal>
     method. It is convenient to first obtain an options object in order to
     access the documentation and default option values. This is done by
-    invoking the method optimize_options:</para>
+    invoking the method <literal>optimize_options</literal>:</para>
 
     <programlisting>&gt;&gt;&gt; help(op.optimize_options)
     Returns an instance of the optimize options class containing options 
@@ -338,10 +333,10 @@ x1 = res['x1']
   <section>
     <title>Scaling</title>
 
-    <para>Many physical models contain variables with values that differ
+    <para>Many physical models contain variables with values that differ by
     several orders of magnitude. A typical example is thermodynamic models
     containing pressures, temperatures and mass flows. Such large differences
-    in values may have a severe deteriorating effect on the performance of
+    in scales may have a severe deteriorating effect on the performance of
     numerical algorithms, and may in some cases even lead to the algorithm
     failing. In order to relieve the user from the burden of manually scaling
     variables, Modelica offers the <literal>nominal</literal> attribute, which
@@ -352,13 +347,13 @@ x1 = res['x1']
 </programlisting>
 
     <para>Here, the <literal>nominal</literal> attribute is used to specify
-    that the variable pressure takes on values which are about 1e5. In order
-    to use <literal>nominal</literal> attributes for scaling with CasADi-based
-    algorithms, scaling is enabled by setting the algorithm option
-    <literal>variable_scaling</literal> to <literal>True</literal>, and is
-    enabled by default . In case of enabling scaling, all variables with a set
+    that the variable pressure takes on values which are on the order of 1e5.
+    In order to use <literal>nominal</literal> attributes for scaling with
+    CasADi-based algorithms, scaling is enabled by setting the algorithm
+    option <literal>variable_scaling</literal> to <literal>True</literal>, and
+    is enabled by default . When scaling is enabled, all variables with a set
     nominal attribute are then scaled by dividing the variable value with its
-    nominal value, i.e., from an algorithm point of view, all variables will
+    nominal value, i.e., from an algorithm point of view, all variables should
     take on values close to one. Notice that variables typically vary during a
     simulation or optimization and that it is therefore not possible to obtain
     perfect scaling. In order to ensure that model equations are fulfilled,
@@ -381,7 +376,7 @@ x1 = res['x1']
     provide nominal values for all variables, and that it is possible to use
     time-varying scaling factors.</para>
 
-    <para>For debugging purposes, is is sometimes useful to write a
+    <para>For debugging purposes, it is sometimes useful to write a
     simulation/optimization/initialization result to file in scaled format, in
     order to detect if there are some variables which require additional
     scaling. The option <literal>write_scaled_result</literal> has been
@@ -415,10 +410,10 @@ x1 = res['x1']
       second-order derivatives are obtained using CasADi by algorithmic
       differentiation.</para>
 
-      <para>The collocation method requires that the model equations are twice
+      <para>The NLP solvers require that the model equations are twice
       continuously differentiable with respect to all of the variables. This
-      for example means that the model can not contain integer variables or if
-      clauses depending on the states.</para>
+      for example means that the model can not contain integer variables or
+      <literal>if</literal> clauses depending on the states.</para>
 
       <para>Optimization models are represented using the class
       <literal>OptimizationProblem</literal>, which can be instantiated using
@@ -842,8 +837,8 @@ opts? # View the help text</programlisting>
       <programlisting>opts = model.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
 
-      <para>JModelica.org's CasADi framework does not support simulation and
-      initialization of models. It is recommended to use PyFMI for these
+      <para>JModelica.org's CasADi based framework does not support simulation
+      and initialization of models. It is recommended to use PyFMI for these
       purposes instead.</para>
 
       <para>Some statistics from the NLP solver can be obtained by issuing the
@@ -1377,10 +1372,10 @@ print('T = %f' % T_0_A)
           returns a result object from which the initialization result can be
           accessed. The values of the states corresponding to point A can then
           be extracted from the result object. Look carefully at the printouts
-          in the Python shell to see a printout of the stationary values.
-          Display the help text for the <literal>initialize</literal> method
-          and take a moment to look it through. The procedure is now repeated
-          for operating point B:</para>
+          in the Python shell to see the stationary values. Display the help
+          text for the <literal>initialize</literal> method and take a moment
+          to look it through. The procedure is now repeated for operating
+          point B:</para>
 
           <programlisting language="python"># Set inputs for Stationary point B
 init_model.reset() # reset the FMU so that we can initialize it again
@@ -1408,7 +1403,7 @@ print('T = %f' % T_0_B)
             <title>Solving an optimal control problem</title>
 
             <para>The optimal control problem we are about to solve is given
-            by:</para>
+            by</para>
 
             <informalequation>
               <m:math display="block" overflow="scroll">
@@ -1658,9 +1653,8 @@ init_res = init_sim_model.simulate(start_time=0., final_time=150.)
             interval 0 to 150 seconds. Take a moment to read the interactive
             help for the <literal>simulate</literal> method.</para>
 
-            <para>The simulation result object is returned and to retrieve the
-            simulation data use Python dictionary access to retrieve the
-            variable trajectories.</para>
+            <para>The simulation result object is returned. Python dictionary
+            access can be used to retrieve the variable trajectories.</para>
 
             <programlisting language="python"># Extract variable profiles
 t_init_sim = init_res['time']
@@ -1846,12 +1840,10 @@ sim_model = load_fmu(sim_fmu)
 
           <para>The solution obtained from the optimization are values at a
           finite number of time points, in this case the collocation points.
-          With the JMI framework, these values are normally interpolated
-          linearly when used for simulation purposes. The CasADi framework
-          also supports obtaining all the collocation polynomials for all the
-          input variables in the form of a function instead, which can be used
-          during simulation for greater accuracy. We obtain it from the result
-          object in the following manner.</para>
+          The CasADi framework also supports obtaining all the collocation
+          polynomials for all the input variables in the form of a function
+          instead, which can be used during simulation for greater accuracy.
+          We obtain it from the result object in the following manner.</para>
 
           <programlisting># Get optimized input
 (_, opt_input) = res.get_opt_input()
@@ -1936,8 +1928,8 @@ plt.show()
 
           <orderedlist>
             <listitem>
-              <para>Remove the constraint on cstr.T. What is then the maximum
-              temperature?</para>
+              <para>Remove the constraint on <literal>cstr.T</literal>. What
+              is then the maximum temperature?</para>
             </listitem>
 
             <listitem>
@@ -1949,10 +1941,10 @@ plt.show()
 
             <listitem>
               <para>Add terminal constraints
-              ('cstr.T(finalTime)=someParameter') for the states so that they
-              are equal to point B at the end of the optimization interval.
-              Now reduce the length of the optimization interval. How short
-              can you make the interval?</para>
+              (<literal>cstr.T(finalTime)=someParameter</literal>) for the
+              states so that they are equal to point B at the end of the
+              optimization interval. Now reduce the length of the optimization
+              interval. How short can you make the interval?</para>
             </listitem>
 
             <listitem>
@@ -2004,7 +1996,7 @@ plt.show()
             </m:munder>
 
             <m:msub>
-              <m:mi>t</m:mi>
+              <m:mi> t</m:mi>
 
               <m:mi>f</m:mi>
             </m:msub>
@@ -2372,7 +2364,7 @@ plt.show()
 
                     <m:mi>(t) -</m:mi>
 
-                    <m:mi>2</m:mi>
+                    <m:mi> 2</m:mi>
 
                     <m:msub>
                       <m:mi>u</m:mi>
@@ -2521,8 +2513,8 @@ constraint
 end DelayTest;
 </programlisting>
 
-        <para>The problem is then solved in the following python script.
-        Notice how delay constraint is added using the
+        <para>The problem is then solved in the following Python script.
+        Notice how the delay constraint is added using the
         <literal>delayed_feedback</literal> option, and the initial part of
         <inlineequation>
             <m:math display="inline">
@@ -2604,7 +2596,7 @@ plt.show()
               <m:mi>1 -</m:mi>
 
               <m:msub>
-                <m:mi>t</m:mi>
+                <m:mi> t</m:mi>
 
                 <m:mi>delay</m:mi>
               </m:msub>
@@ -3136,7 +3128,7 @@ plt.show()
         model variables and parameters are expressed in SI units.</para>
 
         <para>Measurement data, available in <link
-        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/qt_par_est_data.mat">qt_par_est_data.mat</link>,
+        xlink:href="https://svn.jmodelica.org/trunk/Python/src/pyjmi/examples/files/qt_par_est_data.mat"><literal>qt_par_est_data.mat</literal></link>,
         has been logged in an identification experiment. Download also this
         file to your working directory.</para>
 
@@ -3366,8 +3358,8 @@ quad_pen['u2'] = data_u2
 external_data = ExternalData(Q=Q, quad_pen=quad_pen)
 </programlisting>
 
-        <para>This will create an objective which is integral of the squared
-        difference between the measured profiles for x1 and x2 and the
+        <para>This will create an objective which is the integral of the
+        squared difference between the measured profiles for x1 and x2 and the
         corresponding model profiles. We will also introduce corresponding
         penalties for the two input variables, which are left as optimization
         variables. It would also have been possible to eliminate the input
@@ -3466,7 +3458,7 @@ plt.show()
 
         <para>The profiles corresponding to the estimated values of a1 and a2
         are shown in black curves. As can be seen, the match between the model
-        response and the measurement data has been significantly increased. Is
+        response and the measurement data has been significantly improved. Is
         the behavior of the model consistent with the estimated parameter
         values?</para>
 
@@ -3520,17 +3512,17 @@ solver = res.get_solver()
         need to be instantiated at additional points, such as the initial
         point which is typically not a collocation point.</para>
 
-        <para>The equations in a model are divided into initial equations, dae
+        <para>The equations in a model are divided into initial equations, DAE
         equations, path constraints and point constraints. These equations are
         also instantiated at different time points to become constraints in
         the NLP. Initial equations and point constraints are instantiated only
-        once. Dae equations and path constraints are instantiated at
+        once. DAE equations and path constraints are instantiated at
         collocation point of each element and possibly some additional
         points.</para>
 
         <para>When using the methods described below, each model equation is
         referred to as a pair <literal>(eqtype, eqind)</literal>. The string
-        <literal>eqtype</literal> may be either <literal>'initial'</literal>,
+        <literal>eqtype</literal> may be either<literal>'initial'</literal>,
         <literal>'dae'</literal>, <literal>'path_eq'</literal>,
         <literal>'path_ineq'</literal>, <literal>'point_eq'</literal>, or
         <literal>'point_ineq'</literal>. The equation index
@@ -3640,7 +3632,7 @@ all_eqs = solver.get_equations(eqtype)        # all equations of the given type
         evaluate the Jacobian of the constraint residual functions.
         Convergence problems can sometimes be related to numerical problems
         with the constraint Jacobian. In particular, Ipopt will never consider
-        potential solution if there are nonfinite (infinity or not-a-number)
+        a potential solution if there are nonfinite (infinity or not-a-number)
         entries in the Jacobian. If the Jacobian has such entries at the
         initial guess, the optimizer will give up completely.</para>
 
@@ -3774,6 +3766,9 @@ solver.print_jacobian_entries(entries) # Print them
         <literal>get_model_jacobian_entries</literal>, and the
         <literal>print_jacobian_entries</literal> method have already been
         covered in the section about jacobians above.</para>
+
+        <para>See the docstring for the respective method for more
+        information.</para>
       </section>
     </section>
   </section>
@@ -3805,9 +3800,9 @@ solver.print_jacobian_entries(entries) # Print them
         </m:math>
       </inlineequation>. Copy the file
     <filename>$JMODELICA_HOME/Python/pyjmi/examples/files/FMUs/Furuta.fmu</filename>
-    to your working directory. <emphasis role="bold">Note that this the
-    Furuta.fmu file is currently only supported on Windows.</emphasis>
-    Measurement data for <inlineequation>
+    to your working directory. <emphasis role="bold">Note that the Furuta.fmu
+    file is currently only supported on Windows.</emphasis> Measurement data
+    for <inlineequation>
         <m:math display="inline">
           <m:mi>φ</m:mi>
         </m:math>
@@ -4106,7 +4101,7 @@ theta_meas = data['theta'][:,0]
 
     <para>Next, define the objective function, it is important that the
     objective function has the same name as the file it is defined in (except
-    for .py):</para>
+    for <literal>.py</literal>):</para>
 
     <programlisting language="python"># Define the objective function
 def furuta_cost(x):
@@ -4133,11 +4128,11 @@ def furuta_cost(x):
 </programlisting>
 
     <para>This function will later be evaluated in temporary sub-directories
-    to your working directory which is why the string '../' is added to the
-    FMU name, it means that the FMU is located in the parent directory. The
-    Python function <literal>dfo.quad_err</literal> evaluates the objective
-    function. Now we can finally perform the actual calibration. Solve the
-    optimization problem by calling the Python function
+    to your working directory which is why the string <literal>'../'</literal>
+    is added to the FMU name, it means that the FMU is located in the parent
+    directory. The Python function <literal>dfo.quad_err</literal> evaluates
+    the objective function. Now we can finally perform the actual calibration.
+    Solve the optimization problem by calling the Python function
     <literal>dfo.fmin</literal> in the file named
     <filename>furuta_par_est.py</filename>:</para>
 
@@ -4154,7 +4149,7 @@ xstart=x0,lb=lb,ub=ub,alg=1,nbr_cores=4,x_tol=1e-3,f_tol=1e-2)
     and the optimal function value:</para>
 
     <programlisting language="python"># Optimal point (don't forget to scale down)
-[armFrictionCoefficient_opt ,pendulumFrictionCoefficient_opt] = x_opt/1e3
+[armFrictionCoefficient_opt, pendulumFrictionCoefficient_opt] = x_opt/1e3
 # Print optimal parameter values and optimal function value
 print 'Optimal parameter values:'
 print 'arm friction coeff = ' + str(armFrictionCoefficient_opt)
@@ -4170,7 +4165,7 @@ pendulum friction coeff = 0.000994473020199
 Optimal function value: 1.09943830585
 </programlisting>
 
-    <para>Then, we shall set the optimized parameter values into the model and
+    <para>Then, we set the optimized parameter values into the model and
     simulate it:</para>
 
     <programlisting language="python"># Load model
@@ -4186,7 +4181,7 @@ theta_opt = res['pendulumJoint.phi']
 t_opt = res['time']
 </programlisting>
 
-    <para>And finally, we plot the simulation result:</para>
+    <para>Finally, we plot the simulation result:</para>
 
     <programlisting language="python"># Plot simulation result
 plt.figure (1)

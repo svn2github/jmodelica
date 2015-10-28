@@ -4104,4 +4104,28 @@ end EvaluationTests.ForLoopSizeVary2;
 ")})));
 end ForLoopSizeVary2;
 
+model RelExpAlmost1
+    constant Real eps = 1e-16;
+    constant Boolean b1 = 1 >= 1 - eps;
+    constant Boolean b2 = 1 <= 1 - eps;
+    constant Boolean b3 = 1 > 1 - eps;
+    constant Boolean b4 = 1 < 1 - eps;
+    constant Boolean b5 = 0 < 1e-15;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RelExpAlmost1",
+            description="Very close real comparisons",
+            flatModel="
+fclass EvaluationTests.RelExpAlmost1
+ constant Real eps = 1.0E-16;
+ constant Boolean b1 = true;
+ constant Boolean b2 = true;
+ constant Boolean b3 = false;
+ constant Boolean b4 = false;
+ constant Boolean b5 = true;
+end EvaluationTests.RelExpAlmost1;
+")})));
+end RelExpAlmost1;
+
 end EvaluationTests;

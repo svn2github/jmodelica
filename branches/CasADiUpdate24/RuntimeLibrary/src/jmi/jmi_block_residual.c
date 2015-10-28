@@ -702,7 +702,7 @@ int jmi_ode_unsolved_block_dir_der(jmi_t *jmi, jmi_block_residual_t *current_blo
     ef = current_block->dF(jmi, current_block->x, current_block->dx,current_block->res, current_block->dv, JMI_BLOCK_INITIALIZE);
 
     /* Now we evaluate the system matrix of the linear system. */
-    if (!current_block->jmi->cached_block_jacobians==1) {
+    if (!(current_block->jmi->cached_block_jacobians==1)) {
         jmi_real_t* store_dz = jmi->dz[0]; 
         jmi->dz_active_index++;
         jmi->dz[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];

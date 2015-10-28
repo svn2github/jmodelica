@@ -1003,7 +1003,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
-            if (!graph.isInitialSystem() || !equation.getEquation().containsFHomotopyExp()) {
+            if (!graph.isInitialSystem() || graph.insideHomotopySimplified() || !equation.getEquation().containsFHomotopyExp()) {
                 return Collections.emptyMap();
             }
             Map<E, Collection<? extends Object>> eqsIdentMap = new HashMap<E, Collection<? extends Object>>();
@@ -1314,6 +1314,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Iterable<E> {
     private Collection<E> members = new LinkedHashSet<E>();
     private Collection<E> predecessors = null;
+    private boolean containsHomotopy = false;
 
     
     public SCCBlock() {}
@@ -1331,6 +1332,8 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> i
         if (predecessors != null)
             predecessors.remove(member);
         members.add(member);
+        if (!containsHomotopy && member.getEquation().containsFHomotopyExp())
+            containsHomotopy = true;
     }
     
     public Collection<E> getMembers() {
@@ -1352,6 +1355,10 @@ public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> i
     @Override
     public String toString() {
         return members.toString();
+    }
+    
+    public boolean containsHomotopy() {
+        return containsHomotopy;
     }
 }
 
@@ -1799,7 +1806,16 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
     @Override
     public int hashCode() {
         return getName().hashCode();
-    };
+    }
+    
+    public void removeIncidencesNotInSet(Set<V> vars) {
+        Iterator<V> it = variables.iterator();
+        while (it.hasNext()) {
+            V var = it.next();
+            if (!vars.contains(var))
+                it.remove();
+        }
+    }
 
 }
 

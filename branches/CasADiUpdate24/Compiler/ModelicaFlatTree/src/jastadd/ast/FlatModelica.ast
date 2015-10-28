@@ -1706,7 +1706,7 @@ FInStream : FStreamBuiltIn;
 
 /**
  * Derivative of inStream(). Temporary expression created by der(inStream()) rewrites
- * and removed after connection sets are built.
+ * and removed after symbolic manipulations.
  */
 FDerInStream : FInStream;
 

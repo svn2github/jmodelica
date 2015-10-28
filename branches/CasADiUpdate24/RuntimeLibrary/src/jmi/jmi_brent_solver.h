@@ -39,6 +39,9 @@ int jmi_brent_solver_solve(jmi_block_solver_t* block_solver);
 /**< \brief Brent solver destructor */
 void jmi_brent_solver_delete(jmi_block_solver_t* block_solver);
 
+/**< \brief Newton before Brent */
+int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d);
+
 /**< \brief Data structure used by the Brent algorithm */
 struct jmi_brent_solver_t {
     double y;              /**< \brief current/last iterate */

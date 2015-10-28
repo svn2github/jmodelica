@@ -2468,6 +2468,102 @@ end ModificationTests.ArrayModifications73;
 ")})));
 end ArrayModifications73;
 
+model ArrayModifications74
+    model A
+        Real[:,2] x = {{1,2}};
+    end A;
+    
+    model A2 = A(x={{3,4}});
+    A2[2] a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications74",
+            description="Binding expression modification on array",
+            flatModel="
+fclass ModificationTests.ArrayModifications74
+ Real a[1].x[1,2] = {{3, 4}};
+ Real a[2].x[1,2] = {{3, 4}};
+end ModificationTests.ArrayModifications74;
+")})));
+end ArrayModifications74;
+
+model ArrayModifications75
+    model A
+        Real[1,2] x = {{1,2}};
+    end A;
+    
+    model A2 = A[2](x={{{3,4}},{{5,6}}});
+    A2 a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications75",
+            description="Binding expression modification on array",
+            flatModel="
+fclass ModificationTests.ArrayModifications75
+ Real a[1].x[1,2] = {{3, 4}};
+ Real a[2].x[1,2] = {{5, 6}};
+end ModificationTests.ArrayModifications75;
+")})));
+end ArrayModifications75;
+
+model ArrayModifications76
+    model A
+        Real[1,2] x = {{1,2}};
+    end A;
+    
+    model A2 = A[2](x={{{3,4}},{{5,6}}});
+    A2[3] a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications76",
+            description="Binding expression modification on array",
+            flatModel="
+fclass ModificationTests.ArrayModifications76
+ Real a[1,1].x[1,2] = {{3, 4}};
+ Real a[1,2].x[1,2] = {{5, 6}};
+ Real a[2,1].x[1,2] = {{3, 4}};
+ Real a[2,2].x[1,2] = {{5, 6}};
+ Real a[3,1].x[1,2] = {{3, 4}};
+ Real a[3,2].x[1,2] = {{5, 6}};
+end ModificationTests.ArrayModifications76;
+")})));
+end ArrayModifications76;
+
+model ArrayModifications77
+    model A
+        Real[1,2] x = {{1,2}};
+    end A;
+    
+    model A1 = A[2](x={{{3,4}},{{5,6}}});
+    model A2 = A1[2](x(start={{{{3,4}},{{5,6}}},{{{3,4}},{{5,6}}}})={{{{3,4}},{{5,6}}},{{{3,4}},{{5,6}}}});
+    A2[3] a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications77",
+            description="Modifications on array",
+            flatModel="
+fclass ModificationTests.ArrayModifications77
+ Real a[1,1,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[1,1,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+ Real a[1,2,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[1,2,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+ Real a[2,1,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[2,1,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+ Real a[2,2,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[2,2,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+ Real a[3,1,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[3,1,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+ Real a[3,2,1].x[1,2](start = {{3, 4}}) = {{3, 4}};
+ Real a[3,2,2].x[1,2](start = {{5, 6}}) = {{5, 6}};
+end ModificationTests.ArrayModifications77;
+")})));
+end ArrayModifications77;
+
+
 /* ========= Modifications on type declarations ========= */
 
 type TypeA = Real(final quantity="A", unit="1");

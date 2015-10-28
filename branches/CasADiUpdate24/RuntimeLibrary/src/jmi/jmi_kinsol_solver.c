@@ -231,7 +231,13 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             
         /* Save pointer to the array in tmp2 */
         tmp2_data = N_VGetArrayPointer(tmp2);
-      
+        
+        /* Make sure that the residual values are up to date */
+        ret = kin_f(u, fu, block);
+        if(ret != 0) {
+            return ret;
+        }
+
         /* Rename work vectors for readibility */
         ftemp = tmp1; 
         jthCol = tmp2;
@@ -718,7 +724,9 @@ static int jmi_kinsol_init_bounds(jmi_block_solver_t * block) {
             num_bounds++;
             hasMin = 1;
         }
-        if(hasMin && hasMax && (range > block->max[i]) && (range > 0)) {
+        
+        if(hasMin && hasMax && (range > 0) /* range limit only of interest when both max & min are present and are of the same sign */
+            && (block->max[i] * block->min[i] > 0) ) {
             solver->range_limits[i] = range * block->options->step_limit_factor;
         }
         else {
@@ -908,74 +916,8 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     else
         min_step_ratio = 2*solver->kin_stol;
 
-    /*
-        Go over the iteration vars and reduce max_step_ratio
-        based on step_limits
-    */
-    if(block->options->step_limit_factor <= 1) {
-        if (block->callbacks->log_options.log_level >= 5) {
-            /* Print variables with long steps */
-            outer = jmi_log_enter_(log, logInfo, "StepLimits");
-            inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
-        }
-
-        for( i=0; i<block->n; i++ ) {
-            double range_limit = solver->range_limits[i];
-            double step_limit = range_limit;
-            realtype pi = RAbs(xd[i]);            /* abs solved step length for the variable*/
-            double nom = RAbs(block->nominal[i]);
-            double nom_limit;
-            double ui =  RAbs(NV_Ith_S(kin_mem->kin_uu,i));  /* current variable value */
-            double step_ratio;
-
-            if(nom < ui) {  /* if nominal is below current - take current*/
-                nom = ui; 
-            }
-            /* step length limit based on max(nominal, |current|)*/
-            nom_limit = nom *  block->options->step_limit_factor;
-            if(range_limit > nom_limit) { /* if nominal based is tighter than range based update step factor */
-                step_limit = nom_limit;
-            }
-
-            if (block->callbacks->log_options.log_level >= 5) {
-                jmi_log_real_(log, step_limit);
-            }
-
-            if( pi < step_limit) {
-                solver->range_limited[i] = 0;
-                continue;
-            }
-
-            solver->range_limited[i] = 1;
-            rangeLimited = TRUE;
-
-            step_ratio = step_limit/RAbs(pi);
-
-            if(max_step_ratio > step_ratio) {
-                max_step_ratio = step_ratio;
-                solver->last_bounding_index = i;
-                solver->range_most_limiting = TRUE;
-            }
-        }
-
-        if (block->callbacks->log_options.log_level >= 5) {
-            jmi_log_leave(log, inner);
-            jmi_log_leave(log, outer);
-        }
-    }
-
-    if (block->callbacks->log_options.log_level >= 5) {
-        jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max: %g>", max_step_ratio);
-    }
-
-    /* Make sure that we are not projecting if step length already small enough */
-    if(max_step_ratio < min_step_ratio) {
-        min_step_ratio = max_step_ratio;
-    }
-
-
     /* 
-        Go over the list of bounds and reduce "max_step_ratio" 
+        Go over the list of bounds and reduce "max_step_ratio"; project if needed
     */
     for(i = 0; i < solver->num_bounds; ++i) {
         int index = solver->bound_vindex[i]; /* variable index */
@@ -985,7 +927,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         realtype bound = solver->bounds[i]; 
         realtype pbi = (bound - ui)*(1 - UNIT_ROUNDOFF);  /* distance to the bound */
         realtype step_ratio_i;        
-        int nom_criteria = FALSE;
+        int nom_criteria = FALSE;        
 
         if(    ((kind == 1)&& (pbi >= pi))
             || ((kind == -1)&& (pbi <= pi))) {
@@ -1029,6 +971,95 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 solver->last_bounding_index = index;
                 solver->range_most_limiting = FALSE;
             }
+        }
+    }
+
+    if (block->callbacks->log_options.log_level >= 5) {
+        jmi_log_node(log, logInfo, "BoundsMaxStepRatio", "Step ratio after bounds check <lambda_max_bounds: %g>", max_step_ratio);
+    }
+
+    /*
+        Go over the iteration vars and reduce max_step_ratio
+        based on step_limit_factor & range_limits
+    */
+    if(block->options->step_limit_factor <= 1 ) {
+        if (block->callbacks->log_options.log_level >= 5) {
+            /* Print variables with long steps */
+            outer = jmi_log_enter_(log, logInfo, "StepLimits");
+            inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
+        }
+
+        for( i=0; i<block->n; i++ ) {
+            double range_limit = solver->range_limits[i];
+            double step_limit = range_limit;
+            realtype pi = RAbs(xxd[i]);            /* abs solved step length for the variable*/
+            double nom = RAbs(block->nominal[i]);
+            double nom_limit;
+            double ui =  RAbs(NV_Ith_S(kin_mem->kin_uu,i));  /* current variable value */
+            double step_ratio;
+            int activeBound = 0;
+            realtype bnd;
+            
+            if(solver->num_bounds > 0)
+                bnd = solver->active_bounds[i];
+            else
+                bnd = 0.0;
+
+            if(pi == 0.0) {
+                /* either projected or zero step */                
+                if(bnd != 0.0) { 
+                    /* enforce range check to avoid jumping over the full range */
+                    pi = RAbs(bnd);                    
+                    activeBound = 1;
+                }
+                else {
+                    /* zero step - no range violation possible*/
+                    solver->range_limited[i] = 0;
+                    continue;
+                }
+            }
+
+            if(nom < ui) {  /* if nominal is below current - take current*/
+                nom = ui; 
+            }
+            /* step length limit based on max(nominal, |current|)*/
+            nom_limit = nom *  block->options->step_limit_factor;
+            if(range_limit > nom_limit) { /* if nominal based is tighter than range based update step factor */
+                step_limit = nom_limit;
+            }
+
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_real_(log, step_limit);
+            }
+
+            if( pi < step_limit) {
+                solver->range_limited[i] = 0;
+                continue;
+            }
+
+            solver->range_limited[i] = 1;
+            rangeLimited = TRUE;
+            
+            if(activeBound) {
+                if(bnd > 0)
+                    solver->active_bounds[i] = step_limit;
+                else
+                    solver->active_bounds[i] = -step_limit;
+            } else {
+                step_ratio = step_limit/RAbs(pi);
+
+                if(max_step_ratio > step_ratio) {
+                    max_step_ratio = step_ratio;
+                    solver->last_bounding_index = i;
+                    solver->range_most_limiting = TRUE;
+                }
+            }
+        }
+
+        if (block->callbacks->log_options.log_level >= 5) {
+            jmi_log_leave(log, inner);
+            jmi_log_leave(log, outer);
+            jmi_log_node(block->log, logInfo, "RangeMaxStepRatio", "Step ratio after range check <lambda_max_range: %g>", max_step_ratio);
         }
     }
 
@@ -1561,6 +1592,12 @@ static void jmi_setup_f_residual_scaling(jmi_block_solver_t *block) {
     
     block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL_AUTO);
     block->F(block->problem_data,dummy, solver->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL);
+    for (i = 0; i < N; i++) {
+        if (solver->residual_heuristic_nominal[i] == 0.0) {
+            /* TODO: This information could be used to see that the system is structually singular */
+            solver->residual_heuristic_nominal[i] = 1.0;
+        }
+    }
 }
 
 /* 
@@ -1641,24 +1678,10 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
                     }
                 }
                 
-                if (bsop->experimental_mode == jmi_block_solver_experimental_scaling_from_nominal_heuristics) {
-                    if (scale_ptr[i] > solver->residual_heuristic_nominal[i]/bsop->min_residual_scaling_factor) {
-                        scale_ptr[i] = bsop->max_residual_scaling_factor/solver->residual_heuristic_nominal[i];
-                        jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
-                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                    } else {
-                        scale_ptr[i] = 1/scale_ptr[i];
-                        jmi_log_node(block->log, logWarning, "MaxScalingExceeded", "Poor scaling in <block: %s> but will allow it based on structure of block. "
-                            "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                            block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                    }
-                } else {
-                    scale_ptr[i] = bsop->max_residual_scaling_factor;
-                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
-                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
-                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
-                }
+                scale_ptr[i] = bsop->max_residual_scaling_factor;
+                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                    block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(solver->J, i, maxInJacIndex) ,maxInJac);
             }
             else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;

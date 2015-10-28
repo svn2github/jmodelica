@@ -1919,6 +1919,39 @@ aspect InstanceAST_API {
     eq InstNode.getChild().instNodeParent() = this;
     eq Root.getChild().instNodeParent()     = null;
     
+    syn InstNode InstNode.matchingAncestor(InstNode node) {
+        if (node.isClassDecl()) {
+            int dims = node.nTypeDims();
+            for (InstNode mine : instAncestors()) {
+                if (mine.isThisClass(node)) {
+                    if (dims == 0 || mine.isClassDecl()) {
+                        return mine;
+                    }
+                    dims = dims - 1;
+                }
+            }
+            return null;
+        } else {
+            return commonAncestor(node);
+        }
+    }
+    
+    syn int InstNode.nTypeDims()      = 0;
+    eq InstShortClassDecl.nTypeDims() = (hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0) 
+            + getInstExtends(0).nTypeDims();
+    eq InstExtends.nTypeDims()        = myInstClass().nTypeDims();
+    
+    syn boolean InstNode.isThisClass(InstNode node)                 = this == node;
+    eq InstComponentDecl.isThisClass(InstNode node)                 = myInstClass().isThisClass(node);
+    eq InstReplacingShortClassDecl.isThisClass(InstNode node)       = getInstClassRedeclare().isThisClass(node);
+    eq InstReplacingSimpleShortClassDecl.isThisClass(InstNode node) = actualInstClass().isThisClass(node);
+    
+    public interface InstRedeclareClassNode {
+        public boolean isThisClass(InstNode node);
+    }
+    
+    syn boolean InstClassRedeclare.isThisClass(InstNode node)       = getInstClassDecl().isThisClass(node);
+    
 	/**
 	 * Find the component that this access should be evaluated in.
 	 */

@@ -1472,6 +1472,64 @@ end StreamTests.InStreamDer1;
 end InStreamDer1;
 
 
+model InStreamDer2
+    model A
+        StreamConnector c1(p = 7, f = time, s = 4);
+        StreamConnector c2(s = 5);
+        StreamConnector c3(s = 6, f = 2 * time);
+        Real x1 = inStream(c1.s);
+        Real x2 = inStream(c2.s);
+        Real x3 = inStream(c3.s);
+    end A;
+    
+    A a;
+    
+    Real y1 = der(inStream(a.c1.s));
+    Real y2 = der(der(inStream(a.c1.s)));
+equation
+    connect(a.c1, a.c2);
+    connect(a.c1, a.c3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InStreamDer2",
+            description="Test handling of derivative of inStream()",
+            flatModel="
+fclass StreamTests.InStreamDer2
+ constant Real a.c1.p = 7;
+ Real a.c1.f;
+ constant Real a.c1.s = 4;
+ Real a.c2.f;
+ constant Real a.c2.s = 5;
+ Real a.c3.f;
+ constant Real a.c3.s = 6;
+ Real a.x1;
+ Real a.x2;
+ Real a.x3;
+ Real y1;
+ Real y2;
+ constant Real a.c2.p = 7;
+ constant Real a.c3.p = 7;
+ Real a.c2._der_f;
+ Real a.c3._der_f;
+ Real a.c1._der_f;
+equation
+ a.c1.f + a.c2.f + a.c3.f = 0;
+ a.c1.f = time;
+ a.c3.f = 2 * time;
+ a.x1 = (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) / (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8));
+ a.x2 = (max(- a.c1.f, 1.0E-8) * 4.0 + max(- a.c3.f, 1.0E-8) * 6.0) / (max(- a.c1.f, 1.0E-8) + max(- a.c3.f, 1.0E-8));
+ a.x3 = (max(- a.c1.f, 1.0E-8) * 4.0 + max(- a.c2.f, 1.0E-8) * 5.0) / (max(- a.c1.f, 1.0E-8) + max(- a.c2.f, 1.0E-8));
+ y1 = ((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0))) / (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2;
+ y2 = (((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)) + (noEvent(if - a.c2.f > 1.0E-8 then - der(a.c2._der_f) else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - der(a.c3._der_f) else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - ((max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - der(a.c2._der_f) else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - der(a.c3._der_f) else 0.0)) + (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)))) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2 - ((noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) * 5.0 + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0) * 6.0) * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) - (max(- a.c2.f, 1.0E-8) * 5.0 + max(- a.c3.f, 1.0E-8) * 6.0) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0))) * (2 * (max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) * (noEvent(if - a.c2.f > 1.0E-8 then - a.c2._der_f else 0.0) + noEvent(if - a.c3.f > 1.0E-8 then - a.c3._der_f else 0.0)))) / ((max(- a.c2.f, 1.0E-8) + max(- a.c3.f, 1.0E-8)) ^ 2) ^ 2;
+ a.c1._der_f + a.c2._der_f + a.c3._der_f = 0;
+ a.c1._der_f = 1.0;
+ a.c3._der_f = 2;
+end StreamTests.InStreamDer2;
+")})));
+end InStreamDer2;
+
+
 model StreamWithConst1
     model A
         StreamConnector c;
@@ -1577,7 +1635,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="StreamWithConst3",
-            description="",
+            description="Test array stream connectors connected N=2, M=2, with some constant flows",
             flatModel="
 fclass StreamTests.StreamWithConst3
  constant Real a1[1].c.f = 1;
@@ -1616,6 +1674,48 @@ equation
 end StreamTests.StreamWithConst3;
 ")})));
 end StreamWithConst3;
+
+
+model StreamWithConst4
+    model A
+        StreamConnector c;
+    end A;
+        
+    A a1(c(f = 0, p = 0, s = 2 * time)), a2(c(f = time, s = 3)), a3(c(s = 4));
+    Real x1, x2, x3;
+equation
+    connect(a1.c, a2.c);
+    connect(a2.c, a3.c);
+    x1 = inStream(a1.c.s);
+    x2 = inStream(a2.c.s);
+    x3 = inStream(a3.c.s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamWithConst4",
+            description="Constant evaluation of inStream() where only one constant stream variable with a non-constant flow contributes to the result",
+            flatModel="
+fclass StreamTests.StreamWithConst4
+ constant Real a1.c.p = 0;
+ constant Real a1.c.f = 0;
+ Real a1.c.s;
+ Real a2.c.f;
+ constant Real a2.c.s = 3;
+ constant Real a3.c.s = 4;
+ Real x1;
+ Real x2;
+ Real x3;
+ constant Real a2.c.p = 0;
+ constant Real a3.c.p = 0;
+equation
+ x1 = (max(- a2.c.f, 1.0E-8) * 3.0 + max(a2.c.f, 1.0E-8) * 4.0) / (max(- a2.c.f, 1.0E-8) + max(a2.c.f, 1.0E-8));
+ x2 = 4.0;
+ x3 = 3.0;
+ a1.c.s = 2 * time;
+ a2.c.f = time;
+end StreamTests.StreamWithConst4;
+")})));
+end StreamWithConst4;
 
 
 model StreamWithArrays1
@@ -1848,6 +1948,70 @@ equation
 end StreamTests.StreamWithArrays3;
 ")})));
 end StreamWithArrays3;
+
+
+model StreamDerAlias1
+    model A
+        StreamConnector c;
+    end A;
+
+    A a1(c(f = time * time, p = 0, s = 2 * time));
+    A a2(c(f = 2 * time * time, s = 3 * time));
+    A a3(c(s = 4 * time));
+    Real x1, x2, x3;
+    Real y1(min = 0), y2(min = 0), y3(min = 0);
+equation
+    connect(a1.c, a2.c);
+    connect(a2.c, a3.c);
+    x1 = inStream(a1.c.s);
+    x2 = inStream(a2.c.s);
+    x3 = inStream(a3.c.s);
+    a1.c.f = der(y1);
+    a2.c.f = der(y2);
+    a3.c.f = der(y3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamDerAlias1",
+            description="Check expansion of inStream() when flow variables are alias eliminated against derivative variable",
+            flatModel="
+fclass StreamTests.StreamDerAlias1
+ constant Real a1.c.p = 0;
+ Real a1.c.f;
+ Real a1.c.s;
+ Real a2.c.f;
+ Real a2.c.s;
+ Real a3.c.f;
+ Real a3.c.s;
+ Real x1;
+ Real x2;
+ Real x3;
+ Real y1(min = 0);
+ Real y2(min = 0);
+ Real y3(min = 0);
+ constant Real a2.c.p = 0;
+ constant Real a3.c.p = 0;
+initial equation 
+ y1 = 0.0;
+ y2 = 0.0;
+ y3 = 0.0;
+equation
+ x1 = (max(- der(y2), 1.0E-8) * a2.c.s + max(- der(y3), 1.0E-8) * a3.c.s) / (max(- der(y2), 1.0E-8) + max(- der(y3), 1.0E-8));
+ x2 = (max(- der(y1), 1.0E-8) * a1.c.s + max(- der(y3), 1.0E-8) * a3.c.s) / (max(- der(y1), 1.0E-8) + max(- der(y3), 1.0E-8));
+ x3 = (max(- der(y1), 1.0E-8) * a1.c.s + max(- der(y2), 1.0E-8) * a2.c.s) / (max(- der(y1), 1.0E-8) + max(- der(y2), 1.0E-8));
+ a1.c.f = der(y1);
+ a2.c.f = der(y2);
+ a3.c.f = der(y3);
+ der(y1) + der(y2) + der(y3) = 0;
+ der(y1) = time * time;
+ a1.c.s = 2 * time;
+ der(y2) = 2 * time * time;
+ a2.c.s = 3 * time;
+ a3.c.s = 4 * time;
+end StreamTests.StreamDerAlias1;
+")})));
+end StreamDerAlias1;
+
 
 
 // TODO: Add error tests (e.g. stream connector without flow)

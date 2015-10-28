@@ -133,6 +133,24 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             return JMI_ODE_ERROR;
         }
         
+        /* Log information */
+        if (problem->jmi_callbacks->log_options.log_level >= 4) {
+            jmi_log_node_t node = jmi_log_enter_fmt(problem->log, logInfo, "CVode", 
+                                "CVode completed a step at <time:%f>", tret);
+            jmi_real_t last_h = 0.0, next_h = 0.0;
+            int    last_order, next_order;
+            
+            CVodeGetLastOrder(integrator->cvode_mem, &last_order);
+            CVodeGetCurrentOrder(integrator->cvode_mem, &next_order);
+            CVodeGetLastStep(integrator->cvode_mem, &last_h);
+            CVodeGetCurrentStep(integrator->cvode_mem, &next_h);
+            
+            jmi_log_fmt(problem->log, node, logInfo, 
+                "<lastUsedOrder: %d, newOrder: %d, lastUsedStepsize: %g, newStepsize: %g>",
+                last_order, next_order, last_h, next_h);
+            jmi_log_leave(problem->log, node);
+        }
+        
         /* After each step call completed integrator step */
         retval = problem->complete_step_func(problem, &step_event);
         if (retval != 0) {

@@ -452,6 +452,29 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart3", file_name)
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
+        compile_fmu("NonLinear.DoubleRoot1", file_name)
+    
+    @testattr(stddist = True)
+    def test_Brent_double_root1(self):
+        def run_model(init):
+            model = load_fmu("NonLinear_DoubleRoot1.fmu")
+            model.set("_use_Brent_in_1d", True)
+            model.set("x", init)
+            model.initialize()
+            return model.get("x")
+        
+        sol_pos = N.sqrt(1e-7)+1.5
+        sol_neg =-N.sqrt(1e-7)+1.5
+
+        nose.tools.assert_almost_equal(run_model(sol_pos+1e-16) ,sol_pos)
+        nose.tools.assert_almost_equal(run_model(sol_pos-1e-16) ,sol_pos)
+        nose.tools.assert_almost_equal(run_model(sol_pos+1e-14) ,sol_pos)
+        nose.tools.assert_almost_equal(run_model(sol_pos-1e-14) ,sol_pos)
+        
+        nose.tools.assert_almost_equal(run_model(sol_neg+1e-16) ,sol_neg)
+        nose.tools.assert_almost_equal(run_model(sol_neg-1e-16) ,sol_neg)
+        nose.tools.assert_almost_equal(run_model(sol_neg+1e-14) ,sol_neg)
+        nose.tools.assert_almost_equal(run_model(sol_neg-1e-14) ,sol_neg)
     
     @testattr(stddist = True)
     def test_nominals_fallback_1(self):
@@ -1346,12 +1369,16 @@ class Test_ODE_JACOBIANS2:
 
     @testattr(stddist = True)
     def test_ode_simulation_NonLinear(self):
+        pass
+        """
+        #Disabled the test temporary, see https://trac.jmodelica.org/ticket/4612 
         m_nonlin = FMUModel2('NonLinear_MultiSystems.fmu')
         
         m_nonlin.initialize()
         
         A,B,C,D,n_err = m_nonlin.check_jacobians()
         nose.tools.assert_equals(n_err, 0)
+        """
         
         
 class Test_ODE_JACOBIANS3:

@@ -2108,6 +2108,212 @@ void func_CADCodeGenTests_CADFunction10_F1_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_
 ")})));
 end CADFunction10;
 
+model CADFunction11
+    function F1
+        input Real[2] X;
+        output Real lambda;
+    algorithm
+        lambda := F3(F2(X, {1.1, 1.2}));
+    annotation(smoothOrder = 1, Inline=false);
+    end F1;
+
+    function F2
+        input Real[:] X;
+        input Real[size(X, 1)] MMX;
+        output Real[size(X, 1)] moleFractions;
+    algorithm
+        for i in 1:size(X, 1) loop
+            moleFractions[i] := X[i] * MMX[i];
+        end for;
+        annotation(smoothOrder = 1, Inline=false);
+    end F2;
+
+    function F3
+        input Real[:] X;
+        output Real y;
+    algorithm
+        y := 0;
+        for i in 1:size(X, 1) loop
+            y := y + X[i];
+        end for;
+    annotation(smoothOrder = 1, Inline=false);
+    end F3;
+
+    Real x;
+    Real y;
+equation
+    x = F1({y, -y});
+    y * x = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="CADFunction11",
+            description="Test code gen bug where function call and input initialization was done in the wrong order",
+            generate_dae_jacobian=true,
+            template="
+$CAD_functions$
+",
+            generatedCode="
+void func_CADCodeGenTests_CADFunction11_F1_der_AD0(jmi_array_t* X_var_a, jmi_array_t* X_der_a, jmi_ad_var_t* lambda_var_o, jmi_ad_var_t* lambda_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, lambda_var_v)
+    JMI_DEF(REA, lambda_der_v)
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_0, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_1, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_1, 2, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_0, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1, 2)
+    jmi_array_ref_1(tmp_var_0, 1) = 1.1;
+    jmi_array_ref_1(tmp_var_0, 2) = 1.2;
+    jmi_array_ref_1(tmp_der_0, 1) = AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_der_0, 2) = AD_WRAP_LITERAL(0);
+    func_CADCodeGenTests_CADFunction11_F2_der_AD2(X_var_a, tmp_var_0, X_der_a, tmp_der_0, tmp_var_1, tmp_der_1);
+    func_CADCodeGenTests_CADFunction11_F3_der_AD1(tmp_var_1, tmp_der_1, &v_0, &d_0);
+    lambda_var_v = v_0;
+    lambda_der_v = d_0;
+    if (lambda_var_o != NULL) *lambda_var_o = lambda_var_v;
+    if (lambda_der_o != NULL) *lambda_der_o = lambda_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADFunction11_F3_der_AD1(jmi_array_t* X_var_a, jmi_array_t* X_der_a, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_var_v)
+    JMI_DEF(REA, y_der_v)
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    y_var_v = 0;
+    y_der_v = AD_WRAP_LITERAL(0);
+    v_1 = jmi_array_size(X_var_a, 0);
+    i_0ie = v_1 + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        y_var_v = y_var_v + jmi_array_val_1(X_var_a, i_0i);
+        y_der_v = y_der_v + jmi_array_val_1(X_der_a, i_0i);
+    }
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADFunction11_F2_der_AD2(jmi_array_t* X_var_a, jmi_array_t* MMX_var_a, jmi_array_t* X_der_a, jmi_array_t* MMX_der_a, jmi_array_t* moleFractions_var_a, jmi_array_t* moleFractions_der_a) {
+    JMI_DYNAMIC_INIT()
+    jmi_ad_var_t v_2;
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, moleFractions_var_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, moleFractions_der_an, -1, 1)
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t i_1i;
+    jmi_ad_var_t i_1ie;
+    if (moleFractions_var_a == NULL) {
+        v_2 = jmi_array_size(X_var_a, 0);
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, moleFractions_var_an, v_2, 1, jmi_array_size(X_var_a, 0))
+        moleFractions_var_a = moleFractions_var_an;
+    }
+    if (moleFractions_der_a == NULL) {
+        v_2 = jmi_array_size(X_var_a, 0);
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, moleFractions_der_an, v_2, 1, jmi_array_size(X_var_a, 0))
+        moleFractions_der_a = moleFractions_der_an;
+    }
+    v_3 = jmi_array_size(X_var_a, 0);
+    i_1ie = v_3 + 1 / 2.0;
+    for (i_1i = 1; i_1i < i_1ie; i_1i += 1) {
+        jmi_array_ref_1(moleFractions_var_a, i_1i) = jmi_array_val_1(X_var_a, i_1i) * jmi_array_val_1(MMX_var_a, i_1i);
+        jmi_array_ref_1(moleFractions_der_a, i_1i) = jmi_array_val_1(X_der_a, i_1i) * jmi_array_val_1(MMX_var_a, i_1i) + jmi_array_val_1(X_var_a, i_1i) * jmi_array_val_1(MMX_der_a, i_1i);
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end CADFunction11;
+
+model CADFunction12
+    function F1
+        input Real x;
+        output Real[2] y;
+    algorithm
+        y[1] := x;
+        y[2] := -x;
+    annotation(derivative=F1_der, Inline=false);
+    end F1;
+
+    function F1_der
+        input Real x;
+        input Real x_der;
+        output Real[2] y;
+    algorithm
+        y[1] := x_der;
+        y[2] := -x_der;
+    annotation(Inline=false);
+    end F1_der;
+
+
+    Real x;
+    Real y;
+    Real z;
+equation
+    {x, y} = F1(z);
+    y * x = z;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="CADFunction12",
+            description="Test code gen bug including function call with derivative annoation and non-scalar output",
+            generate_dae_jacobian=true,
+            template="
+$C_functions$
+$CAD_functions$
+",
+            generatedCode="
+void func_CADCodeGenTests_CADFunction12_F1_def0(jmi_ad_var_t x_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(y_a, 1) = x_v;
+    jmi_array_ref_1(y_a, 2) = - x_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADFunction12_F1_der_def1(jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1)
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, y_an, 2, 1, 2)
+        y_a = y_an;
+    }
+    jmi_array_ref_1(y_a, 1) = x_der_v;
+    jmi_array_ref_1(y_a, 2) = - x_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+void func_CADCodeGenTests_CADFunction12_F1_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_array_t* y_var_a, jmi_array_t* y_der_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_var_an, 2, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, y_der_an, 2, 1)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADFunction12_F1_def0(x_var_v, y_var_a);
+    func_CADCodeGenTests_CADFunction12_F1_der_def1(x_var_v, x_der_v, y_der_a);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+")})));
+end CADFunction12;
+
 model FunctionDiscreteInputTest1
 	function f
 		input Integer i;
@@ -2678,6 +2884,176 @@ jmi_ad_var_t func_CADCodeGenTests_CADDerAnno2_f_der_exp1(jmi_ad_var_t x1_v, jmi_
 
 ")})));
 end CADDerAnno2;
+
+model CADDerAnno3
+    
+    function f
+        input Real x;
+        output Real y = 3 * x^3;
+    algorithm
+        annotation(Inline=false,derivative=fd);
+    end f;
+    
+    function fd
+        input Real x;
+        input Real dx;
+        output Real dy = 6 * dx^2;
+    algorithm
+        annotation(Inline=false,derivative=fdd);
+    end fd;
+    
+    function fdd
+        input Real x;
+        input Real dx;
+        input Real ddx;
+        output Real y = 12 * ddx^1;
+    algorithm
+        annotation(Inline=false);
+    end fdd;
+    
+    Real x,y,dx,dy;
+equation
+    der(x) = dx;
+    der(y) = dy;
+    der(dx) + der(dy) = 2;
+    dx + dy = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="CADDerAnno3",
+            description="",
+            generate_ode_jacobian=true,
+            generate_block_jacobian=true,
+            template="
+$CAD_function_headers$
+$CAD_functions$
+$C_functions$
+$CAD_dae_blocks_residual_functions$
+",
+            generatedCode="
+void func_CADCodeGenTests_CADDerAnno3_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o);
+void func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(jmi_ad_var_t x_v, jmi_ad_var_t dx_var_v, jmi_ad_var_t dx_der_v, jmi_ad_var_t* dy_var_o, jmi_ad_var_t* dy_der_o);
+
+void func_CADCodeGenTests_CADDerAnno3_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* y_var_o, jmi_ad_var_t* y_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_var_v)
+    JMI_DEF(REA, y_der_v)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADDerAnno3_f_def0(x_var_v, &y_var_v);
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_var_v, x_der_v, &y_der_v);
+    if (y_var_o != NULL) *y_var_o = y_var_v;
+    if (y_der_o != NULL) *y_der_o = y_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(jmi_ad_var_t x_v, jmi_ad_var_t dx_var_v, jmi_ad_var_t dx_der_v, jmi_ad_var_t* dy_var_o, jmi_ad_var_t* dy_der_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, dy_var_v)
+    JMI_DEF(REA, dy_der_v)
+    /*Using specified derivative annotation instead of AD*/
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_v, dx_var_v, &dy_var_v);
+    func_CADCodeGenTests_CADDerAnno3_fdd_def2(x_v, dx_var_v, dx_der_v, &dy_der_v);
+    if (dy_var_o != NULL) *dy_var_o = dy_var_v;
+    if (dy_der_o != NULL) *dy_der_o = dy_der_v;
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+
+void func_CADCodeGenTests_CADDerAnno3_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = 3 * (1.0 * (x_v) * (x_v) * (x_v));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_f_exp0(jmi_ad_var_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CADCodeGenTests_CADDerAnno3_f_def0(x_v, &y_v);
+    return y_v;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fd_def1(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t* dy_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, dy_v)
+    dy_v = 6 * (1.0 * (dx_v) * (dx_v));
+    JMI_RET(GEN, dy_o, dy_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_fd_exp1(jmi_ad_var_t x_v, jmi_ad_var_t dx_v) {
+    JMI_DEF(REA, dy_v)
+    func_CADCodeGenTests_CADDerAnno3_fd_def1(x_v, dx_v, &dy_v);
+    return dy_v;
+}
+
+void func_CADCodeGenTests_CADDerAnno3_fdd_def2(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t ddx_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = 12 * (1.0 * (ddx_v));
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CADCodeGenTests_CADDerAnno3_fdd_exp2(jmi_ad_var_t x_v, jmi_ad_var_t dx_v, jmi_ad_var_t ddx_v) {
+    JMI_DEF(REA, y_v)
+    func_CADCodeGenTests_CADDerAnno3_fdd_def2(x_v, dx_v, ddx_v, &y_v);
+    return y_v;
+}
+
+
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t d_1;
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t d_2;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _der_2_x_5;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = dx[0];
+        _der_2_x_5 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    v_0 = - _der_2_x_5;
+    d_0 = - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
+    func_CADCodeGenTests_CADDerAnno3_fd_der_AD1(_time, 1.0, AD_WRAP_LITERAL(0), &v_1, &d_1);
+    _der_2_y_6 = v_0 + v_1;
+    (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx] = d_0 + d_1;
+    _der_dy_9 = _der_2_y_6;
+    (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
+    v_2 = - _der_dy_9;
+    d_2 = - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
+    _der_dx_4 = v_2 + 2;
+    (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] = d_2 + AD_WRAP_LITERAL(0);
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = _der_dx_4 - (_der_2_x_5);
+        (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+")})));
+end CADDerAnno3;
 
 model CADIfStmtTest1
 	function f
@@ -4904,6 +5280,32 @@ static const int CAD_dae_nz_cols[42] = {0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,
 ")})));
 end SparseJacTest5;
 
+model SparseJacTest6
+    parameter String s = "string";
+    Real x;
+equation
+    der(x) = time;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="SparseJacTest6",
+            description="Test that sparsity information is generated correctly. #4644.",
+            variability_propagation=false,
+            inline_functions="none",
+            generate_dae_jacobian=true,
+            template="$C_DAE_equation_sparsity$",
+            generatedCode="
+static const int CAD_dae_real_p_opt_n_nz = 0;
+static const int CAD_dae_real_dx_n_nz = 1;
+static const int CAD_dae_real_x_n_nz = 0;
+static const int CAD_dae_real_u_n_nz = 0;
+static const int CAD_dae_real_w_n_nz = 0;
+static int CAD_dae_n_nz = 1;
+static const int CAD_dae_nz_rows[1] = {0};
+static const int CAD_dae_nz_cols[1] = {0};
+")})));
+end SparseJacTest6;
+
 model TestExtObject1
 	class ExtObjectwInput
 		extends ExternalObject;
@@ -5651,5 +6053,75 @@ equation
     }
 ")})));
 end IfEqu4;
+
+model StringZeroValue1
+    record R
+        Real x;
+        parameter String s;
+    end R;
+    function F1
+        input R r;
+        output Real y;
+    algorithm
+        y := r.x;
+    annotation(Inline=false);
+    end F1;
+
+    R r = R(x, "Jon was here");
+    Real x;
+    Real y;
+equation
+    y = F1(r);
+    y * x = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="StringZeroValue1",
+            description="Test code gen for zero value of string expressions",
+            generate_ode_jacobian=true,
+            template="$CAD_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t d_0;
+    JMI_RECORD_STATIC(R_0_r, tmp_var_0)
+    JMI_RECORD_STATIC(R_0_r, tmp_der_0)
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+        (*dz)[ jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = dx[0];
+        _x_1 = x[0];
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = -(*dF)[0];
+    } else {
+        return -1;
+    }
+    tmp_var_0->x = _x_1;
+    tmp_var_0->s = \"Jon was here\";
+    tmp_der_0->x = (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx];
+    tmp_der_0->s = \"\";
+    func_CADCodeGenTests_StringZeroValue1_F1_der_AD0(tmp_var_0, tmp_der_0, &v_0, &d_0);
+    _y_2 = v_0;
+    (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = d_0;
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = 0 - (_y_2 * _x_1);
+        (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x_1 + _y_2 * (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = 0;
+    }
+    return ef;
+}
+
+")})));
+end StringZeroValue1;
 
 end CADCodeGenTests;

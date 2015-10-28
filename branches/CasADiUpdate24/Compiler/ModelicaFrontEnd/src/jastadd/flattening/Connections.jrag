@@ -52,11 +52,11 @@ aspect Connections {
 		connectionSetManager.disconnectFromInstanceTree();
         endStep("genConnectionEquations()");
 	}
-		
-	public void ASTNode.enableStreamsRewrite() {
-		for (ASTNode n : this)
-			n.enableStreamsRewrite();
-	}
+
+    public void ASTNode.enableStreamsRewrite() {
+        for (ASTNode n : this)
+            n.enableStreamsRewrite();
+    }
 
     public void FStreamBuiltIn.enableStreamsRewrite() {
         super.enableStreamsRewrite();
@@ -91,9 +91,18 @@ aspect Connections {
     }
 
     protected FExp FDerInStream.expandInStreamExp() {
-        // TODO: This looks wrong, it just takes the derivative of the argument
-        return getFExp().diff(FExp.TIME);
+        // Note: this handles both enableStreamsRewrite and enableExpandedInStreamRewrite
+        FExp arg = getFExp();
+        if (arg.needsLaterInStreamRewrite()) {
+            return new FDerInStream(arg.treeCopy());
+        } else {
+            return arg.diff(FExp.TIME);
+        }
     }
+
+    syn boolean FExp.needsLaterInStreamRewrite() = false;
+    eq FExInStream.needsLaterInStreamRewrite()   = true;
+    eq FDerInStream.needsLaterInStreamRewrite()  = true;
 
 
     public void ASTNode.enableExpandedInStreamRewrite() {
@@ -104,6 +113,12 @@ aspect Connections {
     public void FExInStream.enableExpandedInStreamRewrite() {
         super.enableExpandedInStreamRewrite();
         rewriteExpandedInStream = true;
+        is$Final = false;
+    }
+
+    public void FDerInStream.enableExpandedInStreamRewrite() {
+        super.enableExpandedInStreamRewrite();
+        rewriteStreams = true;
         is$Final = false;
     }
 
@@ -135,8 +150,8 @@ aspect Connections {
                 if (!cont.outside) {
                     flow = new FNegExp(flow);
                 }
-                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopy()));
-                FExp sumP = new FMulExp(divP.treeCopy(), stream);
+                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopyNoTransform()));
+                FExp sumP = new FMulExp(divP.treeCopyNoTransform(), stream);
                 if (sum == null) {
                     sum = sumP;
                     div = divP;

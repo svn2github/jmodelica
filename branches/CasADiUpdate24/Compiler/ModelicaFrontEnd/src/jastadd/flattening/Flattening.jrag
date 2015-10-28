@@ -959,7 +959,7 @@ aspect Flattening {
 			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
 				InstNode decl = im.myInstNode();
-				InstNode ancestor = decl.isClassDecl() ? decl : InstAssignable.this.commonAncestor(decl);
+                InstNode ancestor = InstAssignable.this.matchingAncestor(decl);
 				return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
 						exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
 			}
@@ -1101,8 +1101,7 @@ aspect Flattening {
 				(!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
             InstNode decl = im.myInstNode();
 			if (!hasEach && decl != this) {
-			    if (!decl.isClassDecl())
-			        decl = commonAncestor(decl);
+                decl = matchingAncestor(decl);
 				fe = splitBindingFExp(fe, decl);
 			}
 			return fe.unboundCopy();
@@ -1138,10 +1137,17 @@ aspect Flattening {
 	eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
 	eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
 	eq Root.getChild().splitBindingFExp(FExp fe, InstNode node)          = fe;
-	eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
-		fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
-	eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node) =
-		(node == this) ? fe : splitBindingFExp(fe, node);
+    eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node) =
+        (node == this) ? fe : splitBindingFExp(fe, node);
+    eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
+        (node == this) ? fe : fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
+    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) {
+        FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node);
+        for (int i = 0; i < nTypeDims(); i++) {
+            nfe = fe.dynamicFExp(nfe).splitArrayExp(size().get(i));
+        }
+        return nfe;
+    }
 	
 	/**
 	 * \Return the expression corresponding to the given index in this array expression. 

@@ -169,32 +169,59 @@ aspect FlatTypeCheck {
 	    for (InstModification im : totalMergedEnvironment()) 
 	    	im.typeCheckAttribute(this);
      }
-   
+
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {
         if (hasInstModification() && getInstModification().hasInstValueMod()) {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
-                String description = "the attribute " + name() + " for the " + owner.kindDescription() + " " + owner.name();
+                String description = "attribute " + name() + " for the " + owner.kindDescription() + " " + owner.name();
                 Size attrSize = expectedSize();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
-                    error("The type of the binding expression of " + description + 
+                    error("The type of the binding expression of the " + description + 
                             " does not match the declared type of the variable");
+                } else if (!attrSize.equivalent(valMod.size(), true)) {
+                    InstModification im = findModificationLackingEach(valMod.size());
+                    if (im != null) {
+                        im.generateMissingEachWarning();
+                    } else {
+                        error("Array size mismatch in modification of the " + description +
+                                ", expected size is " + (hasEach() ? "(due to 'each') " : "") + attrSize +
+                                " and size of " + name() + " expression is " + valMod.size());
+                    }
                 } else {
-                    if (!attrSize.equivalent(valMod.size(), true)) {
-                        InstModification im = findModificationLackingEach(valMod.size());
-                        if (im != null) {
-                            im.generateMissingEachWarning();
-                        } else {
-                            error("Array size mismatch in modification of " + description +
-                                    ", expected size is " + (hasEach() ? "(due to 'each') " : "") + attrSize +
-                                    " and size of " + name() + " expression is " + valMod.size());
-                        }
+                    if (name().equals("nominal")) {
+                        checkNominalAttribute(valMod, description);
                     }
                 }
             }
         }
+    }
+
+    public void InstComponentModification.checkNominalAttribute(FExp valMod, String description) {
+        try {
+            String evalMsg = null;
+            CValue val = valMod.ceval();
+            if (val.isArray()) {
+                CValueArray arr = (CValueArray) val;
+                for (Index i : arr.indices()) {
+                    if (arr.getCell(i).realValue() == 0.0) {
+                        evalMsg = "where element " + i + " evaluates";
+                        break;
+                    }
+                }
+            } else {
+                if (val.realValue() == 0.0) {
+                    evalMsg = "evaluating";
+                }
+            }
+            if (evalMsg != null) {
+                error("The %s is set to %s, %s to 0.0. A nominal value of zero is not meaningful. " + 
+                        "Please set the nominal value to the expected magnitude of the variable.", 
+                        description, valMod, evalMsg);
+            }
+        } catch (ConstantEvaluationException e) {}
     }
 
     syn String InstNode.kindDescription() {

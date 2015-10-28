@@ -501,6 +501,12 @@ aspect FlatNames {
     eq FQNameFull.isSimple()      = false;
 
     /**
+     * Check if this use has any expression or colon array subscripts. 
+     */
+    syn boolean FIdUse.hasNonLiteralSubscripts()  = getFQName().hasNonLiteralSubscripts();
+    eq FIdUseInstAccess.hasNonLiteralSubscripts() = false;
+
+    /**
      * Check if this name has any expression or colon array subscripts. 
      */
     syn boolean FQName.hasNonLiteralSubscripts() = false;

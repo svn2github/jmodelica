@@ -200,12 +200,13 @@ void jmi_brent_solver_print_solve_end(jmi_block_solver_t *block, const jmi_log_n
     }
 }
 
-static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
+int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d) {
     double x = *x0;
     double x_tmp = x;
-    double f = 0.0;
+    double f = *f0;
     double df = 0.0;
     double delta = 1e20;
+    double delta_prev = delta;
     int flag;
     int i = 0;
     jmi_log_node_t node;
@@ -218,16 +219,18 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
     
     for (i = 0; i < BRENT_MAX_NEWTON; i++) {
         x = x_tmp;
-        flag = brentf(x, &f, block);
-        if (flag) {
-            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
-            jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed during Newton for block "
-                    "<block: %s>", block->label);
-            return -1;
+        if (i > 0) { /* First call is unnecessary due to an updated f is provided to the method */
+            flag = brentf(x, &f, block);
+            if (flag) {
+                if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
+                jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed during Newton for block "
+                        "<block: %s>", block->label);
+                return -1;
+            }
         }
         
         /* Iteration terminates successfully */
-        if (JMI_ABS(f) < UNIT_ROUNDOFF) { 
+        if (JMI_ABS(f) <= DBL_MIN) {
             if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
                 jmi_log_fmt(block->log, node, logInfo, "The residual meets the tolerance requirement <res: %f>. Stopping Newton.", f);
             }
@@ -280,12 +283,22 @@ static int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, d
             x_tmp = block->max[0];
         }
         
+        /* Check if Newton is making good progress */
+        if (i > 1 && JMI_ABS(delta) > 2*JMI_ABS(delta_prev)) {
+            if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) {
+                jmi_log_fmt(block->log, node, logInfo, "Not making progress with Newton. Stopping Newton.");
+            }
+            break;
+        }
+        
+        delta_prev = delta;
+        
     }
     
     if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL) { jmi_log_leave(block->log, node); }
     
     /* If the function value was significantly decreased during Newton, return successful together with the values, x, f and the last step */
-    if (JMI_ABS(f) < JMI_ABS(*f0) * BRENT_SIGNIFICANT_DECREASE) {
+    if (delta != 0 && (JMI_ABS(f) < JMI_ABS(*f0) * BRENT_SIGNIFICANT_DECREASE || JMI_ABS(f) < UNIT_ROUNDOFF)) {
         *x0 = x;
         *f0 = f;
         *d = delta >= 0 ? delta : -delta;

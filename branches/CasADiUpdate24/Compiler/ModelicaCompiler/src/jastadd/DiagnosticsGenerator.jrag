@@ -784,7 +784,7 @@ protected String EquationBlock.diagnostics_generateBLTTable_color() {
     return "#CCCCF0";
 }
 
-protected String DynamicStateBlock.diagnostics_generateBLTTable_color() {
+protected String AbstractSubBLTBlock.diagnostics_generateBLTTable_color() {
     return "#FF00FF";
 }
 
