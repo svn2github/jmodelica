@@ -33,6 +33,7 @@ equation
 			name="VariabilityInference",
 			description="Tests if variability 
 			inferred from equations is propagated to declarations",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.VariabilityInference
  constant Real x1 = 1;
@@ -1606,6 +1607,7 @@ initial equation
 		TransformCanonicalTestCase(
 			name="InitialEquation1",
 			description="Tests that corresponding initial equations are removed",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.InitialEquation1
  parameter Boolean c = false /* false */;
@@ -1656,6 +1658,7 @@ equation
         TransformCanonicalTestCase(
             name="InitialEquation3",
             description="Test no propagation of initial equations",
+            eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.InitialEquation3
  discrete Real x;
@@ -1691,7 +1694,6 @@ equation
 			description="Check that aliases are handled correctly",
 			flatModel="
 fclass VariabilityPropagationTests.AliasVariabilities1
- parameter Real a;
  constant Real c = 3.0;
  parameter Real p1;
  parameter Real p2;
@@ -1700,8 +1702,7 @@ fclass VariabilityPropagationTests.AliasVariabilities1
  parameter Real b;
  constant Real d = 3.0;
 parameter equation
- a = p1 + p2;
- b = a;
+ b = p1 + p2;
 end VariabilityPropagationTests.AliasVariabilities1;
 			
 "),
@@ -1711,12 +1712,12 @@ end VariabilityPropagationTests.AliasVariabilities1;
 			generate_fmi_me_xml=false,
 			template="$XML_variables$",
 			generatedCode="
-		<ScalarVariable name=\"a\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"a\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
-			<VariableCategory>dependentParameter</VariableCategory>
+			<VariableCategory>independentParameter</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"b\" valueReference=\"7\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"b\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>dependentParameter</VariableCategory>
@@ -1998,12 +1999,10 @@ initial equation
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse5
  parameter Real p1(fixed = false);
- parameter Real p3(fixed = false);
  parameter Real p2(fixed = false);
 initial equation 
- p1 = p3 * 23;
- p3 = p1 + 1;
- p2 = p3;
+ p1 = p2 * 23;
+ p2 = p1 + 1;
 end VariabilityPropagationTests.FixedFalse5;
 ")})));
 end FixedFalse5;

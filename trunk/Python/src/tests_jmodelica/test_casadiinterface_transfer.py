@@ -92,7 +92,7 @@ class ModelicaTransfer(object):
 
     @testattr(casadi = True)
     def test_ModelicaBindingExpression(self):
-        model =  self.load_model("AtomicModelAttributeBindingExpression", modelFile)
+        model =  self.load_model("AtomicModelAttributeBindingExpression", modelFile, compiler_options={"eliminate_alias_variables":False})
         dependent =  model.getVariables(Model.REAL_PARAMETER_DEPENDENT)
         independent =  model.getVariables(Model.REAL_PARAMETER_INDEPENDENT)
         actual =  str(independent[0].getAttribute("bindingExpression")) + str(dependent[0].getAttribute("bindingExpression"))

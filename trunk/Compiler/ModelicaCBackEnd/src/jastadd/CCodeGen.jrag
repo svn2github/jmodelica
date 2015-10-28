@@ -4683,26 +4683,30 @@ aspect CCodeGen {
     
     @Override
 	public void FEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
-		p.printPreSteps(this, str, indent);
-		FIdUseExp left = (FIdUseExp)getLeft();
+        p.printPreSteps(this, str, indent);
+        FIdUseExp left = (FIdUseExp)getLeft().stripNegations();
         FAbstractVariable fv = left.myFV();
         if (left.myFV().isExternalObject()) {
             FExternalObjectVariable eo = (FExternalObjectVariable) fv;
             eo.genDestructorCall_C(p, str, indent);
         }
         str.print(indent);
-		p.print(left.getFIdUse(), str, "");
-		str.print(" = (");
-		p.print(getRight(), str, "");
-		str.print(")");
-		if (left.myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
-			str.print("/sf(");
-			str.print(left.myFV().valueReference());
-			str.print(")");
-		}
-		str.print(";\n");
-		
-		p.printPostSteps(this, str, indent);
+        p.print(left.getFIdUse(), str, "");
+        str.print(" = ");
+        if (getLeft().isNegated()) {
+            str.print("-");
+        }
+        str.print("(");
+        p.print(getRight(), str, "");
+        str.print(")");
+        if (left.myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
+            str.print("/sf(");
+            str.print(left.myFV().valueReference());
+            str.print(")");
+        }
+        str.print(";\n");
+        
+        p.printPostSteps(this, str, indent);
 	}
     
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {

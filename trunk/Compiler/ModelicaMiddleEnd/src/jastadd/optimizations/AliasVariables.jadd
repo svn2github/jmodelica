@@ -859,8 +859,8 @@ aspect AliasVariables {
 	 * 
 	 * The variable with the highest score should be kept. Score is always > 0.
 	 */
-	syn int FVariable.aliasHeuristicScore() {
-        int score = 0;
+	syn long FVariable.aliasHeuristicScore() {
+        long score = 0;
         
         // Temporary variables added during transformations should get lower priority
         if (!isTemporary())
@@ -870,6 +870,18 @@ aspect AliasVariables {
         score *= 10;
         if (isInput())
             score += 1;
+        
+        // Parameter
+        score *= 10;
+        if (variability().parameterOrLess()) {
+            if (isConstant()) {
+                score += 3;
+            } else if (isIndependentParameter()) {
+                score += 2;
+            } else {
+                score += 1;
+            }
+        }
         
         // Stateselect level
         score *= 100;
@@ -888,7 +900,7 @@ aspect AliasVariables {
         
         // Fixed attribute == true
         score *= 10;
-        if (!isParameter() && fixedAttributeSet() && fixedAttributeExp().ceval().booleanValue())
+        if (fixedAttribute())
             score += 1;
         
         // Start attribute set
@@ -951,6 +963,7 @@ aspect DerivativeRewriting {
         } else {
             return;
         }
+        //aliasClass = AliasClass.DER_ALIAS;
         myFClass().getAliasManager().addDerivativeBindingPair(var, derVar.getMeIntegrated());
     }
 
