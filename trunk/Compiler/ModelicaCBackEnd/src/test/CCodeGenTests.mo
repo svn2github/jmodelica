@@ -2314,10 +2314,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_3, 1) = _x_1_0;
     jmi_array_ref_1(tmp_3, 2) = _x_2_1;
     func_CCodeGenTests_CFunctionTest13_F_def0(tmp_3, _u_4, tmp_1, tmp_2);
-    _z_1_2 = (jmi_array_val_1(tmp_1, 1));
-    _z_2_3 = (jmi_array_val_1(tmp_1, 2));
-    _y_1_5 = (jmi_array_val_1(tmp_2, 1));
-    _y_2_6 = (jmi_array_val_1(tmp_2, 2));
+    memcpy(&_z_1_2, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
+    memcpy(&_y_1_5, &jmi_array_val_1(tmp_2, 1), 2 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
@@ -2685,6 +2683,94 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
 end CFunctionTest19;
+
+model CFunctionTest20
+    record R
+        Real[5] x;
+    end R;
+    
+    function f
+        input Real[:] x1;
+        input Real x2;
+        output R y;
+    algorithm
+        y := R(x1);
+        y.x[3] := x2;
+        annotation(Inline=false);
+    end f;
+    
+    R y = f({time,time,time,time,time}, 3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest20",
+            description="memcpy for parts of array",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1, 5)
+    tmp_1->x = tmp_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1, 5)
+    jmi_array_ref_1(tmp_3, 1) = _time;
+    jmi_array_ref_1(tmp_3, 2) = _time;
+    jmi_array_ref_1(tmp_3, 3) = _time;
+    jmi_array_ref_1(tmp_3, 4) = _time;
+    jmi_array_ref_1(tmp_3, 5) = _time;
+    func_CCodeGenTests_CFunctionTest20_f_def0(tmp_3, AD_WRAP_LITERAL(3), tmp_1);
+    memcpy(&_y_x_1_0, &jmi_array_val_1(tmp_1->x, 1), 2 * sizeof(jmi_real_t));
+    memcpy(&_y_x_4_3, &jmi_array_val_1(tmp_1->x, 4), 2 * sizeof(jmi_real_t));
+    return ef;
+}
+")})));
+end CFunctionTest20;
+
+model CFunctionTest21
+    record R
+        Real[5] x;
+    end R;
+    
+    function f
+        input Real[:] x1;
+        output R y;
+    algorithm
+        y := R(x1);
+        annotation(Inline=false);
+    end f;
+    
+    R y = f({time,time,time,time,time});
+    Real x = y.x[3];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest21",
+            description="memcpy for parts of array",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1, 5)
+    tmp_1->x = tmp_2;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1, 5)
+    jmi_array_ref_1(tmp_3, 1) = _time;
+    jmi_array_ref_1(tmp_3, 2) = _time;
+    jmi_array_ref_1(tmp_3, 3) = _time;
+    jmi_array_ref_1(tmp_3, 4) = _time;
+    jmi_array_ref_1(tmp_3, 5) = _time;
+    func_CCodeGenTests_CFunctionTest21_f_def0(tmp_3, tmp_1);
+    memcpy(&_y_x_1_0, &jmi_array_val_1(tmp_1->x, 1), 2 * sizeof(jmi_real_t));
+    _x_4 = (jmi_array_val_1(tmp_1->x, 3));
+    memcpy(&_y_x_4_2, &jmi_array_val_1(tmp_1->x, 4), 2 * sizeof(jmi_real_t));
+    return ef;
+}
+")})));
+end CFunctionTest21;
 
 model CForLoop1
  function f
@@ -8266,10 +8352,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         jmi_array_ref_1(tmp_3, 1) = _time;
         jmi_array_ref_1(tmp_3, 2) = _time;
         func_CCodeGenTests_IfEqu4_f_def0(tmp_3, tmp_1, tmp_2);
-        _x_1_0 = (jmi_array_val_1(tmp_1, 1));
-        _x_2_1 = (jmi_array_val_1(tmp_1, 2));
-        _y_1_2 = (jmi_array_val_1(tmp_2, 1));
-        _y_2_3 = (jmi_array_val_1(tmp_2, 2));
+        memcpy(&_x_1_0, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
+        memcpy(&_y_1_2, &jmi_array_val_1(tmp_2, 1), 2 * sizeof(jmi_real_t));
     } else {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1, 2)
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
@@ -8277,8 +8361,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         jmi_array_ref_1(tmp_6, 1) = _time;
         jmi_array_ref_1(tmp_6, 2) = _time;
         func_CCodeGenTests_IfEqu4_f_def0(tmp_6, tmp_4, tmp_5);
-        _x_1_0 = (jmi_array_val_1(tmp_4, 1));
-        _x_2_1 = (jmi_array_val_1(tmp_4, 2));
+        memcpy(&_x_1_0, &jmi_array_val_1(tmp_4, 1), 2 * sizeof(jmi_real_t));
         _y_2_3 = (jmi_array_val_1(tmp_5, 1));
         _y_1_2 = (jmi_array_val_1(tmp_5, 2));
     }
@@ -10826,8 +10909,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         jmi_array_ref_1(tmp_2, 1) = _time;
         jmi_array_ref_1(tmp_2, 2) = _time;
         func_CCodeGenTests_BlockTest19_f_def0(tmp_2, tmp_1);
-        _temp_1_1_3 = (jmi_array_val_1(tmp_1, 1));
-        _temp_1_2_4 = (jmi_array_val_1(tmp_1, 2));
+        memcpy(&_temp_1_1_3, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
         _x_1_0 = _temp_1_1_3;
         _x_2_1 = _temp_1_2_4;
         tmp_3 = _x_1_0;
@@ -11987,30 +12069,25 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_1);
-    _temp_2_1_6 = (jmi_array_val_1(tmp_1, 1));
-    _temp_2_2_7 = (jmi_array_val_1(tmp_1, 2));
+    memcpy(&_temp_2_1_6, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
     _r_a_1_0 = 2 * _temp_2_1_6;
     _r_a_2_1 = 2 * _temp_2_2_7;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_2);
-    _temp_3_1_8 = (jmi_array_val_1(tmp_2, 1));
-    _temp_3_2_9 = (jmi_array_val_1(tmp_2, 2));
+    memcpy(&_temp_3_1_8, &jmi_array_val_1(tmp_2, 1), 2 * sizeof(jmi_real_t));
     _r_a_2_1 = _temp_3_1_8;
     _r_a_3_2 = _temp_3_2_9;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
     tmp_3->a = tmp_4;
     func_CCodeGenTests_Algorithm9_fw_def1(tmp_3);
-    _temp_4_a_1_10 = (jmi_array_val_1(tmp_3->a, 1));
-    _temp_4_a_2_11 = (jmi_array_val_1(tmp_3->a, 2));
-    _temp_4_a_3_12 = (jmi_array_val_1(tmp_3->a, 3));
+    memcpy(&_temp_4_a_1_10, &jmi_array_val_1(tmp_3->a, 1), 3 * sizeof(jmi_real_t));
     _r_a_1_0 = _temp_4_a_1_10;
     _r_a_2_1 = _temp_4_a_2_11;
     _r_a_3_2 = _temp_4_a_3_12;
     _re_a_1_3 = 1;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(tmp_5);
-    _re_a_2_4 = (jmi_array_val_1(tmp_5, 1));
-    _re_a_3_5 = (jmi_array_val_1(tmp_5, 2));
+    memcpy(&_re_a_2_4, &jmi_array_val_1(tmp_5, 1), 2 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));

@@ -178,7 +178,13 @@ aspect FlatAPI {
     syn int FVariable.aliasValueReference() = alias()!=null? 
         alias().valueReference(): -1;
 
-    syn int FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
+    syn int FAbstractVariable.indexInZ() = -1;
+    eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
+    
+    syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
+    
+    syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
+    eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
 
     syn int FClass.independentRealConstantsOffset() = 0;
     syn int FClass.independentIntegerConstantsOffset() = 

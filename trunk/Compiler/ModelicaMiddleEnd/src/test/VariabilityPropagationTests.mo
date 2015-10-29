@@ -1493,8 +1493,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     func_VariabilityPropagationTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
-    _x_1_0 = (jmi_array_val_2(tmp_1, 1,1));
-    _x_2_1 = (jmi_array_val_2(tmp_1, 1,2));
+    memcpy(&_x_1_0, &jmi_array_val_2(tmp_1, 1,1), 2 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
