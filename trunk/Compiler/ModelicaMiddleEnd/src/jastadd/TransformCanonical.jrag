@@ -3235,8 +3235,10 @@ aspect ParameterSorting {
 					try {
 						var.setBindingExp(var.getBindingExp().ceval().buildLiteral());
 					} catch (ConstantEvaluationException e) {
-						getFParameterEquations().add(new FEquation(var.createUseExp(), var.getBindingExp()));
-						var.removeBindingExp();
+                        FAbstractEquation fae = new FEquation(var.createUseExp(), var.getBindingExp());
+                        getFParameterEquations().add(fae);
+                        var.removeBindingExp();
+                        parameterEquationsMap().put(var,fae);
 					}
 				}
 			}
@@ -3330,15 +3332,17 @@ aspect ParameterSorting {
 			
 			// Rearrange parameters in same order as parameter equations
 			ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
+            for (FAbstractEquation fae : L) {
+                depParams.addAll(fae.referencedFVariablesInLHS());
+            }
 			ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
 			for (int i = 0; i < n_vars; i++) {
 				FVariable fv = vars.getChild(i);
 				if (fv.hasParameterEquation()) {
-					depParams.add(fv);
-					depParamIndices.add(new Integer(i));
-				}
-			}
-			FVariable.sortParameters(depParams);
+                    depParamIndices.add(new Integer(i));
+                }
+            }
+            
 			for (int i = 0; i < depParams.size(); i++)
 				vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 	

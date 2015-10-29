@@ -2772,6 +2772,49 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end CFunctionTest21;
 
+model CFunctionTest22
+    record R
+        Real[5] x;
+    end R;
+    
+    function f
+        input Real[:] x1;
+        output R y;
+    algorithm
+        y := R(x1);
+        annotation(Inline=false);
+    end f;
+    
+    parameter R y = f({1,2,3,4,5});
+    parameter Real x = y.x[3];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest22",
+            description="memcpy for parts of array",
+            template="$C_DAE_initial_dependent_parameter_assignments$",
+            eliminate_alias_parameters=true,
+            generatedCode="
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_RECORD_STATIC(R_0_r, tmp_1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1, 5)
+    tmp_1->x = tmp_2;
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 5, 1, 5)
+    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(tmp_3, 4) = AD_WRAP_LITERAL(4);
+    jmi_array_ref_1(tmp_3, 5) = AD_WRAP_LITERAL(5);
+    func_CCodeGenTests_CFunctionTest22_f_def0(tmp_3, tmp_1);
+    memcpy(&_y_x_1_0, &jmi_array_val_1(tmp_1->x, 1), 5 * sizeof(jmi_real_t));
+    return ef;
+}
+")})));
+end CFunctionTest22;
+
 model CForLoop1
  function f
   output Real o = 1.0;
