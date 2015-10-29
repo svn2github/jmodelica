@@ -2824,29 +2824,29 @@ model ModificationLevel1
 	C c;
 	D d(c1(a(x(start = 0.6))));
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ModificationLevel1",
-			description="Test calculation of modification levels",
-			methodName="attributeLevels",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ModificationLevel1",
+            description="Test calculation of modification levels",
+            methodName="attributeLevels",
+            methodResult="
 Variables:
-  a.x(start:4=0.1)
-  a.y(start:3=0.5)
-  b.x(start:5=0.1)
+  a.x(start:3=0.1)
+  a.y(start:2=0.5)
+  b.x(start:4=0.1)
   b.y(start:3=0.2)
-  c.a.x(start:5=0.1)
-  c.a.y(start:4=0.3)
-  c.b.x(start:6=0.1)
-  c.b.y(start:3=0.2)
-  d.c1.a.x(start:3=0.6)
-  d.c1.a.y(start:5=0.3)
-  d.c1.b.x(start:7=0.1)
-  d.c1.b.y(start:3=0.2)
-  d.c2.a.x(start:6=0.1)
-  d.c2.a.y(start:5=0.3)
-  d.c2.b.x(start:4=0.4)
-  d.c2.b.y(start:3=0.2)
+  c.a.x(start:4=0.1)
+  c.a.y(start:3=0.3)
+  c.b.x(start:5=0.1)
+  c.b.y(start:4=0.2)
+  d.c1.a.x(start:2=0.6)
+  d.c1.a.y(start:4=0.3)
+  d.c1.b.x(start:6=0.1)
+  d.c1.b.y(start:5=0.2)
+  d.c2.a.x(start:5=0.1)
+  d.c2.a.y(start:4=0.3)
+  d.c2.b.x(start:3=0.4)
+  d.c2.b.y(start:5=0.2)
 ")})));
 end ModificationLevel1;
 
@@ -2870,16 +2870,16 @@ model ModificationLevel2
     A a(y(start = 0.5));
     D d;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="ModificationLevel2",
-			description="Test calculation of modification levels for simple short class decl",
-			methodName="attributeLevels",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ModificationLevel2",
+            description="Test calculation of modification levels for simple short class decl",
+            methodName="attributeLevels",
+            methodResult="
 Variables:
-  a.x(start:4=0.1)
-  a.y(start:3=0.5)
-  d.c.b.x(start:7=0.1)
+  a.x(start:3=0.1)
+  a.y(start:2=0.5)
+  d.c.b.x(start:6=0.1)
   d.c.b.y
 ")})));
 end ModificationLevel2;
@@ -2898,7 +2898,7 @@ model ModificationLevel3
             methodName="attributeLevels",
             methodResult="
 Variables:
-  a.x(start:4=1)
+  a.x(start:1001=1)
 ")})));
 end ModificationLevel3;
 
@@ -2927,10 +2927,10 @@ model ModificationLevel4
             methodName="attributeLevels",
             methodResult="
 Variables:
-  a.x(start:4=1)
-  a.y(start:3=3)
-  w.m.a.x(start:4=1)
-  w.m.a.y(start:5=4)
+  a.x(start:1001=1)
+  a.y(start:2=3)
+  w.m.a.x(start:1001=1)
+  w.m.a.y(start:4=4)
 ")})));
 end ModificationLevel4;
 
@@ -2949,10 +2949,10 @@ model ModificationLevel5
             methodName="attributeLevels",
             methodResult="
 Variables:
-  a1.x[1](start:4=1)
-  a1.x[2](start:4=1)
-  a2.x[1](start:3=2)
-  a2.x[2](start:3=2)
+  a1.x[1](start:1001=1)
+  a1.x[2](start:1001=1)
+  a2.x[1](start:2=2)
+  a2.x[2](start:2=2)
 ")})));
 end ModificationLevel5;
 
