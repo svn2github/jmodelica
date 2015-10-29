@@ -38,10 +38,93 @@
 
 #define JMI_LIMIT_VALUE 1e30
 
+/* KINSOL callback for linear system solve */
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
-static void jmi_update_f_scale(jmi_block_solver_t *block);
+
+/* KINSOL callback for setting up linear solver (jacobian update and decomposition) */
 static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
 
+/* Update residual scales based on jacobian information */
+static void jmi_update_f_scale(jmi_block_solver_t *block);
+
+/* Calculate matrix vector product vv = M*v or vv = M^T*v */
+static void jmi_kinsol_calc_Mv(DlsMat M, int transpose, N_Vector v, N_Vector vv) {
+    realtype **m = M->cols;
+    realtype*  vd = N_VGetArrayPointer(v);
+    realtype*  vvd = N_VGetArrayPointer(vv);
+    long int N = M->N;
+    long int i,j;
+
+    if(transpose) {
+        for (i=0;i<N;i++) {
+            vvd[i] = 0;
+            for (j=0;j<N;j++){
+                vvd[i] += m[i][j] * vd[j];
+            }
+        }
+    } else {
+        for (i=0;i<N;i++) {
+            vvd[i] = 0;
+        }
+        for (i=0;i<N;i++) {
+            for (j=0;j<N;j++){
+                vvd[j] += m[i][j] * vd[i];
+            }
+        }
+    }
+}
+
+
+/* Calculate Transpose(v1)*diag(w)*diag(w)*v2.
+   w can be NULL in which case it is set to identity */
+static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
+    long int i, N;
+    realtype sum, prodi;
+
+    sum = 0.0;
+
+    N  = NV_LENGTH_S(v1);
+
+    if( v1 == v2) {
+        N_Vector v = v1;
+        realtype *vd;
+        vd = NV_DATA_S(v);
+        if ( w != 0) {
+            realtype *wd;
+            wd = NV_DATA_S(w);
+            for (i = 0; i < N; i++) {
+                prodi = vd[i]*wd[i];
+                sum += SQR(prodi);
+            }
+        } else {
+            for (i = 0; i < N; i++) {
+                prodi = vd[i];
+                sum += SQR(prodi);
+            }
+        }
+    } else {
+        realtype *vd1, *vd2;
+        vd1 = NV_DATA_S(v1);
+        vd2 = NV_DATA_S(v2);
+        if ( w != 0) {
+            realtype *wd;
+            wd = NV_DATA_S(w);
+            for (i = 0; i < N; i++) {
+                prodi = vd1[i]*wd[i]*wd[i]*vd2[i];
+                sum += prodi;
+            }
+        } else {
+            for (i = 0; i < N; i++) {
+                prodi = vd1[i]*vd2[i];
+                sum += prodi;
+            }
+        }
+    }
+    return(sum);
+}
+
+
+/* Kinsol Jacobian function wrapper */
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2);
 
 /*Kinsol function wrapper
@@ -1254,9 +1337,9 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
         else if(info > 0) {
             solver->equed = 'N';
             if(info <= N)
-                jmi_log_node(block->log, logWarning, "ZeroRow", "Row %d of the Jacobian is exactly zero in <block: %s>.", info, block->label);
+                jmi_log_node(block->log, logWarning, "ZeroRow", "<Row: %d> of the Jacobian is exactly zero in <block: %s>.", info, block->label);
             else
-                jmi_log_node(block->log, logWarning, "ZeroColumn", "Column %d of the Jacobian is exactly zero in <block: %s>.", info-N, block->label);
+                jmi_log_node(block->log, logWarning, "ZeroColumn", "<Column: %d> of the Jacobian is exactly zero in <block: %s>.", info-N, block->label);
         }
         else {
             solver->equed = 'N';
@@ -1380,24 +1463,16 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     }
     if(solver->use_steepest_descent_flag ||block->options->enforce_bounds_flag) {
         /* calculate steepest descent direction */
-        /* Make step in steepest descent direction and not Newton*/
-        realtype **jac = solver->J->cols;
-        realtype*  gd = N_VGetArrayPointer(solver->gradient);
-        int N = block->n;
-        int j;
-        
-        /*  Step = Transpose(J) W*W F, 
+
+        /*  gradient = Transpose(J) W*W F, 
             where W is the diagonal matix of residual scaling factors. 
             W*W F is effectively calculated above in "x" as a part of kin_sfdotJp calculation.
-            Step is saved in "b" and then copied into "x" */
-        for (i=0;i<N;i++) {
-            gd[i] = 0;
-            for (j=0;j<N;j++){
-                gd[i] += jac[i][j] * xd[j];
-            }
-        }
+         */
+
+        jmi_kinsol_calc_Mv(solver->J, TRUE, x, solver->gradient);
     }
     if(solver->use_steepest_descent_flag) {
+        /* Make step in steepest descent direction and not Newton*/
         N_VScale(ONE, solver->gradient, x);
 
         ret = 0;
@@ -1535,26 +1610,48 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_reals(block->log, topnode, logInfo, "unbounded_step", xd, block->n);
         }
         jmi_kinsol_limit_step(kin_mem, x, b);
+
+        if(solver->last_num_active_bounds > 0 && (block->options->experimental_mode & jmi_block_solver_experimental_check_descent_direction)) {
+            realtype sJpnorm, sfJp, fnorm, g_scale;
+            
+            /*scalar product of gradient and projected step */
+            double xg = jmi_kinsol_calc_v1twwv2(x, solver->gradient, solver->kin_y_scale); 
+
+            if(xg <= 0.0) {
+                if(block->callbacks->log_options.log_level >= 5) {
+                    double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
+                    N_VScale(step_factor, x, b);
+                    jmi_log_reals(block->log, topnode, logInfo, "projected_newton_step", bd, block->n);
+                    jmi_log_leave(block->log, topnode);
+                }
+                jmi_log_node(block->log, logWarning, "StepNotDescent", 
+                    "Projected Newton step is not descent in <block: %s>, scaled scalar product with gradient <spxg: %g>, trying steepest descent", block->label, xg);
+            }
+            /*
+                sfdotJp = Transpose(F) * Wf*Wf*J*gradient = Transpose(F) * Wf*Wf*J* Transpose(J)* Wf*Wf*F = Transpose(gradient)*gradient
+            */
+            sfJp = jmi_kinsol_calc_v1twwv2(solver->gradient, solver->gradient, 0);
+            KINGetFuncNorm(solver->kin_mem, &fnorm);
+            g_scale = fnorm*fnorm/sfJp;
+            N_VScale(g_scale, solver->gradient, x);
+            sfJp *= g_scale;
+            jmi_kinsol_calc_Mv(solver->J, FALSE, solver->gradient, b);
+            sJpnorm = N_VWL2Norm(b,solver->kin_f_scale);
+            kin_mem->kin_sJpnorm = sJpnorm;
+            kin_mem->kin_sfdotJp = sfJp;
+            jmi_kinsol_limit_step(kin_mem, x, b);
+            xg = jmi_kinsol_calc_v1twwv2(x, solver->gradient, solver->kin_y_scale); 
+
+            if(xg == 0.0) {
+                jmi_log_node(block->log, logWarning, "StepIsZero",
+                    "Projected steepest descent step is zero in <block: %s>", block->label);
+            }
+        }
         if(block->callbacks->log_options.log_level >= 5) {
             double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
-            for(i = 0; i < block->n; i++) {
-                bd[i] = xd[i]*step_factor;
-            }
+            N_VScale(step_factor, x, b);
             jmi_log_reals(block->log, topnode, logInfo, "projected_step", bd, block->n);
             jmi_log_leave(block->log, topnode);
-        }
-
-        if(solver->last_num_active_bounds > 0 && block->options->experimental_mode & jmi_block_solver_experimental_check_descent_direction) {
-            realtype*  gd = N_VGetArrayPointer(solver->gradient);
-            double xg = 0; /*scalar product of gradient and projected step */
-            int i;
-            for( i = 0;  i < block->n; i++) {
-                xg += xd[i]*gd[i]*Ith(solver->kin_y_scale,i)*Ith(solver->kin_y_scale,i);
-            }
-            if(xg <= 0) {
-                jmi_log_node(block->log, logWarning, "StepNotDescent", 
-                    "Projected Newton step is not descent in <block: %s>, scaled scalar product with gradient <spxg: %g>", block->label, xg);
-            }
         }
     }
     return 0;
