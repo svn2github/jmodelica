@@ -682,7 +682,14 @@ void handleAliasVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model> m, ModelicaC
     if (!fv.isAlias()) {
         return;
     }
-    var->setAlias(m->getVariable(env->toString(fv.alias().name().this$)));
+    
+    std::string aliasName = env->toString(fv.alias().name().this$);
+    ModelicaCasADi::Ref<ModelicaCasADi::Variable> aliasVariable = m->getVariable(aliasName);
+    if (aliasVariable == NULL) {
+        throw std::runtime_error("Tried to transfer alias variable `" + var->getName() + "` before its model variable `" + aliasName + "`");
+    }
+    var->setAlias(aliasVariable);
+    
     var->setNegated(fv.isNegated());
 }
 
