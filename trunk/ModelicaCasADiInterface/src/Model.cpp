@@ -396,7 +396,7 @@ namespace ModelicaCasADi
         setUpValAndSymbolVecs();
         for (vector< Variable * >::iterator it = z.begin(); it != z.end(); ++it) {
             Ref<Variable> var = (*it);
-            if (var->getVariability() == Variable::PARAMETER) {
+            if ((var->getVariability() == Variable::PARAMETER) && !var->isAlias()) {
                 if (var->hasAttributeSet("bindingExpression")) {
                     bindingExpression = *var->getAttribute("bindingExpression");
                     if (!bindingExpression.isConstant()) {

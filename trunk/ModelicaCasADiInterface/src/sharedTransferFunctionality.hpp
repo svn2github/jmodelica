@@ -474,9 +474,11 @@ template <class FVar, class List, class Attribute, class Comment>
  */
 void transferAttributes(ModelicaCasADi::Ref<ModelicaCasADi::Variable> var, FVar &fv)
 {
-    transferBindingExpressionsOrEquationForVariable<FVar>(var, fv);
     transferCommentForVariable<FVar, Comment>(var, fv);
-    transferFAttributeListForVariable<FVar, List, Attribute>(var, fv);
+    if (!var->isAlias()) {
+        transferBindingExpressionsOrEquationForVariable<FVar>(var, fv);
+        transferFAttributeListForVariable<FVar, List, Attribute>(var, fv);
+    }
 }
 
 
@@ -615,12 +617,12 @@ void transferDifferentiatedVariableAndItsDerivative(ModelicaCasADi::Ref<Modelica
     ModelicaCasADi::Ref<ModelicaCasADi::DerivativeVariable> derVar = new ModelicaCasADi::DerivativeVariable(m.getNode(), toMX(fDer.asMXVariable()),
         realVar, getUserType<FVar>(m, fDer));
     realVar->setMyDerivativeVariable(derVar);
-    transferAttributes<FVar, List, Attribute, Comment>(realVar, fDiff);
-    transferAttributes<FVar, List, Attribute, Comment>(derVar, fDer);
     m->addVariable(derVar);
     m->addVariable(realVar);
     handleAliasVariable(m, realVar, fv);
     handleAliasVariable(m, derVar, fv);
+    transferAttributes<FVar, List, Attribute, Comment>(realVar, fDiff);
+    transferAttributes<FVar, List, Attribute, Comment>(derVar, fDer);
     
     indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), realVar));
     indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.myDerivativeVariable().findVariableIndex(), derVar));
@@ -639,8 +641,8 @@ void transferRealVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar &f
     }
     ModelicaCasADi::Ref<ModelicaCasADi::RealVariable> realVar = new ModelicaCasADi::RealVariable(m.getNode(), toMX(fv.asMXVariable()),
         getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
-    transferAttributes<FVar, List, Attribute, Comment>(realVar, fv);
     handleAliasVariable(m, realVar, fv);
+    transferAttributes<FVar, List, Attribute, Comment>(realVar, fv);
     m->addVariable(realVar);
     
     indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), realVar));
@@ -652,8 +654,8 @@ void transferIntegerVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar
 {
     ModelicaCasADi::Ref<ModelicaCasADi::IntegerVariable> intVar = new ModelicaCasADi::IntegerVariable(m.getNode(), toMX(fv.asMXVariable()),
         getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
-    transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
     handleAliasVariable(m, intVar, fv);
+    transferAttributes<FVar, List, Attribute, Comment>(intVar, fv);
     m->addVariable(intVar);
     
     indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), intVar));
@@ -666,8 +668,8 @@ void transferBooleanVariable(ModelicaCasADi::Ref<ModelicaCasADi::Model>  m, FVar
     ModelicaCasADi::Ref<ModelicaCasADi::BooleanVariable> boolVar = new ModelicaCasADi::BooleanVariable(m.getNode(), toMX(fv.asMXVariable()),
         getCausality(fv), getVariability(fv), getUserType<FVar>(m, fv));
     
-    transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
     handleAliasVariable(m, boolVar, fv);
+    transferAttributes<FVar, List, Attribute, Comment>(boolVar, fv);
     m->addVariable(boolVar);
     
     indexToVariable.insert(std::pair<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >(fv.findVariableIndex(), boolVar));

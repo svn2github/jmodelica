@@ -17,7 +17,9 @@ end Integrator;
 
 optimization TestDependentParameter
     parameter Real p = 1;
-    parameter Real q = -p;
+    parameter Real q = -p;  // negated alias
+    parameter Real r = p;   // alias
+    parameter Real s = p^2; // dependent parameter
     Real x(start = 1, fixed = true);
 equation
     der(x) = q*x;
