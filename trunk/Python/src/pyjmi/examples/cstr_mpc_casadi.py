@@ -180,11 +180,11 @@ def run_demo(with_plots=True):
         pass
     else:
         Tc_norm = N.linalg.norm(Tc_res_comp) / N.sqrt(len(Tc_res_comp))
-        assert(N.abs(Tc_norm - 311.71777347245921) < 1e-3)
+        assert(N.abs(Tc_norm - 311.7362) < 1e-3)
         c_norm = N.linalg.norm(c_res_comp) / N.sqrt(len(c_res_comp))
-        assert(N.abs(c_norm - 653.65024527945957) < 1e-3)
+        assert(N.abs(c_norm - 653.5369) < 1e-3)
         T_norm = N.linalg.norm(T_res_comp) / N.sqrt(len(T_res_comp))
-        assert(N.abs(T_norm - 328.0844758978343) < 1e-3)
+        assert(N.abs(T_norm - 328.0852) < 1e-3)
     
     # Plot the results
     if with_plots: 
