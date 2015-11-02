@@ -1536,6 +1536,63 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
     end PartiallyKnownComposite11;
+    
+    model PartiallyKnownComposite12
+       function e
+           input Real x;
+           output Real y;
+           external;
+       end e;
+           
+       function f
+           input Real x1,x2;
+           output Real y1,y2;
+       algorithm
+           y2 := e(x2);
+           y1 := x1;
+           annotation(Inline=false);
+       end f;
+    
+        Real y1,y2,y3;
+    equation
+        (y1,y2) = f(1,y3);
+        y3 = 3;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite12",
+            description="Failing on second evaluation of constant function",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite12
+ constant Real y1 = 1;
+ parameter Real y2;
+ constant Real y3 = 3;
+parameter equation
+ (, y2) = VariabilityPropagationTests.PartiallyKnownComposite12.f(1, 3.0);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite12.f
+  input Real x1;
+  input Real x2;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y2 := VariabilityPropagationTests.PartiallyKnownComposite12.e(x2);
+  y1 := x1;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.PartiallyKnownComposite12.f;
+
+ function VariabilityPropagationTests.PartiallyKnownComposite12.e
+  input Real x;
+  output Real y;
+ algorithm
+  external \"C\" y = e(x);
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite12.e;
+
+end VariabilityPropagationTests.PartiallyKnownComposite12;
+")})));
+    end PartiallyKnownComposite12;
 
 model ConstantRecord1
 	record A
