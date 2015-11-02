@@ -34,6 +34,7 @@
 #define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
 #define BRENT_INF 1e20
 #define BRENT_SIGNIFICANT_DECREASE 0.01 /* Value used in Newton for determining if the values should be used or not */
+#define BRENT_SMALL_RESIDUAL_FACTOR 1e3
 
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
@@ -566,7 +567,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
-        double initialStep = (initialStepNewton > initialStepStatic) ? initialStepStatic : initialStepNewton;
+        double initialStepStaticSmall = initialStepStatic*initialStepStatic;
+        double initialStep = (initialStepNewton > initialStepStatic) ? (JMI_ABS(f) < UNIT_ROUNDOFF*BRENT_SMALL_RESIDUAL_FACTOR ? initialStepStaticSmall : initialStepStatic) : initialStepNewton;
         double lstep = initialStep, ustep = initialStep;
         while (1) {
             if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
