@@ -1098,6 +1098,9 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 else {
                     /* zero step - no range violation possible*/
                     solver->range_limited[i] = 0;
+                    if (block->callbacks->log_options.log_level >= 5) {
+                        jmi_log_real_(log, BIG_REAL);
+                    }
                     continue;
                 }
             }
@@ -1767,7 +1770,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     if(use_scaling_flag) {
         solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
-        /* check that scaling factors has reasonable magnitude */
+        /* check that scaling factors have reasonable magnitude */
         for(i = 0; i < N; i++) {
             if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
                 int j, maxInJacIndex = 0;
