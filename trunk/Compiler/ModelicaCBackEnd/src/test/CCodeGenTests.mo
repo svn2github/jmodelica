@@ -14796,6 +14796,25 @@ model Smooth1
 ")})));
 end Smooth1;
 
+model Smooth1_noEventOption
+  Real y = time - 2;
+  Real x = smooth(0, if y < 0 then 0 else y ^ 3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Smooth1_noEventOption",
+            description="",
+            variability_propagation=false,
+            disable_smooth_events=true,
+            generate_ode=false,
+            generate_dae=true,
+            template="$C_DAE_equation_residuals$",
+            generatedCode="
+    (*res)[0] = _time - 2 - (_y_0);
+    (*res)[1] = (COND_EXP_EQ(COND_EXP_LT(_y_0, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), (1.0 * (_y_0) * (_y_0) * (_y_0)))) - (_x_1);
+")})));
+end Smooth1_noEventOption;
+
 model Homotopy1
     Real x,y;
 equation

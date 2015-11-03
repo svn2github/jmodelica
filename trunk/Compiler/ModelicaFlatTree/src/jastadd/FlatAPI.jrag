@@ -1394,7 +1394,7 @@ aspect FlatAPI {
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
             !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
 
-    syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
+    syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(myOptions().getBooleanOption("disable_smooth_events") ? 0 : 1);
 
     syn boolean FExp.hasEventGeneratingType() = false;
     eq FRelExp.hasEventGeneratingType()       = isRealComparison();

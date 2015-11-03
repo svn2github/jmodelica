@@ -518,6 +518,12 @@ abstract public class OptionRegistry {
              Category.user,
              true,
              "If enabled, then relational operators are allowed to generate time events."),
+        DISABLE_SMOOTH_EVENTS
+            ("disable_smooth_events",
+             OptionType.compiler,
+             Category.experimental,
+             false,
+             "If enabled, no events will be generated for smooth operator if order equals to zero."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
              OptionType.compiler,
