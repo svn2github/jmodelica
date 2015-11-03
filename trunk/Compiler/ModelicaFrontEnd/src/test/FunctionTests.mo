@@ -10378,6 +10378,70 @@ end FunctionTests.UnknownArray49;
 ")})));
 end UnknownArray49;
 
+model UnknownArray50
+    function f
+        input Integer n;
+        input Real[2] x;
+        output Real y;
+    algorithm
+        y := sum(if n < 1 then cat(1,1:(n+2),1:0) else if n > 3 then 2:(n+3) else cat(1,x,1:n));
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f(3, {time,time+1});
+    
+    annotation(__JModelica(UnitTesting(tests={
+                TransformCanonicalTestCase(
+            name="UnknownArray50",
+            description="Varying size temp in if expressions",
+            flatModel="
+fclass FunctionTests.UnknownArray50
+ Real y;
+equation
+ y = FunctionTests.UnknownArray50.f(3, {time, time + 1});
+
+public
+ function FunctionTests.UnknownArray50.f
+  input Integer n;
+  input Real[2] x;
+  output Real y;
+  Real temp_1;
+  Integer[:] temp_2;
+  Real[:] temp_3;
+ algorithm
+  if n < 1 then
+   size(temp_2) := {max(n + 2, 0)};
+   for i2 in 1:max(n + 2, 0) loop
+    temp_2[i2] := i2;
+   end for;
+   for i2 in 1:0 loop
+    temp_2[i2 + max(n + 2, 0)] := i2;
+   end for;
+  else
+   if n > 3 then
+   else
+    size(temp_3) := {2 + max(n, 0)};
+    for i2 in 1:2 loop
+     temp_3[i2] := x[i2];
+    end for;
+    for i2 in 1:max(n, 0) loop
+     temp_3[i2 + 2] := i2;
+    end for;
+   end if;
+  end if;
+  temp_1 := 0.0;
+  for i1 in 1:max(n + 2, 0) loop
+   temp_1 := temp_1 + (if n < 1 then temp_2[i1] elseif n > 3 then 2 + (i1 - 1) else temp_3[i1]);
+  end for;
+  y := temp_1;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.UnknownArray50.f;
+
+end FunctionTests.UnknownArray50;
+")})));
+end UnknownArray50;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
