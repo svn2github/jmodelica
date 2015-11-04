@@ -245,6 +245,7 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
     jmi_ode_method_t ode_method;
     jmi_real_t ode_step_size;
     jmi_real_t ode_rel_tol;
+    int        ode_experimental_mode;
 
 	if (c == NULL) {
 		return fmi2Fatal;
@@ -273,12 +274,13 @@ fmi2Status fmi2_enter_initialization_mode(fmi2Component c) {
         
         
         /* These options for the solver need to be found in a better way. */
-        ode_method    = jmi->options.cs_solver;
-        ode_step_size = jmi->options.cs_step_size;
-        ode_rel_tol   = jmi->options.cs_rel_tol;
+        ode_method            = jmi->options.cs_solver;
+        ode_step_size         = jmi->options.cs_step_size;
+        ode_rel_tol           = jmi->options.cs_rel_tol;
+        ode_experimental_mode = jmi->options.cs_experimental_mode;
         
         /* Create solver */
-        retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol);
+        retval = jmi_new_ode_solver(ode_problem, ode_method, ode_step_size, ode_rel_tol, ode_experimental_mode);
         if (retval != fmi2OK) { 
             return fmi2Error;
         }

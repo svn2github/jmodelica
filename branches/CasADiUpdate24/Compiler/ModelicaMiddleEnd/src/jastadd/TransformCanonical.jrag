@@ -1873,6 +1873,13 @@ aspect TransformCanonical {
 			if (equation.isAliasEquation()) 
 				aliasManager.addAliasVariables(equation.aliasVariables());
 		}
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getFParameterEquations()) {
+                equation.aliasClassified = false; 
+                if (equation.isAliasEquation()) 
+                    aliasManager.addAliasVariables(equation.aliasVariables());
+            }
+        }
 		aliasManager.reportAliasErrors(this);
 		//flush();
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
@@ -1894,6 +1901,7 @@ aspect TransformCanonical {
 		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
 		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
 		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
 		
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
@@ -1910,7 +1918,14 @@ aspect TransformCanonical {
 		for (FAbstractEquation equation : getFAbstractEquations()) 
 			if (!equation.isAliasEquation()) 
 				eqns.add(equation);
-
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getFParameterEquations()) { 
+                if (!equation.isAliasEquation()) {
+                    pEqns.add(equation);
+                }
+            }
+        }
+        
         // Collect derivative binding equations, however only if we are going
         // to perform index reduction!
         if (myOptions().getBooleanOption("propagate_derivatives")) {
@@ -1922,6 +1937,9 @@ aspect TransformCanonical {
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            setFParameterEquationList(new List(pEqns));
+        }
 		
 		aliasVariablesEliminated = true;
 		enableAliasRewrite();
@@ -2434,45 +2452,73 @@ aspect TransformCanonical {
             }
         }
     }
-	
-	public void FClass.insertTempsInLHS() {
-		for (FAbstractEquation equation : getFAbstractEquations()) {
-			equation.insertTempsInLHS(this);
-		}
-	}
-	
-	public void FAbstractEquation.insertTempsInLHS(FClass fClass) {}
-	public void FFunctionCallEquation.insertTempsInLHS(FClass fClass) {
-		for (FFunctionCallLeft left : getLefts())
-			left.insertTempsInLHS(fClass);
-	}
-	
-	public void FFunctionCallLeft.insertTempsInLHS(FClass fClass) {
-		if (hasFExp())
-			getFExp().insertTempsInLHS(fClass);
-	}
-	
-	public void FExp.insertTempsInLHS(FClass fClass) {
-		String tempName = calcTempVarName();
-        fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), type().funcOutputVariability()));
-		replaceMe(new FIdUseExp(tempName));
-		fClass.addFEquation(new FEquation(this, new FIdUseExp(tempName)));
-	}
-	
-    public void FNoExp.insertTempsInLHS(FClass fClass) {
+    
+    public void FClass.insertTempsInLHS() {
+        for (FAbstractEquation equation : getFParameterEquations()) {
+            equation.insertTempsInLHS(this, true);
+        }
+        for (FAbstractEquation equation : getFAbstractEquations()) {
+            equation.insertTempsInLHS(this, false);
+        }
+    }
+    
+    public void FAbstractEquation.insertTempsInLHS(FClass fClass, boolean param) {}
+    
+    @Override
+    public void FFunctionCallEquation.insertTempsInLHS(FClass fClass, boolean param) {
+        for (FFunctionCallLeft left : getLefts()) {
+            left.insertTempsInLHS(fClass, param);
+        }
+    }
+    
+    public void FFunctionCallLeft.insertTempsInLHS(FClass fClass, boolean param) {
+        if (hasFExp()) {
+            getFExp().insertTempsInLHS(fClass, param);
+        }
+    }
+    
+    public void FExp.insertTempsInLHS(FClass fClass, boolean param) {
+        String tempName = calcTempVarName();
+        FTypePrefixVariability v;
+        if (param) {
+            v = fParameter();
+        } else {
+            v = type().funcOutputVariability();
+        }
+        fClass.addFVariable(type().createTempFVariable(new FQNameString(tempName), v));
+        replaceMe(new FIdUseExp(tempName));
+        FEquation e = new FEquation(this, new FIdUseExp(tempName));
+        if (param) {
+            fClass.addFParameterEquation(e);
+        } else {
+            fClass.addFEquation(e);
+        }
+    }
+    
+    @Override
+    public void FNoExp.insertTempsInLHS(FClass fClass, boolean param) {
         
     }
-	
-	public void FIdUseExp.insertTempsInLHS(FClass fClass) {}
-	public void FArray.insertTempsInLHS(FClass fClass) {
-		for (FExp fExp : getFExps())
-			fExp.insertTempsInLHS(fClass);
-	}
-	public void FRecordConstructor.insertTempsInLHS(FClass fClass) {
-		for (FExp fExp : getArgs())
-			fExp.insertTempsInLHS(fClass);
-	}
-	
+    
+    @Override
+    public void FIdUseExp.insertTempsInLHS(FClass fClass, boolean param) {
+        
+    }
+    
+    @Override
+    public void FArray.insertTempsInLHS(FClass fClass, boolean param) {
+        for (FExp fExp : getFExps()) {
+            fExp.insertTempsInLHS(fClass, param);
+        }
+    }
+    
+    @Override
+    public void FRecordConstructor.insertTempsInLHS(FClass fClass, boolean param) {
+        for (FExp fExp : getArgs()) {
+            fExp.insertTempsInLHS(fClass, param);
+        }
+    }
+    
     public void FClass.remoteRedundantInitialEquations() {
         ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
         // Remove alias equations.
@@ -3189,8 +3235,10 @@ aspect ParameterSorting {
 					try {
 						var.setBindingExp(var.getBindingExp().ceval().buildLiteral());
 					} catch (ConstantEvaluationException e) {
-						getFParameterEquations().add(new FEquation(var.createUseExp(), var.getBindingExp()));
-						var.removeBindingExp();
+                        FAbstractEquation fae = new FEquation(var.createUseExp(), var.getBindingExp());
+                        getFParameterEquations().add(fae);
+                        var.removeBindingExp();
+                        parameterEquationsMap().put(var,fae);
 					}
 				}
 			}
@@ -3284,15 +3332,17 @@ aspect ParameterSorting {
 			
 			// Rearrange parameters in same order as parameter equations
 			ArrayList<FVariable> depParams = new ArrayList<FVariable>(n_eqns);
+            for (FAbstractEquation fae : L) {
+                depParams.addAll(fae.referencedFVariablesInLHS());
+            }
 			ArrayList<Integer> depParamIndices = new ArrayList<Integer>(n_eqns);
 			for (int i = 0; i < n_vars; i++) {
 				FVariable fv = vars.getChild(i);
 				if (fv.hasParameterEquation()) {
-					depParams.add(fv);
-					depParamIndices.add(new Integer(i));
-				}
-			}
-			FVariable.sortParameters(depParams);
+                    depParamIndices.add(new Integer(i));
+                }
+            }
+            
 			for (int i = 0; i < depParams.size(); i++)
 				vars.setChild(depParams.get(i), depParamIndices.get(i).intValue());
 	

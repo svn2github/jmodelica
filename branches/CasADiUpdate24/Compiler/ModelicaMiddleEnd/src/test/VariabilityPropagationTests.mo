@@ -1493,8 +1493,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     func_VariabilityPropagationTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
-    _x_1_0 = (jmi_array_val_2(tmp_1, 1,1));
-    _x_2_1 = (jmi_array_val_2(tmp_1, 1,2));
+    memcpy(&_x_1_0, &jmi_array_val_2(tmp_1, 1,1), 2 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
@@ -1537,6 +1536,63 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
     end PartiallyKnownComposite11;
+    
+    model PartiallyKnownComposite12
+       function e
+           input Real x;
+           output Real y;
+           external;
+       end e;
+           
+       function f
+           input Real x1,x2;
+           output Real y1,y2;
+       algorithm
+           y2 := e(x2);
+           y1 := x1;
+           annotation(Inline=false);
+       end f;
+    
+        Real y1,y2,y3;
+    equation
+        (y1,y2) = f(1,y3);
+        y3 = 3;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="PartiallyKnownComposite12",
+            description="Failing on second evaluation of constant function",
+            flatModel="
+fclass VariabilityPropagationTests.PartiallyKnownComposite12
+ constant Real y1 = 1;
+ parameter Real y2;
+ constant Real y3 = 3;
+parameter equation
+ (, y2) = VariabilityPropagationTests.PartiallyKnownComposite12.f(1, 3.0);
+
+public
+ function VariabilityPropagationTests.PartiallyKnownComposite12.f
+  input Real x1;
+  input Real x2;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y2 := VariabilityPropagationTests.PartiallyKnownComposite12.e(x2);
+  y1 := x1;
+  return;
+ annotation(Inline = false);
+ end VariabilityPropagationTests.PartiallyKnownComposite12.f;
+
+ function VariabilityPropagationTests.PartiallyKnownComposite12.e
+  input Real x;
+  output Real y;
+ algorithm
+  external \"C\" y = e(x);
+  return;
+ end VariabilityPropagationTests.PartiallyKnownComposite12.e;
+
+end VariabilityPropagationTests.PartiallyKnownComposite12;
+")})));
+    end PartiallyKnownComposite12;
 
 model ConstantRecord1
 	record A
@@ -1779,10 +1835,10 @@ model StructParam1
             flatModel="
 fclass VariabilityPropagationTests.StructParam1
  eval parameter Real r.a = 1.0 /* 1.0 */;
- eval parameter Real r.b;
- structural parameter Real a = 1.0 /* 1.0 */;
  eval parameter Real temp_1.a;
+ structural parameter Real a = 1.0 /* 1.0 */;
  eval parameter Real temp_1.b;
+ eval parameter Real r.b;
 parameter equation
  (VariabilityPropagationTests.StructParam1.R(temp_1.a, temp_1.b)) = VariabilityPropagationTests.StructParam1.f();
  r.b = temp_1.b;

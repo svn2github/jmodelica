@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,13 +87,15 @@ aspect Flattening {
     }
 
     public void InstClassDecl.flattenInstClassDecl(FClass fc) {
+        int level = 1;
+        HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
         beginStep("flattenInstClassDecl()");
         fc.setName(qualifiedName());
         buildConnectionSets(fc);
         breakOnErrors();
         beginStep("flattenComponents()");
-        flatten(fc, false);
-        getInstGeneratedInners().flatten(fc, false);
+        flatten(fc, false, level);
+        getInstGeneratedInners().flatten(fc, false, level);
         flattenUsedFuncsAndEnums(fc);
         flattenInstClassDeclExtra(fc);
         endStep("flattenComponents()");
@@ -102,6 +105,7 @@ aspect Flattening {
         breakOnErrors();
         endStep("flattenInstClassDecl()");
         fc.generateStepMof("flattening");
+        clearModificationLevel(oldLevels);
     }
 
 
@@ -305,7 +309,7 @@ aspect Flattening {
         ffd.setFQName(new FQNameString(qualifiedName()));
         fc.addFFunctionDecl(ffd);
         
-        flattenComponentsInFunction(ffd, fc, new HashSet<String>());
+        flattenComponentsInFunction(ffd, fc, new HashSet<String>(), FUNC_AND_REC_MOD_LEVEL);
         
         FAlgorithm fab;
         if (ie != null) {
@@ -319,7 +323,9 @@ aspect Flattening {
         ffd.setFAlgorithm(fab);
         return ffd;
     }
-    
+
+    public static final int InstNode.FUNC_AND_REC_MOD_LEVEL = 1000;
+
     protected void InstBaseClassDecl.flattenExternal(FAlgorithm fab, InstExternal ie) {
         fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
     }
@@ -418,15 +424,19 @@ aspect Flattening {
             comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getOutputs()));
     }
 
-    public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added) {
+    public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added, int level) {
+        HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
         for (InstExtends ie : getInstExtendss())
-            ie.flattenComponentsInFunction(ffd, fc, added);
+            ie.flattenComponentsInFunction(ffd, fc, added, level + 1);
         for (InstComponentDecl icd : getInstComponentDecls()) {
             if (added.add(icd.name())) {
+                HashMap<InstNode,Integer> oldLevels2 = icd.setModificationLevel(level + 1);
                 icd.flattenInFunction(ffd, fc, false, null);
                 icd.flattenUsedFuncsAndEnums(fc);
+                icd.clearModificationLevel(oldLevels2);
             }
         }
+        clearModificationLevel(oldLevels);
     }
 
 	syn FAlgorithm InstNode.findFunctionAlgorithm() {
@@ -482,16 +492,30 @@ aspect Flattening {
             frd.setFQName(new FQNameString(name));
             
             Set<String> names = new HashSet<String>();
-            for (InstComponentDecl icd : allInstComponentDecls()) {
-                icd.flattenInRecord(frd, fc, names);
-            }
+            flattenComponentsInRecord(frd, fc, names, FUNC_AND_REC_MOD_LEVEL);
             
             fc.addFRecordDecl(frd);
             
             flattenUsedFuncsAndEnums(fc);
         }
     }
-    
+
+    public void InstNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
+        HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
+        for (InstExtends ie : getInstExtendss())
+            ie.flattenComponentsInRecord(frd, fc, names, level + 1);
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            HashMap<InstNode,Integer> oldLevels2 = icd.setModificationLevel(level + 1);
+            icd.flattenInRecord(frd, fc, names);
+            icd.clearModificationLevel(oldLevels2);
+        }
+        clearModificationLevel(oldLevels);
+    }
+
+    public void InstSimpleShortClassDecl.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
+        actualInstClass().flattenComponentsInRecord(frd, fc, names, level);
+    }
+
     public FExternalStmt InstExternal.flatten(InstClassDecl func, FQName prefix) {
         return createStmt(func, prefix, true);
     }
@@ -743,26 +767,32 @@ aspect Flattening {
 	}
 	
 	// TODO: end of remove (see TODO above)
-	
-	
-	// Generic method for flattening	
-	public void ASTNode.flatten(FClass fc, boolean excludeBinding) {
-		for (ASTNode n : this) {
-			n.flatten(fc, excludeBinding);
-		}
-	}
-    
-    public void InstNode.flatten(FClass fc, boolean excludeBinding) {
-        flatten(fc, getFQName(), excludeBinding);
+
+
+    // Generic method for flattening
+    public void ASTNode.flatten(FClass fc, boolean excludeBinding, int level) {
+        for (ASTNode n : this) {
+            n.flatten(fc, excludeBinding, level);
+        }
     }
-    
-    public void InstNode.flatten(FClass fc, FQName name, boolean excludeBinding) {
-		for (FAbstractEquation ae : getFAbstractEquations()) 
-		   ae.flatten(name, fc);
-		getInstComponentDeclList().flatten(fc, excludeBinding);
-		getInstExtendsList().flatten(fc, excludeBinding);
+
+    public void InstNode.flatten(FClass fc, boolean excludeBinding, int level) {
+        flatten(fc, getFQName(), excludeBinding, level);
+    }
+
+    public void InstNode.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
+        HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
+        flattenEquations(name, fc);
+        getInstComponentDeclList().flatten(fc, excludeBinding, level + 1);
+        getInstExtendsList().flatten(fc, excludeBinding, level + 1);
         contribute(fc);
-	}
+        clearModificationLevel(oldLevels);
+    }
+
+    public void InstNode.flattenEquations(FQName name, FClass fc) {
+        for (FAbstractEquation ae : getFAbstractEquations()) 
+            ae.flatten(name, fc);
+    }
 
     /**
      * Check if this component is present in the model (i.e. not a disabled conditional 
@@ -777,18 +807,18 @@ aspect Flattening {
      */
     syn boolean InstComponentDecl.useInFlattening()    = isPresent() && !(isOuter() && !isInner());
 
-	public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding) {
-		if (useInFlattening()) 
-			super.flatten(fc, name, excludeBinding);
-	}
-    
-    public void InstExpandableConnectorMember.flatten(FClass fc, boolean excludeBinding) {
-        if (getCopyOf().isAssignable())
-            getCopyOf().flatten(fc, getFQName(), true);
-        else
-            flatten(fc, getFQName(), true);
+    public void InstComponentDecl.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
+        if (useInFlattening()) 
+            super.flatten(fc, name, excludeBinding, level);
     }
-	
+
+    public void InstExpandableConnectorMember.flatten(FClass fc, boolean excludeBinding, int level) {
+        if (getCopyOf().isAssignable())
+            getCopyOf().flatten(fc, getFQName(), true, level);
+        else
+            flatten(fc, getFQName(), true, level);
+    }
+
 	public void InstClassDecl.buildConnectionSets(FClass fc) {
         beginStep("buildConnectionSets()");
 		ConnectionSetManager csm = fc.getConnectionSetManager();
@@ -810,10 +840,12 @@ aspect Flattening {
         }
     }
 
-    public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding) {
+    public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
         if (useInFlattening()) {
+            HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
             fc.addFVariableNoTransform(createFVariable(name, excludeBinding));
             flattenMyType(fc);
+            clearModificationLevel(oldLevels);
         }
     }
 
@@ -1432,8 +1464,87 @@ aspect Flattening {
 	inh boolean InstModification.isOnPrimitiveTypeDecl();
 	eq InstExtends.getChild().isOnPrimitiveTypeDecl() = extendsPrimitive();
 	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
-	
-	
+
+
+    /**
+     * Get the modification level that is set for containing InstNode.
+     * 
+     * @throws UnsupportedOperationException  if setModificationLevel() has not been called on surrounding InstNode
+     */
+    inh int InstModification.modificationLevel();
+    eq Root.getChild().modificationLevel()     = 0;
+    eq InstNode.getChild().modificationLevel() = myModificationLevel;
+
+    /**
+     * Set the modification level for contained modifications.
+     * 
+     * @throws IllegalArgumentException  if level is negative
+     */
+    public HashMap<InstNode,Integer> InstNode.setModificationLevel(int level) {
+        HashMap<InstNode,Integer> old = new HashMap<InstNode,Integer>();
+        setModificationLevelHelper(old, level);
+        return old;
+    }
+
+    public void InstNode.setModificationLevelHelper(HashMap<InstNode,Integer> old, int level) {
+        myModificationLevel = level;
+        old.put(this, myModificationLevel);
+        for (InstNode extra : extraNodesToSetModLevelFor()) {
+            if (extra != null && !old.containsKey(extra)) {
+                extra.setModificationLevelHelper(old, extra.nextModLevelForExtraNode(level));
+            }
+        }
+    }
+
+    public void InstNode.clearModificationLevel(HashMap<InstNode,Integer> old) {
+        for (InstNode n : old.keySet()) {
+            n.myModificationLevel = old.get(n);
+        }
+    }
+
+    syn int InstNode.nextModLevelForExtraNode(int level)                  = level + 1;
+    eq InstExtendsShortClass.nextModLevelForExtraNode(int level)          = level;
+    eq InstReplacingExtendsShortClass.nextModLevelForExtraNode(int level) = level;
+    eq InstInlineExtends.nextModLevelForExtraNode(int level)              = level;
+
+    inh InstNode InstNode.parentNodeToSetModLevelFor();
+    eq InstClassDecl.getChild().parentNodeToSetModLevelFor()    = hasModificationLevel() ? null : this;
+    eq InstExtends.getChild().parentNodeToSetModLevelFor()      = hasModificationLevel() ? null : this;
+    eq InstRoot.getChild().parentNodeToSetModLevelFor()         = null;
+    eq Root.getChild().parentNodeToSetModLevelFor()             = null;
+
+    syn InstNode[] InstNode.extraNodesToSetModLevelFor()        = listExtraNodesToSetModLevelFor(false);
+    eq InstComponentDecl.extraNodesToSetModLevelFor()           = listExtraNodesToSetModLevelFor(true, myInstClass());
+    eq InstExtends.extraNodesToSetModLevelFor()                 = listExtraNodesToSetModLevelFor(true, myInstClass());
+    eq InstClassDecl.extraNodesToSetModLevelFor()               = listExtraNodesToSetModLevelFor(true);
+    eq InstSimpleShortClassDecl.extraNodesToSetModLevelFor()    = listExtraNodesToSetModLevelFor(false, actualInstClass());
+    eq InstReplacingComposite.extraNodesToSetModLevelFor()      = 
+        listExtraNodesToSetModLevelFor(true, getInstComponentRedeclare().getInstComponentDecl(), myInstClass());
+    eq InstReplacingRecord.extraNodesToSetModLevelFor()         = 
+        listExtraNodesToSetModLevelFor(true, getInstComponentRedeclare().getInstComponentDecl(), myInstClass());
+    eq InstReplacingPrimitive.extraNodesToSetModLevelFor()      = 
+        listExtraNodesToSetModLevelFor(true, getInstComponentRedeclare().getInstComponentDecl(), myInstClass());
+    eq InstReplacingFullClassDecl.extraNodesToSetModLevelFor()  = 
+        listExtraNodesToSetModLevelFor(true, getInstClassRedeclare().redeclaringInstClassDecl());
+    eq InstReplacingShortClassDecl.extraNodesToSetModLevelFor() = 
+        listExtraNodesToSetModLevelFor(true, getInstClassRedeclare().redeclaringInstClassDecl());
+    eq InstReplacingSimpleShortClassDecl.extraNodesToSetModLevelFor() = 
+        listExtraNodesToSetModLevelFor(false, getInstClassRedeclare().redeclaringInstClassDecl(), actualInstClass());
+
+    protected InstNode[] InstNode.listExtraNodesToSetModLevelFor(boolean ext, InstNode... nodes) {
+        InstNode[] res = new InstNode[nodes.length + (ext ? getNumInstExtends() : 0) + 1];
+        System.arraycopy(nodes, 0, res, 0, nodes.length);
+        for (int i = nodes.length; i < res.length - 1; i++) {
+            res[i] = getInstExtends(i - nodes.length);
+        }
+        res[res.length - 1] = parentNodeToSetModLevelFor();
+        return res;
+    }
+
+    private int InstNode.myModificationLevel = Integer.MAX_VALUE;
+
+    syn boolean InstNode.hasModificationLevel() = myModificationLevel != Integer.MAX_VALUE;
+
 }
 
 aspect FlatteningDebug {

@@ -1483,6 +1483,100 @@ end TransformCanonicalTests.AliasPropStart1;
 end AliasPropStart1;
 
 
+model AliasPropStart2
+    model A
+        Real x(start = 1);
+    end A;
+    
+    model B = A(x(start=2));
+    model C = B(x(nominal=1));
+    
+    model D
+        C c;
+    end D;
+    
+    model E
+        A a(x = time);
+        D d(c(x = a.x));
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropStart2",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.AliasPropStart2
+ Real e.a.x(start = 1,nominal = 1);
+equation
+ e.a.x = time;
+end TransformCanonicalTests.AliasPropStart2;
+")})));
+end AliasPropStart2;
+
+
+model AliasPropStart3
+    model A
+        Real x(start = 1);
+    end A;
+    
+    model B = A(x(start=2));
+    model C = B;
+    
+    model D
+        C c;
+    end D;
+    
+    model E
+        A a(x = time);
+        D d(c(x = a.x));
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropStart3",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.AliasPropStart3
+ Real e.a.x(start = 1);
+equation
+ e.a.x = time;
+end TransformCanonicalTests.AliasPropStart3;
+")})));
+end AliasPropStart3;
+
+
+model AliasPropStart4
+    model A
+        Real x(start = 1);
+    end A;
+    
+    model B = A(x(start=2));
+    
+    model E
+        A a(x = time);
+        B b(x = a.x);
+    end E;
+    
+    E e;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AliasPropStart4",
+            description="",
+            flatModel="
+fclass TransformCanonicalTests.AliasPropStart4
+ Real e.b.x(start = 2);
+equation
+ e.b.x = time;
+end TransformCanonicalTests.AliasPropStart4;
+")})));
+end AliasPropStart4;
+
+
 model AliasPropFixed1
 	Real x1(fixed = true);
 	Real x2(start = 1) = x1;
@@ -7396,7 +7490,7 @@ y = homotopy(y * x, time)
                 methodName="printDAEInitBLT",
                 methodResult="
 --- Homotopy block ---
-  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  --- Unsolved system (Block 1(Homotopy).1) of 2 variables ---
   Unknown variables:
     y ()
     x ()
@@ -7439,7 +7533,7 @@ y = homotopy(y * x, time)
 b := time * 2
 
 --- Homotopy block ---
-  --- Unsolved system (Block 1(Homotopy).1.1) of 2 variables ---
+  --- Unsolved system (Block 1(Homotopy).1) of 2 variables ---
   Unknown variables:
     y ()
     x ()
@@ -7449,7 +7543,7 @@ b := time * 2
       Iteration variables: y
     x = homotopy(x * x, time)
       Iteration variables: x
-
+  --- Solved equation ---
   a := x + y * b
   -------------------------------
   --- Unsolved equation (Block 1(Simplified).1) ---
@@ -7466,6 +7560,35 @@ b := time * 2
 -------------------------------
 ")})));
         end SuccessorMerge1;
+        
+        model SubBlocks1
+            Real x,y;
+        equation
+            y = time;
+            0 = homotopy(x * y, x);
+        
+        annotation(__JModelica(UnitTesting(tests={
+	        FClassMethodTestCase(
+                name="Operators.Homotopy.SubBlocks1",
+                description="Tests a bug where block numbers for sub-blocks in homotopy part was generated wrong",
+                homotopy_type="homotopy",
+                methodName="printDAEInitBLT",
+                methodResult="
+--- Solved equation ---
+y := time
+
+--- Homotopy block ---
+  --- Unsolved equation (Block 1(Homotopy).1) ---
+  0 = homotopy(x * y, x)
+    Computed variables: x
+  -------------------------------
+  --- Unsolved equation (Block 1(Simplified).1) ---
+  0 = homotopy(x * y, x)
+    Computed variables: x
+  -------------------------------
+-------------------------------
+")})));
+        end SubBlocks1;
         
     end Homotopy;
 end Operators;

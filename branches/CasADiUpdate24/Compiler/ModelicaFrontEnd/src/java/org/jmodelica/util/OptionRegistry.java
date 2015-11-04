@@ -238,6 +238,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true, 
              "If enabled, then alias variables are eliminated from the model."),
+        ELIM_ALIAS_PARAM
+            ("eliminate_alias_parameters", 
+             OptionType.compiler, 
+             Category.uncommon,
+             false, 
+             "If enabled, then alias parameters are eliminated from the model."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 
@@ -741,6 +747,13 @@ abstract public class OptionRegistry {
              Category.user,
              1e-3,
              "Step-size for the fixed-step solvers in the Co-Simulation case."),
+        CS_EXPERIMENTAL_MODE
+            ("cs_experimental_mode",
+             OptionType.runtime, 
+             Category.experimental,
+             0,
+             "Activates experimental features of CS ode solvers",
+             0, Integer.MAX_VALUE),
         RUNTIME_LOG_TO_FILE
             ("runtime_log_to_file",
              OptionType.runtime, 

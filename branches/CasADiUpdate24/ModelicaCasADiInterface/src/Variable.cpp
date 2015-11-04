@@ -93,13 +93,17 @@ bool Variable::hasAttributeSet(AttributeKey key) const {
     }
 }
 
+bool isNegatedAttributeKey(Variable::AttributeKey key) {
+    return key == "start" || key == "min" || key == "max" || key == "nominal" ||
+           key == "bindingExpression" || key == "evaluatedBindingExpression";
+}
 
 /// Assumes that this is an alias, and that the attribute should be retrieved from
 /// the alias variable. 
 Variable::AttributeValue* Variable::getAttributeForAlias(AttributeKey key) {
     AttributeValue* val = myModelVariable->getAttribute(keyForAlias(key)); // Note that keyForAlias can change key for min/max. 
-    bool shoulNegateAttribute = ((key == "start" || key == "min" || key == "max" || key == "nominal") && isNegated());
-    if (val != NULL && shoulNegateAttribute) {
+    if (val == NULL) return val;
+    if (isNegated() && isNegatedAttributeKey(key)) {
         val = new MX(val->operator-());
     }
     return val;
@@ -120,7 +124,7 @@ Variable::AttributeKey Variable::keyForAlias(AttributeKey key)  const{
 
 /// Assumes that this is an alias, and propagates the attribute to its alias variable.
 void Variable::setAttributeForAlias(AttributeKey key, AttributeValue val) {
-    if (isNegated() && (key == "start" || key == "min" || key == "max" || key == "nominal")) {
+    if (isNegated() && isNegatedAttributeKey(key)) {
         key = keyForAlias(key);
         val = -val;
     }

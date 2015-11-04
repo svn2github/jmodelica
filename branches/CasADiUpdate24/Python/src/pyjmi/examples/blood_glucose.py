@@ -57,9 +57,9 @@ def run_demo(with_plots=True):
     I = res['I']
     t = res['time']
     
-    assert N.abs(res.final('G') - 19.77650) < 1e-4
-    assert N.abs(res.final('X') - 14.97815) < 1e-4
-    assert N.abs(res.final('I') - 2.7)      < 1e-4
+    assert N.abs(res.final('G') - 19.77650) < 1e-3
+    assert N.abs(res.final('X') - 14.97815) < 1e-3
+    assert N.abs(res.final('I') - 2.7)      < 1e-3
 
     if with_plots:
         plt.figure(1)

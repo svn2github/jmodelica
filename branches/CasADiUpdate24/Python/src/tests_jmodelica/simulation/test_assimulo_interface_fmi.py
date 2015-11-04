@@ -453,6 +453,7 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
+        compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
     
     @testattr(stddist = True)
     def test_Brent_double_root1(self):
@@ -516,6 +517,13 @@ class Test_NonLinear_Systems:
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
+        
+    @testattr(stddist = True)
+    def test_residual_scaling_heuristics(self):
+        model = load_fmu("NonLinear_ResidualHeuristicScaling1.fmu")
+        model.set("_use_Brent_in_1d", False)
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('state_a_p'), 17.78200351)
     
 
 class Test_Singular_Systems:
@@ -677,12 +685,14 @@ class Test_FMI_ODE:
         """
         file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
         file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
+        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
 
         _ex1_name = compile_fmu("NoState.Example1", file_name)
         _ex2_name = compile_fmu("NoState.Example2", file_name)
         _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
         _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
         _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
         
     def setUp(self):
         """
@@ -694,6 +704,17 @@ class Test_FMI_ODE:
         self._dq.initialize()
         self._bounceSim = FMIODE(self._bounce)
         self._dqSim     = FMIODE(self._dq)
+        
+    @testattr(stddist = True)
+    def test_updated_values_in_result(self):
+        model = load_fmu("LinearTest_Linear1.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        
+        res = model.simulate(final_time=1,options=opts)
+        
+        for i in range(len(res["der(x)"])):
+            assert res["der(x)"][i] == 0.0
     
     @testattr(stddist = True)
     def test_cc_with_cvode(self):
@@ -1042,12 +1063,15 @@ class Test_FMI_ODE:
         """
         model = load_fmu('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         
-        res = model.simulate(final_time=10)
+        opts = model.simulate_options()
+        opts["CVode_options"]["atol"] = 1e-8
+        opts["CVode_options"]["rtol"] = 1e-8
+        res = model.simulate(final_time=10, options=opts)
     
         nose.tools.assert_almost_equal(res.initial('x'), 1.000000, 4)
         nose.tools.assert_almost_equal(res.initial('y'), 0.000000, 4)
-        nose.tools.assert_almost_equal(res.final('x'), 0.290109468, 4)
-        nose.tools.assert_almost_equal(res.final('y'), -0.956993467, 4)
+        nose.tools.assert_almost_equal(res.final('x'), 0.25370773767354998, 4)
+        nose.tools.assert_almost_equal(res.final('y'), -0.96728092291979395, 4)
         
         model = FMUModel('Pendulum_0Dynamic.fmu', path_to_fmus_me1)
         

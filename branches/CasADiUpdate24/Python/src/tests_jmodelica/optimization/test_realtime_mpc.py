@@ -34,17 +34,17 @@ except (NameError, ImportError):
 
 def check_result(results, ref):
     for key in ref:
-        assert abs(ref[key] - results[key][-1]) < 1e-10
+        assert abs(ref[key] - results[key][-1]) < 1e-5
         
 
 @testattr(casadi = True)
 def test_realtime_mpc():
     start_values = {'_start_phi': 0, '_start_v': 0, '_start_z': 0}
     par_changes = ParameterChanges({1: {'z_ref': 5}})
-    ref = {'phi': 0.93714835014165698,
-           'z': 4.2596216924881896,
-           'v': 3.40490145572327,
-           'u': -0.05978545628989447,
+    ref = {'phi': 0.936978004043,
+           'z': 4.25919322427,
+           'v': 3.40523065632,
+           'u': -0.0597209819244,
            'time': 2.0}
 
     path = os.path.join(get_files_path(), 'Modelica', 'bnb.mop')
@@ -59,10 +59,10 @@ def test_realtime_mpc():
 def test_realtime_mpc_ia():
     start_values = {'_start_h1': 0, '_start_h2': 0,
                     '_start_h3': 0, '_start_h4': 0}
-    ref = {'h1': 5.4116337435361999,
-           'h2': 5.1418558610587501,
-           'h3': 7.6829467117738703,
-           'h4': 8.6693843873568106,
+    ref = {'h1': 5.41158639648,
+           'h2': 5.14179296558,
+           'h3': 7.6831333579,
+           'h4': 8.66958129138,
            'u1': 10.0,
            'u2': 10.0,
            'time': 5.0}
@@ -98,19 +98,19 @@ def test_realtime_mpc_cg():
     par_changes = ParameterChanges({1: {'lx_ref': 0.5,
                                         'ly_ref': 1.0,
                                         'lz_ref': -0.5}})
-    ref = {'px': 0.34693717380897798,
-           'py': 0.69417490777505597,
+    ref = {'px': 0.346932431817,
+           'py': 0.694178183248,
            'ul': 0.11764811976,
-           'vx': 0.263505231113,
-           'vy': 0.520916184088,
-           'der_l': 0.237664018001,
-           'tx': 0.153929416599,
-           'ty': 0.298646637823,
-           'wx': 1.20407229085,
-           'wy': 2.20179280407,
-           'ux': -0.0553971744143,
+           'vx': 0.263449683258,
+           'vy': 0.520923008414,
+           'der_l': 0.237609752809,
+           'tx': 0.153826374643,
+           'ty': 0.29862921556,
+           'wx': 1.20408324142,
+           'wy': 2.20145775869,
+           'ux': -0.0554289031676,
            'uy': -0.11787736265,
-           'ul': 0.11764811976,
+           'ul': 0.117369869311,
            'time': 2.0}
     
     path = os.path.join(get_files_path(), 'Modelica', 'crane.mop')

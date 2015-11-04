@@ -262,17 +262,6 @@ aspect InstModifications{
 	syn ClassRedeclare InstClassRedeclare.getClassRedeclare() = (ClassRedeclare)getModification();
 	syn ComponentRedeclare InstComponentRedeclare.getComponentRedeclare() = (ComponentRedeclare)getModification();
 
-	
-	/**
-	 * At what level from the top model is this modification set?
-	 */
-	inh int InstModification.modificationLevel();
-	inh int InstNode.modificationLevel();
-	eq InstNode.getChild().modificationLevel()           = modificationLevel() + 1;
-	eq InstRoot.getChild().modificationLevel()           = 0;
-    eq Root.getChild().modificationLevel()               = 0;
-	eq InstShortClassDecl.getChild().modificationLevel() = modificationLevel();
-
 }
 
 aspect Environments {
@@ -947,12 +936,16 @@ aspect InstanceTreeConstruction {
          public InstLookupResult<InstClassDecl> lookupInstClass(String name);
          public InstLookupResult<InstClassDecl> lookupInstClassQualified(String name);
          public ClassDecl redeclaringClassDecl();
+         public InstClassDecl redeclaringInstClassDecl();
      }
     InstClassDecl implements InstRedeclareClassNode;
     InstClassRedeclare implements InstRedeclareClassNode;
-    
+
     syn ClassDecl InstClassDecl.redeclaringClassDecl()      = getClassDecl();
     syn ClassDecl InstClassRedeclare.redeclaringClassDecl() = getClassRedeclare().getBaseClassDecl();
+
+    syn InstClassDecl InstClassDecl.redeclaringInstClassDecl()      = this;
+    syn InstClassDecl InstClassRedeclare.redeclaringInstClassDecl() = getInstClassDecl();
 
 	public InstNode InstNode.createInstExtends(ExtendsClause ec) {
    		// This cannot be redeclared. Just create and return.

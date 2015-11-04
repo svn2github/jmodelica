@@ -54,9 +54,15 @@ struct jmi_ode_solver_t {
     void *integrator;
     jmi_real_t step_size;
     jmi_real_t rel_tol;
+    int experimental_mode;
     jmi_ode_solve_func_t solve;
     jmi_ode_delete_func_t delete_solver;
 };
+
+/** \brief Experimental features in the solver */
+typedef enum jmi_cs_experimental_mode_t {
+    jmi_cs_experimental_none = 0
+} jmi_cs_experimental_mode_t;
 
 /**
  * \brief Creates a new jmi_ode_solver_t instance.
@@ -67,7 +73,7 @@ struct jmi_ode_solver_t {
  * @param rel_tol The relative tolerance for the method.
  * @return Error code.
   */
-int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method, jmi_real_t step_size, jmi_real_t rel_tol);
+int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method, jmi_real_t step_size, jmi_real_t rel_tol, int experimental_mode);
 
 /**
  * \brief Deletes the jmi_ode_solver_t instance.

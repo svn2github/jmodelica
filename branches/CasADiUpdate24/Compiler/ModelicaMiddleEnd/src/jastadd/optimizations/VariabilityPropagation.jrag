@@ -362,6 +362,11 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
             List<FAbstractEquation> parameterEquations) {
+        
+        if (taggedByVProp) {
+            return taggedByVProp;
+        }
+        
 	    boolean res = true;
 		CValueRecord frc = null;
 		if (!value.isUnknown()) {
@@ -380,7 +385,11 @@ aspect VariabilityPropagation {
 			LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
             List<FAbstractEquation> parameterEquations) {
-		
+        
+        if (taggedByVProp) {
+            return taggedByVProp;
+        }
+        
 		CValueArray a = null;
 		if (value != CValue.UNKNOWN) {
 			a = (CValueArray) value;
@@ -415,6 +424,10 @@ aspect VariabilityPropagation {
             LinkedHashSet<FAbstractEquation> worklist,
             CValue value,
             List<FAbstractEquation> parameterEquations) {
+        
+        if (taggedByVProp) {
+            return taggedByVProp;
+        }
         
         FExp bexp = null;
         FTypePrefixVariability variability = null;

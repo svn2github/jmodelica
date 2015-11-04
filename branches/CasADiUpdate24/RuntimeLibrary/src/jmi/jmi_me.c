@@ -925,7 +925,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->cs_rel_tol = z[index];
     index = get_option_index("_cs_step_size");
     if(index)
-        op->cs_step_size = z[index]; 
+        op->cs_step_size = z[index];
+    index = get_option_index("_cs_experimental_mode");
+    if(index)
+        op->cs_experimental_mode = z[index];
     index = get_option_index("_runtime_log_to_file");
     if(index)
         op->log_options->copy_log_to_file_flag = (int)z[index]; 

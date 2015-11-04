@@ -199,19 +199,25 @@ def test_change_eliminated_input_mesh_points():
 @testattr(casadi = True)
 def test_update_dependent_parameter():
     file_path = os.path.join(get_files_path(), 'Modelica', 'TestWarmStart.mop')
-    op = transfer_optimization_problem("TestDependentParameter", file_path)
+    compiler_options={"eliminate_alias_parameters": True}
+    op = transfer_optimization_problem("TestDependentParameter", file_path,
+                                       compiler_options=compiler_options)
 
     solver = op.prepare_optimization()
     res = solver.optimize()
 
     assert solver.get('p') ==  1
     assert solver.get('q') == -1
+    assert solver.get('r') == 1
+    assert solver.get('s') == 1
     assert N.abs(res.final('x') - N.exp(-1)) < 1e-8
 
     solver.set('p', 2)
 
     assert solver.get('p') ==  2
     assert solver.get('q') == -2
+    assert solver.get('r') ==  2
+    assert solver.get('s') ==  4
 
     res = solver.optimize()
 
