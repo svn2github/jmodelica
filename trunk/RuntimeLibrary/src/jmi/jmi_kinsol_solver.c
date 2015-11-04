@@ -840,8 +840,20 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SolverOptions", "<block:%s>", block->label);
     jmi_log_fmt(block->log, node,logInfo, "Tolerance <tolerance: %g>",block->options->res_tol);
     jmi_log_fmt(block->log, node,logInfo, "Max number of iterations <max_iter: %d>",block->options->max_iter);
-    jmi_log_fmt(block->log, node,logInfo, "Step limit <factor: %g>",block->options->step_limit_factor);
-    jmi_log_fmt(block->log, node,logInfo, "Experimental <mode: %d>",block->options->experimental_mode);
+    jmi_log_fmt(block->log, node,logInfo, "Step limit <step_limit_factor: %g>",block->options->step_limit_factor);
+    if(block->options->experimental_mode != 0)
+        jmi_log_fmt(block->log, node,logInfo, "Experimental <experimental_mode: %d>",block->options->experimental_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <rescale_after_singular_jac: %d>", block->options->rescale_after_singular_jac_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <use_Brent_in_1d: %d>", block->options->use_Brent_in_1d_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <check_jac_cond: %d>", block->options->check_jac_cond_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <enforce_bounds: %d>", block->options->enforce_bounds_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <iteration_variable_scaling: %d>", block->options->iteration_variable_scaling_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <residual_equation_scaling: %d>", block->options->residual_equation_scaling_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <regularization_tolerance: %g>", block->options->regularization_tolerance);
+    jmi_log_fmt(block->log, node, logInfo, " <min_residual_scaling_factor: %g>", block->options->min_residual_scaling_factor);
+    jmi_log_fmt(block->log, node, logInfo, " <max_residual_scaling_factor: %g>", block->options->max_residual_scaling_factor);
+    jmi_log_fmt(block->log, node, logInfo, " <use_jacobian_equilibration: %d>", block->options->use_jacobian_equilibration_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
