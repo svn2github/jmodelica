@@ -1344,32 +1344,6 @@ aspect Scalarization {
         }
     }
     
-    public void FIfExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        if (inFunction()) {
-            List thenClauses = new List();
-            List elseClauses = new List();
-            getIfExp().createArrayTemporaries(clauses, vars, indexMap, names);
-            getThenExp().createArrayTemporaries(thenClauses, vars, indexMap, names);
-            getElseExp().createArrayTemporaries(elseClauses, vars, indexMap, names);
-            
-            if (thenClauses.getNumChild() > 0 || elseClauses.getNumChild() > 0) {
-                FExp ifExp = getIfExp().scalarize(indexMap);
-                List<FIfWhenClause> cl = new List<FIfWhenClause>();
-                cl.add(new FIfClause(ifExp, thenClauses));
-                clauses.add(new FIfStmt(cl, elseClauses));
-            }
-            if (extractTemp()) {
-                if (extractAsUnknown()) {
-                    unknownFunctionArrayTemporaries_pre(clauses, vars, indexMap, names);
-                } else {
-                    knownArrayTemporaries(clauses, vars, indexMap);
-                }
-            }
-        } else {
-            super.createArrayTemporaries(clauses, vars, indexMap, names);
-        }
-    }
-    
     public void FFunctionCall.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // No names available as a function call arg.
         boolean b = !extractTemp();
