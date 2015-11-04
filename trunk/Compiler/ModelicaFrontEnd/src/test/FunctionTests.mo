@@ -10378,6 +10378,33 @@ end FunctionTests.UnknownArray49;
 ")})));
 end UnknownArray49;
 
+model UnknownArray50
+    function F
+        input Integer x;
+        output Real y = 0;
+    algorithm
+        for i in 0:x loop
+            y := missingFunction(i, x) + notAVariable;
+        end for;
+    end F;
+    
+    parameter Real r = F(3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray50",
+            description="Ensure that error checking is done in for loops which loop over unknown size",
+            errorMessage="
+2 errors found:
+
+Error at line 1, column 1, in file '...':
+  Cannot find function declaration for missingFunction()
+
+Error at line 1, column 1, in file '...':
+  Cannot find class or component declaration for notAVariable
+")})));
+end UnknownArray50;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

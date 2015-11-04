@@ -1102,25 +1102,28 @@ aspect InstanceErrorCheck {
 	public void FIterExp.collectErrors(ErrorCheckType checkType) {
 	    collectErrorsInFor(getFExp(), getForIndexList(), checkType);
 	}
-	
-	public void ASTNode.collectErrorsInFor(
-	        ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
-	    // Do the checks on the for itself
-	    allChecks(checkType);
-	    
-	    // Check everything except iterChild once
-	    for (ASTNode ch : this)
-	        if (ch != iterChild)
-	            ch.collectErrors(checkType);
-	    
-	    // Check array bounds in iterChild for each index combination
-	    try {
-	        indices.getChild(0).collectErrorsForAllIndices(indices, 0, iterChild, checkType);
-	    } catch (ConstantEvaluationException e) {
-	        // This error is caught elsewhere
-	    }
-	}
-    
+
+    public void ASTNode.collectErrorsInFor(
+            ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
+        // Do the checks on the for itself
+        allChecks(checkType);
+        
+        // Check everything except iterChild once
+        for (ASTNode ch : this)
+            if (ch != iterChild)
+                ch.collectErrors(checkType);
+        
+        // Check array bounds in iterChild for each index combination
+        try {
+            indices.getChild(0).collectErrorsForAllIndices(indices, 0, iterChild, checkType);
+        } catch (ConstantEvaluationException e) {
+            // Do "general" check if we are unable to determine the indices.
+            // Will probably give incorrect errors. However this is better than
+            // passing along errors and then crash!
+            iterChild.collectErrors(checkType);
+        }
+    }
+
     /**
      * Collect errors in iterated node for all combinations of for indices.
      * 
