@@ -663,7 +663,7 @@ aspect FunctionInlining {
     }
     eq FNoEventExp.generatesEvents() = false;
     eq FIdUseExp.generatesEvents()   = getFIdUse().getFQName().generatesEvents();
-    eq FSmoothExp.generatesEvents()  = !(order() == 0 && myOptions().getBooleanOption("disable_smooth_events"));
+    eq FSmoothExp.generatesEvents()  = super.generatesEvents() && !(order() == 0 && myOptions().getBooleanOption("disable_smooth_events"));
 
     syn boolean FQName.generatesEvents() = false;
     eq FQNameFull.generatesEvents() {
