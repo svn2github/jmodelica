@@ -30,7 +30,7 @@ class MHE(object):
     An object used to perform Moving Horizon Estimation on a Modelica
     model.
     """
-    
+  
     def __init__(self, op, sample_time, horizon, x_0_guess, dx_0,
                  c_0, MHE_opts):
         """
