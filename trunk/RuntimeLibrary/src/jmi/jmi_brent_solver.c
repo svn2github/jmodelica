@@ -567,7 +567,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
-        double initialStepStaticSmall = initialStepStatic*initialStepStatic;
+        double initialStepStaticSmall = initialStepStatic*BRENT_INITIAL_STEP_FACTOR;
         double initialStep = (initialStepNewton > initialStepStatic) ? (JMI_ABS(f) < UNIT_ROUNDOFF*BRENT_SMALL_RESIDUAL_FACTOR ? initialStepStaticSmall : initialStepStatic) : initialStepNewton;
         double lstep = initialStep, ustep = initialStep;
         while (1) {
