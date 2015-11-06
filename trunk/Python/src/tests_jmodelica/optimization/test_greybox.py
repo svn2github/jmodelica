@@ -18,7 +18,6 @@
 """Tests the greybox identification framework."""
 
 import os
-from collections import OrderedDict
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.optimization.greybox import GreyBox, Identification
