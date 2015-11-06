@@ -2200,9 +2200,9 @@ aspect Arrays {
 	 */
 	public void FExp.fillArray(Array arr, Index i, int level) {
 		if (isArray())
-			arr.set(i, getArray().get(i.subIndex(level)).fullCopy());
+            arr.set(i, getArray().get(i.subIndex(level)).copySymbolic());
 		else
-			arr.set(i, fullCopy());
+            arr.set(i, copySymbolic());
 	}
 	
 	/**

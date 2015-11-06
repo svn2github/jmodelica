@@ -4171,10 +4171,17 @@ aspect EliminateEqualSwitches{
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (original == null)
+                        if (!exp.hasBrancher()) {
                             original = exp;
-                        else
-                            exp.originalFRelExp = original;
+                            break;
+                        }
+                    }
+                    if (original != null) {
+                        for (FRelExp exp : entry.getValue()) {
+                            if (exp != original) {
+                                exp.originalFRelExp = original;
+                            }
+                        }
                     }
                 }
                 root().flushAllRecursive();
