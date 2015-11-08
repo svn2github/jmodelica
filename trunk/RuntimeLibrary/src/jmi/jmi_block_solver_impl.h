@@ -69,6 +69,7 @@ struct jmi_block_solver_t {
     void * solver;
     jmi_block_solver_solve_func_t solve;
     jmi_block_solver_delete_func_t delete_solver;
+    jmi_block_solver_completed_integrator_step_func_t completed_integrator_step;
     
     int init;              /**< \brief A flag for initialization */
     int at_event;          /**< \brief A flag indicating if we are at an event */

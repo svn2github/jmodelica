@@ -350,6 +350,9 @@ int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
 int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
 int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian);
 
+/** \brief Notify the residual that an integrator step is completed */
+int jmi_block_residual_completed_integrator_step(jmi_block_residual_t* block);
+
 /* Utilized Lapack routines */
 extern void dgetrf_(int* M, int* N, double* A, int* LDA, int* IPIV, int* INFO );
 extern void dgetrs_(char* TRANS, int* N, int* NRHS, double* A, int* LDA, int* IPIV, double* B, int* LDB, int* INFO);

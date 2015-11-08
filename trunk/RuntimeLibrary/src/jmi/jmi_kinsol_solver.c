@@ -2439,5 +2439,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     return flag;
 }
 
-
+int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver) {
+    return 1;
+}
 

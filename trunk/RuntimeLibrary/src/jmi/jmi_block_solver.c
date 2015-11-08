@@ -113,6 +113,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                 block_solver->solver = solver;
                 block_solver->solve = jmi_kinsol_solver_solve;
                 block_solver->delete_solver = jmi_kinsol_solver_delete;
+                block_solver->completed_integrator_step = jmi_kinsol_completed_integrator_step;
             }
         }
         break;
@@ -245,6 +246,12 @@ static jmi_real_t compute_minimal_step(jmi_block_solver_t* block_solver, jmi_rea
     return b;
 }
 
+int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver) {
+    if (block_solver->completed_integrator_step) {
+        return block_solver->completed_integrator_step(block_solver->problem_data);
+    } 
+    return 1;
+}
 
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes) {
     int ef;

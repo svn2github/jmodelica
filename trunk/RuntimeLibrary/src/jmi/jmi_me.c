@@ -467,7 +467,7 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     /* Save the z values to the z_last vector */
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
-    /* jmi_block_completed_integrator_step(jmi); */
+    jmi_block_completed_integrator_step(jmi);
     
     /* Verify the choice of dynamic states */
     retval = jmi_dynamic_state_verify_choice(jmi);
@@ -712,7 +712,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
         /* Block completed step */
-        /* jmi_block_completed_integrator_step(jmi); */
+        jmi_block_completed_integrator_step(jmi);
         
         jmi_log_leave(jmi->log, final_node);
 

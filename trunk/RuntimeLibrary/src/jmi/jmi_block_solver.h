@@ -199,6 +199,14 @@ typedef int (*jmi_block_solver_solve_func_t)(jmi_block_solver_t* block_solver);
   */
 typedef void (*jmi_block_solver_delete_func_t)(jmi_block_solver_t* block_solver);
 
+/**
+ * \brief A equation block signature for notifying the block that an integrator step has been accepted.
+ * 
+ * @param block A jmi_block_solver_t struct.
+ * @return Error code.
+ */
+typedef int (*jmi_block_solver_completed_integrator_step_func_t)(jmi_block_solver_t* block_solver);
+
 /**< \brief Equation block solver options. */
 struct jmi_block_solver_options_t {
     double res_tol;                         /**< \brief Tolerance for the equation block solver */
@@ -240,8 +248,11 @@ struct jmi_block_solver_options_t {
 
 };
 
-/** \brief Solve the eqautions in the associated problem. */
+/** \brief Solve the equations in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+
+/** \brief Notify the block that an integrator step is completed */
+int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver);
 
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
