@@ -22,6 +22,7 @@ import numpy as N
 from tests_jmodelica import testattr, get_files_path
 from pyjmi.optimization.greybox import GreyBox, Identification
 import cPickle as pickle
+import collections # collections needed to load pickle
 
 try:
     from pyjmi import transfer_optimization_problem
