@@ -68,10 +68,11 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
 
     block_solver->n = n;                         /**< \brief The number of iteration variables */
     block_solver->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));                 /**< \brief Work vector for the real iteration variables */
+    block_solver->last_accepted_x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 
     block_solver->dx=(jmi_real_t*)calloc(n,sizeof(jmi_real_t));;                /**< \brief Work vector for the seed vector */
 
-     block_solver->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+    block_solver->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->jac  = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
     block_solver->ipiv = (int*)calloc(2*n+1,sizeof(int));
@@ -186,6 +187,7 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     block_solver->delete_solver(block_solver);
 
     free(block_solver->x);
+    free(block_solver->last_accepted_x);
 
     free(block_solver->dx);
 
@@ -248,9 +250,9 @@ static jmi_real_t compute_minimal_step(jmi_block_solver_t* block_solver, jmi_rea
 
 int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver) {
     if (block_solver->completed_integrator_step) {
-        return block_solver->completed_integrator_step(block_solver->problem_data);
+        return block_solver->completed_integrator_step(block_solver);
     } 
-    return 1;
+    return 0;
 }
 
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes) {

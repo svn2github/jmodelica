@@ -2244,6 +2244,15 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         if(flag) return flag;
     }
     else {
+        if (!(block->at_event) && block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+            flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
+            if(flag) {        
+                jmi_log_node(log, logError, "ErrorSettingInitialGuess", "<errorCode: %d> returned from <block: %s> "
+                             "when setting the initial guess.", flag, block->label);
+                return flag;
+            }
+        }
+        
         /* Read initial values for iteration variables from variable vector.
         * This is needed if the user has changed initial guesses in between calls to
         * Kinsol.
@@ -2439,7 +2448,21 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     return flag;
 }
 
-int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver) {
-    return 1;
+int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
+    if(block->n == 1 && 
+       block->options->use_Brent_in_1d_flag && 
+       block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+           return jmi_brent_completed_integrator_step(block);
+    } else if (block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+        /* Kinsol specific handling of a completed step */
+        int flag;
+        flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
+        if (flag) {
+            jmi_log_node(block->log, logError, "ReadLastIterationVariables",
+                         "Failed to read the iteration variables, <errorCode: %d> in <block: %s>", flag, block->label);
+            return flag;
+        }
+    }
+    return 0;
 }
 

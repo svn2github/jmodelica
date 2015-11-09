@@ -37,6 +37,7 @@ struct jmi_block_solver_t {
 
     int n;                         /**< \brief The number of iteration variables */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
+    jmi_real_t* last_accepted_x;   /**< \brief Work vector for the real iteration variables holding the last accepted vales by the integrator */
 
     jmi_real_t* dx;                /**< \brief Work vector for the seed vector */
 

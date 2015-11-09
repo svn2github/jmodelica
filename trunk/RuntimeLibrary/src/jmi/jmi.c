@@ -349,11 +349,11 @@ int jmi_block_completed_integrator_step(jmi_t *jmi) {
     for (i = 0; i < jmi->n_dae_blocks; i++){
         jmi_block_residual_t* block_residual = jmi->dae_block_residuals[i]; 
         flag = jmi_block_residual_completed_integrator_step(block_residual);
-        if (flag == 0) { 
+        if (flag != 0) { 
             return flag; 
         }
     }
-    return 1;
+    return 0;
 }
 
 

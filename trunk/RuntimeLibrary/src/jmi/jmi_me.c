@@ -545,6 +545,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
+        
+        /* This is an implicit accepted step. */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
@@ -579,6 +587,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
+        
+        /* This is an implicit accepted step. */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
@@ -712,7 +728,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
         /* Block completed step */
-        jmi_block_completed_integrator_step(jmi);
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
         
         jmi_log_leave(jmi->log, final_node);
 
