@@ -414,11 +414,15 @@ aspect CCodeGen {
 	}
 	
 	public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (inIfCondition()) 
-			str.print("AD_WRAP_LITERAL(");
+        boolean wrap = inIfCondition();
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(ceval().intValue());
-		if (inIfCondition()) 
+        if (wrap) {
 			str.print(")");
+        }
 	}
 	
 	public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2834,10 +2838,14 @@ aspect CCodeGen {
 		str.print(")");
 	}
 	
+    public static String FLitExp.macro_C = "AD_WRAP_LITERAL";
+    
 	public void FRealLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		boolean wrap = inIfCondition();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(getValue());
 		if (wrap) 
 			str.print(")");
@@ -2845,8 +2853,10 @@ aspect CCodeGen {
 
 	public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		boolean wrap = inIfCondition() || inFunctionArg();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(getValue());
 		if (wrap) 
 			str.print(")");
@@ -5162,7 +5172,7 @@ aspect CCodeGen {
         }
         
         if (guard && hasBrancher()) {
-            sp.print(str, ", 1)");
+            sp.print(str, ", " + FLitExp.macro_C + "(1))");
         }
     }
     

@@ -24,8 +24,9 @@ package TimeEvents
     model Basic3
         Real x;
         parameter Real p = 2;
+        Boolean b = time < 1.5;
     equation
-        if time < p or time < 1.5 then
+        if time < p or b then
             der(x) = 1;
         else
             der(x) = -1;
@@ -92,8 +93,9 @@ package TimeEvents
     model Mixed1
         Real x(start=0.5);
         parameter Real p = 2;
+        Boolean b = time < 1.5;
     equation
-        if time < p or time < 1.5 then
+        if time < p or b then
             der(x) = if x < 1 then 1 else 0.5;
         else
             der(x) = if x < 1 then -0.5 else -1;
