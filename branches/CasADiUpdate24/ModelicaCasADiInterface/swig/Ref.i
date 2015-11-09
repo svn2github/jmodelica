@@ -25,6 +25,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %{
 #include "numpy/arrayobject.h"
+#ifndef NPY_ARRAY_IN_ARRAY
+#define NPY_ARRAY_IN_ARRAY NPY_IN_ARRAY
+#endif
 %}
 
 // Dummy definition to allow to instantiate std::vector.

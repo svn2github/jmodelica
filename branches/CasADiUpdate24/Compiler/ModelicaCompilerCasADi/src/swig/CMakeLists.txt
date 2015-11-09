@@ -61,7 +61,7 @@ endif(WIN32)
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
   PROPERTIES LINK_FLAGS "${LINKFLAGS}")
 set_target_properties(${SWIG_MODULE_${MODULE_NAME}_REAL_NAME}
-  PROPERTIES COMPILE_FLAGS "-std=c++11")
+  PROPERTIES COMPILE_FLAGS "-std=gnu++11")
 
 
 # Expose the SWIG module under a nicely named build target

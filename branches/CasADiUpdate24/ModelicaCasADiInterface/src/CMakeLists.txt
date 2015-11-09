@@ -14,7 +14,7 @@
 
 add_subdirectory(jcc)
 
-set(CXX_FLAGS "-std=c++11")
+set(CXX_FLAGS "-std=gnu++11")
 # Switch flag to debug for debuggind purposes 
 set(CMAKE_BUILD_TYPE Release)
 

@@ -16,6 +16,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 %module modelicacasadi_wrapper
 
+%begin %{
+// There seems to be an include file included later (Python.h?) that redefines
+// hypot, causing trouble for cmath if it is included afterwards. Include it
+// initially instead.
+#include <cmath>
+%}
 
 // Pull in numpy
 // WORKAROUNDS BEGINS: Due to Python-related issues in casadi.i
