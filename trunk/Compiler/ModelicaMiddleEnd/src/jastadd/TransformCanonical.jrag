@@ -4041,14 +4041,27 @@ aspect SemiLinear {
 	
 	syn boolean FExp.isSemiLinear() = false;
 	eq FSemiLinearExp.isSemiLinear() = true;
-	
-	syn FExp FSemiLinearExp.asIfExp() {
-		FIfExp exp = new FIfExp(new FGeqExp(getX().fullCopy(), new FRealLitExp(0)),
-			new FMulExp(getX().fullCopy(), getPosSlope().fullCopy()),
-			new FMulExp(getX().fullCopy(), getNegSlope().fullCopy()));
-		return exp;
-	}
-	
+
+    syn FExp FSemiLinearExp.asIfExp() {
+        FExp exp = new FIfExp(new FGeqExp(getX().treeCopy(), new FRealLitExp(0)),
+            new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
+            new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
+        if (isSmoothInSemiLinear()) {
+            exp = new FSmoothExp(0, exp);
+        }
+        return exp;
+    }
+
+    // TODO: should be replaced with a generic method that calculates smoothness of any expression (considering sub-expressions)
+    /**
+     * Checks if this expression allows a semiLinear() with it as argument to be smooth(0, ...).
+     */
+    syn boolean FExp.isSmoothInSemiLinear()  = false;
+    eq FIdUseExp.isSmoothInSemiLinear()      = true;
+    eq FLitExp.isSmoothInSemiLinear()        = true;
+    eq FSemiLinearExp.isSmoothInSemiLinear() = 
+        getX().isSmoothInSemiLinear() && getPosSlope().isSmoothInSemiLinear() && getNegSlope().isSmoothInSemiLinear();
+
 	/**
 	 * Collects semiLinear expressions.
 	 */
