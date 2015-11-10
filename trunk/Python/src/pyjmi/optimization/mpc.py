@@ -187,7 +187,6 @@ class MPC(object):
              
         # Save the initialization time
         self.times['init'] = time.clock() - self._startTime
-        self.t0_update = time.clock()
 
     def _create_clock(self):
         """
@@ -834,25 +833,6 @@ class MPC(object):
             self.collocator.solver_object.init()
             self.collocator._init_and_set_solver_inputs()
                     
-        #~ # Set next initial guess and initiate the warm start        
-            #~ elif self._sample_nbr == 2:            
-            #~ self.collocator.warm_start = True
-            #~ self._set_warm_start_options()
-            #~ if self._init_traj_set_by_user:
-                #~ self._set_inittraj()
-            #~ else:
-                #~ if self.initial_guess == 'shift':
-                    #~ self._shift_xx()
-                #~ elif self.initial_guess == 'trajectory':
-                    #~ self._init_traj = self._result_object
-                    #~ self._set_inittraj()
-                #~ elif self.initial_guess == 'prev':
-                    #~ if self.status in self.successful_optimization: 
-                        #~ self.collocator.xx_init = self.collocator.primal_opt
-                #~ else:
-                    #~ print("Warning: A new initial guess for the primal " +\
-                          #~ "variables have not been specified for this sample.") 
-            #~ self.collocator._init_and_set_solver_inputs()
 
         # Solve the NLP
         self.sol_time = self.collocator.solve_nlp()
