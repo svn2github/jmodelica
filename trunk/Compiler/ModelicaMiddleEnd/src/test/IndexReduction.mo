@@ -1512,6 +1512,71 @@ Warning in flattened model:
 ")})));
 end IndexReduction57;
 
+model IndexReduction58
+    Real y, x;
+equation
+    der(y) = der(x);
+    y = abs(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IndexReduction58",
+            description="Code generation of diffed abs expression",
+            template="
+$C_dae_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 3;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _der_x_3;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t* Q1 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(1, sizeof(jmi_real_t));
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch(_x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+        }
+        Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
+        for (i = 0; i < 1; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = 1.0;
+        memset(Q3, 0, 1 * sizeof(jmi_real_t));
+        Q3[0] = -1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _der_x_3 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch(_x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+        }
+        _der_y_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _der_x_3, - _der_x_3);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _der_x_3 - (_der_y_2);
+        }
+    }
+    return ef;
+}
+")})));
+end IndexReduction58;
 
   model AlgorithmVariability1
     parameter Real L = 1 "Pendulum length";
