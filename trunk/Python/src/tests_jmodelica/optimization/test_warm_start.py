@@ -1,19 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2015 Modelon AB
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Copyright (C) 2015 Modelon AB, all rights reserved.
 
 """Tests warm starting optimization functionality for the casadi_collocation module."""
 
@@ -195,6 +183,22 @@ def test_change_eliminated_input_element_interpolation():
 @testattr(casadi = True)
 def test_change_eliminated_input_mesh_points():
     test_change_eliminated_input(result_mode = 'mesh_points')
+    
+@testattr(casadi = True)
+def test_times():
+    file_path = os.path.join(get_files_path(), 'Modelica', 'VDP.mop')
+    op = transfer_optimization_problem("VDP_pack.VDP_Opt2", file_path)
+
+    resOp = op.optimize()
+    
+    assert abs(resOp.times['init']+resOp.times['update']+resOp.times['sol']+resOp.times['post_processing'] - resOp.times['tot']) <1e-4
+    
+    solver = op.prepare_optimization()
+    res1 = solver.optimize()
+    res2 = solver.optimize()
+    
+    assert abs(res1.times['update']+res1.times['sol']+res1.times['post_processing'] - res1.times['tot']) <1e-4
+    assert abs(res2.times['init'] - res2.times['init']) < 1e-4
 
 @testattr(casadi = True)
 def test_update_dependent_parameter():
