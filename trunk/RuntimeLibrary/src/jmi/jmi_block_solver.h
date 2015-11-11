@@ -24,7 +24,9 @@
 
 #ifndef _JMI_BLOCK_SOLVER_H
 #define _JMI_BLOCK_SOLVER_H
+
 #include "jmi_log.h"
+
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
@@ -48,6 +50,8 @@
 #define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 65536
 #define JMI_BLOCK_START_SET                                     131072
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
+
+#define JMI_LIMIT_VALUE 1e30
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -258,5 +262,9 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
 
+/** \brief Check and log illegal iv inputs */
+int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
 
+/** \brief Check and log illegal residual output(s) */
+int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* heuristic_nominal,int N);
 #endif /* _JMI_BLOCK_SOLVER_H */

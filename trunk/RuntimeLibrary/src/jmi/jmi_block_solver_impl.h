@@ -25,6 +25,7 @@
 #ifndef _JMI_BLOCK_SOLVER_IMPL_H
 #define _JMI_BLOCK_SOLVER_IMPL_H
 #include "jmi_block_solver.h"
+
 /**
     \brief Main data structure used in the block solver.
 */
@@ -89,6 +90,8 @@ struct jmi_block_solver_t {
     char* message_buffer ; /**< \brief Message buffer used for debugging purposes */
 
     double canari; /* for debugging */
+
+    int* residual_error_indicator;  /**< \brief flags indicating if NaN, Inf or Limiting values output of residual vector */
 
 } ;
 

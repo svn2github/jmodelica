@@ -49,8 +49,8 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     block->nb_fevals++;
 
     /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
+    ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
+    if (ret == -1) {
         return -1;
     }
 
@@ -66,14 +66,8 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     }
     /* Check that outputs are valid */    
     {
-        realtype v = *f;
-        if (v- v != 0) {
-             jmi_log_t* log = block->log;
-             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
-             jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-             jmi_log_leave(log, node);
-             ret = 1;
-        }
+        double heuristic_nominal = BIG_REAL/JMI_LIMIT_VALUE;
+        ret = jmi_check_and_log_illegal_residual_output(block, f, &y, &heuristic_nominal,1);
     }
     return ret;
 }
@@ -87,8 +81,8 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     realtype inc;
 
     /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
+    ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
+    if (ret == -1) {
         return -1;
     }
             
@@ -122,18 +116,18 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     }
     
     *df = (ftemp-f)/inc;
-    
     /* Check that outputs are valid */    
     {
         realtype v = *df;
         if (v- v != 0) {
              jmi_log_t* log = block->log;
-             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
+             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in derivative from <block: %s>", block->label);
              jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
              jmi_log_leave(log, node);
              ret = 1;
         }
     }
+
     return ret;
 }
 
@@ -315,7 +309,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
 static int jmi_brent_init(jmi_block_solver_t * block) {
    jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
    solver->originalStart = block->x[0];
-    return 0;
+   return 0;
 }
 
 

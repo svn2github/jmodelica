@@ -29,6 +29,7 @@
 
 #include "jmi_kinsol_solver.h"
 #include "jmi_block_solver_impl.h"
+#include "jmi_block_solver.h"
 
 #include "jmi_brent_search.h"
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */
@@ -138,8 +139,9 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 #endif
     realtype *y, *f;
     jmi_block_solver_t *block = problem_data;
+    jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
-    int i,n, ret;
+    int n, ret;
     block->nb_fevals++;
     y = NV_DATA_S(yy); /*y is now a vector of realtype*/
     f = NV_DATA_S(ff); /*f is now a vector of realtype*/
@@ -148,21 +150,11 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         t = clock();
     }
 #endif
-
-    /* Test if input is OK (no -1.#IND) */
     n = NV_LENGTH_S(yy);
-    for (i=0;i<n;i++) {
-        /* Unrecoverable error*/
-        if (Ith(yy,i)- Ith(yy,i) != 0) {
-            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNInput", "Not a number in <input: #r%d#> to <block: %s>", 
-                         block->value_references[i], block->label);
-            if (block->callbacks->log_options.log_level >= 3) {
-                jmi_log_reals(log, node, logWarning, "ivs", y, block->n);
-            }
-            jmi_log_leave(log, node);
-            return -1;
-        }
-    }
+    ret = jmi_check_and_log_illegal_iv_input(block, y, n);
+    /* Test if input is OK (no -1.#IND) */
+    
+    if(ret == -1) return ret;
 
     /*Evaluate the residual*/
     ret = block->F(block->problem_data,y,f,JMI_BLOCK_EVALUATE);
@@ -181,60 +173,12 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 
     /* Test if output is OK (no -1.#IND) */
     n = NV_LENGTH_S(ff);
-    {
-        jmi_log_node_t node;
-        jmi_kinsol_solver_t* solver = block->solver;
-
-        for (i=0;i<n;i++) {
-            double v = Ith(ff,i);
-            /* Recoverable error*/
-            if (v != v) { /* NaN */
-                if(ret == 0) {
-                    ret = 1;
-                    node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", 
-                        "Not a number in <output: %I> from <block: %s>", i, block->label);
-                }
-                else {
-                    jmi_log_node(block->log, logWarning, "NaNOutput", 
-                        "Not a number in <output: %I> from <block: %s>", i, block->label);
-                }
-            } else if(v - v != 0) { /* Inf */
-                if(ret == 0) {
-                    ret = 1;
-                    node = jmi_log_enter_fmt(block->log, logWarning, "INFOutput", 
-                        "Infinity in <output: %I> from <block: %s>", i, block->label);
-                }
-                else {
-                    jmi_log_node(block->log, logWarning, "INFOutput", 
-                        "Infinity in <output: %I> from <block: %s>", i, block->label);
-                }
-            } else if (v >  JMI_LIMIT_VALUE * solver->residual_heuristic_nominal[i] ||
-                       v < -JMI_LIMIT_VALUE * solver->residual_heuristic_nominal[i]) {
-                if(ret == 0) {
-                    ret = 1;
-                    node = jmi_log_enter_fmt(block->log, logWarning, "LimitingValues", 
-                        "Limiting value in <output: %I> from <block: %s>", i, block->label);
-                }
-                else {
-                    jmi_log_node(block->log, logWarning, "LimitingValues", 
-                        "Limiting value in <output: %I> from <block: %s>", i, block->label);
-                }
-            }
-        }
-        if (ret) { 
-            if(block->callbacks->log_options.log_level >= 3) {
-                   jmi_log_reals(log, node, logWarning, "ivs", y, block->n);
-                   jmi_log_reals(log, node, logWarning, "residuals", f, block->n);                   
-            }
-            jmi_log_leave(log, node);
-        }
-
-    }
+    ret = jmi_check_and_log_illegal_residual_output(block, f, y, solver->residual_heuristic_nominal ,n);
+    
     /* record information for Brent search */
     if(!ret && (block->n == 1) && block->options->use_Brent_in_1d_flag) {
         double yv = y[0];
         double fv = f[0];
-        jmi_kinsol_solver_t* solver = block->solver;
         if(fv <= 0) {
             if(solver->f_neg_max_1d < fv) {
                 solver->f_neg_max_1d = fv;

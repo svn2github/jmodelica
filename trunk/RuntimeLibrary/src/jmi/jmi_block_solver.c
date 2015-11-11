@@ -36,6 +36,7 @@
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
 
+#define Ith(v,i)    NV_Ith_S(v,i)
 
 const double jmi_block_solver_canari = 3.14159;
 
@@ -90,6 +91,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->message_buffer = 0;
 #endif
     
+    block_solver->residual_error_indicator = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));  
     block_solver->jacobian_variability = options->jacobian_variability;
 
     block_solver->cur_time = 0;
@@ -196,6 +198,7 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->jac);
     free(block_solver->ipiv);
       
+    free(block_solver->residual_error_indicator);
     free(block_solver->min);
     free(block_solver->max);
     free(block_solver->nominal);
@@ -662,4 +665,151 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->solver = JMI_KINSOL_SOLVER;
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
+}
+
+int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* residual_heuristic_nominal, int N) {
+    int i, ret=0;
+    jmi_log_t *log = block->log;
+    int nansPresent = FALSE;
+    int infsPresent = FALSE;
+    int limValsPresent = FALSE;
+
+    for (i=0;i<N;i++) {
+        double v = f[i];
+        /* Recoverable error*/
+        if (v != v) { /* NaN */
+            ret = 1;
+            nansPresent = TRUE;
+            block->residual_error_indicator[i] = 1;
+        } else if(v - v != 0) { /* Inf */
+            ret = 1;
+            infsPresent = TRUE;
+            block->residual_error_indicator[i] = 2;
+        } else if (v >  JMI_LIMIT_VALUE * residual_heuristic_nominal[i] ||
+            v < -JMI_LIMIT_VALUE * residual_heuristic_nominal[i]) {
+                ret = 1;
+                limValsPresent = TRUE;
+                block->residual_error_indicator[i] = 3;
+        } else {
+            block->residual_error_indicator[i] = 0;
+        }
+
+    }
+
+    if(ret && N==1) {
+        if (nansPresent)
+            jmi_log_node(log, logWarning, "IllegalResidualOutput", "Not a number as output from <block: %s> with <input: %g>", block->label, ivs[0]);
+        if (infsPresent)
+            jmi_log_node(log, logWarning, "IllegalResidualOutput", "INF as output from <block: %s> with <input: %g>", block->label, ivs[0]);
+        if( limValsPresent)
+            jmi_log_node(log, logWarning, "IllegalResidualOutput", "Absolute value of <output: %g> too big in <block: %s> with <input: %g>", f[i], block->label, ivs[0]);
+    } else if (ret) {
+        jmi_log_node_t outer;
+        jmi_log_node_t inner;
+        outer = jmi_log_enter_fmt(log, logWarning, "IllegalResidualOutput", "The residual output is illegal in <block: %s>", block->label);    
+        if (nansPresent) {
+            inner = jmi_log_enter_index_vector_(log, outer, logWarning, "NaNResidualIndices", 'R');
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 1) 
+                    jmi_log_int_(log, i);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if (infsPresent) {
+            inner = jmi_log_enter_index_vector_(log, outer, logWarning, "INFResidualIndices", 'R');
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 2) 
+                    jmi_log_int_(log, i);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if( limValsPresent) {
+            inner = jmi_log_enter_index_vector_(log, outer, logWarning, "LimitingValueIndices", 'R');
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 3) 
+                    jmi_log_int_(log, i);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if(block->callbacks->log_options.log_level >= 3) {
+            jmi_log_reals(log, outer, logWarning, "ivs", ivs, block->n);
+            jmi_log_reals(log, outer, logWarning, "residuals", f, block->n);                   
+        }
+        jmi_log_leave(log, outer);
+    }
+    return ret;
+}
+
+int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t *block, double* ivs, int N) {
+    int i, ret = 0;
+    jmi_log_t *log = block->log;
+    int nansPresent = FALSE;
+    int infsPresent = FALSE;
+    int limValsPresent = FALSE;
+
+    for (i=0;i<N;i++) {
+        double v = ivs[i];
+        /* Recoverable error*/
+        if (v != v) { /* NaN */
+            ret = -1;
+            nansPresent = TRUE;
+            block->residual_error_indicator[i] = 1;
+        } else if(v - v != 0) { /* Inf */
+            ret = -1;
+            infsPresent = TRUE;
+            block->residual_error_indicator[i] = 2;
+        } else if (v >  JMI_LIMIT_VALUE * block->nominal[i] ||
+            v < -JMI_LIMIT_VALUE * block->nominal[i]) {
+                ret = -1;
+                limValsPresent = TRUE;
+                block->residual_error_indicator[i] = 3;
+        } else {
+            block->residual_error_indicator[i] = 0;
+        }
+
+    }
+
+    if(ret && N==1) {
+        if (nansPresent)
+            jmi_log_node(log, logWarning, "IllegalIterationVariableInput", "Not a number as input to <block: %s>", block->label);
+        if (infsPresent)
+            jmi_log_node(log, logWarning, "IllegalIterationVariableInput", "INF as input to <block: %s>", block->label);
+        if( limValsPresent)
+            jmi_log_node(log, logWarning, "IllegalIterationVariableInput", "Absolute value of input too big in <block: %s>", block->label);
+    } else if (ret) {
+        jmi_log_node_t outer;
+        jmi_log_node_t inner;
+        outer = jmi_log_enter_fmt(log, logWarning, "IllegalIterationVariableInput", "The iteration variable input is illegal in <block: %s>", block->label);
+
+        if (nansPresent) {
+            inner = jmi_log_enter_vector_(log, outer, logWarning, "NaNIterationVariableIndices");
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 1) 
+                    jmi_log_vref_(log, 'r', block->value_references[i]);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if (infsPresent) {
+            inner = jmi_log_enter_vector_(log, outer, logWarning, "INFIterationVariableIndices");
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 2) 
+                    jmi_log_vref_(log, 'r', block->value_references[i]);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if( limValsPresent) {
+            inner = jmi_log_enter_vector_(log, outer, logWarning, "LimitingValueIndices");
+            for(i=0; i<N; i++) {
+                if(block->residual_error_indicator[i] == 3) 
+                    jmi_log_vref_(log, 'r', block->value_references[i]);
+            }
+            jmi_log_leave(log, inner);
+        }
+        if(block->callbacks->log_options.log_level >= 3) {
+            jmi_log_reals(log, outer, logWarning, "ivs", ivs, block->n);
+               
+        }
+        jmi_log_leave(log, outer);
+    }
+    return ret;
 }
