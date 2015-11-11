@@ -5014,8 +5014,8 @@ class LocalDAECollocator(CasadiCollocator):
             (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt, elim_vars) = self.get_result()
             data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
         else:
-            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt) = result
-            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt))
+            (t,dx_opt,x_opt,u_opt,w_opt,p_fixed,p_opt, elim_vars) = result
+            data = N.hstack((t,dx_opt,x_opt,u_opt,w_opt,elim_vars))
 
         if (format=='txt'):
             op = self.op

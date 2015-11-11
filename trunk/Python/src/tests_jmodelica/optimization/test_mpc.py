@@ -1,19 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 
-# Copyright (C) 2014 Modelon AB
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, version 3 of the License.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program. If not, see <http://www.gnu.org/licenses/>.
+# Copyright (C) 2015 Modelon AB, all rights reserved.
 
 """Tests the mpc module."""
 
@@ -233,7 +221,7 @@ class TestMPCClass(object):
         res = MPC_object.get_results_this_sample()
         
         Tc = res['Tc']
- 		
+        
         prev_value = Tc[0]
         largest_delta = 0
 
@@ -242,7 +230,7 @@ class TestMPCClass(object):
             if delta > largest_delta:
                 largest_delta = delta
             prev_value = value
-			
+            
         N.testing.assert_(largest_delta<5)
         
     @testattr(casadi = True)
@@ -396,7 +384,7 @@ class TestMPCClass(object):
         """
         op = transfer_to_casadi_interface("CSTR.CSTR_MPC", 
                                         self.cstr_file_path,
-                            compiler_options={"state_initial_equations":True})
+                                        compiler_options={"state_initial_equations":True})
         
         # Set options collocation
         n_e = 50
@@ -665,3 +653,130 @@ class TestMPCClass(object):
         N.testing.assert_(wsip == 'yes')
         N.testing.assert_equal(mu_init, 1e-3)
         N.testing.assert_equal(prl,  0)
+        
+    @testattr(casadi = True)
+    def test_eliminated_variables(self):
+        """ 
+        Test that the results when using eliminated variables are the same as when not using them.
+        """
+        # Compile and load the model used for simulation
+        sim_fmu = compile_fmu("CSTR.CSTR_MPC_Model", self.cstr_file_path, 
+                            compiler_options={"state_initial_equations":True})
+        sim_model = load_fmu(sim_fmu)
+        
+        # Compile and load the model with eliminated variables used for simulation
+        sim_fmu_elim = compile_fmu("CSTR.CSTR_elim_vars_MPC_Model", self.cstr_file_path, 
+                            compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False})
+        sim_model_elim = load_fmu(sim_fmu_elim)
+        
+
+        # Define stationary point A and set initial values and inputs
+        c_0_A = 956.271352
+        T_0_A = 250.051971
+        sim_model.set('_start_c', c_0_A)
+        sim_model.set('_start_T', T_0_A)
+        sim_model.set('Tc', 280)
+        init_res = sim_model.simulate(start_time=0., final_time=150)
+
+        # Compile and load optimization problems
+        op = transfer_to_casadi_interface("CSTR.CSTR_MPC", self.cstr_file_path,
+                                compiler_options={"state_initial_equations":True})
+        op_elim = transfer_to_casadi_interface("CSTR.CSTR_elim_vars_MPC", self.cstr_file_path,
+                                compiler_options={"state_initial_equations":True,'equation_sorting':True, 'automatic_tearing':False})
+
+        # Define MPC options
+        sample_period = 5                           # s
+        horizon = 10                                # Samples on the horizon
+        n_e_per_sample = 1                          # Collocation elements / sample
+        n_e = n_e_per_sample*horizon                # Total collocation elements
+        finalTime = 50                             # s
+        number_samp_tot = 5                       # Total number of samples to do
+
+        # Create blocking factors with quadratic penalty and bound on 'Tc'
+        bf_list = [n_e_per_sample]*(horizon/n_e_per_sample)
+        factors = {'Tc': bf_list}
+        du_quad_pen = {'Tc': 50}
+        du_bounds = {'Tc': 30}
+        bf = BlockingFactors(factors, du_bounds, du_quad_pen)
+
+        # Set collocation options
+        opt_opts = op.optimize_options()
+        opt_opts['n_e'] = n_e
+        opt_opts['n_cp'] = 2
+        opt_opts['init_traj'] = init_res
+
+        constr_viol_costs = {'T': 1e6}
+
+        # Create the MPC object
+        MPC_object = MPC(op, opt_opts, sample_period, horizon, 
+                        constr_viol_costs=constr_viol_costs, noise_seed=1)
+
+        # Set initial state
+        x_k = {'_start_c': c_0_A, '_start_T': T_0_A }
+
+        # Update the state and optimize number_samp_tot times
+        for k in range(number_samp_tot):
+
+            # Update the state and compute the optimal input for next sample period
+            MPC_object.update_state(x_k)
+            u_k = MPC_object.sample()
+
+            # Reset the model and set the new initial states before simulating
+            # the next sample period with the optimal input u_k
+            sim_model.reset()
+            sim_model.set(x_k.keys(), x_k.values())
+            sim_res = sim_model.simulate(start_time=k*sample_period, 
+                                         final_time=(k+1)*sample_period, 
+                                         input=u_k)
+
+            # Extract state at end of sample_period from sim_res and add Gaussian
+            # noise with mean 0 and standard deviation 0.005*(state_current_value)
+            x_k = MPC_object.extract_states(sim_res, mean=0, st_dev=0.005)
+
+
+        # Extract variable profiles
+        complete_result = MPC_object.get_complete_results()
+        
+        op_elim.eliminateAlgebraics()
+        
+        assert (len(op_elim.getEliminatedVariables())==2)
+        
+        opt_opts_elim = op_elim.optimize_options()
+        opt_opts_elim['n_e'] = n_e
+        opt_opts_elim['n_cp'] = 2
+        opt_opts_elim['init_traj'] = init_res
+        
+        # Create the MPC object with eliminated variables
+        MPC_object_elim = MPC(op_elim, opt_opts_elim, sample_period, horizon, 
+                        constr_viol_costs=constr_viol_costs, noise_seed=1)
+
+        # Set initial state
+        x_k = {'_start_c': c_0_A, '_start_T': T_0_A }
+
+        # Update the state and optimize number_samp_tot times
+        for k in range(number_samp_tot):
+
+            # Update the state and compute the optimal input for next sample period
+            MPC_object_elim.update_state(x_k)
+            u_k = MPC_object_elim.sample()
+
+            # Reset the model and set the new initial states before simulating
+            # the next sample period with the optimal input u_k
+            sim_model_elim.reset()
+            sim_model_elim.set(x_k.keys(), x_k.values())
+            sim_res = sim_model_elim.simulate(start_time=k*sample_period, 
+                                         final_time=(k+1)*sample_period, 
+                                         input=u_k)
+            
+            # Extract state at end of sample_period from sim_res and add Gaussian
+            # noise with mean 0 and standard deviation 0.005*(state_current_value)
+            x_k = MPC_object_elim.extract_states(sim_res, mean=0, st_dev=0.005)
+        
+
+         # Extract variable profiles
+        complete_result_elim = MPC_object_elim.get_complete_results()
+       
+        N.testing.assert_array_almost_equal(complete_result['c'],complete_result_elim['c'])
+        N.testing.assert_array_almost_equal(complete_result['T'],complete_result_elim['T'])
+        N.testing.assert_array_almost_equal(complete_result['Tc'],complete_result_elim['Tc'])
+          
