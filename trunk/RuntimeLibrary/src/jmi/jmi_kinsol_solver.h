@@ -79,6 +79,8 @@ struct jmi_kinsol_solver_t {
 
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
+    N_Vector last_residual;        /**< \brief Last residual vector submitted to linear solver */
+
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     N_Vector gradient;              /**< \brief Steepest descent direction */
