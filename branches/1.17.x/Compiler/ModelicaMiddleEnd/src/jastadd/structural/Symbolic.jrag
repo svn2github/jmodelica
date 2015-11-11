@@ -384,6 +384,10 @@ aspect EquationSolve {
     syn FDelayExp FDelayExp.originalFExp() = (originalFDelayExp == null)  ? this : originalFDelayExp;
     syn FSpatialDistExp FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
     
+    public void FRelExp.setOriginalFExp(FRelExp original) {
+        this.originalFRelExp = original;
+    }
+    
     /**
      * This method is used when the original node has been discarded and the
      * orignal references in FRelExp and FSampleExp needs to be reset.
@@ -400,7 +404,7 @@ aspect EquationSolve {
     
     @Override
     protected void FRelExp.resetOriginalReferences() {
-        originalFRelExp = null;
+        setOriginalFExp(this);
         super.resetOriginalReferences();
     }
     
@@ -431,7 +435,7 @@ aspect EquationSolve {
     @Override
 	protected void FRelExp.traverseSymbolic(ASTNode e) {
 		FRelExp re = (FRelExp) e;
-		originalFRelExp = (re.originalFRelExp == null) ? re : re.originalFRelExp;
+        setOriginalFExp(re.originalFRelExp);
 		super.traverseSymbolic(e);
 	}
     
@@ -825,10 +829,13 @@ aspect Derivatives {
 
     public FExp FAbsExp.diff(String name) {
         FExp diff = getFExp().diff(name);
-        if (diff.isLiteralZero())
+        if (diff.isLiteralZero()) {
             return dynamicFExp(diff);
-        else
-            return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
+        } else {
+            FRelExp e = new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0));
+            e.setOriginalFExp(e);
+            return dynamicFExp(new FIfExp(e, diff, new FNegExp(diff.copySymbolic())));
+        }
     }
 
     public FExp FDSRefExp.diff(String name) {

@@ -4174,20 +4174,29 @@ aspect EliminateEqualSwitches{
         public class eliminateEqualSwitches extends Transformation {
             public void perform() {
                 Map<String, Collection<FRelExp>> candidates = new HashMap<String, Collection<FRelExp>>();
-                for (FExp exp : relExpsWithEvent())
+                for (FRelExp exp : relExpsWithEvent()) {
                     exp.collectEqualSwitches(candidates);
-                for (FExp exp : eventExpInInitialEquations())
+                    exp.setOriginalFExp(exp);
+                } 
+                for (FRelExp exp : eventExpInInitialEquations()) {
                     exp.collectEqualSwitches(candidates);
+                    exp.setOriginalFExp(exp);
+                }
                 for (Map.Entry<String, Collection<FRelExp>> entry : candidates.entrySet()) {
                     if (entry.getValue().size() < 2)
                         continue;
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (original == null)
+                        if (!exp.hasBrancher()) {
                             original = exp;
-                        else
-                            exp.originalFRelExp = original;
+                            break;
+                        }
+                    }
+                    if (original != null) {
+                        for (FRelExp exp : entry.getValue()) {
+                            exp.setOriginalFExp(original);
+                        }
                     }
                 }
                 root().flushAllRecursive();

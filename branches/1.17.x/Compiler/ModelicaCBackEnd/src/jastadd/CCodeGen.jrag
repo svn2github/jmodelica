@@ -62,14 +62,16 @@ aspect CCodeGen {
         private final boolean inBlock;
         private final boolean inInitialSystem;
         private final Homotopy homotopyType;
+        private final boolean writeSwitches;
 
-        public CodePrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
+        public CodePrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType, boolean writeSwitches) {
             super("    ");
             for (CodeGeneratorProvider provider : getProviders())
                 provider.provide(this);
             this.inBlock = inBlock;
             this.inInitialSystem = inInitialSystem;
             this.homotopyType = homotopyType;
+            this.writeSwitches = writeSwitches;
         }
         
         /**
@@ -118,24 +120,36 @@ aspect CCodeGen {
             return inBlock;
         }
 
-        protected abstract CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType);
+        protected abstract CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+                boolean writeSwitches);
 
         public final CodePrinter initialSystemPrinter() {
             if (inInitialSystem())
                 return this;
             else
-                return createPrinter(inBlock, true, homotopyType);
+                return createPrinter(inBlock, true, homotopyType, writeSwitches);
         }
 
         public final CodePrinter homotopySimplifiedPrinter() {
             if (homotopyType == Homotopy.SIMPLIFIED)
                 return this;
             else
-                return createPrinter(inBlock, inInitialSystem, Homotopy.SIMPLIFIED);
+                return createPrinter(inBlock, inInitialSystem, Homotopy.SIMPLIFIED, writeSwitches);
+        }
+        
+        public final CodePrinter eventIndicatorPrinter() {
+            if (writeSwitches) {
+                return createPrinter(inBlock, inInitialSystem, homotopyType, false);
+            }
+            return this;
         }
         
         public boolean inInitialSystem() {
             return inInitialSystem;
+        }
+        
+        public boolean writeSwitches() {
+            return writeSwitches;
         }
         
         protected static enum Homotopy {
@@ -156,6 +170,51 @@ aspect CCodeGen {
         public abstract TypePrinter_C createDeclPrinter(CodeStream str);
         public abstract TypePrinter_C createInitPrinter(CodeStream str);
         public abstract TypePrinter_C createInitSetPrinter(CodeStream str);
+        
+        public abstract class StepPrinter {
+            public abstract void print(ASTNode n, CodeStream str, String indent);
+            public void print(CodeStream str, String s) {
+                
+            }
+        }
+        
+        public StepPrinter DeclStep  = new DeclCodePrinter();
+        public StepPrinter PreStep   = new PreCodePrinter();
+        public StepPrinter ExecStep  = new ExecuteCodePrinter();
+        public StepPrinter PostStep  = new PostCodePrinter();
+        
+        private class DeclCodePrinter extends StepPrinter {
+            @Override
+            public void print(ASTNode n, CodeStream str, String indent) {
+                CodePrinter.this.printVarDecls(n, str, indent);
+            }
+        }
+        
+        private class PreCodePrinter extends StepPrinter {
+            @Override
+            public void print(ASTNode n, CodeStream str, String indent) {
+                CodePrinter.this.printPreSteps(n, str, indent);
+            }
+        }
+        
+        private class ExecuteCodePrinter extends StepPrinter {
+            @Override
+            public void print(ASTNode n, CodeStream str, String indent) {
+                CodePrinter.this.print(n, str, indent);
+            }
+            
+            @Override
+            public void print(CodeStream str, String s) {
+                str.print(s);
+            }
+        }
+        
+        private class PostCodePrinter extends StepPrinter {
+            @Override
+            public void print(ASTNode n, CodeStream str, String indent) {
+                CodePrinter.this.printPostSteps(n, str, indent);
+            }
+        }
     }
     
     public class CPrettyPrinter extends CodePrinter {
@@ -165,16 +224,18 @@ aspect CCodeGen {
         }
         
         public CPrettyPrinter(boolean inBlock) {
-            this(inBlock, false, Homotopy.HOMOTOPY);
+            this(inBlock, false, Homotopy.HOMOTOPY, true);
         }
 
-        protected CPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
-            super(inBlock, inInitialSystem, homotopyType);
+        protected CPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+                boolean writeSwitches) {
+            super(inBlock, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
-        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
-            return new CPrettyPrinter(inBlock, inInitialSystem, homotopyType);
+        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+                boolean writeSwitches) {
+            return new CPrettyPrinter(inBlock, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
@@ -353,11 +414,15 @@ aspect CCodeGen {
 	}
 	
 	public void FEnumLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		if (inIfCondition()) 
-			str.print("AD_WRAP_LITERAL(");
+        boolean wrap = inIfCondition();
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(ceval().intValue());
-		if (inIfCondition()) 
+        if (wrap) {
 			str.print(")");
+        }
 	}
 	
 	public void FIdUseExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
@@ -2544,7 +2609,8 @@ aspect CCodeGen {
 
 	
 	public void FIfExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.print("COND_EXP_EQ(");
+        str.print(FEqExp.macro_C);
+        str.print("(");
 		p.print(getIfExp(), str, indent);
 		str.print(", JMI_TRUE, ");
 		p.print(getThenExp(),str,indent);
@@ -2641,14 +2707,20 @@ aspect CCodeGen {
 	}
 	
 	syn String FBoolBinExp.macro_C();
-	eq FEqExp.macro_C()  = "COND_EXP_EQ";
-	eq FNeqExp.macro_C() = "COND_EXP_EQ";
+    eq FEqExp.macro_C()  = FEqExp.macro_C;
+    eq FNeqExp.macro_C() = FEqExp.macro_C;
 	eq FLtExp.macro_C()  = "COND_EXP_LT";
 	eq FLeqExp.macro_C() = "COND_EXP_LE";
 	eq FGtExp.macro_C()  = "COND_EXP_GT";
 	eq FGeqExp.macro_C() = "COND_EXP_GE";
-	eq FAndExp.macro_C() = "LOG_EXP_AND";
+    eq FAndExp.macro_C() = FAndExp.macro_C;
 	eq FOrExp.macro_C()  = "LOG_EXP_OR";
+	
+    public static String FEqExp.macro_C = "COND_EXP_EQ";
+    public static String FAndExp.macro_C = "LOG_EXP_AND";
+    
+    public static String FNotExp.macro_C = "LOG_EXP_NOT";
+    
 	
 	syn boolean FRelExp.relIsInverted_C() = false;
 	eq FNeqExp.relIsInverted_C() = true;
@@ -2687,18 +2759,16 @@ aspect CCodeGen {
     
     @Override
     public void FRelExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        super.genVarDecls_C(p, str, indent);
-        if (generatesEvent(p.inInitialSystem())) {
-            printIndicatorDecls_C(p, str, indent);
+        if (myOptions().getBooleanOption("generate_dae") || !generatesEvent(p.inInitialSystem())) {
+            super.genVarDecls_C(p, str, indent);
         }
     }
     
     @Override
     public void FRelExp.genTempVars_C(CodePrinter p, CodeStream str, String outerIndent) {
-        super.genTempVars_C(p, str, outerIndent);
-        if (myOptions().getBooleanOption("generate_dae"))
-            return;
-        if (generatesEvent(p.inInitialSystem())) {
+        if (myOptions().getBooleanOption("generate_dae") || !generatesEvent(p.inInitialSystem())) {
+            super.genTempVars_C(p, str, outerIndent);
+        } else if (p.writeSwitches()) {
             str.format("%sif (", outerIndent);
             if (p.inBlock())
                 str.print("evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS");
@@ -2707,7 +2777,8 @@ aspect CCodeGen {
             str.println(") {");
             
             String indent = p.indent(outerIndent);
-            printIndicatorPre_C(p, str, indent);
+            printIndicator(p.DeclStep, str, indent, false);
+            printIndicator(p.PreStep, str, indent, false);
             str.print(indent);
             printSwitchMacro_C(p, str, indent);
             boolean time = isTimeEventGenerating();
@@ -2716,7 +2787,7 @@ aspect CCodeGen {
             } else {
                 str.print(" = jmi_turn_switch(");
             }
-            printIndicator_C(p, str, indent);
+            printIndicator(p.ExecStep, str, indent, false);
             str.print(", ");
             printSwitchMacro_C(p, str, indent);
             if (time) {
@@ -2736,7 +2807,7 @@ aspect CCodeGen {
             }
             
             str.formatln(");");
-            printIndicatorPost_C(p, str, indent);
+            printIndicator(p.PostStep, str, indent, false);
             str.formatln("%s}", outerIndent);
         }
     }
@@ -2761,15 +2832,20 @@ aspect CCodeGen {
 	}
 	
 	public void FNotExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		str.print("LOG_EXP_NOT(");
+        str.print(FNotExp.macro_C);
+        str.print("(");
 		p.print(getFExp(), str, indent);
 		str.print(")");
 	}
 	
+    public static String FLitExp.macro_C = "AD_WRAP_LITERAL";
+    
 	public void FRealLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		boolean wrap = inIfCondition();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(getValue());
 		if (wrap) 
 			str.print(")");
@@ -2777,8 +2853,10 @@ aspect CCodeGen {
 
 	public void FIntegerLitExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		boolean wrap = inIfCondition() || inFunctionArg();
-		if (wrap) 
-			str.print("AD_WRAP_LITERAL(");
+        if (wrap) {
+            str.print(FLitExp.macro_C);
+            str.print("(");
+        }
 		str.print(getValue());
 		if (wrap) 
 			str.print(")");
@@ -4989,7 +5067,7 @@ aspect CCodeGen {
     }
     
     public void FRelExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        genVarDecls_C(p, str, indent);
+        printIndicator(p.DeclStep, str, indent, true);
     }
         
     public void FDelayExp.genEventResidualVarDecls_C(CodePrinter p, CodeStream str, String indent) {
@@ -5010,13 +5088,11 @@ aspect CCodeGen {
     }
     
     public void FRelExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-        p.printPreSteps(getLeft(), str, indent);
-        p.printPreSteps(getRight(), str, indent);
+        printIndicator(p.PreStep, str, indent, true);
 		str.print(indent + "(*res)[" + enumerator.next() + "] = ");
-		printIndicator_C(p, str, indent);
+        printIndicator(p.ExecStep, str, indent, true);
 		str.print(";\n");
-        p.printPostSteps(getLeft(), str, indent);
-        p.printPostSteps(getRight(), str, indent);
+        printIndicator(p.PostStep, str, indent, true);
 	}
 	
     public void FDelayExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
@@ -5055,60 +5131,139 @@ aspect CCodeGen {
         }
     }
     
-    private void FRelExp.printIndicatorDecls_C(CodePrinter p, CodeStream str, String indent) {
-        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
-        if (scale) {
-            p.printVarDecls(getIndicatorNominal(), str, indent);
-        }
-    }
+    syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
     
-    private void FRelExp.printIndicatorPre_C(CodePrinter p, CodeStream str, String indent) {
-        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
-        if (scale) {
-            p.printPreSteps(getIndicatorNominal(), str, indent);
-        }
-    }
+    syn lazy boolean FRelExp.scale() = myOptions().getBooleanOption("event_indicator_scaling");
     
-    private void FRelExp.printIndicatorPost_C(CodePrinter p, CodeStream str, String indent) {
-        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
-        if (scale) {
-            p.printPostSteps(getIndicatorNominal(), str, indent);
-        }
-    }
+    inh boolean FExp.hasBrancher();
+    inh lazy boolean FRelExp.hasBrancher();
+    eq Root.getChild().hasBrancher()              = false;
+    eq FAbstractEquation.getChild().hasBrancher() = false;
+    eq FAndExp.getRight().hasBrancher()           = true;
+    eq FOrExp.getRight().hasBrancher()            = true;
+    eq FIfExp.getThenExp().hasBrancher()          = true;
+    eq FIfExp.getElseExp().hasBrancher()          = true;
     
-    private void FRelExp.printIndicator_C(CodePrinter p, CodeStream str, String indent) {
-        boolean scale = myOptions().getBooleanOption("event_indicator_scaling");
-        if (scale) {
-            str.print("(");
+    private void FRelExp.printIndicator(CodePrinter.StepPrinter sp, CodeStream str, String indent, boolean guard) {
+        
+        if (guard && hasBrancher()) {
+            sp.print(str, FEqExp.macro_C);
+            sp.print(str, "(");
+            printIndicatorGuard(sp, str, indent, this);
+            sp.print(str, ", JMI_TRUE, ");
         }
+        
+        if (scale()) {
+            sp.print(str, "(");
+        }
+        
         if (hasIndicator()) {
-            p.print(getIndicator(), str, indent);
+            sp.print(getIndicator(), str, indent);
         } else {
-            p.print(getLeft(), str, indent);
-            str.print(" - (");
-            p.print(getRight(), str, indent);
-            str.print(")");
+            sp.print(getLeft(), str, indent);
+            sp.print(str, " - (");
+            sp.print(getRight(), str, indent);
+            sp.print(str, ")");
         }
-        if (scale) {
-            str.print(") / ");
-            p.print(getIndicatorNominal(), str, indent);
+        
+        if (scale()) {
+            sp.print(str, ") / ");
+            sp.print(getIndicatorNominal(), str, indent);
+        }
+        
+        if (guard && hasBrancher()) {
+            sp.print(str, ", " + FLitExp.macro_C + "(1))");
         }
     }
     
-    public void FExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
+    inh FExp FExp.parentFExp();
+    eq Root.getChild().parentFExp()              = null;
+    eq FAbstractEquation.getChild().parentFExp() = null;
+    eq FExp.getChild().parentFExp()              = this;
+    
+    public void FExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent) {
+        FExp par = parentFExp();
+        if (par != null) {
+            par.printIndicatorGuard(sp, str, indent, this);
+        }
+    }
+    
+    public void FExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e) {
+        if (isIndicatorGuard(e)) {
+            printIndicatorGuard(sp, str, indent, myIndicatorGuardExp(), negateIndicatorGuard(e));
+        } else {
+            printIndicatorGuard(sp, str, indent);
+        }
+    }
+    
+    syn boolean FExp.isIndicatorGuard(FExp e) = false;
+    eq FLogBinExp.isIndicatorGuard(FExp e)    = e == getRight();
+    eq FIfExp.isIndicatorGuard(FExp e)        = e == getElseExp();
+    
+    syn FExp FExp.myIndicatorGuardExp() = null;
+    eq FLogBinExp.myIndicatorGuardExp() = getLeft();
+    eq FIfExp.myIndicatorGuardExp()     = getIfExp();
+    
+    syn boolean FExp.negateIndicatorGuard(FExp e) = false;
+    eq FOrExp.negateIndicatorGuard(FExp e)        = true;
+    eq FIfExp.negateIndicatorGuard(FExp e)        = e == getElseExp();
+    
+    @Override
+    public void FIfExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e) {
+        if (e == getThenExp() || e == getElseExp()) {
+            printIndicatorGuard(sp, str, indent, getIfExp(), e == getElseExp());
+        } else {
+            printIndicatorGuard(sp, str, indent);
+        }
+    }
+    
+    public void FExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e, boolean not) {
+        boolean hb = hasBrancher();
+        if (hb) {
+            sp.print(str, FAndExp.macro_C);
+            sp.print(str, "(");
+            printIndicatorGuard(sp, str, indent);
+            sp.print(str, ", ");
+        }
+        
+        if (not) {
+            sp.print(str, FNotExp.macro_C);
+            sp.print(str, "(");
+        }
+        
+        sp.print(e, str, indent);
+        
+        if (not) {
+            sp.print(str, ")");
+        }
+        
+        if (hb) {
+            sp.print(str, ")");
+        }
+    }
+    
+    public void FExp.genTimeEventVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        genVarDecls_C(p, str, indent);
+    }
+    
+    public void FRelExp.genTimeEventVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        printIndicator(p.DeclStep, str, indent, true);
+    }
+    
+    public void FExp.genTimeEvent_C(CodePrinter p, CodeStream str, String indent, String res) {
         throw new UnsupportedOperationException();
     }
     
     @Override
-    public void FRelExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
-        super.genTempVars_C(p, str, indent);
+    public void FRelExp.genTimeEvent_C(CodePrinter p, CodeStream str, String indent, String res) {
+        printIndicator(p.PreStep, str, indent, true);
         boolean phased = isPhased();
         str.format("%sif (SURELY_LT_ZERO(", indent);
-        printIndicator_C(p, str, indent);
+        printIndicator(p.ExecStep, str, indent, true);
         str.print(")");
         if (phased) {
             str.print(" || (!jmi->eventPhase && ALMOST_ZERO(");
-            printIndicator_C(p, str, indent);
+            printIndicator(p.ExecStep, str, indent, true);
             str.print("))");
         }
         str.println(") {");
@@ -5116,11 +5271,11 @@ aspect CCodeGen {
         str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
         p.print(solutionForTime(), str, indent);
         str.formatln(");\n%s}", indent);
-        super.genTempFree_C(p, str, indent);
+        printIndicator(p.PostStep, str, indent, true);
     }
     
     @Override
-    public void FSampleExp.genTimeEventCalc_C(CodePrinter p, CodeStream str, String indent, String res) {
+    public void FSampleExp.genTimeEvent_C(CodePrinter p, CodeStream str, String indent, String res) {
         /*
             There are three cases to consider for each sampler:
              1) The current time is (surely) before the offset of 

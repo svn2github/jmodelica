@@ -36,16 +36,18 @@ aspect CADCodeGen {
     public class CADPrettyPrinter extends CodePrinter {
 
         public CADPrettyPrinter() {
-            this(false, false, Homotopy.HOMOTOPY);
+            this(false, false, Homotopy.HOMOTOPY, true);
         }
 
-        private CADPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
-            super(inBlock, inInitialSystem, homotopyType);
+        private CADPrettyPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType, 
+                boolean writeSwitches) {
+            super(inBlock, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
-        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType) {
-            return new CADPrettyPrinter(inBlock, inInitialSystem, homotopyType);
+        protected CodePrinter createPrinter(boolean inBlock, boolean inInitialSystem, Homotopy homotopyType,
+                boolean writeSwitches) {
+            return new CADPrettyPrinter(inBlock, inInitialSystem, homotopyType, writeSwitches);
         }
 
         @Override
