@@ -2468,12 +2468,18 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     int flag = 0;
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
+    jmi_log_node_t node;
     
     flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
     if(flag) {        
         jmi_log_node(log, logError, "ErrorSettingInitialGuess", "<errorCode: %d> returned from <block: %s> "
                      "when setting the initial guess.", flag, block->label);
         return flag;
+    }
+    
+    if((block->callbacks->log_options.log_level >= 6)) {
+        node = jmi_log_enter_fmt(block->log, logInfo, "KinsolRestoreState", "Restoring the Kinsol state in <block:%s>", block->label);
+        jmi_log_reals(block->log, node, logInfo, "ivs", block->last_accepted_x, block->n);
     }
     
     if (solver->saved_state->J_is_singular_flag) {
@@ -2485,12 +2491,23 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     } else {
             DenseCopy(solver->saved_state->J, solver->J_LU);
     }
-        
+    
+    solver->force_new_J_flag = 0; /* This cannot happend due to Kinsol is always saved in a succeeded state */
+    solver->handling_of_singular_jacobian_flag = solver->saved_state->handling_of_singular_jacobian_flag;
     solver->J_is_singular_flag = solver->saved_state->J_is_singular_flag;
     ((struct KINMemRec *)solver->kin_mem)->kin_nnilset = ((struct KINMemRec *)solver->kin_mem)->kin_nni - solver->saved_state->mbset;
     memcpy(N_VGetArrayPointer(solver->kin_f_scale), N_VGetArrayPointer(solver->saved_state->kin_f_scale), block->n*sizeof(realtype));
     memcpy(N_VGetArrayPointer(solver->kin_y_scale), N_VGetArrayPointer(solver->saved_state->kin_y_scale), block->n*sizeof(realtype));
     memcpy(solver->lapack_ipiv, solver->saved_state->lapack_ipiv, (block->n+2)*sizeof(int)); 
+    
+    if((block->callbacks->log_options.log_level >= 6)) {
+        jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, &(((struct KINMemRec *)solver->kin_mem)->kin_nni), &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
+        jmi_log_ints(block->log, node, logInfo, "handling_singular", &(solver->handling_of_singular_jacobian_flag), 1);
+        jmi_log_ints(block->log, node, logInfo, "is_singular", &(solver->J_is_singular_flag), 1);
+        jmi_log_reals(block->log, node, logInfo, "iv_scaling", N_VGetArrayPointer(solver->kin_y_scale), block->n);
+        jmi_log_reals(block->log, node, logInfo, "residual_scaling", N_VGetArrayPointer(solver->kin_f_scale), block->n);
+        jmi_log_leave(block->log, node);
+    }
     
     return flag;
 }
@@ -2504,6 +2521,7 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         /* Kinsol specific handling of a completed step */
         int flag;
         jmi_kinsol_solver_t* solver = block->solver;
+        jmi_log_node_t node;
         
         flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
         if (flag) {
@@ -2511,6 +2529,12 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
                          "Failed to read the iteration variables, <errorCode: %d> in <block: %s>", flag, block->label);
             return flag;
         }
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            node = jmi_log_enter_fmt(block->log, logInfo, "KinsolSaveState", "Saving the Kinsol state in <block:%s>", block->label);
+            jmi_log_reals(block->log, node, logInfo, "ivs", block->last_accepted_x, block->n);
+        }
+        
         if (solver->J_is_singular_flag) {
             if (solver->handling_of_singular_jacobian_flag == JMI_REGULARIZATION) {
                 DenseCopy(solver->JTJ, solver->saved_state->J);
@@ -2526,6 +2550,15 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         memcpy(N_VGetArrayPointer(solver->saved_state->kin_f_scale),N_VGetArrayPointer(solver->kin_f_scale), block->n*sizeof(realtype));
         memcpy(N_VGetArrayPointer(solver->saved_state->kin_y_scale),N_VGetArrayPointer(solver->kin_y_scale), block->n*sizeof(realtype));
         memcpy(solver->saved_state->lapack_ipiv, solver->lapack_ipiv, (block->n+2)*sizeof(int)); 
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+            jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, &(((struct KINMemRec *)solver->kin_mem)->kin_nni), &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
+            jmi_log_ints(block->log, node, logInfo, "handling_singular", &(solver->handling_of_singular_jacobian_flag), 1);
+            jmi_log_ints(block->log, node, logInfo, "is_singular", &(solver->J_is_singular_flag), 1);
+            jmi_log_reals(block->log, node, logInfo, "iv_scaling", N_VGetArrayPointer(solver->kin_y_scale), block->n);
+            jmi_log_reals(block->log, node, logInfo, "residual_scaling", N_VGetArrayPointer(solver->kin_f_scale), block->n);
+            jmi_log_leave(block->log, node);
+        }
     }
     return 0;
 }
