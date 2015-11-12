@@ -220,6 +220,7 @@ struct jmi_block_solver_options_t {
     double step_limit_factor;               /**< \brief Step limiting factor */
     double regularization_tolerance;        /**< \brief Tolerance for deciding when regularization should be performed */
     int max_iter;                           /**< \brief Maximum number of iterations for the equation block solver before failure */
+    int max_iter_no_jacobian;               /**< \brief Maximum number of iterations for the equation block solver without full jacobian recalculation */
 
     int enforce_bounds_flag;                /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     int use_jacobian_equilibration_flag;    /**< \brief If jacobian equlibration should be used in equation block solvers */

@@ -110,6 +110,7 @@ struct jmi_kinsol_solver_t {
     realtype* rScale;               /**< \brief Row scale factors */
     realtype* cScale;               /**< \brief Column scale factors */
     
+    N_Vector work_vector;           /**< \brief work vector for vector operations */
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
     int * lapack_ipiv;            /**< \brief work vector for lapack */
