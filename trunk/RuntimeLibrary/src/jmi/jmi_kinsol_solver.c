@@ -445,17 +445,21 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
             int i, info, N = block->n;
             realtype tol = solver->kin_stol;
             realtype *scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
-            for(i = 0; i < N; i++){
-                int j;
-                realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-                realtype* col_ptr = DENSE_COL(solver->J, i);
-                realtype xscale = RAbs(block->nominal[i]);
-                realtype x = RAbs(block->x[i]);
-                if(x < xscale) x = xscale;
-                if(x < tol) x = tol;
-                for(j = 0; j < N; j++){
-                    scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+            if(block->options->residual_equation_scaling_mode != 0) {
+                for(i = 0; i < N; i++){
+                    int j;
+                    realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+                    realtype* col_ptr = DENSE_COL(solver->J, i);
+                    realtype xscale = RAbs(block->nominal[i]);
+                    realtype x = RAbs(block->x[i]);
+                    if(x < xscale) x = xscale;
+                    if(x < tol) x = tol;
+                    for(j = 0; j < N; j++){
+                        scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+                    }
                 }
+            } else {
+                DenseCopy(solver->J, solver->J_scale);
             }
             dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
             if(info > 0) {
@@ -1867,12 +1871,16 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         double Jnorm = 1.0, Jcond = 1.0;
         int info;
 
-        for(i = 0; i < N; i++){
-            int j;
-            scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-            for(j = 0; j < N; j++){
-                scaled_col_ptr[j] = scaled_col_ptr[j] * scale_ptr[j];
+        if(use_scaling_flag) {
+            for(i = 0; i < N; i++){
+                int j;
+                scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+                for(j = 0; j < N; j++){
+                    scaled_col_ptr[j] = scaled_col_ptr[j] * scale_ptr[j];
+                }
             }
+        } else {
+            DenseCopy(solver->J, solver->J_scale);
         }
 
         dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
@@ -2194,17 +2202,21 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
             int i, info, N = block->n;
             realtype* scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
             realtype tol = solver->kin_stol;
-            for(i = 0; i < N; i++){
-                int j;
-                realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
-                realtype* col_ptr = DENSE_COL(solver->J, i);
-                realtype xscale = RAbs(block->nominal[i]);
-                realtype x = RAbs(block->x[i]);
-                if(x < xscale) x = xscale;
-                if(x < tol) x = tol;
-                for(j = 0; j < N; j++){
-                    scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+            if(block->options->residual_equation_scaling_mode !=0) {
+                for(i = 0; i < N; i++){
+                    int j;
+                    realtype* scaled_col_ptr = DENSE_COL(solver->J_scale, i);
+                    realtype* col_ptr = DENSE_COL(solver->J, i);
+                    realtype xscale = RAbs(block->nominal[i]);
+                    realtype x = RAbs(block->x[i]);
+                    if(x < xscale) x = xscale;
+                    if(x < tol) x = tol;
+                    for(j = 0; j < N; j++){
+                        scaled_col_ptr[j] = col_ptr[j] * x *scale_ptr[j];
+                    }
                 }
+            } else {
+                DenseCopy(solver->J, solver->J_scale);
             }
 
             dgetrf_(  &N, &N, solver->J_scale->data, &N, solver->lapack_iwork, &info);
