@@ -3839,4 +3839,20 @@ Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameT
 ")})));
 end BadEscape2;
 
+
+model LibWithVerTest1
+    LibWithVer.Test a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LibWithVerTest1",
+            description="Load library with version # in name",
+            modelicaLibraries="LibWithVer 1.2",
+            flatModel="
+fclass NameTests.LibWithVerTest1
+ Real a.x = time;
+end NameTests.LibWithVerTest1;
+")})));
+end LibWithVerTest1;
+
 end NameTests;
