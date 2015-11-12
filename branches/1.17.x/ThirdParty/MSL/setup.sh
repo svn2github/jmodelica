@@ -1,7 +1,7 @@
 #!/bin/bash
 
 svn co https://svn.modelica.org/projects/Modelica/tags/v3.2.1+build.4 .
-svn merge --accept base -c 7502,7545,7977,7573,7479,8626 https://svn.modelica.org/projects/Modelica/trunk
+svn merge --accept base -c 7479,7502,7545,7562,7573,7977,8067,8626 https://svn.modelica.org/projects/Modelica/trunk
 
 rm -r .svn
 rm -r ModelicaTest
