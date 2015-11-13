@@ -930,7 +930,7 @@ Iteration variables:
   dynDer(a2)
 
 Torn equations:
-  _der_a9 := ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) - _der_a5 - _der_a7
+  _der_a9 := ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) - (_der_a5 + _der_a7)
   _der_a8 := _der_a6 - 1.0
   dynDer(a4) := - dynDer(a1) + (- _der_a5) + (- _der_a8) + (- _der_a9)
   dynDer(a3) := - dynDer(a2) + (- _der_a7) + (- _der_a6)

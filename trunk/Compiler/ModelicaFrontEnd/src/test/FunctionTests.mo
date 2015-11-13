@@ -13078,7 +13078,7 @@ public
     temp_1[i1,i2] := temp_2;
    end for;
   end for;
-  c := 2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2];
+  c := 2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2]);
   return;
  end FunctionTests.UnknownSize.Hidden.Combinations1.f;
 
@@ -13137,7 +13137,7 @@ public
     temp_3[i4,i5] := temp_4;
    end for;
   end for;
-  c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,2] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,2]);
+  c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,2] + ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,2]));
   return;
  end FunctionTests.UnknownSize.Hidden.Combinations3.f;
 
