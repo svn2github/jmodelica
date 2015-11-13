@@ -2295,7 +2295,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         if(flag) return flag;
     }
     else {
-        if (!(block->at_event) && block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+        if (!(block->at_event) && block->options->start_from_last_integrator_step) {
             flag = jmi_kinsol_restore_state(block);
             
             if (flag) return flag;
@@ -2547,9 +2547,9 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
 int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
     if(block->n == 1 && 
        block->options->use_Brent_in_1d_flag && 
-       block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+       block->options->start_from_last_integrator_step) {
            return jmi_brent_completed_integrator_step(block);
-    } else if (block->options->experimental_mode & jmi_block_solver_experimental_use_last_integrator_step) {
+    } else if (block->options->start_from_last_integrator_step) {
         /* Kinsol specific handling of a completed step */
         int flag;
         jmi_kinsol_solver_t* solver = block->solver;

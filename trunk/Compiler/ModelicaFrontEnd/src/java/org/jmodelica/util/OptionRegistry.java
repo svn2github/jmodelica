@@ -705,6 +705,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
+        NLE_SOLVER_LAST_INTEGRATOR_STEP
+            ("nle_solver_use_last_integrator_step",
+             OptionType.runtime, 
+             Category.uncommon,
+             false,
+             "If enabled, the intial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               OptionType.runtime, 
