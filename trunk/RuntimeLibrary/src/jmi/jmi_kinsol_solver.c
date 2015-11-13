@@ -1289,6 +1289,9 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     int N = block->n;
       
     int ret;
+    if(solver->updated_jacobian_flag) {
+        return 0;
+    }
     SetToZero(solver->J);
 
     /* Evaluate Jacobian */
@@ -1327,7 +1330,6 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     /* Broyden upate: Jac = Jac + (ResidualDelta  - Jac * step)*(step_scale^2 step)^T / norm_2(step_scale * step)^2;
     See algorithm A8.3.1 in "Numerical methods for Unconstrained Opt and NLE" */
     double denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
-
     /* work_vector = Jac * step */
     jmi_kinsol_calc_Mv(solver->J, 0, kin_mem->kin_pp, solver->work_vector);
 
@@ -1375,7 +1377,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
     int info;
     int N = block->n;
       
-    DenseCopy(solver->J, solver->J_LU); /* make at copy of the Jacobian that will be used for LU factorization */
+    DenseCopy(solver->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
 
     /* Equillibrate if corresponding option is set */
     if((N>1) && block->options->use_jacobian_equilibration_flag) {
