@@ -315,7 +315,7 @@ model CSTR_MPC_Model
 end CSTR_MPC_Model;
 
 model CSTR_elim_vars_MPC_Model
-  extends CSTR;
+  extends CSTR_elim_vars;
   parameter Real c_ref = 338.775766; 
   parameter Real T_ref = 280.099198;
   parameter Real Tc_ref = 280;
