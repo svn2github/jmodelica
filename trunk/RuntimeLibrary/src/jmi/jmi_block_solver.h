@@ -96,6 +96,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_residual_monitoring = 256,
     jmi_block_solver_experimental_check_descent_direction = 512,
+    jmi_block_solver_experimental_use_last_integrator_step = 1024,
     jmi_block_solver_experimental_use_Broyden = 2048
 } jmi_block_solver_experimental_mode_t;
 
@@ -246,7 +247,6 @@ struct jmi_block_solver_options_t {
     int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
-    int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
     
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */

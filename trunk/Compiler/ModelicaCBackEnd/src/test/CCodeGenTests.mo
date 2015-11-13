@@ -16248,7 +16248,6 @@ const char *fmi_runtime_options_map_names[] = {
     \"_nle_solver_regularization_tolerance\",
     \"_nle_solver_step_limit_factor\",
     \"_nle_solver_tol_factor\",
-    \"_nle_solver_use_last_integrator_step\",
     \"_nle_solver_use_nominals_as_fallback\",
     \"_rescale_after_singular_jac\",
     \"_rescale_each_step\",
@@ -16263,11 +16262,11 @@ const char *fmi_runtime_options_map_names[] = {
 const int fmi_runtime_options_map_vrefs[] = {
     536870931, 0, 268435468, 268435469, 1, 268435470, 2, 536870932, 3, 4,
     268435471, 268435472, 536870933, 536870934, 5, 268435473, 6, 7, 8, 9,
-    10, 11, 536870935, 536870936, 536870937, 536870938, 268435474, 536870939, 536870940, 536870941,
-    536870942, 0
+    10, 11, 536870935, 536870936, 536870937, 268435474, 536870938, 536870939, 536870940, 536870941,
+    0
 };
 
-const int fmi_runtime_options_map_length = 31;
+const int fmi_runtime_options_map_length = 30;
 #define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
 #define __cs_rel_tol_5 ((*(jmi->z))[jmi->offs_real_pi+1])
 #define __cs_step_size_7 ((*(jmi->z))[jmi->offs_real_pi+2])
@@ -16286,19 +16285,18 @@ const int fmi_runtime_options_map_length = 31;
 #define __iteration_variable_scaling_11 ((*(jmi->z))[jmi->offs_integer_pi+3])
 #define __log_level_12 ((*(jmi->z))[jmi->offs_integer_pi+4])
 #define __nle_solver_max_iter_16 ((*(jmi->z))[jmi->offs_integer_pi+5])
-#define __residual_equation_scaling_27 ((*(jmi->z))[jmi->offs_integer_pi+6])
+#define __residual_equation_scaling_26 ((*(jmi->z))[jmi->offs_integer_pi+6])
 #define __block_jacobian_check_1 ((*(jmi->z))[jmi->offs_boolean_pi+0])
 #define __enforce_bounds_8 ((*(jmi->z))[jmi->offs_boolean_pi+1])
 #define __nle_brent_ignore_error_13 ((*(jmi->z))[jmi->offs_boolean_pi+2])
 #define __nle_solver_check_jac_cond_14 ((*(jmi->z))[jmi->offs_boolean_pi+3])
-#define __nle_solver_use_last_integrator_step_23 ((*(jmi->z))[jmi->offs_boolean_pi+4])
-#define __nle_solver_use_nominals_as_fallback_24 ((*(jmi->z))[jmi->offs_boolean_pi+5])
-#define __rescale_after_singular_jac_25 ((*(jmi->z))[jmi->offs_boolean_pi+6])
-#define __rescale_each_step_26 ((*(jmi->z))[jmi->offs_boolean_pi+7])
-#define __runtime_log_to_file_28 ((*(jmi->z))[jmi->offs_boolean_pi+8])
-#define __use_Brent_in_1d_29 ((*(jmi->z))[jmi->offs_boolean_pi+9])
-#define __use_jacobian_equilibration_30 ((*(jmi->z))[jmi->offs_boolean_pi+10])
-#define __use_newton_for_brent_31 ((*(jmi->z))[jmi->offs_boolean_pi+11])
+#define __nle_solver_use_nominals_as_fallback_23 ((*(jmi->z))[jmi->offs_boolean_pi+4])
+#define __rescale_after_singular_jac_24 ((*(jmi->z))[jmi->offs_boolean_pi+5])
+#define __rescale_each_step_25 ((*(jmi->z))[jmi->offs_boolean_pi+6])
+#define __runtime_log_to_file_27 ((*(jmi->z))[jmi->offs_boolean_pi+7])
+#define __use_Brent_in_1d_28 ((*(jmi->z))[jmi->offs_boolean_pi+8])
+#define __use_jacobian_equilibration_29 ((*(jmi->z))[jmi->offs_boolean_pi+9])
+#define __use_newton_for_brent_30 ((*(jmi->z))[jmi->offs_boolean_pi+10])
 #define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
@@ -16328,15 +16326,14 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __nle_solver_regularization_tolerance_20 = (-1.0);
     __nle_solver_step_limit_factor_21 = (10.0);
     __nle_solver_tol_factor_22 = (1.0E-4);
-    __nle_solver_use_last_integrator_step_23 = (JMI_FALSE);
-    __nle_solver_use_nominals_as_fallback_24 = (JMI_TRUE);
-    __rescale_after_singular_jac_25 = (JMI_TRUE);
-    __rescale_each_step_26 = (JMI_FALSE);
-    __residual_equation_scaling_27 = (1);
-    __runtime_log_to_file_28 = (JMI_FALSE);
-    __use_Brent_in_1d_29 = (JMI_TRUE);
-    __use_jacobian_equilibration_30 = (JMI_FALSE);
-    __use_newton_for_brent_31 = (JMI_TRUE);
+    __nle_solver_use_nominals_as_fallback_23 = (JMI_TRUE);
+    __rescale_after_singular_jac_24 = (JMI_TRUE);
+    __rescale_each_step_25 = (JMI_FALSE);
+    __residual_equation_scaling_26 = (1);
+    __runtime_log_to_file_27 = (JMI_FALSE);
+    __use_Brent_in_1d_28 = (JMI_TRUE);
+    __use_jacobian_equilibration_29 = (JMI_FALSE);
+    __use_newton_for_brent_30 = (JMI_TRUE);
     return ef;
 }
 

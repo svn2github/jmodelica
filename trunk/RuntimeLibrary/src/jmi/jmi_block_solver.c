@@ -663,7 +663,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->brent_ignore_error_flag = 0;
     bsop->experimental_mode = 0;
     bsop->use_nominals_as_fallback_in_init = 0;
-    bsop->start_from_last_integrator_step = 0;
     bsop->solver = JMI_KINSOL_SOLVER;
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
