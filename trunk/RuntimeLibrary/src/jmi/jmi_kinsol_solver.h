@@ -65,12 +65,15 @@ const char *jmi_kinsol_flag_to_name(int flag);
 
 struct jmi_kinsol_solver_reset_t {
     DlsMat J;
+    DlsMat J_modified;
     int * lapack_ipiv;
     N_Vector kin_y_scale;
     N_Vector kin_f_scale;
     int J_is_singular_flag;
     int handling_of_singular_jacobian_flag;
     int mbset;
+    realtype kin_scale_update_time;
+    int force_rescaling;
 };
 
 struct jmi_kinsol_solver_t {
