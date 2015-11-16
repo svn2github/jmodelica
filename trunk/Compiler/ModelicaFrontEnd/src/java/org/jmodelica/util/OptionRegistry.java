@@ -138,6 +138,15 @@ abstract public class OptionRegistry {
         public static final String NONE  = "none";
         public static final String ALL = "all";
     }
+    public interface CCompilerFiles {
+        public static final String NONE      = "none";
+        public static final String FUNCTIONS = "functions";
+        public static final String ALL       = "all";
+    }
+    public interface CCompilerFlags {
+        public static final String O1 = ":O1";
+        public static final String O2 = ":O2";
+    }
 
     public enum OptionType { compiler, runtime }
 
@@ -546,6 +555,20 @@ abstract public class OptionRegistry {
              Category.uncommon,
              4,
              "The maximum number of processes used during c-code compilation."),
+        CC_EXTRA_FLAGS_APPLIES_TO
+            ("cc_extra_flags_applies_to",
+            OptionType.compiler,
+            Category.uncommon,
+            CCompilerFiles.FUNCTIONS,
+            "Parts of c-code to compile with extra compiler flags specified by ccompiler_extra_flags",
+            CCompilerFiles.NONE,CCompilerFiles.FUNCTIONS,CCompilerFiles.ALL),
+        CC_EXTRA_FLAGS
+            ("cc_extra_flags",
+            OptionType.compiler,
+            Category.uncommon,
+            CCompilerFlags.O1,
+            "Optimization level for c-code compilation",
+            CCompilerFlags.O1, CCompilerFlags.O2),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,
