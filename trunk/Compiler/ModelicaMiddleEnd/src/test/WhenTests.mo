@@ -299,7 +299,7 @@ equation
 1 errors found:
 
 Error at line 291, column 9, in file 'Compiler/ModelicaMiddleEnd/src/test/WhenTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is (no return value)
 ")})));
 end ReinitErr13;
 

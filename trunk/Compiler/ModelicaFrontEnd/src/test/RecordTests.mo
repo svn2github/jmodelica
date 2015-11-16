@@ -548,7 +548,7 @@ equation
 1 errors found:
 
 Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
 ")})));
 end RecordType2;
 
@@ -578,7 +578,7 @@ equation
 1 errors found:
 
 Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
 ")})));
 end RecordType3;
 
@@ -682,7 +682,7 @@ equation
 1 errors found:
 
 Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
 ")})));
 end RecordType5;
 

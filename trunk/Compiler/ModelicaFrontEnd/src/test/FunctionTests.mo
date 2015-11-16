@@ -2185,7 +2185,7 @@ equation
 1 errors found:
 
 Error at line 2126, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction2(): types of component y and output o2 are not compatible
+  Calling function TestFunction2(): component y is of type Integer and output o2 is of type Real - they are not compatible
 ")})));
 end FunctionType12;
 
@@ -2204,11 +2204,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component x and output o1 are not compatible
+Error at line 2197, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component x is of type Integer and output o1 is of type Real - they are not compatible
 
-Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component z and output o3 are not compatible
+Error at line 2197, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType13;
 
@@ -2246,8 +2246,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2188, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component z and output o3 are not compatible
+Error at line 2239, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType15;
 
@@ -3243,8 +3243,8 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3185, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Types of right and left side of assignment are not compatible
+Error at line 3236, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  The right and left expression types of assignment are not compatible, type of left-hand side is Integer, and type of right-hand side is Real
 ")})));
 end AlgorithmTypeAssign1;
 
@@ -3301,8 +3301,8 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3243, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Types of right and left side of assignment are not compatible
+Error at line 3294, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  The right and left expression types of assignment are not compatible, type of left-hand side is Real, and type of right-hand side is String
 ")})));
 end AlgorithmTypeAssign4;
 
@@ -8157,8 +8157,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 8104, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function f(): array sizes of component y and output c are not compatible
+Error at line 8150, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function f(): component y is of size [2] and output c is of size [3] - they are not compatible
 ")})));
 end UnknownArray7;
 

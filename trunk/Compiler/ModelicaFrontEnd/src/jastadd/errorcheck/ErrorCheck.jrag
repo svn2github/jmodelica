@@ -325,7 +325,53 @@ aspect ErrorCheck {
   public void ASTNode.problem(Problem p) {
       root().getErrorHandler().problem(p);
   }
-  
+
+    /**
+     * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
+     */
+    public void ASTNode.errorUnlessDisabled(String s) {
+        if (inDisabledComponent()) {
+            warning("Found error in disabled conditional:\n  " + s);
+        } else {
+            error(s);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
+     */
+    public void ASTNode.errorUnlessDisabled(String format, Object... args) {
+        if (inDisabledComponent()) {
+            warning("Found error in disabled conditional:\n  " + format, args);
+        } else {
+            error(format, args);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
+     * generate a warning, otherwise generate an error.
+     */
+    public void ASTNode.errorUnlessDisabledAnd(boolean condition, String s) {
+        if (condition) {
+            errorUnlessDisabled(s);
+        } else {
+            error(s);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
+     * generate a warning, otherwise generate an error.
+     */
+    public void ASTNode.errorUnlessDisabledAnd(boolean condition, String format, Object... args) {
+        if (condition) {
+            errorUnlessDisabled(format, args);
+        } else {
+            error(format, args);
+        }
+    }
+
   /**
    * Lock the closest surrounding if-equation or if-expression that have only 
    * parameter-expression tests and evaluates to another branch. Returns true 
