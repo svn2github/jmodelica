@@ -37,6 +37,7 @@ struct jmi_block_solver_t {
 
     int n;                         /**< \brief The number of iteration variables */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
+    jmi_real_t* last_accepted_x;   /**< \brief Work vector for the real iteration variables holding the last accepted vales by the integrator */
 
     jmi_real_t* dx;                /**< \brief Work vector for the seed vector */
 
@@ -69,6 +70,7 @@ struct jmi_block_solver_t {
     void * solver;
     jmi_block_solver_solve_func_t solve;
     jmi_block_solver_delete_func_t delete_solver;
+    jmi_block_solver_completed_integrator_step_func_t completed_integrator_step;
     
     int init;              /**< \brief A flag for initialization */
     int at_event;          /**< \brief A flag indicating if we are at an event */

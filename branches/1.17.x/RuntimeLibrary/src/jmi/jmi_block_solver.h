@@ -91,7 +91,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_residual_monitoring = 256,
-    jmi_block_solver_experimental_check_descent_direction = 512
+    jmi_block_solver_experimental_check_descent_direction = 512,
+    jmi_block_solver_experimental_use_last_integrator_step = 1024
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -199,6 +200,14 @@ typedef int (*jmi_block_solver_solve_func_t)(jmi_block_solver_t* block_solver);
   */
 typedef void (*jmi_block_solver_delete_func_t)(jmi_block_solver_t* block_solver);
 
+/**
+ * \brief A equation block signature for notifying the block that an integrator step has been accepted.
+ * 
+ * @param block A jmi_block_solver_t struct.
+ * @return Error code.
+ */
+typedef int (*jmi_block_solver_completed_integrator_step_func_t)(jmi_block_solver_t* block_solver);
+
 /**< \brief Equation block solver options. */
 struct jmi_block_solver_options_t {
     double res_tol;                         /**< \brief Tolerance for the equation block solver */
@@ -240,8 +249,11 @@ struct jmi_block_solver_options_t {
 
 };
 
-/** \brief Solve the eqautions in the associated problem. */
+/** \brief Solve the equations in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+
+/** \brief Notify the block that an integrator step is completed */
+int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver);
 
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);

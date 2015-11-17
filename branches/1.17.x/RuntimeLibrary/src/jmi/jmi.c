@@ -342,6 +342,21 @@ int jmi_delete(jmi_t* jmi){
     return 0;
 }
 
+int jmi_block_completed_integrator_step(jmi_t *jmi) {
+    int i, flag;
+    
+    /* Loop over all the internal blocks */
+    for (i = 0; i < jmi->n_dae_blocks; i++){
+        jmi_block_residual_t* block_residual = jmi->dae_block_residuals[i]; 
+        flag = jmi_block_residual_completed_integrator_step(block_residual);
+        if (flag != 0) { 
+            return flag; 
+        }
+    }
+    return 0;
+}
+
+
 int jmi_init_delay_if(jmi_t* jmi, int n_delays, int n_spatialdists, jmi_generic_func_t init, jmi_generic_func_t sample, int n_delay_switches) {
 
     int i;

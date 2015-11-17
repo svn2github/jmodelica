@@ -775,3 +775,8 @@ int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t*
     }
     return 0;
 }
+
+
+int jmi_block_residual_completed_integrator_step(jmi_block_residual_t* block) {
+    return jmi_block_solver_completed_integrator_step(block->block_solver);
+}

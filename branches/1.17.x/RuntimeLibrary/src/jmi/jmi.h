@@ -1430,4 +1430,12 @@ int jmi_init_delay_blocks(jmi_t* jmi);
  * Expects event mode set with jmi_delay_set_event_mode */
 int jmi_sample_delay_blocks(jmi_t* jmi);
 
+/**
+ * \brief Notifies the internal blocks that an integrator step is complete.
+ * 
+ * @param jmi A jmi_t struct.
+ * @return 
+ */
+int jmi_block_completed_integrator_step(jmi_t *jmi);
+
 #endif

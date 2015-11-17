@@ -53,6 +53,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 /**< \brief Kinsol solver destructor */
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
+int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver);
+
 /**< \brief Retrieve residual scales used in Kinsol solver */
 double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
 
