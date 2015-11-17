@@ -2455,7 +2455,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
-        block->nb_iters++;
         if(flagNonscaled != 0) {
             jmi_log_node(log, logWarning, "NonConverge", "The equations with initial scaling didn't converge to a "
                          "solution in <block: %s>", block->label);
@@ -2553,7 +2552,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
      
     /* Store debug information */
-    block->nb_iters += nniters+1;
+    block->nb_iters += nniters;
 
 #ifdef JMI_PROFILE_RUNTIME
     {
