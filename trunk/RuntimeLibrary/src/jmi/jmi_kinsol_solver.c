@@ -1346,7 +1346,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
 
 /* Perform Broyden update and factorize the resulted matrix */
 static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
-    clock_t t;
+    clock_t t = clock();
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     struct KINMemRec* kin_mem = solver->kin_mem;
     int ret, i, j;
