@@ -34,7 +34,7 @@ equation
 1 errors found:
 
 Error at line 26, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 ")})));
 end InnerOuter1;
 
@@ -1222,5 +1222,111 @@ initial equation
 end CheckTests.FixedFalseIndex1;
 ")})));
 end FixedFalseIndex1;
+
+
+model SizeInDisabled1
+    parameter Integer n;
+    Real z[n] = 1:2 if n == 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="SizeInDisabled1",
+            description="Test that check mode only gives warning for array length mismatch in declaration of disabled conditional",
+            checkType=check,
+            errorMessage="
+2 errors found:
+
+Warning at line 1227, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The parameter n does not have a binding expression
+
+Warning at line 1229, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Found error in disabled conditional:
+  Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2]
+")})));
+end SizeInDisabled1;
+
+
+model SizeInDisabled2
+    parameter Integer n;
+    Real z[n] = {1:2,3:4} if n == 2;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="SizeInDisabled2",
+            description="Test that check mode gives error for mismatch in number of array dimensions in declaration of disabled conditional",
+            checkType=check,
+            errorMessage="
+2 errors found:
+
+Error at line 1250, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2, 2]
+
+Warning at line 1248, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The parameter n does not have a binding expression
+")})));
+end SizeInDisabled2;
+
+
+model SizeInDisabled3
+    model A
+        parameter Integer n;
+        Real x[n];
+        Real y[n];
+    equation
+        y = cat(1, {x[1]}, x[2:end] .- 1) .* x;
+    end A;
+    
+    parameter Integer n;
+    A a(n = n) if n > 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="SizeInDisabled3",
+            description="Test that check mode only gives warning for mismatch in number of array dimensions inside disabled conditional",
+            checkType=check,
+            errorMessage="
+2 errors found:
+
+Warning at line 1275, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Found error in disabled conditional:
+  Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* x
+    type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
+    type of 'x' is Real[0]
+
+Warning at line 1276, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The parameter n does not have a binding expression
+")})));
+end SizeInDisabled3;
+
+
+model SizeInDisabled4
+    model A
+        parameter Integer n;
+        Real x[n];
+        Real y[n];
+    equation
+        y = cat(1, {x[1]}, x[2:end] .- 1) .* { x, x };
+    end A;
+    
+    parameter Integer n;
+    A a(n = n) if n > 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="SizeInDisabled4",
+            description="Test that check mode gives error for mismatch in number of array dimensions inside disabled conditional",
+            checkType=check,
+            errorMessage="
+2 errors found:
+
+Error at line 1306, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* {x, x}
+    type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
+    type of '{x, x}' is Real[2, 0]
+
+Warning at line 1307, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+  The parameter n does not have a binding expression
+")})));
+end SizeInDisabled4;
 
 end CheckTests;

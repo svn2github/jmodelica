@@ -1392,6 +1392,17 @@ aspect ComponentDeclMethods {
     			return true;
     	return false;
     }
+
+    /**
+     * Check if this node is in a disabled condition component.
+     * 
+     * Only valid in instance tree.
+     */
+    inh boolean ASTNode.inDisabledComponent();
+    eq Root.getChild().inDisabledComponent()              = false;
+    eq InstClassDecl.getChild().inDisabledComponent()     = false;
+    eq InstComponentDecl.getChild().inDisabledComponent() = isDisabled() || inDisabledComponent();
+
 }
 
 aspect ClassDeclMethods {

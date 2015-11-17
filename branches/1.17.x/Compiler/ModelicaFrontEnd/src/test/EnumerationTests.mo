@@ -120,7 +120,7 @@ Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Enumera
 1 errors found:
 
 Error at line 113, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is EnumerationTests.EnumerationTest5.A, and type of right-hand side is EnumerationTests.EnumerationTest5.B
 ")})));
   end EnumerationTest5;
   

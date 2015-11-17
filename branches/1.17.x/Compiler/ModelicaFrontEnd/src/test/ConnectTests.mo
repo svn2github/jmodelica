@@ -1789,7 +1789,7 @@ equation
 1 errors found:
 
 Error at line 1713, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Sizes do not match in connection
+  Sizes do not match in connection, size of 'a1' is [3] and size of 'a2[1:2]' is [2]
 ")})));
 end ConnectErrTest6;
 

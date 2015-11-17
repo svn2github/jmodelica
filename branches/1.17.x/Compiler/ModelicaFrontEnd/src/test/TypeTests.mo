@@ -46,7 +46,7 @@ Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
 1 errors found:
 
 Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The right and left expression types of equation are not compatible
+  The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 ")})));
 	end TypeTest2;
 
@@ -2032,13 +2032,13 @@ algorithm
 3 errors found:
 
 Error at line 2023, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Boolean, and type of right-hand side is Real
 
 Error at line 2024, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 
 Error at line 2025, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Integer, and type of right-hand side is String
 ")})));
 end AlgorithmType3;
 

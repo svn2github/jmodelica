@@ -124,14 +124,17 @@ aspect FlatTypeCheck {
                     bexp.error("The binding expression of the variable " + name() +
                             " does not match the declared type of the variable");
                 } else {
-                    if (ivm.myInstNode() == this)
-                        bexp.error("Array size mismatch in declaration of " + name() +
+                    String msg;
+                    if (ivm.myInstNode() == this) {
+                        msg = "Array size mismatch in declaration of " + name() +
                                 ", size of declaration is " + expectedBT.size() + 
-                                " and size of binding expression is " + actualBT.size());
-                    else
-                        bexp.error("Array size mismatch in modification of " + name() + 
+                                " and size of binding expression is " + actualBT.size();
+                    } else {
+                        msg = "Array size mismatch in modification of " + name() + 
                                 ", expected size is " + (ivm.hasEach() ? "(due to 'each') " : "") + expectedBT.size() +
-                                " and size of binding expression is " + actualBT.size());
+                                " and size of binding expression is " + actualBT.size();
+                    }
+                    bexp.errorUnlessDisabledAnd(expectedBT.ndims() == actualBT.ndims(), msg);
                 }
             }
         }
@@ -186,7 +189,8 @@ aspect FlatTypeCheck {
                     if (im != null) {
                         im.generateMissingEachWarning();
                     } else {
-                        error("Array size mismatch in modification of the " + description +
+                        errorUnlessDisabledAnd(attrSize.ndims() != valMod.ndims(),
+                                "Array size mismatch in modification of the " + description +
                                 ", expected size is " + (hasEach() ? "(due to 'each') " : "") + attrSize +
                                 " and size of " + name() + " expression is " + valMod.size());
                     }
@@ -243,21 +247,23 @@ aspect FlatTypeCheck {
     eq Root.getChild().isInRedeclareMod()                 = false;
 
 
-  public void FEquation.typeCheck(ErrorCheckType checkType) {
-      typeCheckLocalIteration(checkType);
-      FType left = getLeft().type();
-      FType right = getRight().type();
-      if (!left.isUnknown() && !right.isUnknown()) {
-          if (!left.equivalentTo(right)) {
-              if (left.scalarType().equivalentTo(right.scalarType())) {
-                  if (!lockBranch(checkType))
-                      error("The array sizes of right and left hand side of equation are not compatible");
-              } else {
-                  error("The right and left expression types of equation are not compatible");
-              }
-          }
-      }
-  }
+    public void FEquation.typeCheck(ErrorCheckType checkType) {
+        typeCheckLocalIteration(checkType);
+        FType left = getLeft().type();
+        FType right = getRight().type();
+        if (!left.isUnknown() && !right.isUnknown()) {
+            if (!left.equivalentTo(right)) {
+                if (left.equivalentExceptLengths(right)) {
+                    if (!lockBranch(checkType))
+                        errorUnlessDisabled("The array sizes of right and left hand side of equation are not compatible, " + 
+                                "size of left-hand side is %s, and size of right-hand side is %s", left.size(), right.size());
+                } else {
+                    error("The right and left expression types of equation are not compatible, " + 
+                            "type of left-hand side is %s, and type of right-hand side is %s", left, right);
+                }
+            }
+        }
+    }
 
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1().getInstAccess();
@@ -279,10 +285,13 @@ aspect FlatTypeCheck {
         if (checkTypes) { 
             InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
             InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-            if (!leftComp.connectableTo(rightComp))
+            if (!leftComp.connectableTo(rightComp)) {
                 error("Types of connected components do not match");
-            else if (!left.size().equivalent(right.size(), false))
-                error("Sizes do not match in connection");
+            } else if (!left.size().equivalent(right.size(), false)) {
+                errorUnlessDisabledAnd(left.ndims() == right.ndims(), 
+                        "Sizes do not match in connection, size of '%s' is %s and size of '%s' is %s", 
+                        left, left.size(), right, right.size());
+            }
         }
     }
 
@@ -312,15 +321,37 @@ aspect FlatTypeCheck {
             buf.append("' is ");
             buf.append(exp.type());
         }
-        error(buf.toString());
+        errorUnlessDisabledAnd(typeErrorOnlyLengths(), buf.toString());
     }
-    
+
     public void FIdUse.typeError(ErrorCheckType checkType, FIdUseExp use) {
         use.typeError(checkType);
     }
-    
+
     public void FIdUseInstAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
         getInstAccess().typeError();
+    }
+
+    /**
+     * Check if type error is only in array lengths.
+     */
+    syn boolean FExp.typeErrorOnlyLengths() = typeErrorOnlyLengths(childFExps());
+    eq FAbstractCat.typeErrorOnlyLengths()  = typeErrorOnlyLengths(getFExps());
+
+    /**
+     * Check if type error is only in array lengths.
+     */
+    syn boolean FExp.typeErrorOnlyLengths(Iterable<FExp> exps) {
+        FType first = null;
+        for (FExp exp : exps) {
+            FType cur = exp.type();
+            if (first == null) {
+                first = cur;
+            } else if (!first.equivalentExceptLengths(cur)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -345,7 +376,7 @@ aspect FlatTypeCheck {
             if (badVar)
                 error("%s\n    '%s' is of %s variability", msg, getN(), getN().variability().toStringLiteral());
             else if (canCeval && !lockBranch(checkType))
-                error("%s\n    '%s' evaluates to %d", msg, getN(), getN().ceval().intValue());
+                errorUnlessDisabled("%s\n    '%s' evaluates to %d", msg, getN(), getN().ceval().intValue());
         } else {
             super.typeError(checkType);
         }
@@ -571,37 +602,37 @@ aspect FlatTypeCheck {
 		  }
 	  }
   }
-  
-  public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
-	  if (ndims() > 1) { 
-		  error("Array index must be scalar or vector expression: " + getFExp());
-      } else if (!type().isUnknown() && !type().canBeIndex()) {
-          error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
-      } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
-          error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
-	  } else if (!inFunction()) { 
-            if (!getFExp().variability().fixedParameterOrLess()) {
-			  warning("Variable array index in equation can result in slow simulation time");
-		  } else if (!reportedOutOfBound && !inUnknownAccess()) {
-	          // Check array bounds
-	          // TODO: Perform bounds check in functions if index has parameter variability or lower?
-	          try {
-	              int max = mySize().get(0);
-	              for (FExp e : getFExp().getArray().iterable()) {
-	                  int i = e.ceval().intValue();
-	                  if (i < 1 || i > max) {
-	                      if (!lockBranch(checkType))
-	                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
-	                      reportedOutOfBound = true;
-	                      return;
-	                  }
-	              }
-	          } catch (ConstantEvaluationException e) {
-	          }
-		  }
-	  }
-  }
-  
+
+    public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
+        if (ndims() > 1) { 
+            error("Array index must be scalar or vector expression: " + getFExp());
+        } else if (!type().isUnknown() && !type().canBeIndex()) {
+            error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
+        } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
+            error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
+        } else if (!inFunction()) { 
+              if (!getFExp().variability().fixedParameterOrLess()) {
+                warning("Variable array index in equation can result in slow simulation time");
+            } else if (!reportedOutOfBound && !inUnknownAccess()) {
+                // Check array bounds
+                // TODO: Perform bounds check in functions if index has parameter variability or lower?
+                try {
+                    int max = mySize().get(0);
+                    for (FExp e : getFExp().getArray().iterable()) {
+                        int i = e.ceval().intValue();
+                        if (i < 1 || i > max) {
+                            if (!lockBranch(checkType))
+                                errorUnlessDisabled("Array index out of bounds: " + i + ", index expression: " + getFExp());
+                            reportedOutOfBound = true;
+                            return;
+                        }
+                    }
+                } catch (ConstantEvaluationException e) {
+                }
+            }
+        }
+    }
+
   syn FType FExpSubscript.myIndexType() = myIndexType(myDim());
   inh FType FExpSubscript.myIndexType(int i);
   eq Root.getChild().myIndexType(int i)                                = fUnknownType();
@@ -672,14 +703,24 @@ aspect FlatTypeCheck {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
   }
   
-  
-    public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
-	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-            if (!getLeft().type().typeCompatible(getRight().type(), true)) 
-			  error("Types of right and left side of assignment are not compatible");		  
-	  }
+
+  public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
+      FType left = getLeft().type();
+      FType right = getRight().type();
+      if (!left.isUnknown() && !right.isUnknown()) {
+          if (!left.typeCompatible(right, true)) {
+              if (left.typeCompatibleExceptLengths(right)) {
+                  // TODO: should use lockBranch() here as well, but no support yet
+                  errorUnlessDisabled("The array sizes of right and left hand side of assignment are not compatible, " + 
+                          "size of left-hand side is %s, and size of right-hand side is %s", left.size(), right.size());
+              } else {
+                  error("The right and left expression types of assignment are not compatible, " + 
+                          "type of left-hand side is %s, and type of right-hand side is %s", left, right);
+              }
+          }
+      }
   }
-  
+
   public void FWhileStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
 		  error("Type of test expression of while statement is not Boolean");
@@ -736,12 +777,12 @@ aspect FlatTypeCheck {
 	  else if (!getDim().type().isUnknown() && !getDim().variability().parameterOrLess())
 		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
-  
-  public void FAbstractCat.typeCheckFExps() {}
-  
-  public void FAbstractCat.typeError(ErrorCheckType checkType) {
-	  error("Types do not match in array concatenation");	  
-  }
+
+    public void FAbstractCat.typeCheckFExps() {}
+
+    public void FAbstractCat.typeError(ErrorCheckType checkType) {
+        errorUnlessDisabledAnd(typeErrorOnlyLengths(), "Types do not match in array concatenation");
+    }
 
     syn int FInfArgsFunctionCall.minNumArgs() = 1;
     eq FFillExp.minNumArgs()                  = 2;
@@ -770,20 +811,33 @@ aspect FlatTypeCheck {
 	  else if (!isFunctionCallClause() && n == 0)
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
-  
-  public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
-      if (isArray()) {
-          Size s = size();
-          for (FExp arg : myArgs()) {
-              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
-                  error("Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes");
-                  break;
-              }
-          }
-      }
-      super.typeCheck(checkType);
-  }
-  
+
+    public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
+        checkVectorizedSizes(checkType);
+        super.typeCheck(checkType);
+    }
+
+    public void FBuiltInFunctionCall.checkVectorizedSizes(ErrorCheckType checkType) {
+        if (isArray()) {
+            boolean error = false;
+            boolean onlyLengths = true;
+            Size s = size();
+            for (FExp arg : myArgs()) {
+                if (arg.isArray() && !arg.size().equivalent(s, false)) {
+                    error = true;
+                    if (arg.ndims() != s.ndims()) {
+                        onlyLengths = false;
+                        break;
+                    }
+                }
+            }
+            if (error) {
+                errorUnlessDisabledAnd(onlyLengths, 
+                        "Mismatching sizes in %s. All non-scalar arguments need matching sizes", builtInName());
+            }
+        }
+    }
+
   public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
@@ -833,7 +887,8 @@ aspect FlatTypeCheck {
     public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
         if (!getIn0().size().equivalent(getIn1().size(), true)) {
-            error("Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
+            errorUnlessDisabledAnd(getIn0().ndims() == getIn1().ndims(), 
+                    "Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
         }
         if (isArray()) {
             if (getX().isArray()) {
@@ -854,16 +909,8 @@ aspect FlatTypeCheck {
 	}
 
     public void FHomotopyExp.typeCheck(ErrorCheckType checkType) {
-      if (isArray()) {
-          Size s = size();
-          for (FExp arg : myArgs()) {
-              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
-                  error("Mismatching sizes in homotopy. All non-scalar arguments need matching sizes");
-                  break;
-              }
-          }
-      }
-      super.typeCheck(checkType);
+        checkVectorizedSizes(checkType);
+        super.typeCheck(checkType);
     }
   
     public void InstDerExp.typeCheck(ErrorCheckType checkType) {
@@ -903,30 +950,32 @@ aspect FlatTypeCheck {
   
   syn boolean InstFunctionCall.isPartialFunctionCall() = false;
   eq InstPartialFunctionCall.isPartialFunctionCall()   = true;
-  
-  public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
-	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
-		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
-			  FIdUse use = getFExp().asFIdUse();
-			  if (use.isForIndex()) {
-				  error("Can not assign a value to a for loop index");
-			  } else if (size().isUnknown() && !inFunction()) {
-				  error(functionCallDecription() + ": could not evaluate array size of output " + 
-						  myOutput().name());
-			  } else if (!use.type().typeCompatible(type(), true)) {
-			      if (use.type().scalarType().typeCompatible(type().scalarType())) {
-			          if (!lockBranch(checkType))
-	                      error(functionCallDecription() + ": array sizes of component " + use.name() + 
-	                              " and output " + myOutput().name() + " are not compatible");
-			      } else {
-    				  error(functionCallDecription() + ": types of component " + use.name() + 
-    						  " and output " + myOutput().name() + " are not compatible");
-			      }
-			  }
-		  }
-	  }
-  }
-  
+
+    public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
+        if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
+            if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
+                FIdUse use = getFExp().asFIdUse();
+                FType useType = use.type();
+                FType outType = type();
+                if (use.isForIndex()) {
+                    error("Can not assign a value to a for loop index");
+                } else if (outType.size().isUnknown() && !inFunction()) {
+                    error(functionCallDecription() + ": could not evaluate array size of output " + 
+                            myOutput().name());
+                } else if (!useType.typeCompatible(outType, true)) {
+                    if (useType.typeCompatibleExceptLengths(outType)) {
+                        if (!lockBranch(checkType))
+                            errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
+                                    functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
+                    } else {
+                        error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
+                                functionCallDecription(), use.name(), useType, myOutput().name(), outType);
+                    }
+                }
+            }
+        }
+    }
+
   inh String InstFunctionArgument.functionCallDecription();
   inh String FFunctionCallLeft.functionCallDecription();
   eq FAbstractFunctionCall.getChild().functionCallDecription() = functionCallDecription();
@@ -1168,28 +1217,29 @@ aspect FlatTypeCheck {
 			  return false;
 	  return true;
   }
-	
-  protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
-      enabledExp.collectErrors(checkType);
-      if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
-          enabledExp.error("The type of the enabled expression is not boolean");
-      } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
-          if (enabledExp.ndims() == 0) {
-              enabledExp.warning("Assuming 'each' for enabled expression");
-          } else {
-              enabledExp.error("Array size mismatch for the enabled attribute" +
-                      ", size of component declaration is " + parentType.size() + 
-                      " and size of expression is " + enabledExp.size());
-          }
-      } else if (eachSet) { 
-          if (parentType.ndims() == 0) {
-              enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
-          } else if (enabledExp.ndims() > 0) {
-              enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
-          }
-      }
-  }
-  
+
+    protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
+        enabledExp.collectErrors(checkType);
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
+            enabledExp.error("The type of the enabled expression is not boolean");
+        } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
+            if (enabledExp.ndims() == 0) {
+                enabledExp.warning("Assuming 'each' for enabled expression");
+            } else {
+                enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
+                        "Array size mismatch for the enabled attribute, " + 
+                        "size of component declaration is %s and size of expression is %s", 
+                        parentType.size(), enabledExp.size());
+            }
+        } else if (eachSet) { 
+            if (parentType.ndims() == 0) {
+                enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
+            } else if (enabledExp.ndims() > 0) {
+                enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
+            }
+        }
+    }
+
 }
 
 aspect VariabilityCheck {

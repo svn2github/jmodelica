@@ -1026,25 +1026,13 @@ aspect Arrays {
     eq FSpatialDistExp.vectorizedNdims() {
         return getIn0().ndims();
     }
-    
-    syn FExp[] FBuiltInFunctionCall.myArgs() = null;
-    eq FSemiLinearExp.myArgs() {
-        FExp[] e = {getX(), getPosSlope(), getNegSlope()};
-        return e;
-    }
-    eq FDelayExp.myArgs() {
-        if (hasMax()) {
-            FExp[] e = {getFExp(), getDelay(), getMax()};
-            return e;
-        } else {
-            FExp[] e = {getFExp(), getDelay()};
-            return e;
-        }
-    }
-    
-    eq FHomotopyExp.myArgs() {
-        return new FExp[] {getActual(), getSimplified()};
-    }
+
+    /**
+     * An iterable over the arguments of the builtin.
+     * 
+     * Default implementation is simply an alias for childFExps().
+     */
+    syn Iterable<FExp> FBuiltInFunctionCall.myArgs() = childFExps();
 
 	eq FArrayDimAsArgsExp.size() {
 		if (!isArray())

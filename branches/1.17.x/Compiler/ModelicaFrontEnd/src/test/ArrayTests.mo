@@ -1357,7 +1357,7 @@ Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Array
   Can not infer array size of the variable x
 
 Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  The array sizes of right and left hand side of equation are not compatible
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [:, :], and size of right-hand side is [2, 2]
 ")})));
 end UnknownSize6;
 
@@ -7980,7 +7980,7 @@ Error at line 7833, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayT
   All branches in if equation with non-parameter tests must have the same number of equations
 
 Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  The array sizes of right and left hand side of equation are not compatible
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [2], and size of right-hand side is [5]
 ")})));
 end ArraySizeInIf2;
 
