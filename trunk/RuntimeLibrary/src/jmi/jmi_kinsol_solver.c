@@ -137,6 +137,7 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 #ifdef JMI_PROFILE_RUNTIME 
     clock_t t;
 #endif
+    clock_t t;
     realtype *y, *f;
     jmi_block_solver_t *block = problem_data;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -150,6 +151,9 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         t = clock();
     }
 #endif
+    if (block->n > 1) {
+        t = clock();
+    }
     n = NV_LENGTH_S(yy);
     ret = jmi_check_and_log_illegal_iv_input(block, y, n);
     /* Test if input is OK (no -1.#IND) */
@@ -158,7 +162,10 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 
     /*Evaluate the residual*/
     ret = block->F(block->problem_data,y,f,JMI_BLOCK_EVALUATE);
-    
+    /* Log time */
+    if (block->n > 1) {
+        block->func_eval_time +=((double)clock()-t);
+    }
     if(ret) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "ErrOutput", "<errorCode: %d> returned from function evaluation in <block: %s>", 
             ret, block->label);
@@ -170,6 +177,8 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
         /* Always treat this as a recoverable error */
         return 1;
     }
+    /* Reset clock to avoid timing of output */
+    t = clock();
 
     /* Test if output is OK (no -1.#IND) */
     n = NV_LENGTH_S(ff);
@@ -205,6 +214,10 @@ int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
     }
     printf("]);\n");
 */
+    /* Log time */
+    if (block->n > 1) {
+        block->func_eval_time +=((double)clock()-t);
+    }
     return ret; /*Success*/
     /*return 1;  //Recoverable error*/
     /*return -1; //Unrecoverable error*/
@@ -229,6 +242,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
  #ifdef JMI_PROFILE_RUNTIME 
     clock_t t;
 #endif
+    clock_t t;
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
@@ -249,7 +263,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
                      "jmi_kinsol_solver", block->label, message);
     }
-
+    if (block->n > 1) {
+        t = clock();
+    }
     if (!block->dF || block->options->block_jacobian_check) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
@@ -339,7 +355,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             block->dx[i] = 0;
         }       
     }
-    
+    if (block->n > 1) {
+        block->jac_eval_time +=((double)clock()-t);
+    }
     if (block->options->block_jacobian_check) {
         /* compare analytical and finite differences Jacobians */
         if (block->dF) {
@@ -933,6 +951,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     jmi_log_t *log = block->log;
     jmi_log_node_t outer;
     jmi_log_node_t inner;
+    clock_t t;
 
     /* MAX_NEWTON_STEP_RATIO is used just to ensure that full Newton step can 
     be taken when no bounds are present. 
@@ -941,7 +960,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     Consider using block->options->step_limit_factor instead
     */
 #define MAX_NEWTON_STEP_RATIO 1.0
-
+    t = clock();
     xnorm = N_VWL2Norm(x, kin_mem->kin_uscale); /* scaled L2 norm of the Newton step */
     solver->last_xnorm = xnorm;
     solver->last_bounding_index = -1;
@@ -1029,7 +1048,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             }
         }
     }
-
+    block->bounds_handling_time += ((double)clock()-t);
     if (block->callbacks->log_options.log_level >= 5) {
         jmi_log_node(log, logInfo, "BoundsMaxStepRatio", "Step ratio after bounds check <lambda_max_bounds: %g>", max_step_ratio);
     }
@@ -1044,7 +1063,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
             outer = jmi_log_enter_(log, logInfo, "StepLimits");
             inner = jmi_log_enter_vector_(log, outer, logInfo, "range");
         }
-
+        t = clock();
         for( i=0; i<block->n; i++ ) {
             double range_limit = solver->range_limits[i];
             double step_limit = range_limit;
@@ -1071,9 +1090,11 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 else {
                     /* zero step - no range violation possible*/
                     solver->range_limited[i] = 0;
+                    block->bounds_handling_time += ((double)clock()-t);
                     if (block->callbacks->log_options.log_level >= 5) {
                         jmi_log_real_(log, BIG_REAL);
                     }
+                    t = clock();
                     continue;
                 }
             }
@@ -1114,7 +1135,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
                 }
             }
         }
-
+        block->bounds_handling_time += ((double)clock()-t);
         if (block->callbacks->log_options.log_level >= 5) {
             jmi_log_leave(log, inner);
             jmi_log_leave(log, outer);
@@ -1176,6 +1197,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         jmi_log_leave(log, outer);
     }
 
+    t = clock();
     /* 
         Since analysis was done with x = MAX_NEWTON_STEP_RATIO * Newton step
         the actual Newton step ration is also MAX_NEWTON_STEP_RATIO larger
@@ -1193,6 +1215,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     if(!activeBounds) {
         /* bounds do not affect the base-line algorithm, only limit the step */
         kin_mem->kin_mxnewtstep = max_step_ratio * xnorm ;
+        block->bounds_handling_time += ((double)clock()-t);
         return;
     }
 
@@ -1222,6 +1245,7 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
     solver->last_xnorm = xnorm*(1 - UNIT_ROUNDOFF);
 
     kin_mem->kin_mxnewtstep =  solver->last_xnorm;
+    block->bounds_handling_time += ((double)clock()-t);
 }
 
 /* Form regularized matrix Transpose(J).J */
@@ -1322,14 +1346,19 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
 
 /* Perform Broyden update and factorize the resulted matrix */
 static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
+    clock_t t;
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     struct KINMemRec* kin_mem = solver->kin_mem;
     int ret, i, j;
     int N = block->n;
+    double denom;
 
+    if(block->n > 1) {
+        t= clock();
+    }
     /* Broyden upate: Jac = Jac + (ResidualDelta  - Jac * step)*(step_scale^2 step)^T / norm_2(step_scale * step)^2;
     See algorithm A8.3.1 in "Numerical methods for Unconstrained Opt and NLE" */
-    double denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
+    denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
     jmi_kinsol_calc_Mv(solver->J, 0, kin_mem->kin_pp, solver->work_vector);
 
@@ -1353,6 +1382,9 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
         }
     }
 
+    if(block->n > 1) {
+        block->broyden_update_time +=((double)clock()-t);
+    }
     if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "BroydenJacobianUpdate", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
@@ -1376,6 +1408,10 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     int info;
     int N = block->n;
+    clock_t t;
+    if(block->n > 1) {
+        t = clock();
+    }
       
     DenseCopy(solver->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
 
@@ -1457,6 +1493,9 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
         */
         solver->J_is_singular_flag = 0;
     }
+    if(block->n > 1) {
+        block->factorization_time +=((double)clock()-t);
+    }
     return 0;
 }
 
@@ -1464,6 +1503,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
+    clock_t t;
     realtype*  bd = N_VGetArrayPointer(b); /* residuals */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
     jmi_log_node_t node;
@@ -1573,7 +1613,9 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             /* Back-solve and get solution in x */
             trans = 'N'; /* No transposition */
             i = 1;
+            t = clock();
             dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+            block->step_calc_time += ((double)clock()-t);
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
                 block->force_rescaling = 1;
@@ -1592,8 +1634,9 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             int iwork = 5*N;
             
             N_VScale(ONE, b, x);
-
+            t = clock();
             dgelss_(&N, &N, &nrhs, solver->J_sing->data, &N, xd, &N ,solver->singular_values, &rcond, &rank, solver->dgelss_rwork, &iwork, &ret);
+            block->step_calc_time += ((double)clock()-t);
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
                 block->force_rescaling = 1;
@@ -1637,8 +1680,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
+        t = clock();
         dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
-        
+        block->step_calc_time += ((double)clock()-t);
+
         if((block->callbacks->log_options.log_level >= 6)) {
             jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
         }
@@ -2410,6 +2455,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
+        block->nb_iters++;
         if(flagNonscaled != 0) {
             jmi_log_node(log, logWarning, "NonConverge", "The equations with initial scaling didn't converge to a "
                          "solution in <block: %s>", block->label);
@@ -2507,7 +2553,8 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
     KINGetNumNonlinSolvIters(solver->kin_mem, &nniters);    
      
     /* Store debug information */
-    block->nb_iters += nniters;
+    block->nb_iters += nniters+1;
+
 #ifdef JMI_PROFILE_RUNTIME
     {
         char message[256];

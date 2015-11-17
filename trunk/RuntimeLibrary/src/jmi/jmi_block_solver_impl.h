@@ -54,6 +54,13 @@ struct jmi_block_solver_t {
     double time_df;
 #endif
 
+    double func_eval_time;          /**< \brief Total time spend in function evaluations */
+    double jac_eval_time;           /**< \brief Total time spend in jacobian evaluations */
+    double broyden_update_time;     /**< \brief Total time spend on Broyden updates */
+    double step_calc_time;          /**< \brief Total time spend in solving linear system */
+    double factorization_time;      /**< \brief Total time spend on factorizing jacobian matrix */
+    double bounds_handling_time;    /**< \brief Total time spend on step limiting */
+
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
