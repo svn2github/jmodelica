@@ -72,6 +72,7 @@ struct jmi_kinsol_solver_reset_t {
     int J_is_singular_flag;
     int handling_of_singular_jacobian_flag;
     int mbset;
+    int force_new_J_flag;
     realtype kin_scale_update_time;
     int force_rescaling;
 };

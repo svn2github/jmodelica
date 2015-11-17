@@ -2115,6 +2115,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->saved_state->kin_y_scale = N_VNew_Serial(n);
     solver->saved_state->lapack_ipiv = (int *)calloc(n+2, sizeof(int));
     solver->saved_state->J_is_singular_flag = 0;
+    solver->saved_state->force_new_J_flag = 0;
     solver->saved_state->force_rescaling = 0;
     solver->saved_state->handling_of_singular_jacobian_flag = JMI_REGULARIZATION;
     solver->saved_state->mbset = 0;
@@ -2595,7 +2596,7 @@ int jmi_kinsol_restore_state(jmi_block_solver_t* block) {
     solver->kin_scale_update_time = solver->saved_state->kin_scale_update_time;
     block->force_rescaling        = solver->saved_state->force_rescaling;
 
-    solver->force_new_J_flag = 0; /* This cannot happend due to Kinsol is always saved in a succeeded state */
+    solver->force_new_J_flag = solver->saved_state->force_new_J_flag;
     solver->handling_of_singular_jacobian_flag = solver->saved_state->handling_of_singular_jacobian_flag;
     solver->J_is_singular_flag = solver->saved_state->J_is_singular_flag;
     ((struct KINMemRec *)solver->kin_mem)->kin_nnilset = ((struct KINMemRec *)solver->kin_mem)->kin_nni - solver->saved_state->mbset;
@@ -2653,6 +2654,7 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
         
         solver->saved_state->kin_scale_update_time = solver->kin_scale_update_time;
         solver->saved_state->force_rescaling       = block->force_rescaling;
+        solver->saved_state->force_new_J_flag      = solver->force_new_J_flag;
         
         solver->saved_state->handling_of_singular_jacobian_flag = solver->handling_of_singular_jacobian_flag;
         solver->saved_state->J_is_singular_flag = solver->J_is_singular_flag;
