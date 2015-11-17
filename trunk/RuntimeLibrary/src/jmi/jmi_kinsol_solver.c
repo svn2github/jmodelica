@@ -2665,6 +2665,8 @@ int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block) {
             jmi_log_fmt(block->log, node, logInfo, "<mbset: %d> <nni: %d> < nnilset: %d>", solver->saved_state->mbset, &(((struct KINMemRec *)solver->kin_mem)->kin_nni), &(((struct KINMemRec *)solver->kin_mem)->kin_nnilset));
             jmi_log_ints(block->log, node, logInfo, "handling_singular", &(solver->handling_of_singular_jacobian_flag), 1);
             jmi_log_ints(block->log, node, logInfo, "is_singular", &(solver->J_is_singular_flag), 1);
+            jmi_log_ints(block->log, node, logInfo, "force_rescaling", &(solver->J_is_singular_flag), 1);
+            jmi_log_reals(block->log, node, logInfo, "residual_scaling_update_time", &(solver->kin_scale_update_time), 1);
             jmi_log_reals(block->log, node, logInfo, "iv_scaling", N_VGetArrayPointer(solver->kin_y_scale), block->n);
             jmi_log_reals(block->log, node, logInfo, "residual_scaling", N_VGetArrayPointer(solver->kin_f_scale), block->n);
             jmi_log_leave(block->log, node);
