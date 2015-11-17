@@ -136,9 +136,9 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
 int kin_f(N_Vector yy, N_Vector ff, void *problem_data){
 #ifdef JMI_PROFILE_RUNTIME 
     clock_t t;
-#endif
-    clock_t t;
+#endif 
     realtype *y, *f;
+    clock_t t = clock();
     jmi_block_solver_t *block = problem_data;
     jmi_kinsol_solver_t* solver = block->solver;
     jmi_log_t *log = block->log;
@@ -242,7 +242,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
  #ifdef JMI_PROFILE_RUNTIME 
     clock_t t;
 #endif
-    clock_t t;
+    clock_t t = clock();
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
     struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
     int i, j, ret = 0;
@@ -1409,9 +1409,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
     int info;
     int N = block->n;
     clock_t t;
-    if(block->n > 1) {
-        t = clock();
-    }
+    t = clock();
       
     DenseCopy(solver->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
 
@@ -1503,7 +1501,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm) {
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
-    clock_t t;
+    clock_t t = clock();
     realtype*  bd = N_VGetArrayPointer(b); /* residuals */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
     jmi_log_node_t node;
