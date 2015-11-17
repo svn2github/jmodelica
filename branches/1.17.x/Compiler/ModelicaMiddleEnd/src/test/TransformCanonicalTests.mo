@@ -5252,10 +5252,10 @@ z := (x + (- y)) / (1.0 / x)
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (1.0 + -3)
+y := (x + 3) / (1.0 - 3)
 
 --- Solved equation ---
-z := (x + (- y)) / (1.0 + (-x - 3))
+z := (x + (- y)) / (1.0 - (x + 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5310,10 +5310,10 @@ x / z = x - y
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (-1.0 + 1.0 + -4)
+y := (x + 3) / (- 1.0 + 1.0 - 4)
 
 --- Solved equation ---
-z := (x + (- y)) / (-1.0 + 1.0 + 5)
+z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -5333,50 +5333,10 @@ z := (x + (- y)) / (-1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 + 1.0 + -1.0)
+der(x) := (- x) / (-1.0 - -1.0 - 1.0)
 -------------------------------
 ")})));
-  end SolveEqTest8;
-  
-  model SolveEqTest9
-        Real x;
-    equation
-        0 = x;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="SolveEqTest9",
-            description="Test bug found in solution framework",
-            flatModel="
-fclass TransformCanonicalTests.SolveEqTest9
- constant Real x = 0;
-end TransformCanonicalTests.SolveEqTest9;
-")})));
-  end SolveEqTest9;
-
-  model SolveEqTest10
-        Real x,y;
-    equation
-        y = time;
-        y * x = 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="SolveEqTest10",
-            description="Test bug found in solution framework",
-            equation_sorting=true,
-            variability_propagation=false,
-            methodName="printDAEBLT",
-            methodResult="
---- Solved equation ---
-y := time
-
---- Unsolved equation (Block 1) ---
-y * x = 0
-  Computed variables: x
--------------------------------
-")})));
-  end SolveEqTest10;
+end SolveEqTest8;
 
 model BlockTest1
 record R
