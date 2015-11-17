@@ -185,7 +185,7 @@ aspect ExternalConstantEvaluation {
         if (ext.includeDirectory() != null)
             incDirs.add(ext.includeDirectory());
         try {
-            OptionRegistry options = getOptions();
+            OptionRegistry options = ext.myOptions();
             ModulesSettings modulesSettings = createModulesSettings(options);
             
             target.getTemplates(options).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
@@ -193,7 +193,9 @@ aspect ExternalConstantEvaluation {
             CCompilerDelegator ccompiler = getCCompiler();
             ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
             
-            executable = ccompiler.compileCCodeLocal(source, target, outDir, libs, libDirs, incDirs, 1);
+            CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(source, options, target,
+                    libs, libDirs, incDirs);
+            executable = ccompiler.compileCCodeLocal(ccArgs, outDir);
             new File(sourceDir, source + ".c").delete();
             log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
         } catch (FileNotFoundException e) {

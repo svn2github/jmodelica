@@ -38,6 +38,8 @@
 #   EXT_LIB_DIRS          List of external library directories.
 #   EXT_LIBS              List of external libraries.
 #   EXT_INC_DIRS          List of external include directories.
+#   EXTRA_CFLAGS          Extra CFLAGS for specific files
+#                         Format is (with e1.c and e2.c) "e1:O2:pedantic e2:O1"
 #
 # The following targets are supported:
 #    jmu          Build a shared object file including the low level JMI interface 
@@ -67,6 +69,9 @@ SHELL = cmd.exe
 
 # Name of shared library
 FILE_NAME = 
+
+# Extra CFLAGS for specific source files.
+EXTRA_CFLAGS =
 
 # Platform name - controls what sub-directory the binary is placed in
 PLATFORM = 
@@ -306,6 +311,17 @@ ifeq ($(JMI_AD),JMI_AD_CPPAD)
 else
 	$(CC) $(CFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
 endif
+
+# Create a rule which uses the first item in arg as src name and
+# following items as additional CFLAGS. Argument "file:-O2:-d"
+# will expand to the rule "file.o : CFLAGS = $(CFLAGS) -O2 -d"
+define cflagrule
+$(word 1,$(1)).o : CFLAGS = $(CFLAGS) $(wordlist 2,$(words $(1)),$(1))
+endef
+
+# For each word in variable EXTRA_CFLAGS, create a cflagrule
+# Example "main2 main3:O3 main:O2:pedantic"
+$(foreach src, $(EXTRA_CFLAGS),$(eval $(call cflagrule, $(subst :, -,$(src)))))
 
 clean:
 	$(RM) $(SHARED) $(OBJS)
