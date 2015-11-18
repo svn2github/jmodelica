@@ -4072,9 +4072,14 @@ aspect SemiLinear {
 	eq FSemiLinearExp.isSemiLinear() = true;
 
     syn FExp FSemiLinearExp.asIfExp() {
-        FExp exp = new FIfExp(new FGtExp(getX().treeCopy(), new FIntegerLitExp(0)),
-            new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
-            new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
+        boolean negate = getX().isNegated();
+        FExp x = getX().stripNegations();
+        FExp pos = negate ? getNegSlope() : getPosSlope();
+        FExp neg = negate ? getPosSlope() : getNegSlope();
+        FExp exp = new FIfExp(new FGtExp(x.treeCopy(), new FIntegerLitExp(0)),
+            new FMulExp(x.treeCopy(), pos.treeCopy()),
+            new FMulExp(x.treeCopy(), neg.treeCopy()));
+        exp = exp.negated(negate);
         if (isSmoothInSemiLinear()) {
             exp = new FSmoothExp(0, exp);
         }
