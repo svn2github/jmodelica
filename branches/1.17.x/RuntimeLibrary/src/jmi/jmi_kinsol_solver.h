@@ -43,6 +43,7 @@
 #define JMI_MINIMUM_NORM 2
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
+typedef struct jmi_kinsol_solver_reset_t jmi_kinsol_solver_reset_t;
 
 /**< \brief Kinsol solver constructor function */
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_solver_t* block_solver);
@@ -54,6 +55,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
 int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver);
+int jmi_kinsol_restore_state(jmi_block_solver_t* block);
 
 /**< \brief Retrieve residual scales used in Kinsol solver */
 double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
@@ -61,8 +63,19 @@ double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
 /**< \brief Convert Kinsol return flag to readable name */
 const char *jmi_kinsol_flag_to_name(int flag);
 
+struct jmi_kinsol_solver_reset_t {
+    DlsMat J;
+    int * lapack_ipiv;
+    N_Vector kin_y_scale;
+    N_Vector kin_f_scale;
+    int J_is_singular_flag;
+    int handling_of_singular_jacobian_flag;
+    int mbset;
+};
+
 struct jmi_kinsol_solver_t {
     jmi_brent_solver_t externalBrent; /**< Brent solver when run stand-alone. Temporary solution until supported by options. */
+    jmi_kinsol_solver_reset_t *saved_state;
 
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
