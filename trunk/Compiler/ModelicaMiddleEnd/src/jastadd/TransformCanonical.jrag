@@ -3992,7 +3992,7 @@ aspect SemiLinear {
                 // S(1) = if X >= 0 SA else SB
                 newEquations.add(new FEquation(
                         first.zeroFlowGetNeg().fullCopy(), 
-                        new FIfExp(new FGeqExp(chainX.fullCopy(), new FIntegerLitExp(0)),
+                        new FIfExp(new FGtExp(chainX.fullCopy(), new FIntegerLitExp(0)),
                                 chainPos.fullCopy(),
                                 chainNeg.fullCopy()
                                 )));
@@ -4072,7 +4072,7 @@ aspect SemiLinear {
 	eq FSemiLinearExp.isSemiLinear() = true;
 
     syn FExp FSemiLinearExp.asIfExp() {
-        FExp exp = new FIfExp(new FGeqExp(getX().treeCopy(), new FRealLitExp(0)),
+        FExp exp = new FIfExp(new FGtExp(getX().treeCopy(), new FIntegerLitExp(0)),
             new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
             new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
         if (isSmoothInSemiLinear()) {
