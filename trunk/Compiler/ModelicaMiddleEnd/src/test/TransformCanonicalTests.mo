@@ -1275,7 +1275,61 @@ der(x) := x * (time - switchTime)
 pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
 -------------------------------
 ")})));
-  end AliasTest34;
+end AliasTest34;
+
+    model AliasTest35
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+            output Real o2;
+        algorithm
+            o1 := i1 * 2;
+            o2 := i2 * 2;
+            annotation(InlineAfterIndexReduction=true,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i1_der;
+            input Real i2;
+            input Real i2_der;
+            output Real o1_der;
+            output Real o2_der;
+        protected
+            Real v1;
+            Real v2;
+        algorithm
+            v1 := 1 * i1_der;
+            v2 := 1 * i2_der;
+            (o1_der, o2_der) := F(v1, v2);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real vx2;
+        Real vy2;
+        Real a;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        (vx, vy) = F(vx2, vy2);
+        der(vx2) = a*x;
+        der(vy2) = a*y;
+        x^2 + y^2 = 2;
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AliasTest35",
+            methodName="aliasDiagnostics",
+            description="Test so that alias sets with only temporaries in are removed",
+            methodResult="
+Alias sets:
+0 variables can be eliminated
+")})));
+    end AliasTest35;
 
 model AliasFuncTest1
     function f

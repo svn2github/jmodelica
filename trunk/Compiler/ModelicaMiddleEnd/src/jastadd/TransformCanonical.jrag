@@ -2121,33 +2121,50 @@ aspect TransformCanonical {
         }
     }
 
-	/**
-	 * Remove all unused temporary variables, and inline temporaries only used once.
-	 */
-	public void FClass.removeUnusedTemporaries() {
-		ArrayList<FVariable> temps = tempVariables();
-		int oldSize = Integer.MAX_VALUE;
-		while (temps.size() < oldSize) {
-			ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
-			for (FVariable fv : temps) {
+    /**
+     * Remove all unused temporary variables, and inline temporaries only used once.
+     */
+    public void FClass.removeUnusedTemporaries() {
+        ArrayList<FVariable> temps = tempVariables();
+        Collection<FVariable> tempsToRemove = new ArrayList<FVariable>();
+        int oldSize = Integer.MAX_VALUE;
+        while (temps.size() < oldSize) {
+            ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
+            for (FVariable fv : temps) {
                 if (!fv.inlineUses()) {
-					temps2.add(fv);
+                    temps2.add(fv);
+                } else {
+                    tempsToRemove.add(fv);
                 }
-			}
-			oldSize = temps.size();
-			temps = temps2;
-		}
-		
-		ArrayList<FVariable> vars = new ArrayList<FVariable>();
-		for (FVariable fv : getFVariables())
-			if (!fv.isTemporary())
-				vars.add(fv);
-		for (FVariable fv : temps)
-			vars.add(fv);
-		
-		removeMarkedEqns();
-		setFVariableList(new List(vars));
-	}
+            }
+            oldSize = temps.size();
+            temps = temps2;
+        }
+        
+        ArrayList<FVariable> vars = new ArrayList<FVariable>();
+        for (FVariable fv : getFVariables())
+            if (!fv.isTemporary())
+                vars.add(fv);
+        for (FVariable fv : temps)
+            vars.add(fv);
+        
+        removeMarkedEqns();
+        setFVariableList(new List(vars));
+        
+        Set<FVariable> aliasVarsToRemove = new HashSet<FVariable>();
+        
+        for (FVariable fv : tempsToRemove) {
+            aliasVarsToRemove.addAll(getAliasManager().removeTemporaryVariableSet(fv));
+        }
+        
+        ArrayList<FVariable> newAliasVars = new ArrayList<FVariable>();
+        for (FVariable fv : getAliasVariables()) {
+            if (!aliasVarsToRemove.contains(fv)) {
+                newAliasVars.add(fv);
+            }
+        }
+        setAliasVariableList(new List(newAliasVars));
+    }
 
     /**
      * Check if this is a temporary variable that should be eliminated.

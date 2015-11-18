@@ -326,7 +326,36 @@ aspect AliasVariables {
 			}
 			return str.toString();		
 		}
-		
+
+        /**
+         * Removes the alias set for the temporary variable provided.
+         * Errorchecks are done to ensure that only temporary variables are
+         * removed. However if the system variable is a temporary variable
+         * then all of the variables in the set should be temporaries.
+         * 
+         * This method returns a collection with all the variables removed
+         */
+        public Collection<FVariable> removeTemporaryVariableSet(FVariable fv) {
+            if (!fv.isTemporary()) {
+                throw new UnsupportedOperationException("FVariable " + fv.name() + " of java class " + fv.getClass().getSimpleName() + " is not a temporary variable!");
+            }
+            AliasVariable av = variableMap.get(fv);
+            if (av == null) {
+                return Collections.<FVariable>emptyList();
+            }
+            AliasSet as = av.getSet();
+            Collection<FVariable> removedVars = new ArrayList<FVariable>();
+            for (AliasVariable aliasVar : as) {
+                if (!aliasVar.getFVariable().isTemporary()) {
+                    throw new UnsupportedOperationException("FVariable " + fv.name() + " of java class " + fv.getClass().getSimpleName() + " is not a temporary variable!");
+                }
+                variableMap.remove(aliasVar.getFVariable());
+                removedVars.add(aliasVar.getFVariable());
+            }
+            aliasSets.remove(as);
+            return removedVars;
+        }
+
 		/**
 		 * A class representing a set of alias variables.
 		 */
@@ -467,6 +496,11 @@ aspect AliasVariables {
 				}
 				return str.toString();
 			}
+
+            protected void removeVariableFromSet(AliasVariable var) {
+                aliases.remove(var);
+            }
+
 			
 		}
 		
