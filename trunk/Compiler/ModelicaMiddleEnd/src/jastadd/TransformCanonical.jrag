@@ -3841,14 +3841,22 @@ aspect SemiLinear {
 
     public class FClass {
         public class enableSemiLinearRewrite extends Transformation {
+            private boolean changed = false;
+            
             public void perform() {
                 setFAbstractEquationList(transform(getFAbstractEquations()));
                 setFInitialEquationList(transform(getFInitialEquations()));
                 setFParameterEquationList(transform(getFParameterEquations()));
                 
-                // Change all remaining semiLinear exps to if exps. 
-                for (FSemiLinearExp exp: collectSemiLinearExps())
+                // Change all remaining semiLinear exps to if exps.
+                Set<FSemiLinearExp> fsls = collectSemiLinearExps();
+                changed = changed || fsls.size() > 0;
+                for (FSemiLinearExp exp: fsls)
                     exp.replaceMe(exp.asIfExp());
+                
+                if (changed) {
+                    change();
+                }
             }
             
             /**
@@ -3871,9 +3879,13 @@ aspect SemiLinear {
                 
                 // Chained zero flow transformations (Rule 1)
                 for (java.util.List<FEquation> l : rule1.values()) {
-                    if (l.size() > 1)
+                    if (l.size() > 1) {
                         transformChain(newEquations, buildChain(l));
+                        changed = true;
+                    }
                 }
+                
+                changed = changed || rule2.size() > 0;
                 
                 // Constant zero flow transformations (Rule 2)
                 for (FEquation equation : rule2) {
