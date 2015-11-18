@@ -5139,14 +5139,16 @@ aspect CCodeGen {
     inh lazy boolean FRelExp.hasBrancher();
     eq Root.getChild().hasBrancher()              = false;
     eq FAbstractEquation.getChild().hasBrancher() = false;
+    eq FAndExp.getLeft().hasBrancher()            = isIndicatorGuard(getLeft()) || hasBrancher();
     eq FAndExp.getRight().hasBrancher()           = true;
+    eq FOrExp.getLeft().hasBrancher()             = isIndicatorGuard(getLeft()) || hasBrancher();
     eq FOrExp.getRight().hasBrancher()            = true;
     eq FIfExp.getThenExp().hasBrancher()          = true;
     eq FIfExp.getElseExp().hasBrancher()          = true;
     
     private void FRelExp.printIndicator(CodePrinter.StepPrinter sp, CodeStream str, String indent, boolean guard) {
-        
-        if (guard && hasBrancher()) {
+        boolean hb = hasBrancher();
+        if (guard && hb) {
             sp.print(str, FEqExp.macro_C);
             sp.print(str, "(");
             printIndicatorGuard(sp, str, indent, this);
@@ -5171,7 +5173,7 @@ aspect CCodeGen {
             sp.print(getIndicatorNominal(), str, indent);
         }
         
-        if (guard && hasBrancher()) {
+        if (guard && hb) {
             sp.print(str, ", " + FLitExp.macro_C + "(1))");
         }
     }
@@ -5190,32 +5192,35 @@ aspect CCodeGen {
     
     public void FExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e) {
         if (isIndicatorGuard(e)) {
-            printIndicatorGuard(sp, str, indent, myIndicatorGuardExp(), negateIndicatorGuard(e));
+            printIndicatorGuard(sp, str, indent, myIndicatorGuardExp(e), negateIndicatorGuard(e));
         } else {
             printIndicatorGuard(sp, str, indent);
         }
     }
     
     syn boolean FExp.isIndicatorGuard(FExp e) = false;
-    eq FLogBinExp.isIndicatorGuard(FExp e)    = e == getRight();
-    eq FIfExp.isIndicatorGuard(FExp e)        = e == getElseExp();
+    eq FLogBinExp.isIndicatorGuard(FExp e)    = e == getRight() || allowFlipGuard();
+    eq FIfExp.isIndicatorGuard(FExp e)        = e == getThenExp() || e == getElseExp();
     
-    syn FExp FExp.myIndicatorGuardExp() = null;
-    eq FLogBinExp.myIndicatorGuardExp() = getLeft();
-    eq FIfExp.myIndicatorGuardExp()     = getIfExp();
+    syn FExp FExp.myIndicatorGuardExp(FExp e) = null;
+    eq FLogBinExp.myIndicatorGuardExp(FExp e) = e == getRight() ? getLeft() : getRight();
+    eq FIfExp.myIndicatorGuardExp(FExp e)     = getIfExp();
     
     syn boolean FExp.negateIndicatorGuard(FExp e) = false;
     eq FOrExp.negateIndicatorGuard(FExp e)        = true;
     eq FIfExp.negateIndicatorGuard(FExp e)        = e == getElseExp();
     
-    @Override
-    public void FIfExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e) {
-        if (e == getThenExp() || e == getElseExp()) {
-            printIndicatorGuard(sp, str, indent, getIfExp(), e == getElseExp());
-        } else {
-            printIndicatorGuard(sp, str, indent);
+    syn lazy boolean FLogBinExp.allowFlipGuard() = !getRight().hasEventIndicator();
+    
+    syn boolean ASTNode.hasEventIndicator() {
+        for (ASTNode n : this) {
+            if (n.hasEventIndicator()) {
+                return true;
+            }
         }
+        return false;
     }
+    eq FRelExp.hasEventIndicator() = originalFExp() == this && generatesEvent() || super.hasEventIndicator();
     
     public void FExp.printIndicatorGuard(CodePrinter.StepPrinter sp, CodeStream str, String indent, FExp e, boolean not) {
         boolean hb = hasBrancher();
