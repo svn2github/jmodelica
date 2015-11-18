@@ -30,6 +30,7 @@
 #include "jmi_kinsol_solver.h"
 #include "jmi_block_solver_impl.h"
 #include "jmi_block_solver.h"
+#include "jmi_block_log.h"
 
 #include "jmi_brent_search.h"
 /* RCONST from SUNDIALS and defines a compatible type, usually double precision */

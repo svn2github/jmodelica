@@ -24,6 +24,7 @@
 
 #include "jmi_brent_solver.h"
 #include "jmi_block_solver_impl.h"
+#include "jmi_block_log.h"
 
 #include "jmi_brent_search.h"
 
