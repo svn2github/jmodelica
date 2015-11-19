@@ -15317,6 +15317,66 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 ")})));
 end TearingTest2;
 
+model TearingTest3
+    Real x,y;
+    Boolean b;
+equation
+    y = x + 1;
+    x = if b then 0 else y;
+    b = x > 0;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TearingTest3",
+            description="Test code generation of torn blocks",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+        x[1] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_1;
+        x[1] = _x_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 4 * sizeof(jmi_real_t));
+        residual[0] = 1.0;
+        residual[1] = - COND_EXP_EQ(_b_2, JMI_TRUE, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(1.0));
+        residual[2] = -1.0;
+        residual[3] = 1.0;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_1 = x[0];
+            _x_0 = x[1];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_x_0 - (0), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+            }
+            _b_2 = _sw(0);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x_0 + 1 - (_y_1);
+            (*res)[1] = COND_EXP_EQ(_b_2, JMI_TRUE, AD_WRAP_LITERAL(0), _y_1) - (_x_0);
+        }
+    }
+    return ef;
+}
+")})));
+end TearingTest3;
+
 model MapTearingTest1
 
   function F
