@@ -1685,7 +1685,7 @@ FSumExp : FReductionExp;
 FProductExp : FReductionExp;
 
 /**
- * SemiLinear built-in function.
+ * Homotopy built-in function.
  */
 FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
 

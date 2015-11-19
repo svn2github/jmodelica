@@ -2013,6 +2013,39 @@ end StreamTests.StreamDerAlias1;
 end StreamDerAlias1;
 
 
+model StreamSemiLinear1
+    model A
+        StreamConnector c1;
+        StreamConnector c2;
+    end A;
+    
+    A a(c1(s = time, p = 1, f = 2 - time), c2(s = 2 * time));
+    Real x = semiLinear(a.c1.f, actualStream(a.c1.s), a.c1.s);
+equation
+    connect(a.c1, a.c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamSemiLinear1",
+            description="",
+            flatModel="
+fclass StreamTests.StreamSemiLinear1
+ constant Real a.c1.p = 1;
+ Real a.c1.f;
+ Real a.c1.s;
+ Real a.c2.s;
+ Real x;
+ constant Real a.c2.p = 1;
+equation
+ a.c1.f = 2 - time;
+ a.c1.s = time;
+ a.c2.s = 2 * time;
+ x = smooth(0, if a.c1.f >= 0.0 then a.c1.f * smooth(0, if a.c1.f > 0.0 then a.c2.s else a.c1.s) else a.c1.f * a.c1.s);
+end StreamTests.StreamSemiLinear1;
+")})));
+end StreamSemiLinear1;
+
+
 
 // TODO: Add error tests (e.g. stream connector without flow)
 

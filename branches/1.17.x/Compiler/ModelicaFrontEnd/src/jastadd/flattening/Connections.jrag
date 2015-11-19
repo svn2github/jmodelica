@@ -248,22 +248,25 @@ aspect Connections {
         }
     }
 
-	/**
-	 * Check if this expression is multiplied with the given variable.
-	 */
-	inh boolean FExp.isMultipliedWith(FVariable v);
-	eq BaseNode.getChild().isMultipliedWith(FVariable v)   = false;
-	eq FDotMulExp.getRight().isMultipliedWith(FVariable v) = getLeft().isMultiplicationOf(v) || isMultipliedWith(v);
-	eq FDotMulExp.getLeft().isMultipliedWith(FVariable v)  = getRight().isMultiplicationOf(v) || isMultipliedWith(v);
-	
-	/**
-	 * Check if this expression is an access to v or a multiplication where one of the 
-	 * multiplicands is an access to v.
-	 */
-	syn boolean FExp.isMultiplicationOf(FVariable v) = false;
-	eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
-	eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
-		getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
+    /**
+     * Check if this expression is multiplied with the given variable.
+     */
+    inh boolean FExp.isMultipliedWith(FVariable v);
+    eq BaseNode.getChild().isMultipliedWith(FVariable v)          = false;
+    eq FDotMulExp.getRight().isMultipliedWith(FVariable v)        = getLeft().isMultiplicationOf(v) || isMultipliedWith(v);
+    eq FDotMulExp.getLeft().isMultipliedWith(FVariable v)         = getRight().isMultiplicationOf(v) || isMultipliedWith(v);
+    eq FSemiLinearExp.getPosSlope().isMultipliedWith(FVariable v) = getX().isMultiplicationOf(v) || isMultipliedWith(v);
+    eq FSemiLinearExp.getNegSlope().isMultipliedWith(FVariable v) = getX().isMultiplicationOf(v) || isMultipliedWith(v);
+
+    /**
+     * Check if this expression is an access to v or a multiplication where one of the 
+     * multiplicands is an access to v.
+     */
+    syn boolean FExp.isMultiplicationOf(FVariable v) = false;
+    eq FIdUseExp.isMultiplicationOf(FVariable v)     = v == myFV();
+    eq FNegExp.isMultiplicationOf(FVariable v)       = getFExp().isMultiplicationOf(v);
+    eq FDotMulExp.isMultiplicationOf(FVariable v)    = 
+        getLeft().isMultiplicationOf(v) || getRight().isMultiplicationOf(v);
 
     rewrite FActualStream {
         when (rewriteStreams) to FExp {
