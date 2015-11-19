@@ -4093,6 +4093,8 @@ aspect SemiLinear {
     syn boolean FExp.isSmoothInSemiLinear()  = false;
     eq FIdUseExp.isSmoothInSemiLinear()      = true;
     eq FLitExp.isSmoothInSemiLinear()        = true;
+    eq FSmoothExp.isSmoothInSemiLinear()     = true;
+    eq FNegExp.isSmoothInSemiLinear()        = getFExp().isSmoothInSemiLinear();
     eq FSemiLinearExp.isSmoothInSemiLinear() = 
         getX().isSmoothInSemiLinear() && getPosSlope().isSmoothInSemiLinear() && getNegSlope().isSmoothInSemiLinear();
 
