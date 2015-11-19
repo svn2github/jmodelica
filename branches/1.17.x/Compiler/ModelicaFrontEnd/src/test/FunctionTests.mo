@@ -14174,16 +14174,16 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  discrete Real k;
  discrete Boolean temp_1;
 initial equation 
- k = if time >= 0.0 then time else time * 2;
+ k = if time >= 0 then time else time * 2;
  pre(temp_1) = false;
 parameter equation
- p = smooth(0, if a >= 0.0 then a else a * 2);
+ p = smooth(0, if a >= 0 then a else a * 2);
 equation
  temp_1 = time > 1;
- k = if temp_1 and not pre(temp_1) then if time >= 0.0 then time else time * 2 else pre(k);
- x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[2] = if time >= 0.0 then time * 2 else time * 3;
+ k = if temp_1 and not pre(temp_1) then if time >= 0 then time else time * 2 else pre(k);
+ x = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[1] = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[2] = if time >= 0 then time * 2 else time * 3;
 end FunctionTests.FunctionLike.Special.SemiLinear1;
 ")})));
 end SemiLinear1;
@@ -14282,7 +14282,7 @@ equation
  sb = time;
  x = time;
  s[2] = if x >= 0 then sa else sb;
- y = smooth(0, if x >= 0.0 then x * sa else x * sb);
+ y = smooth(0, if x >= 0 then x * sa else x * sb);
 end FunctionTests.FunctionLike.Special.SemiLinear4;
 ")})));
 end SemiLinear4;
@@ -14320,9 +14320,9 @@ equation
  sb = time;
  x = time;
  s[5] = if x >= 0 then s[3] else sb;
- y = - smooth(0, if x >= 0.0 then x * s[3] else x * sb);
+ y = - smooth(0, if x >= 0 then x * s[3] else x * sb);
  s[2] = if x >= 0 then sa else s[3];
- y = smooth(0, if x >= 0.0 then x * sa else x * s[3]);
+ y = smooth(0, if x >= 0 then x * sa else x * s[3]);
 end FunctionTests.FunctionLike.Special.SemiLinear5;
 ")})));
 end SemiLinear5;
@@ -14379,8 +14379,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real y[1];
  Real y[2];
 equation
- y[1] = smooth(0, if x[1] >= 0.0 then x[1] * s[1] else x[1] * s[1]);
- y[2] = smooth(0, if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2]);
+ y[1] = smooth(0, if x[1] >= 0 then x[1] * s[1] else x[1] * s[1]);
+ y[2] = smooth(0, if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -14416,10 +14416,10 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear8
  Real y[2,1];
  Real y[2,2];
 equation
- y[1,1] = smooth(0, if x[1] >= 0.0 then x[1] * s[2] else x[1] * s[1]);
- y[1,2] = smooth(0, if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2]);
- y[2,1] = smooth(0, if x2 >= 0.0 then x2 * s[1] else x2 * s[1]);
- y[2,2] = smooth(0, if x2 >= 0.0 then x2 * s[2] else x2 * s[1]);
+ y[1,1] = smooth(0, if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
+ y[1,2] = smooth(0, if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
+ y[2,1] = smooth(0, if x2 >= 0 then x2 * s[1] else x2 * s[1]);
+ y[2,2] = smooth(0, if x2 >= 0 then x2 * s[2] else x2 * s[1]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -14466,12 +14466,28 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear10
  Real y;
  Real z;
 equation
- y = if (if time > 1 then 1 else -1) >= 0.0 then (if time > 1 then 1 else -1) * x else (if time > 1 then 1 else -1) * z;
+ y = if (if time > 1 then 1 else -1) >= 0 then (if time > 1 then 1 else -1) * x else (if time > 1 then 1 else -1) * z;
  x = time;
  z = 2 * time;
 end FunctionTests.FunctionLike.Special.SemiLinear10;
 ")})));
 end SemiLinear10;
+
+model SemiLinear11
+    Real y = semiLinear(-time, 1, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear11",
+            description="Rewrite negated isolated semilinears",
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear11
+ Real y;
+equation
+ y = - (if time >= 0 then time * 2 else time);
+end FunctionTests.FunctionLike.Special.SemiLinear11;
+")})));
+end SemiLinear11;
 
 end Special;
 
