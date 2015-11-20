@@ -790,7 +790,7 @@ equation
  x = time;
  y = time;
 constraint 
- x >= if time > 0 then time * y else time * 2;
+ x >= if time >= 0 then time * y else time * 2;
 end OptimicaTransformCanonicalTests.SemiLinearConstraint;
 ")})));
 end SemiLinearConstraint;
