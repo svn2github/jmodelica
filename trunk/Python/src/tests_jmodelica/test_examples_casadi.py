@@ -62,12 +62,22 @@ def test_qt_par_casadi():
 def test_vehicle_turn():
     """Run the vehicle turn example."""
     vehicle_turn.run_demo(False)
-    
+
+@testattr(ma57 = True)
+def test_vehicle_turn():
+    """Run the vehicle turn example."""
+    vehicle_turn.run_demo(False, use_ma57=True)
+
 @testattr(ma27 = True)
 def test_distillation4_opt():
     """Run the large istillation optimization example."""
     distillation4_opt.run_demo(False)
-    
+
+@testattr(ma57 = True)
+def test_distillation4_opt():
+    """Run the large istillation optimization example."""
+    distillation4_opt.run_demo(False, use_ma57=True)
+
 @testattr(casadi = True)
 def test_cstr_mpc_casadi():
     """Run the cstr mpc optimization example."""
