@@ -2040,7 +2040,7 @@ equation
  a.c1.f = 2 - time;
  a.c1.s = time;
  a.c2.s = 2 * time;
- x = noEvent(if a.c1.f >= 0 then a.c1.f * smooth(0, if a.c1.f > 0.0 then a.c2.s else a.c1.s) else a.c1.f * a.c1.s);
+ x = smooth(0, if a.c1.f >= 0 then a.c1.f * smooth(0, if a.c1.f > 0.0 then a.c2.s else a.c1.s) else a.c1.f * a.c1.s);
 end StreamTests.StreamSemiLinear1;
 ")})));
 end StreamSemiLinear1;
