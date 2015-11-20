@@ -1003,6 +1003,7 @@ class Test_Logger:
         self.m = load_fmu(Test_Logger.fmu)
         self.m.set_debug_logging(True)
         self.m.set('_log_level',7)
+        self.m.set("_nle_solver_use_last_integrator_step", True)
         self.m.set_log_level(5)
 
     @testattr(fmi = True)
