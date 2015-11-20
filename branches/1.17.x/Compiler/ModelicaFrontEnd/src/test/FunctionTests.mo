@@ -14473,22 +14473,6 @@ end FunctionTests.FunctionLike.Special.SemiLinear10;
 ")})));
 end SemiLinear10;
 
-model SemiLinear11
-    Real y = semiLinear(-time, 1, 2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_Special_SemiLinear11",
-            description="Rewrite negated isolated semilinears",
-            flatModel="
-fclass FunctionTests.FunctionLike.Special.SemiLinear11
- Real y;
-equation
- y = - (if time >= 0 then time * 2 else time);
-end FunctionTests.FunctionLike.Special.SemiLinear11;
-")})));
-end SemiLinear11;
-
 end Special;
 
 
