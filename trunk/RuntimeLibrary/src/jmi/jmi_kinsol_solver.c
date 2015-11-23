@@ -411,17 +411,17 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
     jmi_log_leave(block->log, node);
 }
 
-static void jmi_kinsol_small_step_nonconv_error_message(jmi_block_solver_t * block) {
+static void jmi_kinsol_small_step_nonconv_info_message(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
-    jmi_log_node_t node = jmi_log_enter(block->log, logError, "KinsolError");
+    jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "KinsolErrorInfo");
     realtype fnorm, snorm;
     KINGetFuncNorm(solver->kin_mem, &fnorm);
     KINGetStepLength(solver->kin_mem, &snorm);
     
-    jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
+    jmi_log_fmt(block->log, node, logInfo, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
         "KINSol", block->cur_time, block->label);
-    jmi_log_fmt(block->log, node, logError, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
-    jmi_log_fmt(block->log, node, logError, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+    jmi_log_fmt(block->log, node, logInfo, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
+    jmi_log_fmt(block->log, node, logInfo, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
                 fnorm, snorm, solver->kin_stol);
     jmi_log_leave(block->log, node);
 }
@@ -1357,7 +1357,7 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
     if(block->n > 1) {
         t= clock();
     }
-    /* Broyden upate: Jac = Jac + (ResidualDelta  - Jac * step)*(step_scale^2 step)^T / norm_2(step_scale * step)^2;
+    /* Broyden update: Jac = Jac + (ResidualDelta  - Jac * step)*(step_scale^2 step)^T / norm_2(step_scale * step)^2;
     See algorithm A8.3.1 in "Numerical methods for Unconstrained Opt and NLE" */
     denom = jmi_kinsol_calc_v1twwv2(kin_mem->kin_pp,kin_mem->kin_pp,solver->kin_y_scale);
     /* work_vector = Jac * step */
@@ -2283,7 +2283,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
             jmi_kinsol_linesearch_nonconv_error_message(block);
         } 
         else {
-            jmi_kinsol_small_step_nonconv_error_message(block);
+            jmi_kinsol_small_step_nonconv_info_message(block);
         }
 
         if(block->options->check_jac_cond_flag) {
@@ -2455,7 +2455,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         flagNonscaled = flag;
         /* Get & store debug information */
         KINGetNumNonlinSolvIters(solver->kin_mem, &block->nb_iters);
-        if(flagNonscaled != 0) {
+        if(flagNonscaled != 0 && flag != KIN_STEP_LT_STPTOL) {
             jmi_log_node(log, logWarning, "NonConverge", "The equations with initial scaling didn't converge to a "
                          "solution in <block: %s>", block->label);
         }
