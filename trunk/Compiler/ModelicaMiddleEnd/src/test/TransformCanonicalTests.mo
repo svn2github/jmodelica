@@ -2784,17 +2784,17 @@ fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer i(start = 0,fixed = true);
  discrete Real t;
  discrete Integer temp_1;
- Real temp_2;
- discrete Boolean temp_3;
+ Real _eventIndicator_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
  pre(i) = 0;
  pre(t) = 0.0;
- pre(temp_3) = false;
+ pre(temp_2) = false;
 algorithm
- temp_2 := time - (1 + t);
- temp_3 := time > 1 + t;
- if initial() or temp_3 and not pre(temp_3) then
+ _eventIndicator_1 := time - (1 + t);
+ temp_2 := time > 1 + t;
+ if initial() or temp_2 and not pre(temp_2) then
   t := time + 1;
  end if;
  temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
@@ -6675,19 +6675,18 @@ fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
  discrete Real temp_1;
  discrete Integer temp_2;
- Real temp_3;
- Real temp_4;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_3 := 3 + temp_1 * 4 - pre(temp_2);
- temp_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ _eventIndicator_1 := 3 + temp_1 * 4 - pre(temp_2);
+ _eventIndicator_2 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
  temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
-			
 ")})));
 end InAlgorithm;
 

@@ -12405,8 +12405,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     _y_1 = _time;
     _x_0 = 1;
-    _temp_1_3 = _y_1 - _x_0 * 3;
-    _temp_2_4 = _y_1 - 1 - _x_0;
+    __eventIndicator_1_3 = _y_1 - _x_0 * 3;
+    __eventIndicator_2_4 = _y_1 - 1 - _x_0;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(_y_1 - (_x_0 * 3), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
     }

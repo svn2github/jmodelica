@@ -1933,8 +1933,8 @@ fclass TypeTests.AlgorithmType1
  discrete Integer i;
  discrete Real r;
  discrete Integer temp_1;
- Real temp_2;
- Real temp_3;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0;
  pre(b) = false;
@@ -1943,8 +1943,8 @@ initial equation
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
- temp_2 := r - pre(temp_1);
- temp_3 := r - (pre(temp_1) + 1);
+ _eventIndicator_1 := r - pre(temp_1);
+ _eventIndicator_2 := r - (pre(temp_1) + 1);
  temp_1 := if r < pre(temp_1) or r >= (pre(temp_1) + 1) or initial() then integer(r) else pre(temp_1);
  i := temp_1;
 end TypeTests.AlgorithmType1;

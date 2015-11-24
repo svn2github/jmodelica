@@ -1421,7 +1421,7 @@ aspect TransformCanonical {
 	 * Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
-		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
+		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcIndicatorVarName()));
 		myFClass().addFVariable(v);
 		setIndicator(v.createUseExp());
 	}

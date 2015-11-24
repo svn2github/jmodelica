@@ -1705,13 +1705,19 @@ aspect FlatFunctionUtils {
          return myTempVarName;
      }
      private String FAssignStmt.myTempVarName;
-     inh String FExp.calcTempVarName();
-     inh String FAssignStmt.calcTempVarName();
-     eq InstNode.getChild().calcTempVarName()            = null;
-     eq FFunctionCall.getArray().calcTempVarName()       = tempVarName();
-     eq FVectorFunctionCall.getArray().calcTempVarName() = calcTempVarName();
-     eq FClass.getChild().calcTempVarName()              = nextTempVarName();
-     eq FFunctionDecl.getChild().calcTempVarName()       = nextTempVarName();
+     
+     syn String FExp.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     syn String FAssignStmt.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     
+     syn String FRelExp.calcIndicatorVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
+     
+     inh String FExp.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
+     inh String FAssignStmt.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
+     eq InstNode.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)            = null;
+     eq FFunctionCall.getArray().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)       = tempVarName();
+     eq FVectorFunctionCall.getArray().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt) = calcGeneratedVarName(gvt);
+     eq FClass.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)              = nextGeneratedVarName(gvt);
+     eq FFunctionDecl.getChild().calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt)       = nextGeneratedVarName(gvt);
      
      /**
       * Creates expressions based on tempVarName();
@@ -1734,34 +1740,77 @@ aspect FlatFunctionUtils {
          super.flushTempVarNames();
      }
      
+     private FlatVariableMap.NameIndexCache FClass.nameIndexCache = new FlatVariableMap.NameIndexCache();
+     private FlatVariableMap.NameIndexCache FFunctionDecl.nameIndexCache = new FlatVariableMap.NameIndexCache();
+     
      public String FClass.nextTempVarName() {
-         FlatVariableMap vars = variablesMap();
-         String name;
-         do {
-             name = "temp_" + nextTempVarIndex++;
-         } while (vars.lookup(name) != null);
-         return name;
+         return nextGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      }
+     
+     public String FClass.nextGeneratedVarName(FlatVariableMap.GeneratedVarType gvt) {
+         return variablesMap().nextGeneratedVarName(nameIndexCache, gvt);
+     }
+     
      public String FFunctionDecl.nextTempVarName() {
-         FlatVariableMap vars = variablesMap();
-         String name;
-         do {
-             name = "temp_" + nextTempVarIndex++;
-         } while (vars.lookup(name) != null);
-         return name;
+         return nextGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      }
+     
+     public String FFunctionDecl.nextGeneratedVarName(FlatVariableMap.GeneratedVarType gvt) {
+         return variablesMap().nextGeneratedVarName(nameIndexCache, gvt);
+     }
+     
      public String FClass.nextTempVarName(FFunctionDecl func) {
-         FlatVariableMap vars1 = variablesMap();
-         FlatVariableMap vars2 = func.variablesMap();
+         return variablesMap().nextGeneratedVarName(nameIndexCache, FlatVariableMap.GeneratedVarType.TEMP, func.variablesMap());
+     }
+     
+     public class FlatVariableMap {
+         
+         public static class NameIndexCache extends java.util.EnumMap<GeneratedVarType,Enumerator> {
+             public NameIndexCache() {
+                 super(GeneratedVarType.class);
+             }
+             
+             public int nextIndex(GeneratedVarType gvt) {
+                 int res;
+                 if (!containsKey(gvt)) {
+                     put(gvt, new Enumerator(1));
+                 }
+                 return get(gvt).next();
+             }
+         }
+         
+         public enum GeneratedVarType {
+             TEMP("temp_"),
+             INDICATOR("_eventIndicator_");
+             
+             private String prefix;
+             
+             private GeneratedVarType(String prefix) {
+                 this.prefix = prefix;
+             }
+             
+             public String name(NameIndexCache nic, GeneratedVarType gvt) {
+                 return prefix + nic.nextIndex(gvt);
+             }
+         }
+     }
+     
+     public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt) {
          String name;
          do {
-             name = "temp_" + nextTempVarIndex++;
-         } while (vars1.lookup(name) != null || vars2.lookup(name) != null);
+             name = gvt.name(nic, gvt);
+         } while (lookup(name) != null);
          return name;
      }
      
-     private int FFunctionDecl.nextTempVarIndex = 1;
-     private int FClass.nextTempVarIndex = 1;
+     public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt, FlatVariableMap other) {
+         String name;
+         do {
+             name = gvt.name(nic, gvt);
+         } while (lookup(name) != null || other.lookup(name) != null);
+         return name;
+     }
+     
 
     public String FClass.nextTempFuncName() {
         String name;
