@@ -821,19 +821,19 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void FExp.checkConstantExpression(ErrorCheckType checkType, String varKind, String varName) {
-		String exp = "'" + prettyPrint("") + "'";
 		boolean failed = false;
+        ConstantEvaluationException eres = null;
 		try {
 			if (isCircular()) {
 			    if (!checkType.allowConstantNoValue())
-    				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
-    						varKind, varName, exp);
+    				error("Could not evaluate binding expression for %s '%s' due to circularity: '%s'", 
+    						varKind, varName, prettyPrint(""));
 			} else {
 				CValue val = ceval();
 				if (val.isPartlyUnknown()) {
 					if (val.isUnsupported()) {
 						compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
-								"used by the binding expression for %s '%s': %s", varKind, varName, exp);
+								"used by the binding expression for %s '%s': '%s'", varKind, varName, prettyPrint(""));
 					} else {
 						failed = true;
 					}
@@ -843,9 +843,12 @@ aspect InstanceErrorCheck {
 			// Will be evaluatable later, ignore for now
 		} catch (ConstantEvaluationException e) {
 			failed = true;
+			eres = e;
 		}
-		if (failed && !checkType.allowConstantNoValue())
-			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
+		if (failed && !checkType.allowConstantNoValue()) {
+			error("Could not evaluate binding expression for %s '%s': '%s'%s", varKind, varName, prettyPrint(""),
+			        eres == null ? "" : eres.getModelicaStackTrace());
+		}
 	}
 
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {

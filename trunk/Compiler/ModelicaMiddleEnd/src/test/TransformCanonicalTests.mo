@@ -5147,6 +5147,8 @@ equation
 
 Error at line 4839, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Could not evaluate binding expression for attribute 'start': 'f()'
+    in function 'TransformCanonicalTests.StateInitialPars7.f'
+    Failed to evaluate external function 'f', external function cache unavailable
 ")})));
 end StateInitialPars7;
 

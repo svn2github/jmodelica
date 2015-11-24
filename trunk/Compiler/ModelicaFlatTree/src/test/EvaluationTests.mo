@@ -857,6 +857,7 @@ Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/Evalua
 
 Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'z': 'f()'
+    Unspecified constant evaluation failure
 ")})));
 end FunctionEval24;
 

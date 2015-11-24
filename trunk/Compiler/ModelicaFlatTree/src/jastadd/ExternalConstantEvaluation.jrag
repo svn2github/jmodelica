@@ -17,6 +17,7 @@
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -136,9 +137,17 @@ aspect ExternalConstantEvaluation {
     public ExternalFunctionCache.ExternalFunction FExternalStmt.myExternalFunction() {
         ExternalFunctionCache efc = root().getUtilInterface().getExternalFunctionCache();
         if (efc == null) {
-            return ExternalFunctionCache.FAILED_EXTERNAL_FUNCTION;
+            return ExternalFunctionCache.failedEval(this, "external function cache unavailable");
         }
         return efc.getExternalFunction(this);
+    }
+    
+    public static ExternalFunction ExternalFunctionCache.failedEval(FExternalStmt ext, String msg) {
+        return new FailedExternalFunction(failedEvalMsg(ext, msg));
+    }
+    
+    public static String ExternalFunctionCache.failedEvalMsg(FExternalStmt ext, String msg) {
+        return "Failed to evaluate external function '" + ext.getName() + "', " + msg;
     }
     
     /**
@@ -153,22 +162,24 @@ aspect ExternalConstantEvaluation {
         int res = 0;
         int timeout = myOptions().getIntegerOption("external_constant_evaluation");
         ExternalFunctionCache.ExternalFunction ef = myExternalFunction();
+        String error = null;
         try {
             res = ef.evaluate(this, values, timeout);
+            if (res != 0) {
+                error = "process returned '" + res + "'";
+            }
         } catch (IOException e) {
-//            ModelicaCompiler.log.debug(e);
-            res = -2;
+            error = "error in process communication: '"+ e.getMessage() + "'";
         }
         
-        if (res != 0) {
-            ModelicaCompiler.log.debug("Could not evaluate external function " + getName() + ", error code: " + res);
-            throw new ConstantEvaluationException(null, "Failed to evaluate external function call, error during evaluation");
+        if (error != null) {
+            throw new ConstantEvaluationException(null, ExternalFunctionCache.failedEvalMsg(this, error));
         }
         
         return EVAL_CONT;
     }
     
-    public String ModelicaCompiler.compileExternal(FExternalStmt ext) {
+    public String ModelicaCompiler.compileExternal(FExternalStmt ext) throws FileNotFoundException, CcodeCompilationException {
         String executable = null;
         if (outDir == null)
             setRandomOutDir();
@@ -184,26 +195,18 @@ aspect ExternalConstantEvaluation {
             libDirs.add(ext.libraryDirectory());
         if (ext.includeDirectory() != null)
             incDirs.add(ext.includeDirectory());
-        try {
-            OptionRegistry options = ext.myOptions();
-            ModulesSettings modulesSettings = createModulesSettings(options);
-            
-            target.getTemplates(options).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
-            
-            CCompilerDelegator ccompiler = getCCompiler();
-            ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
-            
-            CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(source, options, target,
-                    libs, libDirs, incDirs);
-            executable = ccompiler.compileCCodeLocal(ccArgs, outDir);
-            new File(sourceDir, source + ".c").delete();
-            log.debug(String.format("Compiled external function \"%s\" to executable \"%s\" for constant evaluation.", ext.getName(), executable));
-        } catch (FileNotFoundException e) {
-            log.debug(String.format("Could not generate code for constant evaluation of external function \"%s\".", ext.getName()));
-        } catch (CcodeCompilationException e) {
-            log.debug(String.format("Could not compile external function \"%s\" for constant evaluation.", ext.getName()));
-            e.printStackTrace(new PrintStream(log.debugStream()));
-        }
+        OptionRegistry options = ext.myOptions();
+        ModulesSettings modulesSettings = createModulesSettings(options);
+        
+        target.getTemplates(options).generateCFiles(ModelicaCompiler.this, null, createCGenerator(ext), sourceDir, source);
+        
+        CCompilerDelegator ccompiler = getCCompiler();
+        ccompiler.setModuleLibraryNames(modulesSettings.getLibraryNames());
+        
+        CCompilerDelegator.Arguments ccArgs = new CCompilerDelegator.Arguments(source, options, target,
+                libs, libDirs, incDirs);
+        executable = ccompiler.compileCCodeLocal(ccArgs, outDir);
+        new File(sourceDir, source + ".c").delete();
         return executable;
     }
 }
@@ -241,17 +244,24 @@ aspect ExternalConstantEvaluationCaching {
             ExternalFunction ef = cachedExternals.get(ext.getName());
             if (ef == null) {
                 if (mc == null) {
-                    return FAILED_EXTERNAL_FUNCTION;
+                    return ExternalFunctionCache.failedEval(ext, "ModelicaCompiler unavailable");
                 }
-                String executable = mc.compileExternal(ext);
-                if (executable == null) {
-                    ef = FAILED_EXTERNAL_FUNCTION;
-                } else {
+                try {
+                    String executable = mc.compileExternal(ext);
                     if (ext.shouldCacheExternalObject()) {
                         ef = new MappedExternalFunction(ext, executable);
                     } else {
                         ef = new CompiledExternalFunction(ext, executable);
                     }
+                    ModelicaCompiler.log.debug("Succesfully compiled external function '" + ext.getName() + 
+                            "' to executable '" + executable + "' code for evaluation");
+                } catch (FileNotFoundException e) {
+                    ef = ExternalFunctionCache.failedEval(ext, "c-code generation failed '" + e.getMessage() + "'");
+                    ModelicaCompiler.log.debug(ef.getMessage());
+                } catch (CcodeCompilationException e) {
+                    ef = ExternalFunctionCache.failedEval(ext, "c-code compilation failed '" + e.getMessage() + "'");
+                    ModelicaCompiler.log.debug(ef.getMessage());
+                    e.printStackTrace(new PrintStream(ModelicaCompiler.log.debugStream()));
                 }
                 cachedExternals.put(ext.getName(), ef);
             }
@@ -291,21 +301,29 @@ aspect ExternalConstantEvaluationCaching {
                     throws IOException;
             public abstract void destroyProcess(int timeout);
             public abstract void remove();
+            public abstract String getMessage();
         }
         
-        public static final ExternalFunction FAILED_EXTERNAL_FUNCTION = new FailedExternalFunction();
         
         /**
          * Represents an external function that for some reason fail to evaluate.
          */
         private static class FailedExternalFunction extends ExternalFunction {
+            private String s;
+            
+            public FailedExternalFunction(String s) {
+                this.s = s;
+            }
+            
+            public String getMessage() {
+                return s;
+            }
             
             @Override
             public int evaluate(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) 
                     throws IOException {
                 ModelicaCompiler.log.debug("Evaluating failed external function: " + ext.getName());
-                throw new ConstantEvaluationException(null, 
-                        "Failed to evaluate external function call, could not start process");
+                throw new ConstantEvaluationException(null, getMessage());
             }
             
             @Override
@@ -325,10 +343,16 @@ aspect ExternalConstantEvaluationCaching {
         private class CompiledExternalFunction extends ExternalFunction {
             protected String executable;
             protected ProcessBuilder processBuilder;
+            private String msg;
             
             public CompiledExternalFunction(FExternalStmt ext, String executable) {
                 this.executable = executable;
                 this.processBuilder = createProcessBuilder(ext);
+                this.msg = "Succesfully compiled external function '" + ext.getName() + "'";
+            }
+            
+            public String getMessage() {
+                return msg;
             }
             
             protected ProcessCommunicator createProcessCommunicator(FExternalStmt ext) throws IOException {
@@ -458,10 +482,10 @@ aspect ExternalConstantEvaluationCaching {
                         ef = lef;
                     } catch (IOException e) {
                         lef.destroyProcess(timeout);
-                        ef = FAILED_EXTERNAL_FUNCTION;
+                        ef = ExternalFunctionCache.failedEval(ext, " error starting process '" + e.getMessage() + "'");
                     } catch (ConstantEvaluationException e) {
                         lef.destroyProcess(timeout);
-                        ef = FAILED_EXTERNAL_FUNCTION;
+                        ef = ExternalFunctionCache.failedEval(ext, " error starting process '" + e.getMessage() + "'");
                     }
                     lives.put(name, ef);
                 }
@@ -493,6 +517,10 @@ aspect ExternalConstantEvaluationCaching {
                 
                 public LiveExternalFunction(String name) {
                     this.name = name;
+                }
+                
+                public String getMessage() {
+                    return MappedExternalFunction.this.getMessage();
                 }
                 
                 @Override
@@ -595,7 +623,7 @@ aspect ExternalProcessCommunication {
             if (line == null)
                 line = in.readLine();
             if (line == null)
-                throw new IOException();
+                throw new IOException("Process halted unexpectedly");
             buffLine = null;
             return line;
         }
@@ -629,9 +657,8 @@ aspect ExternalProcessCommunication {
             log();
             abort();
             String line = getLine();
-            if (line == null || !line.equals(s)) {
-                ModelicaCompiler.log.debug(String.format("ProcessCommunicator did not receive expected line\n\t'%s' != '%s'", s, (line == null ? "null" : line)));
-                throw new IOException();
+            if (!line.equals(s)) {
+                throw new IOException(String.format("Communication protocol error. Expected '%s', received '%s'", s, line));
             }
         }
         
@@ -714,29 +741,26 @@ aspect ExternalProcessCommunication {
         }
         
         public double deserializeReal() throws IOException {
-            String s = in.readLine();
-            if (s == null)
-                throw new IOException();
+            String line = getLine();
             try {
-                return Double.parseDouble(s);
+                return Double.parseDouble(line);
             } catch (NumberFormatException e) {
-                throw new IOException();
+                throw new IOException("Communication protocol error. Failed to parse real number '" + line + "'");
             }
         }
         
         public String deserializeString() throws IOException {
-            String s = in.readLine();
-            if (s == null)
-                throw new IOException();
+            String line = getLine();
+            int len;
             try {
-                int len = Integer.parseInt(s);
-                char[] c = new char[len];
-                in.read(c,0,len);
-                s = in.readLine();
-                return new String(c);
+                len = Integer.parseInt(line);
             } catch (NumberFormatException e) {
-                throw new IOException();
+                throw new IOException("Communication protocol error. Failed to parse size of string '" + line + "'");
             }
+            char[] c = new char[len];
+            in.read(c,0,len);
+            in.readLine();
+            return new String(c);
         }
         
         public void startTimer(int timeout) {
@@ -770,13 +794,15 @@ aspect ExternalProcessCommunication {
      * Print this constant value to <code>buff</code>
      */
     public void CValue.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
-        throw new IOException();
+        throw new IOException("Unsupported type to serialize '" + getClass().getSimpleName() + "'");
     }
+    
     public void CValueUnknown.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
-        if (allowUninitialized)
+        if (allowUninitialized) {
             type.uninitialized().serialize(buff, type, false);
-        else
-            super.serialize(buff, type, allowUninitialized);
+        } else {
+            throw new IOException("Uninitialized value when expecting initialized");
+        }
     }
     public void CValueArray.serialize(BufferedWriter buff, FType type, boolean allowUninitialized) throws IOException {
         for (int s : size().size) {
@@ -831,7 +857,7 @@ aspect ExternalProcessCommunication {
         }
     }
     public CValue FType.deserializeScalar(ProcessCommunicator com) throws IOException {
-        throw new IOException();
+        throw new IOException("Unsupported type to deserialize '" + getClass().getSimpleName() + "'");
     }
     public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
         return new CValueReal(com.deserializeReal());

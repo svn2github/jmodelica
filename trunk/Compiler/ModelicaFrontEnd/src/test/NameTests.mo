@@ -1064,6 +1064,7 @@ model ConstantLookup16
 
 Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'a': 'b[c]'
+    Cannot get int value of CValueUnknown
 
 Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for d
