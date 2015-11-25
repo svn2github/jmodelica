@@ -38,14 +38,6 @@ static const int N_boolean_pi_f = $n_boolean_pi_f$;
 static const int N_boolean_pi_e = $n_boolean_pi_e$;
 static const int N_boolean_pd = $n_boolean_pd$;
 
-static const int N_string_ci = $n_string_ci$;
-static const int N_string_cd = $n_string_cd$;
-static const int N_string_pi = $n_string_pi$;
-static const int N_string_pi_s = $n_string_pi_s$;
-static const int N_string_pi_f = $n_string_pi_f$;
-static const int N_string_pi_e = $n_string_pi_e$;
-static const int N_string_pd = $n_string_pd$;
-
 static const int N_real_dx = $n_real_x$;
 static const int N_real_x = $n_real_x$;
 static const int N_real_u = $n_real_u$;
@@ -58,9 +50,6 @@ static const int N_integer_u = $n_integer_u$ + $n_enum_u$;
 
 static const int N_boolean_d = $n_boolean_d$;
 static const int N_boolean_u = $n_boolean_u$;
-
-static const int N_string_d = $n_string_d$;
-static const int N_string_u = $n_string_u$;
 
 static const int N_ext_objs = $n_ext_objs$;
 
@@ -182,15 +171,21 @@ $C_delay_sample$
     return 0;
 }
 
+static int jmi_z_offset_strings(jmi_z_offsets_t* o) {
+$C_z_offsets_strings$
+    return 0;
+}
+
 int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
+
+    jmi_z_offset_strings(&(*jmi)->z_t.strings.offsets);
 
     jmi_init(jmi, N_real_ci, N_real_cd,  N_real_pi,    N_real_pi_s,    N_real_pi_f,    N_real_pi_e,    N_real_pd,
              N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pi_s, N_integer_pi_f, N_integer_pi_e, N_integer_pd,
              N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pi_s, N_boolean_pi_f, N_boolean_pi_e, N_boolean_pd,
-             N_string_ci,  N_string_cd,  N_string_pi,  N_string_pi_s,  N_string_pi_f,  N_string_pi_e,  N_string_pd,
              N_real_dx, N_real_x, N_real_u, N_real_w,
              N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
-             N_string_d, N_string_u, N_outputs, (int (*))Output_vrefs,
+             N_outputs, (int (*))Output_vrefs,
              N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
              N_dae_blocks, N_dae_init_blocks,
              N_initial_relations, (int (*))DAE_initial_relations,

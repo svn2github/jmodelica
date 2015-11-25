@@ -1100,6 +1100,39 @@ aspect CCodeGen {
     public static final String ASTNode.C_SUFFIX_FPCR     = "fpcr";
     public static final String ASTNode.C_SUFFIX_FPOUT    = "fpout";
     
+    public class FTypePrefixVariability {
+        public enum VariabilityCausality_C {
+            CI("ci"),
+            CD("cd"),
+            PI("pi"),
+            PS("ps"),
+            PF("pf"),
+            PE("pe"),
+            PD("pd");
+            
+            private String s;
+            
+            private VariabilityCausality_C(String s) {
+                this.s = s;
+            }
+            
+            public String toString() {
+                return s;
+            }
+        }
+    }
+    
+    syn FTypePrefixVariability.VariabilityCausality_C FVariable.variabilityCausality_C() = variability().variabilityCausality_C(this);
+    
+    syn VariabilityCausality_C FTypePrefixVariability.variabilityCausality_C(FVariable fv) {
+        throw new UnsupportedOperationException();
+    }
+    eq FConstant.variabilityCausality_C(FVariable fv)        = fv.isIndependentConstant()  ? VariabilityCausality_C.CI : VariabilityCausality_C.CD;
+    eq FParameter.variabilityCausality_C(FVariable fv)       = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PD;
+    eq FStructParameter.variabilityCausality_C(FVariable fv) = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PS;
+    eq FFinalParameter.variabilityCausality_C(FVariable fv)  = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PF;
+    eq FEvalParameter.variabilityCausality_C(FVariable fv)   = fv.isIndependentParameter() ? VariabilityCausality_C.PI : VariabilityCausality_C.PE;
+    
 	syn String FAbstractVariable.funcArrayType(boolean assign) = 
 		isRecord() ? C_ARRAY_RECORD : (assign ? C_ARRAY_REFERENCE : C_ARRAY_VALUE);
     
@@ -1112,6 +1145,7 @@ aspect CCodeGen {
 	eq FVariable.name_C()           = isForIndex() ? 
 										name_C(null, variableIndex() + C_SUFFIX_INDEX) : 
 										name_C(""); 
+    eq FStringVariable.name_C()     = name_C("_s_" + variabilityCausality_C());
 	eq FPreRealVariable.name_C()    = preName_C();
 	eq FPreBooleanVariable.name_C() = preName_C();
 	eq FPreIntegerVariable.name_C() = preName_C();
@@ -5468,10 +5502,6 @@ aspect CCodeGen {
 			setBindingExpOpt(new Opt());
 		str.print(";\n");
         p.printPostSteps(this, str, indent);
-	}
-	
-    public void FStringVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
-		// Skip string variables
 	}
 	
 	public void BLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {

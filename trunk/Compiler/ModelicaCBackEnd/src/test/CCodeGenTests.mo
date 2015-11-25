@@ -1162,12 +1162,11 @@ N_boolean_pi_s = $n_boolean_pi_s$;
 N_boolean_pi_f = $n_boolean_pi_f$;
 N_boolean_pi_e = $n_boolean_pi_e$;
 
-N_string_pi = $n_string_pi$;
-N_string_pi_s = $n_string_pi_s$;
-N_string_pi_f = $n_string_pi_f$;
-N_string_pi_e = $n_string_pi_e$;
+$C_z_offsets_strings$
+
 ---
 $C_variable_aliases$
+$C_z_aliases_strings$
 ---
 $C_DAE_initial_dependent_parameter_assignments$
 ---
@@ -1189,10 +1188,21 @@ N_boolean_pi_s = 3;
 N_boolean_pi_f = 0;
 N_boolean_pi_e = 0;
 
-N_string_pi = 4;
-N_string_pi_s = 4;
-N_string_pi_f = 0;
-N_string_pi_e = 0;
+o->o_ci = 0;
+o->n_ci = 0;
+o->o_cd = 0;
+o->n_cd = 0;
+o->o_pi = 0;
+o->n_pi = 4;
+o->o_ps = 4;
+o->n_ps = 0;
+o->o_pf = 4;
+o->n_pf = 0;
+o->o_pe = 4;
+o->n_pe = 0;
+o->o_pd = 4;
+o->n_pd = 0;
+o->n = 4;
 ---
 #define _reg1_0 ((*(jmi->z))[jmi->offs_real_pi+0])
 #define _dummy_1_20 ((*(jmi->z))[jmi->offs_real_pi+1])
@@ -1216,6 +1226,10 @@ N_string_pi_e = 0;
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
 
+#define _s_pi_reg5_4 jmi->z_t.strings.values[0]
+#define _s_pi_struct5_9 jmi->z_t.strings.values[1]
+#define _s_pi_final5_14 jmi->z_t.strings.values[2]
+#define _s_pi_eval5_19 jmi->z_t.strings.values[3]
 ---
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
@@ -1231,18 +1245,22 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     _reg4_3 = (JMI_TRUE);
     _dummy_1_20 = (0.0);
     _dummy_2_21 = (0.0);
+    _s_pi_reg5_4 = (\"string\");
     _struct1_5 = (1);
     _struct2_6 = (1);
     _struct3_7 = (1);
     _struct4_8 = (JMI_TRUE);
+    _s_pi_struct5_9 = (\"string\");
     _final1_10 = (1);
     _final2_11 = (1);
     _final3_12 = (1);
     _final4_13 = (JMI_TRUE);
+    _s_pi_final5_14 = (\"string\");
     _eval1_15 = (1);
     _eval2_16 = (1);
     _eval3_17 = (1);
     _eval4_18 = (JMI_TRUE);
+    _s_pi_eval5_19 = (\"string\");
     _n_22 = (2);
     return ef;
 }
@@ -1255,6 +1273,78 @@ int jmi_set_start_values_base(jmi_t* jmi) {
 }
 ")})));
 end CCodeGenParameters2;
+
+model CCodeGenParameters3
+    function f
+        input String s;
+        output Integer n = 0;
+    algorithm
+    end f;
+
+    constant String ci = "s1";
+    constant String cd = ci;
+    parameter String pi = "s2";
+    parameter String ps = "s3";
+    final parameter String pf = "s4";
+    parameter String pe = "s5" annotation(Evaluate=true);
+    parameter String pd = pi;
+    
+    Real[f(ps)] x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenParameters3",
+            description="Code generated for strings",
+            template="
+$C_z_aliases_strings$
+$C_z_offsets_strings$
+$C_set_start_values$
+",
+            generatedCode="
+#define _s_ci_ci_0 jmi->z_t.strings.values[0]
+#define _s_ci_cd_1 jmi->z_t.strings.values[1]
+#define _s_pi_pi_2 jmi->z_t.strings.values[2]
+#define _s_pi_ps_3 jmi->z_t.strings.values[3]
+#define _s_pi_pf_4 jmi->z_t.strings.values[4]
+#define _s_pi_pe_5 jmi->z_t.strings.values[5]
+#define _s_pi_pd_6 jmi->z_t.strings.values[6]
+
+o->o_ci = 0;
+o->n_ci = 2;
+o->o_cd = 2;
+o->n_cd = 0;
+o->o_pi = 2;
+o->n_pi = 5;
+o->o_ps = 7;
+o->n_ps = 0;
+o->o_pf = 7;
+o->n_pf = 0;
+o->o_pe = 7;
+o->n_pe = 0;
+o->o_pd = 7;
+o->n_pd = 0;
+o->n = 7;
+
+int jmi_set_start_values_0_0(jmi_t* jmi) {
+    int ef = 0;
+    _s_ci_ci_0 = (\"s1\");
+    _s_ci_cd_1 = (\"s1\");
+    _s_pi_pi_2 = (\"s2\");
+    _s_pi_ps_3 = (\"s3\");
+    _s_pi_pf_4 = (\"s4\");
+    _s_pi_pe_5 = (\"s5\");
+    _s_pi_pd_6 = (\"s2\");
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    return ef;
+}
+")})));
+end CCodeGenParameters3;
 
 model CCodeGenUniqueNames
  model A

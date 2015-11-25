@@ -30,6 +30,14 @@
 #include "jmi_dynamic_state.h"
 #include "module_include/jmi_get_set.h"
 
+void jmi_z_init(jmi_z_t* z) {
+    z->strings.values = calloc(sizeof(char*), z->strings.offsets.n);
+}
+
+void jmi_z_delete(jmi_z_t* z) {
+    free(z->strings.values);
+}
+
 int jmi_init(jmi_t** jmi,
         int n_real_ci, int n_real_cd, int n_real_pi,
         int n_real_pi_s, int n_real_pi_f, int n_real_pi_e, int n_real_pd,
@@ -37,12 +45,9 @@ int jmi_init(jmi_t** jmi,
         int n_integer_pi_s, int n_integer_pi_f, int n_integer_pi_e, int n_integer_pd, 
         int n_boolean_ci, int n_boolean_cd, int n_boolean_pi,
         int n_boolean_pi_s, int n_boolean_pi_f, int n_boolean_pi_e, int n_boolean_pd,
-        int n_string_ci, int n_string_cd, int n_string_pi,
-        int n_string_pi_s, int n_string_pi_f, int n_string_pi_e, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
         int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
-        int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
         int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
         int n_guards, int n_guards_init,
@@ -78,11 +83,6 @@ int jmi_init(jmi_t** jmi,
     jmi_->n_boolean_pi = n_boolean_pi;
     jmi_->n_boolean_pd = n_boolean_pd;
 
-    jmi_->n_string_ci = n_string_ci;
-    jmi_->n_string_cd = n_string_cd;
-    jmi_->n_string_pi = n_string_pi;
-    jmi_->n_string_pd = n_string_pd;
-
     jmi_->n_real_dx = n_real_dx;
     jmi_->n_real_x = n_real_x;
     jmi_->n_real_u = n_real_u;
@@ -95,9 +95,6 @@ int jmi_init(jmi_t** jmi,
 
     jmi_->n_boolean_d = n_boolean_d;
     jmi_->n_boolean_u = n_boolean_u;
-
-    jmi_->n_string_d = n_string_d;
-    jmi_->n_string_u = n_string_u;
 
     jmi_->n_outputs = n_outputs;
     jmi_->output_vrefs = (int*)calloc(n_outputs,sizeof(int));
@@ -188,6 +185,7 @@ int jmi_init(jmi_t** jmi,
         2*(n_real_d + n_integer_d + n_integer_u + n_boolean_d + n_boolean_u) + 
         2*n_sw + 2*n_sw_init + 2*n_guards + 2*n_guards_init;
 
+    jmi_z_init(&jmi_->z_t);
     jmi_->z = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
     *(jmi_->z) = (jmi_real_t*)calloc(jmi_->n_z,sizeof(jmi_real_t));
     jmi_->z_last    = (jmi_real_t**)calloc(1,sizeof(jmi_real_t *));
@@ -288,6 +286,8 @@ int jmi_delete(jmi_t* jmi){
     int i;
 
     jmi_me_delete_modules(jmi);
+
+    jmi_z_delete(&jmi->z_t);
 
     if (jmi->dae != NULL) {
         jmi_func_delete(jmi->dae->F);

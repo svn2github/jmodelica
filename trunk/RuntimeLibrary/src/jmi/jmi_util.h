@@ -832,10 +832,6 @@ struct jmi_simple_color_info_t {
  * @param n_boolean_cd Number of boolean dependent constants.
  * @param n_boolean_pi Number of boolean independent parameters.
  * @param n_boolean_pd Number of boolean dependent parameters.
- * @param n_string_ci Number of string independent constants.
- * @param n_string_cd Number of string dependent constants.
- * @param n_string_pi Number of string independent parameters.
- * @param n_string_pd Number of string dependent parameters.
  * @param n_real_dx Number of real derivatives.
  * @param n_real_x Number of real differentiated variables.
  * @param n_real_u Number of real inputs.
@@ -845,8 +841,6 @@ struct jmi_simple_color_info_t {
  * @param n_integer_u Number of integer inputs.
  * @param n_boolean_d Number of boolean discrete parameters.
  * @param n_boolean_u Number of boolean inputs.
- * @param n_string_d Number of string discrete parameters.
- * @param n_string_u Number of string inputs.
  * @param n_outputs Number of outputs.
  * @param output_vrefs Value references of the outputs.
  * @param n_sw Number of switching functions in DAE \$fF\$f.
@@ -871,12 +865,9 @@ int jmi_init(jmi_t** jmi,
         int n_integer_pi_s, int n_integer_pi_f, int n_integer_pi_e, int n_integer_pd, 
         int n_boolean_ci, int n_boolean_cd, int n_boolean_pi,
         int n_boolean_pi_s, int n_boolean_pi_f, int n_boolean_pi_e, int n_boolean_pd,
-        int n_string_ci, int n_string_cd, int n_string_pi,
-        int n_string_pi_s, int n_string_pi_f, int n_string_pi_e, int n_string_pd,
         int n_real_dx, int n_real_x, int n_real_u, int n_real_w,
         int n_real_d, int n_integer_d, int n_integer_u,
         int n_boolean_d, int n_boolean_u,
-        int n_string_d, int n_string_u,
         int n_outputs, int* output_vrefs,
         int n_sw, int n_sw_init, int n_time_sw, int n_state_sw,
         int n_guards, int n_guards_init,
@@ -1064,6 +1055,20 @@ struct jmi_modules_t {
     /* Add future modules here */
 };
 
+typedef struct jmi_z_offsets {
+    int o_ci, o_cd, o_pi, o_pd, o_ps, o_pf, o_pe;
+    int n_ci, n_cd, n_pi, n_pd, n_ps, n_pf, n_pe, n;
+} jmi_z_offsets_t;
+
+typedef struct jmi_z_strings {
+    char** values;
+    jmi_z_offsets_t offsets;
+} jmi_z_strings_t;
+
+typedef struct jmi_z {
+    jmi_z_strings_t strings;
+} jmi_z_t;
+
 /**
  * \brief The main struct of the JMI Model interface containing
  * dimension information and pointers to jmi_dae_t and jmi_init_t.
@@ -1081,6 +1086,8 @@ struct jmi_t {
     jmi_generic_func_t init_delay;       /**< \brief Function for initializing delay structures. */
     jmi_generic_func_t sample_delay;       /**< \brief Function for initializing delay structures. */
 
+    jmi_z_t z_t;
+
     int n_real_ci;                       /**< \brief Number of independent constants. */
     int n_real_cd;                       /**< \brief Number of dependent constants. */
     int n_real_pi;                       /**< \brief Number of independent parameters. */
@@ -1096,11 +1103,6 @@ struct jmi_t {
     int n_boolean_pi;                    /**< \brief Number of boolean independent parameters. */
     int n_boolean_pd;                    /**< \brief Number of boolean dependent parameters. */
 
-    int n_string_ci;                     /**< \brief Number of string independent constants. */
-    int n_string_cd;                     /**< \brief Number of string dependent constants. */
-    int n_string_pi;                     /**< \brief Number of string independent parameters. */
-    int n_string_pd;                     /**< \brief Number of string dependent parameters. */
-
     int n_real_dx;                       /**< \brief Number of derivatives. */
     int n_real_x;                        /**< \brief Number of differentiated states. */
     int n_real_u;                        /**< \brief Number of inputs. */
@@ -1113,9 +1115,6 @@ struct jmi_t {
 
     int n_boolean_d;                     /**< \brief Number of boolean discrete variables. */
     int n_boolean_u;                     /**< \brief Number of boolean inputs. */
-
-    int n_string_d;                      /**< \brief Number of string discrete variables. */
-    int n_string_u;                      /**< \brief Number of string inputs. */
 
     int n_outputs;                       /** \brief Number of output variables. */
 
