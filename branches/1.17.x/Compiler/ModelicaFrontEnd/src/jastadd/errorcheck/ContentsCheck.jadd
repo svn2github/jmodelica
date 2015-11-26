@@ -745,10 +745,10 @@ aspect ForceVariability {
         // Flush cache for variability()
         setVariabilityNotCalculated();
         if (hasBindingFExp()) {
-            FExp e = getBindingFExp();
-            if (!checkType.allowConstantNoValue() && !e.canCeval())
-                error("Could not evaluate binding expression of structural parameter " + qualifiedName());
-            e.forceUsesVariability(checkType, v);
+            if (v.structParameterVariability()) {
+                getBindingFExp().checkConstantExpression(checkType, forcedVariability.toStringLiteral(), qualifiedName());
+            }
+            getBindingFExp().forceUsesVariability(checkType, v);
         }
     }
     
