@@ -1928,6 +1928,21 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
             jmi_log_leave(block->log, outer);
         }
+    } else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+        for(i = 0; i < N; i++) {
+            scale_ptr[i] = 1/scale_ptr[i];
+        }
+        /* Scaling is not updated */
+        if (block->callbacks->log_options.log_level >= 4) {
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%s>", block->label);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = scale_ptr;
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
+            jmi_log_leave(block->log, outer);
+        }
     }
 
     if (solver->using_max_min_scaling_flag && !solver->J_is_singular_flag) {
