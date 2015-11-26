@@ -1833,7 +1833,8 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
     if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto ||
-        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual)
     {
         for (i = 0; i < N; i++) {
             int j;
@@ -1868,7 +1869,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
     }
 
-    if(use_scaling_flag) {
+    if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto || bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid) {
         solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
         /* check that scaling factors have reasonable magnitude */
         for(i = 0; i < N; i++) {
@@ -1952,7 +1953,6 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         char norm = 'I';
         double Jnorm = 1.0, Jcond = 1.0;
         int info;
-
         if(use_scaling_flag) {
             for(i = 0; i < N; i++){
                 int j;
