@@ -534,10 +534,12 @@ aspect DynamicStateSelect{
     }
 
     public FVariable.StateSelect IndexReductionBiPGraph.computeIncidenceStateSelect(IndexReductionEq eq, IndexReductionVar var) {
+        if (var.getVariable().stateSelection() == FVariable.StateSelect.ALWAYS) {
+            return FVariable.StateSelect.ALWAYS;
+        }
         for (FIdUseExp exp : eq.getEquation().findFIdUseExpsInTree()) {
-            if (getVariable(exp.name()) == var) {
-                if (exp.getOriginalStateSelect() != null)
-                    return exp.getOriginalStateSelect();
+            if (getVariable(exp.name()) == var && exp.getOriginalStateSelect() != null) {
+                return exp.getOriginalStateSelect();
             }
         }
         return var.getVariable().stateSelection();
