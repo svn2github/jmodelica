@@ -20,7 +20,5 @@ $C_set_start_values$
 
 int jmi_set_start_values(jmi_t* jmi) {
     jmi_set_start_values_base(jmi);
-    printf("%s\n", _ci_0);
-    printf("%s\n", _pd_6);
     return jmi_set_start_values_base(jmi);
 }
