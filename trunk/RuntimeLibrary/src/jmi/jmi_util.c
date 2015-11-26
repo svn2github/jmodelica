@@ -1349,6 +1349,10 @@ jmi_real_t* jmi_get_z(jmi_t* jmi) {
     return *(jmi->z);
 }
 
+jmi_string_t* jmi_get_string_z(jmi_t* jmi) {
+    return jmi->z_t.strings.values;
+}
+
 jmi_real_t* jmi_get_z_last(jmi_t* jmi) {
     return *(jmi->z_last);
 }

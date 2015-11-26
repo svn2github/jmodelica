@@ -998,8 +998,7 @@ fmiStatus fmi1_me_get_string(fmiComponent c, const fmiValueReference vr[], size_
         return fmiError;
     }
 
-    /* Strings not yet supported. */
-    return fmiWarning;
+    return fmiOK;
 }
 
 jmi_t* fmi1_me_get_jmi_t(fmiComponent c) {

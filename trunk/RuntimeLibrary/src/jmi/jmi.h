@@ -431,6 +431,8 @@ int jmi_save_last_successful_values(jmi_t *jmi);
  */
 jmi_real_t* jmi_get_z(jmi_t* jmi);
 
+jmi_string_t* jmi_get_string_z(jmi_t* jmi);
+
 /**
  * \brief Get a pointer to the last successful z vector containing all variables.
  *

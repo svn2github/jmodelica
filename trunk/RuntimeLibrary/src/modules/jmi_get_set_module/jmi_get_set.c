@@ -282,27 +282,17 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
 int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    jmi_string  value[]) {
-
-    int retval;
+    /* Currently we only need to consider constant/structural parameter strings */
     int i;
-    int eval_required;
+    jmi_string_t* z;
+    jmi_value_reference index;
 
-    eval_required = jmi_evaluation_required(jmi, vr, nvr);
+    z = jmi_get_string_z(jmi);
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
-
-        retval = jmi_ode_derivatives(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
-            return -1;
-        }
-
-        RECOMPUTE_VARIABLES_CLR(jmi);
+    for (i = 0; i < nvr; i++) {
+        index = get_index_from_value_ref(vr[i]);
+        value[i] = z[index];
     }
-
-    /* Strings not yet supported. */
-    for(i = 0; i < nvr; i++) value[i] = 0;
-    jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
 
     return 0;
 }

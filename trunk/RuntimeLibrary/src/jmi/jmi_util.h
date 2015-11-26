@@ -140,6 +140,7 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define REAL_TYPE_MASK   0x00000000
 #define INT_TYPE_MASK    0x10000000
 #define BOOL_TYPE_MASK   0x20000000
+#define STR_TYPE_MASK    0x30000000
 
 /* These are a temporary remnants of CppAD*/            
 #define AD_WRAP_LITERAL(x) ((jmi_real_t) (x))
