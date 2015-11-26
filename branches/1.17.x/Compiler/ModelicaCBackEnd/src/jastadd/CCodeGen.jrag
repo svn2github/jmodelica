@@ -469,7 +469,7 @@ aspect CCodeGen {
             if (first)
                 str.format("%sif (", indent);
             else
-                str.format("%s} else if(", indent);
+                str.format("%s} else if (", indent);
             first = false;
             str.format("jmi_dynamic_state_check_is_state(jmi, %d", mySet().id_C());
             for (FVariable var : combination)
@@ -4387,7 +4387,7 @@ aspect CCodeGen {
             if (first)
                 str.format("%sif (", indent);
             else
-                str.format("%s} else if(", indent);
+                str.format("%s} else if (", indent);
             first = false;
             blt.genSubBLTTest_C(p, str);
             str.println(") {");

@@ -2540,7 +2540,7 @@ aspect Attributes {
     syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
     
     // State Select attribute
-    syn boolean FRealVariable.stateSelectAttributeSet()    = attributeSet(FAttribute.STATE_SELECT);
+    syn boolean FVariable.stateSelectAttributeSet()        = attributeSet(FAttribute.STATE_SELECT);
     syn FExp    FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
     syn CValue  FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
     syn int     FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();

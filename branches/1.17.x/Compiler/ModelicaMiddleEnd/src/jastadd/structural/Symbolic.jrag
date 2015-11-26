@@ -906,7 +906,13 @@ aspect Derivatives {
     eq FAbstractDerivativeVariable.order() = getOrder();
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
-    eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+    eq FIdUseExp.createDerExp(int order) {
+        FExp exp = getFIdUse().createDerExp(order() + order);
+        if (exp instanceof FIdUseExp) {
+            ((FIdUseExp)exp).setOriginalStateSelect(getOriginalStateSelect());
+        }
+        return exp;
+    }
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 
     syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);

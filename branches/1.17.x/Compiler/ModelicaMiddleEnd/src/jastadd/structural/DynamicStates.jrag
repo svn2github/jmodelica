@@ -256,7 +256,7 @@ aspect DynamicStateSelect{
     
     rewrite FDerExp {
         when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
-            return new FDynamicDerExp(getFIdUse(), order());
+            return new FDynamicDerExp(getFIdUse(), getOriginalStateSelect(), order());
         }
     }
     
@@ -290,6 +290,7 @@ aspect DynamicStateSelect{
         for (IndexReductionVar var : getVariables())
             initialMatching.put(var, var.getMatching());
         
+        Map<IndexReductionVar, IndexReductionEq> tempAssignmentMap = computeTempAssignmentMap();
         
         ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, false));
         ASTNode.log.verbose(printCoefficientsObj(coefficientsMatrix, true));
@@ -312,7 +313,7 @@ aspect DynamicStateSelect{
             Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
             if (coefficients == null)
                 continue;
-            if (!eqn.getMatching().dynamicSetCandidate(coefficients.get(eqn.getMatching())))
+            if (!dynamicSetCandidate(eqn, eqn.getMatching(), coefficients))
                 continue;
             lightReset();
             ASTNode.log.debug("  SAP1");
@@ -323,8 +324,8 @@ aspect DynamicStateSelect{
                 set = new DSSet();
             Collection<IndexReductionEq> otherEqns = new ArrayList<IndexReductionEq>();
             ASTNode.log.debug("    Path not found, set %d", set.id);
-            for (IndexReductionVar var : eqn.getVariables()) {
-                if (!var.dynamicSetCandidate(coefficients.get(var)))
+            for (IndexReductionVar var : eqn.getVariablesSortedSAP2(tempAssignmentMap)) {
+                if (!dynamicSetCandidate(eqn, var, coefficients))
                     continue;
                 ASTNode.log.debug("  Checking ncc variable %s", var);
                 if (var.getMatching() == eqn) {
@@ -335,6 +336,14 @@ aspect DynamicStateSelect{
                     var.setMatching(eqn);
                     ASTNode.log.debug("    adding %s to set %d", var, set.id);
                 } else {
+                    IndexReductionEq tmpAssignEqn = tempAssignmentMap.get(var);
+                    if (tmpAssignEqn != null) {
+                        if (tmpAssignEqn.getMatching() != var && dsLookup.get(tmpAssignEqn) == null) {
+                            set.vars.add(tmpAssignEqn.getMatching());
+                            set.eqns.add(tmpAssignEqn);
+                            continue;
+                        }
+                    }
                     lightReset();
                     DSSet otherSet = dsLookup.get(var.getMatching());
                     Collection<IndexReductionVar> noVisit = new ArrayList<IndexReductionVar>();
@@ -395,14 +404,14 @@ aspect DynamicStateSelect{
             Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
             if (coefficients == null)
                 continue; // Possible?
-            if (!eqn.getMatching().dynamicSetCandidate(coefficients.get(eqn.getMatching())))
+            if (!dynamicSetCandidate(eqn, eqn.getMatching(), coefficients))
                 continue;
             for (IndexReductionVar var : eqn.getVariables()) {
                 if (eqn.getMatching() == var || var.getMatching() == null)
                     continue;
                 IndexReductionEq otherEqn = var.getMatching();
                 coefficients = coefficientsMatrix.get(otherEqn);
-                if (!var.dynamicSetCandidate(coefficients.get(var)))
+                if (!dynamicSetCandidate(eqn, var, coefficients))
                     continue;
                 DSSet set = dsLookup.get(otherEqn);
                 if (set == null)
@@ -438,6 +447,12 @@ aspect DynamicStateSelect{
         
         Set<IndexReductionVar> vars = new HashSet<IndexReductionVar>();
         for (DSSet set : dsSets) {
+            if (set.eqns.size() == set.vars.size()) {
+                ASTNode.log.debug("Set %d not added, %d eqns and %d vars", set.id, set.eqns.size(), set.vars.size());
+                continue;
+            } else if (set.eqns.size() > set.vars.size()) {
+                throw new UnsupportedOperationException("Something went wrong during dynamic state selection, dynamic state set " + set.id + " contains " + set.eqns.size() + " equations but only " + set.vars.size() + "variables! Please report this error!");
+            }
             set.coefficients = new FExp[set.eqns.size()][set.vars.size()];
             int i = 0;
             for (IndexReductionEq eqn : set.eqns) {
@@ -460,21 +475,74 @@ aspect DynamicStateSelect{
         }
         return vars;
     }
+    
+    public Collection<IndexReductionVar> IndexReductionEq.getVariablesSortedSAP2(final Map<IndexReductionVar, IndexReductionEq> tempAssignmentMap) {
+        java.util.List<IndexReductionVar> res = new ArrayList<IndexReductionVar>(getVariables());
+        Collections.sort(res, new Comparator<IndexReductionVar>() {
+            @Override
+            public int compare(IndexReductionVar a, IndexReductionVar b) {
+                int diff = (a.getMatching() == null ? 1 : 0) - (b.getMatching() == null ? 1 : 0);
+                if (diff != 0) {
+                    return -diff;
+                }
+                diff = (a.getMatching() == IndexReductionEq.this ? 1 : 0) - (b.getMatching() == IndexReductionEq.this ? 1 : 0);
+                if (diff != 0) {
+                    return -diff;
+                }
+                IndexReductionEq aEq = tempAssignmentMap.get(a);
+                IndexReductionEq bEq = tempAssignmentMap.get(b);
+                diff = (aEq != null ? (aEq.getMatching() != a ? 2 : 1) : 0) - (bEq != null ? (bEq.getMatching() != b ? 2 : 1) : 0);
+                if (diff != 0) {
+                    return -diff;
+                }
+                return a.getName().compareTo(b.getName());
+            }
+        });
+        return res;
+    }
+    
+    public Map<IndexReductionVar, IndexReductionEq> IndexReductionBiPGraph.computeTempAssignmentMap() {
+        Map<IndexReductionVar, IndexReductionEq> res = new HashMap<IndexReductionVar, IndexReductionEq>();
+        for (IndexReductionEq eqn : getEquations()) {
+            FAbstractVariable var = eqn.getEquation().assignedFV();
+            if (var == null || !var.isTemporary()) {
+                continue;
+            }
+            IndexReductionVar bipVar = getVariable(var.name());
+            if (bipVar == null) {
+                continue;
+            }
+            res.put(bipVar, eqn);
+        }
+        return res;
+    }
+    
+    public boolean IndexReductionBiPGraph.dynamicSetCandidate(IndexReductionEq eqn, IndexReductionVar var,
+            Map<IndexReductionVar, Coefficient> coefficients) {
+        return var.dynamicSetCandidate(coefficients.get(var), computeIncidenceStateSelect(eqn, var));
+    }
 
-    public boolean IndexReductionVar.dynamicSetCandidate(IndexReductionBiPGraph.Coefficient coefficient) {
+    public boolean IndexReductionVar.dynamicSetCandidate(IndexReductionBiPGraph.Coefficient coefficient, FVariable.StateSelect stateSelect) {
         if (coefficient == null)
             return false;
         if (coefficient.state != IndexReductionBiPGraph.COEFFICIENT_STATE.CONTINUOUS)
             return false;
-//        if (getVariable().isTemporary())
-//            return false;
-        FAbstractVariable.StateSelect stateSelect = getVariable().stateSelection();
-        if (stateSelect == FRealVariable.StateSelect.ALWAYS)
-            return false;
-//        if (stateSelect == FRealVariable.StateSelect.NEVER)
-//            return false;
-        return true;
+        return dynamicSetCandidate(stateSelect);
     }
+    public boolean IndexReductionVar.dynamicSetCandidate(FVariable.StateSelect stateSelect) {
+        return stateSelect != FVariable.StateSelect.NEVER && stateSelect != FVariable.StateSelect.ALWAYS;
+    }
+
+    public FVariable.StateSelect IndexReductionBiPGraph.computeIncidenceStateSelect(IndexReductionEq eq, IndexReductionVar var) {
+        for (FIdUseExp exp : eq.getEquation().findFIdUseExpsInTree()) {
+            if (getVariable(exp.name()) == var) {
+                if (exp.getOriginalStateSelect() != null)
+                    return exp.getOriginalStateSelect();
+            }
+        }
+        return var.getVariable().stateSelection();
+    }
+    
 
     public Object IndexReductionBiPGraph.printCoefficientsObj(final Map<IndexReductionEq, Map<IndexReductionVar, Coefficient>> coefficientsMatrix, final boolean printExpressions) {
         return new Object() {
@@ -567,12 +635,7 @@ aspect DynamicStateSelect{
                     if (coff != null && coff.state == COEFFICIENT_STATE.CONTINUOUS)
                         return false;
                 }
-                FAbstractVariable.StateSelect stateSelect = var.getVariable().stateSelection();
-                if (stateSelect == FRealVariable.StateSelect.ALWAYS)
-                    return false;
-                if (stateSelect == FRealVariable.StateSelect.NEVER)
-                    return false;
-                return true;
+                return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
             }
         }
 
@@ -631,16 +694,19 @@ aspect DynamicStateSelect{
             
             @Override
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
-                if (!super.shouldVisit(eqn, var))
+                if (!super.shouldVisit(eqn, var)) {
                     return false;
-                FAbstractVariable.StateSelect stateSelect = var.getVariable().stateSelection();
-                if (stateSelect == FRealVariable.StateSelect.ALWAYS)
-                    return false;
-                if (stateSelect == FRealVariable.StateSelect.NEVER)
-                    return false;
-                return true;
+                }
+                return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
             }
         }
+    }
+    
+    public boolean IndexReductionEq.isTempAssignmentFor(IndexReductionVar var) {
+        if (!var.getVariable().isTemporary()) {
+            return false;
+        }
+        return getEquation().assignedFV() == var.getVariable();
     }
     
     public boolean SCCBlock.containsDynamicStates() {

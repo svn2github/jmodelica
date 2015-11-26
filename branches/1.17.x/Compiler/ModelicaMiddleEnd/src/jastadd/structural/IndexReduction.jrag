@@ -630,7 +630,7 @@ aspect IndexReduction {
         // Go through all group members and collect all unique AST equations.
         // There might be several equations the second time an inlined
         // equation is differentiated.
-        Set<FAbstractEquation> originalFEqns = new HashSet<FAbstractEquation>();
+        Set<FAbstractEquation> originalFEqns = new LinkedHashSet<FAbstractEquation>();
         for (IndexReductionEq eqn : baseEqn.getGroupMembers())
             originalFEqns.add(eqn.getEquation());
         

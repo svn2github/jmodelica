@@ -1108,14 +1108,14 @@ aspect FlatNames {
      * Create an FHDummyDerExp for this name with order order, using a copy if needed.
      */
     public FDummyDerExp FQName.createFDummyDerExp(int order) {
-        return new FDummyDerExp(createFIdUse(), order); 
+        return new FDummyDerExp(createFIdUse(), null, order); 
     }
 
     /**
      * Create an FHDummyDerExp for this name with order order, using a copy if needed.
      */
     public FDynamicDerExp FQName.createFDynamicDerExp(int order) {
-        return new FDynamicDerExp(createFIdUse(), order); 
+        return new FDynamicDerExp(createFIdUse(), null, order); 
     }
 
     /**
