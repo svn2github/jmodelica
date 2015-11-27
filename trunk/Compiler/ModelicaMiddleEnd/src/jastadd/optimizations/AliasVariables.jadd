@@ -256,6 +256,8 @@ aspect AliasVariables {
 			} else {
 				join(fvA, fvB, neg);
 			}
+            if (fvA.isTemporary())
+                getAliasVariable(fvA).setTempAssignRight(fvB);
 		}
 		
 		private static final String MERGE_ERROR_MESSAGE = 
@@ -597,6 +599,28 @@ aspect AliasVariables {
 				return buf.toString();
 			}
 			
+            /**
+             * This tempAssignRight functionality is needed when resolving the
+             * original alias variable for variable incidences in equations.
+             * Due to how the functioninlining works this information would
+             * otherwise be lost. E.g.:
+             *   x = z;
+             *   temp_1 = x;
+             *   y = cos(temp_1);
+             * Which might eventually become:
+             *   y = cos(z);
+             * In this situation we wan't to know that the x was the original
+             * reference in the cos expression. Hence this functionality
+             */
+            private FVariable tempAssignRight;
+            
+            private void setTempAssignRight(FVariable var) {
+                tempAssignRight = var;
+            }
+            
+            public FVariable getTempAssignRight() {
+                return tempAssignRight;
+            }
 		}
 		
 		

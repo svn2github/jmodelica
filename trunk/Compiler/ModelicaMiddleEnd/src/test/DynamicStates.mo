@@ -90,15 +90,15 @@ der(_ds.1.s1) := dsDer(1, 1)
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
-  --- States: a2 ---
-    --- Unsolved equation (Block 1(a2).1) ---
-    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
-      Computed variables: a1
-    -------------------------------
   --- States: a1 ---
     --- Unsolved equation (Block 1(a1).1) ---
     ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
       Computed variables: a2
+    -------------------------------
+  --- States: a2 ---
+    --- Unsolved equation (Block 1(a2).1) ---
+    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = 1
+      Computed variables: a1
     -------------------------------
 
 --- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
@@ -149,15 +149,15 @@ der(_ds.1.s1) := dsDer(1, 1)
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
-  --- States: a2, a1 ---
-    --- Solved equation ---
-    a3 := 1 / (ds(1, a1) * ds(1, a2))
-    -------------------------------
   --- States: a3, a1 ---
     --- Solved equation ---
     a2 := 1 / (ds(1, a1) * ds(1, a3))
     -------------------------------
-  --- States: a3, a2 ---
+  --- States: a2, a1 ---
+    --- Solved equation ---
+    a3 := 1 / (ds(1, a1) * ds(1, a2))
+    -------------------------------
+  --- States: a2, a3 ---
     --- Solved equation ---
     a1 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
@@ -294,13 +294,6 @@ der(_ds.1.s1) := dsDer(1, 1)
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
-  --- States: a2, a1 ---
-    --- Solved equation ---
-    a3 := 1 / (ds(1, a1) * ds(1, a2))
-
-    --- Solved equation ---
-    a4 := 1 / (ds(1, a2) * ds(1, a3))
-    -------------------------------
   --- States: a3, a1 ---
     --- Solved equation ---
     a2 := 1 / (ds(1, a1) * ds(1, a3))
@@ -308,7 +301,14 @@ der(_ds.1.s1) := dsDer(1, 1)
     --- Solved equation ---
     a4 := 1 / (ds(1, a2) * ds(1, a3))
     -------------------------------
-  --- States: a3, a2 ---
+  --- States: a2, a1 ---
+    --- Solved equation ---
+    a3 := 1 / (ds(1, a1) * ds(1, a2))
+
+    --- Solved equation ---
+    a4 := 1 / (ds(1, a2) * ds(1, a3))
+    -------------------------------
+  --- States: a2, a3 ---
     --- Solved equation ---
     a4 := 1 / (ds(1, a2) * ds(1, a3))
 
@@ -318,25 +318,25 @@ der(_ds.1.s1) := dsDer(1, 1)
   --- States: a4, a1 ---
     --- Unsolved system (Block 1(a4, a1).1) of 2 variables ---
     Unknown variables:
-      a2 ()
       a3 ()
+      a2 ()
 
     Equations:
       ds(1, a1) * ds(1, a2) * ds(1, a3) = 1
-        Iteration variables: a2
-      ds(1, a2) * ds(1, a3) * ds(1, a4) = 1
         Iteration variables: a3
-    -------------------------------
-  --- States: a4, a2 ---
-    --- Solved equation ---
-    a3 := 1 / (ds(1, a2) * ds(1, a4))
-
-    --- Solved equation ---
-    a1 := 1 / (ds(1, a2) * ds(1, a3))
+      ds(1, a2) * ds(1, a3) * ds(1, a4) = 1
+        Iteration variables: a2
     -------------------------------
   --- States: a4, a3 ---
     --- Solved equation ---
     a2 := 1 / (ds(1, a3) * ds(1, a4))
+
+    --- Solved equation ---
+    a1 := 1 / (ds(1, a2) * ds(1, a3))
+    -------------------------------
+  --- States: a4, a2 ---
+    --- Solved equation ---
+    a3 := 1 / (ds(1, a2) * ds(1, a4))
 
     --- Solved equation ---
     a1 := 1 / (ds(1, a2) * ds(1, a3))
@@ -704,13 +704,13 @@ Jacobian:
 a1 := - ds(1, a4) + 1
 
 --- Dynamic state block ---
-  --- States: a2 ---
-    --- Solved equation ---
-    a3 := (- a1) / (- ds(2, a2))
-    -------------------------------
   --- States: a3 ---
     --- Solved equation ---
     a2 := (- a1) / (- ds(2, a3))
+    -------------------------------
+  --- States: a2 ---
+    --- Solved equation ---
+    a3 := (- a1) / (- ds(2, a2))
     -------------------------------
 
 --- Torn linear system (Block 4) of 1 iteration variables and 1 solved variables ---
@@ -785,37 +785,6 @@ a7 := time
 a5 := - a7 + 1
 
 --- Dynamic state block ---
-  --- States: a1, a3 ---
-    --- Torn linear system (Block 1(a1, a3).1) of 3 iteration variables and 2 solved variables ---
-Coefficient variability: continuous-time
-    Torn variables:
-      a9
-      a8
-
-    Iteration variables:
-      a6
-      a2
-      a4
-
-    Torn equations:
-      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
-      a8 := a6 - time
-
-    Residual equations:
-      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
-        Iteration variables: a6
-      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
-        Iteration variables: a2
-      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
-        Iteration variables: a4
-
-    Jacobian:
-      |-1.0, 0.0, 0.0, ds(1, a1), 0.0|
-      |0.0, -1.0, 1.0, 0.0, 0.0|
-      |-1.0, -1.0, -1.0, 0.0, ds(2, a3)|
-      |-1.0, 0.0, 0.0, 0.0, ds(2, a3)|
-      |-1.0, -1.0, -1.0, ds(1, a1), 0.0|
-    -------------------------------
   --- States: a1, a4 ---
     --- Torn linear system (Block 1(a1, a4).1) of 3 iteration variables and 2 solved variables ---
 Coefficient variability: continuous-time
@@ -847,8 +816,8 @@ Coefficient variability: continuous-time
       |-1.0, 0.0, 0.0, 0.0, ds(2, a4)|
       |-1.0, -1.0, -1.0, ds(1, a1), 0.0|
     -------------------------------
-  --- States: a2, a3 ---
-    --- Torn linear system (Block 1(a2, a3).1) of 3 iteration variables and 2 solved variables ---
+  --- States: a1, a3 ---
+    --- Torn linear system (Block 1(a1, a3).1) of 3 iteration variables and 2 solved variables ---
 Coefficient variability: continuous-time
     Torn variables:
       a9
@@ -856,7 +825,7 @@ Coefficient variability: continuous-time
 
     Iteration variables:
       a6
-      a1
+      a2
       a4
 
     Torn equations:
@@ -867,16 +836,16 @@ Coefficient variability: continuous-time
       ds(2, a3) * ds(2, a4) = a6 + a8 + a9
         Iteration variables: a6
       ds(2, a3) * ds(2, a4) = a5 + a7 + a9
-        Iteration variables: a1
+        Iteration variables: a2
       ds(1, a1) * ds(1, a2) = a6 + a8 + a9
         Iteration variables: a4
 
     Jacobian:
-      |-1.0, 0.0, 0.0, ds(1, a2), 0.0|
+      |-1.0, 0.0, 0.0, ds(1, a1), 0.0|
       |0.0, -1.0, 1.0, 0.0, 0.0|
       |-1.0, -1.0, -1.0, 0.0, ds(2, a3)|
       |-1.0, 0.0, 0.0, 0.0, ds(2, a3)|
-      |-1.0, -1.0, -1.0, ds(1, a2), 0.0|
+      |-1.0, -1.0, -1.0, ds(1, a1), 0.0|
     -------------------------------
   --- States: a2, a4 ---
     --- Torn linear system (Block 1(a2, a4).1) of 3 iteration variables and 2 solved variables ---
@@ -907,6 +876,37 @@ Coefficient variability: continuous-time
       |0.0, -1.0, 1.0, 0.0, 0.0|
       |-1.0, -1.0, -1.0, 0.0, ds(2, a4)|
       |-1.0, 0.0, 0.0, 0.0, ds(2, a4)|
+      |-1.0, -1.0, -1.0, ds(1, a2), 0.0|
+    -------------------------------
+  --- States: a2, a3 ---
+    --- Torn linear system (Block 1(a2, a3).1) of 3 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+    Torn variables:
+      a9
+      a8
+
+    Iteration variables:
+      a6
+      a1
+      a4
+
+    Torn equations:
+      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a8 := a6 - time
+
+    Residual equations:
+      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+        Iteration variables: a6
+      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+        Iteration variables: a1
+      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+        Iteration variables: a4
+
+    Jacobian:
+      |-1.0, 0.0, 0.0, ds(1, a2), 0.0|
+      |0.0, -1.0, 1.0, 0.0, 0.0|
+      |-1.0, -1.0, -1.0, 0.0, ds(2, a3)|
+      |-1.0, 0.0, 0.0, 0.0, ds(2, a3)|
       |-1.0, -1.0, -1.0, ds(1, a2), 0.0|
     -------------------------------
 
@@ -1086,18 +1086,6 @@ der(_ds.1.s1) := dsDer(1, 1)
     ds(1, a2) = sin(ds(1, a4))
       Computed variables: a4
     -------------------------------
-  --- States: a1 ---
-    --- Solved equation ---
-    a2 := time / ds(1, a1)
-
-    --- Unsolved equation (Block 1(a1).1) ---
-    ds(1, a2) = sin(ds(1, a4))
-      Computed variables: a4
-
-    --- Unsolved equation (Block 1(a1).2) ---
-    ds(1, a1) = sin(ds(1, a3))
-      Computed variables: a3
-    -------------------------------
   --- States: a2 ---
     --- Unsolved equation (Block 1(a2).1) ---
     ds(1, a2) = sin(ds(1, a4))
@@ -1110,7 +1098,19 @@ der(_ds.1.s1) := dsDer(1, 1)
     ds(1, a1) = sin(ds(1, a3))
       Computed variables: a3
     -------------------------------
+  --- States: a1 ---
+    --- Solved equation ---
+    a2 := time / ds(1, a1)
 
+    --- Unsolved equation (Block 1(a1).1) ---
+    ds(1, a2) = sin(ds(1, a4))
+      Computed variables: a4
+
+    --- Unsolved equation (Block 1(a1).2) ---
+    ds(1, a1) = sin(ds(1, a3))
+      Computed variables: a3
+    -------------------------------
+    
 --- Torn linear system (Block 2) of 2 iteration variables and 3 solved variables ---
 Coefficient variability: continuous-time
 Torn variables:
@@ -1400,15 +1400,15 @@ a1 := - a2 * a3 + 1
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
-  --- States: y ---
-    --- Unsolved equation (Block 1(y).1) ---
-    ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
-      Computed variables: x
-    -------------------------------
   --- States: x ---
     --- Unsolved equation (Block 1(x).1) ---
     ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
       Computed variables: y
+    -------------------------------
+  --- States: y ---
+    --- Unsolved equation (Block 1(y).1) ---
+    ds(2, x) ^ 2 + ds(2, y) ^ 2 = L
+      Computed variables: x
     -------------------------------
 
 --- Dynamic state block ---
@@ -1555,8 +1555,8 @@ States:
     Real _der_x
     Real _der_y
   Set of dynamic states with 1 states and 1 algebraics:
-    Real x(start = L) \"Cartesian x coordinate\"
     Real y \"Cartesian x coordinate\"
+    Real x(start = L) \"Cartesian x coordinate\"
 "),TransformCanonicalTestCase(
                 name="DynamicStates_Examples_Pendulum_Model",
                 description="Check the model of the pendulum model",
@@ -1771,6 +1771,16 @@ end DynamicStates.Special.FunctionDerivative1;
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
+  --- States: a1 ---
+    --- Solved function call equation ---
+    (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(1, a1))
+      Assigned variables: t.x
+                          t.y
+
+    --- Unsolved equation (Block 1(a1).1) ---
+    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
+      Computed variables: a2
+    -------------------------------
   --- States: a2 ---
     --- Torn system (Block 1(a2).1) of 1 iteration variables and 2 solved variables ---
     Torn variables:
@@ -1789,16 +1799,6 @@ end DynamicStates.Special.FunctionDerivative1;
     Residual equations:
       ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
         Iteration variables: a1
-    -------------------------------
-  --- States: a1 ---
-    --- Solved function call equation ---
-    (DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y)) = DynamicStates.Special.FunctionCallEquation1.F2(ds(1, a1))
-      Assigned variables: t.x
-                          t.y
-
-    --- Unsolved equation (Block 1(a1).1) ---
-    ds(1, a1) ^ 2 + ds(1, a2) ^ 2 = DynamicStates.Special.FunctionCallEquation1.F1(ds(1, a1), DynamicStates.Special.FunctionCallEquation1.R(t.x, t.y))
-      Computed variables: a2
     -------------------------------
 
 --- Torn system (Block 2) of 1 iteration variables and 2 solved variables ---
