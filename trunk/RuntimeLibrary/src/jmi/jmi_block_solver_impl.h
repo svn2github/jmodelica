@@ -60,6 +60,7 @@ struct jmi_block_solver_t {
     double step_calc_time;          /**< \brief Total time spend in solving linear system */
     double factorization_time;      /**< \brief Total time spend on factorizing jacobian matrix */
     double bounds_handling_time;    /**< \brief Total time spend on step limiting */
+    double logging_time;            /**< \brief Total time spend on logging of kin_info and kin_err */
 
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
