@@ -869,7 +869,7 @@ aspect Derivatives {
     eq FIdUseExp.createDerExp(int order) {
         FExp exp = getFIdUse().createDerExp(order() + order);
         if (exp instanceof FIdUseExp) {
-            ((FIdUseExp)exp).setOriginalStateSelect(getOriginalStateSelect());
+            ((FIdUseExp)exp).setOriginalVariable(getOriginalVariable());
         }
         return exp;
     }

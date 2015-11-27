@@ -2028,7 +2028,7 @@ aspect TransformCanonical {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
-                new_exp.setOriginalStateSelect(originalStateSelect(fv));
+                new_exp.setOriginalVariable(this, fv);
                 new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 
                     return new FNegExp(new_exp);
@@ -2042,7 +2042,7 @@ aspect TransformCanonical {
                     && !inWhen() && !inFunctionCallLeft()) {
                 FVariable var = myFV().derivativeEquivalent();
                 FIdUseExp exp =  var.getMeDifferentiated().createUseExp();
-                exp.setOriginalStateSelect(originalStateSelect(var));
+                exp.setOriginalVariable(this, var);
                 if (var.isAlias())
                     exp.rewriteAlias = true;
                 return exp;
@@ -2058,7 +2058,7 @@ aspect TransformCanonical {
             if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
                 FVariable fv = (FVariable) myNonPreFV();
                 FIdUseExp new_exp = fv.alias().createFPreExp();
-                new_exp.setOriginalStateSelect(originalStateSelect(fv));
+                new_exp.setOriginalVariable(this, fv);
                 if (fv.isNegated()) 
                     return new FNegExp(new_exp);
                 else
@@ -2077,7 +2077,7 @@ aspect TransformCanonical {
                 FVariable fv = (FVariable) left.myFV();
                 FIdUseExp exp = fv.alias().createUseExp();
                 setLeft(exp);
-                exp.setOriginalStateSelect(left.originalStateSelect(fv));
+                exp.setOriginalVariable(left, fv);
                 if (fv.isNegated()) 
                     setRight(new FNegExp(getRight()));
                 return this;
@@ -2102,7 +2102,7 @@ aspect TransformCanonical {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
-                new_exp.setOriginalStateSelect(originalStateSelect(fv));
+                new_exp.setOriginalVariable(this, fv);
                 if (myFV().isNegated()) 
                     return new FNegExp(new_exp);
                 else
@@ -2112,7 +2112,7 @@ aspect TransformCanonical {
                 FAbstractDerExp new_exp = createEmptyNode();
                 new_exp.setFIdUse(new FIdUse(new_name));
                 new_exp.setOrder(order());
-                new_exp.setOriginalStateSelect(originalStateSelect(getFIdUse().myFV()));
+                new_exp.setOriginalVariable(this, getFIdUse().myFV());
                 if (getFIdUse().myFV().isNegated())
                     return new FNegExp(new_exp);
                 else
@@ -2121,20 +2121,26 @@ aspect TransformCanonical {
         }
     }
 
-    syn FVariable.StateSelect FIdUseExp.originalStateSelect(FAbstractVariable from) {
-        if (getOriginalStateSelect() != null) {
-            return getOriginalStateSelect();
+    public void FIdUseExp.setOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
+        setOriginalVariable(computeOriginalVariable(oldExp, var));
+    }
+    private static String FIdUseExp.computeOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
+        if (!oldExp.getOriginalVariable().isEmpty()) {
+            return oldExp.getOriginalVariable();
         }
-        if (from.isTemporary()) {
-            AliasManager.AliasVariable av = from.asFVariable().myFClass().getAliasManager().getAliasVariable(from.asFVariable());
+        while (var.isTemporary()) {
+            AliasManager.AliasVariable av = var.asFVariable().myFClass().getAliasManager().getAliasVariable(var.asFVariable());
             if (av.getTempAssignRight() != null) {
-                return av.getTempAssignRight().stateSelection();
+                var = av.getTempAssignRight();
             } else {
                 return null;
             }
+            
         }
-        return getFIdUse().myFV().stateSelection();
+        return var.name();
     }
+    
+    syn FAbstractVariable FIdUseExp.myOriginalFV() = myFClass().lookupFV(getOriginalVariable());
     
     /*
      * Rewrite derivatives of parameters to zeros.
@@ -3462,7 +3468,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
-            return new FDummyDerExp(getFIdUse(), getOriginalStateSelect(), order());
+            return new FDummyDerExp(getFIdUse(), getOriginalVariable(), order());
         }
     }
 

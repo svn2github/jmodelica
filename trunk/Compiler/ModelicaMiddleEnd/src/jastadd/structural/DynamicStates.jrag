@@ -256,7 +256,7 @@ aspect DynamicStateSelect{
     
     rewrite FDerExp {
         when (myFV().isDynamicDerivativeVariable()) to FDynamicDerExp {
-            return new FDynamicDerExp(getFIdUse(), getOriginalStateSelect(), order());
+            return new FDynamicDerExp(getFIdUse(), getOriginalVariable(), order());
         }
     }
     
@@ -538,8 +538,8 @@ aspect DynamicStateSelect{
             return FVariable.StateSelect.ALWAYS;
         }
         for (FIdUseExp exp : eq.getEquation().findFIdUseExpsInTree()) {
-            if (getVariable(exp.name()) == var && exp.getOriginalStateSelect() != null) {
-                return exp.getOriginalStateSelect();
+            if (getVariable(exp.name()) == var && !exp.getOriginalVariable().isEmpty()) {
+                return exp.myOriginalFV().stateSelection();
             }
         }
         return var.getVariable().stateSelection();

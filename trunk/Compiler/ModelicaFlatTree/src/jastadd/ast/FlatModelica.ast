@@ -1117,7 +1117,7 @@ FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= FIdUse <OriginalStateSelect:FVariable.StateSelect>;
+FIdUseExp : FAssignableExp ::= FIdUse <OriginalVariable:String>;
 
 /**
  * A reference to a dynamic state
