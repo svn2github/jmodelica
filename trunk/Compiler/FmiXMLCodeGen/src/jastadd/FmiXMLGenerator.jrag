@@ -1,5 +1,6 @@
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 /*
@@ -19,6 +20,7 @@ import java.util.LinkedList;
 */
 
 
+aspect FmiXMLGenerator {
 /**
  * A generator class containing common functionality for generating the 
  * modelDescription.xml files for different FMI versions.
@@ -207,12 +209,12 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
                 HashSet<String> displayUnitsSet = unitMap.get(attribute);
                 displayUnitsSet.add(variable.displayUnitAttribute());
             } else {
-                HashSet<String> displayUnitsSet = new HashSet<String>();
+                HashSet<String> displayUnitsSet = new LinkedHashSet<String>();
                 displayUnitsSet.add(variable.displayUnitAttribute());
                 unitMap.put(attribute, displayUnitsSet);
             }
         } else if(!unitMap.containsKey(attribute)) {
-            HashSet<String> emptySet = new HashSet<String>();
+            HashSet<String> emptySet = new LinkedHashSet<String>();
             unitMap.put(attribute, emptySet);
         }
     }
@@ -291,7 +293,81 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
             return fclass.numEventIndicators();
     }
     
+    protected static class UnitConversion {
+        public double gain;
+        public double offset;
+        
+        public UnitConversion(double gain, double offset) {
+            this.gain = gain;
+            this.offset = offset;
+        }
+    }
     
+    protected static class BaseUnitInfo {
+        
+        public static final int Length = 0;
+        public static final int Time = 1;
+        public static final int Mass = 2;
+        public static final int Temperature = 3;
+        public static final int Current = 4;
+        public static final int SubstanceAmount = 5;
+        public static final int LuminousIntensity = 6;
+        public static final int Angle = 7;
+        // Number of dimensions defined here
+        public static final int NumberOfDimensions = 8;
+        
+        public static final String[] SIBaseUnits;
+        
+        static {
+            SIBaseUnits = new String[NumberOfDimensions];
+            SIBaseUnits[Length] = "m";
+            SIBaseUnits[Time] = "s";
+            SIBaseUnits[Mass] = "kg";
+            SIBaseUnits[Temperature] = "K";
+            SIBaseUnits[Current] = "A";
+            SIBaseUnits[SubstanceAmount] = "mol";
+            SIBaseUnits[LuminousIntensity] = "cd";
+            SIBaseUnits[Angle] = "rad";
+        }
+        
+        // Powers of the SI-base units (in the same order as above)
+        public int[] powers;
+        
+        // Conversion from unit into SI-baseunits
+        public UnitConversion conv;
+        
+        public BaseUnitInfo(int[] powers, UnitConversion conv) {
+            assert(powers.length == SIBaseUnits.length);
+            this.powers = powers;
+            this.conv = conv;
+        }
+    }
+}
+
+/**
+ * Calculate conversion factor and offset between units. Used to 
+ * specify conversions between base units and display units.
+ * 
+ * @param fclass An FClass object used as a basis for the code generation.
+ * @param from Unit expression to convert from
+ * @param to Unit expression to convert to
+ * @return null if conversion was unsuccessful,
+ * otherwise a UnitConversion object with gain and offset.
+ * Gain and offset is calculated such that:
+ * valueInV = gain*valueInU + offset
+ */
+protected UnitConversion FmiXMLGenerator.getUnitConversion(FClass fclass, String from, String to) {
+   return null;
+}
+
+/**
+ * Calculate information about units in FMI2.
+ * @param fclass An FClass object used as a basis for the code generation.
+ * @param unit Unit expression to get base unit information from
+ * @return null if unsuccessful
+ */
+protected BaseUnitInfo FmiXMLGenerator.getBaseUnitInfo(FClass fclass, String unit) {
+    return null;
 }
 
 /**
@@ -427,6 +503,14 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
                 public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("displayUnit", def, genPrinter);
+                    
+                    UnitConversion conv = getUnitConversion(fclass, unit, def);
+                    if (conv != null) {
+                        generateAttribute("gain", conv.gain, genPrinter);
+                        if (conv.offset != 0) {
+                            generateAttribute("offset", conv.offset, genPrinter);
+                        }
+                    }
                 }
             }
         }
@@ -1040,7 +1124,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
         public class XMLTag_unit extends XMLTag {
-
+            AbstractTag baseUnitTag;
+            BaseUnitInfo baseUnitInfo;
             private String def;
 
             public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
@@ -1054,11 +1139,44 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
 
             public void generateChildren(CodeStream genPrinter) {
+                baseUnitTag = getTag("baseUnit");
+                // Get base unit information
+                baseUnitInfo = getBaseUnitInfo(fclass, unit);
+                if (baseUnitInfo != null) {
+                    baseUnitTag.generateTag(genPrinter);
+                }
+                
                 HashSet<String> defs = unitMap.get(unit);
                 Iterator<String> defsItr = defs.iterator();
                 while(defsItr.hasNext()) {
                     def = defsItr.next();
                     super.generateChildren(genPrinter);
+                }
+            }
+
+            public class XMLTag_baseUnit extends XMLTag {
+                
+                public XMLTag_baseUnit(AbstractGenerator myGenerator, FClass fclass) {
+                    super("baseUnit", "BaseUnit", myGenerator, fclass);
+                }
+                
+                public void generateAttributes(CodeStream genPrinter) {
+                    for (int i = 0; i < BaseUnitInfo.SIBaseUnits.length; i++) {
+                        String baseunit = BaseUnitInfo.SIBaseUnits[i];
+                        if (baseUnitInfo.powers[i] != 0) {
+                            generateAttribute(baseunit, baseUnitInfo.powers[i], genPrinter);
+                        }
+                    }
+                    
+                    UnitConversion conv = baseUnitInfo.conv;
+                    if (conv != null) {
+                        if (conv.gain != 1.0) {
+                            generateAttribute("factor", conv.gain, genPrinter);
+                        }
+                        if (conv.offset != 0.0) {
+                            generateAttribute("offset", conv.offset, genPrinter);
+                        }
+                    }
                 }
             }
 
@@ -1070,6 +1188,14 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
                 public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("name", def, genPrinter);
+                    
+                    UnitConversion conv = getUnitConversion(fclass, unit, def);
+                    if (conv != null) {
+                        generateAttribute("factor", conv.gain, genPrinter);
+                        if (conv.offset != 0) {
+                            generateAttribute("offset", conv.offset, genPrinter);
+                        }
+                    }
                 }
             }
         }
@@ -1639,4 +1765,5 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
         }
     }
+}
 }
