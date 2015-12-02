@@ -50,6 +50,7 @@
 #define JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE                 65536
 #define JMI_BLOCK_START_SET                                     131072
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
+#define JMI_BLOCK_EVALUATE_JAC                                  524288
 
 #define JMI_LIMIT_VALUE 1e30
 
@@ -144,7 +145,22 @@ typedef int (*jmi_block_solver_residual_func_t)(void* problem_data, jmi_real_t* 
  * @return Error code.
  */
 typedef int (*jmi_block_solver_dir_der_func_t)(void* problem_data, jmi_real_t* x,
-         jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mdoe);
+         jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int mode);
+
+/**
+ * \brief Function signature for evaluation of the jacobian corresponding to 
+ * an equation block residual in the block solver interface.
+ *
+ * @param problem_data Problem data pointer passed in the jmi_block_solver_new.
+ * @param x (Input/Output) If mode is set to JMI_BLOCK_EVALUATE_JAC, then x is an input
+ * argument used in the evaluation of the jacobian.
+ * @param jac(Output) The jacobian matrix if mode is set to
+ * JMI_BLOCK_EVALUATE_JAC, otherwise this argument is not used.
+ * @param mode Evaluation mode define
+ * @return Error code.
+ */
+typedef int (*jmi_block_solver_jacobian_func_t)(void* problem_data, jmi_real_t* x,
+         jmi_real_t** jac, int mode);
 
 /**
  * \brief Function signature for checking if discrete variables would change
@@ -180,6 +196,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                          jmi_log_t* log,
                          jmi_block_solver_residual_func_t F,
                          jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
+                         jmi_block_solver_jacobian_func_t Jacobian, /* can be NULL if, e.g., kin_dF should be used for Jacobian calculation */
                          jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                          jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                          jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
@@ -248,7 +265,8 @@ struct jmi_block_solver_options_t {
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
-    
+    int calculate_jacobian_externally; /**< \bried Flag indicating if the solver should use callback for calculating Jacobian */
+
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */

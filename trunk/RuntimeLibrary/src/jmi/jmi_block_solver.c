@@ -48,6 +48,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            jmi_log_t* log,                          
                            jmi_block_solver_residual_func_t F, 
                            jmi_block_solver_dir_der_func_t dF,
+                           jmi_block_solver_jacobian_func_t Jacobian, 
                            jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
                            jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
                            jmi_block_solver_log_discrete_variables log_discrete_variables,
@@ -56,7 +57,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            void* problem_data){
     jmi_block_solver_t* block_solver = (jmi_block_solver_t*)calloc(1, sizeof(jmi_block_solver_t));
     if(!block_solver) {
-        jmi_log_comment(log, logError, "Could not allocate memory for block solver");
+        jmi_log_node(log, logError, "MemoryAllocationFailed","Could not allocate memory for block solver");
         return 1;
     }
     *block_solver_ptr = block_solver;
@@ -155,6 +156,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
 
     block_solver->F = F;
     block_solver->dF =dF;
+    block_solver->Jacobian = Jacobian;
     block_solver->check_discrete_variables_change = check_discrete_variables_change;
     block_solver->update_discrete_variables = update_discrete_variables;
     block_solver->log_discrete_variables = log_discrete_variables;
@@ -660,6 +662,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->rescale_each_step_flag = 0;
     bsop->rescale_after_singular_jac_flag = 0;
     bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
+    bsop->calculate_jacobian_externally = 0;
     bsop->brent_ignore_error_flag = 0;
     bsop->experimental_mode = 0;
     bsop->use_nominals_as_fallback_in_init = 0;

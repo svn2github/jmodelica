@@ -258,7 +258,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
                      "jmi_kinsol_solver", block->label, message);
     }
-    if (!block->dF || block->options->block_jacobian_check) {
+    if ((!block->dF && !block->Jacobian) || block->options->block_jacobian_check || (!block->options->calculate_jacobian_externally && !block->dF)
+        || (!block->Jacobian && block->options->calculate_jacobian_externally)) {
         /* Use (almost) standard finite differences */
         realtype inc, inc_inv, ujsaved, ujscale, sign;
         realtype *tmp2_data, *u_data, *uscale_data;
@@ -332,7 +333,10 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             }
         }
     }
-    if (block->dF) {
+    if(block->Jacobian && block->options->calculate_jacobian_externally) {
+        ret = block->Jacobian(block->problem_data, N_VGetArrayPointer(u), J->cols, JMI_BLOCK_EVALUATE_JAC);
+    }
+    if (block->dF && !block->options->calculate_jacobian_externally) {
         /* utilize directional derivatives to calculate Jacobian */
         for(i = 0; i < N; i++){ 
             block->x[i] = Ith(u,i);
@@ -350,17 +354,24 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     }
 
     if (block->options->block_jacobian_check) {
-        /* compare analytical and finite differences Jacobians */
-        if (block->dF) {
+        /* compare analytical/external and finite differences Jacobians */
+        if (block->dF || block->Jacobian) {
             for (i = 0; i < N; i++) {
                 for (j = 0; j < N; j++) {
                     realtype fd_val = jac_fd[i * N + j];
                     realtype a_val = J->data[i * N + j];
                     realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
                     if (rel_error >= block->options->block_jacobian_check_tol) {
-                        jmi_log_node(block->log, logError, "JacobianCheck",
-                                     "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
+                        if(block->options->calculate_jacobian_externally) {
+                            jmi_log_node(block->log, logError, "JacobianCheck",
+                                     "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
                                      j, i, a_val, fd_val, rel_error);
+                        }
+                        else {
+                            jmi_log_node(block->log, logError, "JacobianCheck",
+                                "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
+                                j, i, a_val, fd_val, rel_error);
+                        }
                     }
                 }
             }
@@ -816,6 +827,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_fmt(block->log, node, logInfo, " <max_residual_scaling_factor: %g>", block->options->max_residual_scaling_factor);
     jmi_log_fmt(block->log, node, logInfo, " <use_jacobian_equilibration: %d>", block->options->use_jacobian_equilibration_flag);
     jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
+    jmi_log_fmt(block->log, node, logInfo, " <calculate_jacobian_externally: %d>", block->options->calculate_jacobian_externally);
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
