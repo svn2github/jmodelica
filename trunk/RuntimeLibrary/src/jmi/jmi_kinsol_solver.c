@@ -2398,7 +2398,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         solver->last_max_residual_index = max_index;
         solver->last_fnorm = N_VWL2Norm(kin_mem->kin_fval, solver->kin_f_scale);
         kin_mem->kin_fnorm = solver->last_fnorm;
-        sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16lg", kin_mem->kin_nni, kin_mem->kin_nfe, solver->last_fnorm);
+        sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16g", kin_mem->kin_nni, kin_mem->kin_nfe, solver->last_fnorm);
         kin_info("", "KINSolInit", msg, kin_mem->kin_ih_data);
         jmi_kinsol_print_progress(block, 2);
     } else {
