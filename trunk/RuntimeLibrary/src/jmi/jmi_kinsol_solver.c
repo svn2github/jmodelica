@@ -415,15 +415,19 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
 
 static void jmi_kinsol_small_step_nonconv_info_message(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
-    jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "KinsolErrorInfo");
+    jmi_log_category_t logCategory = logInfo;
+    jmi_log_node_t node;
     realtype fnorm, snorm;
+    if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual) 
+        logCategory = logError;
+    node = jmi_log_enter(block->log, logCategory, "KinsolErrorInfo");
     KINGetFuncNorm(solver->kin_mem, &fnorm);
     KINGetStepLength(solver->kin_mem, &snorm);
     
-    jmi_log_fmt(block->log, node, logInfo, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
+    jmi_log_fmt(block->log, node, logCategory, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
         "KINSol", block->cur_time, block->label);
-    jmi_log_fmt(block->log, node, logInfo, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
-    jmi_log_fmt(block->log, node, logInfo, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+    jmi_log_fmt(block->log, node, logCategory, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
+    jmi_log_fmt(block->log, node, logCategory, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
                 fnorm, snorm, solver->kin_stol);
     jmi_log_leave(block->log, node);
 }
@@ -555,7 +559,7 @@ static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidual
     if (block->callbacks->log_options.log_level < 4) return;
     KINGetNumNonlinSolvIters(kin_mem, &nniters);
     /* Only print header first iteration */
-    if (nniters == 0) {
+    if (nniters == 0 && logResidualOnlyFlag != 2) { /* Do not print header if INITIAL_GUESS ok */
         jmi_log_node(log, logInfo, "Progress", "<source:%s><message:%s><isheader:%d>",
             "jmi_kinsol_solver",
             "iter       res_norm      max_res: ind   nlb  nab   lambda_max: ind      lambda",
@@ -601,7 +605,7 @@ static void jmi_kinsol_print_progress(jmi_block_solver_t *block, int logResidual
     return;
 }
 
-/* Logging callback used by KINSOL to report progress att higher log levels */
+/* Logging callback used by KINSOL to report progress at higher log levels */
 void kin_info(const char *module, const char *function, char *msg, void *eh_data){
     int i;
     jmi_block_solver_t *block = eh_data;
@@ -822,19 +826,25 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_fmt(block->log, node, logInfo, " <enforce_bounds: %d>", block->options->enforce_bounds_flag);
     jmi_log_fmt(block->log, node, logInfo, " <iteration_variable_scaling: %d>", block->options->iteration_variable_scaling_mode);
     jmi_log_fmt(block->log, node, logInfo, " <residual_equation_scaling: %d>", block->options->residual_equation_scaling_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <solver_exit_criterion: %d>", block->options->solver_exit_criterion_mode);
     jmi_log_fmt(block->log, node, logInfo, " <regularization_tolerance: %g>", block->options->regularization_tolerance);
     jmi_log_fmt(block->log, node, logInfo, " <min_residual_scaling_factor: %g>", block->options->min_residual_scaling_factor);
     jmi_log_fmt(block->log, node, logInfo, " <max_residual_scaling_factor: %g>", block->options->max_residual_scaling_factor);
     jmi_log_fmt(block->log, node, logInfo, " <use_jacobian_equilibration: %d>", block->options->use_jacobian_equilibration_flag);
     jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
     jmi_log_fmt(block->log, node, logInfo, " <calculate_jacobian_externally: %d>", block->options->calculate_jacobian_externally);
+    jmi_log_fmt(block->log, node, logInfo, " <jacobian_update_mode: %d>", block->options->jacobian_update_mode);
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
 
     /* Test to enable residual monitoring based Jac update */
-    KINSetNoResMon(solver->kin_mem,(block->options->experimental_mode & jmi_block_solver_experimental_residual_monitoring)?0:1);
-
+    if(block->options->jacobian_update_mode == jmi_reuse_jacobian_update_mode
+        || block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode
+        || (block->options->experimental_mode &jmi_block_solver_experimental_use_modifiedBFGS))
+        KINSetNoResMon(solver->kin_mem,0);
+    else
+        KINSetNoResMon(solver->kin_mem,1);
     KINSetMaxSetupCalls(solver->kin_mem,block->options->max_iter_no_jacobian);
 
     /* residual monitoring does not need to be done in every step but max_iter_no_jacobian must be proportional to the number */
@@ -1565,7 +1575,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     int N = block->n;
     char trans = 'N';
     int ret = 0, i;
-    if(block->options->experimental_mode & jmi_block_solver_experimental_use_Broyden) {
+    if(block->options->jacobian_update_mode & jmi_broyden_jacobian_update_mode) {
         if(!solver->updated_jacobian_flag) {
             long int  nniters;
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
@@ -2351,19 +2361,60 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
     int flag;
     jmi_log_node_t topnode;
     
+    if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step) {
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
+        KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
+    } else if (block->options->solver_exit_criterion_mode == jmi_exit_criterion_residual) {
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_stol);
+        KINSetScaledStepTol(solver->kin_mem, solver->kin_ftol);
+    } else if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual) {
+        KINSetFuncNormTol(solver->kin_mem, solver->kin_stol);
+        KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
+    }
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, strategy, solver->kin_y_scale, solver->kin_f_scale);
-    jmi_kinsol_print_progress(block, 1);
+    if(flag == KIN_INITIAL_GUESS_OK) { /* last_fnorm not up to date in this case */
+        double max_residual = 0.0;
+        int i, max_index = 0;
+        realtype* f;
+        char msg[256];
+        realtype* residual_scaling_factors = NV_DATA_S(solver->kin_f_scale);
+        struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
+
+        /*kin_f(solver->kin_y, solver->work_vector, block); */
+        f = NV_DATA_S(kin_mem->kin_fval);
+        if (block->n >= 1) {
+            max_residual = f[0]*residual_scaling_factors[0];
+            for (i=1;i<block->n;i++) {
+                realtype res = f[i]*residual_scaling_factors[i];
+                if (RAbs(res) > RAbs(max_residual)) {
+                    max_residual = res;
+                    max_index = i;
+                }
+            }
+        }
+
+        solver->last_max_residual= max_residual;
+        solver->last_max_residual_index = max_index;
+        solver->last_fnorm = N_VWL2Norm(kin_mem->kin_fval, solver->kin_f_scale);
+        kin_mem->kin_fnorm = solver->last_fnorm;
+        sprintf(msg, "nni = %4ld   nfe = %6ld   fnorm = %26.16lg", kin_mem->kin_nni, kin_mem->kin_nfe, solver->last_fnorm);
+        kin_info("", "KINSolInit", msg, kin_mem->kin_ih_data);
+        jmi_kinsol_print_progress(block, 2);
+    } else {
+        jmi_kinsol_print_progress(block, 1);
+    }
     if(flag == KIN_INITIAL_GUESS_OK) {
         flag = KIN_SUCCESS;
         /* If the evaluation of the residuals fails, e.g. due to NaN in the residuals, the Kinsol exits, but the old fnorm
              from a previous solve, possibly converged, is still stored. In such cases Kinsol reports success based on a fnorm
-             value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reproted
+             value from a previous solve - if the previous solve was converged, then also a following faulty solve will be reported
              as a success. Commenting out this code since it causes problems.*/
     } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
         realtype fnorm;
         KINGetFuncNorm(solver->kin_mem, &fnorm);
-        if(fnorm <= solver->kin_stol) {
+        if((fnorm <= solver->kin_stol && !block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual)
+            || (block->options->solver_exit_criterion_mode == jmi_exit_criterion_step && flag == KIN_STEP_LT_STPTOL)) {
             flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
             jmi_kinsol_linesearch_nonconv_error_message(block);

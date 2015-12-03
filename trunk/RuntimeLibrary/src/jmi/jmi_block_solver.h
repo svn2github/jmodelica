@@ -85,6 +85,20 @@ typedef enum jmi_block_solver_iv_scaling_mode_t {
     jmi_iter_var_scaling_heuristics = 2
 } jmi_block_solver_iv_scaling_mode_t;
 
+/** \brief Exit criterion mode for the non-linear solver*/
+typedef enum jmi_block_solver_exit_criterion_mode_t {
+    jmi_exit_criterion_step_residual = 0, /* must be zero */
+    jmi_exit_criterion_step = 1,
+    jmi_exit_criterion_residual = 2,
+    jmi_exit_criterion_hybrid = 3
+} jmi_block_solver_exit_criterion_mode_t;
+
+/** \brief Mode for Jacobian updates*/
+typedef enum jmi_block_solver_jacobian_update_mode_t {
+    jmi_full_jacobian_update_mode = 0, 
+    jmi_broyden_jacobian_update_mode = 1,
+    jmi_reuse_jacobian_update_mode = 2
+} jmi_block_solver_jacobian_update_mode_t;
 
 /** \brief Experimental features in the solver */
 typedef enum jmi_block_solver_experimental_mode_t {
@@ -95,9 +109,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
-    jmi_block_solver_experimental_residual_monitoring = 256,
     jmi_block_solver_experimental_check_descent_direction = 512,
-    jmi_block_solver_experimental_use_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096
 } jmi_block_solver_experimental_mode_t;
 
@@ -239,6 +251,9 @@ struct jmi_block_solver_options_t {
     int max_iter;                           /**< \brief Maximum number of iterations for the equation block solver before failure */
     int max_iter_no_jacobian;               /**< \brief Maximum number of iterations for the equation block solver without full jacobian recalculation */
 
+    jmi_block_solver_exit_criterion_mode_t solver_exit_criterion_mode; /**< \brief Exit criterion mode for non-linear block solver:
+                                                                       0 - step length + residual, 1 - step length, 2 - residual, 3 -hybrid (default) */
+
     int enforce_bounds_flag;                /**< \brief Enforce min-max bounds on variables in the equation blocks*/
     int use_jacobian_equilibration_flag;    /**< \brief If jacobian equlibration should be used in equation block solvers */
     int use_Brent_in_1d_flag;               /**< \brief If Brent search should be used to improve accuracy in solution of 1D non-linear equations */
@@ -246,6 +261,7 @@ struct jmi_block_solver_options_t {
     int block_jacobian_check;               /**< \brief Compares analytic block jacobian with finite difference block jacobian */ 
     double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
     
+    jmi_block_solver_jacobian_update_mode_t jacobian_update_mode; /**< \brief Jacobian update mode in equation block solvers: 0 - full Jacobian, 1 - Broyden update */
     jmi_block_solver_residual_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
 
     double max_residual_scaling_factor;    /**< \breif Maximum residual scaling factor used in nle solver */

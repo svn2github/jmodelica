@@ -55,7 +55,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
         /* creating jmi struct failed */
-        jmi_log_comment(jmi_->log, logError, "Creating internal struct failed.");
+        jmi_log_node(jmi_->log, logError, "StructCreationFailure","Creating internal struct failed.");
         return retval;
     }
     
@@ -63,7 +63,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     retval = jmi_me_init_modules(jmi);
     if (retval != 0) {
-    	jmi_log_comment(jmi_->log, logError, "Failed to initialize modules");
+    	jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
     	jmi_delete(jmi_);
     	return -1;
     }
@@ -71,7 +71,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
 
     /* Check if the GUID is correct.*/
     if (strcmp(GUID, C_GUID) != 0) {
-        jmi_log_comment(jmi_->log, logError, "The model and the description file are not consistent to each other.");
+        jmi_log_node(jmi_->log, logError, "ModelDescriptionFileInconsistency","The model and the description file are not consistent to each other.");
         jmi_delete(jmi_);
         return -1;
     }
@@ -86,7 +86,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     /* set start values*/
     if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
-        jmi_log_comment(jmi_->log, logError, "Failed to set start values.");
+        jmi_log_node(jmi_->log, logError, "SetStartValuesFailure","Failed to set start values.");
         jmi_delete(jmi_);
         return -1;
     }
@@ -790,7 +790,7 @@ int jmi_update_and_terminate(jmi_t* jmi) {
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "DerivativeCalculationFailure","Evaluating the ode derivatives failed.");
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -859,7 +859,22 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
         }
-    }  
+    } 
+
+    index = get_option_index("_nle_jacobian_update_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_broyden_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
+            break;
+        case jmi_reuse_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+            break;
+        default:
+            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+        }
+    } 
         
     index = get_option_index("_nle_solver_min_residual_scaling_factor");
     if(index)
@@ -895,6 +910,22 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         default:
             bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+        }
+    }
+    index = get_option_index("_nle_solver_exit_criterion");
+    if(index) {
+        switch((int)z[index]) {
+        case jmi_exit_criterion_step_residual:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_step_residual;
+            break;
+        case jmi_exit_criterion_step:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_step;
+            break;
+        case jmi_exit_criterion_residual:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_residual;
+            break;
+        default:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;
         }
     }
     index = get_option_index("_rescale_each_step");
