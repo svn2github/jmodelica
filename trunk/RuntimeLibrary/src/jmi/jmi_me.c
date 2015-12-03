@@ -895,6 +895,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_max_iter");
     if(index)
         bsop->max_iter = (int)z[index];
+    index = get_option_index("_nle_solver_max_iter_no_jacobian");
+    if(index)
+        bsop->max_iter_no_jacobian = (int)z[index];
     index = get_option_index("_block_solver_experimental_mode");
     if(index)
         bsop->experimental_mode  = (int)z[index];

@@ -629,6 +629,22 @@ abstract public class OptionRegistry {
              "Equations scaling mode in equation block solvers: " +
              "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid.",
              0, 3),
+        NLE_SOLVER_EXIT_CRITERION
+            ("nle_solver_exit_criterion",
+             OptionType.runtime, 
+             Category.user,
+             3,
+             "Exit criterion mode: " +
+             "0 - step length and residual based, 1 - only step length based, 2 - only residual based, 3 - hybrid.",
+             0, 3),
+        NLE_JACOBIAN_UPDATE_MODE
+            ("nle_jacobian_update_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to update the Jacobian: " +
+             "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
+             0, 2),
         NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
             ("nle_solver_min_residual_scaling_factor",
              OptionType.runtime, 
@@ -681,7 +697,7 @@ abstract public class OptionRegistry {
              Category.uncommon, 
              false,
              "If enabled, the equation block solver computes and log the jacobian condition number."),
-             NLE_SOLVER_BRENT_IGNORE_ERROR
+        NLE_SOLVER_BRENT_IGNORE_ERROR
             ("nle_brent_ignore_error",
              OptionType.runtime, 
              Category.uncommon, 
@@ -708,6 +724,13 @@ abstract public class OptionRegistry {
              100,
              "Maximum number of iterations for the equation block solver.",
              2, 500),
+        NLE_SOLVER_MAX_ITER_NO_JACOBIAN
+            ("nle_solver_max_iter_no_jacobian",
+             OptionType.runtime, 
+             Category.uncommon,
+             10,
+             "Maximum number of iterations without jacobian update. Value 1 means an update in every iteration.",
+             1, 500),
         NLE_SOLVER_STEP_LIMIT_FACTOR
             ("nle_solver_step_limit_factor",
              OptionType.runtime, 
