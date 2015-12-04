@@ -427,7 +427,7 @@ static void jmi_kinsol_small_step_nonconv_info_message(jmi_block_solver_t * bloc
     jmi_log_fmt(block->log, node, logCategory, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
         "KINSol", block->cur_time, block->label);
     jmi_log_fmt(block->log, node, logCategory, "<msg: %s>", "Step norm criterion is satisfied but residual norm is above the tolerance.");
-    jmi_log_fmt(block->log, node, logCategory, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+    jmi_log_fmt(block->log, node, logCategory, "<functionL2Norm: %g, scaledStepLength: %g, tolerance: %g>",
                 fnorm, snorm, solver->kin_stol);
     jmi_log_leave(block->log, node);
 }
@@ -2359,17 +2359,16 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
     jmi_kinsol_solver_t* solver = block->solver;
     int flag;
     jmi_log_node_t topnode;
+    struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
     
-    if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step) {
+    if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step || 
+        block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual) {
         KINSetFuncNormTol(solver->kin_mem, solver->kin_ftol);
         KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
     } else if (block->options->solver_exit_criterion_mode == jmi_exit_criterion_residual) {
         KINSetFuncNormTol(solver->kin_mem, solver->kin_stol);
         KINSetScaledStepTol(solver->kin_mem, solver->kin_ftol);
-    } else if(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual) {
-        KINSetFuncNormTol(solver->kin_mem, solver->kin_stol);
-        KINSetScaledStepTol(solver->kin_mem, solver->kin_stol);
-    }
+    } 
     jmi_kinsol_solver_print_solve_start(block, &topnode);
     flag = KINSol(solver->kin_mem, solver->kin_y, strategy, solver->kin_y_scale, solver->kin_f_scale);
     if(flag == KIN_INITIAL_GUESS_OK) { /* last_fnorm not up to date in this case */
@@ -2378,7 +2377,6 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         realtype* f;
         char msg[256];
         realtype* residual_scaling_factors = NV_DATA_S(solver->kin_f_scale);
-        struct KINMemRec* kin_mem = (struct KINMemRec*) solver->kin_mem;
 
         /*kin_f(solver->kin_y, solver->work_vector, block); */
         f = NV_DATA_S(kin_mem->kin_fval);
@@ -2411,9 +2409,12 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
              as a success. Commenting out this code since it causes problems.*/
     } else if (flag == KIN_LINESEARCH_NONCONV || flag == KIN_STEP_LT_STPTOL) {
         realtype fnorm;
-        KINGetFuncNorm(solver->kin_mem, &fnorm);
+        N_VProd(solver->kin_f_scale, kin_mem->kin_fval, solver->work_vector);
+        fnorm =N_VMaxNorm(solver->work_vector);
         if((fnorm <= solver->kin_stol && !block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual)
-            || (block->options->solver_exit_criterion_mode == jmi_exit_criterion_step && flag == KIN_STEP_LT_STPTOL)) {
+            || (block->options->solver_exit_criterion_mode == jmi_exit_criterion_step && flag == KIN_STEP_LT_STPTOL) ||
+            (fnorm <= solver->kin_stol && block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual 
+             && flag == KIN_STEP_LT_STPTOL)) {
             flag = KIN_SUCCESS;
         } else if (flag == KIN_LINESEARCH_NONCONV) { /* Print the postponed error message */
             jmi_kinsol_linesearch_nonconv_error_message(block);
