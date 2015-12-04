@@ -685,9 +685,6 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                 solver->lambda = lambda;
                 solver->lambda_max = lambda_max;
 
-                if (solver->use_steepest_descent_flag) kin_char_log(solver, 'd');
-                if (solver->J_is_singular_flag) kin_char_log(solver, 'r');
-
                 jmi_kinsol_print_progress(block, 0);
                 if (nniters > 0) {
                     jmi_log_fmt(log, topnode, logInfo, "<lambda_max:%E>", lambda_max);
@@ -1650,7 +1647,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     if(solver->use_steepest_descent_flag) {
         /* Make step in steepest descent direction and not Newton*/
         N_VScale(ONE, solver->gradient, x);
-
+        kin_char_log(solver, 'd');
         ret = 0;
     }
     else if(solver->J_is_singular_flag) {
@@ -1692,6 +1689,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             i = 1;
             t = clock();
             dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+            kin_char_log(solver, 'r');
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
                 block->force_rescaling = 1;
@@ -1724,6 +1722,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
                 jmi_log_fmt(block->log, inner_node, logInfo, "<rank:%d>", rank);
                 jmi_log_leave(block->log, inner_node);
             }
+            kin_char_log(solver, 'm');
         }
 
         /* Evaluate discrete variables after a regularization. */
