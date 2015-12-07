@@ -110,6 +110,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_check_descent_direction = 512,
+    jmi_block_solver_experimental_Sparse_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096
 } jmi_block_solver_experimental_mode_t;
 

@@ -838,7 +838,8 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* Test to enable residual monitoring based Jac update */
     if(block->options->jacobian_update_mode == jmi_reuse_jacobian_update_mode
         || block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode
-        || (block->options->experimental_mode &jmi_block_solver_experimental_use_modifiedBFGS))
+        || (block->options->experimental_mode &jmi_block_solver_experimental_use_modifiedBFGS)
+        || (block->options->experimental_mode & jmi_block_solver_experimental_Sparse_Broyden))
         KINSetNoResMon(solver->kin_mem,0);
     else
         KINSetNoResMon(solver->kin_mem,1);
@@ -1281,6 +1282,14 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
             JTJ_c[i][j] = JTJ_c[j][i];
         }
     }
+
+    if((block->callbacks->log_options.log_level >= 4)) {
+        jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "RegularizedJacobian", "<block:%s>", block->label);
+        if (block->callbacks->log_options.log_level >= 6) {
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
+        }
+        jmi_log_leave(block->log, node);
+    }
 }
 
 /* Estimate condition number utilizing dgecon from LAPACK*/
@@ -1397,6 +1406,65 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
             jmi_log_reals(block->log, node, logInfo, "current_residual", N_VGetArrayPointer(b), N);
             jmi_log_reals(block->log, node, logInfo, "last_step", N_VGetArrayPointer(kin_mem->kin_pp), N);
             jmi_log_fmt(block->log, node,logInfo, "Update denominator <step_norm: %g>", denom);
+#endif
+            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J->data, N, N);
+        }
+        jmi_log_leave(block->log, node);
+    }
+    block->broyden_update_time +=((double)clock()-t);
+    ret = jmi_kin_factorize_jacobian(block );
+    return ret;
+}
+
+/* Perform sparse (Bogle & Perkins, "A new sparsity preserving Quasi-Newtion update for solving nonlinear equations", 1990) 
+    Broyden update and factorize the resulted matrix */
+static int jmi_kin_make_sparse_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
+    clock_t t = clock();
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
+    struct KINMemRec* kin_mem = solver->kin_mem;
+    int ret, i, j;
+    int N = block->n;
+
+    /* work_vector = Jac * step */
+    jmi_kinsol_calc_Mv(solver->J, 0, kin_mem->kin_pp, solver->work_vector);
+
+    /* work_vector = (ResidualDelta  - Jac * step) unless below update tolerance */
+    for(i = 0; i < N; i++) {
+        double tempi = -(Ith(b,i) - Ith(solver->last_residual,i)) - Ith(solver->work_vector,i);
+        if(RAbs(tempi) >= UNIT_ROUNDOFF*(RAbs(Ith(b,i))+RAbs(Ith(solver->last_residual,i)))) {
+            Ith(solver->work_vector,i) = tempi;
+        } else {
+            Ith(solver->work_vector,i) = 0;
+        }
+    }
+
+    /* work_vector2(i) = sum(k=1:n) step(k)*Jac(i,k) */
+    for(i = 0; i < N; i++) {
+        double denom = 0;
+        for(j=0; j < N; j++) {
+            denom += Ith(kin_mem->kin_pp, j)*Ith(kin_mem->kin_pp, j)*solver->J->cols[j][i]*solver->J->cols[j][i];
+        }
+        Ith(solver->work_vector2,i) = denom;
+    }
+
+    for(j=0; j < N; j++) {
+        realtype *jacCol_j = solver->J->cols[j];
+        for(i = 0; i < N; i++) {
+            if( Ith(solver->work_vector2,i) >= UNIT_ROUNDOFF) {
+                jacCol_j[i] += Ith(solver->work_vector,i) * Ith(kin_mem->kin_pp, i)*jacCol_j[i]*jacCol_j[i]/Ith(solver->work_vector2,i);
+            }
+        }
+    }
+
+    if((block->callbacks->log_options.log_level >= 4)) {
+        jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "SparseBroydenJacobianUpdate", "<block:%s>", block->label);
+        if (block->callbacks->log_options.log_level >= 6) {
+#if 0
+            jmi_log_reals(block->log, node, logInfo, "last_residual", N_VGetArrayPointer(solver->last_residual), N);
+            jmi_log_reals(block->log, node, logInfo, "current_residual", N_VGetArrayPointer(b), N);
+            jmi_log_reals(block->log, node, logInfo, "last_step", N_VGetArrayPointer(kin_mem->kin_pp), N);
+            jmi_log_reals(block->log, node,logInfo, "denoms", N_VGetArrayPointer(solver->work_vector2), N);
+            jmi_log_reals(block->log, node,logInfo, "res_JacStep", N_VGetArrayPointer(solver->work_vector), N);
 #endif
             jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->J->data, N, N);
         }
@@ -1591,6 +1659,18 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             /* Never do update in the first iteration */
             if (nniters > 0) {        
                 ret = jmi_kin_make_modifiedBFGS_update(block, b);
+                if(ret != 0) return ret;
+            }
+        }
+    }
+
+    if(block->options->experimental_mode & jmi_block_solver_experimental_Sparse_Broyden) {
+        if(!solver->updated_jacobian_flag) {
+            long int  nniters;
+            KINGetNumNonlinSolvIters(kin_mem, &nniters);
+            /* Never do update in the first iteration */
+            if (nniters > 0) {        
+                ret = jmi_kin_make_sparse_Broyden_update(block, b);
                 if(ret != 0) return ret;
             }
         }
