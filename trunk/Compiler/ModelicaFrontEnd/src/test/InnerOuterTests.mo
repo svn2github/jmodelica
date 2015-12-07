@@ -1294,5 +1294,49 @@ end InnerOuterTests.NoInner13;
 ")})));
 end NoInner13;
 
+model NoInner14
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 1;
+    annotation(Inline=false);
+    end F;
+    record R
+        parameter Real a = 1;
+        parameter Real b = F(a);
+    end R;
+    model B
+        outer R r;
+    end B;
+    B b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NoInner14",
+            description="Check that referenced functions in automatic inner is flattened",
+            flatModel="
+fclass InnerOuterTests.NoInner14
+ parameter InnerOuterTests.NoInner14.R r(a = 1,b = InnerOuterTests.NoInner14.F(r.a));
+
+public
+ function InnerOuterTests.NoInner14.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ annotation(Inline = false);
+ end InnerOuterTests.NoInner14.F;
+
+ record InnerOuterTests.NoInner14.R
+  parameter Real a;
+  parameter Real b;
+ end InnerOuterTests.NoInner14.R;
+
+end InnerOuterTests.NoInner14;
+")})));
+end NoInner14;
+
 
 end InnerOuterTests;
