@@ -2078,7 +2078,7 @@ public class ModelicaCompiler {
     /**
      * Tear down the compiler. Undo the work done in {@link #setUp(IErrorHandler)}.
      */
-    protected void ModelicaCompiler.tearDown() {
+    public void ModelicaCompiler.tearDown() {
         createUtilInterface().tearDown();
         setErrorHandler(null);
         isSetUp = false;
