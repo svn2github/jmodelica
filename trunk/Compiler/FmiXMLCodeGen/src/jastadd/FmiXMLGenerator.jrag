@@ -1,5 +1,6 @@
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
@@ -225,7 +226,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param fclass An FClass object used as a basis for the code generation.
      */
     protected HashMap<String,HashSet<String>> extractUnits(FClass fclass) {
-        HashMap<String,HashSet<String>> unitMap = new HashMap<String,HashSet<String>>();
+        HashMap<String,HashSet<String>> unitMap = new LinkedHashMap<String,HashSet<String>>();
         for(FVariable variable:fclass.allVariables()) {
             if(realVariableWithUnit(variable)) {
                 addToUnitMap(unitMap, (FRealVariable)variable);
