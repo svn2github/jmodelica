@@ -11,6 +11,39 @@
   <title>Release notes</title>
 
   <section>
+    <title>Release notes for JModelica.org version 1.17</title>
+
+    <section>
+      <title>Highlights</title>
+
+      <para>For this release, all focus has been on Modelica/MSL compliance.
+      All example models in the bundled MSL version both check and simulate
+      correctly with this release.</para>
+    </section>
+
+    <section>
+      <title>Compiler</title>
+
+      <section>
+        <title>Compliance</title>
+
+        <para>For this release, the Modelica Standard Library (MSL) version
+        3.2.1 build 4 is used with some additional handpicked revisions from
+        trunk. All example models in this version of MSL simulate correctly
+        with the JModelica.org 1.17 release. The results can be seen in the
+        compliance reports for simulation and check on the JModelica.org <link
+        xlink:href="http://jmodelica.org/binary">download site</link>.</para>
+
+        <para>The trunk version of MSL has some additional example models
+        compared to version 3.2.1. build 4. Compliance reports for trunk MSL
+        can be found on the JModelica.org public <link
+        xlink:href="http://jmodelica.org:8080">Jenkins</link>, using trunk
+        version of JModelica.org.</para>
+      </section>
+    </section>
+  </section>
+
+  <section>
     <title>Release notes for JModelica.org version 1.16</title>
 
     <section>
@@ -41,7 +74,7 @@
         xlink:href="http://jmodelica.org:8080">Jenkins</link>.</para>
 
         <para>Especially, compliance improvements have been made in the
-        following subpackages: </para>
+        following subpackages:</para>
 
         <para><itemizedlist>
             <listitem>

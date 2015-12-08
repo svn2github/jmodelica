@@ -45,7 +45,7 @@
 
         <listitem>
           <para>The following built-in functions are only supported in
-          FMUs:<informaltable border="1" frame="void" width="75%">
+          FMUs:<informaltable border="1" frame="void" width="100%">
               <tr>
                 <td><code>ceil(x)</code></td>
 
