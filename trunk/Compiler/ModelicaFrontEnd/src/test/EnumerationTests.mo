@@ -261,14 +261,17 @@ end EnumerationTests.EnumerationTest10;
 Error at line 250, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '\"1\"' is String
+    expected type is enumeration
 
 Error at line 251, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1.0' is Real
+    expected type is enumeration
 
 Error at line 252, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
   Calling function Integer(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is enumeration
 ")})));
   end EnumerationTest11;
   

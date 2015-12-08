@@ -130,6 +130,7 @@ model SizeExp7
 Error at line 122, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is Integer
 ")})));
 end SizeExp7;
 
@@ -147,6 +148,7 @@ model SizeExp8
 Error at line 140, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '1.0' is Real
+    expected type is Integer
 ")})));
 end SizeExp8;
 
@@ -527,10 +529,12 @@ model MinExp6
 Error at line 518, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 
 Error at line 518, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 ")})));
 end MinExp6;
 
@@ -548,6 +552,7 @@ model MinExp7
 Error at line 539, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is array of Real, Integer, Boolean, String or enumeration
 ")})));
 end MinExp7;
 
@@ -739,10 +744,12 @@ model MaxExp6
 Error at line 730, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 
 Error at line 730, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 ")})));
 end MaxExp6;
 
@@ -760,6 +767,7 @@ model MaxExp7
 Error at line 751, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is array of Real, Integer, Boolean, String or enumeration
 ")})));
 end MaxExp7;
 
@@ -924,6 +932,7 @@ model SumExp5
 Error at line 915, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function sum(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is Real array
 ")})));
 end SumExp5;
 
@@ -1083,6 +1092,7 @@ model ProductExp6
 Error at line 1074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function product(): types of positional argument 1 and input A are not compatible
     type of '42' is Integer
+    expected type is Real array
 ")})));
 end ProductExp6;
 
@@ -1281,6 +1291,7 @@ equation
 Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
+    expected type is matrix of Real, Integer, Boolean, String or enumeration
 ")})));
 end Transpose5;
 
@@ -1298,6 +1309,7 @@ model Transpose6
 Error at line 1289, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is matrix of Real, Integer, Boolean, String or enumeration
 ")})));
 end Transpose6;
 
@@ -1608,6 +1620,7 @@ equation
 Error at line 1599, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
+    expected type is square matrix
 ")})));
 end Symmetric5;
 
@@ -1625,6 +1638,7 @@ model Symmetric6
 Error at line 1616, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is square matrix
 ")})));
 end Symmetric6;
 
@@ -1733,10 +1747,12 @@ model Cross4
 Error at line 1724, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is Real[3]
 
 Error at line 1724, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
+    expected type is Real[3]
 ")})));
 end Cross4; 
 
@@ -1754,10 +1770,12 @@ model Cross5
 Error at line 1745, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
+    expected type is Real[3]
 
 Error at line 1745, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{4, 5, 6, 7}' is Integer[4]
+    expected type is Real[3]
 ")})));
 end Cross5; 
 
@@ -1775,10 +1793,12 @@ model Cross6
 Error at line 1766, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[3]
 
 Error at line 1766, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
+    expected type is Real[3]
 ")})));
 end Cross6; 
 
@@ -1796,10 +1816,12 @@ model Cross7
 Error at line 1787, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
+    expected type is Real[3]
 
 Error at line 1787, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
+    expected type is Real[3]
 ")})));
 end Cross7; 
 
@@ -1851,10 +1873,12 @@ model Skew2
 Error at line 1841, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
+    expected type is Real[3]
 
 Error at line 1842, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[3]
 ")})));
 end Skew2;
 
@@ -1936,10 +1960,12 @@ model OuterProduct4
 Error at line 1927, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is Real[:]
 
 Error at line 1927, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
+    expected type is Real[:]
 ")})));
 end OuterProduct4; 
 
@@ -1957,10 +1983,12 @@ model OuterProduct5
 Error at line 1948, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[:]
 
 Error at line 1948, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
+    expected type is Real[:]
 ")})));
 end OuterProduct5; 
 
@@ -1978,10 +2006,12 @@ model OuterProduct6
 Error at line 1969, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
+    expected type is Real[:]
 
 Error at line 1969, column 63, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
+    expected type is Real[:]
 ")})));
 end OuterProduct6; 
 		
@@ -2435,10 +2465,12 @@ model Scalar2
 Error at line 2424, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[1, 1, 2]
+    expected type is array with exactly 1 element
 
 Error at line 2425, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of '{{{{3}, {4}}}}' is Integer[1, 1, 2, 1]
+    expected type is array with exactly 1 element
 ")})));
 end Scalar2;
 
@@ -2499,10 +2531,12 @@ model Vector3
 Error at line 2489, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
+    expected type is scalar or vector-shaped array
 
 Error at line 2490, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{{{{1}, {2}}}, {{{3}, {4}}}}}' is Integer[1, 2, 1, 2, 1]
+    expected type is scalar or vector-shaped array
 ")})));
 end Vector3;
 
@@ -2547,6 +2581,7 @@ model Matrix2
 Error at line 2538, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function matrix(): types of positional argument 1 and input A are not compatible
     type of '{{{1, 2}, {3, 4}}}' is Integer[1, 2, 2]
+    expected type is scalar, vector or matrix-shaped array
 ")})));
 end Matrix2;
 
@@ -2619,6 +2654,7 @@ model Linspace3
 Error at line 2610, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function linspace(): types of positional argument 3 and input n are not compatible
     type of 'c' is Real
+    expected type is Integer
 ")})));
 end Linspace3;
 
@@ -2965,6 +3001,7 @@ model Identity4
 Error at line 2956, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function identity(): types of positional argument 1 and input n are not compatible
     type of '3.0' is Real
+    expected type is Integer
 ")})));
 end Identity4;
 
@@ -3013,14 +3050,17 @@ model Diagonal2
 Error at line 3002, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
+    expected type is Real[:]
 
 Error at line 3003, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '1' is Integer
+    expected type is Real[:]
 
 Error at line 3004, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{true, true}' is Boolean[2]
+    expected type is Real[:]
 ")})));
 end Diagonal2;
 

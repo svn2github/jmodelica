@@ -1007,8 +1007,12 @@ aspect FlatTypeCheck {
                 if (msg != null)
                     error(msg);
                 else
-                    error("%s: types of %s and input %s are not compatible\n    type of '%s' is %s", 
-                            functionCallDecription(), argumentDesc(), getBoundInput().name(), getFExp(), getFExp().type());
+                    error("%s: types of %s and input %s are not compatible\n" + 
+                          "    type of '%s' is %s\n" + 
+                          "    expected type is %s", 
+                          functionCallDecription(), argumentDesc(), getBoundInput().name(), 
+                          getFExp(), getFExp().type(),
+                          argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
             }
         }
     }
@@ -1122,7 +1126,7 @@ aspect FlatTypeCheck {
 
     /**
      * Check if the type defined for this argument in the built-in function list 
-     *        is valid.
+     * is valid.
      */
     inh boolean InstFunctionArgument.argumentDefinedTypeValid();
     eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
@@ -1158,7 +1162,8 @@ aspect FlatTypeCheck {
     inh boolean InstFunctionArgument.argumentTypeValid(FType type);
     eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type)     = type.isPrimitive();
     eq FTranspose.getChild().argumentTypeValid(FType type)                = type.ndims() >= 2 && type.isPrimitive();
-    eq FSymmetric.getChild().argumentTypeValid(FType type)                = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
+    eq FSymmetric.getChild().argumentTypeValid(FType type)                = 
+        type.ndims() == 2 && type.size().get(0) == type.size().get(1);
     eq FReductionExp.getChild().argumentTypeValid(FType type)             = type.ndims() > 0 && type.hasAdd();
     eq FSemiLinearExp.getChild().argumentTypeValid(FType type)            = type.isNumeric();
     eq FAbsExp.getChild().argumentTypeValid(FType type)                   = type.isNumeric();
@@ -1170,16 +1175,48 @@ aspect FlatTypeCheck {
         hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
-    eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FCardinality.getChild().argumentTypeValid(FType type)              = 
+        type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
-            getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
-    eq FStringExp.getChild().argumentTypeValid(FType type)                = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+        getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FStringExp.getChild().argumentTypeValid(FType type)                = 
+        type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
     eq FInfArgsFunctionCall.getChild().argumentTypeValid(FType type)      = true;  // Type checked in FInfArgsFunctionCall.typeCheck()
     eq FReinit.getChild().argumentTypeValid(FType type)                   = true;  // Type checked in Reinit.typeCheck()
     eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
     // All types allowed for these:
     eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
     eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
+
+    /**
+     * Description of expexted type of argument.
+     * 
+     * Should be defined for cases where argumentDefinedTypeValid() returns and 
+     * argumentTypeValid() both return false.
+     */
+    inh String InstFunctionArgument.expectedArgumentType();
+    eq FAbstractFunctionCall.getChild().expectedArgumentType()     = 
+        "Real, Integer, Boolean, String or enumeration";
+    eq FTranspose.getChild().expectedArgumentType()                = 
+        "matrix of Real, Integer, Boolean, String or enumeration";
+    eq FSymmetric.getChild().expectedArgumentType()                = "square matrix";
+    eq FReductionExp.getChild().expectedArgumentType()             = "Real array";
+    eq FEnumIntegerExp.getChild().expectedArgumentType()           = "enumeration";
+    eq FSemiLinearExp.getChild().expectedArgumentType()            = "Real";
+    eq FAbsExp.getChild().expectedArgumentType()                   = "Real";
+    eq FSignExp.getChild().expectedArgumentType()                  = "Real";
+    eq FEventGenExp.getChild().expectedArgumentType()              = "Real";
+    eq FMathematicalFunctionCall.getChild().expectedArgumentType() = "Real";
+    eq FSmoothExp.getChild().expectedArgumentType()                = "Real";
+    eq FHomotopyExp.getChild().expectedArgumentType()              = "Real";
+    eq FMinMaxExp.getOriginalArg(int i).expectedArgumentType()     = 
+        (hasY() ? "scalar" : "array of") + " Real, Integer, Boolean, String or enumeration";
+    eq FScalarExp.getChild().expectedArgumentType()                = "array with exactly 1 element";
+    eq FVectorExp.getChild().expectedArgumentType()                = "scalar or vector-shaped array";
+    eq FMatrixExp.getChild().expectedArgumentType()                = "scalar, vector or matrix-shaped array";
+    eq FCardinality.getChild().expectedArgumentType()              = "scalar connector";
+    eq FConnectionsOp.getChild().expectedArgumentType()            = "connector";
+    eq FStringExp.getChild().expectedArgumentType()                = "scalar Real, Integer, Boolean or enumeration";
 
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }

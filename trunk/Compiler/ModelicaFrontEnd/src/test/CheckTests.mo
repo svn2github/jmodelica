@@ -785,6 +785,7 @@ Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
 Error at line 644, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is Real
+    expected type is ((Real y) = CheckTests.Functional.PartialCall1.partFunc(Real x))
 ")})));
 end PartialCall1;
 
@@ -1114,6 +1115,7 @@ model Vectorized1
 Error at line 976, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc(x1={1})' is Real[1]
+    expected type is ((Real y) = CheckTests.Functional.Vectorized1.partFunc())
 ")})));
 end Vectorized1;
 

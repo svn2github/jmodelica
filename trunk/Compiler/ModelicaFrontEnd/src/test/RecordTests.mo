@@ -2123,6 +2123,7 @@ model RecordConstructor4
 Error at line 2030, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Record constructor for A: types of positional argument 3 and input c are not compatible
     type of '3' is Integer
+    expected type is String
 ")})));
 end RecordConstructor4;
 

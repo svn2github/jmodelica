@@ -429,6 +429,7 @@ Error at line 416, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTe
 Error at line 417, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): types of positional argument 1 and input v are not compatible
     type of '\"-1\"' is String
+    expected type is Real
 ")})));
 end AbsType5;
 
@@ -1231,10 +1232,12 @@ model DivTest2
 Error at line 1222, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1222, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end DivTest2;
 
@@ -1285,10 +1288,12 @@ model ModTest2
 Error at line 1276, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1276, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end ModTest2;
 
@@ -1336,10 +1341,12 @@ model RemTest2
 Error at line 1327, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1327, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end RemTest2;
 
@@ -1904,13 +1911,15 @@ Error at line 1889, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 Error at line 1890, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean or enumeration
 
 Error at line 1890, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-    Could not evaluate binding expression for structural parameter 'b': 'String(\"a\")'
+  Could not evaluate binding expression for structural parameter 'b': 'String(\"a\")'
 
 Error at line 1891, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
+    expected type is scalar Real, Integer, Boolean or enumeration
 ")})));
 end StringExpType1;
 
@@ -2264,10 +2273,12 @@ model Functional4
 Error at line 2254, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'time' is Real
+    expected type is ((Real y) = TypeTests.Functional4.partFunc(Real x))
 
 Error at line 2254, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 2 and input x are not compatible
     type of 'fullFunc()' is ((Real y) = TypeTests.Functional4.fullFunc(Real x))
+    expected type is Real
 ")})));
 end Functional4;
 
@@ -2305,6 +2316,7 @@ model Functional5
 Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is ((Real b) = TypeTests.Functional5.fullFunc())
+    expected type is ((Real y) = TypeTests.Functional5.partFunc(Real x))
 
 Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument fullFunc(): missing argument for required input a
@@ -2395,6 +2407,7 @@ Error at line 2370, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 Error at line 2370, column 54, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): types of named argument x2 and input x2 are not compatible
     type of '\"string\"' is String
+    expected type is Real
 
 Error at line 2370, column 66, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x3 found
@@ -2421,6 +2434,7 @@ model Delay1
 Error at line 2411, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function delay(): types of positional argument 2 and input delayTime are not compatible
     type of '{d, d}' is Real[2]
+    expected type is Real
 ")})));
 end Delay1;
 
@@ -2450,6 +2464,7 @@ Error at line 2431, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 Error at line 2431, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): types of positional argument 5 and input initialPoints are not compatible
     type of '{{0, 0}, {0, 0}}' is Integer[2, 2]
+    expected type is Real[:]
 ")})));
 end SpatialDist1;
 

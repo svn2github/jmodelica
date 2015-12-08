@@ -2049,6 +2049,7 @@ model FunctionType5
 Error at line 1988, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end FunctionType5;
 
@@ -2067,6 +2068,7 @@ model FunctionType6
 Error at line 2006, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'a' is Boolean
+    expected type is Real
 ")})));
 end FunctionType6;
 
@@ -2114,6 +2116,7 @@ model FunctionType8
 Error at line 2053, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end FunctionType8;
 
@@ -2167,6 +2170,7 @@ Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src
 Error at line 2103, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
     type of '1' is Integer
+    expected type is String
 ")})));
 end FunctionType11;
 
@@ -2311,6 +2315,7 @@ model BuiltInCallType1
 Error at line 2250, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sin(): types of positional argument 1 and input u are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end BuiltInCallType1;
 
@@ -2328,6 +2333,7 @@ model BuiltInCallType2
 Error at line 2267, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
     type of '\"test\"' is String
+    expected type is Real
 ")})));
 end BuiltInCallType2;
 
@@ -2409,6 +2415,7 @@ model BuiltInCallType7
 Error at line 2348, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
     type of '\"test\"' is String
+    expected type is Real
 ")})));
 end BuiltInCallType7;
 
