@@ -4106,12 +4106,11 @@ aspect SemiLinear {
             new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
             new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
         if (isSmoothInSemiLinear()) {
-            exp = new FSmoothExp(0, exp);
+            exp = new FNoEventExp(exp);
         }
         return exp;
     }
 
-    // TODO: should be replaced with a generic method that calculates smoothness of any expression (considering sub-expressions)
     /**
      * Checks if this expression allows a semiLinear() with it as argument to be smooth(0, ...).
      */
