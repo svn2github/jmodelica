@@ -1286,7 +1286,7 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     if((block->callbacks->log_options.log_level >= 4)) {
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "RegularizedJacobian", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
-            jmi_log_real_matrix(block->log, node, logInfo, "jacobian", solver->JTJ->data, N, N);
+            jmi_log_real_matrix(block->log, node, logInfo, "regularized_jacobian", solver->JTJ->data, N, N);
         }
         jmi_log_leave(block->log, node);
     }
@@ -1393,7 +1393,10 @@ static int jmi_kin_make_Broyden_update(jmi_block_solver_t *block, N_Vector b) {
         double tempj = Ith(kin_mem->kin_pp, j)*Ith(solver->kin_y_scale,j)*Ith(solver->kin_y_scale,j);
         for(i = 0; i < N; i++) {
             if( Ith(solver->work_vector,i) != 0.0) {
-                jacCol_j[i] += Ith(solver->work_vector,i) * tempj;
+                if(block->options->experimental_mode & jmi_block_solver_experimental_Broyden_with_zeros && jacCol_j[i] == 0) {
+                } else {
+                    jacCol_j[i] += Ith(solver->work_vector,i) * tempj;
+                }
             }
         }
     }
