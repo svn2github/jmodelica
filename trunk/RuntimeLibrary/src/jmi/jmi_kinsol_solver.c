@@ -1209,13 +1209,12 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         jmi_log_leave(log, outer);
     }
 
-    if( MAX_NEWTON_STEP_RATIO != 1.0) {
-        /* 
+ 
+     /* 
             Since analysis was done with x = MAX_NEWTON_STEP_RATIO * Newton step
             the actual Newton step ration is also MAX_NEWTON_STEP_RATIO larger
-        */
-        max_step_ratio *= MAX_NEWTON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
-    }
+     */
+     max_step_ratio *= MAX_NEWTON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
     
     /* If the step is limited by a bound or we're following the bound it
     should be allowed to take the full step length more than 5 times
