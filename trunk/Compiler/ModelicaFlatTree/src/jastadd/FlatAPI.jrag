@@ -1719,7 +1719,11 @@ aspect FlatAPI {
     syn List<FAbstractEquation> FIfWhenElseEquation.createInitialEquationList() {
         List<FAbstractEquation> l = new List<FAbstractEquation>();
         for (FAbstractEquation e : getFAbstractEquations()) {
-            l.add(e.copySymbolic());
+            if (e.replacedAtInitialization()) {
+                l.addAll(e.getInitialEquations());
+            } else {
+                l.add(e.copySymbolic());
+            }
         }
         return l;
     }

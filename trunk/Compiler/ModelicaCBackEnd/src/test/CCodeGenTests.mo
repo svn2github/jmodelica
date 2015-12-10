@@ -8255,7 +8255,73 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 ")})));
-end WhenTest11; 
+end WhenTest11;
+
+
+model WhenTest12
+    Real x(start = 2, fixed = true);
+equation
+    der(x) = 1;
+    when time > 4 then
+        reinit(x, 1);
+    elsewhen time > 2 then
+        reinit(x, 0);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTest12",
+            description="Check that elsewhen without initial() is correctly excluded from initial system",
+            template="$C_ode_initialization$",
+            generatedCode="
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    _der_x_5 = 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (4), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (2), _sw(1), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_2_2 = _sw(1);
+    _x_0 = 2;
+    pre_temp_1_1 = JMI_FALSE;
+    pre_temp_2_2 = JMI_FALSE;
+    return ef;
+}
+")})));
+end WhenTest12;
+
+
+model WhenTest13
+    discrete Real x;
+equation
+    when time > 4 then
+        x = 3;
+    elsewhen initial() then
+        x = 4;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTest13",
+            description="Check that elsewhen with initial() is correctly included in initial system",
+            template="$C_ode_initialization$",
+            generatedCode="
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (4), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    _x_0 = 4;
+    pre_x_0 = 0.0;
+    pre_temp_1_1 = JMI_FALSE;
+    return ef;
+}
+")})));
+end WhenTest13;
 
 
 
@@ -8857,13 +8923,10 @@ int model_ode_initialize_base(jmi_t* jmi) {
         _sw(1) = jmi_turn_switch(_time - (1), _sw(1), jmi->events_epsilon, JMI_REL_GT);
     }
     _temp_2_3 = _sw(1);
-    _y_1 = 0.0;
-    pre_temp_2_3 = JMI_FALSE;
-    if (LOG_EXP_AND(_temp_2_3, LOG_EXP_NOT(pre_temp_2_3))) {
-        tmp_3 = AD_WRAP_LITERAL(1);
-    }
     _x_0 = 0.0;
+    _y_1 = 0.0;
     pre_temp_1_2 = JMI_FALSE;
+    pre_temp_2_3 = JMI_FALSE;
     return ef;
 }
 
