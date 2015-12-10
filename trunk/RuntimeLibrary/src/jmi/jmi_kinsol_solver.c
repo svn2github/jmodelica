@@ -1209,11 +1209,13 @@ static void jmi_kinsol_limit_step(struct KINMemRec * kin_mem, N_Vector x, N_Vect
         jmi_log_leave(log, outer);
     }
 
-    /* 
-        Since analysis was done with x = MAX_NEWTON_STEP_RATIO * Newton step
-        the actual Newton step ration is also MAX_NEWTON_STEP_RATIO larger
-    */
-    max_step_ratio *= MAX_NEWTON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
+    if( MAX_NEWTON_STEP_RATIO != 1.0) {
+        /* 
+            Since analysis was done with x = MAX_NEWTON_STEP_RATIO * Newton step
+            the actual Newton step ration is also MAX_NEWTON_STEP_RATIO larger
+        */
+        max_step_ratio *= MAX_NEWTON_STEP_RATIO * (1 - UNIT_ROUNDOFF);
+    }
     
     /* If the step is limited by a bound or we're following the bound it
     should be allowed to take the full step length more than 5 times
@@ -1643,7 +1645,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     int N = block->n;
     char trans = 'N';
     int ret = 0, i;
-    if(block->options->jacobian_update_mode & jmi_broyden_jacobian_update_mode) {
+    if(block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode) {
         if(!solver->updated_jacobian_flag) {
             long int  nniters;
             KINGetNumNonlinSolvIters(kin_mem, &nniters);
@@ -1877,38 +1879,46 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         if(solver->last_num_active_bounds > 0 && (block->options->experimental_mode & jmi_block_solver_experimental_check_descent_direction)) {
             realtype sJpnorm, sfJp, fnorm, g_scale;
             
-            /*scalar product of gradient and projected step */
-            double xg = jmi_kinsol_calc_v1twwv2(x, solver->gradient, solver->kin_y_scale); 
+            /*scalar product of gradient and projected step = Transpose(gradient) * x = Transpose(Transpose(J) Wf Wf F)*x = Transpose(F) Wf Wf J x = sfJp */
+            sfJp = jmi_kinsol_calc_v1twwv2(x, solver->gradient, 0); 
 
-            if(xg <= 0.0) {
+            if(sfJp <= 0.0) {
                 if(block->callbacks->log_options.log_level >= 5) {
                     double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
                     N_VScale(step_factor, x, b);
-                    jmi_log_reals(block->log, topnode, logInfo, "projected_newton_step", bd, block->n);
-                    jmi_log_leave(block->log, topnode);
+                    jmi_log_reals(block->log, topnode, logInfo, "projected_newton_step", bd, block->n);                    
                 }
                 jmi_log_node(block->log, logWarning, "StepNotDescent", 
-                    "Projected Newton step is not descent in <block: %s>, scaled scalar product with gradient <spxg: %g>, trying steepest descent", block->label, xg);
+                    "Projected Newton step is not descent in <block: %s>, scaled scalar product with gradient <spxg: %g>, trying steepest descent", block->label, sfJp);
+                /*
+                    sfdotJp = Transpose(F) * Wf*Wf*J*gradient = Transpose(F) * Wf*Wf*J* Transpose(J)* Wf*Wf*F = Transpose(gradient)*gradient
+                */
+                sfJp = jmi_kinsol_calc_v1twwv2(solver->gradient, solver->gradient, 0);
+                KINGetFuncNorm(solver->kin_mem, &fnorm);
+                g_scale = fnorm*fnorm/sfJp;
+                if(block->callbacks->log_options.log_level >= 5) {
+                    jmi_log_node(block->log, logInfo, "GradientScaling", "Used gradient scaling is <gs: %g> in <block: %s>", g_scale, block->label);
+                }
+                N_VScale(g_scale, solver->gradient, x);
+             /*   sfJp *= g_scale;
+                jmi_kinsol_calc_Mv(solver->J, FALSE, solver->gradient, b);
+                sJpnorm = N_VWL2Norm(b,solver->kin_f_scale); */
+                jmi_kinsol_limit_step(kin_mem, x, b);
+
+                sfJp = jmi_kinsol_calc_v1twwv2(x, solver->gradient, 0); 
+
+                if(sfJp == 0.0) {
+                    jmi_log_node(block->log, logWarning, "StepIsZero", "Projected steepest descent step is zero in <block: %s>", block->label);
+                }
             }
-            /*
-                sfdotJp = Transpose(F) * Wf*Wf*J*gradient = Transpose(F) * Wf*Wf*J* Transpose(J)* Wf*Wf*F = Transpose(gradient)*gradient
-            */
-            sfJp = jmi_kinsol_calc_v1twwv2(solver->gradient, solver->gradient, 0);
-            KINGetFuncNorm(solver->kin_mem, &fnorm);
-            g_scale = fnorm*fnorm/sfJp;
-            N_VScale(g_scale, solver->gradient, x);
-            sfJp *= g_scale;
-            jmi_kinsol_calc_Mv(solver->J, FALSE, solver->gradient, b);
+            
+            /* recalculate sJpnorm  */ 
+            jmi_kinsol_calc_Mv(solver->J, FALSE, x, b);
             sJpnorm = N_VWL2Norm(b,solver->kin_f_scale);
+            /* update sJpnorm and sfdotJp for Kinsol */ 
             kin_mem->kin_sJpnorm = sJpnorm;
             kin_mem->kin_sfdotJp = sfJp;
-            jmi_kinsol_limit_step(kin_mem, x, b);
-            xg = jmi_kinsol_calc_v1twwv2(x, solver->gradient, solver->kin_y_scale); 
-
-            if(xg == 0.0) {
-                jmi_log_node(block->log, logWarning, "StepIsZero",
-                    "Projected steepest descent step is zero in <block: %s>", block->label);
-            }
+            solver->sJpnorm = kin_mem->kin_sJpnorm;
         }
         if(block->callbacks->log_options.log_level >= 5) {
             double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
