@@ -644,6 +644,15 @@ class Test_FMUModelME2:
         assert input_dep["y1"][0] == "u1"
         assert input_dep["y3"][0] == "u1"
         assert len(input_dep["y2"]) == 0
+        
+    @testattr(fmi = True)
+    def test_output_dependencies_2(self):
+        model = load_fmu(self.coupled_name)
+        
+        [state_dep, input_dep] = model.get_output_dependencies()
+        
+        assert len(state_dep.keys()) == 0
+        assert len(input_dep.keys()) == 0
 
     @testattr(fmi = True)
     def test_get_derivatives(self):
