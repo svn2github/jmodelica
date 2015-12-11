@@ -427,6 +427,8 @@ class Test_FMUModelME2:
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0")
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
+        cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
+    
     
     @testattr(fmi = True)
     def test_version(self):
@@ -650,6 +652,15 @@ class Test_FMUModelME2:
         model = load_fmu(self.coupled_name)
         
         [state_dep, input_dep] = model.get_output_dependencies()
+        
+        assert len(state_dep.keys()) == 0
+        assert len(input_dep.keys()) == 0
+        
+    @testattr(fmi = True)
+    def test_derivative_dependencies(self):
+        model = load_fmu(self.no_state_name)
+        
+        [state_dep, input_dep] = model.get_derivatives_dependencies()
         
         assert len(state_dep.keys()) == 0
         assert len(input_dep.keys()) == 0
