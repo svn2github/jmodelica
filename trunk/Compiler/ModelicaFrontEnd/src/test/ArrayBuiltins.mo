@@ -3171,16 +3171,32 @@ end NonVectorizedScalarization2;
 
 
 model NonVectorizedScalarization3
-    Real x[3] = {1,2,3};
-    Real y[3] = Modelica.Math.Vectors.normalize(x);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NonVectorizedScalarization3",
-			description="Test of accesses that should be kept without indices during scalarization",
-			variability_propagation=false,
-			inline_functions="none",
-			flatModel="
+  function length
+    input Real v[:];
+    output Real result;
+  algorithm
+    result := sqrt(v*v);
+  end length;
+
+    function normalize
+        input Real v[:];
+        input Real eps(min=0.0)=100*Modelica.Constants.eps;
+        output Real result[size(v, 1)];
+    algorithm
+       result := smooth(0, if length(v) >= eps then v/length(v) else v/eps);
+    end normalize;
+    
+    Real x[3] = {1,2,3};
+    Real y[3] = normalize(x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonVectorizedScalarization3",
+            description="Test of accesses that should be kept without indices during scalarization",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
 fclass ArrayBuiltins.NonVectorizedScalarization3
  Real x[1];
  Real x[2];
@@ -3192,23 +3208,22 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- ({y[1], y[2], y[3]}) = Modelica.Math.Vectors.normalize({x[1], x[2], x[3]}, 100 * 1.0E-15);
+ ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedScalarization3.normalize({x[1], x[2], x[3]}, 100 * 1.0E-15);
 
 public
- function Modelica.Math.Vectors.normalize
+ function ArrayBuiltins.NonVectorizedScalarization3.normalize
   input Real[:] v;
   input Real eps;
   output Real[:] result;
  algorithm
   size(result) := {size(v, 1)};
   for i1 in 1:size(v, 1) loop
-   result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
+   result[i1] := smooth(0, if ArrayBuiltins.NonVectorizedScalarization3.length(v) >= eps then v[i1] / ArrayBuiltins.NonVectorizedScalarization3.length(v) else v[i1] / eps);
   end for;
   return;
- annotation(Inline = true);
- end Modelica.Math.Vectors.normalize;
+ end ArrayBuiltins.NonVectorizedScalarization3.normalize;
 
- function Modelica.Math.Vectors.length
+ function ArrayBuiltins.NonVectorizedScalarization3.length
   input Real[:] v;
   output Real result;
   Real temp_1;
@@ -3221,11 +3236,9 @@ public
   temp_1 := temp_2;
   result := sqrt(temp_1);
   return;
- annotation(Inline = true);
- end Modelica.Math.Vectors.length;
+ end ArrayBuiltins.NonVectorizedScalarization3.length;
 
 end ArrayBuiltins.NonVectorizedScalarization3;
-			
 ")})));
 end NonVectorizedScalarization3;
 
