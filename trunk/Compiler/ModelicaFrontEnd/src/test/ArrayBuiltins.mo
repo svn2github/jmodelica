@@ -3100,7 +3100,7 @@ Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/Array
 end ScalarSize2;
 
 
-model NonVectorizedSalarization1
+model NonVectorizedScalarization1
     function f1
         input Real x1[3];
         output Real y1[3];
@@ -3120,22 +3120,22 @@ model NonVectorizedSalarization1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization1",
+			name="NonVectorizedScalarization1",
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization1
+fclass ArrayBuiltins.NonVectorizedScalarization1
  constant Real x[1] = 1;
  constant Real x[2] = 2;
  constant Real x[3] = 3;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;
-end ArrayBuiltins.NonVectorizedSalarization1;
+end ArrayBuiltins.NonVectorizedScalarization1;
 ")})));
-end NonVectorizedSalarization1;
+end NonVectorizedScalarization1;
 
 
-model NonVectorizedSalarization2
+model NonVectorizedScalarization2
     function f1
         input Real x1[:];
         output Real y1[size(x1,1)];
@@ -3155,33 +3155,33 @@ model NonVectorizedSalarization2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization2",
+			name="NonVectorizedScalarization2",
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization2
+fclass ArrayBuiltins.NonVectorizedScalarization2
  constant Real x[1] = 1;
  constant Real x[2] = 2;
  constant Real x[3] = 3;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;
-end ArrayBuiltins.NonVectorizedSalarization2;
+end ArrayBuiltins.NonVectorizedScalarization2;
 ")})));
-end NonVectorizedSalarization2;
+end NonVectorizedScalarization2;
 
 
-model NonVectorizedSalarization3
+model NonVectorizedScalarization3
     Real x[3] = {1,2,3};
     Real y[3] = Modelica.Math.Vectors.normalize(x);
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization3",
+			name="NonVectorizedScalarization3",
 			description="Test of accesses that should be kept without indices during scalarization",
 			variability_propagation=false,
 			inline_functions="none",
 			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization3
+fclass ArrayBuiltins.NonVectorizedScalarization3
  Real x[1];
  Real x[2];
  Real x[3];
@@ -3224,10 +3224,10 @@ public
  annotation(Inline = true);
  end Modelica.Math.Vectors.length;
 
-end ArrayBuiltins.NonVectorizedSalarization3;
+end ArrayBuiltins.NonVectorizedScalarization3;
 			
 ")})));
-end NonVectorizedSalarization3;
+end NonVectorizedScalarization3;
 
 
 model InfArgsWithNamed

@@ -76,7 +76,14 @@ abstract public class TestCase implements GenericTestCase {
 			exception = e;
 		}
 	}
-	
+    
+    public String filterTestResult(String str, Map<Pattern, String> resultFilters) {
+        for (Pattern p : resultFilters.keySet()) {
+            str = p.matcher(str).replaceAll(resultFilters.get(p));
+        }
+        return str;
+    }
+    
 	/**
 	 * Set a boolean option to be used during compilation.
 	 */
