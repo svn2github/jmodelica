@@ -856,6 +856,8 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_residual_scaling_hybrid:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_hybrid;
             break;
+        case jmi_residual_scaling_aggressive_auto:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_aggressive_auto;
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
         }

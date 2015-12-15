@@ -408,7 +408,7 @@ static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * blo
     jmi_log_fmt(block->log, node, logError, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
         "KINSol", block->cur_time, block->label);
     jmi_log_fmt(block->log, node, logError, "<msg: %s>", "The line search algorithm was unable to find an iterate sufficiently distinct from the current iterate.");
-    jmi_log_fmt(block->log, node, logError, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+    jmi_log_fmt(block->log, node, logError, "<functionL2Norm: %g, scaledStepLength: %g, tolerance: %g>",
                 fnorm, snorm, solver->kin_stol);
     jmi_log_leave(block->log, node);
 }
@@ -462,7 +462,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_log_fmt(block->log, node, category, "Error occured in <function: %s> at <t: %f> when solving <block: %s>",
             function, block->cur_time, block->label);
         jmi_log_fmt(block->log, node, category, "<msg: %s>", msg);
-        jmi_log_fmt(block->log, node, category, "<functionNorm: %g, scaledStepLength: %g, tolerance: %g>",
+        jmi_log_fmt(block->log, node, category, "<functionL2Norm: %g, scaledStepLength: %g, tolerance: %g>",
                     fnorm, snorm, solver->kin_stol);
         jmi_log_leave(block->log, node);
 
@@ -1329,8 +1329,14 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     jmi_kinsol_solver_t* solver = block->solver;
     
     int N = block->n;
-      
+    long int nniters;
     int ret;
+    KINGetNumNonlinSolvIters(kin_mem, &nniters);
+   
+    if(solver->current_nni == nniters && nniters > 0) { /* We are on retry iterations */
+        kin_char_log(solver, 'x');
+    }
+
     if(solver->updated_jacobian_flag) {
         return 0;
     }
@@ -1626,6 +1632,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
         */
         solver->J_is_singular_flag = 0;
     }
+
     block->factorization_time +=((double)clock()-t);
     return 0;
 }
@@ -1638,14 +1645,15 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     realtype*  bd = N_VGetArrayPointer(b); /* residuals */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
     jmi_log_node_t node;
-    
+    long int  nniters;           
     int N = block->n;
     char trans = 'N';
     int ret = 0, i;
+    KINGetNumNonlinSolvIters(kin_mem, &nniters);
+    solver->current_nni = nniters;
+
     if(block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode) {
         if(!solver->updated_jacobian_flag) {
-            long int  nniters;
-            KINGetNumNonlinSolvIters(kin_mem, &nniters);
             /* Never do update in the first iteration */
             if (nniters > 0) {        
                 ret = jmi_kin_make_Broyden_update(block, b);
@@ -1656,8 +1664,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
     if(block->options->experimental_mode & jmi_block_solver_experimental_use_modifiedBFGS) {
         if(!solver->updated_jacobian_flag) {
-            long int  nniters;
-            KINGetNumNonlinSolvIters(kin_mem, &nniters);
             /* Never do update in the first iteration */
             if (nniters > 0) {        
                 ret = jmi_kin_make_modifiedBFGS_update(block, b);
@@ -1668,14 +1674,34 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 
     if(block->options->experimental_mode & jmi_block_solver_experimental_Sparse_Broyden) {
         if(!solver->updated_jacobian_flag) {
-            long int  nniters;
-            KINGetNumNonlinSolvIters(kin_mem, &nniters);
             /* Never do update in the first iteration */
             if (nniters > 0) {        
                 ret = jmi_kin_make_sparse_Broyden_update(block, b);
                 if(ret != 0) return ret;
             }
         }
+    }
+
+    if((block->options->residual_equation_scaling_mode & jmi_residual_scaling_aggressive_auto) &&
+        nniters > 1 && solver->is_first_newton_solve_flag) {
+        int i;
+        jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
+        N_VScale(1.0, solver->kin_f_scale, solver->work_vector);
+        jmi_update_f_scale(block);
+        for(i=0; i<block->n; i++) {
+            Ith(solver->kin_f_scale, i) = Ith(solver->kin_f_scale, i) > Ith( solver->work_vector, i)? Ith( solver->work_vector, i):Ith(solver->kin_f_scale, i);
+        }
+        if (block->callbacks->log_options.log_level >= 4) {
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%s>", block->label);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = N_VGetArrayPointer(solver->kin_f_scale);
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
+            jmi_log_leave(block->log, outer);
+        }
+        jmi_log_leave(block->log, node);
     }
     t = clock();
     N_VScale(ONE, b, solver->last_residual);
@@ -2005,7 +2031,8 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     scale_ptr = N_VGetArrayPointer(solver->kin_f_scale);
 
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
-    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto ||
+    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto || 
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto ||
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid ||
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual)
     {
@@ -2042,7 +2069,9 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
             }
     }
 
-    if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto || bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid) {
+    if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto 
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid) {
         solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
         /* check that scaling factors have reasonable magnitude */
         for(i = 0; i < N; i++) {
@@ -2213,6 +2242,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_ftol = UROUND; /* block->options->min_tol; */
     solver->kin_stol = block->options->min_tol;
     solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
+
+    solver->current_nni = 0;
     
     solver->J = NewDenseMat(n ,n);
     solver->JTJ = NewDenseMat(n ,n);
@@ -2631,8 +2662,10 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         solver->use_steepest_descent_flag = 1;
     }
 
+    solver->is_first_newton_solve_flag = TRUE;
     flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
-    
+    solver->is_first_newton_solve_flag = FALSE;
+
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {
         KINSetNoResMon(solver->kin_mem,1);
         solver->use_steepest_descent_flag = 0;

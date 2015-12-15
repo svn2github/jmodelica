@@ -1506,7 +1506,7 @@ static int KINStop(KINMem kin_mem, int strategy, booleantype maxStepTaken, int s
     if (setupNonNull && !jacCurrent) {
       /* If the Jacobian is out of date, update it and retry */
       sthrsh = TWO;
-      return(CONTINUE_ITERATIONS);
+      return(RETRY_ITERATION);
     } else {
       /* Give up */
       if (strategy == KIN_NONE)  return(KIN_STEP_LT_STPTOL);
@@ -1560,54 +1560,54 @@ static int KINStop(KINMem kin_mem, int strategy, booleantype maxStepTaken, int s
 
   if (inexact_ls) {
 
-    /* We're doing inexact Newton.
-       Load threshold for reevaluating the Jacobian. */
+      /* We're doing inexact Newton.
+      Load threshold for reevaluating the Jacobian. */
 
-    sthrsh = rlength;
+      sthrsh = rlength;
 
   } else if (!noResMon) {
 
-    /* We're doing modified Newton and the user did not disable residual monitoring.
-       Check if it is time to monitor residual. */
+      /* We're doing modified Newton and the user did not disable residual monitoring.
+      Check if it is time to monitor residual. */
 
-    if ((nni - nnilset_sub) >= msbset_sub) {
+      if ((nni - nnilset_sub) >= msbset_sub) {
 
-      /* Residual monitoring needed */
+          /* Residual monitoring needed */
 
-      nnilset_sub = nni;
+          nnilset_sub = nni;
 
-      /* If indicated, estimate new OMEGA value */
-      if (eval_omega) {
-        omexp = MAX(ZERO,(fnorm/fnormtol)-ONE);
-        omega = (omexp > TWELVE)? omega_max : MIN(omega_min*EXP(omexp), omega_max);
-      }   
-      /* Check if making satisfactory progress */
+          /* If indicated, estimate new OMEGA value */
+          if (eval_omega) {
+              omexp = MAX(ZERO,(fnorm/fnormtol)-ONE);
+              omega = (omexp > TWELVE)? omega_max : MIN(omega_min*EXP(omexp), omega_max);
+          }   
+          /* Check if making satisfactory progress */
 
-      if (fnorm > omega*fnorm_sub) {
-        /* Insuficient progress */
-	if (setupNonNull && !jacCurrent) {
-          /* If the Jacobian is out of date, update it and retry */
-	  sthrsh = TWO;
-	  return(RETRY_ITERATION);
-	} else {
-          /* Otherwise, we cannot do anything, so just return. */
-        }
+          if (fnorm > omega*fnorm_sub) {
+              /* Insuficient progress */
+              if (setupNonNull && !jacCurrent) {
+                  /* If the Jacobian is out of date, update it and retry */
+                  sthrsh = TWO;
+                  return(CONTINUE_ITERATIONS);
+              } else {
+                  /* Otherwise, we cannot do anything, so just return. */
+              }
+          } else {
+              /* Sufficient progress */
+              fnorm_sub = fnorm;
+              sthrsh = ONE;
+          }
+
       } else {
-        /* Sufficient progress */
-	fnorm_sub = fnorm;
-	sthrsh = ONE;
+
+          /* Residual monitoring not needed */
+
+          /* Reset sthrsh */
+          if (retry_nni || update_fnorm_sub) fnorm_sub = fnorm;
+          if (update_fnorm_sub) update_fnorm_sub = FALSE;
+          sthrsh = ONE;
+
       }
-
-    } else {
-
-      /* Residual monitoring not needed */
-
-      /* Reset sthrsh */
-      if (retry_nni || update_fnorm_sub) fnorm_sub = fnorm;
-      if (update_fnorm_sub) update_fnorm_sub = FALSE;
-      sthrsh = ONE;
-
-    }
 
   }
 

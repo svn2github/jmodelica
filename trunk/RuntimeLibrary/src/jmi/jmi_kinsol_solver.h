@@ -110,6 +110,8 @@ struct jmi_kinsol_solver_t {
     DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
     DlsMat J_SVD_VT;                /**< \brief The right singular vectors */
 
+    int is_first_newton_solve_flag; /**< \brief Flag indicating if the current solve is the first Newton solve */
+
     char equed;                     /**< \brief Type of Jac scaling used */
     realtype* rScale;               /**< \brief Row scale factors */
     realtype* cScale;               /**< \brief Column scale factors */
@@ -154,6 +156,8 @@ struct jmi_kinsol_solver_t {
     int last_num_active_bounds;    /**< \brief Number of active bounds at last jmi_kinsol_limit_step */
     double lambda, lambda_max;     /**< \brief lambda and lambda_max for logging */
     int iterationProgressFlag;     /**< \brief Flag indicating that KINStop was called and so there was some progress */
+
+    long int current_nni;          /**< \brief Current nni in Kinsol solver, used to track if we are on retry iterations */
 
     realtype max_step_ratio;        /**< \brief Max ratio of the Newton step */
 
