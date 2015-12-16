@@ -858,6 +858,8 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         case jmi_residual_scaling_aggressive_auto:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_aggressive_auto;
+        case jmi_residual_scaling_full_jacobian_auto:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_full_jacobian_auto;
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
         }

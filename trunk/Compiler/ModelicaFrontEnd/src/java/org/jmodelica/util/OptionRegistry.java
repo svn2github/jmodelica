@@ -627,8 +627,8 @@ abstract public class OptionRegistry {
              Category.user,
              1,
              "Equations scaling mode in equation block solvers: " +
-             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid, 4- aggressive automatic scaling",
-             0, 4),
+             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid, 4- aggressive automatic scaling, 5 - automatic rescaling at full Jacobian update",
+             0, 5),
         NLE_SOLVER_EXIT_CRITERION
             ("nle_solver_exit_criterion",
              OptionType.runtime, 

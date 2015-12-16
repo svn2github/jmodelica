@@ -1682,8 +1682,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
 
-    if((block->options->residual_equation_scaling_mode & jmi_residual_scaling_aggressive_auto) &&
-        nniters > 1 && solver->is_first_newton_solve_flag) {
+    if(((block->options->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto) &&
+        nniters > 1 && solver->is_first_newton_solve_flag) 
+        || (block->options->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto 
+        && nniters > 1 && solver->updated_jacobian_flag)) {
         int i;
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
         N_VScale(1.0, solver->kin_f_scale, solver->work_vector);
@@ -2033,6 +2035,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
     /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
     if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto || 
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto ||
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid ||
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual)
     {
@@ -2071,6 +2074,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto 
         || bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto
         || bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid) {
         solver->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
         /* check that scaling factors have reasonable magnitude */

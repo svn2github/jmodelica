@@ -76,7 +76,8 @@ typedef enum jmi_block_solver_residual_scaling_mode_t {
     jmi_residual_scaling_auto = 1,
     jmi_residual_scaling_manual = 2,
     jmi_residual_scaling_hybrid = 3,
-    jmi_residual_scaling_aggressive_auto = 4
+    jmi_residual_scaling_aggressive_auto = 4,
+    jmi_residual_scaling_full_jacobian_auto = 5
 } jmi_block_solver_residual_scaling_mode_t;
 
 /** \brief Scaling mode for the iteration variables in the non-linear solver*/
