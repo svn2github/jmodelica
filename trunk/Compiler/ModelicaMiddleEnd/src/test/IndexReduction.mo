@@ -184,7 +184,6 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
- constant Real sine.pi = 3.141592653589793;
  parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
  parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
  parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
