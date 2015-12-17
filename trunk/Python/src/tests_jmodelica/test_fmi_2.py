@@ -413,6 +413,74 @@ class Test_FMUModelCS2:
         assert len(res['time']) == 251
 
 
+class Test_State_Space_Repr:
+    """
+    This class tests pyfmi.fmi.FMUModelME2.get_state_space_representation
+    """
+    @classmethod
+    def setUpClass(cls):
+        cls.directional1 = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+        cls.directional2 = compile_fmu("JacFuncTests.BasicJacobianTest2",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+    
+    def _run_test(self, name, matrix):
+        model = load_fmu(name)
+        model.setup_experiment()
+        model.initialize()
+        
+        def get_matrix(matrix):
+            if matrix == "A":
+                M = model._get_A()
+            elif matrix == "B":
+                M = model._get_B()
+            elif matrix == "C":
+                M = model._get_C()
+            elif matrix == "D":
+                M = model._get_D()
+            return M
+        
+        M1 = get_matrix(matrix)
+        model.force_finite_differences = True
+        M2 = get_matrix(matrix)
+        
+        print model.get_states_list()
+        print model.get_input_list()
+        print matrix, M1
+        print matrix, M2
+        
+        M1 = M1.toarray().flatten()
+        M2 = M2.toarray().flatten()
+        
+        for i in range(len(M1)):
+            nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
+    
+    def test_A_matrix1(self):
+        pass
+        #Should be actived after https://trac.jmodelica.org/ticket/4739
+        #self._run_test(self.directional1, "A")
+    
+    def test_A_matrix2(self):
+        pass
+        ##Should be actived after https://trac.jmodelica.org/ticket/4739
+        #self._run_test(self.directional2, "A")
+        
+    def test_B_matrix1(self):
+        self._run_test(self.directional1, "B")
+    
+    def test_B_matrix2(self):
+        self._run_test(self.directional2, "B")
+    
+    def test_C_matrix1(self):
+        self._run_test(self.directional1, "C")
+    
+    def test_C_matrix2(self):
+        self._run_test(self.directional2, "C")
+    
+    def test_D_matrix1(self):
+        self._run_test(self.directional1, "D")
+    
+    def test_D_matrix2(self):
+        self._run_test(self.directional2, "D")
+
 
 class Test_FMUModelME2:
     """

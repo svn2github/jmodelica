@@ -9,6 +9,18 @@ package JacFuncTests
         der(x2) = x1 * 3 + 4 * x2 + 11 * x1^1;
         
     end BasicJacobianTest;
+    
+    model BasicJacobianTest2
+        extends BasicJacobianTest;
+        output Real y1,y2,y3;
+        input Real u1,u2,u3;
+        Real x3;
+    equation
+        der(x3) = x1+u2+u3;
+        y1 = x1+x2+x3+u1+u3;
+        y2 = x3+u1;
+        y3 = u2+u3;
+    end BasicJacobianTest2;
 
 	model sparseFunc1
 		function F1
