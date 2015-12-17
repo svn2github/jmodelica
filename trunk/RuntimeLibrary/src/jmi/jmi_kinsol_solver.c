@@ -305,8 +305,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             "jmi_kinsol_solver", block->label, message);
     }
 
-    if (!solver->has_compression_setup_flag && ((!block->dF && !block->Jacobian) || (!block->options->calculate_jacobian_externally && !block->dF)
-        || (!block->Jacobian && block->options->calculate_jacobian_externally)) || block->options->block_jacobian_check) {
+    if ((!solver->has_compression_setup_flag && ((!block->dF && !block->Jacobian) || (!block->options->calculate_jacobian_externally && !block->dF)
+        || (!block->Jacobian && block->options->calculate_jacobian_externally))) || block->options->block_jacobian_check) {
             /* Use (almost) standard finite differences */
             realtype inc, inc_inv, ujsaved, ujscale, sign;
             realtype *tmp2_data, *u_data, *uscale_data;
@@ -475,8 +475,8 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
 
     if (block->options->block_jacobian_check) {
         /* compare analytical/external and finite differences Jacobians */
-        if (block->dF || block->Jacobian && (solver->has_compression_setup_flag 
-            || block->options->calculate_jacobian_externally)) {
+        if (block->dF || (block->Jacobian && (solver->has_compression_setup_flag 
+            || block->options->calculate_jacobian_externally))) {
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
                         realtype fd_val = jac_fd[i * N + j];
