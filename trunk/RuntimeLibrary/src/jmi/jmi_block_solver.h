@@ -51,6 +51,7 @@
 #define JMI_BLOCK_START_SET                                     131072
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
 #define JMI_BLOCK_EVALUATE_JAC                                  524288
+#define JMI_BLOCK_GET_DEPENDENCY_MATRIX                         1048576
 
 #define JMI_LIMIT_VALUE 1e30
 
@@ -112,6 +113,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_Broyden_with_zeros = 64,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
+    jmi_block_solver_experimental_mode_jacobian_compression = 256,
     jmi_block_solver_experimental_check_descent_direction = 512,
     jmi_block_solver_experimental_Sparse_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096
@@ -171,7 +173,8 @@ typedef int (*jmi_block_solver_dir_der_func_t)(void* problem_data, jmi_real_t* x
  * @param x (Input/Output) If mode is set to JMI_BLOCK_EVALUATE_JAC, then x is an input
  * argument used in the evaluation of the jacobian.
  * @param jac(Output) The jacobian matrix if mode is set to
- * JMI_BLOCK_EVALUATE_JAC, otherwise this argument is not used.
+ * JMI_BLOCK_EVALUATE_JAC, the dependency matrix if mode is set to JMI_BLOCK_GET_DEPENDENCY_MATRIX,
+ * otherwise this argument is not used.
  * @param mode Evaluation mode define
  * @return Error code.
  */

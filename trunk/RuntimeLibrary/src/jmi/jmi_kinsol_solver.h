@@ -109,6 +109,7 @@ struct jmi_kinsol_solver_t {
     DlsMat J_sing;                  /**< \brief Jacobian matrix/it's right singular vectors */
     DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
     DlsMat J_SVD_VT;                /**< \brief The right singular vectors */
+    DlsMat J_Dependency;            /**< \brief Dependency matrix with value 1 at (i,j) if iv j depends on residual i, 0 otherwise */ 
 
     int is_first_newton_solve_flag; /**< \brief Flag indicating if the current solve is the first Newton solve */
 
@@ -139,6 +140,10 @@ struct jmi_kinsol_solver_t {
     realtype max_nw_step;           /**< \brief maximal newton step calculated from nominals */
     realtype* range_limits;         /**< \brief step limits on the different IVs */
     int* range_limited;             /**< \brief flags indicating if step in specific IV is limiting */
+    
+    int* jac_compression_groups;    /**< \brief Vector with groups used for Jacobian compression */
+    int* jac_compression_group_index; /**< \brief Indices for iv:s belonging to the groups in jac_compression_groups. */
+    int has_compression_setup_flag;  /**< \brief Flag indicating whether Jacobian compression groups have been set up. */
     
     realtype y_pos_min_1d;
     realtype f_pos_min_1d;

@@ -232,9 +232,55 @@ static void kin_char_log(jmi_kinsol_solver_t* solver, char c) {
         solver->char_log[JMI_KINSOL_SOLVER_MAX_CHAR_LOG_LENGTH-1] = '?';
     }
 }
+
+static double kin_dot_product(double* y, double* x, int n) {
+    double prod = 0;
+    int i;
+    for(i=0; i<n; i++)
+        prod+= y[i]*x[i];
+    return prod;
+}
+
+static void kin_sum_vectors(double* y, double* x, int n, double* z) {
+    int i;
+    for(i=0; i<n; i++)
+        z[i] = y[i]+ x[i];
+}
+
+static void kin_prod_vectors(double* y, double* x, int n, double* z) {
+    int i;
+    for(i=0; i<n; i++)
+        z[i] = y[i]*x[i];
+}
+
+void jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
+    int N = block->n;
+    int leftColumns = N;
+    int i, group = 0;
+    N_Vector rows = N_VNew_Serial(N);
+    realtype* rows_r = N_VGetArrayPointer(rows);
+    N_VScale(0.0, solver->work_vector, solver->work_vector);
+    while(leftColumns > 0) {
+        group++;
+        N_VScale(0.0, rows, rows);
+        for(i = 0; i<N; i++) {
+            if(Ith(solver->work_vector, i) == 0.0) {
+                if(kin_dot_product(rows_r, solver->J_Dependency->cols[i], N)==0.0) { /* Column can be added */
+                    kin_sum_vectors(rows_r, solver->J_Dependency->cols[i], N, rows_r);
+                    solver->jac_compression_groups[N-leftColumns]=group;
+                    solver->jac_compression_group_index[N-leftColumns]=i;
+                    Ith(solver->work_vector, i) = 1.0;
+                    leftColumns--;
+                }
+            }
+        }
+    }
+}
+
 /* Wrapper function to Jacobian evaluation as needed by standard KINSOL solvers */
 int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block, N_Vector tmp1, N_Vector tmp2){
- #ifdef JMI_PROFILE_RUNTIME 
+#ifdef JMI_PROFILE_RUNTIME 
     clock_t t;
 #endif
     clock_t t = clock();
@@ -245,7 +291,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     realtype *jac_fd = NULL;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
- #ifdef JMI_PROFILE_RUNTIME 
+#ifdef JMI_PROFILE_RUNTIME 
     if (block->n > 1) {
         t = clock();
     }
@@ -256,86 +302,160 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         char message[256];
         sprintf(message, "Updating Jacobian (evaluations: %d)", (int)block->nb_jevals);
         jmi_log_node(block->log, logInfo, "Progress", "<source:%s><block:%s><message:%s>",
-                     "jmi_kinsol_solver", block->label, message);
+            "jmi_kinsol_solver", block->label, message);
     }
-    if ((!block->dF && !block->Jacobian) || block->options->block_jacobian_check || (!block->options->calculate_jacobian_externally && !block->dF)
-        || (!block->Jacobian && block->options->calculate_jacobian_externally)) {
-        /* Use (almost) standard finite differences */
-        realtype inc, inc_inv, ujsaved, ujscale, sign;
-        realtype *tmp2_data, *u_data, *uscale_data;
-        N_Vector ftemp, jthCol;
-            
-        /* Save pointer to the array in tmp2 */
-        tmp2_data = N_VGetArrayPointer(tmp2);
-        
-        /* Make sure that the residual values are up to date */
-        ret = kin_f(u, fu, block);
-        if(ret != 0) {
-            block->jac_eval_time +=((double)clock()-t);
-            return ret;
-        }
 
-        /* Rename work vectors for readibility */
-        ftemp = tmp1; 
-        jthCol = tmp2;
-      
-        /* Obtain pointers to the data for u and uscale */
-        u_data   = N_VGetArrayPointer(u);
-        uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
-      
-        /* This is the only for loop for 0..N-1 in KINSOL */
-      
-        for (j = 0; j < N; j++) {
-          realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
-            
-      
-          ujsaved = u_data[j];
-          ujscale = ONE/uscale_data[j];
-          sign = (ujsaved >= 0) ? 1 : -1;
-          inc = MAX(ABS(ujsaved), ujscale)*sign;
-          if(sqrt_relfunc > 0) 
-              inc *= sqrt_relfunc;
-          u_data[j] += inc;
-          /* make sure we're inside bounds*/
-          if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
-              inc = -inc;
-              u_data[j] = ujsaved + inc;
-          }
-          ret = kin_f(u, ftemp, block);
-          if(ret > 0) {
-              /* try to recover by stepping in the opposite direction */
-              inc = -inc;
-              u_data[j] = ujsaved + inc;
-          
-              ret = kin_f(u, ftemp, block);
-          }
-          if (ret != 0) break; 
-      
-          u_data[j] = ujsaved;
-      
-          inc_inv = ONE/inc;
-          /* Generate the jth col of Jac(u) */
-          N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
-          N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
-          /* Restore original array pointer in tmp2 */
-          N_VSetArrayPointer(tmp2_data, tmp2);
-        }
-      
-        /* Evaluate the residual with the original u vector to avoid that the initial guess 
-           for the final IV is pertubated when the iterations start*/
-        /*ret = kin_f(u, ftemp, block);*/
+    if (!solver->has_compression_setup_flag && ((!block->dF && !block->Jacobian) || (!block->options->calculate_jacobian_externally && !block->dF)
+        || (!block->Jacobian && block->options->calculate_jacobian_externally)) || block->options->block_jacobian_check) {
+            /* Use (almost) standard finite differences */
+            realtype inc, inc_inv, ujsaved, ujscale, sign;
+            realtype *tmp2_data, *u_data, *uscale_data;
+            N_Vector ftemp, jthCol;
 
-       
-        if (block->options->block_jacobian_check) {
-            jac_fd = (realtype*) calloc(N * N, sizeof(realtype));
-            for (i = 0; i < N * N; i++) {
-                jac_fd[i] = J->data[i];
+            /* Save pointer to the array in tmp2 */
+            tmp2_data = N_VGetArrayPointer(tmp2);
+
+            /* Make sure that the residual values are up to date */
+            ret = kin_f(u, fu, block);
+            if(ret != 0) {
+                block->jac_eval_time +=((double)clock()-t);
+                return ret;
             }
-        }
+
+            /* Rename work vectors for readibility */
+            ftemp = tmp1; 
+            jthCol = tmp2;
+
+            /* Obtain pointers to the data for u and uscale */
+            u_data   = N_VGetArrayPointer(u);
+            uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+
+            /* This is the only for loop for 0..N-1 in KINSOL */
+
+            for (j = 0; j < N; j++) {
+                realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
+
+
+                ujsaved = u_data[j];
+                ujscale = ONE/uscale_data[j];
+                sign = (ujsaved >= 0) ? 1 : -1;
+                inc = MAX(ABS(ujsaved), ujscale)*sign;
+                if(sqrt_relfunc > 0) 
+                    inc *= sqrt_relfunc;
+                u_data[j] += inc;
+                /* make sure we're inside bounds*/
+                if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
+                    inc = -inc;
+                    u_data[j] = ujsaved + inc;
+                }
+                ret = kin_f(u, ftemp, block);
+                if(ret > 0) {
+                    /* try to recover by stepping in the opposite direction */
+                    inc = -inc;
+                    u_data[j] = ujsaved + inc;
+
+                    ret = kin_f(u, ftemp, block);
+                }
+                if (ret != 0) break; 
+
+                u_data[j] = ujsaved;
+
+                inc_inv = ONE/inc;
+                /* Generate the jth col of Jac(u) */
+                N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
+                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
+                /* Restore original array pointer in tmp2 */
+                N_VSetArrayPointer(tmp2_data, tmp2);
+            }
+
+            /* Evaluate the residual with the original u vector to avoid that the initial guess 
+            for the final IV is pertubated when the iterations start*/
+            /*ret = kin_f(u, ftemp, block);*/
+
+
+            if (block->options->block_jacobian_check) {
+                jac_fd = (realtype*) calloc(N * N, sizeof(realtype));
+                for (i = 0; i < N * N; i++) {
+                    jac_fd[i] = J->data[i];
+                }
+            }
     }
-    if(block->Jacobian && block->options->calculate_jacobian_externally) {
+
+    if (solver->has_compression_setup_flag && block->options->experimental_mode 
+        & jmi_block_solver_experimental_mode_jacobian_compression && block->Jacobian) {
+            /* Use (almost) standard finite differences */
+            realtype inc, inc_inv, ujsaved, ujscale, sign;
+            realtype *tmp2_data, *u_data, *uscale_data;
+            N_Vector ftemp, jthCol, utemp;
+            int k, first_index_in_group = 0;
+
+            /* Save pointer to the array in tmp2 */
+            tmp2_data = N_VGetArrayPointer(tmp2);
+
+            /* Make sure that the residual values are up to date */
+            ret = kin_f(u, fu, block);
+            if(ret != 0) {
+                block->jac_eval_time +=((double)clock()-t);
+                return ret;
+            }
+
+            /* Rename work vectors for readibility */
+            ftemp = tmp1; 
+            jthCol = tmp2;
+
+            /* Make sure we save initial point */
+            utemp = solver->work_vector2;
+            N_VScale(1.0, u, utemp); 
+            /* Obtain pointers to the data for u and uscale */
+            u_data   = N_VGetArrayPointer(u);
+            uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+
+            /* This is the only for loop for 0..N-1 in KINSOL */
+
+            for (i = 0; i < N; i++) {
+                realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
+                j = solver->jac_compression_group_index[i];  
+                ujsaved = u_data[j];
+                ujscale = ONE/uscale_data[j];
+                sign = (ujsaved >= 0) ? 1 : -1;
+                inc = MAX(ABS(ujsaved), ujscale)*sign;
+                if(sqrt_relfunc > 0) 
+                    inc *= sqrt_relfunc;
+                u_data[j] += inc;
+                /* make sure we're inside bounds*/
+                if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
+                    inc = -inc;
+                    u_data[j] = ujsaved + inc;
+                }
+                Ith(solver->work_vector,j) = inc;
+
+                if(i==N-1 || solver->jac_compression_groups[i] != solver->jac_compression_groups[i+1]) {
+                    ret = kin_f(u, ftemp, block);
+                    N_VScale(1.0, utemp, u);
+                } else {
+                    continue;
+                }
+                if (ret != 0) break; 
+
+
+                for(k=first_index_in_group; k<=i; k++) {
+                    inc_inv = ONE/Ith(solver->work_vector, solver->jac_compression_group_index[k]);
+                    /* Generate the jth col of Jac(u) */
+                    N_VSetArrayPointer(DENSE_COL(J, solver->jac_compression_group_index[k]), jthCol);
+                    N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
+                    kin_prod_vectors(solver->J_Dependency->cols[solver->jac_compression_group_index[k]], N_VGetArrayPointer(jthCol), N, N_VGetArrayPointer(jthCol));
+                } 
+                /* Restore original array pointer in tmp2 */
+                N_VSetArrayPointer(tmp2_data, tmp2);
+                first_index_in_group = i+1;
+                /* Make sure we save initial point */
+                N_VScale(1.0, u, utemp); 
+            }
+    }
+    if(block->Jacobian && block->options->calculate_jacobian_externally && !solver->has_compression_setup_flag) {
         ret = block->Jacobian(block->problem_data, N_VGetArrayPointer(u), J->cols, JMI_BLOCK_EVALUATE_JAC);
     }
+
     if (block->dF && !block->options->calculate_jacobian_externally) {
         /* utilize directional derivatives to calculate Jacobian */
         for(i = 0; i < N; i++){ 
@@ -355,29 +475,30 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
 
     if (block->options->block_jacobian_check) {
         /* compare analytical/external and finite differences Jacobians */
-        if (block->dF || block->Jacobian) {
-            for (i = 0; i < N; i++) {
-                for (j = 0; j < N; j++) {
-                    realtype fd_val = jac_fd[i * N + j];
-                    realtype a_val = J->data[i * N + j];
-                    realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
-                    if (rel_error >= block->options->block_jacobian_check_tol) {
-                        if(block->options->calculate_jacobian_externally) {
-                            jmi_log_node(block->log, logError, "JacobianCheck",
-                                     "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
-                                     j, i, a_val, fd_val, rel_error);
-                        }
-                        else {
-                            jmi_log_node(block->log, logError, "JacobianCheck",
-                                "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
-                                j, i, a_val, fd_val, rel_error);
+        if (block->dF || block->Jacobian && (solver->has_compression_setup_flag 
+            || block->options->calculate_jacobian_externally)) {
+                for (i = 0; i < N; i++) {
+                    for (j = 0; j < N; j++) {
+                        realtype fd_val = jac_fd[i * N + j];
+                        realtype a_val = J->data[i * N + j];
+                        realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
+                        if (rel_error >= block->options->block_jacobian_check_tol) {
+                            if(block->options->calculate_jacobian_externally) {
+                                jmi_log_node(block->log, logError, "JacobianCheck",
+                                    "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
+                                    j, i, a_val, fd_val, rel_error);
+                            }
+                            else {
+                                jmi_log_node(block->log, logError, "JacobianCheck",
+                                    "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
+                                    j, i, a_val, fd_val, rel_error);
+                            }
                         }
                     }
                 }
-            }
         } else {
             jmi_log_node(block->log, logError, "JacobianCheck", 
-                         "No block jacobian specified, unable to do jacobian check");
+                "No block jacobian specified, unable to do jacobian check");
         }
         free(jac_fd);
     }
@@ -389,14 +510,14 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         }
         jmi_log_leave(block->log, node);
     }
- #ifdef JMI_PROFILE_RUNTIME 
+#ifdef JMI_PROFILE_RUNTIME 
     if (block->n > 1) {
         block->time_df += ((double)clock() - t) / CLOCKS_PER_SEC;
     }
 #endif
     block->jac_eval_time +=((double)clock()-t);
     return ret;
-}
+    }
 
 static void jmi_kinsol_linesearch_nonconv_error_message(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
@@ -941,6 +1062,25 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
         }
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
+
+    if(!solver->has_compression_setup_flag && block->Jacobian && block->options->experimental_mode & jmi_block_solver_experimental_mode_jacobian_compression) {
+        int ret, N=block->n;
+        ret = block->Jacobian(block->problem_data, 0, solver->J_Dependency->cols, JMI_BLOCK_GET_DEPENDENCY_MATRIX);
+        if(ret==0) {
+            jmi_kin_setup_column_partition(block);
+            if((block->callbacks->log_options.log_level >= 4)) {
+                jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "DependencyMatrix", "<block:%s>", block->label);
+                if (block->callbacks->log_options.log_level >= 6) {
+                    jmi_log_real_matrix(block->log, node, logInfo, "dependency_matrix", solver->J_Dependency->data, N, N);
+                    jmi_log_ints(block->log, node, logInfo, "column_partioning_groups", solver->jac_compression_groups, N);
+                    jmi_log_ints(block->log, node, logInfo, "column_partioning_group_index", solver->jac_compression_group_index, N);
+                }
+                jmi_log_leave(block->log, node);
+            }
+            solver->has_compression_setup_flag = TRUE;
+        } 
+    }
+
     /* evaluate Jacobian at initial */
     if(jmi_kin_lsetup(kin_mem)) {
         ef = 1;
@@ -1346,6 +1486,14 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     ret = kin_dF(N, solver->kin_y, kin_mem->kin_fval, solver->J, block, kin_mem->kin_vtemp1, kin_mem->kin_vtemp2);
     solver->updated_jacobian_flag = 1; /* The Jacobian is current */
     
+    if(ret != 0 && solver->has_compression_setup_flag && block->options->experimental_mode & jmi_block_solver_experimental_mode_jacobian_compression) {
+        solver->has_compression_setup_flag = FALSE;
+        jmi_log_node(block->log, logWarning, "CompressedJacobianEvaluation", "Failed to evaluate Jacobian using compression. Will try full finite differences.");
+        /* Try if it helps with full finite differences with possibility to step in other direction */
+        ret = kin_dF(N, solver->kin_y, kin_mem->kin_fval, solver->J, block, kin_mem->kin_vtemp1, kin_mem->kin_vtemp2);
+        solver->has_compression_setup_flag = TRUE;
+    }
+
     if(ret != 0 ) return ret; /* There was an error in calculation of Jacobian */
     
     if(solver->use_steepest_descent_flag) return ret; /* No further processing when using steepest descent */
@@ -2246,6 +2394,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_ftol = UROUND; /* block->options->min_tol; */
     solver->kin_stol = block->options->min_tol;
     solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
+    solver->has_compression_setup_flag = FALSE;
 
     solver->current_nni = 0;
     
@@ -2256,6 +2405,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->J_sing = NewDenseMat(n, n);
     solver->J_SVD_U = NewDenseMat(n, n);
     solver->J_SVD_VT = NewDenseMat(n, n);
+    solver->J_Dependency = NewDenseMat(n,n);
     solver->J_is_singular_flag = 0;
 
     solver->equed = 'N';
@@ -2263,6 +2413,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->cScale = (realtype*)calloc(n+1,sizeof(realtype));
     solver->range_limits = (realtype*)calloc(n+1,sizeof(realtype));
     solver->range_limited = (int*)calloc(n+1,sizeof(int));
+    solver->jac_compression_groups = (int*)calloc(n+1,sizeof(int));
+    solver->jac_compression_group_index = (int*)calloc(n+1,sizeof(int));
     solver->range_most_limiting = 0;
 
     solver->work_vector = N_VNew_Serial(n);
@@ -2383,10 +2535,13 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     DestroyMat(solver->J_sing);
     DestroyMat(solver->J_SVD_U);
     DestroyMat(solver->J_SVD_VT);
+    DestroyMat(solver->J_Dependency);
     free(solver->cScale);
     free(solver->rScale);
     free(solver->range_limits);
     free(solver->range_limited);
+    free(solver->jac_compression_groups);
+    free(solver->jac_compression_group_index);
     N_VDestroy_Serial(solver->work_vector);
     N_VDestroy_Serial(solver->work_vector2);
     free(solver->lapack_work);
