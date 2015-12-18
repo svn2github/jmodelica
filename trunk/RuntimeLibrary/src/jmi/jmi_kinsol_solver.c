@@ -333,7 +333,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             /* This is the only for loop for 0..N-1 in KINSOL */
 
             for (j = 0; j < N; j++) {
-                realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
+                realtype sqrt_relfunc = block->options->jacobian_finite_difference_delta; /*kin_mem->kin_sqrt_relfunc;*/
 
 
                 ujsaved = u_data[j];
@@ -413,7 +413,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             /* This is the only for loop for 0..N-1 in KINSOL */
 
             for (i = 0; i < N; i++) {
-                realtype sqrt_relfunc = kin_mem->kin_sqrt_relfunc;
+                realtype sqrt_relfunc = block->options->jacobian_finite_difference_delta; /*kin_mem->kin_sqrt_relfunc;*/
                 j = solver->jac_compression_group_index[i];  
                 ujsaved = u_data[j];
                 ujscale = ONE/uscale_data[j];
@@ -948,6 +948,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_fmt(block->log, node, logInfo, " <regularization_tolerance: %g>", block->options->regularization_tolerance);
     jmi_log_fmt(block->log, node, logInfo, " <min_residual_scaling_factor: %g>", block->options->min_residual_scaling_factor);
     jmi_log_fmt(block->log, node, logInfo, " <max_residual_scaling_factor: %g>", block->options->max_residual_scaling_factor);
+    jmi_log_fmt(block->log, node, logInfo, " <jacobian_finite_difference_delta: %g>", block->options->jacobian_finite_difference_delta);
     jmi_log_fmt(block->log, node, logInfo, " <use_jacobian_equilibration: %d>", block->options->use_jacobian_equilibration_flag);
     jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
     jmi_log_fmt(block->log, node, logInfo, " <calculate_jacobian_externally: %d>", block->options->calculate_jacobian_externally);
@@ -1833,7 +1834,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     if(((block->options->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto) &&
         nniters > 1 && solver->is_first_newton_solve_flag) 
         || (block->options->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto 
-        && nniters > 1 && solver->updated_jacobian_flag)) {
+        && nniters > 1 && solver->updated_jacobian_flag && solver->is_first_newton_solve_flag)) {
         int i;
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
         N_VScale(1.0, solver->kin_f_scale, solver->work_vector);

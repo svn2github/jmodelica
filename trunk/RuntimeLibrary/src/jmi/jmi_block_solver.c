@@ -652,6 +652,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
 
     bsop->block_jacobian_check = 0;
     bsop->block_jacobian_check_tol = 1e-6;
+    bsop->jacobian_finite_difference_delta = sqrt(UNIT_ROUNDOFF);
 
     bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto; 
     bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;

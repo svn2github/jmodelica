@@ -288,7 +288,8 @@ struct jmi_block_solver_options_t {
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
-    int calculate_jacobian_externally; /**< \bried Flag indicating if the solver should use callback for calculating Jacobian */
+    int calculate_jacobian_externally; /**< \brief Flag indicating if the solver should use callback for calculating Jacobian */
+    double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobians, default sqrt(eps). */
 
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
