@@ -260,7 +260,7 @@ void jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
     int i, group = 0;
     N_Vector rows = N_VNew_Serial(N);
     realtype* rows_r = N_VGetArrayPointer(rows);
-    N_VScale(0.0, solver->work_vector, solver->work_vector);
+    N_VConst_Serial(0.0, solver->work_vector);
     while(leftColumns > 0) {
         group++;
         N_VScale(0.0, rows, rows);
