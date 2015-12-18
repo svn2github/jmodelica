@@ -461,7 +461,7 @@ aspect FExpToCasADi {
     }
     
     
-    eq FVariable.asMXVariable() = ifcasadi.msym(displayName());
+    eq FVariable.asMXVariable() = ifcasadi.msym(name());
     eq FFunctionVariable.asMXVariable() = ifcasadi.msym(getFQName().toString());
     
     eq FFunctionArray.asMXVector() {
