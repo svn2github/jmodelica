@@ -284,8 +284,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     clock_t t;
 #endif
     clock_t t = clock();
-    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;        
-    struct KINMemRec * kin_mem = (struct KINMemRec *)solver->kin_mem;    
+    jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;            
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
     realtype *jac_fd = NULL;
