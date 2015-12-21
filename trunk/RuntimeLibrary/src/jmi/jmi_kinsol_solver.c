@@ -253,17 +253,16 @@ static void kin_prod_vectors(double* y, double* x, int n, double* z) {
         z[i] = y[i]*x[i];
 }
 
-void jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
+int jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     int N = block->n;
     int leftColumns = N;
     int i, group = 0;
-    N_Vector rows = N_VNew_Serial(N);
-    realtype* rows_r = N_VGetArrayPointer(rows);
+    realtype* rows_r = N_VGetArrayPointer(solver->work_vector2);
     N_VConst_Serial(0.0, solver->work_vector);
-    while(leftColumns > 0) {
+    while(leftColumns > 0 && group <N) {
         group++;
-        N_VConst_Serial(0.0, rows);
+        N_VConst_Serial(0.0, solver->work_vector2);
         for(i = 0; i<N; i++) {
             if(Ith(solver->work_vector, i) == 0.0) {
                 if(kin_dot_product(rows_r, solver->J_Dependency->cols[i], N)==0.0) { /* Column can be added */
@@ -276,7 +275,11 @@ void jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
             }
         }
     }
-    N_VDestroy_Serial(rows);
+    if(leftColumns != 0) {
+        jmi_log_node(block->log, logWarning, "ColumnPartitioning", "Column partitioning error, dependency data may be corrupt.");
+        return -1;
+    }
+    return 0;
 }
 
 /* Wrapper function to Jacobian evaluation as needed by standard KINSOL solvers */
@@ -503,7 +506,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
         free(jac_fd);
     }
 
-    if((block->callbacks->log_options.log_level >= 4)) {
+    if((block->callbacks->log_options.log_level >= 4) && ret == 0) { /* Do only log if succeeded */
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "JacobianUpdated", "<block:%s>", block->label);
         if (block->callbacks->log_options.log_level >= 6) {
             jmi_log_real_matrix(block->log, node, logInfo, "jacobian", J->data, N, N);
@@ -1068,17 +1071,19 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
         int ret, N=block->n;
         ret = block->Jacobian(block->problem_data, 0, solver->J_Dependency->cols, JMI_BLOCK_GET_DEPENDENCY_MATRIX);
         if(ret==0) {
-            jmi_kin_setup_column_partition(block);
-            if((block->callbacks->log_options.log_level >= 4)) {
-                jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "DependencyMatrix", "<block:%s>", block->label);
-                if (block->callbacks->log_options.log_level >= 6) {
-                    jmi_log_real_matrix(block->log, node, logInfo, "dependency_matrix", solver->J_Dependency->data, N, N);
-                    jmi_log_ints(block->log, node, logInfo, "column_partioning_groups", solver->jac_compression_groups, N);
-                    jmi_log_ints(block->log, node, logInfo, "column_partioning_group_index", solver->jac_compression_group_index, N);
+            ret = jmi_kin_setup_column_partition(block);
+            if(ret == 0) {
+                if((block->callbacks->log_options.log_level >= 4)) {
+                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "DependencyMatrix", "<block:%s>", block->label);
+                    if (block->callbacks->log_options.log_level >= 6) {
+                        jmi_log_real_matrix(block->log, node, logInfo, "dependency_matrix", solver->J_Dependency->data, N, N);
+                        jmi_log_ints(block->log, node, logInfo, "column_partitioning_groups", solver->jac_compression_groups, N);
+                        jmi_log_ints(block->log, node, logInfo, "column_partitioning_group_index", solver->jac_compression_group_index, N);
+                    }
+                    jmi_log_leave(block->log, node);
                 }
-                jmi_log_leave(block->log, node);
+                solver->has_compression_setup_flag = TRUE;
             }
-            solver->has_compression_setup_flag = TRUE;
         } 
     }
 
