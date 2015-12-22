@@ -956,6 +956,11 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
     jmi_log_fmt(block->log, node, logInfo, " <calculate_jacobian_externally: %d>", block->options->calculate_jacobian_externally);
     jmi_log_fmt(block->log, node, logInfo, " <jacobian_update_mode: %d>", block->options->jacobian_update_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <log_level: %d>", block->callbacks->log_options.log_level);
+    jmi_log_fmt(block->log, node, logInfo, " <jacobian_check: %d>", block->options->block_jacobian_check);
+    jmi_log_fmt(block->log, node, logInfo, " <jacobian_check_tolerance: %g>", block->options->block_jacobian_check_tol);
+    jmi_log_fmt(block->log, node, logInfo, " <step_limit_factor: %g>", block->options->step_limit_factor);
+    jmi_log_fmt(block->log, node, logInfo, " <max_iter_no_jacobian: %d>", block->options->max_iter_no_jacobian);
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
