@@ -453,31 +453,39 @@ class Test_State_Space_Repr:
         for i in range(len(M1)):
             nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
     
+    @testattr(fmi = True)
     def test_A_matrix1(self):
         pass
         #Should be actived after https://trac.jmodelica.org/ticket/4739
         #self._run_test(self.directional1, "A")
     
+    @testattr(fmi = True)
     def test_A_matrix2(self):
         pass
         ##Should be actived after https://trac.jmodelica.org/ticket/4739
         #self._run_test(self.directional2, "A")
-        
+    
+    @testattr(fmi = True)
     def test_B_matrix1(self):
         self._run_test(self.directional1, "B")
     
+    @testattr(fmi = True)
     def test_B_matrix2(self):
         self._run_test(self.directional2, "B")
     
+    @testattr(fmi = True)
     def test_C_matrix1(self):
         self._run_test(self.directional1, "C")
     
+    @testattr(fmi = True)
     def test_C_matrix2(self):
         self._run_test(self.directional2, "C")
     
+    @testattr(fmi = True)
     def test_D_matrix1(self):
         self._run_test(self.directional1, "D")
     
+    @testattr(fmi = True)
     def test_D_matrix2(self):
         self._run_test(self.directional2, "D")
 
