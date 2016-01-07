@@ -3713,15 +3713,15 @@ model RedeclareTest51
             description="Check that arrays of unknown size are correctly error checked",
             checkType=check,
             errorMessage="
-3 errors found:
+3 warnings found:
 
-Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', STRING_PARAMETERS_PARTIALLY_SUPPORTED:
   String parameters are only partially supported
 
 Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   The parameter a[:].b does not have a binding expression
 
-Warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Compliance warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', STRING_PARAMETERS_PARTIALLY_SUPPORTED:
   String parameters are only partially supported
 ")})));
 end RedeclareTest51;

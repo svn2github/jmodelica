@@ -15,7 +15,7 @@
 */
 package org.jmodelica.util.logging;
 
-import org.jmodelica.util.Problem.Severity;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
 
 
 public enum Level {
@@ -40,7 +40,7 @@ public enum Level {
         return this.compareTo(other) >= 0 && (alreadySentLevel == null || this.compareTo(alreadySentLevel) < 0);
     }
     
-    public static Level fromKind(Severity severity) {
+    public static Level fromKind(ProblemSeverity severity) {
         switch (severity) {
         case ERROR:
             return ERROR;

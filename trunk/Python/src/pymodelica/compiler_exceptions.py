@@ -168,11 +168,14 @@ class CompilationProblem():
     """
     Baseclass for representing a compiler problem.
     """
-    def __init__(self, type, kind, file, line, column, message):
+    def __init__(self, identifier, type, kind, file, line, column, message):
         """
         Constructor, takes the infromation about the compiler problem
         
         Parameters::
+            identifier --
+                The problem message that explain the problem in detail
+            
             type --
                 The type of the problem, for example error.
             
@@ -191,6 +194,7 @@ class CompilationProblem():
             message --
                 The problem message that explain the problem in detail
         """
+        self.identifier = identifier
         self.type = type
         self.kind = kind
         self.file = file
@@ -221,8 +225,8 @@ class CompilationError(CompilationProblem):
     Class for representing an error that occurs during compilation.
     See CompilationProblem for more documentation.
     """
-    def __init__(self, kind, file, line, column, message):
-        CompilationProblem.__init__(self, 'error', kind, \
+    def __init__(self, identifier, kind, file, line, column, message):
+        CompilationProblem.__init__(self, identifier, 'error', kind, \
             file, line, column, message)
     
 
@@ -231,7 +235,7 @@ class CompilationWarning(CompilationProblem):
     Class for representing an warning that occurs during compilation.
     See CompilationProblem for more documentation.
     """
-    def __init__(self, kind, file, line, column, message):
-        CompilationProblem.__init__(self, 'warning', kind, file, \
+    def __init__(self, identifier, kind, file, line, column, message):
+        CompilationProblem.__init__(self, identifier, 'warning', kind, file, \
             line, column, message)
         

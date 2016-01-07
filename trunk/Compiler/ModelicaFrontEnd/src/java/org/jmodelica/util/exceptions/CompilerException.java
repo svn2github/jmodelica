@@ -18,7 +18,8 @@ package org.jmodelica.util.exceptions;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
 
 /**
  * Exception containing a list of compiler errors/warnings.
@@ -51,7 +52,7 @@ public class CompilerException extends ModelicaException {
      * Add a new problem.
      */
     public void addProblem(Problem p) {
-        if (p.severity() == Problem.Severity.ERROR)
+        if (p.severity() == ProblemSeverity.ERROR)
             errors.add(p);
         else
             warnings.add(p);
@@ -94,6 +95,9 @@ public class CompilerException extends ModelicaException {
      * Convert to error message.
      */
     public String getMessage() {
+        return getMessage(false);
+    }
+    public String getMessage(boolean printIdentifier) {
         StringBuilder str = new StringBuilder();
         if (!errors.isEmpty()) {
             str.append(errors.size());
@@ -105,11 +109,11 @@ public class CompilerException extends ModelicaException {
             str.append(" warnings found:\n\n");
         }
         for (Problem p : errors) {
-            str.append(p);
+            str.append(p.toString(printIdentifier));
             str.append("\n\n");
         }
         for (Problem p : warnings) {
-            str.append(p);
+            str.append(p.toString(printIdentifier));
             str.append("\n\n");
         }
         str.deleteCharAt(str.length() - 1);

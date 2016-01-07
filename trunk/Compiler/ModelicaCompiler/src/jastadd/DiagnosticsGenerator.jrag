@@ -374,15 +374,15 @@ public class DiagnosticsGenerator {
             numComplianceErrors = 0;
             numWarnings = 0;
             for (Problem p : problems) {
-                if (p.severity() == Problem.Severity.ERROR &&
-                    p.kind() != Problem.Kind.COMPLIANCE) {
+                if (p.severity() == ProblemSeverity.ERROR &&
+                    p.kind() != ProblemKind.COMPLIANCE) {
                     errs.append(p.toString() + "\n");
                     numErrors++;
-                } else if (p.severity() == Problem.Severity.ERROR &&
-                           p.kind() == Problem.Kind.COMPLIANCE) {
+                } else if (p.severity() == ProblemSeverity.ERROR &&
+                           p.kind() == ProblemKind.COMPLIANCE) {
                     compErrs.append(p.toString() + "\n");
                     numComplianceErrors++;
-                } else if (p.severity() == Problem.Severity.WARNING) {
+                } else if (p.severity() == ProblemSeverity.WARNING) {
                     warns.append(p.toString() + "\n");
                     numWarnings++;
                 }

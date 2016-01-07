@@ -15,6 +15,9 @@
 */
 
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.problemHandling.SimpleProblemProducer;
+import org.jmodelica.util.problemHandling.SimpleWarningProducer;
+import org.jmodelica.util.problemHandling.SimpleErrorProducer;
 
 aspect ComplianceCheck {
 
@@ -84,6 +87,7 @@ aspect ComplianceCheck {
 		complianceOnlyFMU("When equations are");
 	}
 	
+	@Deprecated
 	public void ASTNode.complianceOnlyFMU(String message) {
 		if (!myOptions().getBooleanOption("generate_ode"))
 			compliance(message + " currently only supported when compiling FMUs");
@@ -239,18 +243,25 @@ aspect ComplianceCheck {
                getSignificantDigits().compliance("significantDigits with higher than parameter variability is not supported");
        }
 	}
-		
+	
+    public static final SimpleProblemProducer ASTNode.STRING_ARGUMENTS_PARTIALLY_SUPPORTED =
+            new SimpleWarningProducer("STRING_ARGUMENTS_PARTIALLY_SUPPORTED", ProblemKind.COMPLIANCE, "String arguments in functions are only partially supported");
+    public static final SimpleProblemProducer ASTNode.STRING_PARAMETERS_PARTIALLY_SUPPORTED =
+            new SimpleWarningProducer("STRING_PARAMETERS_PARTIALLY_SUPPORTED", ProblemKind.COMPLIANCE, "String parameters are only partially supported");
+    public static final SimpleProblemProducer ASTNode.STRING_VARIABLES_NOT_SUPPORTED =
+            new SimpleErrorProducer("STRING_VARIABLES_NOT_SUPPORTED", ProblemKind.COMPLIANCE, "String variables are not supported");
+	
 	public void InstPrimitive.complianceCheck(ErrorCheckType checkType) {
 		super.complianceCheck(checkType);
 		if (isString()) {
 			if (inFunction()) {
-				warning("String arguments in functions are only partially supported");
+			    STRING_ARGUMENTS_PARTIALLY_SUPPORTED.invoke(this);
 			} else if (variability().parameterOrLess()) {
-				warning("String parameters are only partially supported");
+			    STRING_PARAMETERS_PARTIALLY_SUPPORTED.invoke(this);
 				if (isParameter())
 					forceVariability(checkType, fStructParameter());
 			} else {
-				compliance("String variables are not supported");
+			    STRING_VARIABLES_NOT_SUPPORTED.invoke(this);
 			}
 		}
 		if (!myOptions().getBooleanOption("generate_ode")) {

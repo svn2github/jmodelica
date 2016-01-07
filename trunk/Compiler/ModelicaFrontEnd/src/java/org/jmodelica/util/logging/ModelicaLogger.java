@@ -27,7 +27,7 @@ import java.util.Map;
 
 import org.jmodelica.util.streams.NullStream;
 import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.problemHandling.Problem;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.StringLoggingUnit;
@@ -144,8 +144,8 @@ public abstract class ModelicaLogger {
      * Log a list of problems.
      */
     public void logProblems(Collection<Problem> problems) {
-        for (Problem warning : problems)
-            logProblem(warning);
+        for (Problem problem : problems)
+            logProblem(problem);
     }
 
     /**

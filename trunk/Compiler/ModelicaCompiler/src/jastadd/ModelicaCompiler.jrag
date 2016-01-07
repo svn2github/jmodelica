@@ -939,9 +939,7 @@ public class ModelicaCompiler {
 						log.info(file + " parsed OK.");
 					}
 				} catch (CompilerException e) {
-					StringBuilder str = new StringBuilder();
-					for (Problem p : e.getErrors()) 
-						log.error(p.toString());
+                    log.logCompilerException(e);
 				} catch (FileNotFoundException e) {
 					log.error("Could not find file: " + e.getMessage());
 				} catch (IOException e) {
@@ -2085,11 +2083,11 @@ public class ModelicaCompiler {
     }
     
     protected void ModelicaCompiler.warning(String message) {
-        errorHandler.problem(new Problem("", message, Problem.Severity.WARNING));
+        errorHandler.problem(new Problem("", message, ProblemSeverity.WARNING));
     }
     
     protected void ModelicaCompiler.error(String message) {
-        errorHandler.problem(new Problem("", message, Problem.Severity.ERROR));
+        errorHandler.problem(new Problem("", message, ProblemSeverity.ERROR));
     }
 }
 

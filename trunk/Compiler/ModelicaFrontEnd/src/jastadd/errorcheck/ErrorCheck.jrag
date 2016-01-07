@@ -22,7 +22,10 @@ import java.util.Map;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
+import org.jmodelica.util.problemHandling.ProblemKind;
+import org.jmodelica.util.problemHandling.ReporterNode;
 import org.jmodelica.util.ErrorCheckType;
 
 
@@ -96,7 +99,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the error originated from.
 	   */
 	  public void error(String s, ASTNode n) {
-		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.SEMANTIC);
+		  problem(s, n, errors, ProblemSeverity.ERROR, ProblemKind.SEMANTIC);
 	  }
 
 	  /**
@@ -107,7 +110,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the error originated from.
 	   */
 	  public void compliance(String s, ASTNode n) {
-		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.COMPLIANCE);
+		  problem(s, n, errors, ProblemSeverity.ERROR, ProblemKind.COMPLIANCE);
 	  }
 
 	  /**
@@ -117,7 +120,7 @@ import org.jmodelica.util.ErrorCheckType;
 	   * @param n	the node the warning originated from.
 	   */
 	  public void warning(String s, ASTNode n) {
-		  problem(s, n, warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
+		  problem(s, n, warnings, ProblemSeverity.WARNING, ProblemKind.OTHER);
 	  }
 
       /**
@@ -128,7 +131,7 @@ import org.jmodelica.util.ErrorCheckType;
        * @see ASTNode#problem(Problem)
        */
       public void problem(Problem p) {
-          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? warnings : errors;
+          ArrayList<Problem> list = (p.severity() == ProblemSeverity.WARNING) ? warnings : errors;
           int pos = list.indexOf(p);
           if (pos == -1)
               list.add(p);
@@ -136,7 +139,7 @@ import org.jmodelica.util.ErrorCheckType;
               list.get(pos).merge(p);
       }
 
-      protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
+      protected void problem(String s, ASTNode n, ArrayList<Problem> list, ProblemSeverity sev, ProblemKind kind) {
           Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
           if (n.myOptions().getBooleanOption("component_names_in_errors"))
               p.addComponent(n.errorComponentName());
@@ -267,10 +270,20 @@ aspect ErrorCheck {
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
   
+  
+  ASTNode implements ReporterNode;
+  
+  public void ASTNode.reportProblem(Problem problem) {
+      root().getErrorHandler().problem(problem);
+  }
+
+  
+  
   /**
    * Register an error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
+  @Deprecated
   public void ASTNode.error(String s) {
 	  root().getErrorHandler().error(s, this);
   }
@@ -280,6 +293,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.error(String format, Object... args) {
 	  error(String.format(format, args));
   }
@@ -288,6 +302,7 @@ aspect ErrorCheck {
    * Register a compliance error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
+  @Deprecated
   public void ASTNode.compliance(String s) {
 	  root().getErrorHandler().compliance(s, this);
   }
@@ -297,6 +312,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.compliance(String format, Object... args) {
 	  compliance(String.format(format, args));
   }
@@ -305,6 +321,7 @@ aspect ErrorCheck {
    * Register a warning. Delegates to an {@link IErrorHandler}.
    * @param s	the warning message.
    */
+  @Deprecated
   public void ASTNode.warning(String s) {
 	  root().getErrorHandler().warning(s, this);
   }
@@ -314,6 +331,7 @@ aspect ErrorCheck {
    * 
    * Builds warning message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
   }
@@ -322,6 +340,7 @@ aspect ErrorCheck {
    * Register a problem. Delegates to an {@link IErrorHandler}.
    * @param p   the problem.
    */
+  @Deprecated
   public void ASTNode.problem(Problem p) {
       root().getErrorHandler().problem(p);
   }
@@ -329,6 +348,7 @@ aspect ErrorCheck {
     /**
      * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
      */
+    @Deprecated
     public void ASTNode.errorUnlessDisabled(String s) {
         if (inDisabledComponent()) {
             warning("Found error in disabled conditional:\n  " + s);
@@ -340,6 +360,7 @@ aspect ErrorCheck {
     /**
      * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
      */
+    @Deprecated
     public void ASTNode.errorUnlessDisabled(String format, Object... args) {
         if (inDisabledComponent()) {
             warning("Found error in disabled conditional:\n  " + format, args);
@@ -352,6 +373,7 @@ aspect ErrorCheck {
      * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
      * generate a warning, otherwise generate an error.
      */
+    @Deprecated
     public void ASTNode.errorUnlessDisabledAnd(boolean condition, String s) {
         if (condition) {
             errorUnlessDisabled(s);
@@ -364,6 +386,7 @@ aspect ErrorCheck {
      * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
      * generate a warning, otherwise generate an error.
      */
+    @Deprecated
     public void ASTNode.errorUnlessDisabledAnd(boolean condition, String format, Object... args) {
         if (condition) {
             errorUnlessDisabled(format, args);

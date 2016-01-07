@@ -873,12 +873,7 @@ abstract public class TestAnnotationizerHelper {
                 compile();
                 throw new ModelicaException(noExceptionMessage());
             } catch (CompilerException e) {
-                StringBuilder str = new StringBuilder();
-                str.append(e.getProblems().size() + " errors found:\n\n");
-                for (Problem p : e.getProblems()) 
-                    str.append(p.toString() + "\n\n");
-                str.deleteCharAt(str.length() - 1);
-                message = prepare(str.toString());
+                message = prepare(e.getMessage(true));
             }
         }
 
@@ -976,7 +971,7 @@ abstract public class TestAnnotationizerHelper {
 		 * This implementation filters out compliance errors.
 		 */
 		protected boolean keepProblem(Problem p) {
-			return p.severity() == Problem.Severity.ERROR;
+			return p.severity() == ProblemSeverity.ERROR;
 		}
 
 	}

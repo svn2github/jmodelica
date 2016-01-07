@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-package org.jmodelica.util;
+package org.jmodelica.util.problemHandling;
 
 import java.util.Collection;
 import java.util.Set;
@@ -27,6 +27,9 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem other) {
+        if (identifier != null && other.identifier != null && !identifier.equals(other.identifier)) {
+            return identifier.compareTo(other.identifier);
+        }
         if (kind.order != other.kind.order)
             return kind.order - other.kind.order;
         if (fileName == null || other.fileName == null) {
@@ -45,36 +48,11 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return message.compareTo(other.message);
     }
 
-    public enum Severity { ERROR, WARNING }
-
-    public enum Kind { 
-        OTHER(2), LEXICAL("Syntax", 1), SYNTACTIC("Syntax", 1), SEMANTIC(2), COMPLIANCE("Compliance", 2);
-
-        private String desc = null;
-        public final int order;
-
-        private Kind(int order) {
-            this.order = order;
-        }
-
-        private Kind(String desc, int order) {
-            this.desc = desc;
-            this.order = order;
-        }
-
-        public void writeKindAndSeverity(StringBuilder sb, Severity sev) {
-            String s = sev.toString().toLowerCase();
-            if (desc != null) {
-                sb.append(desc);
-                sb.append(' ');
-                sb.append(s);
-            } else {
-                sb.append(Character.toUpperCase(s.charAt(0)));
-                sb.append(s.substring(1));
-            }
-        }
+    protected final String identifier;
+    public String identifier() {
+        return identifier;
     }
-
+    
     protected final int beginLine;
     protected final int beginColumn;
     public int beginLine() { return beginLine; }
@@ -89,11 +67,11 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     protected final String message;
     public String message() { return message; }
 
-    protected final Severity severity;
-    public Severity severity() { return severity; }
+    protected final ProblemSeverity severity;
+    public ProblemSeverity severity() { return severity; }
 
-    protected final Kind kind;
-    public Kind kind() { return kind; }
+    protected final ProblemKind kind;
+    public ProblemKind kind() { return kind; }
 
     protected Set<String> components = new TreeSet<String>(); // TreeSet is used so that we get a sorted set
 
@@ -104,19 +82,28 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
 
     public Collection<String> components() { return components; }
 
+    @Deprecated
     public Problem(String fileName, String message) {
-        this(fileName, message, Severity.ERROR);
+        this(fileName, message, ProblemSeverity.ERROR);
     }
 
-    public Problem(String fileName, String message, Severity severity) {
-        this(fileName, message, severity, Kind.OTHER);
+    @Deprecated
+    public Problem(String fileName, String message, ProblemSeverity severity) {
+        this(fileName, message, severity, ProblemKind.OTHER);
     }
 
-    public Problem(String fileName, String message, Severity severity, Kind kind) {
-        this(fileName, message, severity, kind, 0, 0);
+    @Deprecated
+    public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind) {
+        this(null, fileName, message, severity, kind, 0, 0);
     }
 
-    public Problem(String fileName, String message, Severity severity, Kind kind, int beginLine, int beginColumn) {
+    @Deprecated
+    public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
+        this(null, fileName, message, severity, kind, beginLine, beginColumn);
+    }
+    @Deprecated
+    public Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
+        this.identifier = identifier;
         this.fileName = fileName;
         this.message = message;
         this.severity = severity;
@@ -127,9 +114,16 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         if (message == null)
             throw new NullPointerException();
     }
+    
+    public Problem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
+        this(identifier, src.fileName(), message, severity, kind, src.beginLine(), src.beginColumn());
+        if (src.myOptions().getBooleanOption("component_names_in_errors")) {
+            addComponent(src.errorComponentName());
+        }
+    }
 
     public boolean isTestError(boolean checkAll) {
-        return checkAll || (severity == Severity.ERROR && kind != Kind.COMPLIANCE);
+        return checkAll || (severity == ProblemSeverity.ERROR && kind != ProblemKind.COMPLIANCE);
     }
 
     public boolean equals(Object o) {
@@ -145,7 +139,12 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         components.addAll(p.components);
     }
 
+    @Override
     public String toString() {
+        return toString(false);
+    }
+
+    public String toString(boolean printIdentifier) {
         StringBuilder sb = new StringBuilder();
         kind.writeKindAndSeverity(sb, severity);
         if (fileName == null) {
@@ -158,6 +157,9 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
             sb.append(", in file '");
             sb.append(fileName);
             sb.append("'");
+        }
+        if (printIdentifier && identifier != null) {
+            sb.append(", " + identifier);
         }
         if (!components.isEmpty()) {
             sb.append(",\n");
@@ -194,17 +196,18 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
 
     @Override
     public String print(Level level) {
-        return toString();
-}
+        return toString(level.shouldLog(Level.INFO));
+    }
 
     @Override
     public String printXML(Level level) {
         return XMLLogger.write_node(Problem.capitalize(severity()), 
-                "kind",    kind().toString().toLowerCase(),
-                "file",    fileName(),
-                "line",    beginLine(),
-                "column",  beginColumn(),
-                "message", message());
+                "identifier",   identifier() == null ? "" : identifier(),
+                "kind",         kind().toString().toLowerCase(),
+                "file",         fileName(),
+                "line",         beginLine(),
+                "column",       beginColumn(),
+                "message",      message());
     }
 
     @Override

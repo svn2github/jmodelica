@@ -22,7 +22,9 @@
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
  import org.jmodelica.util.formattedPrint.FormattingInfo;
- import org.jmodelica.util.Problem;
+ import org.jmodelica.util.problemHandling.Problem;
+ import org.jmodelica.util.problemHandling.ProblemSeverity;
+ import org.jmodelica.util.problemHandling.ProblemKind;
  import beaver.Parser.Events;
  import java.io.*;
  import java.util.Collection;
@@ -57,7 +59,7 @@
                 s.append("  Unexpected token: " + Terminals.NAMES[token.getId()]);
             else 
                 s.append("  Syntactic error");
-            Problem p = new Problem(fileName, s.toString(), Problem.Severity.ERROR, Problem.Kind.SYNTACTIC, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()));
+            Problem p = new Problem(fileName, s.toString(), ProblemSeverity.ERROR, ProblemKind.SYNTACTIC, Symbol.getLine(token.getStart()), Symbol.getColumn(token.getStart()));
             
             report(p);
         }
@@ -75,7 +77,7 @@
             s.append(", column ");
             s.append(e.column);
             */
-            Problem p = new Problem(fileName, e.getMessage(), Problem.Severity.ERROR, Problem.Kind.LEXICAL, e.line, e.column);
+            Problem p = new Problem(fileName, e.getMessage(), ProblemSeverity.ERROR, ProblemKind.LEXICAL, e.line, e.column);
             
             report(p);
         }

@@ -27,7 +27,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.logging.ObjectStreamLogger;
@@ -87,7 +88,7 @@ public final class Compilation {
         return new FilteredIterator<Problem>(getProblems(), new Criteria<Problem>() {
             @Override
             public boolean test(Problem elem) {
-                return elem.severity() == Problem.Severity.ERROR;
+                return elem.severity() == ProblemSeverity.ERROR;
             }});
     }
     
@@ -95,7 +96,7 @@ public final class Compilation {
         return new FilteredIterator<Problem>(getProblems(), new Criteria<Problem>() {
             @Override
             public boolean test(Problem elem) {
-                return elem.severity() == Problem.Severity.WARNING;
+                return elem.severity() == ProblemSeverity.WARNING;
             }});
     }
     

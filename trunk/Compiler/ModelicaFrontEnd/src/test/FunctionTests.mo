@@ -2131,7 +2131,7 @@ model FunctionType9
             errorMessage="
 1 errors found:
 
-Compliance error at line 2069, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2069, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', STRING_VARIABLES_NOT_SUPPORTED:
   String variables are not supported
 ")})));
 end FunctionType9;
@@ -2148,7 +2148,7 @@ model FunctionType10
             errorMessage="
 1 errors found:
 
-Compliance error at line 2086, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2086, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', STRING_VARIABLES_NOT_SUPPORTED:
   String variables are not supported
 ")})));
 end FunctionType10;
@@ -2164,7 +2164,7 @@ model FunctionType11
             errorMessage="
 2 errors found:
 
-Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', STRING_VARIABLES_NOT_SUPPORTED:
   String variables are not supported
 
 Error at line 2103, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
