@@ -744,7 +744,7 @@ aspect UnitParser {
             
             private boolean isUnitSymbol(char peekChar) {
                 // Good enough for now.
-                return Character.isAlphabetic(peekChar);
+                return Character.isLetter(peekChar);
             }
             
             public boolean hasNextUnitSymbol() {
