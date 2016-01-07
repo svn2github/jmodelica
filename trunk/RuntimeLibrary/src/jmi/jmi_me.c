@@ -872,10 +872,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_broyden_jacobian_update_mode:
             bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
             break;
-        case jmi_full_jacobian_update_mode:
-            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
-        default:
+        case jmi_reuse_jacobian_update_mode:
             bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+            break;
+        default:
+            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
         }
     } 
         
