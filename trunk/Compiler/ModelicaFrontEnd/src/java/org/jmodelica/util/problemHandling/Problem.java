@@ -27,9 +27,6 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     private static final long serialVersionUID = 1;
     
     public int compareTo(Problem other) {
-        if (identifier != null && other.identifier != null && !identifier.equals(other.identifier)) {
-            return identifier.compareTo(other.identifier);
-        }
         if (kind.order != other.kind.order)
             return kind.order - other.kind.order;
         if (fileName == null || other.fileName == null) {
@@ -45,6 +42,9 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
             return beginLine - other.beginLine;
         if (beginColumn != other.beginColumn)
             return beginColumn - other.beginColumn;
+        if (identifier != null && other.identifier != null && !identifier.equals(other.identifier)) {
+            return identifier.compareTo(other.identifier);
+        }
         return message.compareTo(other.message);
     }
 
