@@ -131,7 +131,9 @@ libModelicaExternalC_la_SOURCES =  ModelicaUtilities.h \
                                    jmi_global.h \
                                    jmi_global.c \
                                    $(MSLCSOURCES)/ModelicaInternal.c \
-	                               $(MSLCSOURCES)/ModelicaStrings.c
+	                               $(MSLCSOURCES)/ModelicaStrings.c \
+	                               $(MSLCSOURCES)/ModelicaRandom.c \
+	                               $(MSLCSOURCES)/ModelicaFFT.c
 
 libModelicaExternalC_la_CFLAGS = -Wall -g -std=c89 -pedantic -I$(MSLCSOURCES)
 
