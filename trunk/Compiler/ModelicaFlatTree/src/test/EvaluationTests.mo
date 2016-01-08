@@ -1337,6 +1337,32 @@ end EvaluationTests.FunctionEval36;
 end FunctionEval36;
 
 
+model FunctionEval37
+    function f
+        input Real x[2];
+        input Integer i;
+        output Real y;
+    protected
+        Real z = x[i];
+    algorithm
+        y := z;
+    end f;
+
+    constant Real x = f({1, 2}, 1);
+    constant Real y = f({3, 4}, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval37",
+            description="Evaluation of array index in binding expression of protected variable in function",
+            flatModel="
+fclass EvaluationTests.FunctionEval37
+ constant Real x = 1;
+ constant Real y = 4;
+end EvaluationTests.FunctionEval37;
+")})));
+end FunctionEval37;
+
 
 model VectorFuncEval1
     function f
