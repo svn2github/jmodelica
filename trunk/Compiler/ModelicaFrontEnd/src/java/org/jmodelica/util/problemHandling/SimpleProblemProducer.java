@@ -1,5 +1,9 @@
 package org.jmodelica.util.problemHandling;
 
+/**
+ * Abstract base class for all types of problem messages which only consists of
+ * a message and some optional format parameters.
+ */
 public abstract class SimpleProblemProducer extends ProblemProducer<ReporterNode> {
 
     private final String message;

@@ -3715,13 +3715,13 @@ model RedeclareTest51
             errorMessage="
 3 warnings found:
 
-Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', STRING_PARAMETERS_PARTIALLY_SUPPORTED:
+Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
   String parameters are only partially supported
 
 Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
   The parameter a[:].b does not have a binding expression
 
-Compliance warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', STRING_PARAMETERS_PARTIALLY_SUPPORTED:
+Compliance warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
   String parameters are only partially supported
 ")})));
 end RedeclareTest51;

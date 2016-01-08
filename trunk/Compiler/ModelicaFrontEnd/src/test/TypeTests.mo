@@ -2482,7 +2482,7 @@ model SpatialDist2
             errorMessage="
 1 errors found:
 
-Compliance error at line 2460, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Compliance error at line 2460, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', INCORRECT_USE_OF_SPATIAL_DISTRIBUTION:
   The spatialDistribution() function-like operator is not supported vectorized in function call equations
 ")})));
 end SpatialDist2;

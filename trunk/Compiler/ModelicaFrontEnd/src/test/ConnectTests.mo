@@ -2787,10 +2787,10 @@ model Cardinality3
             errorMessage="
 2 errors found:
 
-Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', INCORRECT_USE_OF_CARDINALITY:
   The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()
 
-Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', DEPRECATED_CARDINALITY:
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;

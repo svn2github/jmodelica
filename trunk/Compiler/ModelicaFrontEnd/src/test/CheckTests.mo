@@ -903,7 +903,7 @@ model Array1
             errorMessage="
 1 errors found:
 
-Compliance error at line 759, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 759, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_ARRAY_INPUT:
   Arrays of functional input arguments is currently not supported
 ")})));
 end Array1;
@@ -938,7 +938,7 @@ model Bind1
             errorMessage="
 1 errors found:
 
-Compliance error at line 794, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 794, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_FROM_FUNCTION_DEFAULT:
   Creating functional input arguments from functions with default input arguments is currently not supported
 ")})));
 end Bind1;
@@ -975,19 +975,19 @@ model Bind2
             errorMessage="
 6 errors found:
 
-Compliance error at line 829, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 829, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 830, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   The binding expression of the variable pf1 does not match the declared type of the variable
 
-Compliance error at line 830, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 830, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 831, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
   Illegal access to class in expression: fullFunc
 
-Compliance error at line 831, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 831, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_DEFAULT:
   Default values of functional input arguments is currently not supported
 
 Error at line 832, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
@@ -1039,10 +1039,10 @@ model Bind3
             errorMessage="
 2 errors found:
 
-Compliance error at line 895, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 895, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 
-Compliance error at line 896, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Compliance error at line 896, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
   Functional input arguments with record/array inputs/outputs is currently not supported
 ")})));
 end Bind3;

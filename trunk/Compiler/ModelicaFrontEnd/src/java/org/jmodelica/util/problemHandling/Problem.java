@@ -23,8 +23,13 @@ import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.logging.XMLLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
 
+/**
+ * Represents a error or warning given by the compiler during compilation of
+ * a model. It contains information about where, type, severity and message
+ * about the problem.
+ */
 public class Problem implements Comparable<Problem>, LoggingUnit {
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 2;
     
     public int compareTo(Problem other) {
         if (kind.order != other.kind.order)
