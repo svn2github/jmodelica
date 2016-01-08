@@ -88,11 +88,6 @@ set(JMISources
 )
 
 # Source files for ModelicaExternalC
-if(MSVC)
-    set(MODELICAEXTERNALCSources_EXTRA ${MSLCSOURCES}/win32_dirent.c)
-else()
-    set(MODELICAEXTERNALCSources_EXTRA "")
-endif()
 set(MODELICAEXTERNALCSources
     jmi_global.h
     ModelicaUtilities.h
@@ -104,7 +99,6 @@ set(MODELICAEXTERNALCSources
     ${MSLCSOURCES}/ModelicaStrings.c
     ${MSLCSOURCES}/ModelicaRandom.c
     ${MSLCSOURCES}/ModelicaFFT.c
-    ${MODELICAEXTERNALCSources_EXTRA}
 )
 
 # Source files for ModelicaStandardTables
