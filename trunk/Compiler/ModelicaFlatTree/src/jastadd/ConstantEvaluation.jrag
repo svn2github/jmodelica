@@ -2668,6 +2668,8 @@ aspect ConstantEvaluation {
         return new CValueReal(val);
     }
 
+    eq FScalarExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator).array().getCell(0);
+
     syn CValue FSubscript.ceval() = ceval(defaultVariableEvaluator());
 	syn CValue FSubscript.ceval(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
 	eq FExpSubscript.ceval(VariableEvaluator evaluator)      = getFExp().ceval(evaluator);

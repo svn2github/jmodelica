@@ -4129,4 +4129,21 @@ end EvaluationTests.RelExpAlmost1;
 ")})));
 end RelExpAlmost1;
 
+
+model FScalarExpEval
+    constant Real x = scalar({1});
+    Integer y = 1.0; // Generate error so we can use error test
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FScalarExpEval",
+            description="Check that scalar() can be constant evaluated (before scalarization)",
+            errorMessage="
+1 errors found:
+
+Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FScalarExpEval;
+
 end EvaluationTests;
