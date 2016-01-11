@@ -32,7 +32,9 @@ public abstract class ProblemProducer<T extends ReporterNode> implements Compara
         this.identifier = identifier;
         this.kind = kind;
         if (!problemProducers.add(this)) {
-            throw new IllegalArgumentException("The problem producer with the identifier '" + identifier + "' has already been registrerd!");
+            // TODO: Removing this line since it causes crash if the Modelica
+            // and Optimica ASTNode is loaded in the same java process..
+//            throw new IllegalArgumentException("The problem producer with the identifier '" + identifier + "' has already been registrerd!");
         }
     }
 
