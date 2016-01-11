@@ -6905,7 +6905,7 @@ model GetInstanceName2
             errorMessage="
 1 errors found:
 
-Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable dummy does not match the declared type of the variable
 ")})));
 end GetInstanceName2;

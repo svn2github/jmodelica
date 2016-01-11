@@ -2857,7 +2857,7 @@ model ConditionalComponentTest1_Err
             errorMessage="
 1 errors found:
 
-Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2873,7 +2873,7 @@ model ConditionalComponentTest2_Err
             errorMessage="
 1 errors found:
 
-Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2889,10 +2889,10 @@ model ConditionalComponentTest3_Err
             errorMessage="
 2 errors found:
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;

@@ -4167,7 +4167,7 @@ model FScalarExpEval
             errorMessage="
 1 errors found:
 
-Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
+Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable y does not match the declared type of the variable
 ")})));
 end FScalarExpEval;

@@ -447,7 +447,7 @@ model ArrayTest15_Err
             errorMessage="
 1 errors found:
 
-Error at line 441, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 441, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 end ArrayTest15_Err;
@@ -727,7 +727,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
@@ -1316,10 +1316,10 @@ model UnknownSize4
             errorMessage="
 2 errors found:
 
-Error at line 1306, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1306, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
-Error at line 1307, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1307, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
 end UnknownSize4;
@@ -1335,7 +1335,7 @@ model UnknownSize5
             errorMessage="
 1 errors found:
 
-Error at line 1326, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1326, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [1, 2] and size of binding expression is [2, 2]
 ")})));
 end UnknownSize5;
@@ -1353,10 +1353,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
-Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
   The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [:, :], and size of right-hand side is [2, 2]
 ")})));
 end UnknownSize6;
@@ -1997,7 +1997,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2006, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2006, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2018,7 +2018,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2027, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2027, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2039,7 +2039,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2048, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2048, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2060,7 +2060,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2069, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2069, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2081,7 +2081,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2090, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2090, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2102,7 +2102,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2111, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2111, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2123,7 +2123,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2132, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2132, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2144,7 +2144,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2153, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2153, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2165,7 +2165,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2174, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2174, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2413,7 +2413,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2422, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2422, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2434,7 +2434,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2443, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2443, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2455,7 +2455,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2464, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2464, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2559,7 +2559,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2568, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2568, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2580,7 +2580,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2589, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2589, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2601,7 +2601,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2610, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2610, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2622,7 +2622,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2631, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2631, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2643,7 +2643,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2652, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2652, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2664,7 +2664,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2673, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2673, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2685,7 +2685,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2694, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2694, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2706,7 +2706,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2715, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2715, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2727,7 +2727,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2736, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2736, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2975,7 +2975,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2984, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2984, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2996,7 +2996,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3005, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3005, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3017,7 +3017,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3026, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3026, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3360,7 +3360,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3369, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3369, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real[2, 2, 2]
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -3381,7 +3381,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3390, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3390, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3402,7 +3402,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3411, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3411, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3423,7 +3423,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3432, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3432, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}, {50, 60}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}, {50, 60}}' is Integer[3, 2]
@@ -3444,7 +3444,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3453, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3453, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3465,7 +3465,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3474, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3474, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20, 30}, {40, 50, 60}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20, 30}, {40, 50, 60}}' is Integer[2, 3]
@@ -3486,7 +3486,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3495, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3495, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2, 2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3507,7 +3507,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3516, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3516, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3528,7 +3528,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3537, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3537, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}}' is Integer[1, 2]
@@ -3776,7 +3776,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3785, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3785, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3797,7 +3797,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3806, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3806, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3818,7 +3818,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3827, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3827, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3843,7 +3843,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3852, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3852, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {10, 20}
     type of 'y' is Real[2]
     type of '{10, 20}' is Integer[2]
@@ -3864,7 +3864,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3873, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3873, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3964,7 +3964,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3973, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3973, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -3985,7 +3985,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3994, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3994, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4006,7 +4006,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4015, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4015, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4254,7 +4254,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4263, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4263, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4275,7 +4275,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4284, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4284, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4296,7 +4296,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4305, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4305, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4547,7 +4547,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4556, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4556, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4568,7 +4568,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4589,7 +4589,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4598, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4598, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4753,7 +4753,7 @@ model ArrayPow8
             errorMessage="
 1 errors found:
 
-Error at line 4762, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4762, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ -1
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '-1' is Integer
@@ -4771,7 +4771,7 @@ model ArrayPow9
             errorMessage="
 1 errors found:
 
-Error at line 4780, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4780, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ 1.0
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '1.0' is Real
@@ -4789,7 +4789,7 @@ model ArrayPow10
             errorMessage="
 1 errors found:
 
-Error at line 4798, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4798, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ {{1, 2}, {3, 4}}
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
@@ -4807,7 +4807,7 @@ model ArrayPow11
             errorMessage="
 1 errors found:
 
-Error at line 4816, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4816, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}, {5, 6}} ^ 2
     type of '{{1, 2}, {3, 4}, {5, 6}}' is Integer[3, 2]
     type of '2' is Integer
@@ -4826,7 +4826,7 @@ model ArrayPow12
             errorMessage="
 1 errors found:
 
-Error at line 4834, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4834, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4865,7 +4865,7 @@ model ArrayPow14
             errorMessage="
 1 errors found:
 
-Error at line 4873, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4873, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4898,7 +4898,7 @@ model ArrayPow16
             errorMessage="
 1 errors found:
 
-Error at line 4907, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4907, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} ^ 2
     type of '{1}' is Integer[1]
     type of '2' is Integer
@@ -4995,7 +4995,7 @@ model ArrayNeg4
             errorMessage="
 1 errors found:
 
-Error at line 5004, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5004, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: - {true, false}
     type of '{true, false}' is Boolean[2]
 ")})));
@@ -5013,7 +5013,7 @@ model ArrayNeg5
             errorMessage="
 1 errors found:
 
-Error at line 5021, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5021, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: - y
     type of 'y' is Boolean[2]
 ")})));
@@ -5073,7 +5073,7 @@ model ArrayAnd3
             errorMessage="
 1 errors found:
 
-Error at line 5082, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5082, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5092,7 +5092,7 @@ model ArrayAnd4
             errorMessage="
 1 errors found:
 
-Error at line 5101, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5101, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5110,7 +5110,7 @@ model ArrayAnd5
             errorMessage="
 1 errors found:
 
-Error at line 5119, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5119, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5129,7 +5129,7 @@ model ArrayAnd6
             errorMessage="
 1 errors found:
 
-Error at line 5138, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5138, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5147,7 +5147,7 @@ model ArrayAnd7
             errorMessage="
 1 errors found:
 
-Error at line 5156, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5156, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} and {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5166,7 +5166,7 @@ model ArrayAnd8
             errorMessage="
 1 errors found:
 
-Error at line 5175, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5175, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} and y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5244,7 +5244,7 @@ model ArrayOr3
             errorMessage="
 1 errors found:
 
-Error at line 5253, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5253, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5263,7 +5263,7 @@ model ArrayOr4
             errorMessage="
 1 errors found:
 
-Error at line 5272, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5272, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5281,7 +5281,7 @@ model ArrayOr5
             errorMessage="
 1 errors found:
 
-Error at line 5290, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5290, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5300,7 +5300,7 @@ model ArrayOr6
             errorMessage="
 1 errors found:
 
-Error at line 5309, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5309, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5318,7 +5318,7 @@ model ArrayOr7
             errorMessage="
 1 errors found:
 
-Error at line 5327, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5327, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} or {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5337,7 +5337,7 @@ model ArrayOr8
             errorMessage="
 1 errors found:
 
-Error at line 5346, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5346, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} or y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5435,7 +5435,7 @@ model ArrayNot4
             errorMessage="
 1 errors found:
 
-Error at line 5444, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5444, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: not {1, 0}
     type of '{1, 0}' is Integer[2]
 ")})));
@@ -5453,7 +5453,7 @@ model ArrayNot5
             errorMessage="
 1 errors found:
 
-Error at line 5461, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5461, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: not y
     type of 'y' is Integer[2]
 ")})));
@@ -7691,16 +7691,16 @@ model CircularFunctionArg1
             errorMessage="
 4 errors found:
 
-Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable c
 
-Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 
-Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable d
 
-Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 ")})));
 end CircularFunctionArg1;
@@ -7797,7 +7797,7 @@ model ArraySize2
             errorMessage="
 2 errors found:
 
-Error at line 7657, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7657, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
 Error at line 7658, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
@@ -7979,7 +7979,7 @@ equation
 Error at line 7833, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   All branches in if equation with non-parameter tests must have the same number of equations
 
-Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
   The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [2], and size of right-hand side is [5]
 ")})));
 end ArraySizeInIf2;

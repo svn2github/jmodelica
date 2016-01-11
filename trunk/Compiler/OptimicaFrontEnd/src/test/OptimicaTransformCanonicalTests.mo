@@ -318,7 +318,7 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
             errorMessage="
 1 errors found:
 
-Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute objective for the optimization ArrayTest3_Err, expected size is scalar and size of objective expression is [2]
 ")})));
   end ArrayTest3_Err;

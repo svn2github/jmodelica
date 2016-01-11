@@ -1736,7 +1736,7 @@ Error at line 1703, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
             errorMessage="
 1 errors found:
 
-Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr14;
@@ -1763,7 +1763,7 @@ Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
             errorMessage="
 1 errors found:
 
-Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr15;
@@ -1862,7 +1862,7 @@ Error at line 1816, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
             errorMessage="
 1 errors found:
 
-Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
   Connecting an expandable connector to a non-expandable connector is not allowed
 ")})));
 	end ExpandableErr18;

@@ -328,7 +328,7 @@ end OperatorRecordTests.OperatorOverload3;
             errorMessage="
 1 errors found:
 
-Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 - b
     type of 'c1' is OperatorRecordTests.Cplx
     type of 'b' is Boolean
@@ -541,7 +541,7 @@ end OperatorRecordTests.OperatorOverload8;
             errorMessage="
 1 errors found:
 
-Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.OperatorOverload9.Op[2]
     type of 'c2' is OperatorRecordTests.OperatorOverload9.Op[2]
@@ -561,7 +561,7 @@ Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/Operat
             errorMessage="
 1 errors found:
 
-Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.Cplx[2]
     type of 'c2' is OperatorRecordTests.Cplx[2, 2]

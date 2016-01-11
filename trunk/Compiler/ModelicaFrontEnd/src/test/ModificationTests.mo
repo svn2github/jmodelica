@@ -550,7 +550,7 @@ model ArrayModifications2
             errorMessage="
 1 warning found:
 
-Warning at line 544, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 544, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each start = 3
 ")})));
 end ArrayModifications2;
@@ -566,7 +566,7 @@ model ArrayModifications3
             errorMessage="
 1 errors found:
 
-Error at line 560, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 560, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable b, expected size is [3] and size of start expression is [4]
 ")})));
 end ArrayModifications3;
@@ -582,7 +582,7 @@ model ArrayModifications4
             errorMessage="
 1 errors found:
 
-Error at line 576, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 576, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of the attribute start for the variable a, expected size is (due to 'each') scalar and size of start expression is [2]
 ")})));
 end ArrayModifications4;
@@ -633,7 +633,7 @@ model ArrayModifications6
             errorMessage="
 1 errors found:
 
-Error at line 627, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 627, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of x, expected size is [3] and size of binding expression is [4]
 ")})));
 end ArrayModifications6;
@@ -653,7 +653,7 @@ model ArrayModifications7
             errorMessage="
 1 warnings found:
 
-Warning at line 647, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 647, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each y = 2
 ")})));
 end ArrayModifications7;
@@ -945,7 +945,7 @@ model ArrayModifications16
             errorMessage="
 1 errors found:
 
-Error at line 939, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 939, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is scalar
 ")})));
 end ArrayModifications16;
@@ -969,7 +969,7 @@ model ArrayModifications17
             errorMessage="
 1 errors found:
 
-Error at line 963, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 963, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications17;
@@ -993,7 +993,7 @@ model ArrayModifications18
             errorMessage="
 1 errors found:
 
-Error at line 987, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 987, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of the attribute start for the variable x, expected size is (due to 'each') scalar and size of start expression is [2]
 ")})));
 end ArrayModifications18;
@@ -1057,7 +1057,7 @@ model ArrayModifications20
             errorMessage="
 1 errors found:
 
-Error at line 1051, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1051, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of z, expected size is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications20;
@@ -1081,7 +1081,7 @@ model ArrayModifications21
             errorMessage="
 1 errors found:
 
-Error at line 1075, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1075, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable z, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications21;
@@ -1106,7 +1106,7 @@ model ArrayModifications22
             errorMessage="
 1 errors found:
 
-Error at line 1099, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1099, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of zc, expected size is [2, 2, 3] and size of binding expression is [2, 3, 2]
 ")})));
 end ArrayModifications22;
@@ -1131,7 +1131,7 @@ model ArrayModifications23
             errorMessage="
 1 errors found:
 
-Error at line 1124, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1124, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable zc, expected size is [2, 2, 3] and size of start expression is [2, 3, 2]
 ")})));
 end ArrayModifications23;
@@ -1151,7 +1151,7 @@ model ArrayModifications24
             errorMessage="
 1 errors found:
 
-Error at line 1145, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1145, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of yb, expected size is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications24;
@@ -1173,7 +1173,7 @@ model ArrayModifications25
             errorMessage="
 1 errors found:
 
-Error at line 1165, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1165, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of yb, expected size is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications25;
@@ -1287,7 +1287,7 @@ model ArrayModifications29
             errorMessage="
 1 errors found:
 
-Error at line 1281, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1281, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications29;
@@ -1309,7 +1309,7 @@ model ArrayModifications30
             errorMessage="
 1 errors found:
 
-Error at line 1301, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1301, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable yb, expected size is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications30;
@@ -1453,7 +1453,7 @@ model ArrayModifications35
             errorMessage="
 1 errors found:
 
-Error at line 1440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications35;
@@ -1477,7 +1477,7 @@ model ArrayModifications36
             errorMessage="
 1 errors found:
 
-Error at line 1464, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1464, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [2, 2]
 ")})));
 end ArrayModifications36;
@@ -1531,7 +1531,7 @@ model ArrayModifications38
             errorMessage="
 1 errors found:
 
-Error at line 1522, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1522, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of x, expected size is [2, 2] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications38;
@@ -1555,7 +1555,7 @@ model ArrayModifications39
             errorMessage="
 1 errors found:
 
-Error at line 1546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1546, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of x, expected size is [2, 2] and size of binding expression is [2, 2, 2]
 ")})));
 end ArrayModifications39;
@@ -1579,7 +1579,7 @@ model ArrayModifications40
             errorMessage="
 1 errors found:
 
-Error at line 1566, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1566, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [2] and size of start expression is [3]
 ")})));
 end ArrayModifications40;
@@ -1603,7 +1603,7 @@ model ArrayModifications41
             errorMessage="
 1 errors found:
 
-Error at line 1590, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1590, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [2] and size of start expression is [2, 2]
 ")})));
 end ArrayModifications41;
@@ -1627,7 +1627,7 @@ model ArrayModifications42
             errorMessage="
 1 errors found:
 
-Warning at line 1618, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1618, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'x(start = {1,2})'
 ")})));
 end ArrayModifications42;
@@ -1651,7 +1651,7 @@ model ArrayModifications43
             errorMessage="
 1 errors found:
 
-Error at line 1642, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1642, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 2] and size of start expression is [2, 3]
 ")})));
 end ArrayModifications43;
@@ -1675,7 +1675,7 @@ model ArrayModifications44
             errorMessage="
 1 errors found:
 
-Error at line 1666, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 1666, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 2] and size of start expression is [2, 2, 2]
 ")})));
 end ArrayModifications44;
@@ -1691,7 +1691,7 @@ model ArrayModifications45
             errorMessage="
 1 errors found:
 
-Warning at line 1685, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1685, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'start = 0'
 ")})));
 end ArrayModifications45;
@@ -1711,7 +1711,7 @@ model ArrayModifications46
             errorMessage="
 1 errors found:
 
-Warning at line 1705, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1705, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'x = {1,2}'
 ")})));
 end ArrayModifications46;
@@ -1831,10 +1831,10 @@ model ArrayModifications51
             errorMessage="
 3 warnings found:
 
-Warning at line 1824, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1824, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each b(c = 1)
 
-Warning at line 1824, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1824, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'c = 1'
 
 Warning at line 1824, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
@@ -2002,7 +2002,7 @@ model ArrayModifications57
             errorMessage="
 1 errors found:
 
-Warning at line 1993, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1993, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'a(x(start = 1:3))'
 ")})));
 end ArrayModifications57;
@@ -2030,7 +2030,7 @@ model ArrayModifications58
             errorMessage="
 1 errors found:
 
-Warning at line 2021, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2021, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'start = 1'
 ")})));
 end ArrayModifications58;
@@ -2116,7 +2116,7 @@ model ArrayModifications61
             errorMessage="
 1 errors found:
 
-Warning at line 2110, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2110, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'b(a(x = {1:3,4:6}))'
 ")})));
 end ArrayModifications61;
@@ -2145,7 +2145,7 @@ model ArrayModifications62
             errorMessage="
 1 errors found:
 
-Error at line 2138, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 2138, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of x, expected size is (due to 'each') [3] and size of binding expression is [2, 3]
 ")})));
 end ArrayModifications62;
@@ -2173,7 +2173,7 @@ model ArrayModifications63
             errorMessage="
 1 warnings found:
 
-Warning at line 2164, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2164, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each a(x = 1:3)
 ")})));
 end ArrayModifications63;
@@ -2201,7 +2201,7 @@ model ArrayModifications64
             errorMessage="
 1 warnings found:
 
-Warning at line 2196, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2196, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each a(x = 1:3)
 ")})));
 end ArrayModifications64;
@@ -2229,10 +2229,10 @@ model ArrayModifications65
             errorMessage="
 2 errors found:
 
-Error at line 2221, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 2221, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [2, 3] and size of start expression is [3]
 
-Error at line 2221, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 2221, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION:
   Array size mismatch in modification of x, expected size is [2, 3] and size of binding expression is scalar
 ")})));
 end ArrayModifications65;
@@ -2291,7 +2291,7 @@ model ArrayModifications67
             errorMessage="
 1 errors found:
 
-Error at line 2286, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 2286, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of y, expected size is (due to 'each') scalar and size of binding expression is [2]
 ")})));
 end ArrayModifications67;
@@ -2320,7 +2320,7 @@ model ArrayModifications68
             errorMessage="
 1 errors found:
 
-Error at line 2315, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Error at line 2315, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
   Array size mismatch in modification of x, expected size is (due to 'each') [2] and size of binding expression is [3]
 ")})));
 end ArrayModifications68;
@@ -2380,7 +2380,7 @@ model ArrayModifications70
             errorMessage="
 1 errors found:
 
-Warning at line 2375, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2375, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'r(x = {1,2}, y = 1)'
 ")})));
 end ArrayModifications70;

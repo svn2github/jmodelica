@@ -344,7 +344,7 @@ model FillExp4
             errorMessage="
 1 errors found:
 
-Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end FillExp4;
@@ -377,7 +377,7 @@ model FillExp6
             errorMessage="
 2 errors found:
 
-Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
 
 Error at line 369, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
@@ -396,7 +396,7 @@ model FillExp7
             errorMessage="
 2 errors found:
 
-Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
 
 Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
@@ -508,7 +508,7 @@ model MinExp5
             errorMessage="
 1 errors found:
 
-Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: min(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -634,7 +634,7 @@ model MinExp12
             errorMessage="
 1 errors found:
 
-Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MinExp12;
@@ -723,7 +723,7 @@ model MaxExp5
             errorMessage="
 1 errors found:
 
-Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: max(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -838,7 +838,7 @@ model MaxExp12
             errorMessage="
 1 errors found:
 
-Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MaxExp12;
@@ -1324,7 +1324,7 @@ model Transpose7
             errorMessage="
 1 errors found:
 
-Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Transpose7;
@@ -1653,7 +1653,7 @@ model Symmetric7
             errorMessage="
 1 errors found:
 
-Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Symmetric7;
@@ -1728,7 +1728,7 @@ model Cross3
             errorMessage="
 1 errors found:
 
-Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Cross3; 
@@ -1941,7 +1941,7 @@ model OuterProduct3
             errorMessage="
 1 errors found:
 
-Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end OuterProduct3; 
@@ -2126,7 +2126,7 @@ model ArrayCat6
             errorMessage="
 1 errors found:
 
-Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ArrayCat6;
@@ -2689,7 +2689,7 @@ model Linspace5
             errorMessage="
 1 errors found:
 
-Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Linspace5;
@@ -2964,7 +2964,7 @@ model Identity2
             errorMessage="
 1 errors found:
 
-Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
@@ -3092,7 +3092,7 @@ model ScalarSize2
             errorMessage="
 1 errors found:
 
-Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} + Modelica.Constants.pi
     type of '{1}' is Integer[1]
     type of 'Modelica.Constants.pi' is Real

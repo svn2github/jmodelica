@@ -27,7 +27,7 @@ package TypeTests
             errorMessage="
 1 errors found:
 
-Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 	end TypeTest1;
@@ -45,7 +45,7 @@ Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
             errorMessage="
 1 errors found:
 
-Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 ")})));
 	end TypeTest2;
@@ -62,7 +62,7 @@ Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 1 errors found:
 
-Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -82,7 +82,7 @@ Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
             errorMessage="
 1 errors found:
 
-Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -102,7 +102,7 @@ Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 1 errors found:
 
-Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -122,19 +122,19 @@ Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 5 errors found:
 
-Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
 
-Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
 
-Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
 
-Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
 
-Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
 ")})));
 	end TypeTest6;
@@ -255,32 +255,32 @@ model TypeRel5
             errorMessage="
 6 errors found:
 
-Error at line 244, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 244, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} == {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 245, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 245, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} <> {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 246, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 246, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} > {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 247, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 247, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} >= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 248, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 248, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} < {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 249, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 249, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} <= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
@@ -303,32 +303,32 @@ model TypeRel6
             errorMessage="
 6 errors found:
 
-Error at line 292, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 292, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 == \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 293, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 293, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 <> \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 294, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 294, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 > \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 295, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 295, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 >= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 296, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 296, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 < \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 297, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 297, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 <= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
@@ -688,7 +688,7 @@ model RealEq1
             errorMessage="
 1 errors found:
 
-Error at line 681, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 681, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 == 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -706,7 +706,7 @@ model RealEq2
             errorMessage="
 1 errors found:
 
-Error at line 699, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 699, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 <> 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -1023,7 +1023,7 @@ model ExtObjType1
             errorMessage="
 1 errors found:
 
-Error at line 1016, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1016, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ExtObjType1;
@@ -2155,10 +2155,10 @@ model Functional1
             errorMessage="
 2 errors found:
 
-Error at line 2138, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2138, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of y1, size of declaration is [2] and size of binding expression is [1, 2]
 
-Error at line 2139, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2139, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of y2, size of declaration is [2] and size of binding expression is [1, 2]
 ")})));
 end Functional1;
@@ -2665,7 +2665,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2641, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2641, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to 0, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue1;
@@ -2685,7 +2685,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2661, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2661, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to p1 - p2, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue2;
@@ -2722,7 +2722,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_ELEMENT_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to {1, 0, 2, 0}, where element [2] evaluates to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue4;

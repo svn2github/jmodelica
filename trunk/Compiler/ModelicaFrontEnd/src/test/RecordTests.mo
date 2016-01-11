@@ -547,7 +547,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
 ")})));
 end RecordType2;
@@ -577,7 +577,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
 ")})));
 end RecordType3;
@@ -681,7 +681,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
 ")})));
 end RecordType5;
@@ -754,7 +754,7 @@ model RecordType7
             errorMessage="
 1 errors found:
 
-Error at line 718, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 718, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -853,7 +853,7 @@ model RecordBinding3
             errorMessage="
 1 errors found:
 
-Error at line 818, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 818, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end RecordBinding3;
@@ -876,7 +876,7 @@ model RecordBinding4
             errorMessage="
 1 errors found:
 
-Error at line 841, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 841, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
@@ -898,7 +898,7 @@ model RecordBinding5
             errorMessage="
 1 errors found:
 
-Error at line 864, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 864, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
@@ -1530,7 +1530,7 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordBinding28;
@@ -5259,7 +5259,7 @@ model RecordWithColonArray2
             errorMessage="
 1 errors found:
 
-Error at line 5126, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 5126, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;

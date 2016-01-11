@@ -99,7 +99,7 @@ end EnumerationTests.EnumerationTest3;
             errorMessage="
 1 errors found:
 
-Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
   end EnumerationTest4;
@@ -119,7 +119,7 @@ Error at line 93, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Enumera
             errorMessage="
 1 errors found:
 
-Error at line 113, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo':
+Error at line 113, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/EnumerationTests.mo', TYPE_MISMATCH_IN_EQUATION:
   The right and left expression types of equation are not compatible, type of left-hand side is EnumerationTests.EnumerationTest5.A, and type of right-hand side is EnumerationTests.EnumerationTest5.B
 ")})));
   end EnumerationTest5;

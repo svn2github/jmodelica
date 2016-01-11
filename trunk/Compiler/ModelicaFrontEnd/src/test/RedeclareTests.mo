@@ -85,7 +85,7 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
             errorMessage="
 1 errors found:
 
-Error at line 78, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 78, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx2_Err;
@@ -170,7 +170,7 @@ model RedeclareTestOx4_Err "Redeclare deeper into instance hierarchy."
             errorMessage="
 1 errors found:
 
-Error at line 163, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 163, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx4_Err;
@@ -289,7 +289,7 @@ model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redecl
             errorMessage="
 1 errors found:
 
-Error at line 270, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 270, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a'
 ")})));
 end RedeclareTestOx65_Err;
@@ -403,7 +403,7 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 386, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 386, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B'
 ")})));
 end RedeclareTestOx9_Err;
@@ -439,7 +439,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 418, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 418, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
@@ -523,10 +523,10 @@ model RedeclareTestOx11_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 503, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 503, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 
-Error at line 507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare D d(redeclare A c)', the replacing class is not a subtype of the constraining class from the declaration 'replaceable D d constrainedby D (redeclare replaceable B c constrainedby A)'
 ")})));
 end RedeclareTestOx11_Err;
@@ -572,7 +572,7 @@ Semantic error at line 431, column 32:
             errorMessage="
 1 errors found:
 
-Error at line 553, column 81, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 553, column 81, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx115_Err;
@@ -619,7 +619,7 @@ Semantic error at line 470, column 58:
             errorMessage="
 1 errors found:
 
-Error at line 600, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 600, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx116_Err;
@@ -761,7 +761,7 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 741, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 741, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_14_Err;
@@ -801,7 +801,7 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 782, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 782, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_15_Err;
@@ -841,7 +841,7 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 825, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 825, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B'
 ")})));
 end RedeclareTest_Constr_16_Err;
@@ -881,10 +881,10 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 865, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 865, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable D d(redeclare replaceable B c) constrainedby D (redeclare replaceable C c constrainedby C)', the declared class is not a subtype of the constraining class
 
-Error at line 865, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 865, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
@@ -925,10 +925,10 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 903, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 903, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
 
-Error at line 906, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 906, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_18_Err;
@@ -3774,7 +3774,7 @@ model RedeclareTest53
             errorMessage="
 1 errors found:
 
-Error at line 3758, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 3758, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare B a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable A a'
 ")})));
 end RedeclareTest53;
@@ -3869,7 +3869,7 @@ model RedeclareTest56_err
             errorMessage="
 1 warnings found:
 
-Warning at line 3853, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Warning at line 3853, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', EACH_APPLIED_ON_SCALAR:
   The 'each' keyword should not be applied to a modification of a scalar component: each x = time
 ")})));
 end RedeclareTest56_err;

@@ -1978,7 +1978,7 @@ model FunctionType2
             errorMessage="
 1 errors found:
 
-Error at line 1920, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 1920, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end FunctionType2;
@@ -2293,7 +2293,7 @@ model FunctionType17
             errorMessage="
 1 errors found:
 
-Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real[:, :]
     type of 'y' is Real[2, :]
@@ -2364,7 +2364,7 @@ model BuiltInCallType4
             errorMessage="
 1 errors found:
 
-Error at line 2300, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2300, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end BuiltInCallType4;
@@ -2464,7 +2464,7 @@ model BuiltInCallType10
             errorMessage="
 2 errors found:
 
-Error at line 2399, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2399, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, \"test\"]
 
 Error at line 2399, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
@@ -8137,7 +8137,7 @@ model UnknownArray6
             errorMessage="
 1 errors found:
 
-Error at line 8077, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8077, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end UnknownArray6;
@@ -8188,10 +8188,10 @@ model UnknownArray8
             errorMessage="
 2 errors found:
 
-Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [:]
 
-Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 ")})));
 end UnknownArray8;
@@ -8693,10 +8693,10 @@ model UnknownArray19
 Error at line 8626, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find class or component declaration for b
 
-Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, :]
 
-Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output c
 ")})));
 end UnknownArray19;
@@ -11353,10 +11353,10 @@ model InputAsArraySize5
             errorMessage="
 2 errors found:
 
-Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [n]
 
-Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output x
 ")})));
 end InputAsArraySize5;
@@ -11380,7 +11380,7 @@ model InputAsArraySize6
             errorMessage="
 1 errors found:
 
-Error at line 11303, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11303, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end InputAsArraySize6;

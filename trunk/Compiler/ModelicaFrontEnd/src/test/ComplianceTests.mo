@@ -656,7 +656,7 @@ model ArrayIterTest
             errorMessage="
 3 errors found:
 
-Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
 
 Compliance error at line 643, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
