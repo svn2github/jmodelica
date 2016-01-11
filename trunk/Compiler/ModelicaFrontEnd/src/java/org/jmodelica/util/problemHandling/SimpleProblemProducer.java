@@ -18,4 +18,14 @@ public abstract class SimpleProblemProducer extends ProblemProducer<ReporterNode
     public void invoke(ReporterNode src, Object ... args) {
         invoke(src, severity, message, args);
     }
+
+    @Override
+    public String description() {
+        return message;
+    }
+
+    @Override
+    public ProblemSeverity severity() {
+        return severity;
+    }
 }

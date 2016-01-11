@@ -16,13 +16,7 @@
 
 package org.jmodelica.util;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,9 +27,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.jmodelica.util.xml.DocBookColSpec;
+import org.jmodelica.util.xml.DocBookPrinter;
+import org.jmodelica.util.xml.StringUtil;
+import org.jmodelica.util.xml.XMLPrinter;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
@@ -968,155 +964,6 @@ abstract public class OptionRegistry {
         out.exit(3);
     }
 
-    private static class XMLPrinter {
-        private Stack<Entry> stack;
-        private String indent;
-        private PrintStream out;
-        private String indentStep;
-        
-        public XMLPrinter(PrintStream out, String indent, String indentStep) {
-            stack = new Stack<Entry>();
-            this.indent = indent;
-            this.out = out;
-            this.indentStep = indentStep;
-        }
-        
-        public void enter(String name, Object... args) {
-            stack.push(new Entry(indent, name));
-            printHead(name, args);
-            out.println('>');
-            indent = indent + indentStep;
-        }
-        
-        public void exit(int n) {
-            for (int i = 0; i < n; i++) {
-                exit();
-            }
-        }
-        
-        public void exit() {
-            Entry e = stack.pop();
-            indent = e.indent;
-            out.format("%s</%s>\n", indent, e.name);
-        }
-        
-        public void single(String name, Object... args) {
-            printHead(name, args);
-            out.print(" />\n");
-        }
-        
-        public void oneLine(String name, String cont, Object... args) {
-            printHead(name, args);
-            out.format(">%s</%s>\n", cont, name);
-        }
-
-        public void text(String text, int width) {
-            wrapText(out, text, indent, width);
-        }
-        
-        public String surround(String str, String tag) {
-            return String.format("<%s>%s</%s>", tag, str, tag);
-        }
-        
-        private void printHead(String name, Object... args) {
-            out.format("%s<%s", indent, name);
-            for (int i = 0; i < args.length - 1; i += 2) {
-                out.format(" %s=\"%s\"", args[i], args[i + 1]);
-            }
-        }
-        
-        private static class Entry {
-            public final String indent;
-            public final String name;
-            
-            private Entry(String indent, String name) {
-                this.indent = indent;
-                this.name = name;
-            }
-        }
-    }
-
-    private static class DocBookPrinter extends XMLPrinter {
-        private static final Pattern PREPARE_PAT = 
-                Pattern.compile("(?<=^|[^-a-zA-Z_])('[a-z]+'|true|false|[a-z]+(_[a-z]+)+)(?=$|[^-a-zA-Z_])");
-        
-        public DocBookPrinter(PrintStream out, String indent) {
-            super(out, indent, "  ");
-        }
-        
-        public String lit(String str) {
-            return surround(str, "literal");
-        }
-        
-        public String prepare(String str) {
-            return PREPARE_PAT.matcher(str).replaceAll("<literal>$1</literal>");
-        }
-    }
-
-    private static class DocBookColSpec {
-        private String title;
-        private String align;
-        private String name;
-        private String width;
-        
-        public DocBookColSpec(String title, String align, String name, String width) {
-            this.title = title;
-            this.align = align;
-            this.name = name;
-            this.width = width;
-        }
-        
-        public void printColspec(DocBookPrinter out) {
-            out.single("colspec", "align", align, "colname", "col-" + name, "colwidth", width);
-        }
-        
-        public void printTitle(DocBookPrinter out) {
-            out.oneLine("entry", title, "align", "center");
-        }
-    }
-
-    private static void doWrap(Writer out, String text, String prefix, String partSep, String suffix, char splitAt, int width) {
-        try {
-            if (width == 0) {
-                width = Integer.MAX_VALUE;
-            }
-            int start = 0;
-            int end = width;
-            int len = text.length();
-            while (end < len) {
-                while (end > start && text.charAt(end) != splitAt)
-                    end--;
-                out.append(prefix);
-                if (end <= start) {
-                    out.append(text.substring(start, start + width - 1));
-                    start += width - 1;
-                    out.append('-');
-                } else {
-                    out.append(text.substring(start, end + 1));
-                    start = end + 1;
-                }
-                out.append(suffix);
-                out.append(partSep);
-                end = start + width;
-            }
-            out.append(prefix);
-            out.append(text.substring(start));
-            out.append(suffix);
-        } catch (IOException e) {
-            // Not handled - left to caller to discover on next write
-        }
-    }
-
-    private static void wrapText(PrintStream out, String text, String indent, int width) {
-        doWrap(new OutputStreamWriter(out), text, indent, "", "\n", ' ', width);
-    }
-
-    private static String wrapUnderscoreName(String text, int width) {
-        StringWriter out = new StringWriter();
-        doWrap(out , text, "", " ", "", '_', width);
-        return out.toString();
-    }
-
     protected void defaultOption(Default o) {
         if (o.val instanceof Integer) {
             if (o.lim != null)
@@ -1561,7 +1408,7 @@ abstract public class OptionRegistry {
 
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
-            out.oneLine("entry", out.lit(wrapUnderscoreName(key, 26)));
+            out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
             out.oneLine("entry", String.format("%s / %s", out.lit(getType()), out.lit(getValueForDoc())));
             out.oneLine("entry", out.prepare(description));
             out.exit();
@@ -1569,7 +1416,7 @@ abstract public class OptionRegistry {
 
         public void exportPlainText(PrintStream out) {
             out.format("%-30s  %-15s\n", key, getValueForDoc());
-            wrapText(out, description, "    ", 80);
+            StringUtil.wrapText(out, description, "    ", 80);
         }
 
         public void exportXML(XMLPrinter out) {

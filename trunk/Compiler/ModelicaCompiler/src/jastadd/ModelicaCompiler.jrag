@@ -66,6 +66,7 @@ import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
 import org.jmodelica.util.exceptions.ModelicaClassNotFoundException;
 import org.jmodelica.util.exceptions.PackingFailedException;
 import org.jmodelica.util.exceptions.CcodeCompilationException;
+import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
@@ -254,6 +255,16 @@ public class ModelicaCompiler {
         
         private enum Type {
             XML, DocBook, PlainText, Template;
+        }
+    }
+    
+    /**
+     * Basic export of all known problem types
+     */
+    public static class ProblemExporter {
+        public static void main(String[] args) {
+            ASTNode node = new ASTNode(); // Dummy read to initialize all of the producers
+            ProblemProducer.exportXML(new PrintStream(System.out));
         }
     }
 
