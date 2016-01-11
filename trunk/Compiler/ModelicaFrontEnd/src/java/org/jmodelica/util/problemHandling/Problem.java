@@ -121,7 +121,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     }
     
     public Problem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
-        this(identifier, src.fileName(), message, severity, kind, src.beginLine(), src.beginColumn());
+        this(identifier, src.fileName(), message, severity, kind, src.lineNumber(), src.columnNumber());
         if (src.myOptions().getBooleanOption("component_names_in_errors")) {
             addComponent(src.errorComponentName());
         }
