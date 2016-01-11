@@ -2492,8 +2492,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     KINSetErrHandlerFn(solver->kin_mem, kin_err, block);
     /*Info function*/
     KINSetInfoHandlerFn(solver->kin_mem, kin_info, block);
-    /*  Jacobian can be reused if set to true, this parameter should be changed later on after first time of Newton solve. */
-    KINSetNoInitSetup(solver->kin_mem, 0);    
+    /*  Jacobian can be reused */
+    KINSetNoInitSetup(solver->kin_mem, 1);    
     
     /* Struct for storing the Kinsol state */
     solver->saved_state = (jmi_kinsol_solver_reset_t*)calloc(1,sizeof(jmi_kinsol_solver_reset_t));
@@ -2834,8 +2834,6 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 
     solver->is_first_newton_solve_flag = TRUE;
     flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
-    /* From now on, the Jacobian can be reused. */
-    KINSetNoInitSetup(solver->kin_mem, 1);  
     solver->is_first_newton_solve_flag = FALSE;
 
     if(block->options->experimental_mode & jmi_block_solver_experimental_steepest_descent_first) {

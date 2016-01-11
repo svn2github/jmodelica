@@ -656,7 +656,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
 
     bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto; 
     bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;
-    bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+    bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
 
     bsop->min_residual_scaling_factor = 1e-10;
     bsop->max_residual_scaling_factor = 1e10;
