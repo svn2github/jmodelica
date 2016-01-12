@@ -333,6 +333,12 @@ abstract public class OptionRegistry {
              FMIVersion.FMI10, 
              "Version of the FMI specification to generate FMU for.", 
              FMIVersion.FMI10, FMIVersion.FMI20, FMIVersion.FMI20a /* Temporary alpha version for FMI 2.0. TODO: remove */),
+        EXPOSE_TEMP_VARS_IN_FMU 
+            ("expose_temp_vars_in_fmu", 
+             OptionType.compiler, 
+             Category.uncommon,
+             false, 
+             "If enabled, then all temporary variables are exposed in the FMU XML and accessable as ordinary variables"),
         VAR_SCALE 
             ("enable_variable_scaling", 
              OptionType.compiler, 

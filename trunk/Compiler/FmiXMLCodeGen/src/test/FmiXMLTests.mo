@@ -1303,4 +1303,71 @@ $modelVariables$
 ")})));
 end NoInitialTypeForInputs;
 
+model TempVars1
+    function f
+        input Real i;
+        output Real o[2];
+    algorithm
+        o := {i,-i};
+    annotation(Inline=false);
+    end f;
+
+    Real x;
+equation
+    x = f(time) * {3,4};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVars1",
+            description="Ensures that temporary variables isn't exposed in the xml by default",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+")})));
+end TempVars1;
+
+model TempVars2
+    function f
+        input Real i;
+        output Real o[2];
+    algorithm
+        o := {i,-i};
+    annotation(Inline=false);
+    end f;
+
+    Real x;
+equation
+    x = f(time) * {3,4};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVars2",
+            description="Ensures that temporary variables are exposed in the xml when expose_temp_vars_in_fmu is set to true",
+            expose_temp_vars_in_fmu=true,
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"temp_1[1]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_1[2]\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+")})));
+end TempVars2;
+
 end FmiXMLTests;

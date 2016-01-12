@@ -237,15 +237,6 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     }
     
     /**
-     * Checks if a variable should be exposed in the XML
-     *
-     * @param FVariable A variable class.
-     */
-    protected boolean isXMLVariable(FVariable var) {
-        return !var.isPreVariable() && !var.isExternalObject() && (!var.isTemporary() || var.isDifferentiatedVariable());
-    }
-    
-    /**
      * Gets the start expresion of a variable. Returns null if there is
      * none.
      *
@@ -294,6 +285,16 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
             return fclass.numEventIndicators();
     }
     
+}
+
+/**
+ * Checks if a variable should be exposed in the XML
+ *
+ * @param FVariable A variable class.
+ */
+syn boolean FVariable.isXMLVariable() {
+    return !isPreVariable() && !isExternalObject() && (!isTemporary()
+            || isDifferentiatedVariable() || myOptions().getBooleanOption("expose_temp_vars_in_fmu"));
 }
 
 /**
@@ -587,7 +588,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			Collections.sort(variables, comp);
 
 			for (FVariable var : variables) {
-                if (isXMLVariable(var)) {
+                if (var.isXMLVariable()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1372,12 +1373,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			variableIndexMap = new HashMap<String, Integer>();
 			int index = 1;
 			for (FVariable var : variables) {
-                if (isXMLVariable(var))
+                if (var.isXMLVariable())
                     variableIndexMap.put(var.name(), index++);
 			}
 
 			for (FVariable var : variables) {
-                if (isXMLVariable(var)) {
+                if (var.isXMLVariable()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1658,7 +1659,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 //Find the initial unknowns if there are any.
                 initialUnknowns = new LinkedList<FVariable>();
                 for (FVariable var : fclass.allVariables()) {
-                    if (isXMLVariable(var) && isInitialUnknown(var))
+                    if (var.isXMLVariable() && isInitialUnknown(var))
                         initialUnknowns.add(var);
                 }
                 
@@ -1735,7 +1736,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             
             protected boolean isInitialKnown(FVariable var) {
                 boolean isExact = getInitialType(var) == InitialType.EXACT;
-                return isXMLVariable(var) && isExact || var.isInput();
+                return var.isXMLVariable() && isExact || var.isInput();
             }
         }
         
