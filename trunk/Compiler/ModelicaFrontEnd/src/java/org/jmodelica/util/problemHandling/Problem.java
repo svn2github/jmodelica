@@ -107,7 +107,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         this(null, fileName, message, severity, kind, beginLine, beginColumn);
     }
     @Deprecated
-    public Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
+    protected Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
         this.identifier = identifier;
         this.fileName = fileName;
         this.message = message;
@@ -120,11 +120,30 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
             throw new NullPointerException();
     }
     
-    public Problem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
-        this(identifier, src.fileName(), message, severity, kind, src.lineNumber(), src.columnNumber());
-        if (src.myOptions().getBooleanOption("component_names_in_errors")) {
-            addComponent(src.errorComponentName());
+//    public Problem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
+//        this(identifier, src.fileName(), message, severity, kind, src.lineNumber(), src.columnNumber());
+//        if (src.myOptions().getBooleanOption("component_names_in_errors")) {
+//            addComponent(src.errorComponentName());
+//        }
+//    }
+//    
+    public static Problem createProblem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
+        Problem p;
+        if (src == null) {
+            // TODO, insert something else than null in filename, that way we
+            // can differentiate between errors in flattened model and generic
+            // errors
+            p = new Problem(identifier, null, message, severity, kind, 0, 0);
+        } else {
+            if (identifier != null && src.myProblemOptionsProvider().filterThisWarning(identifier)) {
+                return new WarningFilteredProblem();
+            }
+            p = new Problem(identifier, src.fileName(), message, severity, kind, src.lineNumber(), src.columnNumber());
+            if (src.myProblemOptionsProvider().getOptionRegistry().getBooleanOption("component_names_in_errors")) {
+                p.addComponent(src.errorComponentName());
+            }
         }
+        return p;
     }
 
     public boolean isTestError(boolean checkAll) {
@@ -195,7 +214,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
             sb.append(":\n");
         }
         sb.append("  ");
-        sb.append(message);
+        sb.append(message());
         return sb.toString();
     }
 

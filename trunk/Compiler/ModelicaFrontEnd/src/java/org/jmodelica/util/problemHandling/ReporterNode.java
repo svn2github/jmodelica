@@ -1,7 +1,5 @@
 package org.jmodelica.util.problemHandling;
 
-import org.jmodelica.util.OptionRegistry;
-
 /**
  * A interface that all problem reporting nodes should fulfill. In reality
  * this is implemented by ASTNode and the interface is needed since ASTnode
@@ -14,6 +12,6 @@ public interface ReporterNode {
     public String fileName();
     public String errorComponentName();
     public void reportProblem(Problem problem);
-    public OptionRegistry myOptions();
+    public ProblemOptionsProvider myProblemOptionsProvider();
     public boolean inDisabledComponent();
 }

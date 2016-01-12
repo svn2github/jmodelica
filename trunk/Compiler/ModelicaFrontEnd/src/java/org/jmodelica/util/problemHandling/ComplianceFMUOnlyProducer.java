@@ -14,7 +14,7 @@ public class ComplianceFMUOnlyProducer extends SimpleErrorProducer {
 
     @Override
     public void invoke(ReporterNode src, Object ... args) {
-        if (!src.myOptions().getBooleanOption("generate_ode")) {
+        if (!src.myProblemOptionsProvider().getOptionRegistry().getBooleanOption("generate_ode")) {
             super.invoke(src, args);
         }
     }

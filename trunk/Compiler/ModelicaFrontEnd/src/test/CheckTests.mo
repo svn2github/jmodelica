@@ -662,6 +662,48 @@ In components:
 ")})));
 end ComponentNameError2;
 
+model FilterWarnings1
+    parameter String s1 = "42";
+    
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="FilterWarnings1",
+            description="Check so that filtering of warnings works",
+            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS",
+            errorMessage="
+1 warnings found:
+
+Warning in flattened model:
+  There are 1 warning(s) that has been discarded due to the 'filter_warnings' option
+")})));
+end FilterWarnings1;
+
+model FilterWarnings2
+    model A
+        Real x(start=1) = 1;
+    end A;
+    
+    model B
+        extends A;
+        Real x = 1;
+    end B;
+    
+    B b;
+    parameter String s1 = "42";
+    
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="FilterWarnings2",
+            description="Check so that filtering of multiple types of warnings works",
+            filter_warnings="PARTIALLY_SUPPORTED_STRING_PARAMETERS,UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES",
+            errorMessage="
+1 warnings found:
+
+Warning in flattened model:
+  There are 2 warning(s) that has been discarded due to the 'filter_warnings' option
+")})));
+end FilterWarnings2;
+
 model ExtObjConstructor
   model EO
     extends ExternalObject;

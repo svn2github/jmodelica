@@ -378,6 +378,12 @@ abstract public class OptionRegistry {
              Category.user,
              false, 
              "If enabled, the compiler will include the name of the component where the error was found, if applicable."),
+        FILTER_WARNINGS
+            ("filter_warnings",
+             OptionType.compiler,
+             Category.user,
+             "",
+             "A comma separated list of warning identifiers that should be omitted from the logs."),
         GEN_HTML_DIAG 
             ("generate_html_diagnostics", 
              OptionType.compiler, 

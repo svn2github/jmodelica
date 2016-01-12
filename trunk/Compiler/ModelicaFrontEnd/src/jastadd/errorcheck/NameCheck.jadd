@@ -163,6 +163,9 @@ aspect DuplicateComponents {
     eq InstForStmt.getChild().nameCollisionScope()    = this;
     eq Root.getChild().nameCollisionScope()           = this;
 
+    public static final SimpleProblemProducer ASTNode.UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES =
+            new SimpleWarningProducer("UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES", ProblemKind.SEMANTIC,
+                    "The component %s is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.");
 
     public void InstComponentDecl.nameCheck(ErrorCheckType checkType) {
         // TODO: check for duplicate classes and for class and component with same name
@@ -172,8 +175,7 @@ aspect DuplicateComponents {
                 error("Duplicate component in same class: " + this);
             } else {
                 // TODO: check if they are identical
-                warning("The component " + name() + " is declared multiple times and can not " +
-                        "be verified to be identical to other declaration(s) with the same name.");
+                UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES.invoke(this, name());
             }
         }
     }

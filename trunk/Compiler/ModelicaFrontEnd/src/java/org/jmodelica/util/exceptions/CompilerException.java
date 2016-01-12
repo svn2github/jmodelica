@@ -94,9 +94,11 @@ public class CompilerException extends ModelicaException {
     /**
      * Convert to error message.
      */
+    @Override
     public String getMessage() {
         return getMessage(false);
     }
+    
     public String getMessage(boolean printIdentifier) {
         StringBuilder str = new StringBuilder();
         if (!errors.isEmpty()) {

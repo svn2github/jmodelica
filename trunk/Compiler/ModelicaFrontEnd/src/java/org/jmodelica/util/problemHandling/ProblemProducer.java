@@ -39,7 +39,7 @@ public abstract class ProblemProducer<T extends ReporterNode> implements Compara
     }
 
     protected void invoke(T src, ProblemSeverity severity, String message, Object ... args) {
-        src.reportProblem(new Problem(identifier, src, severity, kind, String.format(message, args)));
+        src.reportProblem(Problem.createProblem(identifier, src, severity, kind, String.format(message, args)));
     }
     
     @Override

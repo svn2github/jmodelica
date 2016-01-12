@@ -282,7 +282,7 @@ model DuplicateVariables_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 289, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo':
+Warning at line 289, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNABLE_TO_INFER_EQUALITY_FOR_DUPLICATES:
   The component x is declared multiple times and can not be verified to be identical to other declaration(s) with the same name.
 ")})));
 end DuplicateVariables_Warn;
