@@ -126,6 +126,8 @@ struct jmi_kinsol_solver_t {
     realtype* dgesdd_work;          /**< \brief Work vector for desdd */
     int dgesdd_lwork;               /**< \brief Work vector for desdd */
     int* dgesdd_iwork;              /**< \brief Work vector for desdd */
+
+    long int* sundials_permutationwork;  /**< \briaf Work vector for sundials LU factorization */
     
     realtype* dgelss_rwork;
     realtype* singular_values;

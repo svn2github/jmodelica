@@ -109,6 +109,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_steepest_descent = 1,
     jmi_block_solver_experimental_steepest_descent_first = 2,
     jmi_block_solver_experimental_Brent = 4,
+    jmi_block_solver_experimental_LU_through_sundials = 8,
     jmi_block_solver_experimental_Brent_with_newton = 16,
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_Broyden_with_zeros = 64,

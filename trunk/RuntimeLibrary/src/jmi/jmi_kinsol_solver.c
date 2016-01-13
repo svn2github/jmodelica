@@ -26,6 +26,7 @@
 #include <nvector/nvector_serial.h>
 #include <kinsol/kinsol_direct.h>
 #include <kinsol/kinsol_impl.h>
+#include <sundials/sundials_dense.h>
 
 #include "jmi_kinsol_solver.h"
 #include "jmi_block_solver_impl.h"
@@ -1734,8 +1735,14 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
         }
     }
     
-    /* Perform factorization to detect if there is a singular Jacobian */
-    dgetrf_(  &N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
+    if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
+        info = DenseGETRF(solver->J_LU, solver->sundials_permutationwork);
+    } else {
+        /* Perform factorization to detect if there is a singular Jacobian */
+        dgetrf_(  &N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
+    }
+
+
     
     if(info != 0 ) {
         if (N > 1) {
@@ -1765,7 +1772,11 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
                 
                 if(N > 1) {
                     jmi_kinsol_reg_matrix(block);
-                    dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+                    if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
+                        info = DenseGETRF(solver->JTJ, solver->sundials_permutationwork);
+                    } else {
+                        dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
+                    }
                 }
             } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
                 jmi_log_node(block->log, logWarning, "MinimumNorm", "Singular Jacobian detected when factorizing in linear solver. "
@@ -1957,7 +1968,11 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             trans = 'N'; /* No transposition */
             i = 1;
             t = clock();
-            dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+            if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
+                DenseGETRS(solver->JTJ, solver->sundials_permutationwork, xd);
+            } else {
+                dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+            }
             kin_char_log(solver, 'r');
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
@@ -2023,7 +2038,11 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
-        dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+        if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
+            DenseGETRS(solver->J_LU, solver->sundials_permutationwork, xd);
+        } else {
+            dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+        }
 
         if((block->callbacks->log_options.log_level >= 6)) {
             jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
@@ -2437,6 +2456,8 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->dgesdd_lwork = 7*n*n+4*n;
     solver->dgesdd_work  = (realtype*)calloc(solver->dgesdd_lwork,sizeof(realtype));
     solver->dgesdd_iwork = (int*)calloc(8*n,sizeof(int));
+
+    solver->sundials_permutationwork = (long int*)calloc(n+1,sizeof(long int));
     
     solver->dgelss_rwork = (realtype*)calloc(5*n,sizeof(realtype));
     solver->singular_values = (realtype*)calloc(n,sizeof(realtype));
@@ -2560,6 +2581,8 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     free(solver->lapack_ipiv);
     free(solver->dgelss_rwork);
     free(solver->singular_values);
+
+    free(solver->sundials_permutationwork);
 
     free(solver->dgesdd_work);
     free(solver->dgesdd_iwork);
