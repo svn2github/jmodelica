@@ -456,7 +456,37 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NonLinear3", file_name)
         compile_fmu("NonLinear.NonLinear4", file_name)
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
+        compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
     
+    @testattr(stddist = True)
+    def test_Brent_AD(self):
+        
+        model = load_fmu("NonLinear_NonLinear5.fmu", log_level=6)
+        model.set("_log_level", 8)
+        
+        model.initialize()
+        
+        def get_history(filename):
+            import re
+            data = [[],[]]
+            with open(filename, 'r') as f:
+                line = f.readline()
+                while line:
+                    if line.find("Iteration variable") != -1:
+                        iv = re.search('<value name="ivs">(.*)</value>, Function', line).group(1).strip()
+                        df = re.search('<value name="df">(.*)</value>, Delta', line).group(1).strip()
+                        data[0].append(float(iv))
+                        data[1].append(float(df))
+                    line = f.readline()
+            return data[0], data[1]
+            
+        ivs,df = get_history("NonLinear_NonLinear5_log.txt")
+
+        fprime = lambda y: -200*y;
+
+        for i,iv in enumerate(ivs):
+            nose.tools.assert_almost_equal(fprime(iv) ,df[i], places=12)  
+            
     @testattr(stddist = True)
     def test_Brent_double_root1(self):
         def run_model(init):

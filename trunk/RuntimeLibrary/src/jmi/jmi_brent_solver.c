@@ -86,37 +86,57 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     if (ret == -1) {
         return -1;
     }
-            
-    sign = (y >= 0) ? 1 : -1;
-    inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
-    y += inc;
-    /* make sure we're inside bounds*/
-    if((y > block->max[0]) || (y < block->min[0])) {
-        inc = -inc;
-        y = y0 + inc;
-    }
-
-    ret = brentf(y, &ftemp, block);
-
-    /* If function evaluation failed, try finite difference in other direction. */
-    if (ret) {
-        inc = -inc;
-        y = y0 + inc;
-        if ((y <= block->max[0]) && (y >= block->min[0])) {
-            ret = brentf(y, &ftemp, block);
+        
+    if (block->dF) {
+        /* utilize directional derivatives to calculate Jacobian */
+        block->x[0] = y;
+        
+        block->dx[0] = 1;
+        ret = block->dF(block->problem_data,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+        *df = block->dres[0];
+        block->dx[0] = 0;
+        
+        if (ret) {
+            jmi_log_t* log = block->log;
+            jmi_log_node_t node = 
+                jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling directional derivative function in <block: %s>", ret, block->label);
+            jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+            jmi_log_leave(log, node);
+            return ret;
         }
-    }
+    } else {
+        sign = (y >= 0) ? 1 : -1;
+        inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
+        y += inc;
+        /* make sure we're inside bounds*/
+        if((y > block->max[0]) || (y < block->min[0])) {
+            inc = -inc;
+            y = y0 + inc;
+        }
 
-    if (ret) {
-        jmi_log_t* log = block->log;
-        jmi_log_node_t node = 
-            jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
-        jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-        jmi_log_leave(log, node);
-        return ret;
+        ret = brentf(y, &ftemp, block);
+
+        /* If function evaluation failed, try finite difference in other direction. */
+        if (ret) {
+            inc = -inc;
+            y = y0 + inc;
+            if ((y <= block->max[0]) && (y >= block->min[0])) {
+                ret = brentf(y, &ftemp, block);
+            }
+        }
+
+        if (ret) {
+            jmi_log_t* log = block->log;
+            jmi_log_node_t node = 
+                jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
+            jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+            jmi_log_leave(log, node);
+            return ret;
+        }
+        
+        *df = (ftemp-f)/inc;
     }
     
-    *df = (ftemp-f)/inc;
     /* Check that outputs are valid */    
     {
         realtype v = *df;

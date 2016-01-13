@@ -830,6 +830,13 @@ equation
     r2_v  =  v_in - v_out;
 end NonLinear4;
 
+model NonLinear5
+   Real x(start=2);
+   Real y(start=0.5);
+equation
+    der(x) = -1;
+ 100*(y^2-0.1) = 0;
+end NonLinear5;
 
 end NonLinear;
 
