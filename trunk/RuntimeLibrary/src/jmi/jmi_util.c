@@ -1349,6 +1349,10 @@ jmi_real_t* jmi_get_z(jmi_t* jmi) {
     return *(jmi->z);
 }
 
+int jmi_get_z_size(jmi_t* jmi) {
+    return jmi->n_z;
+}
+
 jmi_string_t* jmi_get_string_z(jmi_t* jmi) {
     return jmi->z_t.strings.values;
 }

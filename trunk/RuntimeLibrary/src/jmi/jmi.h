@@ -431,6 +431,16 @@ int jmi_save_last_successful_values(jmi_t *jmi);
  */
 jmi_real_t* jmi_get_z(jmi_t* jmi);
 
+/**
+
+ * \brief Get the size of the z vector containing all variables.
+ *
+ * @param jmi The jmi_t struct.
+ * @return The size of the \f$z\f$ vector.
+ *
+ */
+int jmi_get_z_size(jmi_t* jmi);
+
 jmi_string_t* jmi_get_string_z(jmi_t* jmi);
 
 /**
