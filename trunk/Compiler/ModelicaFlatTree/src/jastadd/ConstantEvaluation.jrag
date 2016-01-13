@@ -3884,6 +3884,10 @@ aspect ConstantEvaluation {
         return super.collectEvaluationValues(collectMyEvaluationValue(map));
     }
     
+    public Map<CommonVariableDecl,CValue> FAttribute.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return map;
+    }
+    
     public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
         return myFV().collectMyEvaluationValue(map);
     }
