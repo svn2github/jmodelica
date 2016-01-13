@@ -54,6 +54,7 @@ struct fmi2_me_t {
     fmi2Boolean                  initial_logging_on;    /**< \brief The initial option for loggingOn at instantiation. */
     fmi2Real                     stopTime;              /**< \brief The stop time when simulating the FMU. */
     const fmi2CallbackFunctions* fmi_functions;         /**< \brief The fmi callback functions provided by the environment at instantiaton. */
+    jmi_event_info_t*            event_info;            /**< \brief The event info struct that is propagated to the JMI runtime. */
 };
 
 /**
