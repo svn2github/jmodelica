@@ -51,8 +51,8 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
         // Note that modifiers (including redeclarations) in a constraining clause
         // are applied to the declaration itself and is therefore also type checked.
-        if (hasInstConstraining()) {
-              InstNode superType = getInstConstraining().getInstNode();
+        if (hasInstConstrainingComponent()) {
+              InstNode superType = getInstConstrainingComponent().getInstNode();
               InstComponentDecl declaredType = this; 
               if (!declaredType.subType(superType))
                   CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType.getComponentDecl(), declaredType.getComponentDecl());
@@ -80,7 +80,7 @@ aspect FlatTypeCheck {
         
         // Type check the original component
         InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-        if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
+        if (declaredType.hasInstConstrainingComponent() && !declaredType.subType(superType))
             CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
 
         // The environment should be traversed backwards in order to perform correct
@@ -93,7 +93,7 @@ aspect FlatTypeCheck {
                 InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                     
                 // Check consistency of the redeclaring component
-                if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
+                if (declaredSubType.hasInstConstrainingComponent() && !declaredSubType.subType(constrainingSubType))
                     CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType.getComponentDecl(), declaredSubType.getComponentDecl());
 
                 // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
@@ -106,7 +106,7 @@ aspect FlatTypeCheck {
                 // If the redeclaring declaration has a constraining clause, the constraining
                 // type of the redeclaring declaration of should be used in following subtype-test 
                 // instead of the constraining type of the orignal declaration.
-                if (declaredSubType.hasInstConstraining()) 
+                if (declaredSubType.hasInstConstrainingComponent()) 
                     superType = constrainingSubType;
             }
         }

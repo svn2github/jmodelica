@@ -1911,8 +1911,10 @@ public class ModelicaCompiler {
                     break;
                 case NOCODEGEN:
                     options.setBooleanOption("generate_runtime_option_parameters", false);
-		    options.setBooleanOption("equation_sorting", false);
-		    options.setBooleanOption("automatic_tearing", false);
+                    options.setBooleanOption("equation_sorting", false);
+                    options.setBooleanOption("automatic_tearing", false);
+                    break;
+                default:
                     break;
             }
             
@@ -1930,8 +1932,7 @@ public class ModelicaCompiler {
                 case FMUMECS20:
                     options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20);
                     break;
-                case JMU:
-                case FMUX:
+                default:
                     break;
             }
         }

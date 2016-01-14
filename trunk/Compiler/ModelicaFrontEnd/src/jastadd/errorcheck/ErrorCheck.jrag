@@ -645,10 +645,12 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             super.collectErrors(checkType);
             errorChecked = true;
-            for (InstImport ii : getInstImports())
+            for (InstImport ii : getInstImports()) {
                 ii.collectErrors(checkType);
-            if (hasInstConstraining())
-                getInstConstraining().collectErrors(checkType);
+            }
+            if (hasInstConstrainingClass()) {
+                getInstConstrainingClass().collectErrors(checkType);
+            }
             getInstRestriction().collectErrors(checkType);
             getInstGeneratedInners().collectErrors(checkType);
             if (getBaseClassDecl() instanceof FullClassDecl) {
@@ -805,20 +807,25 @@ aspect InstanceErrorCheck {
             } else {
                 collectErrorsInClassName(checkType);
                 myInstClass().checkRestriction(checkType);
-                if (hasFArraySubscripts())
+                if (hasFArraySubscripts()) {
                     getFArraySubscripts().collectErrors(checkType);
-                if (hasConditionalAttribute()) 
+                }
+                if (hasConditionalAttribute())  {
                     getConditionalAttribute().collectErrors(checkType);
-                if (!isDisabled() && hasInstModification())
+                }
+                if (!isDisabled() && hasInstModification()) {
                     getInstModification().collectErrors(checkType);
-                for (InstModification im : getMergedEnvironment())
+                }
+                for (InstModification im : getMergedEnvironment()) {
                     im.checkModificationNames(checkType);
+                }
                 
                 if (shouldCheckInto(checkType)) {
                     errorChecked = false;
                     super.collectErrors(checkType);
-                    if (hasInstConstraining())
-                        getInstConstraining().collectErrors(checkType);
+                    if (hasInstConstrainingComponent()) {
+                        getInstConstrainingComponent().collectErrors(checkType);
+                    }
                 }
             }
         }
@@ -976,19 +983,20 @@ aspect InstanceErrorCheck {
 	syn boolean InstExtends.shouldCheckModification()           = true;
 	eq InstExtendsShortClass.shouldCheckModification()          = extendsPrimitive();
 	eq InstReplacingExtendsShortClass.shouldCheckModification() = extendsPrimitive();
-	
-	public void InstShortClassDecl.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-		  super.collectErrors(checkType);
-    	  errorChecked = true;
-		  // The localInstModifications should only be checked if
-		  // the node is not a InstReplacingShortClassDecl. This
-		  // is accomplished by the method collectInstModificationErrors.
-		  collectInstModificationErrors(checkType);
-		  if (hasInstConstraining())
-				getInstConstraining().collectErrors(checkType);		  
-		}
-	}
+
+    public void InstShortClassDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+          super.collectErrors(checkType);
+          errorChecked = true;
+          // The localInstModifications should only be checked if
+          // the node is not a InstReplacingShortClassDecl. This
+          // is accomplished by the method collectInstModificationErrors.
+          collectInstModificationErrors(checkType);
+          if (hasInstConstrainingClass()) {
+                getInstConstrainingClass().collectErrors(checkType);
+          }
+        }
+    }
 
 	public void InstShortClassDecl.collectInstModificationErrors(ErrorCheckType checkType) {
 		for (InstModification mod : localInstModifications())
@@ -1056,11 +1064,13 @@ aspect InstanceErrorCheck {
     }
 
     public void InstComponentDecl.checkRedeclares(ErrorCheckType checkType) {
-        if (!isDisabled() && hasInstModification())
+        if (!isDisabled() && hasInstModification()) {
             getInstModification().collectErrors(checkType);
+        }
         if (shouldCheckInto(checkType)) {
-            if (hasInstConstraining())
-                getInstConstraining().collectErrors(checkType);
+            if (hasInstConstrainingComponent()) {
+                getInstConstrainingComponent().collectErrors(checkType);
+            }
             super.checkRedeclares(checkType);
         }
     }

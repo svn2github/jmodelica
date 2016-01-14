@@ -114,7 +114,7 @@ aspect Types {
 
     syn InstNode InstNode.constrainingInstType() = this;
     eq InstClassDecl.constrainingInstType()      = 
-        hasInstConstraining() ? getInstConstraining().getInstNode() : findConstrainingInstType();
+        hasInstConstrainingClass() ? getInstConstrainingClass().getInstNode() : findConstrainingInstType();
     eq InstComponentDecl.constrainingInstType() { 
         InstComponentDecl forCmp = constrainingInstComponentDecl();
         InstNode forClass = forCmp.constrainingTypeOfMyClass();
@@ -129,7 +129,7 @@ aspect Types {
 
 
     syn InstComponentDecl InstComponentDecl.constrainingInstComponentDecl() = 
-        hasInstConstraining() ? (InstComponentDecl) getInstConstraining().getInstNode() : this;
+        hasInstConstrainingComponent() ? (InstComponentDecl) getInstConstrainingComponent().getInstNode() : this;
 
     syn InstNode InstComponentDecl.constrainingTypeOfMyClass() = getClassName().constrainingTypeOfClass();
 
