@@ -2565,6 +2565,37 @@ end IndexReduction.Algorithm1;
 ")})));
 end Algorithm1;
 
+model Algorithm2
+    Real x(stateSelect=StateSelect.always);
+    Real z;
+equation
+    x = time;
+algorithm
+    z := time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm2",
+            description="Test index reduction and variablity computation bug with algorithms.",
+            flatModel="
+fclass IndexReduction.Algorithm2
+ Real x(stateSelect = StateSelect.always);
+ Real z;
+ Real _der_x;
+equation
+ x = time;
+algorithm
+ z := time;
+equation
+ _der_x = 1.0;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.Algorithm2;
+")})));
+end Algorithm2;
+
 model DoubleDifferentiationWithSS1
     parameter Real L = 1 "Pendulum length";
     parameter Real g = 9.81 "Acceleration due to gravity";
