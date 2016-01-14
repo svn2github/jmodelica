@@ -568,17 +568,13 @@ aspect VariabilityPropagation {
     }
     
     
-    refine Variability eq FMulExp.expVariability() {
-        if (taggedByVProp)
-            return fConstant();
-        return Variability.FMulExp.expVariability();
-    }
+    refine Variability eq FMulExp.expVariability() = taggedByVProp ? fConstant() : refined();
+    refine Variability eq FDivExp.expVariability() = taggedByVProp ? fConstant() : refined();
     
-    refine Variability eq FDivExp.expVariability() {
-        if (taggedByVProp)
-            return fConstant();
-        return Variability.FMulExp.expVariability();
-    }
+    refine ConstantEvaluation eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) = taggedByVProp ? 
+            type().zeroCValue() : refined(evaluator);
+    refine ConstantEvaluation eq FDotDivExp.cevalCalc(VariableEvaluator evaluator) = taggedByVProp ? 
+            type().zeroCValue() : refined(evaluator);
 }
 
 aspect ConstantFolding {

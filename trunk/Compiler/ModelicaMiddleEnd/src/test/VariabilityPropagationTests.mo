@@ -2126,4 +2126,26 @@ end VariabilityPropagationTests.EvalFail2;
 ")})));
 end EvalFail2;
 
+model AlgebraicLoopParameter1
+    parameter Real p = 1;
+    Real zero = 0;
+    Real x = p*y;
+    Real y = zero * x + p;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgebraicLoopParameter1",
+            description="Test evaluation of algebraic loop in propagated parameters",
+            flatModel="
+fclass VariabilityPropagationTests.AlgebraicLoopParameter1
+ parameter Real p = 1 /* 1 */;
+ constant Real zero = 0;
+ parameter Real y;
+ parameter Real x;
+parameter equation
+ y = p;
+ x = p * y;
+end VariabilityPropagationTests.AlgebraicLoopParameter1;
+")})));
+end AlgebraicLoopParameter1;
+
 end VariabilityPropagationTests;
