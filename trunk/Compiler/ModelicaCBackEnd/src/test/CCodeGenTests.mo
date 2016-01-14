@@ -8625,6 +8625,128 @@ int model_ode_initialize_base(jmi_t* jmi) {
 ")})));
 end IfEqu5;
 
+model IfEqu6
+    function F
+        input Real[2] x;
+    algorithm
+        annotation(Inline=false);
+    end F;
+    parameter Real p = 1;
+equation
+    if time > p then
+        F({time, -time});
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IfEqu6",
+            description="Ensure that temporaries for equations inside if equations only is produced once inside the guard",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (_p_0), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    if (_sw(0)) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+        jmi_array_ref_1(tmp_1, 1) = _time;
+        jmi_array_ref_1(tmp_1, 2) = - _time;
+        func_CCodeGenTests_IfEqu6_F_def0(tmp_1);
+    }
+    return ef;
+}
+")})));
+end IfEqu6;
+
+model IfEqu7
+    parameter Real p = 1;
+equation
+    if time > p then
+        Modelica.Utilities.Streams.print("This is a dumb way of finding out the value of p: " + String(time));
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IfEqu7",
+            description="Ensure that temporaries for equations inside if equations only is produced once inside the guard",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DEF_STR_STAT(tmp_1, 63)
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (_p_0), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    if (_sw(0)) {
+        JMI_INI_STR_STAT(tmp_1)
+        snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"This is a dumb way of finding out the value of p: \");
+        snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, _time);
+        func_Modelica_Utilities_Streams_print_def0(tmp_1, \"\");
+    }
+    return ef;
+}
+")})));
+end IfEqu7;
+
+model IfEqu8
+    parameter Real p = 1;
+equation
+    when time > p then
+        Modelica.Utilities.Streams.print("This is a dumb way of finding out the value of p: " + String(time));
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IfEqu8",
+            description="Ensure that temporaries for equations inside if equations only is produced once inside the guard",
+            template="
+$C_dae_blocks_residual_functions$
+$C_ode_derivatives$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DEF_STR_STAT(tmp_1, 63)
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870915;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(_time - (_p_0), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_1 = _sw(0);
+        }
+        if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
+            JMI_INI_STR_STAT(tmp_1)
+            snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%s\", \"This is a dumb way of finding out the value of p: \");
+            snprintf(JMI_STR_END(tmp_1), JMI_STR_LEFT(tmp_1), \"%-.*g\", (int) 6, _time);
+            func_Modelica_Utilities_Streams_print_def0(tmp_1, \"\");
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    return ef;
+}
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (_p_0), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    return ef;
+}
+")})));
+end IfEqu8;
+
 
 
 model ReinitCTest1
@@ -9063,8 +9185,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_1_1 = _sw(0);
         }
-        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1, 1)
-        jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
         if (LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1))) {
             JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1, 1)
             jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);

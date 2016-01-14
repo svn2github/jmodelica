@@ -3325,6 +3325,16 @@ aspect CCodeGen {
                 p.printPostSteps(node, str, indent);
     }
 
+    @Override
+    public void FIfEquation.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPreSteps(getTest(), str, indent);
+    }
+    
+    @Override
+    public void FIfEquation.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+        p.printPostSteps(getTest(), str, indent);
+    }
+    
 	public void FExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
 		if (isArray() && !size().isUnknown())
 			p.printPreSteps(getArray(), str, indent);
