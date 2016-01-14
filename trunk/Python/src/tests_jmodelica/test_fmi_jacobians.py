@@ -761,13 +761,11 @@ class Test_FMI_Jacobians_Unsolved_blocks(Test_FMI_Jacobians_base):
     def test_Unsolved_blocks6(self):
         cname = "JacGenTests.Unsolved_blocks6"
         fn = compile_fmu(cname,self.fname,compiler_options={'generate_ode_jacobian':True,\
-          'eliminate_alias_variables':False}, version="2.0alpha")
-        m = FMUModel2(fn)
-        m.set_debug_logging(True)
-        m.initialize(relativeTolerance=1e-11)
-        Afd,Bfd,Cfd,Dfd,n_errs= m.check_jacobians(delta_rel=1e-6,delta_abs=1e-3,tol=1e-5)
-        assert n_errs ==0       
-
+          'eliminate_alias_variables':False}, version="2.0")
+        m = load_fmu(fn)
+        m.setup_experiment()
+        m.initialize()
+        assert self.check_jacobian(m, tol_check=1e-5)  
 
     @testattr(stddist = True)
     def test_Unsolved_blocks_torn_1(self):
