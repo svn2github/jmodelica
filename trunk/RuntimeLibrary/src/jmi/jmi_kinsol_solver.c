@@ -293,6 +293,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
     realtype *jac_fd = NULL;
+    struct KINMemRec* kin_mem = (struct KINMemRec*)solver->kin_mem;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
 #ifdef JMI_PROFILE_RUNTIME 
@@ -326,7 +327,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 return ret;
             }
 
-            /* Rename work vectors for readibility */
+            /* Rename work vectors for readability */
             ftemp = tmp1; 
             jthCol = tmp2;
 
@@ -344,6 +345,92 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 ujscale = ONE/uscale_data[j];
                 sign = (ujsaved >= 0) ? 1 : -1;
                 inc = MAX(ABS(ujsaved), ujscale)*sign;
+
+                if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences || 
+                    block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds ||
+                    block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0) {
+                    /* Central differences to be utilized when we are close to bounds or close to 0 */
+                    if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences ||
+                        (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds &&
+                        ((block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 )|| 
+                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) 
+                        || (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && ujsaved*sign < sqrt_relfunc*ABS(inc))) {
+                            double incLeft = 0.0, incRight = 0.0, leftPart, rightPart;
+                            /*jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "CentralDifferences");
+                            jmi_log_reals(block->log, node, logInfo, "u", &u_data[j], 1);
+                            jmi_log_reals(block->log, node, logInfo, "max", &block->max[j], 1);
+                            jmi_log_reals(block->log, node, logInfo, "min", &block->min[j], 1);
+                            jmi_log_reals(block->log, node, logInfo, "inc", &inc, 1); 
+                            jmi_log_reals(block->log, node, logInfo, "f", N_VGetArrayPointer(fu), N); */
+                            inc = ABS(inc);
+                            incRight = MIN(block->max[j]-ujsaved, sqrt_relfunc*inc);
+                            u_data[j] = ujsaved + incRight;
+                            ret = kin_f(u, ftemp, block);
+                            /*jmi_log_reals(block->log, node, logInfo, "ftemp", N_VGetArrayPointer(ftemp), N); 
+                            jmi_log_reals(block->log, node, logInfo, "utemp", u_data, N); */
+                            u_data[j] = ujsaved;
+                            if(ret == 0 ) {
+                                if(incRight > 0)
+                                    inc_inv = ONE/incRight;
+                                else
+                                    inc_inv = 0;
+                                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector2);
+                            } else {
+                                incRight = 0;
+                            }
+                            /*jmi_log_reals(block->log, node, logInfo, "right", N_VGetArrayPointer(solver->work_vector2), N); */
+
+                            incLeft = MIN(ujsaved-block->min[j], sqrt_relfunc*inc);
+                            u_data[j] = ujsaved - incLeft;
+                            ret = kin_f(u, ftemp, block);
+                            /*jmi_log_reals(block->log, node, logInfo, "ftemp", N_VGetArrayPointer(ftemp), N); 
+                            jmi_log_reals(block->log, node, logInfo, "utemp", u_data, N); */
+                            if(ret == 0) {
+                                if(incLeft > 0)
+                                    inc_inv = -ONE/incLeft;
+                                else
+                                    inc_inv = 0;
+                                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector);             
+                            } else {
+                                incLeft = 0;
+                            }
+
+                            if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
+                                (block->max[j]-ujsaved) > sqrt_relfunc*inc && (block->max[j]-ujsaved) < 2*sqrt_relfunc*inc && sign > 0) {
+                                rightPart = 0.5*((block->max[j]-ujsaved)-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
+                                leftPart = 1 - rightPart;
+                            } else if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
+                                (ujsaved-block->min[j]) > sqrt_relfunc*inc && (ujsaved-block->min[j]) < 2*sqrt_relfunc*inc && sign < 0) {
+                                leftPart = 0.5*((ujsaved-block->min[j])-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
+                                rightPart = 1-leftPart;
+                            } else if( block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && 
+                                ujsaved*sign < sqrt_relfunc*inc && sign > 0) {
+                                rightPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
+                                leftPart = 1 - rightPart;
+                            } else if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && 
+                                ujsaved*sign < sqrt_relfunc*inc  && sign < 0) {
+                                leftPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
+                                rightPart = 1 - leftPart;
+                            } else {
+                                rightPart = incRight/(incRight+incLeft);
+                                leftPart = incLeft/(incRight+incLeft);
+                            }
+                            /* Generate the jth col of Jac(u) */
+                            N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
+                            N_VLinearSum(rightPart, solver->work_vector2, leftPart, solver->work_vector, jthCol);
+                            /*jmi_log_reals(block->log, node, logInfo, "left", N_VGetArrayPointer(solver->work_vector), N);
+                            jmi_log_reals(block->log, node, logInfo, "incLeft", &incLeft, 1);
+                            jmi_log_reals(block->log, node, logInfo, "incRight", &incRight, 1); 
+                            jmi_log_reals(block->log, node, logInfo, "leftPart", &leftPart, 1);
+                            jmi_log_reals(block->log, node, logInfo, "rightPart", &rightPart, 1); */
+                            u_data[j] = ujsaved;
+                            /* Restore original array pointer in tmp2 */
+                            N_VSetArrayPointer(tmp2_data, tmp2);
+                            /*jmi_log_leave(block->log, node);*/
+                            if(incLeft == 0 && incRight == 0) break;
+                            continue;
+                    }
+                } 
                 if(sqrt_relfunc > 0) 
                     inc *= sqrt_relfunc;
                 u_data[j] += inc;
