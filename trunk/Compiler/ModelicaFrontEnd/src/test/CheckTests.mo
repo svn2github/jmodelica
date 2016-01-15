@@ -674,7 +674,7 @@ model FilterWarnings1
 1 warnings found:
 
 Warning in flattened model:
-  There are 1 warning(s) that has been discarded due to the 'filter_warnings' option
+  1 warning(s) has been ignored due to the 'filter_warnings' option
 ")})));
 end FilterWarnings1;
 
@@ -700,7 +700,7 @@ model FilterWarnings2
 1 warnings found:
 
 Warning in flattened model:
-  There are 2 warning(s) that has been discarded due to the 'filter_warnings' option
+  2 warning(s) has been ignored due to the 'filter_warnings' option
 ")})));
 end FilterWarnings2;
 

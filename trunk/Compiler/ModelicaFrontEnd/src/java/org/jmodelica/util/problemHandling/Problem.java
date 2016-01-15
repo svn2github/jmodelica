@@ -135,7 +135,7 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
             // errors
             p = new Problem(identifier, null, message, severity, kind, 0, 0);
         } else {
-            if (identifier != null && src.myProblemOptionsProvider().filterThisWarning(identifier)) {
+            if (identifier != null && severity == ProblemSeverity.WARNING && src.myProblemOptionsProvider().filterThisWarning(identifier)) {
                 return new WarningFilteredProblem();
             }
             p = new Problem(identifier, src.fileName(), message, severity, kind, src.lineNumber(), src.columnNumber());

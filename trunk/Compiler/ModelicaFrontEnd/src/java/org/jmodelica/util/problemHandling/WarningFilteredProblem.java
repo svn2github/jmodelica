@@ -6,7 +6,7 @@ public class WarningFilteredProblem extends Problem {
     private int count = 1;
 
     public WarningFilteredProblem() {
-        super(null, null, "There are %d warning(s) that has been discarded due to the 'filter_warnings' option", ProblemSeverity.WARNING, ProblemKind.SEMANTIC, 0, 0);
+        super(null, null, "%d warning(s) has been ignored due to the 'filter_warnings' option", ProblemSeverity.WARNING, ProblemKind.SEMANTIC, 0, 0);
     }
     
     @Override
