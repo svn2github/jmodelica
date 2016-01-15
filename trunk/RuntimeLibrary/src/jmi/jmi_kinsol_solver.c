@@ -293,7 +293,6 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     int i, j, ret = 0;
     realtype curtime = block->cur_time;
     realtype *jac_fd = NULL;
-    struct KINMemRec* kin_mem = (struct KINMemRec*)solver->kin_mem;
     solver->kin_jac_update_time = curtime;
     block->nb_jevals++;
 #ifdef JMI_PROFILE_RUNTIME 
@@ -346,15 +345,15 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 sign = (ujsaved >= 0) ? 1 : -1;
                 inc = MAX(ABS(ujsaved), ujscale)*sign;
 
-                if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences || 
-                    block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds ||
-                    block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0) {
+                if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences) || 
+                    (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) ||
+                    (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0)) {
                     /* Central differences to be utilized when we are close to bounds or close to 0 */
-                    if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences ||
-                        (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds &&
-                        ((block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 )|| 
-                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) 
-                        || (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && ujsaved*sign < sqrt_relfunc*ABS(inc))) {
+                    if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences) ||
+                        ((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
+                        (( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
+                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) )
+                        || ((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0) && ujsaved*sign < sqrt_relfunc*ABS(inc))) {
                             double incLeft = 0.0, incRight = 0.0, leftPart, rightPart;
                             /*jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "CentralDifferences");
                             jmi_log_reals(block->log, node, logInfo, "u", &u_data[j], 1);
