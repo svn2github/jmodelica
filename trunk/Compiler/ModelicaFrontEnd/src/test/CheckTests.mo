@@ -135,7 +135,7 @@ model InnerOuter5
             errorMessage="
 1 errors found:
 
-Warning at line 127, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Warning at line 127, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter w does not have a binding expression
 ")})));
 end InnerOuter5;
@@ -1280,7 +1280,7 @@ model SizeInDisabled1
             errorMessage="
 2 errors found:
 
-Warning at line 1227, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Warning at line 1227, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 
 Warning at line 1229, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
@@ -1305,7 +1305,7 @@ model SizeInDisabled2
 Error at line 1250, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of z, size of declaration is [0] and size of binding expression is [2, 2]
 
-Warning at line 1248, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Warning at line 1248, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled2;
@@ -1337,7 +1337,7 @@ Warning at line 1275, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Che
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of 'x' is Real[0]
 
-Warning at line 1276, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Warning at line 1276, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled3;
@@ -1368,7 +1368,7 @@ Error at line 1306, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Check
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of '{x, x}' is Real[2, 0]
 
-Warning at line 1307, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo':
+Warning at line 1307, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter n does not have a binding expression
 ")})));
 end SizeInDisabled4;

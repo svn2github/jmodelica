@@ -3715,11 +3715,11 @@ model RedeclareTest51
             errorMessage="
 3 warnings found:
 
+Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter a[:].b does not have a binding expression
+
 Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
   String parameters are only partially supported
-
-Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  The parameter a[:].b does not have a binding expression
 
 Compliance warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
   String parameters are only partially supported

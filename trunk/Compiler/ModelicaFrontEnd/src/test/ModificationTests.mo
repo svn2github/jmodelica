@@ -1786,7 +1786,7 @@ model ArrayModifications49
             errorMessage="
 1 errors found:
 
-Warning at line 1779, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1779, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications49;
@@ -1837,7 +1837,7 @@ Warning at line 1824, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Modi
 Warning at line 1824, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ASSUMING_EACH:
   Assuming 'each' for the modification 'c = 1'
 
-Warning at line 1824, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1824, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications51;
@@ -1862,7 +1862,7 @@ model ArrayModifications52
             errorMessage="
 1 errors found:
 
-Warning at line 1855, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1855, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications52;
@@ -1887,7 +1887,7 @@ model ArrayModifications53
             errorMessage="
 1 errors found:
 
-Warning at line 1880, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1880, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications53;
@@ -1916,7 +1916,7 @@ model ArrayModifications54
             errorMessage="
 1 errors found:
 
-Warning at line 1909, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1909, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications54;
@@ -1945,7 +1945,7 @@ model ArrayModifications55
             errorMessage="
 1 errors found:
 
-Warning at line 1938, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1938, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications55;
@@ -1974,7 +1974,7 @@ model ArrayModifications56
             errorMessage="
 1 errors found:
 
-Warning at line 1967, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 1967, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications56;
@@ -2059,7 +2059,7 @@ model ArrayModifications59
             errorMessage="
 1 errors found:
 
-Warning at line 2052, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2052, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications59;
@@ -2088,7 +2088,7 @@ model ArrayModifications60
             errorMessage="
 1 errors found:
 
-Warning at line 2081, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2081, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications60;
@@ -2262,7 +2262,7 @@ model ArrayModifications66
             errorMessage="
 1 errors found:
 
-Warning at line 2256, column 41, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2256, column 41, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications66;
@@ -2351,7 +2351,7 @@ model ArrayModifications69
             errorMessage="
 1 errors found:
 
-Warning at line 2345, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo':
+Warning at line 2345, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter d does not have a binding expression
 ")})));
 end ArrayModifications69;

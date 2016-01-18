@@ -5599,7 +5599,7 @@ model RecordParam8
             errorMessage="
 1 errors found:
 
-Warning at line 5480, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5480, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -5621,7 +5621,7 @@ model RecordParam9
             errorMessage="
 1 errors found:
 
-Warning at line 5505, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5505, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -5649,7 +5649,7 @@ model RecordParam10
             errorMessage="
 1 errors found:
 
-Warning at line 5533, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5533, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;

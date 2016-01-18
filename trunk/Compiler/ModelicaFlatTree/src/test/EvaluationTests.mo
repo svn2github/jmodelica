@@ -1600,7 +1600,7 @@ end EvaluationTests.EvaluateAnnotation2;
 Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 
-Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
+Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end EvaluateAnnotation2;

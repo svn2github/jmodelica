@@ -2727,4 +2727,34 @@ Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 ")})));
 end NominalValue4;
 
+model ConstantNoBindingExp1
+    constant Real c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ConstantNoBindingExp1",
+            description="Ensure that a warning is given for constant which is missing a binding expression",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2730, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
+  The constant c does not have a binding expression
+")})));
+end ConstantNoBindingExp1;
+
+model ParameterNoBindingExp1
+    parameter Real p;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ParameterNoBindingExp1",
+            description="Ensure that a warning is given for parameters which is missing a binding expression",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2730, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter p does not have a binding expression
+")})));
+end ParameterNoBindingExp1;
+
 end TypeTests;

@@ -330,7 +330,7 @@ model InnerOuterTest9
 Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer parameter Real T = 5'
 
-Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter T does not have a binding expression
 ")})));
 end InnerOuterTest9;
@@ -350,7 +350,7 @@ model InnerOuterTest10
 Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer constant Real T = 5'
 
-Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
   The constant T does not have a binding expression
 ")})));
 end InnerOuterTest10;

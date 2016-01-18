@@ -1878,7 +1878,7 @@ model ParameterBindingExpTest3_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;

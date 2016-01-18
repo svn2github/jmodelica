@@ -889,6 +889,11 @@ aspect InstanceErrorCheck {
 		}
 	}
 
+    public static final SimpleProblemProducer ASTNode.PARAMETER_MISSING_BINDING_EXPRESSION =
+            new SimpleWarningProducer("PARAMETER_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The parameter %s does not have a binding expression");
+    public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
+            new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
+
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
@@ -911,8 +916,11 @@ aspect InstanceErrorCheck {
                 // Warn if constant or parameter does not have a binding expression (start is used)
                 if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
                         !hasParentRecordWithBindingExp() && !inFunction()) {
-                    String type = isParameter() ? "parameter" : "constant";
-                    warning("The %s %s does not have a binding expression", type, qualifiedName());
+                    if (isParameter()) {
+                        PARAMETER_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
+                    } else {
+                        CONSTANT_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
+                    }
                 }
             }
             
