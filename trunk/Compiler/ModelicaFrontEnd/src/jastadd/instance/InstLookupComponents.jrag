@@ -288,6 +288,7 @@ aspect InstLookupComponents {
     };
 
     inh InstLookupResult<InstComponentDecl> InstAccess.lookupInstComponent(String name);
+    inh InstLookupResult<InstComponentDecl> InstConstraining.lookupInstComponent(String name);
     inh lazy InstLookupResult<InstComponentDecl> InstNode.lookupInstComponent(String name);
     inh lazy InstLookupResult<InstComponentDecl> InstModification.lookupInstComponent(String name);
     eq InstNode.getChild().lookupInstComponent(String name) = genericLookupInstComponent(name);
@@ -308,6 +309,10 @@ aspect InstLookupComponents {
     eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
     eq InstSimpleShortClassDecl.getChild().lookupInstComponent(String name)               = lookupInstComponent(name);
     eq InstExternalObject.getDestructorCall().lookupInstComponent(String name)            = lookupInstComponent(name);
+    eq InstConstrainingComponent.getChild().lookupInstComponent(String name)              = 
+        (getInstRedeclare() != null) ? getInstRedeclare().lookupInstComponent(name) : lookupInstComponent(name);
+    eq InstConstrainingClass.getChild().lookupInstComponent(String name)                  = 
+        (getInstRedeclare() != null) ? getInstRedeclare().lookupInstComponent(name) : lookupInstComponent(name);
 
     eq InstDot.getInstAccess(int i).lookupInstComponent(String name)             = 
         (i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
@@ -378,13 +383,21 @@ aspect InstLookupComponents {
         (i == 0) ? null : getInstAccessNoListTrans(i - 1).closestConstrainingDecl();
     eq BaseNode.getChild().findClosestConstrainingInstNode()          = null;
 
-    syn InstNode InstNode.myConstrainingDecl()                = this;
-    eq InstReplacingFullClassDecl.myConstrainingDecl()        = getOriginalInstClass();
-    eq InstReplacingShortClassDecl.myConstrainingDecl()       = getOriginalInstClass();
-    eq InstReplacingSimpleShortClassDecl.myConstrainingDecl() = getOriginalInstClass();
-    eq InstReplacingComposite.myConstrainingDecl()            = getOriginalInstComponent();
-    eq InstReplacingRecord.myConstrainingDecl()               = getOriginalInstComponent();
-    eq InstReplacingPrimitive.myConstrainingDecl()            = getOriginalInstComponent();
+    syn InstNode InstNode.myConstrainingDecl() {
+        if (hasInstConstraining() && getInstConstraining().hasInstRedeclare()) {
+            return getInstConstraining().getRedeclareInstNode();
+        } else {
+            return myDefaultConstrainingDecl();
+        }
+    }
+
+    syn InstNode InstNode.myDefaultConstrainingDecl()                = this;
+    eq InstReplacingFullClassDecl.myDefaultConstrainingDecl()        = getOriginalInstClass();
+    eq InstReplacingShortClassDecl.myDefaultConstrainingDecl()       = getOriginalInstClass();
+    eq InstReplacingSimpleShortClassDecl.myDefaultConstrainingDecl() = getOriginalInstClass();
+    eq InstReplacingComposite.myDefaultConstrainingDecl()            = getOriginalInstComponent();
+    eq InstReplacingRecord.myDefaultConstrainingDecl()               = getOriginalInstComponent();
+    eq InstReplacingPrimitive.myDefaultConstrainingDecl()            = getOriginalInstComponent();
 
 
     inh InstLookupResult<InstComponentDecl> InstAccess.localLookupInstComponent(String name);

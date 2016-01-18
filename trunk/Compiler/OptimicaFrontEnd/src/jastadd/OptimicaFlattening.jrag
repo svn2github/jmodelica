@@ -29,13 +29,13 @@ aspect OptimicaFlatTree {
 aspect OptimicaFlattening {
 
     public InstFullClassDecl OptClassDecl.newInstClassDecl() {
-    	InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt(), new Opt());
-	    fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
-	    if (hasClassModification()) 
-	    	fcd.setInstClassModification(getClassModification().newInstModification());
-    	return copyLocationTo(fcd);
+        InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt(), new Opt());
+        fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt(null));
+        if (hasClassModification()) 
+            fcd.setInstClassModification(getClassModification().newInstModification());
+        return copyLocationTo(fcd);
     }
-    
+
     public InstOptimizationClass OptimizationClass.newInstRestriction() {
     	return copyLocationTo(new InstOptimizationClass());
     }
