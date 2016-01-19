@@ -337,16 +337,18 @@ public class ModelicaCompiler {
 		jmodelicaHome = jmHome;
 	}
 	
-	public static void addGlobalCompilationHooks(CompilationHooks hooks) {
+	public static <T extends CompilationHooks> T addGlobalCompilationHooks(T hooks) {
 		globalHooksList.add(hooks);
+		return hooks;
 	}
 	
 	public static void removeGlobalCompilationHooks(CompilationHooks hooks) {
 		globalHooksList.remove(hooks);
 	}
 	
-	public void addCompilationHooks(CompilationHooks hooks) {
+	public <T extends CompilationHooks> T addCompilationHooks(T hooks) {
 		hooksList.add(hooks);
+		return hooks;
 	}
 	
 	public void removeCompilationHooks(CompilationHooks hooks) {
@@ -372,7 +374,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookCheckAbort() {
 		for (CompilationHooks hooks : hooksList) {
-			if (hooks.shouldAbort()) {
+			if (hooks.shouldAbort(this)) {
 				log.info("Compilation aborted.");
 				throw new CompilationAbortedException();
 			}
@@ -384,7 +386,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookFilesParsed(SourceRoot sr) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.filesParsed(sr);
+			hooks.filesParsed(this, sr);
 	}
 	
 	/**
@@ -393,7 +395,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookModelInstantiatied(InstClassDecl icd) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.modelInstantiatied(icd);
+			hooks.modelInstantiatied(this, icd);
 	}
 	
 	/**
@@ -401,7 +403,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookModelFlattened(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.modelFlattened(fc);
+			hooks.modelFlattened(this, fc);
 	}
 	
 	/**
@@ -409,7 +411,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookModelTransformed(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.modelTransformed(fc);
+			hooks.modelTransformed(this, fc);
 	}
 	
 	/**
@@ -418,7 +420,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookFlatModelChecked(FClass fc) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.flatModelChecked(fc);
+			hooks.flatModelChecked(this, fc);
 	}
 	
 	/**
@@ -426,7 +428,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookCodeGeneratorCreated(AbstractGenerator gen) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.codeGeneratorCreated(gen);
+			hooks.codeGeneratorCreated(this, gen);
 	}
 	
 	/**
@@ -434,7 +436,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookCodeGenerated(File dir) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.codeGenerated(dir);
+			hooks.codeGenerated(this, dir);
 	}
 	
 	/**
@@ -442,7 +444,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookCodeCompiled() {
 		for (CompilationHooks hooks : hooksList)
-			hooks.codeCompiled();
+			hooks.codeCompiled(this);
 	}
 	
 	/**
@@ -450,7 +452,7 @@ public class ModelicaCompiler {
 	 */
 	protected void hookFmuPacked(File path) {
 		for (CompilationHooks hooks : hooksList)
-			hooks.fmuPacked(path);
+			hooks.fmuPacked(this, path);
 	}
 	
 	public String getStringOption(String key) throws UnknownOptionException {
@@ -2446,56 +2448,56 @@ public interface CompilationHooks {
 	 * If compilation is aborted before it is finished, a 
 	 * {@link CompilationAbortedException} is thrown.
 	 */
-	public boolean shouldAbort();
+	public boolean shouldAbort(ModelicaCompiler instance);
 	
 	/**
 	 * Called after the supplied code files are parsed.
 	 */
-	public void filesParsed(SourceRoot sr);
+	public void filesParsed(ModelicaCompiler instance, SourceRoot sr);
 	
 	/**
 	 * Called after the error checks on the instantiated model are finished without errors.
 	 * 
 	 * Since the instance tree is built lazily, this step can not be broken up.
 	 */
-	public void modelInstantiatied(InstClassDecl icd);
+	public void modelInstantiatied(ModelicaCompiler instance, InstClassDecl icd);
 	
 	/**
 	 * Called after the model is flattened.
 	 */
-	public void modelFlattened(FClass fc);
+	public void modelFlattened(ModelicaCompiler instance, FClass fc);
 	
 	/**
 	 * Called after transformations are applied to the flat model.
 	 */
-	public void modelTransformed(FClass fc);
+	public void modelTransformed(ModelicaCompiler instance, FClass fc);
 	
 	/**
 	 * Called after error checks of the flat model are finished without errors.
 	 */
-	public void flatModelChecked(FClass fc);
+	public void flatModelChecked(ModelicaCompiler instance, FClass fc);
 	
 	/**
 	 * Called after a code generator is created.
 	 * 
 	 * Normally called three times.
 	 */
-	public void codeGeneratorCreated(AbstractGenerator gen);
+	public void codeGeneratorCreated(ModelicaCompiler instance, AbstractGenerator gen);
 	
 	/**
 	 * Called after output code is generated.
 	 */
-	public void codeGenerated(File dir);
+	public void codeGenerated(ModelicaCompiler instance, File dir);
 	
 	/**
 	 * Called after the generated C code is compiled.
 	 */
-	public void codeCompiled();
+	public void codeCompiled(ModelicaCompiler instance);
 	
 	/**
 	 * Called after the FMU is packed.
 	 */
-	public void fmuPacked(File path);
+	public void fmuPacked(ModelicaCompiler instance, File path);
 }
 
 public class JModelicaHomeNotFoundException extends Exception {
