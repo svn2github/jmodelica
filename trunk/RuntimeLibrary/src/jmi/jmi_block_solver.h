@@ -134,7 +134,7 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_mode_jacobian_compression = 256,
     jmi_block_solver_experimental_Sparse_Broyden = 2048,
-    jmi_block_solver_experimental_use_modifiedBFGS = 4096,
+    jmi_block_solver_experimental_use_modifiedBFGS = 4096
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
