@@ -599,15 +599,6 @@ aspect Environments {
 		return null;
 	}
 
-    syn InstComponentRedeclare InstNode.retrieveConstrainingComponent(String name) {
-        for (InstModification im : getMergedEnvironment()) {
-            InstComponentRedeclare icr = im.matchInstComponentRedeclare(name);
-            if (icr != null && icr.getComponentRedeclare().getComponentDecl().hasConstrainingClause()) 
-                return icr;
-        }
-        return null;
-    }
-
 	// TODO: make sure components are created using the right class now
 	syn InstRedeclareClassNode InstNode.retrieveReplacingClass(String name) {
 		for (InstModification im : getMergedEnvironment()) {
@@ -617,16 +608,7 @@ aspect Environments {
 		}
 		return null;
 	}
-
-    syn InstRedeclareClassNode InstNode.retrieveConstrainingClass(String name) {
-        for (InstModification im : getMergedEnvironment()) {
-            InstRedeclareClassNode icr = im.matchInstClassRedeclare(name);
-            if (icr != null && icr.redeclaringClassDecl().hasConstrainingClause()) 
-                return icr;
-        }
-        return null;
-    }
-
+	
 	eq InstExtends.retrieveReplacingClass(String name) {
 		InstRedeclareClassNode res = super.retrieveReplacingClass(name);
 		return (res == null) ? lookupReplacingClass(name) : res;
@@ -911,24 +893,22 @@ aspect InstanceTreeConstruction {
 
 
     public InstComponentDecl InstNode.createInstComponentDecl(ComponentDecl cd) {
-        // Check if the component is redeclared. 
-        // -> Yes: Create an InstReplacingComponent component
-        // -> No: Create an InstComponent 
-        InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
-        InstComponentRedeclare cicr = retrieveConstrainingComponent(cd.name());
-        if (irc!=null) {
-            ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
-            return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc, cicr);
-            // TODO: handle expandable connectors in this case
-        } else { 
-            return new InstCreateComponentDecl(cd, null);       
-        }
+    	// Check if the component is redeclared. 
+    	// -> Yes: Create an InstReplacingComponent component
+    	// -> No: Create an InstComponent 
+    	InstComponentRedeclare irc = retrieveReplacingComponent(cd.name());
+    	if (irc!=null) {
+    		ComponentDecl replacingComp = irc.getComponentRedeclare().getComponentDecl();
+    		return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc);
+    		// TODO: handle expandable connectors in this case
+    	} else { 
+    		return new InstCreateComponentDecl(cd, null);    	
+    	}
      }
-
+     
      rewrite InstCreateReplacingComponentDecl {
-         to InstComponentDecl getClassName().myInstClassDecl().newInstReplacingComponent(
-                 getComponentDecl(), getOriginalDecl(), 
-                 getInstComponentRedeclare(), getInstConstrainingRedeclare());
+     	to InstComponentDecl getClassName().myInstClassDecl().newInstReplacingComponent(
+     			getComponentDecl(), getOriginalDecl(), getInstComponentRedeclare());
      }
      
      rewrite InstCreateComponentDecl {
@@ -944,17 +924,15 @@ aspect InstanceTreeConstruction {
          // -> Yes: Create an InstReplacingClass component
          // -> No: Create an InstClassDecl
          InstRedeclareClassNode icr = retrieveReplacingClass(bcd.name());
-         InstRedeclareClassNode cicr = retrieveConstrainingClass(bcd.name());
          if (icr != null) {
              ClassDecl replacingClass = icr.redeclaringClassDecl();
-             return bcd.newInstReplacingClass(replacingClass, icr, cicr);
+             return bcd.newInstReplacingClass(replacingClass, icr);
          } else {
              return bcd.newInstClassDecl();
          }
      }
 
      public interface InstRedeclareClassNode {
-         public InstLookupResult<InstComponentDecl> lookupInstComponent(String name);
          public InstLookupResult<InstClassDecl> lookupInstClass(String name);
          public InstLookupResult<InstClassDecl> lookupInstClassQualified(String name);
          public ClassDecl redeclaringClassDecl();
@@ -1062,7 +1040,7 @@ aspect InstanceTreeConstruction {
             icd.setConditionalAttribute(cd.getConditionalAttribute().getExp().instantiate());
         if (cd.hasModification())
             icd.setInstModification(cd.getModification().newInstModification());
-        icd.setInstConstrainingComponentOpt(cd.newInstConstrainingComponentOpt(null));
+        icd.setInstConstrainingComponentOpt(cd.newInstConstrainingComponentOpt());
         icd.setLocation(cd);
         return icd;
     }
@@ -1109,33 +1087,28 @@ aspect InstanceTreeConstruction {
         return icd;
     }
 
-    public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(
-            ComponentDecl replacingDecl, ComponentDecl originalDecl, 
-            InstComponentRedeclare icr, InstComponentRedeclare cicr);
+	public abstract InstComponentDecl InstClassDecl.newInstReplacingComponent(
+			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr);
 
     public InstComponentDecl InstBaseClassDecl.newInstReplacingComponent(
-            ComponentDecl replacingDecl, ComponentDecl originalDecl, 
-            InstComponentRedeclare icr, InstComponentRedeclare cicr) {
+            ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
         Opt fas_opt = new Opt();
-        if (replacingDecl.hasVarArraySubscripts()) {
+        if (replacingDecl.hasVarArraySubscripts()) 
             fas_opt.setChild(replacingDecl.getVarArraySubscripts().instantiate(), 0);
-        }
         Opt cond_attr_opt = new Opt();
-        if (originalDecl.hasConditionalAttribute()) {
+        if (originalDecl.hasConditionalAttribute()) 
             cond_attr_opt.setChild(originalDecl.getConditionalAttribute().getExp().instantiate(), 0);
-        }
-        ComponentDecl constrainingDecl = (cicr == null) ? originalDecl : cicr.getComponentRedeclare().getComponentDecl();
         
         if (isOrExtendsPrimitive()) {
             InstReplacingPrimitive icd = new InstReplacingPrimitive(replacingDecl.newInstClassAccess(), 
                     fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
+            icd.setInstConstrainingComponentOpt(originalDecl.newInstConstrainingComponentOpt());
             icd.setLocation(originalDecl);
             return icd;
         } else if (isRecord()) {
             InstReplacingRecord icd = new InstReplacingRecord(replacingDecl.newInstClassAccess(), 
                     fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
+            icd.setInstConstrainingComponentOpt(originalDecl.newInstConstrainingComponentOpt());
             icd.setLocation(originalDecl);
             return icd;
         } else {
@@ -1146,18 +1119,17 @@ aspect InstanceTreeConstruction {
             else
                 icd = new InstReplacingComposite(replacingDecl.newInstClassAccess(), 
                         fas_opt, replacingDecl, new Opt(), new Opt(), cond_attr_opt, originalDecl, icr);
-            icd.setInstConstrainingComponentOpt(constrainingDecl.newInstConstrainingComponentOpt(cicr));
+            icd.setInstConstrainingComponentOpt(originalDecl.newInstConstrainingComponentOpt());
             icd.setLocation(originalDecl);
             return icd;
         }
     }
 
-    // This cannot be done.
-    public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(
-            ComponentDecl replacingDecl, ComponentDecl originalDecl, 
-            InstComponentRedeclare icr, InstComponentRedeclare cicr) {
-        throw new UnsupportedOperationException();
-    }
+	// This cannot be done.
+	public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(
+			ComponentDecl replacingDecl, ComponentDecl originalDecl, InstComponentRedeclare icr) {
+		throw new UnsupportedOperationException();
+	}
 
     public InstClassDecl ClassDecl.newInstClassDecl() {
         return new UnknownInstClassDecl();
@@ -1169,7 +1141,7 @@ aspect InstanceTreeConstruction {
 
     public InstFullClassDecl FullClassDecl.newInstClassDecl() {
         InstFullClassDecl fcd = new InstFullClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt());
-        fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt(null));
+        fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
         fcd.setLocation(this);
         return fcd;
     }
@@ -1177,7 +1149,7 @@ aspect InstanceTreeConstruction {
     public InstExtendClassDecl ExtendClassDecl.newInstClassDecl() {
         // TODO: Shouldn't extending class decl be able to have an external clause?
         InstExtendClassDecl ecd = new InstExtendClassDecl(this, new Opt(), newInstRestriction(), new Opt());
-        ecd.setInstConstrainingClassOpt(newInstConstrainingClassOpt(null));
+        ecd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
         ecd.setLocation(this);
         return ecd;
     }
@@ -1189,7 +1161,7 @@ aspect InstanceTreeConstruction {
         }
         InstShortClassDecl scd =  new InstShortClassDecl(this, new Opt(), 
                 newInstRestriction(),fas_opt);
-        scd.setInstConstrainingClassOpt(newInstConstrainingClassOpt(null));     
+        scd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());     
         scd.setLocation(this);
         return scd;
     }
@@ -1213,46 +1185,38 @@ aspect InstanceTreeConstruction {
         return ecd;
     }
 
-    public InstClassDecl ClassDecl.newInstReplacingClass(
-            ClassDecl replacingClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
-        return replacingClass.createInstReplacingClass(this, icr, cicr);
-    }
-
-    public InstClassDecl PrimitiveClassDecl.newInstReplacingClass(
-            ClassDecl replacingClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
-        InstRestriction ir = newInstRestriction();
-        Opt<InstExternal> exto = newInstExternalOpt();  // TODO: shouldn't ir & exto come from replacing class
+    public InstClassDecl ClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {
+    	return replacingClass.createInstReplacingClass(this, icr);
+    }    
+    
+    public InstClassDecl PrimitiveClassDecl.newInstReplacingClass(ClassDecl replacingClass, InstRedeclareClassNode icr) {
+    	InstRestriction ir = newInstRestriction();
+    	Opt<InstExternal> exto = newInstExternalOpt();  // TODO: shouldn't ir & exto come from replacing class
         return new InstReplacingPrimitiveClassDecl(replacingClass, new Opt(), ir, exto, this, icr);
     }
-
-    public InstClassDecl ClassDecl.createInstReplacingClass(
-            ClassDecl replacedClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
-        return null;
+    
+    public InstClassDecl ClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
+    	return null;
     }
 
-    public InstClassDecl FullClassDecl.createInstReplacingClass(
-            ClassDecl replacedClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
+    public InstClassDecl FullClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
         InstRestriction ir = newInstRestriction();
         Opt<InstExternal> exto = newInstExternalOpt();
-        ClassDecl constrainingDecl = (cicr == null) ? replacedClass : cicr.redeclaringClassDecl();
         InstReplacingFullClassDecl fcd = new InstReplacingFullClassDecl(this, new Opt(), ir, exto, replacedClass, icr);
-        fcd.setInstConstrainingClassOpt(constrainingDecl.newInstConstrainingClassOpt(cicr));
+        fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
         //TODO: Should be constr clause of original or redeclared? 
         // - Should be from redeclared if it has one.
         fcd.setLocation(this);
         return fcd;
     }
 
-    public InstClassDecl ShortClassDecl.createInstReplacingClass(
-            ClassDecl replacedClass, InstRedeclareClassNode icr, InstRedeclareClassNode cicr) {
+    public InstClassDecl ShortClassDecl.createInstReplacingClass(ClassDecl replacedClass, InstRedeclareClassNode icr) {
         Opt fas_opt = new Opt();
-        if (getExtendsClauseShortClass().hasArraySubscripts()) {
+        if (getExtendsClauseShortClass().hasArraySubscripts()) 
             fas_opt.setChild(getExtendsClauseShortClass().getArraySubscripts().instantiate(), 0);
-        }
-        ClassDecl constrainingDecl = (cicr == null) ? replacedClass : cicr.redeclaringClassDecl();
         InstRestriction ir = newInstRestriction();
         InstReplacingShortClassDecl scd =  new InstReplacingShortClassDecl(this, new Opt(), ir, fas_opt, replacedClass, icr);
-        scd.setInstConstrainingClassOpt(constrainingDecl.newInstConstrainingClassOpt(cicr));
+        scd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
         scd.setLocation(this);
         return scd;
      }
@@ -1573,30 +1537,24 @@ aspect ExpandableConnectorMembers {
 
 aspect InstaceConstrainingClauses {
 
-    public Opt ComponentDecl.newInstConstrainingComponentOpt(InstComponentRedeclare cicr) {
-        if (hasConstrainingClause()) {
-            ConstrainingClause cc = getConstrainingClause();
-            Opt opt = cc.hasClassModification() ? new Opt(cc.getClassModification().newInstModification()) : new Opt();
-            return new Opt(new InstConstrainingComponent(cc.getAccess().newInstAccess(), opt, this, cicr));
-        } else {
-            return new Opt();
-        }
-    }
+	public Opt ComponentDecl.newInstConstrainingComponentOpt() {
+		if (hasConstrainingClause()) {
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newInstModification()) : new Opt();
+			return new Opt(new InstConstrainingComponent(getConstrainingClause().getAccess().newInstAccess(),opt,this));
+		} else {
+			return new Opt();
+		}
+	}
 
-    public Opt ClassDecl.newInstConstrainingClassOpt(InstRedeclareClassNode cicr) {
-        return new Opt();
-    }
-
-    public Opt BaseClassDecl.newInstConstrainingClassOpt(InstRedeclareClassNode cicr) {
-        if (hasConstrainingClause()) {
-            ConstrainingClause cc = getConstrainingClause();
-            Opt opt = cc.hasClassModification() ? new Opt(cc.getClassModification().newInstModification()) : new Opt();
-            return new Opt(new InstConstrainingClass(cc.getAccess().newInstAccess(), opt, this, cicr));
-        } else {
-            return new Opt();
-        }
-    }
-
+	public Opt BaseClassDecl.newInstConstrainingClassOpt() {
+		if (hasConstrainingClause()) {
+	    	Opt opt = getConstrainingClause().hasClassModification()? new Opt(getConstrainingClause().getClassModification().newInstModification()) : new Opt();
+			return new Opt(new InstConstrainingClass(getConstrainingClause().getAccess().newInstAccess(),opt,this));
+		} else {
+			return new Opt();
+		}
+	}
+	
     syn lazy ConstrainingClause InstConstraining.getConstrainingClause();
     eq InstConstrainingComponent.getConstrainingClause() = getComponentDecl().getConstrainingClause();
     eq InstConstrainingClass.getConstrainingClause() = getBaseClassDecl().getConstrainingClause();
@@ -1832,37 +1790,9 @@ aspect InstanceAST_API {
 	}
 
 
-    // Overridden in BaseClassDecl by generated API for optional child
-    syn boolean ClassDecl.hasConstrainingClause() = false;
-    syn ConstrainingClause ClassDecl.getConstrainingClause() = null;
-
     // Overridden in InstBaseClassDecl by generated API for optional child
     syn boolean InstClassDecl.hasInstConstrainingClass() = false;
     syn InstConstrainingClass InstClassDecl.getInstConstrainingClass() = null;
-
-    syn boolean InstNode.hasInstConstraining() = false;
-    eq InstBaseClassDecl.hasInstConstraining() = hasInstConstrainingClass();
-    eq InstComponentDecl.hasInstConstraining() = hasInstConstrainingComponent();
-
-    syn InstConstraining InstNode.getInstConstraining() = null;
-    eq InstBaseClassDecl.getInstConstraining()          = getInstConstrainingClass();
-    eq InstComponentDecl.getInstConstraining()          = getInstConstrainingComponent();
-
-    /**
-     * Does this constraining clause come from a redeclare?
-     */
-    syn boolean InstConstraining.hasInstRedeclare();
-    eq InstConstrainingComponent.hasInstRedeclare() = getInstRedeclare() != null;
-    eq InstConstrainingClass.hasInstRedeclare()     = getInstRedeclare() != null;
-
-    /**
-     * get the InstNode for the redeclare that this constraining clause comes from.
-     * 
-     * Only valid if hasInstRedeclare() returns true.
-     */
-    syn InstNode InstConstraining.getRedeclareInstNode();
-    eq InstConstrainingComponent.getRedeclareInstNode() = getInstRedeclare().getInstComponentDecl();
-    eq InstConstrainingClass.getRedeclareInstNode()     = getInstRedeclare().redeclaringInstClassDecl();
 
     /**
      * Is this declaration redeclared?
