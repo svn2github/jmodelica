@@ -90,12 +90,19 @@ aspect ComplianceCheck {
 	
     public static final SimpleProblemProducer ASTNode.ONLY_FMU_NON_FIXED_RECORD_ARRAY_INDEX =
             new ComplianceFMUOnlyProducer("ONLY_FMU_NON_FIXED_RECORD_ARRAY_INDEX", "Using arrays of records with indices of higher than parameter variability is");
+    public static final SimpleProblemProducer ASTNode.EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION =
+            new SimpleErrorProducer("EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION", ProblemKind.COMPLIANCE, "Access to external object constants is not supported in functions");
+    
 
     public void InstAccess.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (myInstComponentDecl().isRecord() && hasFArraySubscripts() && inFunction() && 
+        InstComponentDecl decl = myInstComponentDecl();
+        if (decl.isRecord() && hasFArraySubscripts() && inFunction() && 
                 !getFArraySubscripts().variability().parameterOrLess()) {
             ONLY_FMU_NON_FIXED_RECORD_ARRAY_INDEX.invoke(this);
+        }
+        if (decl.isExternalObject() && !decl.inFunction() && decl.getComponentDecl().isConstant() && inFunction()) {
+            EXTERNAL_OBJECT_CONSTANT_FROM_FUNCTION.invoke(this);
         }
     }
 
