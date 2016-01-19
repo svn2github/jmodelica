@@ -858,10 +858,13 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         case jmi_residual_scaling_aggressive_auto:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_aggressive_auto;
+            break;
         case jmi_residual_scaling_full_jacobian_auto:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_full_jacobian_auto;
+            break;
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+            break;
         }
     } 
 
@@ -877,6 +880,51 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         default:
             bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+        }
+    } 
+
+    index = get_option_index("_nle_jacobian_calculation_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_central_diffs_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_small_res_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_small_res_jacobian_calculation_mode;
+            break;
+        case jmi_calculate_externally_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_calculate_externally_jacobian_calculation_mode;
+        default:
+            bsop->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode;
+            break;
+        }
+    } 
+
+    index = get_option_index("_nle_active_bounds_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_use_steepest_descent_active_bounds_mode:
+            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
+            break;
+        default:
+            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
         }
     } 
         

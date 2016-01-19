@@ -653,6 +653,22 @@ abstract public class OptionRegistry {
              "Mode for how to update the Jacobian: " +
              "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
              0, 2),
+        NLE_JACOBIAN_CALCULATION_MODE
+            ("nle_jacobian_calculation_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to calculate the Jacobian: " +
+             "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally.",
+             0, 8),
+        NLE_ACTIVE_BOUNDS_MODE
+            ("nle_active_bounds_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to handle active bounds: " +
+             "0 - project Newton step at active bounds, 1 - use projected steepest descent direction.",
+             0, 1),
         NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
             ("nle_solver_min_residual_scaling_factor",
              OptionType.runtime, 

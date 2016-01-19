@@ -103,6 +103,24 @@ typedef enum jmi_block_solver_jacobian_update_mode_t {
     jmi_reuse_jacobian_update_mode = 2
 } jmi_block_solver_jacobian_update_mode_t;
 
+/** \brief Mode for Jacobian calculation*/
+typedef enum jmi_block_solver_jacobian_calculation_mode_t {
+    jmi_onesided_diffs_jacobian_calculation_mode = 0, 
+    jmi_central_diffs_jacobian_calculation_mode = 1,
+    jmi_central_diffs_at_bound_jacobian_calculation_mode = 2,
+    jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode = 3,
+    jmi_central_diffs_solve2_jacobian_calculation_mode = 4,
+    jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode = 5,
+    jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode = 6,
+    jmi_central_diffs_at_small_res_jacobian_calculation_mode = 7,
+    jmi_calculate_externally_jacobian_calculation_mode = 8
+} jmi_block_solver_jacobian_calculation_mode_t;
+
+typedef enum jmi_block_solver_active_bounds_mode_t {
+    jmi_project_newton_step_active_bounds_mode = 0,
+    jmi_use_steepest_descent_active_bounds_mode = 1
+} jmi_block_solver_active_bounds_mode_t;
+
 /** \brief Experimental features in the solver */
 typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_none = 0,
@@ -115,12 +133,8 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_Broyden_with_zeros = 64,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
     jmi_block_solver_experimental_mode_jacobian_compression = 256,
-    jmi_block_solver_experimental_check_descent_direction = 512,
     jmi_block_solver_experimental_Sparse_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096,
-    jmi_block_solver_experimental_central_differences = 8192,
-    jmi_block_solver_experimental_central_differences_at_bounds = 16384,
-    jmi_block_solver_experimental_central_differences_at_0 = 32768
 } jmi_block_solver_experimental_mode_t;
 
 typedef enum jmi_block_solver_status_t {
@@ -273,7 +287,9 @@ struct jmi_block_solver_options_t {
     double block_jacobian_check_tol;        /**< \brief Tolerance for block jacobian comparison */
     
     jmi_block_solver_jacobian_update_mode_t jacobian_update_mode; /**< \brief Jacobian update mode in equation block solvers: 0 - full Jacobian, 1 - Broyden update */
+    jmi_block_solver_jacobian_calculation_mode_t jacobian_calculation_mode; /**< \brief Jacobian calculation mode 0- one-sided diffs, 1 - central diffs, 2 - central diffs at bound, 3 - central diffs at bound and 0 */
     jmi_block_solver_residual_scaling_mode_t residual_equation_scaling_mode; /**< \brief Equations scaling mode in equation block solvers:0-no scaling,1-automatic scaling,2-manual scaling */
+    jmi_block_solver_active_bounds_mode_t active_bounds_mode; /**< \brief Handling of active bounds mode: 0 - only project, 1 - use steepest descent in case of non descent direction */
 
     double max_residual_scaling_factor;    /**< \breif Maximum residual scaling factor used in nle solver */
     double min_residual_scaling_factor;    /**< \breif Minimum residual scaling factor used in nle solver */
@@ -292,7 +308,6 @@ struct jmi_block_solver_options_t {
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
-    int calculate_jacobian_externally; /**< \brief Flag indicating if the solver should use callback for calculating Jacobian */
     double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobians, default sqrt(eps). */
 
     /* Options below are not supposed to change between invocations of the solver*/

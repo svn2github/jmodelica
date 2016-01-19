@@ -657,6 +657,8 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto; 
     bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;
     bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+    bsop->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode;
+    bsop->active_bounds_mode = jmi_project_newton_step_active_bounds_mode;
 
     bsop->min_residual_scaling_factor = 1e-10;
     bsop->max_residual_scaling_factor = 1e10;
@@ -665,7 +667,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->rescale_each_step_flag = 0;
     bsop->rescale_after_singular_jac_flag = 0;
     bsop->check_jac_cond_flag = 0;  /**< \brief NLE solver should check Jacobian condition number and log it. */
-    bsop->calculate_jacobian_externally = 0;
     bsop->brent_ignore_error_flag = 0;
     bsop->experimental_mode = 0;
     bsop->use_nominals_as_fallback_in_init = 0;

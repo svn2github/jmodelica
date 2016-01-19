@@ -309,13 +309,12 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             "jmi_kinsol_solver", block->label, message);
     }
 
-    if ((!solver->has_compression_setup_flag && ((!block->dF && !block->Jacobian) || (!block->options->calculate_jacobian_externally && !block->dF)
-        || (!block->Jacobian && block->options->calculate_jacobian_externally))) || block->options->block_jacobian_check) {
+    if ((!solver->has_compression_setup_flag && ((!block->dF && !block->Jacobian) || (block->options->jacobian_calculation_mode != jmi_calculate_externally_jacobian_calculation_mode && !block->dF)
+        || (!block->Jacobian && block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode))) || block->options->block_jacobian_check) {
             /* Use (almost) standard finite differences */
             realtype inc, inc_inv, ujsaved, ujscale, sign;
             realtype *tmp2_data, *u_data, *uscale_data;
             N_Vector ftemp, jthCol;
-
             /* Save pointer to the array in tmp2 */
             tmp2_data = N_VGetArrayPointer(tmp2);
 
@@ -338,6 +337,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
 
             for (j = 0; j < N; j++) {
                 realtype sqrt_relfunc = block->options->jacobian_finite_difference_delta; /*kin_mem->kin_sqrt_relfunc;*/
+                int utilize_central_differences;
 
 
                 ujsaved = u_data[j];
@@ -345,91 +345,145 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 sign = (ujsaved >= 0) ? 1 : -1;
                 inc = MAX(ABS(ujsaved), ujscale)*sign;
 
-                if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences) || 
-                    (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) ||
-                    (block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0)) {
-                    /* Central differences to be utilized when we are close to bounds or close to 0 */
-                    if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences) ||
-                        ((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
-                        (( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
-                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) )
-                        || ((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0) && ujsaved*sign < sqrt_relfunc*ABS(inc))) {
-                            double incLeft = 0.0, incRight = 0.0, leftPart, rightPart;
-                            /*jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "CentralDifferences");
-                            jmi_log_reals(block->log, node, logInfo, "u", &u_data[j], 1);
-                            jmi_log_reals(block->log, node, logInfo, "max", &block->max[j], 1);
-                            jmi_log_reals(block->log, node, logInfo, "min", &block->min[j], 1);
-                            jmi_log_reals(block->log, node, logInfo, "inc", &inc, 1); 
-                            jmi_log_reals(block->log, node, logInfo, "f", N_VGetArrayPointer(fu), N); */
-                            inc = ABS(inc);
-                            incRight = MIN(block->max[j]-ujsaved, sqrt_relfunc*inc);
-                            u_data[j] = ujsaved + incRight;
-                            ret = kin_f(u, ftemp, block);
-                            /*jmi_log_reals(block->log, node, logInfo, "ftemp", N_VGetArrayPointer(ftemp), N); 
-                            jmi_log_reals(block->log, node, logInfo, "utemp", u_data, N); */
-                            u_data[j] = ujsaved;
-                            if(ret == 0 ) {
-                                if(incRight > 0)
-                                    inc_inv = ONE/incRight;
-                                else
-                                    inc_inv = 0;
-                                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector2);
-                            } else {
-                                incRight = 0;
-                            }
-                            /*jmi_log_reals(block->log, node, logInfo, "right", N_VGetArrayPointer(solver->work_vector2), N); */
-
-                            incLeft = MIN(ujsaved-block->min[j], sqrt_relfunc*inc);
-                            u_data[j] = ujsaved - incLeft;
-                            ret = kin_f(u, ftemp, block);
-                            /*jmi_log_reals(block->log, node, logInfo, "ftemp", N_VGetArrayPointer(ftemp), N); 
-                            jmi_log_reals(block->log, node, logInfo, "utemp", u_data, N); */
-                            if(ret == 0) {
-                                if(incLeft > 0)
-                                    inc_inv = -ONE/incLeft;
-                                else
-                                    inc_inv = 0;
-                                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector);             
-                            } else {
-                                incLeft = 0;
-                            }
-
-                            if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
-                                (block->max[j]-ujsaved) > sqrt_relfunc*inc && (block->max[j]-ujsaved) < 2*sqrt_relfunc*inc && sign > 0) {
-                                rightPart = 0.5*((block->max[j]-ujsaved)-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
-                                leftPart = 1 - rightPart;
-                            } else if((block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_bounds) &&
-                                (ujsaved-block->min[j]) > sqrt_relfunc*inc && (ujsaved-block->min[j]) < 2*sqrt_relfunc*inc && sign < 0) {
-                                leftPart = 0.5*((ujsaved-block->min[j])-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
-                                rightPart = 1-leftPart;
-                            } else if( block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && 
-                                ujsaved*sign < sqrt_relfunc*inc && sign > 0) {
-                                rightPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
-                                leftPart = 1 - rightPart;
-                            } else if(block->options->experimental_mode & jmi_block_solver_experimental_central_differences_at_0 && 
-                                ujsaved*sign < sqrt_relfunc*inc  && sign < 0) {
-                                leftPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
-                                rightPart = 1 - leftPart;
-                            } else {
-                                rightPart = incRight/(incRight+incLeft);
-                                leftPart = incLeft/(incRight+incLeft);
-                            }
-                            /* Generate the jth col of Jac(u) */
-                            N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
-                            N_VLinearSum(rightPart, solver->work_vector2, leftPart, solver->work_vector, jthCol);
-                            /*jmi_log_reals(block->log, node, logInfo, "left", N_VGetArrayPointer(solver->work_vector), N);
-                            jmi_log_reals(block->log, node, logInfo, "incLeft", &incLeft, 1);
-                            jmi_log_reals(block->log, node, logInfo, "incRight", &incRight, 1); 
-                            jmi_log_reals(block->log, node, logInfo, "leftPart", &leftPart, 1);
-                            jmi_log_reals(block->log, node, logInfo, "rightPart", &rightPart, 1); */
-                            u_data[j] = ujsaved;
-                            /* Restore original array pointer in tmp2 */
-                            N_VSetArrayPointer(tmp2_data, tmp2);
-                            /*jmi_log_leave(block->log, node);*/
-                            if(incLeft == 0 && incRight == 0) break;
-                            continue;
+                switch(block->options->jacobian_calculation_mode) {
+                case jmi_central_diffs_jacobian_calculation_mode:
+                    utilize_central_differences = TRUE;
+                    break;
+                case jmi_central_diffs_at_bound_jacobian_calculation_mode:
+                    if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
+                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
+                        utilize_central_differences = TRUE;
+                    } else {
+                        utilize_central_differences = FALSE;
                     }
-                } 
+                    break;
+                case jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode:
+                    if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
+                        ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
+                        utilize_central_differences = TRUE;
+                    } else if(ujsaved*sign < sqrt_relfunc*ABS(inc)) {
+                        utilize_central_differences = TRUE;
+                    } else {
+                        utilize_central_differences = FALSE;
+                    }
+                    break;
+                case jmi_central_diffs_solve2_jacobian_calculation_mode:
+                    if(!solver->is_first_newton_solve_flag) {
+                        utilize_central_differences = TRUE;
+                    } else {
+                        utilize_central_differences = FALSE;
+                    }
+                    break;
+                case jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode:
+                    if(!solver->is_first_newton_solve_flag) {
+                        if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
+                            ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
+                            utilize_central_differences = TRUE;
+                        } else {
+                            utilize_central_differences = FALSE;
+                        }
+                    } else {
+                        utilize_central_differences = FALSE;
+                    }
+                    break;
+                case jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode:
+                    if(!solver->is_first_newton_solve_flag) {
+                        if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
+                            ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
+                            utilize_central_differences = TRUE;
+                        } else if(ujsaved*sign < sqrt_relfunc*ABS(inc)) {
+                            utilize_central_differences = TRUE;
+                        } else {
+                            utilize_central_differences = FALSE;
+                        }
+                    } else {
+                        utilize_central_differences = FALSE;
+                    }
+                    break;
+                case jmi_central_diffs_at_small_res_jacobian_calculation_mode:
+                    if(solver->last_fnorm < 1e-2 && solver->last_fnorm > 0) {
+                        utilize_central_differences = TRUE;
+                    } else {
+                        utilize_central_differences = FALSE;
+                    }
+                    break;
+                default: 
+                    utilize_central_differences = FALSE;
+                    break;
+                }
+
+                /* Central differences to be utilized  under certain conditions */
+                if(utilize_central_differences) {
+                    double incLeft = 0.0, incRight = 0.0, leftPart, rightPart;
+                    /*jmi_log_node_t node = jmi_log_enter(block->log, logInfo, "CentralDifferences"); */
+                    inc = ABS(inc);
+                    incRight = MIN(block->max[j]-ujsaved, sqrt_relfunc*inc);
+                    u_data[j] = ujsaved + incRight;
+                    ret = kin_f(u, ftemp, block);
+
+                    u_data[j] = ujsaved;
+                    if(ret == 0 ) {
+                        if(incRight > 0)
+                            inc_inv = ONE/incRight;
+                        else
+                            inc_inv = 0;
+                        N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector2);
+                    } else {
+                        incRight = 0;
+                    }
+
+                    incLeft = MIN(ujsaved-block->min[j], sqrt_relfunc*inc);
+                    u_data[j] = ujsaved - incLeft;
+                    ret = kin_f(u, ftemp, block);
+
+                    if(ret == 0) {
+                        if(incLeft > 0)
+                            inc_inv = -ONE/incLeft;
+                        else
+                            inc_inv = 0;
+                        N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, solver->work_vector);             
+                    } else {
+                        incLeft = 0;
+                    }
+
+                    if((block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode) &&
+                        (block->max[j]-ujsaved) > sqrt_relfunc*inc && (block->max[j]-ujsaved) < 2*sqrt_relfunc*inc && sign > 0) {
+                            rightPart = 0.5*((block->max[j]-ujsaved)-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
+                            leftPart = 1 - rightPart;
+                    } else if((block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode) &&
+                        (ujsaved-block->min[j]) > sqrt_relfunc*inc && (ujsaved-block->min[j]) < 2*sqrt_relfunc*inc && sign < 0) {
+                            leftPart = 0.5*((ujsaved-block->min[j])-sqrt_relfunc*inc)/(sqrt_relfunc*inc)+0.5;
+                            rightPart = 1-leftPart;
+                    } else if( (block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode) && 
+                        ujsaved*sign < sqrt_relfunc*inc && sign > 0) {
+                            rightPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
+                            leftPart = 1 - rightPart;
+                    } else if((block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode ||
+                        block->options->jacobian_calculation_mode == jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode) && 
+                        ujsaved*sign < sqrt_relfunc*inc  && sign < 0) {
+                            leftPart = 0.5*(ujsaved*sign)/(sqrt_relfunc*inc)+0.5;
+                            rightPart = 1 - leftPart;
+                    } else {
+                        rightPart = incRight/(incRight+incLeft);
+                        leftPart = incLeft/(incRight+incLeft);
+                    }
+                    /* Generate the jth col of Jac(u) */
+                    N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
+                    N_VLinearSum(rightPart, solver->work_vector2, leftPart, solver->work_vector, jthCol);
+                    u_data[j] = ujsaved;
+                    /* Restore original array pointer in tmp2 */
+                    N_VSetArrayPointer(tmp2_data, tmp2);
+                    /*jmi_log_leave(block->log, node);*/
+                    if(incLeft == 0 && incRight == 0) break;
+                    continue;
+                }
                 if(sqrt_relfunc > 0) 
                     inc *= sqrt_relfunc;
                 u_data[j] += inc;
@@ -461,7 +515,6 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             /* Evaluate the residual with the original u vector to avoid that the initial guess 
             for the final IV is pertubated when the iterations start*/
             /*ret = kin_f(u, ftemp, block);*/
-
 
             if (block->options->block_jacobian_check) {
                 jac_fd = (realtype*) calloc(N * N, sizeof(realtype));
@@ -542,11 +595,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 N_VScale(1.0, u, utemp); 
             }
     }
-    if(block->Jacobian && block->options->calculate_jacobian_externally && !solver->has_compression_setup_flag) {
+    if(block->Jacobian && (block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode) && !solver->has_compression_setup_flag) {
         ret = block->Jacobian(block->problem_data, N_VGetArrayPointer(u), J->cols, JMI_BLOCK_EVALUATE_JAC);
     }
 
-    if (block->dF && !block->options->calculate_jacobian_externally) {
+    if (block->dF && (block->options->jacobian_calculation_mode != jmi_calculate_externally_jacobian_calculation_mode)) {
         /* utilize directional derivatives to calculate Jacobian */
         for(i = 0; i < N; i++){ 
             block->x[i] = Ith(u,i);
@@ -566,14 +619,14 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
     if (block->options->block_jacobian_check) {
         /* compare analytical/external and finite differences Jacobians */
         if (block->dF || (block->Jacobian && (solver->has_compression_setup_flag 
-            || block->options->calculate_jacobian_externally))) {
+            || (block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode)))) {
                 for (i = 0; i < N; i++) {
                     for (j = 0; j < N; j++) {
                         realtype fd_val = jac_fd[i * N + j];
                         realtype a_val = J->data[i * N + j];
                         realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
                         if (rel_error >= block->options->block_jacobian_check_tol) {
-                            if(block->options->calculate_jacobian_externally) {
+                            if(block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode) {
                                 jmi_log_node(block->log, logError, "JacobianCheck",
                                     "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
                                     j, i, a_val, fd_val, rel_error);
@@ -1041,13 +1094,14 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_log_fmt(block->log, node, logInfo, " <jacobian_finite_difference_delta: %g>", block->options->jacobian_finite_difference_delta);
     jmi_log_fmt(block->log, node, logInfo, " <use_jacobian_equilibration: %d>", block->options->use_jacobian_equilibration_flag);
     jmi_log_fmt(block->log, node, logInfo, " <Brent_ignore_error: %d>", block->options->brent_ignore_error_flag);
-    jmi_log_fmt(block->log, node, logInfo, " <calculate_jacobian_externally: %d>", block->options->calculate_jacobian_externally);
     jmi_log_fmt(block->log, node, logInfo, " <jacobian_update_mode: %d>", block->options->jacobian_update_mode);
+    jmi_log_fmt(block->log, node, logInfo, " <jacobian_calculation_mode: %d>", block->options->jacobian_calculation_mode);
     jmi_log_fmt(block->log, node, logInfo, " <log_level: %d>", block->callbacks->log_options.log_level);
     jmi_log_fmt(block->log, node, logInfo, " <jacobian_check: %d>", block->options->block_jacobian_check);
     jmi_log_fmt(block->log, node, logInfo, " <jacobian_check_tolerance: %g>", block->options->block_jacobian_check_tol);
     jmi_log_fmt(block->log, node, logInfo, " <step_limit_factor: %g>", block->options->step_limit_factor);
     jmi_log_fmt(block->log, node, logInfo, " <max_iter_no_jacobian: %d>", block->options->max_iter_no_jacobian);
+    jmi_log_fmt(block->log, node, logInfo, " <active_bounds_mode: %d>", block->options->active_bounds_mode);
     jmi_log_leave(block->log, node);
 
     KINSetPrintLevel(solver->kin_mem, get_print_level(block));
@@ -1529,6 +1583,36 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
     }
 }
 
+/* Perform LU factorization with different linear algebra packages */
+static int jmi_LU_factorization(jmi_block_solver_t * block, DlsMat matrix, int lin_alg_package) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int info, N = block->n;
+    if(lin_alg_package == 0) {
+        dgetrf_(  &N, &N, matrix->data, &N, solver->lapack_ipiv, &info);
+        
+    } else if (lin_alg_package == 1) {
+        /* Perform factorization to detect if there is a singular Jacobian */
+        info = DenseGETRF(matrix, solver->sundials_permutationwork);
+    }
+    return info;
+}
+
+/* Solve with an LU factorized matrix with different linear algebra packages */
+static int jmi_LU_solve(jmi_block_solver_t * block, DlsMat matrix, realtype* xd, int lin_alg_package) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int ret = 0, N = block->n;
+    if(lin_alg_package == 1) {
+        DenseGETRS(matrix, solver->sundials_permutationwork, xd);
+    } else if (lin_alg_package == 0){
+        /* Back-solve and get solution in x */
+        char trans = 'N'; /* No transposition */
+        int i = 1;
+        dgetrs_(&trans, &N, &i, matrix->data, &N, solver->lapack_ipiv, xd, &N, &ret);
+    }
+    return ret;
+}
+
+
 /* Estimate condition number utilizing dgecon from LAPACK*/
 static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
@@ -1821,14 +1905,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
         }
     }
     
-    if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
-        info = DenseGETRF(solver->J_LU, solver->sundials_permutationwork);
-    } else {
-        /* Perform factorization to detect if there is a singular Jacobian */
-        dgetrf_(  &N, &N, solver->J_LU->data, &N, solver->lapack_ipiv, &info);
-    }
-
-
+    info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
     
     if(info != 0 ) {
         if (N > 1) {
@@ -1858,11 +1935,7 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
                 
                 if(N > 1) {
                     jmi_kinsol_reg_matrix(block);
-                    if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
-                        info = DenseGETRF(solver->JTJ, solver->sundials_permutationwork);
-                    } else {
-                        dgetrf_(  &N, &N, solver->JTJ->data, &N, solver->lapack_ipiv, &info);
-                    }
+                    info = jmi_LU_factorization(block, solver->JTJ, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials? 1:0);
                 }
             } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
                 jmi_log_node(block->log, logWarning, "MinimumNorm", "Singular Jacobian detected when factorizing in linear solver. "
@@ -1903,7 +1976,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     jmi_log_node_t node;
     long int  nniters;           
     int N = block->n;
-    char trans = 'N';
     int ret = 0, i;
     KINGetNumNonlinSolvIters(kin_mem, &nniters);
     solver->current_nni = nniters;
@@ -2051,14 +2123,8 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             }
 
             /* Back-solve and get solution in x */
-            trans = 'N'; /* No transposition */
-            i = 1;
             t = clock();
-            if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
-                DenseGETRS(solver->JTJ, solver->sundials_permutationwork, xd);
-            } else {
-                dgetrs_(&trans, &N, &i, solver->JTJ->data, &N, solver->lapack_ipiv, xd, &N, &ret);
-            }
+            ret = jmi_LU_solve(block, solver->JTJ, xd, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
             kin_char_log(solver, 'r');
             solver->force_new_J_flag = 1;
             if(block->options->rescale_after_singular_jac_flag)
@@ -2124,11 +2190,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             jmi_log_reals(block->log, node, logInfo, "rhs", xd, N);
         }
         
-        if(block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials) {
-            DenseGETRS(solver->J_LU, solver->sundials_permutationwork, xd);
-        } else {
-            dgetrs_(&trans, &N, &i, solver->J_LU->data, &N, solver->lapack_ipiv, xd, &N, &ret);
-        }
+        ret = jmi_LU_solve(block, solver->J_LU, xd, block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
 
         if((block->callbacks->log_options.log_level >= 6)) {
             jmi_log_reals(block->log, node, logInfo, "solution", xd, N);
@@ -2165,7 +2227,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
         jmi_kinsol_limit_step(kin_mem, x, b);
         t = clock();
-        if(solver->last_num_active_bounds > 0 && (block->options->experimental_mode & jmi_block_solver_experimental_check_descent_direction)) {
+        if(solver->last_num_active_bounds > 0 && (block->options->active_bounds_mode == jmi_use_steepest_descent_active_bounds_mode)) {
             realtype sJpnorm, sfJp, fnorm, g_scale;
             
             /*scalar product of gradient and projected step = Transpose(gradient) * x = Transpose(Transpose(J) Wf Wf F)*x = Transpose(F) Wf Wf J x = sfJp */
@@ -2511,7 +2573,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->kin_stol = block->options->min_tol;
     solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
     solver->has_compression_setup_flag = FALSE;
-
+    solver->is_first_newton_solve_flag = TRUE;
     solver->current_nni = 0;
     
     solver->J = NewDenseMat(n ,n);
