@@ -366,6 +366,7 @@ aspect AliasVariables {
 			// List of aliases
 			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
             private AliasVariable model = null;
+            private long score = 0;
 			
 			/**
 			 * Private constructor
@@ -411,10 +412,12 @@ aspect AliasVariables {
              * @param newAlias Alias variable to check
              */
             private void model(AliasVariable newAlias) {
-                if (model == null || (newAlias != null && 
-                        newAlias.getFVariable().aliasHeuristicScore() 
-                        > model.getFVariable().aliasHeuristicScore())) {
-                    model = newAlias;
+                if (newAlias != null) {
+                    long newScore = newAlias.getFVariable().aliasHeuristicScore();
+                    if (newScore > score) {
+                        model = newAlias;
+                        score = newScore;
+                    }
                 }
             }
             
@@ -431,7 +434,10 @@ aspect AliasVariables {
                         a.negated = !a.negated;
                     _add(a);
                 }
-                model(mergeSet.model);
+                if (mergeSet.score > score) {
+                    model = mergeSet.model;
+                    score = mergeSet.score;
+                }
             }
             
 			

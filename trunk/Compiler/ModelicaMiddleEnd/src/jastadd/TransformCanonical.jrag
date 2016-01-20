@@ -1880,6 +1880,20 @@ aspect TransformCanonical {
                     aliasManager.addAliasVariables(equation.aliasVariables());
             }
         }
+        if (myOptions().getBooleanOption("eliminate_alias_constants")) {
+            Map<String, FVariable> firstOccurences = new HashMap<String, FVariable>();
+            for (FVariable fv : getFVariables()) {
+                if (fv.variability().knownParameterOrLess() && fv.hasBindingExp()) {
+                    String s = fv.getBindingExp().prettyPrint("");
+                    FVariable first = firstOccurences.get(s);
+                    if (first != null) {
+                        aliasManager.addAliasVariables(new AliasPair(first, fv, false));
+                    } else {
+                        firstOccurences.put(s, fv);
+                    }
+                }
+            }
+        }
 		aliasManager.reportAliasErrors(this);
 		//flush();
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
@@ -1900,18 +1914,21 @@ aspect TransformCanonical {
 	public void FClass.eliminateAliasVariables() {
 		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
 		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
+        ArrayList<FVariable> aliasConstants = new ArrayList<FVariable>();
 		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
         ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
 		
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
 		// Go through all variables and insert in correct list
-		int i = 1;
 		for (FVariable fv : getAliasVariables()) {
 				aliasVars.add(fv);
 		}
+        for (FVariable fv : getAliasConstants()) {
+            aliasConstants.add(fv);
+        }
 		for (FVariable fv : getFVariables()) {
-			fv.aliasSort(aliasVars, nonAliasVars);
+            fv.aliasSort(nonAliasVars, aliasVars, aliasConstants);
 		}
 		
 		// Remove alias equations.
@@ -1936,6 +1953,7 @@ aspect TransformCanonical {
 
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
+        setAliasConstantList(new List(aliasConstants));
 		setFAbstractEquationList(new List(eqns));
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
             setFParameterEquationList(new List(pEqns));
@@ -1951,12 +1969,20 @@ aspect TransformCanonical {
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.
      */
-    public void FVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+    public void FVariable.aliasSort(ArrayList<FVariable> nonAliasVars, ArrayList<FVariable> aliasVars, 
+            ArrayList<FVariable> aliasConstants) {
+        boolean known = variability().knownParameterOrLess();
         if (isAlias()) {
-            aliasVars.add(this);
+            if (known) {
+                aliasConstants.add(this);
+            } else {
+                aliasVars.add(this);
+            }
         } else if (aliasSortKeep()) { 
             nonAliasVars.add(this);
-            this.propagateAttributesFromAlias();
+            if (!known) {
+                this.propagateAttributesFromAlias();
+            }
         }
     }
     
@@ -1964,7 +1990,8 @@ aspect TransformCanonical {
      * A derivative variable of an alias is removed, if there is no suitable 
      * alias derivative variable one is created. 
      */
-    public void FDerivativeVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+    public void FDerivativeVariable.aliasSort(ArrayList<FVariable> nonAliasVars, ArrayList<FVariable> aliasVars, 
+            ArrayList<FVariable> aliasConstants) {
         FVariable itg = getMeIntegrated();
         if (itg.isAlias()) {
             FVariable alias = itg.alias();
@@ -1975,7 +2002,7 @@ aspect TransformCanonical {
                 nonAliasVars.add(fdv);
             }
         } else {
-            super.aliasSort(aliasVars, nonAliasVars);
+            super.aliasSort(nonAliasVars, aliasVars, aliasConstants);
         }
     }
     
