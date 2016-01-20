@@ -563,9 +563,9 @@ aspect VariabilityPropagation {
         }
         
         // Alias variables
-        if (((variability.knownParameterOrLess() && propagator.splitAliasConstants()) ||
-                (variability.parameterVariability() && propagator.splitAliasParameters()))
-                && aliasSet() != null) {
+        if (aliasSet() != null) {
+            boolean unAlias = (variability.knownParameterOrLess() && propagator.splitAliasConstants()) ||
+                    (variability.parameterVariability() && propagator.splitAliasParameters());
             AliasManager.AliasVariable thisAlias = aliasSet().getModelVariable();
             for (AliasManager.AliasVariable av : aliasSet()) {
                 FVariable fv = av.getFVariable();
@@ -574,11 +574,13 @@ aspect VariabilityPropagation {
                     fv.setFTypePrefixVariability(variability);
                     if (variability.knownParameterOrLess())
                         fv.setBindingExp(bindingExp.negated(neg));
-                    if (variability.parameterVariability() && !fv.isTemporary())
+                    if (unAlias && variability.parameterVariability() && !fv.isTemporary())
                         propagator.addParamEq(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
                 }
             }
-            myFClass().getAliasManager().unAlias(this);
+            if (unAlias) {
+                myFClass().getAliasManager().unAlias(this);
+            }
         }
     }
 	

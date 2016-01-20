@@ -5104,6 +5104,7 @@ end FunctionTests.ArrayExpInFunc20;
             name="ArrayExpInFunc20ceval",
             description="Scalarization of functions: unknown size matrix expression",
             variability_propagation=true,
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass FunctionTests.ArrayExpInFunc20
@@ -13287,6 +13288,7 @@ model Abs2
 		TransformCanonicalTestCase(
 			name="FunctionLike_NumericConversion_Abs2",
 			description="Test of vectorized abs()",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Abs2
  constant Real c[1,1] = -1;
@@ -13369,6 +13371,7 @@ model Sign2
 		TransformCanonicalTestCase(
 			name="FunctionLike_NumericConversion_Sign2",
 			description="Test of vectorized sign()",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Sign2
  constant Real c[1,1] = -1;

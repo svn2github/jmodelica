@@ -256,6 +256,7 @@ end ArrayTests.General.ArrayTest8;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest9",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest9
  structural parameter Integer nn.n2 = 2 /* 2 */;
@@ -343,6 +344,7 @@ end ArrayTests.General.ArrayTest10;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest11",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest11
  constant Real m1[1].x[1] = 1;
@@ -425,6 +427,7 @@ end ArrayTests.General.ArrayTest13;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest14",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest14
  constant Real n.m[1,1].x[1] = 1;
@@ -483,6 +486,7 @@ model ArrayTest17
 		TransformCanonicalTestCase(
 			name="General_ArrayTest17",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest17
@@ -509,12 +513,13 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest21",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest21
  constant Real x[1] = 0;
  constant Real x[2] = 0;
- constant Real y[1] = 0;
- constant Real y[2] = 0;
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 0.0;
 end ArrayTests.General.ArrayTest21;
 ")})));
 end ArrayTest21;
@@ -530,12 +535,13 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest22",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest22
  constant Real x[1] = 1;
  constant Real x[2] = 1;
- constant Real y[1] = 1;
- constant Real y[2] = 1;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 1.0;
 end ArrayTests.General.ArrayTest22;
 			
 ")})));
@@ -552,16 +558,17 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest23",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest23
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 1;
  constant Real x[2,1] = 1;
  constant Real x[2,2] = 1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 1;
- constant Real y[2,1] = 1;
- constant Real y[2,2] = 1;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 1.0;
+ constant Real y[2,1] = 1.0;
+ constant Real y[2,2] = 1.0;
 end ArrayTests.General.ArrayTest23;
 			
 ")})));
@@ -581,6 +588,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest24",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest24
  constant Real x[1,1] = 1;
@@ -611,6 +619,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest25",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest25
  constant Real x[1,1] = 1;
@@ -665,6 +674,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest26",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
 			flatModel="
@@ -941,6 +951,7 @@ model ArrayTest35
 		TransformCanonicalTestCase(
 			name="General_ArrayTest35",
 			description="Test adding array sizes that are present as expressions in tree",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
  constant Real z[1] = 1;
@@ -1141,6 +1152,7 @@ model ArrayTest43
         TransformCanonicalTestCase(
             name="General_ArrayTest43",
             description="Splitting expression with access in array subscripts in part of dotted access",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.General.ArrayTest43
  structural parameter Integer n = 3 /* 3 */;
@@ -1148,10 +1160,16 @@ fclass ArrayTests.General.ArrayTest43
  Real a[2].x;
  Real a[3].x;
  structural parameter Integer b.m = 3 /* 3 */;
+ Real b.y[1];
+ Real b.y[2];
+ Real b.y[3];
 equation
- a[1].x = 1 ./ time;
- a[2].x = 2 ./ time;
- a[3].x = 3 ./ time;
+ a[1].x = b.y[1];
+ a[2].x = b.y[2];
+ a[3].x = b.y[3];
+ b.y[1] = 1 ./ time;
+ b.y[2] = 2 ./ time;
+ b.y[3] = 3 ./ time;
 end ArrayTests.General.ArrayTest43;
 ")})));
 end ArrayTest43;
@@ -1275,6 +1293,7 @@ model UnknownSize2
 		TransformCanonicalTestCase(
 			name="UnknownSize_UnknownSize2",
 			description="Using unknown array sizes: binding exp through modification on array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize2
  constant Real x[1].y[1].z[1] = 1;
@@ -1476,6 +1495,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Subscripts_SubscriptExpression6",
 			description="Type checking array subscripts: simulating [4,4] with [16]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression6
  constant Real x[1] = 3;
@@ -1510,6 +1530,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Subscripts_SubscriptExpression7",
 			description="Type checking array subscripts: using min in subscripts",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
 			flatModel="
@@ -1815,6 +1836,7 @@ model MixedTypes1
         TransformCanonicalTestCase(
             name="Subscripts_MixedTypes1",
             description="Test subscripting with bools.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Subscripts.MixedTypes1
  structural parameter Integer maxQuality = 1 /* 1 */;
@@ -4025,6 +4047,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv1",
 			description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv1
  constant Real x[1] = 0.1;
@@ -4046,6 +4069,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv2",
 			description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv2
  constant Real x[1,1] = 0.1;
@@ -4071,6 +4095,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv3",
 			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv3
  constant Real x[1,1,1] = 0.1;
@@ -4476,6 +4501,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow7",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow7
  constant Real x[1] = 1.0;
@@ -4496,6 +4522,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow8",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow8
  constant Real x[1,1] = 1.0;
@@ -4518,6 +4545,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow9",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow9
  constant Real x[1,1,1] = 1.0;
@@ -4605,6 +4633,7 @@ model ArrayPow1
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayPow1",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow1
  constant Real x[1,1] = 1;
@@ -4728,6 +4757,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayPow7",
 			description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow7
  constant Real x[1,1] = 1;
@@ -4972,6 +5002,7 @@ model ArrayNeg3
 		TransformCanonicalTestCase(
 			name="Algebra_Neg_ArrayNeg3",
 			description="Scalarization of negation: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg3
  constant Integer x[1] = -1;
@@ -5052,6 +5083,7 @@ model ArrayAnd2
 		TransformCanonicalTestCase(
 			name="Logical_And_ArrayAnd2",
 			description="Scalarization of logical and: arrays of Booleans (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd2
  constant Boolean y[1] = true;
@@ -5182,6 +5214,7 @@ model ArrayAnd9
 		TransformCanonicalTestCase(
 			name="Logical_And_ArrayAnd9",
 			description="Scalarization of logical and: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd9
  constant Boolean y[1] = true;
@@ -5206,6 +5239,7 @@ model ArrayOr1
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr1",
 			description="Scalarization of logical or: arrays of Booleans (literal)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr1
  constant Boolean x[1] = true;
@@ -5223,6 +5257,7 @@ model ArrayOr2
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr2",
 			description="Scalarization of logical or: arrays of Booleans (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr2
  constant Boolean y[1] = true;
@@ -5353,6 +5388,7 @@ model ArrayOr9
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr9",
 			description="Scalarization of logical or: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr9
  constant Boolean y[1] = true;
@@ -5395,6 +5431,7 @@ model ArrayNot2
 		TransformCanonicalTestCase(
 			name="Logical_Not_ArrayNot2",
 			description="Scalarization of logical not: array of Boolean (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot2
  constant Boolean x[1] = false;
@@ -5414,6 +5451,7 @@ model ArrayNot3
 		TransformCanonicalTestCase(
 			name="Logical_Not_ArrayNot3",
 			description="Scalarization of logical not: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot3
  constant Boolean x[1] = false;
@@ -5530,23 +5568,24 @@ model LongArrayForm4
 		TransformCanonicalTestCase(
 			name="Constructors_LongForm_LongArrayForm4",
 			description="Long form of array constructor, array component parts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm4
- constant Real x3[1,1] = 1;
- constant Real x3[1,2] = 2;
- constant Real x3[1,3] = 3;
- constant Real x3[2,1] = 4;
- constant Real x3[2,2] = 5;
- constant Real x3[2,3] = 6;
- constant Real x3[3,1] = 7;
- constant Real x3[3,2] = 8;
- constant Real x3[3,3] = 9;
  constant Real x1[1] = 1;
  constant Real x1[2] = 2;
  constant Real x1[3] = 3;
  constant Real x2[1] = 4;
  constant Real x2[2] = 5;
  constant Real x2[3] = 6;
+ constant Real x3[1,1] = 1.0;
+ constant Real x3[1,2] = 2.0;
+ constant Real x3[1,3] = 3.0;
+ constant Real x3[2,1] = 4.0;
+ constant Real x3[2,2] = 5.0;
+ constant Real x3[2,3] = 6.0;
+ constant Real x3[3,1] = 7;
+ constant Real x3[3,2] = 8;
+ constant Real x3[3,3] = 9;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -5599,16 +5638,17 @@ model EmptyArray3
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray3",
 			description="Empty arrays, concatenation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
- constant Real xx[1,1] = 1;
- constant Real xx[1,2] = 2;
- constant Real xx[2,1] = 3;
- constant Real xx[2,2] = 4;
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
  constant Real x[2,1] = 3;
  constant Real x[2,2] = 4;
+ constant Real xx[1,1] = 1.0;
+ constant Real xx[1,2] = 2.0;
+ constant Real xx[2,1] = 3.0;
+ constant Real xx[2,2] = 4.0;
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -5623,6 +5663,7 @@ model EmptyArray4
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray4",
 			description="Empty arrays, multiplication",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray4
  constant Real y[1,1] = 0;
@@ -5653,6 +5694,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray5",
 			description="Empty arrays, simple equation system",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  structural parameter Integer n = 0 /* 0 */;
@@ -5705,6 +5747,7 @@ model ArrayIterTest1
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest1",
 			description="Array constructor with iterators: over scalar exp",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
  constant Real x[1,1] = 2;
@@ -5728,6 +5771,7 @@ model ArrayIterTest2
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest2",
 			description="Array constructor with iterators: over array exp",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
  constant Real x[1,1,1] = 1;
@@ -5751,6 +5795,7 @@ model ArrayIterTest3
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest3",
 			description="Array constructor with iterators: nestled constructors, masking index",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest3
  constant Real i = 1;
@@ -6106,8 +6151,17 @@ model ArrayIterTest13
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest13",
             description="Nested iteration expressions",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
+ constant Integer x0[1] = 1;
+ constant Integer x0[2] = 2;
+ constant Integer x0[3] = 3;
+ constant Integer x0[4] = 4;
+ constant Integer x0[5] = 5;
+ constant Integer x0[6] = 6;
+ constant Integer x0[7] = 7;
+ constant Integer x0[8] = 8;
  constant Integer x1[1,1,1] = 1;
  constant Integer x1[1,1,2] = 2;
  constant Integer x1[1,2,1] = 3;
@@ -6124,14 +6178,6 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
  constant Integer x2[2,1,2] = 6;
  constant Integer x2[2,2,1] = 4;
  constant Integer x2[2,2,2] = 8;
- constant Integer x0[1] = 1;
- constant Integer x0[2] = 2;
- constant Integer x0[3] = 3;
- constant Integer x0[4] = 4;
- constant Integer x0[5] = 5;
- constant Integer x0[6] = 6;
- constant Integer x0[7] = 7;
- constant Integer x0[8] = 8;
 end ArrayTests.Constructors.Iterators.ArrayIterTest13;
 ")})));
 end ArrayIterTest13;
@@ -6296,6 +6342,7 @@ model ForEquation2
 		TransformCanonicalTestCase(
 			name="For_ForEquation2",
 			description="",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.For.ForEquation2
  structural parameter Integer a.N = 3 /* 3 */;
@@ -6305,9 +6352,9 @@ fclass ArrayTests.For.ForEquation2
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
- constant Real a.y[1] = 3;
- constant Real a.y[2] = 2;
- constant Real a.y[3] = 1;
+ constant Real a.y[1] = 3.0;
+ constant Real a.y[2] = 2.0;
+ constant Real a.y[3] = 1.0;
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -6582,6 +6629,7 @@ model SliceTest3
 		TransformCanonicalTestCase(
 			name="Slices_SliceTest3",
 			description="Slice operations: test with vector indices",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.SliceTest3
  constant Real x[1].a[1] = 1;
@@ -6628,24 +6676,9 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices1",
 			description="Mixing for index subscripts with colon subscripts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
- Real y[1,1,1];
- Real y[1,1,2];
- Real y[1,2,1];
- Real y[1,2,2];
- Real y[2,1,1];
- Real y[2,1,2];
- Real y[2,2,1];
- Real y[2,2,2];
- constant Real z[1,1,1] = 1;
- constant Real z[1,1,2] = 0;
- constant Real z[1,2,1] = 0;
- constant Real z[1,2,2] = 1;
- constant Real z[2,1,1] = 1;
- constant Real z[2,1,2] = 0;
- constant Real z[2,2,1] = 0;
- constant Real z[2,2,2] = 1;
  constant Real m[1].x[1,1] = 1;
  constant Real m[1].x[1,2] = 0;
  constant Real m[1].x[2,1] = 0;
@@ -6654,6 +6687,22 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real m[2].x[1,2] = 0;
  constant Real m[2].x[2,1] = 0;
  constant Real m[2].x[2,2] = 1;
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+ constant Real z[1,1,1] = 1.0;
+ constant Real z[1,1,2] = 0.0;
+ constant Real z[1,2,1] = 0.0;
+ constant Real z[1,2,2] = 1.0;
+ constant Real z[2,1,1] = 1.0;
+ constant Real z[2,1,2] = 0.0;
+ constant Real z[2,2,1] = 0.0;
+ constant Real z[2,2,2] = 1.0;
 initial equation 
  y[1,1,1] = 0.0;
  y[1,1,2] = 0.0;
@@ -6689,6 +6738,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices2",
 			description="Mixing expression subscripts containing for indices with colon subscripts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices2
  constant Real y[1,1] = 2.0;
@@ -7823,6 +7873,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySize3",
 			description="Handle end in for loop",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySize3
  structural parameter Integer n = 2 /* 2 */;
@@ -7925,6 +7976,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf1",
 			description="Test that array size errors lock if branches if possible",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf1
  structural parameter Boolean a = false /* false */;
@@ -8019,6 +8071,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf3",
 			description="Test that array size errors lock if branches if possible",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
  structural parameter Boolean a = true /* true */;
@@ -8052,6 +8105,7 @@ model ArraySizeInComp1
         TransformCanonicalTestCase(
             name="Other_ArraySizeInComp1",
             description="",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp1
  constant Real r1.x[1] = 1;
@@ -8082,6 +8136,7 @@ model ArraySizeInComp2
         TransformCanonicalTestCase(
             name="Other_ArraySizeInComp2",
             description="",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp2
  constant Real r1.x[1] = 1;
@@ -8109,6 +8164,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySimplify1",
 			description="Correct simplification of array expressions",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySimplify1
  Real x[1];

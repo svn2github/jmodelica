@@ -393,6 +393,7 @@ model CCodeGenTest13
             name="CCodeGenTest13",
             description="Code generation for enumerations: variable aliases",
             variability_propagation=false,
+            eliminate_alias_variables=false,
             template="$C_variable_aliases$",
             generatedCode="
 #define _ci_0 ((*(jmi->z))[jmi->offs_integer_ci+0])
@@ -1016,6 +1017,7 @@ equation
             name="CCodeGenDiscreteVariables1",
             description="Test C code generation of discrete variables.",
             variability_propagation=false,
+            eliminate_alias_variables=false,
             generate_ode=false,
             generate_dae=true,
             template="
@@ -1027,28 +1029,34 @@ $C_DAE_equation_residuals$
 #define _c2_1 ((*(jmi->z))[jmi->offs_real_ci+1])
 #define _p1_2 ((*(jmi->z))[jmi->offs_real_pi+0])
 #define _p2_3 ((*(jmi->z))[jmi->offs_real_pd+0])
-#define _ci1_7 ((*(jmi->z))[jmi->offs_integer_ci+0])
-#define _ci2_8 ((*(jmi->z))[jmi->offs_integer_ci+1])
-#define _pi1_9 ((*(jmi->z))[jmi->offs_integer_pi+0])
-#define _pi2_10 ((*(jmi->z))[jmi->offs_integer_pd+0])
-#define _cb1_12 ((*(jmi->z))[jmi->offs_boolean_ci+0])
-#define _cb2_13 ((*(jmi->z))[jmi->offs_boolean_ci+1])
-#define _pb1_14 ((*(jmi->z))[jmi->offs_boolean_pi+0])
-#define _pb2_15 ((*(jmi->z))[jmi->offs_boolean_pd+0])
-#define _der_x_20 ((*(jmi->z))[jmi->offs_real_dx+0])
-#define _x_5 ((*(jmi->z))[jmi->offs_real_x+0])
-#define _w_6 ((*(jmi->z))[jmi->offs_real_w+0])
+#define _ci1_8 ((*(jmi->z))[jmi->offs_integer_ci+0])
+#define _ci2_9 ((*(jmi->z))[jmi->offs_integer_ci+1])
+#define _pi1_10 ((*(jmi->z))[jmi->offs_integer_pi+0])
+#define _pi2_11 ((*(jmi->z))[jmi->offs_integer_pd+0])
+#define _cb1_14 ((*(jmi->z))[jmi->offs_boolean_ci+0])
+#define _cb2_15 ((*(jmi->z))[jmi->offs_boolean_ci+1])
+#define _pb1_16 ((*(jmi->z))[jmi->offs_boolean_pi+0])
+#define _pb2_17 ((*(jmi->z))[jmi->offs_boolean_pd+0])
+#define _der_x_26 ((*(jmi->z))[jmi->offs_real_dx+0])
+#define _x_6 ((*(jmi->z))[jmi->offs_real_x+0])
+#define _w_7 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
-#define _rd2_4 ((*(jmi->z))[jmi->offs_real_d+0])
-#define _rid2_11 ((*(jmi->z))[jmi->offs_integer_d+0])
-#define _rbd2_16 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define _rd1_4 ((*(jmi->z))[jmi->offs_real_d+0])
+#define _rd2_5 ((*(jmi->z))[jmi->offs_real_d+1])
+#define _rid1_12 ((*(jmi->z))[jmi->offs_integer_d+0])
+#define _rid2_13 ((*(jmi->z))[jmi->offs_integer_d+1])
+#define _rbd1_18 ((*(jmi->z))[jmi->offs_boolean_d+0])
+#define _rbd2_19 ((*(jmi->z))[jmi->offs_boolean_d+1])
 
-    (*res)[0] = - _x_5 - (_der_x_20);
-    (*res)[1] = 4 - (_rd2_4);
-    (*res)[2] = 4 - (_w_6);
-    (*res)[3] = 4 - (_rid2_11);
-    (*res)[4] = JMI_FALSE - (_rbd2_16);
+    (*res)[0] = - _x_6 - (_der_x_26);
+    (*res)[1] = 4 - (_rd1_4);
+    (*res)[2] = _rd1_4 - (_rd2_5);
+    (*res)[3] = 4 - (_w_7);
+    (*res)[4] = 4 - (_rid1_12);
+    (*res)[5] = _rid1_12 - (_rid2_13);
+    (*res)[6] = JMI_FALSE - (_rbd1_18);
+    (*res)[7] = _rbd1_18 - (_rbd2_19);
 ")})));
 end CCodeGenDiscreteVariables1;
 
@@ -1144,6 +1152,7 @@ model CCodeGenParameters2
         CCodeGenTestCase(
             name="CCodeGenParameters2",
             description="Code generated for independent parameters",
+            eliminate_alias_variables=false,
             generate_dae=true,
             variability_propagation=false,
             template="
@@ -1295,6 +1304,7 @@ model CCodeGenParameters3
         CCodeGenTestCase(
             name="CCodeGenParameters3",
             description="Code generated for strings",
+            eliminate_alias_variables=false,
             template="
 $C_z_aliases_strings$
 $C_z_offsets_strings$
@@ -2592,6 +2602,7 @@ model CFunctionTest16
             name="CFunctionTest16",
             description="Function call equation with partially propagated composite elements",
             inline_functions="none",
+            eliminate_alias_variables=false,
             template="$C_ode_derivatives$",
             generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {

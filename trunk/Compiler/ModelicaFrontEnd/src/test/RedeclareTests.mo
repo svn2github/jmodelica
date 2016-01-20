@@ -2981,6 +2981,7 @@ model RedeclareTest32
 		TransformCanonicalTestCase(
 			name="RedeclareTest32",
 			description="Lookup of extends with redeclare modification in array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareTest32
  constant Real d[1].y = 3.0;
@@ -5278,13 +5279,14 @@ model RedeclareElement23
 		TransformCanonicalTestCase(
 			name="RedeclareElement23",
 			description="Array of redeclare class extends",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareElement23
  constant Real b[1].z = 2;
+ constant Real b[1].y = 1;
  constant Real b[2].z = 2;
  constant Real b[2].y = 1;
- constant Real x = 1;
- constant Real b[1].y = 1;
+ constant Real x = 1.0;
 end RedeclareTests.RedeclareElement23;
 ")})));
 end RedeclareElement23;
@@ -5848,6 +5850,7 @@ model RedeclareEach1
 		TransformCanonicalTestCase(
 			name="RedeclareEach1",
 			description="Using redeclare on array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareEach1
  constant Real a[1].a[1] = 0;
@@ -5881,6 +5884,7 @@ model RedeclareEach2
 		TransformCanonicalTestCase(
 			name="RedeclareEach2",
 			description="Using redeclare on array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareEach2
  constant Real a[1].a[1] = 0;

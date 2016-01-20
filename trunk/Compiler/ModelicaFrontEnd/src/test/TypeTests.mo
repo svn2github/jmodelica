@@ -490,6 +490,7 @@ model IntegerExp1
 		TransformCanonicalTestCase(
 			name="IntegerExp1",
 			description="integer() operator: constant",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.IntegerExp1
  constant Integer x = 1;
@@ -545,6 +546,7 @@ model ConstCmpEq
 		TransformCanonicalTestCase(
 			name="ConstCmpEq",
 			description="Constant evaluation of comparisons: equals",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpEq
  constant Boolean a = false;
@@ -566,6 +568,7 @@ model ConstCmpNeq
 		TransformCanonicalTestCase(
 			name="ConstCmpNeq",
 			description="Constant evaluation of comparisons: not equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpNeq
  constant Boolean a = true;
@@ -589,6 +592,7 @@ model ConstCmpLeq
 		TransformCanonicalTestCase(
 			name="ConstCmpLeq",
 			description="Constant evaluation of comparisons: less or equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpLeq
  constant Boolean a = true;
@@ -614,6 +618,7 @@ model ConstCmpLt
 		TransformCanonicalTestCase(
 			name="ConstCmpLt",
 			description="Constant evaluation of comparisons: less than",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpLt
  constant Boolean a = true;
@@ -639,6 +644,7 @@ model ConstCmpGeq
 		TransformCanonicalTestCase(
 			name="ConstCmpGeq",
 			description="Constant evaluation of comparisons: greater or equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpGeq
  constant Boolean a = false;
@@ -664,6 +670,7 @@ model ConstCmpGt
 		TransformCanonicalTestCase(
 			name="ConstCmpGt",
 			description="Constant evaluation of comparisons:greater than",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpGt
  constant Boolean a = false;
@@ -796,6 +803,7 @@ model ParameterStart2
 		TransformCanonicalTestCase(
 			name="ParameterStart2",
 			description="Constant without binding expression: start not set",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ParameterStart2
  constant Real p = 0.0;
@@ -834,6 +842,7 @@ model ArrayTypeTest2
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest2",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest2
  constant TypeTests.ArrayTypeTest2.T x[1] = 1;
@@ -878,6 +887,7 @@ model ArrayTypeTest3
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest3",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest3
  constant Real y[1].x(start = 1) = 1;
@@ -912,6 +922,7 @@ model ArrayTypeTest4
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest4",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest4
  constant Real y[1,1].x(start = 1) = 1;
@@ -950,6 +961,7 @@ model ArrayTypeTest5
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest5",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest5
  constant Real y[1,1].x(start = 1) = 3;
@@ -1201,6 +1213,7 @@ model DivTest1
 		TransformCanonicalTestCase(
 			name="DivTest1",
 			description="Testing output types of the div operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.DivTest1
  constant Real aReal = 3;
@@ -1254,6 +1267,7 @@ model ModTest1
 		TransformCanonicalTestCase(
 			name="ModTest1",
 			description="Testing output types of the mod operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ModTest1
  constant Real aReal = 3;
@@ -1310,6 +1324,7 @@ model RemTest1
 		TransformCanonicalTestCase(
 			name="RemTest1",
 			description="Testing output types of the rem operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.RemTest1
  constant Real aReal = 3;
@@ -1615,6 +1630,7 @@ model IfExpType1
 		TransformCanonicalTestCase(
 			name="IfExpType1",
 			description="If expression with branches with different array sizes",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.IfExpType1
  structural parameter Integer n = 3 /* 3 */;
@@ -1713,6 +1729,7 @@ model IfExpType5
 		TransformCanonicalTestCase(
 			name="IfExpType5",
 			description="If expression with branches with different array sizes, using function call",
+            eliminate_alias_variables=false,
 			variability_propagation=false,
 			flatModel="
 fclass TypeTests.IfExpType5
@@ -2626,6 +2643,7 @@ model DivType1
         TransformCanonicalTestCase(
             name="DivType1",
             description="Type calculation for div() operator",
+            eliminate_alias_variables=false,
             flatModel="
 fclass TypeTests.DivType1
  parameter Real x[1];

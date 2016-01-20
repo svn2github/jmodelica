@@ -271,6 +271,7 @@ model FillExp1
 		TransformCanonicalTestCase(
 			name="Fill_FillExp1",
 			description="Fill operator: one dim",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp1
  constant Real x[1] = 3;
@@ -287,6 +288,7 @@ model FillExp2
 		TransformCanonicalTestCase(
 			name="Fill_FillExp2",
 			description="Fill operator: three dims",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp2
  constant Real x[1,1,1] = 3;
@@ -412,6 +414,7 @@ model FillExp8
 		TransformCanonicalTestCase(
 			name="Fill_FillExp8",
 			description="Fill operator: filling with array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp8
  constant Real x[1,1] = 1;
@@ -472,6 +475,7 @@ model MinExp3
 		TransformCanonicalTestCase(
 			name="MinExp3",
 			description="Min operator: strings",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = \"bar\";
@@ -489,6 +493,7 @@ model MinExp4
 		TransformCanonicalTestCase(
 			name="Min_MinExp4",
 			description="Min operator: booleans",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp4
  constant Boolean x = false;
@@ -565,6 +570,7 @@ model MinExp8
 		TransformCanonicalTestCase(
 			name="Min_MinExp8",
 			description="Reduction-expression with min(): constant expression",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp8
  constant Real x = 1.0;
@@ -687,6 +693,7 @@ model MaxExp3
 		TransformCanonicalTestCase(
 			name="MaxExp3",
 			description="Max operator: strings",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = \"foo\";
@@ -704,6 +711,7 @@ model MaxExp4
 		TransformCanonicalTestCase(
 			name="Max_MaxExp4",
 			description="Max operator: booleans",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp4
  constant Boolean x = true;
@@ -951,6 +959,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Sum_SumExp6",
 			description="",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp6
  structural parameter Integer N = 3 /* 3 */;
@@ -1525,6 +1534,7 @@ model Symmetric1
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric1",
 			description="Scalarization of symmetric operator: Integer[2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric1
  constant Real x[1,1] = 1;
@@ -1543,6 +1553,7 @@ model Symmetric2
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric2",
 			description="Scalarization of symmetric operator: Integer[3,3]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric2
  constant Real x[1,1] = 1;
@@ -1581,6 +1592,7 @@ model Symmetric4
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric4",
 			description="Scalarization of symmetric operator: Integer[2,2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric4
  constant Integer x[1,1] = 1;
@@ -1667,6 +1679,7 @@ model Symmetric8
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric8",
 			description="Scalarization of symmetric operator: access to variable",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric8
  constant Real x[1,1] = 1;
@@ -1915,6 +1928,7 @@ model OuterProduct2
 		TransformCanonicalTestCase(
 			name="OuterProduct_OuterProduct2",
 			description="outerProduct() operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct2
  constant Integer x[1,1] = 4;
@@ -2275,17 +2289,18 @@ model ArrayShortCat2
 		TransformCanonicalTestCase(
 			name="Cat_ArrayShortCat2",
 			description="Shorthand array concatenation operator: different sizes",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[1,3] = 3;
- constant Real x[2,1] = 4;
- constant Real x[2,2] = 5;
- constant Real x[2,3] = 6;
- constant Real x[3,1] = 7;
- constant Real x[3,2] = 8;
- constant Real x[3,3] = 9;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[1,3] = 3.0;
+ constant Real x[2,1] = 4.0;
+ constant Real x[2,2] = 5.0;
+ constant Real x[2,3] = 6.0;
+ constant Real x[3,1] = 7.0;
+ constant Real x[3,2] = 8.0;
+ constant Real x[3,3] = 9.0;
  constant Real a = 1;
  constant Real b[1,1] = 2;
  constant Real b[1,2] = 3;
@@ -2503,6 +2518,7 @@ model Vector2
 		TransformCanonicalTestCase(
 			name="DimensionConvert_Vector2",
 			description="Vector operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector2
  constant Real x[1] = 1;
@@ -2551,6 +2567,7 @@ model Matrix1
 		TransformCanonicalTestCase(
 			name="DimensionConvert_Matrix1",
 			description="Matrix operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Matrix1
  constant Real x[1,1] = 1;
@@ -2797,6 +2814,7 @@ model Linspace9
         TransformCanonicalTestCase(
             name="Linspace9",
             description="Linspace operator: to low value for n in inactive branch",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayBuiltins.Linspace9
  structural parameter Integer n = 1 /* 1 */;
@@ -3015,6 +3033,7 @@ model Diagonal1
 		TransformCanonicalTestCase(
 			name="Diagonal1",
 			description="diagonal() operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Diagonal1
  constant Real x[1,1] = 1;

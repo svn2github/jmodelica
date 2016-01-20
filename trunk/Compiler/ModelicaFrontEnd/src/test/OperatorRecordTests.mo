@@ -3353,6 +3353,7 @@ model RealTypeOpArg1
         TransformCanonicalTestCase(
             name="RealTypeOpArg1",
             description="Constant eval of overloaded operator expression, real type inference",
+            eliminate_alias_variables=false,
             flatModel="
 fclass OperatorRecordTests.Eval.RealTypeOpArg1
  constant Real y1.re = 3.0 \"Real part of complex number\";
@@ -3374,6 +3375,7 @@ model RealTypeOpArg2
         TransformCanonicalTestCase(
             name="RealTypeOpArg2",
             description="Constant eval of overloaded operator expression: array real type inference",
+            eliminate_alias_variables=false,
             flatModel="
 fclass OperatorRecordTests.Eval.RealTypeOpArg2
  constant Real y1[1].re = 3.0 \"Real part of complex number\";

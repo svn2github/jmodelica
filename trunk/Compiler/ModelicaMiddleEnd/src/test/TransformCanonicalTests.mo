@@ -216,13 +216,14 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest7",
 			description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
  structural parameter Integer p1 = 2 /* 2 */;
  structural parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
- constant Real y = 2;
  constant Real x[2] = 2;
+ constant Real y = 2.0;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
@@ -860,11 +861,12 @@ Error in flattened model:
 		TransformCanonicalTestCase(
 			name="AliasTest20",
 			description="Test elimination of alias variables",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest20
- constant Real x1 = 1;
- constant Real x2 = - 1;
- constant Real x3 = 1;
+ Real x1;
+equation
+ x1 = 1;
 end TransformCanonicalTests.AliasTest20;
 ")})));
   end AliasTest20;
@@ -899,11 +901,14 @@ Alias sets:
 		TransformCanonicalTestCase(
 			name="AliasTest22",
 			description="Test elimination of alias variables",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest22
- constant Real x1 = 1;
- constant Real x3 = 1.0;
- constant Real x2 = - 1;
+ Real x1;
+ Real x3;
+equation
+ x1 = 1;
+ x3 = (- x1) ^ 2;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -1024,13 +1029,12 @@ equation
 		TransformCanonicalTestCase(
 			name="AliasTest27",
 			description="Test elimination of alias variables.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest27
- constant Real x1 = 1;
- constant Real x2 = 1;
- constant Real x3 = 1;
- constant Real x4 = 1;
- constant Real x5 = 1;
+ Real x1;
+equation
+ x1 = 1;
 end TransformCanonicalTests.AliasTest27;
 ")})));
 end AliasTest27;
@@ -1190,7 +1194,7 @@ end AliasTest31;
 model AliasTest32
   Integer a = 42;
   Real b;
-  Integer c;
+  Real c;
 equation
   a = b;
   b = c;
@@ -1200,9 +1204,11 @@ equation
 			name="AliasTest32",
 			methodName="aliasDiagnostics",
 			description="Test so that variables with different types aren't alias eliminated",
+            variability_propagation=false,
 			methodResult="
 Alias sets:
-0 variables can be eliminated
+{b, c}
+1 variables can be eliminated
 ")})));
 end AliasTest32;
 
@@ -1679,6 +1685,7 @@ model AliasStateSelect1
 		TransformCanonicalTestCase(
 			name="AliasStateSelect1",
 			description="Test propagation of stateSelect attribute in alias set",
+            eliminate_alias_constants=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
@@ -2404,15 +2411,37 @@ end TransformCanonicalTests.InitialEqTest8;
 		TransformCanonicalTestCase(
 			name="InitialEqTest9",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
+            inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest9
- constant Real x[1] = 1;
- constant Real x[2] = 1;
- constant Real x[3] = 1;
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ ({x[1], x[2], x[3]}, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
+
+public
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest9;
 ")})));
   end InitialEqTest9;
@@ -2484,21 +2513,23 @@ end TransformCanonicalTests.InitialEqTest10;
 			name="InitialEqTest11",
 			inline_functions="none",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest11
  Real x[1];
  Real x[2];
  Real x[3];
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
 initial equation 
  ({x[1], x[2], x[3]}, ) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
+ (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 
 public
  function TransformCanonicalTests.f2
@@ -2531,15 +2562,16 @@ end TransformCanonicalTests.InitialEqTest11;
 		TransformCanonicalTestCase(
 			name="InitialEqTest12",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest12
  Real x[1](start = 3);
  Real x[2](start = 3);
  Real x[3](start = 3);
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
 initial equation 
  x[1] = 3;
  x[2] = 3;
@@ -2548,6 +2580,10 @@ equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
+ y[1] = 1;
+ y[2] = 1;
+ y[3] = 1;
+ y[4] = 1;
 end TransformCanonicalTests.InitialEqTest12;
 ")})));
   end InitialEqTest12;
@@ -6317,6 +6353,7 @@ model StringFuncTest
 		TransformCanonicalTestCase(
 			name="StringFuncTest",
 			description="Test that string parameters and string parameters goes through front-end.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.StringFuncTest
  structural parameter String p1 = \"a\" /* \"a\" */;

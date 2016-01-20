@@ -527,6 +527,7 @@ model ArrayModifications1
 		TransformCanonicalTestCase(
 			name="ArrayModifications1",
 			description="Modifications to arrays: array attributes",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications1
  constant Real a[1](start = 3) = 0;
@@ -600,6 +601,7 @@ model ArrayModifications5
 		TransformCanonicalTestCase(
 			name="ArrayModifications5",
 			description="Modifications to arrays: members that are arrays",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications5
  constant Real b[1].x[1] = 1;
@@ -675,6 +677,7 @@ model ArrayModifications8
 		TransformCanonicalTestCase(
 			name="ArrayModifications8",
 			description="Modifications to arrays: arrays of composites: same name on different levels",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications8
  constant Real x[1].y[1].x[1] = 1;
@@ -710,6 +713,7 @@ model ArrayModifications9
 		TransformCanonicalTestCase(
 			name="ArrayModifications9",
 			description="Modifications to arrays: arrays of composites: same name on different levels, attribute",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications9
  constant Real x[1].y[1].x[1](start = 1) = 0;
@@ -778,6 +782,7 @@ model ArrayModifications11
 		TransformCanonicalTestCase(
 			name="ArrayModifications11",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, literal attribute on outer",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications11
  constant Real x[1].y[1].z[1](start = 1) = 0;
@@ -842,6 +847,7 @@ model ArrayModifications13
 		TransformCanonicalTestCase(
 			name="ArrayModifications13",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute modifier on outer",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications13
  constant Real xa[1].yb[1].zc[1](start = 1.0) = 0;
@@ -1254,6 +1260,7 @@ model ArrayModifications28
 		TransformCanonicalTestCase(
 			name="ArrayModifications28",
 			description="Modifications to arrays: arrays of composites: array expression (with constants) attribute on outer level",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications28
  constant Real x[1].yb[1](start = 10.0 + 2.0 * 30.0) = 1;
@@ -1330,6 +1337,7 @@ model ArrayModifications31
 		TransformCanonicalTestCase(
 			name="ArrayModifications31",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on inner",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications31
  constant Real x[1].y[1].x[1] = 1;
@@ -1360,6 +1368,7 @@ model ArrayModifications32
 		TransformCanonicalTestCase(
 			name="ArrayModifications32",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on inner",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications32
  constant Real x[1].y[1].x[1](start = 1) = 3;
@@ -1390,6 +1399,7 @@ model ArrayModifications33
 		TransformCanonicalTestCase(
 			name="ArrayModifications33",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, binding exp on middle",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications33
  constant Real x[1].y[1].x[1] = 1;
@@ -1420,6 +1430,7 @@ model ArrayModifications34
 		TransformCanonicalTestCase(
 			name="ArrayModifications34",
 			description="Modifications to arrays: arrays of composites: 3 levels deep, attribute on middle",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications34
  constant Real x[1].y[1].x[1](start = 1) = 3;
@@ -1508,6 +1519,7 @@ model ArrayModifications37
 		TransformCanonicalTestCase(
 			name="ArrayModifications37",
 			description="Modifications to arrays: inferring each: 3 levels deep, binding exp on middle",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications37
  constant Real x[1].y[1].x[1] = 1;
@@ -2706,6 +2718,7 @@ model TypeModifications5
 		TransformCanonicalTestCase(
 			name="TypeModifications5",
 			description="Array-valued annotations on types: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications5
  constant ModificationTests.TypeModifications5.T a[1](min = 1) = 4;
@@ -2734,6 +2747,7 @@ model TypeModifications6
 		TransformCanonicalTestCase(
 			name="TypeModifications6",
 			description="Array-valued annotations on types: in array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications6
  constant ModificationTests.TypeModifications6.T z.x[1](min = 0.1) = 1;
@@ -2760,6 +2774,7 @@ model TypeModifications7
 		TransformCanonicalTestCase(
 			name="TypeModifications7",
 			description="Array-valued annotations on types: in record",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications7
  constant ModificationTests.TypeModifications7.T x[1,1](min = 0.1) = 1;
@@ -2790,6 +2805,7 @@ model TypeModifications8
 		TransformCanonicalTestCase(
 			name="TypeModifications8",
 			description="Array-valued annotations on types: array of records",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications8
  constant ModificationTests.TypeModifications8.T y[1].x[1,1](min = 0.1) = 1;
@@ -2878,6 +2894,7 @@ model ModificationLevel1
         FClassMethodTestCase(
             name="ModificationLevel1",
             description="Test calculation of modification levels",
+            eliminate_alias_variables=false,
             methodName="attributeLevels",
             methodResult="
 Variables:
@@ -2924,6 +2941,7 @@ model ModificationLevel2
         FClassMethodTestCase(
             name="ModificationLevel2",
             description="Test calculation of modification levels for simple short class decl",
+            eliminate_alias_variables=false,
             methodName="attributeLevels",
             methodResult="
 Variables:

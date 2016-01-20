@@ -1061,6 +1061,7 @@ model RecordBinding11
 		TransformCanonicalTestCase(
 			name="RecordBinding11",
 			description="Modification of string record member",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordBinding11
  structural parameter String r.s1 = \"foobar\" /* \"foobar\" */;
@@ -1265,6 +1266,7 @@ model RecordBinding19
         TransformCanonicalTestCase(
             name="RecordBinding19",
             description="String parameters in record with continuous part",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding19
  structural parameter String r1.x = \"A\" /* \"A\" */;
@@ -1289,6 +1291,7 @@ model RecordBinding20
         TransformCanonicalTestCase(
             name="RecordBinding20",
             description="Modified string parameters in record with continuous part",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding20
  structural parameter String r1.x = \"B\" /* \"B\" */;
@@ -1417,6 +1420,7 @@ model RecordBinding24
         TransformCanonicalTestCase(
             name="RecordBinding24",
             description="Final parameter record component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
@@ -1582,6 +1586,7 @@ model UnmodifiableComponent1
         TransformCanonicalTestCase(
             name="UnmodifiableComponent1",
             description="Record constructor for record of unmodifiable components",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.UnmodifiableComponent1
  constant Real rec.x1 = -1;
@@ -1698,6 +1703,7 @@ model UnmodifiableComponent5
         TransformCanonicalTestCase(
             name="UnmodifiableComponent5",
             description="Record constructor for record of unmodifiable components",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.UnmodifiableComponent5
  constant Real r1.x = 1;
@@ -3294,6 +3300,7 @@ model RecordScalarize27
         TransformCanonicalTestCase(
             name="RecordScalarize27",
             description="Flattening of record with size determined by parameter component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordScalarize27
  structural parameter Integer r1.n = 0 /* 0 */;
@@ -3322,6 +3329,7 @@ model RecordScalarize28
         TransformCanonicalTestCase(
             name="RecordScalarize28",
             description="Flattening of record with size determined by parameter component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordScalarize28
  constant Real r1.x[1] = 1;
@@ -5951,6 +5959,7 @@ model RecordEval6
 		TransformCanonicalTestCase(
 			name="RecordEval6",
 			description="Test that evaluation before scalarization of record variable works",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordEval6
  structural parameter Integer r.n1 = 2 /* 2 */;
@@ -6106,6 +6115,7 @@ model RecordModification3
         TransformCanonicalTestCase(
             name="RecordModification3",
             description="Modification on record array",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordModification3
  constant Real a1[1].b[1].x[1] = 1;

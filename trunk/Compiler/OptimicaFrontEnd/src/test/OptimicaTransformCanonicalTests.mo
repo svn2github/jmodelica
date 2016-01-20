@@ -334,13 +334,14 @@ constraint
 		TransformCanonicalTestCase(
 			name="TimedArrayTest1",
 			description="Timed array variables: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
+ constant Real x[1] = 1;
  constant Real x[2] = 2;
- constant Real y = 1;
+ constant Real y = 1.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
- constant Real x[1] = 1;
 constraint 
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;

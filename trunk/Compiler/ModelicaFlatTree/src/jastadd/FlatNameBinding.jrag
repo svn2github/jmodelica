@@ -196,7 +196,6 @@ aspect FlatNameBinding {
 		FlatVariableMap map = new FlatVariableMap();
 		map.addVariables(getFVariables());
         map.addVariables(getAliasVariables());
-        map.addVariables(getAliasConstants());
 		return map;
 	}
 	

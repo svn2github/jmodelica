@@ -1138,6 +1138,7 @@ model ConstantLookup18
 		TransformCanonicalTestCase(
 			name="ConstantLookup18",
 			description="Member of constant record, using record constructor, through inheritance and short class decl",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass NameTests.ConstantLookup18
  structural parameter Integer b.n = 3 /* 3 */;
