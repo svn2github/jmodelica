@@ -141,6 +141,13 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         
         retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
         initialize = FALSE; /* The ODE problem has been initialized. */
+        
+        /* Set states to the model */
+        flag = fmi2_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        if (flag != fmi2OK) {
+            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
+            return fmi2Error;
+        }
 
         if (retval < JMI_ODE_OK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
