@@ -250,7 +250,8 @@ model RedeclareTestOx6_Err
             errorMessage="
 1 errors found:
 
-Error at line 241, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 241, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component e:
   Cannot find class or component declaration for z
 ")})));
 end RedeclareTestOx6_Err;
@@ -331,7 +332,8 @@ model RedeclareTestOx7_Err
             errorMessage="
 1 errors found:
 
-Error at line 312, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 312, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component e:
   Cannot find class or component declaration for z
 ")})));
 end RedeclareTestOx7_Err;
@@ -1565,7 +1567,8 @@ model RedeclareTest95_Err
             errorMessage="
 1 errors found:
 
-Error at line 1544, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 1544, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component b:
   Cannot find component declaration for w
 ")})));
 end RedeclareTest95_Err;
@@ -1608,7 +1611,8 @@ model RedeclareTest97_Err
             errorMessage="
 1 errors found:
 
-Error at line 1587, column 62, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 1587, column 62, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component b:
   Cannot find component declaration for w
 ")})));
 end RedeclareTest97_Err;
@@ -3574,7 +3578,8 @@ model RedeclareTest47
             errorMessage="
 1 errors found:
 
-Error at line 3555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 3555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component f:
   Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
 end RedeclareTest47;
@@ -3653,7 +3658,8 @@ model RedeclareTest49
             errorMessage="
 1 errors found:
 
-Error at line 3634, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 3634, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component e:
   Cannot use component y, because it is not present in constraining type of declaration 'replaceable D c constrainedby C'
 ")})));
 end RedeclareTest49;
@@ -3715,10 +3721,12 @@ model RedeclareTest51
             errorMessage="
 3 warnings found:
 
-Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+Warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEd/src/test/RedeclareTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION,
+In component a[:]:
   The parameter a[:].b does not have a binding expression
 
-Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
+Compliance warning at line 3693, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS,
+In component a[:]:
   String parameters are only partially supported
 
 Compliance warning at line 3697, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', PARTIALLY_SUPPORTED_STRING_PARAMETERS:
@@ -6008,7 +6016,8 @@ model ShortClassDeclEqu1
             errorMessage="
 1 errors found:
 
-Error at line 5660, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
+Error at line 5660, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component a:
   Cannot find class or component declaration for y
 ")})));
 end ShortClassDeclEqu1;

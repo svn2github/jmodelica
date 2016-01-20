@@ -116,7 +116,8 @@ model NameTest4_Err
             errorMessage="
 1 errors found:
 
-Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component m:
   Cannot find class declaration for B
 ")})));
   end NameTest4_Err;
@@ -167,7 +168,8 @@ model NameTest55_Err
             errorMessage="
 1 errors found:
 
-Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Cannot find class or component declaration for x
 ")})));
 end NameTest55_Err;
@@ -189,7 +191,8 @@ model NameTest6_Err
             errorMessage="
 1 errors found:
 
-Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Cannot find class or component declaration for y
 ")})));
 end NameTest6_Err;
@@ -211,7 +214,10 @@ model NameTest7_Err
             errorMessage="
 1 errors found:
 
-Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In components:
+    a1
+    a2
   Cannot find class declaration for B
 ")})));
 end NameTest7_Err;
@@ -230,7 +236,8 @@ model NameTest8_Err
             errorMessage="
 1 errors found:
 
-Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component c:
   Cannot find class declaration for D
 ")})));
 end NameTest8_Err;
@@ -399,10 +406,12 @@ end NameTest12_Err;
 Error at line 381, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component bb:
   Cannot find class declaration for C
 
-Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component bb:
   Cannot find component declaration for y
 
 Error at line 389, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2486,7 +2495,8 @@ model ShortClassDeclTest35_Err
             errorMessage="
 2 errors found:
 
-Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component x:
   Cannot find component declaration for q
 
 Error at line 2478, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -3780,7 +3790,8 @@ model DuplicateVariables6
             errorMessage="
 1 errors found:
 
-Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables6;

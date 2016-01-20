@@ -1989,7 +1989,8 @@ model AttributeBindingExpTest5_Err
             errorMessage="
 2 errors found:
 
-Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo',
+In component a:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 
 Error at line 1794, column 15, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':

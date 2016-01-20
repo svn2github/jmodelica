@@ -1870,7 +1870,10 @@ end OperatorRecordTests.OperatorLimitations2;
             errorMessage="
 1 errors found:
 
-Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In components:
+    a
+    b
   Operator classes are only allowed in operator records and packages in operator records
 ")})));
     end OperatorLimitations3;
@@ -2205,7 +2208,8 @@ Error at line 2176, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations13;
@@ -2245,7 +2249,8 @@ Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14;
@@ -2279,7 +2284,8 @@ Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14b;
@@ -2402,7 +2408,8 @@ end OperatorRecordTests.OperatorLimitations15b;
             errorMessage="
 1 errors found:
 
-Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations16;

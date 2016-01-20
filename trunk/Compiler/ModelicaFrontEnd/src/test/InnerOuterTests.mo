@@ -694,7 +694,8 @@ model InnerOuterAccess1
             description="Access to component in outer that only exist in inner",
             errorMessage="
 1 errors found:
-Error at line 590, column 11, in file '...':
+Error at line 590, column 11, in file '...',
+In component a:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 
 ")})));
@@ -732,10 +733,12 @@ model InnerOuterAccess2
             errorMessage="
 2 errors found:
 
-Error at line 622, column 11, in file '...':
+Error at line 622, column 11, in file '...',
+In component b.a:
   Cannot find class or component declaration for y
 
-Error at line 629, column 11, in file '...':
+Error at line 629, column 11, in file '...',
+In component b:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'inner outer R_0 r'
 
 ")})));
@@ -770,7 +773,8 @@ model InnerOuterAccess3
             errorMessage="
 1 errors found:
 
-Error at line 665, column 11, in file '...':
+Error at line 665, column 11, in file '...',
+In component a:
   Cannot use component k in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 ")})));
 end InnerOuterAccess3;
@@ -931,7 +935,8 @@ end InnerOuterTests.NoInner2;
             errorMessage="
 1 errors found:
 
-Warning at line 569, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 569, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo',
+In component b:
   Generated missing inner declaration for 'outer Real r'
 ")})));
 end NoInner2;

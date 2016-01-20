@@ -1530,7 +1530,8 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
+In component d:
   Can not infer array size of the variable a
 ")})));
 end RecordBinding28;
@@ -1559,7 +1560,8 @@ model RecordBinding29
             errorMessage="
 1 errors found:
 
-Error at line 1523, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 1523, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo',
+In component d:
   Circularity in binding expression of parameter: d.b.a = b.a
 ")})));
 end RecordBinding29;

@@ -158,7 +158,8 @@ model ConditionalError1
             errorMessage="
 1 errors found:
 
-Error at line 66, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 66, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ConditionalError1;
@@ -229,7 +230,8 @@ model ConditionalError4
             errorMessage="
 1 errors found:
 
-Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 137, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH,
+In component a:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ConditionalError4;
@@ -1331,7 +1333,8 @@ model SizeInDisabled3
             errorMessage="
 2 errors found:
 
-Warning at line 1275, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Warning at line 1275, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
+In component a:
   Found error in disabled conditional:
   Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* x
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
@@ -1363,7 +1366,8 @@ model SizeInDisabled4
             errorMessage="
 2 errors found:
 
-Error at line 1306, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 1306, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', TYPE_MISMATCH_IN_EXPRESSION,
+In component a:
   Type error in expression: cat(1, {x[1]}, x[2:end] .- 1) .* {x, x}
     type of 'cat(1, {x[1]}, x[2:end] .- 1)' is Real[1]
     type of '{x, x}' is Real[2, 0]

@@ -1046,7 +1046,8 @@ model RecursiveStructure1
             errorMessage="
 1 errors found:
 
-Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a2:
   Recursive class structure
 ")})));
 end RecursiveStructure1;
@@ -1070,7 +1071,8 @@ model RecursiveStructure2
             errorMessage="
 1 errors found:
 
-Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a:
   Recursive class structure
 ")})));
 end RecursiveStructure2;
@@ -1094,7 +1096,8 @@ model RecursiveStructure3
             errorMessage="
 1 errors found:
 
-Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a2:
   Recursive class structure
 ")})));
 end RecursiveStructure3;
@@ -1113,7 +1116,8 @@ model RecursiveStructure4
             errorMessage="
 1 errors found:
 
-Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a:
   Recursive class structure
 ")})));
 end RecursiveStructure4;

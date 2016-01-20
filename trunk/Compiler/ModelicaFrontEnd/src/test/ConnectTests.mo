@@ -86,7 +86,8 @@ end ConnectTests.ConnectTest1;
             errorMessage="
 1 errors found:
 
-Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo',
+In component c2:
   Cannot find class or component declaration for cc
 ")})));
    end ConnectTest2_Err;

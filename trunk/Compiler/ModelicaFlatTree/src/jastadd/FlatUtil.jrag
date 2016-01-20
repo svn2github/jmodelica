@@ -308,11 +308,12 @@ aspect FlatNames {
         return op + '(' + name + (index > 1 ? "," + index : "") + ')';
     }
 
-    syn String FQName.scalarName() = name();
-    eq FQNameFull.scalarName() {
+    syn String FQName.scalarName() = scalarName(true);
+    syn String FQName.scalarName(boolean eval) = name();
+    eq FQNameFull.scalarName(boolean eval) {
         boolean scalar = scalarized;
         scalarized = true;
-        String res = prefixName(0, null, true, -1);
+        String res = prefixName(0, null, eval, -1);
         scalarized = scalar;
         return res;
     }

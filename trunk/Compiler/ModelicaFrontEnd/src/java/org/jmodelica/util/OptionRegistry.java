@@ -388,7 +388,7 @@ abstract public class OptionRegistry {
             ("component_names_in_errors", 
              OptionType.compiler, 
              Category.user,
-             false, 
+             true, 
              "If enabled, the compiler will include the name of the component where the error was found, if applicable."),
         FILTER_WARNINGS
             ("filter_warnings",

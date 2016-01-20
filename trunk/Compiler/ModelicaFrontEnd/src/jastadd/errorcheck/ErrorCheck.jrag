@@ -550,13 +550,23 @@ aspect ErrorCheck {
 
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
+    eq InstComponentDecl.getChild().errorEnclosingComponent() {
+        if (isRedeclared() || getComponentDecl().hasRedeclare()) {
+            return errorEnclosingComponent();
+        } else {
+            return containingInstComponent();
+        }
+    }
+    eq InstComponentDecl.getFAbstractEquation().errorEnclosingComponent() = this;
+    eq InstAssignable.getBindingFExp().errorEnclosingComponent() = myInstValueMod().errorEnclosingComponent();
+    
     eq FlatRoot.getChild().errorEnclosingComponent() = null;
     eq InstRoot.getChild().errorEnclosingComponent() = null;
     eq SourceRoot.getChild().errorEnclosingComponent() = null;
 
     syn String ASTNode.errorComponentName() {
         InstComponentDecl parent = errorEnclosingComponent();
-        return parent == null ? null : parent.qualifiedName();
+        return parent == null ? null : parent.getFQName().scalarName(false);
     }
 
 }
