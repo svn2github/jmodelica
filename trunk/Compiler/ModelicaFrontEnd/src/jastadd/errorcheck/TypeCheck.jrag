@@ -1137,17 +1137,11 @@ aspect FlatTypeCheck {
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
   eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";
-  
-  protected String InstFunctionArgument.argumentDesc() { return null; }
-  
-  protected String InstPositionalArgument.argumentDesc() {
-	  return "positional argument " + (getPos() + 1);
-  }
-  
-  protected String InstNamedArgument.argumentDesc() {
-	  return "named argument " + getName().prettyPrint("");
-  }
-  
+
+    syn String InstFunctionArgument.argumentDesc() = null;
+    eq InstPositionalArgument.argumentDesc() = "positional argument " + (getPos() + 1);
+    eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
+
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
 //	  if (getTopInstAccess() == this && !type().isUnknown()) {
 		  // TODO: if this is a slice, check that all branches are of equal size

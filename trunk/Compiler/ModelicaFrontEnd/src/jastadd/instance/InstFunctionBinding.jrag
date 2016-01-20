@@ -83,14 +83,13 @@ aspect InstFunctionBinding {
 		}
 		return -1;
 	}
-	
-	/**
-	 * Check if the argument was explicitly given in the call.
-	 */
-	syn boolean InstFunctionArgument.isGiven() = false;
-	eq InstPositionalArgument.isGiven() = true;
-	eq InstNamedArgument.isGiven()      = true;
-	
+
+    /**
+     * Check if the argument was explicitly given in the call.
+     */
+    syn boolean InstFunctionArgument.isGiven() = false;
+    eq InstGivenArgument.isGiven()      = true;
+
 	/**
 	 * The input component this argument is bound to.
 	 */
@@ -808,14 +807,10 @@ aspect InstFunctionBinding {
 	public int InstFunctionArgument.findVectorizationNdims(int dims) {
 		return dims;
 	}
-	
-	public int InstPositionalArgument.findVectorizationNdims(int dims) {
-		return combineVectorizationSize(dims, getFExp().ndims(), getBoundInput().ndims());
-	}
-	
-	public int InstNamedArgument.findVectorizationNdims(int dims) {
-		return combineVectorizationSize(dims, getFExp().ndims(), getBoundInput().ndims());
-	}
+
+    public int InstGivenArgument.findVectorizationNdims(int dims) {
+        return combineVectorizationSize(dims, getFExp().ndims(), getBoundInput().ndims());
+    }
 
 	protected int InstFunctionArgument.combineVectorizationSize(int pre, int exp, int var) {
 		int res = exp - var;
@@ -836,17 +831,15 @@ aspect InstFunctionBinding {
 	eq FDelayExp.getChild().inVectorizedCall()              = isArray();
 	eq FSpatialDistExp.getChild().inVectorizedCall()        = isArray();
 	eq FHomotopyExp.getChild().inVectorizedCall()           = isArray();
-	
-	/**
-	 * Check if this argument is vectorized.
-	 */
-	syn lazy boolean InstFunctionArgument.isVectorized() = false;
-	eq InstPositionalArgument.isVectorized()             = 
-		getFExp().ndims() > getBoundInput().ndims() && inVectorizedCall();
-	eq InstNamedArgument.isVectorized()                  = 
-		getFExp().ndims() > getBoundInput().ndims() && inVectorizedCall();
-	
-	
+
+    /**
+     * Check if this argument is vectorized.
+     */
+    syn lazy boolean InstFunctionArgument.isVectorized() = false;
+    eq InstGivenArgument.isVectorized()                  = 
+        getFExp().ndims() > getBoundInput().ndims() && inVectorizedCall();
+
+
 	/**
 	 * Replace initial node for construct "array(...)" with permanent one.
 	 */

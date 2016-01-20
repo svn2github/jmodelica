@@ -244,15 +244,14 @@ aspect Arrays {
 	eq InstFunctionCall.ndims()       = hasOutputs() ? expOutput().ndims() : -1;
     eq InstPartialFunctionCall.ndims() = hasOutputs() ? 0 : -1;
 	eq InstVectorFunctionCall.ndims() = getDims();
-	
-	/**
-	 * Get array dimensions of function argument.
-	 */
-	syn int InstFunctionArgument.ndims() = -1;
-	eq InstDefaultArgument.ndims()       = getFExp().ndims();
-	eq InstPositionalArgument.ndims()    = getFExp().ndims();
-	eq InstNamedArgument.ndims()         = getFExp().ndims();
-	
+
+    /**
+     * Get array dimensions of function argument.
+     */
+    syn int InstFunctionArgument.ndims() = -1;
+    eq InstDefaultArgument.ndims()       = getFExp().ndims();
+    eq InstGivenArgument.ndims()         = getFExp().ndims();
+
 	eq FArgumentExp.ndims() = copiedFExp().ndims();
 
     eq FBinExp.ndims()   = overloadNdims();
@@ -1117,15 +1116,14 @@ aspect Arrays {
 	eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
 	eq FDelayExp.getChild().vectorizedSize()             = vectorizedSize();
 	eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
-	
-	/**
-	 * Get array sizes of function argument.
-	 */
-	syn Size InstFunctionArgument.size() = null;
-	eq InstDefaultArgument.size()        = getFExp().size();
-	eq InstPositionalArgument.size()     = getFExp().size();
-	eq InstNamedArgument.size()          = getFExp().size();
-    
+
+    /**
+     * Get array sizes of function argument.
+     */
+    syn Size InstFunctionArgument.size() = null;
+    eq InstDefaultArgument.size()        = getFExp().size();
+    eq InstGivenArgument.size()          = getFExp().size();
+
     eq FArgumentExp.size() = copiedFExp().size();
 	
 	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
@@ -1410,11 +1408,11 @@ aspect Arrays {
     }
 
     public InstPositionalArgument InstPositionalArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
-        return new InstPositionalArgument(getPos(), getFExp().createSizeFExp(varMap));
+        return new InstPositionalArgument(getFExp().createSizeFExp(varMap), getPos());
     }
 
     public InstNamedArgument InstNamedArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
-        return new InstNamedArgument(getName().fullCopy(), getFExp().createSizeFExp(varMap));
+        return new InstNamedArgument(getFExp().createSizeFExp(varMap), getName().fullCopy());
     }
 
     /**

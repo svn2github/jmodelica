@@ -1538,7 +1538,7 @@ aspect ConstantEvaluation {
             InstRecordConstructor res = new InstRecordConstructor(rec, new List());
             int i = 1;
             for (CValue val : values)
-                res.addArg(new InstPositionalArgument(i++, val.buildInstLiteral()));
+                res.addArg(new InstPositionalArgument(val.buildInstLiteral(), i++));
             return res;
         }
 
@@ -4741,12 +4741,11 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}
-	
-	syn boolean InstFunctionArgument.isCircular() = false;
-	eq InstPositionalArgument.isCircular() = getFExp().isCircular();
-	eq InstNamedArgument.isCircular()      = getFExp().isCircular();
-	eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
-	
+
+    syn boolean InstFunctionArgument.isCircular() = false;
+    eq InstGivenArgument.isCircular()      = getFExp().isCircular();
+    eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
+
 
 	syn lazy boolean FAbstractVariable.isCircular() circular [true] = false;
 	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());

@@ -3082,7 +3082,7 @@ aspect InstantiatedExpressions {
 	}
 	
 	public InstNamedArgument NamedArgument.instantiate() {
-		return copyLocationTo(new InstNamedArgument(getName().instantiate(), getExp().instantiate()));
+		return copyLocationTo(new InstNamedArgument(getExp().instantiate(), getName().instantiate()));
 	}
 	
 	protected FAbstractFunctionCall FunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
@@ -3099,7 +3099,7 @@ aspect InstantiatedExpressions {
 		if (hasFunctionArguments()) {
 			int i = 0;
 			for (Exp arg : getFunctionArguments().getExpList()) {
-				InstPositionalArgument iarg = new InstPositionalArgument(i++, arg.instantiate());
+				InstPositionalArgument iarg = new InstPositionalArgument(arg.instantiate(), i++);
 				iarg.setLocation(arg);
 				args.add(iarg);
 			}

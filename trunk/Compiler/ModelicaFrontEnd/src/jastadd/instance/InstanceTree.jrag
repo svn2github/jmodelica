@@ -1393,7 +1393,7 @@ aspect InstanceTreeConstruction {
 	syn lazy FFunctionCallStmt InstExternalObject.getDestructorCall() {
 		InstAccess name = getClassName().copyAndAppend("destructor");
 		List<InstFunctionArgument> args = new List<InstFunctionArgument>();
-		args.add(new InstPositionalArgument(0, createUseExp()));
+		args.add(new InstPositionalArgument(createUseExp(), 0));
 		InstFunctionCall ifc = new InstFunctionCall(name, args);
 		ifc.generated = true;
 		FFunctionCallStmt stmt = new FFunctionCallStmt(new List(), ifc);
