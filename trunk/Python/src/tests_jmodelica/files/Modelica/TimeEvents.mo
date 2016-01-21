@@ -100,6 +100,15 @@ package TimeEvents
         end when;
     end Advanced4;
     
+    model Advanced5
+        Real x(start=1.1);
+    equation
+        when (time>=0.5) then
+            reinit(x, 5);
+            end when;
+        der(x) = -0.5*x;
+    end Advanced5;
+    
     model Mixed1
         Real x(start=0.5);
         parameter Real p = 2;
