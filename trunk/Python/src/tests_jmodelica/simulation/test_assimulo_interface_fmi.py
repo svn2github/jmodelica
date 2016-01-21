@@ -738,49 +738,6 @@ class Test_Singular_Systems:
         nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
         nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
 
-class Test_FMI_ODE_CS_2:
-    @classmethod
-    def setUpClass(cls):
-        """
-        Compile the test model.
-        """
-        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
-        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
-        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
-
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
-        
-    @testattr(stddist = True)
-    def test_updated_values_in_result(self):
-        model = load_fmu("LinearTest_Linear1.fmu")
-        opts = model.simulate_options()
-        
-        res = model.simulate(final_time=1,options=opts)
-        
-        for i in range(len(res["der(x)"])):
-            assert res["der(x)"][i] == 0.0
-
-class Test_FMI_ODE_CS:
-    @classmethod
-    def setUpClass(cls):
-        """
-        Compile the test model.
-        """
-        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
-        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
-        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
-
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs")
-        
-    @testattr(stddist = True)
-    def test_updated_values_in_result(self):
-        model = load_fmu("LinearTest_Linear1.fmu")
-        opts = model.simulate_options()
-        
-        res = model.simulate(final_time=1,options=opts)
-        
-        for i in range(len(res["der(x)"])):
-            assert res["der(x)"][i] == 0.0
 
 class Test_FMI_ODE:
     """

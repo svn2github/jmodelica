@@ -104,20 +104,13 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             fflush(stdout);*/
     
             retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
+            if (retval==JMI_ODE_OK && time_event == time_final) {
+                break;
+            }
+            
             if (retval<JMI_ODE_OK){
                 jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
                 return fmiError;
-            }
-            
-            /* Set states to the model */
-            flag = fmi1_me_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
-            if (flag != fmiOK) {
-                jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
-                return fmiError;
-            }
-        
-            if (retval==JMI_ODE_OK && time_event == time_final) {
-                break;
             }
             
             flag = fmi1_me_event_update(ode_problem ->fmix_me, fmiFalse, &(fmi1_cs->event_info));
