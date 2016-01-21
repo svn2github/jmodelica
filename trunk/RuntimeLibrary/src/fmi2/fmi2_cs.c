@@ -75,7 +75,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         return fmi2Error;
 	}
 
-    if (((fmi2_me_t*)c)->stopTime < time_final) {
+    if (((fmi2_me_t*)c)->stopTime < time_final-JMI_CS_SMALL*time_final) {
         jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot take a step past the <stop_time: %g>.", ((fmi2_me_t*)c)->stopTime);
         return fmi2Error;
     }
