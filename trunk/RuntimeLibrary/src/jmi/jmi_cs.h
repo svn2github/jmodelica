@@ -25,6 +25,7 @@
 #include "jmi_me.h"
 
 #define JMI_CS_MAX_INPUT_DERIVATIVES 3
+#define JMI_CS_SMALL 1e-14
 
 struct jmi_cs_input_t {
     jmi_value_reference vr;         /**< \brief Valuereference of the input, note only reals */

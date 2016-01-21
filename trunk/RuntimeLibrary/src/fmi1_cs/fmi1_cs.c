@@ -98,11 +98,8 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         }
     } else {
         retval = JMI_ODE_EVENT;
-        while (retval == JMI_ODE_EVENT && ode_problem->time < time_final){
-            
-            /*printf("time = %f", ode_problem->time);
-            fflush(stdout);*/
-    
+        while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final){
+
             retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
             if (retval<JMI_ODE_OK){
                 jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");

@@ -96,14 +96,14 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         }
     }
     
-    while (retval == JMI_ODE_EVENT && ode_problem->time < time_final) {
+    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final) {
 
         while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
             flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));
             initialize = TRUE; /* Event detected, need to initialize the ODE problem. */
 
             if (flag != fmi2OK) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
+                jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
                 return fmi2Error;
             }
         }
