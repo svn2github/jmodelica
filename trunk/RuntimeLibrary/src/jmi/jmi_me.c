@@ -910,6 +910,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         case jmi_calculate_externally_jacobian_calculation_mode:
             bsop->jacobian_calculation_mode = jmi_calculate_externally_jacobian_calculation_mode;
+            break;
+        case jmi_compression_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_compression_jacobian_calculation_mode;
+            break;
         default:
             bsop->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode;
             break;

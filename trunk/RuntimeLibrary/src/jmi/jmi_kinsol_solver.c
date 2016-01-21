@@ -524,8 +524,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             }
     }
 
-    if (solver->has_compression_setup_flag && block->options->experimental_mode 
-        & jmi_block_solver_experimental_mode_jacobian_compression && block->Jacobian) {
+    if (solver->has_compression_setup_flag && block->options->jacobian_calculation_mode == jmi_compression_jacobian_calculation_mode && block->Jacobian) {
             /* Use (almost) standard finite differences */
             realtype inc, inc_inv, ujsaved, ujscale, sign;
             realtype *tmp2_data, *u_data, *uscale_data;
@@ -1213,7 +1212,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
 
-    if(!solver->has_compression_setup_flag && block->Jacobian && block->options->experimental_mode & jmi_block_solver_experimental_mode_jacobian_compression) {
+    if(!solver->has_compression_setup_flag && block->Jacobian && block->options->jacobian_calculation_mode == jmi_compression_jacobian_calculation_mode) {
         int ret, N=block->n;
         ret = block->Jacobian(block->problem_data, 0, solver->J_Dependency->cols, JMI_BLOCK_GET_DEPENDENCY_MATRIX);
         if(ret==0) {
@@ -1668,7 +1667,7 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     ret = kin_dF(N, solver->kin_y, kin_mem->kin_fval, solver->J, block, kin_mem->kin_vtemp1, kin_mem->kin_vtemp2);
     solver->updated_jacobian_flag = 1; /* The Jacobian is current */
     
-    if(ret != 0 && solver->has_compression_setup_flag && block->options->experimental_mode & jmi_block_solver_experimental_mode_jacobian_compression) {
+    if(ret != 0 && solver->has_compression_setup_flag && block->options->jacobian_calculation_mode == jmi_compression_jacobian_calculation_mode) {
         solver->has_compression_setup_flag = FALSE;
         jmi_log_node(block->log, logWarning, "CompressedJacobianEvaluation", "Failed to evaluate Jacobian using compression. Will try full finite differences.");
         /* Try if it helps with full finite differences with possibility to step in other direction */

@@ -113,7 +113,8 @@ typedef enum jmi_block_solver_jacobian_calculation_mode_t {
     jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode = 5,
     jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode = 6,
     jmi_central_diffs_at_small_res_jacobian_calculation_mode = 7,
-    jmi_calculate_externally_jacobian_calculation_mode = 8
+    jmi_calculate_externally_jacobian_calculation_mode = 8,
+    jmi_compression_jacobian_calculation_mode = 9
 } jmi_block_solver_jacobian_calculation_mode_t;
 
 typedef enum jmi_block_solver_active_bounds_mode_t {
@@ -132,7 +133,6 @@ typedef enum jmi_block_solver_experimental_mode_t {
     jmi_block_solver_experimental_active_bounds_threshold = 32,
     jmi_block_solver_experimental_Broyden_with_zeros = 64,
     jmi_block_solver_experimental_nom_in_active_bounds = 128,
-    jmi_block_solver_experimental_mode_jacobian_compression = 256,
     jmi_block_solver_experimental_Sparse_Broyden = 2048,
     jmi_block_solver_experimental_use_modifiedBFGS = 4096
 } jmi_block_solver_experimental_mode_t;

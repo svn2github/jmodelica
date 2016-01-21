@@ -665,8 +665,8 @@ abstract public class OptionRegistry {
              Category.user,
              0,
              "Mode for how to calculate the Jacobian: " +
-             "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally.",
-             0, 8),
+             "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally, 9 - Jacobian compresssion.",
+             0, 9),
         NLE_ACTIVE_BOUNDS_MODE
             ("nle_active_bounds_mode",
              OptionType.runtime, 
