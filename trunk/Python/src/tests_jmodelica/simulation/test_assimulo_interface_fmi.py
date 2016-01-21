@@ -747,8 +747,10 @@ class Test_FMI_ODE_CS_2:
         file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
         file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+        file_name_time_event = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
 
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
+        _t1_name = compile_fmu("TimeEvents.Basic5", file_name_time_event, version=2.0, target="cs")
         
     @testattr(stddist = True)
     def test_updated_values_in_result(self):
@@ -759,6 +761,15 @@ class Test_FMI_ODE_CS_2:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+    
+    @testattr(stddist = True)
+    def test_time_event_basic_5(self):
+        model = load_fmu("TimeEvents_Basic5.fmu")
+        opts = model.simulate_options()
+        
+        res = model.simulate(final_time=1,options=opts)
+        
+        assert res["der(x)"][-1] == -1.0
 
 class Test_FMI_ODE_CS:
     @classmethod

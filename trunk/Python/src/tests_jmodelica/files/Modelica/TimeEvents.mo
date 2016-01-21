@@ -42,6 +42,16 @@ package TimeEvents
         der(x) = -1;
     end Basic4;
     
+    model Basic5
+        Real x(start=1.1); 
+    equation
+        if (time < 0.5) then
+            der(x) = -0.5*x;
+        else
+            der(x) = -1;
+        end if;
+    end Basic5;
+    
     model Advanced1
         Real x(start = 1);
         Integer i(start=0);
