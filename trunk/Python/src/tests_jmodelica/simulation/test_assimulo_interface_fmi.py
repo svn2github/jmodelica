@@ -751,6 +751,7 @@ class Test_FMI_ODE_CS_2:
 
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
         _t1_name = compile_fmu("TimeEvents.Basic5", file_name_time_event, version=2.0, target="cs")
+        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, version=2.0, target="cs")
         
     @testattr(stddist = True)
     def test_updated_values_in_result(self):
@@ -770,6 +771,15 @@ class Test_FMI_ODE_CS_2:
         res = model.simulate(final_time=1,options=opts)
         
         assert res["der(x)"][-1] == -1.0
+        
+    @testattr(stddist = True)
+    def test_time_event_at_do_step_end(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["ncp"] = 100
+        res = model.simulate(final_time=1,options=opts)
+        
+        nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
 
 class Test_FMI_ODE_CS:
     @classmethod
