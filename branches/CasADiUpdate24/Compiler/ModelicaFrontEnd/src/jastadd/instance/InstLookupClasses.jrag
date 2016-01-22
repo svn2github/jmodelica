@@ -312,9 +312,9 @@ aspect InstLookupClasses {
         if (!res.successful())
             return null;
         InstClassDecl icd = res.target();
-        if (!icd.hasInstConstraining() || !icd.isReplaceable())
+        if (!icd.hasInstConstrainingClass() || !icd.isReplaceable())
             return icd;
-        return (InstClassDecl) icd.getInstConstraining().getInstNode();
+        return (InstClassDecl) icd.getInstConstrainingClass().getInstNode();
     }
 
 

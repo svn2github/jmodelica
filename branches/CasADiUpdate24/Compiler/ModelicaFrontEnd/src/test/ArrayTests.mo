@@ -256,6 +256,7 @@ end ArrayTests.General.ArrayTest8;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest9",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest9
  structural parameter Integer nn.n2 = 2 /* 2 */;
@@ -343,6 +344,7 @@ end ArrayTests.General.ArrayTest10;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest11",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest11
  constant Real m1[1].x[1] = 1;
@@ -425,6 +427,7 @@ end ArrayTests.General.ArrayTest13;
 		TransformCanonicalTestCase(
 			name="General_ArrayTest14",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest14
  constant Real n.m[1,1].x[1] = 1;
@@ -447,7 +450,7 @@ model ArrayTest15_Err
             errorMessage="
 1 errors found:
 
-Error at line 441, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 441, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, 1]
 ")})));
 end ArrayTest15_Err;
@@ -483,6 +486,7 @@ model ArrayTest17
 		TransformCanonicalTestCase(
 			name="General_ArrayTest17",
 			description="Test scalarization of variables",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest17
@@ -509,12 +513,13 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest21",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest21
  constant Real x[1] = 0;
  constant Real x[2] = 0;
- constant Real y[1] = 0;
- constant Real y[2] = 0;
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 0.0;
 end ArrayTests.General.ArrayTest21;
 ")})));
 end ArrayTest21;
@@ -530,12 +535,13 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest22",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest22
  constant Real x[1] = 1;
  constant Real x[2] = 1;
- constant Real y[1] = 1;
- constant Real y[2] = 1;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 1.0;
 end ArrayTests.General.ArrayTest22;
 			
 ")})));
@@ -552,16 +558,17 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest23",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest23
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 1;
  constant Real x[2,1] = 1;
  constant Real x[2,2] = 1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 1;
- constant Real y[2,1] = 1;
- constant Real y[2,2] = 1;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 1.0;
+ constant Real y[2,1] = 1.0;
+ constant Real y[2,2] = 1.0;
 end ArrayTests.General.ArrayTest23;
 			
 ")})));
@@ -581,6 +588,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest24",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest24
  constant Real x[1,1] = 1;
@@ -611,6 +619,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest25",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest25
  constant Real x[1,1] = 1;
@@ -665,6 +674,7 @@ equation
 		TransformCanonicalTestCase(
 			name="General_ArrayTest26",
 			description="Flattening of arrays.",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
 			flatModel="
@@ -727,7 +737,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 719, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute start for the variable x, expected size is [3] and size of start expression is [2]
 ")})));
 end ArrayTest27_Err;
@@ -941,6 +951,7 @@ model ArrayTest35
 		TransformCanonicalTestCase(
 			name="General_ArrayTest35",
 			description="Test adding array sizes that are present as expressions in tree",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
  constant Real z[1] = 1;
@@ -1141,6 +1152,7 @@ model ArrayTest43
         TransformCanonicalTestCase(
             name="General_ArrayTest43",
             description="Splitting expression with access in array subscripts in part of dotted access",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.General.ArrayTest43
  structural parameter Integer n = 3 /* 3 */;
@@ -1148,10 +1160,16 @@ fclass ArrayTests.General.ArrayTest43
  Real a[2].x;
  Real a[3].x;
  structural parameter Integer b.m = 3 /* 3 */;
+ Real b.y[1];
+ Real b.y[2];
+ Real b.y[3];
 equation
- a[1].x = 1 ./ time;
- a[2].x = 2 ./ time;
- a[3].x = 3 ./ time;
+ a[1].x = b.y[1];
+ a[2].x = b.y[2];
+ a[3].x = b.y[3];
+ b.y[1] = 1 ./ time;
+ b.y[2] = 2 ./ time;
+ b.y[3] = 3 ./ time;
 end ArrayTests.General.ArrayTest43;
 ")})));
 end ArrayTest43;
@@ -1275,6 +1293,7 @@ model UnknownSize2
 		TransformCanonicalTestCase(
 			name="UnknownSize_UnknownSize2",
 			description="Using unknown array sizes: binding exp through modification on array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize2
  constant Real x[1].y[1].z[1] = 1;
@@ -1316,10 +1335,10 @@ model UnknownSize4
             errorMessage="
 2 errors found:
 
-Error at line 1306, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1306, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
-Error at line 1307, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1307, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [1, :] and size of binding expression is [2]
 ")})));
 end UnknownSize4;
@@ -1335,7 +1354,7 @@ model UnknownSize5
             errorMessage="
 1 errors found:
 
-Error at line 1326, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1326, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [1, 2] and size of binding expression is [2, 2]
 ")})));
 end UnknownSize5;
@@ -1353,11 +1372,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
-Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  The array sizes of right and left hand side of equation are not compatible
+Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [:, :], and size of right-hand side is [2, 2]
 ")})));
 end UnknownSize6;
 
@@ -1476,6 +1495,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Subscripts_SubscriptExpression6",
 			description="Type checking array subscripts: simulating [4,4] with [16]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression6
  constant Real x[1] = 3;
@@ -1510,6 +1530,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Subscripts_SubscriptExpression7",
 			description="Type checking array subscripts: using min in subscripts",
+            eliminate_alias_variables=false,
 			automatic_add_initial_equations=false,
 			enable_structural_diagnosis=false,
 			flatModel="
@@ -1815,6 +1836,7 @@ model MixedTypes1
         TransformCanonicalTestCase(
             name="Subscripts_MixedTypes1",
             description="Test subscripting with bools.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Subscripts.MixedTypes1
  structural parameter Integer maxQuality = 1 /* 1 */;
@@ -1997,7 +2019,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2006, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2006, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2018,7 +2040,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2027, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2027, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2039,7 +2061,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2048, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2048, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2060,7 +2082,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2069, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2069, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2081,7 +2103,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2090, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2090, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2102,7 +2124,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2111, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2111, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2123,7 +2145,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2132, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2132, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2144,7 +2166,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2153, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2153, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2165,7 +2187,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2174, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2174, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y + {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2413,7 +2435,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2422, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2422, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2434,7 +2456,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2443, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2443, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2455,7 +2477,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2464, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2464, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .+ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2559,7 +2581,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2568, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2568, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2]
     type of '10' is Integer
@@ -2580,7 +2602,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2589, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2589, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2, 2]
     type of '10' is Integer
@@ -2601,7 +2623,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2610, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2610, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - 10
     type of 'y' is Real[2, 2, 2]
     type of '10' is Integer
@@ -2622,7 +2644,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2631, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2631, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -2643,7 +2665,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2652, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2652, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2664,7 +2686,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2673, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2673, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -2685,7 +2707,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2694, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2694, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2706,7 +2728,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2715, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2715, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -2727,7 +2749,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2736, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2736, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y - {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -2975,7 +2997,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2984, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 2984, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -2996,7 +3018,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3005, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3005, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3017,7 +3039,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3026, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3026, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .- {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3360,7 +3382,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3369, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3369, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}
     type of 'y' is Real[2, 2, 2]
     type of '{{{10, 20}, {30, 40}}, {{50, 60}, {70, 80}}}' is Integer[2, 2, 2]
@@ -3381,7 +3403,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3390, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3390, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3402,7 +3424,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3411, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3411, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3423,7 +3445,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3432, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3432, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}, {50, 60}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}, {50, 60}}' is Integer[3, 2]
@@ -3444,7 +3466,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3453, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3453, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3465,7 +3487,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3474, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3474, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20, 30}, {40, 50, 60}}
     type of 'y' is Real[2, 3]
     type of '{{10, 20, 30}, {40, 50, 60}}' is Integer[2, 3]
@@ -3486,7 +3508,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3495, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3495, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {10, 20, 30}
     type of 'y' is Real[2, 2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3507,7 +3529,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3516, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3516, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}, {30, 40}}
     type of 'y' is Real[3]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3528,7 +3550,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3537, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3537, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y * {{10, 20}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}}' is Integer[1, 2]
@@ -3776,7 +3798,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3785, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3785, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -3797,7 +3819,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3806, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3806, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3818,7 +3840,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3827, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3827, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .* {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -3843,7 +3865,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3852, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3852, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {10, 20}
     type of 'y' is Real[2]
     type of '{10, 20}' is Integer[2]
@@ -3864,7 +3886,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3873, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3873, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real[2, 2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -3964,7 +3986,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3973, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3973, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {10, 20}
     type of 'y' is Real
     type of '{10, 20}' is Integer[2]
@@ -3985,7 +4007,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 3994, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 3994, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {{10, 20}, {30, 40}}
     type of 'y' is Real
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4006,7 +4028,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4015, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4015, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y / {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4025,6 +4047,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv1",
 			description="Scalarization of element-wise division: Real[2] ./ Integer[2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv1
  constant Real x[1] = 0.1;
@@ -4046,6 +4069,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv2",
 			description="Scalarization of element-wise division: Real[2,2] ./ Integer[2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv2
  constant Real x[1,1] = 0.1;
@@ -4071,6 +4095,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Div_ArrayDotDiv3",
 			description="Scalarization of element-wise division: Real[2,2,2] ./ Integer[2,2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Div.ArrayDotDiv3
  constant Real x[1,1,1] = 0.1;
@@ -4254,7 +4279,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4263, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4263, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4275,7 +4300,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4284, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4284, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4296,7 +4321,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4305, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4305, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y ./ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4476,6 +4501,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow7",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow7
  constant Real x[1] = 1.0;
@@ -4496,6 +4522,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow8",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow8
  constant Real x[1,1] = 1.0;
@@ -4518,6 +4545,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayDotPow9",
 			description="Scalarization of element-wise exponentiation:",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayDotPow9
  constant Real x[1,1,1] = 1.0;
@@ -4547,7 +4575,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4556, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4556, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {10, 20, 30}
     type of 'y' is Real[2]
     type of '{10, 20, 30}' is Integer[3]
@@ -4568,7 +4596,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {{10, 20}, {30, 40}}
     type of 'y' is Real[2]
     type of '{{10, 20}, {30, 40}}' is Integer[2, 2]
@@ -4589,7 +4617,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 4598, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4598, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: y .^ {\"1\", \"2\"}
     type of 'y' is Real[2]
     type of '{\"1\", \"2\"}' is String[2]
@@ -4605,6 +4633,7 @@ model ArrayPow1
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayPow1",
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 0",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow1
  constant Real x[1,1] = 1;
@@ -4728,6 +4757,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Algebra_Pow_ArrayPow7",
 			description="Scalarization of element-wise exponentiation:component Real[2,2] ^ 0",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow7
  constant Real x[1,1] = 1;
@@ -4753,7 +4783,7 @@ model ArrayPow8
             errorMessage="
 1 errors found:
 
-Error at line 4762, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4762, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ -1
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '-1' is Integer
@@ -4771,7 +4801,7 @@ model ArrayPow9
             errorMessage="
 1 errors found:
 
-Error at line 4780, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4780, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ 1.0
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '1.0' is Real
@@ -4789,7 +4819,7 @@ model ArrayPow10
             errorMessage="
 1 errors found:
 
-Error at line 4798, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4798, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ {{1, 2}, {3, 4}}
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
@@ -4807,7 +4837,7 @@ model ArrayPow11
             errorMessage="
 1 errors found:
 
-Error at line 4816, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4816, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}, {5, 6}} ^ 2
     type of '{{1, 2}, {3, 4}, {5, 6}}' is Integer[3, 2]
     type of '2' is Integer
@@ -4826,7 +4856,7 @@ model ArrayPow12
             errorMessage="
 1 errors found:
 
-Error at line 4834, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4834, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4865,7 +4895,7 @@ model ArrayPow14
             errorMessage="
 1 errors found:
 
-Error at line 4873, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4873, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {{1, 2}, {3, 4}} ^ y
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     type of 'y' is Integer
@@ -4898,7 +4928,7 @@ model ArrayPow16
             errorMessage="
 1 errors found:
 
-Error at line 4907, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 4907, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} ^ 2
     type of '{1}' is Integer[1]
     type of '2' is Integer
@@ -4972,6 +5002,7 @@ model ArrayNeg3
 		TransformCanonicalTestCase(
 			name="Algebra_Neg_ArrayNeg3",
 			description="Scalarization of negation: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Neg.ArrayNeg3
  constant Integer x[1] = -1;
@@ -4995,7 +5026,7 @@ model ArrayNeg4
             errorMessage="
 1 errors found:
 
-Error at line 5004, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5004, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: - {true, false}
     type of '{true, false}' is Boolean[2]
 ")})));
@@ -5013,7 +5044,7 @@ model ArrayNeg5
             errorMessage="
 1 errors found:
 
-Error at line 5021, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5021, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: - y
     type of 'y' is Boolean[2]
 ")})));
@@ -5052,6 +5083,7 @@ model ArrayAnd2
 		TransformCanonicalTestCase(
 			name="Logical_And_ArrayAnd2",
 			description="Scalarization of logical and: arrays of Booleans (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd2
  constant Boolean y[1] = true;
@@ -5073,7 +5105,7 @@ model ArrayAnd3
             errorMessage="
 1 errors found:
 
-Error at line 5082, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5082, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5092,7 +5124,7 @@ model ArrayAnd4
             errorMessage="
 1 errors found:
 
-Error at line 5101, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5101, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5110,7 +5142,7 @@ model ArrayAnd5
             errorMessage="
 1 errors found:
 
-Error at line 5119, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5119, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5129,7 +5161,7 @@ model ArrayAnd6
             errorMessage="
 1 errors found:
 
-Error at line 5138, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5138, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} and y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5147,7 +5179,7 @@ model ArrayAnd7
             errorMessage="
 1 errors found:
 
-Error at line 5156, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5156, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} and {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5166,7 +5198,7 @@ model ArrayAnd8
             errorMessage="
 1 errors found:
 
-Error at line 5175, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5175, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} and y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5182,6 +5214,7 @@ model ArrayAnd9
 		TransformCanonicalTestCase(
 			name="Logical_And_ArrayAnd9",
 			description="Scalarization of logical and: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.And.ArrayAnd9
  constant Boolean y[1] = true;
@@ -5206,6 +5239,7 @@ model ArrayOr1
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr1",
 			description="Scalarization of logical or: arrays of Booleans (literal)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr1
  constant Boolean x[1] = true;
@@ -5223,6 +5257,7 @@ model ArrayOr2
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr2",
 			description="Scalarization of logical or: arrays of Booleans (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr2
  constant Boolean y[1] = true;
@@ -5244,7 +5279,7 @@ model ArrayOr3
             errorMessage="
 1 errors found:
 
-Error at line 5253, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5253, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or {true, false, true}
     type of '{true, true}' is Boolean[2]
     type of '{true, false, true}' is Boolean[3]
@@ -5263,7 +5298,7 @@ model ArrayOr4
             errorMessage="
 1 errors found:
 
-Error at line 5272, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5272, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean[3]
@@ -5281,7 +5316,7 @@ model ArrayOr5
             errorMessage="
 1 errors found:
 
-Error at line 5290, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5290, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or true
     type of '{true, true}' is Boolean[2]
     type of 'true' is Boolean
@@ -5300,7 +5335,7 @@ model ArrayOr6
             errorMessage="
 1 errors found:
 
-Error at line 5309, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5309, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {true, true} or y
     type of '{true, true}' is Boolean[2]
     type of 'y' is Boolean
@@ -5318,7 +5353,7 @@ model ArrayOr7
             errorMessage="
 1 errors found:
 
-Error at line 5327, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5327, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} or {1, 0}
     type of '{1, 1}' is Integer[2]
     type of '{1, 0}' is Integer[2]
@@ -5337,7 +5372,7 @@ model ArrayOr8
             errorMessage="
 1 errors found:
 
-Error at line 5346, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5346, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1, 1} or y
     type of '{1, 1}' is Integer[2]
     type of 'y' is Integer[2]
@@ -5353,6 +5388,7 @@ model ArrayOr9
 		TransformCanonicalTestCase(
 			name="Logical_Or_ArrayOr9",
 			description="Scalarization of logical or: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Or.ArrayOr9
  constant Boolean y[1] = true;
@@ -5395,6 +5431,7 @@ model ArrayNot2
 		TransformCanonicalTestCase(
 			name="Logical_Not_ArrayNot2",
 			description="Scalarization of logical not: array of Boolean (component)",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot2
  constant Boolean x[1] = false;
@@ -5414,6 +5451,7 @@ model ArrayNot3
 		TransformCanonicalTestCase(
 			name="Logical_Not_ArrayNot3",
 			description="Scalarization of logical not: constant evaluation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Logical.Not.ArrayNot3
  constant Boolean x[1] = false;
@@ -5435,7 +5473,7 @@ model ArrayNot4
             errorMessage="
 1 errors found:
 
-Error at line 5444, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5444, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: not {1, 0}
     type of '{1, 0}' is Integer[2]
 ")})));
@@ -5453,7 +5491,7 @@ model ArrayNot5
             errorMessage="
 1 errors found:
 
-Error at line 5461, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 5461, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: not y
     type of 'y' is Integer[2]
 ")})));
@@ -5530,23 +5568,24 @@ model LongArrayForm4
 		TransformCanonicalTestCase(
 			name="Constructors_LongForm_LongArrayForm4",
 			description="Long form of array constructor, array component parts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm4
- constant Real x3[1,1] = 1;
- constant Real x3[1,2] = 2;
- constant Real x3[1,3] = 3;
- constant Real x3[2,1] = 4;
- constant Real x3[2,2] = 5;
- constant Real x3[2,3] = 6;
- constant Real x3[3,1] = 7;
- constant Real x3[3,2] = 8;
- constant Real x3[3,3] = 9;
  constant Real x1[1] = 1;
  constant Real x1[2] = 2;
  constant Real x1[3] = 3;
  constant Real x2[1] = 4;
  constant Real x2[2] = 5;
  constant Real x2[3] = 6;
+ constant Real x3[1,1] = 1.0;
+ constant Real x3[1,2] = 2.0;
+ constant Real x3[1,3] = 3.0;
+ constant Real x3[2,1] = 4.0;
+ constant Real x3[2,2] = 5.0;
+ constant Real x3[2,3] = 6.0;
+ constant Real x3[3,1] = 7;
+ constant Real x3[3,2] = 8;
+ constant Real x3[3,3] = 9;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -5599,16 +5638,17 @@ model EmptyArray3
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray3",
 			description="Empty arrays, concatenation",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
- constant Real xx[1,1] = 1;
- constant Real xx[1,2] = 2;
- constant Real xx[2,1] = 3;
- constant Real xx[2,2] = 4;
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
  constant Real x[2,1] = 3;
  constant Real x[2,2] = 4;
+ constant Real xx[1,1] = 1.0;
+ constant Real xx[1,2] = 2.0;
+ constant Real xx[2,1] = 3.0;
+ constant Real xx[2,2] = 4.0;
 end ArrayTests.Constructors.EmptyArray.EmptyArray3;
 ")})));
 end EmptyArray3;
@@ -5623,6 +5663,7 @@ model EmptyArray4
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray4",
 			description="Empty arrays, multiplication",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray4
  constant Real y[1,1] = 0;
@@ -5653,6 +5694,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Constructors_EmptyArray_EmptyArray5",
 			description="Empty arrays, simple equation system",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  structural parameter Integer n = 0 /* 0 */;
@@ -5705,6 +5747,7 @@ model ArrayIterTest1
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest1",
 			description="Array constructor with iterators: over scalar exp",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
  constant Real x[1,1] = 2;
@@ -5728,6 +5771,7 @@ model ArrayIterTest2
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest2",
 			description="Array constructor with iterators: over array exp",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
  constant Real x[1,1,1] = 1;
@@ -5751,6 +5795,7 @@ model ArrayIterTest3
 		TransformCanonicalTestCase(
 			name="Constructors_Iterators_ArrayIterTest3",
 			description="Array constructor with iterators: nestled constructors, masking index",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest3
  constant Real i = 1;
@@ -6106,8 +6151,17 @@ model ArrayIterTest13
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest13",
             description="Nested iteration expressions",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
+ constant Integer x0[1] = 1;
+ constant Integer x0[2] = 2;
+ constant Integer x0[3] = 3;
+ constant Integer x0[4] = 4;
+ constant Integer x0[5] = 5;
+ constant Integer x0[6] = 6;
+ constant Integer x0[7] = 7;
+ constant Integer x0[8] = 8;
  constant Integer x1[1,1,1] = 1;
  constant Integer x1[1,1,2] = 2;
  constant Integer x1[1,2,1] = 3;
@@ -6124,14 +6178,6 @@ fclass ArrayTests.Constructors.Iterators.ArrayIterTest13
  constant Integer x2[2,1,2] = 6;
  constant Integer x2[2,2,1] = 4;
  constant Integer x2[2,2,2] = 8;
- constant Integer x0[1] = 1;
- constant Integer x0[2] = 2;
- constant Integer x0[3] = 3;
- constant Integer x0[4] = 4;
- constant Integer x0[5] = 5;
- constant Integer x0[6] = 6;
- constant Integer x0[7] = 7;
- constant Integer x0[8] = 8;
 end ArrayTests.Constructors.Iterators.ArrayIterTest13;
 ")})));
 end ArrayIterTest13;
@@ -6296,6 +6342,7 @@ model ForEquation2
 		TransformCanonicalTestCase(
 			name="For_ForEquation2",
 			description="",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.For.ForEquation2
  structural parameter Integer a.N = 3 /* 3 */;
@@ -6305,9 +6352,9 @@ fclass ArrayTests.For.ForEquation2
  constant Real a.x[1] = 1;
  constant Real a.x[2] = 2;
  constant Real a.x[3] = 3;
- constant Real a.y[1] = 3;
- constant Real a.y[2] = 2;
- constant Real a.y[3] = 1;
+ constant Real a.y[1] = 3.0;
+ constant Real a.y[2] = 2.0;
+ constant Real a.y[3] = 1.0;
 end ArrayTests.For.ForEquation2;
 ")})));
 end ForEquation2;
@@ -6493,13 +6540,13 @@ fclass ArrayTests.For.ForAlgorithm1
 algorithm
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
  x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
- x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[1] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + (3.0 + 4.0));
  x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
  x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
- x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[2] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + (3.0 + 4.0));
  x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0);
  x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0);
- x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + 3.0 + 4.0);
+ x[3] := ArrayTests.For.ForAlgorithm1.f(1.0 + 2.0 + (3.0 + 4.0));
 
 public
  function ArrayTests.For.ForAlgorithm1.f
@@ -6582,6 +6629,7 @@ model SliceTest3
 		TransformCanonicalTestCase(
 			name="Slices_SliceTest3",
 			description="Slice operations: test with vector indices",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.SliceTest3
  constant Real x[1].a[1] = 1;
@@ -6628,24 +6676,9 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices1",
 			description="Mixing for index subscripts with colon subscripts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
- Real y[1,1,1];
- Real y[1,1,2];
- Real y[1,2,1];
- Real y[1,2,2];
- Real y[2,1,1];
- Real y[2,1,2];
- Real y[2,2,1];
- Real y[2,2,2];
- constant Real z[1,1,1] = 1;
- constant Real z[1,1,2] = 0;
- constant Real z[1,2,1] = 0;
- constant Real z[1,2,2] = 1;
- constant Real z[2,1,1] = 1;
- constant Real z[2,1,2] = 0;
- constant Real z[2,2,1] = 0;
- constant Real z[2,2,2] = 1;
  constant Real m[1].x[1,1] = 1;
  constant Real m[1].x[1,2] = 0;
  constant Real m[1].x[2,1] = 0;
@@ -6654,6 +6687,22 @@ fclass ArrayTests.Slices.MixedIndices1
  constant Real m[2].x[1,2] = 0;
  constant Real m[2].x[2,1] = 0;
  constant Real m[2].x[2,2] = 1;
+ Real y[1,1,1];
+ Real y[1,1,2];
+ Real y[1,2,1];
+ Real y[1,2,2];
+ Real y[2,1,1];
+ Real y[2,1,2];
+ Real y[2,2,1];
+ Real y[2,2,2];
+ constant Real z[1,1,1] = 1.0;
+ constant Real z[1,1,2] = 0.0;
+ constant Real z[1,2,1] = 0.0;
+ constant Real z[1,2,2] = 1.0;
+ constant Real z[2,1,1] = 1.0;
+ constant Real z[2,1,2] = 0.0;
+ constant Real z[2,2,1] = 0.0;
+ constant Real z[2,2,2] = 1.0;
 initial equation 
  y[1,1,1] = 0.0;
  y[1,1,2] = 0.0;
@@ -6689,6 +6738,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Slices_MixedIndices2",
 			description="Mixing expression subscripts containing for indices with colon subscripts",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices2
  constant Real y[1,1] = 2.0;
@@ -7691,16 +7741,16 @@ model CircularFunctionArg1
             errorMessage="
 4 errors found:
 
-Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7682, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable c
 
-Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7684, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 
-Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7684, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable d
 
-Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7685, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 ")})));
 end CircularFunctionArg1;
@@ -7797,7 +7847,7 @@ model ArraySize2
             errorMessage="
 2 errors found:
 
-Error at line 7657, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
+Error at line 7657, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable x
 
 Error at line 7658, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
@@ -7823,6 +7873,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySize3",
 			description="Handle end in for loop",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySize3
  structural parameter Integer n = 2 /* 2 */;
@@ -7925,6 +7976,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf1",
 			description="Test that array size errors lock if branches if possible",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf1
  structural parameter Boolean a = false /* false */;
@@ -7979,8 +8031,8 @@ equation
 Error at line 7833, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
   All branches in if equation with non-parameter tests must have the same number of equations
 
-Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo':
-  The array sizes of right and left hand side of equation are not compatible
+Error at line 7834, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [2], and size of right-hand side is [5]
 ")})));
 end ArraySizeInIf2;
 
@@ -8019,6 +8071,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySizeInIf3",
 			description="Test that array size errors lock if branches if possible",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySizeInIf3
  structural parameter Boolean a = true /* true */;
@@ -8052,6 +8105,7 @@ model ArraySizeInComp1
         TransformCanonicalTestCase(
             name="Other_ArraySizeInComp1",
             description="",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp1
  constant Real r1.x[1] = 1;
@@ -8082,6 +8136,7 @@ model ArraySizeInComp2
         TransformCanonicalTestCase(
             name="Other_ArraySizeInComp2",
             description="",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp2
  constant Real r1.x[1] = 1;
@@ -8109,6 +8164,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Other_ArraySimplify1",
 			description="Correct simplification of array expressions",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Other.ArraySimplify1
  Real x[1];

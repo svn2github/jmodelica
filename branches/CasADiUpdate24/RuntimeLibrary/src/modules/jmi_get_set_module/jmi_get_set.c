@@ -75,7 +75,7 @@ int jmi_set_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         if( needParameterUpdate ) {
           if(jmi_init_eval_parameters(jmi) != 0) {
-                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                jmi_log_node(jmi->log, logError, "DependentParametersEvaluationFailed", "Error evaluating dependent parameters.");
                 return -1;
           }
         }
@@ -116,7 +116,7 @@ int jmi_set_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         if( needParameterUpdate ) {
            if(jmi_init_eval_parameters(jmi) != 0) {
-                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                jmi_log_node(jmi->log, logError, "DependentParametersEvaluationFailed", "Error evaluating dependent parameters.");
                 return -1;
            }
         }
@@ -154,7 +154,7 @@ int jmi_set_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         if( needParameterUpdate ) {
            if(jmi_init_eval_parameters(jmi) != 0) {
-                jmi_log_comment(jmi->log, logError, "Error evaluating dependent parameters.");
+                jmi_log_node(jmi->log, logError, "DependentParametersEvaluationFailed", "Error evaluating dependent parameters.");
                 return -1;
            }
         }
@@ -170,7 +170,7 @@ int jmi_set_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     NOT_USED(value);
 
     RECOMPUTE_VARIABLES_SET(jmi);
-    jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
+    jmi_log_node(jmi->log, logWarning, "NotSupported", "Setting strings is not yet supported.");
     return 0;
 }
 
@@ -189,7 +189,10 @@ int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+
             return -1;
         }
 
@@ -225,7 +228,10 @@ int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
+
             return -1;
         }
 
@@ -260,7 +266,9 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "ModelEquationsEvaluationFailed", "Error evaluating model equations.");
+            /* If it failed, reset to the previous succesful values */
+            jmi_reset_internal_variables(jmi);
             return -1;
         }
 
@@ -282,27 +290,18 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
 int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
                    jmi_string  value[]) {
-
-    int retval;
+    /* Currently we only need to consider constant/structural parameter strings */
     int i;
-    int eval_required;
+    jmi_string_t* z;
+    jmi_value_reference index;
 
-    eval_required = jmi_evaluation_required(jmi, vr, nvr);
+    z = jmi_get_string_z(jmi);
 
-    if (jmi->recomputeVariables == 1 && jmi->is_initialized == 1 && eval_required == 1 && jmi->user_terminate == 0) {
 
-        retval = jmi_ode_derivatives(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
-            return -1;
-        }
-
-        RECOMPUTE_VARIABLES_CLR(jmi);
+    for (i = 0; i < nvr; i++) {
+        index = get_index_from_value_ref(vr[i]);
+        value[i] = z[index];
     }
-
-    /* Strings not yet supported. */
-    for(i = 0; i < nvr; i++) value[i] = 0;
-    jmi_log_comment(jmi->log, logWarning, "Strings are not yet supported.");
 
     return 0;
 }
@@ -374,7 +373,7 @@ int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size
 
     retval = jmi_dae_R_perturbed(jmi,eventIndicators);
     if(retval != 0) {
-        jmi_log_comment(jmi->log, logError, "Evaluating the event indicators failed.");
+        jmi_log_node(jmi->log, logError, "EventInticatorsEvaluationFailed", "Error evaluating event indicators.");
         if (jmi->jmi_callbacks.log_options.log_level >= 5){
             jmi_log_leave(jmi->log, node);
         }

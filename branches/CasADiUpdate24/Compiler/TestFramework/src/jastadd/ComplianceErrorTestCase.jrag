@@ -23,7 +23,7 @@ public class ComplianceErrorTestCase extends ErrorTestCase {
      */
     protected void filterProblems(Collection<Problem> problems) {
         for (Iterator<Problem> it = problems.iterator(); it.hasNext(); )
-            if (it.next().severity() != Problem.Severity.ERROR)
+            if (it.next().severity() != ProblemSeverity.ERROR)
                 it.remove();
     }
 

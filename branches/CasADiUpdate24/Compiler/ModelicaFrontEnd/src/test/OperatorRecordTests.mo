@@ -328,7 +328,7 @@ end OperatorRecordTests.OperatorOverload3;
             errorMessage="
 1 errors found:
 
-Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 322, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 - b
     type of 'c1' is OperatorRecordTests.Cplx
     type of 'b' is Boolean
@@ -541,7 +541,7 @@ end OperatorRecordTests.OperatorOverload8;
             errorMessage="
 1 errors found:
 
-Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.OperatorOverload9.Op[2]
     type of 'c2' is OperatorRecordTests.OperatorOverload9.Op[2]
@@ -561,7 +561,7 @@ Error at line 535, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/Operat
             errorMessage="
 1 errors found:
 
-Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: c1 * c2
     type of 'c1' is OperatorRecordTests.Cplx[2]
     type of 'c2' is OperatorRecordTests.Cplx[2, 2]
@@ -1870,7 +1870,10 @@ end OperatorRecordTests.OperatorLimitations2;
             errorMessage="
 1 errors found:
 
-Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 1848, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In components:
+    a
+    b
   Operator classes are only allowed in operator records and packages in operator records
 ")})));
     end OperatorLimitations3;
@@ -2205,7 +2208,8 @@ Error at line 2176, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations13;
@@ -2245,7 +2249,8 @@ Error at line 2196, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14;
@@ -2279,7 +2284,8 @@ Error at line 2237, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/Opera
             errorMessage="
 1 errors found:
 
-Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2271, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component b:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations14b;
@@ -2402,7 +2408,8 @@ end OperatorRecordTests.OperatorLimitations15b;
             errorMessage="
 1 errors found:
 
-Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo':
+Error at line 2393, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/OperatorRecordTests.mo',
+In component c2:
   Short class declarations extending an operator record may only modify attributes of members of the record
 ")})));
     end OperatorLimitations16;
@@ -3346,6 +3353,7 @@ model RealTypeOpArg1
         TransformCanonicalTestCase(
             name="RealTypeOpArg1",
             description="Constant eval of overloaded operator expression, real type inference",
+            eliminate_alias_variables=false,
             flatModel="
 fclass OperatorRecordTests.Eval.RealTypeOpArg1
  constant Real y1.re = 3.0 \"Real part of complex number\";
@@ -3367,6 +3375,7 @@ model RealTypeOpArg2
         TransformCanonicalTestCase(
             name="RealTypeOpArg2",
             description="Constant eval of overloaded operator expression: array real type inference",
+            eliminate_alias_variables=false,
             flatModel="
 fclass OperatorRecordTests.Eval.RealTypeOpArg2
  constant Real y1[1].re = 3.0 \"Real part of complex number\";

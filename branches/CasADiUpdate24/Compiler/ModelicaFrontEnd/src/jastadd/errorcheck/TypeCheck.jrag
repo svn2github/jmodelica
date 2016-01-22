@@ -18,6 +18,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import org.jmodelica.util.Criteria;
 import org.jmodelica.util.ErrorCheckType;
+import org.jmodelica.util.problemHandling.ErrorProducerUnlessDisabled;
+import org.jmodelica.util.problemHandling.AbstractErrorProducerUnlessDisabled;
 
 aspect FlatTypeCheck {
 
@@ -38,16 +40,22 @@ aspect FlatTypeCheck {
 
     private static ErrorChecker ASTNode.TYPE_CHECKER = addErrorChecker(new ErrorChecker.TypeChecker());
 
+    public static final SimpleProblemProducer ASTNode.CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
+            new SimpleErrorProducer("CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
+                    "In the declaration '%s', the declared class is not a subtype of the constraining class");
+    public static final SimpleProblemProducer ASTNode.REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
+            new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
+                    "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
+
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
         // Note that modifiers (including redeclarations) in a constraining clause
         // are applied to the declaration itself and is therefore also type checked.
-        if (hasInstConstraining()) {
-              InstNode superType = getInstConstraining().getInstNode();
+        if (hasInstConstrainingComponent()) {
+              InstNode superType = getInstConstrainingComponent().getInstNode();
               InstComponentDecl declaredType = this; 
               if (!declaredType.subType(superType))
-                   declaredType.getComponentDecl().error("In the declaration '" + declaredType.getComponentDecl() + 
-                           "', the declared class is not a subtype of the constraining class");
+                  CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredType.getComponentDecl(), declaredType.getComponentDecl());
         }
     }
 
@@ -72,9 +80,8 @@ aspect FlatTypeCheck {
         
         // Type check the original component
         InstComponentDecl superType = declaredType.constrainingInstComponentDecl();
-        if (declaredType.hasInstConstraining() && !declaredType.subType(superType))
-            superType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
-                    declaredType.getComponentDecl());
+        if (declaredType.hasInstConstrainingComponent() && !declaredType.subType(superType))
+            CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
 
         // The environment should be traversed backwards in order to perform correct
         // subtype tests in redeclaration chains.       
@@ -86,32 +93,58 @@ aspect FlatTypeCheck {
                 InstComponentDecl constrainingSubType = declaredSubType.constrainingInstComponentDecl();
                     
                 // Check consistency of the redeclaring component
-                if (declaredSubType.hasInstConstraining() && !declaredSubType.subType(constrainingSubType))
-                    declaredSubType.getComponentDecl().error("In the declaration '%s', the declared class is not a subtype of the constraining class", 
-                            declaredSubType.getComponentDecl());
+                if (declaredSubType.hasInstConstrainingComponent() && !declaredSubType.subType(constrainingSubType))
+                    CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(declaredSubType.getComponentDecl(), declaredSubType.getComponentDecl());
 
                 // It is ok to check against the constrainingSubType, since the declaredSubType is a subtype
                 // of the constrainingSubType. Then if constrainingSubType is a subtype of superType, then it
                 // follows that declaredSubType is a subtype of superType by transitivity.
                 if (!constrainingSubType.subType(superType))
-                    constrainingSubType.getComponentDecl().error("In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'", 
+                    REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(constrainingSubType.getComponentDecl(), 
                             constrainingSubType.getComponentDecl(), superType.getComponentDecl());
             
                 // If the redeclaring declaration has a constraining clause, the constraining
                 // type of the redeclaring declaration of should be used in following subtype-test 
                 // instead of the constraining type of the orignal declaration.
-                if (declaredSubType.hasInstConstraining()) 
+                if (declaredSubType.hasInstConstrainingComponent()) 
                     superType = constrainingSubType;
             }
         }
     }
+    
+    public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE =
+            new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE", ProblemKind.SEMANTIC,
+                    "Can not infer array size of the variable %s");
+    public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_TYPE_MISMATCH =
+            new SimpleErrorProducer("BINDING_EXPRESSION_TYPE_MISMATCH", ProblemKind.SEMANTIC,
+                    "The binding expression of the variable %s does not match the declared type of the variable");
+    public static final SimpleProblemProducer ASTNode.ASSUMING_EACH =
+            new SimpleWarningProducer("ASSUMING_EACH", ProblemKind.SEMANTIC, "Assuming 'each' for the modification '%s'");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_DECLARATION =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_DECLARATION", ProblemKind.SEMANTIC,
+                    "Array size mismatch in declaration of %s, size of declaration is %s and size of binding expression is %s");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_MODIFICATION =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_MODIFICATION", ProblemKind.SEMANTIC,
+                    "Array size mismatch in modification of %s, expected size is %s and size of binding expression is %s");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH", ProblemKind.SEMANTIC,
+                    "Array size mismatch in modification of %s, expected size is (due to 'each') %s and size of binding expression is %s");
+    public static final SimpleProblemProducer ASTNode.NON_SCALAR_CONDITIONAL_GUARD =
+            new SimpleErrorProducer("NON_SCALAR_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
+                    "The guard expression of a conditional component should be a scalar expression");
+    public static final SimpleProblemProducer ASTNode.NON_BOOLEAN_CONDITIONAL_GUARD =
+            new SimpleErrorProducer("NON_BOOLEAN_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
+                    "The guard expression of a conditional component should be a boolean expression");
+    public static final SimpleProblemProducer ASTNode.NON_FIXED_CONDITIONAL_GUARD =
+            new SimpleErrorProducer("NON_FIXED_CONDITIONAL_GUARD", ProblemKind.SEMANTIC,
+                    "The guard expression of a conditional component should have parameter or constant variability");
 
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
         FExp bexp = myBindingInstExp();
         boolean func = inFunction();
         Size componentSize = size();
         if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
-            error("Can not infer array size of the variable " + name());
+            CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
             InstValueModification ivm = myInstValueMod();
             FType expectedBT = bindingType();
@@ -119,19 +152,19 @@ aspect FlatTypeCheck {
             if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (needsEach != null) {
-                    needsEach.generateMissingEachWarning();
+                    ASSUMING_EACH.invoke(needsEach, needsEach);
                 } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
-                    bexp.error("The binding expression of the variable " + name() +
-                            " does not match the declared type of the variable");
+                    BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
                 } else {
-                    if (ivm.myInstNode() == this)
-                        bexp.error("Array size mismatch in declaration of " + name() +
-                                ", size of declaration is " + expectedBT.size() + 
-                                " and size of binding expression is " + actualBT.size());
-                    else
-                        bexp.error("Array size mismatch in modification of " + name() + 
-                                ", expected size is " + (ivm.hasEach() ? "(due to 'each') " : "") + expectedBT.size() +
-                                " and size of binding expression is " + actualBT.size());
+                    ErrorProducerUnlessDisabled reporter;
+                    if (ivm.myInstNode() == this) {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_DECLARATION;
+                    } else if (ivm.hasEach()) {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH;
+                    } else {
+                        reporter = ARRAY_SIZE_MISMATCH_IN_MODIFICATION;
+                    }
+                    reporter.invokeWithCondition(bexp, expectedBT.ndims() == actualBT.ndims(), name(), expectedBT.size(), actualBT.size());
                 }
             }
         }
@@ -140,20 +173,16 @@ aspect FlatTypeCheck {
             FExp cond = getConditionalAttribute();
             if (!cond.type().isUnknown()) {
                 if (!cond.type().isScalar()) 
-                    error("The guard expression of a conditional component should be a scalar expression");
+                    NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
                 if (!cond.type().isBoolean()) 
-                    error("The guard expression of a conditional component should be a boolean expression");
+                    NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
                 if (!cond.variability().parameterOrLess()) 
-                    error("The guard expression of a conditional component should have parameter or constant variability");
+                    NON_FIXED_CONDITIONAL_GUARD.invoke(this);
             }
         }
         
         typeCheckAttributes();
         super.typeCheck(checkType);
-    }
-
-    public void InstModification.generateMissingEachWarning() {
-        warning("Assuming 'each' for the modification '" + this + "'");
     }
 
     inh boolean InstComponentDecl.inRecordWithBindingExp();
@@ -172,54 +201,68 @@ aspect FlatTypeCheck {
 
     public void InstModification.typeCheckAttribute(InstNode owner) {}
 
+    public static final SimpleProblemProducer ASTNode.TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION =
+            new SimpleErrorProducer("TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION", ProblemKind.SEMANTIC,
+                    "The type of the binding expression of the attribute %s for the %s %s does not match the declared type of the variable");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION", ProblemKind.SEMANTIC,
+                    "Array size mismatch in modification of the attribute %s for the %s %s, expected size is %s and size of %s expression is %s");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION_DUE_TO_EACH =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION_DUE_TO_EACH", ProblemKind.SEMANTIC,
+                    "Array size mismatch in modification of the attribute %s for the %s %s, expected size is (due to 'each') %s and size of %s expression is %s");
+
     public void InstComponentModification.typeCheckAttribute(InstNode owner) {
         if (hasInstModification() && getInstModification().hasInstValueMod()) {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
-                String description = "attribute " + name() + " for the " + owner.kindDescription() + " " + owner.name();
                 Size attrSize = expectedSize();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
-                    error("The type of the binding expression of the " + description + 
-                            " does not match the declared type of the variable");
+                    TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION.invoke(this, name(), owner.kindDescription(), owner.name());
                 } else if (!attrSize.equivalent(valMod.size(), true)) {
                     InstModification im = findModificationLackingEach(valMod.size());
                     if (im != null) {
-                        im.generateMissingEachWarning();
+                        ASSUMING_EACH.invoke(im, im);
                     } else {
-                        error("Array size mismatch in modification of the " + description +
-                                ", expected size is " + (hasEach() ? "(due to 'each') " : "") + attrSize +
-                                " and size of " + name() + " expression is " + valMod.size());
+                        ErrorProducerUnlessDisabled producer;
+                        if (hasEach()) {
+                            producer = ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION_DUE_TO_EACH;
+                        } else {
+                            producer = ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION;
+                        }
+                        producer.invokeWithCondition(this, attrSize.ndims() != valMod.ndims(), name(),
+                                owner.kindDescription(), owner.name(), attrSize, name(), valMod.size());
                     }
                 } else {
                     if (name().equals("nominal")) {
-                        checkNominalAttribute(valMod, description);
+                        checkNominalAttribute(owner, valMod);
                     }
                 }
             }
         }
     }
 
-    public void InstComponentModification.checkNominalAttribute(FExp valMod, String description) {
+    public static final SimpleProblemProducer ASTNode.NOMINAL_EQUAL_TO_ZERO =
+            new SimpleErrorProducer("NOMINAL_EQUAL_TO_ZERO", ProblemKind.SEMANTIC,
+                    "The attribute nominal for the %s %s is set to %s, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.");
+    public static final SimpleProblemProducer ASTNode.NOMINAL_ELEMENT_EQUAL_TO_ZERO =
+            new SimpleErrorProducer("NOMINAL_ELEMENT_EQUAL_TO_ZERO", ProblemKind.SEMANTIC,
+                    "The attribute nominal for the %s %s is set to %s, where element %s evaluates to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.");
+
+    public void InstComponentModification.checkNominalAttribute(InstNode owner, FExp valMod) {
         try {
-            String evalMsg = null;
             CValue val = valMod.ceval();
             if (val.isArray()) {
                 CValueArray arr = (CValueArray) val;
                 for (Index i : arr.indices()) {
                     if (arr.getCell(i).realValue() == 0.0) {
-                        evalMsg = "where element " + i + " evaluates";
+                        NOMINAL_ELEMENT_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod, i);
                         break;
                     }
                 }
             } else {
                 if (val.realValue() == 0.0) {
-                    evalMsg = "evaluating";
+                    NOMINAL_EQUAL_TO_ZERO.invoke(this, owner.kindDescription(), owner.name(), valMod);
                 }
-            }
-            if (evalMsg != null) {
-                error("The %s is set to %s, %s to 0.0. A nominal value of zero is not meaningful. " + 
-                        "Please set the nominal value to the expected magnitude of the variable.", 
-                        description, valMod, evalMsg);
             }
         } catch (ConstantEvaluationException e) {}
     }
@@ -231,9 +274,13 @@ aspect FlatTypeCheck {
     eq InstPrimitive.kindDescription()     = "variable";
     eq InstBaseClassDecl.kindDescription() = getInstRestriction().toString();
 
+    public static final SimpleProblemProducer ASTNode.EACH_APPLIED_ON_SCALAR =
+            new SimpleWarningProducer("EACH_APPLIED_ON_SCALAR", ProblemKind.SEMANTIC,
+                    "The 'each' keyword should not be applied to a modification of a scalar component: %s");
+
     public void InstArgument.typeCheck(ErrorCheckType checkType) {
         if (getEach() && expectedSizeFromParent() == Size.SCALAR) 
-            warning("The 'each' keyword should not be applied to a modification of a scalar component: " + this);
+            EACH_APPLIED_ON_SCALAR.invoke(this, this);
     }
 
     inh boolean InstNode.isInRedeclareMod();
@@ -242,22 +289,41 @@ aspect FlatTypeCheck {
     eq InstRoot.getChild().isInRedeclareMod()             = false;
     eq Root.getChild().isInRedeclareMod()                 = false;
 
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_EQUATION =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_EQUATION", ProblemKind.SEMANTIC,
+                    "The array sizes of right and left hand side of equation are not compatible, size of left-hand side is %s, and size of right-hand side is %s");
+    public static final SimpleProblemProducer ASTNode.TYPE_MISMATCH_IN_EQUATION =
+            new SimpleErrorProducer("TYPE_MISMATCH_IN_EQUATION", ProblemKind.SEMANTIC,
+                    "The right and left expression types of equation are not compatible, type of left-hand side is %s, and type of right-hand side is %s");
 
-  public void FEquation.typeCheck(ErrorCheckType checkType) {
-      typeCheckLocalIteration(checkType);
-      FType left = getLeft().type();
-      FType right = getRight().type();
-      if (!left.isUnknown() && !right.isUnknown()) {
-          if (!left.equivalentTo(right)) {
-              if (left.scalarType().equivalentTo(right.scalarType())) {
-                  if (!lockBranch(checkType))
-                      error("The array sizes of right and left hand side of equation are not compatible");
-              } else {
-                  error("The right and left expression types of equation are not compatible");
-              }
-          }
-      }
-  }
+    public void FEquation.typeCheck(ErrorCheckType checkType) {
+        typeCheckLocalIteration(checkType);
+        FType left = getLeft().type();
+        FType right = getRight().type();
+        if (!left.isUnknown() && !right.isUnknown()) {
+            if (!left.equivalentTo(right)) {
+                if (left.equivalentExceptLengths(right)) {
+                    if (!lockBranch(checkType))
+                        ARRAY_SIZE_MISMATCH_IN_EQUATION.invoke(this, left.size(), right.size());
+                } else {
+                    TYPE_MISMATCH_IN_EQUATION.invoke(this, left, right);
+                }
+            }
+        }
+    }
+
+    public static final SimpleProblemProducer ASTNode.CONNECT_WITH_INVALID_TYPE =
+            new SimpleErrorProducer("CONNECT_WITH_INVALID_TYPE", ProblemKind.SEMANTIC,
+                    "Connecting to an instance of a non-connector type is not allowed");
+    public static final SimpleProblemProducer ASTNode.CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE =
+            new SimpleErrorProducer("CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE", ProblemKind.SEMANTIC,
+                    "Connecting an expandable connector to a non-expandable connector is not allowed");
+    public static final SimpleProblemProducer ASTNode.TYPE_MISMATCH_IN_CONNECT =
+            new SimpleErrorProducer("TYPE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
+                    "Types of connected components do not match");
+    public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_CONNECT =
+            new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_CONNECT", ProblemKind.SEMANTIC,
+                    "Sizes do not match in connection, size of '%s' is %s and size of '%s' is %s");
 
     public void FConnectClause.typeCheck(ErrorCheckType checkType) {
         InstAccess left  = getConnector1().getInstAccess();
@@ -267,7 +333,7 @@ aspect FlatTypeCheck {
         for (InstAccess access = left; access != null; access = (access == left) ? right : null) {
             if (!access.isExpandableConnectorPart() && !access.isUnknown() && !access.myInstComponentDecl().myInstClass().isUnknown()) {
                 if (!access.myInstComponentDecl().isConnector())
-                    access.error("Connecting to an instance of a non-connector type is not allowed");
+                    CONNECT_WITH_INVALID_TYPE.invoke(access);
             } else {
                 checkTypes = false;
             }
@@ -275,14 +341,16 @@ aspect FlatTypeCheck {
                 expandableSame = !expandableSame;
         }
         if (!expandableSame && !left.isUnknown() && !right.isUnknown())
-            error("Connecting an expandable connector to a non-expandable connector is not allowed");
+            CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE.invoke(this);
         if (checkTypes) { 
             InstComponentDecl leftComp  = left.lookupEvaluatingIndices();
             InstComponentDecl rightComp = right.lookupEvaluatingIndices();
-            if (!leftComp.connectableTo(rightComp))
-                error("Types of connected components do not match");
-            else if (!left.size().equivalent(right.size(), false))
-                error("Sizes do not match in connection");
+            if (!leftComp.connectableTo(rightComp)) {
+                TYPE_MISMATCH_IN_CONNECT.invoke(this);
+            } else if (!left.size().equivalent(right.size(), false)) {
+                ARRAY_SIZE_MISMATCH_IN_CONNECT.invokeWithCondition(this, left.ndims() == right.ndims(), 
+                        left, left.size(), right, right.size());
+            }
         }
     }
 
@@ -300,37 +368,89 @@ aspect FlatTypeCheck {
 	  return n instanceof FExp && ((FExp) n).type().isUnknown();
   }
 
-    // TODO: Add specialized typeError() methods that gives better error messages
+  
+    public class FExp {
+        public static class ExpTypeErrorProducer extends AbstractErrorProducerUnlessDisabled<ReporterNode> {
+            private final String message;
+            
+            public ExpTypeErrorProducer(String identifier, String message) {
+                super(identifier, ProblemKind.SEMANTIC);
+                this.message = message;
+            }
 
-    public void FExp.typeError(ErrorCheckType checkType) {
-        StringBuilder buf = new StringBuilder(typeErrorMessage());
-        buf.append(": ");
-        buf.append(this);
-        for (FExp exp : childFExps()) {
-            buf.append("\n    type of '");
-            buf.append(exp);
-            buf.append("' is ");
-            buf.append(exp.type());
+            public void invoke(FExp node) {
+                StringBuilder buf = new StringBuilder(message);
+                buf.append(": ");
+                buf.append(node);
+                for (FExp exp : node.childFExps()) {
+                    buf.append("\n    type of '");
+                    buf.append(exp);
+                    buf.append("' is ");
+                    buf.append(exp.type());
+                }
+                super.invokeWithCondition(node, node.typeErrorOnlyLengths(), buf.toString());
+            }
+
+            @Override
+            public String description() {
+                return message;
+            }
+            
         }
-        error(buf.toString());
     }
     
+    public static final FExp.ExpTypeErrorProducer ASTNode.TYPE_MISMATCH_IN_EXPRESSION =
+            new FExp.ExpTypeErrorProducer("TYPE_MISMATCH_IN_EXPRESSION", "Type error in expression");
+
+    public void FExp.typeError(ErrorCheckType checkType) {
+        TYPE_MISMATCH_IN_EXPRESSION.invoke(this);
+    }
+
     public void FIdUse.typeError(ErrorCheckType checkType, FIdUseExp use) {
         use.typeError(checkType);
     }
-    
+
     public void FIdUseInstAccess.typeError(ErrorCheckType checkType, FIdUseExp use) {
         getInstAccess().typeError();
     }
 
     /**
+     * Check if type error is only in array lengths.
+     */
+    syn boolean FExp.typeErrorOnlyLengths() = typeErrorOnlyLengths(childFExps());
+    eq FAbstractCat.typeErrorOnlyLengths()  = typeErrorOnlyLengths(getFExps());
+
+    /**
+     * Check if type error is only in array lengths.
+     */
+    syn boolean FExp.typeErrorOnlyLengths(Iterable<FExp> exps) {
+        FType first = null;
+        for (FExp exp : exps) {
+            FType cur = exp.type();
+            if (first == null) {
+                first = cur;
+            } else if (!first.equivalentExceptLengths(cur)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
      * The message to use in default type error.
      */
-    syn String FExp.typeErrorMessage() = "Type error in expression";
-    eq FEqRelExp.typeErrorMessage()    = 
-        ((getLeft().type().isRealScalar() || getRight().type().isRealScalar()) && !inFunction()) ? 
-                "Equality comparisons do not allow real operands" : super.typeErrorMessage();
+    public static final FExp.ExpTypeErrorProducer ASTNode.EQUALITY_COMPARISON_OF_REAL =
+            new FExp.ExpTypeErrorProducer("EQUALITY_COMPARISON_OF_REALS", "Equality comparisons do not allow real operands");
 
+    @Override
+    public void FEqRelExp.typeError(ErrorCheckType checkType) {
+        if ((getLeft().type().isRealScalar() || getRight().type().isRealScalar()) && !inFunction()) {
+            EQUALITY_COMPARISON_OF_REAL.invoke(this);
+        } else {
+            super.typeError(checkType);
+        }
+    }
+    
     public void FLinspace.typeCheck(ErrorCheckType checkType) {
         getN().markAsStructuralParameter(checkType);
         super.typeCheck(checkType);
@@ -345,7 +465,7 @@ aspect FlatTypeCheck {
             if (badVar)
                 error("%s\n    '%s' is of %s variability", msg, getN(), getN().variability().toStringLiteral());
             else if (canCeval && !lockBranch(checkType))
-                error("%s\n    '%s' evaluates to %d", msg, getN(), getN().ceval().intValue());
+                errorUnlessDisabled("%s\n    '%s' evaluates to %d", msg, getN(), getN().ceval().intValue());
         } else {
             super.typeError(checkType);
         }
@@ -571,37 +691,37 @@ aspect FlatTypeCheck {
 		  }
 	  }
   }
-  
-  public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
-	  if (ndims() > 1) { 
-		  error("Array index must be scalar or vector expression: " + getFExp());
-      } else if (!type().isUnknown() && !type().canBeIndex()) {
-          error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
-      } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
-          error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
-	  } else if (!inFunction()) { 
-            if (!getFExp().variability().fixedParameterOrLess()) {
-			  warning("Variable array index in equation can result in slow simulation time");
-		  } else if (!reportedOutOfBound && !inUnknownAccess()) {
-	          // Check array bounds
-	          // TODO: Perform bounds check in functions if index has parameter variability or lower?
-	          try {
-	              int max = mySize().get(0);
-	              for (FExp e : getFExp().getArray().iterable()) {
-	                  int i = e.ceval().intValue();
-	                  if (i < 1 || i > max) {
-	                      if (!lockBranch(checkType))
-	                          error("Array index out of bounds: " + i + ", index expression: " + getFExp());
-	                      reportedOutOfBound = true;
-	                      return;
-	                  }
-	              }
-	          } catch (ConstantEvaluationException e) {
-	          }
-		  }
-	  }
-  }
-  
+
+    public void FExpSubscript.typeCheckAsIndex(ErrorCheckType checkType) {
+        if (ndims() > 1) { 
+            error("Array index must be scalar or vector expression: " + getFExp());
+        } else if (!type().isUnknown() && !type().canBeIndex()) {
+            error("Array index must be Integer, Boolean, or enumeration expression: " + getFExp());
+        } else if (!type().isUnknown() && !myIndexType().isUnknown() && !type().scalarType().typeCompatible(myIndexType())) {
+            error("Expected array index of type '%s' found '%s'", myIndexType().name(), type().scalarType().name());
+        } else if (!inFunction()) { 
+              if (!getFExp().variability().fixedParameterOrLess()) {
+                warning("Variable array index in equation can result in slow simulation time");
+            } else if (!reportedOutOfBound && !inUnknownAccess()) {
+                // Check array bounds
+                // TODO: Perform bounds check in functions if index has parameter variability or lower?
+                try {
+                    int max = mySize().get(0);
+                    for (FExp e : getFExp().getArray().iterable()) {
+                        int i = e.ceval().intValue();
+                        if (i < 1 || i > max) {
+                            if (!lockBranch(checkType))
+                                errorUnlessDisabled("Array index out of bounds: " + i + ", index expression: " + getFExp());
+                            reportedOutOfBound = true;
+                            return;
+                        }
+                    }
+                } catch (ConstantEvaluationException e) {
+                }
+            }
+        }
+    }
+
   syn FType FExpSubscript.myIndexType() = myIndexType(myDim());
   inh FType FExpSubscript.myIndexType(int i);
   eq Root.getChild().myIndexType(int i)                                = fUnknownType();
@@ -672,14 +792,24 @@ aspect FlatTypeCheck {
 	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
   }
   
-  
-    public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
-	  if (!getLeft().type().isUnknown() && !getRight().type().isUnknown()) {
-            if (!getLeft().type().typeCompatible(getRight().type(), true)) 
-			  error("Types of right and left side of assignment are not compatible");		  
-	  }
+
+  public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
+      FType left = getLeft().type();
+      FType right = getRight().type();
+      if (!left.isUnknown() && !right.isUnknown()) {
+          if (!left.typeCompatible(right, true)) {
+              if (left.typeCompatibleExceptLengths(right)) {
+                  // TODO: should use lockBranch() here as well, but no support yet
+                  errorUnlessDisabled("The array sizes of right and left hand side of assignment are not compatible, " + 
+                          "size of left-hand side is %s, and size of right-hand side is %s", left.size(), right.size());
+              } else {
+                  error("The right and left expression types of assignment are not compatible, " + 
+                          "type of left-hand side is %s, and type of right-hand side is %s", left, right);
+              }
+          }
+      }
   }
-  
+
   public void FWhileStmt.typeCheck(ErrorCheckType checkType) {
 	  if (!getTest().type().isUnknown() && !fBooleanScalarType().typeCompatible(getTest().type())) 
 		  error("Type of test expression of while statement is not Boolean");
@@ -736,12 +866,12 @@ aspect FlatTypeCheck {
 	  else if (!getDim().type().isUnknown() && !getDim().variability().parameterOrLess())
 		  error("Dimension argument of cat() does not have constant variability: " + getDim());
   }
-  
-  public void FAbstractCat.typeCheckFExps() {}
-  
-  public void FAbstractCat.typeError(ErrorCheckType checkType) {
-	  error("Types do not match in array concatenation");	  
-  }
+
+    public void FAbstractCat.typeCheckFExps() {}
+
+    public void FAbstractCat.typeError(ErrorCheckType checkType) {
+        errorUnlessDisabledAnd(typeErrorOnlyLengths(), "Types do not match in array concatenation");
+    }
 
     syn int FInfArgsFunctionCall.minNumArgs() = 1;
     eq FFillExp.minNumArgs()                  = 2;
@@ -770,20 +900,33 @@ aspect FlatTypeCheck {
 	  else if (!isFunctionCallClause() && n == 0)
 		  error("Function " + builtInName() + "() has no outputs, but is used in expression");
   }
-  
-  public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
-      if (isArray()) {
-          Size s = size();
-          for (FExp arg : myArgs()) {
-              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
-                  error("Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes");
-                  break;
-              }
-          }
-      }
-      super.typeCheck(checkType);
-  }
-  
+
+    public void FSemiLinearExp.typeCheck(ErrorCheckType checkType) {
+        checkVectorizedSizes(checkType);
+        super.typeCheck(checkType);
+    }
+
+    public void FBuiltInFunctionCall.checkVectorizedSizes(ErrorCheckType checkType) {
+        if (isArray()) {
+            boolean error = false;
+            boolean onlyLengths = true;
+            Size s = size();
+            for (FExp arg : myArgs()) {
+                if (arg.isArray() && !arg.size().equivalent(s, false)) {
+                    error = true;
+                    if (arg.ndims() != s.ndims()) {
+                        onlyLengths = false;
+                        break;
+                    }
+                }
+            }
+            if (error) {
+                errorUnlessDisabledAnd(onlyLengths, 
+                        "Mismatching sizes in %s. All non-scalar arguments need matching sizes", builtInName());
+            }
+        }
+    }
+
   public void FEnumIntegerExp.typeCheck(ErrorCheckType checkType) {
 	  super.typeCheck(checkType);
 	  // We can't define the function Integer in PredefinedTypes.jrag - conflict with the type Integer
@@ -833,7 +976,8 @@ aspect FlatTypeCheck {
     public void FSpatialDistExp.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
         if (!getIn0().size().equivalent(getIn1().size(), true)) {
-            error("Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
+            errorUnlessDisabledAnd(getIn0().ndims() == getIn1().ndims(), 
+                    "Calling function spatialDistribution(): first and second arguments 'in0' and 'in1' needs equivalent sizes");
         }
         if (isArray()) {
             if (getX().isArray()) {
@@ -854,16 +998,8 @@ aspect FlatTypeCheck {
 	}
 
     public void FHomotopyExp.typeCheck(ErrorCheckType checkType) {
-      if (isArray()) {
-          Size s = size();
-          for (FExp arg : myArgs()) {
-              if (!arg.type().isScalar() && !arg.size().equivalent(s, false)) {
-                  error("Mismatching sizes in homotopy. All non-scalar arguments need matching sizes");
-                  break;
-              }
-          }
-      }
-      super.typeCheck(checkType);
+        checkVectorizedSizes(checkType);
+        super.typeCheck(checkType);
     }
   
     public void InstDerExp.typeCheck(ErrorCheckType checkType) {
@@ -890,12 +1026,15 @@ aspect FlatTypeCheck {
   								  getDim().type().isInteger() && getDim().type().isScalar();
   eq FMatrix.dimensionIsOk()    = true;
   eq FMatrixRow.dimensionIsOk() = true;
- 
+    public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT =
+            new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT", ProblemKind.SEMANTIC,
+                    "Could not evaluate array size of output %s");
+
   public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
 	  if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall())
 		  error("Function " + getName().name() + "() has no outputs, but is used in expression");
 	  else if (!isFunctionCallClause() && !inFunction() && size().isUnknown())
-		  error("Could not evaluate array size of output " + expOutput().name());
+	      CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
         if (myCallOutputs().size() < myLefts().size())
 		  error("Too many components assigned from function call: " + getName().name() + 
                 "() has " + myCallOutputs().size() + " output(s)");
@@ -903,30 +1042,32 @@ aspect FlatTypeCheck {
   
   syn boolean InstFunctionCall.isPartialFunctionCall() = false;
   eq InstPartialFunctionCall.isPartialFunctionCall()   = true;
-  
-  public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
-	  if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
-		  if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
-			  FIdUse use = getFExp().asFIdUse();
-			  if (use.isForIndex()) {
-				  error("Can not assign a value to a for loop index");
-			  } else if (size().isUnknown() && !inFunction()) {
-				  error(functionCallDecription() + ": could not evaluate array size of output " + 
-						  myOutput().name());
-			  } else if (!use.type().typeCompatible(type(), true)) {
-			      if (use.type().scalarType().typeCompatible(type().scalarType())) {
-			          if (!lockBranch(checkType))
-	                      error(functionCallDecription() + ": array sizes of component " + use.name() + 
-	                              " and output " + myOutput().name() + " are not compatible");
-			      } else {
-    				  error(functionCallDecription() + ": types of component " + use.name() + 
-    						  " and output " + myOutput().name() + " are not compatible");
-			      }
-			  }
-		  }
-	  }
-  }
-  
+
+    public void FFunctionCallLeft.typeCheck(ErrorCheckType checkType) {
+        if (hasFExp() && !myOutput().isUnknown() && !type().isUnknown()) { // Avoid duplicate error
+            if (getFExp() instanceof FIdUseExp) {  // Should never be false - add check? 
+                FIdUse use = getFExp().asFIdUse();
+                FType useType = use.type();
+                FType outType = type();
+                if (use.isForIndex()) {
+                    error("Can not assign a value to a for loop index");
+                } else if (outType.size().isUnknown() && !inFunction()) {
+                    error(functionCallDecription() + ": could not evaluate array size of output " + 
+                            myOutput().name());
+                } else if (!useType.typeCompatible(outType, true)) {
+                    if (useType.typeCompatibleExceptLengths(outType)) {
+                        if (!lockBranch(checkType))
+                            errorUnlessDisabled("%s: component %s is of size %s and output %s is of size %s - they are not compatible", 
+                                    functionCallDecription(), use.name(), useType.size(), myOutput().name(), outType.size());
+                    } else {
+                        error("%s: component %s is of type %s and output %s is of type %s - they are not compatible", 
+                                functionCallDecription(), use.name(), useType, myOutput().name(), outType);
+                    }
+                }
+            }
+        }
+    }
+
   inh String InstFunctionArgument.functionCallDecription();
   inh String FFunctionCallLeft.functionCallDecription();
   eq FAbstractFunctionCall.getChild().functionCallDecription() = functionCallDecription();
@@ -958,8 +1099,12 @@ aspect FlatTypeCheck {
                 if (msg != null)
                     error(msg);
                 else
-                    error("%s: types of %s and input %s are not compatible\n    type of '%s' is %s", 
-                            functionCallDecription(), argumentDesc(), getBoundInput().name(), getFExp(), getFExp().type());
+                    error("%s: types of %s and input %s are not compatible\n" + 
+                          "    type of '%s' is %s\n" + 
+                          "    expected type is %s", 
+                          functionCallDecription(), argumentDesc(), getBoundInput().name(), 
+                          getFExp(), getFExp().type(),
+                          argumentDefinedTypeValid() ? getBoundInput().type().toString() : expectedArgumentType());
             }
         }
     }
@@ -992,17 +1137,11 @@ aspect FlatTypeCheck {
   inh String InstFunctionArgument.argumentTypeError();
   eq FExp.getChild().argumentTypeError()         = null;
   eq FCardinality.getChild().argumentTypeError() = "The argument of cardinality() must be a scalar reference to a connector";
-  
-  protected String InstFunctionArgument.argumentDesc() { return null; }
-  
-  protected String InstPositionalArgument.argumentDesc() {
-	  return "positional argument " + (getPos() + 1);
-  }
-  
-  protected String InstNamedArgument.argumentDesc() {
-	  return "named argument " + getName().prettyPrint("");
-  }
-  
+
+    syn String InstFunctionArgument.argumentDesc() = null;
+    eq InstPositionalArgument.argumentDesc() = "positional argument " + (getPos() + 1);
+    eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
+
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
 //	  if (getTopInstAccess() == this && !type().isUnknown()) {
 		  // TODO: if this is a slice, check that all branches are of equal size
@@ -1073,7 +1212,7 @@ aspect FlatTypeCheck {
 
     /**
      * Check if the type defined for this argument in the built-in function list 
-     *        is valid.
+     * is valid.
      */
     inh boolean InstFunctionArgument.argumentDefinedTypeValid();
     eq FAbstractFunctionCall.getChild().argumentDefinedTypeValid()           = true;
@@ -1109,7 +1248,8 @@ aspect FlatTypeCheck {
     inh boolean InstFunctionArgument.argumentTypeValid(FType type);
     eq FAbstractFunctionCall.getChild().argumentTypeValid(FType type)     = type.isPrimitive();
     eq FTranspose.getChild().argumentTypeValid(FType type)                = type.ndims() >= 2 && type.isPrimitive();
-    eq FSymmetric.getChild().argumentTypeValid(FType type)                = type.ndims() == 2 && type.size().get(0) == type.size().get(1);
+    eq FSymmetric.getChild().argumentTypeValid(FType type)                = 
+        type.ndims() == 2 && type.size().get(0) == type.size().get(1);
     eq FReductionExp.getChild().argumentTypeValid(FType type)             = type.ndims() > 0 && type.hasAdd();
     eq FSemiLinearExp.getChild().argumentTypeValid(FType type)            = type.isNumeric();
     eq FAbsExp.getChild().argumentTypeValid(FType type)                   = type.isNumeric();
@@ -1121,16 +1261,48 @@ aspect FlatTypeCheck {
         hasY() != getOriginalArg(i).getFExp().isArray() && type.isPrimitive();
     eq FSmoothExp.getChild().argumentTypeValid(FType type)                = type.onlyContainsReal();
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
-    eq FCardinality.getChild().argumentTypeValid(FType type)              = type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FCardinality.getChild().argumentTypeValid(FType type)              = 
+        type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
-            getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
-    eq FStringExp.getChild().argumentTypeValid(FType type)                = type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
+        getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FStringExp.getChild().argumentTypeValid(FType type)                = 
+        type.isScalar() && (type.isReal() || type.isInteger() || type.isBoolean() || type.isEnum());
     eq FInfArgsFunctionCall.getChild().argumentTypeValid(FType type)      = true;  // Type checked in FInfArgsFunctionCall.typeCheck()
     eq FReinit.getChild().argumentTypeValid(FType type)                   = true;  // Type checked in Reinit.typeCheck()
     eq FHomotopyExp.getChild().argumentTypeValid(FType type)              = type.isNumeric();
     // All types allowed for these:
     eq FNoEventExp.getChild().argumentTypeValid(FType type)               = true;
     eq FSizeExp.getChild().argumentTypeValid(FType type)                  = true;
+
+    /**
+     * Description of expexted type of argument.
+     * 
+     * Should be defined for cases where argumentDefinedTypeValid() returns and 
+     * argumentTypeValid() both return false.
+     */
+    inh String InstFunctionArgument.expectedArgumentType();
+    eq FAbstractFunctionCall.getChild().expectedArgumentType()     = 
+        "Real, Integer, Boolean, String or enumeration";
+    eq FTranspose.getChild().expectedArgumentType()                = 
+        "matrix of Real, Integer, Boolean, String or enumeration";
+    eq FSymmetric.getChild().expectedArgumentType()                = "square matrix";
+    eq FReductionExp.getChild().expectedArgumentType()             = "Real array";
+    eq FEnumIntegerExp.getChild().expectedArgumentType()           = "enumeration";
+    eq FSemiLinearExp.getChild().expectedArgumentType()            = "Real";
+    eq FAbsExp.getChild().expectedArgumentType()                   = "Real";
+    eq FSignExp.getChild().expectedArgumentType()                  = "Real";
+    eq FEventGenExp.getChild().expectedArgumentType()              = "Real";
+    eq FMathematicalFunctionCall.getChild().expectedArgumentType() = "Real";
+    eq FSmoothExp.getChild().expectedArgumentType()                = "Real";
+    eq FHomotopyExp.getChild().expectedArgumentType()              = "Real";
+    eq FMinMaxExp.getOriginalArg(int i).expectedArgumentType()     = 
+        (hasY() ? "scalar" : "array of") + " Real, Integer, Boolean, String or enumeration";
+    eq FScalarExp.getChild().expectedArgumentType()                = "array with exactly 1 element";
+    eq FVectorExp.getChild().expectedArgumentType()                = "scalar or vector-shaped array";
+    eq FMatrixExp.getChild().expectedArgumentType()                = "scalar, vector or matrix-shaped array";
+    eq FCardinality.getChild().expectedArgumentType()              = "scalar connector";
+    eq FConnectionsOp.getChild().expectedArgumentType()            = "connector";
+    eq FStringExp.getChild().expectedArgumentType()                = "scalar Real, Integer, Boolean or enumeration";
 
   protected static final Criteria<InstComponentDecl> FCardinality.ALLOWED_COMPONENTS = new Criteria<InstComponentDecl>() {
       public boolean test(InstComponentDecl elem) { return elem.isConnector() || elem.isPrimitive(); }
@@ -1168,28 +1340,29 @@ aspect FlatTypeCheck {
 			  return false;
 	  return true;
   }
-	
-  protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
-      enabledExp.collectErrors(checkType);
-      if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
-          enabledExp.error("The type of the enabled expression is not boolean");
-      } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
-          if (enabledExp.ndims() == 0) {
-              enabledExp.warning("Assuming 'each' for enabled expression");
-          } else {
-              enabledExp.error("Array size mismatch for the enabled attribute" +
-                      ", size of component declaration is " + parentType.size() + 
-                      " and size of expression is " + enabledExp.size());
-          }
-      } else if (eachSet) { 
-          if (parentType.ndims() == 0) {
-              enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
-          } else if (enabledExp.ndims() > 0) {
-              enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
-          }
-      }
-  }
-  
+
+    protected static void ASTNode.typeCheckEnabled(ErrorCheckType checkType, FExp enabledExp, FType parentType, boolean eachSet) {
+        enabledExp.collectErrors(checkType);
+        if (!enabledExp.type().isBoolean() && !enabledExp.type().isUnknown()) {
+            enabledExp.error("The type of the enabled expression is not boolean");
+        } else if (!eachSet && !parentType.dimensionCompatible(enabledExp.type())) { 
+            if (enabledExp.ndims() == 0) {
+                enabledExp.warning("Assuming 'each' for enabled expression");
+            } else {
+                enabledExp.errorUnlessDisabledAnd(parentType.ndims() == enabledExp.ndims(), 
+                        "Array size mismatch for the enabled attribute, " + 
+                        "size of component declaration is %s and size of expression is %s", 
+                        parentType.size(), enabledExp.size());
+            }
+        } else if (eachSet) { 
+            if (parentType.ndims() == 0) {
+                enabledExp.warning("The 'each' keyword should not be applied to attributes of scalar components");
+            } else if (enabledExp.ndims() > 0) {
+                enabledExp.error("The enabled attribute is declared 'each' and the expression is not scalar");
+            }
+        }
+    }
+
 }
 
 aspect VariabilityCheck {

@@ -1352,6 +1352,34 @@ end ExpandableConnectors.Expandable36;
 ")})));
     end Expandable36;
 
+    model Expandable37
+        expandable connector EC
+        end EC;
+        connector C = Real;
+        EC ec1;
+        C c1;
+    equation
+        connect(c1, ec1.a) annotation (Line(
+          points={{-22,2},{-43,2}},
+          color={0,0,255},
+          smooth=Smooth.None));
+        c1 = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expandable37",
+            description="Test expandable connector and connect equation with annotation, caused crash bug",
+            flatModel="
+fclass ExpandableConnectors.Expandable37
+ Real ec1.a;
+ Real c1;
+equation
+ c1 = time;
+ c1 = ec1.a;
+end ExpandableConnectors.Expandable37;
+")})));
+    end Expandable37;
+
     
     
     model ExpandableErr1
@@ -1736,7 +1764,7 @@ Error at line 1703, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
             errorMessage="
 1 errors found:
 
-Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr14;
@@ -1763,7 +1791,7 @@ Error at line 1730, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
             errorMessage="
 1 errors found:
 
-Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1757, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
     end ExpandableErr15;
@@ -1862,7 +1890,7 @@ Error at line 1816, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/Expan
             errorMessage="
 1 errors found:
 
-Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo':
+Error at line 1856, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/ExpandableConnectors.mo', CONNECT_EXPANDABLE_AND_NON_EXPANDABLE_TYPE:
   Connecting an expandable connector to a non-expandable connector is not allowed
 ")})));
 	end ExpandableErr18;

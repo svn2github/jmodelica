@@ -27,7 +27,7 @@ package TypeTests
             errorMessage="
 1 errors found:
 
-Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 	end TypeTest1;
@@ -45,8 +45,8 @@ Error at line 20, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
             errorMessage="
 1 errors found:
 
-Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  The right and left expression types of equation are not compatible
+Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EQUATION:
+  The right and left expression types of equation are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 ")})));
 	end TypeTest2;
 
@@ -62,7 +62,7 @@ Error at line 39, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 1 errors found:
 
-Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -82,7 +82,7 @@ Error at line 56, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTes
             errorMessage="
 1 errors found:
 
-Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -102,7 +102,7 @@ Error at line 76, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 1 errors found:
 
-Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real
     type of 'y' is Boolean
@@ -122,19 +122,19 @@ Error at line 96, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTest
             errorMessage="
 5 errors found:
 
-Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute start for the variable y does not match the declared type of the variable
 
-Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute unit for the variable y does not match the declared type of the variable
 
-Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute nominal for the variable y does not match the declared type of the variable
 
-Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 40, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute min for the variable y does not match the declared type of the variable
 
-Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 114, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   The type of the binding expression of the attribute max for the variable y does not match the declared type of the variable
 ")})));
 	end TypeTest6;
@@ -255,32 +255,32 @@ model TypeRel5
             errorMessage="
 6 errors found:
 
-Error at line 244, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 244, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} == {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 245, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 245, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} <> {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 246, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 246, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} > {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 247, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 247, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} >= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 248, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 248, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} < {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
 
-Error at line 249, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 249, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1.0} <= {2.0}
     type of '{1.0}' is Real[1]
     type of '{2.0}' is Real[1]
@@ -303,32 +303,32 @@ model TypeRel6
             errorMessage="
 6 errors found:
 
-Error at line 292, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 292, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 == \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 293, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 293, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 <> \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 294, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 294, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 > \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 295, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 295, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 >= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 296, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 296, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 < \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
 
-Error at line 297, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 297, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: 1.0 <= \"2.0\"
     type of '1.0' is Real
     type of '\"2.0\"' is String
@@ -424,11 +424,12 @@ model AbsType5
 2 errors found:
 
 Error at line 416, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter x
+  Could not evaluate binding expression for structural parameter 'x': 'abs(\"-1\")'
 
 Error at line 417, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function abs(): types of positional argument 1 and input v are not compatible
     type of '\"-1\"' is String
+    expected type is Real
 ")})));
 end AbsType5;
 
@@ -489,6 +490,7 @@ model IntegerExp1
 		TransformCanonicalTestCase(
 			name="IntegerExp1",
 			description="integer() operator: constant",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.IntegerExp1
  constant Integer x = 1;
@@ -544,6 +546,7 @@ model ConstCmpEq
 		TransformCanonicalTestCase(
 			name="ConstCmpEq",
 			description="Constant evaluation of comparisons: equals",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpEq
  constant Boolean a = false;
@@ -565,6 +568,7 @@ model ConstCmpNeq
 		TransformCanonicalTestCase(
 			name="ConstCmpNeq",
 			description="Constant evaluation of comparisons: not equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpNeq
  constant Boolean a = true;
@@ -588,6 +592,7 @@ model ConstCmpLeq
 		TransformCanonicalTestCase(
 			name="ConstCmpLeq",
 			description="Constant evaluation of comparisons: less or equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpLeq
  constant Boolean a = true;
@@ -613,6 +618,7 @@ model ConstCmpLt
 		TransformCanonicalTestCase(
 			name="ConstCmpLt",
 			description="Constant evaluation of comparisons: less than",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpLt
  constant Boolean a = true;
@@ -638,6 +644,7 @@ model ConstCmpGeq
 		TransformCanonicalTestCase(
 			name="ConstCmpGeq",
 			description="Constant evaluation of comparisons: greater or equal",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpGeq
  constant Boolean a = false;
@@ -663,6 +670,7 @@ model ConstCmpGt
 		TransformCanonicalTestCase(
 			name="ConstCmpGt",
 			description="Constant evaluation of comparisons:greater than",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ConstCmpGt
  constant Boolean a = false;
@@ -687,7 +695,7 @@ model RealEq1
             errorMessage="
 1 errors found:
 
-Error at line 681, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 681, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 == 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -705,7 +713,7 @@ model RealEq2
             errorMessage="
 1 errors found:
 
-Error at line 699, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 699, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', EQUALITY_COMPARISON_OF_REALS:
   Equality comparisons do not allow real operands: 1.0 <> 2
     type of '1.0' is Real
     type of '2' is Integer
@@ -795,6 +803,7 @@ model ParameterStart2
 		TransformCanonicalTestCase(
 			name="ParameterStart2",
 			description="Constant without binding expression: start not set",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ParameterStart2
  constant Real p = 0.0;
@@ -833,6 +842,7 @@ model ArrayTypeTest2
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest2",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest2
  constant TypeTests.ArrayTypeTest2.T x[1] = 1;
@@ -877,6 +887,7 @@ model ArrayTypeTest3
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest3",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest3
  constant Real y[1].x(start = 1) = 1;
@@ -911,6 +922,7 @@ model ArrayTypeTest4
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest4",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest4
  constant Real y[1,1].x(start = 1) = 1;
@@ -949,6 +961,7 @@ model ArrayTypeTest5
 		TransformCanonicalTestCase(
 			name="ArrayTypeTest5",
 			description="Check that short type declarations with array indices are expanded correctly.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest5
  constant Real y[1,1].x(start = 1) = 3;
@@ -1022,7 +1035,7 @@ model ExtObjType1
             errorMessage="
 1 errors found:
 
-Error at line 1016, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1016, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable e does not match the declared type of the variable
 ")})));
 end ExtObjType1;
@@ -1045,7 +1058,8 @@ model RecursiveStructure1
             errorMessage="
 1 errors found:
 
-Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1035, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a2:
   Recursive class structure
 ")})));
 end RecursiveStructure1;
@@ -1069,7 +1083,8 @@ model RecursiveStructure2
             errorMessage="
 1 errors found:
 
-Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1060, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a:
   Recursive class structure
 ")})));
 end RecursiveStructure2;
@@ -1093,7 +1108,8 @@ model RecursiveStructure3
             errorMessage="
 1 errors found:
 
-Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1083, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a2:
   Recursive class structure
 ")})));
 end RecursiveStructure3;
@@ -1112,7 +1128,8 @@ model RecursiveStructure4
             errorMessage="
 1 errors found:
 
-Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 1103, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo',
+In component a:
   Recursive class structure
 ")})));
 end RecursiveStructure4;
@@ -1196,6 +1213,7 @@ model DivTest1
 		TransformCanonicalTestCase(
 			name="DivTest1",
 			description="Testing output types of the div operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.DivTest1
  constant Real aReal = 3;
@@ -1231,10 +1249,12 @@ model DivTest2
 Error at line 1222, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1222, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function div(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end DivTest2;
 
@@ -1247,6 +1267,7 @@ model ModTest1
 		TransformCanonicalTestCase(
 			name="ModTest1",
 			description="Testing output types of the mod operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ModTest1
  constant Real aReal = 3;
@@ -1285,10 +1306,12 @@ model ModTest2
 Error at line 1276, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1276, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function mod(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end ModTest2;
 
@@ -1301,6 +1324,7 @@ model RemTest1
 		TransformCanonicalTestCase(
 			name="RemTest1",
 			description="Testing output types of the rem operator.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.RemTest1
  constant Real aReal = 3;
@@ -1336,10 +1360,12 @@ model RemTest2
 Error at line 1327, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 2 and input x2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 
 Error at line 1327, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function rem(): types of positional argument 1 and input x1 are not compatible
     type of '\"hej\"' is String
+    expected type is Real
 ")})));
 end RemTest2;
 
@@ -1604,6 +1630,7 @@ model IfExpType1
 		TransformCanonicalTestCase(
 			name="IfExpType1",
 			description="If expression with branches with different array sizes",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.IfExpType1
  structural parameter Integer n = 3 /* 3 */;
@@ -1702,6 +1729,7 @@ model IfExpType5
 		TransformCanonicalTestCase(
 			name="IfExpType5",
 			description="If expression with branches with different array sizes, using function call",
+            eliminate_alias_variables=false,
 			variability_propagation=false,
 			flatModel="
 fclass TypeTests.IfExpType5
@@ -1898,18 +1926,21 @@ model StringExpType1
 4 errors found:
 
 Error at line 1889, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter a
+  Could not evaluate binding expression for structural parameter 'a': 'String({1, 2})'
+    Cannot get int value of CValueArray ({ 1, 2 })
 
 Error at line 1890, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean or enumeration
 
 Error at line 1890, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Could not evaluate binding expression of structural parameter b
+  Could not evaluate binding expression for structural parameter 'b': 'String(\"a\")'
 
 Error at line 1891, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function String(): types of positional argument 1 and input x are not compatible
     type of '\"a\"' is String
+    expected type is scalar Real, Integer, Boolean or enumeration
 ")})));
 end StringExpType1;
 
@@ -1932,8 +1963,8 @@ fclass TypeTests.AlgorithmType1
  discrete Integer i;
  discrete Real r;
  discrete Integer temp_1;
- Real temp_2;
- Real temp_3;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0;
  pre(b) = false;
@@ -1942,8 +1973,8 @@ initial equation
 algorithm
  r := time * time + 1;
  b := noEvent(r > 2) and noEvent(r < 4);
- temp_2 := r - pre(temp_1);
- temp_3 := r - (pre(temp_1) + 1);
+ _eventIndicator_1 := r - pre(temp_1);
+ _eventIndicator_2 := r - (pre(temp_1) + 1);
  temp_1 := if r < pre(temp_1) or r >= (pre(temp_1) + 1) or initial() then integer(r) else pre(temp_1);
  i := temp_1;
 end TypeTests.AlgorithmType1;
@@ -2032,13 +2063,13 @@ algorithm
 3 errors found:
 
 Error at line 2023, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Boolean, and type of right-hand side is Real
 
 Error at line 2024, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Real, and type of right-hand side is Boolean
 
 Error at line 2025, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
-  Types of right and left side of assignment are not compatible
+  The right and left expression types of assignment are not compatible, type of left-hand side is Integer, and type of right-hand side is String
 ")})));
 end AlgorithmType3;
 
@@ -2145,10 +2176,10 @@ model Functional1
             errorMessage="
 2 errors found:
 
-Error at line 2138, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2138, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of y1, size of declaration is [2] and size of binding expression is [1, 2]
 
-Error at line 2139, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2139, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of y2, size of declaration is [2] and size of binding expression is [1, 2]
 ")})));
 end Functional1;
@@ -2263,10 +2294,12 @@ model Functional4
 Error at line 2254, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'time' is Real
+    expected type is ((Real y) = TypeTests.Functional4.partFunc(Real x))
 
 Error at line 2254, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 2 and input x are not compatible
     type of 'fullFunc()' is ((Real y) = TypeTests.Functional4.fullFunc(Real x))
+    expected type is Real
 ")})));
 end Functional4;
 
@@ -2304,6 +2337,7 @@ model Functional5
 Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function usePartFunc(): types of positional argument 1 and input pf are not compatible
     type of 'fullFunc()' is ((Real b) = TypeTests.Functional5.fullFunc())
+    expected type is ((Real y) = TypeTests.Functional5.partFunc(Real x))
 
 Error at line 2295, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument fullFunc(): missing argument for required input a
@@ -2394,6 +2428,7 @@ Error at line 2370, column 49, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 Error at line 2370, column 54, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): types of named argument x2 and input x2 are not compatible
     type of '\"string\"' is String
+    expected type is Real
 
 Error at line 2370, column 66, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Creating functional input argument mf(): no input matching named argument x3 found
@@ -2420,6 +2455,7 @@ model Delay1
 Error at line 2411, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function delay(): types of positional argument 2 and input delayTime are not compatible
     type of '{d, d}' is Real[2]
+    expected type is Real
 ")})));
 end Delay1;
 
@@ -2449,6 +2485,7 @@ Error at line 2431, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeT
 Error at line 2431, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
   Calling function spatialDistribution(): types of positional argument 5 and input initialPoints are not compatible
     type of '{{0, 0}, {0, 0}}' is Integer[2, 2]
+    expected type is Real[:]
 ")})));
 end SpatialDist1;
 
@@ -2466,7 +2503,7 @@ model SpatialDist2
             errorMessage="
 1 errors found:
 
-Compliance error at line 2460, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Compliance error at line 2460, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', INCORRECT_USE_OF_SPATIAL_DISTRIBUTION:
   The spatialDistribution() function-like operator is not supported vectorized in function call equations
 ")})));
 end SpatialDist2;
@@ -2606,6 +2643,7 @@ model DivType1
         TransformCanonicalTestCase(
             name="DivType1",
             description="Type calculation for div() operator",
+            eliminate_alias_variables=false,
             flatModel="
 fclass TypeTests.DivType1
  parameter Real x[1];
@@ -2649,7 +2687,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2641, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2641, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to 0, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue1;
@@ -2669,7 +2707,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2661, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2661, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to p1 - p2, evaluating to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue2;
@@ -2706,9 +2744,39 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo':
+Error at line 2686, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', NOMINAL_ELEMENT_EQUAL_TO_ZERO:
   The attribute nominal for the variable x is set to {1, 0, 2, 0}, where element [2] evaluates to 0.0. A nominal value of zero is not meaningful. Please set the nominal value to the expected magnitude of the variable.
 ")})));
 end NominalValue4;
+
+model ConstantNoBindingExp1
+    constant Real c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ConstantNoBindingExp1",
+            description="Ensure that a warning is given for constant which is missing a binding expression",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2730, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
+  The constant c does not have a binding expression
+")})));
+end ConstantNoBindingExp1;
+
+model ParameterNoBindingExp1
+    parameter Real p;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ParameterNoBindingExp1",
+            description="Ensure that a warning is given for parameters which is missing a binding expression",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2730, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/TypeTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter p does not have a binding expression
+")})));
+end ParameterNoBindingExp1;
 
 end TypeTests;

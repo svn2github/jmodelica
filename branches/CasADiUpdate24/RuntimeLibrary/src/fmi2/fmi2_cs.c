@@ -96,14 +96,14 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         }
     }
     
-    while (retval == JMI_ODE_EVENT && ode_problem->time < time_final) {
+    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final) {
 
         while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
             flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));
             initialize = TRUE; /* Event detected, need to initialize the ODE problem. */
 
             if (flag != fmi2OK) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
+                jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
                 return fmi2Error;
             }
         }
@@ -141,11 +141,18 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         
         retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
         initialize = FALSE; /* The ODE problem has been initialized. */
+        
+        /* Set states to the model */
+        flag = fmi2_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
+        if (flag != fmi2OK) {
+            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
+            return fmi2Error;
+        }
 
         if (retval < JMI_ODE_OK) {
             jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
             return fmi2Error;
-        } else if (retval == JMI_ODE_EVENT) {
+        } else if (retval == JMI_ODE_EVENT || (retval == JMI_ODE_OK && time_event != time_final)) {
             fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finished with an event -> new discrete states needed. */
         }
     }
@@ -321,12 +328,11 @@ int fmi2_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
     int retval;
 
 	/* TODO: No support for terminating the Co-Simulation */
-	fmi2Boolean* terminateSimulation = (fmi2Boolean*)calloc(1, sizeof(fmi2Boolean));
-    fmi2Boolean* tmp_step_event = (fmi2Boolean*)calloc(1, sizeof(fmi2Boolean));
-    retval = fmi2_completed_integrator_step(ode_problem->fmix_me, fmi2False, tmp_step_event, terminateSimulation);
-    step_event[0] = (char) tmp_step_event[0];
-	free(terminateSimulation);
-    free(tmp_step_event);
+	fmi2Boolean terminate_simulation;
+    fmi2Boolean tmp_step_event;
+    retval = fmi2_completed_integrator_step(ode_problem->fmix_me, fmi2False, &tmp_step_event, &terminate_simulation);
+    step_event[0] = (char) tmp_step_event;
+
     if (retval != fmi2OK) {
         return -1;
     }

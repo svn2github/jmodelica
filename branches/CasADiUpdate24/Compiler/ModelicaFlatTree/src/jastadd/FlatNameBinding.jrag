@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -194,7 +195,7 @@ aspect FlatNameBinding {
 	syn lazy FlatVariableMap FClass.variablesMap() {
 		FlatVariableMap map = new FlatVariableMap();
 		map.addVariables(getFVariables());
-		map.addVariables(getAliasVariables());
+        map.addVariables(getAliasVariables());
 		return map;
 	}
 	
@@ -206,7 +207,8 @@ aspect FlatNameBinding {
 	
 	public class FlatVariableMap {
 		
-		private Map<String,FAbstractVariable> flatMap;
+        private Map<String,FAbstractVariable> flatMap;
+        private ArrayList<OnDemandMap> aliasMaps = new ArrayList<OnDemandMap>();
 		private Map<String,HierarchicalMapNode> hierMap;
 		private boolean scalar;
 		
@@ -237,6 +239,10 @@ aspect FlatNameBinding {
 				addVariable(fv);
 		}
 		
+        public void addAliasVariables(Iterable<? extends FAbstractVariable> fvs) {
+            aliasMaps.add(new OnDemandMap(fvs));
+        }
+		
 		public void addVariableFlat(FAbstractVariable fv) {
 			if (flatMap == null)
 				flatMap = new HashMap<String,FAbstractVariable>();
@@ -259,6 +265,9 @@ aspect FlatNameBinding {
 			FAbstractVariable res = null;
 			if (flatMap != null) 
 				res = flatMap.get(name);
+            if (doLookupAlias(res)) {
+                res = lookupAlias(name);
+            }
 			if (res == null && hierMap != null) {
 				HierarchicalMapNode n = hierMap.get(name);
 				if (n instanceof FAbstractVariable)
@@ -271,6 +280,9 @@ aspect FlatNameBinding {
 			FAbstractVariable res = null;
 			if (flatMap != null) 
 				res = flatMap.get(name.resolvedName());
+            if (doLookupAlias(res)) {
+                res = lookupAlias(name.resolvedName());
+            }
 			if (res == null && hierMap != null) {
 				name = name.asFQNameFull();
 				HierarchicalMapNode n = hierMap.get(name.partName(0));
@@ -289,9 +301,46 @@ aspect FlatNameBinding {
 			}
 			if (flatMap != null) 
 				res = flatMap.get(name.name());
+            if (doLookupAlias(res)) {
+                res = lookupAlias(name.name());
+            }
 			return res;
 		}
 		
+        public boolean doLookupAlias(FAbstractVariable res) {
+            return res == null && aliasMaps.size() > 0;
+        }
+        
+        public FAbstractVariable lookupAlias(String name) {
+            FAbstractVariable res = null;
+            for (FlatVariableMap fvm : aliasMaps) {
+                res = fvm.lookup(name);
+                if (res != null) {
+                    break;
+                }
+            }
+            return res;
+        }
+        
+        private static class OnDemandMap extends FlatVariableMap {
+            
+            Iterable<? extends FAbstractVariable> fvs;
+            boolean init = false;
+            
+            public OnDemandMap(Iterable<? extends FAbstractVariable> fvs) {
+                this.fvs = fvs;
+            }
+            
+            @Override
+            public FAbstractVariable lookup(String name) {
+                if (!init) {
+                    addVariables(fvs);
+                    init = true;
+                }
+                return super.lookup(name);
+            }
+        }
+        
 		public interface HierarchicalMapNode {
 			public FAbstractVariable lookupHierarchical(FQName name, int part, boolean outermost);
 			public void addHierarchical(FAbstractVariable fv, FQName name, int part);

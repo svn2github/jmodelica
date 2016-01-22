@@ -16,13 +16,7 @@
 
 package org.jmodelica.util;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,9 +27,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
+import org.jmodelica.util.xml.DocBookColSpec;
+import org.jmodelica.util.xml.DocBookPrinter;
+import org.jmodelica.util.xml.StringUtil;
+import org.jmodelica.util.xml.XMLPrinter;
 
 /**
  * OptionRegistry contains all options for the compiler. Options
@@ -137,6 +133,15 @@ abstract public class OptionRegistry {
     public interface FunctionIncidenceCalc {
         public static final String NONE  = "none";
         public static final String ALL = "all";
+    }
+    public interface CCompilerFiles {
+        public static final String NONE      = "none";
+        public static final String FUNCTIONS = "functions";
+        public static final String ALL       = "all";
+    }
+    public interface CCompilerFlags {
+        public static final String O1 = ":O1";
+        public static final String O2 = ":O2";
     }
 
     public enum OptionType { compiler, runtime }
@@ -244,6 +249,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              false, 
              "If enabled, then alias parameters are eliminated from the model."),
+        ELIM_ALIAS_CONST
+            ("eliminate_alias_constants",
+             OptionType.compiler,
+             Category.uncommon,
+             false,
+             "If enabled, then alias constants are eliminated from the model."),
         VPROP
             ("variability_propagation", 
              OptionType.compiler, 
@@ -328,6 +339,12 @@ abstract public class OptionRegistry {
              FMIVersion.FMI10, 
              "Version of the FMI specification to generate FMU for.", 
              FMIVersion.FMI10, FMIVersion.FMI20, FMIVersion.FMI20a /* Temporary alpha version for FMI 2.0. TODO: remove */),
+        EXPOSE_TEMP_VARS_IN_FMU 
+            ("expose_temp_vars_in_fmu", 
+             OptionType.compiler, 
+             Category.uncommon,
+             false, 
+             "If enabled, then all temporary variables are exposed in the FMU XML and accessable as ordinary variables"),
         VAR_SCALE 
             ("enable_variable_scaling", 
              OptionType.compiler, 
@@ -371,8 +388,14 @@ abstract public class OptionRegistry {
             ("component_names_in_errors", 
              OptionType.compiler, 
              Category.user,
-             false, 
+             true, 
              "If enabled, the compiler will include the name of the component where the error was found, if applicable."),
+        FILTER_WARNINGS
+            ("filter_warnings",
+             OptionType.compiler,
+             Category.user,
+             "",
+             "A comma separated list of warning identifiers that should be omitted from the logs."),
         GEN_HTML_DIAG 
             ("generate_html_diagnostics", 
              OptionType.compiler, 
@@ -518,6 +541,12 @@ abstract public class OptionRegistry {
              Category.user,
              true,
              "If enabled, then relational operators are allowed to generate time events."),
+        DISABLE_SMOOTH_EVENTS
+            ("disable_smooth_events",
+             OptionType.compiler,
+             Category.experimental,
+             false,
+             "If enabled, no events will be generated for smooth operator if order equals to zero."),
        BLOCK_FUNCTION_EXTRACTION
             ("enable_block_function_extraction",
              OptionType.compiler,
@@ -540,6 +569,20 @@ abstract public class OptionRegistry {
              Category.uncommon,
              4,
              "The maximum number of processes used during c-code compilation."),
+        CC_EXTRA_FLAGS_APPLIES_TO
+            ("cc_extra_flags_applies_to",
+            OptionType.compiler,
+            Category.uncommon,
+            CCompilerFiles.FUNCTIONS,
+            "Parts of c-code to compile with extra compiler flags specified by ccompiler_extra_flags",
+            CCompilerFiles.NONE,CCompilerFiles.FUNCTIONS,CCompilerFiles.ALL),
+        CC_EXTRA_FLAGS
+            ("cc_extra_flags",
+            OptionType.compiler,
+            Category.uncommon,
+            CCompilerFlags.O1,
+            "Optimization level for c-code compilation",
+            CCompilerFlags.O1, CCompilerFlags.O2),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,
@@ -598,8 +641,40 @@ abstract public class OptionRegistry {
              Category.user,
              1,
              "Equations scaling mode in equation block solvers: " +
-             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid.",
+             "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid, 4- aggressive automatic scaling, 5 - automatic rescaling at full Jacobian update",
+             0, 5),
+        NLE_SOLVER_EXIT_CRITERION
+            ("nle_solver_exit_criterion",
+             OptionType.runtime, 
+             Category.user,
+             3,
+             "Exit criterion mode: " +
+             "0 - step length and residual based, 1 - only step length based, 2 - only residual based, 3 - hybrid.",
              0, 3),
+        NLE_JACOBIAN_UPDATE_MODE
+            ("nle_jacobian_update_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to update the Jacobian: " +
+             "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
+             0, 2),
+        NLE_JACOBIAN_CALCULATION_MODE
+            ("nle_jacobian_calculation_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to calculate the Jacobian: " +
+             "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally, 9 - Jacobian compresssion.",
+             0, 9),
+        NLE_ACTIVE_BOUNDS_MODE
+            ("nle_active_bounds_mode",
+             OptionType.runtime, 
+             Category.user,
+             0,
+             "Mode for how to handle active bounds: " +
+             "0 - project Newton step at active bounds, 1 - use projected steepest descent direction.",
+             0, 1),
         NLE_SOLVER_MIN_RESIDUAL_SCALING_FACTOR
             ("nle_solver_min_residual_scaling_factor",
              OptionType.runtime, 
@@ -652,7 +727,7 @@ abstract public class OptionRegistry {
              Category.uncommon, 
              false,
              "If enabled, the equation block solver computes and log the jacobian condition number."),
-             NLE_SOLVER_BRENT_IGNORE_ERROR
+        NLE_SOLVER_BRENT_IGNORE_ERROR
             ("nle_brent_ignore_error",
              OptionType.runtime, 
              Category.uncommon, 
@@ -679,6 +754,13 @@ abstract public class OptionRegistry {
              100,
              "Maximum number of iterations for the equation block solver.",
              2, 500),
+        NLE_SOLVER_MAX_ITER_NO_JACOBIAN
+            ("nle_solver_max_iter_no_jacobian",
+             OptionType.runtime, 
+             Category.uncommon,
+             10,
+             "Maximum number of iterations without jacobian update. Value 1 means an update in every iteration.",
+             1, 500),
         NLE_SOLVER_STEP_LIMIT_FACTOR
             ("nle_solver_step_limit_factor",
              OptionType.runtime, 
@@ -699,6 +781,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              true,
              "If enabled, the nominal values will be used as initial guess to the solver if initialization failed."),
+        NLE_SOLVER_LAST_INTEGRATOR_STEP
+            ("nle_solver_use_last_integrator_step",
+             OptionType.runtime, 
+             Category.uncommon,
+             false,
+             "If enabled, the intial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
               OptionType.runtime, 
@@ -908,155 +996,6 @@ abstract public class OptionRegistry {
             }
         }
         out.exit(3);
-    }
-
-    private static class XMLPrinter {
-        private Stack<Entry> stack;
-        private String indent;
-        private PrintStream out;
-        private String indentStep;
-        
-        public XMLPrinter(PrintStream out, String indent, String indentStep) {
-            stack = new Stack<Entry>();
-            this.indent = indent;
-            this.out = out;
-            this.indentStep = indentStep;
-        }
-        
-        public void enter(String name, Object... args) {
-            stack.push(new Entry(indent, name));
-            printHead(name, args);
-            out.println('>');
-            indent = indent + indentStep;
-        }
-        
-        public void exit(int n) {
-            for (int i = 0; i < n; i++) {
-                exit();
-            }
-        }
-        
-        public void exit() {
-            Entry e = stack.pop();
-            indent = e.indent;
-            out.format("%s</%s>\n", indent, e.name);
-        }
-        
-        public void single(String name, Object... args) {
-            printHead(name, args);
-            out.print(" />\n");
-        }
-        
-        public void oneLine(String name, String cont, Object... args) {
-            printHead(name, args);
-            out.format(">%s</%s>\n", cont, name);
-        }
-
-        public void text(String text, int width) {
-            wrapText(out, text, indent, width);
-        }
-        
-        public String surround(String str, String tag) {
-            return String.format("<%s>%s</%s>", tag, str, tag);
-        }
-        
-        private void printHead(String name, Object... args) {
-            out.format("%s<%s", indent, name);
-            for (int i = 0; i < args.length - 1; i += 2) {
-                out.format(" %s=\"%s\"", args[i], args[i + 1]);
-            }
-        }
-        
-        private static class Entry {
-            public final String indent;
-            public final String name;
-            
-            private Entry(String indent, String name) {
-                this.indent = indent;
-                this.name = name;
-            }
-        }
-    }
-
-    private static class DocBookPrinter extends XMLPrinter {
-        private static final Pattern PREPARE_PAT = 
-                Pattern.compile("(?<=^|[^-a-zA-Z_])('[a-z]+'|true|false|[a-z]+(_[a-z]+)+)(?=$|[^-a-zA-Z_])");
-        
-        public DocBookPrinter(PrintStream out, String indent) {
-            super(out, indent, "  ");
-        }
-        
-        public String lit(String str) {
-            return surround(str, "literal");
-        }
-        
-        public String prepare(String str) {
-            return PREPARE_PAT.matcher(str).replaceAll("<literal>$1</literal>");
-        }
-    }
-
-    private static class DocBookColSpec {
-        private String title;
-        private String align;
-        private String name;
-        private String width;
-        
-        public DocBookColSpec(String title, String align, String name, String width) {
-            this.title = title;
-            this.align = align;
-            this.name = name;
-            this.width = width;
-        }
-        
-        public void printColspec(DocBookPrinter out) {
-            out.single("colspec", "align", align, "colname", "col-" + name, "colwidth", width);
-        }
-        
-        public void printTitle(DocBookPrinter out) {
-            out.oneLine("entry", title, "align", "center");
-        }
-    }
-
-    private static void doWrap(Writer out, String text, String prefix, String partSep, String suffix, char splitAt, int width) {
-        try {
-            if (width == 0) {
-                width = Integer.MAX_VALUE;
-            }
-            int start = 0;
-            int end = width;
-            int len = text.length();
-            while (end < len) {
-                while (end > start && text.charAt(end) != splitAt)
-                    end--;
-                out.append(prefix);
-                if (end <= start) {
-                    out.append(text.substring(start, start + width - 1));
-                    start += width - 1;
-                    out.append('-');
-                } else {
-                    out.append(text.substring(start, end + 1));
-                    start = end + 1;
-                }
-                out.append(suffix);
-                out.append(partSep);
-                end = start + width;
-            }
-            out.append(prefix);
-            out.append(text.substring(start));
-            out.append(suffix);
-        } catch (IOException e) {
-            // Not handled - left to caller to discover on next write
-        }
-    }
-
-    private static void wrapText(PrintStream out, String text, String indent, int width) {
-        doWrap(new OutputStreamWriter(out), text, indent, "", "\n", ' ', width);
-    }
-
-    private static String wrapUnderscoreName(String text, int width) {
-        StringWriter out = new StringWriter();
-        doWrap(out , text, "", " ", "", '_', width);
-        return out.toString();
     }
 
     protected void defaultOption(Default o) {
@@ -1503,7 +1442,7 @@ abstract public class OptionRegistry {
 
         public void exportDocBook(DocBookPrinter out) {
             out.enter("row");
-            out.oneLine("entry", out.lit(wrapUnderscoreName(key, 26)));
+            out.oneLine("entry", out.lit(StringUtil.wrapUnderscoreName(key, 26)));
             out.oneLine("entry", String.format("%s / %s", out.lit(getType()), out.lit(getValueForDoc())));
             out.oneLine("entry", out.prepare(description));
             out.exit();
@@ -1511,7 +1450,7 @@ abstract public class OptionRegistry {
 
         public void exportPlainText(PrintStream out) {
             out.format("%-30s  %-15s\n", key, getValueForDoc());
-            wrapText(out, description, "    ", 80);
+            StringUtil.wrapText(out, description, "    ", 80);
         }
 
         public void exportXML(XMLPrinter out) {

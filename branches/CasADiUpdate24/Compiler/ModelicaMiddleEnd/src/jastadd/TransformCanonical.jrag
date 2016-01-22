@@ -1421,7 +1421,7 @@ aspect TransformCanonical {
 	 * Creates an indicator for this FRelExp
 	 */
 	public void FRelExp.genIndicator() {
-		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcTempVarName()));
+		FVariable v = new FRealVariable(new FPublicVisibilityType(), fContinuous(), new FQNameFull(calcIndicatorVarName()));
 		myFClass().addFVariable(v);
 		setIndicator(v.createUseExp());
 	}
@@ -1880,10 +1880,32 @@ aspect TransformCanonical {
                     aliasManager.addAliasVariables(equation.aliasVariables());
             }
         }
+        if (myOptions().getBooleanOption("eliminate_alias_constants")) {
+            Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
+            Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
+            for (FVariable fv : getFVariables()) {
+                fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
+            }
+        }
 		aliasManager.reportAliasErrors(this);
 		//flush();
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
 	}
+	
+    public void FVariable.classifyAliasConstant(AliasManager aliasManager, 
+            Map<String, FVariable> firstOccurencesReal, 
+            Map<String, FVariable> firstOccurencesNonReal) {
+        if (variability().knownParameterOrLess() && hasBindingExp()) {
+            Map<String, FVariable> firstOccurences = isReal() ? firstOccurencesReal : firstOccurencesNonReal;
+            String s = getBindingExp().prettyPrint("");
+            FVariable first = firstOccurences.get(s);
+            if (first != null) {
+                aliasManager.addAliasVariables(new AliasPair(first, this, false));
+            } else {
+                firstOccurences.put(s, this);
+            }
+        }
+    }
 
 	/**
 	 * Flag indicating if alias variables have been eliminated from the
@@ -1906,12 +1928,11 @@ aspect TransformCanonical {
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
 		// Go through all variables and insert in correct list
-		int i = 1;
 		for (FVariable fv : getAliasVariables()) {
 				aliasVars.add(fv);
 		}
 		for (FVariable fv : getFVariables()) {
-			fv.aliasSort(aliasVars, nonAliasVars);
+            fv.aliasSort(nonAliasVars, aliasVars);
 		}
 		
 		// Remove alias equations.
@@ -1951,7 +1972,7 @@ aspect TransformCanonical {
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.
      */
-    public void FVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+    public void FVariable.aliasSort(ArrayList<FVariable> nonAliasVars, ArrayList<FVariable> aliasVars) {
         if (isAlias()) {
             aliasVars.add(this);
         } else if (aliasSortKeep()) { 
@@ -1964,7 +1985,7 @@ aspect TransformCanonical {
      * A derivative variable of an alias is removed, if there is no suitable 
      * alias derivative variable one is created. 
      */
-    public void FDerivativeVariable.aliasSort(ArrayList<FVariable> aliasVars, ArrayList<FVariable> nonAliasVars) {
+    public void FDerivativeVariable.aliasSort(ArrayList<FVariable> nonAliasVars, ArrayList<FVariable> aliasVars) {
         FVariable itg = getMeIntegrated();
         if (itg.isAlias()) {
             FVariable alias = itg.alias();
@@ -1975,7 +1996,7 @@ aspect TransformCanonical {
                 nonAliasVars.add(fdv);
             }
         } else {
-            super.aliasSort(aliasVars, nonAliasVars);
+            super.aliasSort(nonAliasVars, aliasVars);
         }
     }
     
@@ -2028,6 +2049,7 @@ aspect TransformCanonical {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
+                new_exp.setOriginalVariable(this, fv);
                 new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 
                     return new FNegExp(new_exp);
@@ -2041,6 +2063,7 @@ aspect TransformCanonical {
                     && !inWhen() && !inFunctionCallLeft()) {
                 FVariable var = myFV().derivativeEquivalent();
                 FIdUseExp exp =  var.getMeDifferentiated().createUseExp();
+                exp.setOriginalVariable(this, var);
                 if (var.isAlias())
                     exp.rewriteAlias = true;
                 return exp;
@@ -2055,10 +2078,12 @@ aspect TransformCanonical {
         when (rewriteAlias) to FExp {
             if (myNonPreFV().isFVariable() && myNonPreFV().isAlias()) {
                 FVariable fv = (FVariable) myNonPreFV();
-                FExp new_exp = fv.alias().createFPreExp();
+                FIdUseExp new_exp = fv.alias().createFPreExp();
+                new_exp.setOriginalVariable(this, fv);
                 if (fv.isNegated()) 
-                    new_exp = new FNegExp(new_exp);
-                return new_exp;
+                    return new FNegExp(new_exp);
+                else
+                    return new_exp;
             } else {
                 rewriteAlias = false;
                 return this;
@@ -2071,7 +2096,9 @@ aspect TransformCanonical {
             FIdUseExp left = (FIdUseExp) getLeft();
             if (left.myFV().isFVariable() && left.myFV().isAlias()) {
                 FVariable fv = (FVariable) left.myFV();
-                setLeft(fv.alias().createUseExp());
+                FIdUseExp exp = fv.alias().createUseExp();
+                setLeft(exp);
+                exp.setOriginalVariable(left, fv);
                 if (fv.isNegated()) 
                     setRight(new FNegExp(getRight()));
                 return this;
@@ -2095,15 +2122,18 @@ aspect TransformCanonical {
         when (rewriteAlias && getFIdUse().myFV().isFVariable() && (myFV().isAlias() || getFIdUse().myFV().isAlias())) to FExp {
             if (myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
-                FExp new_exp = fv.alias().createUseExp();
+                FIdUseExp new_exp = fv.alias().createUseExp();
+                new_exp.setOriginalVariable(this, fv);
                 if (myFV().isNegated()) 
-                    new_exp = new FNegExp(new_exp);
-                return new_exp;
+                    return new FNegExp(new_exp);
+                else
+                    return new_exp;
             } else {
                 FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).alias().getFQName().fullCopy();
                 FAbstractDerExp new_exp = createEmptyNode();
                 new_exp.setFIdUse(new FIdUse(new_name));
                 new_exp.setOrder(order());
+                new_exp.setOriginalVariable(this, getFIdUse().myFV());
                 if (getFIdUse().myFV().isNegated())
                     return new FNegExp(new_exp);
                 else
@@ -2112,6 +2142,27 @@ aspect TransformCanonical {
         }
     }
 
+    public void FIdUseExp.setOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
+        setOriginalVariable(computeOriginalVariable(oldExp, var));
+    }
+    private static String FIdUseExp.computeOriginalVariable(FIdUseExp oldExp, FAbstractVariable var) {
+        if (!oldExp.getOriginalVariable().isEmpty()) {
+            return oldExp.getOriginalVariable();
+        }
+        while (var.isTemporary()) {
+            AliasManager.AliasVariable av = var.asFVariable().myFClass().getAliasManager().getAliasVariable(var.asFVariable());
+            if (av.getTempAssignRight() != null) {
+                var = av.getTempAssignRight();
+            } else {
+                return null;
+            }
+            
+        }
+        return var.name();
+    }
+    
+    syn FAbstractVariable FIdUseExp.myOriginalFV() = myFClass().lookupFV(getOriginalVariable());
+    
     /*
      * Rewrite derivatives of parameters to zeros.
      */
@@ -2121,33 +2172,50 @@ aspect TransformCanonical {
         }
     }
 
-	/**
-	 * Remove all unused temporary variables, and inline temporaries only used once.
-	 */
-	public void FClass.removeUnusedTemporaries() {
-		ArrayList<FVariable> temps = tempVariables();
-		int oldSize = Integer.MAX_VALUE;
-		while (temps.size() < oldSize) {
-			ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
-			for (FVariable fv : temps) {
+    /**
+     * Remove all unused temporary variables, and inline temporaries only used once.
+     */
+    public void FClass.removeUnusedTemporaries() {
+        ArrayList<FVariable> temps = tempVariables();
+        Collection<FVariable> tempsToRemove = new ArrayList<FVariable>();
+        int oldSize = Integer.MAX_VALUE;
+        while (temps.size() < oldSize) {
+            ArrayList<FVariable> temps2 = new ArrayList<FVariable>(temps.size());
+            for (FVariable fv : temps) {
                 if (!fv.inlineUses()) {
-					temps2.add(fv);
+                    temps2.add(fv);
+                } else {
+                    tempsToRemove.add(fv);
                 }
-			}
-			oldSize = temps.size();
-			temps = temps2;
-		}
-		
-		ArrayList<FVariable> vars = new ArrayList<FVariable>();
-		for (FVariable fv : getFVariables())
-			if (!fv.isTemporary())
-				vars.add(fv);
-		for (FVariable fv : temps)
-			vars.add(fv);
-		
-		removeMarkedEqns();
-		setFVariableList(new List(vars));
-	}
+            }
+            oldSize = temps.size();
+            temps = temps2;
+        }
+        
+        ArrayList<FVariable> vars = new ArrayList<FVariable>();
+        for (FVariable fv : getFVariables())
+            if (!fv.isTemporary())
+                vars.add(fv);
+        for (FVariable fv : temps)
+            vars.add(fv);
+        
+        removeMarkedEqns();
+        setFVariableList(new List(vars));
+        
+        Set<FVariable> aliasVarsToRemove = new HashSet<FVariable>();
+        
+        for (FVariable fv : tempsToRemove) {
+            aliasVarsToRemove.addAll(getAliasManager().removeTemporaryVariableSet(fv));
+        }
+        
+        ArrayList<FVariable> newAliasVars = new ArrayList<FVariable>();
+        for (FVariable fv : getAliasVariables()) {
+            if (!aliasVarsToRemove.contains(fv)) {
+                newAliasVars.add(fv);
+            }
+        }
+        setAliasVariableList(new List(newAliasVars));
+    }
 
     /**
      * Check if this is a temporary variable that should be eliminated.
@@ -3421,7 +3489,7 @@ aspect DummyDerivatives {
 
     rewrite FDerExp {
         when (myFV().isDummyDerivativeVariable()) to FDummyDerExp {
-            return new FDummyDerExp(getFIdUse(), order());
+            return new FDummyDerExp(getFIdUse(), getOriginalVariable(), order());
         }
     }
 
@@ -3841,14 +3909,22 @@ aspect SemiLinear {
 
     public class FClass {
         public class enableSemiLinearRewrite extends Transformation {
+            private boolean changed = false;
+            
             public void perform() {
                 setFAbstractEquationList(transform(getFAbstractEquations()));
                 setFInitialEquationList(transform(getFInitialEquations()));
                 setFParameterEquationList(transform(getFParameterEquations()));
                 
-                // Change all remaining semiLinear exps to if exps. 
-                for (FSemiLinearExp exp: collectSemiLinearExps())
+                // Change all remaining semiLinear exps to if exps.
+                Set<FSemiLinearExp> fsls = collectSemiLinearExps();
+                changed = changed || fsls.size() > 0;
+                for (FSemiLinearExp exp: fsls)
                     exp.replaceMe(exp.asIfExp());
+                
+                if (changed) {
+                    change();
+                }
             }
             
             /**
@@ -3871,9 +3947,13 @@ aspect SemiLinear {
                 
                 // Chained zero flow transformations (Rule 1)
                 for (java.util.List<FEquation> l : rule1.values()) {
-                    if (l.size() > 1)
+                    if (l.size() > 1) {
                         transformChain(newEquations, buildChain(l));
+                        changed = true;
+                    }
                 }
+                
+                changed = changed || rule2.size() > 0;
                 
                 // Constant zero flow transformations (Rule 2)
                 for (FEquation equation : rule2) {
@@ -4041,14 +4121,28 @@ aspect SemiLinear {
 	
 	syn boolean FExp.isSemiLinear() = false;
 	eq FSemiLinearExp.isSemiLinear() = true;
-	
-	syn FExp FSemiLinearExp.asIfExp() {
-		FIfExp exp = new FIfExp(new FGeqExp(getX().fullCopy(), new FRealLitExp(0)),
-			new FMulExp(getX().fullCopy(), getPosSlope().fullCopy()),
-			new FMulExp(getX().fullCopy(), getNegSlope().fullCopy()));
-		return exp;
-	}
-	
+
+    syn FExp FSemiLinearExp.asIfExp() {
+        FExp exp = new FIfExp(new FGeqExp(getX().treeCopy(), new FIntegerLitExp(0)),
+            new FMulExp(getX().treeCopy(), getPosSlope().treeCopy()),
+            new FMulExp(getX().treeCopy(), getNegSlope().treeCopy()));
+        if (isSmoothInSemiLinear()) {
+            exp = new FNoEventExp(exp);
+        }
+        return exp;
+    }
+
+    /**
+     * Checks if this expression allows a semiLinear() with it as argument to be smooth(0, ...).
+     */
+    syn boolean FExp.isSmoothInSemiLinear()  = false;
+    eq FIdUseExp.isSmoothInSemiLinear()      = true;
+    eq FLitExp.isSmoothInSemiLinear()        = true;
+    eq FSmoothExp.isSmoothInSemiLinear()     = true;
+    eq FNegExp.isSmoothInSemiLinear()        = getFExp().isSmoothInSemiLinear();
+    eq FSemiLinearExp.isSmoothInSemiLinear() = 
+        getX().isSmoothInSemiLinear() && getPosSlope().isSmoothInSemiLinear() && getNegSlope().isSmoothInSemiLinear();
+
 	/**
 	 * Collects semiLinear expressions.
 	 */
@@ -4161,20 +4255,29 @@ aspect EliminateEqualSwitches{
         public class eliminateEqualSwitches extends Transformation {
             public void perform() {
                 Map<String, Collection<FRelExp>> candidates = new HashMap<String, Collection<FRelExp>>();
-                for (FExp exp : relExpsWithEvent())
+                for (FRelExp exp : relExpsWithEvent()) {
                     exp.collectEqualSwitches(candidates);
-                for (FExp exp : eventExpInInitialEquations())
+                    exp.setOriginalFExp(exp);
+                } 
+                for (FRelExp exp : eventExpInInitialEquations()) {
                     exp.collectEqualSwitches(candidates);
+                    exp.setOriginalFExp(exp);
+                }
                 for (Map.Entry<String, Collection<FRelExp>> entry : candidates.entrySet()) {
                     if (entry.getValue().size() < 2)
                         continue;
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (original == null)
+                        if (!exp.hasBrancher()) {
                             original = exp;
-                        else
-                            exp.originalFRelExp = original;
+                            break;
+                        }
+                    }
+                    if (original != null) {
+                        for (FRelExp exp : entry.getValue()) {
+                            exp.setOriginalFExp(original);
+                        }
                     }
                 }
                 root().flushAllRecursive();

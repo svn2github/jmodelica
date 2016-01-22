@@ -59,6 +59,7 @@ set(JMISources
     # Block solver sources
     jmi_block_solver.h
     jmi_block_solver_impl.h
+	jmi_block_log.h
     jmi_kinsol_solver.h
     jmi_brent_solver.h
     jmi_minpack_solver.h
@@ -66,6 +67,7 @@ set(JMISources
     jmi_simple_newton.h
 
     jmi_block_solver.c
+	jmi_block_log.c
     jmi_kinsol_solver.c
     jmi_brent_solver.c
     jmi_minpack_solver.c
@@ -85,6 +87,7 @@ set(JMISources
     jmi_ode_problem.c
 )
 
+# Source files for ModelicaExternalC
 set(MODELICAEXTERNALCSources
     jmi_global.h
     ModelicaUtilities.h
@@ -94,8 +97,11 @@ set(MODELICAEXTERNALCSources
     
     ${MSLCSOURCES}/ModelicaInternal.c
     ${MSLCSOURCES}/ModelicaStrings.c
+    ${MSLCSOURCES}/ModelicaRandom.c
+    ${MSLCSOURCES}/ModelicaFFT.c
 )
 
+# Source files for ModelicaStandardTables
 set(STANDARDTABLESSources
     ${MSLCSOURCES}/ModelicaStandardTables.c
     ${MSLCSOURCES}/ModelicaMatIO.c

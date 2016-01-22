@@ -43,6 +43,7 @@
 #define JMI_MINIMUM_NORM 2
 
 typedef struct jmi_kinsol_solver_t jmi_kinsol_solver_t;
+typedef struct jmi_kinsol_solver_reset_t jmi_kinsol_solver_reset_t;
 
 /**< \brief Kinsol solver constructor function */
 int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver, jmi_block_solver_t* block_solver);
@@ -53,17 +54,37 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t* block_solver);
 /**< \brief Kinsol solver destructor */
 void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 
+int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver);
+int jmi_kinsol_restore_state(jmi_block_solver_t* block);
+
 /**< \brief Retrieve residual scales used in Kinsol solver */
 double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
 
 /**< \brief Convert Kinsol return flag to readable name */
 const char *jmi_kinsol_flag_to_name(int flag);
 
+struct jmi_kinsol_solver_reset_t {
+    DlsMat J;
+    DlsMat J_modified;
+    int * lapack_ipiv;
+    N_Vector kin_y_scale;
+    N_Vector kin_f_scale;
+    int J_is_singular_flag;
+    int handling_of_singular_jacobian_flag;
+    int mbset;
+    int force_new_J_flag;
+    realtype kin_scale_update_time;
+    int force_rescaling;
+};
+
 struct jmi_kinsol_solver_t {
     jmi_brent_solver_t externalBrent; /**< Brent solver when run stand-alone. Temporary solution until supported by options. */
+    jmi_kinsol_solver_reset_t *saved_state;
 
     void* kin_mem;                 /**< \brief A pointer to the Kinsol solver */
     N_Vector kin_y;                /**< \brief Work vector for Kinsol y */
+    N_Vector last_residual;        /**< \brief Last residual vector submitted to linear solver */
+
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
     N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     N_Vector gradient;              /**< \brief Steepest descent direction */
@@ -88,11 +109,16 @@ struct jmi_kinsol_solver_t {
     DlsMat J_sing;                  /**< \brief Jacobian matrix/it's right singular vectors */
     DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
     DlsMat J_SVD_VT;                /**< \brief The right singular vectors */
+    DlsMat J_Dependency;            /**< \brief Dependency matrix with value 1 at (i,j) if iv j depends on residual i, 0 otherwise */ 
+
+    int is_first_newton_solve_flag; /**< \brief Flag indicating if the current solve is the first Newton solve */
 
     char equed;                     /**< \brief Type of Jac scaling used */
     realtype* rScale;               /**< \brief Row scale factors */
     realtype* cScale;               /**< \brief Column scale factors */
     
+    N_Vector work_vector;           /**< \brief work vector for vector operations */
+    N_Vector work_vector2;           /**< \brief work vector for vector operations */
     realtype* lapack_work;         /**< \brief work vector for lapack */
     int * lapack_iwork;            /**< \brief work vector for lapack */
     int * lapack_ipiv;            /**< \brief work vector for lapack */
@@ -100,6 +126,8 @@ struct jmi_kinsol_solver_t {
     realtype* dgesdd_work;          /**< \brief Work vector for desdd */
     int dgesdd_lwork;               /**< \brief Work vector for desdd */
     int* dgesdd_iwork;              /**< \brief Work vector for desdd */
+
+    long int* sundials_permutationwork;  /**< \briaf Work vector for sundials LU factorization */
     
     realtype* dgelss_rwork;
     realtype* singular_values;
@@ -114,6 +142,10 @@ struct jmi_kinsol_solver_t {
     realtype max_nw_step;           /**< \brief maximal newton step calculated from nominals */
     realtype* range_limits;         /**< \brief step limits on the different IVs */
     int* range_limited;             /**< \brief flags indicating if step in specific IV is limiting */
+    
+    int* jac_compression_groups;    /**< \brief Vector with groups used for Jacobian compression */
+    int* jac_compression_group_index; /**< \brief Indices for iv:s belonging to the groups in jac_compression_groups. */
+    int has_compression_setup_flag;  /**< \brief Flag indicating whether Jacobian compression groups have been set up. */
     
     realtype y_pos_min_1d;
     realtype f_pos_min_1d;
@@ -131,6 +163,8 @@ struct jmi_kinsol_solver_t {
     int last_num_active_bounds;    /**< \brief Number of active bounds at last jmi_kinsol_limit_step */
     double lambda, lambda_max;     /**< \brief lambda and lambda_max for logging */
     int iterationProgressFlag;     /**< \brief Flag indicating that KINStop was called and so there was some progress */
+
+    long int current_nni;          /**< \brief Current nni in Kinsol solver, used to track if we are on retry iterations */
 
     realtype max_step_ratio;        /**< \brief Max ratio of the Newton step */
 

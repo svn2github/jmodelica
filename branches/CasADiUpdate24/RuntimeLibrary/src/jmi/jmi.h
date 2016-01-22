@@ -432,6 +432,18 @@ int jmi_save_last_successful_values(jmi_t *jmi);
 jmi_real_t* jmi_get_z(jmi_t* jmi);
 
 /**
+
+ * \brief Get the size of the z vector containing all variables.
+ *
+ * @param jmi The jmi_t struct.
+ * @return The size of the \f$z\f$ vector.
+ *
+ */
+int jmi_get_z_size(jmi_t* jmi);
+
+jmi_string_t* jmi_get_string_z(jmi_t* jmi);
+
+/**
  * \brief Get a pointer to the last successful z vector containing all variables.
  *
  * @param jmi The jmi_t struct.
@@ -1429,5 +1441,13 @@ int jmi_init_delay_blocks(jmi_t* jmi);
  * Called after each completed integrator step and event iteration.
  * Expects event mode set with jmi_delay_set_event_mode */
 int jmi_sample_delay_blocks(jmi_t* jmi);
+
+/**
+ * \brief Notifies the internal blocks that an integrator step is complete.
+ * 
+ * @param jmi A jmi_t struct.
+ * @return 
+ */
+int jmi_block_completed_integrator_step(jmi_t *jmi);
 
 #endif

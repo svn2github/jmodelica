@@ -24,6 +24,7 @@
 
 #include "jmi_brent_solver.h"
 #include "jmi_block_solver_impl.h"
+#include "jmi_block_log.h"
 
 #include "jmi_brent_search.h"
 
@@ -34,6 +35,7 @@
 #define BRENT_MAX_NEWTON 10 /* Max number of Newton iteration */
 #define BRENT_INF 1e20
 #define BRENT_SIGNIFICANT_DECREASE 0.01 /* Value used in Newton for determining if the values should be used or not */
+#define BRENT_SMALL_RESIDUAL_FACTOR 1e3
 
 /* Interface to the residual function that is compatible with Brent search.
    @param y - input - function argument
@@ -48,8 +50,8 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     block->nb_fevals++;
 
     /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
+    ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
+    if (ret == -1) {
         return -1;
     }
 
@@ -65,14 +67,8 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     }
     /* Check that outputs are valid */    
     {
-        realtype v = *f;
-        if (v- v != 0) {
-             jmi_log_t* log = block->log;
-             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
-             jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-             jmi_log_leave(log, node);
-             ret = 1;
-        }
+        double heuristic_nominal = BIG_REAL/JMI_LIMIT_VALUE;
+        ret = jmi_check_and_log_illegal_residual_output(block, f, &y, &heuristic_nominal,1);
     }
     return ret;
 }
@@ -86,53 +82,73 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     realtype inc;
 
     /* Check that arguments are valid */
-    if ((y- y) != 0) {
-        jmi_log_node(block->log, logWarning, "NaNInput", "Not a number in arguments to <block: %s>", block->label);
+    ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
+    if (ret == -1) {
         return -1;
     }
-            
-    sign = (y >= 0) ? 1 : -1;
-    inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
-    y += inc;
-    /* make sure we're inside bounds*/
-    if((y > block->max[0]) || (y < block->min[0])) {
-        inc = -inc;
-        y = y0 + inc;
-    }
-
-    ret = brentf(y, &ftemp, block);
-
-    /* If function evaluation failed, try finite difference in other direction. */
-    if (ret) {
-        inc = -inc;
-        y = y0 + inc;
-        if ((y <= block->max[0]) && (y >= block->min[0])) {
-            ret = brentf(y, &ftemp, block);
+        
+    if (block->dF) {
+        /* utilize directional derivatives to calculate Jacobian */
+        block->x[0] = y;
+        
+        block->dx[0] = 1;
+        ret = block->dF(block->problem_data,block->x,block->dx,block->res,block->dres,JMI_BLOCK_EVALUATE);
+        *df = block->dres[0];
+        block->dx[0] = 0;
+        
+        if (ret) {
+            jmi_log_t* log = block->log;
+            jmi_log_node_t node = 
+                jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling directional derivative function in <block: %s>", ret, block->label);
+            jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+            jmi_log_leave(log, node);
+            return ret;
         }
-    }
+    } else {
+        sign = (y >= 0) ? 1 : -1;
+        inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
+        y += inc;
+        /* make sure we're inside bounds*/
+        if((y > block->max[0]) || (y < block->min[0])) {
+            inc = -inc;
+            y = y0 + inc;
+        }
 
-    if (ret) {
-        jmi_log_t* log = block->log;
-        jmi_log_node_t node = 
-            jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
-        jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
-        jmi_log_leave(log, node);
-        return ret;
+        ret = brentf(y, &ftemp, block);
+
+        /* If function evaluation failed, try finite difference in other direction. */
+        if (ret) {
+            inc = -inc;
+            y = y0 + inc;
+            if ((y <= block->max[0]) && (y >= block->min[0])) {
+                ret = brentf(y, &ftemp, block);
+            }
+        }
+
+        if (ret) {
+            jmi_log_t* log = block->log;
+            jmi_log_node_t node = 
+                jmi_log_enter_fmt(log, logWarning, "Warning", "<errorCode: %d> returned when calling residual function in <block: %s>", ret, block->label);
+            jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
+            jmi_log_leave(log, node);
+            return ret;
+        }
+        
+        *df = (ftemp-f)/inc;
     }
-    
-    *df = (ftemp-f)/inc;
     
     /* Check that outputs are valid */    
     {
         realtype v = *df;
         if (v- v != 0) {
              jmi_log_t* log = block->log;
-             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in output from <block: %s>", block->label);
+             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in derivative from <block: %s>", block->label);
              jmi_log_reals(log, node, logWarning, "ivs", &y, 1);
              jmi_log_leave(log, node);
              ret = 1;
         }
     }
+
     return ret;
 }
 
@@ -314,7 +330,7 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
 static int jmi_brent_init(jmi_block_solver_t * block) {
    jmi_brent_solver_t* solver = (jmi_brent_solver_t*)block->solver;
    solver->originalStart = block->x[0];
-    return 0;
+   return 0;
 }
 
 
@@ -391,11 +407,21 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         init = block->x[0];
     }
     else {
+        double nom, min, max;
+        
+        
+        if (!(block->at_event) && block->options->start_from_last_integrator_step) {
+            flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
+            if(flag) {        
+                jmi_log_node(log, logError, "ErrorSettingInitialGuess", "<errorCode: %d> returned from <block: %s> "
+                             "when setting the initial guess.", flag, block->label);
+                return flag;
+            }
+        }
         /* Read initial values and bounds for iteration variables from variable vector.
         * This is needed if the user has changed initial guesses in between calls to
         * the solver.
         */
-        double nom, min, max;
         flag = block->F(block->problem_data,block->x,block->res,JMI_BLOCK_INITIALIZE);
         init = block->x[0];
         if (flag ||(init != init)) {        
@@ -566,7 +592,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double lower = x, f_lower = f;
         double upper = x, f_upper = f;
         double initialStepStatic = block->nominal[0]*BRENT_INITIAL_STEP_FACTOR;
-        double initialStep = (initialStepNewton > initialStepStatic) ? initialStepStatic : initialStepNewton;
+        double initialStepStaticSmall = initialStepStatic*BRENT_INITIAL_STEP_FACTOR;
+        double initialStep = (initialStepNewton > initialStepStatic) ? (JMI_ABS(f) < UNIT_ROUNDOFF*BRENT_SMALL_RESIDUAL_FACTOR ? initialStepStaticSmall : initialStepStatic) : initialStepNewton;
         double lstep = initialStep, ustep = initialStep;
         while (1) {
             if (lower > block->min[0] && /* lower is fine as long as we're inside the bounds */
@@ -869,4 +896,18 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
         jmi_log_leave(log, log_node);
     }
 
+}
+
+int jmi_brent_completed_integrator_step(jmi_block_solver_t* block) {
+    int flag = 0;
+    if (block->options->start_from_last_integrator_step) {
+        /* Brent specific handling of a completed step */
+        flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
+        if (flag) {
+            jmi_log_node(block->log, logError, "ReadLastIterationVariables",
+                         "Failed to read the iteration variables, <errorCode: %d> in <block: %s>", flag, block->label);
+            return flag;
+        }
+    }
+    return flag;
 }

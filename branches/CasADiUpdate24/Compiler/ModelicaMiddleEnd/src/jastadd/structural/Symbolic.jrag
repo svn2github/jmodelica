@@ -109,146 +109,106 @@ aspect EquationSolve {
 		ArrayList<FExp> activeTerms = new ArrayList<FExp>();
 		ArrayList<FExp> inactiveTerms = new ArrayList<FExp>();
 		// Find terms
-		//System.out.println("Equation:\n" + prettyPrint(""));			
 		for (FExp e : t) {
-			//System.out.println("Term" + (e.isNegativeTerm()? "(-): ": "(+): ") + e.prettyPrint(""));
 			if (e.nbrUses(var.name())==1) {
-			    //System.out.println(" - active");
 				activeTerms.add(e);
 			} else if (e.nbrUses(var.name())==0) {
-				//System.out.println(" - inactive");
 			    inactiveTerms.add(e);
 			} else {
 			    return new FNoExp();
 			}
 		}
-		//System.out.println("Found term" + (theTerm.isNegativeTerm()? "(-): ": "(+): ") + theTerm.prettyPrint(""));	
 		
-		FExp sol = null;
-		// Build new AST for the inactive terms
-		for (FExp e : inactiveTerms) {
-			FExp ee = e.copySymbolic();
-			if (!e.isNegativeTerm()) {
-			  	ee = new FNegExp(ee);
-			}
-			if (sol==null) {
-				sol = ee;
-			} else {
-			    sol = new FAddExp(sol,ee);
-			}
-		}
-		if (sol==null) { 
-			// No inactive terms
-			sol = new FRealLitExp(0);
-		}
-		
-		FExp mulCoeff = null;
-		FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
-		// Build new AST for the active terms
-		for (FExp e : activeTerms) {
-			ArrayList<FExp> fac = e.factors();
-			// There is only one reference to the active variable in each
-			// term - this is checked above.			
-			ArrayList<FExp> activeFactors = new ArrayList<FExp>();
-			ArrayList<FExp> inactiveFactors = new ArrayList<FExp>();
-			// Find terms
-			//System.out.println("Equation:\n" + prettyPrint(""));
-			//System.out.println("N factors: " + fac.size());
-			boolean negatedFactor = false;			
-			for (FExp ee : fac) {
-				//System.out.println("Factor" + (ee.isNegativeTerm()? "(-): ": "(+): ") + ee.prettyPrint(""));
-				if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
-				    (ee.isIdentifier(var.name()) || // Identifier 
-				    (ee instanceof FPreExp))) { // pre expression 
-					//System.out.println(" - active"); 
-					activeFactors.add(ee);
-				} else if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
-				    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(var.name()))) { 
-				    // TODO: remove this branch since it is not general enough
-					//System.out.println(" - active"); 
-					activeFactors.add(((FNegExp)ee).getFExp());
-					negatedFactor = true;
-				} else if (ee.nbrUses(var.name())==0) {
-					//System.out.println(" - inactive"); 
-				    inactiveFactors.add(ee);
-				} else {
-					// This equation cannot be solved
-				    return new FNoExp();
-				}
-			}
-						
-			FExp coeff = null;
-			for (FExp eee : inactiveFactors) {
-			    mulCoeffVar = mulCoeffVar.combine(eee.variability());			
-				FExp eeee = eee.copySymbolic();
-				if (eee.isInvertedFactor()) {
-				  	eeee = new FDivExp(new FRealLitExp(1), eeee);
-				}
-				if (coeff==null) {
-					coeff = eeee;
-				} else {
-				    coeff = new FMulExp(coeff,eeee);				  	
-				}
-			}
-			if (coeff==null) {
-				coeff = new FRealLitExp(1);
-			}
-/*			System.out.println("Coeff: ");
-			if (coeff!=null) 
-				System.out.println(coeff.prettyPrint(""));
-			else
-				System.out.println("null");
-			System.out.println("mulCoeff: ");
-			if (mulCoeff!=null) 
-				System.out.println(mulCoeff.prettyPrint(""));
-			else
-				System.out.println("null");
-*/
-			if (coeff!=null) {
-				if (mulCoeff==null) {
-					if (e.isNegativeTerm() || negatedFactor) {
-						mulCoeff = new FNegExp(coeff);
-					} else {
-					    mulCoeff = coeff;
-					}
-				} else {
-					if (e.isNegativeTerm() || negatedFactor) {
-						mulCoeff = new FSubExp(mulCoeff,coeff);				  
-					} else {
-					    mulCoeff = new FAddExp(mulCoeff,coeff);				  
-					}	
-				}					
-			}	
-/*			System.out.println("Coeff: ");
-			if (coeff!=null) 
-				System.out.println(coeff.prettyPrint(""));
-			else
-				System.out.println("null");
-			System.out.println("mulCoeff: ");
-			if (mulCoeff!=null) 
-				System.out.println(mulCoeff.prettyPrint(""));
-			else
-				System.out.println("null");
-			
-			//System.out.println("*Coeff: " + coeff!=null? coeff.prettyPrint(""): "null");
-			//System.out.println("*MulCoeff: " + mulCoeff!=null? mulCoeff.prettyPrint(""): "null");
-*/
-		}
-	    	
-	    if ((duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing")) || 
-	            sol.isLiteralZero()) { 	   
-		    if (!mulCoeffVar.lessOrEqual(fConstant())) {
-		    	return new FNoExp();
-		    }
-		}
-	    
-	    if (mulCoeff!=null && !mulCoeff.isLiteralOne()) {
-	    	sol = new FDivExp(sol, mulCoeff);
-	    }
+        // Compute new expressions for the inactive and active terms
+        FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
+        FExp activeTerm = computeActiveSolution(activeTerms, var, duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") || inactiveTerm.isLiteralZero());
+        
+        if (activeTerm.isNoExp()) {
+            return new FNoExp();
+        }
+        if (inactiveTerm.isLiteralZero() || activeTerm.isLiteralOne()) {
+            return inactiveTerm;
+        }
+        return new FDivExp(inactiveTerm, activeTerm);
+    }
 
-		return sol;
-	}
-	
+    private static FExp FEquation.computeInactiveSolution(Collection<FExp> exps) {
+        if (exps.size() == 0) {
+            return new FRealLitExp(0);
+        }
+        java.util.List<FExp> expsCopies = new ArrayList<FExp>();
+        // Compute new expressions for the inactive terms
+        for (FExp exp : exps) {
+            FExp expCopy = exp.copySymbolic();
+            if (!exp.isNegativeTerm()) {
+                expCopy = new FNegExp(expCopy);
+            }
+            expsCopies.add(expCopy);
+        }
+        return FExp.createBalancedBinaryTree(new FAddExp(), expsCopies);
+    }
+    
+    private static FExp FEquation.computeActiveSolution(Collection<FExp> exps, FVariable var, boolean dontAllowDivisionByVariable) {
+        java.util.List<FExp> parts = new ArrayList<FExp>();
+        FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
+        // Compute new expressions for the active terms
+        for (FExp e : exps) {
+            ArrayList<FExp> fac = e.factors();
+            // There is only one reference to the active variable in each
+            // term - this is checked above.            
+            ArrayList<FExp> activeFactors = new ArrayList<FExp>();
+            ArrayList<FExp> inactiveFactors = new ArrayList<FExp>();
+            // Find terms
+            boolean negatedFactor = false;          
+            for (FExp ee : fac) {
+                if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
+                    (ee.isIdentifier(var.name()) || // Identifier 
+                    (ee instanceof FPreExp))) { // pre expression 
+                    activeFactors.add(ee);
+                } else if (ee.nbrUses(var.name())==1 && !ee.isInvertedFactor() && 
+                    ((ee instanceof FNegExp) && ((FNegExp)ee).getFExp().isIdentifier(var.name()))) { 
+                    // TODO: remove this branch since it is not general enough
+                    activeFactors.add(((FNegExp)ee).getFExp());
+                    negatedFactor = true;
+                } else if (ee.nbrUses(var.name())==0) {
+                    inactiveFactors.add(ee);
+                } else {
+                    // This equation cannot be solved
+                    return new FNoExp();
+                }
+            }
+            
+            FExp coeff = computeInactiveFactorSolution(inactiveFactors);
+            for (FExp eee : inactiveFactors) {
+                mulCoeffVar = mulCoeffVar.combine(eee.variability());
+            }
+            if (e.isNegativeTerm() || negatedFactor) {
+                coeff = new FNegExp(coeff);
+            }
+            parts.add(coeff);
+        }
+        if (dontAllowDivisionByVariable && !mulCoeffVar.lessOrEqual(fConstant())) {
+            return new FNoExp();
+        }
+        return FExp.createBalancedBinaryTree(new FAddExp(), parts);
+    }
+    
+    private static FExp FEquation.computeInactiveFactorSolution(Collection<FExp> exps) {
+        if (exps.size() == 0) {
+            return new FRealLitExp(1);
+        }
+        java.util.List<FExp> expsCopies = new ArrayList<FExp>();
+        // Compute new expressions for the inactive factor terms
+        for (FExp exp : exps) {
+            FExp expCopy = exp.copySymbolic();
+            if (exp.isInvertedFactor()) {
+                expCopy = new FDivExp(new FRealLitExp(1), expCopy);
+            }
+            expsCopies.add(expCopy);
+        }
+        return FExp.createBalancedBinaryTree(new FMulExp(), expsCopies);
+    }
+
 	// Get terms
 	syn ArrayList<FExp> FEquation.terms() {
 		ArrayList<FExp> t = new ArrayList<FExp>();
@@ -384,6 +344,10 @@ aspect EquationSolve {
     syn FDelayExp FDelayExp.originalFExp() = (originalFDelayExp == null)  ? this : originalFDelayExp;
     syn FSpatialDistExp FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
     
+    public void FRelExp.setOriginalFExp(FRelExp original) {
+        this.originalFRelExp = original;
+    }
+    
     /**
      * This method is used when the original node has been discarded and the
      * orignal references in FRelExp and FSampleExp needs to be reset.
@@ -400,7 +364,7 @@ aspect EquationSolve {
     
     @Override
     protected void FRelExp.resetOriginalReferences() {
-        originalFRelExp = null;
+        setOriginalFExp(this);
         super.resetOriginalReferences();
     }
     
@@ -431,7 +395,7 @@ aspect EquationSolve {
     @Override
 	protected void FRelExp.traverseSymbolic(ASTNode e) {
 		FRelExp re = (FRelExp) e;
-		originalFRelExp = (re.originalFRelExp == null) ? re : re.originalFRelExp;
+        setOriginalFExp(re.originalFRelExp);
 		super.traverseSymbolic(e);
 	}
     
@@ -825,10 +789,13 @@ aspect Derivatives {
 
     public FExp FAbsExp.diff(String name) {
         FExp diff = getFExp().diff(name);
-        if (diff.isLiteralZero())
+        if (diff.isLiteralZero()) {
             return dynamicFExp(diff);
-        else
-            return dynamicFExp(new FIfExp(new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0)), diff, new FNegExp(diff.copySymbolic())));
+        } else {
+            FRelExp e = new FGeqExp(getFExp().copySymbolic(), new FRealLitExp(0));
+            e.setOriginalFExp(e);
+            return dynamicFExp(new FIfExp(e, diff, new FNegExp(diff.copySymbolic())));
+        }
     }
 
     public FExp FDSRefExp.diff(String name) {
@@ -899,7 +866,13 @@ aspect Derivatives {
     eq FAbstractDerivativeVariable.order() = getOrder();
 
     syn FExp FExp.createDerExp(int order) = diff(TIME, order);
-    eq FIdUseExp.createDerExp(int order) = getFIdUse().createDerExp(order() + order);
+    eq FIdUseExp.createDerExp(int order) {
+        FExp exp = getFIdUse().createDerExp(order() + order);
+        if (exp instanceof FIdUseExp) {
+            ((FIdUseExp)exp).setOriginalVariable(getOriginalVariable());
+        }
+        return exp;
+    }
     eq InstDerExp.createDerExp(int order) = getFExp().createDerExp(order() + order);
 
     syn FExp FIdUse.createDerExp(int order) = new FDerExp(fullCopy(), order);

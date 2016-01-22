@@ -547,8 +547,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+Error at line 513, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType2.B, and type of right-hand side is RecordTests.RecordType2.A
 ")})));
 end RecordType2;
 
@@ -577,8 +577,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+Error at line 543, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType3.B, and type of right-hand side is RecordTests.RecordType3.A
 ")})));
 end RecordType3;
 
@@ -681,8 +681,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
-  The right and left expression types of equation are not compatible
+Error at line 647, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', TYPE_MISMATCH_IN_EQUATION:
+  The right and left expression types of equation are not compatible, type of left-hand side is RecordTests.RecordType5.D, and type of right-hand side is RecordTests.RecordType5.C
 ")})));
 end RecordType5;
 
@@ -754,7 +754,7 @@ model RecordType7
             errorMessage="
 1 errors found:
 
-Error at line 718, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 718, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordType7;
@@ -853,7 +853,7 @@ model RecordBinding3
             errorMessage="
 1 errors found:
 
-Error at line 818, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 818, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end RecordBinding3;
@@ -876,7 +876,7 @@ model RecordBinding4
             errorMessage="
 1 errors found:
 
-Error at line 841, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 841, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is scalar and size of binding expression is [2]
 ")})));
 end RecordBinding4;
@@ -898,7 +898,7 @@ model RecordBinding5
             errorMessage="
 1 errors found:
 
-Error at line 864, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 864, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable b does not match the declared type of the variable
 ")})));
 end RecordBinding5;
@@ -1061,6 +1061,7 @@ model RecordBinding11
 		TransformCanonicalTestCase(
 			name="RecordBinding11",
 			description="Modification of string record member",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordBinding11
  structural parameter String r.s1 = \"foobar\" /* \"foobar\" */;
@@ -1265,6 +1266,7 @@ model RecordBinding19
         TransformCanonicalTestCase(
             name="RecordBinding19",
             description="String parameters in record with continuous part",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding19
  structural parameter String r1.x = \"A\" /* \"A\" */;
@@ -1289,6 +1291,7 @@ model RecordBinding20
         TransformCanonicalTestCase(
             name="RecordBinding20",
             description="Modified string parameters in record with continuous part",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding20
  structural parameter String r1.x = \"B\" /* \"B\" */;
@@ -1417,6 +1420,7 @@ model RecordBinding24
         TransformCanonicalTestCase(
             name="RecordBinding24",
             description="Final parameter record component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
@@ -1530,7 +1534,8 @@ model RecordBinding28
             errorMessage="
 1 errors found:
 
-Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 1485, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE,
+In component d:
   Can not infer array size of the variable a
 ")})));
 end RecordBinding28;
@@ -1559,7 +1564,8 @@ model RecordBinding29
             errorMessage="
 1 errors found:
 
-Error at line 1523, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 1523, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo',
+In component d:
   Circularity in binding expression of parameter: d.b.a = b.a
 ")})));
 end RecordBinding29;
@@ -1580,6 +1586,7 @@ model UnmodifiableComponent1
         TransformCanonicalTestCase(
             name="UnmodifiableComponent1",
             description="Record constructor for record of unmodifiable components",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.UnmodifiableComponent1
  constant Real rec.x1 = -1;
@@ -1696,6 +1703,7 @@ model UnmodifiableComponent5
         TransformCanonicalTestCase(
             name="UnmodifiableComponent5",
             description="Record constructor for record of unmodifiable components",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.UnmodifiableComponent5
  constant Real r1.x = 1;
@@ -2123,6 +2131,7 @@ model RecordConstructor4
 Error at line 2030, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
   Record constructor for A: types of positional argument 3 and input c are not compatible
     type of '3' is Integer
+    expected type is String
 ")})));
 end RecordConstructor4;
 
@@ -3291,6 +3300,7 @@ model RecordScalarize27
         TransformCanonicalTestCase(
             name="RecordScalarize27",
             description="Flattening of record with size determined by parameter component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordScalarize27
  structural parameter Integer r1.n = 0 /* 0 */;
@@ -3319,6 +3329,7 @@ model RecordScalarize28
         TransformCanonicalTestCase(
             name="RecordScalarize28",
             description="Flattening of record with size determined by parameter component",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordScalarize28
  constant Real r1.x[1] = 1;
@@ -5258,7 +5269,7 @@ model RecordWithColonArray2
             errorMessage="
 1 errors found:
 
-Error at line 5126, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Error at line 5126, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
   Can not infer array size of the variable a
 ")})));
 end RecordWithColonArray2;
@@ -5598,7 +5609,7 @@ model RecordParam8
             errorMessage="
 1 errors found:
 
-Warning at line 5480, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5480, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter a.y does not have a binding expression
 ")})));
 end RecordParam8;
@@ -5620,7 +5631,7 @@ model RecordParam9
             errorMessage="
 1 errors found:
 
-Warning at line 5505, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5505, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam9;
@@ -5648,7 +5659,7 @@ model RecordParam10
             errorMessage="
 1 errors found:
 
-Warning at line 5533, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+Warning at line 5533, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter z does not have a binding expression
 ")})));
 end RecordParam10;
@@ -5948,6 +5959,7 @@ model RecordEval6
 		TransformCanonicalTestCase(
 			name="RecordEval6",
 			description="Test that evaluation before scalarization of record variable works",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass RecordTests.RecordEval6
  structural parameter Integer r.n1 = 2 /* 2 */;
@@ -6103,6 +6115,7 @@ model RecordModification3
         TransformCanonicalTestCase(
             name="RecordModification3",
             description="Modification on record array",
+            eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordModification3
  constant Real a1[1].b[1].x[1] = 1;

@@ -881,6 +881,13 @@ aspect FTypeCompatibility {
     syn boolean FType.looslyDimensionCompatible(FType type, boolean allowUnknown) = 
         isScalar() || type.isScalar() || dimensionCompatible(type, allowUnknown);
 
+    /**
+     * Check if types are compatible except for array lengths, i.e. if the scalar types and the number of array 
+     * dimensions are the same.
+     */
+    syn boolean FType.typeCompatibleExceptLengths(FType type) = 
+        ndims() == type.ndims() && scalarType().typeCompatible(type.scalarType());
+
 }
 
 
@@ -907,6 +914,14 @@ aspect FTypeEquivalent {
         typeMatches(type, false, allowUnknown);
     eq FFunctionType.equivalentTo(FType type, boolean allowUnknown) =
         typeMatches(type, false, allowUnknown);
+
+    /**
+     * Check if types are equivalent except for array lengths, i.e. if the scalar types and the number of array 
+     * dimensions are the same.
+     */
+    syn boolean FType.equivalentExceptLengths(FType type) = 
+        ndims() == type.ndims() && scalarType().equivalentTo(type.scalarType());
+
 }
 
 

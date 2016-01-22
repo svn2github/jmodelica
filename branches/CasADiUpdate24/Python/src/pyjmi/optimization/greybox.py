@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#    Copyright (C) 2014 Modelon AB
+#    Copyright (C) 2015 Modelon AB
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -14,20 +14,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-from pyjmi.common.io import ResultDymolaTextual
-from pyjmi.jmi_algorithm_drivers import LocalDAECollocationAlg, LocalDAECollocationAlgOptions
 from pyjmi.optimization.casadi_collocation import ExternalData
 
 import time, types
-import numpy as N
+import numpy as np
 import casadi
 
-from newEstPack import *
 from collections import OrderedDict
-from scipy.stats import norm
 from scipy.stats import chi2
 from pymodelica import compile_fmu
-from pyfmi import load_fmu
 from pyjmi import get_files_path
 from casadi import MX
 import cPickle as pickle
@@ -36,8 +31,7 @@ from scipy.stats import chi2
 
 from pyjmi.common.io import VariableNotFoundError as jmiVariableNotFoundError
 from pyjmi import transfer_optimization_problem
-from IPython.core.debugger import Tracer; dh = Tracer() #DELETTE BEFORE COMMIT
-# TODO: CHECK IF ALL THESE ARE NEEDED??
+
 #Check to see if pyfmi is installed so that we also catch the error generated
 #from that package
 from pymodelica.common.io import VariableNotFoundError as \
@@ -53,14 +47,62 @@ except ImportError:
                              pymodelicaVariableNotFoundError)
 
 
-
 class GreyBox(object):
 
     """
-	GREYBOX FRAMEWORK
+    Framework for GreyBox Identification. When initialized it builds an 
+    optimization problem based on the measurements and inputs specified. 
+    Allows the user to interactively choose which parameters that are to 
+    be free for each optimization.
+    
+    parameters::
+        -- op
+            An empty optimization problem containing the model of the system. 
+            When model is transfered to an optimization problem the option 
+            'accept_model' must be set to true i.e. 
+            op = transfer_optimization_problem(modelPath, file_path, accept_model=True ).
+        -- options
+            An optimization options object. The framework will override 
+            the options ['n_e'], ['hs'] and in some cases also ['n_cp'] 
+            if they've been specified by the user. This is because we need 
+            the endpoints of the collocation elements to coincide with the 
+            measurement points.
+        -- measurements
+            A dictionary with variable names as keys and and arrays of measurements as values.  
+        -- inputs
+            A dictionary with input variable names as keys and and arrays of values as values. 
+        -- time
+            An array with timepoints at which the measurements and inputs are taken.
+        -- costType
+            A string defining which type of costfunction that is to be built:
+            -- 'integral': 
+            The costfunction will be approximated as an integral: 
+            
+            objectiveIntegrand = w*(y-y_meas)²/r_y
+            
+            where w is a weight calculated as the number of elements / the optimization time:
+            w = options['n_e']/(time[-1]-time[0]), y_meas is the measurements for 
+            variable y and r_y is the noise covariance for y.
+            
+            A Mayer part of the objective is also added as:
+            
+            objective = log(r_y) + (y(0)-y_meas(0))^2/r_y
+            
+            This to make up for the first measurement that is not included in the objectiveIntegrand.
+            
+            -- 'sum':
+            The costfunction will be a sum:
+            objective = (y(time[i])-y_meas(time[i]))^2/r_y + log(r_y) for all i in time. 
+            
+        -- hs
+            A flag indicating that the measurements supplied are not taken with 
+            a constant sample period. If True, the length of each collocation 
+            element will be calculated based on the time array.
+
+             
     """
 
-    def __init__(self, op, options, measurements, inputs, time, costType="integral", hs = True):
+    def __init__(self, op, options, measurements, inputs, time, costType="integral", hs = False):
         """
 
         """
@@ -80,9 +122,7 @@ class GreyBox(object):
             sumTimePoints = np.sum(diffTimePoints)
             self.options['hs'] = diffTimePoints/sumTimePoints
             
-        # set parameters for calculating cost, costred and risk
-        self.df = 0
-        self.n = 0
+        # create time parameters
         N_meas = len(time)
         self.tf = time[-1]
         self.t0 = time[0]
@@ -96,7 +136,6 @@ class GreyBox(object):
         op.setFinalTime(MX(self.tf))
 
         # Check if free parameters already in model
-        # QUESTION LOOP OVER INTEGER PARAMETERS AS WELL?
         for par in self.op.getVariables(self.op.REAL_PARAMETER_INDEPENDENT):
             if par.hasAttributeSet('free'):
                 if par.getAttribute('free'):
@@ -124,8 +163,6 @@ class GreyBox(object):
                 self.op.set(self.prefix+'r_'+var, value**2)
                 r.setAttribute('initialGuess', value**2) 
                 r.setAttribute('min',0)
-
-                # TODO: allow user defined values as well
                 
                 # Create real input for measurement data 
                 meas = self._add_real_input(self.prefix+'measured_'+var)
@@ -137,7 +174,7 @@ class GreyBox(object):
                 # Add log term and first measurement to objective
                 timed_var = self._add_timed_variable(var,time[0])
                 obj = self.op.getObjective()
-                self.op.setObjective(obj + (N_meas)*log(r.getVar())+(timed_var.getVar()-measurements[var][0])**2/r.getVar())
+                self.op.setObjective(obj + (N_meas)*casadi.log(r.getVar())+(timed_var.getVar()-measurements[var][0])**2/r.getVar())
                 
         elif costType =="sum":
             
@@ -162,7 +199,7 @@ class GreyBox(object):
                     
                 # add logterm
                 obj = self.op.getObjective() 
-                self.op.setObjective(obj+(N_meas-1)*log(r.getVar()))
+                self.op.setObjective(obj+(N_meas)*casadi.log(r.getVar()))
                 
             
         else:
@@ -265,12 +302,20 @@ class GreyBox(object):
         self.op.addTimedVariable(timed_var)
         return timed_var
         
-    def identify(self):
+    def identify(self, free_parameters):
         """
-        Prints the parameters that are currently free and solves the optimization problem.
+        Sets the parameters to be free in the optimization and solves the optimization problem.
         If the solver fails to converge the cost returned will be Inf.
         
+        Parameters::
+            free_parameters --
+                A set of parameters that are to be free in this optimization.
+                
+        Returns::
+            identification --
+                An Identification object with results from this optimization.
         """
+        self._set_free_parameters(free_parameters)
         # print currently free parameters
         print ('Identifying with free parameters:')
         print self.free_parameters
@@ -284,11 +329,12 @@ class GreyBox(object):
             cost = Inf
         
         # return identification object
-        return IdentificationObject(self, frozenset(self.free_parameters), res, cost)
+        return Identification(self, frozenset(self.free_parameters), res, cost)
         
-    def set_free_parameters(self, parameters):
+    def _set_free_parameters(self, parameters):
         """
-        Sets the specified parameters as free parameters.
+        Sets the specified parameters as free parameters. Fixes all 
+        parameters not included in parameters.
               
         Parameters::
             parameters --
@@ -312,17 +358,6 @@ class GreyBox(object):
         
          # update free_parameters to parameters
         self.free_parameters = parameters.copy()
-         
- 
-    def print_optimial_parameters(self, res):  
-        """
-        Extracts the free parameters values from res and prints them.
-        
-        Parameters::
-            res --
-                Result object from which to extract the parameter values.     
-        """  
-        print(extract_parameter_values(res,self.free_parameters))
         
     def set_initial_trajectory(self, result):
         """
@@ -370,7 +405,7 @@ class GreyBox(object):
         
     def extract_parameter_values(self, result, parameters):
         """
-        Extracts and returns parameters values from opt_data.
+        Extracts and returns parameters values from result.
         
         Parameters::
             result --
@@ -378,25 +413,72 @@ class GreyBox(object):
             parameters --
                 List of parameter names to extract values for.     
 
-        Returns an OrderedDict() with parameter names as keys and their values as values.
+        Returns::
+            est_parameters --
+                An OrderedDict() with parameter names as keys and their values as values.
         """  
         est_parameters = OrderedDict()
-		
+        
         for (name) in parameters:
             est_parameters[name] = result.final(name)
 
         return est_parameters
         
+    def get_noise_covariance_variable(self, variable):
+        """
+        Returns the name of the added noise covariance variable for variable.
+        
+        Parameters::
+            variable --
+                The name of the variable to return the added noise 
+                covariance variable for.
+        Returns::
+            nc_variable --
+                The name of the noise covariance variable.
+        """
+        return self.prefix+'r_'+variable
+    
+    def get_noise_covariance_variables(self, variables):
+        """
+        Returns the name of the added noise covariance variables.
+        
+        Parameters::
+            variables --
+                A list of variable names for which to return the added noise 
+                covariance variable for.
+        Returns::
+            nc_variables --
+                The names of the noise covariance variables. The list is
+                in the same order as the input list.
+        """
+        noise_covariance_variables = []
+        for var in varibles:
+            noise_covariance_variables.append(self.prefix+'r_'+var)
+        return noise_covariance_variables 
 
 
-class IdentificationObject(object):
+class Identification(object):
 
     """
-	GREYBOX FRAMEWORK
+    A wrapper to contain the results of an greybox identification optimization.
+    Contains the greybox object which generated the results, a frozen set with 
+    the free parameters used in the optimization, the result object from the 
+    optionization and the total cost.
     """
 
     def __init__(self, greybox, free_parameters, result, cost):
         """
+        Creates an Identification object containing results from a greybox identification optimization.
+
+        Parameters::
+            greybox --
+                The greybox object used when generating these results.
+            free_parameters --
+                A frozen set with the variables that were free in this optimization.
+            result --
+                The result object from the optimization.
+            cost --
+                The cost from this optimization.
 
         """
         self.greybox = greybox
@@ -404,46 +486,77 @@ class IdentificationObject(object):
         self.result = result
         self.cost = cost
         
-        greybox.set_initial_trajectory(result)
-        
     def release(self, parameters):
-
+        """
+        Sets the parameters in parameters to free and solves the optimization. 
+        Fixes all parameters that were free in the previous optimization and 
+        are not included in parameters. Uses the result of the Identification 
+        object on which this method is called as initial guess.
+        
+        Parameters::
+            parameters --
+                The name of the parameters that are to be free in this optimization.
+                
+        Returns::
+            result --
+                An Identification object with the results from this optimization.
+        """
+        # set initial guess
+        self.greybox.set_initial_trajectory(self.result)
+        
         # make new set with parameters to be free
         param = self.free_parameters.union(parameters)
-        self.greybox.set_free_parameters(param)
         
-        return self.greybox.identify()
+        return self.greybox.identify(param)
     
     def compare(self, idObj):
+        """
+        Calculates cost reduction and risk from this Identification object 
+        compared to a list of other Identification objects.
+        The Identification object this method is called on will be treated 
+        as the null model. For the risk calculation the degrees of freedom 
+        will be calculated based on the number of free parameters in each 
+        Identification object. The number of cases will be the length of idObj.
+         
+        Parameters::
+            idObj --
+                A list of Identification objects to compare this Identification 
+                objects results against.
         
+        Returns::
+            results --
+                A list of dicts containing information on the cost, cost reduction 
+                and risk for each Identification object compared to the null model. 
+                The list of results are in the same order as the input list 
+                of Identification objects idObj.
+        
+        """
         nbrFreeNull = len(self.free_parameters)
         cases = len(idObj)
-        resultDict = {}
-        for obj in idObj:
+        results = list()
+        for i, obj in enumerate(idObj):
             additionalFree = []
             for par in obj.free_parameters:
-				if par not in self.free_parameters:
-					additionalFree.append(par)
+                if par not in self.free_parameters:
+                    additionalFree.append(par)
             dof = len(additionalFree)
             
             print("Additional free parameter/-s:")
             for par in additionalFree:
-				print(par)
+                print(par)
             print("Cost: %f" % obj.cost)
             costred = self.cost-obj.cost
-            print("Cost red: %f" % costred)
+            print("Cost reduction: %f" % costred)
             risk= self.calculate_risk(costred, dof, cases)
             print("Risk: %f" % risk )
             print("")
+
+            results.append({})
+            results[i]['cost'] = obj.cost
+            results[i]['costred'] = costred
+            results[i]['risk'] = risk
             
-            if dof == 1:
-				name = additionalFree.pop()
-				resultDict[name] = {}
-				resultDict[name]['cost'] = obj.cost
-				resultDict[name]['costred'] = costred
-				resultDict[name]['risk'] = risk
-				
-        return resultDict
+        return results
         
     def calculate_risk(self, costred, df, n):  
         """
@@ -460,4 +573,27 @@ class IdentificationObject(object):
        """  
         risk = 1-chi2.cdf(costred,df)**n    
         return risk
-       
+        
+    def get_cost(self):  
+        """
+        Returns the cost for this optimization.
+        
+        """  
+          
+        return self.cost
+        
+    def get_free_parameters(self):  
+        """
+        Returns the set of parameters that were free in this optimization.
+        
+        """  
+          
+        return self.free_parameters
+        
+    def get_result(self):  
+        """
+        Returns the result object for this optimization.
+        
+        """  
+          
+        return self.result

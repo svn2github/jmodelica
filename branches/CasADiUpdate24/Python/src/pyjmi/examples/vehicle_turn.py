@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 import numpy as N
 import os
 
-def run_demo(with_plots=True):
+def run_demo(with_plots=True, use_ma57=False):
     """
     This example is based on a single-track model of a car with tire dynamics.
     The optimization problem is to minimize the duration of a 90-degree turn
@@ -34,13 +34,15 @@ def run_demo(with_plots=True):
     This example also demonstrates the usage of blocking factors, to enforce
     piecewise constant inputs.
 
-    This example needs the linear solver MA27 to work.
+    This example needs one of the linear solvers MA27 or MA57 to work.
+    The precense of MA27 or MA57 is not detected in the example, so if only 
+    MA57 is present, then True must be passed in the use_ma57 argument.
     """
     # Set up optimization
     mop_path = os.path.join(get_files_path(), "vehicle_turn.mop")
     op = transfer_optimization_problem('Turn', mop_path)
     opts = op.optimize_options()
-    opts['IPOPT_options']['linear_solver'] = "ma27"
+    opts['IPOPT_options']['linear_solver'] = "ma57" if use_ma57 else "ma27"
     opts['IPOPT_options']['tol'] = 1e-9
     opts['n_e'] = 60
 

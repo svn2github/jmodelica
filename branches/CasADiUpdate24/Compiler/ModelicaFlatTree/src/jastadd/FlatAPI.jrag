@@ -172,6 +172,7 @@ aspect FlatAPI {
     inh lazy int FAbstractVariable.valueReference();
     eq FClass.getFVariable(int i).valueReference()     = valueReferenceMap().get(getFVariable(i));
     eq FClass.getAliasVariable(int i).valueReference() = getAliasVariable(i).aliasValueReference();
+    eq FClass.getAliasConstant(int i).valueReference() = getAliasConstant(i).aliasValueReference();
     eq FClass.getFAbstractEquation().valueReference()  = -1;
     eq Root.getChild().valueReference()                = -1;
     
@@ -1394,7 +1395,7 @@ aspect FlatAPI {
     syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
             !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
 
-    syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(1);
+    syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(myOptions().getBooleanOption("disable_smooth_events") ? 0 : 1);
 
     syn boolean FExp.hasEventGeneratingType() = false;
     eq FRelExp.hasEventGeneratingType()       = isRealComparison();
@@ -1719,7 +1720,11 @@ aspect FlatAPI {
     syn List<FAbstractEquation> FIfWhenElseEquation.createInitialEquationList() {
         List<FAbstractEquation> l = new List<FAbstractEquation>();
         for (FAbstractEquation e : getFAbstractEquations()) {
-            l.add(e.copySymbolic());
+            if (e.replacedAtInitialization()) {
+                l.addAll(e.getInitialEquations());
+            } else {
+                l.add(e.copySymbolic());
+            }
         }
         return l;
     }
@@ -2498,7 +2503,7 @@ aspect Attributes {
 
     // start attribute
     syn boolean FVariable.useBindingExpAsStart()  = 
-        (isIndependentParameter() && hasBindingExp()) || isIndependentConstant();
+        (isIndependentParameter() && hasBindingExp() && !isAlias()) || isIndependentConstant();
     
     syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
     syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);
@@ -2540,7 +2545,7 @@ aspect Attributes {
     syn CValue  FDerivativeVariable.nominalAttributeCValue() = myDifferentiatedVariable().nominalAttributeCValue();
     
     // State Select attribute
-    syn boolean FRealVariable.stateSelectAttributeSet()    = attributeSet(FAttribute.STATE_SELECT);
+    syn boolean FVariable.stateSelectAttributeSet()        = attributeSet(FAttribute.STATE_SELECT);
     syn FExp    FRealVariable.stateSelectAttributeExp()    = attributeExp(FAttribute.STATE_SELECT);
     syn CValue  FRealVariable.stateSelectAttributeCValue() = attributeCValueEnum(FAttribute.STATE_SELECT, stateSelectType(), 3);
     syn int     FRealVariable.stateSelectAttributeInt()    = stateSelectAttributeCValue().intValue();
@@ -2677,8 +2682,6 @@ aspect Nominals {
     
     syn FExp FExp.nominal() = FExp.nominalDefault();
     eq FLitExp.nominal()    = new FAbsExp(fullCopy());
-    
-    syn nta FExp FRelExp.getIndicatorNominal() = FExp.nominalMax(getLeft(), getRight());
     
     eq FDotAddExp.nominal() = FExp.nominalMax(getLeft(), getRight());
     eq FDotSubExp.nominal() = FExp.nominalMax(getLeft(), getRight());

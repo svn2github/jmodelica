@@ -83,10 +83,10 @@ class LogErrorParser(xml.sax.ContentHandler):
         if node['type'] == 'exception':
             return CompilationException(node['kind'], node['message'], node['stacktrace'])
         elif node['type'] == 'error':
-            return CompilationError(node['kind'], node['file'], node['line'], \
+            return CompilationError(node['identifier'], node['kind'], node['file'], node['line'], \
                 node['column'], node['message'])
         elif node['type'] == 'warning':
-            return CompilationWarning(node['kind'], node['file'], node['line'], \
+            return CompilationWarning(node['identifier'], node['kind'], node['file'], node['line'], \
                 node['column'], node['message'])
 
 class KeepLastStream():

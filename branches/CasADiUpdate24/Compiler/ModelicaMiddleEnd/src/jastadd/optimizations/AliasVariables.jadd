@@ -256,6 +256,8 @@ aspect AliasVariables {
 			} else {
 				join(fvA, fvB, neg);
 			}
+            if (fvA.isTemporary())
+                getAliasVariable(fvA).setTempAssignRight(fvB);
 		}
 		
 		private static final String MERGE_ERROR_MESSAGE = 
@@ -326,7 +328,36 @@ aspect AliasVariables {
 			}
 			return str.toString();		
 		}
-		
+
+        /**
+         * Removes the alias set for the temporary variable provided.
+         * Errorchecks are done to ensure that only temporary variables are
+         * removed. However if the system variable is a temporary variable
+         * then all of the variables in the set should be temporaries.
+         * 
+         * This method returns a collection with all the variables removed
+         */
+        public Collection<FVariable> removeTemporaryVariableSet(FVariable fv) {
+            if (!fv.isTemporary()) {
+                throw new UnsupportedOperationException("FVariable " + fv.name() + " of java class " + fv.getClass().getSimpleName() + " is not a temporary variable!");
+            }
+            AliasVariable av = variableMap.get(fv);
+            if (av == null) {
+                return Collections.<FVariable>emptyList();
+            }
+            AliasSet as = av.getSet();
+            Collection<FVariable> removedVars = new ArrayList<FVariable>();
+            for (AliasVariable aliasVar : as) {
+                if (!aliasVar.getFVariable().isTemporary()) {
+                    throw new UnsupportedOperationException("FVariable " + fv.name() + " of java class " + fv.getClass().getSimpleName() + " is not a temporary variable!");
+                }
+                variableMap.remove(aliasVar.getFVariable());
+                removedVars.add(aliasVar.getFVariable());
+            }
+            aliasSets.remove(as);
+            return removedVars;
+        }
+
 		/**
 		 * A class representing a set of alias variables.
 		 */
@@ -335,6 +366,7 @@ aspect AliasVariables {
 			// List of aliases
 			private java.util.List<AliasVariable> aliases = new ArrayList<AliasVariable>();
             private AliasVariable model = null;
+            private long score = 0;
 			
 			/**
 			 * Private constructor
@@ -380,10 +412,12 @@ aspect AliasVariables {
              * @param newAlias Alias variable to check
              */
             private void model(AliasVariable newAlias) {
-                if (model == null || (newAlias != null && 
-                        newAlias.getFVariable().aliasHeuristicScore() 
-                        > model.getFVariable().aliasHeuristicScore())) {
-                    model = newAlias;
+                if (newAlias != null) {
+                    long newScore = newAlias.getFVariable().aliasHeuristicScore();
+                    if (newScore > score) {
+                        model = newAlias;
+                        score = newScore;
+                    }
                 }
             }
             
@@ -400,7 +434,10 @@ aspect AliasVariables {
                         a.negated = !a.negated;
                     _add(a);
                 }
-                model(mergeSet.model);
+                if (mergeSet.score > score) {
+                    model = mergeSet.model;
+                    score = mergeSet.score;
+                }
             }
             
 			
@@ -467,6 +504,11 @@ aspect AliasVariables {
 				}
 				return str.toString();
 			}
+
+            protected void removeVariableFromSet(AliasVariable var) {
+                aliases.remove(var);
+            }
+
 			
 		}
 		
@@ -563,6 +605,28 @@ aspect AliasVariables {
 				return buf.toString();
 			}
 			
+            /**
+             * This tempAssignRight functionality is needed when resolving the
+             * original alias variable for variable incidences in equations.
+             * Due to how the functioninlining works this information would
+             * otherwise be lost. E.g.:
+             *   x = z;
+             *   temp_1 = x;
+             *   y = cos(temp_1);
+             * Which might eventually become:
+             *   y = cos(z);
+             * In this situation we wan't to know that the x was the original
+             * reference in the cos expression. Hence this functionality
+             */
+            private FVariable tempAssignRight;
+            
+            private void setTempAssignRight(FVariable var) {
+                tempAssignRight = var;
+            }
+            
+            public FVariable getTempAssignRight() {
+                return tempAssignRight;
+            }
 		}
 		
 		

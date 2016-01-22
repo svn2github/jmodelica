@@ -24,7 +24,7 @@ from pymodelica import compile_fmu
 from pyfmi import load_fmu
 from pyjmi import get_files_path, transfer_optimization_problem
 
-def run_demo(with_plots=True):
+def run_demo(with_plots=True, use_ma57=False):
     """
     This example is based on a binary distillation column. The model has 125
     states, 1000 algebraic variables and 2 control variables. The task is to
@@ -59,6 +59,10 @@ def run_demo(with_plots=True):
     John Hedengren's nonlinear model library available at:
 
     http://www.hedengren.net/research/models.htm
+
+    This example needs one of the linear solvers MA27 or MA57 to work.
+    The precense of MA27 or MA57 is not detected in the example, so if only 
+    MA57 is present, then True must be passed in the use_ma57 argument.
     """
     ### 1. Find the desired steady state by simulating with constant inputs
     # Compile model
@@ -275,7 +279,7 @@ def run_demo(with_plots=True):
     opts['init_traj'] = ref_res
     opts['nominal_traj'] = ref_res
     opts['n_e'] = 15
-    opts['IPOPT_options']['linear_solver'] = "ma27"
+    opts['IPOPT_options']['linear_solver'] = "ma57" if use_ma57 else "ma27"
     opts['IPOPT_options']['mu_init'] = 1e-3
     opt_res = op.optimize(options=opts)
 

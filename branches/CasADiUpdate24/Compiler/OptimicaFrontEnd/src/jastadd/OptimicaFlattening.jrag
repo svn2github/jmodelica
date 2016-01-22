@@ -30,7 +30,7 @@ aspect OptimicaFlattening {
 
     public InstFullClassDecl OptClassDecl.newInstClassDecl() {
     	InstOptClassDecl fcd = new InstOptClassDecl(this, new Opt(), newInstRestriction(), newInstExternalOpt(), new Opt());
-	    fcd.setInstConstrainingOpt(newInstConstrainingClassOpt());
+	    fcd.setInstConstrainingClassOpt(newInstConstrainingClassOpt());
 	    if (hasClassModification()) 
 	    	fcd.setInstClassModification(getClassModification().newInstModification());
     	return copyLocationTo(fcd);

@@ -55,7 +55,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     retval = jmi_new(&jmi, jmi_callbacks);
     if(retval != 0) {
         /* creating jmi struct failed */
-        jmi_log_comment(jmi_->log, logError, "Creating internal struct failed.");
+        jmi_log_node(jmi_->log, logError, "StructCreationFailure","Creating internal struct failed.");
         return retval;
     }
     
@@ -63,7 +63,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     retval = jmi_me_init_modules(jmi);
     if (retval != 0) {
-    	jmi_log_comment(jmi_->log, logError, "Failed to initialize modules");
+    	jmi_log_node(jmi_->log, logError, "ModuleInitializationFailure","Failed to initialize modules");
     	jmi_delete(jmi_);
     	return -1;
     }
@@ -71,7 +71,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
 
     /* Check if the GUID is correct.*/
     if (strcmp(GUID, C_GUID) != 0) {
-        jmi_log_comment(jmi_->log, logError, "The model and the description file are not consistent to each other.");
+        jmi_log_node(jmi_->log, logError, "ModelDescriptionFileInconsistency","The model and the description file are not consistent to each other.");
         jmi_delete(jmi_);
         return -1;
     }
@@ -86,7 +86,7 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
     
     /* set start values*/
     if (jmi_generic_func(jmi_, jmi_set_start_values) != 0) {
-        jmi_log_comment(jmi_->log, logError, "Failed to set start values.");
+        jmi_log_node(jmi_->log, logError, "SetStartValuesFailure","Failed to set start values.");
         jmi_delete(jmi_);
         return -1;
     }
@@ -467,7 +467,7 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     /* Save the z values to the z_last vector */
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
-    /* jmi_block_completed_integrator_step(jmi); */
+    jmi_block_completed_integrator_step(jmi);
     
     /* Verify the choice of dynamic states */
     retval = jmi_dynamic_state_verify_choice(jmi);
@@ -545,6 +545,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
+        
+        /* This is an implicit accepted step. */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
@@ -579,6 +587,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
+        
+        /* This is an implicit accepted step. */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
@@ -712,7 +728,12 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
         /* Block completed step */
-        /* jmi_block_completed_integrator_step(jmi); */
+        retval = jmi_block_completed_integrator_step(jmi);
+        if(retval != 0) {
+            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
+            jmi_log_unwind(jmi->log, top_node);
+            return -1;
+        }
         
         jmi_log_leave(jmi->log, final_node);
 
@@ -769,7 +790,7 @@ int jmi_update_and_terminate(jmi_t* jmi) {
     if (jmi->recomputeVariables == 1) {
         retval = jmi_ode_derivatives(jmi);
         if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Evaluating the derivatives failed.");
+            jmi_log_node(jmi->log, logError, "DerivativeCalculationFailure","Evaluating the ode derivatives failed.");
             return -1;
         }
         jmi->recomputeVariables = 0;
@@ -835,10 +856,81 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_residual_scaling_hybrid:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_hybrid;
             break;
+        case jmi_residual_scaling_aggressive_auto:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_aggressive_auto;
+            break;
+        case jmi_residual_scaling_full_jacobian_auto:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_full_jacobian_auto;
+            break;
         default:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+            break;
         }
-    }  
+    } 
+
+    index = get_option_index("_nle_jacobian_update_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_broyden_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
+            break;
+        case jmi_reuse_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+            break;
+        default:
+            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+        }
+    } 
+
+    index = get_option_index("_nle_jacobian_calculation_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_central_diffs_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_and_zero_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_bound_and_zero_solve2_jacobian_calculation_mode;
+            break;
+        case jmi_central_diffs_at_small_res_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_central_diffs_at_small_res_jacobian_calculation_mode;
+            break;
+        case jmi_calculate_externally_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_calculate_externally_jacobian_calculation_mode;
+            break;
+        case jmi_compression_jacobian_calculation_mode:
+            bsop->jacobian_calculation_mode = jmi_compression_jacobian_calculation_mode;
+            break;
+        default:
+            bsop->jacobian_calculation_mode = jmi_onesided_diffs_jacobian_calculation_mode;
+            break;
+        }
+    } 
+
+    index = get_option_index("_nle_active_bounds_mode");
+    if(index) {
+        int fl = (int)z[index];
+        switch(fl) {
+        case jmi_use_steepest_descent_active_bounds_mode:
+            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
+            break;
+        default:
+            bsop->active_bounds_mode = jmi_use_steepest_descent_active_bounds_mode;
+        }
+    } 
         
     index = get_option_index("_nle_solver_min_residual_scaling_factor");
     if(index)
@@ -847,6 +939,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_use_nominals_as_fallback");
     if(index)
         bsop->use_nominals_as_fallback_in_init = z[index];
+        
+    index = get_option_index("_nle_solver_use_last_integrator_step");
+    if(index)
+        bsop->start_from_last_integrator_step = z[index];
     
     index = get_option_index("_nle_solver_max_residual_scaling_factor");
     if(index)
@@ -855,6 +951,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_max_iter");
     if(index)
         bsop->max_iter = (int)z[index];
+    index = get_option_index("_nle_solver_max_iter_no_jacobian");
+    if(index)
+        bsop->max_iter_no_jacobian = (int)z[index];
     index = get_option_index("_block_solver_experimental_mode");
     if(index)
         bsop->experimental_mode  = (int)z[index];
@@ -870,6 +969,22 @@ void jmi_update_runtime_options(jmi_t* jmi) {
             break;
         default:
             bsop->iteration_variable_scaling_mode = jmi_iter_var_scaling_nominal;
+        }
+    }
+    index = get_option_index("_nle_solver_exit_criterion");
+    if(index) {
+        switch((int)z[index]) {
+        case jmi_exit_criterion_step_residual:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_step_residual;
+            break;
+        case jmi_exit_criterion_step:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_step;
+            break;
+        case jmi_exit_criterion_residual:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_residual;
+            break;
+        default:
+            bsop->solver_exit_criterion_mode = jmi_exit_criterion_hybrid;
         }
     }
     index = get_option_index("_rescale_each_step");

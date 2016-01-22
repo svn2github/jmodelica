@@ -35,10 +35,10 @@ public class ErrorTestCase extends TestCase {
 		if (problems.size() == 0)
 			return getCheckType() == ErrorCheckType.CHECK;
 		
-		String test = new CompilerException(problems).getMessage();
+		String test = new CompilerException(problems).getMessage(true);
 		String correct = getErrorMessage();
-		String f_test = filterErrorMessages(test);
-		String f_correct = filterErrorMessages(correct);
+        String f_test = filterTestResult(test, resultFilters);
+        String f_correct = filterTestResult(correct, resultFilters);
 		String sf_test = removeWhitespace(f_test);
 		String sf_correct = removeWhitespace(f_correct);
 		
@@ -58,21 +58,17 @@ public class ErrorTestCase extends TestCase {
 			fail("No errors reported.");
 		return true;
 	}
-
-    private static Pattern introFilter = Pattern.compile("^\\s*[0-9]+.+:");
-    private static String introReplacement = "";
-    private static Pattern posFilter = Pattern.compile("at line [0-9]+, column [0-9]+");
-    private static Pattern fileFilter = Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])");
-    private static String posReplacement = "at line 0, column 0";
-    private static String fileReplacement = "in $1 '...'$3";
-
-    public String filterErrorMessages(String str) {
-        str = introFilter.matcher(str).replaceAll(introReplacement);
-        str = posFilter.matcher(str).replaceAll(posReplacement);
-        str = fileFilter.matcher(str).replaceAll(fileReplacement);
-        return str;
+    
+    private static Map<Pattern, String> resultFilters = createResultFilters();
+    
+    private static Map<Pattern, String> createResultFilters() {
+        Map<Pattern, String> m = new LinkedHashMap<Pattern, String>();
+        m.put(Pattern.compile("^\\s*[0-9]+.+:"), "");
+        m.put(Pattern.compile("at line [0-9]+, column [0-9]+"), "at line 0, column 0");
+        m.put(Pattern.compile("in ([a-zA-Z]+) '([^'\\\\]|\\\\.)+'([:,])"), "in $1 '...'$3");
+        return m;
     }
-
+    
 	/**
 	 * @return the errorMessage
 	 */

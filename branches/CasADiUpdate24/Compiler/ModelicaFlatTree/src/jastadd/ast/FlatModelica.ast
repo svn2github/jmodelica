@@ -30,6 +30,7 @@ FlatRoot : Root ::= FClass;
 FClass : BaseNode ::= FQName 
                       FVariable* 
                       AliasVariable:FVariable* 
+                      AliasConstant:FVariable*
                       FInitialEquation:FAbstractEquation*
                       FParameterEquation:FAbstractEquation*
                       FAbstractEquation*
@@ -1117,7 +1118,7 @@ FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
 /**
  * A qualifed identifier in an expression.
  */
-FIdUseExp : FAssignableExp ::= FIdUse;
+FIdUseExp : FAssignableExp ::= FIdUse <OriginalVariable:String>;
 
 /**
  * A reference to a dynamic state
@@ -1298,14 +1299,19 @@ InstVectorFunctionCall : InstFunctionCall ::= <Dims:int>;
 abstract InstFunctionArgument : BaseNode;
 
 /**
+ * Correctly bound function call arguments in the instance tree.
+ */
+abstract InstGivenArgument : InstFunctionArgument ::= FExp;
+
+/**
  * Positional function call argument in the instance tree.
  */
-InstPositionalArgument : InstFunctionArgument ::= <Pos:int> FExp;
+InstPositionalArgument : InstGivenArgument ::= <Pos:int>;
 
 /**
  * Named function call argument in the instance tree.
  */
-InstNamedArgument : InstFunctionArgument ::= Name:InstAccess FExp;
+InstNamedArgument : InstGivenArgument ::= Name:InstAccess;
 
 /**
  * Missing function call argument in the instance tree.
@@ -1685,7 +1691,7 @@ FSumExp : FReductionExp;
 FProductExp : FReductionExp;
 
 /**
- * SemiLinear built-in function.
+ * Homotopy built-in function.
  */
 FHomotopyExp : FBuiltInFunctionCall ::= Actual:FExp Simplified:FExp;
 

@@ -307,6 +307,13 @@ aspect Constructors {
 	}
 	
 	/**
+	 * Constructs a flat FIdUseExp that refers to the variable with the given FIdUse.
+	 */
+	public FIdUseExp.FIdUseExp(FIdUse name) {
+		this(name, (String)null);
+	}
+	
+	/**
 	 * Constructs a flat FIdUseExp that refers to the variable with the given name.
 	 */
 	public FIdUseExp.FIdUseExp(String name) {
@@ -330,6 +337,13 @@ aspect Constructors {
 	}
 
     /**
+     * Constructs an FDerExp that refers to the variable with the given FIdUse and order.
+     */
+    public FDerExp.FDerExp(FIdUse name, int order) {
+        this(name, (String)null, order);
+    }
+    
+    /**
      * Constructs an FDerExp that refers to the variable with the given name.
      */
     public FDerExp.FDerExp(FQName name, int order) {
@@ -350,6 +364,20 @@ aspect Constructors {
         this(name, 1);
     }
 
+    /**
+     * Constructs an FPreExp that refers to the variable with the given FIdUse.
+     */
+    public FPreExp.FPreExp(FIdUse name) {
+        this(name, (String)null);
+    }
+    
+    /**
+     * Constructs an FIdTempExp that refers to the variable with the given FIdUse.
+     */
+    public FIdTempExp.FIdTempExp(FIdUse name) {
+        this(name, (String)null);
+    }
+    
 	/**
 	 * Constructs an FIdUseInstAccess with an empty FQName.
 	 * 

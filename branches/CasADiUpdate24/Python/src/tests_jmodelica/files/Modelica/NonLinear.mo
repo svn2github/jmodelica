@@ -789,5 +789,54 @@ model ResidualHeuristicScaling1
     F_p = A_mean * (100000.0 - state_a_p);  //Residual equation
 end ResidualHeuristicScaling1;
 
+model NonLinear3
+    parameter Real Vns = -15;
+    parameter Real Vps = 15;
+    parameter Real V0 = 15000;
+    parameter Real opAmp2_v_out = -9.9400010271391164E+00;
+    parameter Real k1 = 1000; 
+    parameter Real k2 = 1500;
+    Real v_in(start=0);
+    Real v_out;
+    Real i;
+    Real r1_v, r2_v;
+    
+equation
+    r1_v = - k1 * i;
+    v_in = r1_v + opAmp2_v_out;
+    r2_v = k2 * i;
+    v_out = min(Vps, max(Vns, V0 * v_in));
+    r2_v  =  v_in - v_out;
+end NonLinear3;
+
+model NonLinear4
+    parameter Real scale = 10000;
+    parameter Real Vns = -Vps;
+    parameter Real Vps = 15;
+    parameter Real V0 = 1000*Vps;
+    parameter Real opAmp2_v_out = -9.9400010271391164E+00;
+    parameter Real k1 = (Vps*2)/3*100/scale; //1000; 
+    parameter Real k2 = 100*Vps/scale;
+    Real v_in(start=0);
+    Real v_out;
+    Real i(nominal=1e3);
+    Real r1_v, r2_v;
+    
+equation
+    r1_v = - k1 * i;
+    v_in = r1_v + opAmp2_v_out;
+    r2_v = k2 * i;
+    v_out = min(Vps, max(Vns, V0 * v_in));
+    r2_v  =  v_in - v_out;
+end NonLinear4;
+
+model NonLinear5
+   Real x(start=2);
+   Real y(start=0.5);
+equation
+    der(x) = -1;
+ 100*(y^2-0.1) = 0;
+end NonLinear5;
+
 end NonLinear;
 

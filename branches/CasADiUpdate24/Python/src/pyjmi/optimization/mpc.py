@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#    Copyright (C) 2014 Modelon AB
+#    Copyright (C) 2015 Modelon AB, all rights reserved.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -130,6 +130,11 @@ class MPC(object):
             self.res['x'] = []
             self.res['u'] = []
             self.res['w'] = []
+            self.res['elim_vars'] = []
+
+			
+        # Create array to storage eliminated variables
+        self.eliminated_variables = op.getEliminatedVariables()
            
         # Create lists for some solver statistics
         self.tot_times = []
@@ -187,7 +192,6 @@ class MPC(object):
              
         # Save the initialization time
         self.times['init'] = time.clock() - self._startTime
-        self.t0_update = time.clock()
 
     def _create_clock(self):
         """
@@ -505,11 +509,6 @@ class MPC(object):
         """
         Extracts the results in sim_res and appends it to the result lists.
         """
-        res_mat = sim_res.data_matrix
-        n_dx= self.collocator.n_var['dx']
-        n_u_start = len(self.original_model_inputs)
-        n_u_end = self.collocator.n_var['u']
-        n_w = self.collocator.n_var['w']
         var_type = ['dx', 'x', 'u', 'w']
         n_values = len(sim_res['time'])
         
@@ -529,7 +528,14 @@ class MPC(object):
                     except VariableNotFoundError:
                         res_var = N.array([0]*n_values)
                     self.res[n].append(res_var[k])
-
+                    
+        elims = N.zeros(len(self.eliminated_variables))
+        for k in range(n_values):
+            for i,var in enumerate (self.eliminated_variables):
+                elims[i] = sim_res[var.getName()][k]
+			
+            self.res['elim_vars'].append(elims)
+       
     def _add_times(self):
         """
         Adds each samples times to the total times. Also keeps track of the 
@@ -834,25 +840,6 @@ class MPC(object):
             self.collocator.solver_object.init()
             self.collocator._init_and_set_solver_inputs()
                     
-        #~ # Set next initial guess and initiate the warm start        
-            #~ elif self._sample_nbr == 2:            
-            #~ self.collocator.warm_start = True
-            #~ self._set_warm_start_options()
-            #~ if self._init_traj_set_by_user:
-                #~ self._set_inittraj()
-            #~ else:
-                #~ if self.initial_guess == 'shift':
-                    #~ self._shift_xx()
-                #~ elif self.initial_guess == 'trajectory':
-                    #~ self._init_traj = self._result_object
-                    #~ self._set_inittraj()
-                #~ elif self.initial_guess == 'prev':
-                    #~ if self.status in self.successful_optimization: 
-                        #~ self.collocator.xx_init = self.collocator.primal_opt
-                #~ else:
-                    #~ print("Warning: A new initial guess for the primal " +\
-                          #~ "variables have not been specified for this sample.") 
-            #~ self.collocator._init_and_set_solver_inputs()
 
         # Solve the NLP
         self.sol_time = self.collocator.solve_nlp()
@@ -970,8 +957,15 @@ class MPC(object):
             self.res_w = N.array(self.res['w'])
         res_p = N.array(0).reshape(-1)
         
+        if len(self.eliminated_variables) == 0:
+            self.res_elim_vars = N.ones([len(self.res['t']),0])	
+        else:
+            self.res_elim_vars = N.array(self.res['elim_vars']).reshape\
+                                            ([-1, len(self.eliminated_variables)])                        
+        res_p = N.array(0).reshape(-1)
+        
         res = (self.res_t, self.res_dx, self.res_x, self.res_u, 
-                        self.res_w, self.p_fixed, res_p) 
+                        self.res_w, self.p_fixed, res_p, self.res_elim_vars) 
 
         self.collocator.export_result_dymola(self._mpc_result_file_name, 
                                                 result=res)

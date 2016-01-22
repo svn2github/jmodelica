@@ -179,7 +179,7 @@ aspect Variability {
         return var;
     }
     eq FAlgorithm.variability() {
-        FTypePrefixVariability rhsVar = fConstant();
+        FTypePrefixVariability rhsVar = containsFTimeExp() ? fContinuous() : fConstant();
         FTypePrefixVariability lhsVar = fConstant();
         for (FVariable fv : referencedFVariablesInLHS()) {
             lhsVar = lhsVar.combine(fv.variability());

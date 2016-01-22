@@ -17,9 +17,9 @@
 package FmiXMLTests
 
 model DisplayUnit1
-	type A = Real(unit="N", displayUnit="kN");
-	A a = time;
-	Real b(unit="J", displayUnit="kWh") = 2 * time;
+    type A = Real(unit="N", displayUnit="kN");
+    A a = time;
+    Real b(unit="J", displayUnit="kW.h") = 2 * time;
 
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
@@ -29,20 +29,20 @@ model DisplayUnit1
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-	<BaseUnit unit=\"N\">
-		<DisplayUnitDefinition displayUnit=\"kN\" />
-	</BaseUnit>
-	<BaseUnit unit=\"J\">
-		<DisplayUnitDefinition displayUnit=\"kWh\" />
-	</BaseUnit>
+    <BaseUnit unit=\"N\">
+        <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
+    </BaseUnit>
+    <BaseUnit unit=\"J\">
+        <DisplayUnitDefinition displayUnit=\"kW.h\" gain=\"2.7777777777777776E-7\" />
+    </BaseUnit>
 </UnitDefinitions>
 ")})));
 end DisplayUnit1;
 
 model DisplayUnit2
-	type A = Real(unit="N", displayUnit="kN");
-	A a = time;
-	Real b(unit="J") = 2 * time;
+    type A = Real(unit="N", displayUnit="kN");
+    A a = time;
+    Real b(unit="J") = 2 * time;
 
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
@@ -52,19 +52,19 @@ model DisplayUnit2
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-	<BaseUnit unit=\"N\">
-		<DisplayUnitDefinition displayUnit=\"kN\" />
-	</BaseUnit>
-	<BaseUnit unit=\"J\">
-	</BaseUnit>
+    <BaseUnit unit=\"N\">
+        <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
+    </BaseUnit>
+    <BaseUnit unit=\"J\">
+    </BaseUnit>
 </UnitDefinitions>
 ")})));
 end DisplayUnit2;
 
 model DisplayUnit3
-	type A = Real(unit="N", displayUnit="kN");
-	A a = time;
-	Real b(unit="J", displayUnit="kWh") = 2 * time;
+    type A = Real(unit="N", displayUnit="kN");
+    A a = time;
+    Real b(unit="J", displayUnit="kW.h") = 2 * time;
 
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
@@ -74,20 +74,22 @@ model DisplayUnit3
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-	<Unit name=\"N\">
-		<DisplayUnit name=\"kN\" />
-	</Unit>
-	<Unit name=\"J\">
-		<DisplayUnit name=\"kWh\" />
-	</Unit>
+    <Unit name=\"N\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"kN\" factor=\"0.001\" />
+    </Unit>
+    <Unit name=\"J\">
+        <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"kW.h\" factor=\"2.7777777777777776E-7\" />
+    </Unit>
 </UnitDefinitions>
 ")})));
 end DisplayUnit3;
 
 model DisplayUnit4
-	type A = Real(unit="N", displayUnit="kN");
-	A a = time;
-	Real b(unit="J") = 2 * time;
+    type A = Real(unit="N", displayUnit="kN");
+    A a = time;
+    Real b(unit="J") = 2 * time;
 
     annotation(__JModelica(UnitTesting(tests={
         FmiXMLCodeGenTestCase(
@@ -97,14 +99,189 @@ model DisplayUnit4
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
-	<Unit name=\"N\">
-		<DisplayUnit name=\"kN\" />
-	</Unit>
-	<Unit name=\"J\">
-	</Unit>
+    <Unit name=\"N\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"kN\" factor=\"0.001\" />
+    </Unit>
+    <Unit name=\"J\">
+        <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" />
+    </Unit>
 </UnitDefinitions>
 ")})));
 end DisplayUnit4;
+
+model DisplayUnit5
+    type A = Real(unit="N", displayUnit="kN");
+    type B = Real(unit="N", displayUnit="mN");
+    A a = time;
+    B b = time;
+    Real c(unit="J", displayUnit="kW.h") = 2 * time;
+    Real d(unit="J", displayUnit="W.h") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit5",
+            description="Two display unit with same base unit.",
+            fmi_version="1.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <BaseUnit unit=\"N\">
+        <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
+    </BaseUnit>
+    <BaseUnit unit=\"J\">
+        <DisplayUnitDefinition displayUnit=\"kW.h\" gain=\"2.7777777777777776E-7\" />
+        <DisplayUnitDefinition displayUnit=\"W.h\" gain=\"2.777777777777778E-4\" />
+    </BaseUnit>
+</UnitDefinitions>
+")})));
+end DisplayUnit5;
+
+model DisplayUnit6
+    type A = Real(unit="N", displayUnit="kN");
+    type B = Real(unit="N", displayUnit="mN");
+    A a = time;
+    B b = time;
+    Real c(unit="J", displayUnit="kW.h") = 2 * time;
+    Real d(unit="J", displayUnit="W.h") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit6",
+            description="Two display unit with same base unit.",
+            fmi_version="2.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <Unit name=\"N\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"kN\" factor=\"0.001\" />
+        <DisplayUnit name=\"mN\" factor=\"1000.0\" />
+    </Unit>
+    <Unit name=\"J\">
+        <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"kW.h\" factor=\"2.7777777777777776E-7\" />
+        <DisplayUnit name=\"W.h\" factor=\"2.777777777777778E-4\" />
+    </Unit>
+</UnitDefinitions>
+")})));
+end DisplayUnit6;
+
+model DisplayUnit7
+    type A = Real(unit="kN", displayUnit="mN");
+    type B = Real(unit="N", displayUnit="mN");
+    A a = time;
+    B b = time;
+    Real c(unit="kW.h", displayUnit="J") = 2 * time;
+    Real d(unit="W.h", displayUnit="J") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit7",
+            description="Two display unit with same base unit.",
+            fmi_version="1.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <BaseUnit unit=\"kN\">
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000000.0\" />
+    </BaseUnit>
+    <BaseUnit unit=\"N\">
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
+    </BaseUnit>
+    <BaseUnit unit=\"kW.h\">
+        <DisplayUnitDefinition displayUnit=\"J\" gain=\"3600000.0\" />
+    </BaseUnit>
+    <BaseUnit unit=\"W.h\">
+        <DisplayUnitDefinition displayUnit=\"J\" gain=\"3600.0\" />
+    </BaseUnit>
+</UnitDefinitions>
+")})));
+end DisplayUnit7;
+
+model DisplayUnit8
+    type A = Real(unit="kN", displayUnit="mN");
+    type B = Real(unit="N", displayUnit="mN");
+    A a = time;
+    B b = time;
+    Real c(unit="kW.h", displayUnit="J") = 2 * time;
+    Real d(unit="W.h", displayUnit="J") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit8",
+            description="Two display unit with same base unit.",
+            fmi_version="2.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <Unit name=\"kN\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" factor=\"1000.0\" />
+        <DisplayUnit name=\"mN\" factor=\"1000000.0\" />
+    </Unit>
+    <Unit name=\"N\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"mN\" factor=\"1000.0\" />
+    </Unit>
+    <Unit name=\"kW.h\">
+        <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" factor=\"3600000.0\" />
+        <DisplayUnit name=\"J\" factor=\"3600000.0\" />
+    </Unit>
+    <Unit name=\"W.h\">
+        <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" factor=\"3600.0\" />
+        <DisplayUnit name=\"J\" factor=\"3600.0\" />
+    </Unit>
+</UnitDefinitions>
+")})));
+end DisplayUnit8;
+
+model DisplayUnit9
+    type A = Real(unit="N", displayUnit="x");
+    A a = time;
+    Real b(unit="Y", displayUnit="y") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit9",
+            description="Test with unknown base units and display units",
+            fmi_version="1.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <BaseUnit unit=\"N\">
+        <DisplayUnitDefinition displayUnit=\"x\" />
+    </BaseUnit>
+    <BaseUnit unit=\"Y\">
+        <DisplayUnitDefinition displayUnit=\"y\" />
+    </BaseUnit>
+</UnitDefinitions>
+")})));
+end DisplayUnit9;
+
+model DisplayUnit10
+    type A = Real(unit="N", displayUnit="x");
+    A a = time;
+    Real b(unit="Y", displayUnit="y") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit10",
+            description="Test with unknown base units and display units",
+            fmi_version="2.0",
+            template="$unitDefinitions$",
+            generatedCode="
+<UnitDefinitions>
+    <Unit name=\"N\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
+        <DisplayUnit name=\"x\" />
+    </Unit>
+    <Unit name=\"Y\">
+        <DisplayUnit name=\"y\" />
+    </Unit>
+</UnitDefinitions>
+")})));
+end DisplayUnit10;
 
 model Fmi1StartAttribute
     constant Real independent1(start=1);
@@ -1125,5 +1302,72 @@ $modelVariables$
 </ModelVariables>
 ")})));
 end NoInitialTypeForInputs;
+
+model TempVars1
+    function f
+        input Real i;
+        output Real o[2];
+    algorithm
+        o := {i,-i};
+    annotation(Inline=false);
+    end f;
+
+    Real x;
+equation
+    x = f(time) * {3,4};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVars1",
+            description="Ensures that temporary variables isn't exposed in the xml by default",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+")})));
+end TempVars1;
+
+model TempVars2
+    function f
+        input Real i;
+        output Real o[2];
+    algorithm
+        o := {i,-i};
+    annotation(Inline=false);
+    end f;
+
+    Real x;
+equation
+    x = f(time) * {3,4};
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="TempVars2",
+            description="Ensures that temporary variables are exposed in the xml when expose_temp_vars_in_fmu is set to true",
+            expose_temp_vars_in_fmu=true,
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"temp_1[1]\" valueReference=\"1\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"temp_1[2]\" valueReference=\"2\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+
+")})));
+end TempVars2;
 
 end FmiXMLTests;

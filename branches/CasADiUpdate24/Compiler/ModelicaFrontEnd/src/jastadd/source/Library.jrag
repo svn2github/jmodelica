@@ -352,10 +352,11 @@ aspect Library {
         
         public static class LibraryDef implements Comparable<LibraryDef> {
             
-            public String name;
-            public File path;
-            public boolean structured;
-            public LibNode.LoadReason reason;
+            public final String name;
+            public final String version;
+            public final File path;
+            public final boolean structured;
+            public final LibNode.LoadReason reason;
             
             public static LibraryDef create(File path, LibNode.LoadReason reason) {
                 if (LibNode.isStructuredLib(path))
@@ -388,11 +389,19 @@ aspect Library {
             }
             
             private LibraryDef(File path, boolean structured, LibNode.LoadReason reason) {
-                this.path = path;
-                this.structured = structured;
-                name = path.getName();
+                String name = path.getName();
                 if (!structured)
                     name = name.substring(0, name.length() - 3);
+                String[] parts = name.split(" ", 2);
+                if (parts.length > 1) {
+                    name = parts[0];
+                    version = parts[1];
+                } else {
+                    version = null;
+                }
+                this.name = name;
+                this.path = path;
+                this.structured = structured;
                 this.reason = reason;
             }
             

@@ -136,6 +136,7 @@ int main() {
                           log,                          
                           f, 
                           0, /* no dF*/
+                          0, /* no Jacobian */
                           0, /* no check discrete vars */
                           update_discrete_variables,
                           0, /* can be NULL, only needed after a regularization. */

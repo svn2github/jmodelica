@@ -86,7 +86,8 @@ end ConnectTests.ConnectTest1;
             errorMessage="
 1 errors found:
 
-Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 76, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo',
+In component c2:
   Cannot find class or component declaration for cc
 ")})));
    end ConnectTest2_Err;
@@ -1651,7 +1652,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1576, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1576, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest1;
@@ -1670,10 +1671,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 1595, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1595, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 
-Error at line 1595, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1595, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', CONNECT_WITH_INVALID_TYPE:
   Connecting to an instance of a non-connector type is not allowed
 ")})));
 end ConnectErrTest2;
@@ -1701,7 +1702,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1626, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1626, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest3;
@@ -1739,7 +1740,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1664, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1664, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest4;
@@ -1766,7 +1767,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1691, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1691, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest5;
@@ -1788,8 +1789,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1713, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
-  Sizes do not match in connection
+Error at line 1713, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', ARRAY_SIZE_MISMATCH_IN_CONNECT:
+  Sizes do not match in connection, size of 'a1' is [3] and size of 'a2[1:2]' is [2]
 ")})));
 end ConnectErrTest6;
 
@@ -1815,7 +1816,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1740, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1740, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest7;
@@ -1842,7 +1843,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1767, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1767, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest8;
@@ -1869,7 +1870,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1794, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1794, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest9;
@@ -1925,7 +1926,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1850, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Error at line 1850, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', TYPE_MISMATCH_IN_CONNECT:
   Types of connected components do not match
 ")})));
 end ConnectErrTest11;
@@ -2787,10 +2788,10 @@ model Cardinality3
             errorMessage="
 2 errors found:
 
-Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Compliance error at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', INCORRECT_USE_OF_CARDINALITY:
   The cardinality() function-like operator is only supported in asserts and in the tests of if clauses that do not contain connect()
 
-Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo':
+Warning at line 2644, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ConnectTests.mo', DEPRECATED_CARDINALITY:
   The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica
 ")})));
 end Cardinality3;

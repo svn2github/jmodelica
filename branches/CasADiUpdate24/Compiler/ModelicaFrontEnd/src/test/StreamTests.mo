@@ -264,15 +264,22 @@ equation
         TransformCanonicalTestCase(
             name="StreamTest7",
             description="",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamTest7
+ constant Real f.e.a = 0.0;
+ Real f.e.b;
+ Real f.e.c;
  constant Real g.a = 0;
+ Real g.b;
  Real g.c;
  Real h;
- constant Real f.e.a = 0;
 equation
- h = time;
- g.c = 2 / h;
+ h = g.b;
+ g.b = time;
+ g.c = 2 / g.b;
+ g.b = f.e.b;
+ f.e.c = g.c;
 end StreamTests.StreamTest7;
 ")})));
 end StreamTest7;
@@ -1494,13 +1501,16 @@ equation
         TransformCanonicalTestCase(
             name="InStreamDer2",
             description="Test handling of derivative of inStream()",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.InStreamDer2
  constant Real a.c1.p = 7;
  Real a.c1.f;
  constant Real a.c1.s = 4;
+ constant Real a.c2.p = 7.0;
  Real a.c2.f;
  constant Real a.c2.s = 5;
+ constant Real a.c3.p = 7.0;
  Real a.c3.f;
  constant Real a.c3.s = 6;
  Real a.x1;
@@ -1508,8 +1518,6 @@ fclass StreamTests.InStreamDer2
  Real a.x3;
  Real y1;
  Real y2;
- constant Real a.c2.p = 7;
- constant Real a.c3.p = 7;
  Real a.c2._der_f;
  Real a.c3._der_f;
  Real a.c1._der_f;
@@ -1548,23 +1556,30 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithConst1",
             description="Test stream connectors connected N=0, M=3, with some constant flows",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst1
  constant Real a1.c.p = 0;
  constant Real a1.c.f = 0;
  Real a1.c.s;
+ constant Real a2.c.p = 0.0;
  Real a2.c.f;
+ Real a2.c.s;
+ constant Real a3.c.p = 0.0;
+ Real a3.c.f;
+ Real a3.c.s;
  Real x1;
  Real x2;
  Real x3;
- constant Real a2.c.p = 0;
- constant Real a3.c.p = 0;
 equation
- x1 = (max(- a2.c.f, 1.0E-8) * x3 + max(a2.c.f, 1.0E-8) * x2) / (max(- a2.c.f, 1.0E-8) + max(a2.c.f, 1.0E-8));
+ x1 = (max(- a2.c.f, 1.0E-8) * a2.c.s + max(- a3.c.f, 1.0E-8) * a3.c.s) / (max(- a2.c.f, 1.0E-8) + max(- a3.c.f, 1.0E-8));
+ x2 = a3.c.s;
+ x3 = a2.c.s;
+ a2.c.f + a3.c.f = 0;
  a1.c.s = 2 * time;
  a2.c.f = time;
- x3 = 3 * time;
- x2 = 4 * time;
+ a2.c.s = 3 * time;
+ a3.c.s = 4 * time;
 end StreamTests.StreamWithConst1;
 ")})));
 end StreamWithConst1;
@@ -1590,22 +1605,23 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithConst2",
             description="Test stream connectors connected N=2, M=2, with some constant flows",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst2
+ constant Real a1.c.p = 4;
  constant Real a1.c.f = 1;
  constant Real a1.c.s = 1;
+ constant Real a2.c.p = 4.0;
  constant Real a2.c.f = -1.0;
  constant Real a2.c.s = 2;
- constant Real c1.p = 4;
+ constant Real c1.p = 4.0;
  constant Real c1.f = 0;
  Real c1.s;
+ constant Real c2.p = 4.0;
  constant Real c2.f = 0;
  Real c2.s;
  Real x1;
  Real x2;
- constant Real a1.c.p = 4;
- constant Real a2.c.p = 4;
- constant Real c2.p = 4;
 equation
  c1.s = 2.0;
  c2.s = 2.0;
@@ -1636,41 +1652,54 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithConst3",
             description="Test array stream connectors connected N=2, M=2, with some constant flows",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst3
+ constant Real a1[1].c.p = 3;
  constant Real a1[1].c.f = 1;
  constant Real a1[1].c.s = 1;
+ Real a1[2].c.p;
  Real a1[2].c.f;
+ Real a1[2].c.s;
+ constant Real a2[1].c.p = 3.0;
  constant Real a2[1].c.f = -1.0;
  constant Real a2[1].c.s = 5;
- constant Real c1[1].p = 3;
+ Real a2[2].c.p;
+ Real a2[2].c.f;
+ Real a2[2].c.s;
+ constant Real c1[1].p = 3.0;
  constant Real c1[1].f = 0;
  Real c1[1].s;
  Real c1[2].p;
  constant Real c1[2].f = 0;
  Real c1[2].s;
+ constant Real c2[1].p = 3.0;
  constant Real c2[1].f = 0;
  Real c2[1].s;
+ Real c2[2].p;
  constant Real c2[2].f = 0;
  Real c2[2].s;
  Real x1[1];
  Real x1[2];
  Real x2[1];
  Real x2[2];
- constant Real a1[1].c.p = 3;
- constant Real a2[1].c.p = 3;
- constant Real c2[1].p = 3;
 equation
  c1[1].s = 5.0;
  c2[1].s = 5.0;
- c1[2].s = (max(- a1[2].c.f, 1.0E-8) * x2[2] + max(a1[2].c.f, 1.0E-8) * x1[2]) / (max(- a1[2].c.f, 1.0E-8) + max(a1[2].c.f, 1.0E-8));
- c2[2].s = (max(- a1[2].c.f, 1.0E-8) * x2[2] + max(a1[2].c.f, 1.0E-8) * x1[2]) / (max(- a1[2].c.f, 1.0E-8) + max(a1[2].c.f, 1.0E-8));
- c1[2].p = 4 * time;
+ a1[2].c.f + a2[2].c.f = 0;
+ a1[2].c.p = a2[2].c.p;
+ a2[2].c.p = c1[2].p;
+ c1[2].p = c2[2].p;
+ c1[2].s = (max(- a1[2].c.f, 1.0E-8) * a1[2].c.s + max(- a2[2].c.f, 1.0E-8) * a2[2].c.s) / (max(- a1[2].c.f, 1.0E-8) + max(- a2[2].c.f, 1.0E-8));
+ c2[2].s = (max(- a1[2].c.f, 1.0E-8) * a1[2].c.s + max(- a2[2].c.f, 1.0E-8) * a2[2].c.s) / (max(- a1[2].c.f, 1.0E-8) + max(- a2[2].c.f, 1.0E-8));
+ a1[2].c.p = 4 * time;
  a1[2].c.f = time;
- x2[2] = 2 * time;
- x1[2] = 6 * time;
+ a1[2].c.s = 2 * time;
+ a2[2].c.s = 6 * time;
  x1[1] = 5.0;
+ x1[2] = a2[2].c.s;
  x2[1] = 5.0;
+ x2[2] = a1[2].c.s;
 end StreamTests.StreamWithConst3;
 ")})));
 end StreamWithConst3;
@@ -1694,23 +1723,26 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithConst4",
             description="Constant evaluation of inStream() where only one constant stream variable with a non-constant flow contributes to the result",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst4
  constant Real a1.c.p = 0;
  constant Real a1.c.f = 0;
  Real a1.c.s;
+ constant Real a2.c.p = 0.0;
  Real a2.c.f;
  constant Real a2.c.s = 3;
+ constant Real a3.c.p = 0.0;
+ Real a3.c.f;
  constant Real a3.c.s = 4;
  Real x1;
  Real x2;
  Real x3;
- constant Real a2.c.p = 0;
- constant Real a3.c.p = 0;
 equation
- x1 = (max(- a2.c.f, 1.0E-8) * 3.0 + max(a2.c.f, 1.0E-8) * 4.0) / (max(- a2.c.f, 1.0E-8) + max(a2.c.f, 1.0E-8));
+ x1 = (max(- a2.c.f, 1.0E-8) * 3.0 + max(- a3.c.f, 1.0E-8) * 4.0) / (max(- a2.c.f, 1.0E-8) + max(- a3.c.f, 1.0E-8));
  x2 = 4.0;
  x3 = 3.0;
+ a2.c.f + a3.c.f = 0;
  a1.c.s = 2 * time;
  a2.c.f = time;
 end StreamTests.StreamWithConst4;
@@ -1749,16 +1781,17 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithArrays1",
             description="Test handling of outer stream connectors with arrays",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithArrays1
- constant Real a.c1.p = 1;
+ constant Real a.c1.p = 1.0;
  constant Real a.c1.f = -0.0;
+ constant Real a.c2.p = 1.0;
  constant Real a.c2.f = 0;
+ constant Real a.c3.p = 1.0;
  constant Real a.c3.f = 0;
- constant Real a.c2.p = 1;
- constant Real a.c3.p = 1;
  constant Real b.c.p = 1;
- constant Real b.c.f = -0.0;
+ constant Real b.c.f = 0.0;
 end StreamTests.StreamWithArrays1;
 ")})));
 end StreamWithArrays1;
@@ -1795,33 +1828,42 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithArrays2",
             description="Test handling of outer stream connectors with arrays",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithArrays2
- constant Real a.c1.p = 1;
+ constant Real a.c1.p = 1.0;
  constant Real a.c1.f = -0.0;
  Real a.c1.s[1];
  Real a.c1.s[2];
+ constant Real a.c2.p = 1.0;
  constant Real a.c2.f = 0;
+ Real a.c2.s[1];
+ Real a.c2.s[2];
+ constant Real a.c3.p = 1.0;
  constant Real a.c3.f = 0;
- constant Real a.x1[1] = 1;
- constant Real a.x1[2] = 2;
+ Real a.c3.s[1];
+ Real a.c3.s[2];
+ constant Real a.x1[1] = 1.0;
+ constant Real a.x1[2] = 2.0;
  Real a.x2[1];
  Real a.x2[2];
  Real a.x3[1];
  Real a.x3[2];
- constant Real a.c2.p = 1;
- constant Real a.c3.p = 1;
  constant Real b.c.p = 1;
- constant Real b.c.f = -0.0;
+ constant Real b.c.f = 0.0;
  constant Real b.c.s[1] = 1;
  constant Real b.c.s[2] = 2;
 equation
+ a.x2[1] = a.c2.s[1];
+ a.x2[2] = a.c2.s[2];
+ a.x3[1] = a.c3.s[1];
+ a.x3[2] = a.c3.s[2];
  a.c1.s[1] = 0.0;
  a.c1.s[2] = 0.0;
- a.x2[1] = 0.0;
- a.x2[2] = 0.0;
- a.x3[1] = 0.0;
- a.x3[2] = 0.0;
+ a.c2.s[1] = 0.0;
+ a.c2.s[2] = 0.0;
+ a.c3.s[1] = 0.0;
+ a.c3.s[2] = 0.0;
 end StreamTests.StreamWithArrays2;
 ")})));
 end StreamWithArrays2;
@@ -1854,72 +1896,73 @@ equation
         TransformCanonicalTestCase(
             name="StreamWithArrays3",
             description="Test handling of outer stream connectors with arrays",
+            eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithArrays3
- constant Real a[1].c1[1].p = 1;
+ constant Real a[1].c1[1].p = 1.0;
  constant Real a[1].c1[1].f = -0.0;
  Real a[1].c1[1].s[1];
  Real a[1].c1[1].s[2];
- constant Real a[1].c1[2].p = 2;
+ constant Real a[1].c1[2].p = 2.0;
  constant Real a[1].c1[2].f = -0.0;
  Real a[1].c1[2].s[1];
  Real a[1].c1[2].s[2];
+ constant Real a[1].c2[1].p = 1.0;
  constant Real a[1].c2[1].f = 0;
  Real a[1].c2[1].s[1];
  Real a[1].c2[1].s[2];
+ constant Real a[1].c2[2].p = 2.0;
  constant Real a[1].c2[2].f = 0;
  Real a[1].c2[2].s[1];
  Real a[1].c2[2].s[2];
+ constant Real a[1].c3[1].p = 1.0;
  constant Real a[1].c3[1].f = 0;
  Real a[1].c3[1].s[1];
  Real a[1].c3[1].s[2];
+ constant Real a[1].c3[2].p = 2.0;
  constant Real a[1].c3[2].f = 0;
  Real a[1].c3[2].s[1];
  Real a[1].c3[2].s[2];
- constant Real a[2].c1[1].p = 1;
+ constant Real a[2].c1[1].p = 1.0;
  constant Real a[2].c1[1].f = -0.0;
  Real a[2].c1[1].s[1];
  Real a[2].c1[1].s[2];
- constant Real a[2].c1[2].p = 2;
+ constant Real a[2].c1[2].p = 2.0;
  constant Real a[2].c1[2].f = -0.0;
  Real a[2].c1[2].s[1];
  Real a[2].c1[2].s[2];
+ constant Real a[2].c2[1].p = 1.0;
  constant Real a[2].c2[1].f = 0;
  Real a[2].c2[1].s[1];
  Real a[2].c2[1].s[2];
+ constant Real a[2].c2[2].p = 2.0;
  constant Real a[2].c2[2].f = 0;
  Real a[2].c2[2].s[1];
  Real a[2].c2[2].s[2];
+ constant Real a[2].c3[1].p = 1.0;
  constant Real a[2].c3[1].f = 0;
  Real a[2].c3[1].s[1];
  Real a[2].c3[1].s[2];
+ constant Real a[2].c3[2].p = 2.0;
  constant Real a[2].c3[2].f = 0;
  Real a[2].c3[2].s[1];
  Real a[2].c3[2].s[2];
+ constant Real b[1].c[1].p = 1;
+ constant Real b[1].c[1].f = 0.0;
  constant Real b[1].c[1].s[1] = 1;
  constant Real b[1].c[1].s[2] = 2;
+ constant Real b[1].c[2].p = 2;
+ constant Real b[1].c[2].f = 0.0;
  constant Real b[1].c[2].s[1] = 3;
  constant Real b[1].c[2].s[2] = 4;
+ constant Real b[2].c[1].p = 1;
+ constant Real b[2].c[1].f = 0.0;
  constant Real b[2].c[1].s[1] = 1;
  constant Real b[2].c[1].s[2] = 2;
+ constant Real b[2].c[2].p = 2;
+ constant Real b[2].c[2].f = 0.0;
  constant Real b[2].c[2].s[1] = 3;
  constant Real b[2].c[2].s[2] = 4;
- constant Real a[1].c2[1].p = 1;
- constant Real a[1].c2[2].p = 2;
- constant Real a[1].c3[1].p = 1;
- constant Real a[1].c3[2].p = 2;
- constant Real a[2].c2[1].p = 1;
- constant Real a[2].c2[2].p = 2;
- constant Real a[2].c3[1].p = 1;
- constant Real a[2].c3[2].p = 2;
- constant Real b[1].c[1].p = 1;
- constant Real b[1].c[1].f = -0.0;
- constant Real b[1].c[2].p = 2;
- constant Real b[1].c[2].f = -0.0;
- constant Real b[2].c[1].p = 1;
- constant Real b[2].c[1].f = -0.0;
- constant Real b[2].c[2].p = 2;
- constant Real b[2].c[2].f = -0.0;
 equation
  a[1].c1[1].s[1] = 0.0;
  a[1].c1[1].s[2] = 0.0;
@@ -2011,6 +2054,42 @@ equation
 end StreamTests.StreamDerAlias1;
 ")})));
 end StreamDerAlias1;
+
+
+model StreamSemiLinear1
+    model A
+        StreamConnector c1;
+        StreamConnector c2;
+    end A;
+    
+    A a(c1(s = time, p = 1, f = 2 - time), c2(s = 2 * time));
+    Real x = semiLinear(a.c1.f, actualStream(a.c1.s), a.c1.s);
+equation
+    connect(a.c1, a.c2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="StreamSemiLinear1",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass StreamTests.StreamSemiLinear1
+ constant Real a.c1.p = 1;
+ Real a.c1.f;
+ Real a.c1.s;
+ constant Real a.c2.p = 1.0;
+ Real a.c2.f;
+ Real a.c2.s;
+ Real x;
+equation
+ a.c1.f + a.c2.f = 0;
+ a.c1.f = 2 - time;
+ a.c1.s = time;
+ a.c2.s = 2 * time;
+ x = noEvent(if a.c1.f >= 0 then a.c1.f * smooth(0, if a.c1.f > 0.0 then a.c2.s else a.c1.s) else a.c1.f * a.c1.s);
+end StreamTests.StreamSemiLinear1;
+")})));
+end StreamSemiLinear1;
 
 
 

@@ -144,6 +144,12 @@ aspect Flattening {
         }
     }
 
+    @Override
+    public void InstClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
+        super.flattenUsedFuncsAndEnums(fc);
+        getInstGeneratedInners().flattenUsedFuncsAndEnums(fc);
+    }
+
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
         actualInstClass().flattenUsedFuncsAndEnums(fc);
     }
@@ -2670,11 +2676,11 @@ aspect FlatExpressions {
      * This is done during variability calculation to keep compatibility with FExp. 
      */
     abstract public FTypePrefixVariability TypePrefixVariability.flatten();
-    public FTypePrefixVariability Continuous.flatten()     { return new FContinuous();     }
-    public FTypePrefixVariability Discrete.flatten()       { return new FDiscrete();       }
-    public FTypePrefixVariability Parameter.flatten()      { return new FFixedParameter(); }
-    public FTypePrefixVariability IndexParameter.flatten() { return fIndexParameter();     }
-    public FTypePrefixVariability Constant.flatten()       { return new FConstant();       }
+    public FTypePrefixVariability Continuous.flatten()     { return fContinuous();     }
+    public FTypePrefixVariability Discrete.flatten()       { return fDiscrete();       }
+    public FTypePrefixVariability Parameter.flatten()      { return fFixedParameter(); }
+    public FTypePrefixVariability IndexParameter.flatten() { return fIndexParameter(); }
+    public FTypePrefixVariability Constant.flatten()       { return fConstant();       }
 }
 
 aspect InstantiatedExpressions {
@@ -3076,7 +3082,7 @@ aspect InstantiatedExpressions {
 	}
 	
 	public InstNamedArgument NamedArgument.instantiate() {
-		return copyLocationTo(new InstNamedArgument(getName().instantiate(), getExp().instantiate()));
+		return copyLocationTo(new InstNamedArgument(getExp().instantiate(), getName().instantiate()));
 	}
 	
 	protected FAbstractFunctionCall FunctionCall.createInstNode(InstAccess name, List<InstFunctionArgument> args) {
@@ -3093,7 +3099,7 @@ aspect InstantiatedExpressions {
 		if (hasFunctionArguments()) {
 			int i = 0;
 			for (Exp arg : getFunctionArguments().getExpList()) {
-				InstPositionalArgument iarg = new InstPositionalArgument(i++, arg.instantiate());
+				InstPositionalArgument iarg = new InstPositionalArgument(arg.instantiate(), i++);
 				iarg.setLocation(arg);
 				args.add(iarg);
 			}

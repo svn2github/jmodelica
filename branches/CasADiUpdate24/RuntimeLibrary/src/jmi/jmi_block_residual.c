@@ -441,6 +441,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
         jmi->log,
         jmi_block_residual,
         dF ? jmi_block_dir_der:0,
+        0, /* jacobian calculation callback */
         jmi_block_check_discrete_variables_change,
         jmi_block_update_discrete_variables,
         jmi_block_log_discrete_variables,
@@ -774,4 +775,9 @@ int jmi_linear_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t*
         jacobian[i] = -jacobian[i];
     }
     return 0;
+}
+
+
+int jmi_block_residual_completed_integrator_step(jmi_block_residual_t* block) {
+    return jmi_block_solver_completed_integrator_step(block->block_solver);
 }

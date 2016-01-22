@@ -22,190 +22,201 @@ import java.util.Map;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.Problem;
+import org.jmodelica.util.problemHandling.Problem;
+import org.jmodelica.util.problemHandling.ProblemSeverity;
+import org.jmodelica.util.problemHandling.ProblemKind;
+import org.jmodelica.util.problemHandling.ReporterNode;
+import org.jmodelica.util.problemHandling.ProblemOptionsProvider;
 import org.jmodelica.util.ErrorCheckType;
 
 
-  
-  /**
-   * Interface for handling semantic errors.
-   * $see Root#setErrorHandler(IErrorHandler)
-   */
-  public interface IErrorHandler {
-	  /**
-	   * Called when a semantic error is found. 
-	   * 
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   * @see ASTNode#error(String)
-	   */
-	  public void error(String s, ASTNode n);
-	  
-	  /**
-	   * Called when a compiler compliance error is found.
-	   * 
-	   * These errors are generated when compiling code that is legal Modelica, 
-	   * but uses features that aren't implemented. Compliance errors are ignored 
-	   * by test cases (except ComplianceErrorTestCase).
-	   *  
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   * @see ASTNode#compliance(String)
-	   */
-	  public void compliance(String s, ASTNode n);
-	  
-	  /**
-	   * Called when a warning is issued during semantic error checking.
-	   * 
-	   * @param s	warning message.
-	   * @param n	the node the warning originated from.
-	   * @see ASTNode#warning(String)
-	   */
-	  public void warning(String s, ASTNode n);
-      
-      /**
-       * Called when a problem is generated though other means than the other methods in this interface, 
-       * typically during parsing of library files.
-       * 
-       * @param p   the problem
-       * @see ASTNode#problem(Problem)
-       */
-      public void problem(Problem p);
-  }
-  
-  /**
-   * Default implementation of {@link IErrorHandler}.
-   *  
-   * Collects a list of {@link Problem} for all found errors.
-   */
-  public class DefaultErrorHandler implements IErrorHandler {
-	  protected boolean haltOnWarning;
-	  
-        public DefaultErrorHandler() {
-            this(false);
-        }
-        
-        public DefaultErrorHandler(boolean haltOnWarning) {
-            this.haltOnWarning = haltOnWarning;
-        }
 
-	  /**
-	   * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
-	   * 
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   */
-	  public void error(String s, ASTNode n) {
-		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.SEMANTIC);
-	  }
+/**
+ * Interface for handling semantic errors.
+ * $see Root#setErrorHandler(IErrorHandler)
+ */
+public interface IErrorHandler {
+    /**
+     * Called when a semantic error is found. 
+     * 
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     * @see ASTNode#error(String)
+     */
+    public void error(String s, ASTNode n);
+    
+    /**
+     * Called when a compiler compliance error is found.
+     * 
+     * These errors are generated when compiling code that is legal Modelica, 
+     * but uses features that aren't implemented. Compliance errors are ignored 
+     * by test cases (except ComplianceErrorTestCase).
+     *  
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     * @see ASTNode#compliance(String)
+     */
+    public void compliance(String s, ASTNode n);
+    
+    /**
+     * Called when a warning is issued during semantic error checking.
+     * 
+     * @param s	warning message.
+     * @param n	the node the warning originated from.
+     * @see ASTNode#warning(String)
+     */
+    public void warning(String s, ASTNode n);
+    
+    /**
+     * Called when a problem is generated though other means than the other methods in this interface, 
+     * typically during parsing of library files.
+     * 
+     * @param p   the problem
+     * @see ASTNode#problem(Problem)
+     */
+    public void problem(Problem p);
+}
 
-	  /**
-	   * Creates a new {@link Problem} with kind COMPLIANCE 
-	   *        and adds it to root.errors, ignoring duplicates.
-	   * 
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   */
-	  public void compliance(String s, ASTNode n) {
-		  problem(s, n, errors, Problem.Severity.ERROR, Problem.Kind.COMPLIANCE);
-	  }
+/**
+ * Default implementation of {@link IErrorHandler}.
+ *  
+ * Collects a list of {@link Problem} for all found errors.
+ */
+public class DefaultErrorHandler implements IErrorHandler {
+    protected boolean haltOnWarning;
+    
+    public DefaultErrorHandler() {
+        this(false);
+    }
 
-	  /**
-	   * Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
-	   * 
-	   * @param s	warning message.
-	   * @param n	the node the warning originated from.
-	   */
-	  public void warning(String s, ASTNode n) {
-		  problem(s, n, warnings, Problem.Severity.WARNING, Problem.Kind.OTHER);
-	  }
+    public DefaultErrorHandler(boolean haltOnWarning) {
+        this.haltOnWarning = haltOnWarning;
+    }
 
-      /**
-       * Called when a problem is generated though other means than the other methods in this class, 
-       * typically during parsing of library files.
-       * 
-       * @param p   the problem
-       * @see ASTNode#problem(Problem)
-       */
-      public void problem(Problem p) {
-          ArrayList<Problem> list = (p.severity() == Problem.Severity.WARNING) ? warnings : errors;
-          int pos = list.indexOf(p);
-          if (pos == -1)
-              list.add(p);
-          else
-              list.get(pos).merge(p);
-      }
+    /**
+     * Creates a new {@link Problem} and adds it to root.errors, ignoring duplicates.
+     * 
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     */
+    public void error(String s, ASTNode n) {
+        problem(s, n, ProblemSeverity.ERROR, ProblemKind.SEMANTIC);
+    }
 
-      protected void problem(String s, ASTNode n, ArrayList<Problem> list, Problem.Severity sev, Problem.Kind kind) {
-          Problem p = new Problem(n.fileName(), s, sev, kind, n.lineNumber(), n.columnNumber());
-          if (n.myOptions().getBooleanOption("component_names_in_errors"))
-              p.addComponent(n.errorComponentName());
-          int pos = list.indexOf(p);
-          if (pos == -1)
-              list.add(p);
-          else
-              list.get(pos).merge(p);
-      }
-  }
-  
-  /**
-   * Error handler that generates warnings for compliance errors, 
-   *        delegating to another error handler.
-   */
-  public class ComplianceWarnErrorHandler implements IErrorHandler {
-  	
-  	  private IErrorHandler delegate;
+    /**
+     * Creates a new {@link Problem} with kind COMPLIANCE 
+     *        and adds it to root.errors, ignoring duplicates.
+     * 
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     */
+    public void compliance(String s, ASTNode n) {
+        problem(s, n, ProblemSeverity.ERROR, ProblemKind.COMPLIANCE);
+    }
 
-	  public ComplianceWarnErrorHandler(IErrorHandler delegate) {
-	  	  if (delegate instanceof ComplianceWarnErrorHandler)
-	  		  delegate = ((ComplianceWarnErrorHandler) delegate).delegate;
-		  this.delegate = delegate;
-	  }
+    /**
+     * Creates a new {@link Problem} and adds it to root.warnings, ignoring duplicates.
+     * 
+     * @param s	warning message.
+     * @param n	the node the warning originated from.
+     */
+    public void warning(String s, ASTNode n) {
+        problem(s, n, ProblemSeverity.WARNING, ProblemKind.OTHER);
+    }
 
-	  /**
-	   * Delegates to wrapped error handler.
-	   * 
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   */
-	  public void error(String s, ASTNode n) {
-		  delegate.error(s, n);
-	  }
+    /**
+     * Called when a problem is generated though other means than the other methods in this class, 
+     * typically during parsing of library files.
+     * 
+     * @param p   the problem
+     * @see ASTNode#problem(Problem)
+     */
+    public void problem(Problem p) {
+        ArrayList<Problem> list = (p.severity() == ProblemSeverity.WARNING) ? warnings : errors;
+        int pos = list.indexOf(p);
+        if (pos == -1)
+            list.add(p);
+        else
+            list.get(pos).merge(p);
+    }
 
-	  /**
-	   * Delegates to warning() in wrapped error handler.
-	   * 
-	   * @param s	error message.
-	   * @param n	the node the error originated from.
-	   */
-	  public void compliance(String s, ASTNode n) {
-		  delegate.warning(s, n);
-	  }
+    protected void problem(String message, ASTNode node, ProblemSeverity severity, ProblemKind kind) {
+        problem(Problem.createProblem(null, node, severity, kind, message));
+    }
+}
 
-	  /**
-	   * Delegates to wrapped error handler.
-	   * 
-	   * @param s	warning message.
-	   * @param n	the node the warning originated from.
-	   */
-	  public void warning(String s, ASTNode n) {
-		  delegate.warning(s, n);
-	  }
+/**
+ * Error handler that generates warnings for compliance errors, 
+ *        delegating to another error handler.
+ */
+public class ComplianceWarnErrorHandler implements IErrorHandler {
 
-      /**
-       * Called when a problem is generated though other means than the other methods in this class, 
-       * typically during parsing of library files.
-       * 
-       * @param p   the problem
-       * @see ASTNode#problem(Problem)
-       */
-      public void problem(Problem p) {
-          delegate.problem(p);
-      }
-  }
-  
+    private IErrorHandler delegate;
+
+    public ComplianceWarnErrorHandler(IErrorHandler delegate) {
+        if (delegate instanceof ComplianceWarnErrorHandler)
+            delegate = ((ComplianceWarnErrorHandler) delegate).delegate;
+        this.delegate = delegate;
+    }
+
+    /**
+     * Delegates to wrapped error handler.
+     * 
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     */
+    public void error(String s, ASTNode n) {
+        delegate.error(s, n);
+    }
+
+    /**
+     * Delegates to warning() in wrapped error handler.
+     * 
+     * @param s	error message.
+     * @param n	the node the error originated from.
+     */
+    public void compliance(String s, ASTNode n) {
+        delegate.warning(s, n);
+    }
+
+    /**
+     * Delegates to wrapped error handler.
+     * 
+     * @param s	warning message.
+     * @param n	the node the warning originated from.
+     */
+    public void warning(String s, ASTNode n) {
+        delegate.warning(s, n);
+    }
+
+    /**
+     * Called when a problem is generated though other means than the other methods in this class, 
+     * typically during parsing of library files.
+     * 
+     * @param p   the problem
+     * @see ASTNode#problem(Problem)
+     */
+    public void problem(Problem p) {
+        delegate.problem(p);
+    }
+}
 
 aspect ErrorCheck {
+    
+    syn ProblemOptionsProvider ASTNode.myProblemOptionsProvider() = root().getUtilInterface();
+    
+    public class UtilInterface implements ProblemOptionsProvider {
+        private Set<String> warningsFilterCache = null;
+        public boolean filterThisWarning(String identifier) {
+            if (warningsFilterCache == null) {
+                warningsFilterCache = new HashSet<String>();
+                for (String s : getOptionRegistry().getStringOption("filter_warnings").split(",")) {
+                    warningsFilterCache.add(s);
+                }
+            }
+            return warningsFilterCache.contains(identifier);
+        }
+    }
 	
 	public void ASTNode.breakOnErrors() throws CompilerException {
 		root().getErrorHandler().breakOnErrors();
@@ -267,10 +278,20 @@ aspect ErrorCheck {
   syn int ASTNode.lineNumber() = (start != 0 || getParent()==null)? beginLine() : getParent().lineNumber();
   syn int ASTNode.columnNumber() = (start != 0 || getParent()==null)? beginColumn() : getParent().columnNumber();
   
+  
+  ASTNode implements ReporterNode;
+  
+  public void ASTNode.reportProblem(Problem problem) {
+      root().getErrorHandler().problem(problem);
+  }
+
+  
+  
   /**
    * Register an error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
+  @Deprecated
   public void ASTNode.error(String s) {
 	  root().getErrorHandler().error(s, this);
   }
@@ -280,6 +301,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.error(String format, Object... args) {
 	  error(String.format(format, args));
   }
@@ -288,6 +310,7 @@ aspect ErrorCheck {
    * Register a compliance error. Delegates to an {@link IErrorHandler}.
    * @param s	the error message.
    */
+  @Deprecated
   public void ASTNode.compliance(String s) {
 	  root().getErrorHandler().compliance(s, this);
   }
@@ -297,6 +320,7 @@ aspect ErrorCheck {
    * 
    * Builds error message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.compliance(String format, Object... args) {
 	  compliance(String.format(format, args));
   }
@@ -305,6 +329,7 @@ aspect ErrorCheck {
    * Register a warning. Delegates to an {@link IErrorHandler}.
    * @param s	the warning message.
    */
+  @Deprecated
   public void ASTNode.warning(String s) {
 	  root().getErrorHandler().warning(s, this);
   }
@@ -314,6 +339,7 @@ aspect ErrorCheck {
    * 
    * Builds warning message using <code>format</code> as format string.
    */
+  @Deprecated
   public void ASTNode.warning(String format, Object... args) {
 	  warning(String.format(format, args));
   }
@@ -322,10 +348,61 @@ aspect ErrorCheck {
    * Register a problem. Delegates to an {@link IErrorHandler}.
    * @param p   the problem.
    */
+  @Deprecated
   public void ASTNode.problem(Problem p) {
       root().getErrorHandler().problem(p);
   }
-  
+
+    /**
+     * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
+     */
+    @Deprecated
+    public void ASTNode.errorUnlessDisabled(String s) {
+        if (inDisabledComponent()) {
+            warning("Found error in disabled conditional:\n  " + s);
+        } else {
+            error(s);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component, generate a warning, otherwise generate an error.
+     */
+    @Deprecated
+    public void ASTNode.errorUnlessDisabled(String format, Object... args) {
+        if (inDisabledComponent()) {
+            warning("Found error in disabled conditional:\n  " + format, args);
+        } else {
+            error(format, args);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
+     * generate a warning, otherwise generate an error.
+     */
+    @Deprecated
+    public void ASTNode.errorUnlessDisabledAnd(boolean condition, String s) {
+        if (condition) {
+            errorUnlessDisabled(s);
+        } else {
+            error(s);
+        }
+    }
+
+    /**
+     * If this node is in a disabled conditional component and <code>condition</code> is <code>true</code>, 
+     * generate a warning, otherwise generate an error.
+     */
+    @Deprecated
+    public void ASTNode.errorUnlessDisabledAnd(boolean condition, String format, Object... args) {
+        if (condition) {
+            errorUnlessDisabled(format, args);
+        } else {
+            error(format, args);
+        }
+    }
+
   /**
    * Lock the closest surrounding if-equation or if-expression that have only 
    * parameter-expression tests and evaluates to another branch. Returns true 
@@ -473,13 +550,23 @@ aspect ErrorCheck {
 
     inh InstComponentDecl ASTNode.errorEnclosingComponent();
     eq InstNode.getChild().errorEnclosingComponent() = containingInstComponent();
+    eq InstComponentDecl.getChild().errorEnclosingComponent() {
+        if (isRedeclared() || getComponentDecl().hasRedeclare()) {
+            return errorEnclosingComponent();
+        } else {
+            return containingInstComponent();
+        }
+    }
+    eq InstComponentDecl.getFAbstractEquation().errorEnclosingComponent() = this;
+    eq InstAssignable.getBindingFExp().errorEnclosingComponent() = myInstValueMod().errorEnclosingComponent();
+    
     eq FlatRoot.getChild().errorEnclosingComponent() = null;
     eq InstRoot.getChild().errorEnclosingComponent() = null;
     eq SourceRoot.getChild().errorEnclosingComponent() = null;
 
     syn String ASTNode.errorComponentName() {
         InstComponentDecl parent = errorEnclosingComponent();
-        return parent == null ? null : parent.qualifiedName();
+        return parent == null ? null : parent.getFQName().scalarName(false);
     }
 
 }
@@ -568,10 +655,12 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             super.collectErrors(checkType);
             errorChecked = true;
-            for (InstImport ii : getInstImports())
+            for (InstImport ii : getInstImports()) {
                 ii.collectErrors(checkType);
-            if (hasInstConstraining())
-                getInstConstraining().collectErrors(checkType);
+            }
+            if (hasInstConstrainingClass()) {
+                getInstConstrainingClass().collectErrors(checkType);
+            }
             getInstRestriction().collectErrors(checkType);
             getInstGeneratedInners().collectErrors(checkType);
             if (getBaseClassDecl() instanceof FullClassDecl) {
@@ -728,20 +817,25 @@ aspect InstanceErrorCheck {
             } else {
                 collectErrorsInClassName(checkType);
                 myInstClass().checkRestriction(checkType);
-                if (hasFArraySubscripts())
+                if (hasFArraySubscripts()) {
                     getFArraySubscripts().collectErrors(checkType);
-                if (hasConditionalAttribute()) 
+                }
+                if (hasConditionalAttribute())  {
                     getConditionalAttribute().collectErrors(checkType);
-                if (!isDisabled() && hasInstModification())
+                }
+                if (!isDisabled() && hasInstModification()) {
                     getInstModification().collectErrors(checkType);
-                for (InstModification im : getMergedEnvironment())
+                }
+                for (InstModification im : getMergedEnvironment()) {
                     im.checkModificationNames(checkType);
+                }
                 
                 if (shouldCheckInto(checkType)) {
                     errorChecked = false;
                     super.collectErrors(checkType);
-                    if (hasInstConstraining())
-                        getInstConstraining().collectErrors(checkType);
+                    if (hasInstConstrainingComponent()) {
+                        getInstConstrainingComponent().collectErrors(checkType);
+                    }
                 }
             }
         }
@@ -775,19 +869,19 @@ aspect InstanceErrorCheck {
 	}	
 	
 	public void FExp.checkConstantExpression(ErrorCheckType checkType, String varKind, String varName) {
-		String exp = "'" + prettyPrint("") + "'";
 		boolean failed = false;
+        ConstantEvaluationException eres = null;
 		try {
 			if (isCircular()) {
 			    if (!checkType.allowConstantNoValue())
-    				error("Could not evaluate binding expression for %s '%s' due to circularity: %s", 
-    						varKind, varName, exp);
+    				error("Could not evaluate binding expression for %s '%s' due to circularity: '%s'", 
+    						varKind, varName, prettyPrint(""));
 			} else {
 				CValue val = ceval();
 				if (val.isPartlyUnknown()) {
 					if (val.isUnsupported()) {
 						compliance("Constant evaluation not supported for expression(s) directly or indirectly " + 
-								"used by the binding expression for %s '%s': %s", varKind, varName, exp);
+								"used by the binding expression for %s '%s': '%s'", varKind, varName, prettyPrint(""));
 					} else {
 						failed = true;
 					}
@@ -797,10 +891,18 @@ aspect InstanceErrorCheck {
 			// Will be evaluatable later, ignore for now
 		} catch (ConstantEvaluationException e) {
 			failed = true;
+			eres = e;
 		}
-		if (failed && !checkType.allowConstantNoValue())
-			error("Could not evaluate binding expression for %s '%s': %s", varKind, varName, exp);
+		if (failed && !checkType.allowConstantNoValue()) {
+			error("Could not evaluate binding expression for %s '%s': '%s'%s", varKind, varName, prettyPrint(""),
+			        eres == null ? "" : eres.getModelicaStackTrace());
+		}
 	}
+
+    public static final SimpleProblemProducer ASTNode.PARAMETER_MISSING_BINDING_EXPRESSION =
+            new SimpleWarningProducer("PARAMETER_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The parameter %s does not have a binding expression");
+    public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
+            new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
 
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
@@ -824,8 +926,11 @@ aspect InstanceErrorCheck {
                 // Warn if constant or parameter does not have a binding expression (start is used)
                 if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
                         !hasParentRecordWithBindingExp() && !inFunction()) {
-                    String type = isParameter() ? "parameter" : "constant";
-                    warning("The %s %s does not have a binding expression", type, qualifiedName());
+                    if (isParameter()) {
+                        PARAMETER_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
+                    } else {
+                        CONSTANT_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
+                    }
                 }
             }
             
@@ -896,19 +1001,20 @@ aspect InstanceErrorCheck {
 	syn boolean InstExtends.shouldCheckModification()           = true;
 	eq InstExtendsShortClass.shouldCheckModification()          = extendsPrimitive();
 	eq InstReplacingExtendsShortClass.shouldCheckModification() = extendsPrimitive();
-	
-	public void InstShortClassDecl.collectErrors(ErrorCheckType checkType) {
-	    if (!errorChecked) {
-		  super.collectErrors(checkType);
-    	  errorChecked = true;
-		  // The localInstModifications should only be checked if
-		  // the node is not a InstReplacingShortClassDecl. This
-		  // is accomplished by the method collectInstModificationErrors.
-		  collectInstModificationErrors(checkType);
-		  if (hasInstConstraining())
-				getInstConstraining().collectErrors(checkType);		  
-		}
-	}
+
+    public void InstShortClassDecl.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+          super.collectErrors(checkType);
+          errorChecked = true;
+          // The localInstModifications should only be checked if
+          // the node is not a InstReplacingShortClassDecl. This
+          // is accomplished by the method collectInstModificationErrors.
+          collectInstModificationErrors(checkType);
+          if (hasInstConstrainingClass()) {
+                getInstConstrainingClass().collectErrors(checkType);
+          }
+        }
+    }
 
 	public void InstShortClassDecl.collectInstModificationErrors(ErrorCheckType checkType) {
 		for (InstModification mod : localInstModifications())
@@ -976,11 +1082,13 @@ aspect InstanceErrorCheck {
     }
 
     public void InstComponentDecl.checkRedeclares(ErrorCheckType checkType) {
-        if (!isDisabled() && hasInstModification())
+        if (!isDisabled() && hasInstModification()) {
             getInstModification().collectErrors(checkType);
+        }
         if (shouldCheckInto(checkType)) {
-            if (hasInstConstraining())
-                getInstConstraining().collectErrors(checkType);
+            if (hasInstConstrainingComponent()) {
+                getInstConstrainingComponent().collectErrors(checkType);
+            }
             super.checkRedeclares(checkType);
         }
     }
@@ -1102,25 +1210,28 @@ aspect InstanceErrorCheck {
 	public void FIterExp.collectErrors(ErrorCheckType checkType) {
 	    collectErrorsInFor(getFExp(), getForIndexList(), checkType);
 	}
-	
-	public void ASTNode.collectErrorsInFor(
-	        ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
-	    // Do the checks on the for itself
-	    allChecks(checkType);
-	    
-	    // Check everything except iterChild once
-	    for (ASTNode ch : this)
-	        if (ch != iterChild)
-	            ch.collectErrors(checkType);
-	    
-	    // Check array bounds in iterChild for each index combination
-	    try {
-	        indices.getChild(0).collectErrorsForAllIndices(indices, 0, iterChild, checkType);
-	    } catch (ConstantEvaluationException e) {
-	        // This error is caught elsewhere
-	    }
-	}
-    
+
+    public void ASTNode.collectErrorsInFor(
+            ASTNode iterChild, List<? extends CommonForIndex> indices, ErrorCheckType checkType) {
+        // Do the checks on the for itself
+        allChecks(checkType);
+        
+        // Check everything except iterChild once
+        for (ASTNode ch : this)
+            if (ch != iterChild)
+                ch.collectErrors(checkType);
+        
+        // Check array bounds in iterChild for each index combination
+        try {
+            indices.getChild(0).collectErrorsForAllIndices(indices, 0, iterChild, checkType);
+        } catch (ConstantEvaluationException e) {
+            // Do "general" check if we are unable to determine the indices.
+            // Will probably give incorrect errors. However this is better than
+            // passing along errors and then crash!
+            iterChild.collectErrors(checkType);
+        }
+    }
+
     /**
      * Collect errors in iterated node for all combinations of for indices.
      * 

@@ -216,13 +216,14 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 		TransformCanonicalTestCase(
 			name="TransformCanonicalTest7",
 			description="Provokes a former bug that was due to tree traversals befor the flush after scalarization",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest7
  structural parameter Integer p1 = 2 /* 2 */;
  structural parameter Integer p2 = 2 /* 2 */;
  constant Real x[1] = 1;
- constant Real y = 2;
  constant Real x[2] = 2;
+ constant Real y = 2.0;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
   end TransformCanonicalTest7;
@@ -860,11 +861,12 @@ Error in flattened model:
 		TransformCanonicalTestCase(
 			name="AliasTest20",
 			description="Test elimination of alias variables",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest20
- constant Real x1 = 1;
- constant Real x2 = - 1;
- constant Real x3 = 1;
+ Real x1;
+equation
+ x1 = 1;
 end TransformCanonicalTests.AliasTest20;
 ")})));
   end AliasTest20;
@@ -899,11 +901,14 @@ Alias sets:
 		TransformCanonicalTestCase(
 			name="AliasTest22",
 			description="Test elimination of alias variables",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest22
- constant Real x1 = 1;
- constant Real x3 = 1.0;
- constant Real x2 = - 1;
+ Real x1;
+ Real x3;
+equation
+ x1 = 1;
+ x3 = (- x1) ^ 2;
 end TransformCanonicalTests.AliasTest22;
 ")})));
   end AliasTest22;
@@ -1024,13 +1029,12 @@ equation
 		TransformCanonicalTestCase(
 			name="AliasTest27",
 			description="Test elimination of alias variables.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasTest27
- constant Real x1 = 1;
- constant Real x2 = 1;
- constant Real x3 = 1;
- constant Real x4 = 1;
- constant Real x5 = 1;
+ Real x1;
+equation
+ x1 = 1;
 end TransformCanonicalTests.AliasTest27;
 ")})));
 end AliasTest27;
@@ -1190,7 +1194,7 @@ end AliasTest31;
 model AliasTest32
   Integer a = 42;
   Real b;
-  Integer c;
+  Real c;
 equation
   a = b;
   b = c;
@@ -1200,9 +1204,11 @@ equation
 			name="AliasTest32",
 			methodName="aliasDiagnostics",
 			description="Test so that variables with different types aren't alias eliminated",
+            variability_propagation=false,
 			methodResult="
 Alias sets:
-0 variables can be eliminated
+{b, c}
+1 variables can be eliminated
 ")})));
 end AliasTest32;
 
@@ -1275,7 +1281,61 @@ der(x) := x * (time - switchTime)
 pre(x) := 2 * switchTime ^ 2 / (1.0 + 1.0)
 -------------------------------
 ")})));
-  end AliasTest34;
+end AliasTest34;
+
+    model AliasTest35
+        function F
+            input Real i1;
+            input Real i2;
+            output Real o1;
+            output Real o2;
+        algorithm
+            o1 := i1 * 2;
+            o2 := i2 * 2;
+            annotation(InlineAfterIndexReduction=true,derivative=F_der);
+        end F;
+    
+        function F_der
+            input Real i1;
+            input Real i1_der;
+            input Real i2;
+            input Real i2_der;
+            output Real o1_der;
+            output Real o2_der;
+        protected
+            Real v1;
+            Real v2;
+        algorithm
+            v1 := 1 * i1_der;
+            v2 := 1 * i2_der;
+            (o1_der, o2_der) := F(v1, v2);
+            annotation(Inline=true);
+        end F_der;
+    
+        Real x;
+        Real y;
+        Real vx;
+        Real vy;
+        Real vx2;
+        Real vy2;
+        Real a;
+    equation
+        der(x) = vx;
+        der(y) = vy;
+        (vx, vy) = F(vx2, vy2);
+        der(vx2) = a*x;
+        der(vy2) = a*y;
+        x^2 + y^2 = 2;
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AliasTest35",
+            methodName="aliasDiagnostics",
+            description="Test so that alias sets with only temporaries in are removed",
+            methodResult="
+Alias sets:
+0 variables can be eliminated
+")})));
+    end AliasTest35;
 
 model AliasFuncTest1
     function f
@@ -1625,6 +1685,7 @@ model AliasStateSelect1
 		TransformCanonicalTestCase(
 			name="AliasStateSelect1",
 			description="Test propagation of stateSelect attribute in alias set",
+            eliminate_alias_constants=false,
 			flatModel="
 fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
@@ -1824,7 +1885,7 @@ model ParameterBindingExpTest3_Warn
             errorMessage="
 1 errors found:
 
-Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Warning at line 1681, column 35, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end ParameterBindingExpTest3_Warn;
@@ -1935,7 +1996,8 @@ model AttributeBindingExpTest5_Err
             errorMessage="
 2 errors found:
 
-Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 1790, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo',
+In component a:
   Variability of binding expression for attribute 'start' is not less than or equal to parameter variability: p1
 
 Error at line 1794, column 15, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
@@ -2349,15 +2411,37 @@ end TransformCanonicalTests.InitialEqTest8;
 		TransformCanonicalTestCase(
 			name="InitialEqTest9",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
+            inline_functions="none",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest9
- constant Real x[1] = 1;
- constant Real x[2] = 1;
- constant Real x[3] = 1;
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ ({x[1], x[2], x[3]}, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
+
+public
+ function TransformCanonicalTests.f2
+  input Real[3] x;
+  input Real[4] y;
+  output Real[3] w;
+  output Real[4] z;
+ algorithm
+  w[1] := x[1];
+  w[2] := x[2];
+  w[3] := x[3];
+  z[1] := y[1];
+  z[2] := y[2];
+  z[3] := y[3];
+  z[4] := y[4];
+  return;
+ end TransformCanonicalTests.f2;
+
 end TransformCanonicalTests.InitialEqTest9;
 ")})));
   end InitialEqTest9;
@@ -2429,21 +2513,23 @@ end TransformCanonicalTests.InitialEqTest10;
 			name="InitialEqTest11",
 			inline_functions="none",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest11
  Real x[1];
  Real x[2];
  Real x[3];
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
 initial equation 
  ({x[1], x[2], x[3]}, ) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
+ (, {y[1], y[2], y[3], y[4]}) = TransformCanonicalTests.f2({1, 1, 1}, {1, 1, 1, 1});
 
 public
  function TransformCanonicalTests.f2
@@ -2476,15 +2562,16 @@ end TransformCanonicalTests.InitialEqTest11;
 		TransformCanonicalTestCase(
 			name="InitialEqTest12",
 			description="Test algorithm for adding additional initial equations.",
+            variability_propagation=false,
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest12
  Real x[1](start = 3);
  Real x[2](start = 3);
  Real x[3](start = 3);
- constant Real y[1] = 1;
- constant Real y[2] = 1;
- constant Real y[3] = 1;
- constant Real y[4] = 1;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
 initial equation 
  x[1] = 3;
  x[2] = 3;
@@ -2493,6 +2580,10 @@ equation
  der(x[1]) = - x[1];
  der(x[2]) = - x[2];
  der(x[3]) = - x[3];
+ y[1] = 1;
+ y[2] = 1;
+ y[3] = 1;
+ y[4] = 1;
 end TransformCanonicalTests.InitialEqTest12;
 ")})));
   end InitialEqTest12;
@@ -2730,17 +2821,17 @@ fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer i(start = 0,fixed = true);
  discrete Real t;
  discrete Integer temp_1;
- Real temp_2;
- discrete Boolean temp_3;
+ Real _eventIndicator_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
  pre(i) = 0;
  pre(t) = 0.0;
- pre(temp_3) = false;
+ pre(temp_2) = false;
 algorithm
- temp_2 := time - (1 + t);
- temp_3 := time > 1 + t;
- if initial() or temp_3 and not pre(temp_3) then
+ _eventIndicator_1 := time - (1 + t);
+ temp_2 := time > 1 + t;
+ if initial() or temp_2 and not pre(temp_2) then
   t := time + 1;
  end if;
  temp_1 := if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
@@ -5093,6 +5184,8 @@ equation
 
 Error at line 4839, column 24, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
   Could not evaluate binding expression for attribute 'start': 'f()'
+    in function 'TransformCanonicalTests.StateInitialPars7.f'
+    Failed to evaluate external function 'f', external function cache unavailable
 ")})));
 end StateInitialPars7;
 
@@ -5252,10 +5345,10 @@ z := (x + (- y)) / (1.0 / x)
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (1.0 - 3)
+y := (x + 3) / (1.0 + -3)
 
 --- Solved equation ---
-z := (x + (- y)) / (1.0 - (x + 3))
+z := (x + (- y)) / (1.0 + (-x - 3))
 -------------------------------
 ")})));
   end SolveEqTest5;
@@ -5310,10 +5403,10 @@ x / z = x - y
 x := 1
 
 --- Solved equation ---
-y := (x + 3) / (- 1.0 + 1.0 - 4)
+y := (x + 3) / (-1.0 + 1.0 + -4)
 
 --- Solved equation ---
-z := (x + (- y)) / (- 1.0 + 1.0 + 5)
+z := (x + (- y)) / (-1.0 + 1.0 + 5)
 -------------------------------
 ")})));
   end SolveEqTest7;
@@ -5333,10 +5426,50 @@ z := (x + (- y)) / (- 1.0 + 1.0 + 5)
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-der(x) := (- x) / (-1.0 - -1.0 - 1.0)
+der(x) := (- x) / (-1.0 + 1.0 + -1.0)
 -------------------------------
 ")})));
-end SolveEqTest8;
+  end SolveEqTest8;
+  
+  model SolveEqTest9
+        Real x;
+    equation
+        0 = x;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SolveEqTest9",
+            description="Test bug found in solution framework",
+            flatModel="
+fclass TransformCanonicalTests.SolveEqTest9
+ constant Real x = 0;
+end TransformCanonicalTests.SolveEqTest9;
+")})));
+  end SolveEqTest9;
+
+  model SolveEqTest10
+        Real x,y;
+    equation
+        y = time;
+        y * x = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="SolveEqTest10",
+            description="Test bug found in solution framework",
+            equation_sorting=true,
+            variability_propagation=false,
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+y := time
+
+--- Unsolved equation (Block 1) ---
+y * x = 0
+  Computed variables: x
+-------------------------------
+")})));
+  end SolveEqTest10;
 
 model BlockTest1
 record R
@@ -6220,6 +6353,7 @@ model StringFuncTest
 		TransformCanonicalTestCase(
 			name="StringFuncTest",
 			description="Test that string parameters and string parameters goes through front-end.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass TransformCanonicalTests.StringFuncTest
  structural parameter String p1 = \"a\" /* \"a\" */;
@@ -6579,19 +6713,18 @@ fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
  discrete Real temp_1;
  discrete Integer temp_2;
- Real temp_3;
- Real temp_4;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
 algorithm
  temp_1 := if time * 0.3 + 4.2 < pre(temp_1) or time * 0.3 + 4.2 >= pre(temp_1) + 1 or initial() then floor(time * 0.3 + 4.2) else pre(temp_1);
- temp_3 := 3 + temp_1 * 4 - pre(temp_2);
- temp_4 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
+ _eventIndicator_1 := 3 + temp_1 * 4 - pre(temp_2);
+ _eventIndicator_2 := 3 + temp_1 * 4 - (pre(temp_2) + 1);
  temp_2 := if 3 + temp_1 * 4 < pre(temp_2) or 3 + temp_1 * 4 >= (pre(temp_2) + 1) or initial() then integer(3 + temp_1 * 4) else pre(temp_2);
  x := temp_2;
 end TransformCanonicalTests.EventGeneratingExps.InAlgorithm;
-			
 ")})));
 end InAlgorithm;
 
@@ -6810,7 +6943,7 @@ model GetInstanceName2
             errorMessage="
 1 errors found:
 
-Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo':
+Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/TransformCanonicalTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable dummy does not match the declared type of the variable
 ")})));
 end GetInstanceName2;

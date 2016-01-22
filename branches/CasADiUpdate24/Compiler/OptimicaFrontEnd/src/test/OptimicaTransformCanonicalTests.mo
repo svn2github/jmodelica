@@ -318,7 +318,7 @@ end OptimicaTransformCanonicalTests.ArrayTest2;
             errorMessage="
 1 errors found:
 
-Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo':
+Error at line 293, column 31, in file 'Compiler/OptimicaFrontEnd/src/test/OptimicaTransformCanonicalTests.mo', ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION:
   Array size mismatch in modification of the attribute objective for the optimization ArrayTest3_Err, expected size is scalar and size of objective expression is [2]
 ")})));
   end ArrayTest3_Err;
@@ -334,13 +334,14 @@ constraint
 		TransformCanonicalTestCase(
 			name="TimedArrayTest1",
 			description="Timed array variables: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
+ constant Real x[1] = 1;
  constant Real x[2] = 2;
- constant Real y = 1;
+ constant Real y = 1.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
- constant Real x[1] = 1;
 constraint 
  y <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
@@ -790,7 +791,7 @@ equation
  x = time;
  y = time;
 constraint 
- x >= if time >= 0.0 then time * y else time * 2;
+ x >= if time >= 0 then time * y else time * 2;
 end OptimicaTransformCanonicalTests.SemiLinearConstraint;
 ")})));
 end SemiLinearConstraint;

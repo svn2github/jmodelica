@@ -45,4 +45,4 @@ __all__ = ['ast_example', 'bang_control', 'blood_glucose', 'blood_glucose_opt',
            'vdp_minimum_time', 'vdp_minimum_time_casadi',
            'vdp_pp', 'VDP_sim', 
            'vdp_minimum_time_interpolation', 'bounds_kinsol',
-           'furuta_dfo_using_algorithm_drivers']
+           'furuta_dfo_using_algorithm_drivers', 'greybox_identification']

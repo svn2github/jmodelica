@@ -1,5 +1,7 @@
 import java.io.PrintStream;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 
 /*
@@ -19,6 +21,7 @@ import java.util.LinkedList;
 */
 
 
+aspect FmiXMLGenerator {
 /**
  * A generator class containing common functionality for generating the 
  * modelDescription.xml files for different FMI versions.
@@ -207,12 +210,12 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
                 HashSet<String> displayUnitsSet = unitMap.get(attribute);
                 displayUnitsSet.add(variable.displayUnitAttribute());
             } else {
-                HashSet<String> displayUnitsSet = new HashSet<String>();
+                HashSet<String> displayUnitsSet = new LinkedHashSet<String>();
                 displayUnitsSet.add(variable.displayUnitAttribute());
                 unitMap.put(attribute, displayUnitsSet);
             }
         } else if(!unitMap.containsKey(attribute)) {
-            HashSet<String> emptySet = new HashSet<String>();
+            HashSet<String> emptySet = new LinkedHashSet<String>();
             unitMap.put(attribute, emptySet);
         }
     }
@@ -223,7 +226,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param fclass An FClass object used as a basis for the code generation.
      */
     protected HashMap<String,HashSet<String>> extractUnits(FClass fclass) {
-        HashMap<String,HashSet<String>> unitMap = new HashMap<String,HashSet<String>>();
+        HashMap<String,HashSet<String>> unitMap = new LinkedHashMap<String,HashSet<String>>();
         for(FVariable variable:fclass.allVariables()) {
             if(realVariableWithUnit(variable)) {
                 addToUnitMap(unitMap, (FRealVariable)variable);
@@ -231,15 +234,6 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
         }
         
         return unitMap;
-    }
-    
-    /**
-     * Checks if a variable should be exposed in the XML
-     *
-     * @param FVariable A variable class.
-     */
-    protected boolean isXMLVariable(FVariable var) {
-        return !var.isPreVariable() && !var.isExternalObject() && (!var.isTemporary() || var.isDifferentiatedVariable());
     }
     
     /**
@@ -291,7 +285,56 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
             return fclass.numEventIndicators();
     }
     
-    
+}
+
+/**
+ * Checks if a variable should be exposed in the XML
+ *
+ * @param FVariable A variable class.
+ */
+syn boolean FVariable.isXMLVariable() {
+    return !isPreVariable() && !isExternalObject() && (!isTemporary()
+            || isDifferentiatedVariable() || myOptions().getBooleanOption("expose_temp_vars_in_fmu"));
+}
+
+/**
+ * Calculate conversion factor and offset between units. Used to 
+ * specify conversions between base units and display units.
+ * 
+ * @param fclass An FClass object used as a basis for the code generation.
+ * @param from Unit expression to convert from
+ * @param to Unit expression to convert to
+ * @return null if conversion was unsuccessful,
+ * otherwise a UnitConversion object with gain and offset.
+ * Gain and offset is calculated such that:
+ * valueInV = gain*valueInU + offset
+ */
+protected Unit FmiXMLGenerator.getUnitConversion(String from, String to) {
+    try {
+        UnitParser unitParser = UnitParser.getParser();
+        Unit c = unitParser.parse(from).convertTo(unitParser.parse(to));
+        if (c.isAnyUnit()) return null;
+        return c;
+    } catch(UnitParser.Exception e) {
+        return null;
+    }
+}
+
+/**
+ * Calculate information about units in FMI2.
+ * @param fclass An FClass object used as a basis for the code generation.
+ * @param unit Unit expression to get base unit information from
+ * @return null if unsuccessful
+ */
+protected Unit FmiXMLGenerator.getBaseUnitInfo(String unit) {
+    try {
+        // Parse unit
+        Unit u = UnitParser.getParser().parse(unit);
+        if (u.isAnyUnit()) return null;
+        return u;
+    } catch(UnitParser.Exception e) {
+        return null;
+    }
 }
 
 /**
@@ -427,6 +470,17 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
                 public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("displayUnit", def, genPrinter);
+                    Unit conv = getUnitConversion(unit, def);
+                    if (conv != null) {
+	                    double factor = conv.getScale();
+	                    double offset = conv.getOffset();
+	                    if (factor != 1.0) {
+                            generateAttribute("gain", factor, genPrinter);
+                        }
+                        if (offset != 0.0) {
+                            generateAttribute("offset", offset, genPrinter);
+                        }
+                    }
                 }
             }
         }
@@ -534,7 +588,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 			Collections.sort(variables, comp);
 
 			for (FVariable var : variables) {
-                if (isXMLVariable(var)) {
+                if (var.isXMLVariable()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1040,7 +1094,8 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 		}
 		
         public class XMLTag_unit extends XMLTag {
-
+            AbstractTag baseUnitTag;
+            Unit baseUnit;
             private String def;
 
             public XMLTag_unit(AbstractGenerator myGenerator, FClass fclass) {
@@ -1054,11 +1109,60 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
 
             public void generateChildren(CodeStream genPrinter) {
+                baseUnitTag = getTag("baseUnit");
+                // Get base unit information
+                baseUnit = getBaseUnitInfo(unit);
+                if (baseUnit != null) {
+                    baseUnitTag.generateTag(genPrinter);
+                }
+                
                 HashSet<String> defs = unitMap.get(unit);
                 Iterator<String> defsItr = defs.iterator();
                 while(defsItr.hasNext()) {
                     def = defsItr.next();
                     super.generateChildren(genPrinter);
+                }
+            }
+
+            public class XMLTag_baseUnit extends XMLTag {
+                
+                public XMLTag_baseUnit(AbstractGenerator myGenerator, FClass fclass) {
+                    super("baseUnit", "BaseUnit", myGenerator, fclass);
+                }
+                
+                public void generateAttributes(CodeStream genPrinter) {
+                    int[] SIDimensions = new int[]{Dimension.Length,
+                                                   Dimension.Time,
+                                                   Dimension.Mass,
+                                                   Dimension.Temperature,
+                                                   Dimension.Current,
+                                                   Dimension.SubstanceAmount,
+                                                   Dimension.LuminousIntensity
+                                                   /*, Dimension.Angle*/};
+                    String[] SIBaseUnits = new String[]{"m",
+                                                        "s",
+                                                        "kg",
+                                                        "K",
+                                                        "A",
+                                                        "mol",
+                                                        "cd"
+                                                        /*, "rad"*/};
+                    int[] powers = baseUnit.getDimensions();
+                    
+                    for (int i = 0; i < SIDimensions.length; i++) {
+                        int dimension = SIDimensions[i];
+                        if (powers[dimension] != 0) {
+                            generateAttribute(SIBaseUnits[i], powers[dimension], genPrinter);
+                        }
+                    }
+                    double factor = baseUnit.getScale();
+                    double offset = baseUnit.getOffset();
+                    if (factor != 1.0) {
+                        generateAttribute("factor", factor, genPrinter);
+                    }
+                    if (offset != 0.0) {
+                        generateAttribute("offset", offset, genPrinter);
+                    }
                 }
             }
 
@@ -1070,6 +1174,18 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
                 public void generateAttributes(CodeStream genPrinter) {
                     generateAttribute("name", def, genPrinter);
+                    
+                    Unit conv = getUnitConversion(unit, def);
+                    if (conv != null) {
+                        double factor = conv.getScale();
+                        double offset = conv.getOffset();
+                        if (factor != 1.0) {
+                            generateAttribute("factor", factor, genPrinter);
+                        }
+                        if (offset != 0.0) {
+                            generateAttribute("offset", offset, genPrinter);
+                        }
+                    }
                 }
             }
         }
@@ -1257,12 +1373,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 			variableIndexMap = new HashMap<String, Integer>();
 			int index = 1;
 			for (FVariable var : variables) {
-                if (isXMLVariable(var))
+                if (var.isXMLVariable())
                     variableIndexMap.put(var.name(), index++);
 			}
 
 			for (FVariable var : variables) {
-                if (isXMLVariable(var)) {
+                if (var.isXMLVariable()) {
 					variable = var;
 					super.generateChildren(genPrinter);
 				}
@@ -1543,7 +1659,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 //Find the initial unknowns if there are any.
                 initialUnknowns = new LinkedList<FVariable>();
                 for (FVariable var : fclass.allVariables()) {
-                    if (isXMLVariable(var) && isInitialUnknown(var))
+                    if (var.isXMLVariable() && isInitialUnknown(var))
                         initialUnknowns.add(var);
                 }
                 
@@ -1620,7 +1736,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             
             protected boolean isInitialKnown(FVariable var) {
                 boolean isExact = getInitialType(var) == InitialType.EXACT;
-                return isXMLVariable(var) && isExact || var.isInput();
+                return var.isXMLVariable() && isExact || var.isInput();
             }
         }
         
@@ -1639,4 +1755,5 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             }
         }
     }
+}
 }

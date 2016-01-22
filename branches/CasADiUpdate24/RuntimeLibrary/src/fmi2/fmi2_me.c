@@ -454,7 +454,7 @@ fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
                          size_t nvr, const fmi2Real value[]) {
     fmi2Integer retval;
-    fmi2Real* negated_value;
+    fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
     size_t i;
     
     if (c == NULL) {
@@ -462,17 +462,15 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     }
     
     /* Negate the values before setting the "negate alias" variables. */
-    negated_value = (fmi2Real*)calloc(nvr, sizeof(fmi2Real));
     for (i = 0; i < nvr; i++) {
         if (is_negated(vr[i])) {
-            negated_value[i] = -value[i];
+            fmi2_me->work_real_array[i] = -value[i];
         } else {
-            negated_value[i] = value[i];
+            fmi2_me->work_real_array[i] = value[i];
         }
     }
     
-    retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, negated_value);
-    free(negated_value);
+    retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
     if (retval != 0) {
         return fmi2Error;
     }
@@ -601,34 +599,30 @@ fmi2Status fmi2_enter_event_mode(fmi2Component c) {
 
 fmi2Status fmi2_new_discrete_state(fmi2Component  c, fmi2EventInfo* fmiEventInfo) {
     fmi2Integer retval;
-    jmi_event_info_t* event_info;
+    fmi2_me_t* fmi2_me = (fmi2_me_t *)c;
     
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
-    event_info = (jmi_event_info_t*)calloc(1, sizeof(jmi_event_info_t));
-
-    event_info->iteration_converged        = !fmiEventInfo->newDiscreteStatesNeeded;
-    event_info->terminate_simulation       =  fmiEventInfo->terminateSimulation;
-    event_info->nominals_of_states_changed =  fmiEventInfo->nominalsOfContinuousStatesChanged;
-    event_info->state_values_changed       =  fmiEventInfo->valuesOfContinuousStatesChanged;
-    event_info->next_event_time_defined    =  fmiEventInfo->nextEventTimeDefined;
-    event_info->next_event_time            =  fmiEventInfo->nextEventTime;
+    fmi2_me->event_info->iteration_converged        = !fmiEventInfo->newDiscreteStatesNeeded;
+    fmi2_me->event_info->terminate_simulation       =  fmiEventInfo->terminateSimulation;
+    fmi2_me->event_info->nominals_of_states_changed =  fmiEventInfo->nominalsOfContinuousStatesChanged;
+    fmi2_me->event_info->state_values_changed       =  fmiEventInfo->valuesOfContinuousStatesChanged;
+    fmi2_me->event_info->next_event_time_defined    =  fmiEventInfo->nextEventTimeDefined;
+    fmi2_me->event_info->next_event_time            =  fmiEventInfo->nextEventTime;
     
-    retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, TRUE, event_info);
+    retval = jmi_event_iteration(&((fmi2_me_t *)c)->jmi, TRUE, fmi2_me->event_info);
     if (retval != 0) {
         return fmi2Error;
     }
     
-    fmiEventInfo->newDiscreteStatesNeeded           = !event_info->iteration_converged;
-    fmiEventInfo->terminateSimulation               =  event_info->terminate_simulation;
-    fmiEventInfo->nominalsOfContinuousStatesChanged =  event_info->nominals_of_states_changed;
-    fmiEventInfo->valuesOfContinuousStatesChanged   =  event_info->state_values_changed;
-    fmiEventInfo->nextEventTimeDefined              =  event_info->next_event_time_defined;
-    fmiEventInfo->nextEventTime                     =  event_info->next_event_time;
-    
-    free(event_info);
+    fmiEventInfo->newDiscreteStatesNeeded           = !(fmi2_me->event_info->iteration_converged);
+    fmiEventInfo->terminateSimulation               =  fmi2_me->event_info->terminate_simulation;
+    fmiEventInfo->nominalsOfContinuousStatesChanged =  fmi2_me->event_info->nominals_of_states_changed;
+    fmiEventInfo->valuesOfContinuousStatesChanged   =  fmi2_me->event_info->state_values_changed;
+    fmiEventInfo->nextEventTimeDefined              =  fmi2_me->event_info->next_event_time_defined;
+    fmiEventInfo->nextEventTime                     =  fmi2_me->event_info->next_event_time;
     
     return fmi2OK;
 }
@@ -865,12 +859,14 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
     fmi2_me->fmu_mode           = instantiatedMode;
     fmi2_me->initial_logging_on = loggingOn;
     fmi2_me->stopTime           = JMI_INF; /* Default if not set in setup_experiment */
+    fmi2_me->event_info         = (jmi_event_info_t*)(fmi2_me_t *)functions->allocateMemory(1, sizeof(jmi_event_info_t));
     
     retval = jmi_me_init(cb, &fmi2_me->jmi, fmuGUID, resource_location);
-          
     if (retval != 0) {
         return fmi2Error;
     }
+    
+    fmi2_me->work_real_array    = (fmi2Real*)(fmi2_me_t *)functions->allocateMemory(jmi_get_z_size(&(fmi2_me->jmi)), sizeof(fmi2Real));
     
     return fmi2OK;
 }
@@ -883,5 +879,7 @@ void fmi2_me_free_instance(fmi2Component c) {
     fmi_free((void*)fmi2_me->fmu_instance_name);
     fmi_free((void*)fmi2_me->fmu_GUID);
     fmi_free(fmi2_me->jmi.resource_location);
+    fmi_free(fmi2_me->event_info);
+    fmi_free(fmi2_me->work_real_array);
     jmi_delete(&fmi2_me->jmi);
 }

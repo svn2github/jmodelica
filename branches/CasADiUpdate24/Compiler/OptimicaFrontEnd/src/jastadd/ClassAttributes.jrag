@@ -69,12 +69,12 @@ aspect ClassAttributes {
     }
 
     rewrite InstPrimitive {
-    	when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
-    	copyLocationTo(new InstClassAttribute(
-    			getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
-    			getInstModificationOpt(), getInstConstrainingOpt(), getConditionalAttributeOpt()));    	
+        when (!(this instanceof InstClassAttribute) && isClassAttribute()) to InstClassAttribute 
+        copyLocationTo(new InstClassAttribute(
+                getClassName(), getLocalFArraySubscriptsOpt(), getComponentDecl(), 
+                getInstModificationOpt(), getInstConstrainingComponentOpt(), getConditionalAttributeOpt()));
     }
-    
+
     inh boolean InstPrimitive.isClassAttribute();
     eq BaseNode.getChild().isClassAttribute()                      = false;
     eq InstOptClassDecl.getInstClassAttribute().isClassAttribute() = true;

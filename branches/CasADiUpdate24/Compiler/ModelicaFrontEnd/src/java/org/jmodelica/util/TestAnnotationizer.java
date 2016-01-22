@@ -18,7 +18,9 @@ package org.jmodelica.util;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -38,12 +40,16 @@ import java.util.Iterator;
  *     -w           write result to file instead of stdout
  *     -m/-o        create annotation for Modelica/Optimica (default is infer from file path)
  *     -r           regenerate an already present annotation
+ *     -e           continue generating until an empty modelname is given
+ *     -a           regenerate annotations for all models in test file (implies -r)
  *     -t=<type>    set type of test, e.g. ErrorTestCase
  *     -c=<class>   set name of class to generate annotation for, if name 
  *                  does not contain a dot, base name of .mo file is prepended
  *     -d=<data>    set extra data to send to the specific generator, \n is interpreted
  *     -p=<opts>    comma-separated list of compiler options to override defaults for,
  *                  example: -p=eliminate_alias_variables=false,default_msl_version="2.2"
+ *     -l=<libs>    comma-separated list of libraries needed by test (except for MSL) 
+ *                  paths should be relative to test file
  *     -h           print this help
  *   User will be prompted for type and/or class if not set with options. 
  *   Options can *not* share a single "-", e.g. "-mw" will not work.
@@ -69,99 +75,64 @@ public class TestAnnotationizer {
 		Lang lang = Lang.none;
 		String opts = null;
         String checkType = null;
+        String libs = null;
         boolean all_models = false;
-		
-		for (String arg : args) {
-			String value = (arg.length() > 3) ? arg.substring(3) : "";
-			if (arg.startsWith("-t=")) 
-				testType = value;
-			else if (arg.startsWith("-c=")) 
-				modelName = value;
-			else if (arg.startsWith("-d=")) 
-				data = value;
-			else if (arg.startsWith("-p=")) 
-				opts = value;
-            else if (arg.startsWith("-k=")) 
-                checkType = value;
-			else if (arg.equals("-w")) 
-				write = true;
-			else if (arg.equals("-r")) 
-				regenerate = true;
-			else if (arg.equals("-e")) 
-				repeat = true;
-			else if (arg.equals("-h")) 
-				usageError(0);
-			else if (arg.equals("-o")) 
-				lang = Lang.optimica;
-			else if (arg.equals("-m")) 
-				lang = Lang.modelica;
-			else if (arg.equals("--ALL"))
-			    all_models = true;
-			else if (arg.startsWith("-")) 
-				System.err.println("Unrecognized option: " + arg + "\nUse -h for help.");
-			else if (filePath == null)
-				filePath = arg;
-			else
-				description += " " + arg;
-		}
-		
-		if (repeat && modelName != null) {
-			System.err.println("Cannot use -e when giving classname on command line.");
-			System.exit(1);
-		}
-		
-		description = description.trim();
-		String packageName = getPackageName(filePath);
-		modelName = composeModelName(packageName, modelName);
-		if (lang == Lang.none)
-			lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
-		boolean optimica = lang == Lang.optimica;
-		
-        ArrayList<String> models = new ArrayList<String>();
-        if (all_models) {
-            if (!regenerate) {
-                System.err.println("'--ALL' requires '-r'");
-                System.exit(1);
-            }
-            
-            HashSet<String> except = new HashSet<String>();
-            
-            ArrayList<String> packStack = new ArrayList<String>();
-            packStack.add("");
-            BufferedReader f = new BufferedReader(new FileReader(new File(filePath)));
-            String fullLine;
-            String[] line;
-            boolean inModel = false;
-            while((fullLine = f.readLine()) != null) {
-                line = fullLine.trim().split(" ");
-                if (!inModel && (line[0].equals("package") || line[0].equals("model"))) {
-                    String top = packStack.get(packStack.size()-1);
-                    if (top != "") {
-                        top += ".";
-                    }
-                    top += line[1];
-                    if (line[0].equals("model")) {
-                        inModel = true;
-                        if (!except.contains(top)) {
-                            models.add(top);
-                        }
-                    }
-                    packStack.add(top);
-                } else if (line[0].equals("end")){
-                    String[] t = packStack.get(packStack.size()-1).split("\\.");
-                    if (line[1].equals(t[t.length-1] + ";")) {
-                        packStack.remove(packStack.size()-1);
-                        inModel = false;
-                    }
-                }
-            }
-            f.close();
-        }
-        Iterator<String> allModelsIterator = models.iterator();
         
-		boolean cont = true;
-		while (cont) {
-			BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
+        for (String arg : args) {
+            String value = (arg.length() > 3) ? arg.substring(3) : "";
+            if (arg.startsWith("-t=")) {
+                testType = value;
+            } else if (arg.startsWith("-c=")) {
+                modelName = value;
+            } else if (arg.startsWith("-d=")) {
+                data = value;
+            } else if (arg.startsWith("-p=")) {
+                opts = value;
+            } else if (arg.startsWith("-k=")) {
+                checkType = value;
+            } else if (arg.startsWith("-l=")) {
+                libs = value;
+            } else if (arg.equals("-w")) {
+                write = true;
+            } else if (arg.equals("-r")) {
+                regenerate = true;
+            } else if (arg.equals("-e")) {
+                repeat = true;
+            } else if (arg.equals("-h")) {
+                usageError(0);
+            } else if (arg.equals("-o")) {
+                lang = Lang.optimica;
+            } else if (arg.equals("-m")) {
+                lang = Lang.modelica;
+            } else if (arg.equals("-a")) {
+                all_models = true;
+                regenerate = true;
+            } else if (arg.startsWith("-")) {
+                System.err.println("Unrecognized option: " + arg + "\nUse -h for help.");
+            } else if (filePath == null) {
+                filePath = arg;
+            } else {
+                description += " " + arg;
+            }
+        }
+        
+        // Check for bad combinations
+        if (repeat && modelName != null) {
+            System.err.println("Cannot use -e when giving classname on command line.");
+            System.exit(1);
+        }
+        
+        description = description.trim();
+        String packageName = getPackageName(filePath);
+        modelName = composeModelName(packageName, modelName);
+        if (lang == Lang.none)
+            lang = filePath.contains("Optimica") ? Lang.optimica : Lang.modelica;
+        boolean optimica = lang == Lang.optimica;
+        
+        Iterator<String> allModelsIterator = all_models ? collectAllModels(filePath) : null;
+        boolean cont = true;
+        while (cont) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
             if (all_models) {
                 if (!allModelsIterator.hasNext()) {
                     break;
@@ -184,10 +155,10 @@ public class TestAnnotationizer {
 				if (testType == null) {
 					System.out.print("Enter type of test: ");
 					System.out.flush();
-					testType = in.readLine().trim();			
+					testType = in.readLine().trim();
 				}
 				
-				doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, write);
+				doAnnotation(optimica, filePath, testType, modelName, description, opts, data, checkType, libs, write);
 			}
 			
 			if (repeat) 
@@ -197,25 +168,67 @@ public class TestAnnotationizer {
 		}
 	}
 
-	private static void doRegenerate(boolean optimica, String filePath, String modelName, boolean write) throws Exception {
-		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doRegenerate", 
-				String.class, String.class, boolean.class);
-		m.invoke(null, filePath, modelName, write);
-	}
+    private static Iterator<String> collectAllModels(String filePath) throws FileNotFoundException,
+            IOException {
+        Iterator<String> allModelsIterator;
+        ArrayList<String> models = new ArrayList<String>();
+        HashSet<String> except = new HashSet<String>();
+        
+        ArrayList<String> packStack = new ArrayList<String>();
+        packStack.add("");
+        BufferedReader f = new BufferedReader(new FileReader(new File(filePath)));
+        String fullLine;
+        String[] line;
+        boolean inModel = false;
+        while((fullLine = f.readLine()) != null) {
+            line = fullLine.trim().split(" ");
+            if (!inModel && (line[0].equals("package") || line[0].equals("model"))) {
+                String top = packStack.get(packStack.size()-1);
+                if (top != "") {
+                    top += ".";
+                }
+                top += line[1];
+                if (line[0].equals("model")) {
+                    inModel = true;
+                    if (!except.contains(top)) {
+                        models.add(top);
+                    }
+                }
+                packStack.add(top);
+            } else if (line[0].equals("end")){
+                String[] t = packStack.get(packStack.size()-1).split("\\.");
+                if (line[1].equals(t[t.length-1] + ";")) {
+                    packStack.remove(packStack.size()-1);
+                    inModel = false;
+                }
+            }
+        }
+        f.close();
+        allModelsIterator = models.iterator();
+        return allModelsIterator;
+    }
 
-	private static void doAnnotation(boolean optimica, String filePath,
-			String testType, String modelName, String description, String optStr, 
-			String data, String checkType, boolean write) throws Exception {
-		String[] opts = (optStr == null) ? new String[0] : optStr.split(",");
-		Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
-				String.class, String.class, String.class, String.class, String[].class, String.class, String.class, boolean.class);
-		m.invoke(null, filePath, testType, modelName, description, opts, data, checkType, write);
-	}
+    private static void doRegenerate(boolean optimica, String filePath, String modelName, boolean write) throws Exception {
+        Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doRegenerate", 
+                String.class, String.class, boolean.class);
+        m.invoke(null, filePath, modelName, write);
+    }
+
+    private static void doAnnotation(boolean optimica, String filePath,
+            String testType, String modelName, String description, String optStr, 
+            String data, String checkType, String libStr, boolean write) throws Exception {
+        String[] opts = (optStr == null) ? new String[0] : optStr.split(",");
+        String[] libs = (libStr == null) ? new String[0] : libStr.split(",");
+        Method m = getHelperClass(optimica ? OPTIMICA : MODELICA).getMethod("doAnnotation", 
+                String.class, String.class, String.class, String.class, String[].class, String.class, 
+                String.class, String[].class, boolean.class);
+        m.invoke(null, filePath, testType, modelName, description, opts, data, checkType, libs, write);
+    }
 
 	private static void usageError(int level) throws Exception {
 		getHelperClass(ANY).getMethod("usageError", int.class).invoke(null, Integer.valueOf(level));
 	}
-	
+
 	private static final String[] MODELICA = { "org.jmodelica.modelica.compiler.TestAnnotationizerHelper" };
 	private static final String[] OPTIMICA = { "org.jmodelica.optimica.compiler.TestAnnotationizerHelper" };
 	private static final String[] ANY      = { MODELICA[0], OPTIMICA[0] };

@@ -1978,7 +1978,7 @@ model FunctionType2
             errorMessage="
 1 errors found:
 
-Error at line 1920, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 1920, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end FunctionType2;
@@ -2049,6 +2049,7 @@ model FunctionType5
 Error at line 1988, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end FunctionType5;
 
@@ -2067,6 +2068,7 @@ model FunctionType6
 Error at line 2006, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction2(): types of positional argument 2 and input i2 are not compatible
     type of 'a' is Boolean
+    expected type is Real
 ")})));
 end FunctionType6;
 
@@ -2114,6 +2116,7 @@ model FunctionType8
 Error at line 2053, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunction1(): types of positional argument 1 and input i1 are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end FunctionType8;
 
@@ -2128,7 +2131,7 @@ model FunctionType9
             errorMessage="
 1 errors found:
 
-Compliance error at line 2069, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2069, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 ")})));
 end FunctionType9;
@@ -2145,7 +2148,7 @@ model FunctionType10
             errorMessage="
 1 errors found:
 
-Compliance error at line 2086, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2086, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 ")})));
 end FunctionType10;
@@ -2161,12 +2164,13 @@ model FunctionType11
             errorMessage="
 2 errors found:
 
-Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Compliance error at line 2102, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', UNSUPPORTED_STRING_VARIABLES:
   String variables are not supported
 
 Error at line 2103, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function TestFunctionString(): types of positional argument 1 and input i1 are not compatible
     type of '1' is Integer
+    expected type is String
 ")})));
 end FunctionType11;
 
@@ -2185,7 +2189,7 @@ equation
 1 errors found:
 
 Error at line 2126, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction2(): types of component y and output o2 are not compatible
+  Calling function TestFunction2(): component y is of type Integer and output o2 is of type Real - they are not compatible
 ")})));
 end FunctionType12;
 
@@ -2204,11 +2208,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component x and output o1 are not compatible
+Error at line 2197, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component x is of type Integer and output o1 is of type Real - they are not compatible
 
-Error at line 2146, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component z and output o3 are not compatible
+Error at line 2197, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType13;
 
@@ -2246,8 +2250,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 2188, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function TestFunction3(): types of component z and output o3 are not compatible
+Error at line 2239, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function TestFunction3(): component z is of type Integer and output o3 is of type Real - they are not compatible
 ")})));
 end FunctionType15;
 
@@ -2289,7 +2293,7 @@ model FunctionType17
             errorMessage="
 1 errors found:
 
-Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
     type of 'x' is Real[:, :]
     type of 'y' is Real[2, :]
@@ -2311,6 +2315,7 @@ model BuiltInCallType1
 Error at line 2250, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sin(): types of positional argument 1 and input u are not compatible
     type of 'true' is Boolean
+    expected type is Real
 ")})));
 end BuiltInCallType1;
 
@@ -2328,6 +2333,7 @@ model BuiltInCallType2
 Error at line 2267, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function sqrt(): types of positional argument 1 and input x are not compatible
     type of '\"test\"' is String
+    expected type is Real
 ")})));
 end BuiltInCallType2;
 
@@ -2358,7 +2364,7 @@ model BuiltInCallType4
             errorMessage="
 1 errors found:
 
-Error at line 2300, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2300, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end BuiltInCallType4;
@@ -2409,6 +2415,7 @@ model BuiltInCallType7
 Error at line 2348, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Calling function atan2(): types of positional argument 2 and input u2 are not compatible
     type of '\"test\"' is String
+    expected type is Real
 ")})));
 end BuiltInCallType7;
 
@@ -2457,7 +2464,7 @@ model BuiltInCallType10
             errorMessage="
 2 errors found:
 
-Error at line 2399, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 2399, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [3, \"test\"]
 
 Error at line 2399, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
@@ -3243,8 +3250,8 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3185, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Types of right and left side of assignment are not compatible
+Error at line 3236, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  The right and left expression types of assignment are not compatible, type of left-hand side is Integer, and type of right-hand side is Real
 ")})));
 end AlgorithmTypeAssign1;
 
@@ -3301,8 +3308,8 @@ algorithm
             errorMessage="
 1 errors found:
 
-Error at line 3243, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Types of right and left side of assignment are not compatible
+Error at line 3294, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  The right and left expression types of assignment are not compatible, type of left-hand side is Real, and type of right-hand side is String
 ")})));
 end AlgorithmTypeAssign4;
 
@@ -5097,6 +5104,7 @@ end FunctionTests.ArrayExpInFunc20;
             name="ArrayExpInFunc20ceval",
             description="Scalarization of functions: unknown size matrix expression",
             variability_propagation=true,
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass FunctionTests.ArrayExpInFunc20
@@ -8130,7 +8138,7 @@ model UnknownArray6
             errorMessage="
 1 errors found:
 
-Error at line 8077, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8077, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end UnknownArray6;
@@ -8157,8 +8165,8 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 8104, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Calling function f(): array sizes of component y and output c are not compatible
+Error at line 8150, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+  Calling function f(): component y is of size [2] and output c is of size [3] - they are not compatible
 ")})));
 end UnknownArray7;
 
@@ -8181,10 +8189,10 @@ model UnknownArray8
             errorMessage="
 2 errors found:
 
-Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [:]
 
-Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8128, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output b
 ")})));
 end UnknownArray8;
@@ -8686,10 +8694,10 @@ model UnknownArray19
 Error at line 8626, column 32, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
   Cannot find class or component declaration for b
 
-Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2, 2] and size of binding expression is [2, :]
 
-Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 8630, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output c
 ")})));
 end UnknownArray19;
@@ -10378,6 +10386,33 @@ end FunctionTests.UnknownArray49;
 ")})));
 end UnknownArray49;
 
+model UnknownArray50
+    function F
+        input Integer x;
+        output Real y = 0;
+    algorithm
+        for i in 0:x loop
+            y := missingFunction(i, x) + notAVariable;
+        end for;
+    end F;
+    
+    parameter Real r = F(3);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="UnknownArray50",
+            description="Ensure that error checking is done in for loops which loop over unknown size",
+            errorMessage="
+2 errors found:
+
+Error at line 1, column 1, in file '...':
+  Cannot find function declaration for missingFunction()
+
+Error at line 1, column 1, in file '...':
+  Cannot find class or component declaration for notAVariable
+")})));
+end UnknownArray50;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
@@ -11319,10 +11354,10 @@ model InputAsArraySize5
             errorMessage="
 2 errors found:
 
-Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [n]
 
-Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11276, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT:
   Could not evaluate array size of output x
 ")})));
 end InputAsArraySize5;
@@ -11346,7 +11381,7 @@ model InputAsArraySize6
             errorMessage="
 1 errors found:
 
-Error at line 11303, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
+Error at line 11303, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [3] and size of binding expression is [4]
 ")})));
 end InputAsArraySize6;
@@ -13051,7 +13086,7 @@ public
     temp_1[i1,i2] := temp_2;
    end for;
   end for;
-  c := 2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2];
+  c := 2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2]);
   return;
  end FunctionTests.UnknownSize.Hidden.Combinations1.f;
 
@@ -13110,7 +13145,7 @@ public
     temp_3[i4,i5] := temp_4;
    end for;
   end for;
-  c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[1,2] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + 2 * temp_1[2,1] + 2 * temp_1[2,2]) * temp_3[2,2]);
+  c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,2] + ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,2]));
   return;
  end FunctionTests.UnknownSize.Hidden.Combinations3.f;
 
@@ -13253,6 +13288,7 @@ model Abs2
 		TransformCanonicalTestCase(
 			name="FunctionLike_NumericConversion_Abs2",
 			description="Test of vectorized abs()",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Abs2
  constant Real c[1,1] = -1;
@@ -13335,6 +13371,7 @@ model Sign2
 		TransformCanonicalTestCase(
 			name="FunctionLike_NumericConversion_Sign2",
 			description="Test of vectorized sign()",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass FunctionTests.FunctionLike.NumericConversion.Sign2
  constant Real c[1,1] = -1;
@@ -14160,11 +14197,11 @@ equation
 		k = semiLinear(time,1,2);
 	end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Special_SemiLinear1",
-			description="Basic test of the semiLinear() operator.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear1",
+            description="Basic test of the semiLinear() operator.",
+            flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear1
  Real x;
  Real y[1];
@@ -14174,18 +14211,17 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear1
  discrete Real k;
  discrete Boolean temp_1;
 initial equation 
- k = if time >= 0.0 then time else time * 2;
+ k = if time >= 0 then time else time * 2;
  pre(temp_1) = false;
 parameter equation
- p = if a >= 0.0 then a else a * 2;
+ p = noEvent(if a >= 0 then a else a * 2);
 equation
  temp_1 = time > 1;
- k = if temp_1 and not pre(temp_1) then if time >= 0.0 then time else time * 2 else pre(k);
- x = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[1] = if sin(time * 10) >= 0.0 then sin(time * 10) * 2 else sin(time * 10) * -10;
- y[2] = if time >= 0.0 then time * 2 else time * 3;
+ k = if temp_1 and not pre(temp_1) then if time >= 0 then time else time * 2 else pre(k);
+ x = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[1] = if sin(time * 10) >= 0 then sin(time * 10) * 2 else sin(time * 10) * -10;
+ y[2] = if time >= 0 then time * 2 else time * 3;
 end FunctionTests.FunctionLike.Special.SemiLinear1;
-			
 ")})));
 end SemiLinear1;
 
@@ -14267,11 +14303,11 @@ equation
   y = semiLinear(x,sa,s[1]);
   y = semiLinear(x,s[4],s[5]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Special_SemiLinear4",
-			description="Test of the semiLinear() operator. Zero flow transformation.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear4",
+            description="Test of the semiLinear() operator. Zero flow transformation.",
+            flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear4
  Real x;
  Real y;
@@ -14283,7 +14319,7 @@ equation
  sb = time;
  x = time;
  s[2] = if x >= 0 then sa else sb;
- y = if x >= 0.0 then x * sa else x * sb;
+ y = noEvent(if x >= 0 then x * sa else x * sb);
 end FunctionTests.FunctionLike.Special.SemiLinear4;
 ")})));
 end SemiLinear4;
@@ -14303,11 +14339,11 @@ equation
   -y = semiLinear(--x,s[4],s[5]);
   -y = semiLinear(-x,s[2],s[1]);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionLike_Special_SemiLinear5",
-			description="Test of the semiLinear() operator. Zero flow transformation.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear5",
+            description="Test of the semiLinear() operator. Zero flow transformation.",
+            flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear5
  Real x;
  Real y;
@@ -14321,9 +14357,9 @@ equation
  sb = time;
  x = time;
  s[5] = if x >= 0 then s[3] else sb;
- y = - (if x >= 0.0 then x * s[3] else x * sb);
+ y = - noEvent(if x >= 0 then x * s[3] else x * sb);
  s[2] = if x >= 0 then sa else s[3];
- y = if x >= 0.0 then x * sa else x * s[3];
+ y = noEvent(if x >= 0 then x * sa else x * s[3]);
 end FunctionTests.FunctionLike.Special.SemiLinear5;
 ")})));
 end SemiLinear5;
@@ -14380,8 +14416,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real y[1];
  Real y[2];
 equation
- y[1] = if x[1] >= 0.0 then x[1] * s[1] else x[1] * s[1];
- y[2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
+ y[1] = noEvent(if x[1] >= 0 then x[1] * s[1] else x[1] * s[1]);
+ y[2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -14417,10 +14453,10 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear8
  Real y[2,1];
  Real y[2,2];
 equation
- y[1,1] = if x[1] >= 0.0 then x[1] * s[2] else x[1] * s[1];
- y[1,2] = if x[2] >= 0.0 then x[2] * s[2] else x[2] * s[2];
- y[2,1] = if x2 >= 0.0 then x2 * s[1] else x2 * s[1];
- y[2,2] = if x2 >= 0.0 then x2 * s[2] else x2 * s[1];
+ y[1,1] = noEvent(if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
+ y[1,2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
+ y[2,1] = noEvent(if x2 >= 0 then x2 * s[1] else x2 * s[1]);
+ y[2,2] = noEvent(if x2 >= 0 then x2 * s[2] else x2 * s[1]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -14449,6 +14485,30 @@ Error at line 14404, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/Funct
   Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
 ")})));
 end SemiLinear9;
+
+model SemiLinear10
+    Real x = time;
+    Real y;
+    Real z = 2 * time;
+equation
+    y = semiLinear(if time > 1 then 1 else -1, x, z);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_Special_SemiLinear10",
+            description="Check that semiLinear() with event-generating argument does not expand with smooth(0, ...)",
+            flatModel="
+fclass FunctionTests.FunctionLike.Special.SemiLinear10
+ Real x;
+ Real y;
+ Real z;
+equation
+ y = if (if time > 1 then 1 else -1) >= 0 then (if time > 1 then 1 else -1) * x else (if time > 1 then 1 else -1) * z;
+ x = time;
+ z = 2 * time;
+end FunctionTests.FunctionLike.Special.SemiLinear10;
+")})));
+end SemiLinear10;
 
 end Special;
 

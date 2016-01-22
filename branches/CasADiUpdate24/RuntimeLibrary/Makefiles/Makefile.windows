@@ -38,6 +38,8 @@
 #   EXT_LIB_DIRS          List of external library directories.
 #   EXT_LIBS              List of external libraries.
 #   EXT_INC_DIRS          List of external include directories.
+#   EXTRA_CFLAGS          Extra CFLAGS for specific files
+#                         Format is (with e1.c and e2.c) "e1:O2:pedantic e2:O1"
 #
 # The following targets are supported:
 #    jmu          Build a shared object file including the low level JMI interface 
@@ -67,6 +69,9 @@ SHELL = cmd.exe
 
 # Name of shared library
 FILE_NAME = 
+
+# Extra CFLAGS for specific source files.
+EXTRA_CFLAGS =
 
 # Platform name - controls what sub-directory the binary is placed in
 PLATFORM = 
@@ -194,6 +199,7 @@ LIBS_FMUME10 = -lfmi1_me           $(LIBS_FMU_ALL)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_ALL)
 LIBS_FMU20   = -lfmi2              $(LIBS_FMU_ALL)
 LIBS_IPOPT = -lfmi -lModelicaExternalC -ljmi_cppad -ljmi_algorithm_cppad -ljmi_solver_cppad $(LIB_FLAGS_IPOPT) "-L$(SUNDIALS_LIB_DIR)" -lsundials_kinsol -lsundials_nvecserial $(LIB_MINPACK)
+LIBS_JMU = $(LIBS_IPOPT) -lpthread
 LIBS_CEVAL = $(LIBS_FMU_STD)
 
 # Include paths for compilation
@@ -283,7 +289,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	mkdir $(BINARY_MKDIR)
 	cd .jmi_objs && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a"  && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_solver_cppad.a"  
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o "-L$(JMI_LIB_DIR)" $(LIBS_IPOPT)
+	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o "-L$(JMI_LIB_DIR)" $(LIBS_JMU)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 	$(RM) $(OBJS)
@@ -306,6 +312,17 @@ ifeq ($(JMI_AD),JMI_AD_CPPAD)
 else
 	$(CC) $(CFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
 endif
+
+# Create a rule which uses the first item in arg as src name and
+# following items as additional CFLAGS. Argument "file:-O2:-d"
+# will expand to the rule "file.o : CFLAGS = $(CFLAGS) -O2 -d"
+define cflagrule
+$(word 1,$(1)).o : CFLAGS = $(CFLAGS) $(wordlist 2,$(words $(1)),$(1))
+endef
+
+# For each word in variable EXTRA_CFLAGS, create a cflagrule
+# Example "main2 main3:O3 main:O2:pedantic"
+$(foreach src, $(EXTRA_CFLAGS),$(eval $(call cflagrule, $(subst :, -,$(src)))))
 
 clean:
 	$(RM) $(SHARED) $(OBJS)

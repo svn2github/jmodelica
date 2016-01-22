@@ -77,12 +77,13 @@ equation
 		TransformCanonicalTestCase(
 			name="ConstantFolding1",
 			description="Tests if constant values inferred from equations are moved to equations and folded.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.ConstantFolding1
- constant Real x3 = 1;
- constant Real x4 = 2.0;
  constant Real x1 = 1;
  constant Real x2 = 2.0;
+ constant Real x3 = 1.0;
+ constant Real x4 = 2.0;
 end VariabilityPropagationTests.ConstantFolding1;
 ")})));
 end ConstantFolding1;
@@ -360,6 +361,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Der1",
 			description="Tests some propagation to and through derivative expressions.",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
@@ -449,10 +451,11 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq1",
 			description="Tests if-expressions",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.IfEq1
  constant Real p1 = 4;
- constant Real x1 = 3;
+ constant Real x1 = 3.0;
  constant Real x2 = 3;
 end VariabilityPropagationTests.IfEq1;
 ")})));
@@ -480,6 +483,7 @@ equation
 		TransformCanonicalTestCase(
 			name="IfEq2",
 			description="Tests if-expressions",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.IfEq2
  constant Real c1 = 4;
@@ -722,6 +726,7 @@ equation
 Tests that parameters in function call equations are folded. 
 Also tests that when it is constant and can't evaluate, variability is propagated as parameter.
 ",
+            eliminate_alias_variables=false,
             inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation4
@@ -938,6 +943,7 @@ model FunctionCallEquationPartial4
             name="FunctionCallEquationPartial4",
             description="Tests evaluation of matrix multiplication in function.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquationPartial4
  constant Real x1 = 7.0;
@@ -972,6 +978,7 @@ model FunctionCallEquationPartial5
         TransformCanonicalTestCase(
             name="FunctionCallEquationPartial5",
             description="Tests evaluation of matrix multiplication in function.",
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquationPartial5
@@ -1045,6 +1052,7 @@ model FunctionCallEquationPartial7
             name="FunctionCallEquationPartial7",
             description="Tests evaluation of matrix multiplication in function.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquationPartial7
  parameter Real x1;
@@ -1265,6 +1273,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite4;
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite5",
             description="Repeatedly partially propagated array",
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite5
@@ -1387,6 +1396,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite7;
             name="PartiallyKnownComposite8",
             description="Test cleanup of record/array outputs",
             inline_functions="none",
+            eliminate_alias_constants=false,
             template="
 $C_ode_derivatives$
 ",
@@ -1745,6 +1755,7 @@ equation
 		TransformCanonicalTestCase(
 			name="AliasVariabilities1",
 			description="Check that aliases are handled correctly",
+            eliminate_alias_constants=false,
 			flatModel="
 fclass VariabilityPropagationTests.AliasVariabilities1
  parameter Real a;
@@ -1765,6 +1776,7 @@ end VariabilityPropagationTests.AliasVariabilities1;
 			name="AliasVariabilities1XML",
 			description="Check that aliases are handled correctly",
 			generate_fmi_me_xml=false,
+			eliminate_alias_constants=false,
 			template="$XML_variables$",
 			generatedCode="
 		<ScalarVariable name=\"a\" valueReference=\"6\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
@@ -1871,6 +1883,7 @@ model ZeroFactor1
         TransformCanonicalTestCase(
             name="ZeroFactor1",
             description="Test elimination of factors that can be reduced to zero.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor1
  constant Real c = 0;
@@ -1917,6 +1930,7 @@ model ZeroFactor3
         TransformCanonicalTestCase(
             name="ZeroFactor3",
             description="Test elimination of factors that can be reduced to zero.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor3
  constant Real c = 0;
@@ -2125,5 +2139,27 @@ public
 end VariabilityPropagationTests.EvalFail2;
 ")})));
 end EvalFail2;
+
+model AlgebraicLoopParameter1
+    parameter Real p = 1;
+    Real zero = 0;
+    Real x = p*y;
+    Real y = zero * x + p;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgebraicLoopParameter1",
+            description="Test evaluation of algebraic loop in propagated parameters",
+            flatModel="
+fclass VariabilityPropagationTests.AlgebraicLoopParameter1
+ parameter Real p = 1 /* 1 */;
+ constant Real zero = 0;
+ parameter Real y;
+ parameter Real x;
+parameter equation
+ y = p;
+ x = p * y;
+end VariabilityPropagationTests.AlgebraicLoopParameter1;
+")})));
+end AlgebraicLoopParameter1;
 
 end VariabilityPropagationTests;

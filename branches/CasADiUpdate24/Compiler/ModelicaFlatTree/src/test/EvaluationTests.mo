@@ -857,6 +857,7 @@ Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/Evalua
 
 Error at line 843, column 20, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Could not evaluate binding expression for constant 'z': 'f()'
+    Unspecified constant evaluation failure
 ")})));
 end FunctionEval24;
 
@@ -956,6 +957,7 @@ model FunctionEval26b
         EvalTestCase(
             name="FunctionEval26b",
             description="Evaluation in flat tree of function with modifications on record variable",
+            eliminate_alias_variables=false,
             variables="
 a1.x
 a1.y
@@ -1240,6 +1242,7 @@ model FunctionEval34
             name="FunctionEval34",
             description="If statement in for statement",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.FunctionEval34
  constant Real y1 = 6.0;
@@ -1335,6 +1338,32 @@ end EvaluationTests.FunctionEval36;
 ")})));
 end FunctionEval36;
 
+
+model FunctionEval37
+    function f
+        input Real x[2];
+        input Integer i;
+        output Real y;
+    protected
+        Real z = x[i];
+    algorithm
+        y := z;
+    end f;
+
+    constant Real x = f({1, 2}, 1);
+    constant Real y = f({3, 4}, 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval37",
+            description="Evaluation of array index in binding expression of protected variable in function",
+            flatModel="
+fclass EvaluationTests.FunctionEval37
+ constant Real x = 1;
+ constant Real y = 4;
+end EvaluationTests.FunctionEval37;
+")})));
+end FunctionEval37;
 
 
 model VectorFuncEval1
@@ -1573,7 +1602,7 @@ end EvaluationTests.EvaluateAnnotation2;
 Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
   Evaluate annotation is ignored for parameters with fixed=false
 
-Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo':
+Warning at line 1552, column 25, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter p does not have a binding expression
 ")})));
 end EvaluateAnnotation2;
@@ -2240,6 +2269,7 @@ model ParameterEvalAnnotation2
 		TransformCanonicalTestCase(
 			name="ParameterEvalAnnotation2",
 			description="Test constant evaluation Evaluate parameter",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation2
  parameter Real p;
@@ -2282,6 +2312,7 @@ equation
 		TransformCanonicalTestCase(
 			name="ParameterEvalAnnotation3",
 			description="Test constant evaluation Evaluate parameter",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass EvaluationTests.ParameterEvalAnnotation3
  constant Real c[1] = 1;
@@ -2375,6 +2406,7 @@ model FuncInArrayExpEval1
             name="FuncInArrayExpEval1",
             description="Constant evaluation of array binary expression containing function call returning array",
             variability_propagation=false,
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.FuncInArrayExpEval1
  structural parameter Real a[1] = 1 /* 1 */;
@@ -2401,6 +2433,7 @@ model PreExp1
         TransformCanonicalTestCase(
             name="PreExp1",
             description="Constant evaluation of pre exp.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.PreExp1
  constant Integer x = 1;
@@ -2449,6 +2482,7 @@ model SpatialDistribution2
         TransformCanonicalTestCase(
             name="SpatialDistribution2",
             description="Constant evaluation of vectorized spatialDistribution operator",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.SpatialDistribution2
  constant Real x1[1] = 0.0;
@@ -2486,6 +2520,7 @@ model Functional1
         TransformCanonicalTestCase(
             name="Functional1",
             description="Constant evaluation of functional input arguments, zero inputs",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional1
  constant Real c1 = 3;
@@ -2521,6 +2556,7 @@ model Functional2
         TransformCanonicalTestCase(
             name="Functional2",
             description="Constant evaluation of functional input arguments, zero inputs, one partial input",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional2
  constant Real c1 = 9.0;
@@ -2561,6 +2597,7 @@ model Functional3
         TransformCanonicalTestCase(
             name="Functional3",
             description="Constant evaluation of functional input arguments, many inputs",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional3
  constant Real c1 = 14.0;
@@ -2601,6 +2638,7 @@ model Functional4
         TransformCanonicalTestCase(
             name="Functional4",
             description="Constant evaluation of functional input arguments, binding expressions",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional4
  constant Real c1 = 3315.0;
@@ -2646,6 +2684,7 @@ model Functional5
         TransformCanonicalTestCase(
             name="Functional5",
             description="Constant evaluation of functional input arguments, multiple extend levels",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional5
  constant Real c1 = 18.0;
@@ -2693,6 +2732,7 @@ model Functional6
         TransformCanonicalTestCase(
             name="Functional6",
             description="Constant evaluation of functional input arguments, multiple outputs",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional6
  constant Real c1 = 19.0;
@@ -2742,6 +2782,7 @@ model Functional7
         TransformCanonicalTestCase(
             name="Functional7",
             description="Constant evaluation of functional input arguments, chained",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional7
  constant Real c1 = 6.0;
@@ -2801,6 +2842,7 @@ model Functional8
         TransformCanonicalTestCase(
             name="Functional8",
             description="Constant evaluation of functional input arguments, chained with shortclassdecls",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional8
  constant Real c1 = 6.0;
@@ -2845,6 +2887,7 @@ model Functional9
         TransformCanonicalTestCase(
             name="Functional9",
             description="Constant evaluation of functional input arguments. Interleaving binds.",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Functional9
  constant Real c1 = 15.0;
@@ -2914,6 +2957,7 @@ end EvaluationTests.Partial.Mul2;
             name="Mul3",
             description="Evaluation of multiplication with zero and unknown",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.Mul3
  constant Real y[1] = 0.0;
@@ -2935,6 +2979,7 @@ end EvaluationTests.Partial.Mul3;
             name="Mul4",
             description="Evaluation of multiplication with zero and unknown",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.Mul4
  constant Real y[1,1] = 0.0;
@@ -3096,6 +3141,7 @@ end EvaluationTests.Partial.IfStmt1;
             name="IfStmt2",
             description="Partial evaluation of if stmt. All branches known.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.IfStmt2
  constant Real y[1] = 0.0;
@@ -3126,6 +3172,7 @@ end EvaluationTests.Partial.IfStmt2;
             name="IfStmt3",
             description="Partial evaluation of if stmt. All branches known.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.IfStmt3
  constant Real y[1] = 0.0;
@@ -3262,6 +3309,7 @@ end EvaluationTests.Partial.IfStmt5;
             name="IfStmt6",
             description="Partial evaluation of if stmt. Chained false, unknown, and true if tests.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.IfStmt6
  constant Real y[1] = 0.0;
@@ -3422,6 +3470,7 @@ end EvaluationTests.Partial.IfStmt8;
             name="IfStmt9",
             description="Partial evaluation of if stmt. Nested.",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.Partial.IfStmt9
  constant Real y[1] = 0.0;
@@ -3614,6 +3663,7 @@ end EvaluationTests.Partial.IfStmt12;
         TransformCanonicalTestCase(
             name="IfStmt13",
             description="Partial evaluation of if stmt. Assigned in only one branch.",
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.IfStmt13
@@ -4067,6 +4117,7 @@ model ForLoopSizeVary1
         TransformCanonicalTestCase(
             name="ForLoopSizeVary1",
             description="Varying sizes in for loops",
+            eliminate_alias_variables=false,
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.ForLoopSizeVary1
@@ -4096,6 +4147,7 @@ model ForLoopSizeVary2
             name="ForLoopSizeVary2",
             description="Varying sizes in for loops",
             inline_functions="none",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.ForLoopSizeVary2
  constant Real y1 = 4.0;
@@ -4116,6 +4168,7 @@ model RelExpAlmost1
         TransformCanonicalTestCase(
             name="RelExpAlmost1",
             description="Very close real comparisons",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.RelExpAlmost1
  constant Real eps = 1.0E-16;
@@ -4127,5 +4180,22 @@ fclass EvaluationTests.RelExpAlmost1
 end EvaluationTests.RelExpAlmost1;
 ")})));
 end RelExpAlmost1;
+
+
+model FScalarExpEval
+    constant Real x = scalar({1});
+    Integer y = 1.0; // Generate error so we can use error test
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="FScalarExpEval",
+            description="Check that scalar() can be constant evaluated (before scalarization)",
+            errorMessage="
+1 errors found:
+
+Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/EvaluationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end FScalarExpEval;
 
 end EvaluationTests;

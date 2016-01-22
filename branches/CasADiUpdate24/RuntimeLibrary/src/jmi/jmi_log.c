@@ -219,6 +219,7 @@ static void buffer_starttag(buf_t *buf, const char *type,
         buffer_char(buf, '"');        
     }
     if ((flags & logFlagIndex) != 0) buffer(buf, " flags=\"index\"");
+    if ((flags & logFlagResidualIndex) != 0) buffer(buf, " flags=\"residual_index\"");
     buffer_char(buf, '>');
 }
 
@@ -719,6 +720,21 @@ node_t jmi_log_enter_vector_(log_t *log, node_t node, category_t c,
     if (!ok_label_parent(log, node)) { name = NULL; }
     return enter_(log, c, "vector", 1, name, NULL, 0);
 }
+
+node_t jmi_log_enter_index_vector_(log_t *log, node_t node, category_t c, 
+                             const char *name, char index_type) {
+    int flag = 0;
+    if(index_type == 'I') {
+        flag = logFlagIndex;
+    }
+    else if (index_type == 'R') {
+        flag = logFlagResidualIndex;
+    }
+    if (!ok_label_parent(log, node)) { name = NULL; }
+    return enter_(log, c, "vector", 1, name, NULL, flag);
+}
+
+
 /* could be exported if we also export an interface to begin a new row. */
 static node_t jmi_log_enter_matrix_(log_t *log, node_t node, category_t c, 
                                     const char *name) {
@@ -780,12 +796,13 @@ static void log_fmt_(log_t *log, node_t parent, category_t c, const char *fmt, v
                 if (ch == '%') {
                     char f = *(fmt++);
                     int flags = (f == 'I' ? logFlagIndex : 0);
-                    if (!contains("diueEfFgGsI", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
+                    flags = (f == 'R' ? logFlagResidualIndex : flags);
+                    if (!contains("diueEfFgGsIR", f)) { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }
                     
                     node = enter_value_(log, parent, c, name_start, name_end, flags);
                     
                     /* todo: consider: what if jmi_real_t is not double? */
-                    if      (contains("diuI", f))   jmi_log_int_(   log, va_arg(ap, int));
+                    if      (contains("diuIR", f))   jmi_log_int_(   log, va_arg(ap, int));
                     else if (contains("eEfFgG", f)) jmi_log_real_(  log, va_arg(ap, double));
                     else if (f == 's')              jmi_log_string_(log, va_arg(ap, const char *));
                     else { logging_error(log, "jmi_log_fmt: unknown format specifier"); break; }

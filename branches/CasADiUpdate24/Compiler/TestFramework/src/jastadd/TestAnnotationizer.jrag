@@ -49,32 +49,35 @@ aspect TestAnnotationizer {
  */
 abstract public class TestAnnotationizerHelper {
 
-	// TODO: Use more code directly from the test case classes.
-	
-	/**
-	 * This is the main method for creating the annotation.
-	 * 
-	 * @param filePath     the path to the Modelica file containing the test model
-	 * @param testType     the type of test case (case sensitive)
-	 * @param modelName    the name of the test model
-	 * @param description  the text to put in the "description" field of the test annotation
-	 * @param data         any extra data to send to the delegate object
+    // TODO: Use more code directly from the test case classes.
+    
+    /**
+     * This is the main method for creating the annotation.
+     * 
+     * @param filePath     the path to the Modelica file containing the test model
+     * @param testType     the type of test case (case sensitive)
+     * @param modelName    the name of the test model
+     * @param description  the text to put in the "description" field of the test annotation
+     * @param data         any extra data to send to the delegate object
      * @param opts         comma-separated list of compiler options to override defaults for
      * @param checkType    check type to use when checking
-	 * @param write        if <code>true</code>, write the annotation directly in the Modelica file
-	 */
-	public static void doAnnotation(String filePath, String testType, String modelName, 
-			String description, String[] opts, String data, String checkType, boolean write) throws Exception {
-		try {
-			Class cl = getTestCase(testType);
-			Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String[].class, String.class);
-			TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
-			ta.setCheckType(checkType);
-			ta.createAnnotation(write);
-		} catch (Exception e) {
-			handleException(e);
-		}
-	}
+     * @param libs         list of libraries needed
+     * @param write        if <code>true</code>, write the annotation directly in the Modelica file
+     */
+    public static void doAnnotation(String filePath, String testType, String modelName, 
+            String description, String[] opts, String data, String checkType, String[] libs, 
+            boolean write) throws Exception {
+        try {
+            Class cl = getTestCase(testType);
+            Constructor constructor = cl.getConstructor(String.class, String.class, String.class, String[].class, String.class);
+            TestAnnotationizerHelper ta = (TestAnnotationizerHelper) constructor.newInstance(filePath, modelName, description, opts, data);
+            ta.setCheckType(checkType);
+            ta.setModelicaLibraries(libs);
+            ta.createAnnotation(write);
+        } catch (Exception e) {
+            handleException(e);
+        }
+    }
 
     /**
      * This is the main method for regenerating an existing annotation.
@@ -130,7 +133,34 @@ abstract public class TestAnnotationizerHelper {
     public ErrorCheckType getCheckType() {
         return (checkType == null) ? ErrorCheckType.COMPILE : checkType;
     }
-	
+
+    /**
+     * Set list of libraries needed by test.
+     */
+    public void setModelicaLibraries(String[] val) {
+        libs = val;
+    }
+
+    /**
+     * Get list of libraries needed by test as comma-separated string.
+     */
+    public String getModelicaLibrariesString() {
+        StringBuilder buf = new StringBuilder();
+        for (String lib : libs) {
+            if (buf.length() > 0)
+                buf.append(',');
+            buf.append(lib);
+        }
+        return buf.toString();
+    }
+
+    /**
+     * Are there any extra libraries needed by test?
+     */
+    public boolean hasModelicaLibraries() {
+        return libs.length > 0;
+    }
+
 	/**
 	 * Get the test case generator class for the specified test case name (or prefix thereof).
 	 */
@@ -175,7 +205,9 @@ abstract public class TestAnnotationizerHelper {
 		System.out.println("    -w           write result to file instead of stdout");
 		System.out.println("    -m/-o        create annotation for Modelica/Optimica (default is infer from file path)");
 		System.out.println("    -r           regenerate an already present annotation");
-		System.out.println("    -e           repeat process until an empty classname is given, incompatible with -c");
+		System.out.println("    -a           regenerate annotations for all models in test file (implies -r)");
+		System.out.println("    -l=<libs>    comma-separated list of libraries needed by test (except for MSL)");
+		System.out.println("                 paths should be relative to test file");
 		System.out.println("    -t=<type>    set type of test, a unique prefix is enough, e.g. Err for ErrorTestCase");
 		System.out.println("    -c=<class>   set name of class to generate annotation for, if name ");
 		System.out.println("                 does not contain a dot, base name of .mo file is prepended");
@@ -216,6 +248,7 @@ abstract public class TestAnnotationizerHelper {
     protected String data;
     protected SourceRoot root;
     protected String[] opts;
+    protected String[] libs;
     protected OptionRegistry or = null;
     protected ErrorCheckType checkType = null;
 
@@ -239,31 +272,33 @@ abstract public class TestAnnotationizerHelper {
 		this.opts = opts;
 		this.data = data;
 	}
-	
-	/**
-	 * Test regeneration constructor for test case creators.
-	 * 
-	 * Parses the Modelica file containing the test model and saves the source root.
-	 * 
-	 * All subclasses should have a constructor with the same arguments that calls this constructor.
-	 * 
-	 * @param filePath     the path to the Modelica file containing the test model
-	 * @param className    the name of the test model
-	 */
-	public TestAnnotationizerHelper(ClassDecl cd, String filePath, String className) throws Exception {
-		this.filePath = filePath;
-		this.className = className;
-		AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
-		this.description = annotationString(a.forPath("description"), false);
+
+    /**
+     * Test regeneration constructor for test case creators.
+     * 
+     * Parses the Modelica file containing the test model and saves the source root.
+     * 
+     * All subclasses should have a constructor with the same arguments that calls this constructor.
+     * 
+     * @param filePath     the path to the Modelica file containing the test model
+     * @param className    the name of the test model
+     */
+    public TestAnnotationizerHelper(ClassDecl cd, String filePath, String className) throws Exception {
+        this.filePath = filePath;
+        this.className = className;
+        AnnotationNode a = cd.annotation("__JModelica/UnitTesting/tests").iterator().next();
+        this.description = annotationString(a.forPath("description"), false);
         this.data = annotationString(a.forPath(dataName()), false);
         setCheckType(annotationString(a.forPath("checkType"), false));
-		ArrayList<String> optStrings = new ArrayList<String>();
-		for (AnnotationNode a2 : a) 
-			if (a2.name().indexOf('_') >= 0) 
-				optStrings.add(a2.name() + '=' + annotationString(a2, true));
-		opts = optStrings.toArray(new String[optStrings.size()]);
-	}
-	
+        String libs = annotationString(a.forPath("modelicaLibraries"), false);
+        setModelicaLibraries((libs == null) ? new String[0] : libs.split(","));
+        ArrayList<String> optStrings = new ArrayList<String>();
+        for (AnnotationNode a2 : a) 
+            if (a2.name().indexOf('_') >= 0) 
+                optStrings.add(a2.name() + '=' + annotationString(a2, true));
+        opts = optStrings.toArray(new String[optStrings.size()]);
+    }
+
 	protected static String annotationString(AnnotationNode a, boolean option) {
 		if (a.isStringValue()) {
 			String str = prepare(a.string().trim());
@@ -290,31 +325,50 @@ abstract public class TestAnnotationizerHelper {
      */
     protected void process() throws Exception {
         testName = className.substring(className.indexOf('.') + 1).replace('.', '_');
-        root = parse(filePath, className, optionRegistry());
+        root = parse(filesToParse(filePath, libs), className, optionRegistry());
     }
 
-	/**
-	 * Parse the file.
-	 */
-	private static SourceRoot parse(String filePath, String className, OptionRegistry opts) throws Exception {
-		String filesep = File.separator;
-		String modelicapath = System.getenv("JMODELICA_HOME")+filesep+"ThirdParty"+filesep+"MSL";
-		opts.setStringOption("MODELICAPATH", modelicapath);
-		SourceRoot root;
-		
-		try {
-			root = ParserHandler.parseFile(UtilInterface.create(opts), filePath);
-		} catch (ParserException e) {
-			e.getProblem().setFileName(filePath);
-			CompilerException ce = new CompilerException();
-			ce.addProblem(e.getProblem());
-			throw ce;
-		}
-		for (StoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
-			sd.setFileName(filePath);
-		return root;
-	}
-	
+    /**
+     * Create list of files and libraries to parse.
+     */
+    private static String[] filesToParse(String filePath, String[] libs) {
+        String[] names = new String[libs.length + 1];
+        names[0] = filePath;
+        File parent = new File(filePath).getParentFile();
+        for (int i = 0; i < libs.length; i++) {
+            names[i + 1] = new File(parent, libs[i]).getAbsolutePath();
+        }
+        return names;
+    }
+
+    /**
+     * Parse a single file.
+     */
+    private static SourceRoot parse(String filePath, String className, OptionRegistry opts) throws Exception {
+        return parse(new String[] { filePath }, className, opts);
+    }
+
+    /**
+     * Parse a set of files.
+     */
+    private static SourceRoot parse(String[] files, String className, OptionRegistry opts) throws Exception {
+        String modelicapath = System.getenv("JMODELICA_HOME") + "/ThirdParty/MSL";
+        opts.setStringOption("MODELICAPATH", modelicapath);
+        SourceRoot root;
+        
+        try {
+            root = ParserHandler.parseModel(UtilInterface.create(opts), files);
+        } catch (ParserException e) {
+            e.getProblem().setFileName(files[0]);
+            CompilerException ce = new CompilerException();
+            ce.addProblem(e.getProblem());
+            throw ce;
+        }
+        for (StoredDefinition sd : root.getProgram().getUnstructuredEntitys()) 
+            sd.setFileName(files[0]);
+        return root;
+    }
+
 	/**
 	 * Create an annotation from this helper object.
 	 * 
@@ -482,6 +536,8 @@ abstract public class TestAnnotationizerHelper {
         out.println("        " + getClass().getSimpleName() + "(");
         out.println("            name=\"" + testName + "\",");
         out.println("            description=\"" + description + "\",");
+        if (hasModelicaLibraries())
+            out.println("            modelicaLibraries=\"" + getModelicaLibrariesString() + "\",");
         for (String opt : opts) 
             out.println("            " + opt + ",");
         if (checkType != null)
@@ -817,12 +873,7 @@ abstract public class TestAnnotationizerHelper {
                 compile();
                 throw new ModelicaException(noExceptionMessage());
             } catch (CompilerException e) {
-                StringBuilder str = new StringBuilder();
-                str.append(e.getProblems().size() + " errors found:\n\n");
-                for (Problem p : e.getProblems()) 
-                    str.append(p.toString() + "\n\n");
-                str.deleteCharAt(str.length() - 1);
-                message = prepare(str.toString());
+                message = prepare(e.getMessage(true));
             }
         }
 
@@ -920,7 +971,7 @@ abstract public class TestAnnotationizerHelper {
 		 * This implementation filters out compliance errors.
 		 */
 		protected boolean keepProblem(Problem p) {
-			return p.severity() == Problem.Severity.ERROR;
+			return p.severity() == ProblemSeverity.ERROR;
 		}
 
 	}

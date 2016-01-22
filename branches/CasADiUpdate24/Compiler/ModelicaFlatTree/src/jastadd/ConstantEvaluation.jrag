@@ -76,8 +76,43 @@ aspect ConstantEvaluation {
 			return (val == null) ? super.getMessage() :
 				"Cannot " + super.getMessage() + val.errorDesc();
 		}
-	}
-	
+		
+        public String getModelicaStackTrace() {
+            StringBuilder sb = new StringBuilder();
+            buildStackTrace(sb);
+            return sb.toString();
+        }
+        
+        static final String STACK_SEP = "\n    ";
+        
+        public void buildStackTrace(StringBuilder sb) {
+            sb.append(STACK_SEP);
+            sb.append(getMessage());
+        }
+    }
+    
+    public class FunctionEvaluationException extends ConstantEvaluationException {
+        private String functionName;
+        private ConstantEvaluationException source;
+        
+        public FunctionEvaluationException(String functionName, ConstantEvaluationException source) {
+            this.functionName = functionName;
+            this.source = source;
+        }
+        
+        public String getMessage() {
+            return source.getMessage();
+        }
+        
+        public void buildStackTrace(StringBuilder sb) {
+            sb.append(STACK_SEP);
+            sb.append("in function '");
+            sb.append(functionName);
+            sb.append("'");
+            source.buildStackTrace(sb);
+        }
+    }
+    
 	public class ConstantEvaluationNotReadyException extends ConstantEvaluationException {
 		
 		public ConstantEvaluationNotReadyException() {
@@ -1503,7 +1538,7 @@ aspect ConstantEvaluation {
             InstRecordConstructor res = new InstRecordConstructor(rec, new List());
             int i = 1;
             for (CValue val : values)
-                res.addArg(new InstPositionalArgument(i++, val.buildInstLiteral()));
+                res.addArg(new InstPositionalArgument(val.buildInstLiteral(), i++));
             return res;
         }
 
@@ -2057,8 +2092,8 @@ aspect ConstantEvaluation {
               return false;
           }
     }
-
-
+    
+    
     /**
      * Constant evaluation for arrays.
      * 
@@ -2553,7 +2588,7 @@ aspect ConstantEvaluation {
         else if (getValue().type().isBoolean() || getValue().type().isEnum())
           value = getValue().ceval(evaluator).stringValue();
         else
-          throw new UnsupportedOperationException();
+          return CValue.UNKNOWN;
         return new CValueString(String.format((Locale) null, formatString(), value));
     }
     eq FGetInstanceName.cevalCalc(VariableEvaluator evaluator) = new CValueString(calcInstanceName());
@@ -2632,6 +2667,8 @@ aspect ConstantEvaluation {
         }
         return new CValueReal(val);
     }
+
+    eq FScalarExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator).array().getCell(0);
 
     syn CValue FSubscript.ceval() = ceval(defaultVariableEvaluator());
 	syn CValue FSubscript.ceval(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
@@ -3176,9 +3213,8 @@ aspect ConstantEvaluation {
   inh boolean InstNamedAccess.duringFunctionEval();
   eq FFunctionDecl.getChild().duringFunctionEval()     = currentEvaluationValues != null;
   eq InstBaseClassDecl.getChild().duringFunctionEval() = currentEvaluationValues != null;
-  eq InstNode.getChild().duringFunctionEval() = false;
-  eq FClass.getChild().duringFunctionEval()   = false;
-  eq Root.getChild().duringFunctionEval()     = false;
+  eq FClass.getChild().duringFunctionEval()            = false;
+  eq Root.getChild().duringFunctionEval()              = false;
   
   /**
    * Perform constant evaluation of functions, with caching.
@@ -3443,7 +3479,7 @@ aspect ConstantEvaluation {
                 fab.getFStatements().evaluateList(algoEvaluator);
             }
         } catch (ConstantEvaluationException e) {
-            algoEvaluator.failed(myOutputs(), e);
+            algoEvaluator.failed(name(), myOutputs(), e);
         } finally {
             for (FFunctionVariable var : getFFunctionVariables())
                 var.clearLocalCachedEvaluationValue();
@@ -3538,7 +3574,7 @@ aspect ConstantEvaluation {
         
             fab.getFStatements().evaluateList(algoEvaluator);
         } catch (ConstantEvaluationException e) {
-            algoEvaluator.failed(myOutputs(), e);
+            algoEvaluator.failed(qualifiedName(), myOutputs(), e);
         } finally {
             for (InstComponentDecl var : allInstComponentDecls())
                 var.clearLocalCachedEvaluationValue();
@@ -3846,6 +3882,10 @@ aspect ConstantEvaluation {
 
     public Map<CommonVariableDecl,CValue> FAbstractVariable.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
         return super.collectEvaluationValues(collectMyEvaluationValue(map));
+    }
+    
+    public Map<CommonVariableDecl,CValue> FAttribute.collectEvaluationValues(Map<CommonVariableDecl,CValue> map) {
+        return map;
     }
     
     public Map<CommonVariableDecl,CValue> FIdUse.collectMyEvaluationValue(Map<CommonVariableDecl,CValue> map) {
@@ -4701,12 +4741,11 @@ aspect CircularExpressions {
 				return true;
 		return false;
 	}
-	
-	syn boolean InstFunctionArgument.isCircular() = false;
-	eq InstPositionalArgument.isCircular() = getFExp().isCircular();
-	eq InstNamedArgument.isCircular()      = getFExp().isCircular();
-	eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
-	
+
+    syn boolean InstFunctionArgument.isCircular() = false;
+    eq InstGivenArgument.isCircular()      = getFExp().isCircular();
+    eq InstDefaultArgument.isCircular()    = getFExp().isCircular();
+
 
 	syn lazy boolean FAbstractVariable.isCircular() circular [true] = false;
 	eq FVariable.isCircular() = getFQName().isCircular() || (hasBindingExp() && getBindingExp().isCircular());
@@ -5057,8 +5096,8 @@ aspect VariableEvaluator {
             return values;
         }
         
-        public void failed(Iterable<? extends CommonVariableDecl> outputs, ConstantEvaluationException e) {
-            throw e;
+        public void failed(String functionName, Iterable<? extends CommonVariableDecl> outputs, ConstantEvaluationException e) {
+            throw new FunctionEvaluationException(functionName, e);
         }
         
         public boolean recursive(Iterable<? extends CommonVariableDecl> inputs, Iterable<? extends CommonVariableDecl> outputs) {
@@ -5117,7 +5156,7 @@ aspect VariableEvaluator {
         }
         
         @Override
-        public void failed(Iterable<? extends CommonVariableDecl> outputs, ConstantEvaluationException e) {
+        public void failed(String functionName, Iterable<? extends CommonVariableDecl> outputs, ConstantEvaluationException e) {
             values.clear();
             for (CommonVariableDecl cvd : outputs) {
                 values.put(cvd, cvd.type().unknownCValue());

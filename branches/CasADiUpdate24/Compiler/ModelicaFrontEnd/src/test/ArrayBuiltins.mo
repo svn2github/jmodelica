@@ -130,6 +130,7 @@ model SizeExp7
 Error at line 122, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is Integer
 ")})));
 end SizeExp7;
 
@@ -147,6 +148,7 @@ model SizeExp8
 Error at line 140, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '1.0' is Real
+    expected type is Integer
 ")})));
 end SizeExp8;
 
@@ -269,6 +271,7 @@ model FillExp1
 		TransformCanonicalTestCase(
 			name="Fill_FillExp1",
 			description="Fill operator: one dim",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp1
  constant Real x[1] = 3;
@@ -285,6 +288,7 @@ model FillExp2
 		TransformCanonicalTestCase(
 			name="Fill_FillExp2",
 			description="Fill operator: three dims",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp2
  constant Real x[1,1,1] = 3;
@@ -342,7 +346,7 @@ model FillExp4
             errorMessage="
 1 errors found:
 
-Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end FillExp4;
@@ -375,7 +379,7 @@ model FillExp6
             errorMessage="
 2 errors found:
 
-Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
 
 Error at line 369, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
@@ -394,7 +398,7 @@ model FillExp7
             errorMessage="
 2 errors found:
 
-Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
 
 Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
@@ -410,6 +414,7 @@ model FillExp8
 		TransformCanonicalTestCase(
 			name="Fill_FillExp8",
 			description="Fill operator: filling with array",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp8
  constant Real x[1,1] = 1;
@@ -470,6 +475,7 @@ model MinExp3
 		TransformCanonicalTestCase(
 			name="MinExp3",
 			description="Min operator: strings",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = \"bar\";
@@ -487,6 +493,7 @@ model MinExp4
 		TransformCanonicalTestCase(
 			name="Min_MinExp4",
 			description="Min operator: booleans",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp4
  constant Boolean x = false;
@@ -506,7 +513,7 @@ model MinExp5
             errorMessage="
 1 errors found:
 
-Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: min(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -527,10 +534,12 @@ model MinExp6
 Error at line 518, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 
 Error at line 518, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 ")})));
 end MinExp6;
 
@@ -548,6 +557,7 @@ model MinExp7
 Error at line 539, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is array of Real, Integer, Boolean, String or enumeration
 ")})));
 end MinExp7;
 
@@ -560,6 +570,7 @@ model MinExp8
 		TransformCanonicalTestCase(
 			name="Min_MinExp8",
 			description="Reduction-expression with min(): constant expression",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp8
  constant Real x = 1.0;
@@ -629,7 +640,7 @@ model MinExp12
             errorMessage="
 1 errors found:
 
-Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MinExp12;
@@ -682,6 +693,7 @@ model MaxExp3
 		TransformCanonicalTestCase(
 			name="MaxExp3",
 			description="Max operator: strings",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = \"foo\";
@@ -699,6 +711,7 @@ model MaxExp4
 		TransformCanonicalTestCase(
 			name="Max_MaxExp4",
 			description="Max operator: booleans",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Max.MaxExp4
  constant Boolean x = true;
@@ -718,7 +731,7 @@ model MaxExp5
             errorMessage="
 1 errors found:
 
-Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: max(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -739,10 +752,12 @@ model MaxExp6
 Error at line 730, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 
 Error at line 730, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
+    expected type is scalar Real, Integer, Boolean, String or enumeration
 ")})));
 end MaxExp6;
 
@@ -760,6 +775,7 @@ model MaxExp7
 Error at line 751, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is array of Real, Integer, Boolean, String or enumeration
 ")})));
 end MaxExp7;
 
@@ -830,7 +846,7 @@ model MaxExp12
             errorMessage="
 1 errors found:
 
-Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MaxExp12;
@@ -924,6 +940,7 @@ model SumExp5
 Error at line 915, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function sum(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is Real array
 ")})));
 end SumExp5;
 
@@ -942,6 +959,7 @@ equation
 		TransformCanonicalTestCase(
 			name="Sum_SumExp6",
 			description="",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Sum.SumExp6
  structural parameter Integer N = 3 /* 3 */;
@@ -1083,6 +1101,7 @@ model ProductExp6
 Error at line 1074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function product(): types of positional argument 1 and input A are not compatible
     type of '42' is Integer
+    expected type is Real array
 ")})));
 end ProductExp6;
 
@@ -1281,6 +1300,7 @@ equation
 Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
+    expected type is matrix of Real, Integer, Boolean, String or enumeration
 ")})));
 end Transpose5;
 
@@ -1298,6 +1318,7 @@ model Transpose6
 Error at line 1289, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is matrix of Real, Integer, Boolean, String or enumeration
 ")})));
 end Transpose6;
 
@@ -1312,7 +1333,7 @@ model Transpose7
             errorMessage="
 1 errors found:
 
-Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Transpose7;
@@ -1513,6 +1534,7 @@ model Symmetric1
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric1",
 			description="Scalarization of symmetric operator: Integer[2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric1
  constant Real x[1,1] = 1;
@@ -1531,6 +1553,7 @@ model Symmetric2
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric2",
 			description="Scalarization of symmetric operator: Integer[3,3]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric2
  constant Real x[1,1] = 1;
@@ -1569,6 +1592,7 @@ model Symmetric4
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric4",
 			description="Scalarization of symmetric operator: Integer[2,2,2]",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric4
  constant Integer x[1,1] = 1;
@@ -1608,6 +1632,7 @@ equation
 Error at line 1599, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
+    expected type is square matrix
 ")})));
 end Symmetric5;
 
@@ -1625,6 +1650,7 @@ model Symmetric6
 Error at line 1616, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
+    expected type is square matrix
 ")})));
 end Symmetric6;
 
@@ -1639,7 +1665,7 @@ model Symmetric7
             errorMessage="
 1 errors found:
 
-Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Symmetric7;
@@ -1653,6 +1679,7 @@ model Symmetric8
 		TransformCanonicalTestCase(
 			name="Symmetric_Symmetric8",
 			description="Scalarization of symmetric operator: access to variable",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric8
  constant Real x[1,1] = 1;
@@ -1714,7 +1741,7 @@ model Cross3
             errorMessage="
 1 errors found:
 
-Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Cross3; 
@@ -1733,10 +1760,12 @@ model Cross4
 Error at line 1724, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is Real[3]
 
 Error at line 1724, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
+    expected type is Real[3]
 ")})));
 end Cross4; 
 
@@ -1754,10 +1783,12 @@ model Cross5
 Error at line 1745, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
+    expected type is Real[3]
 
 Error at line 1745, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{4, 5, 6, 7}' is Integer[4]
+    expected type is Real[3]
 ")})));
 end Cross5; 
 
@@ -1775,10 +1806,12 @@ model Cross6
 Error at line 1766, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[3]
 
 Error at line 1766, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
+    expected type is Real[3]
 ")})));
 end Cross6; 
 
@@ -1796,10 +1829,12 @@ model Cross7
 Error at line 1787, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
+    expected type is Real[3]
 
 Error at line 1787, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
+    expected type is Real[3]
 ")})));
 end Cross7; 
 
@@ -1851,10 +1886,12 @@ model Skew2
 Error at line 1841, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
+    expected type is Real[3]
 
 Error at line 1842, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[3]
 ")})));
 end Skew2;
 
@@ -1891,6 +1928,7 @@ model OuterProduct2
 		TransformCanonicalTestCase(
 			name="OuterProduct_OuterProduct2",
 			description="outerProduct() operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct2
  constant Integer x[1,1] = 4;
@@ -1917,7 +1955,7 @@ model OuterProduct3
             errorMessage="
 1 errors found:
 
-Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end OuterProduct3; 
@@ -1936,10 +1974,12 @@ model OuterProduct4
 Error at line 1927, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
+    expected type is Real[:]
 
 Error at line 1927, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
+    expected type is Real[:]
 ")})));
 end OuterProduct4; 
 
@@ -1957,10 +1997,12 @@ model OuterProduct5
 Error at line 1948, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
+    expected type is Real[:]
 
 Error at line 1948, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
+    expected type is Real[:]
 ")})));
 end OuterProduct5; 
 
@@ -1978,10 +2020,12 @@ model OuterProduct6
 Error at line 1969, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
+    expected type is Real[:]
 
 Error at line 1969, column 63, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
+    expected type is Real[:]
 ")})));
 end OuterProduct6; 
 		
@@ -2096,7 +2140,7 @@ model ArrayCat6
             errorMessage="
 1 errors found:
 
-Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ArrayCat6;
@@ -2245,17 +2289,18 @@ model ArrayShortCat2
 		TransformCanonicalTestCase(
 			name="Cat_ArrayShortCat2",
 			description="Shorthand array concatenation operator: different sizes",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[1,3] = 3;
- constant Real x[2,1] = 4;
- constant Real x[2,2] = 5;
- constant Real x[2,3] = 6;
- constant Real x[3,1] = 7;
- constant Real x[3,2] = 8;
- constant Real x[3,3] = 9;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[1,3] = 3.0;
+ constant Real x[2,1] = 4.0;
+ constant Real x[2,2] = 5.0;
+ constant Real x[2,3] = 6.0;
+ constant Real x[3,1] = 7.0;
+ constant Real x[3,2] = 8.0;
+ constant Real x[3,3] = 9.0;
  constant Real a = 1;
  constant Real b[1,1] = 2;
  constant Real b[1,2] = 3;
@@ -2435,10 +2480,12 @@ model Scalar2
 Error at line 2424, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[1, 1, 2]
+    expected type is array with exactly 1 element
 
 Error at line 2425, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of '{{{{3}, {4}}}}' is Integer[1, 1, 2, 1]
+    expected type is array with exactly 1 element
 ")})));
 end Scalar2;
 
@@ -2471,6 +2518,7 @@ model Vector2
 		TransformCanonicalTestCase(
 			name="DimensionConvert_Vector2",
 			description="Vector operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector2
  constant Real x[1] = 1;
@@ -2499,10 +2547,12 @@ model Vector3
 Error at line 2489, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
+    expected type is scalar or vector-shaped array
 
 Error at line 2490, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{{{{1}, {2}}}, {{{3}, {4}}}}}' is Integer[1, 2, 1, 2, 1]
+    expected type is scalar or vector-shaped array
 ")})));
 end Vector3;
 
@@ -2517,6 +2567,7 @@ model Matrix1
 		TransformCanonicalTestCase(
 			name="DimensionConvert_Matrix1",
 			description="Matrix operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Matrix1
  constant Real x[1,1] = 1;
@@ -2547,6 +2598,7 @@ model Matrix2
 Error at line 2538, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function matrix(): types of positional argument 1 and input A are not compatible
     type of '{{{1, 2}, {3, 4}}}' is Integer[1, 2, 2]
+    expected type is scalar, vector or matrix-shaped array
 ")})));
 end Matrix2;
 
@@ -2619,6 +2671,7 @@ model Linspace3
 Error at line 2610, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function linspace(): types of positional argument 3 and input n are not compatible
     type of 'c' is Real
+    expected type is Integer
 ")})));
 end Linspace3;
 
@@ -2653,7 +2706,7 @@ model Linspace5
             errorMessage="
 1 errors found:
 
-Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Linspace5;
@@ -2761,6 +2814,7 @@ model Linspace9
         TransformCanonicalTestCase(
             name="Linspace9",
             description="Linspace operator: to low value for n in inactive branch",
+            eliminate_alias_variables=false,
             flatModel="
 fclass ArrayBuiltins.Linspace9
  structural parameter Integer n = 1 /* 1 */;
@@ -2928,7 +2982,7 @@ model Identity2
             errorMessage="
 1 errors found:
 
-Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
@@ -2965,6 +3019,7 @@ model Identity4
 Error at line 2956, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function identity(): types of positional argument 1 and input n are not compatible
     type of '3.0' is Real
+    expected type is Integer
 ")})));
 end Identity4;
 
@@ -2978,6 +3033,7 @@ model Diagonal1
 		TransformCanonicalTestCase(
 			name="Diagonal1",
 			description="diagonal() operator: basic test",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Diagonal1
  constant Real x[1,1] = 1;
@@ -3013,14 +3069,17 @@ model Diagonal2
 Error at line 3002, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
+    expected type is Real[:]
 
 Error at line 3003, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '1' is Integer
+    expected type is Real[:]
 
 Error at line 3004, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{true, true}' is Boolean[2]
+    expected type is Real[:]
 ")})));
 end Diagonal2;
 
@@ -3052,7 +3111,7 @@ model ScalarSize2
             errorMessage="
 1 errors found:
 
-Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} + Modelica.Constants.pi
     type of '{1}' is Integer[1]
     type of 'Modelica.Constants.pi' is Real
@@ -3060,7 +3119,7 @@ Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/Array
 end ScalarSize2;
 
 
-model NonVectorizedSalarization1
+model NonVectorizedScalarization1
     function f1
         input Real x1[3];
         output Real y1[3];
@@ -3080,22 +3139,22 @@ model NonVectorizedSalarization1
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization1",
+			name="NonVectorizedScalarization1",
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization1
+fclass ArrayBuiltins.NonVectorizedScalarization1
  constant Real x[1] = 1;
  constant Real x[2] = 2;
  constant Real x[3] = 3;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;
-end ArrayBuiltins.NonVectorizedSalarization1;
+end ArrayBuiltins.NonVectorizedScalarization1;
 ")})));
-end NonVectorizedSalarization1;
+end NonVectorizedScalarization1;
 
 
-model NonVectorizedSalarization2
+model NonVectorizedScalarization2
     function f1
         input Real x1[:];
         output Real y1[size(x1,1)];
@@ -3115,33 +3174,49 @@ model NonVectorizedSalarization2
 
 	annotation(__JModelica(UnitTesting(tests={
 		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization2",
+			name="NonVectorizedScalarization2",
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization2
+fclass ArrayBuiltins.NonVectorizedScalarization2
  constant Real x[1] = 1;
  constant Real x[2] = 2;
  constant Real x[3] = 3;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;
-end ArrayBuiltins.NonVectorizedSalarization2;
+end ArrayBuiltins.NonVectorizedScalarization2;
 ")})));
-end NonVectorizedSalarization2;
+end NonVectorizedScalarization2;
 
 
-model NonVectorizedSalarization3
+model NonVectorizedScalarization3
+
+  function length
+    input Real v[:];
+    output Real result;
+  algorithm
+    result := sqrt(v*v);
+  end length;
+
+    function normalize
+        input Real v[:];
+        input Real eps(min=0.0)=100*Modelica.Constants.eps;
+        output Real result[size(v, 1)];
+    algorithm
+       result := smooth(0, if length(v) >= eps then v/length(v) else v/eps);
+    end normalize;
+    
     Real x[3] = {1,2,3};
-    Real y[3] = Modelica.Math.Vectors.normalize(x);
-
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NonVectorizedSalarization3",
-			description="Test of accesses that should be kept without indices during scalarization",
-			variability_propagation=false,
-			inline_functions="none",
-			flatModel="
-fclass ArrayBuiltins.NonVectorizedSalarization3
+    Real y[3] = normalize(x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonVectorizedScalarization3",
+            description="Test of accesses that should be kept without indices during scalarization",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass ArrayBuiltins.NonVectorizedScalarization3
  Real x[1];
  Real x[2];
  Real x[3];
@@ -3152,23 +3227,22 @@ equation
  x[1] = 1;
  x[2] = 2;
  x[3] = 3;
- ({y[1], y[2], y[3]}) = Modelica.Math.Vectors.normalize({x[1], x[2], x[3]}, 100 * 1.0E-15);
+ ({y[1], y[2], y[3]}) = ArrayBuiltins.NonVectorizedScalarization3.normalize({x[1], x[2], x[3]}, 100 * 1.0E-15);
 
 public
- function Modelica.Math.Vectors.normalize
+ function ArrayBuiltins.NonVectorizedScalarization3.normalize
   input Real[:] v;
   input Real eps;
   output Real[:] result;
  algorithm
   size(result) := {size(v, 1)};
   for i1 in 1:size(v, 1) loop
-   result[i1] := smooth(0, noEvent(if Modelica.Math.Vectors.length(v) >= eps then v[i1] / Modelica.Math.Vectors.length(v) else v[i1] / eps));
+   result[i1] := smooth(0, if ArrayBuiltins.NonVectorizedScalarization3.length(v) >= eps then v[i1] / ArrayBuiltins.NonVectorizedScalarization3.length(v) else v[i1] / eps);
   end for;
   return;
- annotation(Inline = true);
- end Modelica.Math.Vectors.normalize;
+ end ArrayBuiltins.NonVectorizedScalarization3.normalize;
 
- function Modelica.Math.Vectors.length
+ function ArrayBuiltins.NonVectorizedScalarization3.length
   input Real[:] v;
   output Real result;
   Real temp_1;
@@ -3181,13 +3255,11 @@ public
   temp_1 := temp_2;
   result := sqrt(temp_1);
   return;
- annotation(Inline = true);
- end Modelica.Math.Vectors.length;
+ end ArrayBuiltins.NonVectorizedScalarization3.length;
 
-end ArrayBuiltins.NonVectorizedSalarization3;
-			
+end ArrayBuiltins.NonVectorizedScalarization3;
 ")})));
-end NonVectorizedSalarization3;
+end NonVectorizedScalarization3;
 
 
 model InfArgsWithNamed

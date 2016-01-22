@@ -90,6 +90,7 @@ model InnerOuterTest2
 		TransformCanonicalTestCase(
 			name="InnerOuterTest2",
 			description="Basic test of inner outer.",
+            eliminate_alias_variables=false,
 			equation_sorting=true,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest2
@@ -330,7 +331,7 @@ model InnerOuterTest9
 Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer parameter Real T = 5'
 
-Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 319, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', PARAMETER_MISSING_BINDING_EXPRESSION:
   The parameter T does not have a binding expression
 ")})));
 end InnerOuterTest9;
@@ -350,7 +351,7 @@ model InnerOuterTest10
 Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
   Generated missing inner declaration for 'outer constant Real T = 5'
 
-Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 339, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo', CONSTANT_MISSING_BINDING_EXPRESSION:
   The constant T does not have a binding expression
 ")})));
 end InnerOuterTest10;
@@ -694,7 +695,8 @@ model InnerOuterAccess1
             description="Access to component in outer that only exist in inner",
             errorMessage="
 1 errors found:
-Error at line 590, column 11, in file '...':
+Error at line 590, column 11, in file '...',
+In component a:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 
 ")})));
@@ -732,10 +734,12 @@ model InnerOuterAccess2
             errorMessage="
 2 errors found:
 
-Error at line 622, column 11, in file '...':
+Error at line 622, column 11, in file '...',
+In component b.a:
   Cannot find class or component declaration for y
 
-Error at line 629, column 11, in file '...':
+Error at line 629, column 11, in file '...',
+In component b:
   Cannot use component y in inner 'inner R r', because it is not present in outer 'inner outer R_0 r'
 
 ")})));
@@ -770,7 +774,8 @@ model InnerOuterAccess3
             errorMessage="
 1 errors found:
 
-Error at line 665, column 11, in file '...':
+Error at line 665, column 11, in file '...',
+In component a:
   Cannot use component k in inner 'inner R r', because it is not present in outer 'outer R_0 r'
 ")})));
 end InnerOuterAccess3;
@@ -931,7 +936,8 @@ end InnerOuterTests.NoInner2;
             errorMessage="
 1 errors found:
 
-Warning at line 569, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo':
+Warning at line 569, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/InnerOuterTests.mo',
+In component b:
   Generated missing inner declaration for 'outer Real r'
 ")})));
 end NoInner2;
@@ -1293,6 +1299,50 @@ equation
 end InnerOuterTests.NoInner13;
 ")})));
 end NoInner13;
+
+model NoInner14
+    function F
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 1;
+    annotation(Inline=false);
+    end F;
+    record R
+        parameter Real a = 1;
+        parameter Real b = F(a);
+    end R;
+    model B
+        outer R r;
+    end B;
+    B b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NoInner14",
+            description="Check that referenced functions in automatic inner is flattened",
+            flatModel="
+fclass InnerOuterTests.NoInner14
+ parameter InnerOuterTests.NoInner14.R r(a = 1,b = InnerOuterTests.NoInner14.F(r.a));
+
+public
+ function InnerOuterTests.NoInner14.F
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ annotation(Inline = false);
+ end InnerOuterTests.NoInner14.F;
+
+ record InnerOuterTests.NoInner14.R
+  parameter Real a;
+  parameter Real b;
+ end InnerOuterTests.NoInner14.R;
+
+end InnerOuterTests.NoInner14;
+")})));
+end NoInner14;
 
 
 end InnerOuterTests;

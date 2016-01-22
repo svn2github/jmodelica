@@ -42,8 +42,9 @@ import org.jmodelica.util.AbstractModelicaScanner;
 aspect RootAccess {
 
     syn String SourceRoot.language() = "Modelica";
+    public static String ASTNode.JMODELICA_VENDOR_NAME = "JModelica.org";
     public static String ASTNode.vendorName() {
-        return "JModelica.org";
+        return ASTNode.JMODELICA_VENDOR_NAME;
     }
 
     inh Root ASTNode.retrieveRoot();
@@ -1392,6 +1393,17 @@ aspect ComponentDeclMethods {
     			return true;
     	return false;
     }
+
+    /**
+     * Check if this node is in a disabled condition component.
+     * 
+     * Only valid in instance tree.
+     */
+    inh boolean ASTNode.inDisabledComponent();
+    eq Root.getChild().inDisabledComponent()              = false;
+    eq InstClassDecl.getChild().inDisabledComponent()     = false;
+    eq InstComponentDecl.getChild().inDisabledComponent() = isDisabled() || inDisabledComponent();
+
 }
 
 aspect ClassDeclMethods {

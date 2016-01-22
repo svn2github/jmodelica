@@ -200,12 +200,13 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
+            CodePrinter p = ASTNode.printer_C.eventIndicatorPrinter();
 			if (!fclass.onlyInitBLT()) {
                 for (FExp e : fclass.stateEventExps()) 
-                    e.genEventResidualVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+                    e.genEventResidualVarDecls_C(p, genPrinter, INDENT);
 				Enumerator enumerator = new Enumerator();
                 for (FExp e : fclass.stateEventExps())
-                    e.genEventResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator);
+                    e.genEventResidual_C(p, genPrinter, INDENT, enumerator);
 			} else {
 				genPrinter.print("  model_init_R0(jmi, res);\n");
 			}
@@ -247,7 +248,7 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
-            CodePrinter printer = ASTNode.printer_C.initialSystemPrinter();
+            CodePrinter printer = ASTNode.printer_C.initialSystemPrinter().eventIndicatorPrinter();
             for (FExp e : fclass.stateEventExps()) 
                 e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
             for (FExp e : fclass.eventExpInInitialEquations()) 
@@ -426,7 +427,106 @@ public class CGenerator extends GenericGenerator {
             generateExtObjectList(genPrinter, fclass.externalObjectVariables());
         }
 	}
-
+    
+    class ZOffsets {
+        private LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable> m = 
+                new LinkedHashListMap<FTypePrefixVariability.VariabilityCausality_C, FVariable>();
+        
+        public ZOffsets(ArrayList<? extends FVariable> fvs) {
+            for (FVariable fv : fvs) {
+                m.add(fv.variabilityCausality_C(), fv);
+            }
+        }
+        
+        public int size() {
+            int res = 0;
+            for (java.util.List<FVariable> l : m.values()) {
+                res = res + l.size();
+            }
+            return res;
+        }
+        
+        public java.util.List<FVariable> get(FTypePrefixVariability.VariabilityCausality_C s) {
+            return m.getList(s);
+        }
+    }
+    
+    public abstract class DAETag_C_z_strings extends DAETag {
+        public DAETag_C_z_strings(String name, AbstractGenerator myGenerator, FClass fclass) {
+            super(name, myGenerator, fclass);
+        }
+        
+        abstract int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s);
+        void genLast(CodeStream str, int o) {
+            
+        }
+        
+        public void generate(CodeStream str) {
+            ZOffsets zo = new ZOffsets(fclass.strings());
+            int o = 0;
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.CI);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.CD);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PI);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PS);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PF);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PE);
+            o = genList(str, zo, o, FTypePrefixVariability.VariabilityCausality_C.PD);
+            genLast(str, o);
+        }
+    }
+    
+    public class DAETag_C_z_stringAliases extends DAETag_C_z_strings {
+        public DAETag_C_z_stringAliases(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_z_aliases_strings", myGenerator, fclass);
+        }
+        
+        private void genVar(CodeStream str, FVariable fv, int index) {
+            str.print("#define ");
+            str.print(fv.name_C());
+            str.print(" jmi->z_t.strings.values[");
+            str.print(index);
+            str.print("]\n");
+        }
+        
+        @Override
+        int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+            for (FVariable fv : zo.get(s)) {
+                genVar(str, fv, o++);
+            }
+            return o;
+        }
+    }
+    
+    public class DAETag_C_z_stringOffsets extends DAETag_C_z_strings {
+        
+        public DAETag_C_z_stringOffsets(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_z_offsets_strings", myGenerator, fclass);
+        }
+        
+        @Override
+        int genList(CodeStream str, ZOffsets zo, int o, FTypePrefixVariability.VariabilityCausality_C s) {
+            int n = zo.get(s).size();
+            str.print("o->o_");
+            str.print(s);
+            str.print(" = ");
+            str.print(o);
+            str.print(";\n");
+            str.print("o->n_");
+            str.print(s);
+            str.print(" = ");
+            str.print(n);
+            str.print(";\n");
+            return o + n;
+        }
+        
+        void genLast(CodeStream str, int o) {
+            str.print("o->n = ");
+            str.print(o);
+            str.print(";\n");
+        }
+    }
+    
+    
 	/**
 	 * Generates code for BLT block residuals
 	 */
@@ -635,17 +735,17 @@ public class CGenerator extends GenericGenerator {
         }
         
         public void generate(CodeStream str) {
-            CodePrinter p = ASTNode.printer_C;
+            CodePrinter p = ASTNode.printer_C.eventIndicatorPrinter();
             String indent = p.indent("");
             for (FExp e : fclass.timeEventExps()) 
-                e.genVarDecls_C(p, str, INDENT);
+                e.genTimeEventVarDecls_C(p, str, INDENT);
             
             str.formatln("%sjmi_time_event_t nextEvent = {0};", indent);
             str.formatln("%sjmi_real_t nSamp;", indent);
             
 //            str.print("  printf(\"sample function called at time %f\\n\",_t);\n");	
             for (FExp e : fclass.timeEventExps()) {
-                e.genTimeEventCalc_C(p, str, indent, "nextEvent");
+                e.genTimeEvent_C(p, str, indent, "nextEvent");
             }
 //            str.print("printf(\"Happ: %12.12f\\n\",nextTimeEvent);\n");
             

@@ -453,8 +453,40 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
+        compile_fmu("NonLinear.NonLinear3", file_name)
+        compile_fmu("NonLinear.NonLinear4", file_name)
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
+        compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
     
+    @testattr(stddist = True)
+    def test_Brent_AD(self):
+        
+        model = load_fmu("NonLinear_NonLinear5.fmu", log_level=6)
+        model.set("_log_level", 8)
+        
+        model.initialize()
+        
+        def get_history(filename):
+            import re
+            data = [[],[]]
+            with open(filename, 'r') as f:
+                line = f.readline()
+                while line:
+                    if line.find("Iteration variable") != -1:
+                        iv = re.search('<value name="ivs">(.*)</value>, Function', line).group(1).strip()
+                        df = re.search('<value name="df">(.*)</value>, Delta', line).group(1).strip()
+                        data[0].append(float(iv))
+                        data[1].append(float(df))
+                    line = f.readline()
+            return data[0], data[1]
+            
+        ivs,df = get_history("NonLinear_NonLinear5_log.txt")
+
+        fprime = lambda y: -200*y;
+
+        for i,iv in enumerate(ivs):
+            nose.tools.assert_almost_equal(fprime(iv) ,df[i], places=12)  
+            
     @testattr(stddist = True)
     def test_Brent_double_root1(self):
         def run_model(init):
@@ -476,6 +508,41 @@ class Test_NonLinear_Systems:
         nose.tools.assert_almost_equal(run_model(sol_neg-1e-16) ,sol_neg)
         nose.tools.assert_almost_equal(run_model(sol_neg+1e-14) ,sol_neg)
         nose.tools.assert_almost_equal(run_model(sol_neg-1e-14) ,sol_neg)
+        
+    @testattr(stddist = True)
+    def test_Brent_close_to_root(self):
+        model = load_fmu("NonLinear_NonLinear3.fmu")
+        model.set("_use_Brent_in_1d", True)
+        
+        model.set("i",-9.9760004108556469E-03)
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("i"),-9.9760004108556469E-03)
+        
+    @testattr(stddist = True)
+    def test_Brent_close_to_root(self):
+        model = load_fmu("NonLinear_NonLinear4.fmu")
+        model.set("_use_Brent_in_1d", True)
+        
+        scale = model.get("scale")
+        i = -9.9760004108556469E-03*scale
+        model.set("i",i)
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get("i"),i)
+        
+        model.reset()
+        
+        model.set("i", i+i*1e-15)
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get("i"),i)
+        
+        model.reset()
+        
+        model.set("i", i-i*1e-15)
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get("i"),i)
+        
+        
     
     @testattr(stddist = True)
     def test_nominals_fallback_1(self):
@@ -671,6 +738,60 @@ class Test_Singular_Systems:
         nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
         nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
 
+class Test_FMI_ODE_CS_2:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
+        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+        file_name_time_event = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
+
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
+        _t1_name = compile_fmu("TimeEvents.Basic5", file_name_time_event, version=2.0, target="cs")
+        
+    @testattr(stddist = True)
+    def test_updated_values_in_result(self):
+        model = load_fmu("LinearTest_Linear1.fmu")
+        opts = model.simulate_options()
+        
+        res = model.simulate(final_time=1,options=opts)
+        
+        for i in range(len(res["der(x)"])):
+            assert res["der(x)"][i] == 0.0
+    
+    @testattr(stddist = True)
+    def test_time_event_basic_5(self):
+        model = load_fmu("TimeEvents_Basic5.fmu")
+        opts = model.simulate_options()
+        
+        res = model.simulate(final_time=1,options=opts)
+        
+        assert res["der(x)"][-1] == -1.0
+
+class Test_FMI_ODE_CS:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
+        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs")
+        
+    @testattr(stddist = True)
+    def test_updated_values_in_result(self):
+        model = load_fmu("LinearTest_Linear1.fmu")
+        opts = model.simulate_options()
+        
+        res = model.simulate(final_time=1,options=opts)
+        
+        for i in range(len(res["der(x)"])):
+            assert res["der(x)"][i] == 0.0
 
 class Test_FMI_ODE:
     """

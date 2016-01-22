@@ -116,7 +116,8 @@ model NameTest4_Err
             errorMessage="
 1 errors found:
 
-Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component m:
   Cannot find class declaration for B
 ")})));
   end NameTest4_Err;
@@ -167,7 +168,8 @@ model NameTest55_Err
             errorMessage="
 1 errors found:
 
-Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Cannot find class or component declaration for x
 ")})));
 end NameTest55_Err;
@@ -189,7 +191,8 @@ model NameTest6_Err
             errorMessage="
 1 errors found:
 
-Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Cannot find class or component declaration for y
 ")})));
 end NameTest6_Err;
@@ -211,7 +214,10 @@ model NameTest7_Err
             errorMessage="
 1 errors found:
 
-Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In components:
+    a1
+    a2
   Cannot find class declaration for B
 ")})));
 end NameTest7_Err;
@@ -230,7 +236,8 @@ model NameTest8_Err
             errorMessage="
 1 errors found:
 
-Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component c:
   Cannot find class declaration for D
 ")})));
 end NameTest8_Err;
@@ -399,10 +406,12 @@ end NameTest12_Err;
 Error at line 381, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component bb:
   Cannot find class declaration for C
 
-Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component bb:
   Cannot find component declaration for y
 
 Error at line 389, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -1064,6 +1073,7 @@ model ConstantLookup16
 
 Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'a': 'b[c]'
+    Cannot get int value of CValueUnknown
 
 Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for d
@@ -1128,6 +1138,7 @@ model ConstantLookup18
 		TransformCanonicalTestCase(
 			name="ConstantLookup18",
 			description="Member of constant record, using record constructor, through inheritance and short class decl",
+            eliminate_alias_variables=false,
 			flatModel="
 fclass NameTests.ConstantLookup18
  structural parameter Integer b.n = 3 /* 3 */;
@@ -2485,7 +2496,8 @@ model ShortClassDeclTest35_Err
             errorMessage="
 2 errors found:
 
-Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2477, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component x:
   Cannot find component declaration for q
 
 Error at line 2478, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
@@ -2856,7 +2868,7 @@ model ConditionalComponentTest1_Err
             errorMessage="
 1 errors found:
 
-Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2849, column 35, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 ")})));
 end ConditionalComponentTest1_Err;
@@ -2872,7 +2884,7 @@ model ConditionalComponentTest2_Err
             errorMessage="
 1 errors found:
 
-Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2865, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest2_Err;
@@ -2888,10 +2900,10 @@ model ConditionalComponentTest3_Err
             errorMessage="
 2 errors found:
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_BOOLEAN_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a boolean expression
 
-Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 2881, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo', NON_SCALAR_CONDITIONAL_GUARD:
   The guard expression of a conditional component should be a scalar expression
 ")})));
 end ConditionalComponentTest3_Err;
@@ -3779,7 +3791,8 @@ model DuplicateVariables6
             errorMessage="
 1 errors found:
 
-Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 3769, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+In component a:
   Duplicate component in same class: Real x
 ")})));
 end DuplicateVariables6;
@@ -3838,5 +3851,21 @@ Error at line 3813, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameT
   Illegal escape sequence at position 7 in quoted identifier: '\\ '
 ")})));
 end BadEscape2;
+
+
+model LibWithVerTest1
+    LibWithVer.Test a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="LibWithVerTest1",
+            description="Load library with version # in name",
+            modelicaLibraries="LibWithVer 1.2",
+            flatModel="
+fclass NameTests.LibWithVerTest1
+ Real a.x = time;
+end NameTests.LibWithVerTest1;
+")})));
+end LibWithVerTest1;
 
 end NameTests;

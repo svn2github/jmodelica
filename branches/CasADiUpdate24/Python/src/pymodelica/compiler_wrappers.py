@@ -309,6 +309,7 @@ class ModelicaCompiler(object):
         warnings = []
         for java_warning in java_warnings:
             warnings.append(CompilationWarning( \
+                java_warning.identifier(), \
                 java_warning.kind().toString(), \
                 java_warning.fileName(), \
                 java_warning.beginLine(), \
@@ -524,6 +525,7 @@ class ModelicaCompiler(object):
                 problem = itr.next()
                 if str(problem.severity()).lower() == 'warning':
                     warnings.append(CompilationWarning( \
+                        problem.identifier(), \
                         str(problem.kind()).lower(), \
                         problem.fileName(), \
                         problem.beginLine(), \
@@ -532,6 +534,7 @@ class ModelicaCompiler(object):
                     ))
                 else:
                     errors.append(CompilationError( \
+                        problem.identifier(), \
                         str(problem.kind()).lower(), \
                         problem.fileName(), \
                         problem.beginLine(), \

@@ -133,6 +133,9 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             return JMI_ODE_ERROR;
         }
         
+        /* Set states */
+        memcpy (problem->states, NV_DATA_S(integrator->y_work), problem->n_real_x*sizeof(jmi_real_t));
+        
         /* Log information */
         if (problem->jmi_callbacks->log_options.log_level >= 4) {
             jmi_log_node_t node = jmi_log_enter_fmt(problem->log, logInfo, "CVode", 

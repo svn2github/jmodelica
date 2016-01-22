@@ -24,6 +24,32 @@ equation
   der(T) = F0*(T0-T)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);
 end CSTR;
 
+model CSTR_elim_vars "A CSTR"
+ 
+  parameter Modelica.SIunits.VolumeFlowRate F0=100/1000/60 "Inflow";
+  parameter Modelica.SIunits.Concentration c0=1000 "Concentration of inflow"; 
+  Modelica.Blocks.Interfaces.RealInput Tc "Cooling temperature"; 
+  parameter Modelica.SIunits.VolumeFlowRate F=100/1000/60 "Outflow"; 
+  parameter Modelica.SIunits.Temp_K T0 = 350;
+  parameter Modelica.SIunits.Length r = 0.219;
+  parameter Real k0 = 7.2e10/60;
+  parameter Real EdivR = 8750;
+  parameter Real U = 915.6;
+  parameter Real rho = 1000;
+  parameter Real Cp = 0.239*1000;
+  parameter Real dH = -5e4;
+  parameter Modelica.SIunits.Volume V = 100 "Reactor Volume";
+  parameter Modelica.SIunits.Concentration c_init = 1000;
+  parameter Modelica.SIunits.Temp_K T_init = 350;
+  Real c(start=c_init,fixed=true,nominal=c0);
+  Real T(start=T_init,fixed=true,nominal=T0);
+  Real cdiff = c0-c;
+  Real Tdiff = T0-T;  
+equation 
+  der(c) = F0*(cdiff)/V-k0*c*exp(-EdivR/T);
+  der(T) = F0*(Tdiff)/V-dH/(rho*Cp)*k0*c*exp(-EdivR/T)+2*U/(r*rho*Cp)*(Tc-T);
+end CSTR_elim_vars;
+
 model CSTR_Init
   extends CSTR(c(fixed=false),T(fixed=false));
 initial equation
@@ -288,12 +314,26 @@ model CSTR_MPC_Model
   parameter Real Tc_ref = 280;
 end CSTR_MPC_Model;
 
+model CSTR_elim_vars_MPC_Model
+  extends CSTR_elim_vars;
+  parameter Real c_ref = 338.775766; 
+  parameter Real T_ref = 280.099198;
+  parameter Real Tc_ref = 280;
+end CSTR_elim_vars_MPC_Model;
+
 optimization CSTR_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + (Tc_ref-Tc)^2,
     				startTime=0.0, finalTime=150)
 
 extends CSTR_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
 
 end CSTR_MPC;
+
+optimization CSTR_elim_vars_MPC(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + (Tc_ref-Tc)^2,
+    				startTime=0.0, finalTime=150)
+
+extends CSTR_elim_vars_MPC_Model(Tc(min=230, max=370), T(min=0, max=350));
+
+end CSTR_elim_vars_MPC;
 
 optimization CSTR_MPC_Parameter(objectiveIntegrand = (c_ref-c)^2 + (T_ref-T)^2 + p*(Tc_ref-Tc)^2,
     				startTime=0.0, finalTime=150)

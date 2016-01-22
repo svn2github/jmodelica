@@ -124,5 +124,8 @@ INSTALL(FILES ${cvode_HEADERS} ${cvode_BL_HEADERS} DESTINATION include/cvode)
 # Install the CVODE implementation header file
 INSTALL(FILES cvode_impl.h DESTINATION include/cvode)
 
+# Install the CVODE Direct implementation header file
+INSTALL(FILES cvode_direct_impl.h DESTINATION include/cvode)
+
 #
 MESSAGE(STATUS "Added CVODE module")

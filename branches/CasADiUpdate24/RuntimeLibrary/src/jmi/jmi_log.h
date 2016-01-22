@@ -102,7 +102,8 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *      * *name* is an identifier and
  *      * *format* is one of the printf format characters
  *          `diu` for `int`,
- *          `I` for `int`; mark it as an index (to be converted from 0- to 1-based by recepient if needed)
+ *          `I` for `int`; mark it as an iv index (to be converted from 0- to 1-based by recepient if needed)
+ *          `R` for `int`; mark it as a residual index (to be converted from 0- to 1-based by recepient if needed)
  *          `eEfFgG` for `jmi_real_t`, or
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;
@@ -156,6 +157,10 @@ jmi_log_node_t jmi_log_enter_(jmi_log_t *log, jmi_log_category_t c, const char *
 /** \brief Enter a new log node that is a vector of the given element type, without ending the line. */
 jmi_log_node_t jmi_log_enter_vector_(jmi_log_t *log, jmi_log_node_t node,
                                      jmi_log_category_t c, const char *name);
+
+/** \brief Enter a new log node that is a vector with indices of the given element type, without ending the line. */
+jmi_log_node_t jmi_log_enter_index_vector_(jmi_log_t *log, jmi_log_node_t node, jmi_log_category_t c, 
+                             const char *name, char index_type);
 
 /** \brief Leave the current log node, as returned by the `jmi_log_enterXXX` functions, without ending the line. */
 void jmi_log_leave_(jmi_log_t *log, jmi_log_node_t node);
