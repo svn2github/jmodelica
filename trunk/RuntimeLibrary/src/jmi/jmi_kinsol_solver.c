@@ -2348,7 +2348,6 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
 
     solver->kin_scale_update_time = curtime;
     block->force_rescaling = 0;
-    kin_char_log(solver, 's');
     
     if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
         /* Zero out the scales initially if we're modify this. */
@@ -2364,6 +2363,7 @@ static void jmi_update_f_scale(jmi_block_solver_t *block) {
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid ||
         bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual)
     {
+        kin_char_log(solver, 's');
         for (i = 0; i < N; i++) {
             int j;
             /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
