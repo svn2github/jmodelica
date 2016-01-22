@@ -117,6 +117,14 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             
             jmi_log_leave(ode_problem->log, inner_node);
             
+            /* Set time to the model */
+            flag = fmi1_me_set_time(ode_problem->fmix_me, ode_problem->time);
+            if (flag != fmiOK) {
+                jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the time.");
+                jmi_log_unwind(ode_problem->log, top_node);
+                return fmiError;
+            }
+            
             /* Set states to the model */
             flag = fmi1_me_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
             if (flag != fmiOK) {
@@ -131,6 +139,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                     break;
                 }
             }
+            retval = JMI_ODE_EVENT;
             
             flag = fmi1_me_event_update(ode_problem ->fmix_me, fmiFalse, &(fmi1_cs->event_info));
             if (flag != fmiOK){

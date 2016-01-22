@@ -142,6 +142,13 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
         initialize = FALSE; /* The ODE problem has been initialized. */
         
+        /* Set time to the model */
+        flag = fmi2_set_time(ode_problem->fmix_me, ode_problem->time);
+        if (flag != fmi2OK) {
+            jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the time.");
+            return fmi2Error;
+        }
+        
         /* Set states to the model */
         flag = fmi2_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
         if (flag != fmi2OK) {
@@ -156,6 +163,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
                   (retval == JMI_ODE_OK && time_event != time_final) ||
                   (retval == JMI_ODE_OK && fmi2_cs->event_info.nextEventTimeDefined && fmi2_cs->event_info.nextEventTime == time_final)) {
             fmi2_cs->event_info.newDiscreteStatesNeeded = fmi2True; /* Finished with an event -> new discrete states needed. */
+            retval = JMI_ODE_EVENT;
         }
     }
     
