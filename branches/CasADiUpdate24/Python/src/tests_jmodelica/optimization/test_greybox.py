@@ -62,8 +62,8 @@ def test_op_structure():
     GB = GreyBox(op, op_opts, measurements, inputs, time)
     
     # Assert start and final time
-    assert GB.op.getStartTime().getValue() == time[0]
-    assert GB.op.getFinalTime().getValue() == time[-1]
+    assert float(GB.op.getStartTime()) == time[0]
+    assert float(GB.op.getFinalTime()) == time[-1]
     
     # Assert collocation options
     assert GB.options['n_e'] == len(time)-1
@@ -82,8 +82,8 @@ def test_op_structure():
 		N.array_equal(measurements[meas], evaluated_meas)
 		
 	# Assert objective and objective integrand
-    assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('(((0.499*sq((E-GreyBox_measured_E)))/GreyBox_r_E)+((0.499*sq((P-GreyBox_measured_P)))/GreyBox_r_P))')
-    assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((500*log(GreyBox_r_E))+(sq((E(0.000000)-133.837))/GreyBox_r_E))+(500*log(GreyBox_r_P)))+(sq((P(0.000000)-138))/GreyBox_r_P))')
+    assert strnorm(str(GB.op.getObjectiveIntegrand())) == strnorm('(((0.499*sq((E-GreyBox_measured_E)))/GreyBox_r_E)+((0.499*sq((P-GreyBox_measured_P)))/GreyBox_r_P))')
+    assert strnorm(str(GB.op.getObjective())) == strnorm('((((500*log(GreyBox_r_E))+(sq((E(0.000000)-133.837))/GreyBox_r_E))+(500*log(GreyBox_r_P)))+(sq((P(0.000000)-138))/GreyBox_r_P))')
 
 @testattr(casadi = True)
 def test_op_structure_sum():
@@ -113,8 +113,8 @@ def test_op_structure_sum():
     GB = GreyBox(op, op_opts, measurements, inputs, time, costType = 'sum')
     
     # Assert start and final time
-    assert GB.op.getStartTime().getValue() == time[0]
-    assert GB.op.getFinalTime().getValue() == time[-1]
+    assert float(GB.op.getStartTime()) == time[0]
+    assert float(GB.op.getFinalTime()) == time[-1]
     
     # Assert collocation options
     assert GB.options['n_e'] == len(time)-1
@@ -127,9 +127,9 @@ def test_op_structure_sum():
 		N.array_equal(inputs[inp], evaluated_input)
 
    	# Assert objective and objective integrand
-    assert strnorm(GB.op.getObjectiveIntegrand().getDescription()) == strnorm('0')
-    print strnorm(GB.op.getObjective().getDescription())
-    assert strnorm(GB.op.getObjective().getDescription()) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
+    assert strnorm(str(GB.op.getObjectiveIntegrand())) == strnorm('0')
+    print strnorm(str(GB.op.getObjective()))
+    assert strnorm(str(GB.op.getObjective())) == strnorm('((((((((sq((E(0.000000)-133.837))/GreyBox_r_E)+(sq((E(2.004008)-132.493))/GreyBox_r_E))+(sq((E(4.008016)-129.124))/GreyBox_r_E))+(3*log(GreyBox_r_E)))+(sq((P(0.000000)-138))/GreyBox_r_P))+(sq((P(2.004008)-141.156))/GreyBox_r_P))+(sq((P(4.008016)-132.906))/GreyBox_r_P))+(3*log(GreyBox_r_P)))')
 
 @testattr(casadi = True)
 def test_identification_object():
@@ -172,7 +172,7 @@ def test_identification_object():
     assert len(nullModelFree.difference(idFree)) == 0
     
     for par in nullModelFree:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+		assert float(identification.greybox.op.getVariable(par).getAttribute('free')) == 1.0
 		
     #Assert value of free variables
     res = identification.result
@@ -222,8 +222,8 @@ def test_nonuniform_element_length():
     nullModelFree = set(['GreyBox_r_E', 'GreyBox_r_P', 'x10', 'x20'])
     
     # Assert start and final time
-    assert GB.op.getStartTime().getValue() == time[0]
-    assert GB.op.getFinalTime().getValue() == time[-1]
+    assert float(GB.op.getStartTime()) == time[0]
+    assert float(GB.op.getFinalTime()) == time[-1]
     
     # Assert collocation options
     assert GB.options['n_e'] == len(time)-1
@@ -281,7 +281,7 @@ def test_compare():
     
     #Assert that parameters are really free
     for par in freeParam1:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+		assert float(identification.greybox.op.getVariable(par).getAttribute('free')) == 1.0
     
     
     # Optimize with 'A4' added to free variables
@@ -296,10 +296,10 @@ def test_compare():
     
     #Assert that parameters are really free
     for par in freeParam2:
-		assert identification.greybox.op.getVariable(par).getAttribute('free').getValue() == 1.0
+		assert float(identification.greybox.op.getVariable(par).getAttribute('free')) == 1.0
     
     # Assert that 'TD' is no longer free
-    assert identification.greybox.op.getVariable('TD').getAttribute('free').getValue() == 0.0
+    assert float(identification.greybox.op.getVariable('TD').getAttribute('free')) == 0.0
     
     result = identification.compare([idObj1, idObj2])
     

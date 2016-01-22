@@ -159,7 +159,7 @@ class GreyBox(object):
                 # Add parameter for noise convariance, set initial guess to base nominal squared
                 r = self._add_real_parameter(self.prefix+'r_'+var)
                 base_var = op.getVariable(var)
-                value = base_var.getAttribute('nominal').getValue()
+                value = float(base_var.getAttribute('nominal'))
                 self.op.set(self.prefix+'r_'+var, value**2)
                 r.setAttribute('initialGuess', value**2) 
                 r.setAttribute('min',0)
@@ -185,7 +185,7 @@ class GreyBox(object):
                 # Add parameter for noise convariance, set initial guess to base nominal squared
                 r = self._add_real_parameter(self.prefix+'r_'+var)
                 base_var = op.getVariable(var)
-                value = base_var.getAttribute('nominal').getValue()
+                value = float(base_var.getAttribute('nominal'))
                 self.op.set(self.prefix+'r_'+var, value**2)
                 r.setAttribute('initialGuess', value**2)
                 r.setAttribute('min',0)
