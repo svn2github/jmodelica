@@ -105,7 +105,7 @@ jint initJVM(const char *classpath, const char *libpath)
     options[0].optionString = (char *)classpathopt.data();
     options[1].optionString = (char *)libpathopt.data();
 
-    options[2].optionString = (char *)"-Xmx600M";
+    options[2].optionString = (char *)"-Xmx500M";
     
     vm_args.options = options;
     vm_args.ignoreUnrecognized = false;

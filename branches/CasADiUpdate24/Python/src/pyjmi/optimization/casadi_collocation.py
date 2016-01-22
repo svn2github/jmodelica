@@ -5688,10 +5688,12 @@ def _to_external_function(fcn, name, use_existing=False):
             as an ExternalFunction object.
             Default: False
     """
-    if os.name == 'nt':
-        ext = '.dll'
-    else:
-        ext = '.so'
+    # if os.name == 'nt':
+    #     ext = '.dll'
+    # else:
+    #     ext = '.so'
+    ext = '.so' # CasADi 2.4 seems to expect .so even on Windows
+
     if not use_existing:
         print 'Generating code for', name
         fcn.generate(name)
@@ -5725,10 +5727,11 @@ def enable_codegen(coll, name=None):
             names.
             Default: None
     """
-    if os.name == 'nt':
-        ext = '.dll'
-    else:
-        ext = '.so'
+    # if os.name == 'nt':
+    #     ext = '.dll'
+    # else:
+    #     ext = '.so'
+    ext = '.so' # CasADi 2.4 seems to expect .so even on Windows
     
     old_solver = coll.solver_object
     
