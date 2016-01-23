@@ -45,6 +45,53 @@ CS2 = 'bouncingBall2_cs.fmu'
 ME1 = 'bouncingBall.fmu'
 CS1 = 'bouncingBall.fmu'
 
+class Test_FMUModelBase2:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Sets up the test class.
+        """
+        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=2.0)
+        #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
+
+    @testattr(fmi = True)
+    def test_set_get_negated_real(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        x,y = negated_alias.get("x"), negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+
+        negated_alias.set("y",2)
+
+        x,y = negated_alias.get("x"), negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+
+        negated_alias.set("x",3)
+
+        x,y = negated_alias.get("x"), negated_alias.get("y")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+
+    @testattr(fmi = True)
+    def test_set_get_negated_integer(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,1.0)
+        nose.tools.assert_almost_equal(y,-1.0)
+
+        negated_alias.set("iy",2)
+
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,-2.0)
+        nose.tools.assert_almost_equal(y,2.0)
+
+        negated_alias.set("ix",3)
+
+        x,y = negated_alias.get("ix"), negated_alias.get("iy")
+        nose.tools.assert_almost_equal(x,3.0)
+        nose.tools.assert_almost_equal(y,-3.0)
+
 class Test_FMUModelCS2:
     """
     This class tests pyfmi.fmi.FMUModelCS2
