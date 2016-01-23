@@ -56,7 +56,7 @@ class Test_FMUModelBase2:
 
     @testattr(fmi = True)
     def test_set_get_negated_real(self):
-        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         x,y = negated_alias.get("x"), negated_alias.get("y")
         nose.tools.assert_almost_equal(x,1.0)
         nose.tools.assert_almost_equal(y,-1.0)
@@ -75,7 +75,7 @@ class Test_FMUModelBase2:
 
     @testattr(fmi = True)
     def test_set_get_negated_integer(self):
-        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         x,y = negated_alias.get("ix"), negated_alias.get("iy")
         nose.tools.assert_almost_equal(x,1.0)
         nose.tools.assert_almost_equal(y,-1.0)
