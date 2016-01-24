@@ -75,8 +75,8 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         return fmi2Error;
 	}
 
-    if (((fmi2_me_t*)c)->stopTime < time_final-JMI_CS_SMALL*time_final) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot take a step past the <stop_time: %g>.", ((fmi2_me_t*)c)->stopTime);
+    if (((fmi2_me_t*)c)->stopTime < time_final-JMI_ALMOST_EPS*time_final) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot take a step past the <stop_time: %g>. Asked <final_time: %g>.", ((fmi2_me_t*)c)->stopTime);
         return fmi2Error;
     }
 
@@ -96,7 +96,7 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         }
     }
     
-    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final) {
+    while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final) {
 
         while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
             flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));

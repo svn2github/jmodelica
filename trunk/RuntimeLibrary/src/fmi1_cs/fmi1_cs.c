@@ -101,7 +101,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         }
     } else {
         retval = JMI_ODE_EVENT;
-        while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final){
+        while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final){
             
             inner_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "InternalSolver", 
                 "Invoking the internal solver at <t:%E> with end <t:%E>.", ode_problem->time, time_event);

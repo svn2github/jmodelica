@@ -696,8 +696,8 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t*)c)->stopTime < time) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the <stop_time: %g>.", ((fmi2_me_t*)c)->stopTime);
+    if (((fmi2_me_t*)c)->stopTime*(1+JMI_ALMOST_EPS) < time) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the <stop_time: %g>. Asked <time: %g>", ((fmi2_me_t*)c)->stopTime, time);
         return fmi2Error;
     }
 
