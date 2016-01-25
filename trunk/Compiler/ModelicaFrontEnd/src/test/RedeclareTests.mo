@@ -523,13 +523,10 @@ model RedeclareTestOx11_Err "Constraining clause example."
             name="RedeclareTestOx11_Err",
             description="Check that the declaration is a subtype of the constraining clause",
             errorMessage="
-2 errors found:
+1 errors found:
 
 Error at line 503, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
-
-Error at line 507, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
-  In the declaration 'redeclare D d(redeclare A c)', the replacing class is not a subtype of the constraining class from the declaration 'replaceable D d constrainedby D (redeclare replaceable B c constrainedby A)'
 ")})));
 end RedeclareTestOx11_Err;
 
@@ -4381,6 +4378,240 @@ fclass RedeclareTests.RedeclareTest71
 end RedeclareTests.RedeclareTest71;
 ")})));
 end RedeclareTest71;
+
+
+model RedeclareTest72
+    model A
+        replaceable B b constrainedby C;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+    end C;
+    
+    model D
+        extends A(replaceable E b constrainedby F);
+        Real y2 = b.y;  // OK
+    end D;
+    
+    model E
+        Real x;
+        Real y;
+    end E;
+    
+    model F
+        Real y;
+    end F;
+    
+    model G
+        extends D(replaceable H b constrainedby I);
+        Real x2 = b.x;  // error - not in I
+        Real z2 = b.z;  // OK
+    end G;
+    
+    model H
+        Real x;
+        Real y;
+        Real z;
+    end H;
+    
+    model I
+        Real y;
+        Real z;
+    end I;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest72",
+            description="Redeclare chain with changed constraining type in middle",
+            errorMessage="
+1 errors found:
+
+Error at line 4402, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component x, because it is not present in constraining type of declaration 'redeclare replaceable H b constrainedby I'
+")})));
+end RedeclareTest72;
+
+
+model RedeclareTest73
+    model A
+        replaceable B b constrainedby C;
+    end A;
+    
+    model B
+        Real x;
+    end B;
+    
+    model C
+    end C;
+    
+    model D
+        extends A(replaceable E b constrainedby F);
+        Real y2 = b.y;  // OK
+    end D;
+    
+    model E
+        Real x;
+        Real y;
+    end E;
+    
+    model F
+        Real y;
+    end F;
+    
+    model G
+        extends D(replaceable H b);
+        Real x2 = b.x;  // error - not in F
+        Real z2 = b.z;  // error - not in F
+    end G;
+    
+    model H
+        Real x;
+        Real y;
+        Real z;
+    end H;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest73",
+            description="Redeclare chain with changed constraining type in middle",
+            errorMessage="
+2 errors found:
+
+Error at line 4460, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component x, because it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+
+Error at line 4461, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component z, because it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+")})));
+end RedeclareTest73;
+
+
+model RedeclareTest74
+    model A
+        replaceable model J = B constrainedby C;
+    end A;
+    
+    model B
+        constant Real x = 1;
+    end B;
+    
+    model C
+    end C;
+    
+    model D
+        extends A(replaceable model J = E constrainedby F);
+        Real y2 = J.y;  // OK
+    end D;
+    
+    model E
+        constant Real x = 2;
+        constant Real y = 3;
+    end E;
+    
+    model F
+        constant Real y = 4;
+    end F;
+    
+    model G
+        extends D(replaceable model J = H constrainedby I);
+        Real x2 = J.x;  // error - not in I
+        Real z2 = J.z;  // OK
+    end G;
+    
+    model H
+        constant Real x = 5;
+        constant Real y = 6;
+        constant Real z = 7;
+    end H;
+    
+    model I
+        constant Real y = 8;
+        constant Real z = 9;
+    end I;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest74",
+            description="Redeclare chain with changed constraining type in middle",
+            errorMessage="
+1 errors found:
+
+Error at line 4517, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component x, because it is not present in constraining type of declaration 'replaceable model J = H constrainedby I'
+")})));
+end RedeclareTest74;
+
+
+model RedeclareTest75
+    model A
+        replaceable model J = B constrainedby C;
+    end A;
+    
+    model B
+        constant Real x = 1;
+    end B;
+    
+    model C
+    end C;
+    
+    model D
+        extends A(replaceable model J = E constrainedby F);
+        Real y2 = J.y;  // OK
+    end D;
+    
+    model E
+        constant Real x = 2;
+        constant Real y = 3;
+    end E;
+    
+    model F
+        constant Real y = 4;
+    end F;
+    
+    model G
+        extends D(replaceable model J = H);
+        Real x2 = J.x;  // error - not in F
+        Real z2 = J.z;  // error - not in F
+    end G;
+    
+    model H
+        constant Real x = 5;
+        constant Real y = 6;
+        constant Real z = 7;
+    end H;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RedeclareTest75",
+            description="Redeclare chain with changed constraining type in middle",
+            errorMessage="
+2 errors found:
+
+Error at line 4575, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component x, because it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
+
+Error at line 4576, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+In component g:
+  Cannot use component z, because it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
+")})));
+end RedeclareTest75;
 
 
 model RedeclareElement1

@@ -172,15 +172,17 @@ aspect Constructors {
 		this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), 
 				((SourceRoot) cd.root()).getProgram().getInstProgramRoot());
 	}
-	
-	/**
-	 * Constructor with only nessecary args. 
-	 */
-	public InstCreateReplacingComponentDecl.InstCreateReplacingComponentDecl(
-			ComponentDecl cd, InstLookupRedirectNode ln, ComponentDecl ocd, InstComponentRedeclare icr) {
-		this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), ln, ocd, icr);
-	}
-	
+
+    /**
+     * Constructor with only nessecary args. 
+     */
+    public InstCreateReplacingComponentDecl.InstCreateReplacingComponentDecl(
+            ComponentDecl cd, InstLookupRedirectNode ln, ComponentDecl ocd, 
+            InstComponentRedeclare icr, InstComponentRedeclare cicr) {
+        this(cd.getClassName().newInstAccess(), new Opt(), cd, new Opt(), new Opt(), new Opt(), 
+                ln, ocd, icr, cicr);
+    }
+
 	/**
 	 * Constructs an algorithm block that is not initial.
 	 */

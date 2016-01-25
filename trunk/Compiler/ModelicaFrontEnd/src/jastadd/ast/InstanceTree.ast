@@ -89,8 +89,8 @@ InstImportUnqualified : InstImport;
 InstImportRename      : InstImport;
 
 abstract InstConstraining : BaseNode         ::=  ClassName:InstAccess [InstClassModification] /InstNode:InstBaseNode/;
-InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl>;
-InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl>;
+InstConstrainingClass     : InstConstraining ::= <BaseClassDecl:BaseClassDecl> <InstRedeclare:InstRedeclareClassNode>;
+InstConstrainingComponent : InstConstraining ::= <ComponentDecl:ComponentDecl> <InstRedeclare:InstComponentRedeclare>;
 
 // The class to expand may differ from the declared class of the component due to 
 // redeclaration of classes.
@@ -132,7 +132,8 @@ InstReplacingExpandableConnectorDecl : InstReplacingComposite;
 InstCreateComponentDecl : InstComponentDecl ::= <LookupNode:InstLookupRedirectNode>;
 InstCreateForIndexPrimitive : InstPrimitive ::= <LookupNode:InstLookupRedirectNode>;
 InstCreateReplacingComponentDecl : InstCreateComponentDecl ::= <OriginalDecl:ComponentDecl> 
-                                                               <InstComponentRedeclare:InstComponentRedeclare>;
+                                                               <InstComponentRedeclare:InstComponentRedeclare> 
+                                                               <InstConstrainingRedeclare:InstComponentRedeclare>;
 
 InstGeneratedInner : BaseNode ::= InstComponentDecl 
                                   <CopiedOuter:InstComponentDecl> 
