@@ -332,7 +332,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                     if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
                         ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
                         utilize_central_differences = TRUE;
-                    } else if(ujsaved*sign < sqrt_relfunc*ABS(inc)) {
+                    } else if(ujsaved*sign < sqrt_relfunc*ABS(inc) && block->max[j] !=0 && block->min[j] !=0) {
                         utilize_central_differences = TRUE;
                     } else {
                         utilize_central_differences = FALSE;
@@ -362,7 +362,7 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                         if(( (block->max[j]-ujsaved) < 2*sqrt_relfunc*ABS(inc) && block->max[j] > 0 ) || 
                             ((ujsaved-block->min[j]) < 2*sqrt_relfunc*ABS(inc) && block->min[j] < 0)) {
                             utilize_central_differences = TRUE;
-                        } else if(ujsaved*sign < sqrt_relfunc*ABS(inc)) {
+                        } else if(ujsaved*sign < sqrt_relfunc*ABS(inc)&& block->max[j] !=0 && block->min[j] !=0) {
                             utilize_central_differences = TRUE;
                         } else {
                             utilize_central_differences = FALSE;
