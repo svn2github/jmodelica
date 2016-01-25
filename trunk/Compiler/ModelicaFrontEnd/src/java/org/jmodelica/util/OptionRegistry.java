@@ -707,6 +707,12 @@ abstract public class OptionRegistry {
              Category.user,
              true,
              "If enabled, Brent search will be used to improve accuracy in solution of 1D non-linear equations."),
+        BLOCK_SOLVER_PROFILING
+            ("block_solver_profiling",
+             OptionType.runtime, 
+             Category.uncommon,
+             false,
+             "If enabled, methods involved in solving an equation block will be timed."),
         BLOCK_SOLVER_EXPERIMENTAL_MODE
             ("block_solver_experimental_mode",
              OptionType.runtime, 

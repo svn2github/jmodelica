@@ -26,6 +26,7 @@
 #define _JMI_BLOCK_SOLVER_H
 
 #include "jmi_log.h"
+#include <time.h>
 
 
 /** \brief Evaluation modes for the residual function.*/
@@ -309,7 +310,8 @@ struct jmi_block_solver_options_t {
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
     double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobians, default sqrt(eps). */
-
+    int block_profiling; /**< \brief Option for enabling profiling of the blocks. */
+    
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */
@@ -319,6 +321,12 @@ struct jmi_block_solver_options_t {
 
 /** \brief Solve the equations in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+
+/** \brief Start the clock for profiling. */
+clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver);
+
+/** \brief Stop the clock for profiling. */
+double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t start_clock);
 
 /** \brief Notify the block that an integrator step is completed */
 int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver);

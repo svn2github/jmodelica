@@ -477,10 +477,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
 
 int jmi_solve_block_residual(jmi_block_residual_t * block) {
     int ef, i, j;
-    clock_t c0,c1; /*timers*/
+    clock_t c0 = jmi_block_solver_start_clock(block->block_solver); /*timers*/
     jmi_t* jmi = block->jmi;
-    
-    c0 = clock();
 
     jmi->block_level++;
     block->event_iter = 0;
@@ -576,10 +574,11 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         block->init = 0;
     }
     
-    c1 = clock();
     /* Make information available for logger */
     block->nb_calls++;
-    block->time_spent += ((double)(c1-c0))/(CLOCKS_PER_SEC);
+    
+    block->time_spent += jmi_block_solver_elapsed_time(block->block_solver, c0);
+    
     return ef;
 }
 

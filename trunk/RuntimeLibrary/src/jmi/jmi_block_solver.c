@@ -262,7 +262,7 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
 
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes) {
     int ef;
-    clock_t c0,c1; /*timers*/
+    clock_t c0=jmi_block_solver_start_clock(block_solver); /*timers*/
     jmi_log_t* log = block_solver->log;
     /* jmi_callbacks_t* cb = block_solver->callbacks; */
     jmi_block_solver_options_t* options = block_solver->options;
@@ -271,7 +271,6 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
     jmi_int_t converged;
     jmi_real_t h;
 
-    c0 = clock();
     block_solver->cur_time = cur_time;
     block_solver->at_event = handle_discrete_changes;
 
@@ -625,11 +624,30 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         block_solver->init = 0;
     }
     
-    c1 = clock();
     /* Make information available for logger */
     block_solver->nb_calls++;
-    block_solver->time_spent += ((double)(c1-c0))/(CLOCKS_PER_SEC);
+    
+    block_solver->time_spent += jmi_block_solver_elapsed_time(block_solver, c0);
+
     return ef;
+}
+
+/** \brief Start the clock for profiling. */
+clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver) {
+    clock_t time = 0;
+    if (block_solver->options->block_profiling) {
+        time = clock();
+    }
+    return time;
+}
+
+/** \brief Stop the clock for profiling. */
+double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t start_clock) {
+    double elapsed_time = 0.0;
+    if (block_solver->options->block_profiling) {
+        elapsed_time = ((double)(clock()-start_clock))/(CLOCKS_PER_SEC);
+    }
+    return elapsed_time;
 }
 
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
@@ -674,5 +692,6 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->solver = JMI_KINSOL_SOLVER;
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
+    bsop->block_profiling = 0;
 }
 
