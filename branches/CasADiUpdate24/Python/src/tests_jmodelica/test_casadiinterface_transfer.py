@@ -379,6 +379,7 @@ class ModelicaTransfer(object):
     def test_ConstructBooleanExpressions(self):
         dae = self.load_model("AtomicModelBooleanExpressions", modelFile).getDaeResidual()
 #        expected = ("MX(vertcat((der(x1)-if_else(x2,1,2){0}, " +
+#        expected = ("MX(vertcat((der(x1)-switch(x2){0}, " +  # will expect this in CasADi 3.0 because of CasADi #1618
         expected = ("MX(vertcat((der(x1)-if_else(x2){0}), " + # expecting this instead because of CasADi #1618
                     "(x2-(0<x1)), (x3-(0<=x1)), (x4-(x1<0)), " +
                     "(x5-(x1<=0)), (x6-(x5==x4)), (x7-(x6!=x5)), (x8-(x6&&x5)), (x9-(x6||x5))))")
@@ -388,6 +389,7 @@ class ModelicaTransfer(object):
     def test_ConstructMisc(self):
         model = self.load_model("AtomicModelMisc", modelFile)
 #        expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1),3,4){0}), " +
+#        expected = ("MX(vertcat((der(x1)-1.11), (x2-switch((1<x1)){0}), " + # will expect this in CasADi 3.0 because of CasADi #1618
         expected = ("MX(vertcat((der(x1)-1.11), (x2-if_else((1<x1)){0}), " + # expecting this instead because of CasADi #1618
             "(x3-(1||(1<x2))), (x4-(0||x3))))MX(vertcat(repmat(x1, 1), repmat(pre(x2), 1), repmat(pre(x3), 1), repmat(pre(x4), 1)))")
         check_strnorm(repr(model.getDaeResidual()) + repr(model.getInitialResidual()), expected)
@@ -847,6 +849,7 @@ class ModelicaTransfer(object):
             @0 = (@0<@1)
 """ +
 #"@2 = if_else(@0,5,1)" +
+#"@2 = switch(@0)" + # will expect this in CasADi 3.0 because of CasADi #1618
 "@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
 """
             output[0] = @2
@@ -1051,6 +1054,7 @@ class ModelicaTransfer(object):
             @0 = (@0<@1)
 """ +
 #"@2 = if_else(@0,5,1)" +
+#"@2 = switch(@0)" + # will expect this in CasADi 3.0 because of CasADi #1618
 "@2 = if_else(@0)" + # expecting this instead because of CasADi #1618
 """
             output[0] = @2
@@ -1253,6 +1257,7 @@ class ModelicaTransfer(object):
             @0 = input[0][0]
             """ +
             #"@1 = if_else(@0, 0, @0)" +
+            #"@1 = switch(@0, @0)" + # will expect this in CasADi 3.0 because of CasADi #1618
             "@1 = if_else(@0, @0)" + # expecting this instead because of CasADi #1618
             """
             output[0] = @1
