@@ -1351,7 +1351,12 @@ aspect InstanceErrorCheck {
 		    	pos = arg.generateUnbindableError(desc, pos);
 		}
 	}
-	
+
+//    public void InstRecordConstructor.collectErrors(ErrorCheckType checkType) {
+//        getInstComponentDecls().collectErrors(checkType);
+//        super.collectErrors(checkType);
+//    }
+
 	syn String FAbstractFunctionCall.functionCallDecription() = "Calling function " + name() + "()";
 	eq FRecordConstructor.functionCallDecription()    = "Record constructor for " + name();
     eq InstRecordConstructor.functionCallDecription() = "Record constructor for " + name();

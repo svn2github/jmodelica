@@ -398,6 +398,8 @@ aspect Environments {
     */
     syn lazy Environment InstNode.getMergedEnvironment() = 
         filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModifications());
+    syn lazy Environment InstRecordConstructor.getMergedEnvironment() = 
+        myInstClassDecl().getMergedEnvironment().mergeOuterClone(getInstModifications());
 
 	syn Environment InstNode.filteredEnvironment() = nameScope() ? myEnvironment(name()) : myEnvironment();
 	
@@ -439,9 +441,12 @@ aspect Environments {
      * the environment is filtered on that name.
      */
     eq InstNode.getChild().myEnvironment(String name) = myEnvironment_def(name); // This is just to get caching at the right place.
+    eq InstRecordConstructor.getInstComponentDecl().myEnvironment(String name) = myEnvironment_def(name);
 
     syn lazy Environment InstNode.myEnvironment_def(String name) = 
         getMergedEnvironment().filter(name, retrieveReplacingComponent(name), retrieveReplacingClass(name));
+    syn lazy Environment InstRecordConstructor.myEnvironment_def(String name) = 
+        getMergedEnvironment().filter(name);
 
     eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment()            = filteredEnvironment();
     eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment(String name) = filteredEnvironment().filter(name);
@@ -1609,11 +1614,13 @@ aspect InstaceConstrainingClauses {
         return classToExpand.newInstClassDecl();
     }
 
-	syn lazy FExp InstValueModification.getFExp() = 
-		getValueModification().getExp().instantiate();
-	eq InstRecordModification.getFExp() = getValue().unboundCopy();
-	eq InstArrayModification.getFExp()  = getCell().unboundCopy();
-	
+    syn lazy FExp InstValueModification.getFExp() = getValueModification().instantiateExp();
+    eq InstRecordModification.getFExp()           = getValue().unboundCopy();
+    eq InstArrayModification.getFExp()            = getCell().unboundCopy();
+
+    syn FExp ValueModification.instantiateExp() = getExp().instantiate();
+    eq DummyModification.instantiateExp()       = myFExp().treeCopy();
+
 	public List InstNode.buildFAbstractEquationList() { 
 	    List l = new List();
 	    for (AbstractEquation e : equations()) {
