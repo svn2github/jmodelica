@@ -63,6 +63,7 @@ class Variable : public OwnedNode {
         enum Variability {
             CONSTANT,
             PARAMETER,
+            TIMED,
             DISCRETE,
             CONTINUOUS
         };
