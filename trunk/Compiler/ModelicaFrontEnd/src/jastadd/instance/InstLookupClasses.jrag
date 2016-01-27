@@ -102,6 +102,9 @@ aspect InstLookupClasses {
 
     eq InstGeneratedInner.getChild().lookupInstClass(String name) = getCopiedOuter().lookupInstClass(name);
 
+    eq InstDefaultRecordModification.getChild().lookupInstClass(String name) = 
+        (getSource() != null) ? getSource().lookupInstClass(name) : lookupInstClass(name);
+
 
     syn InstLookupResult<InstClassDecl> InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = InstLookupResult.notFound();
     eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);

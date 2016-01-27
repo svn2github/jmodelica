@@ -399,7 +399,7 @@ aspect Environments {
     syn lazy Environment InstNode.getMergedEnvironment() = 
         filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModifications());
     syn lazy Environment InstRecordConstructor.getMergedEnvironment() = 
-        myInstClassDecl().getMergedEnvironment().mergeOuterClone(getInstModifications());
+        new Environment().mergeOuterClone(getInstModifications());
 
 	syn Environment InstNode.filteredEnvironment() = nameScope() ? myEnvironment(name()) : myEnvironment();
 	
@@ -446,7 +446,7 @@ aspect Environments {
     syn lazy Environment InstNode.myEnvironment_def(String name) = 
         getMergedEnvironment().filter(name, retrieveReplacingComponent(name), retrieveReplacingClass(name));
     syn lazy Environment InstRecordConstructor.myEnvironment_def(String name) = 
-        getMergedEnvironment().filter(name);
+        declarationInstComponent(name).filteredEnvironment().mergeOuterClone(getMergedEnvironment().filter(name));
 
     eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment()            = filteredEnvironment();
     eq InstReplacingShortClassDecl.getOriginalInstClass().myEnvironment(String name) = filteredEnvironment().filter(name);
@@ -907,6 +907,60 @@ aspect InstanceTreeConstruction {
 	eq InstPrimitive.getInstComponentDeclList() = new List();
 	eq InstPrimitive.getInstClassDeclList() = new List();
 
+    syn InstComponentDecl InstRecordConstructor.getInstComponentDeclNoTransform(int i) =
+        getInstComponentDeclListNoTransform().getChildNoTransform(i);
+
+    syn nta List<InstComponentDecl> InstRecordConstructor.getInstComponentDeclList() {
+        InstClassDecl icd = getRecord().myInstClassDecl().actualInstClass();
+        List<InstComponentDecl> l = new List<InstComponentDecl>();
+        icd.populateRecordConstructorComponentList(l, new HashSet<String>());
+        return l;
+    }
+
+    protected void InstNode.populateRecordConstructorComponentList(
+            List<InstComponentDecl> list, Set<String> names) {
+        for (InstExtends ie : getInstExtendss()) {
+            ie.populateRecordConstructorComponentList(list, names);
+        }
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            if (names.add(icd.name())) {
+                list.add(createInstComponentDecl(icd.getComponentDecl(), icd));
+            }
+        }
+    }
+
+    syn nta List<InstModification> InstRecordConstructor.getInstModificationList() {
+        List<InstModification> res = new List<InstModification>();
+        for (InstFunctionArgument ifa : getArgs()) {
+            ifa.populateInstModifications(res);
+        }
+        return res;
+    }
+
+    public void InstFunctionArgument.populateInstModifications(List<InstModification> res) {}
+
+    public void InstPositionalArgument.populateInstModifications(List<InstModification> res) {
+        res.add(newInstModification());
+    }
+
+    public void InstNamedArgument.populateInstModifications(List<InstModification> res) {
+        res.add(newInstModification());
+    }
+
+    syn InstModification InstFunctionArgument.newInstModification() = 
+            new InstComponentModification(getModification(), false, false,
+                boundInput.createInstAccess(),
+                new Opt<InstModification>(getModification().newInstModification()));
+
+    syn InstValueModification DummyModification.newInstModification() = new InstValueModification(this);
+
+    syn nta Modification InstFunctionArgument.getModification() {
+        DummyModification res = new DummyModification();
+        copyLocationTo(res);
+        return res;
+    }
+
+
 	syn lazy List<InstModification> InstNode.getElementInstModificationList() {
         List<InstModification> l = new List<InstModification>();
         for (Modification m : elementModifications()) 
@@ -916,6 +970,10 @@ aspect InstanceTreeConstruction {
 
 
     public InstComponentDecl InstNode.createInstComponentDecl(ComponentDecl cd) {
+        return createInstComponentDecl(cd, null);
+    }
+
+    public InstComponentDecl InstNode.createInstComponentDecl(ComponentDecl cd, InstLookupRedirectNode ln) {
         // Check if the component is redeclared. 
         // -> Yes: Create an InstReplacingComponent component
         // -> No: Create an InstComponent 
@@ -926,7 +984,7 @@ aspect InstanceTreeConstruction {
             return new InstCreateReplacingComponentDecl(replacingComp, irc, cd, irc, cicr);
             // TODO: handle expandable connectors in this case
         } else { 
-            return new InstCreateComponentDecl(cd, null);       
+            return new InstCreateComponentDecl(cd, ln);
         }
      }
 

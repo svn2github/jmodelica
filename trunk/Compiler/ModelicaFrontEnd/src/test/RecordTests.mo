@@ -2465,6 +2465,125 @@ end RecordTests.RecordConstructor16;
 end RecordConstructor16;
 
 
+model RecordConstructor17
+    package A
+        type B = Real;
+        
+        record C
+            B b1 = 1;
+            B b2 = 2;
+        end C;
+    end A;
+    
+    model D
+        A.C c = A.C(3);
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor17",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor17
+ RecordTests.RecordConstructor17.A.C d.c = RecordTests.RecordConstructor17.A.C(3, 2);
+
+public
+ record RecordTests.RecordConstructor17.A.C
+  Real b1;
+  Real b2;
+ end RecordTests.RecordConstructor17.A.C;
+
+end RecordTests.RecordConstructor17;
+")})));
+end RecordConstructor17;
+
+
+model RecordConstructor18
+    package A
+        type B = Real;
+        
+        record C
+            B b = 1;
+        end C;
+    end A;
+    
+    package D
+        type E = Real;
+        
+        record F
+            extends A.C(b = 2);
+            E e = 3;
+        end F;
+    end D;
+    
+    model G
+        D.F f = D.F(e = 4);
+    end G;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor18",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor18
+ RecordTests.RecordConstructor18.D.F g.f(b = 2) = RecordTests.RecordConstructor18.D.F(2, 4);
+
+public
+ record RecordTests.RecordConstructor18.D.F
+  Real b;
+  Real e;
+ end RecordTests.RecordConstructor18.D.F;
+
+end RecordTests.RecordConstructor18;
+")})));
+end RecordConstructor18;
+
+
+model RecordConstructor19
+    package A
+        record B
+            Real x = 1;
+            Real y = 2;
+        end B;
+    end A;
+    
+    package C
+        package D
+            constant Real c = 3;
+        end D;
+        
+        record E = A.B(y = D.c);
+    end C;
+
+    model F
+        C.E b = C.E(4);
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor19",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor19
+ RecordTests.RecordConstructor19.C.E f.b(y = 3.0) = RecordTests.RecordConstructor19.C.E(4, 3.0);
+
+public
+ record RecordTests.RecordConstructor19.C.E
+  Real x;
+  Real y;
+ end RecordTests.RecordConstructor19.C.E;
+
+end RecordTests.RecordConstructor19;
+")})));
+end RecordConstructor19;
+
+
 model RecordScalarize1
  record A
   Real a;

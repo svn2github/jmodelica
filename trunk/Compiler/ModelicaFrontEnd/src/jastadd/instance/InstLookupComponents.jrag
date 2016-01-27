@@ -522,6 +522,12 @@ aspect InstLookupComponents {
         return lookupInstComponent(name);
     }
 
+    /**
+     * Lookup name in the record declaration.
+     */
+    syn InstComponentDecl InstRecordConstructor.declarationInstComponent(String name) = 
+        myInstClassDecl().memberInstComponent(name).target(INST_UNKNOWN_COMPONENT, this);
+
     syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) {
         InstLookupResult<InstComponentDecl> res = memberInstComponent(name);
         if (res.successful())
