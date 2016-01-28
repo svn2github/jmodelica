@@ -510,6 +510,23 @@ aspect InstLookupComponents {
                 return InstLookupResult.<InstComponentDecl>found(((InstForIndex) fi).getInstPrimitive());
         return lookupInstComponent(name);
     }
+    
+    inh lazy InstLookupResult<InstComponentDecl> InstRecordConstructor.lookupInstComponent(String name);
+    eq InstRecordConstructor.getChild().lookupInstComponent(String name) = lookupInstComponent(name);
+    eq InstRecordConstructor.getInstComponentDecl().lookupInstComponent(String name) {
+        for (InstComponentDecl icd : getInstComponentDecls()) {
+            if (icd.matches(name)) {
+                return InstLookupResult.<InstComponentDecl>found(icd);
+            }
+        }
+        return lookupInstComponent(name);
+    }
+
+    /**
+     * Lookup name in the record declaration.
+     */
+    syn InstComponentDecl InstRecordConstructor.declarationInstComponent(String name) = 
+        myInstClassDecl().memberInstComponent(name).target(INST_UNKNOWN_COMPONENT, this);
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.genericLookupInstComponent(String name) {
         InstLookupResult<InstComponentDecl> res = memberInstComponent(name);

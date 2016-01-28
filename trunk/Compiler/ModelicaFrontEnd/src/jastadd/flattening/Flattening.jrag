@@ -1335,30 +1335,34 @@ aspect Flattening {
 	eq FIntegerSubscript.specify(int index) = this;
 	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
-	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
-	/**
-	 * Check if this InstAssignable node has an InstModification setting 
-	 *        its binding expression.
-	 */
-	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
-	
-	/**
+    // TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
+    /**
+     * Check if this InstComponentDecl is an assignable has an InstModification setting 
+     * its binding expression.
+     */
+    syn boolean InstComponentDecl.hasInstValueMod() = (myInstValueMod() != null);
+
+    /**
      * Check if this InstComponentDecl is an assignable with a value modifier
      */
     syn boolean InstComponentDecl.hasBindingExp() = false;
     eq InstAssignable.hasBindingExp()             = hasInstValueMod();
-	
-	/**
-	 * Retrieve the InstModification setting the binding expression of 
-	 *        this InstAssignable node.
-	 */
-	syn lazy InstValueModification InstAssignable.myInstValueMod() {
-		for (InstModification im : totalMergedEnvironment()) 
-			if (im.hasInstValueMod()) 
-				return im.getInstValueMod();
-		return null;
-	}
-    
+
+    /**
+     * Retrieve the InstModification setting the binding expression of 
+     * this component. 
+     * 
+     * If the component is not an assignable, or is an assignable that does 
+     * not have a binding expression, return <code>null</code>.
+     */
+    syn InstValueModification InstComponentDecl.myInstValueMod() = null;
+    syn lazy InstValueModification InstAssignable.myInstValueMod() {
+        for (InstModification im : totalMergedEnvironment()) 
+            if (im.hasInstValueMod()) 
+                return im.getInstValueMod();
+        return null;
+    }
+
     syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
     
     syn InstValueModification InstAssignable.myInstValueModTop() {
@@ -1826,8 +1830,13 @@ aspect FlatExpressions {
     public FExp FIdUseInstAccess.flatten(FQName prefix, FIdUseExp use) {
         InstComponentDecl var = getInstAccess().myInstComponentDecl();
         if (use.inDefaultArgument()) {
-            InstClassDecl parent = (InstClassDecl) var.containingEntity();
-            int i = parent.myCallInputs().indexOf(var);
+            int i;
+            if (var.inRecordDecl()) {
+                InstClassDecl parent = (InstClassDecl) var.containingEntity();
+                i = parent.myCallInputs().indexOf(var);
+            } else { // In record constructor
+                i = var.getParent().getIndexOfChild(var);
+            }
             int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
         } else if (!inFunction() && variability().flattenExtractIndices(getInstAccess().indexVariability())) {
@@ -1953,19 +1962,25 @@ aspect FlatExpressions {
     eq FConstant.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
     eq FKnownParameter.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
-	/**
-	 * Check if this access is in the binding expression of an input to a function 
-	 * or component in a record class, and refers to an input in the same function 
-	 * or component in the same record class.
-	 */
+    /**
+     * Check if this access is in the binding expression of an input to a function 
+     * or component in a record class, and refers to an input in the same function 
+     * or component in the same record class.
+     */
     syn boolean FIdUseExp.inDefaultArgument() {
-		InstComponentDecl target = asInstAccess().myInstComponentDecl();
-		InstComponentDecl holder = findComponentWithThisBindingExp();
-		return holder != null && target.containingEntity() == holder.containingEntity() && 
-		       ((inFunction() && holder.isInput() && target.isInput()) || 
-		        (inRecordDecl() && holder.isModifiable() && target.isModifiable()));
-	}
-	
+        InstComponentDecl target = asInstAccess().myInstComponentDecl();
+        InstComponentDecl holder = findComponentWithThisBindingExp();
+        return holder != null && target.containingEntity() == holder.containingEntity() && 
+               ((inFunction() && holder.isInput() && target.isInput()) || 
+                (holder.inNonComponentRecord() && holder.isModifiable() && target.isModifiable()));
+    }
+
+    /**
+     * Check if this component is in a record, but not in a record component - 
+     * i.e. a record declaration or a record constructor.
+     */
+    syn boolean InstComponentDecl.inNonComponentRecord() = inRecordDecl() || inRecordConstructor();
+
 	/**
 	 * Find the component that has this expression as a part of its binding expression, if any.
 	 */
@@ -2532,9 +2547,14 @@ aspect FlatExpressions {
     eq InstArrayAccess.getChild().flatPrefix() = myInstComponentDecl().getFQName().copyPrefix();
     eq InstNode.getChild().flatPrefix() = new FQNameEmpty();
     eq FlatRoot.getChild().flatPrefix() = new FQNameEmpty();
-    
-	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
-		List args = new List();
+
+    inh FExp DummyModification.myFExp();
+    eq InstFunctionArgument.getChild().myFExp() = null;
+    eq InstPositionalArgument.getChild().myFExp() = getFExp();
+    eq InstNamedArgument.getChild().myFExp() = getFExp();
+
+    public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
+        List args = new List();
         int i = 0;
         for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
             if (icd.isModifiable()) {
@@ -2543,9 +2563,9 @@ aspect FlatExpressions {
                 args.add(icd.flattenInRecordConstructor(prefix));
             }
         }
-		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
-	}
-	
+        return new FRecordConstructor(getRecord().flattenRecordName(), args);
+    }
+
     public FExp InstComponentDecl.flattenInRecordConstructor(FQName prefix) {
         return null;
     }

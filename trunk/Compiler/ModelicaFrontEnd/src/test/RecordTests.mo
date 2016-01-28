@@ -17,33 +17,6 @@
 package RecordTests
 
 
-model Test
-    model A
-        replaceable package C = D constrainedby E;
-        C.F f;
-    end A;
-    
-    model B
-        extends A(redeclare package C = E);
-    end B;
-    
-    package D
-        model F
-            Real x = 1;
-            Real y = 2;
-        end F;
-    end D;
-    
-    package E
-        model F
-            Real x = 3;
-        end F;
-    end E;
-    
-    replaceable B b constrainedby A;
-end Test;
-
-
 model RecordFlat1
  record A
   Real a;
@@ -2335,6 +2308,280 @@ public
 end RecordTests.RecordConstructor11;
 ")})));
 end RecordConstructor11;
+
+
+model RecordConstructor12
+    record R
+        parameter Integer n = 1;
+        parameter Real[n] x = 1:n;
+    end R;
+    
+    R r1 = R();
+    R r2 = R(2);
+    R r3 = R(2,{1,2}); 
+    R r4; 
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor12",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor12
+ structural parameter Integer r1.n = 1 /* 1 */;
+ parameter Real r1.x[1] = 1 /* 1 */;
+ structural parameter Integer r2.n = 2 /* 2 */;
+ parameter Real r2.x[1] = 1 /* 1 */;
+ parameter Real r2.x[2] = 2 /* 2 */;
+ structural parameter Integer r3.n = 2 /* 2 */;
+ parameter Real r3.x[1] = 1 /* 1 */;
+ parameter Real r3.x[2] = 2 /* 2 */;
+ structural parameter Integer r4.n = 1 /* 1 */;
+ structural parameter Real r4.x[1] = 1 /* 1 */;
+end RecordTests.RecordConstructor12;
+")})));
+end RecordConstructor12;
+
+
+model RecordConstructor13
+    record R
+        parameter Integer n = 2;
+        parameter Real[n] x = 1:2;
+    end R;
+    
+    R r = R(3, {1,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor13",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2351, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/RecordTests.mo':
+  Record constructor for R: types of positional argument 2 and input x are not compatible
+    type of '{1, 2}' is Integer[2]
+    expected type is Real[3]
+")})));
+end RecordConstructor13;
+
+
+model RecordConstructor14
+    record R
+        parameter Real[:] x = {1};
+        parameter Integer n = size(x, 1);
+    end R;
+    
+    R r1 = R();
+    R r2 = R({2});
+    R r3 = R({1,2});
+    R r4 = R({1,2,3}); 
+    R r5;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor14",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor14
+ parameter RecordTests.RecordConstructor14.R r1(x(size() = {1})) = RecordTests.RecordConstructor14.R({1}, 1) /* RecordTests.RecordConstructor14.R({ 1 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r2(x(size() = {1})) = RecordTests.RecordConstructor14.R({2}, 1) /* RecordTests.RecordConstructor14.R({ 2 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r3(x(size() = {2})) = RecordTests.RecordConstructor14.R({1, 2}, 2) /* RecordTests.RecordConstructor14.R({ 1, 2 }, 2) */;
+ parameter RecordTests.RecordConstructor14.R r4(x(size() = {3})) = RecordTests.RecordConstructor14.R({1, 2, 3}, 3) /* RecordTests.RecordConstructor14.R({ 1, 2, 3 }, 3) */;
+ parameter RecordTests.RecordConstructor14.R r5(x(size() = {1}) = {1},n = 1);
+
+public
+ record RecordTests.RecordConstructor14.R
+  parameter Real x[1];
+  parameter Integer n;
+ end RecordTests.RecordConstructor14.R;
+
+end RecordTests.RecordConstructor14;
+")})));
+end RecordConstructor14;
+
+
+model RecordConstructor15
+    record R
+        parameter Integer n = 1;
+        parameter Real[n] x = 1:n;
+    end R;
+    
+    parameter Integer n = 2;
+    R r = R(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor15",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor15
+ structural parameter Integer n = 2 /* 2 */;
+ structural parameter Integer r.n = 2 /* 2 */;
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+end RecordTests.RecordConstructor15;
+")})));
+end RecordConstructor15;
+
+
+model RecordConstructor16
+    record A
+        Real a;
+        Real b;
+    end A;
+
+    package B
+        constant Real g = 2;
+        constant Real h = 3;
+    
+        record C = A(a = g, b = h);
+    end B;
+
+    model D
+        model E
+            B.C j = B.C(1);
+            constant B.C k = B.C(1);
+            constant Real l = k.a;
+        end E;
+        
+        E e;
+    end D;
+
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor16",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor16
+ constant Real d.e.j.a = 1;
+ constant Real d.e.j.b = 3.0;
+ constant Real d.e.k.a = 1;
+ constant Real d.e.k.b = 3;
+ constant Real d.e.l = 1;
+end RecordTests.RecordConstructor16;
+")})));
+end RecordConstructor16;
+
+
+model RecordConstructor17
+    package A
+        type B = Real;
+        
+        record C
+            B b1 = 1;
+            B b2 = 2;
+        end C;
+    end A;
+    
+    model D
+        A.C c = A.C(3);
+    end D;
+    
+    D d;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor17",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor17
+ RecordTests.RecordConstructor17.A.C d.c = RecordTests.RecordConstructor17.A.C(3, 2);
+
+public
+ record RecordTests.RecordConstructor17.A.C
+  Real b1;
+  Real b2;
+ end RecordTests.RecordConstructor17.A.C;
+
+end RecordTests.RecordConstructor17;
+")})));
+end RecordConstructor17;
+
+
+model RecordConstructor18
+    package A
+        type B = Real;
+        
+        record C
+            B b = 1;
+        end C;
+    end A;
+    
+    package D
+        type E = Real;
+        
+        record F
+            extends A.C(b = 2);
+            E e = 3;
+        end F;
+    end D;
+    
+    model G
+        D.F f = D.F(e = 4);
+    end G;
+    
+    G g;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor18",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor18
+ RecordTests.RecordConstructor18.D.F g.f(b = 2) = RecordTests.RecordConstructor18.D.F(2, 4);
+
+public
+ record RecordTests.RecordConstructor18.D.F
+  Real b;
+  Real e;
+ end RecordTests.RecordConstructor18.D.F;
+
+end RecordTests.RecordConstructor18;
+")})));
+end RecordConstructor18;
+
+
+model RecordConstructor19
+    package A
+        record B
+            Real x = 1;
+            Real y = 2;
+        end B;
+    end A;
+    
+    package C
+        package D
+            constant Real c = 3;
+        end D;
+        
+        record E = A.B(y = D.c);
+    end C;
+
+    model F
+        C.E b = C.E(4);
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor19",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor19
+ RecordTests.RecordConstructor19.C.E f.b(y = 3.0) = RecordTests.RecordConstructor19.C.E(4, 3.0);
+
+public
+ record RecordTests.RecordConstructor19.C.E
+  Real x;
+  Real y;
+ end RecordTests.RecordConstructor19.C.E;
+
+end RecordTests.RecordConstructor19;
+")})));
+end RecordConstructor19;
 
 
 model RecordScalarize1
