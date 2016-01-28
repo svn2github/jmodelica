@@ -758,30 +758,7 @@ aspect InstFunctionBinding {
         }
         return res;
     }
-
-    /**
-     * Re-bind arguments to virtual components under constructor call.
-     */
-    rewrite InstRecordConstructor {
-        when (!constructorArgsRebound) to InstRecordConstructor {
-            for (int i = 0; i < getNumArg(); i++) {
-                getArg(i).updateBoundInput(getInstComponentDecl(i));
-            }
-            constructorArgsRebound = true;
-            return this;
-        }
-    }
-    private boolean InstRecordConstructor.constructorArgsRebound = false;
-
-    public void InstFunctionArgument.updateBoundInput(InstComponentDecl icd) {
-        setBoundInput(icd);
-    }
-
-    public void InstDefaultArgument.updateBoundInput(InstComponentDecl icd) {
-        setBoundInput(icd);
-        setFExp(icd.myInstValueMod().getFExp());
-    }
-
+    
     /**
      * Calculate if this is a vectorized function call.
      */

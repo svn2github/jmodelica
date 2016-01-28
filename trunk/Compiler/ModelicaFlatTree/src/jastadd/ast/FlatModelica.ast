@@ -1185,7 +1185,7 @@ FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FTyp
 /**
  * Record constructor in instance trees.
  */
-InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess Arg:InstFunctionArgument* /InstComponentDecl*/ /InstModification*/;
+InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess Arg:InstFunctionArgument*;
 
 /**
  * Array constructor expression.
