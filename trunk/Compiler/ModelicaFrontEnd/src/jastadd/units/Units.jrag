@@ -53,6 +53,10 @@ aspect Units {
         // <Any>.convertTo(u) == u.convertTo(<Any>) == <Any>
         public abstract Unit convertTo(Unit u);
         
+        // Returns true if the unit u is in the same dimension as this.
+        // If this or u is <Any> then this returns true.
+        public abstract boolean sameDimension(Unit u);
+        
         /*
          * This function is like equals for units but is **not** transitive because of AnyUnit.
          */
@@ -117,6 +121,11 @@ aspect Units {
         @Override
         public Unit convertTo(Unit u) {
             return this;
+        }
+        
+        @Override
+        public boolean sameDimension(Unit u) {
+            return true;
         }
         
         @Override
@@ -357,7 +366,7 @@ aspect Units {
                 double newOffset = offset * newScale - u.offset;
                 int[] newPowers = subArray(powers, u.powers);
                 
-                if(!isZerosArray(newPowers)) {
+                if(!isZeroArray(newPowers)) {
                     return Unit.ANY;
                 }
                 
@@ -367,7 +376,17 @@ aspect Units {
             return Unit.ANY;
         }
         
-        private boolean isZerosArray(int[] a) {
+        @Override
+        public boolean sameDimension(Unit p) {
+            if (p instanceof CompositeUnit) {
+                CompositeUnit u = (CompositeUnit) p;
+                return isZeroArray(subArray(powers, u.powers));
+            }
+            // If p is any unit then return true else false.
+            return p.isAnyUnit();
+        }
+        
+        private boolean isZeroArray(int[] a) {
             for (int i = 0; i < a.length; i++) {
                 if (a[i] != 0) return false;
             }
