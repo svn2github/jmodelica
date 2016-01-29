@@ -1004,13 +1004,13 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Get optimized element lengths
         h_opt = self.get_h_opt()
-	
+    
         self.times['post_processing'] += time.clock() - t0
         self.times['tot'] = self.times['update'] + self.times['sol'] + self.times['post_processing']
         
         if include_init:
-		    self.times['tot'] += self.times['init']
-			
+            self.times['tot'] += self.times['init']
+            
         # Create and return result object
         return LocalDAECollocationAlgResult(self.op, resultfile, self,
                                             res, self.options, self.times,
@@ -1863,7 +1863,10 @@ class LocalDAECollocator(CasadiCollocator):
             if cnstr.getType() == cnstr.EQ:
                 n_c_e += n_tp
             else:
-                n_c_i += n_tp
+                if self.is_gauss:
+                    n_c_i += n_tp - self.n_e + 1
+                else:
+                    n_c_i += n_tp
 
         # Point constraints
         for cnstr in self.op.getPointConstraints():
@@ -6006,7 +6009,7 @@ class OptimizationSolver(object):
         self.collocator._create_initial_trajectories()        
         self.collocator._compute_bounds_and_init()
         self.extra_update = time.clock() - t0
-		
+        
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
         t0 = time.clock()
