@@ -4487,11 +4487,6 @@ equation
             flatModel="
 fclass FunctionTests.ArrayExpInFunc11
  constant Real c[1,1] = 1;
- constant Real c[1,2] = 1;
- constant Real c[2,1] = 1;
- constant Real c[2,2] = 1;
- constant Real c[3,1] = 1;
- constant Real c[3,2] = 1;
  Real x[1,1,1];
  Real x[1,1,2];
  Real x[1,2,1];
@@ -14267,7 +14262,6 @@ equation
 			flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real x = 0;
- constant Real y = 0;
  Real sa;
  parameter Real p1(fixed = false);
  parameter Real p2 = 2 /* 2 */;

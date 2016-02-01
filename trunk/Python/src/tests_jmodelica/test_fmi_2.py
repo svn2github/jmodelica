@@ -101,8 +101,8 @@ class Test_FMUModelCS2:
         """
         Sets up the test class.
         """
-        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0")
-        cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0")
+        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
+        cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="cs", version="2.0", compiler_options={'generate_ode_jacobian':True})
     
     @testattr(fmi = True)
@@ -556,8 +556,8 @@ class Test_FMUModelME2:
         """
         Sets up the test class.
         """
-        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0")
-        cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0")
+        cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
+        cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="me", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
@@ -917,7 +917,7 @@ class Test_FMUModelME2:
     @testattr(fmi = True)
     def test_simulate_no_state(self):
         
-        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True})
+        name = compile_fmu("Modelica.Blocks.Examples.IntegerNetwork1", version = 2.0, compiler_options={"generate_ode_jacobian":True, "eliminate_alias_constants":False})
 
         model = load_fmu(name)
 

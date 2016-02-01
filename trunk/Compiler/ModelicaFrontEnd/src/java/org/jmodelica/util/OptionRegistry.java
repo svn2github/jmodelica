@@ -253,7 +253,7 @@ abstract public class OptionRegistry {
             ("eliminate_alias_constants",
              OptionType.compiler,
              Category.uncommon,
-             false,
+             true,
              "If enabled, then alias constants are eliminated from the model."),
         VPROP
             ("variability_propagation", 

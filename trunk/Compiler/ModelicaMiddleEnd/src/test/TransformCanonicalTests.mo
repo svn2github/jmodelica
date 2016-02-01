@@ -2168,7 +2168,6 @@ end TransformCanonicalTests.InitialEqTest1;
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
  constant Real v1 = 1;
- constant Real v2 = 1;
  Real v3;
  Real v4;
  Real v5;
@@ -2176,7 +2175,6 @@ fclass TransformCanonicalTests.InitialEqTest2
  Real v7;
  Real v8;
  constant Real v9 = 0.0;
- constant Real v10 = 1;
 equation
  2.0 + v3 + v4 + v5 = 1;
  2.0 + v3 + v4 + v6 = 1;

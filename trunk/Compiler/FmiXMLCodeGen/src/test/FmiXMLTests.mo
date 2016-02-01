@@ -324,6 +324,7 @@ model Fmi1StartAttribute
         FmiXMLCodeGenTestCase(
             name="Fmi1StartAttribute",
             description="Check parameters without binding expressions",
+            eliminate_alias_variables=false,
             fmi_version="1.0",
             template="
 $modelVariables$",
@@ -441,6 +442,7 @@ model Fmi2StartAttribute
             name="Fmi2StartAttribute",
             description="Check parameters without binding expressions",
             fmi_version="2.0",
+            eliminate_alias_variables=false,
             template="
 $modelVariables$",
             generatedCode="
@@ -1227,13 +1229,13 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"3\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"a\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"4\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"b\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435461\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
+    <ScalarVariable name=\"n\" valueReference=\"268435459\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
         <Integer />
     </ScalarVariable>
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
@@ -1261,13 +1263,13 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"3\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"a\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"4\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"b\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Real relativeQuantity=\"false\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435461\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+    <ScalarVariable name=\"n\" valueReference=\"268435459\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
         <Integer />
     </ScalarVariable>
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
@@ -1369,5 +1371,140 @@ $modelVariables$
 
 ")})));
 end TempVars2;
+
+model ConstantAliasBase
+    constant Real a = 1;
+    constant Real b = a;
+    constant Integer[n] c = 1:n;
+    parameter Integer n = x1 + integer(x2);
+    parameter Integer x1 = 1;
+    parameter Real x2 = 1;
+    constant String s1 = "string";
+    constant String s2 = s1;
+    parameter String s3 = "string";
+    
+    type E = enumeration(A,B,C);
+    
+    constant E e1 = e2;
+    constant E e2 = E.B;
+    constant E e3 = E.B;
+    constant E e4 = E.C;
+end ConstantAliasBase;
+
+model ConstantAlias1
+    extends ConstantAliasBase;
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="ConstantAlias1",
+            description="Check xml with constant alias sets",
+            fmi_version="1.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"b\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"c[1]\" valueReference=\"268435457\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Integer start=\"1\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"c[2]\" valueReference=\"268435458\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Integer start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e1\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e2\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e3\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e4\" valueReference=\"268435460\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"3\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"n\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"s1\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <String start=\"string\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"s2\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <String start=\"string\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"s3\" valueReference=\"805306368\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
+        <String />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end ConstantAlias1;
+
+model ConstantAlias2
+    extends ConstantAliasBase;
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="ConstantAlias2",
+            description="Check xml with constant alias sets",
+            fmi_version="2.0",
+            template="
+$modelVariables$
+",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"b\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"c[1]\" valueReference=\"268435457\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Integer start=\"1\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"c[2]\" valueReference=\"268435458\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Integer start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e1\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e2\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e3\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"2\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"e4\" valueReference=\"268435460\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"3\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"n\" valueReference=\"268435458\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"s1\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <String start=\"string\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"s2\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <String start=\"string\" />
+    </ScalarVariable>
+    <ScalarVariable name=\"s3\" valueReference=\"805306368\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <String />
+    </ScalarVariable>
+    <ScalarVariable name=\"x1\" valueReference=\"268435457\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Integer />
+    </ScalarVariable>
+    <ScalarVariable name=\"x2\" valueReference=\"0\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end ConstantAlias2;
 
 end FmiXMLTests;

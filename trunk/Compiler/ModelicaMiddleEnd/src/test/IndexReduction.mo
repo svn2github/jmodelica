@@ -150,7 +150,6 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
- eval parameter Boolean idealGear.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
  Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";

@@ -2032,8 +2032,6 @@ fclass StreamTests.StreamDerAlias1
  Real y1(min = 0);
  Real y2(min = 0);
  Real y3(min = 0);
- constant Real a2.c.p = 0;
- constant Real a3.c.p = 0;
 initial equation 
  y1 = 0.0;
  y2 = 0.0;

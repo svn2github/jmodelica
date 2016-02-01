@@ -2680,10 +2680,7 @@ fclass ConnectTests.StreamTest6
  constant Real a[1].b = 0;
  Real a[1].c;
  Real a[2].a;
- constant Real a[2].b = 0;
  Real a[2].c;
- constant Real b[1].a.b = 0;
- constant Real b[2].a.b = 0;
 equation
  a[1].a = time;
  a[2].a = 2 * time;
@@ -2756,8 +2753,6 @@ equation
 fclass ConnectTests.Cardinality2
  Real x.a;
  constant Real x.b = 1;
- constant Real y.b = 1;
- constant Real z.b = 1;
 equation
  x.a = 2 * time;
 end ConnectTests.Cardinality2;
