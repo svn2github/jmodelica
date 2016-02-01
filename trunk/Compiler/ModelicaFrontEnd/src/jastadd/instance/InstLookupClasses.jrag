@@ -102,9 +102,6 @@ aspect InstLookupClasses {
 
     eq InstGeneratedInner.getChild().lookupInstClass(String name) = getCopiedOuter().lookupInstClass(name);
 
-    eq InstDefaultRecordModification.getChild().lookupInstClass(String name) = 
-        (getSource() != null) ? getSource().lookupInstClass(name) : lookupInstClass(name);
-
 
     syn InstLookupResult<InstClassDecl> InstClassDecl.lookupInstClassInInstClassRedeclare(String name) = InstLookupResult.notFound();
     eq InstReplacingShortClassDecl.lookupInstClassInInstClassRedeclare(String name) = getInstClassRedeclare().lookupInstClass(name);
@@ -527,24 +524,20 @@ aspect InstLookupClasses {
 
     private boolean InstClassAccess.lookupError = false;
 
+    // This attribute should to be circular due to lookup in import-statements
+    // If the lookup is triggered by lookup of A in 'extends A', and
+    // there are import statements, evaluation might get back to the 
+    // ClassAccess A when when looking up the ClassAccess to import.
+    // See NameTests.ImportTest1 for an example. 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
-    eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
-    eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
-    syn lazy InstClassDecl InstClassAccess.myInstClassDecl() {
-        // If we return back during same lookup, return unknown to avoid infinite loop
-        if (isInMyInstClassDecl) {
-            return unknownInstClassDecl();
-        }
-        isInMyInstClassDecl = true;
+    syn lazy InstClassDecl InstClassAccess.myInstClassDecl() circular [unknownInstClassDecl()] {
         InstLookupResult<InstClassDecl> res = lookupInstClass(name());
-        isInMyInstClassDecl = false;
         lookupError = res.isError();
         return res.target(INST_UNKNOWN_CLASS, this);
     }
-    private boolean InstClassAccess.isInMyInstClassDecl = false;
-
-    syn InstClassDecl InstFunctionCall.myInstClassDecl()      = getName().myInstClassDecl(); 
-    syn InstClassDecl InstRecordConstructor.myInstClassDecl() = getRecord().myInstClassDecl(); 
+    eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
+    eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
+    syn InstClassDecl InstFunctionCall.myInstClassDecl() = getName().myInstClassDecl(); 
 
     syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
     eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();

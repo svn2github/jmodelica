@@ -281,7 +281,6 @@ abstract Modification : SourceBaseNode;
 CompleteModification  : Modification ::= ClassModification [ValueModification];
 ValueModification     : Modification ::= Exp;
 //AssignModification    : Modification ::= Exp;
-DummyModification     : ValueModification;
 
 ClassModification : Modification ::= Argument*;
 abstract Argument : Modification ::= [Each] [Final];

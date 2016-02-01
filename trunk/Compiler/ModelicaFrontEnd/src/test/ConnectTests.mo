@@ -108,7 +108,7 @@ connector RealInput = input RealSignal "'input Real' as connector";
  
 connector RealSignal 
   "Real port (both input/output possible)" 
-  type SignalType = Real;
+  replaceable type SignalType = Real;
   
   extends SignalType;
   
