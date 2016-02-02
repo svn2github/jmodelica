@@ -28,7 +28,6 @@
 #include "jmi_log.h"
 #include "jmi_delay_impl.h"
 #include "jmi_dynamic_state.h"
-#include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
 void jmi_z_init(jmi_z_t* z) {
@@ -226,8 +225,6 @@ int jmi_init(jmi_t** jmi,
     jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
     jmi_->updated_states = JMI_FALSE;
     
-    jmi_->chattering = jmi_chattering_create(n_sw);
-    
     /* Work arrays */
     jmi_->real_x_work = (jmi_real_t*)calloc(jmi_->n_real_x,sizeof(jmi_real_t));
     jmi_->real_u_work = (jmi_real_t*)calloc(jmi_->n_real_u,sizeof(jmi_real_t));
@@ -318,8 +315,6 @@ int jmi_delete(jmi_t* jmi){
         jmi_dynamic_state_delete_set(jmi, i);
     }
     free(jmi->dynamic_state_sets);
-    
-    jmi_chattering_delete(jmi->chattering);
 
     free(jmi->output_vrefs);
     free(*(jmi->z));
