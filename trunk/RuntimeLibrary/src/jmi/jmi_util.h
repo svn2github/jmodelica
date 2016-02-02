@@ -121,6 +121,7 @@ typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward de
 typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;       /**< \brief Forward declaration of struct. */
 typedef struct jmi_modules_t jmi_modules_t;               /**< \brief Forward declaration of struct. */
 typedef struct jmi_module_t jmi_module_t;                 /**< \brief Forward declaration of struct. */
+typedef struct jmi_chattering_t jmi_chattering_t;         /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
     int defined;
@@ -1277,6 +1278,7 @@ struct jmi_t {
     jmi_string_t resource_location;      /**< \brief Absolute file path to resource directory. No trailing separator. May be null. */
 
     jmi_modules_t modules;               /**< \brief Interchangable modules struct */
+    jmi_chattering_t* chattering;        /**< \brief Contains chattering information, used for logging */
 
     jmi_dynamic_list dyn_mem_head;   /**< \brief List of pointers to memory allocated during function evaluations. */
     jmi_dynamic_list* dyn_mem_last;  /**< \brief List of pointers to memory allocated during function evaluations. */

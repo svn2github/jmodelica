@@ -20,6 +20,7 @@
 #include "jmi_me.h"
 #include "jmi_delay.h"
 #include "jmi_dynamic_state.h"
+#include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
 #define indexmask  0x07FFFFFF
@@ -228,6 +229,9 @@ int jmi_initialize(jmi_t* jmi) {
         }
         return -1;
     }
+    
+    /* Initialize chattering struct */
+    jmi_chattering_init(jmi);
     
     retval = jmi_next_time_event(jmi);
     if(retval != 0) {
@@ -468,6 +472,8 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
     jmi_block_completed_integrator_step(jmi);
+    /* Chattering completed step */
+    jmi_chattering_completed_integrator_step(jmi);
     
     /* Verify the choice of dynamic states */
     retval = jmi_dynamic_state_verify_choice(jmi);
@@ -740,6 +746,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         if (jmi->n_sw > 0) {
             jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, jmi->n_sw);
         }
+        
+        /* Check for chattering and log it */
+        jmi_chattering_check(jmi);
+        
         jmi_log_leave(jmi->log, top_node);
 
     } else if (intermediate_results) {
