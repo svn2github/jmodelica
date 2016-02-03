@@ -455,8 +455,7 @@ fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
         return fmi2Error;
     }
 
-    /* Strings not yet supported. */
-    return fmi2Warning;
+    return fmi2OK;
 }
 
 fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
