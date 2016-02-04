@@ -18939,6 +18939,7 @@ model CFixedFalseParam3
             name="CFixedFalseParam3",
             description="Test of C code generation of parameters with fixed = false. Check that start value is generated.",
             template="$C_set_start_values$",
+            variability_propagation=false,
             generatedCode="
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;

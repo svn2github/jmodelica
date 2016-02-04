@@ -343,7 +343,7 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(final
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
 constraint 
- y <= x[2](0);
+ 1.0 <= x[2](0);
 end OptimicaTransformCanonicalTests.TimedArrayTest1;
 ")})));
 end TimedArrayTest1;
@@ -367,7 +367,7 @@ optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(final
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
 constraint 
- y <= x[1](0) * 2 + x[2](0) * 3;
+ 4.0 <= x[1](0) * 2 + x[2](0) * 3;
 end OptimicaTransformCanonicalTests.TimedArrayTest2;
 ")})));
 end TimedArrayTest2;
@@ -434,10 +434,10 @@ optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](fin
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
 constraint 
- y[1] <= x[1];
- y[1] <= x[2];
- y[2] <= x[1];
- y[2] <= x[2];
+ 4.0 <= 1.0;
+ 4.0 <= 2.0;
+ 6.0 <= 1.0;
+ 6.0 <= 2.0;
 end OptimicaTransformCanonicalTests.ForConstraint1;
 ")})));
 end ForConstraint1;

@@ -616,17 +616,15 @@ aspect ConstantFolding {
 	/**
 	 * Enables constant folding
 	 */
-	public void FClass.enableConstantFolding() {
-		for (FAbstractEquation equation : allEquations()) {
-			equation.enableConstantFolding();
-		}
-	}
-	
 	public void ASTNode.enableConstantFolding() {
 	    for (ASTNode n : this)
 	        n.enableConstantFolding();
 	}
-	
+    
+    public void FFunctionDecl.enableConstantFolding() {
+        
+    }
+    
 	public void FFunctionCallEquation.enableConstantFolding() {
 		for (FExp childExp : getCall().childFExps()) {
 			childExp.enableConstantFolding();
@@ -644,14 +642,14 @@ aspect ConstantFolding {
 	
 	public void FIfExp.enableConstantFolding() {
 		super.enableConstantFolding();
-		if (!constantFoldingEnabled && getIfExp().isConstantExp()) {
+        if (!constantFoldingEnabled && getIfExp().variability().knownParameterOrLess()) {
 			eliminateIfEquation = true;
 			is$Final = false;
 		}
 	}
 	
 	public void FAbstractExp.enableConstantFolding() {
-		if (isConstantExp()) {
+        if (variability().knownParameterOrLess()) {
 			constantFoldingEnabled = true;
 			is$Final = false;
 			return;
@@ -675,7 +673,7 @@ aspect ConstantFolding {
 	}
 
 	rewrite FAbstractExp {
-		when (constantFoldingEnabled && isConstantExp()) to FExp {
+        when (constantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
 			try {
 				CValue value = ceval();
 				if (!value.size().isEmpty()) 

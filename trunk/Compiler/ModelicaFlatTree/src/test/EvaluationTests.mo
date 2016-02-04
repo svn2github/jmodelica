@@ -1879,6 +1879,7 @@ model EvaluateAnnotation11
         TransformCanonicalTestCase(
             name="EvaluateAnnotation11",
             description="Evaluate annotation on record with mixed variabilities",
+            eliminate_alias_variables=false,
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation11
  eval parameter Integer a1[1].n = 1 /* 1 */;

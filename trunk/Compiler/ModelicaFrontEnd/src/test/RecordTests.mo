@@ -1006,7 +1006,7 @@ model RecordBinding9
 fclass RecordTests.RecordBinding9
  constant Real x.a = 1;
  parameter Real x.b = 2 /* 2 */;
- constant Real y.a = x.a;
+ constant Real y.a = 1.0;
  parameter Real y.b;
 parameter equation
  y.b = x.b;
@@ -1031,7 +1031,7 @@ model RecordBinding10
 			flatModel="
 fclass RecordTests.RecordBinding10
  constant Real x.a = 1;
- constant Real y.a = x.a;
+ constant Real y.a = 1.0;
  Real y.b;
 equation
  y.b = time;
