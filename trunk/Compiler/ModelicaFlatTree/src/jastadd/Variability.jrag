@@ -254,63 +254,66 @@ aspect Variability {
      * 
      * @param inWhen  is this node in a when equation?
      */
-    public void ASTNode.updateVariabilityForVariablesInWhen(boolean inWhen) {}
-
-    public void Opt.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        for (ASTNode n : this)
+    public void ASTNode.updateVariabilityForVariablesInWhen(boolean inWhen) {
+        for (ASTNode n : this) {
             n.updateVariabilityForVariablesInWhen(inWhen);
+        }
     }
-
-    public void List.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        for (ASTNode n : this)
-            n.updateVariabilityForVariablesInWhen(inWhen);
-    }
-
-    public void FAbstractEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        for (ASTNode n : this)
-            n.updateVariabilityForVariablesInWhen(inWhen);
-    }
-
-    public void FStatement.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        for (ASTNode n : this)
-            n.updateVariabilityForVariablesInWhen(inWhen);
-    }
-
-    public void FIfWhenClause.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        for (ASTNode n : this)
-            n.updateVariabilityForVariablesInWhen(inWhen);
-    }
-
+    
     public void FWhenEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
         super.updateVariabilityForVariablesInWhen(true);
     }
-
+    
     public void FWhenStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
         super.updateVariabilityForVariablesInWhen(true);
     }
+    
+    public void FIfEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
+        if (getTest().variability().knownParameterOrLess()) {
+            try {
+                if (getTest().ceval().booleanValue()) {
+                    getFAbstractEquations().updateVariabilityForVariablesInWhen(inWhen);
+                } else if (hasElse()) {
+                    getElse().updateVariabilityForVariablesInWhen(inWhen);
+                }
+                return;
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
+        super.updateVariabilityForVariablesInWhen(inWhen);
+    }
 
     public void FEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        if (inWhen) 
+        if (inWhen) {
             getLeft().makeContinuousVariablesDiscrete();
+        }
     }
-
+    
     public void FFunctionCallEquation.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        if (inWhen) 
-            for (FFunctionCallLeft left : getLefts())
-                if (left.hasFExp())
+        if (inWhen) {
+            for (FFunctionCallLeft left : getLefts()) {
+                if (left.hasFExp()) {
                     left.getFExp().makeContinuousVariablesDiscrete();
+                }
+            }
+        }
     }
-
+    
     public void FAssignStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        if (inWhen) 
+        if (inWhen) {
             getLeft().makeContinuousVariablesDiscrete();
+        }
     }
 
     public void FFunctionCallStmt.updateVariabilityForVariablesInWhen(boolean inWhen) {
-        if (inWhen) 
-            for (FFunctionCallLeft left : getLefts())
-                if (left.hasFExp())
+        if (inWhen) {
+            for (FFunctionCallLeft left : getLefts()) {
+                if (left.hasFExp()) {
                     left.getFExp().makeContinuousVariablesDiscrete();
+                }
+            }
+        }
     }
 
     /**

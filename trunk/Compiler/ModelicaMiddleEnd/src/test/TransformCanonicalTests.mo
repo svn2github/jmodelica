@@ -3944,6 +3944,81 @@ pre(temp_2) := false
 ")})));
 end WhenEqu17;
 
+model WhenEqu18
+    parameter Real t = 1 annotation(Evaluate=true);
+    Real x;
+equation
+    if t < 1 then
+        when time > 1 then
+            x = time;
+        end when;
+    else
+        x = time;
+    end if;
+    
+    when time > 1 then
+        if t < 1 then
+            x = time;
+        end if;
+    end when;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu18",
+            description="Variability of real in disabled when",
+            flatModel="
+fclass TransformCanonicalTests.WhenEqu18
+ eval parameter Real t = 1 /* 1 */;
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ pre(temp_1) = false;
+equation
+ x = time;
+ temp_1 = time > 1;
+end TransformCanonicalTests.WhenEqu18;
+")})));
+end WhenEqu18;
+
+model WhenEqu19
+    parameter Real t = 0 annotation(Evaluate=true);
+    Real x;
+equation
+    if t < 1 then
+        x = time;
+    else
+        when time > 1 then
+            x = time;
+        end when;
+    end if;
+    
+    when time > 1 then
+        if t < 1 then
+            
+        else
+            x = time;
+        end if;
+    end when;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu19",
+            description="Variability of real in disabled when",
+            flatModel="
+fclass TransformCanonicalTests.WhenEqu19
+ eval parameter Real t = 0 /* 0 */;
+ Real x;
+ discrete Boolean temp_1;
+initial equation 
+ pre(temp_1) = false;
+equation
+ x = time;
+ temp_1 = time > 1;
+end TransformCanonicalTests.WhenEqu19;
+")})));
+end WhenEqu19;
+
+
 model IntialWhenAlgorithm1
     Boolean a;
     Boolean x;
