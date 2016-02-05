@@ -388,7 +388,7 @@ public class XMLGenerator extends GenericXMLGenerator {
 						genPrinter.print(replaceIllegalChars(variable.getFStringComment().getComment())+"\" ");
 					}
 					genPrinter.print("variability=\"");
-					if (variable.isConstant()) {
+					if (variable.variability().knownParameterOrLess()) {
 						genPrinter.print("constant\" ");
 					} else if (variable.isParameter()) {
 						genPrinter.print("parameter\" ");

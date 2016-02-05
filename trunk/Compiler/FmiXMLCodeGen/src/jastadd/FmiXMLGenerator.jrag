@@ -245,7 +245,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
     protected FExp getStartExp(FVariable var) {
         if (var.useBindingExpAsStart()) 
             return var.getBindingExp();
-        else if (var.startAttributeSet() && !var.isDependentParameter())
+        else if (var.startAttributeSet() && !var.isDependentParameter() && !var.isAlias())
             return var.startAttributeExp();
         else if (var.isInput())
             return var.createStartAttributeExp();
@@ -259,9 +259,6 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param FVariable A variable class.
      */
     protected boolean generateStartAttribute(FVariable var) {
-        if (var.variability().knownParameterVariability()) {
-            return false;
-        }
         FExp startExp = getStartExp(var);
         return startExp != null && startExp.isConstantExp();
     }
@@ -285,6 +282,39 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
             return fclass.numEventIndicators();
     }
     
+    protected boolean generateAsConstant(FVariable var) {
+        return var.variability().knownParameterOrLess();
+    }
+    
+    protected String getCausality(FVariable var) {
+        if (var.isInput()) {
+            return "input";
+        } else if (var.isOutput()) {
+            return "output";
+        } else {
+            return getNonIOCausality(var);
+        }
+    }
+    
+    protected String getNonIOCausality(FVariable var) {
+        return "internal";
+    }
+    
+    protected String getVariability(FVariable var) {
+        if (generateAsConstant(var)) {
+            return "constant";
+        } else if (var.isParameter()) {
+            return getParameterVariability();
+        } else if (var.isDiscrete()) {
+            return "discrete";
+        } else {
+            return "continuous";
+        }
+    }
+    
+    protected String getParameterVariability() {
+        return "parameter";
+    }
 }
 
 /**
@@ -610,22 +640,10 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("valueReference", variable.valueReference(), genPrinter);
                 if (variable.hasFStringComment())
                     generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
-
-                if (variable.isConstant())
-                    generateAttribute("variability", "constant", genPrinter);
-                else if (variable.isParameter())
-                    generateAttribute("variability", "parameter", genPrinter);
-                else if (variable.isDiscrete())
-                    generateAttribute("variability", "discrete", genPrinter);
-                else //default
-                    generateAttribute("variability", "continuous", genPrinter);
-
-                if (variable.isInput())
-                    generateAttribute("causality", "input", genPrinter);
-                else if (variable.isOutput())
-                    generateAttribute("causality", "output", genPrinter);
-                else //default
-                    generateAttribute("causality", "internal", genPrinter);
+                
+                generateAttribute("variability", getVariability(variable), genPrinter);
+                
+                generateAttribute("causality", getCausality(variable), genPrinter);
 
                 if (variable.isAlias() && variable.isNegated())
                     generateAttribute("alias", "negatedAlias", genPrinter);
@@ -752,7 +770,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             if (generateStartAttribute(var)) {
                 generateAttribute("start", getXMLStartAttribute(var), genPrinter);
                 
-                if (!var.fixedAttribute() && !var.isConstant())
+                if (!var.fixedAttribute() && !var.variability().knownParameterOrLess())
                     generateAttribute("fixed", false, genPrinter); //Default is true
             }
         }
@@ -1333,20 +1351,33 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
         public String toString() { return stringRepresentation; }
     }
     
-    protected boolean generateStartAttribute(FVariable var) {
-        //Overshadow as in FMI 2.0 aliases are calculated unless they are constants
-        return super.generateStartAttribute(var) && (!var.isAlias() || var.isConstant());
-    }
-    
     private InitialType getInitialType(FVariable var) {
         if (!generateStartAttribute(var))
             return InitialType.CALCULATED;
-        else if (var.fixedAttribute() || var.isConstant())
+        else if (var.fixedAttribute() || generateAsConstant(var))
             return InitialType.EXACT;
         else
             return InitialType.APPROX;
     }
-	
+    
+    @Override
+    protected String getNonIOCausality(FVariable var) {
+        if (var.isParameter() && !generateAsConstant(var)) {
+            if (getInitialType(var) == InitialType.CALCULATED) {
+                return "calculatedParameter";
+            } else {
+                return "parameter";
+            }
+        } else {
+            return "local";
+        }
+    }
+    
+    @Override
+    protected String getParameterVariability() {
+        return "fixed";
+    }
+    
 	/**
 	 * Internal class used to generate a ModelVariables tag.
 	 * 
@@ -1411,27 +1442,11 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                 InitialType initialType = getInitialType(variable);
                 
                 //Generate the causality attribute.
-                if (variable.isInput())
-                    generateAttribute("causality", "input", genPrinter);
-                else if (variable.isOutput())
-                    generateAttribute("causality", "output", genPrinter);
-                else if (variable.isParameter() && initialType == InitialType.CALCULATED)
-                    generateAttribute("causality", "calculatedParameter", genPrinter);
-                else if (variable.isParameter())
-                    generateAttribute("causality", "parameter", genPrinter);
-                else //default
-                    generateAttribute("causality", "local", genPrinter);
+                generateAttribute("causality", getCausality(variable), genPrinter);
 
                 //Generate the variability attribute. No tunable parameters as for now.
-                if (variable.isConstant())
-                    generateAttribute("variability", "constant", genPrinter);
-                else if (variable.isParameter())
-                    generateAttribute("variability", "fixed", genPrinter);
-                else if (variable.isDiscrete())
-                    generateAttribute("variability", "discrete", genPrinter);
-                else //default
-                    generateAttribute("variability", "continuous", genPrinter);
-
+                generateAttribute("variability", getVariability(variable), genPrinter);
+                
                 //Generate the initial attribute.
                 if (!variable.isInput()) //Except for inputs, see FMI 2.0 spec p.47
                     generateAttribute("initial", initialType, genPrinter);

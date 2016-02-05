@@ -2503,7 +2503,7 @@ aspect Attributes {
 
     // start attribute
     syn boolean FVariable.useBindingExpAsStart()  = 
-        (isIndependentParameter() && hasBindingExp() && !isAlias()) || isIndependentConstant();
+        (isIndependentParameter() || variability().knownParameterOrLess()) && hasBindingExp();
     
     syn boolean FVariable.startAttributeSet()     = attributeSet(FAttribute.START);
     syn FExp    FVariable.startAttributeExp()     = attributeExp(FAttribute.START);

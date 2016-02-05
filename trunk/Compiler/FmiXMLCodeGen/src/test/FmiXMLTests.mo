@@ -1229,14 +1229,14 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"a\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"2\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"b\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435459\" variability=\"parameter\" causality=\"internal\" alias=\"noAlias\">
-        <Integer />
+    <ScalarVariable name=\"n\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <Integer start=\"3\" />
     </ScalarVariable>
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -1263,14 +1263,14 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"a\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"2\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"b\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435459\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Integer />
+    <ScalarVariable name=\"n\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Integer start=\"3\" />
     </ScalarVariable>
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"1.0\" />
@@ -1427,8 +1427,8 @@ $modelVariables$
     <ScalarVariable name=\"e4\" valueReference=\"268435460\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias1.E\" start=\"3\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435458\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <Integer />
+    <ScalarVariable name=\"n\" valueReference=\"268435458\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Integer start=\"2\" />
     </ScalarVariable>
     <ScalarVariable name=\"s1\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
         <String start=\"string\" />
@@ -1436,14 +1436,14 @@ $modelVariables$
     <ScalarVariable name=\"s2\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
         <String start=\"string\" />
     </ScalarVariable>
-    <ScalarVariable name=\"s3\" valueReference=\"805306368\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <String />
+    <ScalarVariable name=\"s3\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <String start=\"string\" />
     </ScalarVariable>
-    <ScalarVariable name=\"x1\" valueReference=\"268435457\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <Integer />
+    <ScalarVariable name=\"x1\" valueReference=\"268435457\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Integer start=\"1\" />
     </ScalarVariable>
-    <ScalarVariable name=\"x2\" valueReference=\"0\" variability=\"parameter\" causality=\"internal\" alias=\"alias\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"x2\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
 </ModelVariables>
 ")})));
@@ -1485,8 +1485,8 @@ $modelVariables$
     <ScalarVariable name=\"e4\" valueReference=\"268435460\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Enumeration declaredType=\"FmiXMLTests.ConstantAlias2.E\" start=\"3\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435458\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Integer />
+    <ScalarVariable name=\"n\" valueReference=\"268435458\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Integer start=\"2\" />
     </ScalarVariable>
     <ScalarVariable name=\"s1\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <String start=\"string\" />
@@ -1494,14 +1494,14 @@ $modelVariables$
     <ScalarVariable name=\"s2\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <String start=\"string\" />
     </ScalarVariable>
-    <ScalarVariable name=\"s3\" valueReference=\"805306368\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <String />
+    <ScalarVariable name=\"s3\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <String start=\"string\" />
     </ScalarVariable>
-    <ScalarVariable name=\"x1\" valueReference=\"268435457\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Integer />
+    <ScalarVariable name=\"x1\" valueReference=\"268435457\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Integer start=\"1\" />
     </ScalarVariable>
-    <ScalarVariable name=\"x2\" valueReference=\"0\" causality=\"calculatedParameter\" variability=\"fixed\" initial=\"calculated\">
-        <Real relativeQuantity=\"false\" />
+    <ScalarVariable name=\"x2\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <Real relativeQuantity=\"false\" start=\"1.0\" />
     </ScalarVariable>
 </ModelVariables>
 ")})));
