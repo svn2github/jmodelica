@@ -1497,6 +1497,10 @@ aspect TransformCanonical {
 		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
 	}
 
+    public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIALBE =
+            new SimpleErrorProducer("DIFFERENTIATED_DISCRETE_VARIALBE", ProblemKind.SEMANTIC,
+                    "Unable to differentiate the variable %s which is declared or infered to be discrete");
+	
     public class FClass {
         
         public setFDerivativeVariables setFDerivativeVariables = new setFDerivativeVariables();
@@ -1511,13 +1515,20 @@ aspect TransformCanonical {
             
             public void perform() {
                 ArrayList<FVariable> l = new ArrayList<FVariable>();
-                for (FVariable fv : getFVariables())
-                    if (!fv.isDerivativeVariable())
+                for (FVariable fv : getFVariables()) {
+                    if (!fv.isDerivativeVariable()) {
                         l.add(fv);
-                for (FVariable fv : variablesToVisit())
+                    }
+                }
+                for (FVariable fv : variablesToVisit()) {
+                    if (fv.isDiscrete()) {
+                        DIFFERENTIATED_DISCRETE_VARIALBE.invoke(fv, fv.name());
+                    }
                     l.add(fv.createFDerivativeVariable());
+                }
                 setFVariableList(new List<FVariable>(l));
                 root().flushAllRecursive();
+                breakOnErrors();
             }
         }
         

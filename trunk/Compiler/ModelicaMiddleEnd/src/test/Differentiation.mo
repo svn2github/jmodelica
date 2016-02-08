@@ -996,6 +996,26 @@ end Differentiation.IntegerVariable;
 ")})));
 end IntegerVariable;
 
+model DifferentiatedDiscreteVariable
+    Real x1,x2;
+equation
+    der(x1) + der(x2) = 1;
+    when time > 2 then
+        x1 = sin(x2) + time;
+    end when;
+
+annotation(__JModelica(UnitTesting(tests={
+    ErrorTestCase(
+        name="DifferentiatedDiscreteVariable",
+        description="Test error given when differentiating a discrete real",
+        errorMessage="
+1 errors found:
+
+Error in flattened model, DIFFERENTIATED_DISCRETE_VARIALBE:
+  Unable to differentiate the variable x1 which is declared or infered to be discrete
+")})));
+end DifferentiatedDiscreteVariable;
+
 model ErrorMessage1
   Real x1;
   Real x2;
