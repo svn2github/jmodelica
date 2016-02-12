@@ -15858,6 +15858,111 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end RecordTearingTest2;
 
+model TornMetaEquation1
+    Real x;
+    Real y;
+    Real z;
+    Real zz;
+    Boolean b;
+    
+equation
+    zz + y = 0.1;
+    zz + z = 1;
+    y + z = if b then time else -time;
+    b = y - z > time;
+    der(x) = 1;
+    when b and not pre(b) then
+        reinit(x, 1);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TornMetaEquation1",
+            description="",
+            template="
+$C_dae_add_blocks_residual_functions$
+$C_reinit_temp_decls$
+$C_dae_blocks_residual_functions$",
+            generatedCode="
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 2, 1, 2, 2, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+
+static jmi_ad_var_t tmp_1;
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 3;
+        x[1] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 4;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870919;
+        x[1] = 536870920;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870920;
+        x[1] = 536870919;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+        (*res)[1] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _z_2;
+        x[1] = _y_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
+        jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
+        jmi_real_t* Q3 = residual;
+        int i;
+        char trans = 'N';
+        double alpha = -1;
+        double beta = 1;
+        int n1 = 1;
+        int n2 = 2;
+        Q1[1] = 1.0;
+        for (i = 0; i < 2; i += 1) {
+            Q1[i + 0] = (Q1[i + 0]) / (1.0);
+        }
+        Q2[0] = 1.0;
+        memset(Q3, 0, 4 * sizeof(jmi_real_t));
+        Q3[0] = 1.0;
+        Q3[1] = 1.0;
+        Q3[3] = 1.0;
+        dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+        free(Q1);
+        free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _z_2 = x[0];
+            _y_1 = x[1];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch(_y_1 - _z_2 - (_time), _sw(0), jmi->events_epsilon, JMI_REL_GT);
+            }
+            _b_4 = _sw(0);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _temp_1_5 = LOG_EXP_AND(_b_4, LOG_EXP_NOT(pre_b_4));
+        }
+        if (LOG_EXP_AND(_temp_1_5, LOG_EXP_NOT(pre_temp_1_5))) {
+            tmp_1 = AD_WRAP_LITERAL(1);
+        }
+        _zz_3 = - _y_1 + 0.1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = 1 - (_zz_3 + _z_2);
+            (*res)[1] = COND_EXP_EQ(_b_4, JMI_TRUE, _time, - _time) - (_y_1 + _z_2);
+        }
+    }
+    return ef;
+}
+
+")})));
+end TornMetaEquation1;
+
+
 
 model MathSolve
 	Real a[2,2] = [1,2;3,4];

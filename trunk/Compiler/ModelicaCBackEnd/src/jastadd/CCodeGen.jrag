@@ -4081,7 +4081,7 @@ aspect CCodeGen {
     public void TornEquationBlock.genBlockResidualFunction_jacobian_C(CodePrinter p, CodeStream str, String indent) {
         if (!isLinear())
             return;
-        int n1 = localSolvedRealBlocks().size();
+        int n1 = localSolvedRealBlocks().size() - localMetaBlocks().size();
         int n2 = unsolvedBlocks().size();
         if (n1 == 0) {
             /* This block should not be a torn block. #4691. */

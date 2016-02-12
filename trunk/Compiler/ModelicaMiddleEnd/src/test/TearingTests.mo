@@ -792,4 +792,179 @@ Discrete equations:
 ")})));
 end TypeComputation1;
 
+model MetaEquation1
+    Real x;
+    Real y;
+    Real z;
+    Real zz;
+    Boolean b;
+    
+equation
+    zz + y = 0.1;
+    zz + z = 1;
+    y + z = if b then time else -time;
+    b = y - z > time;
+    der(x) = 1;
+    when b and not pre(b) then
+        reinit(x, 1);
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="MetaEquation1",
+            description="Test so that the tearing algorithm handles meta equations correctly",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed linear system (Block 1) of 2 iteration variables and 1 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  zz
+
+Iteration variables:
+  z
+  y
+
+Solved discrete variables:
+  b
+  temp_1
+
+Torn equations:
+  zz := - y + 0.1
+
+Continuous residual equations:
+  zz + z = 1
+    Iteration variables: z
+  y + z = if b then time else - time
+    Iteration variables: y
+
+Discrete equations:
+  b := y - z > time
+  temp_1 := b and not pre(b)
+
+Meta equations:
+  if temp_1 and not pre(temp_1) then
+    reinit(x, 1);
+  end if
+
+Jacobian:
+  |1.0, 0.0, 1.0|
+  |1.0, 1.0, 0.0|
+  |0.0, 1.0, 1.0|
+
+--- Solved equation ---
+der(x) := 1
+-------------------------------
+")})));
+end MetaEquation1;
+
+model MetaEquation2
+    function f
+        input Real i1;
+        input Boolean i2[1];
+        output Boolean o1;
+        output Integer o2;
+    algorithm
+        o1 := i2[1] and i1 > 0;
+        o2 := 1;
+        annotation(Inline=false);
+    end f;
+    
+    Real x1;
+    Real x2;
+    Real r1;
+    Integer i1;
+    Boolean b1;
+    Real r2;
+    Real r3[1];
+    Real r4;
+    Real r5;
+    Boolean b2;
+    Boolean b3;
+    parameter Boolean p1 = true;
+    
+equation
+    der(x1) = 1;
+    der(x2) = time;
+    r2 = if b1 then r1 else 42.0;
+    r1 = if b1 then r3[i1] else 0.0;
+    r3[1] = if b3 then 3.14 else 6.28;
+    when pre(b3) and not b3 then
+        reinit(x1, 321.0);
+    end when;
+    when not pre(b1) and b1 then
+        reinit(x2, 123.0);
+    end when;
+    r4 = r3[1] + r2;
+    b3 = p1 and b2;
+    r5 = if noEvent(r4 >= 0) then r4 else - r4;
+    b2 = r5 < 42.0;
+    (b1, i1) = f(1, {b3});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="MetaEquation2",
+            description="Test so that the tearing algorithm handles meta equations correctly",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+der(x1) := 1
+
+--- Solved equation ---
+der(x2) := time
+
+--- Torn mixed linear system (Block 1) of 2 iteration variables and 3 solved variables ---
+Coefficient variability: discrete-time
+Torn variables:
+  r5
+  r1
+  r2
+
+Iteration variables:
+  r3[1]
+  r4
+
+Solved discrete variables:
+  b2
+  b3
+  b1
+  temp_2
+  temp_1
+
+Torn equations:
+  r5 := if noEvent(r4 >= 0) then r4 else - r4
+  r1 := if b1 then ({r3[1]})[1] else 0.0
+  r2 := if b1 then r1 else 42.0
+
+Continuous residual equations:
+  r3[1] = if b3 then 3.14 else 6.28
+    Iteration variables: r3[1]
+  r4 = r3[1] + r2
+    Iteration variables: r4
+
+Discrete equations:
+  b2 := r5 < 42.0
+  b3 := p1 and b2
+  (b1, ) = TearingTests.MetaEquation2.f(1, {b3})
+    Assigned variables: b1
+  temp_2 := not pre(b1) and b1
+  temp_1 := pre(b3) and not b3
+
+Meta equations:
+  if temp_2 and not pre(temp_2) then
+    reinit(x2, 123.0);
+  end if
+  if temp_1 and not pre(temp_1) then
+    reinit(x1, 321.0);
+  end if
+
+Jacobian:
+  |1.0, 0.0, 0.0, 0.0, 0.0|
+  |0.0, 1.0, 0.0, - (if b1 then ({1.0})[1] else 0.0), 0.0|
+  |0.0, - (if b1 then 1.0 else 0.0), 1.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, 1.0, 0.0|
+  |0.0, 0.0, -1.0, -1.0, 1.0|
+-------------------------------
+")})));
+end MetaEquation2;
+
 end TearingTests;

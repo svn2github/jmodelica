@@ -143,16 +143,6 @@ aspect BLT{
                 }
             }
 
-            Map<FAbstractEquation, Collection<E>> faeToEMap = new HashMap<FAbstractEquation, Collection<E>>();
-            for (E e : component) {
-                Collection<E> col = faeToEMap.get(e.getEquation());
-                if (col == null) {
-                    col = new ArrayList<E>();
-                    faeToEMap.put(e.getEquation(), col);
-                }
-                col.add(e);
-            }
-            
             AbstractEquationBlock block = null;
             EquationBlock eqnBlock = null;
             boolean torn = false;
@@ -211,7 +201,8 @@ aspect BLT{
 //                else
 //                   Give warning?
             }
-            if (eqnBlock != null) {
+            if (eqnBlock != null && !torn) {
+                // Torn blocks handles meta equations internaly!
                 for (E eqn : metaEquations) {
                     eqnBlock.addSolvedBlock(createMetaBlock(eqn.getEquation()));
                 }
@@ -1177,7 +1168,27 @@ aspect BLT{
         public abstract void errorCheck();
 
         protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars, Set<FAbstractEquation> activeRealEquations) {
-            FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
+            int numEqns = 0;
+            for (FAbstractEquation eqn : eqns) {
+                if (!eqn.isMetaEquation()) {
+                    numEqns++;
+                }
+            }
+            int numVars = vars.size();
+            if (numEqns != numVars) {
+                ASTNode.log.debug("Oh boy, something went wrong when constructing this block!");
+                ASTNode.log.debug("Variables of intereset:");
+                for (FVariable var : vars) {
+                    ASTNode.log.debug(var);
+                }
+                ASTNode.log.debug("Equations of intereset:");
+                for (FAbstractEquation eqn : eqns) {
+                    ASTNode.log.debug(eqn);
+                }
+                
+                throw new IllegalArgumentException("Incorrect arguments to AbstractEquationBlock.computeJacobian(). The number of equations is " + numEqns + " and number of variables is " + numVars + "!");
+            }
+            FExp[][] jacobian = new FExp[numEqns][numVars];
             int row = 0;
             int col = 0;
             Map<FVariable, Integer> columnMap = new HashMap<FVariable, Integer>();
@@ -1185,6 +1196,9 @@ aspect BLT{
                 columnMap.put(fv, col++);
             
             for (FAbstractEquation fe : eqns) {
+                if (fe.isMetaEquation()) {
+                    continue;
+                }
                 if (!activeRealEquations.contains(fe)) {
                     jacobian[row][row] = new FRealLitExp(1);
                     jacobian[row][row].parent = fe; // TODO: This is ugly, yes!
@@ -2899,8 +2913,11 @@ aspect BLTPrettyPrinting {
     protected void TornEquationBlock.prettyPrintBeforeEquationsStr(Printer p, CodeStream str, String indent) {
         String innerIndent = p.indent(indent);
         str.formatln("%sTorn equations:", indent);
-        for (AbstractEquationBlock seb : solvedRealBlocks())
-            seb.prettyPrintSub(p, str, innerIndent);
+        for (AbstractEquationBlock aeb : solvedRealBlocks()) {
+            if (!aeb.isMeta()) {
+                aeb.prettyPrintSub(p, str, innerIndent);
+            }
+        }
         str.println();
     }
 
@@ -3142,6 +3159,9 @@ aspect AutomaticTearing {
                     //       few variables. 
                     java.util.List<SolvingEq> residuals = new ArrayList<SolvingEq>();
                     for (SolvingEq e : SUME) {
+                        // No need to deal with meta equations here since they
+                        // can not be in SUME and no variable matches to a meta
+                        // equation.
                         SolvingEq bestRes = e;
                         for (SolvingVar v : e.getSolvableVariables()) {
                             SolvingEq ee = v.getMatching();
@@ -3206,6 +3226,9 @@ aspect AutomaticTearing {
                             // Go through equations that might get a new matching
                             boolean isChanged = false;
                             for (SolvingEq e : eqs) {
+                                if (e.isMeta()) {
+                                    continue;
+                                }
                                 SolvingVar bestMatch = e.getMatching();
                                 for (SolvingVar v : e.getSolvableVariables()) {
                                     if (v.isIter() && v.compareTo(bestMatch) < 0)
@@ -3257,6 +3280,9 @@ aspect AutomaticTearing {
             private static void tearInner(SolvingBiPGraph g, TornEquationBlock eb){
                 SolvingVar bestIter = null;
                 for (SolvingEq e : g.getEquations()) {
+                    if (e.isMeta()) {
+                        continue;
+                    }
                     SolvingVar v = e.getMatching();
                     if (bestIter == null || v.compareTo(bestIter) > 0)
                         bestIter = v;
