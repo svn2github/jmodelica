@@ -48,7 +48,7 @@ install_casadi: casadi
 MC_INTERFACE=$(abs_top_srcdir)/ModelicaCasADiInterface
 
 export CASADI_HOME=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi
-MC_SRC="$(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi"
+MC_SRC=$(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
 OC_SRC=$(JAVA_CASADI_BASE_DIR)/OptimicaCompilerCasADi
 MC_SRC_SWIG=$(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi/src/swig
 
