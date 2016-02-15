@@ -726,7 +726,13 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         if (jmi->nextTimeEvent.defined) {
             event_info->next_event_time_defined = TRUE;
             event_info->next_event_time = jmi->nextTimeEvent.time;
-            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
+            if (event_info->next_event_time < jmi_get_t(jmi)[0]) {  /* Next event time is less than the current, error! */
+                jmi_log_node(jmi->log, logError, "NextTimeEventFailure", "Failed to compute the next time event. "
+                                    "The next time event was computed to <t:%E> while the current time is <t:%E>.",
+                                    event_info->next_event_time,jmi_get_t(jmi)[0]);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
         } else {
             event_info->next_event_time_defined = FALSE;
         }
