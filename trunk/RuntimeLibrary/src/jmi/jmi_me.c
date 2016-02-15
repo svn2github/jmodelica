@@ -1042,6 +1042,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_block_jacobian_check_tol");
     if(index)
          bsop->block_jacobian_check_tol = z[index];
+    index = get_option_index("_block_solver_profiling");
+    if(index)
+        bsop->block_profiling  = (int)z[index];
     index = get_option_index("_cs_solver");
     if(index)
         op->cs_solver = (int)z[index];
