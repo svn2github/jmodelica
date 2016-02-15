@@ -766,7 +766,7 @@ public class CGenerator extends GenericGenerator {
 		}
 
         public void generate(CodeStream str) {
-            CodePrinter p = ASTNode.printer_C.initialSystemPrinter();
+            CodePrinter p = ASTNode.printer_C;
             String indent = "";
             String next = p.indent(indent);
             

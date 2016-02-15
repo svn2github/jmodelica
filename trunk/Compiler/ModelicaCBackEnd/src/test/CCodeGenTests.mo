@@ -19401,11 +19401,8 @@ C_dae_init_add_blocks_residual_functions
 C_ode_derivatives
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
-    if (jmi->atInitial || jmi->atEvent) {
-        _sw_init(0) = jmi_turn_switch(_p_1 - (AD_WRAP_LITERAL(3.14)), _sw_init(0), jmi->events_epsilon, JMI_REL_GT);
-    }
-    _x_0 = COND_EXP_EQ(_sw_init(0), JMI_TRUE, _p_1 - AD_WRAP_LITERAL(42), _p_1 + _time);
-    return ef;
+    _x_0 = COND_EXP_EQ(COND_EXP_GT(_p_1, AD_WRAP_LITERAL(3.14), JMI_TRUE, JMI_FALSE), JMI_TRUE, _p_1 - AD_WRAP_LITERAL(42), _p_1 + _time);
+        return ef;
 }
 
 C_ode_initialization
