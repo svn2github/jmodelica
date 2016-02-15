@@ -553,6 +553,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
         jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
+        jmi_log_reals(jmi->log, node, logInfo, "Inputs", jmi_get_real_u(jmi), jmi->n_real_u);
     }
 
     jmi->block_level = 0; /* to recover from errors */
