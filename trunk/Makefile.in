@@ -279,7 +279,7 @@ pyfmi_install_dir = $(abs_builddir)/PyFMI_install
 pyjmi_install_dir = $(abs_builddir)/PyJMI_install
 bindistdir = JModelica.org-$(VERSION)-bin
 MC_INTERFACE = $(abs_top_srcdir)/ModelicaCasADiInterface
-MC_SRC = $(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
+MC_SRC = "$(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi"
 OC_SRC = $(JAVA_CASADI_BASE_DIR)/OptimicaCompilerCasADi
 MC_SRC_SWIG = $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi/src/swig
 
