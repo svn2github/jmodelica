@@ -282,22 +282,9 @@ aspect ComplianceCheck {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "terminate");
     }
 
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_REINIT_IN_INITIAL =
-            new SimpleErrorProducer("UNSUPPORTED_REINIT_IN_INITIAL", ProblemKind.COMPLIANCE, "Reinit in an initial when equation is not supported");
-
     public void FReinit.complianceCheck(ErrorCheckType checkType) {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "reinit");
-        if (inInitialWhenClause()) {
-            UNSUPPORTED_REINIT_IN_INITIAL.invoke(this);
-        }
     }
-
-    inh boolean FReinit.inInitialWhenClause();
-    inh boolean FAbstractEquation.inInitialWhenClause();
-    eq FClass.getChild().inInitialWhenClause()                          = false;
-    eq InstNode.getChild().inInitialWhenClause()                        = false;
-    eq FIfWhenElseEquation.getFAbstractEquation().inInitialWhenClause() = isWhen() || inInitialWhenClause();
-    eq FIfWhenEquation.getFAbstractEquation().inInitialWhenClause()     = isWhen() && getTest().isInitialGuard() || inInitialWhenClause();
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_STRING_ARGUMENT =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_STRING_ARGUMENT", ProblemKind.COMPLIANCE, "%s with higher than parameter variability is not supported");

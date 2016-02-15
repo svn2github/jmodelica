@@ -2223,7 +2223,9 @@ aspect CCodeGen {
 
     @Override
     public void FIfWhenEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitTempDecls_C(p, str, indent);
+        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
+            super.genReinitTempDecls_C(p, str, indent);
+        }
         if (hasElse()) {
             getElse().genReinitTempDecls_C(p, str, indent);
         }
@@ -2263,7 +2265,9 @@ aspect CCodeGen {
 
     @Override
     public void FIfWhenEquation.genReinitTempInits_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitTempInits_C(p, str, indent);
+        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
+            super.genReinitTempInits_C(p, str, indent);
+        }
         if (hasElse()) {
             getElse().genReinitTempInits_C(p, str, indent);
         }
@@ -2313,7 +2317,9 @@ aspect CCodeGen {
 
     @Override
     public void FIfWhenEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        super.genReinitWritebacks_C(p, str, indent);
+        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
+            super.genReinitWritebacks_C(p, str, indent);
+        }
         if (hasElse()) {
             getElse().genReinitWritebacks_C(p, str, indent);
         }

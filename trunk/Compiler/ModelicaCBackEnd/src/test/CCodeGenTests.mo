@@ -8775,6 +8775,8 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
+$C_reinit_temp_decls_initial$
+-----
 $C_reinit_temp_decls$
 -----
 $C_ode_derivatives$
@@ -8786,6 +8788,7 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
+-----
 static jmi_ad_var_t tmp_1;
 
 -----
@@ -8868,6 +8871,8 @@ equation
             description="",
             variability_propagation=false,
             template="
+$C_reinit_temp_decls_initial$
+-----
 $C_reinit_temp_decls$
 -----
 $C_ode_derivatives$
@@ -8879,6 +8884,7 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
+-----
 static jmi_ad_var_t tmp_1;
 static jmi_ad_var_t tmp_2;
 
@@ -9004,6 +9010,8 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
+$C_reinit_temp_decls_initial$
+-----
 $C_reinit_temp_decls$
 -----
 $C_ode_derivatives$
@@ -9015,6 +9023,7 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
+-----
 static jmi_ad_var_t tmp_1;
 static jmi_ad_var_t tmp_2;
 
@@ -9129,6 +9138,8 @@ equation
             variability_propagation=false,
             relational_time_events=false,
             template="
+$C_reinit_temp_decls_initial$
+-----
 $C_reinit_temp_decls$
 -----
 $C_ode_derivatives$
@@ -9140,6 +9151,7 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
+-----
 static jmi_ad_var_t tmp_1;
 
 -----
@@ -9211,6 +9223,173 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 -----
 ")})));
 end ReinitCTest4;
+
+//TODO: The result in this test isn't ideal since the reinit operator is
+// handled in the original system as well even though it won't be triggered.
+// This is however not the fault of reinit but when initial()...
+model ReinitCTest5
+    Real x;
+equation
+    der(x) = time;
+    when initial() then
+        reinit(x, 1);
+    end when;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest5",
+            description="Test the reinit operator in the initial system",
+            template="
+$C_reinit_temp_decls_initial$
+-----
+$C_reinit_temp_decls$
+-----
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+static jmi_ad_var_t tmp_1;
+
+-----
+static jmi_ad_var_t tmp_2;
+
+-----
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_2 = _x_0;
+    _der_x_1 = _time;
+    if (_atInitial) {
+        tmp_2 = AD_WRAP_LITERAL(1);
+    }
+    if (tmp_2 != _x_0) {
+        _x_0 = tmp_2;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+
+-----
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_1 = _x_0;
+    _der_x_1 = _time;
+    _x_0 = 0.0;
+    tmp_1 = AD_WRAP_LITERAL(1);
+    if (tmp_1 != _x_0) {
+        _x_0 = tmp_1;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+
+-----
+
+-----
+
+")})));
+end ReinitCTest5;
+
+model ReinitCTest6
+    Real x;
+equation
+    der(x) = time;
+    when {initial(), time > 2} then
+        reinit(x, 1);
+    end when;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest6",
+            description="Test the reinit operator in the initial system",
+            template="
+$C_reinit_temp_decls_initial$
+-----
+$C_reinit_temp_decls$
+-----
+$C_ode_derivatives$
+-----
+$C_ode_initialization$
+-----
+$C_dae_blocks_residual_functions$
+-----
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+static jmi_ad_var_t tmp_1;
+
+-----
+static jmi_ad_var_t tmp_2;
+
+-----
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_2 = _x_0;
+    _der_x_3 = _time;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (2), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    if (tmp_2 != _x_0) {
+        _x_0 = tmp_2;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+
+-----
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_1 = _x_0;
+    _der_x_3 = _time;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (2), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_1 = _sw(0);
+    _x_0 = 0.0;
+    tmp_1 = AD_WRAP_LITERAL(1);
+    pre_temp_1_1 = JMI_FALSE;
+    if (tmp_1 != _x_0) {
+        _x_0 = tmp_1;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+
+-----
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870916;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(_time - (2), _sw(0), JMI_ALMOST_EPS, jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+            }
+            _temp_1_1 = _sw(0);
+        }
+        if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_1_1, LOG_EXP_NOT(pre_temp_1_1)))) {
+            tmp_2 = AD_WRAP_LITERAL(1);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+        }
+    }
+    return ef;
+}
+
+
+-----
+
+")})));
+end ReinitCTest6;
 
 
 

@@ -833,8 +833,16 @@ public class CGenerator extends GenericGenerator {
                     element.genVarDecls_C(p, str, indent);
                 }
                 @Override
+                public void genPre(AbstractEquationBlock element) {
+                    element.genReinitTempInits_C(p, str, indent);
+                }
+                @Override
                 public void gen(AbstractEquationBlock element) {
                     element.genBlock_C(p, str, indent, true);
+                }
+                @Override
+                public void genPost(AbstractEquationBlock element) {
+                    element.genReinitWritebacks_C(p, indent, str);
                 }
             };
             
@@ -887,6 +895,25 @@ public class CGenerator extends GenericGenerator {
         }
     }
 
+    /**
+     * Generates temporary variables for reinit writebacks in the initial system
+     */
+    /**
+     * C: C temporary variables for reinit writebacks in the initial system
+     */
+    public class DAETag_C_reinit_writeback_temps_initial extends DAETag {
+        
+        public DAETag_C_reinit_writeback_temps_initial(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_reinit_temp_decls_initial", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+        
+        public void generate(CodeStream genPrinter) {
+            for (AbstractEquationBlock block : fclass.getDAEInitBLT().getAllBlocks())
+                block.genReinitTempDecls_C(ASTNode.printer_C.initialSystemPrinter(), genPrinter, "");
+        }
+    }
+    
 	/**
 	 * Generates headers for Modelica functions.
 	 */
