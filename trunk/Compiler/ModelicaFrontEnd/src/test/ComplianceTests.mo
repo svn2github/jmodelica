@@ -832,4 +832,42 @@ Compliance error at line 815, column 24, in file 'Compiler/ModelicaFrontEnd/src/
 ")})));
 end ExtObjInFunction2;
 
+model ReinitInInitial1
+    Real x;
+equation
+    der(x) = time;
+    when initial() then
+        reinit(x, 1);
+    end when;
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ReinitInInitial1",
+            description="Test compliance error for reinit in intial equation",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 840, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_REINIT_IN_INITIAL:
+  Reinit in an initial when equation is not supported
+")})));
+end ReinitInInitial1;
+
+model ReinitInInitial2
+    Real x;
+equation
+    der(x) = time;
+    when initial() or time > 2 then
+        reinit(x, 1);
+    end when;
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ReinitInInitial2",
+            description="Test compliance error for reinit in intial equation",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 840, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_REINIT_IN_INITIAL:
+  Reinit in an initial when equation is not supported
+")})));
+end ReinitInInitial2;
+
 end ComplianceTests;
