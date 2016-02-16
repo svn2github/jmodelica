@@ -430,6 +430,12 @@ AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 AS_IF([test "x$ANT" = x],
       [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
 
+AS_IF([test "x$PYTHON_HOME" != x], [AC_MSG_RESULT([Using Python installation $PYTHON_HOME])]
+      [test "x$PYTHON_HOME" = x], [AC_MSG_RESULT([Python installation not specified.])])
+
+
+AC_SUBST(PYTHON_HOME)
+PYTHON_HOME=$PYTHON_HOME
 
 # Checks for header files.
 AC_HEADER_STDC

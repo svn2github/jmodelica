@@ -127,13 +127,10 @@ $(OC_SRC)/bin/separateProcess.jar:  mc_optimica
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
-# Hook for using a specific Python installation
-PYTHON_LIB=
-PYTHON_INCLUDE=
 
 modelicacasadi_wrapper: $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi # $(MC_LIB)
-	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
-	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
+	if [ "$(PYTHON_HOME)" ]; then \
+	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_HOME)/libs/libpython27.a -DPYTHON_INCLUDE_DIR=$(PYTHON_HOME)/include"; \
 	else \
 	  CMAKE_EXTRA_ARGS=""; \
 	fi; \
