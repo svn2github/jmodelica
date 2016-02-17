@@ -595,7 +595,12 @@ abstract public class OptionRegistry {
              Category.internal,
              "",
              "The MODELICAPATH to use during compilation."),
-
+        CANONIZE_EQUATIONS
+        	("canonize_equations",
+        	 OptionType.compiler,
+        	 Category.experimental,
+        	 true,
+        	 "If enabled, equations will be put in canonical form."),
         // Runtime options
         /*
          * Note: Two JUnit tests are affected by changes to runtime options:

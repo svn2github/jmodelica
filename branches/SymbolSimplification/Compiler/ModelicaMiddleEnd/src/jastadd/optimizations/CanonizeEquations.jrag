@@ -1,0 +1,168 @@
+aspect CanonizeEquations {
+	public class FClass {
+        /**
+         * Perform canonization on equations if it is activated.
+         */
+        public class canonizeEquationsIfSet extends Transformation {
+            public canonizeEquationsIfSet() {
+                super("canonize_equations");
+            }
+            
+            public void perform() {
+                canonizeEquations();
+            }
+        }
+        
+        public canonizeEquationsIfSet canonizeEquations = new canonizeEquationsIfSet();
+    }
+    
+    syn boolean FDivExp.isDivExp() = true;
+    syn boolean FExp.isDivExp() = false;
+    
+    syn boolean FBinExp.isBinExp() = true;
+    syn boolean FExp.isBinExp() = false;
+    
+    syn boolean FAddExp.isAddExp() = true;
+    syn boolean FExp.isAddExp() = false;
+    
+    syn boolean FSubExp.isSubExp() = true;
+    syn boolean FExp.isSubExp() = false;
+    
+    syn boolean FExp.isFExp() = true;
+    syn boolean ASTNode.isFExp() = false;
+    
+    /**
+     * Transforms equations to canonical form.
+     */
+    public class FClass {
+        private FExp denominator = null;
+        private boolean continueUp = false;
+        
+        public void canonizeEquations() {
+	    	for (FAbstractEquation equation: getFAbstractEquations()) {
+	    	    FEquation feq  = (FEquation) equation;
+	            FExp leftExp = feq.getLeft();
+	            FExp rightExp = feq.getRight();
+	    	    // Step 1. Move all expressions to RHS.
+	    	    moveToRHS(feq, leftExp, rightExp);
+	    	    // Step 2: Remove all DivExp.
+	    	    rightExp = feq.getRight();
+	    	    elimDiv(rightExp, feq);
+	    	    // Step 3: Expand parentheses.
+	    	    // TODO: not implemented
+	    	    expandParentheses(rightExp);
+	        	// Step 4: ...
+	        	
+	        	//dumpTree("");
+	        	System.out.print("\n\n");
+            }
+        }
+    
+	    /*
+	     * Move LHS of equation to RHS. 
+	     */
+	    public void moveToRHS(FEquation feq, FExp leftExp, FExp rightExp) {
+	        System.out.println("Do moveToRHS():\n" + feq.toString());
+	        // Set LHS to 0.
+	        feq.setLeft(new FIntegerLitExp(0));
+	        
+	        // Subtract LHS from RHS.
+	        feq.setRight(new FSubExp(rightExp, leftExp));
+	        System.out.println("Done moveToRHS():\n" + feq.toString());
+	    }
+    
+	    /*
+	     * Eliminate all DivExp.
+	     */
+	    public void elimDiv(FExp fexp, FEquation feq) {
+	        System.out.println("Do elimDiv():\n" + feq.toString());
+	        
+	        // Only perform algorithm if RHS starts with a FBinExpr 
+	        if (!fexp.isBinExp()) {
+	           return;
+	        }
+	        
+	        // If RHS is a FDivExp, we only have to replace it with its
+	        // numerator.
+	        if (fexp.isDivExp()) {
+	           if (fexp.getChild(0).isFExp()) {
+	               feq.setRight((FExp) fexp.getChild(0));
+	           }
+	           System.out.println("Done elimDiv():\n" + feq.toString());
+	           return;
+	        }
+	        
+	        boolean foundDiv = false;
+	        do {
+	            foundDiv = divToMul(fexp, fexp);
+	            continueUp = false;
+	        } while (foundDiv);
+	        
+	        System.out.println("Done elimDiv():\n" + feq.toString());
+	    }
+    
+	    /*
+	     * This method calls itself recursively to find the FDivExp at the bottom of
+	     * the tree first.
+	     * TODO: Not optimized atm. The algorithm is traversing the whole tree everytime this method is called.
+	     *       This could be improved by tracking which paths we have already found and removed an FDivExp.
+	     */
+	    public boolean divToMul(FExp fexp, FExp rootParent) {
+	        boolean foundDivLeft = false;
+	        boolean foundDivRight = false;
+	        boolean foundDiv = false;
+	        FExp leftChild = null;
+            FExp rightChild = null;
+	        
+	        // Retrieve children.
+	        if (fexp.getChild(0).isFExp()) {
+	            leftChild = (FExp) fexp.getChild(0);
+	        }
+	        if (fexp.getChild(1).isFExp()) {
+	            rightChild = (FExp) fexp.getChild(1);
+	        }
+	        
+	    
+	        // Recursive call if a child is a FBinExp (then we know its not a leaf).
+	        if (leftChild.isBinExp()) {
+	            foundDivLeft = divToMul(leftChild, rootParent);
+	        }
+	        if (rightChild.isBinExp() && !foundDivLeft) {
+	            foundDivRight = divToMul(rightChild, rootParent);
+	        }
+	        
+	        foundDiv = foundDivLeft || foundDivRight;
+	        
+	        // Remove bottom FDivExp and insert FMulExps at correct places.
+            if (!foundDiv && fexp.isDivExp() && fexp != rootParent) {
+                foundDiv = true;
+                continueUp = true;
+                denominator = rightChild;
+                if (fexp.parentFExp().getChild(0) == fexp) {
+                    fexp.parentFExp().setChild(leftChild, 0);
+                } else {
+                    fexp.parentFExp().setChild(leftChild, 1);
+                }
+            } else if (continueUp && (fexp.isAddExp() || fexp.isSubExp())) {
+                if (foundDivLeft) {
+                    fexp.setChild(new FMulExp(rightChild, denominator), 1);
+                } else {
+                    fexp.setChild(new FMulExp(leftChild, denominator), 0);
+                }
+            } else if (continueUp && foundDivRight && fexp.isDivExp()) {
+                continueUp = false;
+                fexp.setChild(new FMulExp(leftChild, denominator), 0);
+            }
+	        
+	        return foundDiv;
+	    }
+    
+	    /**
+	     * Expand all parenteses.
+         * TODO: implement method.
+	     */
+	    public void expandParentheses(FExp rightExp) {
+	    
+	    }
+	}
+}

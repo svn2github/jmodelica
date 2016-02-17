@@ -31,8 +31,15 @@ aspect AliasVariables {
 	 * 
 	 * @return True if alias, else false.
 	 */
-	syn boolean FAbstractVariable.isAlias() = false; 
-	eq FVariable.isAlias() = aliasVariable() != null; 
+	//syn boolean FAbstractVariable.isAlias() = false; 
+	//eq FVariable.isAlias() = aliasVariable() != null;
+	
+	// Updated 2016-02-15
+	inh boolean FAbstractVariable.isAlias();
+	eq FClass.getChild().isAlias() = false;
+	eq FForIndex.getChild().isAlias() = false;
+	eq FClass.getAliasVariable().isAlias() = true;
+	eq FClass.getAliasConstant().isAlias() = true; 
 	
 	/**
 	 * Retreives the alias set for this variable or null if not an alias

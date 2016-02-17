@@ -489,7 +489,7 @@ import org.junit.runner.RunWith;
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
 
     public ${test_class_name}() { 
-        super(${module_dirs});
+        super("C:/Users/student/workspace/JModelica/Compiler/ModelicaMiddleEnd");
     }
 
     protected ${jm_package}.util.test.Assert createAssert() {
