@@ -1109,24 +1109,25 @@ aspect FlatTypeCheck {
         }
     }
 
-  public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
-	  if (!isDestructorArgument())
-		  error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
-  }
-  
-  public void InstMultipleBoundArgument.typeCheck(ErrorCheckType checkType) {
-	  error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
-  }
-  
-  inh boolean InstFunctionArgument.isDestructorArgument();
-  eq InstFunctionCall.getArg().isDestructorArgument() = isDestructorCall();
-  eq BaseNode.getChild().isDestructorArgument()       = false;
-  
-  inh boolean InstClassDecl.inExternalObject();
-  eq InstNode.getChild().inExternalObject() = isExternalObject();
-  
-  public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
-  
+    public void InstMissingArgument.typeCheck(ErrorCheckType checkType) {
+        if (!isDestructorArgument())
+            error(functionCallDecription() + ": missing argument for required input " + getBoundInput().name());
+    }
+
+    public void InstMultipleBoundArgument.typeCheck(ErrorCheckType checkType) {
+        error(functionCallDecription() + ": multiple arguments matches input " + getBoundInput().name());
+    }
+
+    inh boolean InstFunctionArgument.isDestructorArgument();
+    eq InstFunctionCall.getArg().isDestructorArgument() = isDestructorCall();
+    eq BaseNode.getChild().isDestructorArgument()       = false;
+
+    inh boolean InstClassDecl.inExternalObject();
+    eq InstNode.getChild().inExternalObject()              = isExternalObject();
+    eq InstRecordConstructor.getChild().inExternalObject() = false;
+
+    public void InstDefaultArgument.typeCheck(ErrorCheckType checkType) {}
+
     inh String InstFunctionArgument.nonBoundArgumentTypeError();
     eq FExp.getChild().nonBoundArgumentTypeError() {
         throw new UnsupportedOperationException("Method nonBoundArgumentTypeError() not implemented for type " + getClass().getSimpleName());

@@ -2294,7 +2294,7 @@ aspect FlatTypes {
     eq FRecordDecl.getChild().inRecord() = true;
     eq FClass.getChild().inRecord()      = false;
     eq FForIndex.getChild().inRecord()   = false;
-    
+
     inh boolean InstComponentDecl.inRecord();
     inh boolean InstExtends.inRecord();
     eq InstNode.getInstComponentDecl().inRecord()               = false;
@@ -2304,8 +2304,7 @@ aspect FlatTypes {
     eq InstRecord.getInstExtends().inRecord()                   = true;
     eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
     eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
-    
-    inh boolean FExp.inRecordDecl();
+
     inh boolean InstComponentDecl.inRecordDecl();
     eq InstNode.getChild().inRecordDecl()                     = false;
     eq InstAssignable.getChild().inRecordDecl()               = inRecordDecl();
@@ -2318,7 +2317,15 @@ aspect FlatTypes {
     eq InstClassDecl.getInstComponentDecl().inRecordDecl()    = isRecord();
     eq FClass.getChild().inRecordDecl()                       = false;
     eq FRecordDecl.getChild().inRecordDecl()                  = true;
-    
+
+    inh boolean InstComponentDecl.inRecordConstructor();
+    inh boolean InstExtends.inRecordConstructor();
+    eq InstRecordConstructor.getInstComponentDecl().inRecordConstructor() = true;
+    eq InstRecordConstructor.getInstExtends().inRecordConstructor()       = true;
+    eq InstExtends.getChild().inRecordConstructor()                       = inRecordConstructor();
+    eq InstNode.getChild().inRecordConstructor()                          = false;
+    eq Root.getChild().inRecordConstructor()                              = false;
+
     syn int FRecordDecl.indexOf(String name) {
         for (int i = 0; i < getNumFVariable(); i++)
             if (getFVariable(i).name().equals(name))

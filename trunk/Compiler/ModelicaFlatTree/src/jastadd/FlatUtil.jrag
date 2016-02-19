@@ -126,11 +126,11 @@ aspect FlatNames {
     eq InstRoot.getChild().retrieveFQName()                                      = new FQNameEmpty();
     eq SourceRoot.getProgram().retrieveFQName()                                  = new FQNameEmpty();
     eq FClass.getChild().retrieveFQName()                                        = null;
-    
+
     inh FQName InstModification.retrieveFQNameFromModification();
     eq InstClassDecl.getChild().retrieveFQNameFromModification()                 = retrieveFQName();
     eq InstComponentDecl.getChild().retrieveFQNameFromModification()             = retrieveFQName();
-    eq InstRoot.getChild().retrieveFQNameFromModification()                      = new FQNameEmpty();
+    eq Root.getChild().retrieveFQNameFromModification()                          = new FQNameEmpty();
 
     /**
      * Get a string representation of a prefix of this name.
@@ -1075,8 +1075,10 @@ aspect FlatNames {
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
     public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+        return new FIdUseExp(new FIdUseInstAccess(createInstAccess()));
     }
+    
+    syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
 
     /**
      * Create an access expression with this access.

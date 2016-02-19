@@ -107,12 +107,53 @@ aspect InstFunctionBinding {
 		for (InstFunctionArgument arg : getArgs())
 			arg.setBoundInput(input);
 	}
-	
-	/**
-	 * Get the input component this argument is bound to.
-	 */
-	syn InstComponentDecl InstFunctionArgument.getBoundInput() = boundInput;
-	
+
+    /**
+     * Get the input component this argument is bound to.
+     */
+    syn InstComponentDecl InstFunctionArgument.getBoundInput() = 
+        isInstRecordConstructorArg() ? myRecordConstructorVirtualInstComponentDecl() : boundInput;
+
+    /**
+     * Is this an argument to a record constructor in the instance tree?
+     */
+    inh boolean InstFunctionArgument.isInstRecordConstructorArg();
+    eq InstRecordConstructor.getArg().isInstRecordConstructorArg()     = true;
+    eq InstMultipleBoundArgument.getArg().isInstRecordConstructorArg() = isInstRecordConstructorArg();
+    eq BaseNode.getChild().isInstRecordConstructorArg()                = false;
+
+    /**
+     * Get the virtual component instance that is connected to this argument.
+     * 
+     * Only valid for arguments to record constructors in the instance tree.
+     */
+    inh InstComponentDecl InstFunctionArgument.myRecordConstructorVirtualInstComponentDecl();
+    eq BaseNode.getChild().myRecordConstructorVirtualInstComponentDecl()                 = null;
+    eq InstRecordConstructor.getArg(int i).myRecordConstructorVirtualInstComponentDecl() {
+        Iterator<InstComponentDecl> cmps = allInstComponentDecls().iterator();
+        for (int j = 0; j < i; j++) {
+            cmps.next();
+        }
+        return cmps.next();
+    }
+
+    /**
+     * Get the expression to use for this argument.
+     */
+    syn FExp InstDefaultArgument.getFExp() {
+        InstComponentDecl bi = getBoundInput();
+        if (bi != boundInput) {
+            InstValueModification mod = bi.myInstValueMod();
+            if (mod != null && !mod.isDefaultRecordMod()) {
+                return mod.getFExp();
+            }
+        }
+        return getDeclarationFExp();
+    }
+
+    syn boolean InstModification.isDefaultRecordMod()     = false;
+    eq InstDefaultRecordModification.isDefaultRecordMod() = true;
+
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
@@ -538,7 +579,7 @@ aspect InstFunctionBinding {
             int i = 0;
             for (InstFunctionArgument arg : bound) {
                 if (arg.isOKArg()) {
-                    FType argType = arg.getFExp().type();
+                    FType argType = arg.getFExpNoTransform().type();
                     FType inType = inputs.get(i).type();
                     if (!inType.dimensionCompatible(argType, true))
                         score++;
@@ -758,7 +799,7 @@ aspect InstFunctionBinding {
         }
         return res;
     }
-    
+
     /**
      * Calculate if this is a vectorized function call.
      */

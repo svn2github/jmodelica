@@ -37,7 +37,8 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                /InstBuiltInFunction:InstClassDecl*/
                                /InstLibClassDecl:InstClassDecl*/
                                [Dummy:InstNode]                // Dummy node to prevent InstNode from being classified as root
-                               [Dummy2:InstGeneratedInner];    // Dummy node to prevent InstGeneratedInner from being classified as root
+                               [Dummy2:InstGeneratedInner]     // Dummy node to prevent InstGeneratedInner from being classified as root
+                               [Dummy3:InstConstraining];      // Dummy node to prevent InstConstraining from being classified as root
 
 abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstrainingClass] InstRestriction;
@@ -177,11 +178,12 @@ abstract InstModification : BaseNode ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
 InstValueModification    : InstModification ::= /FExp/ 
                                                 /InstRecordModification*/ 
-                                                /DynamicInstMod:InstModification*/;
+                                                /InstArrayModification*/;
 InstClassModification    : InstModification ::= InstArgument*;
 //Virtual modification for member of record type modification.
-InstRecordModification : InstValueModification ::= <Name:String> <Value:FExp>;
-InstDefaultRecordModification : InstRecordModification ::= <Source:InstModification>;
+abstract InstRecordModification : InstValueModification ::= <Name:String>;
+InstValueRecordModification : InstRecordModification ::= <Value:FExp>;
+InstDefaultRecordModification : InstRecordModification ::= <Arg:InstDefaultArgument>;
 //Virtual modification for cell of array constant value modification.
 InstArrayModification : InstValueModification ::= <Cell:FExp>;
 

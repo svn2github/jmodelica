@@ -191,11 +191,13 @@ aspect Flattening {
     }
     
     inh boolean InstValueModification.isFlattened(InstValueModification ivm);
-    eq InstModification.getChild().isFlattened(InstValueModification ivm) = true;
-    eq InstAssignable.getChild().isFlattened(InstValueModification ivm) = !inRecordDecl() && myInstValueMod() == ivm;
-    eq InstForIndex.getChild().isFlattened(InstValueModification ivm) = true;
-    
-	
+    eq InstModification.getChild().isFlattened(InstValueModification ivm)      = true;
+    eq InstAssignable.getChild().isFlattened(InstValueModification ivm)        = !inRecordDecl() && myInstValueMod() == ivm;
+    eq InstForIndex.getChild().isFlattened(InstValueModification ivm)          = true;
+    eq InstRecordConstructor.getChild().isFlattened(InstValueModification ivm) = true;
+    eq Root.getChild().isFlattened(InstValueModification ivm)                  = true;
+
+
 	public void InstFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
         InstCallable target = myInstCallable();
 		target.flattenFunction(fc);
@@ -1116,8 +1118,11 @@ aspect Flattening {
 
     /**
      * Retrieve the binding expression of an InstAssignable node.
+     * 
+     * Always null for components that are not assignable.
      */
-    syn FExp InstAssignable.myBindingInstExp() = hasInstValueMod() ? myInstValueMod().getFExp() : null;
+    syn FExp InstComponentDecl.myBindingInstExp() = null;
+    eq InstAssignable.myBindingInstExp()          = hasInstValueMod() ? myInstValueMod().getFExp() : null;
 
     /**
      * Check if this component has a binding expression.
@@ -1335,30 +1340,56 @@ aspect Flattening {
 	eq FIntegerSubscript.specify(int index) = this;
 	eq FColonSubscript.specify(int index)   = new FIntegerSubscript(index);
 
-	// TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
-	/**
-	 * Check if this InstAssignable node has an InstModification setting 
-	 *        its binding expression.
-	 */
-	syn boolean InstAssignable.hasInstValueMod() = (myInstValueMod() != null);
-	
-	/**
+    // TODO: The names here needs to be clearer. (Down to and including getInstValueMod().)
+    /**
+     * Check if this InstComponentDecl is an assignable has an InstModification setting 
+     * its binding expression.
+     */
+    syn boolean InstComponentDecl.hasInstValueMod() = (myInstValueMod() != null);
+
+    /**
      * Check if this InstComponentDecl is an assignable with a value modifier
      */
     syn boolean InstComponentDecl.hasBindingExp() = false;
     eq InstAssignable.hasBindingExp()             = hasInstValueMod();
-	
-	/**
-	 * Retrieve the InstModification setting the binding expression of 
-	 *        this InstAssignable node.
-	 */
-	syn lazy InstValueModification InstAssignable.myInstValueMod() {
-		for (InstModification im : totalMergedEnvironment()) 
-			if (im.hasInstValueMod()) 
-				return im.getInstValueMod();
-		return null;
-	}
-    
+
+    /**
+     * Retrieve the InstModification setting the binding expression of 
+     * this component. 
+     * 
+     * If the component is not an assignable, or is an assignable that does 
+     * not have a binding expression, return <code>null</code>.
+     */
+    syn InstValueModification InstComponentDecl.myInstValueMod() = null;
+    syn lazy InstValueModification InstAssignable.myInstValueMod() {
+        if (inRecord()) {
+            InstValueModification ivm = parentInstValueMod();
+            if (ivm != null)
+                return ivm.matchInstRecordModification(name());
+        }
+        for (InstModification im : totalMergedEnvironment()) 
+            if (im.hasInstValueMod()) 
+                return im.getInstValueMod();
+        return null;
+    }
+
+    /**
+     * Retrieve the InstModification setting the binding expression of 
+     * the parent component. 
+     * 
+     * If the parent component is not an assignable, or is an assignable that does 
+     * not have a binding expression, return <code>null</code>.
+     */
+    inh InstValueModification InstAssignable.parentInstValueMod();
+    inh InstValueModification InstArrayComponentDecl.parentInstValueMod();
+    eq InstComponentDecl.getChild().parentInstValueMod()      = myInstValueMod();
+    eq InstClassDecl.getChild().parentInstValueMod()          = null;
+    eq Root.getChild().parentInstValueMod()                   = null;
+    eq InstArrayComponentDecl.getChild().parentInstValueMod() {
+        InstValueModification ivm = parentInstValueMod();
+        return (ivm != null) ? ivm.arrayInstModification(getIndex()) : null;
+    }
+
     syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
     
     syn InstValueModification InstAssignable.myInstValueModTop() {
@@ -1387,6 +1418,7 @@ aspect Flattening {
     inh boolean InstModification.inModWithEach();
     eq InstArgument.getChild().inModWithEach()          = hasEach();
     eq InstNode.getChild().inModWithEach()              = false;
+    eq InstRecordConstructor.getChild().inModWithEach() = false;
     eq InstArrayModification.getChild().inModWithEach() = true;
     syn boolean InstArrayModification.inModWithEach()   = true;
 
@@ -1467,9 +1499,10 @@ aspect Flattening {
 		}
 	}
 
-	inh boolean InstModification.isOnPrimitiveTypeDecl();
-	eq InstExtends.getChild().isOnPrimitiveTypeDecl() = extendsPrimitive();
-	eq InstNode.getChild().isOnPrimitiveTypeDecl()    = false;
+    inh boolean InstModification.isOnPrimitiveTypeDecl();
+    eq InstExtends.getChild().isOnPrimitiveTypeDecl()           = extendsPrimitive();
+    eq InstNode.getChild().isOnPrimitiveTypeDecl()              = false;
+    eq InstRecordConstructor.getChild().isOnPrimitiveTypeDecl() = false;
 
 
     /**
@@ -1826,8 +1859,13 @@ aspect FlatExpressions {
     public FExp FIdUseInstAccess.flatten(FQName prefix, FIdUseExp use) {
         InstComponentDecl var = getInstAccess().myInstComponentDecl();
         if (use.inDefaultArgument()) {
-            InstClassDecl parent = (InstClassDecl) var.containingEntity();
-            int i = parent.myCallInputs().indexOf(var);
+            int i;
+            if (var.inRecordConstructor()) {
+                i = var.argIndexInRecordConstructor();
+            } else {
+                InstClassDecl parent = (InstClassDecl) var.containingEntity();
+                i = parent.myCallInputs().indexOf(var);
+            }
             int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
         } else if (!inFunction() && variability().flattenExtractIndices(getInstAccess().indexVariability())) {
@@ -1839,7 +1877,36 @@ aspect FlatExpressions {
         } else {
             return var.flattenAccess(prefix, use);
         }
-	}
+    }
+
+    inh int InstComponentDecl.argIndexInRecordConstructor();
+    inh int InstExtends.argIndexInRecordConstructor();
+    eq InstRecordConstructor.getInstComponentDecl(int i).argIndexInRecordConstructor() = 
+        argIndexInRecordConstructorImpl(-1, getInstExtendss()) + i;
+    eq InstRecordConstructor.getInstExtends(int i).argIndexInRecordConstructor()       = 
+        argIndexInRecordConstructorImpl(i, getInstExtendss());
+    eq InstExtends.getInstComponentDecl(int i).argIndexInRecordConstructor()           = 
+        argIndexInRecordConstructorImpl(-1, getInstExtendss()) + i + argIndexInRecordConstructor();
+    eq InstExtends.getInstExtends(int i).argIndexInRecordConstructor()                 = 
+        argIndexInRecordConstructorImpl(i, getInstExtendss()) + argIndexInRecordConstructor();
+    eq InstNode.getChild().argIndexInRecordConstructor()                               = 0;
+    eq Root.getChild().argIndexInRecordConstructor()                                   = 0;
+
+    protected static int ASTNode.argIndexInRecordConstructorImpl(int nExt, List<InstExtends> exts) {
+        int res = 0;
+        for (int i = 0, n = (nExt < 0) ? exts.getNumChild() : nExt; i < n; i++) {
+            res += exts.getChild(i).countInstComponentDecls();
+        }
+        return res;
+    }
+
+    syn int InstNode.countInstComponentDecls() {
+        int res = getNumInstComponentDecl();
+        for (InstExtends ie : getInstExtendss()) {
+            res += ie.countInstComponentDecls();
+        }
+        return res;
+    }
 
     /**
      * Flatten an access expression to this component.
@@ -1953,19 +2020,25 @@ aspect FlatExpressions {
     eq FConstant.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
     eq FKnownParameter.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
 
-	/**
-	 * Check if this access is in the binding expression of an input to a function 
-	 * or component in a record class, and refers to an input in the same function 
-	 * or component in the same record class.
-	 */
+    /**
+     * Check if this access is in the binding expression of an input to a function 
+     * or component in a record class, and refers to an input in the same function 
+     * or component in the same record class.
+     */
     syn boolean FIdUseExp.inDefaultArgument() {
-		InstComponentDecl target = asInstAccess().myInstComponentDecl();
-		InstComponentDecl holder = findComponentWithThisBindingExp();
-		return holder != null && target.containingEntity() == holder.containingEntity() && 
-		       ((inFunction() && holder.isInput() && target.isInput()) || 
-		        (inRecordDecl() && holder.isModifiable() && target.isModifiable()));
-	}
-	
+        InstComponentDecl target = asInstAccess().myInstComponentDecl();
+        InstComponentDecl holder = findComponentWithThisBindingExp();
+        return holder != null && target.containingEntity() == holder.containingEntity() && 
+               ((inFunction() && holder.isInput() && target.isInput()) || 
+                (holder.inNonComponentRecord() && holder.isModifiable() && target.isModifiable()));
+    }
+
+    /**
+     * Check if this component is in a record, but not in a record component - 
+     * i.e. a record declaration or a record constructor.
+     */
+    syn boolean InstComponentDecl.inNonComponentRecord() = inRecordDecl() || inRecordConstructor();
+
 	/**
 	 * Find the component that has this expression as a part of its binding expression, if any.
 	 */
@@ -2532,9 +2605,15 @@ aspect FlatExpressions {
     eq InstArrayAccess.getChild().flatPrefix() = myInstComponentDecl().getFQName().copyPrefix();
     eq InstNode.getChild().flatPrefix() = new FQNameEmpty();
     eq FlatRoot.getChild().flatPrefix() = new FQNameEmpty();
-    
-	public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
-		List args = new List();
+
+    inh FExp DummyModification.myFExp();
+    eq InstFunctionArgument.getChild().myFExp()   = null;
+    eq InstPositionalArgument.getChild().myFExp() = getFExp();
+    eq InstNamedArgument.getChild().myFExp()      = getFExp();
+    eq Root.getChild().myFExp()                   = null;
+
+    public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
+        List args = new List();
         int i = 0;
         for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
             if (icd.isModifiable()) {
@@ -2543,9 +2622,9 @@ aspect FlatExpressions {
                 args.add(icd.flattenInRecordConstructor(prefix));
             }
         }
-		return new FRecordConstructor(getRecord().flattenRecordName(), args);		
-	}
-	
+        return new FRecordConstructor(getRecord().flattenRecordName(), args);
+    }
+
     public FExp InstComponentDecl.flattenInRecordConstructor(FQName prefix) {
         return null;
     }
@@ -2620,7 +2699,9 @@ aspect FlatExpressions {
         for (int i = 0; i < nIn; i++) {
             InstComponentDecl in = myInputs().get(i);
             if (args[i] == null) {
-                args[i] = in.createInstDefaultArgument().flatten(prefix);
+                InstFunctionArgument def = in.createInstDefaultArgument();
+                def.parent = in;
+                args[i] = def.flatten(prefix);
             } else if (!in.type().typeCompatible(argTypes[i], true)) {
                 InstClassDecl constructor = in.type().matchOverloadedConstructor(argTypes[i]);
                 args[i] = constructor.flattenOverloadedFunctionCall(prefix, args[i]);

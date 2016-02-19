@@ -511,9 +511,10 @@ aspect Arrays {
 	
 	eq InstComponentDecl.ndims()      = hasFArraySubscripts() ? getFArraySubscripts().ndims() : 0;
 	eq InstArrayComponentDecl.ndims() = retrieveArrayCompNdims();
-	
-	inh int InstArrayComponentDecl.retrieveArrayCompNdims();
-	eq InstNode.getChild().retrieveArrayCompNdims() = ndims() - 1;
+
+    inh int InstArrayComponentDecl.retrieveArrayCompNdims();
+    eq InstNode.getChild().retrieveArrayCompNdims()              = ndims() - 1;
+    eq InstRecordConstructor.getChild().retrieveArrayCompNdims() = 0;
 
 	syn int FAbstractVariable.ndims() = -1;
 	
@@ -1183,7 +1184,7 @@ aspect Arrays {
     syn Size InstComponentDecl.declaredSize() = 
         hasFArraySubscripts() ? getFArraySubscripts().declarationSize() : defaultSize();
     syn Size InstComponentDecl.declaredSizeCalc() =
-        hasFArraySubscripts() ? getFArraySubscripts().declarationSize(getFArraySubscripts().getFSubscripts()) : defaultSizeCalc();
+        hasFArraySubscripts() ? FArraySubscripts.declarationSize(getFArraySubscripts().getFSubscripts()) : defaultSizeCalc();
 
     /**
      * Find the declared size for a component that does not have any array subscripts in the declaration. 

@@ -206,11 +206,11 @@ aspect InstBindingType {
      * The size that a value expression of the parent this modification should have.
      */
     inh Size InstModification.expectedSizeFromParent();
-    eq InstModification.getChild().expectedSizeFromParent()  = expectedSize();
-    eq InstComponentDecl.getChild().expectedSizeFromParent() = size();
-    eq InstClassDecl.getChild().expectedSizeFromParent()     = size();
+    eq InstModification.getChild().expectedSizeFromParent()      = expectedSize();
+    eq InstComponentDecl.getChild().expectedSizeFromParent()     = size();
+    eq InstClassDecl.getChild().expectedSizeFromParent()         = size();
     eq InstConstrainingClass.getChild().expectedSizeFromParent() = getClassName().myInstClassDecl().size();
-    eq InstRoot.getChild().expectedSizeFromParent() {
+    eq Root.getChild().expectedSizeFromParent() {
         throw new UnsupportedOperationException();
     }
 
@@ -256,6 +256,7 @@ aspect InstBindingType {
      */
     inh InstModification InstModification.retrieveModificationLackingEach(Size s);
     eq InstNode.getChild().retrieveModificationLackingEach(Size s)              = null;
+    eq InstRecordConstructor.getChild().retrieveModificationLackingEach(Size s) = null;
     eq InstElementRedeclare.getChild().retrieveModificationLackingEach(Size s)  = null;
     eq InstNamedModification.getChild().retrieveModificationLackingEach(Size s) = findOrRetrieveModificationLackingEach(s);
 
@@ -265,7 +266,6 @@ aspect InstBindingType {
     syn boolean InstModification.allModificationsMatchesSize(Size s)     = true;
     eq InstArrayModification.allModificationsMatchesSize(Size s)         = true;
     eq InstRecordModification.allModificationsMatchesSize(Size s)        = true;
-    eq InstDefaultRecordModification.allModificationsMatchesSize(Size s) = true;
     eq InstElementRedeclare.allModificationsMatchesSize(Size s)          = true;
     eq InstValueModification.allModificationsMatchesSize(Size s)         = getFExp().size().equivalent(s, true);
     eq InstCompleteModification.allModificationsMatchesSize(Size s)      = 

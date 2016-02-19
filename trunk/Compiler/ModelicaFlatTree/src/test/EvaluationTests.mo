@@ -1763,32 +1763,25 @@ end EvaluateAnnotation7;
 model EvaluateAnnotation8
     record R
         Real y;
-        Real x = y annotation(Evaluate=true);
+        Real x = y + 1 annotation(Evaluate=true);
     end R;
    
-    parameter R r(y=2) = R(y=3);
-    Real x = r.x;
+    parameter R r = R(y=3);
+    Real x = r.x + 1;
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        TransformCanonicalTestCase(
             name="EvaluateAnnotation8",
             description="Check that annotation(Evaluate=true) is honored for components of records with the annotation",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation8
- eval parameter EvaluationTests.EvaluateAnnotation8.R r(y = 2) = EvaluationTests.EvaluateAnnotation8.R(3, 3) /* EvaluationTests.EvaluateAnnotation8.R(3, 3) */;
- Real x = 2.0;
-
-public
- record EvaluationTests.EvaluateAnnotation8.R
-  Real y;
-  Real x;
- end EvaluationTests.EvaluateAnnotation8.R;
-
+ parameter Real r.y = 3 /* 3 */;
+ eval parameter Real r.x = 4.0 /* 4.0 */;
+ constant Real x = 5.0;
 end EvaluationTests.EvaluateAnnotation8;
 ")})));
 end EvaluateAnnotation8;
 
-// This test gives wrong result #4327
 model EvaluateAnnotation9
     function F
         input R i;
@@ -1812,7 +1805,7 @@ model EvaluateAnnotation9
 fclass EvaluationTests.EvaluateAnnotation9
  eval parameter EvaluationTests.EvaluateAnnotation9.R r1 = EvaluationTests.EvaluateAnnotation9.R(-41) /* EvaluationTests.EvaluateAnnotation9.R(-41) */;
  structural parameter EvaluationTests.EvaluateAnnotation9.R r2 = EvaluationTests.EvaluateAnnotation9.R(1.0) /* EvaluationTests.EvaluateAnnotation9.R(1.0) */;
- Real x = (-41.0 - 1) * time;
+ Real x = (1.0 - 1) * time;
 
 public
  function EvaluationTests.EvaluateAnnotation9.F

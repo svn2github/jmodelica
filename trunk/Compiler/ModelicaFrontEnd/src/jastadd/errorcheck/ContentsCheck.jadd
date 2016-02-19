@@ -193,6 +193,7 @@ aspect ContentCheck {
 
     inh boolean InstModification.isForAttributeOnOperatorRecordDeclarationMember();
     eq InstNode.getChild().isForAttributeOnOperatorRecordDeclarationMember()                                 = false;
+    eq InstRecordConstructor.getChild().isForAttributeOnOperatorRecordDeclarationMember()                    = false;
     eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = // TODO: not needed?
         isForAttributeOnOperatorRecordDeclarationMember();
     eq InstElementModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()       =
@@ -204,6 +205,7 @@ aspect ContentCheck {
     eq InstClassDecl.getChild().isForOperatorRecordDeclarationMember()           = isOperatorRecord();
     eq InstExtends.getChild().isForOperatorRecordDeclarationMember()             = myInstClass().isOperatorRecord();
     eq InstNode.getChild().isForOperatorRecordDeclarationMember()                = false;
+    eq Root.getChild().isForOperatorRecordDeclarationMember()                    = false;
 
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
        if (generated) {

@@ -2167,12 +2167,12 @@ public class Templates {
         "Compiler/OptimicaCBackEnd/templates",
         "Compiler/OptimicaFMUXBackEnd/templates",
     };
-    
-    
+
+
     public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
-        case FMUME20a:               
+        case FMUME20a:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
             fmuTemplate = true;
             break;
@@ -2203,9 +2203,8 @@ public class Templates {
             templates = null;
             break;
         }
-
+        
         this.type = type;
-        this.templates = templates;
         
         if (CONTRIBUTORS != null) {
             for (TemplateContributor contributor : CONTRIBUTORS) {
@@ -2213,7 +2212,7 @@ public class Templates {
             }
         }
     }
-    
+
     private String template(int i) {
         return (i < templates.length) ? templates[i] : null;
     }
