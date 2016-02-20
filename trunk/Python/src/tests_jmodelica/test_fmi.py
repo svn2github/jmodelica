@@ -634,6 +634,7 @@ class Test_FMUModelME1:
         assert dep.get("b1")
         assert dep.get("b2")
         
+        dep.initialize()
         dep.terminate()
         nose.tools.assert_raises(FMUException, dep.set, "b1", False)
 
@@ -677,6 +678,7 @@ class Test_FMUModelME1:
         dep.set("N1", 4.0)
         assert dep.get("N1")==4
         
+        dep.initialize()
         dep.terminate()
         nose.tools.assert_raises(FMUException, dep.set, "N1", 4.0)
 
