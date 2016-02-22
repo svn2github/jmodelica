@@ -516,6 +516,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_log_node_t top_node;
     jmi_log_node_t iter_node;
     jmi_log_node_t discrete_node;
+    jmi_log_node_t reinit_node;
 
     /* Used for logging */
     switches = jmi_get_sw(jmi);
@@ -644,8 +645,25 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         /* Check if a reinit triggered - this would mean that state variables changed. */
         if (jmi->reinit_triggered) {
+            int verify_state_value_changed = 0;
             event_info->iteration_converged = FALSE;
             event_info->state_values_changed = TRUE;
+            
+            reinit_node =jmi_log_enter_fmt(jmi->log, logInfo, "ReInitTriggered", 
+                                "A reinit triggered during the last event iteration.");
+            for (i = 0; i < jmi->n_real_x; i++) {
+                if (jmi_get_real_x(jmi)[i] != jmi_get_z(jmi)[jmi->offs_pre_real_x+i]) {
+                    verify_state_value_changed = 1; /* State has changed */
+                    jmi_log_node(jmi->log, logInfo, "StateUpdated", " <real: #r%d#> <from: %E> <to: %E>", jmi_get_value_ref_from_index(i+jmi->offs_real_x, JMI_REAL), jmi_get_z(jmi)[jmi->offs_pre_real_x+i], jmi_get_real_x(jmi)[i]);
+                }
+            }
+            jmi_log_leave(jmi->log, reinit_node);
+            
+            if (verify_state_value_changed != 1) {
+                jmi_log_node(jmi->log, logError, "ReInitFailure", "No state was changed despite a reinit triggered which indicates an error at <t:%E>.",jmi_get_t(jmi)[0]);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
         }
         
         /* No convergence under the allowed number of iterations. */
