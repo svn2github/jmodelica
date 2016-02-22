@@ -16,18 +16,27 @@
 
 
 aspect InstLookupComponents {
+    
+    class InstComponentDecl implements InstLookupResult.Item {}
+    class InstClassDecl     implements InstLookupResult.Item {}
+    interface InstCallable  extends    InstLookupResult.Item {}
 
     /**
      * Result class for lookups in the instance tree.
      * 
      * Use the static fields and methods to generate results.
      */
-    public abstract class InstLookupResult<T extends InstNode> {
+    public abstract class InstLookupResult<T extends InstLookupResult.Item> {
 
+        public interface Item {
+            public InstLookupResult<InstComponentDecl> memberInstComponent(String name);
+            public InstCallable asCallable();
+        }
+        
         /**
          * Indicates that the target was not found.
          */
-        public static <T extends InstNode> InstLookupResult<T> notFound() {
+        public static <T extends Item> InstLookupResult<T> notFound() {
             return (InstLookupResult<T>) NOT_FOUND;
         }
 
@@ -36,7 +45,7 @@ aspect InstLookupComponents {
          * 
          * Includes the found class or component.
          */
-        public static <T extends InstNode> InstLookupResult<T> found(T target) {
+        public static <T extends Item> InstLookupResult<T> found(T target) {
             return new Found(target);
         }
 
@@ -45,7 +54,7 @@ aspect InstLookupComponents {
          * 
          * Includes the declaration with the limiting constrainedby clause.
          */
-        public static <T extends InstNode> InstLookupResult<T> constrained(T target, InstNode constr) {
+        public static <T extends Item> InstLookupResult<T> constrained(T target, InstNode constr) {
             return new Constrained(target, constr);
         }
 
@@ -54,8 +63,8 @@ aspect InstLookupComponents {
          * 
          * Includes the declaration with the limiting constrainedby clause.
          */
-        public static <T extends InstNode> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
-            return res.isError() ? res : new Constrained(res.target(), constr);
+        public static <T extends Item> InstLookupResult<T> constrained(InstLookupResult<T> res, InstNode constr) {
+            return new Constrained(res.target(), constr);
         }
         
         /**
@@ -82,9 +91,12 @@ aspect InstLookupComponents {
         /**
          * Is this a result that should generate an error?
          */
-        public boolean isError() {
-            return false;
-        }
+        public boolean isError() { return false; }
+        
+        /**
+         * Is this a result that should generate an error or warning?
+         */
+        public boolean isProblem() { return false; }
 
         /**
          * Get the found class or component, if any.
@@ -106,7 +118,7 @@ aspect InstLookupComponents {
          * @param target The new target
          * @return a copy of this InstLookupResult with a new target.
          */
-        public abstract InstLookupResult<T> create(InstComponentDecl target);
+        public abstract <NT extends Item> InstLookupResult<NT> create(NT target);
         
         /**
          * @param name Name of target subcomponent
@@ -134,38 +146,44 @@ aspect InstLookupComponents {
         }
 
         /**
-         * Generate error for unsuccessful lookup result.
+         * Generate warnings and errors for unsuccessful lookup result.
          * 
          * @param src   node to generate problem on
          * @param kind  how to describe the declaration being sought, e.g. "component"
          * @param name  the name being sought
          */
-        public void error(ASTNode src, String kind, String name) {}
+        public boolean problem(ASTNode src, String kind, String name) {
+            return false;
+        }
 
         /**
          * Generates a default value for {@link #target(DefaultGenerator, ASTNode)}.
          */
-        public static interface DefaultGenerator<T extends InstNode> {
+        public static interface DefaultGenerator<T extends Item> {
             public T generate(ASTNode src);
         }
 
         private final static InstLookupResult NOT_FOUND = new NotFound(); 
 
-        private static class NotFound<T extends InstNode> extends InstLookupResult<T> {
+        private static class NotFound<T extends Item> extends InstLookupResult<T> {
             
-            public InstLookupResult<T> create(InstComponentDecl target) {
+            public <NT extends Item> InstLookupResult<NT> create(NT target) {
                 return notFound();
             }
             
-            public void error(ASTNode src, String kind, String name) {
-                src.error("Cannot find %s declaration for %s", kind, name);
-            }
-
             public boolean isNotFound() {
                 return true;
             }
-
-            public boolean isError() {
+            
+            @Override
+            public boolean isError() { return true; }
+            
+            @Override
+            public boolean isProblem() { return true; }
+            
+            @Override
+            public boolean problem(ASTNode src, String kind, String name) {
+                src.error("Cannot find %s declaration for %s", kind, name);
                 return true;
             }
             
@@ -174,10 +192,10 @@ aspect InstLookupComponents {
             }
         }
 
-        private static class Found<T extends InstNode> extends InstLookupResult<T> {
+        private static class Found<T extends Item> extends InstLookupResult<T> {
             private T target;
 
-            public InstLookupResult<T> create(InstComponentDecl target) {
+            public <NT extends Item> InstLookupResult<NT> create(NT target) {
                 return new Found(target);
             }
             
@@ -202,10 +220,10 @@ aspect InstLookupComponents {
             }
         }
 
-        private static class Constrained<T extends InstNode> extends Found<T> {
+        private static class Constrained<T extends Item> extends Found<T> {
             private InstNode constr;
 
-            public InstLookupResult<T> create(InstComponentDecl target) {
+            public <NT extends Item> InstLookupResult<NT> create(NT target) {
                 return new Constrained(target, constr);
             }
             
@@ -213,14 +231,19 @@ aspect InstLookupComponents {
                 super(target);
                 this.constr = constr;
             }
-
-            public boolean isError() {
-                return true;
+            
+            @Override
+            public boolean isError() { return true; }
+            
+            @Override
+            public boolean isProblem() { return true; }
+            
+            @Override
+            public boolean problem(ASTNode src, String kind, String name) {
+                ASTNode.NOT_IN_CONSTRAINING_TYPE.invoke(src, kind, name, constr);
+                return false;
             }
-
-            public void error(ASTNode src, String kind, String name) {
-                src.error("Cannot use %s %s, because it is not present in constraining type of declaration '%s'", kind, name, constr);
-            }
+            
         }
         
         private static class Outer extends Found<InstComponentDecl> {
@@ -269,12 +292,16 @@ aspect InstLookupComponents {
                     super(target);
                 }
                 
-                public boolean isError() {
-                    return true;
-                }
+                @Override
+                public boolean isError() { return true; }
                 
-                public void error(ASTNode src, String kind, String name) {
+                @Override
+                public boolean isProblem() { return true; }
+                
+                @Override
+                public boolean problem(ASTNode src, String kind, String name) {
                     src.error("Cannot use %s %s in inner '%s', because it is not present in outer '%s'", kind, name, Outer.this.target(), outer.target());
+                    return true;
                 }
             }
         }
@@ -663,41 +690,28 @@ aspect InstLookupComponents {
     /**
      * Check if this access has a lookup error.
      */
-    syn boolean InstAccess.hasLookupError()      = false;
-    eq InstAmbiguousAccess.hasLookupError()      = true;
-    eq InstAmbiguousArrayAccess.hasLookupError() = true;
-    eq InstGlobalAccess.hasLookupError()         = getInstAccess().hasLookupError();
-    eq InstDot.hasLookupError()                  = getInstAccess(getNumInstAccess() - 1).hasLookupError();
-    eq InstComponentAccess.hasLookupError() {
-        myInstComponentDecl();
-        return lookupError;
-    }
-    eq InstComponentArrayAccess.hasLookupError() {
-        myInstComponentDecl();
-        return lookupError;
-    }
-
-    private boolean InstComponentAccess.lookupError      = false;
-    private boolean InstComponentArrayAccess.lookupError = false;
+    syn boolean InstAccess.hasLookupProblem()      = false;
+    eq InstAmbiguousAccess.hasLookupProblem()      = true;
+    eq InstAmbiguousArrayAccess.hasLookupProblem() = true;
+    eq InstGlobalAccess.hasLookupProblem()         = getInstAccess().hasLookupProblem();
+    eq InstDot.hasLookupProblem()                  = getInstAccess(getNumInstAccess() - 1).hasLookupProblem();
+    eq InstNamedAccess.hasLookupProblem()          = myInstLookup().isProblem();
 
     syn InstComponentDecl InstAccess.myInstComponentDecl() = unknownInstComponentDecl();
     eq InstDot.myInstComponentDecl()                       = getLastInstAccess().myInstComponentDecl();
     eq InstGlobalAccess.myInstComponentDecl()              = getInstAccess().myInstComponentDecl();
+    eq InstComponentAccess.myInstComponentDecl()           = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
+    eq InstComponentArrayAccess.myInstComponentDecl()      = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
     
-    syn InstComponentDecl InstComponentAccess.myInstComponentDecl() = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
-    syn InstComponentDecl InstComponentArrayAccess.myInstComponentDecl() = myInstLookup().target(INST_UNKNOWN_COMPONENT, this);
-    
-    syn lazy InstLookupResult<InstComponentDecl> InstComponentAccess.myInstLookup() { 
-        InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
-        lookupError = res.isError();
-        return res;
-    }
-    syn lazy InstLookupResult<InstComponentDecl> InstComponentArrayAccess.myInstLookup() {
-        InstLookupResult<InstComponentDecl> res = lookupInstComponent(name());
-        lookupError = res.isError();
-        return res;
-    }
     syn InstComponentDecl FIdUseInstAccess.myInstComponentDecl() = getInstAccess().myInstComponentDecl();
+    
+    syn InstLookupResult<InstComponentDecl> InstAccess.myInstLookupComponent() = lookupInstComponent(name());
+    
+    syn InstLookupResult<? extends InstLookupResult.Item>  InstAccess.myInstLookup() = myInstLookupClass();
+    eq InstDot.myInstLookup()          = getLastInstAccess().myInstLookup();
+    eq InstGlobalAccess.myInstLookup() = getInstAccess().myInstLookup();
+    syn lazy InstLookupResult<InstComponentDecl> InstComponentAccess.myInstLookup()      = myInstLookupComponent();
+    syn lazy InstLookupResult<InstComponentDecl> InstComponentArrayAccess.myInstLookup() = myInstLookupComponent();
 }
 
 aspect LookupInstComponentsInModifications {

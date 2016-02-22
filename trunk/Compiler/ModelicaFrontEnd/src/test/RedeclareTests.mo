@@ -2939,14 +2939,14 @@ equation
 	a.x = a.y;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest31",
             description="Test that constrainedby prevents accesses to elements not in constraining class from outside component",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 2928, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B a constrainedby A'
+Warning at line 2939, column 10, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B a constrainedby A'
 ")})));
 end RedeclareTest31;
 
@@ -3472,14 +3472,14 @@ model RedeclareTest45
     Real y = c.x;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest45",
             description="",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 3459, column 7, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot use class C, because it is not present in constraining type of declaration 'replaceable package D = B constrainedby A'
+Warning at line 3471, column 7, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to class C not recommended, it is not present in constraining type of declaration 'replaceable package D = B constrainedby A'
 ")})));
 end RedeclareTest45;
 
@@ -3570,15 +3570,15 @@ model RedeclareTest47
     F f;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest47",
             description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 3555, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 3567, column 22, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component f:
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
+  Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
 end RedeclareTest47;
 
@@ -3612,14 +3612,14 @@ model RedeclareTest48
     G.H.E.I x = time;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest48",
             description="When checking constraining type, use constraining type for replaceable components/classes within the constraining type",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 3599, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo':
-  Cannot use class I, because it is not present in constraining type of declaration 'replaceable package E = B constrainedby A'
+Warning at line 3612, column 11, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to class I not recommended, it is not present in constraining type of declaration 'replaceable package E = B constrainedby A'
 ")})));
 end RedeclareTest48;
 
@@ -3650,15 +3650,15 @@ model RedeclareTest49
     E e;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest49",
             description="Check for usage of components not in constraining type also when accessing nestled components",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 3634, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 3647, column 22, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component e:
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable D c constrainedby C'
+  Access to component y not recommended, it is not present in constraining type of declaration 'replaceable D c constrainedby C'
 ")})));
 end RedeclareTest49;
 
@@ -4426,15 +4426,15 @@ model RedeclareTest72
     G g;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest72",
             description="Redeclare chain with changed constraining type in middle",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 4402, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4411, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component x, because it is not present in constraining type of declaration 'redeclare replaceable H b constrainedby I'
+  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable H b constrainedby I'
 ")})));
 end RedeclareTest72;
 
@@ -4480,19 +4480,19 @@ model RedeclareTest73
     G g;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest73",
             description="Redeclare chain with changed constraining type in middle",
             errorMessage="
-2 errors found:
+2 warnings found:
 
-Error at line 4460, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4470, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component x, because it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component x not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
 
-Error at line 4461, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4471, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component z, because it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
+  Access to component z not recommended, it is not present in constraining type of declaration 'redeclare replaceable E b constrainedby F'
 ")})));
 end RedeclareTest73;
 
@@ -4543,15 +4543,15 @@ model RedeclareTest74
     G g;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest74",
             description="Redeclare chain with changed constraining type in middle",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 4517, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4528, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component x, because it is not present in constraining type of declaration 'replaceable model J = H constrainedby I'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable model J = H constrainedby I'
 ")})));
 end RedeclareTest74;
 
@@ -4597,19 +4597,19 @@ model RedeclareTest75
     G g;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="RedeclareTest75",
             description="Redeclare chain with changed constraining type in middle",
             errorMessage="
-2 errors found:
+2 warnings found:
 
-Error at line 4575, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4587, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component x, because it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
 
-Error at line 4576, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Warning at line 4588, column 21, in file '...', NOT_IN_CONSTRAINING_TYPE,
 In component g:
-  Cannot use component z, because it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
+  Access to component z not recommended, it is not present in constraining type of declaration 'replaceable model J = E constrainedby F'
 ")})));
 end RedeclareTest75;
 

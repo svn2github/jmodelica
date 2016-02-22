@@ -528,29 +528,25 @@ aspect InstLookupClasses {
     eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 
     eq InstBaseClassDecl.matches(String str)    = name().equals(str);
 
-
-    eq InstClassAccess.hasLookupError() {
-        myInstClassDecl();
-        return lookupError;
-    }
-
-    private boolean InstClassAccess.lookupError = false;
-
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
     eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
     eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
-    syn lazy InstClassDecl InstClassAccess.myInstClassDecl() {
+    syn InstClassDecl InstClassAccess.myInstClassDecl() = myInstLookup().target(INST_UNKNOWN_CLASS, this);
+    
+    syn lazy InstLookupResult<InstClassDecl> InstClassAccess.myInstLookup() {
         // If we return back during same lookup, return unknown to avoid infinite loop
         if (isInMyInstClassDecl) {
-            return unknownInstClassDecl();
+            return InstLookupResult.notFound();
         }
         isInMyInstClassDecl = true;
-        InstLookupResult<InstClassDecl> res = lookupInstClass(name());
+        InstLookupResult<InstClassDecl> res = myInstLookupClass();
         isInMyInstClassDecl = false;
-        lookupError = res.isError();
-        return res.target(INST_UNKNOWN_CLASS, this);
+        return res;
     }
+    
     private boolean InstClassAccess.isInMyInstClassDecl = false;
+    
+    syn InstLookupResult<InstClassDecl> InstAccess.myInstLookupClass() = lookupInstClass(name());
 
     syn InstClassDecl InstFunctionCall.myInstClassDecl()      = getName().myInstClassDecl(); 
     syn InstClassDecl InstRecordConstructor.myInstClassDecl() = getRecord().myInstClassDecl(); 
@@ -562,6 +558,13 @@ aspect InstLookupClasses {
     eq InstClassDecl.myInstClass()            = this;
     eq InstExtends.myInstClass()              = getClassName().myInstClassDecl();
     eq UnknownInstComponentDecl.myInstClass() = unknownInstClassDecl();
+    
+    protected static final InstLookupResult.DefaultGenerator<InstCallable> ASTNode.INST_UNKNOWN_CALLABLE = 
+            new InstLookupResult.DefaultGenerator<InstCallable>() {
+        public InstCallable generate(ASTNode src) {
+            return src.unknownInstClassDecl();
+        }
+    };
 
 }
 

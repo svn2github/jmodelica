@@ -50,14 +50,14 @@ aspect InstanceNameCheck {
 
     public void InstAccess.nameCheckAmbigous(ErrorCheckType checkType) {
         if (!isExpandableConnectorMemberInConnect()) {
-            InstLookupResult<InstComponentDecl> comp = lookupInstComponent(name());
-            InstLookupResult<InstClassDecl> cls = lookupInstClass(name());
+            InstLookupResult<InstComponentDecl> comp = myInstLookupComponent();
+            InstLookupResult<InstClassDecl> cls      = myInstLookupClass();
             if (!comp.isNotFound())
-                comp.error(this, "component", qualifiedName());
+                comp.problem(this, "component", qualifiedName());
             else if (!cls.isNotFound())
-                cls.error(this, "class", qualifiedName());
+                cls.problem(this, "class", qualifiedName());
             else 
-                comp.error(this, "class or component", qualifiedName());
+                comp.problem(this, "class or component", qualifiedName());
         }
     }
 
@@ -71,8 +71,9 @@ aspect InstanceNameCheck {
 
     public void InstAccess.nameCheckComponentAccess(ErrorCheckType checkType) {
         //log.debug("InstComponentAccess.nameCheck(" + checkType + "): " + name() + " " + myInstComponentDecl().name());
-        if (hasLookupError()) 
-            lookupInstComponent(name()).error(this, "component", qualifiedName());
+        if (hasLookupProblem()) {
+            myInstLookup().problem(this, "component", qualifiedName());
+        }
         if (!inConnectClause() && !isModificationName() && isConditional()) {
             error("The component "+qualifiedName()+" is conditional: Access of conditional components is only valid in connect statements");
         }
@@ -83,19 +84,32 @@ aspect InstanceNameCheck {
     eq InstComponentArrayAccess.isConditional() = myInstLookup().unresolved().target().hasConditionalAttribute();
 
     public void InstClassAccess.nameCheck(ErrorCheckType checkType) {
-        //log.debug("InstClassAccess.nameCheck(" + checkType + "): " + name() + " " + myInstClassDecl().name());
-        if (hasLookupError()) {
-            classLookupError("class", qualifiedName());
+        generateClassLookupProblems(myInstLookup(), this);
+    }
+    
+    public void InstAccess.generateClassLookupProblems(InstLookupResult lookup, ASTNode n) {
+        if (lookup.isProblem()) {
+            lookup.problem(this, n.classErrorType(), n.classErrorName());
         }
     }
 
-    public void InstAccess.classLookupError(String kind, String name) {
-        lookupInstClass(name()).error(this, kind, name);
+    public void InstDot.generateClassLookupProblems(InstLookupResult lookup, ASTNode n) {
+         getInstAccess(getNumInstAccess() - 1).generateClassLookupProblems(lookup, n);
     }
-
-    public void InstDot.classLookupError(String kind, String name) {
-        getInstAccess(getNumInstAccess() - 1).classLookupError(kind, name);
-    }
+    
+    syn String ASTNode.classErrorType()  = null;
+    eq InstClassAccess.classErrorType()  = "class";
+    eq InstFunctionCall.classErrorType() = "function";
+    
+    syn String ASTNode.classErrorName()  = null;
+    eq InstClassAccess.classErrorName()  = qualifiedName();
+    eq InstFunctionCall.classErrorName() = name() + "()";
+    
+    public static final SimpleProblemProducer ASTNode.NOT_IN_CONSTRAINING_TYPE =
+            new SimpleWarningProducer("NOT_IN_CONSTRAINING_TYPE", ProblemKind.SEMANTIC, 
+                    "Access to %s %s not recommended, it is not present in "
+                    + "constraining type of declaration '%s'");
+    
 
     inh boolean InstAccess.isExpandableConnectorMemberInConnect();
     eq InstDot.getInstAccess(int i).isExpandableConnectorMemberInConnect() = 

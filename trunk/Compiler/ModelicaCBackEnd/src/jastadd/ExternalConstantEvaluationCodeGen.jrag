@@ -357,7 +357,7 @@ aspect Serialize {
     }
 
     syn String InstAccess.toString_C(CodePrinter p) =
-        lookupInstComponent(name()).target().name_C();
+        myInstLookupComponent().target().name_C();
 
     public String InstComponentDecl.name_C() {
         StringBuilder buf = new StringBuilder();

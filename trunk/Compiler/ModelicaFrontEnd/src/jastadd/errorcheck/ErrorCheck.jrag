@@ -749,9 +749,11 @@ aspect InstanceErrorCheck {
             return;
         }
         InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
-        if (!lr.successful()) {
-            lr.error(derivative.ast(), "function", name);
-            return;
+        if (lr.isProblem()) {
+            lr.problem(derivative.ast(), "function", name);
+            if (lr.isError()) {
+                return;
+            }
         }
         InstClassDecl icd = lr.target();
         if (!icd.isFunction()) {
@@ -1272,11 +1274,12 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             errorChecked = true;
             // Check that the function exists
+            InstLookupResult<InstCallable> lp = getName().myInstLookupCallable();
             InstCallable func = getName().myInstCallable();
             String name = getName().name();
-            if (getName().hasLookupError() || func.isUnknown()) {
+            if (lp.isError()) {
                 // Function does not exist or can't be used due to constraining classes, or name refers to component
-                getName().classLookupError("function", name + "()");
+                getName().generateClassLookupProblems(lp, this);
             } else if (!func.isCallable()) {
                 if (func.isExternalObject()) {
                     // Something is be wrong with constructor

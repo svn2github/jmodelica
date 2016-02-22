@@ -1711,14 +1711,14 @@ model BadFunctionCall4
     Real x = C.f(1);
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="BadFunctionCall4",
             description="Call to function in replaceable package that is not present in constraining type",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 1660, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo':
-  Cannot use function C.f(), because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
+Warning at line 1711, column 16, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to function C.f() not recommended, it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end BadFunctionCall4;
 

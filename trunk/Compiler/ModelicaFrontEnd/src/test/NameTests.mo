@@ -261,14 +261,14 @@ model NameTest9_Err
 
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="NameTest9_Err",
             description="Test that names are looked up in constraining clauses.",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 253, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby A'
+Warning at line 260, column 9, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
 
@@ -299,14 +299,14 @@ model NameTest10_Err
   
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="NameTest10_Err",
             description="Test that names are looked up in constraining clauses.",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 291, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot use class B, because it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
+Warning at line 298, column 5, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to class B not recommended, it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
   
@@ -777,14 +777,14 @@ model NameTest25_Err
     Real z = a.b.y;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="NameTest25_Err",
             description="Check that member lookup is limited by constraining class when using redeclare replaceable",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 768, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot use component y, because it is not present in constraining type of declaration 'replaceable B b constrainedby B'
+Warning at line 777, column 18, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby B'
 ")})));
 end NameTest25_Err;
 
@@ -1338,14 +1338,14 @@ model ConstantLookup23
 	Real y = C.x;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="ConstantLookup23",
             description="Trying to use member that does not exist in constraining class (but does in actual)",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 1327, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Cannot use component x, because it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
+Warning at line 1338, column 13, in file '...', NOT_IN_CONSTRAINING_TYPE:
+  Access to component x not recommended, it is not present in constraining type of declaration 'replaceable package C = B constrainedby A'
 ")})));
 end ConstantLookup23;
 

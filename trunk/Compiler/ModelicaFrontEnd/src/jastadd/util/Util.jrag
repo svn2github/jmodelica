@@ -1464,11 +1464,24 @@ aspect MultiDeclMethods {
     
     syn InstCallable InstFunctionCall.myInstCallable() = getName().myInstCallable();
     
-    syn InstCallable InstAccess.myInstCallable() = myInstClassDecl();
-    eq InstComponentAccess.myInstCallable() {
-        InstComponentDecl icd = myInstComponentDecl();
-        return icd.isPartialFunction() ? (InstPartialFunction) icd : unknownInstClassDecl();
+    syn InstCallable InstAccess.myInstCallable() = myInstLookupCallable().target(INST_UNKNOWN_CALLABLE, this);
+    
+    syn InstLookupResult<InstCallable> InstAccess.myInstLookupCallable() = myInstLookup().asCallable();
+    
+    public InstLookupResult<InstCallable> InstLookupResult.asCallable() {
+        if (isNotFound()) {
+            return InstLookupResult.<InstCallable>notFound();
+        }
+        InstCallable ic = target().asCallable();
+        if (ic == null) {
+            return InstLookupResult.<InstCallable>notFound();
+        }
+        return create(ic);
     }
+    
+    syn InstCallable InstClassDecl.asCallable()     = this;
+    syn InstCallable InstComponentDecl.asCallable() = null;
+    eq InstPartialFunction.asCallable()             = this;
 }
 
 aspect ShortClassUtil {
