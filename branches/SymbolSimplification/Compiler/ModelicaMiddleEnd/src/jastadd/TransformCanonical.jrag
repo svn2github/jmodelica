@@ -107,6 +107,7 @@ aspect TransformCanonical {
          * multiple initializations.
          */
         private void setupTransformations() {
+            int i = 0;
             if (transformations != null)
                 return;
             transformations = new ArrayList<Transformation>();
@@ -129,7 +130,15 @@ aspect TransformCanonical {
             transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
             transformations.add(new enableIfEquationRewrite());
-            transformations.add(new aliasEliminationIfSet());
+            
+            /* Iterative Symbol Simplification. */
+            
+            transformations.add(new iterativeSymbolSimplificationIfSet());
+            transformations.add(new canonizeEquationsIfSet());
+            
+            /* -------------------------------- */
+
+            transformations.add(new aliasEliminationIfSet()); 
             transformations.add(new variabilityPropagationIfSet());
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new enableExpandedInStreamRewrite());

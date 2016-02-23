@@ -1,0 +1,68 @@
+/**
+ *  Extremely good documentation in development!
+ */
+
+aspect IterativeSymbolSpecification {
+    /**
+     * Top level class for experimental and pedagogical implementation 
+     * of the alias elimination and variability propagation algorithms.
+     * <p>The purpose is for the two to be used interactively with one
+     * another through a common framework. This class will likely serve
+     * as a rudiment for that framework.
+     * 
+     * @author  Johan Calvén, Zimon Kuhs
+     * @date    2016-02-08
+     * @version 0?
+     */
+    public class FClass {
+        public static String defaultIndent = "";
+        public static boolean setAE = true, setVP = false, defaultShowFEq = false;
+    
+        public class iterativeSymbolSimplificationIfSet extends Transformation {
+            public iterativeSymbolSimplificationIfSet() {
+                super("iterative_symbol_simplification");
+            }
+            
+            public void perform() {
+                iterativeSymbolSimplification();
+            }
+        }
+    }
+    
+    /**
+     *  Main method for running the two algorithms.<p>
+     *  Currently only utilizes default booleans to determine
+     *  whether or not they should run.
+     */
+    public void FClass.iterativeSymbolSimplification() {
+        if (setAE)
+            AE();
+        if (setVP)
+            VP();
+    }
+    
+    /**
+     *  Utility method for learning the AST structure.
+     *  <p>Prints the tree of all equations in the current model.
+     *
+     *  @param showFEq  If true, will display the equation string
+     *                      before dumping the AST.
+     *  @param indent   Base indentation of the dumped tree.
+     */
+     public void FClass.showTree(boolean showFEq, String indent) {
+        for (FAbstractEquation fae : getFAbstractEquations()) {
+            if (showFEq)
+                System.out.println("<" + fae.toString() + ">");
+            fae.dumpTree(indent);
+        }
+     }
+     
+     /**
+     *  Utility method for learning the AST structure.
+     *  <p>A No argument version of printTree() not printing the equation
+     *  and using no identation. A "default" version of printTree(),
+     */
+     public void FClass.showTree() {
+        showTree(defaultShowFEq, defaultIndent);
+     }
+}

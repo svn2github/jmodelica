@@ -40,17 +40,24 @@ aspect CanonizeEquations {
         
         public void canonizeEquations() {
 	    	for (FAbstractEquation equation: getFAbstractEquations()) {
+	    	    if (!equation.isFEquation())  // Avoids erroneous class casting.
+	    	      continue;
+	    	      
 	    	    FEquation feq  = (FEquation) equation;
 	            FExp leftExp = feq.getLeft();
 	            FExp rightExp = feq.getRight();
+	            
 	    	    // Step 1. Move all expressions to RHS.
 	    	    moveToRHS(feq, leftExp, rightExp);
+	    	    
 	    	    // Step 2: Remove all DivExp.
 	    	    rightExp = feq.getRight();
 	    	    elimDiv(rightExp, feq);
+	    	    
 	    	    // Step 3: Expand parentheses.
 	    	    // TODO: not implemented
 	    	    expandParentheses(rightExp);
+	    	    
 	        	// Step 4: ...
 	        	
 	        	//dumpTree("");
@@ -116,7 +123,7 @@ aspect CanonizeEquations {
 	        
 	        // Retrieve children.
 	        if (fexp.getChild(0).isFExp()) {
-	            leftChild = (FExp) fexp.getChild(0);
+	            leftChild = (FExp) fexp.getChild(0);       // FExp has getLeft/getRight
 	        }
 	        if (fexp.getChild(1).isFExp()) {
 	            rightChild = (FExp) fexp.getChild(1);

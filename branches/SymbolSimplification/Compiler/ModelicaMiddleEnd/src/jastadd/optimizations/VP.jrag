@@ -1,0 +1,6 @@
+aspect VP {
+    public void FClass.VP() {
+            System.out.println("VP is not implemented yet.");
+            // NOP
+    }
+}
