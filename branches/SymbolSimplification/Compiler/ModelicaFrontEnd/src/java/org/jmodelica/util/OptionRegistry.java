@@ -595,6 +595,12 @@ abstract public class OptionRegistry {
              Category.internal,
              "",
              "The MODELICAPATH to use during compilation."),
+        ITERATIVE_SYMBOL_SIMPLIFICATION
+            ("iterative_symbol_simplification",
+              OptionType.compiler,
+              Category.experimental,
+              true,
+              "If enabled the simple AE and VP algorithms will run"),
         CANONIZE_EQUATIONS
         	("canonize_equations",
         	 OptionType.compiler,
