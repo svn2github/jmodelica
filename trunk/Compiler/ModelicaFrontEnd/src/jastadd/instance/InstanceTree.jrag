@@ -490,8 +490,16 @@ aspect Environments {
     /**
      * Get the InstValueModification corresponding to the specified cell (1-based index) of the array.
      */
-    syn InstValueModification InstValueModification.arrayInstModification(int i) = 
-        (getNumInstArrayModification() > 0) ? getInstArrayModification(i - 1) : this;
+    syn InstValueModification InstValueModification.arrayInstModification(int i) {
+        int n = getNumInstArrayModification();
+        if (n <= 0) {
+            return this;
+        } else {
+            // Make sure we always return something
+            int j = (i > 0 && i <= n) ? i - 1 : 0;
+            return getInstArrayModification(j);
+        }
+    }
 
     syn InstModification InstModification.matchInstModification(String name) = null;
     eq InstCompleteModification.matchInstModification(String name) {

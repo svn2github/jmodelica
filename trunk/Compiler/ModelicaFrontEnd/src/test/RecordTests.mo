@@ -2708,6 +2708,133 @@ end RecordTests.RecordConstructor22;
 end RecordConstructor22;
 
 
+model RecordConstructor23
+    record A
+        parameter Integer n;
+        final parameter Integer m = n + 1;
+        parameter Real x[:, n];
+    end A;
+    
+    record B
+        extends A(n = 1, x = {{1}, {2}});
+    end B;
+    
+    model C
+        parameter A a;
+    end C;
+    
+    extends C(a = B());
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor23",
+            description="Record constructor for record with final parameter",
+            flatModel="
+fclass RecordTests.RecordConstructor23
+ parameter RecordTests.RecordConstructor23.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor23.B(1, n + 1, {{1}, {2}});
+
+public
+ record RecordTests.RecordConstructor23.A
+  parameter Integer n;
+  parameter Integer m;
+  parameter Real x[:,n];
+ end RecordTests.RecordConstructor23.A;
+
+ record RecordTests.RecordConstructor23.B
+  parameter Integer n;
+  parameter Integer m;
+  parameter Real x[2,1];
+ end RecordTests.RecordConstructor23.B;
+
+end RecordTests.RecordConstructor23;
+")})));
+end RecordConstructor23;
+
+
+model RecordConstructor24
+    record A
+        parameter Integer n;
+        constant Integer m = 1;
+        parameter Real x[:, n];
+    end A;
+    
+    record B
+        extends A(n = 1, x = {{1}, {2}});
+    end B;
+    
+    model C
+        parameter A a;
+    end C;
+    
+    extends C(a = B());
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor24",
+            description="Record constructor for record with constant",
+            flatModel="
+fclass RecordTests.RecordConstructor24
+ parameter RecordTests.RecordConstructor24.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor24.B(1, 1, {{1}, {2}});
+
+public
+ record RecordTests.RecordConstructor24.A
+  parameter Integer n;
+  constant Integer m;
+  parameter Real x[:,n];
+ end RecordTests.RecordConstructor24.A;
+
+ record RecordTests.RecordConstructor24.B
+  parameter Integer n;
+  constant Integer m;
+  parameter Real x[2,1];
+ end RecordTests.RecordConstructor24.B;
+
+end RecordTests.RecordConstructor24;
+")})));
+end RecordConstructor24;
+
+
+model RecordConstructor25
+    record A
+        parameter Real x = 1;
+    end A;
+
+    block B
+        parameter Integer n = 1;
+        parameter A[n] a1 = { A() };
+    end B;
+
+    block C
+        parameter A[:] a2 = { A() };
+    end C;
+
+    block D
+        extends C;
+        replaceable B b(n = size(a2, 1), a1 = a2);
+    end D;
+
+    D d(redeclare B b, a2 = {A(2), A(3)});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor25",
+            description="Array of records with constructors used in modification on redeclare",
+            flatModel="
+fclass RecordTests.RecordConstructor25
+ structural parameter Integer d.b.n = 2 /* 2 */;
+ parameter RecordTests.RecordConstructor25.A d.b.a1[2] = d.a2[1:2];
+ parameter RecordTests.RecordConstructor25.A d.a2[2] = {RecordTests.RecordConstructor25.A(2), RecordTests.RecordConstructor25.A(3)} /* { RecordTests.RecordConstructor25.A(2), RecordTests.RecordConstructor25.A(3) } */;
+
+public
+ record RecordTests.RecordConstructor25.A
+  parameter Real x;
+ end RecordTests.RecordConstructor25.A;
+
+end RecordTests.RecordConstructor25;
+")})));
+end RecordConstructor25;
+
+
 model RecordScalarize1
  record A
   Real a;

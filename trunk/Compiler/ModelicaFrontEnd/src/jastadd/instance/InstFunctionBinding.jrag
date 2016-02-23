@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.jmodelica.util.Criteria;
+import org.jmodelica.util.collections.FilteredIterator;
+
 
 aspect InstFunctionBinding {
 
@@ -127,14 +130,18 @@ aspect InstFunctionBinding {
      * 
      * Only valid for arguments to record constructors in the instance tree.
      */
-    inh InstComponentDecl InstFunctionArgument.myRecordConstructorVirtualInstComponentDecl();
-    eq BaseNode.getChild().myRecordConstructorVirtualInstComponentDecl()                 = null;
-    eq InstRecordConstructor.getArg(int i).myRecordConstructorVirtualInstComponentDecl() {
-        Iterator<InstComponentDecl> cmps = allInstComponentDecls().iterator();
-        for (int j = 0; j < i; j++) {
-            cmps.next();
-        }
-        return cmps.next();
+    syn InstComponentDecl InstFunctionArgument.myRecordConstructorVirtualInstComponentDecl() = 
+        lookupRecordConstructorVirtualInstComponentDecl(boundInput.name());
+
+    /**
+     * Lookup the virtual component instance that should be connected to an argument of a given name.
+     * 
+     * Only valid for arguments to record constructors in the instance tree.
+     */
+    inh InstComponentDecl InstFunctionArgument.lookupRecordConstructorVirtualInstComponentDecl(String name);
+    eq BaseNode.getChild().lookupRecordConstructorVirtualInstComponentDecl(String name) = null;
+    eq InstRecordConstructor.getArg(int i).lookupRecordConstructorVirtualInstComponentDecl(String name) {
+        return localLookupInstComponent(name).targetOrNull();
     }
 
     /**

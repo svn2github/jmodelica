@@ -538,13 +538,18 @@ aspect InstLookupComponents {
                 return InstLookupResult.<InstComponentDecl>found(((InstForIndex) fi).getInstPrimitive());
         return lookupInstComponent(name);
     }
+
     
     inh InstLookupResult<InstComponentDecl> InstRecordConstructor.lookupInstComponent(String name);
     eq InstRecordConstructor.getChild().lookupInstComponent(String name)             = lookupInstComponent(name);
     eq InstRecordConstructor.getInstComponentDecl().lookupInstComponent(String name) = genericLookupInstComponent(name);
-    
-    
+
     syn lazy InstLookupResult<InstComponentDecl> InstRecordConstructor.genericLookupInstComponent(String name) {
+        InstLookupResult<InstComponentDecl> res = localLookupInstComponent(name);
+        return res.successful() ? res : lookupInstComponent(name);
+    }
+
+    syn lazy InstLookupResult<InstComponentDecl> InstRecordConstructor.localLookupInstComponent(String name) {
         for (InstComponentDecl icd : getInstComponentDecls()) {
             if (icd.matches(name)) {
                 return InstLookupResult.<InstComponentDecl>found(icd);
@@ -556,7 +561,7 @@ aspect InstLookupComponents {
                 return res;
             }
         }
-        return lookupInstComponent(name);
+        return InstLookupResult.notFound();
     }
 
     /**
