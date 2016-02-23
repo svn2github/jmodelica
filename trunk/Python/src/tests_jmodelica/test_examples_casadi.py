@@ -88,7 +88,7 @@ def test_ccpp_variable_elimination():
     """Run the Combined Cycle Power Plant example."""
     ccpp_elimination.run_demo(False)
     
-@testattr(ma27 = True)
+@testattr(ma27 = True, noncompliantfmi = True)
 def test_fed_batch_oed():
     """Run the Fed Batch Reactor OED example."""
     fed_batch_oed.run_demo(False)

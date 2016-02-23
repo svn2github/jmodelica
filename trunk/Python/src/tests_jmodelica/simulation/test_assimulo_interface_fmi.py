@@ -85,7 +85,7 @@ class Test_Sensitivities_FMI2:
         compile_fmu("BasicSens2", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True})
         compile_fmu("BasicSens1", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True}, compile_to="BasicSens1Dir.fmu")
         
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_basicsens1(self):
         model = load_fmu("BasicSens1.fmu")
         
@@ -97,7 +97,7 @@ class Test_Sensitivities_FMI2:
         
         assert res.solver.statistics["nsensfcnfcns"] > 0
         
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_basicsens1dir(self):
         model = load_fmu("BasicSens1Dir.fmu")
         
@@ -1322,7 +1322,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)        
 
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_assert_raises_sensitivity_parameters(self):
         """
         This tests that an exception is raised if a sensitivity calculation
