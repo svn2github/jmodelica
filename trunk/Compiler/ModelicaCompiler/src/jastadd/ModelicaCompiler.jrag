@@ -1475,11 +1475,15 @@ public class ModelicaCompiler {
             Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
             
             // Eat any output
-            new StreamGobbler(proc.getErrorStream(), logger.warningStream()).start();
-            new StreamGobbler(proc.getInputStream(), logger.verboseStream()).start();
+            Thread err = new StreamGobbler(proc.getErrorStream(), logger.warningStream());
+            Thread out = new StreamGobbler(proc.getInputStream(), logger.verboseStream());
+            err.start();
+            out.start();
             
             // Wait for process to finish and return result
             int code = proc.waitFor();
+            err.join();
+            out.join();
             if (code > 0) {
                 logger.printCache();
             }
