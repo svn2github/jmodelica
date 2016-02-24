@@ -751,6 +751,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 jmi_log_unwind(jmi->log, top_node);
                 return -1;
             }
+            jmi_log_node(jmi->log, logInfo, "NextTimeEvent", "A next time event is defined and computed to occur at <t:%E>",event_info->next_event_time);
         } else {
             event_info->next_event_time_defined = FALSE;
         }
