@@ -164,7 +164,6 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define JMI_EPS 2.2204460492503131e-16
 #define JMI_ALMOST_EPS (JMI_EPS*100)
 
-/*#define ALMOST_ZERO(op) (jmi_abs(op)<=1e-6? JMI_TRUE: JMI_FALSE)*/
 #define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
 #define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
 #define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
@@ -1247,8 +1246,9 @@ struct jmi_t {
     jmi_time_event_t nextTimeEvent;
 
     jmi_int_t is_initialized;            /**< Flag to keep track of if the initial equations have been solved. */
-	
-	int nbr_event_iter;                  /**< Counter for the nummber of global event iterations performed. */ 
+
+    int nbr_event_iter;                  /**< Counter for the nummber of global event iterations performed. */
+    int nbr_consec_time_events;          /**< Counter for the nummber of consecutive time events handled (max should always be 2). */ 
 
     jmi_simple_color_info_t* color_info_A;  /**< \brief CPR coloring info for the ODE Jacobian A */
     jmi_simple_color_info_t* color_info_B;  /**< \brief CPR coloring info for the ODE Jacobian B */

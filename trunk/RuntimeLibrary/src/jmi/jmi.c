@@ -276,6 +276,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->is_initialized = 0;
 
     jmi_->nbr_event_iter = 0;
+    jmi_->nbr_consec_time_events = 0;
 
     jmi_->dyn_mem_head.next = NULL;
     jmi_->dyn_mem_head.data = NULL;

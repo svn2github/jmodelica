@@ -506,6 +506,15 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
     return 0;
 }
 
+/* Local helper function */
+static int jmi_exists_grt_than_time_event(jmi_t* jmi) {
+    return jmi->model_terminate == FALSE                            &&
+           jmi->atTimeEvent                                         &&
+           jmi->eventPhase == JMI_TIME_EXACT                        &&
+           jmi->nextTimeEvent.defined                               && 
+           ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+}
+
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
@@ -775,6 +784,22 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Check for chattering and log it */
         jmi_chattering_check(jmi);
         
+        if (jmi_exists_grt_than_time_event(jmi)) {
+            jmi->nbr_consec_time_events++;
+            
+            if (jmi->nbr_consec_time_events > 2) {
+                jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
+                    "Time even phase failure. Got next time event <t:%E> "
+                    "that should already have been handled.", jmi->nextTimeEvent.time);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
+            
+            return jmi_event_iteration(jmi, intermediate_results, event_info);
+        } else {
+            jmi->nbr_consec_time_events = 0;
+        }
+        
         jmi_log_leave(jmi->log, top_node);
 
     } else if (intermediate_results) {
@@ -783,13 +808,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     /* If everything went well, check if termination of simulation was requested. */
     event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
-    
-    if (jmi->model_terminate == FALSE && jmi->atTimeEvent && 
-        jmi->eventPhase == JMI_TIME_EXACT && jmi->nextTimeEvent.defined 
-        && ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) &&
-        event_info->iteration_converged == TRUE) {
-        return jmi_event_iteration(jmi, intermediate_results, event_info);
-    }
     
     if (jmi->updated_states == JMI_TRUE) {
         event_info->state_values_changed = TRUE;
