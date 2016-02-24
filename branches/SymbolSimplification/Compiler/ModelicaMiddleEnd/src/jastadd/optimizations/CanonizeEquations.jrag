@@ -319,7 +319,7 @@ aspect CanonizeEquations {
 	        ArrayList<FSubExp> subs = new ArrayList();
 	        ArrayList<FMulExp> pMuls = new ArrayList();
 	        ArrayList<FMulExp> nMuls = new ArrayList();
-            int size = 0:
+            int size = 0;
             FExp newExp = null;
             
             for (FExp lpExp : lp) {
@@ -344,16 +344,7 @@ aspect CanonizeEquations {
 	        // Slutade här......
 	        int i = 1;
 	        for (FMulExp pmExp : pMuls) {
-	           if (i == 1) {
-	               newExp = new FAddExp(pmExp, null);
-	           } else if (i == 2) {
-                   newExp.getChild(1) = 
-	           } else if (i%2 != 0) {
-	               
-	           } else {
-	               
-	           }
-	           i++;
+
 	        }
 	        
 	        

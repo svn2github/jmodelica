@@ -16,7 +16,7 @@ aspect VP {
     public void FClass.VP() {
             System.out.println("VP being implemented.");
             simpleVariablityPropagation();
-            //enableSimpleConstantFolding();
+            simpleConstantFolding();
             //forceRewrites();
             root().flushAllRecursiveClearFinal();
     }
@@ -43,17 +43,50 @@ aspect VP {
             
             initWorklist(prop);
             
+            // Start propagating
             while (!worklist.isEmpty()) {
                 FAbstractEquation feq = worklist.iterator().next();
                 try {
                     feq.simpleVariabilityPropagation(prop);
                 } catch (CantSimplePropagateException e) {
                     worklist.clear();
-                    System.out.println("Something bad happend.");
+                    System.out.println("Error caught:\n\t"+e.getMessage());
                 }
                 worklist.remove(feq);
             }
+            
+            // Fix Hybrid DAE
+            cleanUp();            
         }
+        
+        
+        public void cleanUp() {
+            System.out.println("Step into cleanUp()");
+            ArrayList<FVariable> newVariables = new ArrayList();
+            ArrayList<FVariable> newAliases = new ArrayList();
+            ArrayList<FAbstractEquation> newEquations = new ArrayList();
+            
+            /*
+            for (FVariable fVariable: getFVariables()) {
+                if (!fVariable.taggedByVProp) {
+                    newVariables.add(fVariable);
+                }
+            }
+            setFVariableList(new List<FVariable>(newVariables));
+            */
+            System.out.println("\tGoing through equation list");
+            for (FAbstractEquation feq : getFAbstractEquations()) {
+                System.out.print("\t\tequation: "+feq.toString());
+                if (!feq.usedInVariabilityPropagation) {
+                    System.out.println(" was kept");
+                    newEquations.add(feq);
+                } else {
+                    System.out.println(" was NOT kept");
+                }
+            }
+            setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+        }
+        
         
         /**
          * Sets up the worklist at the beginning of the algorithm. All equations that 
@@ -63,7 +96,7 @@ aspect VP {
             for (FAbstractEquation feq : getFAbstractEquations())
             if (feq.canSimplePropagateEquation()) {
                 prop.addWorkEq(feq);
-                System.out.println("Equation added to worklist:\n" + feq.toString());
+                System.out.println("Equation added to worklist:\n\t" + feq.toString());
             }
         }
         
@@ -107,34 +140,39 @@ aspect VP {
     public void FEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) 
             throws CantSimplePropagateException {
         System.out.println("Step into FEquation.simpleVariabilityPropagation(...)");
-        FVariable fvar = variables().iterator().next();                         // the variable in the equation
-        FExp solution = solution(fvar);                                         // the expression of the equation
+        FVariable fvar = variables().iterator().next();
+        FExp solution = solution(fvar);
         solution.resetOriginalReferences();
-        FTypePrefixVariability solutionVariability = solution.variability();    // the variability of the variable
-        solution = solution.ceval().buildLiteral();
+        FTypePrefixVariability solutionVariability = solution.variability();
+        System.out.println("\tvariability = "+solutionVariability.toString());
         
         if (fvar.canSimplePropagateVariable()) {
-            System.out.println("can propagate variable");
-            if (solution.isConstantExp()) {
-                System.out.println("variable is constant");
-                System.out.println("var before change"+fvar.toString());
+            System.out.println("\tcan propagate variable");
+            if (solutionVariability.parameterVariability()) {
+                try {
+                    solution = solution.ceval().buildLiteral();
+                } catch (ConstantEvaluationException e) {
+                    solutionVariability = fParameter();
+                }
+                System.out.println("\t\tvariable is parameter");
+                
+                prop.addParamEq(new FEquation(fvar.createUseExp(), solution));
+            }
+        
+            if (solutionVariability.constantVariability()) {
+                System.out.println("\t\tvariable is constant");
+                System.out.println("\t\t\tvar before adding binding exp: "+fvar.toString());
                 fvar.setBindingExp(solution);
-                System.out.println("var after change"+fvar.toString());
-            } else if (solution.isParameterExp()) {
-                System.out.println("variable is parameter");
-                //prop.addParamEq(new FEquation(fvar,solution));
+                System.out.println("\t\t\tvar after adding binding exp: "+fvar.toString());
             } else {
-                throw new CantSimplePropagateException("Only functionality to handle constants and parameters" +
-                                                       "is implemented.");
+                throw new CantSimplePropagateException("Only functionality to handle constants " +
+                                                       "is yet implemented.");
             }
             
-            //fvar.simpleVariabilityPropagation(solution);
+            fvar.simpleVariabilityPropagation(solution, prop);
             
             //vd
         }
-        
-        
-        
     }
     
     /**
@@ -144,14 +182,23 @@ aspect VP {
     public void FVariable.simpleVariabilityPropagation(FExp solution, FClass.SimpleVariabilityPropagator prop) {
         System.out.println("step into FVariable.simpleVariabilityPropagation(...)");
         FAbstractEquation equation;
+        System.out.println("\tvariable before variability change: " + this.toString());
         setFTypePrefixVariability(solution.variability());
+        System.out.println("\tvariable after variability change: " + this.toString());
         
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
+                System.out.println("\tvariable is in an eq");
                 equation = use.myFEquation();
+                System.out.println("\t\teq before: "+equation);
                 equation.variables().remove(this);
+                System.out.println("\t\teq after: "+equation);
                 if (equation.canSimplePropagateEquation()) {
+                    System.out.println("\t\tadded eq to worklist: "+equation);
                     prop.addWorkEq(equation);
+                } else if (equation.variables().size() == 0) {
+                    System.out.println("\t\ttagged eq for cleanup: "+equation);
+                    equation.usedInVariabilityPropagation = true;
                 }
             }
         }
@@ -175,26 +222,26 @@ aspect VP {
 aspect ConstFold {
     public boolean FAbstractExp.simpleConstantFoldingEnabled = false;
     
-    public void ASTNode.enableConsFold() {
+    public void ASTNode.simpleConstantFolding() {
         for (ASTNode n : this)
-            n.enableConsFold();
+            n.simpleConstantFolding();
     }
 
-    public void FAbstractExp.enableConsFold() {
+    public void FAbstractExp.simpleConstantFolding() {
         if (variability().knownParameterOrLess()) {
             simpleConstantFoldingEnabled = true;
             is$Final = false;
             return;
         }
-        super.enableConsFold();
+        super.simpleConstantFolding();
     }
-    public void FIdUseExp.enableConsFold() {
+    public void FIdUseExp.simpleConstantFolding() {
         if (type().isString()) {
             simpleConstantFoldingEnabled = true;
             is$Final = false;
             return;
         }
-        super.enableConsFold();
+        super.simpleConstantFolding();
     }
 
     rewrite FAbstractExp {
@@ -219,7 +266,7 @@ aspect ConstFold {
             } catch (ConstantEvaluationException e) {
                 compliance("Could not evaluate string variable " + name());
             }
-            constantFoldingEnabled = false;
+            simpleConstantFoldingEnabled = false;
             return this;
         }
     }

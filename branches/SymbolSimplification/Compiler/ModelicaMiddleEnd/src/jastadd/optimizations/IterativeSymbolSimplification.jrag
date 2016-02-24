@@ -10,13 +10,13 @@ aspect IterativeSymbolSpecification {
      * another through a common framework. This class will likely serve
      * as a rudiment for that framework.
      * 
-     * @author  Johan Calvén, Zimon Kuhs
+     * @author  Johan Calven, Zimon Kuhs
      * @date    2016-02-08
      * @version 0?
      */
     public class FClass {
         public static String defaultIndent = "";
-        public static boolean setAE = true, setVP = false, defaultShowFEq = false;
+        public static boolean setAE = false, setVP = true, defaultShowFEq = false;
     
         public class iterativeSymbolSimplificationIfSet extends Transformation {
             public iterativeSymbolSimplificationIfSet() {
