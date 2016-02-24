@@ -1,6 +1,226 @@
+     /**
+     * Simple implementation of the Variable Propatation Algorithm.
+     * 
+     * @author  Johan Calven, Zimon Kuhs
+     * @date    2016-02-16
+     * @version 0?
+     */
 aspect VP {
+    public boolean FFunctionCallEquation.shouldCleanUp              = false;
+    public boolean FAbstractEquation.usedInVariabilityPropagation   = false;
+    public boolean FAbstractVariable.usedInVariabilityPropagation   = false;
+    public boolean FFunctionCallLeft.usedInVariabilityPropagation   = false;
+    public boolean FExp.usedInVariabilityPropagation                = false;
+
+
     public void FClass.VP() {
-            System.out.println("VP is not implemented yet.");
-            // NOP
+            System.out.println("VP being implemented.");
+            simpleVariablityPropagation();
+            //enableSimpleConstantFolding();
+            //forceRewrites();
+            root().flushAllRecursiveClearFinal();
+    }
+    
+    syn boolean FAbstractEquation.canSimplePropagateEquation() = false;
+    syn boolean FEquation.canSimplePropagateEquation() {
+        return variables().size() == 1; 
+    }
+    
+    syn boolean FAbstractVariable.canSimplePropagateVariable() = false;
+    syn boolean FVariable.canSimplePropagateVariable() {
+        return !isDerivativeVariable();
+    }
+    
+    public class FClass {
+        /**
+         * Starts the constant propagation algorithm and continues as long as there are
+         * equations left in the worklist.
+         */
+        public void simpleVariablityPropagation() {
+            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();   
+            List<FAbstractEquation> parameterEquations = getFParameterEquations();
+            FClass.SimpleVariabilityPropagator prop = new FClass.SimpleVariabilityPropagator(worklist, parameterEquations);
+            
+            initWorklist(prop);
+            
+            while (!worklist.isEmpty()) {
+                FAbstractEquation feq = worklist.iterator().next();
+                try {
+                    feq.simpleVariabilityPropagation(prop);
+                } catch (CantSimplePropagateException e) {
+                    worklist.clear();
+                    System.out.println("Something bad happend.");
+                }
+                worklist.remove(feq);
+            }
+        }
+        
+        /**
+         * Sets up the worklist at the beginning of the algorithm. All equations that 
+         * only contains one variable are added to the worklist.
+         */
+        public void initWorklist(FClass.SimpleVariabilityPropagator prop) {
+            for (FAbstractEquation feq : getFAbstractEquations())
+            if (feq.canSimplePropagateEquation()) {
+                prop.addWorkEq(feq);
+                System.out.println("Equation added to worklist:\n" + feq.toString());
+            }
+        }
+        
+        /**
+         * A class that contains the list of equations that can be propagate and a list of
+         * equations that are found to be parameter equations. 
+         */
+        public class SimpleVariabilityPropagator {
+            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
+            List<FAbstractEquation> parameterEquations = new List();
+            
+            public SimpleVariabilityPropagator(LinkedHashSet<FAbstractEquation> worklist,
+                                    List<FAbstractEquation> parameterEquations) {
+                this.worklist = worklist;
+                this.parameterEquations = parameterEquations;
+            }
+            
+            public void addParamEq(FAbstractEquation fae) {
+                parameterEquations.add(fae);
+            }
+            
+            public void addWorkEq(FAbstractEquation fae) {
+                worklist.add(fae);
+            }
+        }
+    }
+    
+    /**
+     * Implemented in the subclass FEquation.
+     */
+    public void FAbstractEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) 
+        throws CantSimplePropagateException {}
+    
+    /**
+     * Continuation of the simpleVariabilityPropagation method in FClass, taken to the level of FEquation.
+     * Used in the simplified version of Variability Propagation algorithm.
+     *
+     * The equations that uses this method has only one variable, since it is picked from the
+     * worklist with this requirement. 
+     */
+    public void FEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) 
+            throws CantSimplePropagateException {
+        System.out.println("Step into FEquation.simpleVariabilityPropagation(...)");
+        FVariable fvar = variables().iterator().next();                         // the variable in the equation
+        FExp solution = solution(fvar);                                         // the expression of the equation
+        solution.resetOriginalReferences();
+        FTypePrefixVariability solutionVariability = solution.variability();    // the variability of the variable
+        solution = solution.ceval().buildLiteral();
+        
+        if (fvar.canSimplePropagateVariable()) {
+            System.out.println("can propagate variable");
+            if (solution.isConstantExp()) {
+                System.out.println("variable is constant");
+                System.out.println("var before change"+fvar.toString());
+                fvar.setBindingExp(solution);
+                System.out.println("var after change"+fvar.toString());
+            } else if (solution.isParameterExp()) {
+                System.out.println("variable is parameter");
+                //prop.addParamEq(new FEquation(fvar,solution));
+            } else {
+                throw new CantSimplePropagateException("Only functionality to handle constants and parameters" +
+                                                       "is implemented.");
+            }
+            
+            //fvar.simpleVariabilityPropagation(solution);
+            
+            //vd
+        }
+        
+        
+        
+    }
+    
+    /**
+     * Continuation of the simpleVariabilityPropagation method in FEquation, taken to the level of FVariable.
+     * Used in the simplified version of Variability Propagation algorithm.
+     */
+    public void FVariable.simpleVariabilityPropagation(FExp solution, FClass.SimpleVariabilityPropagator prop) {
+        System.out.println("step into FVariable.simpleVariabilityPropagation(...)");
+        FAbstractEquation equation;
+        setFTypePrefixVariability(solution.variability());
+        
+        for (FIdUseExp use : uses()) {
+            if (use.inFEquation()) {
+                equation = use.myFEquation();
+                equation.variables().remove(this);
+                if (equation.canSimplePropagateEquation()) {
+                    prop.addWorkEq(equation);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Exception that should be throwned when using this simplified version of Variability Propagation
+     * on equations that is not supported yet.
+     */
+    public class CantSimplePropagateException extends Exception {
+        public CantSimplePropagateException(String message, Throwable throwable) {
+            super(message, throwable);
+        }
+        
+        public CantSimplePropagateException(String message) {
+            super(message);
+        }
+    }
+}
+
+aspect ConstFold {
+    public boolean FAbstractExp.simpleConstantFoldingEnabled = false;
+    
+    public void ASTNode.enableConsFold() {
+        for (ASTNode n : this)
+            n.enableConsFold();
+    }
+
+    public void FAbstractExp.enableConsFold() {
+        if (variability().knownParameterOrLess()) {
+            simpleConstantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+        super.enableConsFold();
+    }
+    public void FIdUseExp.enableConsFold() {
+        if (type().isString()) {
+            simpleConstantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+        super.enableConsFold();
+    }
+
+    rewrite FAbstractExp {
+        when (simpleConstantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
+            try {
+                CValue value = ceval();
+                if (!value.size().isEmpty()) 
+                    return value.buildLiteral();
+            } catch (ConstantEvaluationException e) {
+            }
+            simpleConstantFoldingEnabled = false;
+            return this;
+        }
+    }
+
+    rewrite FIdUseExp {
+        when (constantFoldingEnabled && type().isString()) to FExp {
+            try {
+                CValue value = ceval();
+                if (!value.size().isEmpty()) 
+                    return value.buildLiteral();
+            } catch (ConstantEvaluationException e) {
+                compliance("Could not evaluate string variable " + name());
+            }
+            constantFoldingEnabled = false;
+            return this;
+        }
     }
 }
