@@ -111,6 +111,28 @@ class Test_FMUModelCS2:
         coupled = load_fmu(self.coupled_name)
         
         assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
+        
+    @testattr(fmi = True)
+    def test_part_log(self):
+        model = load_fmu(self.coupled_name, log_level=6)
+        
+        model.set("_log_level", 6)
+        
+        model.simulate()
+        
+        num_lines = model.get_number_of_lines_log()
+        assert num_lines > 50 #Assert big log
+        
+        log = model.get_log(start_lines=10)
+        assert len(log) == 10
+        log = model.get_log(end_lines=10)
+        assert len(log) == 10
+        log = model.get_log()
+        assert len(log) == num_lines
+        log = model.get_log(start_lines=10, end_lines=10)
+        assert len(log) == 20
+        log = model.get_log(start_lines=num_lines-10, end_lines=num_lines-10)
+        assert len(log) == num_lines
     
     @testattr(windows = True)
     def test_init(self):
