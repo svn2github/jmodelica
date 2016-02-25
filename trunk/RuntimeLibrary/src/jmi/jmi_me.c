@@ -789,8 +789,9 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             
             if (jmi->nbr_consec_time_events > 2) {
                 jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
-                    "Time even phase failure. Got next time event <t:%E> "
-                    "that should already have been handled.", jmi->nextTimeEvent.time);
+                    "Time event phase failure. Got next time event <t:%E> at "
+                    "current time <t:%E> that should already have been handled.",
+                    jmi->nextTimeEvent.time, jmi_get_t(jmi)[0]);
                 jmi_log_unwind(jmi->log, top_node);
                 return -1;
             }
