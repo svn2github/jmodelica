@@ -103,10 +103,8 @@ set(MODELICAEXTERNALCSources
     ${MSLCSOURCES}/ModelicaFFT.c
 )
 
-# Source files for ModelicaStandardTables
-set(STANDARDTABLESSources
-    ${MSLCSOURCES}/ModelicaStandardTables.c
-    ${MSLCSOURCES}/ModelicaMatIO.c
+# Source files for Zlib
+set(ZLIB_SOURCES
     ${MSLCSOURCES}/zlib/adler32.c
     ${MSLCSOURCES}/zlib/compress.c
     ${MSLCSOURCES}/zlib/crc32.c
@@ -155,7 +153,25 @@ endif()
 
 #Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
-add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
+add_library(ModelicaStandardTables STATIC ${MSLCSOURCES}/ModelicaStandardTables.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build ModelicaIO library
+add_library(ModelicaIO STATIC ${MSLCSOURCES}/ModelicaIO.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build ModelicaMatIO library
+add_library(ModelicaMatIO STATIC ${MSLCSOURCES}/ModelicaMatIO.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaMatIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build Zlib library
+add_library(zlib STATIC ${ZLIB_SOURCES})
 if(NOT MSVC)
     set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
 endif()
