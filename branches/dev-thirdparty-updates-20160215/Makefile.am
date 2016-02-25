@@ -31,11 +31,25 @@ bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)
+	if [ "$(PYTHON_HOME)" ]; then \
+	  PYTHON_LIB="$(PYTHON_HOME)/libs/libpython27.a"; \
+	  PYTHON_INCLUDE="$(PYTHON_HOME)/include"; \
+	else \
+	  PYTHON_LIB=""; \
+	  PYTHON_INCLUDE=""; \
+	fi; \
+	make -f Makefile CMAKE_PYTHON_LIBRARY=$${PYTHON_LIB} CMAKE_PYTHON_INCLUDE_DIR=$${PYTHON_INCLUDE}
 
 install_casadi: casadi
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB) CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)	
+	if [ "$(PYTHON_HOME)" ]; then \
+	  PYTHON_LIB="$(PYTHON_HOME)/libs/libpython27.a"; \
+	  PYTHON_INCLUDE="$(PYTHON_HOME)/include"; \
+	else \
+	  PYTHON_LIB=""; \
+	  PYTHON_INCLUDE=""; \
+	fi; \
+	make -f Makefile install CMAKE_PYTHON_LIBRARY=$${PYTHON_LIB} CMAKE_PYTHON_INCLUDE_DIR=$${PYTHON_INCLUDE}
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
 	## temp fix
