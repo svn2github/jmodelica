@@ -283,6 +283,42 @@ model DisplayUnit10
 ")})));
 end DisplayUnit10;
 
+model DisplayUnit11
+    Real a(displayUnit="W") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit11",
+            description="Test that no displayUnit without unit is generated for XML variable",
+            fmi_version="1.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"0\" variability=\"continuous\" causality=\"internal\" alias=\"noAlias\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end DisplayUnit11;
+
+model DisplayUnit12
+    Real a(displayUnit="W") = 2 * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="DisplayUnit12",
+            description="Test that no displayUnit without unit is generated for XML variable",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"0\" causality=\"local\" variability=\"continuous\" initial=\"calculated\">
+        <Real relativeQuantity=\"false\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end DisplayUnit12;
+
 model Fmi1StartAttribute
     constant Real independent1(start=1);
     constant Real dependent1(fixed=false) = independent1*independent1;

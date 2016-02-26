@@ -669,11 +669,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 
                 if(realvariable.quantityAttributeSet())
                     generateAttribute("quantity", realvariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
-                if(realvariable.unitAttributeSet())
+                if(realvariable.unitAttributeSet()) {
                     generateAttribute("unit", realvariable.unitXML(Fmi1XMLGenerator.this), genPrinter);
-                if(realvariable.displayUnitAttributeSet())
-                    generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi1XMLGenerator.this), genPrinter);
-                
+                    if(realvariable.displayUnitAttributeSet()) {
+                        generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi1XMLGenerator.this), genPrinter);
+                    }
+                }
                 generateAttribute("relativeQuantity", false, genPrinter);
                 if(realvariable.minAttributeSet())
                     generateAttribute("min", realvariable.minAttribute(), genPrinter);
@@ -1476,11 +1477,12 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 
                 if (realvariable.quantityAttributeSet())
                     generateAttribute("quantity", realvariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
-                if (realvariable.unitAttributeSet())
+                if (realvariable.unitAttributeSet()) {
                     generateAttribute("unit", realvariable.unitXML(Fmi2XMLGenerator.this), genPrinter);
-                if (realvariable.displayUnitAttributeSet())
-                    generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi2XMLGenerator.this), genPrinter);
-                
+                    if (realvariable.displayUnitAttributeSet()) {
+                        generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi2XMLGenerator.this), genPrinter);
+                    }
+                }
                 generateAttribute("relativeQuantity", false, genPrinter);
                 if (realvariable.minAttributeSet())
                     generateAttribute("min", realvariable.minAttribute(), genPrinter);
