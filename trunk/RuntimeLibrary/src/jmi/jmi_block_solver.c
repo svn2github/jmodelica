@@ -650,6 +650,20 @@ double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t 
     return elapsed_time;
 }
 
+int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_real_t* x_pre, jmi_real_t* x_post) {
+    int i, all_iter_vars_equal = 1;
+    jmi_real_t* x_nom = block_solver->nominal;
+    jmi_real_t r_tol = block_solver->options->res_tol;
+    
+    for (i = 0; i < block_solver->n; i++) {
+        if (fabs(x_pre[i] - x_post[i]) > r_tol*fabs(x_pre[i]) + r_tol*x_nom[i]) {
+            all_iter_vars_equal = 0;
+            break;
+        }
+    }
+    return all_iter_vars_equal;
+}
+
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->res_tol = 1e-6;
     /* Default Kinsol tolerance (machine precision pwr 1/3)  -> 1e-6 */

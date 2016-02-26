@@ -123,6 +123,7 @@ struct jmi_block_residual_t {
     int event_iter;                 /**< \brief Current iteration for the switches. Used to index the saved switches/booleans in sw_old/bool_old */
     jmi_real_t* sw_old;             /**< \brief  Saved states of the switches during passed event iterations. Used for infinite loop detection. */
     jmi_real_t* nr_old;             /**< \brief  Saved states of the booleans during passed event iterations. Used for infinite loop detection. */
+    jmi_real_t* x_old;              /**< \brief  Saved states of the interation variables during passed event iterations. Used for infinite loop detection. */
     jmi_int_t* sw_index;            /**< \brief  Index of the active switches for this block. */
     jmi_int_t* sr_vref;             /**< \brief  Value reference of the solved reals for this block. */
     jmi_int_t* sw_direct_index;     /**< \brief  Index of the direct switches for this block. */
@@ -295,15 +296,16 @@ int jmi_compute_reduced_step(jmi_real_t h, jmi_real_t* x_new, jmi_real_t* x, jmi
  * \brief Determines if the current switches has already been tried.
  * 
  * This method loops over all the already tried states of the model
- * i.e. the tried set of the switches and determines if the one 
- * currently being tried has already been checked.
+ * i.e. the tried set of the switches and iteration variables and
+ * determines if the one currently being tried has already been
+ * checked.
  * 
- * @param sw_old A list of all the switches with lenght (nR*iter)
+ * @param b A jmi_block_residual_t struct.
  * @param sw The current switches
- * @param nR The size of the switches
+ * @param x The current iteration variable values
  * @param iter The number of already tried states of the model
  */
-jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t nR, jmi_int_t iter);
+jmi_int_t jmi_block_check_infinite_loop(jmi_block_residual_t* b, jmi_real_t* sw, jmi_real_t* x, jmi_int_t iter);
 
 /**
  * \brief Computes the minial step for changing the relations, i.e. switches or booleans.

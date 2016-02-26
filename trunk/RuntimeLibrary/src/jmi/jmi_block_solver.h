@@ -331,6 +331,21 @@ double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t 
 /** \brief Notify the block that an integrator step is completed */
 int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver);
 
+/**
+ * \brief Compares two sets of iteration variables.
+ * 
+ * Compares two sets of iteration variables and returns (1) if their differance 
+ * is small and (0) if not. The difference between the sets of iteration
+ * variables is considered small if
+ *     |x_pre[i] – x_post[i] | < RTOL*|x_pre[i]| + RTOL*x_nom[i],
+ * is true for each iteration variable (i = 1,2,...,n).
+ * 
+ * @param block_solver A jmi_block_solver_t struct
+ * @param x_pre The first set of iteration variables
+ * @param x_post The second set of iteration varilabes
+ */
+int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_real_t* x_pre, jmi_real_t* x_post);
+
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
 

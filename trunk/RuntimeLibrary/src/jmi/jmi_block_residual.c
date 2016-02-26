@@ -171,6 +171,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     jmi_real_t *pre_switches, *pre_non_reals;
     jmi_real_t* switches  = &block->sw_old[iter*block->n_sw];
     jmi_real_t* non_reals = &block->nr_old[iter*block->n_nr];
+    jmi_real_t* iter_vars = &block->x_old[iter*block->n];
 
     *non_reals_changed_flag = 1;
     
@@ -198,7 +199,8 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
 
     /* Save the current values of the switches and non-reals */
     jmi_block_get_sw_nr(block, switches, non_reals);
-    
+    /* Save the current values of the iteration variables */
+    block->F(jmi, iter_vars, NULL, JMI_BLOCK_INITIALIZE);
     
     /* Log updates, NOTE this should in the future also contain which expressions changed! */
     if (jmi->jmi_callbacks.log_options.log_level >= 5 && (block->n_sw > 0 || block->n_nr > 0)){
@@ -246,7 +248,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         } else {
             /* Check for infinite loop */
             if (block->n_nr == 0) { /* If there are no non-reals do the extensive check for infinite loops */
-                if (jmi_check_infinite_loop(block->sw_old, switches, block->n_sw, iter)) {
+                if (jmi_block_check_infinite_loop(block, switches, iter_vars, iter)) {
                     jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
                     block->event_iter = 0;
                     return jmi_block_solver_status_inf_event_loop;
@@ -254,8 +256,9 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
             } else if (iter > 2) { /* Else, do the naive test for infinite loops */
                 if (jmi_compare_switches(&block->sw_old[block->n_sw*(iter-2)], switches, block->n_sw) && 
                     jmi_compare_switches(&block->nr_old[block->n_nr*(iter-2)], non_reals, block->n_nr) &&
-                    jmi_compare_switches(&block->nr_old[block->n_nr*(iter-3)], pre_non_reals, block->n_nr)) {
-                    
+                    jmi_compare_switches(&block->nr_old[block->n_nr*(iter-3)], pre_non_reals, block->n_nr) &&
+                    jmi_block_solver_compare_iter_vars(block->block_solver, &block->x_old[block->n*(iter-2)], iter_vars))
+                {
                     jmi_log_node(log, logInfo, "Info", "Detected infinite loop in fixed point iteration in <block:%s, iter:%I> at <t:%E>",block->label, iter, cur_time);
                     block->event_iter = 0;
                     return jmi_block_solver_status_inf_event_loop;
@@ -402,6 +405,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     */
     b->sw_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_sw, sizeof(jmi_real_t));
     b->nr_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_nr, sizeof(jmi_real_t));
+    b->x_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n, sizeof(jmi_real_t));
     b->sw_index = (jmi_int_t*)calloc(b->n_sw, sizeof(jmi_int_t));
     b->sw_direct_index = (jmi_int_t*)calloc(b->n_direct_sw, sizeof(jmi_int_t));
     b->sr_vref = (jmi_int_t*)calloc(b->n_sr, sizeof(jmi_int_t));
@@ -582,20 +586,21 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
     return ef;
 }
 
-jmi_int_t jmi_check_infinite_loop(jmi_real_t* sw_old,jmi_real_t *sw, jmi_int_t nR, jmi_int_t iter){
-    jmi_int_t i,infinite_loop = 0;
+jmi_int_t jmi_block_check_infinite_loop(jmi_block_residual_t* block, jmi_real_t* sw, jmi_real_t* x, jmi_int_t iter) {
+    jmi_int_t i, n_sw, n_x, infinite_loop_found = 0;
     
-    for(i=0;i<iter;i++){
-        if(jmi_compare_switches(&sw_old[i*nR],sw,nR)){
-            infinite_loop = 1;
+    n_x = block->n;
+    n_sw = block->n_sw;
+    for(i = 0; i < iter; i++){
+        if (jmi_compare_switches(&block->sw_old[i*n_sw], sw, n_sw) &&
+            jmi_block_solver_compare_iter_vars(block->block_solver, &block->x_old[i*n_x], x))
+        {
+            infinite_loop_found = 1;
             break;
         }
     }
-    if (infinite_loop){
-        return 1;
-    }else{
-        return 0;
-    }
+    
+    return infinite_loop_found;
 }
 
 int jmi_block_jacobian_fd(jmi_block_residual_t* b, jmi_real_t* x, jmi_real_t delta_rel, jmi_real_t delta_abs) {
@@ -652,6 +657,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->label);
     free(b->sw_old);
     free(b->nr_old);
+    free(b->x_old);
     free(b->sw_index);
     free(b->sw_direct_index);
     free(b->bool_direct_index);

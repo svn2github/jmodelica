@@ -2256,14 +2256,16 @@ int jmi_func_cad_dF_get_independent_ind(jmi_t *jmi, jmi_func_t *func, int indepe
     return 0;
 }
 
-int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size){
-    int i;
-    for (i=0;i<size;i++){
-        if (sw_pre[i]!=sw_post[i]){
-            return 0;
+int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size) {
+    int i, all_switches_equal = 1;
+    
+    for (i = 0; i < size; i++){
+        if (sw_pre[i] != sw_post[i]){
+            all_switches_equal = 0;
+            break;
         }
     }
-    return 1;
+    return all_switches_equal;
 }
 
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {

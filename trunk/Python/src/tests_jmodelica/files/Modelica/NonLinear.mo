@@ -789,6 +789,31 @@ model ResidualHeuristicScaling1
     F_p = A_mean * (100000.0 - state_a_p);  //Residual equation
 end ResidualHeuristicScaling1;
 
+model EventIteration1
+  //Iteration variable:
+  Real iter_var_1(start = 300.0);
+  
+  //Teared variables:
+  Real tear_var_1;
+  Real tear_var_2;
+  Real tear_var_3;
+  Real tear_var_4;
+  Real tear_var_5;
+  Real tear_var_6;
+
+equation
+  //Teared equations:
+  tear_var_1 = 0.0317558 * (4124.487568704486 * ((-40783.2321 + iter_var_1 * (2682.484665 + -800.918604 * log(max(iter_var_1, 200)) + iter_var_1 * (8.21470201 + iter_var_1 * (-0.006348572285 + iter_var_1 * (5.845350253333333E-6 + iter_var_1 * (-3.007150675E-9 + 6.73618698E-13 * iter_var_1)))))) / iter_var_1) + 4200697.462150524) + 0.15495407 * (518.2791167938085 * ((176685.0998 + iter_var_1 * (-23313.1436 + 2786.18102 * log(max(iter_var_1, 200)) + iter_var_1 * (-12.0257785 + iter_var_1 * (0.01958809645 + iter_var_1 * (-1.2063514766666667E-5 + iter_var_1 * (5.0671326075E-9 + -9.953410979999998E-13 * iter_var_1)))))) / iter_var_1) + 624355.7409524474) + (0.02871398 * (296.8383547363272 * ((-14890.45326 + iter_var_1 * (-13031.31878 + -292.2285939 * log(max(iter_var_1, 200)) + iter_var_1 * (5.72452717 + iter_var_1 * (-0.004088117515000001 + iter_var_1 * (4.856344896666666E-6 + iter_var_1 * (-2.719365755E-9 + 6.055883654E-13 * iter_var_1)))))) / iter_var_1) + 309570.6191695138) + 0.18372006 * (188.9244822140674 * ((-49436.5054 + iter_var_1 * (-45281.9846 + -626.411601 * log(max(iter_var_1, 200)) + iter_var_1 * (5.30172524 + iter_var_1 * (0.001251906908 + iter_var_1 * (-7.091029093333333E-8 + iter_var_1 * (-1.922497195E-10 + 5.699355602E-14 * iter_var_1)))))) / iter_var_1) + 212805.6215135368)) + (0.2516777 * (461.5233290850878 * ((39479.6083 + iter_var_1 * (-33039.7431 + 575.573102 * log(max(iter_var_1, 200)) + iter_var_1 * (0.931782653 + iter_var_1 * (0.00361135643 + iter_var_1 * (-2.447519123333333E-6 + iter_var_1 * (1.2387608725E-9 + -2.673866492E-13 * iter_var_1)))))) / iter_var_1) + 549760.6476280135) + 0.32785651 * (296.8033869505308 * ((-22103.71497 + iter_var_1 * (710.846086 + -381.846182 * log(max(iter_var_1, 200)) + iter_var_1 * (6.08273836 + iter_var_1 * (-0.004265457205 + iter_var_1 * (4.615487296666666E-6 + iter_var_1 * (-2.406448405E-9 + 5.039411618000001E-13 * iter_var_1)))))) / iter_var_1) + 309498.4543111511) + 0.02132189 * (259.8369938872708 * ((34255.6342 + iter_var_1 * (-3391.45487 + 484.700097 * log(max(iter_var_1, 200)) + iter_var_1 * (1.119010961 + iter_var_1 * (0.00214694462 + iter_var_1 * (-2.27876684E-7 + iter_var_1 * (-5.05843175E-10 + 2.0780800360000002E-13 * iter_var_1)))))) / iter_var_1) + 271263.4223783392));
+  tear_var_2 = (tear_var_1 + 4142388.31874666) / (if iter_var_1 - 873.15 > 0 then max(1, iter_var_1 - 873.15) else min(-1, iter_var_1 - 873.15));
+  tear_var_3 = noEvent(if abs(iter_var_1 - 873.15) <= 1e-9 then 2326.98032733 elseif abs(iter_var_1 - 873.15) >= 1.999999999 then tear_var_2 else (tanh(tan((abs(iter_var_1 - 873.15) - 1) * asin(1))) + 1) * (tear_var_2 - 2326.98032733) / 2 + 2326.98032733);
+  tear_var_4 = min(tear_var_3, 1.6314868948475);
+  tear_var_5 = 1.05 / max(1.0E-15, tear_var_4);
+  tear_var_6 = -4142388.31874666 - tear_var_1;
+  
+  //Residual equation:
+  tear_var_6 = min(0.9995, (1 - exp((- tear_var_5) * 0.99)) / (1 - 0.01 * exp((- tear_var_5) * 0.99))) * tear_var_4 * 510.00071335;
+end EventIteration1;
+
 model NonLinear3
     parameter Real Vns = -15;
     parameter Real Vps = 15;

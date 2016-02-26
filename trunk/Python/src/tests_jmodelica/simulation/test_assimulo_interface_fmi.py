@@ -457,6 +457,7 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NonLinear4", file_name)
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
         compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
+        compile_fmu("NonLinear.EventIteration1", file_name)
     
     @testattr(stddist = True)
     def test_Brent_AD(self):
@@ -591,8 +592,18 @@ class Test_NonLinear_Systems:
         model.set("_use_Brent_in_1d", False)
         model.initialize()
         nose.tools.assert_almost_equal(model.get('state_a_p'), 17.78200351)
+        
+    @testattr(stddist = True)
+    def test_event_iternation_inf_check_warmup(self):
+        # Test where event inf check cannot only look at the switches but need
+        # to look at the iteration variables too. Generally this is needed for
+        # models with systems that have many solutions and bad start values. In
+        # this model the variable iter_var_1 will go from 300 to ca 874 and then
+        # if it don't get stuck in inf check it will go to 872.98062403
+        model = load_fmu("NonLinear_EventIteration1.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('iter_var_1'), 872.98062403)
     
-
 class Test_Singular_Systems:
     
     @classmethod
