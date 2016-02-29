@@ -1543,4 +1543,39 @@ $modelVariables$
 ")})));
 end ConstantAlias2;
 
+model StringStartValueIllegalChars1
+  parameter String a = "Carbon steel (%C <= 0.30)";
+  
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="StringStartValueIllegalChars1",
+            description="Test that no illegal XML characters are generated",
+            fmi_version="1.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"805306368\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+        <String start=\"Carbon steel (%C &lt;= 0.30)\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end StringStartValueIllegalChars1;
+
+model StringStartValueIllegalChars2
+  parameter String a = "Carbon steel (%C <= 0.30)";
+  
+  annotation(__JModelica(UnitTesting(tests={
+        FmiXMLCodeGenTestCase(
+            name="StringStartValueIllegalChars1",
+            description="Test that no illegal XML characters are generated",
+            fmi_version="2.0",
+            template="$modelVariables$",
+            generatedCode="
+<ModelVariables>
+    <ScalarVariable name=\"a\" valueReference=\"805306368\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+        <String start=\"Carbon steel (%C &lt;= 0.30)\" />
+    </ScalarVariable>
+</ModelVariables>
+")})));
+end StringStartValueIllegalChars2;
 end FmiXMLTests;

@@ -269,7 +269,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param FVariable A variable class.
      */
     protected String getXMLStartAttribute(FVariable var) {
-        return var.type().convert(getStartExp(var).ceval()).xmlValue();
+        return replaceIllegalChars(var.type().convert(getStartExp(var).ceval()).xmlValue());
     }
     
     /**
