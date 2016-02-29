@@ -3174,8 +3174,8 @@ aspect IfEquations {
 		if (hasElse())
 		    varsInBoth = intersection(varsInBoth, getElse().assignmentEquationMap().keySet()); 
 		for (FAbstractVariable v : toSortedList(varsInBoth, FAbstractVariable.NAME_COMPARATOR)) {
-			FExp left = assignmentEquationMap().get(v).assignmentExp();
-			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
+			FExp left = assignmentEquationMap().get(v).assignmentExp().fullCopy();
+			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp().fullCopy();
 			FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
 			FEquation e = new FEquation(getType().fullCopy(), v.createUseExp(), ifExp);
 			if (isWhen()) {

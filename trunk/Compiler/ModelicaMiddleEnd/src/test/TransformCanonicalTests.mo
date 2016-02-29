@@ -5032,6 +5032,45 @@ end if
 ")})));
 end IfEqu29;
 
+model IfEqu30
+    Boolean b1 = time > 0;
+    Real a,b;
+    Real x,y;
+equation
+    der(y) = time * 3.14;
+    b = time * 6.28;
+    if b1 then
+        a = b * 2;
+        x = time * 2;
+    else
+        b = a;
+        x = der(y);
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu30",
+            description="Check bug that caused crash during if equation rewrite",
+            flatModel="
+fclass TransformCanonicalTests.IfEqu30
+ discrete Boolean b1;
+ Real a;
+ Real b;
+ Real x;
+ Real y;
+initial equation 
+ y = 0.0;
+ pre(b1) = false;
+equation
+ der(y) = time * 3.14;
+ b = time * 6.28;
+ x = if b1 then time * 2 else der(y);
+ 0.0 = if b1 then a - b * 2 else b - a;
+ b1 = time > 0;
+end TransformCanonicalTests.IfEqu30;
+")})));
+end IfEqu30;
+
 
 
 model IfExpLeft1
