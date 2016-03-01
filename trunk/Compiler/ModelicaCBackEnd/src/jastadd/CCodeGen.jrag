@@ -3532,7 +3532,6 @@ aspect CCodeGen {
         str.format("%s/***** %s: %s *****/\n", indent, inInitial ? "Init block" : "Block", getLabel());
         str.print(indent + "jmi_real_t** res = &residual;\n");
         str.print(indent + "int ef = 0;\n");
-        genBlockResidualFunction_jacobianDecls_C(p, str, indent);
         genVarDecls_C(p, str, indent, null);
         
         str.print(indent);
@@ -3666,7 +3665,9 @@ aspect CCodeGen {
         // Generate code for Jacobian
         if (jacobian != null) {
             genOpenEvalMode_C(str, indent, "JMI_BLOCK_EVALUATE_JACOBIAN");
-            genBlockResidualFunction_jacobian_C(p, str, indent);
+            // TODO: Merge the two functions?
+            genBlockResidualFunction_jacobianDecls_C(p, str, p.indent(indent));
+            genBlockResidualFunction_jacobian_C(p, str, p.indent(indent));
             genCloseEvalMode_C(str, indent);
         }
         
@@ -4064,20 +4065,19 @@ aspect CCodeGen {
     public void AbstractEquationBlock.genBlockResidualFunction_jacobian_C(CodePrinter p, CodeStream str, String indent) {
         if (jacobian == null)
             return;
-        String innerIndent = p.indent(indent);
         FExp[][] jacobian = jacobian();
         int rows = jacobian.length;
         int cols = jacobian.length;
-        str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", innerIndent, rows * cols);
+        str.format("%smemset(residual, 0, %d * sizeof(jmi_real_t));\n", indent, rows * cols);
         // Output Jacobian
         for (int col = 0; col < cols; col++) {
             for (int row = 0; row < rows; row++) {
                 if (jacobian[row][col] != null) {
-                    p.printPreSteps(jacobian[row][col], str, innerIndent);
-                    str.format("%sresidual[%d] = ", innerIndent, rows * col + row);
-                    p.print(jacobian[row][col], str, innerIndent);
+                    p.printPreSteps(jacobian[row][col], str, indent);
+                    str.format("%sresidual[%d] = ", indent, rows * col + row);
+                    p.print(jacobian[row][col], str, indent);
                     str.format(";\n");
-                    p.printPostSteps(jacobian[row][col], str, innerIndent);
+                    p.printPostSteps(jacobian[row][col], str, indent);
                 }
             }
         }
@@ -4094,7 +4094,6 @@ aspect CCodeGen {
             super.genBlockResidualFunction_jacobian_C(p, str, indent);
             return;
         }
-        String outerIndent = indent;
         indent = p.indent(indent);
         String innerIndent = p.indent(indent);
         FExp[][] jacobian = jacobian();
@@ -4123,6 +4122,11 @@ aspect CCodeGen {
         // Compute L^-1 * A12 by doing Q1 = L^-1 * Q1
         str.format("%sfor (i = 0; i < %d; i += %d) {\n", indent, n1 * n2, n1);
         for (int row = 0; row < n1; row++) {
+            for (int col = 0; col <= row; col++) {
+                if (jacobian[row][col] != null) {
+                    p.printPreSteps(jacobian[row][col], str, innerIndent);
+                }
+            }
             str.format("%sQ1[i + %d] = (Q1[i + %d]", innerIndent, row, row);
             for (int col = 0; col < row; col++) {
                 if (jacobian[row][col] != null) {
@@ -4134,6 +4138,11 @@ aspect CCodeGen {
             str.format(") / (");
             p.print(jacobian[row][row], str, indent);
             str.format(");\n");
+            for (int col = 0; col <= row; col++) {
+                if (jacobian[row][col] != null) {
+                    p.printPostSteps(jacobian[row][col], str, innerIndent);
+                }
+            }
         }
         str.format("%s}\n", indent);
         // Write bottom-left quadrant, A21, to Q2.
