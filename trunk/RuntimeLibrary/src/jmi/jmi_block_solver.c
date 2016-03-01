@@ -28,6 +28,13 @@
 #include <string.h>
 #include <math.h>
 
+#include <sundials/sundials_math.h>
+#include <sundials/sundials_direct.h>
+#include <nvector/nvector_serial.h>
+#include <kinsol/kinsol_direct.h>
+#include <kinsol/kinsol_impl.h>
+#include <sundials/sundials_dense.h>
+
 #include "jmi_log.h"
 #include "jmi_simple_newton.h"
 #include "jmi_kinsol_solver.h"
@@ -55,6 +62,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                            int n,
                            jmi_block_solver_options_t* options,
                            void* problem_data){
+    int i;
     jmi_block_solver_t* block_solver = (jmi_block_solver_t*)calloc(1, sizeof(jmi_block_solver_t));
     if(!block_solver) {
         jmi_log_node(log, logError, "MemoryAllocationFailed","Could not allocate memory for block solver");
@@ -74,6 +82,13 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
 
     block_solver->dx=(jmi_real_t*)calloc(n,sizeof(jmi_real_t));;                /**< \brief Work vector for the seed vector */
 
+    block_solver->f_scale = N_VNew_Serial(n);
+    block_solver->scale_update_time = -1.0;
+	if(n>0) {
+		block_solver->J = NewDenseMat(n ,n);
+		block_solver->J_scale = NewDenseMat(n ,n);
+	}
+
     block_solver->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->jac  = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
@@ -83,6 +98,8 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
+    block_solver->residual_nominal = (jmi_real_t*)calloc(n+1,sizeof(jmi_real_t));
+    block_solver->residual_heuristic_nominal = (jmi_real_t*)calloc(n+1,sizeof(jmi_real_t));
     block_solver->initial = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->start_set = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->value_references = (jmi_int_t*)calloc(n,sizeof(jmi_int_t));
@@ -96,6 +113,17 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->jacobian_variability = options->jacobian_variability;
 
     block_solver->cur_time = 0;
+    block_solver->using_max_min_scaling_flag = 0; /* Not using max/min scaling */
+
+        /* Initial equation scaling is 1.0 */
+    N_VConst_Serial(1.0,block_solver->f_scale);
+
+    /* Make sure that residual_nominals and heuristic nominals always have values */
+    for(i=0; i<n; i++) {
+        block_solver->residual_nominal[i] = 1.0;
+        block_solver->residual_heuristic_nominal[i] = 1.0;
+    }
+
     switch(options->solver) {
         case JMI_KINSOL_SOLVER: {
             /* Cannot do this here since options are not set yet */
@@ -195,6 +223,12 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
 
     free(block_solver->dx);
 
+    N_VDestroy_Serial(block_solver->f_scale);
+	if(block_solver->n > 0) {
+		DestroyMat(block_solver->J);
+		DestroyMat(block_solver->J_scale);
+	}
+
     free(block_solver->res);
     free(block_solver->dres);
     free(block_solver->jac);
@@ -204,6 +238,8 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->min);
     free(block_solver->max);
     free(block_solver->nominal);
+    free(block_solver->residual_nominal);
+    free(block_solver->residual_heuristic_nominal);
     free(block_solver->initial);
     free(block_solver->value_references);
     free(block_solver->start_set);
@@ -296,6 +332,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         block_solver->F(block_solver->problem_data,block_solver->initial,block_solver->res,JMI_BLOCK_INITIALIZE);
         block_solver->F(block_solver->problem_data,real_vrs,block_solver->res,JMI_BLOCK_VALUE_REFERENCE);
         block_solver->F(block_solver->problem_data,block_solver->start_set,block_solver->res,JMI_BLOCK_START_SET);
+        jmi_setup_f_residual_scaling(block_solver);
 
         for (i=0;i<block_solver->n;i++) {
             block_solver->value_references[i] = (int)real_vrs[i];
@@ -707,5 +744,207 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
     bsop->block_profiling = 0;
+}
+
+/* 
+    Compute appropriate equation scaling and function tolerance based on Jacobian J,
+    nominal values (block->nominal) and current point (block->x).
+    Store result in block->f_scale.
+*/
+void jmi_update_f_scale(jmi_block_solver_t *block) { 
+    int i, N = block->n;
+    realtype curtime = block->cur_time;
+    realtype* scale_ptr = 0;
+    jmi_block_solver_options_t* bsop = block->options;
+    int use_scaling_flag = bsop->residual_equation_scaling_mode;
+    realtype tol = bsop->res_tol;
+
+    block->scale_update_time = curtime;
+    block->force_rescaling = 0;
+    
+    if(bsop->residual_equation_scaling_mode != jmi_residual_scaling_none) {
+        /* Zero out the scales initially if we're modify this. */
+        N_VConst_Serial(0,block->f_scale);
+    }
+
+    scale_ptr = N_VGetArrayPointer(block->f_scale);
+
+    /* Form scaled Jacobian as needed for automatic scaling and condition number checking*/
+    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto || 
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual)
+    {
+        for (i = 0; i < N; i++) {
+            int j;
+            /* column scaling is formed by max(abs(nominal), abs(actual_value)) */
+            realtype xscale = RAbs(block->nominal[i]);
+            realtype x = RAbs(block->x[i]);
+            realtype* col_ptr;
+            realtype* scaled_col_ptr;
+            if(x < xscale) x = xscale;
+            if(x < tol) x = tol;
+            col_ptr = DENSE_COL(block->J, i);
+            scaled_col_ptr = DENSE_COL(block->J_scale, i);
+
+            /* row scaling is product of Jac entry and column scaling */
+            for (j = 0; j < N; j++) {
+                realtype dres = col_ptr[j];
+                realtype fscale;
+                fscale = dres * x;
+                scaled_col_ptr[j] = fscale;
+                scale_ptr[j] = MAX(scale_ptr[j], RAbs(fscale));
+            }
+        }
+    }
+
+    /* put in manual non-zero scales in hybrid & manual cases */
+    if(    (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) 
+        || (bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid))    {
+            for(i = 0; i < N; i++) {
+                if(block->residual_nominal[i] != 0) {
+                    scale_ptr[i] = block->residual_nominal[i];
+                }
+            }
+    }
+
+    if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_auto 
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto
+        || bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid) {
+        block->using_max_min_scaling_flag = 0; /* NOT using max/min scaling */
+        /* check that scaling factors have reasonable magnitude */
+        for(i = 0; i < N; i++) {
+            if(scale_ptr[i] == 0.0) {
+                jmi_log_node(block->log, logInfo, "JacobianZeroRow", 
+                    "The derivatives for <residual: %d> are all equal 0. Using heuristic residual nominals for scaling in <block: %s>", i, block->label);
+                scale_ptr[i] = block->residual_heuristic_nominal[i];
+            } else if(scale_ptr[i] < 1/bsop->max_residual_scaling_factor) {
+                int j, maxInJacIndex = 0;
+                realtype **jac = block->J_scale->cols;
+                realtype maxInJac = RAbs(jac[0][i]); 
+                block->using_max_min_scaling_flag = 1; /* Using maximum scaling, singular Jacobian? */
+                for(j = 0; j < N; j++) {
+                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
+                        maxInJac = jac[j][i];
+                        maxInJacIndex = j;
+                    }
+                }
+                
+                scale_ptr[i] = bsop->max_residual_scaling_factor;
+                jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Poor scaling in <block: %s>. "
+                    "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                    block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(block->J, i, maxInJacIndex) ,maxInJac);
+            }
+            else if(scale_ptr[i] > 1/bsop->min_residual_scaling_factor) {
+                int j, maxInJacIndex = 0;
+                realtype **jac = block->J_scale->cols;
+                realtype maxInJac = RAbs(jac[0][i]);
+                /* Likely not a problem: solver->using_max_min_scaling_flag = 1; -- Using minimum scaling */
+                for(j = 0; j < N; j++) {
+                    if(RAbs(maxInJac) < RAbs(jac[j][i])) {
+                        maxInJac = jac[j][i];
+                        maxInJacIndex = j;
+                    }
+                }
+                
+                if (scale_ptr[i] > block->residual_heuristic_nominal[i]/bsop->min_residual_scaling_factor) {
+                    scale_ptr[i] = bsop->min_residual_scaling_factor/block->residual_heuristic_nominal[i];
+                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Poor scaling in <block: %s>. "
+                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(block->J, i, maxInJacIndex) ,maxInJac);
+                } else {
+                    scale_ptr[i] = 1/scale_ptr[i];
+                    jmi_log_node(block->log, logWarning, "MinScalingExceeded", "Poor scaling in <block: %s> but will allow it based on structure of block. "
+                        "Consider changes in the model. Partial derivative of <equation: %I> with respect to <Iter: #r%d#> is <dRes_dIter: %g> (<dRes_dIter_scaled: %g>).",
+                        block->label, i, block->value_references[maxInJacIndex], DENSE_ELEM(block->J, i, maxInJacIndex) ,maxInJac);
+                }
+            }
+            else
+                scale_ptr[i] = 1/scale_ptr[i];
+        }
+
+        if (block->callbacks->log_options.log_level >= 4) {
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%s>", block->label);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = scale_ptr;
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
+            jmi_log_leave(block->log, outer);
+        }
+    } else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+        for(i = 0; i < N; i++) {
+            scale_ptr[i] = 1/scale_ptr[i];
+        }
+        /* Scaling is not updated */
+        if (block->callbacks->log_options.log_level >= 4) {
+            jmi_log_node_t outer = jmi_log_enter_fmt(block->log, logInfo, "ResidualScalingUpdated", "<block:%s>", block->label);
+            if (block->callbacks->log_options.log_level >= 5) {
+                jmi_log_node_t inner = jmi_log_enter_vector_(block->log, outer, logInfo, "scaling");
+                realtype* res = scale_ptr;
+                for (i=0;i<N;i++) jmi_log_real_(block->log, 1/res[i]);
+                jmi_log_leave(block->log, inner);
+            }
+            jmi_log_leave(block->log, outer);
+        }
+    }     
+    return;
+}
+
+void jmi_setup_f_residual_scaling(jmi_block_solver_t *block) {
+    jmi_block_solver_options_t* bsop = block->options;
+    int i, N = block->n;
+    realtype* dummy = 0;
+    
+    /* Read manual scaling from annotations and propagated nominal values for
+     * residuals and put them in residual_nominal & scale_ptr*/
+    if (bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual ||
+        bsop->residual_equation_scaling_mode == jmi_residual_scaling_hybrid)
+    {
+        block->F(block->problem_data,dummy, block->residual_nominal, JMI_BLOCK_EQUATION_NOMINAL);
+        for (i = 0; i < N; i++) {
+            if(block->residual_nominal[i] != 0.0) {
+                if(block->residual_nominal[i] < 1/bsop->max_residual_scaling_factor) {
+                    block->residual_nominal[i] = 1/bsop->max_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MaxScalingUsed", "Using maximum scaling factor in <block: %s>, "
+                        "<equation: %I> since specified residual nominal is too small.", block->label, i);
+                }
+                else if(block->residual_nominal[i] > 1/bsop->min_residual_scaling_factor) {
+                    block->residual_nominal[i] = 1/bsop->min_residual_scaling_factor;
+                    jmi_log_node(block->log, logWarning, "MinScalingUsed", "Using minimal scaling factor in <block: %s>, "
+                        "<equation: %I> since specified residual nominal is too big.", block->label, i);
+                }
+            }
+            else if(bsop->residual_equation_scaling_mode == jmi_residual_scaling_manual) {
+                block->residual_nominal[i] = 1.0;
+            }
+        }
+    }
+    
+    block->F(block->problem_data,dummy, block->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL_AUTO);
+    block->F(block->problem_data,dummy, block->residual_heuristic_nominal, JMI_BLOCK_EQUATION_NOMINAL);
+    for (i = 0; i < N; i++) {
+        if (block->residual_heuristic_nominal[i] == 0.0) {
+            /* TODO: This information could be used to see that the system is structually singular */
+            block->residual_heuristic_nominal[i] = 1.0;
+        }
+    }
+}
+
+double* jmi_solver_get_f_scales(jmi_block_solver_t* block) {
+    return N_VGetArrayPointer(block->f_scale);
+}
+
+double calculate_scaled_residual_norm(double* residual, double *f_scale, int n) {
+    double scaledRes, norm = 0;
+    int i;
+    for(i=0; i<n; i++) {
+        scaledRes = residual[i]*f_scale[i];
+        norm = norm>= RAbs(scaledRes)?norm:RAbs(scaledRes);
+    }
+    return norm;
 }
 

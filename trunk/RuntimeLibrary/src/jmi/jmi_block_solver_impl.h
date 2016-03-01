@@ -36,9 +36,14 @@ struct jmi_block_solver_t {
     jmi_log_t* log;
     jmi_string_t label;
 
+    N_Vector f_scale;          /**< \brief Work vector for scaling of f */
+    realtype scale_update_time; /**< \brief The last time when f scale was updated */
     int n;                         /**< \brief The number of iteration variables */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
     jmi_real_t* last_accepted_x;   /**< \brief Work vector for the real iteration variables holding the last accepted vales by the integrator */
+    DlsMat J;                       /**< \brief The Jacobian matrix  */
+    DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
+    int using_max_min_scaling_flag; /**< \brief A flag indicating if either the maximum scaling is used of the minimum */
 
     jmi_real_t* dx;                /**< \brief Work vector for the seed vector */
 
@@ -65,9 +70,11 @@ struct jmi_block_solver_t {
     jmi_real_t* min;               /**< \brief Min values for iteration variables */
     jmi_real_t* max;               /**< \brief Max values for iteration variables */
     jmi_real_t* nominal;           /**< \brief Nominal values for iteration variables */
+    jmi_real_t* residual_nominal;   /**< \brief Nominals values for residual variables */
+    jmi_real_t* residual_heuristic_nominal;   /**< \brief Heuristic nominals values for residual variables */
     jmi_real_t* initial;           /**< \brief Initial values for iteration variables */
     jmi_real_t* start_set;         /**< \brief If the start value is specified for the iteration variables */
-    
+
     int jacobian_variability;      /**< \brief Variability of Jacobian coefficients: JMI_CONSTANT_VARIABILITY
                                          JMI_PARAMETER_VARIABILITY, JMI_DISCRETE_VARIABILITY, JMI_CONTINUOUS_VARIABILITY */
 

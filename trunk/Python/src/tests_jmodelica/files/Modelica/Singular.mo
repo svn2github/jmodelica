@@ -204,5 +204,27 @@ package Singular "Some tests for singular systems"
         (sin(z)+y) = 0;
         (sin(x*y*z)+z) = 0;
     end NonLinear5;
+	
+	model NoMinimumNormSolution
+        Real x,y,z,v;
+        parameter Real a11 = 1;
+        parameter Real a12 = 2;
+        parameter Real a13 = 3;
+        parameter Real a21 = 1;
+        parameter Real a22 = 1;
+        parameter Real a23 = 1;
+        Real a31(start=0);
+        Real a32(start=0);
+        Real a33(start=0);
+        parameter Real b[3] = {1,2,3};
+    equation
+		a33=a31+a32;
+		a33=a31^2+a32^2;
+		a33=a31-a32;
+        a11*x+a12*y+a13*z = b[1];
+        a21*x+a22*y+a23*z = b[2];
+        a31*x+a32*y+a33*z = b[3];
+        der(v) = time;
+    end NoMinimumNormSolution;
 
 end Singular;

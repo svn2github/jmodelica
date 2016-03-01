@@ -620,6 +620,7 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NonLinear1", file_name)
         compile_fmu("Singular.NonLinear4", file_name)
         compile_fmu("Singular.NonLinear5", file_name)
+        compile_fmu("Singular.NoMinimumNormSolution", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -748,6 +749,13 @@ class Test_Singular_Systems:
         
         nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
         nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
+    
+    @testattr(stddist = True)
+    def test_no_valid_minimum_norm_sol(self):
+        model = load_fmu("NoMinimumNormSolution.fmu", log_level=3)
+        model.set("_log_level", 3)
+        model.set_log_level(log_level)
+        nose.tools.assert_raises(FMUException, model.initialize)
 
 class Test_FMI_ODE_CS_2:
     @classmethod

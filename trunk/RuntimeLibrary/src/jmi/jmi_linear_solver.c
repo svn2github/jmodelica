@@ -39,7 +39,6 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     
     /* Initialize work vectors.*/
     solver->factorization = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
-    solver->jacobian = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
     solver->dependent_set = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
     solver->jacobian_temp = (jmi_real_t*)calloc(2*n_x*n_x,sizeof(jmi_real_t));
     solver->jacobian_extension = (jmi_real_t*)calloc(n_x*n_x,sizeof(jmi_real_t));
@@ -81,7 +80,7 @@ static int jmi_linear_find_dependent_set(jmi_block_solver_t * block) {
     /* Reset the dependent sets */
     for (i = 0; i < n_x; i++) { solver->dependent_set[(n_x-1)*n_x+i] = 0; }
     
-    memcpy(solver->jacobian_temp, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
+    memcpy(solver->jacobian_temp, block->J->data, n_x*n_x*sizeof(jmi_real_t));
     /* Compute the null space of A */
     /*
      *       SUBROUTINE DGESDD( JOBZ, M, N, A, LDA, S, U, LDU, VT, LDVT, WORK,
@@ -196,7 +195,7 @@ static int jmi_linear_find_active_set(jmi_block_solver_t * block ) {
     
     if (solver->n_extra_rows > 0) {
         for (j = 0; j < n_x; j++) {
-            memcpy(&solver->jacobian_temp[j*(n_x+solver->n_extra_rows)], &solver->jacobian[j*n_x], n_x*sizeof(jmi_real_t));
+            memcpy(&solver->jacobian_temp[j*(n_x+solver->n_extra_rows)], &block->J->data[j*n_x], n_x*sizeof(jmi_real_t));
             memcpy(&solver->jacobian_temp[j*(n_x+solver->n_extra_rows)+n_x], &solver->jacobian_extension[j*n_x], solver->n_extra_rows*sizeof(jmi_real_t));
         }
         for (j = 0; j < solver->n_extra_rows; j++) { solver->rhs[n_x+j] = 0.0; };
@@ -245,8 +244,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        info = block->F(block->problem_data,NULL,solver->jacobian,JMI_BLOCK_EVALUATE_JACOBIAN);
-        memcpy(solver->factorization, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
+        info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN);
+        memcpy(solver->factorization, block->J->data, n_x*n_x*sizeof(jmi_real_t));
         if(info) {
             if(block->init) {
                 jmi_log_node(block->log, logError, "ErrJac", "Failed in Jacobian calculation for <block: %s>", 
@@ -274,7 +273,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         for (i = 0; i < n_x; i++) {
             for (j = 0; j < n_x; j++) {
                 /* Unrecoverable error*/
-                if ( solver->jacobian[i*n_x+j] - solver->jacobian[i*n_x+j] != 0) {
+                if ( block->J->data[i*n_x+j] - block->J->data[i*n_x+j] != 0) {
                     jmi_log_node(block->log, logError, "NaNOutput", "Not a number in the Jacobian <row: %I> <col: %I> from <block: %s>", 
                             i,j, block->label);
                     return -1;
@@ -288,7 +287,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         destnode = jmi_log_enter_fmt(block->log, logInfo, "LinearSolve", 
                                      "Linear solver invoked for <block:%s>", block->label);
         jmi_log_reals(block->log, destnode, logInfo, "ivs", block->x, block->n);
-        jmi_log_real_matrix(block->log, destnode, logInfo, "A", solver->jacobian, block->n, block->n);
+        jmi_log_real_matrix(block->log, destnode, logInfo, "A", block->J->data, block->n, block->n);
     }
 
     /*  If jacobian is reevaluated then factorize Jacobian. */
@@ -385,7 +384,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         if (n_rows > n_x) {
             dgelss_(&n_rows, &n_x, &i, solver->jacobian_temp, &n_rows, solver->rhs, &n_rows ,solver->singular_values, &rcond, &rank, solver->rwork, &iwork, &info);
         } else {
-            memcpy(solver->jacobian_temp, solver->jacobian, n_x*n_x*sizeof(jmi_real_t));
+            memcpy(solver->jacobian_temp, block->J->data, n_x*n_x*sizeof(jmi_real_t));
             dgelss_(&n_x, &n_x, &i, solver->jacobian_temp, &n_x, solver->rhs, &n_x ,solver->singular_values, &rcond, &rank, solver->rwork, &iwork, &info);
         }
         
@@ -394,9 +393,6 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             return -1;
         }
         
-        if(block->callbacks->log_options.log_level >= 5){
-            jmi_log_node(block->log, logInfo, "Info", "Successfully calculated the minimum norm solution to the linear system in <block: %s>", block->label);
-        }
     }else{
         /*
          * DGETRS solves a system of linear equations
@@ -448,6 +444,25 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* JMI_BLOCK_EVALUATE is used since it is needed for torn linear equation blocks! Might be changed in the future! */
     block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
 
+    /* Check if the calculated solution from minimum norm is a valid solution to the original problem */
+    if(solver->singular_jacobian==1) {
+        double scaledMaxNorm;
+        jmi_update_f_scale(block);
+        scaledMaxNorm = calculate_scaled_residual_norm(solver->rhs, N_VGetArrayPointer(block->f_scale), block->n);
+        if(scaledMaxNorm <= block->options->res_tol) {
+            if(block->callbacks->log_options.log_level >= 5){
+                jmi_log_node(block->log, logInfo, "Info", "Successfully calculated the minimum norm solution to the linear system in <block: %s>", block->label);
+            }
+        } else {
+            info = -1;
+            destnode = jmi_log_enter_fmt(block->log, logError, "UnsolveableLinearSystem", "Failed to calculate a valid minimum norm solution to the linear system in <block: %s> at <t: %f>", block->label, block->cur_time);
+            jmi_log_reals(block->log, destnode, logError, "residual", solver->rhs, block->n);
+            jmi_log_reals(block->log, destnode, logError, "scaled_max_norm", &(scaledMaxNorm), 1);
+            jmi_log_leave(block->log, destnode);
+        }
+
+    }
+
     return info==0? 0: -1;
 }
 
@@ -455,7 +470,6 @@ void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
     free(solver->ipiv);
     free(solver->factorization);
-    free(solver->jacobian);
     free(solver->singular_values);
     free(solver->singular_vectors);
     free(solver->jacobian_extension);

@@ -27,7 +27,12 @@
 
 #include "jmi_log.h"
 #include <time.h>
-
+#include <sundials/sundials_math.h>
+#include <sundials/sundials_direct.h>
+#include <nvector/nvector_serial.h>
+#include <kinsol/kinsol_direct.h>
+#include <kinsol/kinsol_impl.h>
+#include <sundials/sundials_dense.h>
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
@@ -348,6 +353,18 @@ int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_rea
 
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
+
+/** \brief Update function scaling based on Jacobian information */
+void jmi_update_f_scale(jmi_block_solver_t *block);
+
+/**< \brief Retrieve residual scales used in solver */
+double* jmi_solver_get_f_scales(jmi_block_solver_t* block);
+
+/**< \brief Setup residual scaling */
+void jmi_setup_f_residual_scaling(jmi_block_solver_t *block);
+
+/** \brief Calculate scaled residual max norm */
+double calculate_scaled_residual_norm(double* residual, double *f_scale, int n);
 
 /** \brief Check and log illegal iv inputs */
 int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
