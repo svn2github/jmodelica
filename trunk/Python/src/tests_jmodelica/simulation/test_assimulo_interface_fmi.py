@@ -640,15 +640,6 @@ class Test_Singular_Systems:
         nose.tools.assert_almost_equal(res.final('w') ,2.000000000)
     
     @testattr(stddist = True)
-    def test_linear_zero_hold(self):
-        model = load_fmu("Singular_Linear2.fmu", log_level=6)
-        model.set("_log_level", 6)
-        
-        model.set("a33", 0.0)
-        model.initialize()
-        assert model.get("z") == 5.0
-    
-    @testattr(stddist = True)
     def test_linear_inf_1(self):
         
         model = load_fmu("Singular_LinearInf.fmu", log_level=6)
@@ -752,9 +743,9 @@ class Test_Singular_Systems:
     
     @testattr(stddist = True)
     def test_no_valid_minimum_norm_sol(self):
-        model = load_fmu("NoMinimumNormSolution.fmu", log_level=3)
+        model = load_fmu("Singular_NoMinimumNormSolution.fmu", log_level=3)
         model.set("_log_level", 3)
-        model.set_log_level(log_level)
+        model.set_log_level(3)
         nose.tools.assert_raises(FMUException, model.initialize)
 
 class Test_FMI_ODE_CS_2:

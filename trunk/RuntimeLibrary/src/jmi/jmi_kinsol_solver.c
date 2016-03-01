@@ -1698,6 +1698,8 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     }
 
     if(block->force_rescaling) {
+		if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
+			kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
     }
@@ -2024,6 +2026,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         int i;
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
         N_VScale(1.0, block->f_scale, solver->work_vector);
+		kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
         for(i=0; i<block->n; i++) {
@@ -2733,7 +2736,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 
     /* update the scaling only once per time step */
     if(block->init || (block->options->rescale_each_step_flag && (curtime > block->scale_update_time)) || block->force_rescaling) {
-        jmi_update_f_scale(block);
+		if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
+			kin_char_log(solver, 's');
+		jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
     }
     
@@ -2805,6 +2810,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                          "solution in <block: %s>", block->label);
         }
         /* Update the scaling  */
+		kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
         
