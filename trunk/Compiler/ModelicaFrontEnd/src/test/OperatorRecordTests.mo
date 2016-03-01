@@ -3207,7 +3207,7 @@ public
   input Integer n;
   output OperatorRecordTests.Cplx[n] y;
  algorithm
-  y := {OperatorRecordTests.Cplx.'constructor'(i, 0) for i in 1:n};
+  y[:] := {OperatorRecordTests.Cplx.'constructor'(i, 0) for i in 1:n};
   return;
  end OperatorRecordTests.BuildArrayInInst1.f;
 

@@ -557,6 +557,23 @@ aspect FlatNames {
         addFQNamePart(name);
         return this;
     }
+    
+    public FQName FQName.append(String name, FArraySubscripts fas) {
+        return asFQNameFull().append(name, fas);
+    }
+    
+    public FQName FQNameFull.append(String name, FArraySubscripts fas) {
+        if (use(fas)) {
+            addFQNamePart(new FQNamePartArray(name, fas));
+        } else {
+            addFQNamePart(new FQNamePart(name));
+        }
+        return this;
+    }
+    
+    public boolean FQName.use(FArraySubscripts fas) {
+        return fas != null && fas.ndims() > 0;
+    }
 
     /**
      * Copy and append all name parts from <code>fqn</code>.

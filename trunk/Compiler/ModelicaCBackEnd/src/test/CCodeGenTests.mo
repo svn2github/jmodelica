@@ -4673,7 +4673,7 @@ void func_CCodeGenTests_CUnknownArray9_f_def0(jmi_ad_var_t n_v, jmi_array_t* ab_
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(ba_a, i1_0i) = 1;
     }
-    i1_1ie = jmi_max(n_v, AD_WRAP_LITERAL(0)) + 1 / 2.0;
+    i1_1ie = n_v + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         jmi_array_ref_1(ab_a, i1_1i) = jmi_array_val_1(ba_a, i1_1i);
     }

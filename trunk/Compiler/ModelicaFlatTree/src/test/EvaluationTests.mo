@@ -555,22 +555,22 @@ public
   input EvaluationTests.FunctionEval15.R2[2] a;
   output Real x;
  algorithm
-  x := sum(a[1:2].a[1:2].a) + sum(a[1:2].a[1:2].b) + sum(a[1:2].b[1:3].a) + sum(a[1:2].b[1:3].b);
+  x := sum(a[1:2].a[1:2].a[1:2]) + sum(a[1:2].a[1:2].b[1:3]) + sum(a[1:2].b[1:3].a[1:2]) + sum(a[1:2].b[1:3].b[1:3]);
   return;
  end EvaluationTests.FunctionEval15.f1;
 
  function EvaluationTests.FunctionEval15.f2
   output EvaluationTests.FunctionEval15.R2[2] x;
  algorithm
-  x[1:2].a[1:2].a := ones(2, 2, 2);
+  x[1:2].a[1:2].a[1:2] := ones(2, 2, 2);
   for i in 1:2 loop
    for j in 1:2 loop
-    x[i].a[j].b := {1, 1, 1};
-    x[i].b[1:3].a[j] := x[i].a[j].b;
+    x[i].a[j].b[1:3] := {1, 1, 1};
+    x[i].b[1:3].a[j] := x[i].a[j].b[1:3];
    end for;
   end for;
   x[1:2].b[1:3].b[1] := ones(2, 3);
-  x[1:2].b[1].b := ones(2, 3);
+  x[1:2].b[1].b[1:3] := ones(2, 3);
   x[1:2].b[2:3].b[2:3] := ones(2, 2, 2);
   return;
  end EvaluationTests.FunctionEval15.f2;
@@ -1211,7 +1211,7 @@ fclass EvaluationTests.FunctionEval33
 public
  function EvaluationTests.FunctionEval33.f
   input Integer[:] x;
-  output Integer y := sum(x);
+  output Integer y := sum(x[:]);
  algorithm
   return;
  end EvaluationTests.FunctionEval33.f;
@@ -3842,7 +3842,7 @@ fclass EvaluationTests.AssigningCached2
 public
  function EvaluationTests.AssigningCached2.f
   input Real[:] x;
-  output Real[size(x, 1)] y := x;
+  output Real[size(x, 1)] y := x[:];
  algorithm
   y[2] := 3;
   return;
@@ -3924,7 +3924,7 @@ public
   Real[3] t;
   output EvaluationTests.AssigningCached4.R y1;
  algorithm
-  t := x;
+  t[1:3] := x[1:3];
   y1 := EvaluationTests.AssigningCached4.R(t);
   t[1] := 0;
   return;

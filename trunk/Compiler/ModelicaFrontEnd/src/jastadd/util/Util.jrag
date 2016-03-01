@@ -995,18 +995,53 @@ aspect Names {
 }
 
 aspect Slices {
-	
+    
     /**
      * Check if this is a slice operation.
      */
-    syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
-    eq InstDot.isSlice() {
-    	int last = getNumInstAccess() - 1;
-    	for (int i = 0; i < last; i++)
-    		if (getInstAccess(i).isArray())
-    			return true;
-    	return getInstAccess(last).isSlice();
+    syn boolean FExp.isSlice() = false;
+    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    eq FSubscriptedExp.isSlice() = isArray();
+    
+    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+    
+    syn boolean InstAccess.isSlice() {
+        java.util.List<FArraySubscripts> l = allFArraySubscripts();
+        int last = l.size() - 1;
+        for (int i = 0; i < last; i++) {
+            if (l.get(i).ndims() > 0) {
+                return true;
+            }
+        }
+        return l.get(last).isSlice();
     }
+    
+    syn boolean FArraySubscripts.isSlice() {
+        for (FSubscript fs : getFSubscripts()) {
+            if (fs.isSlice()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    syn boolean FSubscript.isSlice() = true;
+    eq FColonSubscript.isSlice()     = false;
+    eq FExpSubscript.isSlice()       = getFExp().isSliceFAS(mySize());
+    
+    syn boolean FExp.isSliceFAS(Size size) = true;
+    eq FRangeExp.isSliceFAS(Size size) =
+         !getFExp(0).isLiteral(1) ||
+         (getNumFExp() > 2 && !getFExp(1).isLiteral(1)) ||
+         size.isSliceFAS(getFExp(getNumFExp()-1));
+    
+    public boolean Size.isSliceFAS(FExp exp) {
+        return isUnknown() || !exp.isLiteral(get(0));
+    }
+    
+    syn boolean FExp.isLiteral(int i)  = false;
+    eq FIntegerLitExp.isLiteral(int i) = getValue() == i;
     
     /**
      * Check if this is a slice operation.
@@ -1021,34 +1056,9 @@ aspect Slices {
     				if (fs.ndims() > 0)
     					return true;
     	}
-    	boolean array = false;
-    	boolean exp = false;
 		FQNamePart part = getFQNamePart(n);
-		if (part.hasFArraySubscripts()) {
-			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
-				if (fs instanceof FExpSubscript) 
-					exp = true;
-				if (fs.ndims() > 0)
-					array = true;
-			}
-		}
-		return array && exp;
+        return part.hasFArraySubscripts() && part.getFArraySubscripts().isSlice();
     }
-    
-    
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FAssignableExp.isSlice();
-    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
-    eq FSubscriptedExp.isSlice() = isArray();
-    
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
-    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-    
 }
 
 

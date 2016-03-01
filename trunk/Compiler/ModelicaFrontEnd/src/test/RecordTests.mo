@@ -1979,7 +1979,7 @@ public
   input Integer n2;
   output RecordTests.RecordArray8.A a(n = n2,x(size() = {n}));
  algorithm
-  a.x := 1:n2;
+  a.x[:] := 1:n2;
   return;
  end RecordTests.RecordArray8.f;
 

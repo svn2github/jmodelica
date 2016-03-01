@@ -72,7 +72,7 @@ public
   input Real[2] i2;
   output Real[1] o;
  algorithm
-  o := sum(i1 .+ i2);
+  o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
  end OverconstrainedConnection.T1.equalityConstraint;
 
@@ -121,7 +121,7 @@ public
   input Real[2] i2;
   output Real[1] o;
  algorithm
-  o := sum(i1 .+ i2);
+  o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
  end OverconstrainedConnection.T1.equalityConstraint;
 

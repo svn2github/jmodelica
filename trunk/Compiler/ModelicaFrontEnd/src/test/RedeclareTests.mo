@@ -5857,7 +5857,7 @@ public
   input Real[2] i;
   output Real[2] o;
  algorithm
-  o := i;
+  o[1:2] := i[1:2];
   return;
  end RedeclareTests.RedeclareFunction1.C.B;
 
@@ -5907,7 +5907,7 @@ public
   input Real[2] i;
   output RedeclareTests.RedeclareFunction2.C.D o(a(size() = {2}));
  algorithm
-  o.a := i;
+  o.a[1:2] := i[1:2];
   return;
  end RedeclareTests.RedeclareFunction2.C.B;
 

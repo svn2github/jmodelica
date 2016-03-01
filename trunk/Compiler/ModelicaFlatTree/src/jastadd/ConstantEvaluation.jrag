@@ -2502,7 +2502,7 @@ aspect ConstantEvaluation {
           Index iHere = Index.NULL;
           InstAssignable var = (InstAssignable) myInstComponentDecl();
           
-          if (hasFArraySubscripts()) {
+          if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();
               iHere = duringFunctionEval() ? fas.createIndex() : fas.asIndex();
               i = iHere.expand(i);

@@ -1904,7 +1904,7 @@ public
   input Real[3] y;
   output Real[3, 3] z;
  algorithm
-  z := {x, cross(x, y), y};
+  z[1:3,1:3] := {x[1:3], cross(x[1:3], y[1:3]), y[1:3]};
   return;
  end TypeTests.Primitive4.f;
 

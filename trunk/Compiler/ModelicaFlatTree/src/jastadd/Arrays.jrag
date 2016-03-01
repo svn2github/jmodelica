@@ -473,12 +473,9 @@ aspect Arrays {
 	/**
 	 * Create a copy of this FSubscript, expanding it to a vector if it is a colon.
 	 */
-	public FSubscript FSubscript.expandedSubscript() {
-		return (FSubscript) fullCopy();
-	}
-	public FSubscript FColonSubscript.expandedSubscript() {
-		return size().createExpandedFSubscript(0);
-	}
+    syn FSubscript FSubscript.expandedSubscript() = (FSubscript) fullCopy();
+    eq FColonSubscript.expandedSubscript() = size().isUnknown() ?
+            super.expandedSubscript() : size().createExpandedFSubscript(0);
 	
 	/**
 	 * Create an FArraySubscripts that spans all array cells of this component.
@@ -3303,7 +3300,7 @@ aspect ArrayHelpers {
 		 * If nothing is known of the length of the dimension, an FColonSubscript is created.
 		 */
 		public FSubscript createExpandedFSubscript(int d) {
-			if (hasValue(d)) {
+			if (!isUnknown(d)) {
 				List<FExp> lim = new List<FExp>();
 				lim.add(new FIntegerLitExp(1));
 				lim.add(createFExp(d));

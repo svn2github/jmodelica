@@ -618,7 +618,7 @@ public
   input Real[2] x;
   output Real[2] y;
  algorithm
-  y := x;
+  y[1:2] := x[1:2];
   return;
  end InnerOuterTests.InnerOuterTest21.b.m.f;
 
@@ -661,8 +661,8 @@ fclass InnerOuterTests.InnerOuterTest22
 
 public
  function InnerOuterTests.InnerOuterTest22.m.f2
-  input Real[:] x := m.X[2];
-  output Real[size(x, 1)] y := x;
+  input Real[:] x := m.X[1:2];
+  output Real[size(x, 1)] y := x[:];
  algorithm
   return;
  end InnerOuterTests.InnerOuterTest22.m.f2;

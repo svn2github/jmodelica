@@ -2033,7 +2033,7 @@ aspect Scalarization {
         FAssignableExp left = getLeft();
         FExp right = getRight();
         
-        if (left.type().isComposite() && !left.isSlice() && right.inFunction() && right instanceof FFunctionCall) {
+        if (scalarizedAsFFunctionCallStmt()) {
             // Special case, Function call stmt
             FFunctionCall call = (FFunctionCall) right;
             call.getArgs().createArrayTemporaries(stmts, vars, indexMap);
@@ -2050,6 +2050,15 @@ aspect Scalarization {
         }
         return false;
     }
+    
+    
+    syn boolean FAssignStmt.scalarizedAsFFunctionCallStmt() = 
+            getRight().isFunctionCall() && getLeft().type().isComposite() && 
+            inFunction() && !getLeft().isSlice();
+    
+    syn boolean FExp.isFunctionCall() = false;
+    eq InstFunctionCall.isFunctionCall() = true;
+    eq FFunctionCall.isFunctionCall()    = true;
 	
 	public boolean FFunctionCallStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 	    indexMap = new HashMap<String, FExp>(indexMap);
