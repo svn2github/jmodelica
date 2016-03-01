@@ -756,7 +756,6 @@ void jmi_update_f_scale(jmi_block_solver_t *block) {
     realtype curtime = block->cur_time;
     realtype* scale_ptr = 0;
     jmi_block_solver_options_t* bsop = block->options;
-    int use_scaling_flag = bsop->residual_equation_scaling_mode;
     realtype tol = bsop->res_tol;
 
     block->scale_update_time = curtime;
