@@ -6,9 +6,6 @@
      * @version 0?
      */
 aspect AE {
-    // Debug printing enabler.
-    public static final boolean FClass.VERBOSE = false;
-    
     /**
      *  A simplified version of the alias elimination algorithm.
      */
@@ -17,9 +14,6 @@ aspect AE {
             setupNewLists();
             doRewrites();
             flush();
-            
-            if (VERBOSE)
-                printAllEquations();
     }
 
     public class FClass {

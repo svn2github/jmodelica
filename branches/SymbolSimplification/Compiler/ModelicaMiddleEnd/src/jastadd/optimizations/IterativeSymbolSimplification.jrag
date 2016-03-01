@@ -15,6 +15,7 @@ aspect IterativeSymbolSpecification {
      * @version 0?
      */
     public class FClass {
+        public static final boolean VERBOSE = true;
         public static String defaultIndent = "";
         public static boolean setAE = false, setVP = true, defaultShowFEq = false;
     
@@ -64,5 +65,15 @@ aspect IterativeSymbolSpecification {
      */
      public void FClass.showTree() {
         showTree(defaultShowFEq, defaultIndent);
+     }
+     
+     /**
+      * Debug printing, will print message if VERBOSE is set.
+      *
+      * @param  msg The message to print.
+      */
+     public void FClass.debugPrintLn(String message) {
+        if (VERBOSE)
+            System.out.println(message);
      }
 }
