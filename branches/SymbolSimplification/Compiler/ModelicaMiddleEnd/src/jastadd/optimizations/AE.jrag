@@ -279,6 +279,14 @@ aspect AE {
     eq FClass.getChild().isAliasVariable(FAbstractVariable fav) =
         fav.isFVariable() ? hasBetter((FVariable) fav) : false;
 
+    refine AliasVariables eq FVariable.isAlias() = refined() || isInAliasList();
+
+    inh boolean FVariable.isInAliasList();
+    eq FClass.getChild().isInAliasList()         = false;
+    eq FForIndex.getChild().isInAliasList()      = false;
+    eq FClass.getAliasVariable().isInAliasList() = true;
+    eq FClass.getAliasConstant().isInAliasList() = true; 
+
     /*
      *  Alias replacement attributes.
      */
