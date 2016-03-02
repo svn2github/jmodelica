@@ -456,8 +456,9 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         } else {
             info = -1;
             destnode = jmi_log_enter_fmt(block->log, logError, "UnsolveableLinearSystem", "Failed to calculate a valid minimum norm solution to the linear system in <block: %s> at <t: %f>", block->label, block->cur_time);
-            jmi_log_reals(block->log, destnode, logError, "residual", solver->rhs, block->n);
+            jmi_log_reals(block->log, destnode, logError, "residuals", solver->rhs, block->n);
             jmi_log_reals(block->log, destnode, logError, "scaled_max_norm", &(scaledMaxNorm), 1);
+			jmi_log_reals(block->log, destnode, logError, "tolerance", &(block->options->res_tol), 1);
             jmi_log_leave(block->log, destnode);
         }
 
