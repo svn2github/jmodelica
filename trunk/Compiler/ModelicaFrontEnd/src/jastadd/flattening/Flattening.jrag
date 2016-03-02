@@ -1310,7 +1310,7 @@ aspect Flattening {
 	}
 	
 	eq InstScalarAccess.splitArrayAccess(int index) {
-		FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(localNdims());
+        FArraySubscripts fas = FArraySubscripts.createFColonSubscripts(ndims());
 		fas.specifyNext(index);
 		return getArrayCopy(fas);
 	}

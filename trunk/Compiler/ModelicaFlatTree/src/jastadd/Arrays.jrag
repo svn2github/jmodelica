@@ -142,22 +142,12 @@ aspect Arrays {
 	 * @return Array dimension.
 	 */	
 	syn lazy int FArraySubscripts.accessNdims() { 
-		//log.debug("FArraySubscripts.accessNdims()");
-		// Need to check if each individual subscript increases 
-		// dimension. (ndims(x[1])=0)
 		int nd = 0;
 		for (FSubscript fs : getFSubscripts()) {
 			nd += fs.ndims();
 		}
 		return nd;
 	}
-	
-	/**
-	 * Get array dimensions of a single part of an access.
-	 */
-	syn int InstAccess.localNdims() = 
-		hasFArraySubscripts() ? getFArraySubscripts().accessNdims() : myInstComponentDecl().ndims();
-
 	
 	/**
 	 * Get array dimensions.
@@ -332,12 +322,17 @@ aspect Arrays {
 	 * 
 	 * @return Array dimension.
 	 */	
-	syn int InstAccess.ndims() {
-		int n = 0;
-		for (FArraySubscripts fas : allFArraySubscripts())
-			n += fas.accessNdims();
-		return n;
-	}
+	syn int InstAccess.ndims()  = 0;
+	eq InstScalarAccess.ndims() = myInstComponentDecl().ndims();
+	eq InstArrayAccess.ndims()  = getFArraySubscripts().accessNdims();
+    eq InstDot.ndims() {
+        int n = 0;
+        for (InstAccess ia : getInstAccesss()) {
+            n = n + ia.ndims();
+        }
+        return n;
+    }
+    eq InstGlobalAccess.ndims() = getInstAccess().ndims();
 	
 	/**
 	 * Get the expanded FArraySubscripts of each part of this access.
@@ -713,9 +708,9 @@ aspect Arrays {
         return myFV().size();
     }
     eq FIdUseInstAccess.getChild().mySize()              = getInstAccess().size();
-    eq InstScalarAccess.getExpandedSubscripts().mySize() = myInstComponentDecl().size();
-    eq InstArrayAccess.getFArraySubscripts().mySize()    = myInstComponentDecl().size();
-    eq InstArrayAccess.getExpandedSubscripts().mySize()  = myInstComponentDecl().size();
+    eq InstScalarAccess.getExpandedSubscripts().mySize() = declarationSize();
+    eq InstArrayAccess.getFArraySubscripts().mySize()    = declarationSize();
+    eq InstArrayAccess.getExpandedSubscripts().mySize()  = declarationSize();
     eq FSubscriptedExp.getFArraySubscripts().mySize()    = getFExp().size();
     eq FExpSubscript.getFExp().mySize()                  = mySize();
     eq FlatRoot.getChild().mySize()                      = Size.SCALAR;
@@ -1162,19 +1157,33 @@ aspect Arrays {
      * Get the array sizes. 
      */
     syn Size InstAccess.size()   = Size.SCALAR;
-    eq InstScalarAccess.size()   = myInstComponentDecl().size();
+    eq InstScalarAccess.size()   = declarationSize();
     eq InstArrayAccess.size()    = getFArraySubscripts().accessSize();
-
+    eq InstDot.size() {
+        if (!isArray())
+            return Size.SCALAR;
+        MutableSize s = new MutableSize(ndims());
+        for (InstAccess ia : getInstAccesss())
+            s.append(ia.size());
+        return s;
+    }
+    eq InstGlobalAccess.size() = getInstAccess().size();
+    
+    syn Size InstAccess.declarationSize() = Size.SCALAR;
+    eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
+    
     /**
      * Get the array sizes. 
      */
+    syn Size InstNode.size()               = FArraySubscripts.declarationSize(myFSubscripts()); 
+    syn lazy Size InstComponentDecl.size() = declaredSize();
     eq InstAssignable.size() {
-        Size s = declaredSize();
+        Size s = super.size();
         if (s.isUnknown() && hasBindingFExp() && (!isInput() || !inFunction()) && !getBindingFExp().isCircular())
             s = s.createKnown(getBindingFExp());
         return s;
     }
-
+    
     /**
      * Get the array sizes as declared. May be unknown. 
      */
@@ -1198,26 +1207,7 @@ aspect Arrays {
     inh Size InstComponentDecl.defaultSizeCalc();
     eq InstComponentRedeclare.getInstComponentDecl().defaultSizeCalc() = myInstReplacingComponent().declaredSizeCalc();
     eq ASTNode.getChild().defaultSizeCalc()                            = Size.SCALAR;
-
-	/**
-	 * Get the array sizes. 
-	 */
-	eq InstDot.size() {
-		if (!isArray())
-			return Size.SCALAR;
-		MutableSize s = new MutableSize(ndims());
-		for (InstAccess ia : getInstAccesss())
-			s.append(ia.size());
-		return s;
-	}
-	eq InstGlobalAccess.size() = getInstAccess().size();
-	
-	/**
-	 * Get the array sizes. 
-	 */
-	syn Size InstNode.size()               = FArraySubscripts.declarationSize(myFSubscripts());	
-	syn lazy Size InstComponentDecl.size() = declaredSize();
-
+    
 	/**
 	 * Get the array sizes. 
 	 */	
