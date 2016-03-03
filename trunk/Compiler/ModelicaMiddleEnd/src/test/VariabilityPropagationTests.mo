@@ -1846,26 +1846,8 @@ model StructParam1
             description="Test propagation of structural parameters",
             flatModel="
 fclass VariabilityPropagationTests.StructParam1
- eval parameter Real temp_1.b;
- structural parameter Real a = 1.0 /* 1.0 */;
- eval parameter Real r.b;
-parameter equation
- (VariabilityPropagationTests.StructParam1.R(, temp_1.b)) = VariabilityPropagationTests.StructParam1.f();
- r.b = temp_1.b;
-
-public
- function VariabilityPropagationTests.StructParam1.f
-  output VariabilityPropagationTests.StructParam1.R r;
- algorithm
-  r.a := 1;
-  return;
- end VariabilityPropagationTests.StructParam1.f;
-
- record VariabilityPropagationTests.StructParam1.R
-  Real a;
-  Real b;
- end VariabilityPropagationTests.StructParam1.R;
-
+ eval parameter Real r.b = 0.0 /* 0.0 */;
+ constant Real a = 1;
 end VariabilityPropagationTests.StructParam1;
 ")})));
 end StructParam1;

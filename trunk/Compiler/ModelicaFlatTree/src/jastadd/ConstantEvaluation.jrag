@@ -1743,6 +1743,7 @@ aspect ConstantEvaluation {
     public CValue FType.zeroCValueScalar()        { return CValue.UNSUPPORTED; }
     public CValue FRealType.zeroCValueScalar()    { return new CValueReal(0.0); }
     public CValue FIntegerType.zeroCValueScalar() { return new CValueInteger(0); }
+    public CValue FEnumType.zeroCValueScalar()    { return new CValueEnum(this, 1); }
     public CValue FStringType.zeroCValueScalar()  { return new CValueString(""); }
     public CValue FBooleanType.zeroCValueScalar() { return new CValueBoolean(false); }
     
@@ -3251,7 +3252,6 @@ aspect ConstantEvaluation {
         public String  name_C();
         public boolean isInput();
         public boolean isOutput();
-        public boolean canBeUnknown();
         
         public FAbstractVariable asFAbstractVariable();
     }
@@ -3261,10 +3261,6 @@ aspect ConstantEvaluation {
     
     syn FAbstractVariable FAbstractVariable.asFAbstractVariable() = this;
     syn FAbstractVariable InstComponentDecl.asFAbstractVariable() = null;
-    
-    syn boolean InstComponentDecl.canBeUnknown() = !isInput() && !hasBindingExp();
-    syn boolean FAbstractVariable.canBeUnknown() = !isInput() && !hasBindingExp();
-    eq FFunctionVariable.canBeUnknown()          = super.canBeUnknown() && !hasBindingAssignment;
   
   syn FExp FAbstractFunctionCall.argument(int i) {
 	  for (FExp e : childFExps())
@@ -3600,7 +3596,7 @@ aspect ConstantEvaluation {
     public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
         CValue val = map.get(this);
         if (val == null) {
-            val = cevalBindingExp();
+            val = cevalFunctionBindingExp(ASTNode.defaultVariableEvaluator());
         }
         if (!isInput()) {
             val = val.cached();
@@ -3617,7 +3613,7 @@ aspect ConstantEvaluation {
     public void InstComponentDecl.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
         CValue val = map.get(this);
         if (val == null) {
-            val = cevalBindingExp();
+            val = cevalFunctionBindingExp(ASTNode.defaultVariableEvaluator());
         }
         if (!isInput()) {
             val = val.cached();
@@ -3627,31 +3623,23 @@ aspect ConstantEvaluation {
     }
     
     
-    protected CValue FAbstractVariable.cevalBindingExp() {
-        return CValue.UNKNOWN;
-    }
-    
-    protected CValue FFunctionVariable.cevalBindingExp() {
-        return cevalBindingExp(defaultVariableEvaluator());
-    }
-
-    protected CValue FFunctionVariable.cevalBindingExp(VariableEvaluator evaluator) {
-        return hasBindingExp() ? getBindingExp().ceval(evaluator) : CValue.UNKNOWN;
-    }
-
-    protected CValue InstComponentDecl.cevalBindingExp() {
-        return cevalBindingExp(defaultVariableEvaluator());
-    }
-
-    protected CValue InstComponentDecl.cevalBindingExp(VariableEvaluator evaluator) {
+    protected CValue FAbstractVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
         return CValue.UNKNOWN;
     }
 
-    protected CValue InstAssignable.cevalBindingExp(VariableEvaluator evaluator) {
-        return hasBindingFExp() ? myBindingInstExp().ceval(evaluator) : CValue.UNKNOWN;
+    protected CValue FFunctionVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return hasBindingExp() ? getBindingExp().ceval(evaluator) : type().zeroCValue();
     }
 
-    protected CValue InstRecord.cevalBindingExp(VariableEvaluator evaluator) {
+    protected CValue InstComponentDecl.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return CValue.UNKNOWN;
+    }
+
+    protected CValue InstAssignable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return hasBindingFExp() ? myBindingInstExp().ceval(evaluator) : type().zeroCValue();
+    }
+
+    protected CValue InstRecord.cevalFunctionBindingExp(VariableEvaluator evaluator) {
         if (hasBindingFExp())
             return myBindingInstExp().ceval(evaluator);
         FRecordType type = (FRecordType) type().scalarType();
@@ -3684,7 +3672,7 @@ aspect ConstantEvaluation {
         CValueRecord res = new CValueRecord(type);
         evaluationValue = res;
         for (InstComponentDecl ch : allInstComponentDecls())
-            res.setMember(ch.name(), ch.cevalBindingExp(evaluator));
+            res.setMember(ch.name(), ch.cevalFunctionBindingExp(evaluator));
         return res;
     }
 
