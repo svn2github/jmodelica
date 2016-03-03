@@ -667,6 +667,13 @@ abstract public class OptionRegistry {
              "Mode for how to calculate the Jacobian: " +
              "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally, 9 - Jacobian compresssion.",
              0, 9),
+        NLE_JACOBIAN_FINITE_DIFFERENCE_DELTA
+            ("nle_jacobian_finite_difference_delta",
+             OptionType.runtime, 
+             Category.user,
+             1.490116119384766e-08,
+             "Delta to use when calculating finite difference Jacobians.",
+             2.220446049250313e-16, 1e-1),
         NLE_ACTIVE_BOUNDS_MODE
             ("nle_active_bounds_mode",
              OptionType.runtime, 

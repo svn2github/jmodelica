@@ -1062,6 +1062,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_brent_ignore_error");
     if(index)
         bsop->brent_ignore_error_flag = (int)z[index];
+	index = get_option_index("_nle_jacobian_finite_difference_delta");
+	if(index)
+		bsop->jacobian_finite_difference_delta = z[index];
     index = get_option_index("_nle_solver_step_limit_factor");
     if(index)
         bsop->step_limit_factor = z[index];
