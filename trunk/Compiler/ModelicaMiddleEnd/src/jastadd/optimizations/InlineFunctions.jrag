@@ -918,7 +918,7 @@ aspect FunctionInlining {
     public void FQNameFull.inlineFunctions(AbstractFunctionInliner fi) {
         for (FQNamePart part : getFQNameParts())
             if (part.hasFArraySubscripts())
-                getFArraySubscripts().inlineFunctions(fi);
+                part.getFArraySubscripts().inlineFunctions(fi);
     }
 
     /**

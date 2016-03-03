@@ -517,8 +517,60 @@ public
 end FunctionInlining.BasicInline13;
 ")})));
     end BasicInline13;
-	
-	
+
+
+    model BasicInline14
+        connector C
+            Real p;
+            flow Real f;
+            stream Real s;
+        end C;
+        
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x;
+        end f;
+        
+        model A
+            C c[1];
+        end A;
+        
+        A a1(each c(s=1, p=2, f=time));
+        A a2(each c(s=4, f=time/2));
+        A a3(each c(s=5));
+        Real x1;
+    equation
+        connect(a1.c[1], a2.c[1]);
+        connect(a1.c[1], a3.c[1]);
+        f(x1) = inStream(a1.c[1].s);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline14",
+            description="Inlining in equation with an access that is a FQNameFull, that has indices, but not in the last name part",
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.BasicInline14
+ constant Real a1.c[1].p = 2;
+ Real a1.c[1].f;
+ constant Real a1.c[1].s = 1;
+ Real a2.c[1].f;
+ constant Real a2.c[1].s = 4;
+ Real a3.c[1].f;
+ constant Real a3.c[1].s = 5;
+ Real x1;
+equation
+ x1 = (max(- a2.c[1].f, 1.0E-8) * 4.0 + max(- a3.c[1].f, 1.0E-8) * 5.0) / (max(- a2.c[1].f, 1.0E-8) + max(- a3.c[1].f, 1.0E-8));
+ a1.c[1].f + a2.c[1].f + a3.c[1].f = 0;
+ a1.c[1].f = time;
+ a2.c[1].f = time / 2;
+end FunctionInlining.BasicInline14;
+")})));
+    end BasicInline14;
+
+
 	model MatrixInline1
 		function f
 			input Real[2,2] a;
@@ -1034,7 +1086,38 @@ equation
 end FunctionInlining.RecordInline11;
 ")})));
     end RecordInline11;
-	
+
+
+model Test2
+  Modelica.Blocks.Sources.Ramp ramp(
+    height=-25,
+    duration=2,
+    offset=75,
+    startTime=2);
+  Modelica.Blocks.Sources.Ramp ramp1(
+    height=0.05,
+    duration=2,
+    offset=0.01,
+    startTime=5);
+  Modelon.ThermoFluid.Sensors.TemperatureSensor temperatureSensor(redeclare
+      package Medium = Modelon.Media.PreDefined.CondensingGases.MoistAir);
+  VaporCycle.Sources.AirPressureSource pressureSource(redeclare package Medium
+      = Modelon.Media.PreDefined.CondensingGases.MoistAir, N=1);
+  VaporCycle.Sources.AirPressureSource pressureSource1(N=1, redeclare package
+      Medium = Modelon.Media.PreDefined.CondensingGases.MoistAir);
+  VaporCycle.FlowModifiers.SetAirFlowRate setAirFlowRate(use_flow_in=true);
+  VaporCycle.FlowModifiers.SetAirTemperature setAirTemperature(use_T_in=true,
+      temperatureUnit=Modelon.ThermoFluid.Choices.RealTemperatureUnit.degC);
+equation
+  connect(pressureSource1.port[1], temperatureSensor.port);
+  connect(setAirTemperature.portB, temperatureSensor.port);
+  connect(ramp.y, setAirTemperature.T_in);
+  connect(ramp1.y, setAirFlowRate.m_flow_in);
+  connect(setAirFlowRate.portB, setAirTemperature.portA);
+  connect(pressureSource.port[1], setAirFlowRate.portA);
+
+end Test2;
+
 
 	class O
 		extends ExternalObject;
