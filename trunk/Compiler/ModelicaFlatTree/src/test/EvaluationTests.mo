@@ -3947,6 +3947,28 @@ end EvaluationTests.AssigningCached4;
 ")})));
 end AssigningCached4;
 
+model AssigningCached5
+    function f
+        input Integer n;
+        Real[n2] k = 1:n2;
+        Integer n2 = n;
+        output Real u = sum(k);
+    algorithm
+        annotation(Inline=false);
+    end f;
+
+    Real y = f(1);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AssigningCached5",
+            description="",
+            flatModel="
+fclass EvaluationTests.AssigningCached5
+ constant Real y = 1.0;
+end EvaluationTests.AssigningCached5;
+")})));
+end AssigningCached5;
 
 
 model ParameterMinMax1

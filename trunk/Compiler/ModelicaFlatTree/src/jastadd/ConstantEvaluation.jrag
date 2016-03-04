@@ -3628,7 +3628,7 @@ aspect ConstantEvaluation {
     }
 
     protected CValue FFunctionVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
-        return hasBindingExp() ? getBindingExp().ceval(evaluator) : type().zeroCValue();
+        return hasBindingExp() ? getBindingExp().ceval(evaluator) : CValue.UNKNOWN;
     }
 
     protected CValue InstComponentDecl.cevalFunctionBindingExp(VariableEvaluator evaluator) {
@@ -4202,6 +4202,7 @@ aspect ConstantEvaluation {
   
   @Override
   public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
+      getFIdUseExp().assignToInFuncEval(evaluator, getFIdUseExp().type().zeroCValue());
 	  return EVAL_CONT;
   }
 
