@@ -8,9 +8,9 @@
 aspect VP {
     public boolean FFunctionCallEquation.shouldCleanUp              = false;
     public boolean FAbstractEquation.removeEquationBySimpleVP       = false;
-    public boolean FAbstractVariable.usedInVariabilityPropagation   = false;
-    public boolean FFunctionCallLeft.usedInVariabilityPropagation   = false;
-    public boolean FExp.usedInVariabilityPropagation                = false;
+    public boolean FAbstractVariable.removeEquationBySimpleVP       = false;
+    public boolean FFunctionCallLeft.removeEquationBySimpleVP       = false;
+    public boolean FExp.removeEquationBySimpleVP                    = false;
 
 
     public void FClass.VP() {
@@ -45,12 +45,7 @@ aspect VP {
             // Start variability propagation.
             while (!worklist.isEmpty()) {
                 FAbstractEquation feq = worklist.iterator().next();
-                try {
-                    feq.simpleVariabilityPropagation(prop);
-                } catch (CantSimplePropagateException e) {
-                    worklist.clear();
-                    System.out.println("Error caught:\n\t"+e.getMessage());
-                }
+                feq.simpleVariabilityPropagation(prop);
                 worklist.remove(feq);
             }
             
@@ -112,8 +107,7 @@ aspect VP {
     /**
      * Implemented in the subclass FEquation.
      */
-    public void FAbstractEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) 
-                                                                throws CantSimplePropagateException {}
+    public void FAbstractEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) {}
     
     /**
      * Continuation of the simpleVariabilityPropagation method in FClass, taken to the level of FEquation.
@@ -122,8 +116,7 @@ aspect VP {
      * Here we check if we can find the solution for the variable at compile time. If we can, our 
      * variable is a constant. If we can not, our variable is a parameter(?).
      */
-    public void FEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) 
-                                                        throws CantSimplePropagateException {
+    public void FEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) {
         FVariable fvar = variables().iterator().next();
         if (fvar.canSimplePropagateVariable()) {
             FExp solution = solution(fvar);
@@ -138,8 +131,7 @@ aspect VP {
                 solutionVariability = fParameter();
                 prop.addParameterEquation(new FEquation(fvar.createUseExp(), solution));
             } else {
-                throw new CantSimplePropagateException("Only functionality to handle constants " +
-                                                       "is yet implemented.");
+                return;
             }
             
             fvar.simpleVariabilityPropagation(solution, solutionVariability, prop);
@@ -173,20 +165,6 @@ aspect VP {
             }
         }
     }
-    
-    /**
-     * Exception that should be throwned when using this simplified version of Variability Propagation
-     * on equations that is not supported yet.
-     */
-    public class CantSimplePropagateException extends Exception {
-        public CantSimplePropagateException(String message, Throwable throwable) {
-            super(message, throwable);
-        }
-        
-        public CantSimplePropagateException(String message) {
-            super(message);
-        }
-    }
 }
 
 // Content below is copied from VariabilityPropagation.jrag
@@ -215,7 +193,30 @@ aspect ConstFold {
         }
         super.simpleConstantFolding();
     }
+    
+    public void FFunctionDecl.simpleConstantFolding() {
+        
+    }
+    
+    public void FFunctionCallEquation.simpleConstantFolding() {
+        for (FExp childExp : getCall().childFExps()) {
+            childExp.simpleConstantFolding();
+        }
+    }
+    
+    public void FPartialFunctionCall.simpleConstantFolding() {
+        for (ASTNode n : this)
+            n.simpleConstantFolding();
+    }
 
+    public void FPreExp.simpleConstantFolding() {
+        if (variability().parameterOrLess()) {
+            simpleConstantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+    }
+    
     rewrite FAbstractExp {
         when (simpleConstantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
             try {
@@ -230,7 +231,7 @@ aspect ConstFold {
     }
 
     rewrite FIdUseExp {
-        when (constantFoldingEnabled && type().isString()) to FExp {
+        when (simpleConstantFoldingEnabled && type().isString()) to FExp {
             try {
                 CValue value = ceval();
                 if (!value.size().isEmpty()) 
