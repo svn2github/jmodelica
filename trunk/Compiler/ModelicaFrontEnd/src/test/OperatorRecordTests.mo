@@ -202,7 +202,7 @@ fclass OperatorRecordTests.OperatorOverload1
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -247,7 +247,7 @@ fclass OperatorRecordTests.OperatorOverload2
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -290,7 +290,7 @@ fclass OperatorRecordTests.OperatorOverload3
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -354,7 +354,7 @@ fclass OperatorRecordTests.OperatorOverload5
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -399,7 +399,7 @@ fclass OperatorRecordTests.OperatorOverload6
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -444,7 +444,7 @@ fclass OperatorRecordTests.OperatorOverload7
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -489,7 +489,7 @@ fclass OperatorRecordTests.OperatorOverload8
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -587,7 +587,7 @@ fclass OperatorRecordTests.OperatorOverload11
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -634,7 +634,7 @@ fclass OperatorRecordTests.OperatorOverload12
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -681,7 +681,7 @@ fclass OperatorRecordTests.OperatorOverload13
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -727,7 +727,7 @@ fclass OperatorRecordTests.OperatorOverload14
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -777,7 +777,7 @@ fclass OperatorRecordTests.OperatorOverload15
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -799,9 +799,11 @@ public
 
  function Complex.'constructor'.fromReal
   input Real re;
-  input Real im := 0;
-  output Complex result(re = re,im = im);
+  input Real im;
+  output Complex result;
  algorithm
+  result.re := re;
+  result.im := im;
   return;
  annotation(Inline = true);
  end Complex.'constructor'.fromReal;
@@ -871,7 +873,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -907,7 +909,7 @@ fclass OperatorRecordTests.OperatorOverload17
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -952,7 +954,7 @@ fclass OperatorRecordTests.OperatorOverload18
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1006,7 +1008,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1051,7 +1053,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1096,7 +1098,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1141,7 +1143,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1186,7 +1188,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1231,7 +1233,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1267,7 +1269,7 @@ fclass OperatorRecordTests.OperatorOverload25
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1312,7 +1314,7 @@ fclass OperatorRecordTests.OperatorOverload26
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1355,7 +1357,7 @@ fclass OperatorRecordTests.OperatorOverload27
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1399,7 +1401,7 @@ fclass OperatorRecordTests.OperatorOverload28
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1435,7 +1437,7 @@ fclass OperatorRecordTests.OperatorOverload29
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1503,7 +1505,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1592,7 +1594,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1669,7 +1671,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -1721,7 +1723,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -2310,7 +2312,7 @@ fclass OperatorRecordTests.OperatorLimitations15
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -2362,7 +2364,7 @@ fclass OperatorRecordTests.OperatorLimitations15b
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -3213,7 +3215,7 @@ public
 
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -3259,7 +3261,7 @@ fclass OperatorRecordTests.OperatorInherit1
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;
@@ -3311,7 +3313,7 @@ fclass OperatorRecordTests.OperatorInherit2
 public
  function OperatorRecordTests.Cplx.'constructor'
   input Real re;
-  input Real im := 0;
+  input Real im;
   output OperatorRecordTests.Cplx c;
  algorithm
   c.re := re;

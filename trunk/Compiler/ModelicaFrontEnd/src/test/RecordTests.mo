@@ -349,14 +349,15 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- eval parameter RecordTests.RecordFlat10.R2 r.r2(x=3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ eval parameter RecordTests.RecordFlat10.R2 r.r2(x = 3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
  eval parameter Real r.x = 3 /* 3 */;
 
 public
  function RecordTests.RecordFlat10.r.f
-  input RecordTests.RecordFlat10.R2 r2(xx = r2.x);
-  output Real x := r2.xx;
+  input RecordTests.RecordFlat10.R2 r2;
+  output Real x;
  algorithm
+  x := r2.xx;
   return;
  end RecordTests.RecordFlat10.r.f;
 
@@ -1977,8 +1978,9 @@ fclass RecordTests.RecordArray8
 public
  function RecordTests.RecordArray8.f
   input Integer n2;
-  output RecordTests.RecordArray8.A a(n = n2,x(size() = {n}));
+  output RecordTests.RecordArray8.A a;
  algorithm
+  a.n := n2;
   a.x[:] := 1:n2;
   return;
  end RecordTests.RecordArray8.f;

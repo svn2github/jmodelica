@@ -739,8 +739,9 @@ fclass TypeTests.RealEq3
 
 public
  function TypeTests.RealEq3.f
-  output Boolean a := 1.0 == 2;
+  output Boolean a;
  algorithm
+  a := 1.0 == 2;
   return;
  end TypeTests.RealEq3.f;
 
@@ -767,8 +768,9 @@ fclass TypeTests.RealEq4
 
 public
  function TypeTests.RealEq4.f
-  output Boolean a := 1.0 <> 2;
+  output Boolean a;
  algorithm
+  a := 1.0 <> 2;
   return;
  end TypeTests.RealEq4.f;
 

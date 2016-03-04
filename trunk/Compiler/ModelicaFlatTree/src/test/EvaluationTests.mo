@@ -1033,7 +1033,7 @@ fclass EvaluationTests.FunctionEval28
 
 public
  function EvaluationTests.FunctionEval28.f2
-  input Real x(min = 1);
+  input Real x;
   output Real y;
  algorithm
   y := x + 2;
@@ -1086,7 +1086,7 @@ fclass EvaluationTests.FunctionEval29
 
 public
  function EvaluationTests.FunctionEval29.b.f3
-  input Real x := 2;
+  input Real x;
   output Real y;
  algorithm
   y := x + 2;
@@ -1211,8 +1211,9 @@ fclass EvaluationTests.FunctionEval33
 public
  function EvaluationTests.FunctionEval33.f
   input Integer[:] x;
-  output Integer y := sum(x[:]);
+  output Integer y;
  algorithm
+  y := sum(x[:]);
   return;
  end EvaluationTests.FunctionEval33.f;
 
@@ -1550,8 +1551,9 @@ fclass EvaluationTests.Structural1
 
 public
  function EvaluationTests.Structural1.f
-  output Integer[2] y := {2, 1};
+  output Integer[2] y;
  algorithm
+  y := {2, 1};
   return;
  end EvaluationTests.Structural1.f;
 
@@ -1701,9 +1703,10 @@ fclass EvaluationTests.EvaluateAnnotation6
 
 public
  function EvaluationTests.EvaluateAnnotation6.f
-  input EvaluationTests.EvaluateAnnotation6.R x(n = 1);
-  output EvaluationTests.EvaluateAnnotation6.R y := x;
+  input EvaluationTests.EvaluateAnnotation6.R x;
+  output EvaluationTests.EvaluateAnnotation6.R y;
  algorithm
+  y := x;
   return;
  end EvaluationTests.EvaluateAnnotation6.f;
 
@@ -1746,9 +1749,10 @@ fclass EvaluationTests.EvaluateAnnotation7
 
 public
  function EvaluationTests.EvaluateAnnotation7.f
-  input EvaluationTests.EvaluateAnnotation7.P x(n = 1);
-  output EvaluationTests.EvaluateAnnotation7.P y := x;
+  input EvaluationTests.EvaluateAnnotation7.P x;
+  output EvaluationTests.EvaluateAnnotation7.P y;
  algorithm
+  y := x;
   return;
  end EvaluationTests.EvaluateAnnotation7.f;
 
@@ -1809,9 +1813,10 @@ fclass EvaluationTests.EvaluateAnnotation9
 
 public
  function EvaluationTests.EvaluateAnnotation9.F
-  input EvaluationTests.EvaluateAnnotation9.R i(p = -41);
-  output EvaluationTests.EvaluateAnnotation9.R o(p = -41);
+  input EvaluationTests.EvaluateAnnotation9.R i;
+  output EvaluationTests.EvaluateAnnotation9.R o;
  algorithm
+  o.p := -41;
   o.p := i.p + 42;
   return;
  end EvaluationTests.EvaluateAnnotation9.F;
@@ -2035,9 +2040,10 @@ fclass EvaluationTests.FinalParameterEval6
 
 public
  function EvaluationTests.FinalParameterEval6.f
-  input EvaluationTests.FinalParameterEval6.R x(n = 1);
-  output EvaluationTests.FinalParameterEval6.R y := x;
+  input EvaluationTests.FinalParameterEval6.R x;
+  output EvaluationTests.FinalParameterEval6.R y;
  algorithm
+  y := x;
   return;
  end EvaluationTests.FinalParameterEval6.f;
 
@@ -3805,8 +3811,9 @@ fclass EvaluationTests.AssigningCached1
 public
  function EvaluationTests.AssigningCached1.f
   input EvaluationTests.AssigningCached1.R x;
-  output EvaluationTests.AssigningCached1.R y := x;
+  output EvaluationTests.AssigningCached1.R y;
  algorithm
+  y := x;
   y.a := 2;
   return;
  end EvaluationTests.AssigningCached1.f;
@@ -3842,8 +3849,9 @@ fclass EvaluationTests.AssigningCached2
 public
  function EvaluationTests.AssigningCached2.f
   input Real[:] x;
-  output Real[size(x, 1)] y := x[:];
+  output Real[size(x, 1)] y;
  algorithm
+  y := x[:];
   y[2] := 3;
   return;
  end EvaluationTests.AssigningCached2.f;
@@ -3878,8 +3886,9 @@ fclass EvaluationTests.AssigningCached3
 public
  function EvaluationTests.AssigningCached3.f
   input Real[2] x;
-  output EvaluationTests.AssigningCached3.R y := EvaluationTests.AssigningCached3.R(x);
+  output EvaluationTests.AssigningCached3.R y;
  algorithm
+  y := EvaluationTests.AssigningCached3.R(x);
   y.a[2] := 3;
   return;
  end EvaluationTests.AssigningCached3.f;

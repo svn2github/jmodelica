@@ -3692,9 +3692,10 @@ fclass RedeclareTests.RedeclareTest50
 public
  function RedeclareTests.RedeclareTest50.b.f2
   input Real a;
-  input Real b := 2;
-  output Real c := a + b;
+  input Real b;
+  output Real c;
  algorithm
+  c := a + b;
   return;
  end RedeclareTests.RedeclareTest50.b.f2;
 
@@ -5905,7 +5906,7 @@ fclass RedeclareTests.RedeclareFunction2
 public
  function RedeclareTests.RedeclareFunction2.C.B
   input Real[2] i;
-  output RedeclareTests.RedeclareFunction2.C.D o(a(size() = {2}));
+  output RedeclareTests.RedeclareFunction2.C.D o;
  algorithm
   o.a[1:2] := i[1:2];
   return;
@@ -6049,7 +6050,7 @@ public
  function RedeclareTests.RedeclareFunction5.a.b.f4
   input Real x;
   output Real y;
-  input Real z := a.b.p2;
+  input Real z;
  algorithm
   y := x + z;
   return;
@@ -7019,7 +7020,7 @@ fclass RedeclareTests.RedeclareInRecord1
 
 public
  function RedeclareTests.RedeclareInRecord1.P2.f
-  input RedeclareTests.RedeclareInRecord1.P2.R r(x = time);
+  input RedeclareTests.RedeclareInRecord1.P2.R r;
   output Real x;
  algorithm
   x := r.x;

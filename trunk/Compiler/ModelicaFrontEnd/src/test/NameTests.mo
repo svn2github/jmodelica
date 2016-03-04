@@ -1638,10 +1638,11 @@ fclass NameTests.ConstantLookup32
 
 public
  function NameTests.ConstantLookup32.f
-  NameTests.ConstantLookup32.A[2] d := {NameTests.ConstantLookup32.A(3),NameTests.ConstantLookup32.A(4)};
+  NameTests.ConstantLookup32.A[2] d;
   input Integer i;
   output Real x;
  algorithm
+  d := {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
   x := d[i].b;
   return;
  end NameTests.ConstantLookup32.f;
@@ -1694,10 +1695,11 @@ fclass NameTests.ConstantLookup33
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[2] d := {NameTests.ConstantLookup33.D.A(3),NameTests.ConstantLookup33.D.A(4)};
+  NameTests.ConstantLookup33.D.A[2] d;
   input Integer i;
   output Real x;
  algorithm
+  d := {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
   x := d[i].b;
   return;
  end NameTests.ConstantLookup33.f;

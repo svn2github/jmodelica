@@ -167,9 +167,10 @@ equation
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -198,11 +199,13 @@ equation
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
@@ -232,19 +235,22 @@ equation
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
 
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -267,9 +273,10 @@ fclass FunctionTests.FunctionFlatten4
 
 public
  function FunctionTests.TestFunctionWithConst
-  input Real x := 1;
-  output Real y := x + 1.0 + 2.0 + 3.0;
+  input Real x;
+  output Real y;
  algorithm
+  y := x + 1.0 + 2.0 + 3.0;
   return;
  end FunctionTests.TestFunctionWithConst;
 
@@ -304,9 +311,10 @@ equation
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -335,9 +343,10 @@ fclass FunctionTests.FunctionFlatten6
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -380,20 +389,23 @@ fclass FunctionTests.FunctionFlatten7
 
 public
  function FunctionTests.FunctionFlatten7.A.f
-  output Real a := 1.0;
+  output Real a;
  algorithm
+  a := 1.0;
   return;
  end FunctionTests.FunctionFlatten7.A.f;
 
  function FunctionTests.FunctionFlatten7.B.f
-  output Real a := 2.0;
+  output Real a;
  algorithm
+  a := 2.0;
   return;
  end FunctionTests.FunctionFlatten7.B.f;
 
  function FunctionTests.FunctionFlatten7.C.f
-  output Real a := 3.0;
+  output Real a;
  algorithm
+  a := 3.0;
   return;
  end FunctionTests.FunctionFlatten7.C.f;
 
@@ -429,8 +441,9 @@ equation
 
 public
  function FunctionTests.FunctionFlatten8.f
-  output Real x := 1;
+  output Real x;
  algorithm
+  x := 1;
   return;
  end FunctionTests.FunctionFlatten8.f;
 
@@ -988,8 +1001,9 @@ fclass FunctionTests.FunctionFlatten21
 public
  function FunctionTests.FunctionFlatten21.f
   Real x;
-  output Real y := x;
+  output Real y;
  algorithm
+  y := x;
   return;
  end FunctionTests.FunctionFlatten21.f;
 
@@ -1104,9 +1118,10 @@ fclass FunctionTests.FunctionBinding1
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1128,9 +1143,10 @@ fclass FunctionTests.FunctionBinding2
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1205,11 +1221,14 @@ public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
-  input Real i3 := 0;
-  output Real o1 := i1 + i2 + i3;
-  output Real o2 := i2 + i3;
-  output Real o3 := i1 + i2;
+  input Real i3;
+  output Real o1;
+  output Real o2;
+  output Real o3;
  algorithm
+  o1 := i1 + i2 + i3;
+  o2 := i2 + i3;
+  o3 := i1 + i2;
   return;
  end FunctionTests.TestFunction3;
 
@@ -1231,8 +1250,9 @@ fclass FunctionTests.FunctionBinding7
 
 public
  function FunctionTests.TestFunction0
-  output Real o1 := 0;
+  output Real o1;
  algorithm
+  o1 := 0;
   return;
  end FunctionTests.TestFunction0;
 
@@ -1254,9 +1274,10 @@ fclass FunctionTests.FunctionBinding8
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1278,11 +1299,13 @@ fclass FunctionTests.FunctionBinding9
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
@@ -1399,9 +1422,10 @@ fclass FunctionTests.FunctionBinding15
 
 public
  function FunctionTests.FunctionBinding15.A.f
-  input Real b := 1.0;
-  output Real c := b;
+  input Real b;
+  output Real c;
  algorithm
+  c := b;
   return;
  end FunctionTests.FunctionBinding15.A.f;
 
@@ -1434,10 +1458,11 @@ fclass FunctionTests.FunctionBinding16
 
 public
  function FunctionTests.FunctionBinding16.f
-  input Real a := 1;
-  input Real b := a;
-  output Real c := a + b;
+  input Real a;
+  input Real b;
+  output Real c;
  algorithm
+  c := a + b;
   return;
  end FunctionTests.FunctionBinding16.f;
 
@@ -1514,7 +1539,7 @@ fclass FunctionTests.FunctionBinding20
 public
  function FunctionTests.FunctionBinding20.f
   input Real a;
-  input Real b := a + 2;
+  input Real b;
   output Real c;
  algorithm
   c := a + b;
@@ -1562,7 +1587,7 @@ fclass FunctionTests.FunctionBinding21
 public
  function FunctionTests.FunctionBinding21.e.f2
   input Real a;
-  input Real b := e.d;
+  input Real b;
   output Real c;
  algorithm
   c := a + b;
@@ -1607,7 +1632,7 @@ fclass FunctionTests.FunctionBinding22
 public
  function FunctionTests.FunctionBinding22.f1
   input Real a;
-  input Real b := FunctionTests.FunctionBinding22.f2(a + 2);
+  input Real b;
   output Real c;
  algorithm
   c := a + b;
@@ -1742,11 +1767,13 @@ equation
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
@@ -1777,11 +1804,14 @@ public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
-  input Real i3 := 0;
-  output Real o1 := i1 + i2 + i3;
-  output Real o2 := i2 + i3;
-  output Real o3 := i1 + i2;
+  input Real i3;
+  output Real o1;
+  output Real o2;
+  output Real o3;
  algorithm
+  o1 := i1 + i2 + i3;
+  o2 := i2 + i3;
+  o3 := i1 + i2;
   return;
  end FunctionTests.TestFunction3;
 
@@ -1811,11 +1841,14 @@ public
  function FunctionTests.TestFunction3
   input Real i1;
   input Real i2;
-  input Real i3 := 0;
-  output Real o1 := i1 + i2 + i3;
-  output Real o2 := i2 + i3;
-  output Real o3 := i1 + i2;
+  input Real i3;
+  output Real o1;
+  output Real o2;
+  output Real o3;
  algorithm
+  o1 := i1 + i2 + i3;
+  o2 := i2 + i3;
+  o3 := i1 + i2;
   return;
  end FunctionTests.TestFunction3;
 
@@ -1843,11 +1876,13 @@ equation
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
@@ -1878,9 +1913,10 @@ public
  end FunctionTests.TestFunctionCallingFunction;
 
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1933,9 +1969,10 @@ fclass FunctionTests.FunctionType0
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1957,9 +1994,10 @@ fclass FunctionTests.FunctionType1
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -1999,9 +2037,10 @@ fclass FunctionTests.FunctionType3
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -2025,9 +2064,10 @@ fclass FunctionTests.FunctionType4
 
 public
  function FunctionTests.TestFunction1
-  input Real i1 := 0;
-  output Real o1 := i1;
+  input Real i1;
+  output Real o1;
  algorithm
+  o1 := i1;
   return;
  end FunctionTests.TestFunction1;
 
@@ -2088,11 +2128,13 @@ fclass FunctionTests.FunctionType7
 
 public
  function FunctionTests.TestFunction2
-  input Real i1 := 0;
-  input Real i2 := 0;
-  output Real o1 := 0;
-  output Real o2 := i2;
+  input Real i1;
+  input Real i2;
+  output Real o1;
+  output Real o2;
  algorithm
+  o1 := 0;
+  o2 := i2;
   o1 := i1;
   return;
  end FunctionTests.TestFunction2;
@@ -2532,8 +2574,9 @@ fclass FunctionTests.FunctionVariability2
 public
  function FunctionTests.FunctionVariability2.count
   input Real x;
-  output Integer y := 0;
+  output Integer y;
  algorithm
+  y := 0;
   while x > y loop
    y := y + 1;
   end while;
@@ -7993,8 +8036,9 @@ fclass FunctionTests.UnknownArray2
 public
  function FunctionTests.UnknownArray2.f
   input Real[:] a;
-  output Real[size(a, 1)] b := a[:];
+  output Real[size(a, 1)] b;
  algorithm
+  b := a[:];
   return;
  end FunctionTests.UnknownArray2.f;
 
@@ -8064,9 +8108,11 @@ fclass FunctionTests.UnknownArray4
 public
  function FunctionTests.UnknownArray4.f
   input Real[:] a;
-  output Real[size(a, 1)] b := c[:];
-  Real[size(a, 1)] c := a[:];
+  output Real[size(a, 1)] b;
+  Real[size(a, 1)] c;
  algorithm
+  b := c[:];
+  c := a[:];
   return;
  end FunctionTests.UnknownArray4.f;
 
@@ -8103,9 +8149,11 @@ equation
 public
  function FunctionTests.UnknownArray5.f
   input Real[:] a;
-  output Real[size(a, 1)] b := c[:];
-  output Real[size(a, 1)] c := a[:];
+  output Real[size(a, 1)] b;
+  output Real[size(a, 1)] c;
  algorithm
+  b := c[:];
+  c := a[:];
   return;
  end FunctionTests.UnknownArray5.f;
 
@@ -8219,9 +8267,11 @@ public
   input Real[:, :] a;
   input Real[:, size(a, 2)] b;
   output Real[size(d, 1), size(d, 2)] c;
-  Real[size(a, 1) + size(b, 1), size(a, 2)] d := cat(1, a[:,:], b[:,:]);
-  Real[size(a, 1) + size(b, 1), size(a, 2)] e := [a[:,:]; b[:,:]];
+  Real[size(a, 1) + size(b, 1), size(a, 2)] d;
+  Real[size(a, 1) + size(b, 1), size(a, 2)] e;
  algorithm
+  d := cat(1, a[:,:], b[:,:]);
+  e := [a[:,:]; b[:,:]];
   c[:,:] := d[:,:];
   return;
  end FunctionTests.UnknownArray9.f;
@@ -10533,7 +10583,7 @@ model ExternalFunc2
 			variability_propagation=false,
 			flatModel="
 fclass FunctionTests.ExternalFunc2
- Real x = FunctionTests.ExternalFunc2.f({{1,2},{3,4}}, 5);
+ Real x = FunctionTests.ExternalFunc2.f({{1, 2}, {3, 4}}, 5);
 
 public
  function FunctionTests.ExternalFunc2.f
@@ -10541,8 +10591,9 @@ public
   input Real y;
   output Real z;
   output Real q;
-  Real a := y + 2;
+  Real a;
  algorithm
+  a := y + 2;
   external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
   return;
  end FunctionTests.ExternalFunc2.f;
@@ -11104,12 +11155,14 @@ fclass FunctionTests.ExtendFunc2
 
 public
  function FunctionTests.ExtendFunc2.f2
-  Real[2] d := {1,2};
+  Real[2] d;
   input Real a;
   output Real b;
-  input Integer c := 2;
-  Real f := a + d[c];
+  input Integer c;
+  Real f;
  algorithm
+  d := {1, 2};
+  f := a + d[c];
   b := f;
   return;
  end FunctionTests.ExtendFunc2.f2;
@@ -12578,7 +12631,7 @@ fclass FunctionTests.ComponentFunc3
 
 public
  function FunctionTests.ComponentFunc3.a.f
-  input Real a := 2;
+  input Real a;
   output Real b;
  algorithm
   b := a + 1;
@@ -12632,7 +12685,7 @@ fclass FunctionTests.MinOnInput1
 
 public
  function FunctionTests.MinOnInput1.F
-  input Real x(min=0) := 3.14;
+  input Real x;
   output Real y;
  algorithm
   y := x * 42;

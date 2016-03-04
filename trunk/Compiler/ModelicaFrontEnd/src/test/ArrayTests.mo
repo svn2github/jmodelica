@@ -1902,9 +1902,10 @@ fclass ArrayTests.Subscripts.EndSubscript2
 
 public
  function ArrayTests.Subscripts.EndSubscript2.f
-  input ArrayTests.Subscripts.EndSubscript2.R r(x(size() = {n}));
-  output Real x := r.x[r.n];
+  input ArrayTests.Subscripts.EndSubscript2.R r;
+  output Real x;
  algorithm
+  x := r.x[r.n];
   return;
  end ArrayTests.Subscripts.EndSubscript2.f;
 

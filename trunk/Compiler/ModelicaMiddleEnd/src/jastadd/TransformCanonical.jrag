@@ -112,7 +112,6 @@ aspect TransformCanonical {
             transformations = new ArrayList<Transformation>();
             transformations.add(new enableIfEquationElimination());
             transformations.add(new genAlgorithmFunctionsIfSet());
-            transformations.add(new genBindingAssignments());
             transformations.add(new scalarize());
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
@@ -815,6 +814,15 @@ aspect TransformCanonical {
             }
         }
     }
+    
+    /**
+     * Flag that controls if this statement should be a part of the set of statements at 
+     * the beginning of a function that are generated from variable declarations, and 
+     * should be sorted to ensure assignment before use among them.
+     * 
+     * Set during flattening
+     */
+    public boolean FStatement.shouldBeSorted = false;
 	
 	public void FFunctionDecl.genInitArrayStatements() {
 		List<FStatement> stmts = new List<FStatement>();
@@ -1026,116 +1034,6 @@ aspect TransformCanonical {
 		return set;
 	}
 	
-	
-	
-
-    public class FClass {
-        /**
-         * Convert function variable binding expressions into regular statements.
-         */
-        public class genBindingAssignments extends Transformation {
-            public void perform() {
-                FQName empty = new FQNameEmpty();
-                for (FFunctionDecl ffd : getFFunctionDecls())
-                    ffd.genBindingAssignments();
-                root().flushAllRecursive();
-           }
-        }
-    }
-	
-	public void FFunctionDecl.genBindingAssignments() {
-		// TODO: To support Modelica 3.3, we need to sort the assignments
-		List<FStatement> stmts = new List<FStatement>();
-		for (FFunctionVariable ffv : getFFunctionVariables())
-			ffv.genBindingAssignments(stmts);
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			stmts.add(stmt);
-		getFAlgorithm().setFStatementList(stmts);
-	}
-	
-	/**
-	 * Flag that controls if this statement should be a part of the set of statements at 
-	 * the beginning of a function that are generated from variable declarations, and 
-	 * should be sorted to ensure assignment before use among them.
-	 */
-	public boolean FStatement.shouldBeSorted = false;
-	
-    public boolean FFunctionVariable.hasBindingAssignment = false;
-	
-    public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
-        if (!isInput()) {
-            if (hasBindingExp()) {
-                FAssignStmt stmt = new FAssignStmt(createUseExp(), getBindingExp());
-                stmt.shouldBeSorted = true;
-                stmts.add(stmt);
-                setBindingExpOpt(new Opt());
-                hasBindingAssignment = true;
-            } else if (hasFAttribute() && isRecord()) {
-                type().genBindingAssignments(stmts, getFQName().asFQNameFull(), getFAttributes());
-            }
-        }
-        
-        if (hasFAttribute()) {
-            setFAttributeList(new List<FAttribute>());
-        }
-    }
-    
-    public void FType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
-        
-    }
-    
-    public void FRecordType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
-        Map<String,FAttribute> m = new HashMap<String,FAttribute>(attrs.getNumChild());
-        for (FAttribute attr : attrs) {
-            m.put(attr.name(), attr);
-        }
-        for (Index i : indices()) {
-            for (FVariable fv : myFRecordDecl().getFVariables()) {
-                fv.genBindingAssignments(stmts, prefix, m, i);
-            }
-        }
-    }
-    
-    public void FVariable.genBindingAssignments(List<FStatement> stmts, FQName prefix, Map<String, FAttribute> attrs, Index i) {
-        FQName left = prefix.copyAndAddIfFas(i).copyAndAppend(name());
-        FAttribute attr = attrs.get(name());
-        FExp right = selectBindingFExp(attr, i);
-        if (right != null) {
-            FAssignStmt stmt = new FAssignStmt(new FIdUseExp(left), right.fullCopy());
-            stmt.shouldBeSorted = true;
-            stmts.add(stmt);
-        } else if (attr != null) {
-            type().genBindingAssignments(stmts, left, attr.getFAttributes());
-        }
-    }
-    
-    public FExp FVariable.selectBindingFExp(FAttribute attr, Index i) {
-        if (attr != null && attr.hasValue()) {
-            if (i.ndims() > 0 && !attr.hasFEach()) {
-                return attr.getValue().getArray().get(i);
-            } else {
-                return attr.getValue();
-            }
-        }
-        return getBindingExp();
-    }
-	
-	syn boolean FExp.canExtractRecordComponents()      = false;
-	eq FIdUseExp.canExtractRecordComponents()          = true;
-	eq FRecordConstructor.canExtractRecordComponents() = true;
-	eq FArray.canExtractRecordComponents() {
-		for (FExp e : childFExps())
-			if (!e.canExtractRecordComponents())
-				return false;
-		return true;
-	}
-	eq FAbstractCat.canExtractRecordComponents(){
-		for (FExp e : childFExps())
-			if (!e.canExtractRecordComponents())
-				return false;
-		return true;
-	}
-	
 	/**
 	 * Create an FExp that represents a specific component of this record expression.
 	 * 
@@ -1236,6 +1134,7 @@ aspect TransformCanonical {
 			allVars.addAll(inVars);
 			allVars.addAll(outVars);
 			
+            List<FStatement> stmts = new List<FStatement>();
 			for (int i = 0; i < inVars.size(); i++) {
 				FVariable fv = inVars.get(i);
 				FFunctionVariable ffv = fv.createFFunctionInput();
@@ -1258,9 +1157,14 @@ aspect TransformCanonical {
 					ffv.setFQName(fqn);
 					
 					// Create and add binding expression for output
-					bothInVars.get(i).setBindingExp(fqn.createFIdUseExp());
+                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), fqn.createFIdUseExp()));
 				}
 			}
+			
+            for (FStatement stmt : alg.getFStatements()) {
+                stmts.add(stmt);
+            }
+            alg.setFStatementList(stmts);
 			
 			// Create function call equation and replace algorithm
 			List<FExp> args = new List<FExp>();

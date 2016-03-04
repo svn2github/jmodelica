@@ -7032,8 +7032,8 @@ equation
 
 public
  function Modelica.Utilities.Streams.print
-  input String string := \"\";
-  input String fileName := \"\";
+  input String string;
+  input String fileName;
  algorithm
   external \"C\" ModelicaInternal_print(string, fileName);
   return;

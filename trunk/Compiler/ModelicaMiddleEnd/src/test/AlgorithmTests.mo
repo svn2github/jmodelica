@@ -346,7 +346,7 @@ public
   AlgorithmTests.TempAssign2.R[:] temp_1;
   Integer[:] temp_2;
  algorithm
-  size(y) := {:};
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1].a := x[i1].a;
    y[i1].b := x[i1].b;
@@ -450,7 +450,7 @@ public
   AlgorithmTests.TempAssign3.R[:] temp_1;
   Integer[:] temp_2;
  algorithm
-  size(y) := {:};
+  size(y) := {size(x, 1)};
   for i1 in 1:size(x, 1) loop
    y[i1].a[1] := x[i1].a[1];
    y[i1].a[2] := x[i1].a[2];

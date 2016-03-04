@@ -305,11 +305,17 @@ aspect Flattening {
     }
 
     private FFunctionDecl InstBaseClassDecl.createFFunctionDecl() {
-        if (isConstructor())
-            return new FConstructorDecl();
-        if (isDestructor())
-            return new FDestructorDecl();
-        return new FFunctionDecl();
+        FFunctionDecl res;
+        if (isConstructor()) {
+            res = new FConstructorDecl();
+        } else if (isDestructor()) {
+            res = new FDestructorDecl();
+        } else {
+            res = new FFunctionDecl();
+        }
+        
+        res.setFAlgorithm(new FAlgorithm(new List<FStatement>()));
+        return res;
     }
 	
     protected FFunctionDecl InstBaseClassDecl.createFFunction(FClass fc, InstExternal ie) {
@@ -319,16 +325,15 @@ aspect Flattening {
         
         flattenComponentsInFunction(ffd, fc, new HashSet<String>(), FUNC_AND_REC_MOD_LEVEL);
         
-        FAlgorithm fab;
         if (ie != null) {
-            fab = new FAlgorithm(new List());
-            flattenExternal(fab, ie);
+            flattenExternal(ffd.getFAlgorithm(), ie);
         } else {
-            fab = findFunctionAlgorithm().flattenEqn(new FQNameEmpty(), fc);
+            FStatement.flattenFStatementList(ffd.getFAlgorithm().getFStatements(), 
+                    new FQNameEmpty(), findFunctionAlgorithm().getFStatements());
         }
-            
-        fab.ensureReturn();
-        ffd.setFAlgorithm(fab);
+        
+        ffd.getFAlgorithm().ensureReturn();
+        
         return ffd;
     }
 
@@ -384,6 +389,8 @@ aspect Flattening {
         Set<InstAssignable> all = localFunctionConstantList();
         List<FFunctionVariable> ffvs = ffd.getFFunctionVariableListNoTransform();
         ffd.setFFunctionVariableList(new List());
+        List<FStatement> stmts = ffd.getFAlgorithmNoTransform().getFStatementsNoTransform();
+        ffd.getFAlgorithmNoTransform().setFStatementList(new List());
         int n = 0;
         while (n < all.size()) {
             n = all.size();
@@ -398,6 +405,8 @@ aspect Flattening {
         }
         for (FFunctionVariable ffv : ffvs.noTransform())
             ffd.addFFunctionVariable(ffv);
+        for (FStatement stmt : stmts.noTransform())
+            ffd.getFAlgorithmNoTransform().addFStatement(stmt);
     }
 
 	public void FFunctionDecl.updateRecordArraySizes() {
@@ -577,7 +586,7 @@ aspect Flattening {
     public void InstComponentDecl.addExternalArg(List<FExp> args, boolean flat) {}
     
     public void InstAssignable.addExternalArg(List<FExp> args, boolean flat) {
-        FIdUseExp use = flat ? new FIdUseExp(name()) : new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+        FIdUseExp use = flat ? new FIdUseExp(expandedFQNameCalc()) : new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
 		args.add(use);
         if (variability().knownParameterOrLess())
             functionConstantList().add(this);
@@ -605,15 +614,15 @@ aspect Flattening {
 	public void InstComponentDecl.flattenInFunction(
 			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {}
 	
+    @Override
 	public void InstAssignable.flattenInFunction(
 			FFunctionDecl ffd, FClass fc, boolean useConstant, InstClassDecl func) {
 		if (useConstant || !flattenAsFunctionConstant()) {
 			InstClassDecl old = temporarilyInFunction;
 			temporarilyInFunction = func;
-			FExp e = flattenBindingFExp();
 			if (hasInstValueMod())
 				getBindingFExp().flattenUsedFuncsAndEnums(fc);
-			Opt eo = (e == null) ? new Opt() : new Opt(e);
+			Opt eo = new Opt();
 			FQName fqn = createFQNameForFuncVar(func);
 			fqn.removeFArraySubscripts();
 			FFunctionVariable ffv = createFFunctionVariable(eo, fqn);
@@ -621,13 +630,75 @@ aspect Flattening {
 				ffv.setFTypePrefixInputOutput(new FInput());
 			if (isOutput())
 				ffv.setFTypePrefixInputOutput(new FOutput());
-			addAttributesToFV(ffv.getFAttributes());
 			ffd.addFFunctionVariable(ffv);
+            if (!isInput()) {
+                addBindingAssignments(ffd.getFAlgorithm().getFStatements());
+            }
 			myInstClass().flattenRecord(fc);
 			temporarilyInFunction = old;
 		}
 	}
-
+    
+    public void InstComponentDecl.addBindingAssignments(List<FStatement> l) {
+        for (InstComponentDecl icd : allInstComponentDecls()) {
+            icd.addBindingAssignments(l);
+        }
+    }
+    
+    public void InstAssignable.addBindingAssignments(List<FStatement> l) {
+        if (hasBindingFExp()) {
+            FStatement stmt = new FAssignStmt(new FIdUseExp(expandedFQNameCalc()), getBindingFExp().flatten(new FQNameEmpty()));
+            stmt.shouldBeSorted = true;
+            l.add(stmt);
+        } else {
+            super.addBindingAssignments(l);
+        }
+    }
+    
+    syn FQName InstAssignable.expandedFQNameCalc() {
+        if (temporarilyInFunction != null) {
+            return createFQNameForFuncUse(temporarilyInFunction);
+        } else {
+            return expandedFQName().append(name());
+        }
+    }
+    
+    inh FQName InstComponentDecl.expandedFQName();
+    eq InstClassDecl.getChild().expandedFQName()     = new FQNameFull();
+    eq InstComponentDecl.getChild().expandedFQName() = expandedFQName();
+    eq InstArrayComponentDecl.getChild().expandedFQName() = appendMyName(expandedFQName());
+    eq InstAssignable.getChild().expandedFQName() {
+        if (temporarilyInFunction != null) {
+            return createFQNameForFuncUse(temporarilyInFunction);
+        }
+        if (size().isUnknown()) {
+            return expandedFQName().append(name(), size().flattenFExp());
+        } else {
+            return expandedFQName().append(name());
+        }
+    }
+    
+    /**
+     * Get the list of constants that need to be added to the surrounding function.
+     */
+    inh Set<InstAssignable> InstAccess.functionConstantList();
+    inh Set<InstAssignable> InstAssignable.functionConstantList();
+    eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
+    eq InstAssignable.getChild().functionConstantList() = 
+        (temporarilyInFunction != null) ? 
+                temporarilyInFunction.localFunctionConstantList() : 
+                functionConstantList();
+    eq Root.getChild().functionConstantList()           = null;
+    
+    /**
+     * The list of constants that need to be added to this function.
+     * 
+     * The list will be populated when expressions in the function are flattened.
+     */
+    syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
+        new LinkedHashSet<InstAssignable>();
+    
+    
     public class InstLookupResult<T extends InstNode> {
         /**
          * Check if lookup found a target that is not the same as the given one.
@@ -645,7 +716,11 @@ aspect Flattening {
         }
         return name.fullCopy();
     }
-
+    
+    public FQName InstAssignable.createFQNameForFuncUse(InstClassDecl func) {
+        return createFQNameForFuncVar(func).asFQNameFull().addFArraySubscripts(null);
+    }
+    
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
         FType type = type().flatten(new FQNameEmpty(), this);
@@ -1712,11 +1787,14 @@ aspect FlatExpressions {
 
 	public FAlgorithm FAlgorithm.flattenEqn(FQName prefix, FClass fc) {
 		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-		return new FAlgorithm(l);
-	}
+        return new FAlgorithm(l);
+    }
+    
+    public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
+        return FStatement.flattenFStatementList(new List<FStatement>(), prefix, l);
+    }
 	
-	public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
-		List<FStatement> l2 = new List<FStatement>();
+    public static List<FStatement> FStatement.flattenFStatementList(List<FStatement> l2, FQName prefix, List<FStatement> l) {
 		for (FStatement s : l) 
 			l2.add(s.flatten(prefix));
 		return l2;
@@ -1825,19 +1903,30 @@ aspect FlatExpressions {
     abstract public FSubscript FSubscript.flatten(FQName prefix);
 
     public FSubscript FColonSubscript.flatten(FQName prefix) { 
-        return size().flattenFExp(prefix);
+        return size().flattenFExp(0);
     }
     
-    public FSubscript Size.flattenFExp(FQName prefix) {
-        return new FExpSubscript(new FRangeExp(new FIntegerLitExp(1),new FIntegerLitExp(get(0))));
+    public FSubscript Size.flattenFExp(int i) {
+        return new FExpSubscript(new FRangeExp(new FIntegerLitExp(1),new FIntegerLitExp(get(i))));
     }
     
-    public FSubscript MutableSize.flattenFExp(FQName prefix) {
+    public FSubscript MutableSize.flattenFExp(int i) {
         if (isUnknown()) {
             return new FColonSubscript();
         } else {
-            return super.flattenFExp(prefix);
+            return super.flattenFExp(i);
         }
+    }
+    
+    public FArraySubscripts Size.flattenFExp() {
+        if (ndims() == 0) {
+            return null;
+        }
+        FArraySubscripts fas = new FArraySubscripts();
+        for (int i = 0; i < ndims(); i++) {
+            fas.addFSubscript(flattenFExp(i));
+        }
+        return fas;
     }
     
     public FSubscript FIntegerSubscript.flatten(FQName prefix) { 
@@ -2135,26 +2224,6 @@ aspect FlatExpressions {
 	public FQName InstDot.flattenAssignablePart(FQName prefix) {
         return flattenName(prefix, prefix, firstAssignableIndex());
 	}
-	
-	/**
-	 * Get the list of constants that need to be added to the surrounding function.
-	 */
-	inh Set<InstAssignable> InstAccess.functionConstantList();
-	inh Set<InstAssignable> InstAssignable.functionConstantList();
-	eq InstClassDecl.getChild().functionConstantList()  = localFunctionConstantList();
-	eq InstAssignable.getChild().functionConstantList() = 
-		(temporarilyInFunction != null) ? 
-				temporarilyInFunction.localFunctionConstantList() : 
-				functionConstantList();
-	eq Root.getChild().functionConstantList()           = null;
-	
-	/**
-	 * The list of constants that need to be added to this function.
-	 * 
-	 * The list will be populated when expressions in the function are flattened.
-	 */
-	syn lazy Set<InstAssignable> InstClassDecl.localFunctionConstantList() = 
-		new LinkedHashSet<InstAssignable>();
 	
 	syn boolean InstAccess.hasUnknownIndices() = 
 		hasFArraySubscripts() && getFArraySubscripts().hasUnknownIndices();
