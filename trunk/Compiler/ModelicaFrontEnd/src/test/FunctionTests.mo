@@ -1102,6 +1102,71 @@ end FunctionTests.FunctionFlatten23;
 ")})));
 end FunctionFlatten23;
 
+model FunctionFlatten24
+    record R
+        parameter Integer n1;
+        parameter Integer n2;
+        Real[n1+n2] x;
+    end R;
+    
+    function f
+        input R r;
+        output Real y = f2(r.x);
+    algorithm
+        annotation(Inline=false); 
+    end f;
+    
+    function f2
+        input Real[:] x;
+        output Real y = sum(x);
+        algorithm
+    end f2;
+    
+    Real y = f(R(1,1,{1,2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten24",
+            description="Flattening of size in function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten24
+ parameter Real y;
+parameter equation
+ y = FunctionTests.FunctionFlatten24.f(FunctionTests.FunctionFlatten24.R(1, 1, {1, 2}));
+
+public
+ function FunctionTests.FunctionFlatten24.f
+  input FunctionTests.FunctionFlatten24.R r;
+  output Real y;
+ algorithm
+  y := FunctionTests.FunctionFlatten24.f2(r.x);
+  return;
+ annotation(Inline = false);
+ end FunctionTests.FunctionFlatten24.f;
+
+ function FunctionTests.FunctionFlatten24.f2
+  input Real[:] x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x, 1) loop
+   temp_1 := temp_1 + x[i1];
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.FunctionFlatten24.f2;
+
+ record FunctionTests.FunctionFlatten24.R
+  parameter Integer n1;
+  parameter Integer n2;
+  Real x[n1 + n2];
+ end FunctionTests.FunctionFlatten24.R;
+
+end FunctionTests.FunctionFlatten24;
+")})));
+end FunctionFlatten24;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1

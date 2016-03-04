@@ -752,15 +752,15 @@ aspect Flattening {
 	public void FRecordType.flattenSize(FQName prefix, ASTNode context) {
 		super.flattenSize(prefix, context);
 		for (FRecordComponentType comp : getComponents())
-			comp.getFType().flattenSize(prefix, null);
+			comp.getFType().flattenSize(prefix, context);
 	}
 	
     public void FFunctionType.flattenSize(FQName prefix, ASTNode context) {
         super.flattenSize(prefix, context);
         for (FRecordComponentType comp : getInputs())
-            comp.getFType().flattenSize(prefix, null);
+            comp.getFType().flattenSize(prefix, context);
         for (FRecordComponentType comp : getOutputs())
-            comp.getFType().flattenSize(prefix, null);
+            comp.getFType().flattenSize(prefix, context);
     }
 	
 	public Size Size.flatten(FQName prefix, ASTNode context) {
