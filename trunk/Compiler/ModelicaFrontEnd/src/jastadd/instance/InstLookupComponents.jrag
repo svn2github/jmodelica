@@ -346,7 +346,6 @@ aspect InstLookupComponents {
         (i == 0) ? lookupInstComponent(name) : getInstAccessNoListTrans(i - 1).qualifiedLookupInstComponent(name);
     eq InstScalarAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
     eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)    = getTopInstAccess().lookupInstComponent(name);
-    eq InstArrayAccess.getExpandedSubscripts().lookupInstComponent(String name)  = getTopInstAccess().lookupInstComponent(name);
     eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)         = InstLookupResult.notFound();
 
     eq InstDefaultRecordModification.getChild().lookupInstComponent(String name) = lookupInstComponentForBindingExp(name);

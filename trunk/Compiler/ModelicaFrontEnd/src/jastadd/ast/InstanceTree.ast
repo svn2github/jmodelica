@@ -158,7 +158,7 @@ abstract InstScalarAccess : InstNamedAccess ::= /ExpandedSubscripts:FArraySubscr
 InstParseAccess           : InstScalarAccess;
 InstAmbiguousAccess       : InstScalarAccess;
 InstComponentAccess       : InstScalarAccess;
-abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts /ExpandedSubscripts:FArraySubscripts/;
+abstract InstArrayAccess  : InstNamedAccess ::= FArraySubscripts;
 InstParseArrayAccess      : InstArrayAccess;
 InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;

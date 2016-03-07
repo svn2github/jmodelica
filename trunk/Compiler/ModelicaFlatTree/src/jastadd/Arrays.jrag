@@ -338,7 +338,7 @@ aspect Arrays {
 	 * Get the expanded FArraySubscripts of each part of this access.
 	 */
 	syn java.util.List<FArraySubscripts> InstAccess.allFArraySubscripts() = Arrays.asList(new FArraySubscripts());
-	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
+	eq InstArrayAccess.allFArraySubscripts() = Arrays.asList(getFArraySubscripts());
 	eq InstScalarAccess.allFArraySubscripts() = Arrays.asList(getExpandedSubscripts());
 	eq InstDot.allFArraySubscripts() {
 		int n = getNumInstAccess();
@@ -430,9 +430,6 @@ aspect Arrays {
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
 	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
-	syn FArraySubscripts InstArrayAccess.getExpandedSubscripts() = getFArraySubscripts().expandedSubscripts();
-	
-//	private static final FArraySubscripts InstAccess.EMPTY_FAS = new FArraySubscripts();
 	
 	/**
 	 * Get the expanded array subscripts of this access.
@@ -454,23 +451,6 @@ aspect Arrays {
 		}
 		return s.createExpandedFArraySubscripts();
 	}
-	
-	/**
-	 * Create a copy of this FArraySubscripts with all colon indices expanded.
-	 */
-	public FArraySubscripts FArraySubscripts.expandedSubscripts() {
-		FArraySubscripts res = new FArraySubscripts();
-		for (FSubscript s : getFSubscripts())
-			res.addFSubscript(s.expandedSubscript());
-		return res;
-	}
-	
-	/**
-	 * Create a copy of this FSubscript, expanding it to a vector if it is a colon.
-	 */
-    syn FSubscript FSubscript.expandedSubscript() = (FSubscript) fullCopy();
-    eq FColonSubscript.expandedSubscript() = size().isUnknown() ?
-            super.expandedSubscript() : size().createExpandedFSubscript(0);
 	
 	/**
 	 * Create an FArraySubscripts that spans all array cells of this component.
@@ -707,30 +687,27 @@ aspect Arrays {
         }
         return myFV().size();
     }
-    eq FIdUseInstAccess.getChild().mySize()              = getInstAccess().size();
-    eq InstScalarAccess.getExpandedSubscripts().mySize() = declarationSize();
-    eq InstArrayAccess.getFArraySubscripts().mySize()    = declarationSize();
-    eq InstArrayAccess.getExpandedSubscripts().mySize()  = declarationSize();
-    eq FSubscriptedExp.getFArraySubscripts().mySize()    = getFExp().size();
-    eq FExpSubscript.getFExp().mySize()                  = mySize();
-    eq FlatRoot.getChild().mySize()                      = Size.SCALAR;
-    eq InstRoot.getChild().mySize()                      = Size.SCALAR;
-
-    eq FArraySubscripts.getFSubscript(int i).mySize() {
-        MutableSize s = new MutableSize(1);
-        Size ms = mySize();
-        if (ms.has(i))
-            s.set(0, ms, i);
-        else 
-            s.set(0, Size.UNKNOWN);
-        return s;
+    eq Root.getChild().mySize()                       = Size.SCALAR;
+    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
+    eq InstNamedAccess.getChild().mySize()            = declarationSize();
+    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
+    
+    public Size Size.contract(int i) {
+        if (has(i)) {
+            return contract(i,size.length-i-1);
+        } else {
+            return Size.SCALAR;
+        }
     }
-
+    
     eq FQNameFull.getFQNamePart(int i).mySize() {
         FQName n = copyPrefix(i + 1).removeFArraySubscripts();
         n.setParent(this);
         return lookupFV(n).size();
     }
+    
+    syn Size InstAccess.declarationSize() = Size.SCALAR;
+    eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
 
 	/**
 	 * Get the array sizes. 
@@ -1156,21 +1133,19 @@ aspect Arrays {
     /**
      * Get the array sizes. 
      */
-    syn Size InstAccess.size()   = Size.SCALAR;
-    eq InstScalarAccess.size()   = declarationSize();
-    eq InstArrayAccess.size()    = getFArraySubscripts().accessSize();
-    eq InstDot.size() {
-        if (!isArray())
-            return Size.SCALAR;
+    syn Size InstAccess.size() = isArray() ? arraySize() : Size.SCALAR;
+    
+    syn Size InstAccess.arraySize() = Size.SCALAR;
+    eq InstGlobalAccess.arraySize() = getInstAccess().arraySize();
+    eq InstScalarAccess.arraySize() = getExpandedSubscripts().accessSize();
+    eq InstArrayAccess.arraySize()  = getFArraySubscripts().accessSize();
+    eq InstDot.arraySize() {
         MutableSize s = new MutableSize(ndims());
-        for (InstAccess ia : getInstAccesss())
+        for (InstAccess ia : getInstAccesss()) {
             s.append(ia.size());
+        }
         return s;
     }
-    eq InstGlobalAccess.size() = getInstAccess().size();
-    
-    syn Size InstAccess.declarationSize() = Size.SCALAR;
-    eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
     
     /**
      * Get the array sizes. 

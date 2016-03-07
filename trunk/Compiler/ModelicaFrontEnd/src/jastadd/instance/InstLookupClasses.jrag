@@ -289,7 +289,6 @@ aspect InstLookupClasses {
     eq InstGlobalAccess.getInstAccess().lookupInstClass(String name)         = lookupInstClassFromTop(name);
     eq InstScalarAccess.getExpandedSubscripts().lookupInstClass(String name) = getTopInstAccess().lookupInstClass(name);
     eq InstArrayAccess.getFArraySubscripts().lookupInstClass(String name)    = getTopInstAccess().lookupInstClass(name);
-    eq InstArrayAccess.getExpandedSubscripts().lookupInstClass(String name)  = getTopInstAccess().lookupInstClass(name);
 
 
     syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClass(String name) {
