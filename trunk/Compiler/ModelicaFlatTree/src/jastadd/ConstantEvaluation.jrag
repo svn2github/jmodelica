@@ -2293,7 +2293,7 @@ aspect ConstantEvaluation {
         return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
     }
 
-    eq FUnknownSizeExp.cevalCalc(VariableEvaluator evaluator) {
+    eq FColonSizeExp.cevalCalc(VariableEvaluator evaluator) {
         if (getVariable() == null)
             return CValue.UNKNOWN;
         CValue val = getVariable().evaluationValue(evaluator);

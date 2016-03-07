@@ -1557,7 +1557,7 @@ aspect FlatPrettyPrint {
 	
 	protected abstract void FExp.prettyPrintExp(Printer p, CodeStream str, String indent);
 	
-	protected void FUnknownSizeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+	protected void FColonSizeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 	

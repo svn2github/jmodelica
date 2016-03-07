@@ -644,7 +644,7 @@ aspect Arrays {
 	}
 	
 	public void FColonSubscript.addDeclarationSize(MutableSize s) {
-		FExp e = new FUnknownSizeExp(surroundingVariableDecl(), myDim());
+		FExp e = new FColonSizeExp(surroundingVariableDecl(), myDim());
 		e.setParent(this);
 		s.append(e);
 	}
@@ -1061,7 +1061,7 @@ aspect Arrays {
             try {
                 ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
             } catch (ConstantEvaluationException e) {
-                ms.append(dynamicFExp(new FUnknownSizeExp(unknownInstComponentDecl(), j)));
+                ms.append(dynamicFExp(new FColonSizeExp(unknownInstComponentDecl(), j)));
             }
         }
         return ms;
@@ -1260,7 +1260,7 @@ aspect Arrays {
         return s.createSizeFExp(dimension(), varMap);
     }
     
-    public FExp FUnknownSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public FExp FColonSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
         boolean circ = varMap.containsKey(this);
         varMap.put(this, null);
         if (!circ && varMap.containsKey(getVariable()))
@@ -1447,7 +1447,7 @@ aspect Arrays {
 		return unboundCopy();
 	}
 	
-	public FExp FUnknownSizeExp.createSizeFExp() {
+	public FExp FColonSizeExp.createSizeFExp() {
 		return new FSizeExp(getVariable().createUseExp(), getDim());
 	}
 		
@@ -2981,7 +2981,7 @@ aspect ArrayHelpers {
 		}
 		
         /**
-         * Replace FUnknownSizeExps with equivalent FSizeExps
+         * Replace FColonSizeExps with equivalent FSizeExps
          */
         public void replaceUnknowns(ASTNode parent) {}
 		
@@ -3506,7 +3506,7 @@ aspect ArrayHelpers {
 		}
 		
         /**
-         * Replace FUnknownSizeExps with equivalent FSizeExps
+         * Replace FColonSizeExps with equivalent FSizeExps
          */
         public void replaceUnknowns(ASTNode parent) {
             for (int i = 0; i < exps.length; i++) {
@@ -3599,7 +3599,7 @@ aspect ArrayHelpers {
             evaluate(i);
             if (i < 0 || i >= size.length)
                 return UNKNOWN;
-            if (size[i] != Size.UNKNOWN) // We want to evaluate FUnknownSizeExps as well
+            if (size[i] != Size.UNKNOWN) // We want to evaluate FColonSizeExps as well
                 return size[i];
             try {
                 if (exps[i] != null)
@@ -3641,7 +3641,7 @@ aspect ArrayHelpers {
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
 			set(d1, exp.size(), d2);
-			if (exps[d1] != null && exps[d1] instanceof FUnknownSizeExp)
+			if (exps[d1] != null && exps[d1] instanceof FColonSizeExp)
 				exps[d1] = exps[d1].dynamicFExp(exps[d1].createSizeFExp());
 			if (!hasValue(d1)) {
 				FExp copyExp = exp.fullCopy();

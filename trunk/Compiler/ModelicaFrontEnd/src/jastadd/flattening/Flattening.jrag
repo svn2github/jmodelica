@@ -804,7 +804,7 @@ aspect Flattening {
 	}
 	
 	/**
-	 * Affix the given expression to the tree, and point FUnknownSizeExps to this var.
+	 * Affix the given expression to the tree, and point FColonSizeExps to this var.
 	 * 
 	 * This implementation uses a hack to add node to tree.
 	 * 
@@ -813,37 +813,37 @@ aspect Flattening {
 	public FExp FAbstractVariable.affixExpression(FExp exp) {
 		// TODO: need better way of including exp in tree
 		exp.parent = this;
-		exp.updateFUnknownSizeExps(this);
+		exp.updateFColonSizeExps(this);
 		return exp;
 	}
 	
 	/**
-	 * Change the variable of any FUnknownSizeExp to the given variable.
+	 * Change the variable of any FColonSizeExp to the given variable.
 	 */
-	public void FExp.updateFUnknownSizeExps(FAbstractVariable var) {
+	public void FExp.updateFColonSizeExps(FAbstractVariable var) {
 	}
 	
-	public void FUnknownSizeExp.updateFUnknownSizeExps(FAbstractVariable var) {
+	public void FColonSizeExp.updateFColonSizeExps(FAbstractVariable var) {
 		setVariable(var);
 	}
 	
 	/**
-	 * Change the variable of any FUnknownSizeExp in size to the given variable.
+	 * Change the variable of any FColonSizeExp in size to the given variable.
 	 */
-	public void FType.updateFUnknownSizeExps(FAbstractVariable var) {
+	public void FType.updateFColonSizeExps(FAbstractVariable var) {
 		if (getSize() != Size.SCALAR) {
 			Size s = getSize().clone();
-			s.updateFUnknownSizeExps(var);
+			s.updateFColonSizeExps(var);
 			setSize(s);
 		}
 	}
 
 	/**
-	 * Change the variable of any FUnknownSizeExp dimension to the given variable.
+	 * Change the variable of any FColonSizeExp dimension to the given variable.
 	 */
-	public void Size.updateFUnknownSizeExps(FAbstractVariable var) {}
+	public void Size.updateFColonSizeExps(FAbstractVariable var) {}
 	
-	public void MutableSize.updateFUnknownSizeExps(FAbstractVariable var) {
+	public void MutableSize.updateFColonSizeExps(FAbstractVariable var) {
 		for (int i = 0; i < exps.length; i++) 
 			if (exps[i] != null) 
 				exps[i] = var.affixExpression(exps[i].fullCopy());
@@ -2584,8 +2584,8 @@ aspect FlatExpressions {
 		}
 	}
 	
-	public FUnknownSizeExp FUnknownSizeExp.flatten(FQName prefix) {
-		return new FUnknownSizeExp(null, getDim());
+	public FColonSizeExp FColonSizeExp.flatten(FQName prefix) {
+		return new FColonSizeExp(null, getDim());
 	}
 	
 	public FExp InstDerExp.flatten(FQName prefix) {

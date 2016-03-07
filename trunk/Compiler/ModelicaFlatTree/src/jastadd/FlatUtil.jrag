@@ -1923,7 +1923,7 @@ aspect FlatExpressions {
     eq FNoExp.isValidExp(boolean allowUnknownSize)              = false;
     eq FUnsupportedExp.isValidExp(boolean allowUnknownSize)     = false;
     eq FUnsupportedBuiltIn.isValidExp(boolean allowUnknownSize) = false;
-    eq FUnknownSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
+    eq FColonSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
     
     /**
      * Counts the total number of FExp nodes in this ASTNode.

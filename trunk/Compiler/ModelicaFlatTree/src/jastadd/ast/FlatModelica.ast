@@ -1238,7 +1238,7 @@ FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
  * 
  * Only used in Size objects.
  */
-FUnknownSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
+FColonSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
  * Dummy node.

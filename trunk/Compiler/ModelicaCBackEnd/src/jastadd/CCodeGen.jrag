@@ -2146,7 +2146,7 @@ aspect CCodeGen {
         size().printSize_C(p, str, indent, getFExp(), dimension());
 	}
 	
-	public void FUnknownSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+	public void FColonSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         size().printSize_C(p, str, indent, getVariable().name_C(), getDim());
 	}
 	

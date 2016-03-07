@@ -784,7 +784,7 @@ aspect Scalarization {
 	public void FFunctionVariable.scalarize(
 			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
 		FFunctionVariable var = (FFunctionVariable) fullCopy();
-		var.getType().updateFUnknownSizeExps(var);
+		var.getType().updateFColonSizeExps(var);
 		var.setBindingExpOpt(new Opt());
 		vars.add(var);
 	}
