@@ -1523,10 +1523,9 @@ static void jmi_kinsol_reg_matrix(jmi_block_solver_t * block) {
 /* Perform LU factorization with different linear algebra packages */
 static int jmi_LU_factorization(jmi_block_solver_t * block, DlsMat matrix, int lin_alg_package) {
     jmi_kinsol_solver_t* solver = block->solver;
-    int info, N = block->n;
+    int info = 0, N = block->n;
     if(lin_alg_package == 0) {
         dgetrf_(  &N, &N, matrix->data, &N, solver->lapack_ipiv, &info);
-        
     } else if (lin_alg_package == 1) {
         /* Perform factorization to detect if there is a singular Jacobian */
         info = DenseGETRF(matrix, solver->sundials_permutationwork);
