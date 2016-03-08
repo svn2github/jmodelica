@@ -241,13 +241,13 @@ abstract public class OptionRegistry {
             ("eliminate_alias_variables", 
              OptionType.compiler, 
              Category.uncommon,
-             true, 
+             false, // --------------------- HÃ„R -------------------
              "If enabled, then alias variables are eliminated from the model."),
         ELIM_ALIAS_PARAM
             ("eliminate_alias_parameters", 
              OptionType.compiler, 
              Category.uncommon,
-             false, 
+             false,
              "If enabled, then alias parameters are eliminated from the model."),
         ELIM_ALIAS_CONST
             ("eliminate_alias_constants",
@@ -259,9 +259,21 @@ abstract public class OptionRegistry {
             ("variability_propagation", 
              OptionType.compiler, 
              Category.uncommon,
-             true,
+             false, // --------------------- HÃ„R -------------------
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
+        ITERATIVE_SYMBOL_SIMPLIFICATION
+            ("iterative_symbol_simplification",
+              OptionType.compiler,
+              Category.experimental,
+              true, // --------------------- HÃ„R -------------------
+              "If enabled the simple AE and VP algorithms will run"),
+        CANONIZE_EQUATIONS
+        	("canonize_equations",
+        	 OptionType.compiler,
+        	 Category.experimental,
+        	 false, // --------------------- HÃ„R -------------------
+        	 "If enabled, equations will be put in canonical form."),            
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 
@@ -595,18 +607,6 @@ abstract public class OptionRegistry {
              Category.internal,
              "",
              "The MODELICAPATH to use during compilation."),
-        ITERATIVE_SYMBOL_SIMPLIFICATION
-            ("iterative_symbol_simplification",
-              OptionType.compiler,
-              Category.experimental,
-              true,
-              "If enabled the simple AE and VP algorithms will run"),
-        CANONIZE_EQUATIONS
-        	("canonize_equations",
-        	 OptionType.compiler,
-        	 Category.experimental,
-        	 true,
-        	 "If enabled, equations will be put in canonical form."),
         // Runtime options
         /*
          * Note: Two JUnit tests are affected by changes to runtime options:
