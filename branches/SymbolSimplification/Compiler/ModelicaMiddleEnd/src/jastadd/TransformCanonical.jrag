@@ -111,9 +111,7 @@ aspect TransformCanonical {
             if (transformations != null)
                 return;
             transformations = new ArrayList<Transformation>();
-            
-            transformations.add(new canonizeEquationsIfSet());
-            
+                 
             transformations.add(new enableIfEquationElimination());
             transformations.add(new genAlgorithmFunctionsIfSet());
             transformations.add(new genBindingAssignments());
@@ -133,6 +131,7 @@ aspect TransformCanonical {
             
             /* Iterative Symbol Simplification. */
             
+            transformations.add(new canonizeEquationsIfSet());
             transformations.add(new iterativeSymbolSimplificationIfSet());
             
             /* -------------------------------- */
