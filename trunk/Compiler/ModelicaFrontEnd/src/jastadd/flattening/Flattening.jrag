@@ -2572,16 +2572,8 @@ aspect FlatExpressions {
 	}
 	
 	public FExp FSizeExp.flatten(FQName prefix) {
-		FExp exp = getFExp();
-		if (exp.size().isUnknown()) {
-	        exp = (exp.type().isUnknown()) ? exp.size().createZeroFExp() : exp.flatten(prefix);
-	        Opt<FExp> dim = hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>();
-	        return new FSizeExp(exp, dim);
-		} else {
-		    Size s = exp.size();
-		    FExp se = hasDim() ? s.createFExp(dimension()) : s.createFExp();
-		    return dynamicFExp(se).flatten(prefix);
-		}
+        return new FSizeExp(getFExp().flatten(prefix), 
+                hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>());
 	}
 	
 	public FColonSizeExp FColonSizeExp.flatten(FQName prefix) {

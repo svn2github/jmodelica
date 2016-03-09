@@ -2384,11 +2384,11 @@ model RecordConstructor14
             description="Parameter in record depending on size of input to constructor",
             flatModel="
 fclass RecordTests.RecordConstructor14
- parameter RecordTests.RecordConstructor14.R r1(x(size() = {1})) = RecordTests.RecordConstructor14.R({1}, 1) /* RecordTests.RecordConstructor14.R({ 1 }, 1) */;
- parameter RecordTests.RecordConstructor14.R r2(x(size() = {1})) = RecordTests.RecordConstructor14.R({2}, 1) /* RecordTests.RecordConstructor14.R({ 2 }, 1) */;
- parameter RecordTests.RecordConstructor14.R r3(x(size() = {2})) = RecordTests.RecordConstructor14.R({1, 2}, 2) /* RecordTests.RecordConstructor14.R({ 1, 2 }, 2) */;
- parameter RecordTests.RecordConstructor14.R r4(x(size() = {3})) = RecordTests.RecordConstructor14.R({1, 2, 3}, 3) /* RecordTests.RecordConstructor14.R({ 1, 2, 3 }, 3) */;
- parameter RecordTests.RecordConstructor14.R r5(x(size() = {1}) = {1},n = 1);
+ parameter RecordTests.RecordConstructor14.R r1(x(size() = {1})) = RecordTests.RecordConstructor14.R({1}, size({1.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r2(x(size() = {1})) = RecordTests.RecordConstructor14.R({2}, size({2.0}, 1)) /* RecordTests.RecordConstructor14.R({ 2 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r3(x(size() = {2})) = RecordTests.RecordConstructor14.R({1, 2}, size({1.0, 2.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2 }, 2) */;
+ parameter RecordTests.RecordConstructor14.R r4(x(size() = {3})) = RecordTests.RecordConstructor14.R({1, 2, 3}, size({1.0, 2.0, 3.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2, 3 }, 3) */;
+ parameter RecordTests.RecordConstructor14.R r5(x(size() = {1}) = {1},n = size(r5.x[1:1], 1));
 
 public
  record RecordTests.RecordConstructor14.R
