@@ -57,7 +57,7 @@ aspect CanonizeEquations {
     
     syn boolean FDivExp.isDivExp() = true;
     syn boolean FExp.isDivExp() = false;
-    
+    //NOP
     syn boolean FMulExp.isMulExp() = true;
     syn boolean FExp.isMulExp() = false;
     
@@ -79,7 +79,7 @@ aspect CanonizeEquations {
     /*
      * Descriptive tag.
      */
-     
+
     syn boolean FExp.isLeftChildOfMul() { 
         if (parentFExp() == null) {
             return false;
@@ -98,6 +98,10 @@ aspect CanonizeEquations {
         return child == getChild(0);
     }
     
+    // Cast avoidance.
+    
+    syn FBinExp FExp.asFBinExp() = (FBinExp) this;
+    
     /*
      * Retrieves the side of an equation which isn't zero.<p>
      * Null in case both sides are actually defined.
@@ -113,7 +117,10 @@ aspect CanonizeEquations {
             return getLeft();
         return null;
     }
-    
+
+    // Remove negations
+
+
     /* ---------------- Attribute list end. ---------------- */
     
     public class FClass {
@@ -121,7 +128,7 @@ aspect CanonizeEquations {
         private boolean continueUp = false;
         
         public void canonizeEquations() {
-	    	for (FAbstractEquation equation: getFAbstractEquations()) {
+            for (FAbstractEquation equation: getFAbstractEquations()) {
 	    	    if (!equation.isFEquation())
 	    	      continue;
 	    	    
@@ -142,8 +149,8 @@ aspect CanonizeEquations {
 	    	    debugPrintLn("Removed parentheses. Eq:\n" + equation.toString() + "\n");
 	    	    
 	        	// Step 4: Re-order terms.
-	        	// TODO: TBI.
-	        	// reOrderTerms();
+	        	reorderTerms(feq);
+	        	debugPrintLn("Re-ordered terms. Eq:\n" + equation.toString() + "\n");
             }
             debugPrintLn("Done canonizing equations.");
         }
@@ -278,9 +285,13 @@ aspect CanonizeEquations {
 	       
 	       // Build factors (recursive method).
 	       ArrayList<FExp> factors = getFactors(fexp);
+	       int size = factors.size();
 	       
-	       // If only one term exists we need not build FBinExps.
-	       FExp newFExp = factors.size() <= 1 ? factors.remove(0) : buildSum(factors);
+	       if (size == 0)
+	           return;
+	       
+	       // If only one term exists we need not build any tree.
+	       FExp newFExp = factors.size() <= 1 ? factors.remove(0) : createTree(factors);
 	       
 	       // Update the equation.
 	       feq.setNonZeroSide(newFExp);
@@ -316,15 +327,16 @@ aspect CanonizeEquations {
             if (exp.isMulExp()) {
                 for (FExp lf : leftFactors) {
                     for (FExp rf : rightFactors) {
-                        factors.add(new FMulExp(lf, rf));
+                        factors.add(new FMulExp(lf.fullCopy(), rf.fullCopy()));
                     }
                 }
              } else {
                 factors.addAll(leftFactors);
-                
-                // If this is a subtraction expression, the RHS must be negated.
-                factors.addAll(exp.isSubExp() ? negateAll(rightFactors)
-                    : rightFactors);
+                for (FExp factor : rightFactors)
+                    if (factor.isNegated())
+                        factors.add(new FNegExp(factor));
+                    else
+                        factors.add(factor);
              }
             
             return factors;
@@ -341,84 +353,140 @@ aspect CanonizeEquations {
          *  @param factors  A list of all multiplication factors.
          *  @return     The top level addition or subtraction.
          */
-	    private FExp buildSum(ArrayList<FExp> factors) {
-	       /*FExp newExp;
+	    private FExp createTree(ArrayList<FExp> factors) {
+	       int factorSize = factors.size();
 	       
-	       int n = factors.size();
-	       if (n == 0) {
-	           newExp = new FIntegerLitExp(0);
-	       } else if (n == 1) {
-	           newExp = factors.remove(0);
-	       } else {
-	           newExp = new FAddExp(factors.remove(0), factors.remove(0));
-	           if (n > 2) {
-	               System.out.println("List has remaining stuff!\n");
-	               FType type = new FRealType();
-	               for (FExp exp : factors) {
-	                   System.out.println("[Factor]:\t" + exp.toString() + "\n");
-	                   newExp = newExp.appendSum(exp, exp.isNegated(), type);
-	               }
-	           }
-	       }
-	       
-	       return newExp;
-	    */
-	       int n = factors.size();
-	       return buildAddTree(new ArrayList<FExp>(factors.subList(0, n / 2)),
-                               new ArrayList<FExp>(factors.subList(n / 2, n)));
+	       if (factorSize == 1)
+	           return factors.remove(0);
+	       else if (factorSize == 2)
+	           return new FAddExp(factors.remove(0),
+	               factors.remove(0));
+	       else
+	           return buildAddTree(factors);   
 	    }
 	    
 	    /**
-         *  Recursive function for building the summation tree.<p>
-         *  The method will partition the lists into two sets of halves
-         *  that are sent as parameters to the function again. Once the lists
-         *  contain only one term it is made into a leaf.<p>
-         *  The method creates a relatively balanced tree.
+         *  Builds a tree of FAddExps with FMulExps as leaves.<p>
+         *  <code>buildAddTree</code> will take a list of factors and split it
+         *  in half, and construct new FAddExps when there are only singular
+         *  factors left in those sublists.
          *
-         *  @param list1    A list containing the first half of the terms.
-         *  @param list2    A list contianing the second half of the terms.
-         *  @return     An arithmetic expression (Add or Sub) that will constitute
-         *                  one side of the sub-tree to the node calling the method.
+         *  @param factors  The factors to fill the tree with.
+         *  @return         A sub-tree with factors at the bottom
+         *                      and FAddExps above.
          */
-	    private FArtmBinExp buildAddTree(ArrayList<FExp> list1, ArrayList<FExp> list2) {
-	       FExp left, right;
-	    
-	       if (list1.size() == 1) {
-	           left = list1.remove(0);
-	       } else {
-	           int n = list1.size();
-	           left = buildAddTree(new ArrayList<FExp>(list1.subList(0, n / 2)),
-	                               new ArrayList<FExp>(list1.subList(n / 2, n)));
-	       }
+	    private FExp buildAddTree(ArrayList<FExp> factors) {
+	       int listSize = factors.size();
+	       ArrayList<FExp>
+	           leftFactors = new ArrayList<FExp>(factors.subList(0, listSize / 2)),
+	           rightFactors = new ArrayList<FExp>(factors.subList(listSize / 2, listSize));
+	           
+	       int leftSize = leftFactors.size(), rightSize = rightFactors.size();
 	       
-	       if (list2.size() == 1) {
-	           right = list2.remove(0);
-	       } else {
-	           int n = list2.size();
-	           right = buildAddTree(new ArrayList<FExp>(list2.subList(0, n / 2)),
-                                    new ArrayList<FExp>(list2.subList(n / 2, n)));
-	       }
+	       if (leftSize == 0 && rightSize == 0)
+	               throw new IllegalStateException(
+	                   "[CanonizeEquations]:\tError while building add-tree, " +
+	                   "factor lists are both empty."
+	               );
+
+	       FExp left = leftSize == 1 ?
+	           leftFactors.remove(0) :
+	           buildAddTree(leftFactors);
+	           
+	       FExp right = rightSize == 1 ?
+	           rightFactors.remove(0) :
+	           buildAddTree(rightFactors);
 	       
-	       return right.isNegExp() ?
-	           new FSubExp(left, right.makeNegated()) : 
-	           new FAddExp(left, right);
-	    }
-    
+            return new FAddExp(left, right);
+	    } 
+        
         /**
-         *  Negates all expressions in a list.<p>
-         *  Iterates through each FExp in the <code>terms</code> list,
-         *  producing a negated version of the expression before adding
-         *  it to the result list.
+         *  Re-orders all multiplied terms.<p>
          *
-         *  @param terms    A list of expressions to negate.
-         *  @return     A list with all expressions from the argument list negated.
+         *  @param feq  The equation containing multiplied terms.
          */
-        private ArrayList<FExp> negateAll(ArrayList<FExp> terms) {
-            ArrayList<FExp> negated = new ArrayList<FExp>();
-            for (FExp f : terms)
-                negated.add(new FNegExp(f));
-            return negated;
-        }
+         
+         public void reorderTerms(FEquation fe) {
+            FExp exp = fe.nonZeroSide();
+            
+            if (!exp.isBinExp())
+                return;
+                
+            recursiveReorder((FBinExp) exp);
+         }
+         
+         private void recursiveReorder(FBinExp exp) { 
+            FExp left = exp.getLeft(), right = exp.getRight();
+            
+            if (exp.isAddExp() || exp.isSubExp()) {
+                if (left.isBinExp())
+                    recursiveReorder((FBinExp) left);
+                if (right.isBinExp())    
+                    recursiveReorder((FBinExp) right);
+            } else if (exp.isMulExp()) {
+                reorderTerm((FMulExp) exp);
+            }
+         }
+        
+        /**
+         *  Re-orders the factors in a multiplication term in alphabetical order.<p>
+         *  
+         *  @param exp  The parent node of a multiplication chain to re-order.
+         */
+         
+         public void reorderTerm(FMulExp fme) {
+            PriorityQueue<FIdUseExp> ids = new PriorityQueue<FIdUseExp>(
+                0, new NameComparator());
+                
+            ArrayList<FIdUseExp> list = new ArrayList<FIdUseExp>();
+            getFIdUses(fme, list);
+            
+            for (FIdUseExp fiue : list)
+                ids.add(fiue);
+                
+            if (ids.size() <= 1)
+                return;
+                
+            if (ids.size() == 2) {
+                fme.setLeft(ids.poll());
+                fme.setRight(ids.poll());
+            } else {
+                fme.setLeft(ids.poll());
+                fme.setRight(buildProduct(ids));
+            }
+         }
+         
+         private void getFIdUses(FExp exp, ArrayList<FIdUseExp> list) {
+            if (exp.isFIdUseExp()) {
+                list.add((FIdUseExp) exp);
+                return;
+            }
+            
+            if (!exp.isBinExp())
+                return;
+            
+            FBinExp fexp = exp.asFBinExp();
+            getFIdUses(fexp.getLeft(), list);
+            getFIdUses(fexp.getRight(), list);    
+         }
+         
+         private FExp buildProduct(PriorityQueue<FIdUseExp> list) {
+            if (list.size() == 1)
+                return list.poll();
+            return new FMulExp(list.poll(), buildProduct(list));
+         }
+         
+         /**
+          * Comparator class for FIdUses.<p>
+          * Refers to the <code>String</code> comparator in order to sort
+          * terms alphabetically.
+          */
+         private class NameComparator implements Comparator<FIdUseExp> {
+            public int compare(FIdUseExp f1, FIdUseExp f2) {
+                return (f1.name()).compareTo(f2.name());
+            }
+         }
+        
         /* --------------- FClass entries end here. --------------- */
 	}
 	
@@ -436,7 +504,7 @@ aspect CanonizeEquations {
 	   public void setNonZeroSide(FExp fexp) {
 	       if (!getLeft().isZeroLiteral())
 	           setLeft(fexp);
-	       else if (!getRight().isZeroLiteral())
+	       else
 	           setRight(fexp);
 	   }
 	   /* --------------- FEquation entries end here. --------------- */
