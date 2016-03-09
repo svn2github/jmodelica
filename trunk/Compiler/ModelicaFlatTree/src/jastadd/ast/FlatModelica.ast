@@ -1574,6 +1574,8 @@ FNdimsExp : FUnaryBuiltIn;
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
+FUnknownSizeExp : FSizeExp;
+
 /**
  * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).
  */

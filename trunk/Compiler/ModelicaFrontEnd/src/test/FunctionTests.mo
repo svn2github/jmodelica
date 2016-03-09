@@ -2402,8 +2402,8 @@ model FunctionType17
 
 Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/FunctionTests.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: x + y
-    type of 'x' is Real[:, :]
-    type of 'y' is Real[2, :]
+    type of 'x' is Real[size(x, 1), size(x, 2)]
+    type of 'y' is Real[2, size(y, 2)]
 ")})));
 end FunctionType17;
 

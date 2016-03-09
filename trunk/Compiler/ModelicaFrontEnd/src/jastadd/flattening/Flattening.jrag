@@ -2262,7 +2262,8 @@ aspect FlatExpressions {
     }
     
     public FArraySubscripts InstAccess.flattenFAS(FQName prefix) {
-        if (hasFArraySubscripts() || (ndims() > 0 && flattenFASContext())) {
+        boolean arr = isArray();
+        if ((!arr && hasFArraySubscripts()) || (arr && flattenFASContext())) {
             return allFArraySubscripts().get(0).flatten(prefix);
         } else {
             return null;
