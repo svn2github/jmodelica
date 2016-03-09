@@ -530,7 +530,9 @@ abstract FSubscript : BaseNode;
 /**
  * The colon subscript used to denote that the array size is inferred.
  */
-FColonSubscript : FSubscript ::= /SizeExp:FExp/;
+FColonSubscript : FSubscript;
+
+FColonSubscriptExpanded : FColonSubscript ::= FExp;
 
 /**
  * Expression subscript.

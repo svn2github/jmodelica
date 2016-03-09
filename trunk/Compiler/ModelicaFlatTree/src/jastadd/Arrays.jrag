@@ -671,26 +671,37 @@ aspect Arrays {
 	eq FColonSubscript.size()   = mySize();
 	eq FIntegerSubscript.size() = Size.SCALAR;
 
+    inh int FArraySubscripts.myDims();
+    eq Root.getChild().myDims()            = 0;
+    eq InstNamedAccess.getChild().myDims() = declarationSize().ndims();
+    
     /**
      * Get the size this subscript(s) would have if all subscripts were colons.
      */
     inh Size FEndExp.mySize();
     inh Size FSubscript.mySize();
-    inh Size FArraySubscripts.mySize();
-    eq FIdUse.getChild().mySize() {
+    eq Root.getChild().mySize()                       = Size.SCALAR;
+    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize(i);
+    
+    inh Size FArraySubscripts.mySize(int d);
+    eq Root.getChild().mySize(int d)                       = Size.SCALAR;
+    eq InstNamedAccess.getChild().mySize(int d)            = accessContextSize(d);
+    eq FSubscriptedExp.getFArraySubscripts().mySize(int d) = getFExp().size().contract(d);
+    eq FIdUse.getChild().mySize(int d) {
         if (inFunction()) {
             FQNameFull fqn = getFQName().asFQNameFull();
             if (fqn.numParts() > 1) {
                 FType type = lookupFV(fqn.copyPrefix(1)).type();
-                return type.lookupHierarchical(fqn, 1).size();
+                return type.lookupHierarchical(fqn, 1).size().contract(d);
             }
         }
-        return myFV().size();
+        return myFV().size().contract(d);
     }
-    eq Root.getChild().mySize()                       = Size.SCALAR;
-    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
-    eq InstNamedAccess.getChild().mySize()            = accessContextSize();
-    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
+    eq FQNameFull.getFQNamePart(int i).mySize(int d) {
+        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
+        n.setParent(this);
+        return lookupFV(n).size().contract(d);
+    }
     
     public Size Size.contract(int i) {
         if (has(i)) {
@@ -700,32 +711,25 @@ aspect Arrays {
         }
     }
     
-    eq FQNameFull.getFQNamePart(int i).mySize() {
-        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
-        n.setParent(this);
-        return lookupFV(n).size();
-    }
     
     syn Size InstAccess.declarationSize() = Size.SCALAR;
     eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
     
-    syn Size InstNamedAccess.accessContextSize() = declarationSize().accessContextSize(this);
+    syn Size InstNamedAccess.accessContextSize(int d) = declarationSize().accessContextSize(this, d);
     
-    public Size Size.accessContextSize(InstNamedAccess use) {
-        return this;
+    public Size Size.accessContextSize(InstNamedAccess use, int d) {
+        return contract(d);
     }
     
-    public Size MutableSize.accessContextSize(InstNamedAccess use) {
-        if (!isUnknown()) {
-            return super.accessContextSize(use);
+    public Size MutableSize.accessContextSize(InstNamedAccess use, int d) {
+        if (!has(d) || !isUnknown(d)) {
+            return super.accessContextSize(use, d);
         }
-        MutableSize ms = new MutableSize(ndims());
-        for (int d = 0; d < ndims(); d++) {
-            if (isUnknown(d) && exps[d] != null) {
-                ms.set(d, exps[d].accessContextSize(use, d));
-            } else {
-                ms.set(d, get(d));
-            }
+        MutableSize ms = new MutableSize(1);
+        if (isUnknown(d) && exps[d] != null) {
+            ms.set(0, exps[d].accessContextSize(use, d));
+        } else {
+            ms.set(0, get(d));
         }
         return ms;
     }
@@ -735,10 +739,10 @@ aspect Arrays {
     }
     
     public FExp FColonSizeExp.accessContextSize(InstNamedAccess use, int d) {
-        return use.accessContextSize(d);
+        return use.accessContextSizeExp(d);
     }
     
-    syn FExp InstNamedAccess.accessContextSize(int d) {
+    syn FExp InstNamedAccess.accessContextSizeExp(int d) {
         InstAccess ia = buildAccessContext(new InstComponentAccess(getID()));
         FIdUseExp use = new FIdUseExp(new FIdUseInstAccess(ia));
         FExp res = new FUnknownSizeExp(use, new Opt<FExp>(new FIntegerLitExp(d + 1)));
