@@ -1,0 +1,156 @@
+/**
+ *  Extremely good documentation in development!
+ */
+
+aspect OptimizingFramework {
+    /**
+     * Framework for optimizing algorithms.
+     * 
+     * Current added algorithms are:
+     * 	- Alias Elimination
+     *  - Variability Propagation
+     * 
+     * @author  Johan Calven, Zimon Kuhs
+     * @date    2016-02-08
+     * @version 0?
+     */
+    public class FClass {
+    	// TODO: Debug data, remove later on:
+        public static final boolean VERBOSE = true;
+        public static String defaultIndent = "";
+        public static boolean defaultShowFEq = false;
+    	// ---------------------------------------------
+    	
+    	
+        public class iterativeSymbolSimplificationIfSet extends Transformation {
+            public iterativeSymbolSimplificationIfSet() {
+                super("iterative_symbol_simplification");
+            }
+            
+            public void perform() {
+                iterativeSymbolSimplification();
+            }
+        }
+    }
+    
+    public class FClass {
+	    /**
+	     *  Main method for running the algorithms.<p>
+		 *  
+		 *  If an algorithm optimizes an equation, its caller method should return true and the
+		 *  while loop will then continue with the next equation in worklist.
+		 * 
+		 *  A class called WorkData is kept for storing essential data needed in and shared between
+		 *  the algorithms. This should be expanded if needed when adding a new algorithm to the framework.
+	     */
+	    public void iterativeSymbolSimplification() {
+	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(); // all
+	    	WorkData workData = new WorkData(worklist); // VP
+	    	
+	    	for (FAbstractEquation feq : getFAbstractEquations())
+	    		workData.addToWorklist(feq);
+	    	
+	    	while (!worklist.isEmpty()) {
+	    		FAbstractEquation feq = worklist.iterator().next();
+	    		worklist.remove(feq);
+	    		System.out.println("Equation: "+feq.toString()); // TODO: Remove later
+	    		
+	    		// Run Alias Elimination.
+	            if (AE(feq, workData)) {
+	            	fixAE(workData);
+	            	System.out.println("Performed AE.\n"); // TODO: Remove later
+	            	continue;
+	            }
+	            // Run Variability Propagation.
+	            if (VP(feq, workData)) {
+	            	fixVP(workData);
+	            	System.out.println("Performed VP.\n"); // TODO: Remove later
+	            	continue;
+	            }
+	            System.out.println("Didn't perform optimization.\n"); // TODO: Remove later
+	        }
+	        
+	        System.out.println("\nEquations in list after optimizing:"); // TODO: Remove later
+	        for (FAbstractEquation feq : getFAbstractEquations())
+	        	System.out.println(feq.toString()); /// felsöka varför b = b finns
+	        
+	        fixStructure();
+	    }
+	    
+	    /**
+		 * Class that contains data that is shared and updated in and between algorithms.
+		 *
+		 * When adding a new algorithm to the framework, update this class
+		 * with needed structure.
+		 */
+	    public class WorkData {
+	    	LinkedHashSet<FAbstractEquation> worklist;  // AE, VP
+	        List<FAbstractEquation> parameterEquations; // VP
+	        Set<FAbstractEquation> removedEquations;	// AE, VP
+	        
+	        public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
+	            this.worklist = worklist;
+	            parameterEquations = getFParameterEquations();
+	            removedEquations = new HashSet<FAbstractEquation>();
+	        }
+	        
+	        public void addParameterEquation(FAbstractEquation feq) {
+	            parameterEquations.add(feq);
+	        }
+	        
+	        public void addToWorklist(FAbstractEquation feq) {
+	            worklist.add(feq);
+	        }
+	        
+	        public boolean removedEquations(FAbstractEquation feq) {
+	        	return removedEquations.contains(feq);
+	        }
+	        
+	        public void removeEquation(FAbstractEquation feq) {
+	        	removedEquations.add(feq);
+	        }
+	    }
+	    
+	    /**
+		 * TODO: Does nothing atm. In future implementation, we could probably perform some
+		 * rewrites after performing all the optimization. Atm, a rewrite is performed if an 
+		 * algorithm changes the structure.
+		 */
+	    public void fixStructure() {
+	    }
+    }
+    /**
+     *  Utility method for learning the AST structure.
+     *  <p>Prints the tree of all equations in the current model.
+     *
+     *  @param showFEq  If true, will display the equation string
+     *                      before dumping the AST.
+     *  @param indent   Base indentation of the dumped tree.
+     */
+     public void FClass.showTree(boolean showFEq, String indent) {
+        for (FAbstractEquation fae : getFAbstractEquations()) {
+            if (showFEq)
+                System.out.println("<" + fae.toString() + ">");
+            fae.dumpTree(indent);
+        }
+     }
+     
+     /**
+     *  Utility method for learning the AST structure.
+     *  <p>A No argument version of printTree() not printing the equation
+     *  and using no identation. A "default" version of printTree(),
+     */
+     public void FClass.showTree() {
+        showTree(defaultShowFEq, defaultIndent);
+     }
+     
+     /**
+      * Debug printing, will print message if VERBOSE is set.
+      *
+      * @param  msg The message to print.
+      */
+     public void FClass.debugPrintLn(String message) {
+        if (VERBOSE)
+            System.out.println(message);
+     }
+}

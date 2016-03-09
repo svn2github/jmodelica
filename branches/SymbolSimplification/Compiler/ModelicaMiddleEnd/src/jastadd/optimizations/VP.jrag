@@ -6,20 +6,10 @@
      * @version 0?
      */
 aspect VP {
-    public boolean FFunctionCallEquation.shouldCleanUp              = false;
-    public boolean FAbstractEquation.removeEquationBySimpleVP       = false;
-    public boolean FAbstractVariable.removeEquationBySimpleVP       = false;
-    public boolean FFunctionCallLeft.removeEquationBySimpleVP       = false;
-    public boolean FExp.removeEquationBySimpleVP                    = false;
+    //public boolean FAbstractVariable.removeEquationBySimpleVP       = false;
+    //public boolean FFunctionCallLeft.removeEquationBySimpleVP       = false;
+    //public boolean FExp.removeEquationBySimpleVP                    = false;
 
-
-    public void FClass.VP() {
-            simpleVariablityPropagation();
-            simpleConstantFolding();
-            forceRewrites();
-            root().flushAllRecursiveClearFinal();
-    }
-    
     syn boolean FAbstractEquation.canSimplePropagateEquation() = false;
     syn boolean FEquation.canSimplePropagateEquation() {
         return variables().size() == 1; 
@@ -35,79 +25,42 @@ aspect VP {
          * Starts the constant propagation algorithm and continues as long as there are
          * equations left in the worklist.
          */
-        public void simpleVariablityPropagation() {
-            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();   
-            List<FAbstractEquation> parameterEquations = getFParameterEquations();
-            FClass.SimpleVariabilityPropagator prop = new FClass.SimpleVariabilityPropagator(worklist, parameterEquations);
-            
-            initWorklist(prop);
-            
-            // Start variability propagation.
-            while (!worklist.isEmpty()) {
-                FAbstractEquation feq = worklist.iterator().next();
-                feq.simpleVariabilityPropagation(prop);
-                worklist.remove(feq);
+        public boolean VP(FAbstractEquation feq, WorkData workData) {
+            if (feq.canSimplePropagateEquation()) {
+            	return feq.simpleVariabilityPropagation(workData);
             }
-            
-            // Remove unnessecary equations
-            fixEquations();
+            return false;
         }
         
         
-        public void fixEquations() {
+        public void fixEquations(WorkData workData) {
             ArrayList<FVariable> newVariables = new ArrayList();
             ArrayList<FVariable> newAliases = new ArrayList();
             ArrayList<FAbstractEquation> newEquations = new ArrayList();
             
             // Only equations not flagged for removal should be kept.
             for (FAbstractEquation feq : getFAbstractEquations()) {
-                if (!feq.removeEquationBySimpleVP) {
+                if (!workData.removedEquations(feq)) {
                     newEquations.add(feq);
                 }
             }
             setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
         }
         
-        
-        /**
-         * Sets up the worklist at the beginning of the algorithm. All equations that 
-         * only contains one variable are added to the worklist.
-         */
-        public void initWorklist(FClass.SimpleVariabilityPropagator prop) {
-            for (FAbstractEquation feq : getFAbstractEquations())
-            if (feq.canSimplePropagateEquation()) {
-                prop.addToWorklist(feq);
-            }
-        }
-        
-        /**
-         * A class that contains the list of equations that can be propagate and a list of
-         * equations that are found to be parameter equations. 
-         */
-        public class SimpleVariabilityPropagator {
-            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
-            List<FAbstractEquation> parameterEquations = getFParameterEquations();
-            
-            public SimpleVariabilityPropagator(LinkedHashSet<FAbstractEquation> worklist,
-                                    List<FAbstractEquation> parameterEquations) {
-                this.worklist = worklist;
-                this.parameterEquations = parameterEquations;
-            }
-            
-            public void addParameterEquation(FAbstractEquation feq) {
-                parameterEquations.add(feq);
-            }
-            
-            public void addToWorklist(FAbstractEquation feq) {
-                worklist.add(feq);
-            }
+        public void fixVP(WorkData workData) {
+	        fixEquations(workData);
+	    	simpleConstantFolding();
+	        forceRewrites();
+	        root().flushAllRecursiveClearFinal();
         }
     }
     
     /**
      * Implemented in the subclass FEquation.
      */
-    public void FAbstractEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) {}
+    public boolean FAbstractEquation.simpleVariabilityPropagation(FClass.WorkData workData) {
+    	return false;
+    }
     
     /**
      * Continuation of the simpleVariabilityPropagation method in FClass, taken to the level of FEquation.
@@ -116,7 +69,7 @@ aspect VP {
      * Here we check if we can find the solution for the variable at compile time. If we can, our 
      * variable is a constant. If we can not, our variable is a parameter(?).
      */
-    public void FEquation.simpleVariabilityPropagation(FClass.SimpleVariabilityPropagator prop) {
+    public boolean FEquation.simpleVariabilityPropagation(FClass.WorkData workData) {
         FVariable fvar = variables().iterator().next();
         if (fvar.canSimplePropagateVariable()) {
             FExp solution = solution(fvar);
@@ -129,13 +82,15 @@ aspect VP {
                 fvar.setBindingExp(solution);
             } else if (solutionVariability.parameterVariability()) {
                 solutionVariability = fParameter();
-                prop.addParameterEquation(new FEquation(fvar.createUseExp(), solution));
+                workData.addParameterEquation(new FEquation(fvar.createUseExp(), solution));
             } else {
-                return;
+                return false;
             }
             
-            fvar.simpleVariabilityPropagation(solution, solutionVariability, prop);
+            fvar.simpleVariabilityPropagation(solution, solutionVariability, workData);
+            return true;
         }
+        return false;
     }
     
     /**
@@ -149,18 +104,24 @@ aspect VP {
      * 0 variables = flag equation for removal.
      */
     public void FVariable.simpleVariabilityPropagation(FExp solution, FTypePrefixVariability solutionVariability,
-                                                        FClass.SimpleVariabilityPropagator prop) {
-        FAbstractEquation equation;
+                                                        FClass.WorkData workData) {
+        FAbstractEquation feq;
         setFTypePrefixVariability(solution.variability());
         
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
-                equation = use.myFEquation();
-                equation.variables().remove(this);
-                if (equation.canSimplePropagateEquation()) { // add to worklist if #variables has been reduced to 1.
-                    prop.addToWorklist(equation);
-                } else if (equation.variables().size() == 0) { // tag equation to be removed further ahead.
-                    equation.removeEquationBySimpleVP = true;
+                feq = use.myFEquation();
+                if (workData.removedEquations(feq)) {
+                	continue;
+                }
+                
+                feq.variables().remove(this);
+                if (feq.canSimplePropagateEquation()) { // add to worklist if #variables has been reduced to 1.
+                	System.out.println("Equation was added to worklist: "+feq.toString());  // TODO: Remove later
+                    workData.addToWorklist(feq);
+                } else if (feq.variables().size() == 0) { // tag equation to be removed further ahead.
+                	System.out.println("Equation was flagged to be removed: "+feq.toString());  // TODO: Remove later
+                    workData.removeEquation(feq);
                 }
             }
         }

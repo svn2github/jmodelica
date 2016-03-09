@@ -9,13 +9,16 @@ aspect AE {
     /**
      *  A simplified version of the alias elimination algorithm.
      */
-    public void FClass.AE() {
-            buildAliasSets();
-            setupNewLists();
-            doRewrites();
-            flush();
+    public boolean FClass.AE(FAbstractEquation fae, WorkData workData) {
+		return buildAliasSets(fae, workData);
     }
-
+	
+	public void FClass.fixAE(WorkData workData) {
+		setupNewLists(workData);
+        doRewrites();
+        flush();
+	}
+	
     public class FClass {
         Set<AliasSet> aliasSets = new HashSet<AliasSet>();
         HashMap<FVariable, Integer> scores = new HashMap<FVariable, Integer>();
@@ -135,26 +138,27 @@ aspect AE {
         /**
          *  Constructs all alias sets.
          */ 
-        public void buildAliasSets() {
-            for (FAbstractEquation fae : getFAbstractEquations()) {
-                    if (!fae.isFEquation() || fae.variables().size() != 2)
-                        continue;
-            
-                    FEquation fe = (FEquation) fae;
-                    FExp left = fe.getLeft();
-                    FExp right = fe.getRight();
-                
-                    if (!right.isFIdUseExp() || !left.isFIdUseExp())
-                        continue;
+        public boolean buildAliasSets(FAbstractEquation fae, WorkData workData) {
+            if (!fae.isFEquation() || fae.variables().size() != 2)
+                return false;
+    
+            FEquation fe = (FEquation) fae;
+            FExp left = fe.getLeft();
+            FExp right = fe.getRight();
+        
+            if (!right.isFIdUseExp() || !left.isFIdUseExp())
+                return false;
 
-                    FAbstractVariable lVar = ((FIdUseExp) left).myFV();
-                    FAbstractVariable rVar = ((FIdUseExp) right).myFV();
-                            
-                    if (lVar.isFVariable() && rVar.isFVariable()) {
-                            newAliasPair((FVariable) lVar, (FVariable) rVar);
-                            markedEquations.add(fae);
-                    }
-                }
+            FAbstractVariable lVar = ((FIdUseExp) left).myFV();
+            FAbstractVariable rVar = ((FIdUseExp) right).myFV();
+                    
+            if (lVar.isFVariable() && rVar.isFVariable()) {
+                newAliasPair((FVariable) lVar, (FVariable) rVar);
+                workData.removeEquation(fae);
+                System.out.println("Equation was flagged to be removed: "+fae.toString());  // TODO: Remove later
+	            return true;
+            }
+            return false;
         }
         
         /**
@@ -230,16 +234,25 @@ aspect AE {
          *  N.B. it is mandatory to update the alias variable
          *  list in the current implementation.
          */
-        public void setupNewLists() {
+        public void setupNewLists(WorkData workData) {
+        	// Clear lists before we insert into them. Needed as it is
+        	// implemented atm where we run different optimizing algorithms
+        	// after one another on each equation. If AE is performed, we
+        	// need to fix the structure directly before moving on to the
+        	// next equation.
+        	keepEquations.clear();
+        	keepVariables.clear();
+        	
             for (FVariable fv : getFVariables())
                 if (hasBetter(fv))
                     markedVariables.add(fv);
                 else
                     keepVariables.add(fv);
                     
-            for (FAbstractEquation fae : getFAbstractEquations())
-                if (!markedEquations.contains(fae))
+            for (FAbstractEquation fae : getFAbstractEquations()) {
+                if (!workData.removedEquations(fae))
                     keepEquations.add(fae);
+			}                
         
             setFVariableList(new List(keepVariables));
             setAliasVariableList(new List(markedVariables));
@@ -253,8 +266,10 @@ aspect AE {
          * @param fe    The equation subject to the query.
          * @return      True if the equation should be removed.
          */
-         public boolean shouldBeRemoved(FEquation fe) {
-            return markedEquations.contains(fe);
+         public boolean shouldBeRemoved(FAbstractEquation fe) {
+            //return fe.equationRemovedByOptAlg;  //equationRemovedByOptAlg was removed
+            return true;
+            //TODO: is this really used?!
          }
          
          /* --------------- FClass entries end here. --------------- */
@@ -268,13 +283,13 @@ aspect AE {
     eq Root.getChild().isAliasEquation(FAbstractEquation fae) = false;
     eq Root.getChild().isAliasVariable(FAbstractVariable fav) = false; 
     
-    syn boolean FAbstractEquation.shouldBeRemoved() = isAliasEquation(this);
+    syn boolean FAbstractEquation.shouldBeRemoved() = isAliasEquation(this);//TODO: is this really used?!
     syn boolean FAbstractVariable.hasReplacement() = isAliasVariable(this);
     inh boolean FAbstractEquation.isAliasEquation(FAbstractEquation fae);
     inh boolean FAbstractVariable.isAliasVariable(FAbstractVariable fav);
 
-    eq FClass.getChild().isAliasEquation(FAbstractEquation fae) =
-        fae.isFEquation() ? shouldBeRemoved((FEquation) fae) : false;
+    eq FClass.getChild().isAliasEquation(FAbstractEquation fae) =//TODO: is this really used?!
+        fae.isFEquation() ? shouldBeRemoved(fae) : false;
 
     eq FClass.getChild().isAliasVariable(FAbstractVariable fav) =
         fav.isFVariable() ? hasBetter((FVariable) fav) : false;
