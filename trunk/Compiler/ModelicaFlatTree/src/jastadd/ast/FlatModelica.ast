@@ -530,9 +530,7 @@ abstract FSubscript : BaseNode;
 /**
  * The colon subscript used to denote that the array size is inferred.
  */
-FColonSubscript : FSubscript;
-
-FColonSubscriptExpanded : FColonSubscript ::= FExp;
+FColonSubscript : FSubscript ::= /SizeExp:FExp/;
 
 /**
  * Expression subscript.
@@ -1575,8 +1573,6 @@ FNdimsExp : FUnaryBuiltIn;
  * Size built-in function.
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
-
-FUnknownSizeExp : FSizeExp;
 
 /**
  * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).

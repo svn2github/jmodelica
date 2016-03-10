@@ -1911,8 +1911,8 @@ aspect FlatExpressions {
     }
     
     public FSubscript MutableSize.flattenFExp(int i) {
-        if (isUnknown() && exps[i] != null) {
-            return new FColonSubscriptExpanded(exps[i].flatten(new FQNameEmpty()));
+        if (isUnknown()) {
+            return new FColonSubscript();
         } else {
             return super.flattenFExp(i);
         }
@@ -2262,8 +2262,7 @@ aspect FlatExpressions {
     }
     
     public FArraySubscripts InstAccess.flattenFAS(FQName prefix) {
-        boolean arr = isArray();
-        if ((!arr && hasFArraySubscripts()) || (arr && flattenFASContext())) {
+        if (hasFArraySubscripts() || (ndims() > 0 && flattenFASContext())) {
             return allFArraySubscripts().get(0).flatten(prefix);
         } else {
             return null;
@@ -2279,8 +2278,7 @@ aspect FlatExpressions {
     eq FIdUseExp.getChild().flattenFASContext()            = flattenFASContext();
     eq InstFunctionArgument.getChild().flattenFASContext() = !inFunction() || getFExp().isSlice();
     eq FFunctionCallLeft.getFExp().flattenFASContext()     = !inFunction() || getFExp().isSlice();
-    eq FSizeExp.getFExp().flattenFASContext()              = !getFExp().isCircular() && (!inFunction() || getFExp().isSlice());
-    eq FUnknownSizeExp.getFExp().flattenFASContext()       = false;
+    eq FSizeExp.getFExp().flattenFASContext()              = !inFunction() || getFExp().isSlice();
     eq InstForIndex.getFExp().flattenFASContext()          = !inFunction() || getFExp().isSlice();
     eq FAssignStmt.getLeft().flattenFASContext()           = !scalarizedAsFFunctionCallStmt();
     eq InstExternalCall.getArg(int i).flattenFASContext()  = getArg(i).isSlice();

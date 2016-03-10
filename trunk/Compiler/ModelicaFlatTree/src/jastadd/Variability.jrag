@@ -454,7 +454,6 @@ aspect Variability {
         res = res.combine(getFExp().size().variability());
         return res;
     }
-    eq FUnknownSizeExp.expVariability() = fParameter().combine(getDim().variability());
     
     public FTypePrefixVariability Size.variability() {
         return ASTNode.fConstant();

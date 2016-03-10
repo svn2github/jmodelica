@@ -1376,7 +1376,7 @@ Error at line 1341, column 18, in file 'Compiler/ModelicaFrontEnd/src/test/Array
   Can not infer array size of the variable x
 
 Error at line 1344, column 2, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayTests.mo', ARRAY_SIZE_MISMATCH_IN_EQUATION:
-  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [size(x, 1), size(x, 2)], and size of right-hand side is [2, 2]
+  The array sizes of right and left hand side of equation are not compatible, size of left-hand side is [:, :], and size of right-hand side is [2, 2]
 ")})));
 end UnknownSize6;
 
