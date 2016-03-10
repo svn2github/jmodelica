@@ -56,6 +56,8 @@ aspect InstVariability {
     syn boolean InstComponentDecl.isDiscrete()   = variability().discreteVariability();
     syn boolean InstComponentDecl.isContinuous() = variability().continuousVariability();
     
+    syn boolean InstComponentDecl.isFixedParameterOrLess() = isConstant() || (isParameter() && valueIsFixed());
+    
     // This attribute should only have one equation, sometimes we flush it manually.
     syn lazy FTypePrefixVariability InstComponentDecl.variability() = calcVariability();
     

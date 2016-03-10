@@ -926,7 +926,7 @@ aspect InstanceErrorCheck {
                             qualifiedName(), bexp);
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
-                if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
+                if (isFixedParameterOrLess() && !isForIndex() && !isRecord() && 
                         !hasParentRecordWithBindingExp() && !inFunction()) {
                     if (isParameter()) {
                         PARAMETER_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());

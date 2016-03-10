@@ -2781,4 +2781,22 @@ Warning at line 2730, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/Typ
 ")})));
 end ParameterNoBindingExp1;
 
+model ParameterNoBindingExp2
+    parameter Real p1;
+    parameter Real p2(fixed=false);
+initial equation
+    p2 = 1;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ParameterNoBindingExp2",
+            description="Ensure that a warning is not given for fixed false parameters which is missing a binding expression",
+            errorMessage="
+1 warnings found:
+
+Warning at line 0, column 0, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter p1 does not have a binding expression
+")})));
+end ParameterNoBindingExp2;
+
 end TypeTests;
