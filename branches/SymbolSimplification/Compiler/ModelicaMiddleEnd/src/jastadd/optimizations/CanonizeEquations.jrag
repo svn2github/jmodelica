@@ -85,14 +85,14 @@ aspect CanonizeEquations {
     eq FEquation.getChild().withinNegativeContext() = false;
     syn boolean ASTNode.withinNegativeContext() = false;
 
-    eq FSubExp.getRight().withinNegativeContext() = !getParent().withinNegativeContext();
-    eq FNegExp.getChild().withinNegativeContext() = !getParent().withinNegativeContext();
+    eq FSubExp.getRight().withinNegativeContext() =
+    	getParent() == null || !withinNegativeContext();
+    eq FNegExp.getChild().withinNegativeContext() =
+    	getParent() == null || !withinNegativeContext();
     
     inh boolean FExp.withinNegativeContext();
     inh boolean FIdUseExp.withinNegativeContext();
-    
-    syn boolean FIntegerLitExp.withinNegativeContext() = 
-    	isNegated() ^ getParent().withinNegativeContext();
+    inh boolean FIntegerLitExp.withinNegativeContext();
     
     /*
      * Descriptive tag.
@@ -117,7 +117,6 @@ aspect CanonizeEquations {
     }
     
     // Cast avoidance.
-    
     syn FBinExp FExp.asFBinExp() = (FBinExp) this;
     
     /*
@@ -135,10 +134,7 @@ aspect CanonizeEquations {
             return getLeft();
         return null;
     }
-
-    // Remove negations
-
-
+    
     /* ---------------- Attribute list end. ---------------- */
     
     public class FClass {
@@ -147,91 +143,41 @@ aspect CanonizeEquations {
         
         /* FactorSet */
         
-        private class Factor  {
-        	private FactorSet factorSet;
-        	private FExp exp;
-        
-        	public Factor(FactorSet factorSet, FExp exp) {
-        		this.factorSet = factorSet;
-        		this.exp = exp;
-        	}
-        	
-        	public FactorSet factorSet() {
-        		return factorSet;
-        	}
-        	
-        	public FExp exp() {
-        		return exp;
-        	}
-        }
-        
         private class FactorSet {
-        	HashSet<Factor> factors;
+        	HashSet<FExp> factors;
         	private boolean negated = false;
         
         	public FactorSet() {
-        		factors = new HashSet<Factor>();
+        		factors = new HashSet<FExp>();
         	}
         
         	public FactorSet(FExp exp) {
-        		factors = new HashSet<Factor>();
-       			factors.add(new Factor(this, exp));
+        		factors = new HashSet<FExp>();
+       			factors.add(exp);
        			this.negated = exp.withinNegativeContext();
         	}
         	
-        	public boolean negated() {
-        		return negated;
-        	}
-        	
         	public FExp multiply() {
-        		ArrayList<FExp> list = new ArrayList<FExp>();
-        		
-        		for (Factor f : factors)
-        			list.add(f.exp());
+				FExp mulExp = null;
 
-				FExp mulExp;
-
-				if (list.size() == 1)
-					mulExp = list.remove(0);
+				if (factors.size() == 1)
+					for (FExp exp : factors)
+						mulExp = exp;
 				else
-					mulExp = buildMulTree(list);
+					mulExp = FExp.createBalancedBinaryTree(
+						new FMulExp(), new ArrayList<FExp>(factors));
 					
-        		return negated() ? new FNegExp(mulExp) : mulExp;
-        	}
-        	
-        	private FExp buildMulTree(ArrayList<FExp> factors) {
-        		int listSize = factors.size();
-	       		ArrayList<FExp>
-	           		leftFactors = new ArrayList<FExp>(factors.subList(0, listSize / 2)),
-	           		rightFactors = new ArrayList<FExp>(factors.subList(listSize / 2, listSize));
-	           
-	       		int leftSize = leftFactors.size(), rightSize = rightFactors.size();
-	       
-	       		if (leftSize == 0 && rightSize == 0)
-	               throw new IllegalStateException(
-	                   "[CanonizeEquations]:\tError while building add-tree, " +
-	                   "factor lists are both empty."
-	               );
-	               
-	       		FExp left = leftSize == 1 ?
-	           		leftFactors.remove(0) :
-	           		buildMulTree(leftFactors);
-	           
-	       		FExp right = rightSize == 1 ?
-	           		rightFactors.remove(0) :
-	           		buildMulTree(rightFactors);
-	       
-            	return new FMulExp(left, right);
+        		return negated ? new FNegExp(mulExp) : mulExp;
         	}
         	
         	public void addAll(FactorSet fs) {
-        		for (Factor f : fs.factors)
+        		for (FExp f : fs.factors)
         			factors.add(f);
-        		negated = negated || fs.negated();
+        		negated = negated || fs.negated;
         	}
         	
         	public void add(FIdUseExp exp) {
-        		factors.add(new Factor(this, exp));
+        		factors.add(exp);
         		negated = negated || exp.withinNegativeContext();
         	}
         }
@@ -470,7 +416,7 @@ aspect CanonizeEquations {
 	           return new FAddExp(list.remove(0),
 	               list.remove(0));
 	       else
-	           return buildAddTree(list);   
+	           return FExp.createBalancedBinaryTree(new FAddExp(), list);   
 	    }
 	    
 	    private ArrayList<FExp> multiplyFactors(HashSet<FactorSet> factors) {
@@ -479,46 +425,7 @@ aspect CanonizeEquations {
 	    		list.add(fs.multiply());
 	    	return list;
 	    }
-	   	    
-	    /**
-		 *	Builds a mul-tree.
-		 */
-	    
-	    /**
-         *  Builds a tree of FAddExps with FMulExps as leaves.<p>
-         *  <code>buildAddTree</code> will take a list of factors and split it
-         *  in half, and construct new FAddExps when there are only singular
-         *  factors left in those sublists.
-         *
-         *  @param factors  The factors to fill the tree with.
-         *  @return         A sub-tree with factors at the bottom
-         *                      and FAddExps above.
-         */
-	    private FExp buildAddTree(ArrayList<FExp> factors) {
-	       int listSize = factors.size();
-	       ArrayList<FExp>
-	           leftFactors = new ArrayList<FExp>(factors.subList(0, listSize / 2)),
-	           rightFactors = new ArrayList<FExp>(factors.subList(listSize / 2, listSize));
-	           
-	       int leftSize = leftFactors.size(), rightSize = rightFactors.size();
-	       
-	       if (leftSize == 0 && rightSize == 0)
-	               throw new IllegalStateException(
-	                   "[CanonizeEquations]:\tError while building add-tree, " +
-	                   "factor lists are both empty."
-	               );
-
-	       FExp left = leftSize == 1 ?
-	           leftFactors.remove(0) :
-	           buildAddTree(leftFactors);
-	           
-	       FExp right = rightSize == 1 ?
-	           rightFactors.remove(0) :
-	           buildAddTree(rightFactors);
-	       
-            return new FAddExp(left, right);
-	    }
-        
+   
         /**
          *  Re-orders all multiplied terms.<p>
          *
