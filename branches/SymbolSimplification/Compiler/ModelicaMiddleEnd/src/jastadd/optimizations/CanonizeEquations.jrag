@@ -57,7 +57,7 @@ aspect CanonizeEquations {
     
     syn boolean FDivExp.isDivExp() = true;
     syn boolean FExp.isDivExp() = false;
-    //NOP
+
     syn boolean FMulExp.isMulExp() = true;
     syn boolean FExp.isMulExp() = false;
     
@@ -75,6 +75,24 @@ aspect CanonizeEquations {
     
     syn boolean FExp.isNegExp() = false;
     syn boolean FNegExp.isNegExp() = true;
+    
+    /*
+     * Within negative context.
+     */
+    
+    // Top-level catchers.
+    eq Root.getChild().withinNegativeContext() = false;
+    eq FEquation.getChild().withinNegativeContext() = false;
+    syn boolean ASTNode.withinNegativeContext() = false;
+
+    eq FSubExp.getRight().withinNegativeContext() = !getParent().withinNegativeContext();
+    eq FNegExp.getChild().withinNegativeContext() = !getParent().withinNegativeContext();
+    
+    inh boolean FExp.withinNegativeContext();
+    inh boolean FIdUseExp.withinNegativeContext();
+    
+    syn boolean FIntegerLitExp.withinNegativeContext() = 
+    	isNegated() ^ getParent().withinNegativeContext();
     
     /*
      * Descriptive tag.
@@ -127,6 +145,99 @@ aspect CanonizeEquations {
         private FExp denominator = null;
         private boolean continueUp = false;
         
+        /* FactorSet */
+        
+        private class Factor  {
+        	private FactorSet factorSet;
+        	private FExp exp;
+        
+        	public Factor(FactorSet factorSet, FExp exp) {
+        		this.factorSet = factorSet;
+        		this.exp = exp;
+        	}
+        	
+        	public FactorSet factorSet() {
+        		return factorSet;
+        	}
+        	
+        	public FExp exp() {
+        		return exp;
+        	}
+        }
+        
+        private class FactorSet {
+        	HashSet<Factor> factors;
+        	private boolean negated = false;
+        
+        	public FactorSet() {
+        		factors = new HashSet<Factor>();
+        	}
+        
+        	public FactorSet(FExp exp) {
+        		factors = new HashSet<Factor>();
+       			factors.add(new Factor(this, exp));
+       			this.negated = exp.withinNegativeContext();
+        	}
+        	
+        	public boolean negated() {
+        		return negated;
+        	}
+        	
+        	public FExp multiply() {
+        		ArrayList<FExp> list = new ArrayList<FExp>();
+        		
+        		for (Factor f : factors)
+        			list.add(f.exp());
+
+				FExp mulExp;
+
+				if (list.size() == 1)
+					mulExp = list.remove(0);
+				else
+					mulExp = buildMulTree(list);
+					
+        		return negated() ? new FNegExp(mulExp) : mulExp;
+        	}
+        	
+        	private FExp buildMulTree(ArrayList<FExp> factors) {
+        		int listSize = factors.size();
+	       		ArrayList<FExp>
+	           		leftFactors = new ArrayList<FExp>(factors.subList(0, listSize / 2)),
+	           		rightFactors = new ArrayList<FExp>(factors.subList(listSize / 2, listSize));
+	           
+	       		int leftSize = leftFactors.size(), rightSize = rightFactors.size();
+	       
+	       		if (leftSize == 0 && rightSize == 0)
+	               throw new IllegalStateException(
+	                   "[CanonizeEquations]:\tError while building add-tree, " +
+	                   "factor lists are both empty."
+	               );
+	               
+	       		FExp left = leftSize == 1 ?
+	           		leftFactors.remove(0) :
+	           		buildMulTree(leftFactors);
+	           
+	       		FExp right = rightSize == 1 ?
+	           		rightFactors.remove(0) :
+	           		buildMulTree(rightFactors);
+	       
+            	return new FMulExp(left, right);
+        	}
+        	
+        	public void addAll(FactorSet fs) {
+        		for (Factor f : fs.factors)
+        			factors.add(f);
+        		negated = negated || fs.negated();
+        	}
+        	
+        	public void add(FIdUseExp exp) {
+        		factors.add(new Factor(this, exp));
+        		negated = negated || exp.withinNegativeContext();
+        	}
+        }
+        
+        /* ----- ----- */
+        
         public void canonizeEquations() {
             for (FAbstractEquation equation: getFAbstractEquations()) {
 	    	    if (!equation.isFEquation())
@@ -149,7 +260,7 @@ aspect CanonizeEquations {
 	    	    debugPrintLn("Removed parentheses. Eq:\n" + equation.toString() + "\n");
 	    	    
 	        	// Step 4: Re-order terms.
-	        	reorderTerms(feq);
+	        	//reorderTerms(feq);
 	        	debugPrintLn("Re-ordered terms. Eq:\n" + equation.toString() + "\n");
             }
             debugPrintLn("Done canonizing equations.");
@@ -284,14 +395,10 @@ aspect CanonizeEquations {
 	       FExp fexp = feq.nonZeroSide();
 	       
 	       // Build factors (recursive method).
-	       ArrayList<FExp> factors = getFactors(fexp);
-	       int size = factors.size();
-	       
-	       if (size == 0)
-	           return;
+	       HashSet<FactorSet> factors = getFactors(fexp);
 	       
 	       // If only one term exists we need not build any tree.
-	       FExp newFExp = factors.size() <= 1 ? factors.remove(0) : createTree(factors);
+	       FExp newFExp = createTree(factors);
 	       
 	       // Update the equation.
 	       feq.setNonZeroSide(newFExp);
@@ -312,34 +419,34 @@ aspect CanonizeEquations {
          *  @param exp  The expression to expand.
          *  @return     All products collected from either side of the expression.
          */
-        private ArrayList<FExp> getFactors(FExp exp) {
-            ArrayList<FExp> factors = new ArrayList<FExp>();
-        
+        private HashSet<FactorSet> getFactors(FExp exp) {
+            HashSet<FactorSet> newSet = new HashSet<FactorSet>();
             if (!exp.isBinExp()) {
-                factors.add(exp);
-                return factors;
+            	FactorSet fs = new FactorSet(exp);
+            	newSet.add(fs);
+                return newSet;
             }
             
-            FBinExp fbe = (FBinExp) exp;
-            ArrayList<FExp> leftFactors = getFactors(fbe.getLeft()),
+            FBinExp fbe = exp.asFBinExp();
+            HashSet<FactorSet> leftFactors = getFactors(fbe.getLeft()),
                 rightFactors = getFactors(fbe.getRight());
             
             if (exp.isMulExp()) {
-                for (FExp lf : leftFactors) {
-                    for (FExp rf : rightFactors) {
-                        factors.add(new FMulExp(lf.fullCopy(), rf.fullCopy()));
+            	HashSet<FactorSet> factors = new HashSet<FactorSet>();
+                for (FactorSet leftSet : leftFactors) {
+                    for (FactorSet rightSet : rightFactors) {
+                    	FactorSet fs = new FactorSet();
+                    	fs.addAll(leftSet);
+                    	fs.addAll(rightSet);
+                    	newSet.add(fs);
                     }
                 }
              } else {
-                factors.addAll(leftFactors);
-                for (FExp factor : rightFactors)
-                    if (factor.isNegated())
-                        factors.add(new FNegExp(factor));
-                    else
-                        factors.add(factor);
+                newSet.addAll(leftFactors);
+                newSet.addAll(rightFactors);
              }
-            
-            return factors;
+             
+             return newSet;
         }
 	    
 	    /**
@@ -353,17 +460,29 @@ aspect CanonizeEquations {
          *  @param factors  A list of all multiplication factors.
          *  @return     The top level addition or subtraction.
          */
-	    private FExp createTree(ArrayList<FExp> factors) {
-	       int factorSize = factors.size();
+	    private FExp createTree(HashSet<FactorSet> factors) {
+	    	ArrayList<FExp> list = multiplyFactors(factors);
+	       int length = list.size();
 	       
-	       if (factorSize == 1)
-	           return factors.remove(0);
-	       else if (factorSize == 2)
-	           return new FAddExp(factors.remove(0),
-	               factors.remove(0));
+	       if (length == 1)
+	           return list.remove(0);
+	       else if (length == 2)
+	           return new FAddExp(list.remove(0),
+	               list.remove(0));
 	       else
-	           return buildAddTree(factors);   
+	           return buildAddTree(list);   
 	    }
+	    
+	    private ArrayList<FExp> multiplyFactors(HashSet<FactorSet> factors) {
+	    	ArrayList<FExp> list = new ArrayList<FExp>();
+	    	for (FactorSet fs : factors)
+	    		list.add(fs.multiply());
+	    	return list;
+	    }
+	   	    
+	    /**
+		 *	Builds a mul-tree.
+		 */
 	    
 	    /**
          *  Builds a tree of FAddExps with FMulExps as leaves.<p>
@@ -398,7 +517,7 @@ aspect CanonizeEquations {
 	           buildAddTree(rightFactors);
 	       
             return new FAddExp(left, right);
-	    } 
+	    }
         
         /**
          *  Re-orders all multiplied terms.<p>
