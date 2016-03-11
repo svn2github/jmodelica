@@ -141,6 +141,8 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
         
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.TestSampling", file_name)
+        compile_fmu("TimeEvents.TestSampling2", file_name)
     
     @testattr(stddist = True)
     def test_time_event_basic_1(self):
@@ -254,6 +256,20 @@ class Test_Time_Events:
         
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
+        
+    @testattr(stddist = True)
+    def test_time_event_sampling(self):
+        model = load_fmu("TimeEvents_TestSampling.fmu")
+        model.initialize()
+        res = model.simulate(0, 1e4, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e5
+        
+    @testattr(stddist = True)
+    def test_time_event_sampling2(self):
+        model = load_fmu("TimeEvents_TestSampling2.fmu")
+        model.initialize()
+        res = model.simulate(0,1e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
         
 
 class Test_Events:
