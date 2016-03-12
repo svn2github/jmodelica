@@ -2130,22 +2130,14 @@ aspect FlatExpressions {
         InstComponentDecl target = asInstAccess().myInstComponentDecl();
         InstComponentDecl holder = findComponentWithThisBindingExp();
         return holder != null && target.containingEntity() == holder.containingEntity() && 
-               ((inFunction() && holder.isInput() && target.isInput()) || 
-                (holder.inNonComponentRecord() && holder.isModifiable() && target.isModifiable()));
+               ((inFunction() && holder.isInput() && target.isInput()) || holder.inRecordConstructor());
     }
-
-    /**
-     * Check if this component is in a record, but not in a record component - 
-     * i.e. a record declaration or a record constructor.
-     */
-    syn boolean InstComponentDecl.inNonComponentRecord() = inRecordDecl() || inRecordConstructor();
-
+    
 	/**
 	 * Find the component that has this expression as a part of its binding expression, if any.
 	 */
 	inh InstComponentDecl FExp.findComponentWithThisBindingExp();
     eq InstAssignable.getInstModification().findComponentWithThisBindingExp() = this;
-//    eq InstAssignable.getBindingFExp().findComponentWithThisBindingExp()      = this;
     eq InstClassModification.getChild().findComponentWithThisBindingExp()     = null;
 	eq InstNode.getChild().findComponentWithThisBindingExp()                  = null;
 	eq FClass.getChild().findComponentWithThisBindingExp()                    = null;

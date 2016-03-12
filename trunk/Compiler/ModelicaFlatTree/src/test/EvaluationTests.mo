@@ -1777,7 +1777,7 @@ model EvaluateAnnotation8
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation8
  parameter Real r.y = 3 /* 3 */;
- eval parameter Real r.x = 4.0 /* 4.0 */;
+ eval parameter Real r.x = 4 /* 4 */;
  constant Real x = 5.0;
 end EvaluationTests.EvaluateAnnotation8;
 ")})));

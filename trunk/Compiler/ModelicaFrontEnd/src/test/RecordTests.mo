@@ -2382,10 +2382,10 @@ model RecordConstructor14
             description="Parameter in record depending on size of input to constructor",
             flatModel="
 fclass RecordTests.RecordConstructor14
- parameter RecordTests.RecordConstructor14.R r1(x(size() = {1})) = RecordTests.RecordConstructor14.R({1}, size({1.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1 }, 1) */;
- parameter RecordTests.RecordConstructor14.R r2(x(size() = {1})) = RecordTests.RecordConstructor14.R({2}, size({2.0}, 1)) /* RecordTests.RecordConstructor14.R({ 2 }, 1) */;
- parameter RecordTests.RecordConstructor14.R r3(x(size() = {2})) = RecordTests.RecordConstructor14.R({1, 2}, size({1.0, 2.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2 }, 2) */;
- parameter RecordTests.RecordConstructor14.R r4(x(size() = {3})) = RecordTests.RecordConstructor14.R({1, 2, 3}, size({1.0, 2.0, 3.0}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2, 3 }, 3) */;
+ parameter RecordTests.RecordConstructor14.R r1(x(size() = {1})) = RecordTests.RecordConstructor14.R({1}, size({1}, 1)) /* RecordTests.RecordConstructor14.R({ 1 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r2(x(size() = {1})) = RecordTests.RecordConstructor14.R({2}, size({2}, 1)) /* RecordTests.RecordConstructor14.R({ 2 }, 1) */;
+ parameter RecordTests.RecordConstructor14.R r3(x(size() = {2})) = RecordTests.RecordConstructor14.R({1, 2}, size({1, 2}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2 }, 2) */;
+ parameter RecordTests.RecordConstructor14.R r4(x(size() = {3})) = RecordTests.RecordConstructor14.R({1, 2, 3}, size({1, 2, 3}, 1)) /* RecordTests.RecordConstructor14.R({ 1, 2, 3 }, 3) */;
  parameter RecordTests.RecordConstructor14.R r5(x(size() = {1}) = {1},n = size(r5.x[1:1], 1));
 
 public
@@ -2833,6 +2833,36 @@ public
 end RecordTests.RecordConstructor25;
 ")})));
 end RecordConstructor25;
+
+model RecordConstructor26
+    record R1
+        parameter Integer n = 2;
+        Real[n] x = 1:n;
+    end R1;
+    
+    record R2
+        extends R1(n=1);
+    end R2;
+    
+    R2 r = R2(n=3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor26",
+            description="Flattening of constant record constructor",
+            flatModel="
+fclass RecordTests.RecordConstructor26
+ RecordTests.RecordConstructor26.R2 r(n = 1,x(size() = {3})) = RecordTests.RecordConstructor26.R2(3, 1:3);
+
+public
+ record RecordTests.RecordConstructor26.R2
+  parameter Integer n;
+  Real x[1];
+ end RecordTests.RecordConstructor26.R2;
+
+end RecordTests.RecordConstructor26;
+")})));
+end RecordConstructor26;
 
 
 model RecordScalarize1
