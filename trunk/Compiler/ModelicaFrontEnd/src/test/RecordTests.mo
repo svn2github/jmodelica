@@ -1365,9 +1365,7 @@ model RecordBinding23
             flatModel="
 fclass RecordTests.RecordBinding23
  parameter Real r1.x = 1 /* 1 */;
- parameter Real r1.y;
-parameter equation
- r1.y = r1.x;
+ parameter Real r1.y = 1 /* 1 */;
 end RecordTests.RecordBinding23;
 ")})));
 end RecordBinding23;
@@ -2733,7 +2731,7 @@ model RecordConstructor23
             description="Record constructor for record with final parameter",
             flatModel="
 fclass RecordTests.RecordConstructor23
- parameter RecordTests.RecordConstructor23.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor23.B(1, n + 1, {{1}, {2}});
+ parameter RecordTests.RecordConstructor23.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor23.B(1, 2, {{1}, {2}});
 
 public
  record RecordTests.RecordConstructor23.A
