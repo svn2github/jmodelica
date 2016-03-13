@@ -3638,7 +3638,13 @@ aspect ConstantEvaluation {
     }
 
     protected CValue FFunctionVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
-        return hasBindingExp() ? getBindingExp().ceval(evaluator) : CValue.UNKNOWN;
+        if (hasBindingExp()) {
+            return getBindingExp().ceval(evaluator);
+        } else if (isArray()) {
+            return CValue.UNKNOWN;
+        } else {
+            return type().zeroCValue();
+        }
     }
 
     protected CValue InstComponentDecl.cevalFunctionBindingExp(VariableEvaluator evaluator) {
