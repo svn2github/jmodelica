@@ -1972,6 +1972,14 @@ aspect FlatPrettyPrint {
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
+    protected void InstDeferComponentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("(");
+        p.print(getFExp(), str, indent);
+        str.print(")");
+        str.print(".");
+        str.print(getName());
+    }
+	
 	protected void FArgumentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(copiedFExp(), str, indent);
 	}

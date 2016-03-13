@@ -2222,6 +2222,16 @@ aspect ConstantEvaluation {
         }
         return res;
     }
+    
+    eq InstDeferComponentExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval().component(getName());
+    
+    public CValue CValue.component(String name) {
+        return CValue.UNKNOWN;
+    }
+    
+    public CValue CValueRecord.component(String name) {
+        return getMember(name);
+    }
 
     // TODO: expand to handle boolean end enum index
     eq FEndExp.cevalCalc(VariableEvaluator evaluator) {

@@ -1542,6 +1542,52 @@ In component d:
 ")})));
 end RecordBinding29;
 
+model RecordBinding30
+    record R
+        parameter Integer n = 2;
+        Real[n] x = 1:n;
+    end R;
+    
+    record RB
+        extends R(n=1);
+    end RB;
+    
+    record RW
+        R r = R();
+    end RW;
+    
+    model A
+        RW rw;
+    end A;
+    
+    model B
+        extends A(rw = if b then R1() else R2());
+        
+        record R1
+            extends RW(r = RB());
+        end R1;
+        
+        record R2
+            extends RW(r = RB(1));
+        end R1;
+        
+        parameter Boolean b = false;
+    end B;
+    
+    B b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding30",
+            description="Flattening and scalarization of record with if binding expression",
+            flatModel="
+fclass RecordTests.RecordBinding30
+ parameter Boolean b.b = false /* false */;
+ structural parameter Integer b.rw.r.n = 1 /* 1 */;
+ constant Real b.rw.r.x[1] = 1;
+end RecordTests.RecordBinding30;
+")})));
+end RecordBinding30;
 
 model UnmodifiableComponent1
     record R

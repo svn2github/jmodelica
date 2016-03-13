@@ -1014,6 +1014,9 @@ aspect InheritedFactoryMethods {
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
 	public abstract FConnBoolOp      	      FConnBoolOp.createEmptyNode();
+	
+    // Misc expressions
+    public InstDeferComponentExp InstDeferComponentExp.createEmptyNode() { return new InstDeferComponentExp(); }
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }

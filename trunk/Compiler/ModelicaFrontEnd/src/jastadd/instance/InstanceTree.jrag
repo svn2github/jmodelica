@@ -537,10 +537,21 @@ aspect Environments {
             return getInstClassDecl().getInstConstrainingClass().getInstClassModification();
         return null;
     }
-
+    
     public void FExp.populateInstRecordModificationList(
-            List<InstRecordModification> list, InstValueModification org) {}
-
+            List<InstRecordModification> list, InstValueModification org) {
+        Modification mod = org.modification();
+        FType t = type();
+        if (t.isRecord()) {
+            FRecordType rt = (FRecordType)t;
+            for (FRecordComponentType frct : rt.getComponents()) {
+                String name = frct.getName();
+                FExp exp = new InstDeferComponentExp(this, name);
+                list.add(new InstValueRecordModification(mod, name, exp));
+            }
+        }
+    }
+    
     public void InstRecordConstructor.populateInstRecordModificationList(
             List<InstRecordModification> list, InstValueModification org) {
         InstClassDecl icd = getRecord().myInstClassDecl();
