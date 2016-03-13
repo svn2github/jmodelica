@@ -32,6 +32,9 @@ aspect CanonizeEquations {
     // Specifies whether the LHS or RHS should be zero.
     public static final boolean FClass.ZERO_LEFT = false;
     
+    // Null avoidance (sort of Null-object).
+    public static final FExp FExp.ZERO_EXP = new FIntegerLitExp(0);
+    
 	public class FClass {
         /**
          * Perform canonization on equations if it is activated.
@@ -55,29 +58,38 @@ aspect CanonizeEquations {
      *  Class identity attributes.
      */
     
-    syn boolean FDivExp.isDivExp() = true;
-    syn boolean FExp.isDivExp() = false;
-
-    syn boolean FMulExp.isMulExp() = true;
-    syn boolean FExp.isMulExp() = false;
-    
-    syn boolean FBinExp.isBinExp() = true;
-    syn boolean FExp.isBinExp() = false;
-    
-    syn boolean FAddExp.isAddExp() = true;
-    syn boolean FExp.isAddExp() = false;
-    
-    syn boolean FSubExp.isSubExp() = true;
-    syn boolean FExp.isSubExp() = false;
-    
     syn boolean FExp.isFExp() = true;
     syn boolean ASTNode.isFExp() = false;
     
-    syn boolean FExp.isNegExp() = false;
-    syn boolean FNegExp.isNegExp() = true;
+    syn boolean FBinExp.isFBinExp() = true;
+    syn boolean FExp.isFBinExp() = false;   
+ 
+    syn boolean FExp.isFNegExp() = false;
+    syn boolean FNegExp.isFNegExp() = true;
+
+    syn boolean FAddExp.isFAddExp() = true;
+    syn boolean FExp.isFAddExp() = false;
+    
+    syn boolean FSubExp.isFSubExp() = true;
+    syn boolean FExp.isFSubExp() = false;
+
+    syn boolean FMulExp.isFMulExp() = true;
+    syn boolean FExp.isFMulExp() = false;
+
+    syn boolean FDivExp.isFDivExp() = true;
+    syn boolean FExp.isFDivExp() = false;
+
+    /*
+     * Casts.
+     */
+     
+    syn FBinExp FExp.asFBinExp() = (FBinExp) this;
+    syn FEquation FAbstractEquation.asFEquation() = (FEquation) this;
     
     /*
-     * Within negative context.
+     * Within negative context.<p>
+     * Tells whether or not the current expression's position
+     * in an equation means it is negative or not.
      */
     
     // Top-level catchers.
@@ -116,9 +128,6 @@ aspect CanonizeEquations {
         return child == getChild(0);
     }
     
-    // Cast avoidance.
-    syn FBinExp FExp.asFBinExp() = (FBinExp) this;
-    
     /*
      * Retrieves the side of an equation which isn't zero.<p>
      * Null in case both sides are actually defined.
@@ -138,13 +147,20 @@ aspect CanonizeEquations {
     /* ---------------- Attribute list end. ---------------- */
     
     public class FClass {
-        private FExp denominator = null;
+        private FExp denominator = FExp.ZERO_EXP;
         private boolean continueUp = false;
         
-        /* FactorSet */
+        /* ---------- FactorSet ---------- */
         
+        /**
+         * A set class for constants and variables which are joined in multiplication.<p>
+         * By building sets of terms the structure of the original equation
+         * can be maintained until the point where it should be re-organized,
+         * avoiding creating new expressions until members of the old equation
+         * (parents) are no longer needed.
+         */ 
         private class FactorSet {
-        	HashSet<FExp> factors;
+        	private HashSet<FExp> factors;
         	private boolean negated = false;
         
         	public FactorSet() {
@@ -153,13 +169,18 @@ aspect CanonizeEquations {
         
         	public FactorSet(FExp exp) {
         		factors = new HashSet<FExp>();
-       			factors.add(exp);
-       			this.negated = exp.withinNegativeContext();
+       			add(exp);
         	}
         	
+        	/**
+        	 * Creates an FMulExp of the current factors.<p>
+        	 * 
+        	 * @return	an FMulExp-tree containing all factors.
+        	 */ 
         	public FExp multiply() {
-				FExp mulExp = null;
+				FExp mulExp = FExp.ZERO_EXP;
 
+				// HashSet.get() doesn't exist so iteration is required.
 				if (factors.size() == 1)
 					for (FExp exp : factors)
 						mulExp = exp;
@@ -170,44 +191,54 @@ aspect CanonizeEquations {
         		return negated ? new FNegExp(mulExp) : mulExp;
         	}
         	
-        	public void addAll(FactorSet fs) {
+        	/**
+        	 * Conjoins two <code>FactorSet</code>s.<p>
+        	 * 
+        	 * @param fs	The <code>FactorSet</code> to join with this.
+        	 */ 
+        	public void merge(FactorSet fs) {
         		for (FExp f : fs.factors)
         			factors.add(f);
         		negated = negated || fs.negated;
         	}
         	
-        	public void add(FIdUseExp exp) {
+        	public void add(FExp exp) {
         		factors.add(exp);
         		negated = negated || exp.withinNegativeContext();
         	}
         }
         
-        /* ----- ----- */
+        /* ---------- FactorSet End ---------- */
         
+        /**
+         * 	Transforms all equations in a model to canonical form.<p>
+         */
         public void canonizeEquations() {
             for (FAbstractEquation equation: getFAbstractEquations()) {
 	    	    if (!equation.isFEquation())
 	    	      continue;
 	    	    
+	    	    FEquation feq = equation.asFEquation();
+	    	    
 	    	    debugPrintLn("Working on equation:\n" + equation.toString() + "\n");
-	    	      
-	    	    FEquation feq  = (FEquation) equation;
 	            
 	    	    // Step 1. Move all expressions to RHS.
 	    	    moveToOneSide(feq);
 	    	    debugPrintLn("Moved to one side. Eq:\n" + equation.toString() + "\n");
 	    	    
 	    	    // Step 2: Remove all DivExp.
-	    	    elimDiv(feq);
+	    	    eliminateDivision(feq);
 	    	    debugPrintLn("Removed division. Eq:\n" + equation.toString() + "\n");
 	    	    
-	    	    // Step 3: Expand parentheses.
-	    	    expandParentheses(feq);
+	    	    // Step 3: Build a tree of only FAddExps and FMulExps.
+	    	    toAddMulTree(feq);
 	    	    debugPrintLn("Removed parentheses. Eq:\n" + equation.toString() + "\n");
 	    	    
 	        	// Step 4: Re-order terms.
 	        	//reorderTerms(feq);
-	        	debugPrintLn("Re-ordered terms. Eq:\n" + equation.toString() + "\n");
+	        	//debugPrintLn("Re-ordered terms. Eq:\n" + equation.toString() + "\n");
+	        	
+	        	// Step 5: ...
             }
             debugPrintLn("Done canonizing equations.");
         }
@@ -215,25 +246,23 @@ aspect CanonizeEquations {
 	    /**
 	     * Subtracts one side of an equation from both sides.<p>
 	     * Transforms f(x) = g(x) to 0 = g(x) - f(x), or the opposite
-	     * if FClass.ZERO_LEFT is true.
+	     * if <code>FClass.ZERO_LEFT</code> is true.
 	     * 
 	     * @param  feq The equation to transform.
 	     * @see    FClass.ZERO_LEFT
 	     */
-	    public void moveToOneSide(FEquation feq) {
+	    private void moveToOneSide(FEquation feq) {
 	        FExp left = feq.getLeft(), right = feq.getRight();
-	        FExp zero = new FIntegerLitExp(0);
-	        FExp newLHS = zero, newRHS = zero;
+	        FExp newLHS = new FIntegerLitExp(0),
+	        	newRHS = new FIntegerLitExp(0);
 	        
-	        // "Move" one side of the equation to the other,
-	        // and set it to zero.
 	        if (ZERO_LEFT)
                newRHS = right.isZeroLiteral() ? left : new FSubExp(left, right);
 	        else
 	           newLHS = left.isZeroLiteral() ? right : new FSubExp(left, right);
 	        
 	        feq.setLeft(newLHS);
-	        feq.setRight(newRHS);	        
+	        feq.setRight(newRHS);
 	    }
     
 	    /*
@@ -243,17 +272,17 @@ aspect CanonizeEquations {
 	     * 
 	     * @param  feq The equation from which to remove divisions.
 	     */
-	    public void elimDiv(FEquation feq) {
+	    private void eliminateDivision(FEquation feq) {
 	       FExp fexp = feq.nonZeroSide();
 	        
 	        // If the expression is only a variable, return.
-	        if (!fexp.isBinExp()) {
+	        if (!fexp.isFBinExp()) {
 	           return;
 	        }
 	        
 	        // If RHS is a FDivExp, we only have to replace it
 	        // with its numerator.
-	        if (fexp.isDivExp()) {
+	        if (fexp.isFDivExp()) {
 	           FExp num = (FExp) fexp.getChild(0);
 	           if (num.isFExp()) {
 	               if (ZERO_LEFT) {
@@ -278,34 +307,36 @@ aspect CanonizeEquations {
 	     * Since the assumption that no expressions exists on one side of an equation all divisions
 	     * can be removed, i.e. every fraction can be multiplied by the equation's GCD.
 	     * 
-	     * @param  fexp
-	     * @param  rootParent  The root expression, i.e. the lhs or rhs depending on FClass.ZERO_LEFT.
-	     * @return true if the current expression should propagate multiplication higher in the tree.
-	     * @see    FClass.ZERO_LEFT.
+	     * @param fexp			The expression which denominator should be evaluated.
+	     * @param rootParent	The root expression, i.e. the lhs or rhs depending on <code>FClass.ZERO_LEFT</code>.
+	     * @return	true if the current expression should propagate multiplication higher in the tree.
+	     * @see		FClass.ZERO_LEFT (CanonizeEquations.jrag).
 	     * 
 	     * TODO: Not optimized atm. The algorithm is traversing the whole tree everytime this method is called.
 	     *       This could be improved by tracking which paths we have already found and removed an FDivExp.
 	     */
-	    public boolean divToMul(FExp fexp, FExp rootParent) {
+	    private boolean divToMul(FExp fexp, FExp rootParent) {
 	        boolean foundDivLeft = false;
 	        boolean foundDivRight = false;
 	        boolean foundDiv = false;
 	        
-	        FExp leftChild = fexp.getChild(0).isFExp() ? (FExp) fexp.getChild(0) : null;
-            FExp rightChild = fexp.getChild(1).isFExp() ? (FExp) fexp.getChild(1) : null;
+	        if (!fexp.isFBinExp())
+	        	return false;
+	        	
+	        FBinExp bin = fexp.asFBinExp();
+	        FExp leftChild = bin.getLeft(),
+	        	rightChild = bin.getRight();
 	    
-	        // Recursive call if a child is a FBinExp (then we know its not a leaf).
-	        if (leftChild.isBinExp()) {
+	        if (leftChild.isFBinExp())
 	            foundDivLeft = divToMul(leftChild, rootParent);
-	        }
-	        if (rightChild.isBinExp() && !foundDivLeft) {
+
+	        if (rightChild.isFBinExp() && !foundDivLeft)
 	            foundDivRight = divToMul(rightChild, rootParent);
-	        }
 	        
 	        foundDiv = foundDivLeft || foundDivRight;
 	        
 	        // Remove bottom FDivExp and insert FMulExps at correct places.
-            if (!foundDiv && fexp.isDivExp() && fexp != rootParent) {
+            if (!foundDiv && fexp.isFDivExp() && fexp != rootParent) {
                 foundDiv = true;
                 continueUp = true;
                 denominator = rightChild;
@@ -315,13 +346,13 @@ aspect CanonizeEquations {
                 } else {
                     fexp.parentFExp().setChild(leftChild, 1);
                 }
-            } else if (continueUp && (fexp.isAddExp() || fexp.isSubExp())) {
+            } else if (continueUp && (fexp.isFAddExp() || fexp.isFSubExp())) {
                 if (foundDivLeft) {
                     fexp.setChild(new FMulExp(rightChild, denominator), 1);
                 } else {
                     fexp.setChild(new FMulExp(leftChild, denominator), 0);
                 }
-            } else if (continueUp && foundDivRight && fexp.isDivExp()) {
+            } else if (continueUp && foundDivRight && fexp.isFDivExp()) {
                 continueUp = false;
                 fexp.setChild(new FMulExp(leftChild, denominator), 0);
             }
@@ -330,24 +361,24 @@ aspect CanonizeEquations {
 	    }
 	    
 	    /**
-         *  Expands (removes) all parentheses.<p>
-         *  By collecting all multiplied factors and building an equation using
-         *  only summation of them, the necessity of using parentheses to describe
-         *  an equation is redundant.
+         *  Refactors and equation to only <code>FAddExp</code>s and <code>FMulExp</code>s.<p>
+         *  Collects all of the multiplication factors of an equation and
+		 *	transforms it to a summation of them. E.g. [a(b - c)(d - e)] will
+		 *	be [abd + ace - abe - acd]. 
          *  
-         *  @param feq  The equation that may or may not contain parentheses.
+         *  @param feq  The equation to transform.
          */
-	    public void expandParentheses(FEquation feq) {
-	       FExp fexp = feq.nonZeroSide();
+         public void toAddMulTree(FEquation feq) {
+	     	FExp fexp = feq.nonZeroSide();
 	       
-	       // Build factors (recursive method).
-	       HashSet<FactorSet> factors = getFactors(fexp);
+	       	// Collect all multiplied factors.
+	       	HashSet<FactorSet> factors = getFactors(fexp);
+			
+			// Build a tree of FAddExps and FMulExps.
+	       	FExp newFExp = createAddTree(factors);
 	       
-	       // If only one term exists we need not build any tree.
-	       FExp newFExp = createTree(factors);
-	       
-	       // Update the equation.
-	       feq.setNonZeroSide(newFExp);
+	       	// Update the equation.
+	       	feq.setNonZeroSide(newFExp);
 	    }
 	    
 	    /**
@@ -355,87 +386,98 @@ aspect CanonizeEquations {
          *  A recursive method that starts with the entire equation (the exp argument
          *  should be the f(x) side of an equation on the form f(x) = 0) and continues
          *  to collect terms from both sides of a binary expression. If the expression
-         *  argument is a variable it is simply returned. If it is an addition or
-         *  subtraction, terms are collected from both sides.<p>
-         *  Should the expression be a multiplication, however, all terms in the l.h.s.
-         *  must be multiplied once by each term in the r.h.s. (this denotes the expansion
-         *  from e.g. ((a + b) * (c + d)) to (ac + ad + bc + bd) before all the products
-         *  are returned.
+         *  argument is an <code>FIdUseExp</code> or <code>FIntegerLitExp</code> it is
+		 *	put in a new <code>FactorSet </code> which is then returned.<p>
+		 *	If the equation	is an <code>FAddExp</code> or an <code>FSubExp</code> the
+		 *	<code>FactorSet</code>s are returned separated (within a <code>HashSet</code>).<p>
+		 *	If the expression is an <code>FMulExp</code> the LHS and RHS factors are joined
+		 *	together (representing multiplying the factors) in a new <code>FactorSet</code>.
          *
-         *  @param exp  The expression to expand.
-         *  @return     All products collected from either side of the expression.
+         *  @param exp  The expression from which to collect products.
+         *  @return     A set containing all multiplied factors from lower in the recursion.
+		 *	@see		FClass.FactorSet (CanonizeEquations.jrag).
          */
         private HashSet<FactorSet> getFactors(FExp exp) {
             HashSet<FactorSet> newSet = new HashSet<FactorSet>();
-            if (!exp.isBinExp()) {
+            
+            // If the expression is a literal or a variable it constitutes a
+            // new set of factors; a leaf is reached in the tree.
+            if (!exp.isFBinExp()) {
             	FactorSet fs = new FactorSet(exp);
             	newSet.add(fs);
                 return newSet;
             }
             
+          	// Collect factors from LHS and RHS.
             FBinExp fbe = exp.asFBinExp();
             HashSet<FactorSet> leftFactors = getFactors(fbe.getLeft()),
                 rightFactors = getFactors(fbe.getRight());
             
-            if (exp.isMulExp()) {
+            // If the expression is a multiplication, join the FactorSets together.
+            if (exp.isFMulExp()) {
             	HashSet<FactorSet> factors = new HashSet<FactorSet>();
                 for (FactorSet leftSet : leftFactors) {
                     for (FactorSet rightSet : rightFactors) {
                     	FactorSet fs = new FactorSet();
-                    	fs.addAll(leftSet);
-                    	fs.addAll(rightSet);
+                    	fs.merge(leftSet);
+                    	fs.merge(rightSet);
                     	newSet.add(fs);
                     }
                 }
-             } else {
+                
+            // Getting here the expression is either FAddExp or FSubExp.
+            } else {
                 newSet.addAll(leftFactors);
-                newSet.addAll(rightFactors);
-             }
+            	newSet.addAll(rightFactors);
+            }
              
-             return newSet;
-        }
+            return newSet;
+		}
 	    
 	    /**
-         *  Recursively builds a summation.<p>
-         *  All multiplied terms are added together in a consecutive summation
-         *  (or subtraction) in a tree built recursively. The tree will have
-         *  FAddExp or FSubExp nodes in the majority of the top level;
-         *  at the 1-2 lowest levels will be only FMulExps and FIdUseExps.<p>
-         *  This is the initial call to the recursive method <code>buildAddTree</code>.
+         *  Builds an <code>FAddExp</code>-tree with <code>FMulExp</code>s at the bottom.
          *
-         *  @param factors  A list of all multiplication factors.
+         *  @param factors  The set of <code>FactorSet</code>s with the multiplied terms
+		 *						to build the tree with.
          *  @return     The top level addition or subtraction.
          */
-	    private FExp createTree(HashSet<FactorSet> factors) {
-	    	ArrayList<FExp> list = multiplyFactors(factors);
-	       int length = list.size();
-	       
-	       if (length == 1)
-	           return list.remove(0);
-	       else if (length == 2)
-	           return new FAddExp(list.remove(0),
-	               list.remove(0));
-	       else
-	           return FExp.createBalancedBinaryTree(new FAddExp(), list);   
-	    }
-	    
-	    private ArrayList<FExp> multiplyFactors(HashSet<FactorSet> factors) {
+	    private FExp createAddTree(HashSet<FactorSet> factors) {
 	    	ArrayList<FExp> list = new ArrayList<FExp>();
+	    	// Gather all factors from the FactorSets.
 	    	for (FactorSet fs : factors)
 	    		list.add(fs.multiply());
-	    	return list;
+	    	
+	    	FExp exp = FExp.ZERO_EXP;
+	       	int length = list.size();
+	       
+	       	// If there is only one expression, return it.
+	       	if (length == 1)
+	        	exp = list.remove(0);
+	        	
+	        // If there is two expressions add them together.
+	       	else if (length == 2)
+	           	exp = new FAddExp(list.remove(0),
+	            	list.remove(0));
+	            	
+	        // If there are numerous expressions, build an FAddExp-tree
+	        // joining them all together.
+	       	else
+	        	exp = FExp.createBalancedBinaryTree(new FAddExp(), list);
+	        	
+	        return exp; 
 	    }
-   
+	    
+	    // TODO: Below.
+
         /**
          *  Re-orders all multiplied terms.<p>
          *
          *  @param feq  The equation containing multiplied terms.
          */
-         
          public void reorderTerms(FEquation fe) {
             FExp exp = fe.nonZeroSide();
             
-            if (!exp.isBinExp())
+            if (!exp.isFBinExp())
                 return;
                 
             recursiveReorder((FBinExp) exp);
@@ -444,12 +486,12 @@ aspect CanonizeEquations {
          private void recursiveReorder(FBinExp exp) { 
             FExp left = exp.getLeft(), right = exp.getRight();
             
-            if (exp.isAddExp() || exp.isSubExp()) {
-                if (left.isBinExp())
+            if (exp.isFAddExp() || exp.isFSubExp()) {
+                if (left.isFBinExp())
                     recursiveReorder((FBinExp) left);
-                if (right.isBinExp())    
+                if (right.isFBinExp())    
                     recursiveReorder((FBinExp) right);
-            } else if (exp.isMulExp()) {
+            } else if (exp.isFMulExp()) {
                 reorderTerm((FMulExp) exp);
             }
          }
@@ -459,7 +501,6 @@ aspect CanonizeEquations {
          *  
          *  @param exp  The parent node of a multiplication chain to re-order.
          */
-         
          public void reorderTerm(FMulExp fme) {
             PriorityQueue<FIdUseExp> ids = new PriorityQueue<FIdUseExp>(
                 0, new NameComparator());
@@ -488,7 +529,7 @@ aspect CanonizeEquations {
                 return;
             }
             
-            if (!exp.isBinExp())
+            if (!exp.isFBinExp())
                 return;
             
             FBinExp fexp = exp.asFBinExp();
@@ -503,7 +544,7 @@ aspect CanonizeEquations {
          }
          
          /**
-          * Comparator class for FIdUses.<p>
+          * Comparator class for <code>FIdUse</code>s.<p>
           * Refers to the <code>String</code> comparator in order to sort
           * terms alphabetically.
           */
@@ -518,7 +559,7 @@ aspect CanonizeEquations {
 	
 	public class FEquation {
 	   /**
-        *  Sets a non-zero side of an equation to an FExp.<p>
+        *  Sets a non-zero side of an equation to an <code>FExp</code>.<p>
         *  Since all equations in canonic form are on the form f(x) = 0,
         *  only one side of the equation should be managed. This method
         *  enables setting the relevant side of the equation to a new
