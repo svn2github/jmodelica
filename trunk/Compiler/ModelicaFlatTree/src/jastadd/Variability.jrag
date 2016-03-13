@@ -124,20 +124,12 @@ aspect Variability {
     }
     
     /**
-     * If this is a composite variability, return the i:th component, else this.
+     * If this is a composite variability, return the named component, else this.
      */
-    syn FTypePrefixVariability FTypePrefixVariability.getPart(int i) {
-        return this;
-    }
-    
-    eq FCompositeVariability.getPart(int i) {
-        return getComponent(i).getVariability();
-    }
-    
-    syn FTypePrefixVariability FTypePrefixVariability.getPart(String name) = this;
+    syn FTypePrefixVariability FTypePrefixVariability.component(String name) = this;
     
     private Map<String,Integer> FCompositeVariability.nameMap = null;
-    public FTypePrefixVariability FCompositeVariability.getPart(String name) {
+    public FTypePrefixVariability FCompositeVariability.component(String name) {
         if (nameMap==null) {
             nameMap = new HashMap<String,Integer>();
             for (int i = 0; i < getNumComponent(); i++) {
@@ -147,7 +139,6 @@ aspect Variability {
         return getComponent(nameMap.get(name)).getVariability();
     }
     
-
     syn FTypePrefixVariability FAbstractEquation.variability() = fContinuous();
     eq FEquation.variability() = isWhen() ? fDiscrete() : getLeft().variability().combine(getRight().variability());
     eq FIfWhenElseEquation.variability() {
@@ -648,7 +639,7 @@ aspect Variability {
         for (FComponentVariability fcv : getComponents()) {
             String name = fcv.getName();
             FTypePrefixVariability v = fcv.getVariability();
-            FTypePrefixVariability nv = other.getPart(name);
+            FTypePrefixVariability nv = other.component(name);
             nv = v.combine(nv, combiner);
             l.add(new FComponentVariability(fcv.getName(), nv));
             low = low.combineDown(nv.combineDown());

@@ -523,7 +523,7 @@ aspect Scalarization {
         public ScalarizingVariableInstance create(Scalarizer scalarizer, FVariable comp) {
             String cName = comp.name();
             
-            FTypePrefixVariability nv = variability.getPart(cName);
+            FTypePrefixVariability nv = variability.component(cName);
             nv = nv.combineDown(comp.variability()); // Covers bug in flattening
             
             List<FAttribute> attrs;

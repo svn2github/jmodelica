@@ -142,11 +142,10 @@ aspect InstVariability {
     // we have to guard agains circularity.
     private boolean InstAssignable.circularVariability = false;
     
-    syn FTypePrefixVariability InstComponentDecl.bExpVariability() = parentBExpVariability().getPart(name());
-    eq InstArrayComponentDecl.bExpVariability() = parentBExpVariability();
+    syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
     eq InstAssignable.bExpVariability() {
         FTypePrefixVariability v = super.bExpVariability();
-        if (!circularVariability && v.continuousVariability()) {
+        if (!circularVariability) {
             InstValueModification ivm = myInstValueMod();
             if (ivm != null && !ivm.getFExp().type().isUnknown()) {
                 circularVariability = true;
@@ -156,6 +155,8 @@ aspect InstVariability {
         }
         return v;
     }
+    
+    eq InstDeferComponentExp.expVariability() = getFExp().variability().component(getName());
     
     inh FTypePrefixVariability InstComponentDecl.parentBExpVariability();
     inh FTypePrefixVariability InstExtends.parentBExpVariability();

@@ -1978,8 +1978,8 @@ model RecordArray7
             flatModel="
 fclass RecordTests.RecordArray7
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray7.A a(x(size() = {2})) = RecordTests.RecordArray7.A(2, 1:2) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
- Real y[2] = a.x[1:2];
+ structural parameter RecordTests.RecordArray7.A a(x(size() = {2})) = RecordTests.RecordArray7.A(2, {1, 2}) /* RecordTests.RecordArray7.A(2, { 1, 2 }) */;
+ Real y[2] = {1.0, 2.0};
 
 public
  record RecordTests.RecordArray7.A
@@ -2463,8 +2463,8 @@ model RecordConstructor15
 fclass RecordTests.RecordConstructor15
  structural parameter Integer n = 2 /* 2 */;
  structural parameter Integer r.n = 2 /* 2 */;
- parameter Real r.x[1] = 1 /* 1 */;
- parameter Real r.x[2] = 2 /* 2 */;
+ structural parameter Real r.x[1] = 1 /* 1 */;
+ structural parameter Real r.x[2] = 2 /* 2 */;
 end RecordTests.RecordConstructor15;
 ")})));
 end RecordConstructor15;
