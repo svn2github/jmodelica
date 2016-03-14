@@ -337,10 +337,21 @@ aspect Scalarization {
      * @param bes        Instance representation of this variable
      */
     public void FVariable.scalarRecordFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes) {
-        for (Index i : bes.indices(this)) {
-            scalarRecordCellFVariables(scalarizer, bes.create(scalarizer, i), i);
+        try {
+            for (Index i : bes.indices(this)) {
+                scalarRecordCellFVariables(scalarizer, bes.create(scalarizer, i));
+            }
+        } catch (ModelicaException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while scalarizing component'" + bes.name() + "'", e);
         }
     }
+    
+    public String ScalarizingVariableInstance.name() {
+        return name.toString();
+    }
+    
     /**
      * Generate scalar FVariables for a single array cell of this record or record component.
      * 
@@ -348,12 +359,12 @@ aspect Scalarization {
      * @param bes        Instance representation of this variable
      * @param i          the index of this scalar variable in an array, or Index.NULL for scalar components
      */
-    public void FVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes, Index i) {
+    public void FVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes) {
         bes.createScalarized(scalarizer, this);
     }
     
-    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes, Index i) {
-		for (FVariable comp : myFRecordDecl().getFVariables()) {
+    public void FRecordVariable.scalarRecordCellFVariables(Scalarizer scalarizer, ScalarizingVariableInstance bes) {
+        for (FVariable comp : myFRecordDecl().getFVariables()) {
             comp.scalarRecordFVariables(scalarizer, bes.create(scalarizer, comp));
         }
     }
