@@ -23,6 +23,9 @@
 
 #ifndef _JMI_TYPES_H
 #define _JMI_TYPES_H
+
+#include <stdio.h>
+
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
                < representation used in the Runtime
@@ -36,6 +39,24 @@ typedef char* jmi_string_t; /*< Typedef for the string
 typedef void* jmi_extobj_t; /*< Typedef for the external object
                < representation used in the Runtime
                < Library. */
+               
+/* Forward declaration of jmi structs */
+typedef struct jmi_t jmi_t;                                         /**< \brief Forward declaration of struct. */
+typedef struct jmi_dae_t jmi_dae_t;                                 /**< \brief Forward declaration of struct. */
+typedef struct jmi_init_t jmi_init_t;                               /**< \brief Forward declaration of struct. */
+typedef struct jmi_func_t jmi_func_t;                               /**< \brief Forward declaration of struct. */
+typedef struct jmi_block_residual_t jmi_block_residual_t;           /**< \brief Forward declaration of struct. */
+typedef struct jmi_cs_input_t jmi_cs_input_t;                       /**< \brief Forward declaration of struct. */
+typedef struct jmi_ode_solver_t jmi_ode_solver_t;                   /**< \brief Forward declaration of struct. */
+typedef struct jmi_ode_problem_t jmi_ode_problem_t;                 /**< \brief Forward declaration of struct. */
+typedef struct jmi_color_info jmi_color_info;                       /**< \brief Forward declaration of struct. */
+typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;     /**< \brief Forward declaration of struct. */
+typedef struct jmi_delay_t jmi_delay_t;                             /**< \brief Forward declaration of struct. */
+typedef struct jmi_spatialdist_t jmi_spatialdist_t;                 /**< \brief Forward declaration of struct. */
+typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;     /**< \brief Forward declaration of struct. */
+typedef struct jmi_modules_t jmi_modules_t;                         /**< \brief Forward declaration of struct. */
+typedef struct jmi_module_t jmi_module_t;                           /**< \brief Forward declaration of struct. */
+typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief Forward declaration of struct. */
 
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
 #define JMI_ABS(X)   ((X) < (0) ? (-1*X) : (X))

@@ -22,9 +22,10 @@
 
 #include "stdio.h"
 
-#include "jmi.h"
 #include "jmi_util.h"
 #include "jmi_log.h"
+#include "jmi_math.h"
+#include "jmi_types.h"
 
 typedef unsigned int jmi_value_reference;
 

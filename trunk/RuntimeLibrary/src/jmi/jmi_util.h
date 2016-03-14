@@ -36,6 +36,8 @@
 #include "jmi_block_solver.h"
 
 #include "jmi_dyn_mem.h"
+#include "jmi_types.h"
+#include "jmi_math.h"
 
 /**
  * \defgroup Jmi_internal Internal functions of the JMI Model \
@@ -106,21 +108,6 @@
  */
 
 /* Forward declaration of jmi structs */
-typedef struct jmi_t jmi_t;                               /**< \brief Forward declaration of struct. */
-typedef struct jmi_dae_t jmi_dae_t;                       /**< \brief Forward declaration of struct. */
-typedef struct jmi_init_t jmi_init_t;                     /**< \brief Forward declaration of struct. */
-typedef struct jmi_func_t jmi_func_t;                     /**< \brief Forward declaration of struct. */
-typedef struct jmi_block_residual_t jmi_block_residual_t; /**< \brief Forward declaration of struct. */
-typedef struct jmi_cs_input_t jmi_cs_input_t;             /**< \brief Forward declaration of struct. */
-typedef struct jmi_ode_solver_t jmi_ode_solver_t;         /**< \brief Forward declaration of struct. */
-typedef struct jmi_ode_problem_t jmi_ode_problem_t;       /**< \brief Forward declaration of struct. */
-typedef struct jmi_color_info jmi_color_info;             /**< \brief Forward declaration of struct. */
-typedef struct jmi_simple_color_info_t jmi_simple_color_info_t;      /**< \brief Forward declaration of struct. */
-typedef struct jmi_delay_t jmi_delay_t;                   /**< \brief Forward declaration of struct. */
-typedef struct jmi_spatialdist_t jmi_spatialdist_t;       /**< \brief Forward declaration of struct. */
-typedef struct jmi_dynamic_state_set_t jmi_dynamic_state_set_t;       /**< \brief Forward declaration of struct. */
-typedef struct jmi_modules_t jmi_modules_t;               /**< \brief Forward declaration of struct. */
-typedef struct jmi_module_t jmi_module_t;                 /**< \brief Forward declaration of struct. */
 typedef struct jmi_chattering_t jmi_chattering_t;         /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
@@ -160,16 +147,6 @@ void jmi_min_time_event(jmi_time_event_t* event, int def, int phase, double time
 #define LOG_EXP_AND(op1,op2) ((op1)*(op2))           /**< \brief Macro for logical expression and <br> */
 #define LOG_EXP_NOT(op)      (JMI_TRUE-(op))         /**< \brief Macro for logical expression not <br> */
 
-/* Define the machine epsilon */
-#define JMI_EPS 2.2204460492503131e-16
-#define JMI_ALMOST_EPS (JMI_EPS*100)
-
-#define ALMOST_ZERO(op) LOG_EXP_AND(ALMOST_LT_ZERO(op),ALMOST_GT_ZERO(op))
-#define ALMOST_LT_ZERO(op) (op<=JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define ALMOST_GT_ZERO(op) (op>=-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_LT_ZERO(op) (op<-JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-#define SURELY_GT_ZERO(op) (op>JMI_ALMOST_EPS? JMI_TRUE: JMI_FALSE)
-
 
 /* Record creation macro */
 #define JMI_RECORD_STATIC(type, name) \
@@ -193,137 +170,9 @@ void jmi_internal_error(jmi_t *jmi, const char msg[]);
 /*Some of these functions return types are a temporary remnants of CppAD*/
 
 /**
- * Function for checking if a vector contains NAN values. Returns the
- * index of the NAN (if found) in the parameter index_of_nan
- */
-int jmi_check_nan(jmi_t *jmi, jmi_real_t* val, size_t n_val, jmi_int_t* index_of_nan);
-/**
- * Function to wrap division and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
-
-/**
- * Function to wrap division and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
-
-/**
- * Function to wrap the C pow function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_pow_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
-
-/**
- * Function to wrap the C pow function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_pow_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
-
-/**
- * Function to wrap the C exp function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_exp_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C exp function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_exp_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C log function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_log_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C log function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_log_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C log10 function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_log10_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C log10 function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_log10_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C sinh function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_sinh_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C sinh function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_sinh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C cosh function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_cosh_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C cosh function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_cosh_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C tan function and report errors to the log, for use in functions.
- */
-jmi_ad_var_t jmi_tan_function(const char* name, jmi_ad_var_t x, const char* msg);
-
-/**
- * Function to wrap the C tan function and report errors to the log, for use in equations.
- */
-jmi_ad_var_t jmi_tan_equation(jmi_t *jmi, jmi_ad_var_t x, const char* msg);
-
-/**
  * Set the terminate flag and log message.
  */
 void jmi_flag_termination(jmi_t *jmi, const char* msg);
-
-/**
- * Function to get the absolute value.
- * Is a separate function to avoid evaluating expressions several times.
- */
-jmi_ad_var_t jmi_abs(jmi_ad_var_t v);
-
-/**
- * Function to get the absolute value.
- * Is a separate function to avoid evaluating expressions several times.
- */
-jmi_ad_var_t jmi_sign(jmi_ad_var_t v);
-
-/**
- * Function to get the smaller of two values.
- * Is a separate function to avoid evaluating expressions twice.
- */
-jmi_ad_var_t jmi_min(jmi_ad_var_t x, jmi_ad_var_t y);
-
-/**
- * Function to get the larger of two values.
- * Is a separate function to avoid evaluating expressions twice.
- */
-jmi_ad_var_t jmi_max(jmi_ad_var_t x, jmi_ad_var_t y);
-
-/**
- * The sample operator. Returns true if time = offset + i*h, i>=0 during
- * handling of an event. During continuous integration, false is returned.
- *
- */
-jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
-
-/**
- * The round function for double numbers. 
- *
- */
-jmi_real_t jmi_dround(jmi_real_t x);
-
-/**
- * The remainder function for double numbers. 
- *
- */
-jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y);
 
 /* @} */
 
