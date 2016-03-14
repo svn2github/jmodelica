@@ -107,8 +107,6 @@
  *  Introduce #defines to denote different error codes
  */
 
-/* Forward declaration of jmi structs */
-typedef struct jmi_chattering_t jmi_chattering_t;         /**< \brief Forward declaration of struct. */
 
 typedef struct _jmi_time_event_t {
     int defined;
