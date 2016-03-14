@@ -234,7 +234,7 @@ aspect AE {
         
             if (!right.isFIdUseExp() || !left.isFIdUseExp())
                 return false;
-
+			System.out.println("--- Performing AE ---");
             FAbstractVariable lVar = left.asFIdUseExp().myFV();
             FAbstractVariable rVar = right.asFIdUseExp().myFV();
                     

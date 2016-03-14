@@ -103,10 +103,12 @@ aspect VP {
             
             // Check if our variable is a constant or parameter
             if (solutionVariability.constantVariability()) {
+            	System.out.println("--- Performing VP ---");
             	System.out.println("constant variable");
                 solution = solution.ceval().buildLiteral();
                 fvar.setBindingExp(solution);
             } else if (solutionVariability.parameterVariability()) {
+            	System.out.println("--- Performing VP ---");
             	System.out.println("parameter variable");
                 solutionVariability = fParameter();
                 workData.addParameterEquation(new FEquation(fvar.createUseExp(), solution));

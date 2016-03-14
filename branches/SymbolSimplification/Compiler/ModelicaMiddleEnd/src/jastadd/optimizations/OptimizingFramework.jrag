@@ -22,13 +22,13 @@ aspect OptimizingFramework {
     	// ---------------------------------------------
     	
     	
-        public class iterativeSymbolSimplificationIfSet extends Transformation {
-            public iterativeSymbolSimplificationIfSet() {
-                super("iterative_symbol_simplification");
+        public class optimizingFrameworkIfSet extends Transformation {
+            public optimizingFrameworkIfSet() {
+                super("optimizing_framework");
             }
             
             public void perform() {
-                iterativeSymbolSimplification();
+                runOptimizations();
             }
         }
     }
@@ -61,12 +61,13 @@ aspect OptimizingFramework {
 		 *  A class called WorkData is kept for storing essential data needed in and shared between
 		 *  the algorithms. This should be expanded if needed when adding a new algorithm to the framework.
 	     */
-	    public void iterativeSymbolSimplification() {
+	    public void runOptimizations() {
 	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(); // all
 	    	WorkData workData = new WorkData(worklist); // VP
 	    	ArrayList<OptimizingAlgorithm> optList = new ArrayList();
 			addOptimizingAlgorithmToFramework();
-				    	
+			CE canonizeEquations = new CE(this);
+				
 	    	for (OptimizingAlgorithm optAlg: optimizeAlgorithmsInFramework)
 	    		if (optAlg.isUsed())
 	    			optList.add(optAlg);
@@ -75,6 +76,9 @@ aspect OptimizingFramework {
 	    		workData.addToWorklist(feq);
 	    	
 	    	System.out.println("\n\n----------- NEW TEST --------------\n");  // TODO: Remove later
+	    	
+	    	if (canonizeEquations.isUsed())
+	    		canonizeEquations.run(null, null);
 	    	
 	    	while (!worklist.isEmpty()) {
 	    		FAbstractEquation feq = worklist.iterator().next();

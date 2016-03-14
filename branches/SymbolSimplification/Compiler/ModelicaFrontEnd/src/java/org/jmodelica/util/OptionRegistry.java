@@ -262,18 +262,24 @@ abstract public class OptionRegistry {
              false, // --------------------- HÃ„R -------------------
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
+        OPTIMIZING_FRAMEWORK
+            ("optimizing_framework",
+              OptionType.compiler,
+              Category.experimental,
+              true, // --------------------- HÃ„R -------------------
+              "If enabled the optimizing framework will run"),
         SIMPLE_AE
             ("simple_ae",
               OptionType.compiler,
               Category.experimental,
               true, // --------------------- HÃ„R -------------------
-              "If enabled the simple AE and VP algorithms will run"),
+              "If enabled the simple AE algorithm will run within the optimizing framework"),
         SIMPLE_VP
             ("simple_vp",
               OptionType.compiler,
               Category.experimental,
               true, // --------------------- HÃ„R -------------------
-              "If enabled the simple AE and VP algorithms will run"),
+              "If enabled the simple VP algorithm will run within the optimizing framework"),
         CANONIZE_EQUATIONS
         	("canonize_equations",
         	 OptionType.compiler,
