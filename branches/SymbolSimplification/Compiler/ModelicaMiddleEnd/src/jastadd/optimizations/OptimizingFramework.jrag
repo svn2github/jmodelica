@@ -33,7 +33,25 @@ aspect OptimizingFramework {
         }
     }
     
+    public abstract class OptimizingAlgorithm {
+    	public FClass fclass;
+    	public OptimizingAlgorithm(FClass fclass) {
+    		this.fclass = fclass;
+    	}
+    	public abstract boolean isUsed();
+    	public abstract boolean run(FAbstractEquation feq, FClass.WorkData workData);
+    }
+    
     public class FClass {
+    	ArrayList<OptimizingAlgorithm> optimizeAlgorithmsInFramework = new ArrayList();
+    	
+    	public void addOptimizingAlgorithmToFramework() {
+    		optimizeAlgorithmsInFramework.add(new AE(this));
+    		optimizeAlgorithmsInFramework.add(new VP(this));
+    	}
+    	
+    	
+    	
 	    /**
 	     *  Main method for running the algorithms.<p>
 		 *  
@@ -46,6 +64,12 @@ aspect OptimizingFramework {
 	    public void iterativeSymbolSimplification() {
 	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(); // all
 	    	WorkData workData = new WorkData(worklist); // VP
+	    	ArrayList<OptimizingAlgorithm> optList = new ArrayList();
+			addOptimizingAlgorithmToFramework();
+				    	
+	    	for (OptimizingAlgorithm optAlg: optimizeAlgorithmsInFramework)
+	    		if (optAlg.isUsed())
+	    			optList.add(optAlg);
 	    	
 	    	for (FAbstractEquation feq : getFAbstractEquations())
 	    		workData.addToWorklist(feq);
@@ -57,45 +81,39 @@ aspect OptimizingFramework {
 	    		worklist.remove(feq);
 	    		System.out.println("Equation: "+feq.toString()); // TODO: Remove later
 	    		
-	    		// Run Alias Elimination.
-	            if (AE(feq, workData)) {
-	            	fixAE(workData);
-	            	System.out.println("Performed AE.\n"); // TODO: Remove later
-	            	continue;
-	            }
-	            // Run Variability Propagation.
-	            if (VP(feq, workData)) {
-	            	fixVP(workData);
-	            	System.out.println("Performed VP.\n"); // TODO: Remove later
-	            	continue;
-	            }
+	    		for (OptimizingAlgorithm optAlg : optList)
+	    			if (optAlg.run(feq, workData))
+	    				continue;
 	        }
 	        
 	        fixStructure();
 	    }
 	    
 	    /**
-		 * Class that contains data that is shared and updated in and between algorithms.
+		 * Class that contains data that is shared and updated in and between optimizing algorithms.
 		 *
-		 * When adding a new algorithm to the framework, update this class
-		 * with needed structure.
+		 * When adding a new algorithm to the framework, update this class with needed methods 
+		 * and variables.
 		 */
 	    public class WorkData {
-	    	LinkedHashSet<FAbstractEquation> worklist;  // AE, VP
-	        ArrayList<FAbstractEquation> parameterEquations; // VP
-	        HashSet<FAbstractEquation> removedEquations;	// AE, VP
+	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();	// Used by AE, VP
+	        ArrayList<FAbstractEquation> parameterEquations = new ArrayList(); 	// Used by VP
+	        HashSet<FAbstractEquation> removedEquations = new HashSet();		// Used by AE, VP
 	        
+	        /**
+	         * Constructs a class containing data needed throughout the execution time 
+	         * of the optimizing algorithms, that are added to the framework. 
+	         */
 	        public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
 	            this.worklist = worklist;
-	            parameterEquations = new ArrayList();
-	            for (FAbstractEquation feq : FClass.this.getFParameterEquations())
+	            for (FAbstractEquation feq : getFParameterEquations())
 	            	parameterEquations.add(feq);
-	            removedEquations = new HashSet();
 	        }
 	        
 	        /**
 			 * If an equation is switched to a parameter equation it should be
 			 * added to this list.
+			 * @param feq The equation that is added to the parameter equations list.
 			 */
 	        public void addParameterEquation(FAbstractEquation feq) {
 	            parameterEquations.add(feq);
@@ -111,6 +129,8 @@ aspect OptimizingFramework {
 	        /**
 			 * Checks if an equation has been removed by one of
 			 * the optimizing algorithms.
+			 * @param feq The equation that is checked. 
+			 * @return {@code true} if it has been removed, {@code false} otherwise.
 			 */
 	        public boolean hasRemovedEquation(FAbstractEquation feq) {
 	        	return removedEquations.contains(feq);
@@ -118,13 +138,15 @@ aspect OptimizingFramework {
 	        
 	        /**
 			 * Adds an equation to the list of removed equations.
+			 * @param feq The equation that is added to the list of removed equations.
 			 */
 	        public void removeEquation(FAbstractEquation feq) {
 	        	removedEquations.add(feq);
 	        }
 	        
 	        /**
-			 * Returns a list containing the parameter equations. 
+			 * Returns a list containing the parameter equations.
+			 * @return The list containing all parameter equations. 
 			 */
 	        public List<FAbstractEquation> getparameterEquations() {
 	        	return new List<FAbstractEquation>(parameterEquations);

@@ -65,28 +65,50 @@ aspect AE {
     
     /* ---------------- Attribute list end. ---------------- */
 
-    /**
-     *  A simplified version of the alias elimination algorithm.
-     */
-    public boolean FClass.AE(FAbstractEquation fae, WorkData workData) {
-		return buildAliasSets(fae, workData);
-    }
-	
-	public void FClass.fixAE(WorkData workData) {
-		setupNewLists(workData);
-        doRewrites();
-        flush();
-	}
-	
-    public class FClass {
-        Set<AliasSet> aliasSets = new HashSet<AliasSet>();
+	public class FClass {
+		Set<AliasSet> aliasSets = new HashSet<AliasSet>();
         HashMap<FVariable, Integer> scores = new HashMap<FVariable, Integer>();
 
         Set<FAbstractEquation> keepEquations = new HashSet<FAbstractEquation>();
         Set<FVariable> keepVariables = new HashSet<FVariable>();
         Set<FVariable> markedVariables = new HashSet<FVariable>();
         Set<FAbstractEquation> markedEquations = new HashSet<FAbstractEquation>();
+	}
+
+    /**
+     *  A simplified version of the alias elimination algorithm.
+     */
+    public class AE extends OptimizingAlgorithm {
+		public AE(FClass fclass) {
+    		super(fclass);
+    	}
+		
+        // TODO: implement method
+    	public boolean isUsed() {
+    		return true;
+    	}
+    	
+    	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
+            return doAE(feq, workData);
+    	}
         
+        
+        public boolean doAE(FAbstractEquation fae, FClass.WorkData workData) {
+        	if (fclass.buildAliasSets(fae, workData)) {
+        		fixAE(workData);
+        		return true;
+        	}
+			return false;
+	    }
+		
+		public void fixAE(FClass.WorkData workData) {
+			fclass.setupNewLists(workData);
+	        fclass.doRewrites();
+	        fclass.flush();
+		}
+	}
+        
+    public class FClass {   
         /**
          * An alias set. Any FVariables within (at least two) are
          * semantically equivalent in the current program.

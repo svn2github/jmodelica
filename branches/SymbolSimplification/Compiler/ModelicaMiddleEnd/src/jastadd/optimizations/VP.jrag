@@ -6,9 +6,9 @@
      * @version 0?
      */
 aspect VP {
-    //public boolean FAbstractVariable.removeEquationBySimpleVP	= false;
-    //public boolean FFunctionCallLeft.removeEquationBySimpleVP = false;
-    //public boolean FExp.removeEquationBySimpleVP              = false;
+    //public boolean FAbstractVariable.removeEquationBySimpleVP	= false; // Not implemented
+    //public boolean FFunctionCallLeft.removeEquationBySimpleVP = false; // Not implemented
+    //public boolean FExp.removeEquationBySimpleVP              = false; // Not implemented
 
     syn boolean FAbstractEquation.canSimplePropagateEquation() = false;
     syn boolean FEquation.canSimplePropagateEquation() {
@@ -20,54 +20,80 @@ aspect VP {
         return !isDerivativeVariable();
     }
     
-    public class FClass {
+    public class VP extends OptimizingAlgorithm {
+    	public VP(FClass fclass) {
+    		super(fclass);
+    	}
+    	
+    	// TODO: implement method
+    	public boolean isUsed() {
+    		return true;
+    	}
+    	
+    	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
+            return doVP(feq, workData);
+    	}
+    	
         /**
-         * Starts the constant propagation algorithm and continues as long as there are
-         * equations left in the worklist.
+         * Performs the simple Variability Propagation (VP) algorithm.
+         * @param feq The equation to perform VP on.
+         * @param workData Data that has to be stored and updated by VP.
+         * @return {@code true} if VP could be performed, {@code false} otherwise.
          */
-        public boolean VP(FAbstractEquation feq, WorkData workData) {
-            if (feq.canSimplePropagateEquation()) {
-            	return feq.simpleVariabilityPropagation(workData);
+        public boolean doVP(FAbstractEquation feq, FClass.WorkData workData) {
+            if (feq.canSimplePropagateEquation() && feq.simpleVariabilityPropagation(workData)) {
+            	fixVP(workData);
+            	return true;
             }
             return false;
         }
         
-        public void fixEquations(WorkData workData) {
+        /**
+         * Fixes the structure that has been altered after performing VP. Also performs 
+         * Constant Folding to the equations and do rewrites.
+         * @param workData Data that is updated by VP.
+         */
+        public void fixVP(FClass.WorkData workData) {
+	        fixStructure(workData);
+	    	fclass.simpleConstantFolding();
+	        fclass.forceRewrites();
+	        fclass.root().flushAllRecursiveClearFinal();
+        }
+        
+        /**
+         * Updates the structure of different lists in FClass.
+         * @param workData Data that is updated by VP.
+         */
+        public void fixStructure(FClass.WorkData workData) {
             //ArrayList<FVariable> newVariables = new ArrayList(); 		// not implemented in this version
             //ArrayList<FVariable> newAliases = new ArrayList(); 		// not implemented in this version
             ArrayList<FAbstractEquation> newEquations = new ArrayList();
             
             // Only equations not flagged for removal should be kept.
-            for (FAbstractEquation feq : getFAbstractEquations()) {
+            for (FAbstractEquation feq : fclass.getFAbstractEquations()) {
                 if (!workData.hasRemovedEquation(feq)) {
                     newEquations.add(feq);
                 }
             }
-            setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
-            setFParameterEquationList(workData.getparameterEquations());
+            fclass.setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+            fclass.setFParameterEquationList(workData.getparameterEquations());
         }
         
-        public void fixVP(WorkData workData) {
-	        fixEquations(workData);
-	    	simpleConstantFolding();
-	        forceRewrites();
-	        root().flushAllRecursiveClearFinal();
-        }
     }
     
     /**
      * Implemented in the subclass FEquation.
+     * @return {@code true} if VP could be performed, {@code false} otherwise.
      */
     public boolean FAbstractEquation.simpleVariabilityPropagation(FClass.WorkData workData) {
     	return false;
     }
     
     /**
-     * Continuation of the simpleVariabilityPropagation method in FClass, taken to the level of FEquation.
-     * Used in the simplified version of Variability Propagation algorithm.
-     *
-     * Here we check if we can find the solution for the variable at compile time. If we can, our 
-     * variable is a constant. If we can not, our variable is a parameter(?).
+     * Checks if the solution for the variable can be found at compile time. If so, the 
+     * variable is a constant. If not, the variable is a parameter(?).
+     * @param workData Data that is stored and updated by VP.
+     * @return {@code true} if VP be performed, {@code false} otherwise.
      */
     public boolean FEquation.simpleVariabilityPropagation(FClass.WorkData workData) {
         FVariable fvar = variables().iterator().next();
@@ -96,14 +122,11 @@ aspect VP {
     }
     
     /**
-     * Continuation of the simpleVariabilityPropagation method in FEquation, taken to the level of FVariable.
-     * Used in the simplified version of Variability Propagation algorithm.
-     * 
-     * Here we go through all the uses of our variable and see if it belongs to an equation. If so, the 
-     * variable is removed from the variables list of the equation. Then we check the number of 
-     * variables that are still left in the variables list of the equation.
-     * 1 variable = send equation to worklist.
-     * 0 variables = flag equation for removal.
+     * All the uses of a variable is checked to see if it belongs to an equation. If so, the 
+     * variable is removed from the list of variables in the equation. If the number of variables 
+	 * left in the list are 0, the equation is removed. Otherwise, the equation is added to the worklist.
+	 * @param solutionVariability The variability of the variable.
+	 * @param workData Data that is stored and updated by VP.
      */
     public void FVariable.simpleVariabilityPropagation(FExp solution, FTypePrefixVariability solutionVariability,
                                                         FClass.WorkData workData) {
@@ -118,12 +141,12 @@ aspect VP {
                 }
                 
                 feq.variables().remove(this);
-                if (feq.canSimplePropagateEquation()) { // add to worklist if #variables has been reduced to 1.
-                	System.out.println("Equation was added to worklist: "+feq.toString());  // TODO: Remove later
-                    workData.addToWorklist(feq);
-                } else if (feq.variables().size() == 0) { // tag equation to be removed further ahead.
+                if (feq.variables().size() == 0) { // tag equation to be removed further ahead.
                 	System.out.println("Equation was flagged to be removed: "+feq.toString());  // TODO: Remove later
                     workData.removeEquation(feq);
+                } else {
+	                System.out.println("Equation was added to worklist: "+feq.toString());  // TODO: Remove later
+    	            workData.addToWorklist(feq);
                 }
             }
         }
