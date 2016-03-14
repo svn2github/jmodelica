@@ -29,28 +29,29 @@
 
  
 aspect CanonizeEquations {
+    
+    public class CE extends OptimizingAlgorithm {
+        public CE(FClass fclass) {
+            super(fclass);
+        }
+        
+        public boolean isUsed() {
+           return fclass.myOptions().getBooleanOption("canonize_equations");
+        }
+        
+        public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
+            fclass.canonizeEquations();
+            return true;
+        }
+    }
+
+
+
     // Specifies whether the LHS or RHS should be zero.
     public static final boolean FClass.ZERO_LEFT = false;
     
     // Null avoidance (sort of Null-object).
     public static final FExp FExp.ZERO_EXP = new FIntegerLitExp(0);
-    
-	public class FClass {
-        /**
-         * Perform canonization on equations if it is activated.
-         */
-        public class canonizeEquationsIfSet extends Transformation {
-            public canonizeEquationsIfSet() {
-                super("canonize_equations");
-            }
-            
-            public void perform() {
-                canonizeEquations();
-            }
-        }
-        
-        public canonizeEquationsIfSet canonizeEquations = new canonizeEquationsIfSet();
-    }
     
     /* ---------------- Attribute list. ---------------- */
     

@@ -25,9 +25,8 @@ aspect VP {
     		super(fclass);
     	}
     	
-    	// TODO: implement method
     	public boolean isUsed() {
-    		return true;
+    		return fclass.myOptions().getBooleanOption("simple_vp");
     	}
     	
     	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {

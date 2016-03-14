@@ -262,8 +262,14 @@ abstract public class OptionRegistry {
              false, // --------------------- HÃ„R -------------------
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
-        ITERATIVE_SYMBOL_SIMPLIFICATION
-            ("iterative_symbol_simplification",
+        SIMPLE_AE
+            ("simple_ae",
+              OptionType.compiler,
+              Category.experimental,
+              true, // --------------------- HÃ„R -------------------
+              "If enabled the simple AE and VP algorithms will run"),
+        SIMPLE_VP
+            ("simple_vp",
               OptionType.compiler,
               Category.experimental,
               true, // --------------------- HÃ„R -------------------

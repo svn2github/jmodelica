@@ -131,7 +131,6 @@ aspect TransformCanonical {
             
             /* Iterative Symbol Simplification. */
             
-            transformations.add(new canonizeEquationsIfSet());
             transformations.add(new iterativeSymbolSimplificationIfSet());
             
             /* -------------------------------- */

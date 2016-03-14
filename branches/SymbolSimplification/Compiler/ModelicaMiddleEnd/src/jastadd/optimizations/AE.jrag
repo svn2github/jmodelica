@@ -83,9 +83,8 @@ aspect AE {
     		super(fclass);
     	}
 		
-        // TODO: implement method
     	public boolean isUsed() {
-    		return true;
+    	   return fclass.myOptions().getBooleanOption("simple_ae");
     	}
     	
     	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
