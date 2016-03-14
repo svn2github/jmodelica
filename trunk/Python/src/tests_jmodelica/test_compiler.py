@@ -348,7 +348,7 @@ class Test_Compiler_functions:
         cls.fpath_oc = os.path.join(get_files_path(), 'Modelica', 
             'Pendulum_pack.mop')
         cls.cpath_oc = "Pendulum_pack.Pendulum_Opt"
-    
+   
     @testattr(stddist = True)
     def test_compile_fmu_illegal_target_error(self):
         """Test that an exception is raised when an incorrect target is given to compile_fmu"""
@@ -450,6 +450,17 @@ class Test_Compiler_functions:
         Test that it is possible to call separate process compilation with multiple jvm args
         """
         fmuname = compile_fmu(Test_Compiler_functions.cpath_mc, Test_Compiler_functions.fpath_mc, jvm_args='-Xmx100m -Xss2m')
+
+        assert os.access(fmuname, os.F_OK) == True, \
+               fmuname+" was not created."
+        os.remove(fmuname)
+
+    @testattr(stddist = True)
+    def test_separate_process_control_characters(self):
+        """
+        Test that the separate process pipe can handle control characters
+        """
+        fmuname = compile_fmu("ExtFunctionTests.PrintsControlCharacters", [os.path.join(get_files_path(), 'Modelica', 'ExtFunctionTests.mo')])
 
         assert os.access(fmuname, os.F_OK) == True, \
                fmuname+" was not created."

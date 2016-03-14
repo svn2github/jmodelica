@@ -804,4 +804,14 @@ package CEval
   end Caching;
 end CEval;
 
+model PrintsControlCharacters
+    "This model prints some control characters using ModelicaMessage during compilation"
+    function f
+        input Real i;
+        output Real o;
+        external "C" o = f(i) annotation(Include="double f(double i) {ModelicaMessage(\"\\1\\2\\3\\4\");return i;}");
+    end f;
+    constant Real c = f(2);
+end PrintsControlCharacters;
+
 end ExtFunctionTests;
