@@ -1,34 +1,29 @@
 package canonicalFormTest
 model canonicalFormTest
 
-    Real a;
-    Real b;
-    Real c;
-    Real d;
+	Real a;
+	Real b;
 
 equation
-    0 = a - b - c- d;
-    a = 1;
-    b = 1;
-    c = 1;
+	a = 0;
+    a = b;
     
        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="CanonicalFormTest",
             eliminate_alias_variables=false,
             variability_propagation=false,
+            iterative_symbol_simplification = false,
+            canonize_equations = true,
             description="",
             flatModel="
             
 fclass canonicalFormTest.canonicalFormTest
- Real x;
  Real a;
  Real b;
 equation
- 0 = x;
- 0 = a + b * 2 + (a + b) * 2 - x * (a + b * 2);
- 0 = (a + b) * 2 * (a - b) + 5 * (a + b * 2) - x * (a + b * 2) * (a - b);
-
+a = 0;
+a + (- b) = 0;
 end canonicalFormTest.canonicalFormTest;
 
 ")})));
