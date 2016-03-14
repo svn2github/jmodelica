@@ -6,6 +6,65 @@
      * @version 0?
      */
 aspect AE {
+    /* ---------------- Attribute list. ---------------- */
+    
+    /*
+     *  Alias identity attributes.
+     */
+    eq Root.getChild().isAliasVariable(FAbstractVariable fav) = false; 
+    
+    syn boolean FAbstractVariable.hasReplacement() = isAliasVariable(this);
+    inh boolean FAbstractVariable.isAliasVariable(FAbstractVariable fav);
+
+    eq FClass.getChild().isAliasVariable(FAbstractVariable fav) =
+        fav.isFVariable() ? hasBetter(fav.asFVariable()) : false;
+
+    refine AliasVariables eq FVariable.isAlias() = refined() || isInAliasList();
+
+    inh boolean FVariable.isInAliasList();
+    eq FClass.getChild().isInAliasList()         = false;
+    eq FForIndex.getChild().isInAliasList()      = false;
+    eq FClass.getAliasVariable().isInAliasList() = true;
+    eq FClass.getAliasConstant().isInAliasList() = true; 
+
+    /*
+     *  Alias replacement attributes.
+     */
+    eq Root.getChild().fetchReplacement(FVariable fv) = null;
+    eq FClass.getChild().fetchReplacement(FVariable fv) = getAliasSet(fv).bestVariable();
+    syn FVariable FVariable.getReplacement() = fetchReplacement(this);
+    inh FVariable FVariable.fetchReplacement(FVariable fv);
+
+    /*
+     *  Class identity attributes.
+     */
+    syn boolean ASTNode.isFEquation() = false;
+    syn boolean FEquation.isFEquation() = true;
+    syn boolean FExp.isFIdUseExp() = false;
+    syn boolean FIdUseExp.isFIdUseExp() = true;
+    
+    /*
+     *  Score calculation attributes.
+     */
+    eq Root.getChild().occurances(FVariable f) = 0;
+    eq FClass.getChild().occurances(FVariable f) {
+        int sum = 0;
+        for (FAbstractEquation fae : getFAbstractEquations())
+            for (FVariable fv : fae.variables())
+                if (fv == f)
+                    ++sum;
+         return sum;
+    }
+    inh int FVariable.occurances(FVariable f);
+    syn int FVariable.occurances() = occurances(this);
+    
+    /*
+     *  QoL attributes.
+     */
+    syn String FVariable.getName() = getFQName().toString();
+    
+    /* ---------------- Attribute list end. ---------------- */
+
     /**
      *  A simplified version of the alias elimination algorithm.
      */
@@ -88,10 +147,16 @@ aspect AE {
                 else if (name1.length() < name2.length())
                     return f2;
                 
-                for (int i = 0; i < name1.length(); ++i)
-                    if (name1.charAt(i) < name2.charAt(i))
+                for (int i = 0; i < name1.length(); ++i) {
+                    char c1 = name1.charAt(i),
+                        c2 = name2.charAt(i);
+                    if (c1 < c2)
                         return f1;
-                 return f1;
+                    else if (c1 > c2)
+                        return f2;
+                }
+                
+                return f1;
              }
 
             /**
@@ -132,7 +197,7 @@ aspect AE {
                 return sb.delete(sb.length() - 2, sb.length())
                          .append("]").toString();
             }
-            /* --------------- AliasSet ends here. --------------- */
+            /* --------------- AliasSet end. --------------- */
         }
         
         /**
@@ -142,18 +207,18 @@ aspect AE {
             if (!fae.isFEquation() || fae.variables().size() != 2)
                 return false;
     
-            FEquation fe = (FEquation) fae;
+            FEquation fe = fae.asFEquation();
             FExp left = fe.getLeft();
             FExp right = fe.getRight();
         
             if (!right.isFIdUseExp() || !left.isFIdUseExp())
                 return false;
 
-            FAbstractVariable lVar = ((FIdUseExp) left).myFV();
-            FAbstractVariable rVar = ((FIdUseExp) right).myFV();
+            FAbstractVariable lVar = left.asFIdUseExp().myFV();
+            FAbstractVariable rVar = right.asFIdUseExp().myFV();
                     
             if (lVar.isFVariable() && rVar.isFVariable()) {
-                newAliasPair((FVariable) lVar, (FVariable) rVar);
+                newAliasPair(lVar.asFVariable(), rVar.asFVariable());
                 workData.removeEquation(fae);
                 System.out.println("Equation was flagged to be removed: "+fae.toString());  // TODO: Remove later
 	            return true;
@@ -273,86 +338,8 @@ aspect AE {
             setFAbstractEquationList(new List(keepEquations));
         }
          
-        /**
-         * Returns whether or not an equation is marked
-         * for removal due to being an alias equation.
-         * 
-         * @param fe    The equation subject to the query.
-         * @return      True if the equation should be removed.
-         */
-         public boolean shouldBeRemoved(FAbstractEquation fe) {
-            //return fe.equationRemovedByOptAlg;  //equationRemovedByOptAlg was removed
-            return true;
-            //TODO: is this really used?!
-         }
-         
          /* --------------- FClass entries end here. --------------- */
     }
-    
-    /* ---------------- Attribute list. ---------------- */
-    
-    /*
-     *  Alias identity attributes.
-     */
-    eq Root.getChild().isAliasEquation(FAbstractEquation fae) = false;
-    eq Root.getChild().isAliasVariable(FAbstractVariable fav) = false; 
-    
-    syn boolean FAbstractEquation.shouldBeRemoved() = isAliasEquation(this);//TODO: is this really used?!
-    syn boolean FAbstractVariable.hasReplacement() = isAliasVariable(this);
-    inh boolean FAbstractEquation.isAliasEquation(FAbstractEquation fae);
-    inh boolean FAbstractVariable.isAliasVariable(FAbstractVariable fav);
-
-    eq FClass.getChild().isAliasEquation(FAbstractEquation fae) =//TODO: is this really used?!
-        fae.isFEquation() ? shouldBeRemoved(fae) : false;
-
-    eq FClass.getChild().isAliasVariable(FAbstractVariable fav) =
-        fav.isFVariable() ? hasBetter((FVariable) fav) : false;
-
-    refine AliasVariables eq FVariable.isAlias() = refined() || isInAliasList();
-
-    inh boolean FVariable.isInAliasList();
-    eq FClass.getChild().isInAliasList()         = false;
-    eq FForIndex.getChild().isInAliasList()      = false;
-    eq FClass.getAliasVariable().isInAliasList() = true;
-    eq FClass.getAliasConstant().isInAliasList() = true; 
-
-    /*
-     *  Alias replacement attributes.
-     */
-    eq Root.getChild().fetchReplacement(FVariable fv) = null;
-    eq FClass.getChild().fetchReplacement(FVariable fv) = getAliasSet(fv).bestVariable();
-    syn FVariable FVariable.getReplacement() = fetchReplacement(this);
-    inh FVariable FVariable.fetchReplacement(FVariable fv);
-
-    /*
-     *  Class identity attributes.
-     */
-    syn boolean ASTNode.isFEquation() = false;
-    syn boolean FEquation.isFEquation() = true;
-    syn boolean FExp.isFIdUseExp() = false;
-    syn boolean FIdUseExp.isFIdUseExp() = true;
-    
-    /*
-     *  Score calculation attributes.
-     */
-    eq Root.getChild().occurances(FVariable f) = 0;
-    eq FClass.getChild().occurances(FVariable f) {
-        int sum = 0;
-        for (FAbstractEquation fae : getFAbstractEquations())
-            for (FVariable fv : fae.variables())
-                if (fv == f)
-                    ++sum;
-         return sum;
-    }
-    inh int FVariable.occurances(FVariable f);
-    syn int FVariable.occurances() = occurances(this);
-    
-    /*
-     *  QoL attributes.
-     */
-    syn String FVariable.getName() = getFQName().toString();
-    
-    /* ---------------- Attribute list end. ---------------- */
     
     /*
      *  Rewrite methods.
@@ -380,7 +367,7 @@ aspect AE {
     rewrite FIdUseExp {
         when (aliasRewrite) to FExp {
             if (myFV().isFVariable() && myFV().hasReplacement()) {
-                FVariable fv = (FVariable) myFV();
+                FVariable fv = myFV().asFVariable();
                 FIdUseExp newFExp = fv.getReplacement().createUseExp();
                 newFExp.setOriginalVariable(this, fv); 
                 
@@ -392,25 +379,5 @@ aspect AE {
             aliasRewrite = false;
             return this;
         }
-    }
-    
-    /*
-     *  Debug methods.
-     */
-     
-    /**
-     *  Prints all equations.
-     */
-    public void FClass.printAllEquations() {
-        for (FAbstractEquation fae : getFAbstractEquations())
-            System.out.println(fae.toString());
-    }
-    
-    /**
-     *  Prints all alias sets.
-     */
-    public void FClass.printAliasSets() {
-        for (AliasSet as : aliasSets)
-            System.out.println(as.toString());
     }
 }
