@@ -6,9 +6,9 @@
      * @version 0?
      */
 aspect VP {
-    //public boolean FAbstractVariable.removeEquationBySimpleVP       = false;
-    //public boolean FFunctionCallLeft.removeEquationBySimpleVP       = false;
-    //public boolean FExp.removeEquationBySimpleVP                    = false;
+    //public boolean FAbstractVariable.removeEquationBySimpleVP	= false;
+    //public boolean FFunctionCallLeft.removeEquationBySimpleVP = false;
+    //public boolean FExp.removeEquationBySimpleVP              = false;
 
     syn boolean FAbstractEquation.canSimplePropagateEquation() = false;
     syn boolean FEquation.canSimplePropagateEquation() {
@@ -32,19 +32,19 @@ aspect VP {
             return false;
         }
         
-        
         public void fixEquations(WorkData workData) {
-            ArrayList<FVariable> newVariables = new ArrayList();
-            ArrayList<FVariable> newAliases = new ArrayList();
+            //ArrayList<FVariable> newVariables = new ArrayList(); 		// not implemented in this version
+            //ArrayList<FVariable> newAliases = new ArrayList(); 		// not implemented in this version
             ArrayList<FAbstractEquation> newEquations = new ArrayList();
             
             // Only equations not flagged for removal should be kept.
             for (FAbstractEquation feq : getFAbstractEquations()) {
-                if (!workData.removedEquations(feq)) {
+                if (!workData.hasRemovedEquation(feq)) {
                     newEquations.add(feq);
                 }
             }
             setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+            setFParameterEquationList(workData.getparameterEquations());
         }
         
         public void fixVP(WorkData workData) {
@@ -76,11 +76,13 @@ aspect VP {
             solution.resetOriginalReferences();
             FTypePrefixVariability solutionVariability = solution.variability();
             
-            // Check if our variable is a constant or variable
+            // Check if our variable is a constant or parameter
             if (solutionVariability.constantVariability()) {
+            	System.out.println("constant variable");
                 solution = solution.ceval().buildLiteral();
                 fvar.setBindingExp(solution);
             } else if (solutionVariability.parameterVariability()) {
+            	System.out.println("parameter variable");
                 solutionVariability = fParameter();
                 workData.addParameterEquation(new FEquation(fvar.createUseExp(), solution));
             } else {
@@ -111,7 +113,7 @@ aspect VP {
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
                 feq = use.myFEquation();
-                if (workData.removedEquations(feq)) {
+                if (workData.hasRemovedEquation(feq)) {
                 	continue;
                 }
                 

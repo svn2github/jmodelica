@@ -244,13 +244,27 @@ aspect AE {
         	keepVariables.clear();
         	
             for (FVariable fv : getFVariables())
-                if (hasBetter(fv))
+                if (hasBetter(fv)) {
                     markedVariables.add(fv);
-                else
+                    // ----- Added code -------- 
+                    // If AE removes a variable, all equations it exists in should be reexamined.
+                    for (FIdUseExp use : fv.uses()) {
+                    	FAbstractEquation fae;
+           				if (use.inFEquation()) {
+                			fae = use.myFEquation();
+                			if (workData.hasRemovedEquation(fae)) {
+                				continue;
+                			}
+                			System.out.println("Equation was added to worklist: "+fae.toString());
+                			workData.addToWorklist(fae);
+                		}
+               		}
+               		// -------------------------
+                } else
                     keepVariables.add(fv);
                     
             for (FAbstractEquation fae : getFAbstractEquations()) {
-                if (!workData.removedEquations(fae))
+                if (!workData.hasRemovedEquation(fae))
                     keepEquations.add(fae);
 			}                
         

@@ -50,6 +50,8 @@ aspect OptimizingFramework {
 	    	for (FAbstractEquation feq : getFAbstractEquations())
 	    		workData.addToWorklist(feq);
 	    	
+	    	System.out.println("\n\n----------- NEW TEST --------------\n");  // TODO: Remove later
+	    	
 	    	while (!worklist.isEmpty()) {
 	    		FAbstractEquation feq = worklist.iterator().next();
 	    		worklist.remove(feq);
@@ -67,12 +69,7 @@ aspect OptimizingFramework {
 	            	System.out.println("Performed VP.\n"); // TODO: Remove later
 	            	continue;
 	            }
-	            System.out.println("Didn't perform optimization.\n"); // TODO: Remove later
 	        }
-	        
-	        System.out.println("\nEquations in list after optimizing:"); // TODO: Remove later
-	        for (FAbstractEquation feq : getFAbstractEquations())
-	        	System.out.println(feq.toString()); /// felsöka varför b = b finns
 	        
 	        fixStructure();
 	    }
@@ -85,29 +82,52 @@ aspect OptimizingFramework {
 		 */
 	    public class WorkData {
 	    	LinkedHashSet<FAbstractEquation> worklist;  // AE, VP
-	        List<FAbstractEquation> parameterEquations; // VP
-	        Set<FAbstractEquation> removedEquations;	// AE, VP
+	        ArrayList<FAbstractEquation> parameterEquations; // VP
+	        HashSet<FAbstractEquation> removedEquations;	// AE, VP
 	        
 	        public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
 	            this.worklist = worklist;
-	            parameterEquations = getFParameterEquations();
-	            removedEquations = new HashSet<FAbstractEquation>();
+	            parameterEquations = new ArrayList();
+	            for (FAbstractEquation feq : FClass.this.getFParameterEquations())
+	            	parameterEquations.add(feq);
+	            removedEquations = new HashSet();
 	        }
 	        
+	        /**
+			 * If an equation is switched to a parameter equation it should be
+			 * added to this list.
+			 */
 	        public void addParameterEquation(FAbstractEquation feq) {
 	            parameterEquations.add(feq);
 	        }
 	        
+	        /**
+			 * Method to add an equation to the worklist.
+			 */
 	        public void addToWorklist(FAbstractEquation feq) {
 	            worklist.add(feq);
 	        }
 	        
-	        public boolean removedEquations(FAbstractEquation feq) {
+	        /**
+			 * Checks if an equation has been removed by one of
+			 * the optimizing algorithms.
+			 */
+	        public boolean hasRemovedEquation(FAbstractEquation feq) {
 	        	return removedEquations.contains(feq);
 	        }
 	        
+	        /**
+			 * Adds an equation to the list of removed equations.
+			 */
 	        public void removeEquation(FAbstractEquation feq) {
 	        	removedEquations.add(feq);
+	        }
+	        
+	        /**
+			 * Returns a list containing the parameter equations. 
+			 */
+	        public List<FAbstractEquation> getparameterEquations() {
+	        	return new List<FAbstractEquation>(parameterEquations);
 	        }
 	    }
 	    
