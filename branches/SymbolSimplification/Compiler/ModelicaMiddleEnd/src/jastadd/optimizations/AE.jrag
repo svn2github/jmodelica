@@ -19,8 +19,16 @@ aspect AE {
     eq FClass.getChild().isAliasVariable(FAbstractVariable fav) =
         fav.isFVariable() ? hasBetter(fav.asFVariable()) : false;
 
-    refine AliasVariables eq FVariable.isAlias() = refined() || isInAliasList();
+    /*
+     *  Refined equations; required for rewrites to work.
+     *  // TODO: Check if they are still needed. 
+     */
 
+    refine AliasVariables eq FVariable.isAlias() = refined() || isInAliasList();
+    refine AliasVariables eq FVariable.alias() = refined() == null ? getReplacement() :
+        refined();
+
+    // Below are required for refinement to work.
     inh boolean FVariable.isInAliasList();
     eq FClass.getChild().isInAliasList()         = false;
     eq FForIndex.getChild().isInAliasList()      = false;
@@ -57,12 +65,7 @@ aspect AE {
     }
     inh int FVariable.occurances(FVariable f);
     syn int FVariable.occurances() = occurances(this);
-    
-    /*
-     *  QoL attributes.
-     */
-    syn String FVariable.getName() = getFQName().toString();
-    
+
     /* ---------------- Attribute list end. ---------------- */
 
 	public class FClass {
@@ -75,9 +78,6 @@ aspect AE {
         Set<FAbstractEquation> markedEquations = new HashSet<FAbstractEquation>();
 	}
 
-    /**
-     *  A simplified version of the alias elimination algorithm.
-     */
     public class AE extends OptimizingAlgorithm {
 		public AE(FClass fclass) {
     		super(fclass);
@@ -118,7 +118,7 @@ aspect AE {
 
             /**
              * Creates a new alias set.
-             */    
+             */
             public AliasSet(FVariable f1, FVariable f2) {
                 set = new HashSet<FVariable>();
                 scores = new HashMap<FVariable, Integer>();
@@ -162,7 +162,7 @@ aspect AE {
                 if (f1 == f2)
                     return f1;
                     
-                String name1 = f1.getName(), name2 = f2.getName();
+                String name1 = f1.name(), name2 = f2.name();
                 if (name1.length() > name2.length())
                     return f1;
                 else if (name1.length() < name2.length())
@@ -223,7 +223,9 @@ aspect AE {
         
         /**
          *  Constructs all alias sets.
-         */ 
+         */
+         
+        // TODO: Commentary.
         public boolean buildAliasSets(FAbstractEquation fae, WorkData workData) {
             if (!fae.isFEquation() || fae.variables().size() != 2)
                 return false;
@@ -316,24 +318,20 @@ aspect AE {
         /**
          *  Sets the new working equation and variables lists
          *  to represent the restructured system of equations.
-         * 
-         *  N.B. it is mandatory to update the alias variable
-         *  list in the current implementation.
          */
+         
+        // TODO: Commentary.
         public void setupNewLists(WorkData workData) {
-        	// Clear lists before we insert into them. Needed as it is
-        	// implemented atm where we run different optimizing algorithms
-        	// after one another on each equation. If AE is performed, we
-        	// need to fix the structure directly before moving on to the
-        	// next equation.
+            // Clear sets since AE (FClass currently) holds them
+            // (they will not be re-instantiated).
         	keepEquations.clear();
         	keepVariables.clear();
         	
             for (FVariable fv : getFVariables())
                 if (hasBetter(fv)) {
                     markedVariables.add(fv);
-                    // ----- Added code -------- 
-                    // If AE removes a variable, all equations it exists in should be reexamined.
+
+                    // If AE removes a variable, all equations it exists in should be re-examined.
                     for (FIdUseExp use : fv.uses()) {
                     	FAbstractEquation fae;
            				if (use.inFEquation()) {
@@ -345,10 +343,9 @@ aspect AE {
                 			workData.addToWorklist(fae);
                 		}
                		}
-               		// -------------------------
-                } else
+                } else {
                     keepVariables.add(fv);
-                    
+                }                    
             for (FAbstractEquation fae : getFAbstractEquations()) {
                 if (!workData.hasRemovedEquation(fae))
                     keepEquations.add(fae);
@@ -364,9 +361,20 @@ aspect AE {
     
     /*
      *  Rewrite methods.
+     *
+     *  The methods in the original AE has corresponding methods in this simple AE:
+     *  
+     *  isAlias         ->  hasReplacement
+     *  alias           ->  getReplacement
+     *  rewriteAlias    ->  aliasRewrite
+     *
+     *  All rewrites are simplified versions of the ones used in TransformCanonical.jrag.
+     *  Negation is <i>not</i> in operation since <code>isNegated()</code> requires
+     *  code used in the original AE, and thus will not work here.
      */
      
-    private boolean FIdUseExp.aliasRewrite = false;
+    public boolean FIdUseExp.aliasRewrite = false;
+    public boolean FAssignStmt.aliasRewrite = false;
     
     // Recursively call everything to rewrite.
     public void ASTNode.doRewrites() {
@@ -374,31 +382,77 @@ aspect AE {
             n.doRewrites();
     }
     
-    // Only FIdUseExps are rewritten in the current implementation.
     public void FIdUseExp.doRewrites() {
         super.doRewrites();
         aliasRewrite = true;
         is$Final = false;
     }
     
-    /*
-     *  Rewrites a FIdUseExp to use a better alias
-     *  if one exists.
-     */
+    // TODO: Commentary for all rewrites.    
     rewrite FIdUseExp {
         when (aliasRewrite) to FExp {
             if (myFV().isFVariable() && myFV().hasReplacement()) {
                 FVariable fv = myFV().asFVariable();
                 FIdUseExp newFExp = fv.getReplacement().createUseExp();
                 newFExp.setOriginalVariable(this, fv); 
-                
-                // The newly built expression needs to be further checked
-                // in case other things should be re-written.
                 newFExp.aliasRewrite = true;
-                return newFExp.isNegated() ? new FNegExp(newFExp) : newFExp;
+                
+                return newFExp;
             }
             aliasRewrite = false;
             return this;
+        }
+    }
+    
+    rewrite FPreExp {
+        when (aliasRewrite) to FExp {
+            if (myNonPreFV().isFVariable() && myNonPreFV().hasReplacement()) {
+                FVariable fv = (FVariable) myNonPreFV();
+                FIdUseExp new_exp = fv.getReplacement().createFPreExp();
+                new_exp.setOriginalVariable(this, fv);
+                
+                return new_exp;
+            } else {
+                aliasRewrite = false;
+                return this;
+            }
+        }
+    }
+    
+    rewrite FAssignStmt {
+        when (aliasRewrite && getLeft() instanceof FIdUseExp) to FAssignStmt {
+            FIdUseExp left = (FIdUseExp) getLeft();
+            if (left.myFV().isFVariable() && left.myFV().hasReplacement()) {
+                FVariable fv = (FVariable) left.myFV();
+                FIdUseExp exp = fv.getReplacement().createUseExp();
+                setLeft(exp);
+                exp.setOriginalVariable(left, fv);
+
+                return this;
+            } else {
+                aliasRewrite = false;
+                return this;
+            }
+        }
+    }
+    
+    rewrite FAbstractDerExp {
+        when (aliasRewrite && getFIdUse().myFV().isFVariable() && (myFV().hasReplacement() || getFIdUse().myFV().hasReplacement())) to FExp {
+            if (myFV().hasReplacement()) {
+                FVariable fv = (FVariable) myFV();
+                FIdUseExp new_exp = fv.getReplacement().createUseExp();
+                new_exp.setOriginalVariable(this, fv);
+                
+                return new_exp;
+            } else {
+                FQName new_name = (FQName)((FVariable)getFIdUse().myFV()).getReplacement().getFQName().fullCopy();
+                FAbstractDerExp new_exp = createEmptyNode();
+                new_exp.setFIdUse(new FIdUse(new_name));
+                new_exp.setOrder(order());
+                new_exp.setOriginalVariable(this, getFIdUse().myFV());
+                
+                return new_exp;
+            }
         }
     }
 }
