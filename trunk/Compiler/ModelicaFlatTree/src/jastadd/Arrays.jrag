@@ -1022,82 +1022,6 @@ aspect Arrays {
 	eq FFunctionCallEquation.getLeft(int i).size() = getCall().sizeOfOutput(i);
 	eq FFunctionCallStmt.getLeft(int i).size()     = getCall().sizeOfOutput(i);
 	
-	syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
-
-    syn Size InstFunctionCall.sizeOfOutput(int i) {
-        Size s = myCallOutputs().get(i).size();
-        if (!s.isUnknown() || isCircular())
-            return s;
-        
-        HashMap<ASTNode, FExp> varMap = new HashMap<ASTNode, FExp>();
-        for (int j = 0; j < getNumArg(); j++)
-            varMap.put(myCallInputs().get(j), getArg(j).getFExp());
-        
-        MutableSize ms = new MutableSize(s.ndims());
-        for (int j = 0; j < s.ndims(); j++) {
-            try {
-                ms.append(dynamicFExp(s.createSizeFExp(j, (HashMap) varMap.clone())));
-            } catch (ConstantEvaluationException e) {
-                ms.append(dynamicFExp(new FColonSizeExp(unknownInstComponentDecl(), j)));
-            }
-        }
-        return ms;
-    }
-    eq InstVectorFunctionCall.sizeOfOutput(int i) = 
-        (i == 0) ? vectorizedSize() : super.sizeOfOutput(i);
-
-	/**
-	 * Return the size the function call is expanded to. This is the size of the 
-	 * entire function call, and the size of a vectorized argument to a scalar input.
-	 * 
-	 * If arguments doesn't match, the size matching the most arguments is returned.
-	 */
-	syn lazy Size InstVectorFunctionCall.vectorizedSize() {
-		boolean func = inFunction();
-		int tot = getNumArg(), n = 0, ndims = ndims();
-		Size[] candidates = new Size[tot];
-		int[] freq = new int[tot];
-		
-		for (InstFunctionArgument arg : getArgs()) {
-			if (arg.isVectorized()) {
-				Size s = arg.size().contractRight(ndims);
-				for (int i = 0; i < n && s != null; i++) {
-					if (!candidates[i].equivalent(s, func)) {
-						if (func && candidates[i].isUnknown())
-							candidates[i] = candidates[i].createKnown(s);
-						s = null;
-						freq[i]++;
-					}
-				}
-				if (s != null)
-					candidates[n++] = s;
-			}
-		}
-	
-		int index = 0;
-		for (int i = 1; i < n; i++) 
-			if (freq[index] < freq[i]) 
-				index = i;
-		return candidates[index];
-	}
-	
-	inh Size InstFunctionArgument.vectorizedSize();
-	eq FAbstractFunctionCall.getChild().vectorizedSize() = Size.SCALAR;
-	eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
-	eq FDelayExp.getChild().vectorizedSize()             = vectorizedSize();
-	eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
-
-    /**
-     * Get array sizes of function argument.
-     */
-    syn Size InstFunctionArgument.size() = null;
-    eq InstDefaultArgument.size()        = getFExp().size();
-    eq InstGivenArgument.size()          = getFExp().size();
-
-    eq FArgumentExp.size() = copiedFExp().size();
-	
-	syn Size FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
-	
 	eq FFunctionCall.size()    = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
 	eq InstFunctionCall.size() = hasOutputs() ? sizeOfOutput(0) : Size.SCALAR;
     eq InstPartialFunctionCall.size() = Size.SCALAR;
@@ -3081,16 +3005,6 @@ aspect ArrayHelpers {
 		}
 		
 		/**
-		 * Create a dummy expression that has the size described by this Size.
-		 */
-		public FExp createDummyFExp(Map<ASTNode, FExp> varMap) {
-			FZeros z = new FZeros();
-			for (int i = 0; i < size.length; i++)
-				z.addFExp(createSizeFExp(i, varMap));
-			return z;
-		}
-		
-		/**
 		 * Create a zero expression of this size.
 		 */
 		public FExp createZeroFExp() {
@@ -3389,8 +3303,9 @@ aspect ArrayHelpers {
 		 */
 		protected void copyFrom(int d1, FExp exp, int d2) {
 			set(d1, exp.size(), d2);
-			if (exps[d1] != null && exps[d1] instanceof FColonSizeExp)
-				exps[d1] = exps[d1].dynamicFExp(exps[d1].createSizeFExp());
+            if (exps[d1] != null && exps[d1] instanceof FColonSizeExp) {
+                exps[d1] = exp.dynamicFExp(exps[d1].createSizeFExp());
+            }
 			if (!hasValue(d1)) {
 				FExp copyExp = exp.fullCopy();
 				Opt dimExp = new Opt(new FIntegerLitExp(d2 + 1));
@@ -3538,16 +3453,7 @@ aspect ArrayHelpers {
                 return this;
             }
         }
-
-		/**
-		 * For each unknown length, copy the equivalent length from the size of <code>exp</code>. 
-		 * 
-		 * If <code>exp</code> has more dimensions, the last part is assumed to match this size.
-		 */
-		public void makeKnown(FExp exp) {
-			fillUnknownFrom(exp);
-		}
-		
+        
 		/**
 		 * Create a new flattened FSubscript for dimension <code>i</code>.
 		 */

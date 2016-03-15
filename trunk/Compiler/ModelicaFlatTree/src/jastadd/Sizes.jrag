@@ -15,7 +15,48 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect SizeExpressions {
+aspect FunctionCallSizes {
+    
+    syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
+    eq InstVectorFunctionCall.sizeOfOutput(int i) = (i == 0) ? vectorizedSize() : super.sizeOfOutput(i);
+    eq FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
+    eq InstFunctionCall.sizeOfOutput(int i) = myCallOutputs().get(i).size().createSizeFExp(this);
+    
+    /**
+     * Get array sizes of function argument.
+     */
+    syn Size InstFunctionArgument.size() = null;
+    eq InstDefaultArgument.size()        = getFExp().size();
+    eq InstGivenArgument.size()          = getFExp().size();
+
+    eq FArgumentExp.size() = copiedFExp().size();
+    
+    
+    public Size Size.createSizeFExp(InstFunctionCall call) {
+        
+        if (!isUnknown() || call.isCircular())
+            return this;
+        
+        HashMap<InstComponentDecl, InstFunctionArgument> varMap = new HashMap<InstComponentDecl, InstFunctionArgument>();
+        for (int j = 0; j < call.getNumArg(); j++) {
+            call.getArg(j).sizeOfOutput(varMap, call.myCallInputs().get(j));
+        }
+        
+        MutableSize ms = new MutableSize(ndims());
+        for (int j = 0; j < ndims(); j++) {
+            try {
+                ms.append(call.dynamicFExp(createSizeFExp(j, varMap)));
+            } catch (ConstantEvaluationException e) {
+                ms.append(Size.UNKNOWN);
+            }
+        }
+        return ms;
+    }
+    
+    public void InstFunctionArgument.sizeOfOutput(Map<InstComponentDecl, InstFunctionArgument> varMap, InstComponentDecl icd) {
+        getFExp().size();      // Cash sizes to prevent false circularity in nested function calls
+        varMap.put(icd, this); // TODO: #4850 InstDefaultArguments shouldn't do this;
+    }
     
     /**
      * Create an FExp that describes the length of dimension <code>d</code>, 
@@ -23,11 +64,14 @@ aspect SizeExpressions {
      *        
      * @param varMap  a map of variables to replace and expressions to replace them with
      */
-    public FExp Size.createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+    public FExp Size.createSizeFExp(int d, Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        if (d < 0 || d >= ndims()) {
+            throw new ConstantEvaluationException();
+        }
         return createFExp(d);
     }
     
-    public FExp MutableSize.createSizeFExp(int d, Map<ASTNode, FExp> varMap) {
+    public FExp MutableSize.createSizeFExp(int d, Map<InstComponentDecl, InstFunctionArgument> varMap) {
         evaluate(d);
         return (okExp(d, true)) ?
                 exps[d].createSizeFExp(varMap) :
@@ -41,113 +85,102 @@ aspect SizeExpressions {
      * For non-FExp nodes, this simply makes a full copy.
      * 
      * @param varMap  a map of variables to replace and expressions to replace them with.
-     *                Also contains uses that have been replaced, to detect circularities.
      */
-    public ASTNode ASTNode.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public ASTNode ASTNode.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return fullCopy();
     }
-
-    public List List.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    
+    public List List.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         List node = new List();
         for (ASTNode ch : this)
             node.add(ch.createSizeFExp(varMap));
         return node;
     }
     
-    public Opt Opt.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public Opt Opt.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return getNumChild() == 0 ? new Opt() : new Opt(getChild(0).createSizeFExp(varMap));
     }
     
-    /**
-     * Create a copy of this FExp with variable uses and function calls replaced with expressions 
-     * that allow calculations of unknown sizes.
-     * 
-     * For non-FExp nodes, this simply makes a full copy.
-     * 
-     * @param varMap  a map of variables to replace and expressions to replace them with.
-     *                Also contains uses that have been replaced, to detect circularities.
-     */
-    public FExp FExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public FExp FExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         FExp exp = copy();
-        for (int i = 0; i < getNumChild(); i++) 
+        for (int i = 0; i < getNumChild(); i++) {
             exp.setChild(getChild(i).createSizeFExp(varMap), i);
+        }
         return exp;
     }
     
-    public FExp FSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        if (varMap.containsKey(this))
+    private boolean FSizeExp.circ = false;
+    public FExp FSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        if (circ) {
             throw new ConstantEvaluationException();
-        varMap.put(this, null);
-        Size s = getFExp().size();
-        if (s.ndims() == 0)
-            throw new ConstantEvaluationException();
-        return s.createSizeFExp(dimension(), varMap);
+        }
+        circ = true;
+        FExp res = getFExp().size().createSizeFExp(dimension(), varMap);
+        circ = false;
+        return res;
     }
     
-    public FExp FColonSizeExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        boolean circ = varMap.containsKey(this);
-        varMap.put(this, null);
-        if (!circ && varMap.containsKey(getVariable()))
-            return varMap.get(getVariable()).size().createSizeFExp(getDim(), varMap);
-        else
-            return new FSizeExp(getVariable().createUseExp(), getDim());
+    private boolean FColonSizeExp.circ = false;
+    public FExp FColonSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        InstComponentDecl icd = (InstComponentDecl)getVariable();
+        if (circ || !varMap.containsKey(icd)) {
+            return new FSizeExp(icd.createUseExp(), getDim());
+        }
+        circ = true;
+        FExp res = varMap.get(icd).getFExp().size().createSizeFExp(getDim(), varMap);
+        circ = false;
+        return res;
     }
-
-    public FExp FIdUseExp.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    
+    public FExp FIdUseExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return getFIdUse().createSizeFExp(varMap);
     }
     
-    public FExp FIdUse.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public FExp FIdUse.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         throw new UnsupportedOperationException();
     }
     
-    public FExp FIdUseInstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
+    public FExp FIdUseInstAccess.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return getInstAccess().createSizeFExp(varMap);
     }
-
-    public FExp InstAccess.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        return createSizeFExpForUse(varMap, myInstComponentDecl());
-    }
     
-    public FExp InstDot.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        InstComponentDecl top = getFirstInstAccess().myInstComponentDecl();
-        if (varMap.get(top) != null) {
-            FExp exp = null;
-            for (InstAccess ia : getInstAccesss()) {
-                if (exp == null) {
-                    exp = varMap.get(top);
-                } else {
-                    exp = exp.extractRecordFExp(ia.name());
-                }
-                if (ia.hasFArraySubscripts()) {
-                    exp = exp.splitArrayExp(ia.getFArraySubscripts().createIndex());
-                }
-            }
-            varMap.put(myInstComponentDecl(), exp);
-        }
-        return super.createSizeFExp(varMap);
-    }
-    
-    /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
-     */
-    protected FExp InstAccess.createSizeFExpForUse(Map<ASTNode, FExp> varMap, CommonVariableDecl var) {
-        if (varMap.containsKey(this))
-            throw new ConstantEvaluationException();
-        varMap.put(this, null);
-        FExp exp = varMap.get(var);
-        if (exp != null) 
-            return exp;  // Known argument of function
-        else if (onlyUsesSize()) 
-            return var.size().createDummyFExp(varMap);
-        else
+    public FExp InstAccess.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        InstComponentDecl var = myInstComponentDecl();
+        InstFunctionArgument arg = varMap.get(var);
+        if (arg != null) {
+            return arg.getFExp().cell(getFArraySubscripts());
+        } else {
             return createSizeFExpForKeptUse(varMap);
+        }
+    }
+    
+    public FExp InstDot.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        FExp exp = null;
+        for (InstAccess ia : getInstAccesss()) {
+            if (exp == null) {
+                exp = ia.createSizeFExp(varMap);
+            } else {
+                exp = exp.component(ia.name()).cell(ia.getFArraySubscripts());
+            }
+        }
+        return exp;
+    }
+    
+    public FExp FExp.component(String name) {
+        return extractRecordFExp(name);
+    }
+    
+    public FExp FExp.cell(FArraySubscripts fas) {
+        if (fas != null) {
+            return splitArrayExp(fas.createIndex());
+        }
+        return this;
     }
     
     /**
      * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
-    protected FExp InstAccess.createSizeFExpForKeptUse(Map<ASTNode, FExp> varMap) {
+    protected FExp InstAccess.createSizeFExpForKeptUse(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         InstAccess res = fullCopy();
         res.replaceExpsWithSizeFExp(varMap);
         return res.createFExp();
@@ -156,62 +189,52 @@ aspect SizeExpressions {
     /**
      * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
-    protected void InstAccess.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {}
+    protected void InstAccess.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {}
 
-    protected void InstArrayAccess.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {
-        for (FSubscript sub : getFArraySubscripts().getFSubscripts())
+    protected void InstArrayAccess.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        for (FSubscript sub : getFArraySubscripts().getFSubscripts()) {
             sub.replaceExpsWithSizeFExp(varMap);
+        }
     }
     
-    protected void InstDot.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {
-        for (InstAccess part : getInstAccesss())
+    protected void InstDot.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        for (InstAccess part : getInstAccesss()) {
             part.replaceExpsWithSizeFExp(varMap);
+        }
     }
     
     /**
      * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
-    protected void FSubscript.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {}
+    protected void FSubscript.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {}
 
-    protected void FExpSubscript.replaceExpsWithSizeFExp(Map<ASTNode, FExp> varMap) {
+    protected void FExpSubscript.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         setFExp(getFExp().createSizeFExp(varMap));
     }
     
-    public FExp InstFunctionCall.createSizeFExp(Map<ASTNode, FExp> varMap) {
-        if (onlyUsesSize()) 
-            return size().createDummyFExp(varMap);
+    public FExp InstFunctionCall.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         InstAccess name = InstAccess.fromName(getName().myInstCallable().actualInstCallable().qualifiedName());
         InstFunctionCall res = new InstFunctionCall(name, new List<InstFunctionArgument>());
-        for (InstFunctionArgument arg : getArgs())
+        for (InstFunctionArgument arg : getArgs()) {
             res.addArg(arg.createSizeFExpArg(varMap));
+        }
         return res;
     }
 
     /**
      * Helper method for {@link ASTNode#createSizeFExp(Map)}.
      */
-    public InstFunctionArgument InstFunctionArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
+    public InstFunctionArgument InstFunctionArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return fullCopy();
     }
 
-    public InstPositionalArgument InstPositionalArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
+    public InstPositionalArgument InstPositionalArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return new InstPositionalArgument(getFExp().createSizeFExp(varMap), getPos());
     }
 
-    public InstNamedArgument InstNamedArgument.createSizeFExpArg(Map<ASTNode, FExp> varMap) {
+    public InstNamedArgument InstNamedArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return new InstNamedArgument(getFExp().createSizeFExp(varMap), getName().fullCopy());
     }
-
-    /**
-     * Check is this expression is used in a way that means that only its size is ever needed.
-     * 
-     * Typically applies to the first argument of a size() expression.
-     */
-    inh boolean ASTNode.onlyUsesSize();
-    eq FSizeExp.getFExp().onlyUsesSize()       = true;
-    eq FExpSubscript.getChild().onlyUsesSize() = false;
-    eq InstNode.getChild().onlyUsesSize()      = false;
-    eq Root.getChild().onlyUsesSize()          = false;
     
     /**
      * Create a copy of this expression suitable for when it is used to describe a size.
@@ -225,4 +248,46 @@ aspect SizeExpressions {
     public FExp FColonSizeExp.createSizeFExp() {
         return new FSizeExp(getVariable().createUseExp(), getDim());
     }
+    
+    
+    /**
+     * Return the size the function call is expanded to. This is the size of the 
+     * entire function call, and the size of a vectorized argument to a scalar input.
+     * 
+     * If arguments doesn't match, the size matching the most arguments is returned.
+     */
+    syn lazy Size InstVectorFunctionCall.vectorizedSize() {
+        boolean func = inFunction();
+        int tot = getNumArg(), n = 0, ndims = ndims();
+        Size[] candidates = new Size[tot];
+        int[] freq = new int[tot];
+        
+        for (InstFunctionArgument arg : getArgs()) {
+            if (arg.isVectorized()) {
+                Size s = arg.size().contractRight(ndims);
+                for (int i = 0; i < n && s != null; i++) {
+                    if (!candidates[i].equivalent(s, func)) {
+                        if (func && candidates[i].isUnknown())
+                            candidates[i] = candidates[i].createKnown(s);
+                        s = null;
+                        freq[i]++;
+                    }
+                }
+                if (s != null)
+                    candidates[n++] = s;
+            }
+        }
+    
+        int index = 0;
+        for (int i = 1; i < n; i++) 
+            if (freq[index] < freq[i]) 
+                index = i;
+        return candidates[index];
+    }
+    
+    inh Size InstFunctionArgument.vectorizedSize();
+    eq FAbstractFunctionCall.getChild().vectorizedSize() = Size.SCALAR;
+    eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
+    eq FDelayExp.getChild().vectorizedSize()             = vectorizedSize();
+    eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
 }
