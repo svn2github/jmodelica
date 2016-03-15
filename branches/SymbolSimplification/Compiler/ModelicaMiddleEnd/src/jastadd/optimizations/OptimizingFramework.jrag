@@ -33,24 +33,44 @@ aspect OptimizingFramework {
         }
     }
     
+    /**
+     * Optimizing algorithms that are added to the Optimizing Framework will have to
+     * extend this class.
+     */ 
     public abstract class OptimizingAlgorithm {
-    	public FClass fclass;
-    	public OptimizingAlgorithm(FClass fclass) {
+    	protected FClass fclass;
+    	protected FClass.WorkData workData;
+    	public OptimizingAlgorithm(FClass fclass, FClass.WorkData workData) {
     		this.fclass = fclass;
+    		this.workData = workData;
     	}
+    	
+    	/*
+    	 * Checks if the optimizing algorithm is enabled. The algorithm must have an option added
+    	 * to the enum Default in {JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
+    	 * Use {fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
+    	 * @return {code true} if it is enabled, {code false} otherwise.
+    	 */
     	public abstract boolean isUsed();
-    	public abstract boolean run(FAbstractEquation feq, FClass.WorkData workData);
+    	
+    	/*
+    	 * Starts the optimizing algorithm.
+    	 * @param feq The equation to optimize.
+    	 */
+    	public abstract boolean run(FAbstractEquation feq);
     }
     
     public class FClass {
     	ArrayList<OptimizingAlgorithm> optimizeAlgorithmsInFramework = new ArrayList();
     	
-    	public void addOptimizingAlgorithmToFramework() {
-    		optimizeAlgorithmsInFramework.add(new AE(this));
-    		optimizeAlgorithmsInFramework.add(new VP(this));
+    	/**
+    	 * Optimizing algorithms that are used by the framework are added here.
+    	 * @param workData	Data that is shared and updated in and between optimizing algorithms.
+    	 */ 
+    	public void addOptimizingAlgorithmsToFramework(WorkData workData) {
+    		optimizeAlgorithmsInFramework.add(new AE(this, workData));
+    		optimizeAlgorithmsInFramework.add(new VP(this, workData));
     	}
-    	
-    	
     	
 	    /**
 	     *  Main method for running the algorithms.<p>
@@ -65,8 +85,8 @@ aspect OptimizingFramework {
 	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>(); // all
 	    	WorkData workData = new WorkData(worklist); // VP
 	    	ArrayList<OptimizingAlgorithm> optList = new ArrayList();
-			addOptimizingAlgorithmToFramework();
-			CE canonizeEquations = new CE(this);
+			addOptimizingAlgorithmsToFramework(workData);
+			CE canonizeEquations = new CE(this, workData);
 				
 	    	for (OptimizingAlgorithm optAlg: optimizeAlgorithmsInFramework)
 	    		if (optAlg.isUsed())
@@ -78,7 +98,7 @@ aspect OptimizingFramework {
 	    	System.out.println("\n\n----------- NEW TEST --------------\n");  // TODO: Remove later
 	    	
 	    	if (canonizeEquations.isUsed())
-	    		canonizeEquations.run(null, null);
+	    		canonizeEquations.run(null);
 	    	
 	    	while (!worklist.isEmpty()) {
 	    		FAbstractEquation feq = worklist.iterator().next();
@@ -86,7 +106,7 @@ aspect OptimizingFramework {
 	    		System.out.println("Equation: "+feq.toString()); // TODO: Remove later
 	    		
 	    		for (OptimizingAlgorithm optAlg : optList)
-	    			if (optAlg.run(feq, workData))
+	    			if (optAlg.run(feq))
 	    				continue;
 	        }
 	        
@@ -100,9 +120,9 @@ aspect OptimizingFramework {
 		 * and variables.
 		 */
 	    public class WorkData {
-	    	LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();	// Used by AE, VP
-	        ArrayList<FAbstractEquation> parameterEquations = new ArrayList(); 	// Used by VP
-	        HashSet<FAbstractEquation> removedEquations = new HashSet();		// Used by AE, VP
+	    	private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();	// Used by AE, VP
+	        private ArrayList<FAbstractEquation> parameterEquations = new ArrayList(); 	// Used by VP
+	        private HashSet<FAbstractEquation> removedEquations = new HashSet();		// Used by AE, VP
 	        
 	        /**
 	         * Constructs a class containing data needed throughout the execution time 

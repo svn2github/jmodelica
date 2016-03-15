@@ -79,28 +79,25 @@ aspect AE {
 	}
 
     public class AE extends OptimizingAlgorithm {
-		public AE(FClass fclass) {
-    		super(fclass);
+		public AE(FClass fclass, FClass.WorkData workData) {
+    		super(fclass, workData);
     	}
 		
+		@Override
     	public boolean isUsed() {
     	   return fclass.myOptions().getBooleanOption("simple_ae");
     	}
     	
-    	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
-            return doAE(feq, workData);
-    	}
-        
-        
-        public boolean doAE(FAbstractEquation fae, FClass.WorkData workData) {
-        	if (fclass.buildAliasSets(fae, workData)) {
-        		fixAE(workData);
+    	@Override
+    	public boolean run(FAbstractEquation fae) {
+            if (fclass.buildAliasSets(fae, workData)) {
+        		fixAE();
         		return true;
         	}
 			return false;
-	    }
+    	}
 		
-		public void fixAE(FClass.WorkData workData) {
+		public void fixAE() {
 			fclass.setupNewLists(workData);
 	        fclass.doRewrites();
 	        fclass.flush();

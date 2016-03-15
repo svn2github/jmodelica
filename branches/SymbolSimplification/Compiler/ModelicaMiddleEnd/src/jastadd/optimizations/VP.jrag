@@ -21,16 +21,18 @@ aspect VP {
     }
     
     public class VP extends OptimizingAlgorithm {
-    	public VP(FClass fclass) {
-    		super(fclass);
+    	public VP(FClass fclass, FClass.WorkData workData) {
+    		super(fclass, workData);
     	}
     	
+    	@Override
     	public boolean isUsed() {
     		return fclass.myOptions().getBooleanOption("simple_vp");
     	}
     	
-    	public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
-            return doVP(feq, workData);
+    	@Override
+    	public boolean run(FAbstractEquation feq) {
+            return doVP(feq);
     	}
     	
         /**
@@ -39,9 +41,9 @@ aspect VP {
          * @param workData Data that has to be stored and updated by VP.
          * @return {@code true} if VP could be performed, {@code false} otherwise.
          */
-        public boolean doVP(FAbstractEquation feq, FClass.WorkData workData) {
+        public boolean doVP(FAbstractEquation feq) {
             if (feq.canSimplePropagateEquation() && feq.simpleVariabilityPropagation(workData)) {
-            	fixVP(workData);
+            	fixVP();
             	return true;
             }
             return false;
@@ -52,8 +54,8 @@ aspect VP {
          * Constant Folding to the equations and do rewrites.
          * @param workData Data that is updated by VP.
          */
-        public void fixVP(FClass.WorkData workData) {
-	        fixStructure(workData);
+        public void fixVP() {
+	        fixStructure();
 	    	fclass.simpleConstantFolding();
 	        fclass.forceRewrites();
 	        fclass.root().flushAllRecursiveClearFinal();
@@ -63,7 +65,7 @@ aspect VP {
          * Updates the structure of different lists in FClass.
          * @param workData Data that is updated by VP.
          */
-        public void fixStructure(FClass.WorkData workData) {
+        public void fixStructure() {
             //ArrayList<FVariable> newVariables = new ArrayList(); 		// not implemented in this version
             //ArrayList<FVariable> newAliases = new ArrayList(); 		// not implemented in this version
             ArrayList<FAbstractEquation> newEquations = new ArrayList();
