@@ -40,9 +40,38 @@ aspect CanonizeEquations {
         }
         
         public boolean run(FAbstractEquation feq, FClass.WorkData workData) {
-            fclass.canonizeEquations();
+            fclass.canonizeEquations(new DivToMul());
             return true;
         }
+        
+        /**
+		 * Private class that stores variables needed when replacing FDivExps with FMulexps.
+		 */
+	    public class DivToMul {
+	    	private FExp denominator;
+        	private boolean continueMultiplying;
+        	
+        	public DivToMul() {
+        		denominator = FExp.ZERO_EXP;
+        		continueMultiplying = false;
+        	}
+			
+        	public FExp getDenom() {
+        		return denominator;
+        	}
+        	
+        	public void setDenom(FExp denom) {
+        		denominator = denom;
+        	}
+        	
+        	public boolean continueMultiplying() {
+        		return continueMultiplying;
+        	}
+        	
+        	public void setContinueMultiplying(boolean b) {
+        		continueMultiplying = b;
+        	}
+	    }
     }
 
 
@@ -148,9 +177,6 @@ aspect CanonizeEquations {
     /* ---------------- Attribute list end. ---------------- */
     
     public class FClass {
-        private FExp denominator = FExp.ZERO_EXP;
-        private boolean continueUp = false;
-        
         /* ---------- FactorSet ---------- */
         
         /**
@@ -212,9 +238,10 @@ aspect CanonizeEquations {
         /* ---------- FactorSet End ---------- */
         
         /**
-         * 	Transforms all equations in a model to canonical form.<p>
+         * Transforms all equations in a model to canonical form.<p>
+         * @param dToM	Stores variables needed for step 2: Remove all DivExp.
          */
-        public void canonizeEquations() {
+        public void canonizeEquations(CE.DivToMul dToM) {
             for (FAbstractEquation equation: getFAbstractEquations()) {
 	    	    if (!equation.isFEquation())
 	    	      continue;
@@ -228,7 +255,7 @@ aspect CanonizeEquations {
 	    	    debugPrintLn("Moved to one side. Eq:\n" + equation.toString() + "\n");
 	    	    
 	    	    // Step 2: Remove all DivExp.
-	    	    eliminateDivision(feq);
+	    	    eliminateDivision(feq, dToM);
 	    	    debugPrintLn("Removed division. Eq:\n" + equation.toString() + "\n");
 	    	    
 	    	    // Step 3: Build a tree of only FAddExps and FMulExps.
@@ -273,7 +300,7 @@ aspect CanonizeEquations {
 	     * 
 	     * @param  feq The equation from which to remove divisions.
 	     */
-	    private void eliminateDivision(FEquation feq) {
+	    private void eliminateDivision(FEquation feq, CE.DivToMul dToM) {
 	       FExp fexp = feq.nonZeroSide();
 	        
 	        // If the expression is only a variable, return.
@@ -297,65 +324,86 @@ aspect CanonizeEquations {
 	        
 	        boolean foundDiv = false;
 	        
+	        // Continue searching through the tree untill no more FDivExps are found
 	        do {
-	            foundDiv = divToMul(fexp, fexp);
-	            continueUp = false;
+	            foundDiv = divToMul(fexp, fexp, dToM);
+	            dToM.setContinueMultiplying(false);
 	        } while (foundDiv);
 	    }
     
 	    /*
-	     * Translates all division expressions of an equation to multiplication expressions.<p>
+	     * Translates all division expressions of an equation to new multiplication expressions.<p>
 	     * Since the assumption that no expressions exists on one side of an equation all divisions
 	     * can be removed, i.e. every fraction can be multiplied by the equation's GCD.
 	     * 
+	     * The transformation is performed by recursively traversing the tree DFS style.
+	     * 
 	     * @param fexp			The expression which denominator should be evaluated.
 	     * @param rootParent	The root expression, i.e. the lhs or rhs depending on <code>FClass.ZERO_LEFT</code>.
-	     * @return	true if the current expression should propagate multiplication higher in the tree.
+	     * @param dToM			A class containing the denominator FExp to multiply with and a boolean flag
+	     * 						set to true if should continue propagate upwards.
+	     * @return {@code true} if a FDivExp was found, {@code false} otherwise.
 	     * @see		FClass.ZERO_LEFT (CanonizeEquations.jrag).
 	     * 
 	     * TODO: Not optimized atm. The algorithm is traversing the whole tree everytime this method is called.
 	     *       This could be improved by tracking which paths we have already found and removed an FDivExp.
 	     */
-	    private boolean divToMul(FExp fexp, FExp rootParent) {
-	        boolean foundDivLeft = false;
-	        boolean foundDivRight = false;
-	        boolean foundDiv = false;
+	    private boolean divToMul(FExp fexp, FExp rootParent, CE.DivToMul dToM) {
+	        boolean foundDivLeft = false;		// If found a FDivExp searching on left child
+	        boolean foundDivRight = false;		// If found a FDivExp searching on right child
+	        boolean foundDiv = false;			// If found a FDivExp
 	        
-	        if (!fexp.isFBinExp())
+	        if (!fexp.isFBinExp())				// Stop searching down the tree if this node is not an FBinExp
 	        	return false;
-	        	
-	        FBinExp bin = fexp.asFBinExp();
-	        FExp leftChild = bin.getLeft(),
-	        	rightChild = bin.getRight();
+	        
+	        FBinExp bin = fexp.asFBinExp();		// The FBinExp node currently at
+	        FExp leftChild = bin.getLeft(),		// Left child of this node
+	        	rightChild = bin.getRight();	// Right Child of this node
 	    
-	        if (leftChild.isFBinExp())
-	            foundDivLeft = divToMul(leftChild, rootParent);
+	    	// Continue recursively searching down the left child as long as its an FBinExp
+	        if (leftChild.isFBinExp()) 
+	            foundDivLeft = divToMul(leftChild, rootParent, dToM);
 
+			// Continue recursively searching down the right child as long as its an FBinExp
 	        if (rightChild.isFBinExp() && !foundDivLeft)
-	            foundDivRight = divToMul(rightChild, rootParent);
+	            foundDivRight = divToMul(rightChild, rootParent, dToM);
 	        
 	        foundDiv = foundDivLeft || foundDivRight;
 	        
-	        // Remove bottom FDivExp and insert FMulExps at correct places.
+	        
             if (!foundDiv && fexp.isFDivExp() && fexp != rootParent) {
-                foundDiv = true;
-                continueUp = true;
-                denominator = rightChild;
+            // Check if at a bottom FDivExp node (foundDiv==false) and its not the rootParent.
+                foundDiv = true; 					// Found an FDivExp
+                dToM.setContinueMultiplying(true); 	// Continue multiplying upwards in tree
+                dToM.setDenom(rightChild);			// Fetch denominator of FDivExp
                 
-                if (fexp.parentFExp().getChild(0) == fexp) {
-                    fexp.parentFExp().setChild(leftChild, 0);
-                } else {
+                // Check if this node is left or right child of its parent.
+                // Then replace the FDivExp with its left child (numerator).
+                if (fexp.parentFExp().getChild(0) == fexp) {	
+                    fexp.parentFExp().setChild(leftChild, 0);	
+                } else {										
                     fexp.parentFExp().setChild(leftChild, 1);
                 }
-            } else if (continueUp && (fexp.isFAddExp() || fexp.isFSubExp())) {
+            } else if (dToM.continueMultiplying() && (fexp.isFAddExp() || fexp.isFSubExp())) {
+            // Check if should continuing multiplying upwards in tree and the node is an FAddExp or FSubExp.
+            // After checking at which child the FDivExp was found, an FMulExp is inserted that multiplies
+            // the other child with the denominator of the FDivExp.
                 if (foundDivLeft) {
-                    fexp.setChild(new FMulExp(rightChild, denominator), 1);
+                	fexp.setChild(new FMulExp(rightChild, dToM.getDenom()), 1);
+                    //fexp.setChild(new FMulExp(rightChild, denominator), 1);
                 } else {
-                    fexp.setChild(new FMulExp(leftChild, denominator), 0);
+                	fexp.setChild(new FMulExp(leftChild, dToM.getDenom()), 0);
+                    //fexp.setChild(new FMulExp(leftChild, denominator), 0);
                 }
-            } else if (continueUp && foundDivRight && fexp.isFDivExp()) {
-                continueUp = false;
-                fexp.setChild(new FMulExp(leftChild, denominator), 0);
+            } else if (dToM.continueMultiplying() && foundDivRight && fexp.isFDivExp()) {
+            // Check if should continuing multiplying upwards in tree, the FDivExp was found at
+            // the right child of this node and the node is an FDivExp.
+            // Time to stop multiplying upwards and an FMulExp is inserted that multiplies
+            // the left child with the denominator of the FDivExp.
+                dToM.setContinueMultiplying(false);
+                //continueUp = false;
+                fexp.setChild(new FMulExp(leftChild, dToM.getDenom()), 0);
+                //fexp.setChild(new FMulExp(leftChild, denominator), 0);
             }
 	        
 	        return foundDiv;
