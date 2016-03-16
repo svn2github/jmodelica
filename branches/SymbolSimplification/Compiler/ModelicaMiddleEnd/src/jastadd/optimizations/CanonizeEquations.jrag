@@ -30,6 +30,8 @@ aspect CanonizeEquations {
     public class CE extends OptimizingAlgorithm {
     	// Specifies whether the LHS or RHS should be zero.
     	public static final boolean ZERO_LEFT = false;
+    	private static FactorComparator factorComparator
+            = new FactorComparator();
     	
         public CE(FClass fclass, FClass.WorkData workData) {
             super(fclass, workData);
@@ -254,16 +256,17 @@ aspect CanonizeEquations {
          * avoiding creating new expressions until members of the old equation
          * (parents) are no longer needed.
          */ 
-        private class FactorSet {
-        	private HashSet<FExp> factors;
+	private class FactorSet {
+            private FactorComparator comparator = CE.factorComparator;
+        	private PriorityQueue<FExp> factors;
         	private boolean negated = false;
         
         	public FactorSet() {
-        		factors = new HashSet<FExp>();
+        	   factors = new PriorityQueue<FExp>(comparator);
         	}
         
         	public FactorSet(FExp exp) {
-        		factors = new HashSet<FExp>();
+        		factors = new PriorityQueue<FExp>(comparator);
        			add(exp);
         	}
         	
@@ -276,13 +279,17 @@ aspect CanonizeEquations {
 				FExp mulExp = FExp.ZERO_EXP;
 
 				// HashSet.get() doesn't exist so iteration is required.
-				if (factors.size() == 1)
+				if (factors.size() == 1) {
 					for (FExp exp : factors)
 						mulExp = exp;
-				else
-					mulExp = FExp.createBalancedBinaryTree(
-						new FMulExp(), new ArrayList<FExp>(factors));
-					
+				} else {
+				    ArrayList<FExp> queue = new ArrayList<FExp>();
+				    
+				    for (FExp factor : factors)
+				        queue.add(factor);
+				        
+					mulExp = FExp.createBalancedBinaryTree(new FMulExp(), queue);
+                }					
         		return negated ? new FNegExp(mulExp) : mulExp;
         	}
         	
@@ -446,7 +453,7 @@ aspect CanonizeEquations {
          */
          private void reorderTerm(FMulExp fme) {
             PriorityQueue<FIdUseExp> ids = new PriorityQueue<FIdUseExp>(
-                0, new NameComparator());
+                0, new FactorComparator());
                 
             ArrayList<FIdUseExp> list = new ArrayList<FIdUseExp>();
             getFIdUses(fme, list);
@@ -491,9 +498,43 @@ aspect CanonizeEquations {
           * Refers to the <code>String</code> comparator in order to sort
           * terms alphabetically.
           */
-         private class NameComparator implements Comparator<FIdUseExp> {
-            public int compare(FIdUseExp f1, FIdUseExp f2) {
-                return (f1.name()).compareTo(f2.name());
+         /**
+          * Comparator class for <code>FIdUse</code>s.<p>
+          * Refers to the <code>String</code> comparator in order to sort
+          * terms alphabetically.
+          */
+         private static class FactorComparator implements Comparator<FExp> {
+            public int compare(FExp exp1, FExp exp2) {
+                int result = 0;
+                
+                // For ids, we compare the strings.
+                if (exp1.isFIdUseExp() && exp2.isFIdUseExp()) {
+                    String id1 = exp1.asFIdUseExp().name(),
+                        id2 = exp2.asFIdUseExp().name();
+                    
+                    result = id1.compareTo(id2);
+                    
+                // For constants, we order them from lowest to greatest.
+                } else if (exp1.isLiteralExp() && exp2.isLiteralExp()) {
+                    FIntegerLitExp lit1 = exp1.asFIntegerLitExp(),
+                        lit2 = exp2.asFIntegerLitExp();
+                        
+                    result = lit1.getValue() - lit2.getValue();
+                    
+                // MulExps are ordered according to their first id.
+                } else if (exp1.isFMulExp() && exp2.isFMulExp()) {
+                    result = 0;
+                
+                // Ids are ordered before constants.
+                } else if (exp1.isFIdUseExp() && exp2.isLiteralExp()) {
+                    result = -1;
+                } else if (exp1.isLiteralExp() && exp2.isFIdUseExp()) {
+                    result = 1;
+                } else {
+                    return 0;
+                }
+                
+                return result;
             }
          }
     }
@@ -534,6 +575,7 @@ aspect CanonizeEquations {
      
     syn FBinExp FExp.asFBinExp() = (FBinExp) this;
     syn FEquation FAbstractEquation.asFEquation() = (FEquation) this;
+	syn FIntegerLitExp FExp.asFIntegerLitExp() = (FIntegerLitExp) this;
     
     /*
      * Within negative context.<p>
