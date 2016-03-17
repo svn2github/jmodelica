@@ -999,7 +999,7 @@ aspect Slices {
     /**
      * Check if this is a slice operation.
      */
-    syn boolean FExp.isSlice() = false;
+    syn boolean FExp.isSlice() = true;
     eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
     eq FSubscriptedExp.isSlice() = isArray();
     

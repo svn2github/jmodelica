@@ -2296,13 +2296,16 @@ aspect ConstantEvaluation {
      */
     protected OverconstrainedConnectionGraph FConnBoolOp.connectionGraph = null;
 
-    eq FSizeExp.cevalCalc(VariableEvaluator evaluator) {
-        if (!hasDim())
-          return CValue.UNKNOWN;
-        int s = getFExp().size().get(dimension());
+    eq FSizeExp.cevalCalc(VariableEvaluator evaluator) =
+            getFExp().size().ceval(evaluator, dimension());
+    eq FUnknownSizeExp.cevalCalc(VariableEvaluator evaluator) =
+            getFExp().cevalCalc(evaluator).size().ceval(evaluator, dimension());
+    
+    public CValue Size.ceval(VariableEvaluator evaluator, int d) {
+        int s = get(d);
         return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
     }
-
+    
     eq FColonSizeExp.cevalCalc(VariableEvaluator evaluator) {
         if (getVariable() == null)
             return CValue.UNKNOWN;
@@ -2779,6 +2782,9 @@ aspect ConstantEvaluation {
     
     eq InstRecord.cevalNoBExp(VariableEvaluator evaluator, Index i) {
         if (isArray()) {
+            if (size().isUnknown()) {
+                return CValue.UNKNOWN;
+            }
             CValueArray val = new CValueArray(size());
             cevalNoBExpArray(evaluator, this, val, ndims());
             return i == Index.NULL ? val : val.getCell(i);
@@ -4687,7 +4693,8 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-
+    eq FUnknownSizeExp.isCircularCalc() = getFExp().isCircular() || getDim().isCircular();
+    
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
             try {

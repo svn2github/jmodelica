@@ -15,6 +15,174 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+aspect AccessSizes {
+    
+    syn Size InstAccess.declarationSize() = Size.SCALAR;
+    eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
+    
+    /**
+     * Get the array sizes. 
+     */
+    syn Size FSubscript.size();
+    eq FExpSubscript.size()     = getFExp().size();
+    eq FColonSubscript.size()   = accessContextSize();
+    eq FIntegerSubscript.size() = Size.SCALAR;
+    
+    /**
+     * Get the size this subscript(s) would have if all subscripts were colons.
+     */
+    inh Size FSubscript.mySize();
+    inh Size FArraySubscripts.mySize();
+    eq Root.getChild().mySize()                       = Size.SCALAR;
+    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
+    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
+    eq InstNamedAccess.getChild().mySize()            = declarationSize();
+    
+    inh Size FEndExp.mySize();
+    eq FExpSubscript.getChild().mySize()   = accessContextSize();
+    
+    eq FIdUse.getChild().mySize() {
+        if (inFunction()) {
+            FQNameFull fqn = getFQName().asFQNameFull();
+            if (fqn.numParts() > 1) {
+                FType type = lookupFV(fqn.copyPrefix(1)).type();
+                return type.lookupHierarchical(fqn, 1).size();
+            }
+        }
+        return myFV().size();
+    }
+    eq FQNameFull.getFQNamePart(int i).mySize() {
+        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
+        n.setParent(this);
+        return lookupFV(n).size();
+    }
+    
+    public Size Size.contract(int i) {
+        if (has(i)) {
+            return contract(i,size.length-i-1);
+        } else {
+            return Size.SCALAR;
+        }
+    }
+    
+    syn Size FSubscript.accessContextSize() = mySize().accessContextSize(this);
+    
+    public Size Size.accessContextSize(FSubscript sub) {
+        return this;
+    }
+    
+    public Size MutableSize.accessContextSize(FSubscript sub) {
+        if (exps[0] == null || sub == null) {
+            return super.accessContextSize(sub);
+        }
+        MutableSize ms = new MutableSize(1);
+        ms.set(0, exps[0].accessContextSize(sub));
+        return ms;
+    }
+    
+    public FExp FExp.accessContextSize(FSubscript sub) {
+        return this;
+    }
+    
+    public FExp FColonSizeExp.accessContextSize(FSubscript sub) {
+        return sub.getAccessContextSizeExp();
+    }
+    
+    syn FExp FSubscript.getAccessContextSizeExp() = null;
+    syn FExp FColonSubscript.getAccessContextSizeExp() = buildAccessContextSizeExp();
+    syn FExp FExpSubscript.getAccessContextSizeExp()   = buildAccessContextSizeExp();
+    
+    inh FExp FSubscript.buildAccessContextSizeExp();
+    inh FExp FArraySubscripts.buildAccessContextSizeExp();
+    eq Root.getChild().buildAccessContextSizeExp()   = null;
+    eq FArraySubscripts.getFSubscript(int i).buildAccessContextSizeExp() =
+            new FUnknownSizeExp(buildAccessContextSizeExp(), new Opt<FExp>(new FIntegerLitExp(i+1)));
+    eq InstNamedAccess.getChild().buildAccessContextSizeExp() =
+            new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
+    eq FQNamePart.getChild().buildAccessContextSizeExp() =
+            new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
+    eq FIdUse.getExpandedSubscripts().buildAccessContextSizeExp() =
+            new FIdUseExp(new FIdUse(new FQNameFull(getFQName().buildAccessContext())));
+    
+    syn List<FQNamePart> FQName.buildAccessContext() = null;
+    eq FQNameString.buildAccessContext() {
+        List<FQNamePart> l = new List<FQNamePart>();
+        l.add(new FQNamePart(name()));
+        return l;
+    }
+    eq FQNameFull.buildAccessContext() {
+        FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
+        return last.buildAccessContext(last.name(), null);
+    }
+    
+    public List<InstAccess> InstAccess.buildAccessContext(String name, FArraySubscripts fas) {
+        List<InstAccess> res = accessContextInst();
+        if (fas == null) {
+            res.add(new InstParseAccess(name));
+        } else {
+            res.add(new InstParseArrayAccess(name, fas));
+        }
+        return res;
+    }
+    
+    public List<FQNamePart> FQNamePart.buildAccessContext(String name, FArraySubscripts fas) {
+        List<FQNamePart> res = accessContextFlat();
+        if (fas == null) {
+            res.add(new FQNamePart(name));
+        } else {
+            res.add(new FQNamePartArray(name, fas));
+        }
+        return res;
+    }
+    
+    inh List<InstAccess> InstAccess.accessContextInst();
+    eq Root.getChild().accessContextInst()     = new List<InstAccess>();
+    eq FExp.getChild().accessContextInst()     = new List<InstAccess>();
+    eq InstDot.getInstAccess(int i).accessContextInst() = 
+            i == 0 ? new List<InstAccess>() : getInstAccess(i-1).buildAccessContext();
+    
+    inh List<FQNamePart> FQNamePart.accessContextFlat();
+    eq Root.getChild().accessContextFlat()     = new List<FQNamePart>();
+    eq FExp.getChild().accessContextFlat()     = new List<FQNamePart>();
+    eq FQNameFull.getFQNamePart(int i).accessContextFlat() = 
+            i == 0 ? new List<FQNamePart>() : getFQNamePart(i-1).buildAccessContext();
+    
+    syn List<InstAccess> InstAccess.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
+    syn List<FQNamePart> FQNamePart.buildAccessContext() = buildAccessContext(name(), accessContextFAS());
+    
+    syn FArraySubscripts InstAccess.accessContextFAS() {
+        FArraySubscripts res = null;
+        if (declarationDims() > 0) {
+            for (FArraySubscripts fas : allFArraySubscripts()) {
+                res = fas.buildAccessContext();
+            }
+        }
+        return res;
+    }
+    
+    syn FArraySubscripts FQNamePart.accessContextFAS() = null;
+    eq FQNamePartArray.accessContextFAS() = getFArraySubscripts().buildAccessContext();
+    
+    syn FArraySubscripts FArraySubscripts.buildAccessContext() {
+        FArraySubscripts res = new FArraySubscripts();
+        for (FSubscript fs : getFSubscripts()) {
+            res.addFSubscript(fs.buildAccessContext());
+        }
+        return res;
+    }
+    
+    syn FSubscript FSubscript.buildAccessContext() = treeCopy();
+    eq FColonSubscript.buildAccessContext()   = new FIntegerSubscript(1);
+    eq FExpSubscript.buildAccessContext()     = getFExp().isArray() ? 
+            new FExpSubscript(getFExp().createFirstIndexExp()) : super.buildAccessContext();
+    
+    syn FExp FExp.createFirstIndexExp() {
+        FArraySubscripts fas = new FArraySubscripts();
+        fas.addFSubscript(new FIntegerSubscript(1));
+        return new FSubscriptedExp(treeCopy(), fas);
+    }
+}
+
 aspect FunctionCallSizes {
     
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
@@ -109,7 +277,7 @@ aspect FunctionCallSizes {
         return exp;
     }
     
-    private boolean FSizeExp.circ = false;
+    protected boolean FSizeExp.circ = false;
     public FExp FSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         if (circ) {
             throw new ConstantEvaluationException();
@@ -120,16 +288,18 @@ aspect FunctionCallSizes {
         return res;
     }
     
-    private boolean FColonSizeExp.circ = false;
-    public FExp FColonSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        InstComponentDecl icd = (InstComponentDecl)getVariable();
-        if (circ || !varMap.containsKey(icd)) {
-            return new FSizeExp(icd.createUseExp(), getDim());
+    public FExp FUnknownSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        if (circ) {
+            throw new ConstantEvaluationException();
         }
         circ = true;
-        FExp res = varMap.get(icd).getFExp().size().createSizeFExp(getDim(), varMap);
+        FExp res = getFExp().createSizeFExp(varMap).size().createFExp(dimension());
         circ = false;
         return res;
+    }
+    
+    public FExp FColonSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        throw new UnsupportedOperationException("What am i doing here?");
     }
     
     public FExp FIdUseExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {

@@ -661,54 +661,7 @@ aspect Arrays {
 				s.append(fs.size());
 		return s;
 	}
-
 	
-	/**
-	 * Get the array sizes. 
-	 */
-	syn Size FSubscript.size();
-	eq FExpSubscript.size()     = getFExp().size();
-	eq FColonSubscript.size()   = mySize();
-	eq FIntegerSubscript.size() = Size.SCALAR;
-
-    /**
-     * Get the size this subscript(s) would have if all subscripts were colons.
-     */
-    inh Size FEndExp.mySize();
-    inh Size FSubscript.mySize();
-    inh Size FArraySubscripts.mySize();
-    eq FIdUse.getChild().mySize() {
-        if (inFunction()) {
-            FQNameFull fqn = getFQName().asFQNameFull();
-            if (fqn.numParts() > 1) {
-                FType type = lookupFV(fqn.copyPrefix(1)).type();
-                return type.lookupHierarchical(fqn, 1).size();
-            }
-        }
-        return myFV().size();
-    }
-    eq Root.getChild().mySize()                       = Size.SCALAR;
-    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
-    eq InstNamedAccess.getChild().mySize()            = declarationSize();
-    eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
-    
-    public Size Size.contract(int i) {
-        if (has(i)) {
-            return contract(i,size.length-i-1);
-        } else {
-            return Size.SCALAR;
-        }
-    }
-    
-    eq FQNameFull.getFQNamePart(int i).mySize() {
-        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
-        n.setParent(this);
-        return lookupFV(n).size();
-    }
-    
-    syn Size InstAccess.declarationSize() = Size.SCALAR;
-    eq InstNamedAccess.declarationSize()  = myInstComponentDecl().size();
-
 	/**
 	 * Get the array sizes. 
 	 */
@@ -1255,11 +1208,6 @@ aspect Arrays {
 		FExp res = indexMap.get(name());
 		return (res == null) ? this : res;
 	}
-	
-	/**
-	 * Expand index for all values of each for index used in expression.
-	 */
-    syn lazy Array FExpSubscript.getExpanded() = getFExp().getArray().createExpanded(collectForIndices(), getFExp().myFClass() != null);
 	
 	/**
 	 * Collect all ForIndexs used in the expression of this FExpSubscript.
@@ -2436,7 +2384,6 @@ aspect Arrays {
 	 */
 	inh FType Array.type();
 	eq FExp.getArray().type()             = type();
-	eq FExpSubscript.getExpanded().type() = type();
 
 }
 

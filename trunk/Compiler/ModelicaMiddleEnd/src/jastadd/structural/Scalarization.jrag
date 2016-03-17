@@ -1768,7 +1768,11 @@ aspect Scalarization {
             super.addArrayUsesToIndexMap(indexMap, names);
         }
     }
-
+    
+    public void FSizeExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
+        
+    }
+    
     public void FIdUseExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         if (!hasFArraySubscripts() && isArray())
             indexNames = names;
@@ -2388,7 +2392,7 @@ aspect Scalarization {
 		if (isArray()) {
 			FQNameFull fullSuffix = suffix.copyAsFQNameFull();
 			Indices ind = null;
-			if (size().isComplete()) 
+            if (!size().isUnknown())
 				ind = indices(); 
 			else  // TODO: This is calculated each time - introduce some kind of lazy attribute?
 				ind = left.dynamicFExp(left.scalarRecordFExp(indexMap, suffix)).indices();
@@ -3145,12 +3149,11 @@ aspect Scalarization {
 
 	
 	public FExp FSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
-		// Only the form with dim can be in the tree at this point
-		FExp exp = getFExp();
-		if (exp instanceof FIdUseExp && exp.size().isUnknown() && !((FIdUseExp)exp).hasFArraySubscripts())
-			return fullCopy();
-		else
-			return dynamicFExp(getFExp().size().createFExp(dimension())).scalarize(indexMap);
+        if (getFExp().isSlice() || !getFExp().size().isUnknown(dimension())) {
+            return getFExp().size().createFExp(dimension());
+        } else {
+            return new FSizeExp(getFExp().scalarize(indexMap), new Opt<FExp>(getDim().scalarize(indexMap)));
+        }
 	}
 	
 	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
