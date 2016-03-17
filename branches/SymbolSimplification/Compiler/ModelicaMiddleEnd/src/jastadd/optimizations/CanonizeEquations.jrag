@@ -101,10 +101,6 @@ aspect CanonizeEquations {
 	    	    // Step 3: Build a tree of only FAddExps and FMulExps.
 	    	    toAddMulTree(feq);
 	    	    fclass.debugPrintLn("Removed parentheses. Eq:\n" + equation.toString() + "\n");
-	    	    
-	        	// Step 4: Re-order terms.
-	        	//reorderTerms(feq);
-	        	//debugPrintLn("Re-ordered terms. Eq:\n" + equation.toString() + "\n");
 	        	
 	        	// Step 5: ...
             }
@@ -278,19 +274,17 @@ aspect CanonizeEquations {
         	public FExp multiply() {
 				FExp mulExp = FExp.ZERO_EXP;
 
-				// HashSet.get() doesn't exist so iteration is required.
 				if (factors.size() == 1) {
-					for (FExp exp : factors)
-						mulExp = exp;
+					mulExp = factors.poll();
 				} else {
-				    ArrayList<FExp> queue = new ArrayList<FExp>();
+				    ArrayList<FExp> list = new ArrayList<FExp>();
 				    
 				    for (FExp factor : factors)
-				        queue.add(factor);
+				        list.add(factor);
 				        
-					mulExp = FExp.createBalancedBinaryTree(new FMulExp(), queue);
+					mulExp = FExp.createBalancedBinaryTree(new FMulExp(), list);
                 }					
-        		return negated ? new FNegExp(mulExp) : mulExp;
+        		return negated ? new FMulExp(mulExp, new FIntegerLitExp(-1)) : mulExp;
         	}
         	
         	/**
@@ -392,106 +386,32 @@ aspect CanonizeEquations {
          *  @return     The top level addition or subtraction.
          */
 	    private FExp createAddTree(HashSet<FactorSet> factors) {
-	    	ArrayList<FExp> list = new ArrayList<FExp>();
+	    	PriorityQueue<FExp> queue =
+	    		new PriorityQueue<FExp>(factorComparator);
+	    		
 	    	// Gather all factors from the FactorSets.
 	    	for (FactorSet fs : factors)
-	    		list.add(fs.multiply());
+	    		queue.add(fs.multiply());
 	    	
 	    	FExp exp = FExp.ZERO_EXP;
-	       	int length = list.size();
+	       	int length = queue.size();
 	       
 	       	// If there is only one expression, return it.
 	       	if (length == 1)
-	        	exp = list.remove(0);
+	        	exp = queue.poll();
 	        	
 	        // If there is two expressions add them together.
 	       	else if (length == 2)
-	           	exp = new FAddExp(list.remove(0),
-	            	list.remove(0));
+	           	exp = new FAddExp(queue.poll(), queue.poll());
 	            	
 	        // If there are numerous expressions, build an FAddExp-tree
 	        // joining them all together.
 	       	else
-	        	exp = FExp.createBalancedBinaryTree(new FAddExp(), list);
+	        	exp = FExp.createBalancedBinaryTree(new FAddExp(),
+	        		new ArrayList<FExp>(queue));
 	        	
 	        return exp; 
 	    }
-	    
-	    // TODO: Below.
-
-        /**
-         *  Re-orders all multiplied terms.<p>
-         *
-         *  @param feq  The equation containing multiplied terms.
-         */
-         private void reorderTerms(FEquation fe) {
-            FExp exp = fe.nonZeroSide();
-            
-            if (!exp.isFBinExp())
-                return;
-                
-            recursiveReorder((FBinExp) exp);
-         }
-         
-         private void recursiveReorder(FBinExp exp) { 
-            FExp left = exp.getLeft(), right = exp.getRight();
-            
-            if (exp.isFAddExp() || exp.isFSubExp()) {
-                if (left.isFBinExp())
-                    recursiveReorder((FBinExp) left);
-                if (right.isFBinExp())    
-                    recursiveReorder((FBinExp) right);
-            } else if (exp.isFMulExp()) {
-                reorderTerm((FMulExp) exp);
-            }
-         }
-        
-        /**
-         *  Re-orders the factors in a multiplication term in alphabetical order.<p>
-         *  
-         *  @param exp  The parent node of a multiplication chain to re-order.
-         */
-         private void reorderTerm(FMulExp fme) {
-            PriorityQueue<FIdUseExp> ids = new PriorityQueue<FIdUseExp>(
-                0, new FactorComparator());
-                
-            ArrayList<FIdUseExp> list = new ArrayList<FIdUseExp>();
-            getFIdUses(fme, list);
-            
-            for (FIdUseExp fiue : list)
-                ids.add(fiue);
-                
-            if (ids.size() <= 1)
-                return;
-                
-            if (ids.size() == 2) {
-                fme.setLeft(ids.poll());
-                fme.setRight(ids.poll());
-            } else {
-                fme.setLeft(ids.poll());
-                fme.setRight(buildProduct(ids));
-            }
-         }
-         
-         private void getFIdUses(FExp exp, ArrayList<FIdUseExp> list) {
-            if (exp.isFIdUseExp()) {
-                list.add((FIdUseExp) exp);
-                return;
-            }
-            
-            if (!exp.isFBinExp())
-                return;
-            
-            FBinExp fexp = exp.asFBinExp();
-            getFIdUses(fexp.getLeft(), list);
-            getFIdUses(fexp.getRight(), list);    
-         }
-         
-         private FExp buildProduct(PriorityQueue<FIdUseExp> list) {
-            if (list.size() == 1)
-                return list.poll();
-            return new FMulExp(list.poll(), buildProduct(list));
-         }
          
          /**
           * Comparator class for <code>FIdUse</code>s.<p>
@@ -523,7 +443,25 @@ aspect CanonizeEquations {
                     
                 // MulExps are ordered according to their first id.
                 } else if (exp1.isFMulExp() && exp2.isFMulExp()) {
-                    result = 0;
+                    ArrayList<FExp> ids1 = exp1.factors(),
+                    	ids2 = exp2.factors();
+                    
+					if (hasNegative(ids1) && !hasNegative(ids2))
+						return 1;
+					else if (!hasNegative(ids1) && hasNegative(ids2))
+						return -1;
+						
+					if (ids1.size() > ids2.size())
+						return -1;
+					else if (ids1.size() < ids2.size())
+						return 1;
+                    
+                    while (!(ids1.isEmpty() || ids2.isEmpty())) {
+                    	FExp f1 = ids1.remove(0),
+                    		f2 = ids2.remove(0);
+                    	if ((result = compare(f1, f2)) != 0)
+                    		break;
+                    } 
                 
                 // Ids are ordered before constants.
                 } else if (exp1.isFIdUseExp() && exp2.isLiteralExp()) {
@@ -535,6 +473,13 @@ aspect CanonizeEquations {
                 }
                 
                 return result;
+            }
+            
+            private boolean hasNegative(ArrayList<FExp> ids) {
+            	FExp last = ids.get(ids.size() - 1);
+            	if (!last.isLiteralExp())
+            		return false;
+            	return last.asFIntegerLitExp().getValue() < 0;
             }
          }
     }
