@@ -82,6 +82,28 @@ jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den,
     return jmi_divide(jmi, NULL, num, den, msg);
 }
 
+jmi_ad_var_t static jmi_atan2(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, jmi_ad_var_t y, const char msg[]) {
+    jmi_ad_var_t to_return = atan2(x, y);
+	if (x == 0 && y == 0) {
+        char val[64];
+        sprintf(val, "%.14E, %.14E", x, y);
+        
+        if (jmi == NULL) jmi = jmi_get_current();
+        jmi_log_func_or_eq(jmi, "IllegalAtan2Input", func_name, msg, val);
+		to_return = x/y; /* Create Nan as output. */
+    }
+    
+    return to_return;
+}
+
+jmi_ad_var_t jmi_atan2_function(const char func_name[], jmi_ad_var_t x, jmi_ad_var_t y, const char msg[]) {
+    return jmi_atan2(NULL, func_name, x, y, msg);
+}
+
+jmi_ad_var_t jmi_atan2_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char msg[]) {
+    return jmi_atan2(jmi, NULL, x, y, msg);
+}
+
 jmi_ad_var_t static jmi_pow(jmi_t *jmi, const char func_name[], jmi_ad_var_t x, jmi_ad_var_t y, const char msg[]) {
 
     jmi_ad_var_t to_return = pow(x, y);

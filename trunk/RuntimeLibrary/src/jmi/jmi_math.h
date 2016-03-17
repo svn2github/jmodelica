@@ -55,6 +55,16 @@ jmi_ad_var_t jmi_divide_function(const char* name, jmi_ad_var_t num, jmi_ad_var_
 jmi_ad_var_t jmi_divide_equation(jmi_t *jmi, jmi_ad_var_t num, jmi_ad_var_t den, const char* msg);
 
 /**
+ * Function to wrap atan2 and report errors to the log, for use in functions.
+ */
+jmi_ad_var_t jmi_atan2_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+
+/**
+ * Function to wrap atan2 and report errors to the log, for use in equations.
+ */
+jmi_ad_var_t jmi_atan2_equation(jmi_t *jmi, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
+
+/**
  * Function to wrap the C pow function and report errors to the log, for use in functions.
  */
 jmi_ad_var_t jmi_pow_function(const char* name, jmi_ad_var_t x, jmi_ad_var_t y, const char* msg);
