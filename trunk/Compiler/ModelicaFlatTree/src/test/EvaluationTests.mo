@@ -1366,6 +1366,28 @@ end EvaluationTests.FunctionEval37;
 ")})));
 end FunctionEval37;
 
+model FunctionEval38
+    record R
+        Real[:] x;
+    end R;
+    function f
+        input R r;
+        output Real x = r.x[end];
+    algorithm
+    end f;
+    constant Real x1 = f(R({1,2}));
+    Real x2 = f(R({1,2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval38",
+            description="Evaluation of end exp",
+            flatModel="
+fclass EvaluationTests.FunctionEval38
+ constant Real x1 = 2;
+end EvaluationTests.FunctionEval38;
+")})));
+end FunctionEval38;
 
 model VectorFuncEval1
     function f

@@ -1167,6 +1167,42 @@ end FunctionTests.FunctionFlatten24;
 ")})));
 end FunctionFlatten24;
 
+model FunctionFlatten25
+    record R
+        Real[:] x;
+    end R;
+    function f
+        input R r;
+        output Real x = r.x[end];
+    algorithm
+    end f;
+    Real x = f(R({1,2}));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionFlatten25",
+            description="Flattening of end in function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten25
+ Real x = FunctionTests.FunctionFlatten25.f(FunctionTests.FunctionFlatten25.R({1, 2}));
+
+public
+ function FunctionTests.FunctionFlatten25.f
+  input FunctionTests.FunctionFlatten25.R r;
+  output Real x;
+ algorithm
+  x := r.x[size(r.x, 1)];
+  return;
+ end FunctionTests.FunctionFlatten25.f;
+
+ record FunctionTests.FunctionFlatten25.R
+  Real x[:];
+ end FunctionTests.FunctionFlatten25.R;
+
+end FunctionTests.FunctionFlatten25;
+")})));
+end FunctionFlatten25;
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1

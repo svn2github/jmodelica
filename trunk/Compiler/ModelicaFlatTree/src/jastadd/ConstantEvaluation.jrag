@@ -2232,15 +2232,10 @@ aspect ConstantEvaluation {
     public CValue CValueRecord.component(String name) {
         return getMember(name);
     }
-
-    // TODO: expand to handle boolean end enum index
-    eq FEndExp.cevalCalc(VariableEvaluator evaluator) {
-        int end = mySize().has(0) ? mySize().get(0) : Size.UNKNOWN;
-        return end != Size.UNKNOWN ? new CValueInteger(end) : CValue.UNKNOWN;
-    }
-
+    
+    eq FEndExp.cevalCalc(VariableEvaluator evaluator) = mySize().ceval(evaluator, 0);
     eq FNdimsExp.cevalCalc(VariableEvaluator evaluator) = new CValueInteger(getFExp().ndims());
-
+    
     eq FSubscriptedExp.cevalCalc(VariableEvaluator evaluator) {
         Index i = getFArraySubscripts().createIndex();
         return getFExp().ceval(evaluator, i).array().getCell(i);

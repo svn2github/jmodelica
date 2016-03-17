@@ -672,7 +672,7 @@ aspect Flattening {
             return createFQNameForFuncUse(temporarilyInFunction);
         }
         if (size().isUnknown()) {
-            return expandedFQName().append(name(), size().flattenFExp());
+            return expandedFQName().append(name(), size().flattenSubscript());
         } else {
             return expandedFQName().append(name());
         }
@@ -1903,28 +1903,28 @@ aspect FlatExpressions {
     abstract public FSubscript FSubscript.flatten(FQName prefix);
 
     public FSubscript FColonSubscript.flatten(FQName prefix) { 
-        return size().flattenFExp(0);
+        return size().flattenSubscript(0);
     }
     
-    public FSubscript Size.flattenFExp(int i) {
+    public FSubscript Size.flattenSubscript(int i) {
         return new FExpSubscript(new FRangeExp(new FIntegerLitExp(1),new FIntegerLitExp(get(i))));
     }
     
-    public FSubscript MutableSize.flattenFExp(int i) {
+    public FSubscript MutableSize.flattenSubscript(int i) {
         if (isUnknown()) {
             return new FColonSubscript();
         } else {
-            return super.flattenFExp(i);
+            return super.flattenSubscript(i);
         }
     }
     
-    public FArraySubscripts Size.flattenFExp() {
+    public FArraySubscripts Size.flattenSubscript() {
         if (ndims() == 0) {
             return null;
         }
         FArraySubscripts fas = new FArraySubscripts();
         for (int i = 0; i < ndims(); i++) {
-            fas.addFSubscript(flattenFExp(i));
+            fas.addFSubscript(flattenSubscript(i));
         }
         return fas;
     }
@@ -2606,19 +2606,26 @@ aspect FlatExpressions {
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-    public FExp  FEndExp.flatten(FQName prefix)  { 
-        Size s = mySize();
-        if (s.isUnknown()) {
-            prefix = prefix.copyAndAppend(flatPrefix());
-        }
-        return dynamicFExp(s.createFExp(0)).flatten(prefix);
+    public FExp FEndExp.flatten(FQName prefix)  { 
+        return mySize().flattenFExp(0);
     }
-	
-    inh FQName FEndExp.flatPrefix();
-    eq InstArrayAccess.getChild().flatPrefix() = myInstComponentDecl().getFQName().copyPrefix();
-    eq InstNode.getChild().flatPrefix() = new FQNameEmpty();
-    eq FlatRoot.getChild().flatPrefix() = new FQNameEmpty();
-
+    
+    public FExp Size.flattenFExp(int d) {
+        return createFExp(d);
+    }
+    
+    public FExp MutableSize.flattenFExp(int d) {
+        if (exps[d] != null) {
+            return exps[d].flatten(exps[d].sizeFlatteningPrefix());
+        } else {
+            return super.flattenFExp(d);
+        }
+    }
+    
+    inh FQName FExp.sizeFlatteningPrefix();
+    eq Root.getChild().sizeFlatteningPrefix()              = new FQNameEmpty();
+    eq InstNode.getChild().sizeFlatteningPrefix()          = retrieveFQName();
+    
     inh FExp DummyModification.myFExp();
     eq InstFunctionArgument.getChild().myFExp()   = null;
     eq InstPositionalArgument.getChild().myFExp() = getFExp();

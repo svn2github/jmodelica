@@ -80,13 +80,8 @@ aspect AccessSizes {
         return ms;
     }
     
-    public FExp FExp.accessContextSize(FSubscript sub) {
-        return this;
-    }
-    
-    public FExp FColonSizeExp.accessContextSize(FSubscript sub) {
-        return sub.getAccessContextSizeExp();
-    }
+    syn FExp FExp.accessContextSize(FSubscript sub) = this;
+    eq FColonSizeExp.accessContextSize(FSubscript sub) = sub.getAccessContextSizeExp();
     
     syn FExp FSubscript.getAccessContextSizeExp() = null;
     syn FExp FColonSubscript.getAccessContextSizeExp() = buildAccessContextSizeExp();
