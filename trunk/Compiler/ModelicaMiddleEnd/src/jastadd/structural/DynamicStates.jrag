@@ -631,6 +631,9 @@ aspect DynamicStateSelect{
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
                 if (!super.shouldVisit(eqn, var))
                     return false;
+                if (var.numDifferentiations() < eqn.numDifferentiations()) {
+                    return false;
+                }
                 Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
                 if (coefficients != null) {
                     Coefficient coff = coefficients.get(var);
@@ -697,6 +700,9 @@ aspect DynamicStateSelect{
             @Override
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
                 if (!super.shouldVisit(eqn, var)) {
+                    return false;
+                }
+                if (var.numDifferentiations() < eqn.numDifferentiations()) {
                     return false;
                 }
                 return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
