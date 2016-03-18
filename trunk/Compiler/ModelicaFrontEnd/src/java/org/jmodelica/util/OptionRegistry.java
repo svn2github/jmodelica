@@ -655,7 +655,7 @@ abstract public class OptionRegistry {
             ("nle_jacobian_update_mode",
              OptionType.runtime, 
              Category.user,
-             0,
+             2,
              "Mode for how to update the Jacobian: " +
              "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
              0, 2),
