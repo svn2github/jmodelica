@@ -17086,7 +17086,7 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __nle_brent_ignore_error_15 = (JMI_FALSE);
     __nle_jacobian_calculation_mode_16 = (0);
     __nle_jacobian_finite_difference_delta_17 = (1.490116119384766E-8);
-    __nle_jacobian_update_mode_18 = (0);
+    __nle_jacobian_update_mode_18 = (2);
     __nle_solver_check_jac_cond_19 = (JMI_FALSE);
     __nle_solver_default_tol_20 = (1.0E-10);
     __nle_solver_exit_criterion_21 = (3);

@@ -2443,6 +2443,58 @@ Error at line 2228, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/Functi
 ")})));
 end FunctionType17;
 
+model FunctionType18
+    function f1
+        input Integer a;
+        input Integer b;
+        output Integer c;
+    algorithm
+        c := a + b;
+    end f1;
+    
+    function f2
+        input Integer d = 2 * e;
+        input Integer e = 1;
+        input Integer f = d - 1;
+        output Real g[f1(f, e)];
+    algorithm
+        g := (1:size(g, 1)) .+ d;
+    end f2;
+
+    Real x[:] = f2(e = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionType18",
+            description="",
+            flatModel="
+fclass FunctionTests.FunctionType18
+ Real x[5] = FunctionTests.FunctionType18.f2(2 * 2, 2, 2 * 2 - 1);
+
+public
+ function FunctionTests.FunctionType18.f2
+  input Integer d;
+  input Integer e;
+  input Integer f;
+  output Real[FunctionTests.FunctionType18.f1(f, e)] g;
+ algorithm
+  g[:] := (1:size(g, 1)) .+ d;
+  return;
+ end FunctionTests.FunctionType18.f2;
+
+ function FunctionTests.FunctionType18.f1
+  input Integer a;
+  input Integer b;
+  output Integer c;
+ algorithm
+  c := a + b;
+  return;
+ end FunctionTests.FunctionType18.f1;
+
+end FunctionTests.FunctionType18;
+")})));
+end FunctionType18;
+
 
 model BuiltInCallType1
   Real x = sin(true);
@@ -9439,7 +9491,6 @@ end FunctionTests.UnknownArray32;
 end UnknownArray32;
 
 model UnknownArray33
-	
   record R
     Real[2] x;
   end R;

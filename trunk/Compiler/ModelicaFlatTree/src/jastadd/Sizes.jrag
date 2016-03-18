@@ -218,7 +218,7 @@ aspect FunctionCallSizes {
     
     public void InstFunctionArgument.sizeOfOutput(Map<InstComponentDecl, InstFunctionArgument> varMap, InstComponentDecl icd) {
         getFExp().size();      // Cash sizes to prevent false circularity in nested function calls
-        varMap.put(icd, this); // TODO: #4850 InstDefaultArguments shouldn't do this;
+        varMap.put(icd, this);
     }
     
     /**
@@ -309,10 +309,20 @@ aspect FunctionCallSizes {
         InstComponentDecl var = myInstComponentDecl();
         InstFunctionArgument arg = varMap.get(var);
         if (arg != null) {
-            return arg.getFExp().cell(getFArraySubscripts());
+            return arg.createSizeFExp(varMap).cell(getFArraySubscripts());
         } else {
-            return createSizeFExpForKeptUse(varMap);
+            return createSizeInstAccessForKeptUse(varMap).createFExp();
         }
+    }
+    
+    public FExp InstFunctionArgument.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        // TODO: Should use a copy, since this is a create method, but that gives circularity when calculating size(),
+        //       see InstFunctionArgument.sizeOfOutput(). We need a copy, but with the pre-calculated size. 
+        return getFExp();
+    }
+    
+    public FExp InstDefaultArgument.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        return getFExp().dynamicFExp(getFExp().createSizeFExp(varMap));
     }
     
     public FExp InstDot.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
@@ -321,7 +331,8 @@ aspect FunctionCallSizes {
             if (exp == null) {
                 exp = ia.createSizeFExp(varMap);
             } else {
-                exp = exp.component(ia.name()).cell(ia.getFArraySubscripts());
+                InstAccess temp = ia.createSizeInstAccessForKeptUse(varMap);
+                exp = exp.component(temp.name()).cell(temp.getFArraySubscripts());
             }
         }
         return exp;
@@ -341,10 +352,11 @@ aspect FunctionCallSizes {
     /**
      * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
      */
-    protected FExp InstAccess.createSizeFExpForKeptUse(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        InstAccess res = fullCopy();
+    protected InstAccess InstAccess.createSizeInstAccessForKeptUse(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+        InstAccess res = treeCopy();
+        res.parent = this;
         res.replaceExpsWithSizeFExp(varMap);
-        return res.createFExp();
+        return res;
     }
     
     /**
