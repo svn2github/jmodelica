@@ -2146,10 +2146,6 @@ aspect CCodeGen {
         size().printSize_C(p, str, indent, getFExp(), dimension());
 	}
 	
-	public void FColonSizeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        size().printSize_C(p, str, indent, getVariable().name_C(), getDim());
-	}
-	
 	public void FTerminate.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		str.print(indent);
 		str.print("jmi_flag_termination(jmi, ");

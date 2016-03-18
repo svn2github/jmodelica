@@ -2300,13 +2300,6 @@ aspect ConstantEvaluation {
         int s = get(d);
         return (s == Size.UNKNOWN) ? CValue.UNKNOWN : new CValueInteger(s);
     }
-    
-    eq FColonSizeExp.cevalCalc(VariableEvaluator evaluator) {
-        if (getVariable() == null)
-            return CValue.UNKNOWN;
-        CValue val = getVariable().evaluationValue(evaluator);
-        return val.isUnknown() ? val : new CValueInteger(val.size().get(getDim()));
-    }
 
     eq FMinMaxExp.cevalCalc(VariableEvaluator evaluator) {
         if (hasY()) {

@@ -293,10 +293,6 @@ aspect FunctionCallSizes {
         return res;
     }
     
-    public FExp FColonSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        throw new UnsupportedOperationException("What am i doing here?");
-    }
-    
     public FExp FIdUseExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
         return getFIdUse().createSizeFExp(varMap);
     }
