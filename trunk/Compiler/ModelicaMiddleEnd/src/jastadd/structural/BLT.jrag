@@ -250,8 +250,14 @@ aspect BLT{
                         continue;
                     for (FExp guard : eqn.getEquation().transformedGuards()) {
                         if (guard.dependsOn(vars)) {
+                            StringBuilder sb = new StringBuilder();
+                            for (Eq e : block.getMembers()) {
+                                sb.append(e.printEquation());
+                                sb.append("\n");
+                            }
                             throw new BLTException("A when-guard is involved in an algebraic loop, "
-                                            + "consider breaking it using pre() expressions");
+                                            + "consider breaking it using pre() expressions. Equations in block:\n" 
+                                    + sb.toString());
                         }
                     }
                 }

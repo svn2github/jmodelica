@@ -3059,7 +3059,10 @@ equation
 1 errors found:
 
 Error in flattened model:
-  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions. Equations in block:
+c = if temp_2 and not pre(temp_2) then pre(c) + 42 else pre(c)
+a = b + c + time
+temp_2 = b > pre(c)
 ")})));
 end MatchingTest3;
 
@@ -7364,7 +7367,9 @@ model IllegalWhen1_Err
 1 errors found:
 
 Error in flattened model:
-  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions. Equations in block:
+temp_1 = time > x
+x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x)
 ")})));
 end IllegalWhen1_Err;
 
@@ -7392,7 +7397,12 @@ model IllegalWhen2_Err
 1 errors found:
 
 Error in flattened model:
-  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions
+  A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions. Equations in block:
+y = if temp_3 and not pre(temp_3) then 3 else pre(y)
+x = y - 1
+temp_2 = x >= 0.5
+z = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) then 2 else pre(z)
+temp_3 = z >= 1
 ")})));
 end IllegalWhen2_Err;
   
