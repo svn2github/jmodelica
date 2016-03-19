@@ -1531,6 +1531,26 @@ aspect OverconstrainedConnections {
 		 * See Modelica Language Specification 3.3, section 9.4.2.
 		 */
 		public void buildTrees(ConnectionSetManager csm) {
+            // Check for redundant edges (endges that connect the same nodes)
+            for (Node n : nodes) {
+                Map<Node, Edge> currentEdgeMap = new HashMap<Node, Edge>();
+                for (Edge e : n.edges) {
+                    // TODO: Is this sufficient, what happens if we have one
+                    // connect() and one branch edge which point between the
+                    // same nodes?
+                    if (e.isIgnored() || !e.isBreakable()) {
+                        continue;
+                    }
+                    Node other = e.other(n);
+                    Edge otherEdge = currentEdgeMap.get(other);
+                    if (otherEdge == null) {
+                        currentEdgeMap.put(other, e);
+                    } else {
+                        e.setAsIgnored();
+                    }
+                }
+            }
+            
 			// Collect roots
 			Queue<Node> roots = new PriorityQueue<Node>();
 			for (Node n : nodes)
@@ -1685,6 +1705,7 @@ aspect OverconstrainedConnections {
 			private ConnectionSetEntry cse2;
 			private FQName prefix;
 			private boolean broken;
+			private boolean ignore = false;
 			
 			/**
 			 * Create a new edge.
@@ -1769,7 +1790,21 @@ aspect OverconstrainedConnections {
 						cse1.getVar().connectTo(cse1, cse2, prefix, csm, source, false);
 				}
 			}
-			
+
+            /**
+             * Checks if this edge should be ignored during computations
+             */
+            public boolean isIgnored() {
+                return ignore;
+            }
+
+            /**
+             * Marks this edge as ignored and will not be considered during computations
+             */
+            public void setAsIgnored() {
+                ignore = true;
+            }
+
 		}
 
         /**
@@ -1864,7 +1899,7 @@ aspect OverconstrainedConnections {
             public OpsResult opsResult() {
                 Node other = null;
                 for (Edge e : edges)
-                    if (e.isLeft(this) && !e.isBreakable())
+                    if (!e.isIgnored() && e.isLeft(this) && !e.isBreakable())
                         other = e.other(this);
                 boolean rooted = other != null && level < other.level;
                 return new OpsResult(isSelectedRoot(), rooted);
@@ -1875,7 +1910,7 @@ aspect OverconstrainedConnections {
              */
             public void buildTree(Queue<Node> work, ConnectionSetManager csm) {
                 for (Edge e : edges) 
-                    if (!e.visited) 
+                    if (!e.isIgnored() && !e.visited) 
                         buildTreeVisit(e, work, csm);
             }
 
@@ -1884,7 +1919,7 @@ aspect OverconstrainedConnections {
              */
             private void buildTreeForUnbreakable(Queue<Node> work, ConnectionSetManager csm) {
                 for (Edge e : edges) 
-                    if (!e.visited && !e.isBreakable()) 
+                    if (!e.isIgnored() && !e.visited && !e.isBreakable()) 
                         buildTreeVisit(e, work, csm);
             }
 
@@ -1927,7 +1962,7 @@ aspect OverconstrainedConnections {
                 }
                 
                 for (Edge e : edges) {
-                    if (!e.visited && !e.isBreakable()) {
+                    if (!e.isIgnored() && !e.visited && !e.isBreakable()) {
                         e.visited = true;
                         Node n = e.other(this);
                         if (n.visited) {
@@ -1949,7 +1984,9 @@ aspect OverconstrainedConnections {
                 visited = true;
                 sg.add(this);
                 for (Edge e : edges) {
-                    e.other(this).subGraph(sg);
+                    if (!e.isIgnored()) {
+                        e.other(this).subGraph(sg);
+                    }
                 }
             }
 

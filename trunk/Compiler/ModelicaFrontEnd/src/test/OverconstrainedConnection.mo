@@ -337,6 +337,32 @@ end OverconstrainedConnection.OverconstrainedCorrect8;
 ")})));
 end OverconstrainedCorrect8;
 
+model OverconstrainedCorrect9
+    C1 c1;
+    C1 c2;
+equation
+    c1.t = {time, -time};
+    connect(c1,c2);
+    connect(c1,c2);
+    Connections.root(c1.t);
+
+	annotation(__JModelica(UnitTesting(tests={
+		FlatteningTestCase(
+			name="OverconstrainedCorrect9",
+			description="Ensure that we handle multiple connections between the same nodes",
+			flatModel="
+fclass OverconstrainedConnection.OverconstrainedCorrect9
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c1.t[1:2] = c2.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.OverconstrainedCorrect9;
+")})));
+end OverconstrainedCorrect9;
 
 model OverconstrainedUnrooted1
 	C1 c1;
