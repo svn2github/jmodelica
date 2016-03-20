@@ -1245,6 +1245,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         return map;
     }
+
+    public int countNumberOfIncidences() {
+        int count = 0;
+        for (E e : getEquations()) {
+            count += e.getVariables().size();
+        }
+        return count;
+    }
 }
 
     public class DAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {

@@ -302,6 +302,13 @@ abstract public class OptionRegistry {
              Category.user,
              true, 
              "If enabled, then index reduction is performed for high-index systems."),
+        MUNKRES_MAX_INCIDENCES
+            ("munkres_max_incidences", 
+             OptionType.compiler, 
+             Category.uncommon,
+             2500, 
+             "The maximum number of incidences that can be in a graph when solving a munkres problem. " +
+             "A value of zero or less results in no limit."),
         PROPAGATE_DERIVATIVES
             ("propagate_derivatives", 
              OptionType.compiler, 
