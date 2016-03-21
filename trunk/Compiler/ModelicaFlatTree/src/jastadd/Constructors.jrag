@@ -472,7 +472,11 @@ aspect Constructors {
 	public FSizeExp.FSizeExp(FExp exp, int dim) {
 		this(exp, new Opt(new FIntegerLitExp(dim + 1)));
 	}
-	
+    
+    public FUnknownSizeExp.FUnknownSizeExp(FExp exp, int dim) {
+        super(exp, dim);
+    }
+    
 	/**
 	 * Constructs an FRangeExp with the given start and stop expressions.
 	 */
