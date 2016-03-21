@@ -9392,6 +9392,145 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 end ReinitCTest6;
 
 
+model ReinitCTest7
+    Real x(start = 1);
+equation
+    der(x) = -x;
+  when x < 0.9 then
+    reinit(x, 0.8);
+  elsewhen x < 0.7 then
+    reinit(x, 0.4);
+  end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest7",
+            description="Reinit of same var in different elsewhen branches",
+            template="
+$C_reinit_temp_decls$
+-----
+$C_ode_derivatives$
+",
+            generatedCode="
+static jmi_ad_var_t tmp_1;
+static jmi_ad_var_t tmp_2;
+
+-----
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_1 = _x_0;
+    tmp_2 = _x_0;
+    _der_x_5 = - _x_0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_x_0 - (0.7), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (0.9), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    if (tmp_1 != _x_0) {
+        _x_0 = tmp_1;
+        jmi->reinit_triggered = 1;
+    } else if (tmp_2 != _x_0) {
+        _x_0 = tmp_2;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+")})));
+end ReinitCTest7;
+
+
+model ReinitCTest8
+    Real x(start = 1);
+    Real y(start = 2);
+    Real z(start = 3);
+equation
+    der(x) = -x;
+    der(y) = -y;
+    der(z) = -z;
+  when x < 0.9 then
+    reinit(x, 0.8);
+    reinit(y, 1.8);
+  elsewhen x < 0.7 then
+    reinit(z, 2.4);
+    reinit(x, 0.4);
+  elsewhen x < 0.5 then
+    reinit(z, 2.1);
+    reinit(x, 0.1);
+    reinit(y, 1.1);
+  end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ReinitCTest8",
+            description="Reinit of same var in different elsewhen branches, check grouping of several sets of reinits",
+            template="
+$C_reinit_temp_decls$
+-----
+$C_ode_derivatives$
+",
+            generatedCode="
+static jmi_ad_var_t tmp_1;
+static jmi_ad_var_t tmp_2;
+static jmi_ad_var_t tmp_3;
+static jmi_ad_var_t tmp_4;
+static jmi_ad_var_t tmp_5;
+static jmi_ad_var_t tmp_6;
+static jmi_ad_var_t tmp_7;
+
+-----
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    tmp_1 = _x_0;
+    tmp_2 = _y_1;
+    tmp_3 = _z_2;
+    tmp_4 = _x_0;
+    tmp_5 = _z_2;
+    tmp_6 = _x_0;
+    tmp_7 = _y_1;
+    _der_x_9 = - _x_0;
+    _der_y_10 = - _y_1;
+    _der_z_11 = - _z_2;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(_x_0 - (0.5), _sw(2), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(_x_0 - (0.7), _sw(1), jmi->events_epsilon, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(_x_0 - (0.9), _sw(0), jmi->events_epsilon, JMI_REL_LT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    if (tmp_1 != _x_0) {
+        _x_0 = tmp_1;
+        jmi->reinit_triggered = 1;
+    } else if (tmp_4 != _x_0) {
+        _x_0 = tmp_4;
+        jmi->reinit_triggered = 1;
+    } else if (tmp_6 != _x_0) {
+        _x_0 = tmp_6;
+        jmi->reinit_triggered = 1;
+    }
+    if (tmp_2 != _y_1) {
+        _y_1 = tmp_2;
+        jmi->reinit_triggered = 1;
+    } else if (tmp_7 != _y_1) {
+        _y_1 = tmp_7;
+        jmi->reinit_triggered = 1;
+    }
+    if (tmp_3 != _z_2) {
+        _z_2 = tmp_3;
+        jmi->reinit_triggered = 1;
+    } else if (tmp_5 != _z_2) {
+        _z_2 = tmp_5;
+        jmi->reinit_triggered = 1;
+    }
+    return ef;
+}
+")})));
+end ReinitCTest8;
+
 
 model NoDAEGenerationTest1
   Real x, y, z;

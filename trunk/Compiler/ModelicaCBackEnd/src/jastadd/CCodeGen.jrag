@@ -2282,42 +2282,54 @@ aspect CCodeGen {
     
     
 
-    @Override
-    public void FReinit.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
+    public void FReinit.genReinitWritebacks_C(
+            CodePrinter p, CodeStream str, String indent, boolean first, boolean last) {
         //TODO: This is TEMPORARY, will need a better solution later!
-        str.format("%sif (%s != ", indent, tempName_C());
+        str.format("%sif (%s != ", (first ? indent : " else "), tempName_C());
         p.print(getVar(), str, indent);
         str.println(") {");
         str.print(p.indent(indent));
         p.print(getVar(), str, indent);
         str.formatln(" = %s;", tempName_C());
         str.formatln("%sjmi->reinit_triggered = 1;", p.indent(indent));
-        str.formatln("%s}", indent);
+        str.format("%s}", indent);
+        if (last)
+            str.println();
     }
 
-    public void FAbstractFunctionCall.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
+    public void FReinit.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
+        String key = getVar().toString();
+        ArrayList<FReinit> list = map.get(key);
+        if (list == null) {
+            list = new ArrayList<FReinit>();
+            map.put(key, list);
+        }
+        list.add(this);
+    }
 
-    public void FAbstractEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {}
+    public void FAbstractFunctionCall.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
+
+    public void FAbstractEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {}
 
     @Override
-    public void FFunctionCallEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        getCall().genReinitWritebacks_C(p, str, indent);
+    public void FFunctionCallEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
+        getCall().collectReinits_C(map, initial);
     }
 
     @Override
-    public void FIfWhenElseEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
+    public void FIfWhenElseEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
         for (FAbstractEquation e : getFAbstractEquations()) {
-            e.genReinitWritebacks_C(p, str, indent);
+            e.collectReinits_C(map, initial);
         }
     }
 
     @Override
-    public void FIfWhenEquation.genReinitWritebacks_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
-            super.genReinitWritebacks_C(p, str, indent);
+    public void FIfWhenEquation.collectReinits_C(Map<String, ArrayList<FReinit>> map, boolean initial) {
+        if (!initial || getTest().isInitialGuard()) {
+            super.collectReinits_C(map, initial);
         }
         if (hasElse()) {
-            getElse().genReinitWritebacks_C(p, str, indent);
+            getElse().collectReinits_C(map, initial);
         }
     }
 
@@ -2326,8 +2338,14 @@ aspect CCodeGen {
      * no if guard here, that is controlled from the actual reinit statement.
      */
     public void AbstractEquationBlock.genReinitWritebacks_C(CodePrinter p, String indent, CodeStream str) {
+        Map<String, ArrayList<FReinit>> map = new LinkedHashMap<String, ArrayList<FReinit>>();
         for (FAbstractEquation eqn : allEquations()) {
-            eqn.genReinitWritebacks_C(p, str, indent);
+            eqn.collectReinits_C(map, p.inInitialSystem());
+        }
+        for (ArrayList<FReinit> list : map.values()) {
+            for (int i = 0, n = list.size(); i < n; i++) {
+                list.get(i).genReinitWritebacks_C(p, str, indent, i == 0, i == n - 1);
+            }
         }
     }
 
