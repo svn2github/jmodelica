@@ -136,7 +136,7 @@ aspect TransformCanonical {
             /* -------------------------------- */
 
             transformations.add(new aliasEliminationIfSet()); 
-            transformations.add(new variabilityPropagationIfSet());
+            //transformations.add(new variabilityPropagationIfSet());
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new enableExpandedInStreamRewrite());
             transformations.add(new evaluateAsserts());
