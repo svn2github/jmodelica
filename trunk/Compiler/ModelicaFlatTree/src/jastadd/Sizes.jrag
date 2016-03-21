@@ -206,9 +206,10 @@ aspect FunctionCallSizes {
         }
         
         MutableSize ms = new MutableSize(ndims());
+        FExp.FunctionSizeContextReplacer crp = new FExp.FunctionSizeContextReplacer(varMap);
         for (int j = 0; j < ndims(); j++) {
             try {
-                ms.append(call.dynamicFExp(createSizeFExp(j, varMap)));
+                ms.append(call.dynamicFExp(copyReplaceAccess(j, crp)));
             } catch (ConstantEvaluationException e) {
                 ms.append(Size.UNKNOWN);
             }
@@ -216,122 +217,63 @@ aspect FunctionCallSizes {
         return ms;
     }
     
+    class FExp {
+        public static class FunctionSizeContextReplacer implements ContextReplacer {
+            Map<InstComponentDecl, InstFunctionArgument> varMap;
+            public FunctionSizeContextReplacer(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+                this.varMap = varMap;
+            }
+            
+            public FExp replaceContext(FIdUse use) {
+                return use.createSizeFExp(this);
+            }
+            
+            public Map<InstComponentDecl, InstFunctionArgument> getMap() {
+                return varMap;
+            }
+        }
+    }
+    
     public void InstFunctionArgument.sizeOfOutput(Map<InstComponentDecl, InstFunctionArgument> varMap, InstComponentDecl icd) {
         getFExp().size();      // Cash sizes to prevent false circularity in nested function calls
         varMap.put(icd, this);
     }
     
-    /**
-     * Create an FExp that describes the length of dimension <code>d</code>, 
-     *        given the supplied variable values.
-     *        
-     * @param varMap  a map of variables to replace and expressions to replace them with
-     */
-    public FExp Size.createSizeFExp(int d, Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        if (d < 0 || d >= ndims()) {
-            throw new ConstantEvaluationException();
-        }
-        return createFExp(d);
-    }
-    
-    public FExp MutableSize.createSizeFExp(int d, Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        evaluate(d);
-        return (okExp(d, true)) ?
-                exps[d].createSizeFExp(varMap) :
-                super.createSizeFExp(d, varMap);
-    }
-    
-    /**
-     * Create a copy of this FExp with variable uses and function calls replaced with expressions 
-     * that allow calculations of unknown sizes.
-     * 
-     * For non-FExp nodes, this simply makes a full copy.
-     * 
-     * @param varMap  a map of variables to replace and expressions to replace them with.
-     */
-    public ASTNode ASTNode.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return fullCopy();
-    }
-    
-    public List List.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        List node = new List();
-        for (ASTNode ch : this)
-            node.add(ch.createSizeFExp(varMap));
-        return node;
-    }
-    
-    public Opt Opt.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return getNumChild() == 0 ? new Opt() : new Opt(getChild(0).createSizeFExp(varMap));
-    }
-    
-    public FExp FExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        FExp exp = copy();
-        for (int i = 0; i < getNumChild(); i++) {
-            exp.setChild(getChild(i).createSizeFExp(varMap), i);
-        }
-        return exp;
-    }
-    
-    protected boolean FSizeExp.circ = false;
-    public FExp FSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        if (circ) {
-            throw new ConstantEvaluationException();
-        }
-        circ = true;
-        FExp res = getFExp().size().createSizeFExp(dimension(), varMap);
-        circ = false;
-        return res;
-    }
-    
-    public FExp FUnknownSizeExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        if (circ) {
-            throw new ConstantEvaluationException();
-        }
-        circ = true;
-        FExp res = getFExp().createSizeFExp(varMap).size().createFExp(dimension());
-        circ = false;
-        return res;
-    }
-    
-    public FExp FIdUseExp.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return getFIdUse().createSizeFExp(varMap);
-    }
-    
-    public FExp FIdUse.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+    public FExp FIdUse.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
         throw new UnsupportedOperationException();
     }
     
-    public FExp FIdUseInstAccess.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return getInstAccess().createSizeFExp(varMap);
+    public FExp FIdUseInstAccess.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
+        return getInstAccess().createSizeFExp(crp);
     }
     
-    public FExp InstAccess.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+    public FExp InstAccess.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
         InstComponentDecl var = myInstComponentDecl();
-        InstFunctionArgument arg = varMap.get(var);
+        InstFunctionArgument arg = crp.getMap().get(var);
         if (arg != null) {
-            return arg.createSizeFExp(varMap).cell(getFArraySubscripts());
+            return arg.createSizeFExp(crp).cell(getFArraySubscripts());
         } else {
-            return createSizeInstAccessForKeptUse(varMap).createFExp();
+            return createSizeInstAccessForKeptUse(crp).createFExp();
         }
     }
     
-    public FExp InstFunctionArgument.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+    public FExp InstFunctionArgument.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
         // TODO: Should use a copy, since this is a create method, but that gives circularity when calculating size(),
         //       see InstFunctionArgument.sizeOfOutput(). We need a copy, but with the pre-calculated size. 
         return getFExp();
     }
     
-    public FExp InstDefaultArgument.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return getFExp().dynamicFExp(getFExp().createSizeFExp(varMap));
+    public FExp InstDefaultArgument.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
+        return getFExp().dynamicFExp(getFExp().copyReplaceAccess(crp));
     }
     
-    public FExp InstDot.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
+    public FExp InstDot.createSizeFExp(FExp.FunctionSizeContextReplacer crp) {
         FExp exp = null;
         for (InstAccess ia : getInstAccesss()) {
             if (exp == null) {
-                exp = ia.createSizeFExp(varMap);
+                exp = ia.createSizeFExp(crp);
             } else {
-                InstAccess temp = ia.createSizeInstAccessForKeptUse(varMap);
+                InstAccess temp = ia.createSizeInstAccessForKeptUse(crp);
                 exp = exp.component(temp.name()).cell(temp.getFArraySubscripts());
             }
         }
@@ -349,64 +291,12 @@ aspect FunctionCallSizes {
         return this;
     }
     
-    /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
-     */
-    protected InstAccess InstAccess.createSizeInstAccessForKeptUse(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        InstAccess res = treeCopy();
-        res.parent = this;
-        res.replaceExpsWithSizeFExp(varMap);
-        return res;
-    }
-    
-    /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
-     */
-    protected void InstAccess.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {}
-
-    protected void InstArrayAccess.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        for (FSubscript sub : getFArraySubscripts().getFSubscripts()) {
-            sub.replaceExpsWithSizeFExp(varMap);
+    public InstAccess InstAccess.createSizeInstAccessForKeptUse(FExp.ContextReplacer crp) {
+        if (hasFArraySubscripts()) {
+            return new InstParseArrayAccess(name(), getFArraySubscripts().copyReplaceAccess(crp));
+        } else {
+            return new InstParseAccess(name());
         }
-    }
-    
-    protected void InstDot.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        for (InstAccess part : getInstAccesss()) {
-            part.replaceExpsWithSizeFExp(varMap);
-        }
-    }
-    
-    /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map)} - should not be called directly.
-     */
-    protected void FSubscript.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {}
-
-    protected void FExpSubscript.replaceExpsWithSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        setFExp(getFExp().createSizeFExp(varMap));
-    }
-    
-    public FExp InstFunctionCall.createSizeFExp(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        InstAccess name = InstAccess.fromName(getName().myInstCallable().actualInstCallable().qualifiedName());
-        InstFunctionCall res = new InstFunctionCall(name, new List<InstFunctionArgument>());
-        for (InstFunctionArgument arg : getArgs()) {
-            res.addArg(arg.createSizeFExpArg(varMap));
-        }
-        return res;
-    }
-
-    /**
-     * Helper method for {@link ASTNode#createSizeFExp(Map)}.
-     */
-    public InstFunctionArgument InstFunctionArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return fullCopy();
-    }
-
-    public InstPositionalArgument InstPositionalArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return new InstPositionalArgument(getFExp().createSizeFExp(varMap), getPos());
-    }
-
-    public InstNamedArgument InstNamedArgument.createSizeFExpArg(Map<InstComponentDecl, InstFunctionArgument> varMap) {
-        return new InstNamedArgument(getFExp().createSizeFExp(varMap), getName().fullCopy());
     }
     
     /**
@@ -463,4 +353,132 @@ aspect FunctionCallSizes {
     eq InstVectorFunctionCall.getArg().vectorizedSize()  = vectorizedSize();
     eq FDelayExp.getChild().vectorizedSize()             = vectorizedSize();
     eq FSpatialDistExp.getChild().vectorizedSize()       = vectorizedSize();
+}
+
+
+aspect SizesUtil {
+    
+    
+    class FExp {
+        public interface ContextReplacer {
+            public FExp replaceContext(FIdUse use);
+        }
+    }
+    
+    /**
+     * Create a copy of this FExp with variable uses and function calls replaced with expressions 
+     * that allow calculations of unknown sizes.
+     * 
+     * For non-FExp nodes, this simply makes a full copy.
+     * 
+     * @param varMap  a map of variables to replace and expressions to replace them with.
+     */
+    public ASTNode ASTNode.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return treeCopy();
+    }
+    
+    public List List.copyReplaceAccess(FExp.ContextReplacer crp) {
+        List node = new List();
+        for (ASTNode ch : this)
+            node.add(ch.copyReplaceAccess(crp));
+        return node;
+    }
+    
+    public Opt Opt.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return getNumChild() == 0 ? new Opt() : new Opt(getChild(0).copyReplaceAccess(crp));
+    }
+    
+    public FExp FExp.copyReplaceAccess(FExp.ContextReplacer crp) {
+        FExp exp = copy();
+        for (int i = 0; i < getNumChild(); i++) {
+            exp.setChild(getChild(i).copyReplaceAccess(crp), i);
+        }
+        return exp;
+    }
+    
+    public FExp InstFunctionCall.copyReplaceAccess(FExp.ContextReplacer crp) {
+        InstAccess name = InstAccess.fromName(getName().myInstCallable().actualInstCallable().qualifiedName());
+        InstFunctionCall res = new InstFunctionCall(name, new List<InstFunctionArgument>());
+        for (InstFunctionArgument arg : getArgs()) {
+            res.addArg(arg.copyReplaceAccess(crp));
+        }
+        return res;
+    }
+    
+    /**
+     * Helper method for {@link ASTNode#createSizeFExp(Map)}.
+     */
+    public InstFunctionArgument InstFunctionArgument.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return fullCopy();
+    }
+    
+    public InstPositionalArgument InstPositionalArgument.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return new InstPositionalArgument(getFExp().copyReplaceAccess(crp), getPos());
+    }
+    
+    public InstNamedArgument InstNamedArgument.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return new InstNamedArgument(getFExp().copyReplaceAccess(crp), getName().fullCopy());
+    }
+    
+    public FExp FIdUseExp.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return crp.replaceContext(getFIdUse());
+    }
+    
+    public FArraySubscripts FArraySubscripts.copyReplaceAccess(FExp.ContextReplacer crp) {
+        FArraySubscripts res = new FArraySubscripts();
+        for (FSubscript f : getFSubscripts()) {
+            res.addFSubscript(f.copyReplaceAccess(crp));
+        }
+        return res;
+    }
+    
+    public FSubscript FSubscript.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return treeCopy();
+    }
+    
+    public FSubscript FExpSubscript.copyReplaceAccess(FExp.ContextReplacer crp) {
+        return new FExpSubscript(getFExp().copyReplaceAccess(crp));
+    }
+    
+    protected boolean FSizeExp.circ = false;
+    public FExp FSizeExp.copyReplaceAccess(FExp.ContextReplacer crp) {
+        if (circ) {
+            throw new ConstantEvaluationException();
+        }
+        circ = true;
+        FExp res = getFExp().size().copyReplaceAccess(dimension(), crp);
+        circ = false;
+        return res;
+    }
+    
+    public FExp FUnknownSizeExp.copyReplaceAccess(FExp.ContextReplacer crp) {
+        if (circ) {
+            throw new ConstantEvaluationException();
+        }
+        circ = true;
+        FExp res = getFExp().copyReplaceAccess(crp).size().createFExp(dimension());
+        circ = false;
+        return res;
+    }
+    
+    /**
+     * Create an FExp that describes the length of dimension <code>d</code>, 
+     *        given the supplied variable values.
+     *        
+     * @param varMap  a map of variables to replace and expressions to replace them with
+     */
+    public FExp Size.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
+        if (d < 0 || d >= ndims()) {
+            throw new ConstantEvaluationException();
+        }
+        return createFExp(d);
+    }
+    
+    public FExp MutableSize.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
+        evaluate(d);
+        return (okExp(d, true)) ?
+                exps[d].copyReplaceAccess(crp) :
+                super.copyReplaceAccess(d, crp);
+    }
+    
 }
