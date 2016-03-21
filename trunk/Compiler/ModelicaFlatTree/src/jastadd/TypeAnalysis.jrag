@@ -334,7 +334,6 @@ aspect FlatTypeAnalysis {
             return fIntegerArrayType(size());
         }
     }
-    eq FColonSizeExp.type() = fIntegerScalarType();
 
     eq FMinMaxExp.type() = 
         hasY() ? 

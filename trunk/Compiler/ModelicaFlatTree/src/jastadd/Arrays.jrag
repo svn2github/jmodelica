@@ -2609,11 +2609,6 @@ aspect ArrayHelpers {
 		    return this;
 		}
 		
-        /**
-         * Replace FColonSizeExps with equivalent FSizeExps
-         */
-        public void replaceUnknowns(ASTNode parent) {}
-		
 		/**
 		 * Return a Size that have the same lengths as this size where they are known, 
 		 *        and any that are unknown copied from the size of <code>exp</code>. 
@@ -3113,18 +3108,6 @@ aspect ArrayHelpers {
 			for (int i = 0; i < size.length; i++) 
 				evaluate(i);
 		}
-		
-        /**
-         * Replace FColonSizeExps with equivalent FSizeExps
-         */
-        public void replaceUnknowns(ASTNode parent) {
-            for (int i = 0; i < exps.length; i++) {
-                if (exps[i] != null) {
-                    exps[i] = exps[i].createSizeFExp();
-                    exps[i].parent = parent;
-                }
-            }
-        }
 		
 		/**
 		 * Adds <code>s</code> to length <code>d</code>.

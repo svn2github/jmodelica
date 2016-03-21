@@ -786,19 +786,6 @@ aspect Scalarization {
         }
         return v.scalarize(indexMap);
     }
-
-	/**
-	 * Scalarize the function variable.
-	 * 
-	 * Any binding expression is added to statement list as an assignment.
-	 */
-	public void FFunctionVariable.scalarize(
-			List<FFunctionVariable> vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-		FFunctionVariable var = (FFunctionVariable) fullCopy();
-		var.getType().updateFColonSizeExps(var);
-		var.setBindingExpOpt(new Opt());
-		vars.add(var);
-	}
 	
 	/**
 	 * A node that can look up variable names in the flat tree.
@@ -2231,16 +2218,13 @@ aspect Scalarization {
 
         FFunctionDecl fd = createDecl();
         fd.setFQName(getFQName().fullCopy());
-        fd.setFFunctionVariableList(vars);
         fd.setFAlgorithm(new FAlgorithm(stmts));
         for (FAttribute a : getFAttributes()) 
             a.scalarize(fd.getFAttributes(), Index.NULL, Collections.<String,FExp>emptyMap());
         fd.parent = this;
 
-        for (FFunctionVariable var : getFFunctionVariables())
-            var.scalarize(vars, stmts, emptyIndexMap);
-        FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, vars, emptyIndexMap);
-
+        FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, getFFunctionVariables(), emptyIndexMap);
+        fd.setFFunctionVariableList(getFFunctionVariables());
         return fd;
     }
 	
@@ -2753,7 +2737,6 @@ aspect Scalarization {
             if (type.size().isUnknown()) {
                 v.parent = this; // Needed for genInitArrayStatements
                 ASTNode n = v.genInitArrayStatements(clauses, false);
-                type.size().replaceUnknowns(n);
             }
             vars.add(v);
         }

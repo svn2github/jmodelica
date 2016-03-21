@@ -469,8 +469,6 @@ aspect Variability {
         return res;
     }
     
-    eq FColonSizeExp.expVariability() = fParameter();
-    
     eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
 
     eq FEventGenExp.expVariability()    = getX().variability().combineDown(fDiscrete());

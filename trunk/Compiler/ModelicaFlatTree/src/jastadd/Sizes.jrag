@@ -72,7 +72,7 @@ aspect AccessSizes {
     }
     
     public Size MutableSize.accessContextSize(FSubscript sub) {
-        if (exps[0] == null || sub == null || isCircular()) {
+        if (size[0] != Size.UNKNOWN || sub == null || isCircular()) {
             return super.accessContextSize(sub);
         }
         MutableSize ms = new MutableSize(1);
@@ -85,13 +85,15 @@ aspect AccessSizes {
     syn FExp FExpSubscript.getAccessContextSizeExp()   = mySize().buildAccessContextSizeExp(this);
     
     public FExp Size.buildAccessContextSizeExp(FSubscript fs)        { throw new UnsupportedOperationException(); }
-    public FExp MutableSize.buildAccessContextSizeExp(FSubscript fs) { return exps[0].buildAccessContextSizeExp(fs); }
-    
-    syn FExp FExp.buildAccessContextSizeExp(FSubscript fs)    = copyReplaceAccess(new FExp.SizeContextReplacer(fs));
-    eq FColonSizeExp.buildAccessContextSizeExp(FSubscript fs) = new FUnknownSizeExp(fs.buildAccessContextSizeExp(), fs.myDim());
+    public FExp MutableSize.buildAccessContextSizeExp(FSubscript fs) {
+        if (exps[0] == null || exps[0] instanceof FColonSizeExp) {
+            return new FUnknownSizeExp(fs.buildAccessContextSizeExp(), fs.myDim());
+        }
+        return exps[0].copyReplaceAccess(new FExp.SizeContextReplacer(fs));
+    }
     
     class FExp {
-        public class SizeContextReplacer implements ContextReplacer {
+        public static class SizeContextReplacer implements ContextReplacer {
             private FSubscript fs;
             public SizeContextReplacer(FSubscript fs) {
                 this.fs = fs;

@@ -743,8 +743,6 @@ aspect Flattening {
         return new FFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), getInputs().fullCopy(), getOutputs().fullCopy(), getFClass());
     }
 	
-	// TODO: perhaps we should duplicate the instance tree algorithm for calculating the size 
-	//       of function calls in the flat tree instead of all this (all down to "TODO: end of remove")
 	public void FType.flattenSize(FQName prefix, ASTNode context) {
 		setSize(getSize().flatten(prefix, context));
 	}
@@ -771,10 +769,8 @@ aspect Flattening {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
 		for (int i = 0; i < exps.length; i++) {
-			if (size[i] == Size.UNKNOWN && exps[i] != null) {
-				res.exps[i] = exps[i].flatten(prefix);
-				if (context != null)
-					res.exps[i] = context.affixExpression(res.exps[i]);
+			if (size[i] == Size.UNKNOWN && exps[i] != null && !(exps[i] instanceof FColonSizeExp)) {
+				res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
 			}
 		}
 		return res;
@@ -803,54 +799,11 @@ aspect Flattening {
 		return exp;
 	}
 	
-	/**
-	 * Affix the given expression to the tree, and point FColonSizeExps to this var.
-	 * 
-	 * This implementation uses a hack to add node to tree.
-	 * 
-	 * @return the expression, possibly rewritten
-	 */
 	public FExp FAbstractVariable.affixExpression(FExp exp) {
 		// TODO: need better way of including exp in tree
 		exp.parent = this;
-		exp.updateFColonSizeExps(this);
 		return exp;
 	}
-	
-	/**
-	 * Change the variable of any FColonSizeExp to the given variable.
-	 */
-	public void FExp.updateFColonSizeExps(FAbstractVariable var) {
-	}
-	
-	public void FColonSizeExp.updateFColonSizeExps(FAbstractVariable var) {
-		setVariable(var);
-	}
-	
-	/**
-	 * Change the variable of any FColonSizeExp in size to the given variable.
-	 */
-	public void FType.updateFColonSizeExps(FAbstractVariable var) {
-		if (getSize() != Size.SCALAR) {
-			Size s = getSize().clone();
-			s.updateFColonSizeExps(var);
-			setSize(s);
-		}
-	}
-
-	/**
-	 * Change the variable of any FColonSizeExp dimension to the given variable.
-	 */
-	public void Size.updateFColonSizeExps(FAbstractVariable var) {}
-	
-	public void MutableSize.updateFColonSizeExps(FAbstractVariable var) {
-		for (int i = 0; i < exps.length; i++) 
-			if (exps[i] != null) 
-				exps[i] = var.affixExpression(exps[i].fullCopy());
-	}
-	
-	// TODO: end of remove (see TODO above)
-
 
     // Generic method for flattening
     public void ASTNode.flatten(FClass fc, boolean excludeBinding, int level) {
@@ -2568,10 +2521,6 @@ aspect FlatExpressions {
 	public FExp FSizeExp.flatten(FQName prefix) {
         return new FSizeExp(getFExp().flatten(prefix), 
                 hasDim() ? new Opt<FExp>(getDim().flatten(prefix)) : new Opt<FExp>());
-	}
-	
-	public FColonSizeExp FColonSizeExp.flatten(FQName prefix) {
-		return new FColonSizeExp(null, getDim());
 	}
 	
 	public FExp InstDerExp.flatten(FQName prefix) {
