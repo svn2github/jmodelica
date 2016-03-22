@@ -598,6 +598,7 @@ class Test_NonLinear_Systems:
         model = load_fmu("NonLinear_NominalStart3.fmu")
         model.set("_use_Brent_in_1d", False)
         model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.set('_nle_jacobian_update_mode', 0)
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
