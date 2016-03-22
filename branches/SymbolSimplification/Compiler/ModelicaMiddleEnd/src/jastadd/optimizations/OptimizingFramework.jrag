@@ -68,9 +68,10 @@ aspect OptimizingFramework {
     	 * @param workData	Data that is shared and updated in and between optimizing algorithms.
     	 */ 
     	public void addOptimizingAlgorithmsToFramework(WorkData workData) {
-    		optimizeAlgorithmsInFramework.add(new AE(this, workData));
-    		optimizeAlgorithmsInFramework.add(new VP(this, workData));
+ //   		optimizeAlgorithmsInFramework.add(new AE(this, workData));
+ //   		optimizeAlgorithmsInFramework.add(new VP(this, workData));
     		optimizeAlgorithmsInFramework.add(new VariabilityPropagator(this, workData));
+ 			optimizeAlgorithmsInFramework.add(new AliasEliminator(this, workData));
     	}
     	
 	    /**

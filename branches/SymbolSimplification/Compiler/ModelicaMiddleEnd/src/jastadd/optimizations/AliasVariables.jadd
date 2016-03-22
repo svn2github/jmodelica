@@ -24,6 +24,59 @@ import java.util.BitSet;
  */
 aspect AliasVariables {
 	
+	 /*
+	  * ---------- Johan/Zimon start. ----------
+	  */
+	 
+	 public class AliasEliminator extends OptimizingAlgorithm {
+		public AliasEliminator(FClass fclass, FClass.WorkData workData) {
+    		super(fclass, workData);
+    	}
+		
+		@Override
+    	public boolean isUsed() {
+    		return fclass.myOptions().getBooleanOption("eliminate_alias_variables");
+    	}
+    	
+    	@Override
+    	public boolean run(FAbstractEquation feq) {
+    		    fclass.genAlias();
+                fclass.eliminateAliasVariables();
+                fclass.removeUnusedTemporaries();
+                fclass.mergeEquivalentRecords();
+                fclass.insertTempsInLHS();
+                fclass.remoteRedundantInitialEquations();
+                change();
+            	return true;
+		}
+		
+		// Not sure where to put this, was part of Transformation interface.
+		void change() {
+                fclass.setDAEBLT(BLT.EMPTY_BLT);
+                fclass.setDAEInitBLT(BLT.EMPTY_BLT);
+                fclass.DAEBiPGraph = null;
+                fclass.root().flushAllRecursiveClearFinal();
+     	}
+	 }
+	 
+	 /*
+	  * ---------- Johan/Zimon end. ----------
+	  */
+
+		/**
+		 * An FClass has an alias manager.
+	 	 */
+		private AliasManager FClass.aliasManager = new AliasManager();
+
+		/**
+		 * Get the alias manager.
+		 * 
+		 * @return the alias manager.
+		 */
+		public AliasManager FClass.getAliasManager() {
+			return aliasManager;
+		}
+	
 	/**
 	 * Check if an FVariable is an alias.
 	 * 
@@ -125,20 +178,6 @@ aspect AliasVariables {
      * Intended to allow extensions to deactivate alias propagation for some variables.
      */
     syn boolean FVariable.shouldPropagateAttributesForAlias() = true;
-
-	/**
-	 * An FClass has an alias manager.
-	 */
-	private AliasManager FClass.aliasManager = new AliasManager();
-
-	/**
-	 * Get the alias manager.
-	 * 
-	 * @return the alias manager.
-	 */
-	public AliasManager FClass.getAliasManager() {
-		return aliasManager;
-	}
 	
 	/**
 	 * AliasManager contains the connection sets of an FClass.

@@ -135,9 +135,9 @@ aspect TransformCanonical {
             
             /* -------------------------------- */
 
-            transformations.add(new aliasEliminationIfSet()); 
+            //transformations.add(new aliasEliminationIfSet()); 
             //transformations.add(new variabilityPropagationIfSet());
-            transformations.add(new aliasEliminationIfSet());
+            //transformations.add(new aliasEliminationIfSet());
             transformations.add(new enableExpandedInStreamRewrite());
             transformations.add(new evaluateAsserts());
             transformations.add(new enableSemiLinearRewrite());
@@ -150,7 +150,7 @@ aspect TransformCanonical {
             transformations.add(new LateFunctionInliningIfSet());
             transformations.add(new commonSubexpressionEliminationIfSet());
             transformations.add(new addFPreVariables());
-            transformations.add(new aliasEliminationIfSet());
+            //transformations.add(new aliasEliminationIfSet());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
             transformations.add(new computeMatchingsAndBLT());
@@ -528,7 +528,9 @@ aspect TransformCanonical {
         return g;
     }
     
-    private BiPGraph FClass.DAEBiPGraph = null;
+    // Changed to public in order to be visible to AliasEliminator.
+    // This might be a bad idea, I do not know.
+    public BiPGraph FClass.DAEBiPGraph = null;
     
     /**
      * The symbolic equation sorting and canonicalization proceeds in the
