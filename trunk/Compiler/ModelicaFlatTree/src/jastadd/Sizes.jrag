@@ -107,17 +107,11 @@ aspect AccessSizes {
                 return exp.copyReplaceAccessExp(this);
             }
             
-            public InstDot buildContext() {
-                 return fs.buildAccessContextSizeExp().asInstDot();
+            public List<InstAccess> buildContext() {
+                 return fs.myInstAccess().accessContextInst();
             }
         }
     }
-    
-    syn InstDot FIdUseExp.asInstDot()  = getFIdUse().asInstDot();
-    syn InstDot FIdUse.asInstDot()     = null;
-    eq FIdUseInstAccess.asInstDot()    = getInstAccess().asInstDot();
-    syn InstDot InstAccess.asInstDot() = null;
-    eq InstDot.asInstDot()             = this;
     
     public FExp FIdUse.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         return new FIdUseExp(treeCopy());
@@ -128,9 +122,11 @@ aspect AccessSizes {
     }
     
     public InstAccess InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        InstDot id = crp.buildContext();
-        id.getInstAccessListNoTransform().setChild(copyReplaceAccess(crp), id.getNumInstAccessNoTransform()-1);
-        return id;
+        List<InstAccess> res = crp.buildContext();
+        for (InstAccess part : allParts()) {
+            res.addChild(part.copyReplaceAccess(crp));
+        }
+        return new InstDot(res);
     }
     
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
@@ -156,9 +152,9 @@ aspect AccessSizes {
     public List<InstAccess> InstAccess.buildAccessContext(String name, FArraySubscripts fas) {
         List<InstAccess> res = accessContextInst();
         if (fas == null) {
-            res.add(new InstParseAccess(name));
+            res.add(new InstAmbiguousAccess(name));
         } else {
-            res.add(new InstParseArrayAccess(name, fas));
+            res.add(new InstAmbiguousArrayAccess(name, fas));
         }
         return res;
     }
@@ -488,9 +484,9 @@ aspect SizesUtil {
     
     public InstAccess InstAccess.copyReplaceAccess(FExp.ContextReplacer crp) {
         if (hasFArraySubscripts()) {
-            return new InstParseArrayAccess(name(), getFArraySubscripts().copyReplaceAccess(crp));
+            return new InstAmbiguousArrayAccess(name(), getFArraySubscripts().copyReplaceAccess(crp));
         } else {
-            return new InstParseAccess(name());
+            return new InstAmbiguousAccess(name());
         }
     }
     

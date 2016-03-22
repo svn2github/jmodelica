@@ -884,7 +884,20 @@ aspect Names {
     eq InstDot.getInstAccess(int i).getNextInstAccess() = 
     		(i >= getNumInstAccessNoTransform() - 1) ? null : getInstAccess(i + 1);
     eq BaseNode.getChild().getNextInstAccess()          = null;
-
+    
+    /**
+     * Iterable of all parts of this access
+     */
+    syn Iterable<InstAccess> InstAccess.allParts() = Arrays.asList(this);
+    eq InstDot.allParts() = getInstAccessList();
+    
+    /**
+     * Find the parent access for this subscript 
+     */
+    inh InstAccess FSubscript.myInstAccess();
+    eq Root.getChild().myInstAccess() = null;
+    eq InstNode.getChild().myInstAccess() = null;
+    eq InstAccess.getChild().myInstAccess() = this;
     
     /**
      * stripFirstAccess removes the first access in a qualified

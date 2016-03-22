@@ -1413,6 +1413,33 @@ end EvaluationTests.FunctionEval39;
 ")})));
 end FunctionEval39;
 
+model FunctionEval40
+    record R
+        parameter Integer n;
+    end R;
+    
+    function f
+        input R r;
+        output Real y;
+    protected
+        Real[r.n+1] N;
+    algorithm
+        N := 1:r.n+1;
+        y := sum(N);
+    end f;
+    
+    constant Real y = f(R(2));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionEval40",
+            description="Evaluation of unknown array size in record",
+            flatModel="
+fclass EvaluationTests.FunctionEval40
+ constant Real y = 6.0;
+end EvaluationTests.FunctionEval40;
+")})));
+end FunctionEval40;
 
 model VectorFuncEval1
     function f
