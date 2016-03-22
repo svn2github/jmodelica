@@ -81,8 +81,8 @@ aspect AccessSizes {
     }
     
     syn FExp FSubscript.getAccessContextSizeExp()      = null;
-    syn FExp FColonSubscript.getAccessContextSizeExp() = mySize().buildAccessContextSizeExp(this);
-    syn FExp FExpSubscript.getAccessContextSizeExp()   = mySize().buildAccessContextSizeExp(this);
+    syn lazy FExp FColonSubscript.getAccessContextSizeExp() = mySize().buildAccessContextSizeExp(this);
+    syn lazy FExp FExpSubscript.getAccessContextSizeExp()   = mySize().buildAccessContextSizeExp(this);
     
     public FExp Size.buildAccessContextSizeExp(FSubscript fs)        { throw new UnsupportedOperationException(); }
     public FExp MutableSize.buildAccessContextSizeExp(FSubscript fs) {

@@ -429,7 +429,7 @@ aspect Arrays {
 	 * An access without subscripts returns subscripts that span the entire component.
 	 * Any colon subscripts are expanded into constant vector expressions.
 	 */
-	syn FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
+	syn lazy FArraySubscripts InstScalarAccess.getExpandedSubscripts() = myInstComponentDecl().expandedSubscripts();
 	
 	/**
 	 * Get the expanded array subscripts of this access.
