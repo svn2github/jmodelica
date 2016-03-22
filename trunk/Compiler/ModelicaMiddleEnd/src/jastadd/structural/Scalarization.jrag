@@ -116,11 +116,8 @@ aspect Scalarization {
     }
     
 	protected void FClass.scalarizeFuncs() {
-		List<FFunctionDecl> funcs = new List<FFunctionDecl>();
 		for (FFunctionDecl f : getFFunctionDecls()) 
-			funcs.add(f.scalarize());
-		setFFunctionDeclList(funcs);
-		funcs.clearScalarized();  // Functions need scalarized = false in FQNames
+			f.scalarize();
 	}
 	
     /**
@@ -2211,22 +2208,18 @@ aspect Scalarization {
      * Scalarize the function, replacing all array assignments with separate scalar 
      *        assignments and scalarize all expressions.
      */
-    public FFunctionDecl FFunctionDecl.scalarize() {
+    public void FFunctionDecl.scalarize() {
         Map<String,FExp> emptyIndexMap = Collections.emptyMap();
-        List<FFunctionVariable> vars = new List<FFunctionVariable>();
         List<FStatement> stmts = new List<FStatement>();
-
-        FFunctionDecl fd = createDecl();
-        fd.setFQName(getFQName().fullCopy());
-        fd.setFAlgorithm(new FAlgorithm(stmts));
-        for (FAttribute a : getFAttributes()) 
-            a.scalarize(fd.getFAttributes(), Index.NULL, Collections.<String,FExp>emptyMap());
-        fd.parent = this;
-
+        List<FAttribute> attrs = new List<FAttribute>();
         FStatement.scalarizeStmtList(getFAlgorithm().getFStatements(), stmts, getFFunctionVariables(), emptyIndexMap);
-        fd.setFFunctionVariableList(getFFunctionVariables());
-        return fd;
+        for (FAttribute a : getFAttributes()) 
+            a.scalarize(attrs, Index.NULL, emptyIndexMap);
+        setFAlgorithm(new FAlgorithm(stmts));
+        setFAttributeList(attrs);
+        clearScalarized();  // Functions need scalarized = false in FQNames
     }
+
 	
 	public FFunctionDecl FFunctionDecl.createDecl() {
 		return new FFunctionDecl();

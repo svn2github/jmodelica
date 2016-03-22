@@ -459,11 +459,7 @@ aspect SizesUtil {
     
     public FExp InstFunctionCall.copyReplaceAccess(FExp.ContextReplacer crp) {
         InstAccess name = InstAccess.fromName(getName().myInstCallable().actualInstCallable().qualifiedName());
-        InstFunctionCall res = new InstFunctionCall(name, new List<InstFunctionArgument>());
-        for (InstFunctionArgument arg : getArgs()) {
-            res.addArg(arg.copyReplaceAccess(crp));
-        }
-        return res;
+        return new InstFunctionCall(name, getArgs().copyReplaceAccess(crp));
     }
     
     public InstFunctionArgument InstFunctionArgument.copyReplaceAccess(FExp.ContextReplacer crp) {
