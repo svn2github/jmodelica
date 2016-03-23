@@ -513,6 +513,12 @@ aspect CanonizeEquations {
 
     syn boolean FDivExp.isFDivExp() = true;
     syn boolean FExp.isFDivExp() = false;
+    
+    syn boolean FAbstractEquation.isFEquation() = false;
+    syn boolean FEquation.isFEquation() = true;
+      
+    syn boolean FExp.isFIdUseExp() = false;
+    syn boolean FIdUseExp.isFIdUseExp() = true;
 
     /*
      * Casts.
