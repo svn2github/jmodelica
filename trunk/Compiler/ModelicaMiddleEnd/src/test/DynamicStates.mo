@@ -1861,7 +1861,7 @@ der(_ds.1.s1) := dsDer(1, 1)
             c = cos(vx);
         annotation(__JModelica(UnitTesting(tests={
             FClassMethodTestCase(
-                name="FunctionCallEquation1",
+                name="NoDerivative1",
                 description="Ensure that the dynamic state algorithm doesn't rematch to a variable with lower order than the equation'",
                 methodName="printDAEBLT",
                 methodResult="
@@ -2009,5 +2009,112 @@ der(_ds.2.s1) := dsDer(2, 1)
 -------------------------------
 ")})));
         end NoDerivative1;
+        model MetaEquation1
+            Real a1;
+            Real a2;
+            Real b;
+            Integer i;
+            Real x;
+        equation
+            der(x) = 1;
+            der(a1) = b;
+            der(a2) = b;
+            a1 * a2 = i;
+            i = integer(abs(a1 - a2));
+            when abs(i - pre(i)) > 0.1 then
+                reinit(x, 0);
+            end when;
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="MetaEquation1",
+                description="Ensure that the dynamic state block factory can handle meta equations among the equations'",
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+der(x) := 1
+
+--- Dynamic state block ---
+  --- States: a1 ---
+    --- Unsolved mixed linear system (Block 1(a1).1) of 2 variables ---
+Coefficient variability: continuous-time
+    Unknown continuous variables:
+      a2
+
+    Solved discrete variables:
+      i
+
+    Continuous residual equations:
+      ds(1, a1) * ds(1, a2) = i
+        Iteration variables: a2
+
+    Discrete equations:
+      i := if abs(ds(1, a1) - ds(1, a2)) < pre(i) or abs(ds(1, a1) - ds(1, a2)) >= pre(i) + 1 or initial() then integer(abs(ds(1, a1) - ds(1, a2))) else pre(i)
+
+    Jacobian:
+      |ds(1, a1)|
+
+    --- Solved equation ---
+    temp_2 := abs(i - pre(i)) > 0.1
+
+    --- Meta equation block ---
+    if temp_2 and not pre(temp_2) then
+      reinit(x, 0);
+    end if
+    -------------------------------
+  --- States: a2 ---
+    --- Unsolved mixed linear system (Block 1(a2).1) of 2 variables ---
+Coefficient variability: continuous-time
+    Unknown continuous variables:
+      a1
+
+    Solved discrete variables:
+      i
+
+    Continuous residual equations:
+      ds(1, a1) * ds(1, a2) = i
+        Iteration variables: a1
+
+    Discrete equations:
+      i := if abs(ds(1, a1) - ds(1, a2)) < pre(i) or abs(ds(1, a1) - ds(1, a2)) >= pre(i) + 1 or initial() then integer(abs(ds(1, a1) - ds(1, a2))) else pre(i)
+
+    Jacobian:
+      |ds(1, a2)|
+
+    --- Solved equation ---
+    temp_2 := abs(i - pre(i)) > 0.1
+
+    --- Meta equation block ---
+    if temp_2 and not pre(temp_2) then
+      reinit(x, 0);
+    end if
+    -------------------------------
+
+--- Torn linear system (Block 2) of 1 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  b
+  dynDer(a1)
+
+Iteration variables:
+  dynDer(a2)
+
+Torn equations:
+  b := dynDer(a2)
+  dynDer(a1) := b
+
+Residual equations:
+  ds(1, a1) * dynDer(a2) + dynDer(a1) * ds(1, a2) = 0
+    Iteration variables: dynDer(a2)
+
+Jacobian:
+  |-1.0, 0.0, 1.0|
+  |-1.0, 1.0, 0.0|
+  |0.0, ds(1, a2), ds(1, a1)|
+
+--- Solved equation ---
+der(_ds.1.s1) := dsDer(1, 1)
+-------------------------------
+")})));
+        end MetaEquation1;
     end Special;
 end DynamicStates;
