@@ -40,14 +40,18 @@ aspect AliasVariables {
     	
     	@Override
     	public boolean run(FAbstractEquation feq) {
-    		    fclass.genAlias();
-                fclass.eliminateAliasVariables();
+    		if(fclass.genAlias(feq)) {
+    			System.out.println("Performing Alias Elimination...");
+                fclass.eliminateAliasVariables(workData, feq);
                 fclass.removeUnusedTemporaries();
                 fclass.mergeEquivalentRecords();
                 fclass.insertTempsInLHS();
                 fclass.remoteRedundantInitialEquations();
                 change();
+                System.out.println("Done with Alias Elimination.");
             	return true;
+            }
+            return false;
 		}
 		
 		// Not sure where to put this, was part of Transformation interface.

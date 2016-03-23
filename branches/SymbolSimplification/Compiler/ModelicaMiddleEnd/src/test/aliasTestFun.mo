@@ -31,19 +31,22 @@ equation
        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="TestTest1",
-            eliminate_alias_variables=false,
-            variability_propagation=false,
+	eliminate_alias_variables=true,
+	variability_propagation=true,
+	canonize_equations=false,
+	simple_ae=false,
+	simple_vp=false,
             description="",
             flatModel="
             
 fclass aliasTestFun.aliasTestFun
+ Real a;
  Real p;
  Real q;
- Real j;
 equation
+ a = 10;
  p = 20;
- j = 10;
- q = j + p;
+ q = a + p;
 end aliasTestFun.aliasTestFun;
 
 ")})));

@@ -14,7 +14,7 @@ equation
         TransformCanonicalTestCase(
             name="canonicalFormTestAddMulTree",
             eliminate_alias_variables=true,
-            variability_propagation=true,
+            variability_propagation=false,
             simple_ae = false,
             simple_vp = false,
             canonize_equations = false,

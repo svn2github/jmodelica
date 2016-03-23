@@ -1730,13 +1730,13 @@ aspect TransformCanonical {
             }
             
             public void perform() {
-                genAlias();
-                eliminateAliasVariables();
-                removeUnusedTemporaries();
-                mergeEquivalentRecords();
-                insertTempsInLHS();
-                remoteRedundantInitialEquations();
-                change();
+                //genAlias();
+                //eliminateAliasVariables();
+                //removeUnusedTemporaries();
+                //mergeEquivalentRecords();
+                //insertTempsInLHS();
+                //remoteRedundantInitialEquations();
+                //change();
             }
         }
         
@@ -1880,38 +1880,40 @@ aspect TransformCanonical {
 	
 	/**
 	 * Generate alias information and remove alias equations.
+	 * 
+	 * Johan/Zimon CHANGED
 	 */
-	public void FClass.genAlias() {
+	public boolean FClass.genAlias(FAbstractEquation equation) {
 		if (aliasManager == null) {
 			aliasManager = new AliasManager();
 		}
-		for (FAbstractEquation equation : getFAbstractEquations()) {
-			// Iterate over all equations
-			// If the equation is an alias equation, then register
-			// the alias variables in the alias manager.
-			// Check all alias equations, also those that that have been
-			// checked before.
-			equation.aliasClassified = false; 
-			if (equation.isAliasEquation()) 
-				aliasManager.addAliasVariables(equation.aliasVariables());
+		
+		equation.aliasClassified = false; 
+		if (equation.isAliasEquation()) {
+			aliasManager.addAliasVariables(equation.aliasVariables());
+		} else {
+			return false;
 		}
+/*
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation equation : getFParameterEquations()) {
-                equation.aliasClassified = false; 
-                if (equation.isAliasEquation()) 
-                    aliasManager.addAliasVariables(equation.aliasVariables());
-            }
+            equation.aliasClassified = false; 
+            if (equation.isAliasEquation()) 
+                aliasManager.addAliasVariables(equation.aliasVariables());
         }
+        
         if (myOptions().getBooleanOption("eliminate_alias_constants")) {
             Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
             Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
+            
             for (FVariable fv : getFVariables()) {
                 fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
             }
         }
+*/        
 		aliasManager.reportAliasErrors(this);
-		//flush();
+
 		root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
+		return true;
 	}
 	
     public void FVariable.classifyAliasConstant(AliasManager aliasManager, 
@@ -1941,11 +1943,12 @@ aspect TransformCanonical {
 	 * The non-alias variables are kept in the list FClass.FVariableList but the
 	 * alias variables are moved to FClass.AliasVariablesList.
 	 */
-	public void FClass.eliminateAliasVariables() {
+	 
+	public void FClass.eliminateAliasVariables(FClass.WorkData workData, FAbstractEquation feq) {
 		ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
 		ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
 		ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+    	ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
 		
 		//log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
 		
@@ -1954,21 +1957,51 @@ aspect TransformCanonical {
 				aliasVars.add(fv);
 		}
 		for (FVariable fv : getFVariables()) {
-            fv.aliasSort(nonAliasVars, aliasVars);
+			fv.aliasSort(nonAliasVars, aliasVars);
 		}
 		
-		// Remove alias equations.
-		for (FAbstractEquation equation : getFAbstractEquations()) 
-			if (!equation.isAliasEquation()) 
+		workData.removeEquation(feq);
+		
+		for (FAbstractEquation equation: getFAbstractEquations()) {
+			// Remove equation if alias.
+			if (!workData.hasRemovedEquation(equation)) 
 				eqns.add(equation);
+		}
+		
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation equation : getFParameterEquations()) { 
-                if (!equation.isAliasEquation()) {
-                    pEqns.add(equation);
+            for (FAbstractEquation parEquation : getFParameterEquations()) { 
+                if (!parEquation.isAliasEquation()) {
+                    pEqns.add(parEquation);
                 }
             }
         }
         
+        /*
+        System.out.println("\talias variables:");
+        for (FVariable fv : aliasVars) {
+        	System.out.println("\t* "+fv.toString());
+        }
+        System.out.println("\tnormal variables:");
+        for (FVariable fv : nonAliasVars) {
+        	System.out.println("\t* "+fv.toString());
+        }
+        */
+
+		for (FVariable fv : aliasVars) {
+            for (FIdUseExp use : fv.uses()) {
+            	FAbstractEquation fae;
+            	if (use.inFEquation()) {
+            		fae = use.myFEquation();
+            		if (!workData.hasRemovedEquation(fae)) {
+            			System.out.println("\tEquation was added to worklist: "
+            				+ fae.toString());
+      					workData.addToWorklist(fae);
+            		}	
+            	}
+            }
+		}
+        
+  /*      
         // Collect derivative binding equations, however only if we are going
         // to perform index reduction!
         if (myOptions().getBooleanOption("propagate_derivatives")) {
@@ -1976,10 +2009,11 @@ aspect TransformCanonical {
                 eqn.propagateDerivativeBindings();
             }
         }
-
+*/	
 		setFVariableList(new List(nonAliasVars));
 		setAliasVariableList(new List(aliasVars));
 		setFAbstractEquationList(new List(eqns));
+		
         if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
             setFParameterEquationList(new List(pEqns));
         }
