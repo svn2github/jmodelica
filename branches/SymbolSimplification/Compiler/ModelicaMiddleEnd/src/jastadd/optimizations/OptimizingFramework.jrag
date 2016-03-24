@@ -1,27 +1,18 @@
 /**
- *  Extremely good documentation in development!
+ * Framework for optimizing algorithms.<p>
+ * 
+ * Current added algorithms are:
+ * <ul>
+ * 	<li>Alias Elimination</li>
+ *  <li>Variability Propagation</li>
+ * </ul>
+ *  
+ * @author  Johan Calvén, Zimon Kuhs
+ * @date	2016-02-08
+ * @version 0?
  */
-
 aspect OptimizingFramework {
-    /**
-     * Framework for optimizing algorithms.
-     * 
-     * Current added algorithms are:
-     * 	- Alias Elimination
-     *  - Variability Propagation
-     * 
-     * @author  Johan Calven, Zimon Kuhs
-     * @date    2016-02-08
-     * @version 0?
-     */
     public class FClass {
-    	// TODO: Debug data, remove later on:
-        public static final boolean VERBOSE = true;
-        public static String defaultIndent = "";
-        public static boolean defaultShowFEq = false;
-    	// ---------------------------------------------
-    	
-    	
         public class optimizingFrameworkIfSet extends Transformation {
             public optimizingFrameworkIfSet() {
                 super("optimizing_framework");
@@ -49,13 +40,16 @@ aspect OptimizingFramework {
     	 * Checks if the optimizing algorithm is enabled. The algorithm must have an option added
     	 * to the enum Default in {JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
     	 * Use {fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
+    	 * 
     	 * @return {code true} if it is enabled, {code false} otherwise.
     	 */
     	public abstract boolean isUsed();
     	
     	/*
-    	 * Starts the optimizing algorithm.
-    	 * @param feq The equation to optimize.
+    	 * Starts the optimizing algorithm.<p>
+    	 * 
+    	 * @param feq	The equation to optimize.
+    	 * @return	{@code true} if the equation was updated, {@code false} otherwise.
     	 */
     	public abstract boolean run(FAbstractEquation feq);
     }
@@ -65,21 +59,18 @@ aspect OptimizingFramework {
     	
     	/**
     	 * Optimizing algorithms that are used by the framework are added here.
+    	 * 
     	 * @param workData	Data that is shared and updated in and between optimizing algorithms.
     	 */ 
     	public void addOptimizingAlgorithmsToFramework(WorkData workData) {
- //   		optimizeAlgorithmsInFramework.add(new AE(this, workData));
- //   		optimizeAlgorithmsInFramework.add(new VP(this, workData));
+    	 	optimizeAlgorithmsInFramework.add(new AliasEliminator(this, workData));
     		optimizeAlgorithmsInFramework.add(new VariabilityPropagator(this, workData));
- 			optimizeAlgorithmsInFramework.add(new AliasEliminator(this, workData));
     	}
     	
 	    /**
 	     *  Main method for running the algorithms.<p>
-		 *  
 		 *  If an algorithm optimizes an equation, its caller method should return true and the
-		 *  while loop will then continue with the next equation in worklist.
-		 * 
+		 *  while loop will then continue with the next equation in worklist.<p>
 		 *  A class called WorkData is kept for storing essential data needed in and shared between
 		 *  the algorithms. This should be expanded if needed when adding a new algorithm to the framework.
 	     */
@@ -88,7 +79,7 @@ aspect OptimizingFramework {
 	    	WorkData workData = new WorkData(worklist); // VP
 	    	ArrayList<OptimizingAlgorithm> optList = new ArrayList();
 			addOptimizingAlgorithmsToFramework(workData);
-			CE canonizeEquations = new CE(this, workData);
+			Canonizer canonizer = new Canonizer(this, workData);
 				
 	    	for (OptimizingAlgorithm optAlg: optimizeAlgorithmsInFramework)
 	    		if (optAlg.isUsed())
@@ -99,11 +90,13 @@ aspect OptimizingFramework {
 	    	
 	    	System.out.println("\n\n----------- NEW TEST --------------\n");  // TODO: Remove later
 	    	
-	    	if (canonizeEquations.isUsed())
-	    		canonizeEquations.run(null);
+	    	// If canonization is enabled it is performed before any algorithm.
+	    	if (canonizer.isUsed())
+	    		for (FAbstractEquation feq : getFAbstractEquations())
+	    		canonizer.run(feq);
 	    	
 	    	while (!worklist.isEmpty()) {
-	    		/* --- felsÃ¶kning --- */
+	    		/* --- Felsökning --- */
 	    		/*
 	    		System.out.println("\tEquations in system:");
 	    		for (FAbstractEquation feq : getFAbstractEquations())
@@ -121,7 +114,7 @@ aspect OptimizingFramework {
 	    		
 	    		for (OptimizingAlgorithm optAlg : optList)
 	    			if (optAlg.run(feq))
-	    				continue;
+	    				break;
 	        }
 	        
 	        fixStructure();
@@ -149,7 +142,9 @@ aspect OptimizingFramework {
             
 	        /**
 	         * Constructs a class containing data needed throughout the execution time 
-	         * of the optimizing algorithms, that are added to the framework. 
+	         * of the optimizing algorithms, that are added to the framework.
+			 *
+			 * @param worklist	The working list of equations to modify with the algorithms.
 	         */
 	        public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
 	            this.worklist = worklist;
@@ -157,11 +152,20 @@ aspect OptimizingFramework {
 	            	parameterEquations.add(feq);
 	        }
 			
-			
+			/*
+			 * Getter for the <code>splitAliasParameters</code> boolean.
+			 *
+			 * @return	the constant.
+			 */
 			public boolean splitAliasParameters() {
                 return splitAliasParameters;
             }
             
+            /*
+			 * Getter for the <code>splitAliasConstants</code> boolean.
+			 *
+			 * @return	the constant.
+			 */
             public boolean splitAliasConstants() {
                 return splitAliasConstants;
             }
@@ -169,6 +173,7 @@ aspect OptimizingFramework {
 	        /**
 			 * If an equation is switched to a parameter equation it should be
 			 * added to this list.
+			 *
 			 * @param feq The equation that is added to the parameter equations list.
 			 */
 	        public void addParameterEquation(FAbstractEquation feq) {
@@ -177,6 +182,8 @@ aspect OptimizingFramework {
 	        
 	        /**
 			 * Method to add an equation to the worklist.
+			 *
+			 * @param feq	The equation to be added.
 			 */
 	        public void addToWorklist(FAbstractEquation feq) {
 	            worklist.add(feq);
@@ -185,6 +192,7 @@ aspect OptimizingFramework {
 	        /**
 			 * Checks if an equation has been removed by one of
 			 * the optimizing algorithms.
+			 *
 			 * @param feq The equation that is checked. 
 			 * @return {@code true} if it has been removed, {@code false} otherwise.
 			 */
@@ -194,6 +202,7 @@ aspect OptimizingFramework {
 	        
 	        /**
 			 * Adds an equation to the list of removed equations.
+			 *
 			 * @param feq The equation that is added to the list of removed equations.
 			 */
 	        public void removeEquation(FAbstractEquation feq) {
@@ -202,6 +211,7 @@ aspect OptimizingFramework {
 	        
 	        /**
 			 * Returns a list containing the parameter equations.
+			 *
 			 * @return The list containing all parameter equations. 
 			 */
 	        public List<FAbstractEquation> getparameterEquations() {
@@ -214,41 +224,6 @@ aspect OptimizingFramework {
 		 * rewrites after performing all the optimization. Atm, a rewrite is performed if an 
 		 * algorithm changes the structure.
 		 */
-	    public void fixStructure() {
-	    }
+	    public void fixStructure() {}
     }
-    /**
-     *  Utility method for learning the AST structure.
-     *  <p>Prints the tree of all equations in the current model.
-     *
-     *  @param showFEq  If true, will display the equation string
-     *                      before dumping the AST.
-     *  @param indent   Base indentation of the dumped tree.
-     */
-     public void FClass.showTree(boolean showFEq, String indent) {
-        for (FAbstractEquation fae : getFAbstractEquations()) {
-            if (showFEq)
-                System.out.println("<" + fae.toString() + ">");
-            fae.dumpTree(indent);
-        }
-     }
-     
-     /**
-     *  Utility method for learning the AST structure.
-     *  <p>A No argument version of printTree() not printing the equation
-     *  and using no identation. A "default" version of printTree(),
-     */
-     public void FClass.showTree() {
-        showTree(defaultShowFEq, defaultIndent);
-     }
-     
-     /**
-      * Debug printing, will print message if VERBOSE is set.
-      *
-      * @param  msg The message to print.
-      */
-     public void FClass.debugPrintLn(String message) {
-        if (VERBOSE)
-            System.out.println(message);
-     }
 }
