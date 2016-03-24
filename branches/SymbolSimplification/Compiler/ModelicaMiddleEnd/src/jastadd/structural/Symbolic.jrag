@@ -1193,7 +1193,7 @@ aspect ExpressionSimplification {
      */
     syn FExp FDotSubExp.convertToAddition() = new FDotAddExp(getLeft(), getRight().makeNegated());
     eq FSubExp.convertToAddition()          = new FAddExp(getLeft(), getRight().makeNegated());
-
+/*
     rewrite FDotMulExp {
         when (getLeftNoTransform().isLiteralZero())      to FExp getRight().size().createZeroFExp();
         when (getLeftNoTransform().isLiteralOne())       to FExp getRight();
@@ -1202,7 +1202,7 @@ aspect ExpressionSimplification {
         when (getRightNoTransform().isLiteralOne())      to FExp getLeft();
         when (getRightNoTransform().isLiteralMinusOne()) to FExp getLeft().makeNegated();
     }
-
+*/
     rewrite FDotDivExp {
         when (getLeftNoTransform().isLiteralZero())       to FExp getRight().size().createZeroFExp();
         when (getRightNoTransform().isLiteralOne())       to FExp getLeft();
