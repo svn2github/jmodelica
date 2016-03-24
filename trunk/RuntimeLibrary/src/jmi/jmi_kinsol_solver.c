@@ -1979,7 +1979,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     jmi_block_solver_t *block = kin_mem->kin_user_data;
     jmi_kinsol_solver_t* solver = block->solver;
     clock_t t;
-    realtype*  bd = N_VGetArrayPointer(b); /* residuals */
+    realtype*  bd = N_VGetArrayPointer(b); /* - residuals, i.e. -F(x) */
     realtype*  xd = N_VGetArrayPointer(x); /* on input - last successfull step; on output - new step */
     jmi_log_node_t node;
     long int  nniters;           
@@ -2075,7 +2075,6 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     N_VProd(x, block->f_scale, x);
     
     kin_mem->kin_sfdotJp = N_VDotProd(kin_mem->kin_fval, x);
-
     /* if the Jacobian was equilibrated then scale the residuals accordingly */
     if((solver->equed == 'R') || (solver->equed == 'B')) {
         for(i = 0; i < N; i++) {
@@ -2088,6 +2087,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         /*  gradient = Transpose(J) W*W F, 
             where W is the diagonal matix of residual scaling factors. 
             W*W F is effectively calculated above in "x" as a part of kin_sfdotJp calculation.
+            solver->gradient is the negative gradient.
          */
 
         jmi_kinsol_calc_Mv(block->J, TRUE, x, solver->gradient);
@@ -2283,8 +2283,9 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             sJpnorm = N_VWL2Norm(b,block->f_scale);
             /* update sJpnorm and sfdotJp for Kinsol */ 
             kin_mem->kin_sJpnorm = sJpnorm;
-            kin_mem->kin_sfdotJp = sfJp;
+            kin_mem->kin_sfdotJp = -sfJp; /* Due to opposite sign of solver->gradient minus is present here. */
             solver->sJpnorm = kin_mem->kin_sJpnorm;
+
         }
         if(block->callbacks->log_options.log_level >= 5) {
             double step_factor = solver->last_num_active_bounds > 0? 1.0:solver->max_step_ratio;
