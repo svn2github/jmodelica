@@ -27,15 +27,21 @@
  */
 aspect CanonizeEquations {
     
-    public class CE extends OptimizingAlgorithm {
+    public class Canonizer extends OptimizingAlgorithm {
     	// Specifies whether the LHS or RHS should be zero.
     	public static final boolean ZERO_LEFT = false;
     	
     	// We only need one comparator instance.
     	private static FactorComparator factorComparator
             = new FactorComparator();
+            
+        /*
+         * DivToMul data.
+         */
+		private static FExp denominator = FExp.ZERO_EXP;
+		private static boolean continueMultiplying = false;
     	
-        public CE(FClass fclass, FClass.WorkData workData) {
+        public Canonizer(FClass fclass, FClass.WorkData workData) {
             super(fclass, workData);
         }
         
@@ -46,72 +52,16 @@ aspect CanonizeEquations {
         
         @Override
         public boolean run(FAbstractEquation feq) {
-            canonizeEquations(new DivToMul());
+            if (!feq.isFEquation())
+            	return false;
+            	
+            FEquation equation = feq.asFEquation();
+            moveToOneSide(equation);
+            eliminateDivision(equation);
+            convertNegations(equation);
+            toAddMulTree(equation);
+            
             return true;
-        }
-        
-        /**
-		 * Nested class that stores variables needed when replacing FDivExps with FMulexps.
-		 */
-	    private class DivToMul {
-	    	private FExp denominator;
-        	private boolean continueMultiplying;
-        	
-        	public DivToMul() {
-        		denominator = FExp.ZERO_EXP;
-        		continueMultiplying = false;
-        	}
-			
-        	public FExp getDenom() {
-        		return denominator;
-        	}
-        	
-        	public void setDenom(FExp denom) {
-        		denominator = denom;
-        	}
-        	
-        	public boolean continueMultiplying() {
-        		return continueMultiplying;
-        	}
-        	
-        	public void setContinueMultiplying(boolean b) {
-        		continueMultiplying = b;
-        	}
-	    }
-	    
-	    /**
-         * Transforms all equations in a model to canonical form.<p>
-         * 
-         * @param dToM	Object to store variables needed when performing eliminateDivision().
-         */
-        private void canonizeEquations(DivToMul dToM) {
-            for (FAbstractEquation equation: fclass.getFAbstractEquations()) {
-	    	    if (!equation.isFEquation())
-	    	      continue;
-	    	    
-	    	    FEquation feq = equation.asFEquation();
-	    	    
-	    	    fclass.debugPrintLn("Working on equation:\n" + equation.toString() + "\n");
-	            
-	    	    // Step 1. Move all expressions to RHS.
-	    	    moveToOneSide(feq);
-	    	    fclass.debugPrintLn("Moved to one side. Eq:\n" + equation.toString() + "\n");
-	    	    
-	    	    // Step 2: Remove all DivExp.
-	    	    eliminateDivision(feq, dToM);
-	    	    fclass.debugPrintLn("Removed division. Eq:\n" + equation.toString() + "\n");
-	    	    
-	    	    // Step 3: Translate all negations to x * -1.
-	    	    convertNegations(feq);
-	    	    fclass.debugPrintLn("Translated negative expressions. Eq:\n" + equation.toString() + "\n");
-	    	    
-	    	    // Step 4: Build a tree of only FAddExps and FMulExps.
-	    	    toAddMulTree(feq);
-	    	    fclass.debugPrintLn("Built add-mul tree and reordered. Eq:\n" + equation.toString() + "\n");
-	        	
-	        	// Step 5: ...
-            }
-            fclass.debugPrintLn("Done canonizing equations.");
         }
         
         /**
@@ -143,7 +93,7 @@ aspect CanonizeEquations {
 	     * 
 	     * @param  feq The equation from which to remove divisions.
 	     */
-	    private void eliminateDivision(FEquation feq, DivToMul dToM) {
+	    private void eliminateDivision(FEquation feq) {
 	       FExp fexp = feq.nonZeroSide();
 	        
 	        // If the expression is only a variable, return.
@@ -169,8 +119,8 @@ aspect CanonizeEquations {
 	        
 	        // Continue searching through the tree untill no more FDivExps are found
 	        do {
-	            foundDiv = divToMul(fexp, fexp, dToM);
-	            dToM.setContinueMultiplying(false);
+	            foundDiv = divToMul(fexp, fexp);
+	            continueMultiplying = false;
 	        } while (foundDiv);
 	    }
     
@@ -183,7 +133,6 @@ aspect CanonizeEquations {
 	     * 
 	     * @param fexp			The expression which denominator should be evaluated.
 	     * @param rootParent	The root expression, i.e. the lhs or rhs depending on <code>FClass.ZERO_LEFT</code>.
-	     * @param dToM			A class containing the denominator FExp to multiply with and a boolean flag
 	     * 						set to true if should continue propagate upwards.
 	     * @return {@code true} if a FDivExp was found, {@code false} otherwise.
 	     * @see		FClass.ZERO_LEFT (CanonizeEquations.jrag).
@@ -191,7 +140,7 @@ aspect CanonizeEquations {
 	     * TODO: Not optimized atm. The algorithm is traversing the whole tree everytime this method is called.
 	     *       This could be improved by tracking which paths we have already found and removed an FDivExp.
 	     */
-	    private boolean divToMul(FExp fexp, FExp rootParent, DivToMul dToM) {
+	    private boolean divToMul(FExp fexp, FExp rootParent) {
 	        boolean foundDivLeft = false;		// If found a FDivExp searching on left child
 	        boolean foundDivRight = false;		// If found a FDivExp searching on right child
 	        boolean foundDiv = false;			// If found a FDivExp
@@ -205,20 +154,20 @@ aspect CanonizeEquations {
 	    
 	    	// Continue recursively searching down the left child as long as its an FBinExp
 	        if (leftChild.isFBinExp()) 
-	            foundDivLeft = divToMul(leftChild, rootParent, dToM);
+	            foundDivLeft = divToMul(leftChild, rootParent);
 
 			// Continue recursively searching down the right child as long as its an FBinExp and no FDivExp was
 			// found in left child.
 	        if (rightChild.isFBinExp() && !foundDivLeft)
-	            foundDivRight = divToMul(rightChild, rootParent, dToM);
+	            foundDivRight = divToMul(rightChild, rootParent);
 	        
 	        foundDiv = foundDivLeft || foundDivRight;
 	        
             if (!foundDiv && fexp.isFDivExp() && fexp != rootParent) {
             // Check if at a bottom FDivExp node (foundDiv==false) and its not the rootParent.
                 foundDiv = true; 					// Found an FDivExp
-                dToM.setContinueMultiplying(true); 	// Continue multiplying upwards in tree
-                dToM.setDenom(rightChild);			// Fetch denominator of FDivExp
+                continueMultiplying = true;		 	// Continue multiplying upwards in tree
+                denominator = rightChild;			// Fetch denominator of FDivExp
                 
                 // Check if this node is left or right child of its parent.
                 // Then replace the FDivExp with its left child (numerator).
@@ -227,78 +176,74 @@ aspect CanonizeEquations {
                 } else {										
                     fexp.parentFExp().setChild(leftChild, 1);
                 }
-            } else if (dToM.continueMultiplying() && (fexp.isFAddExp() || fexp.isFSubExp())) {
+            } else if (continueMultiplying && (fexp.isFAddExp() || fexp.isFSubExp())) {
             // Check if should continuing multiplying upwards in tree and the node is an FAddExp or FSubExp.
             // After checking at which child the FDivExp was found, an FMulExp is inserted that multiplies
             // the other child with the denominator of the FDivExp.
                 if (foundDivLeft) {
-                	fexp.setChild(new FMulExp(rightChild, dToM.getDenom()), 1);
-                    //fexp.setChild(new FMulExp(rightChild, denominator), 1);
+                	fexp.setChild(new FMulExp(rightChild, denominator), 1);
                 } else {
-                	fexp.setChild(new FMulExp(leftChild, dToM.getDenom()), 0);
-                    //fexp.setChild(new FMulExp(leftChild, denominator), 0);
+                	fexp.setChild(new FMulExp(leftChild, denominator), 0);
                 }
-            } else if (dToM.continueMultiplying() && foundDivRight && fexp.isFDivExp()) {
+            } else if (continueMultiplying && foundDivRight && fexp.isFDivExp()) {
             // Check if should continuing multiplying upwards in tree, the FDivExp was found at
             // the right child of this node and the node is an FDivExp.
             // Time to stop multiplying upwards and an FMulExp is inserted that multiplies
             // the left child with the denominator of the FDivExp.
-                dToM.setContinueMultiplying(false);
-                //continueUp = false;
-                fexp.setChild(new FMulExp(leftChild, dToM.getDenom()), 0);
-                //fexp.setChild(new FMulExp(leftChild, denominator), 0);
+                continueMultiplying = false;
+                fexp.setChild(new FMulExp(leftChild, denominator), 0);
             }
 	        
 	        return foundDiv;
 	    }
 	
-	/**
-	 * Converts all negations and subtractions in an equation.<p>
-	 * Initial call of recurisve method traversing an equation-tree,
-	 * performing the following translations:<p>
-	 * <ul>
-	 * 	<li>Subtraction expressions to additions of the LHS and the
-	 * 		RHS expression multiplied by -1.</li>
-	 * 	<li>Negation expressions to multiplications of the expression
-	 * 		and -1.</li>
-	 * </ul>
-	 * 
-	 * @param feq	The equation with expressions to convert.
-	 * @see			<code>convertNegativeExpressions</code>
-	 */ 
-	private void convertNegations(FEquation feq) {
-		// Copy to avoid parental issues.
-		FExp newExp = feq.nonZeroSide().fullCopy();
+		/**
+		 * Converts all negations and subtractions in an equation.<p>
+		 * Initial call of recurisve method traversing an equation-tree,
+		 * performing the following translations:<p>
+		 * <ul>
+		 * 	<li>Subtraction expressions to additions of the LHS and the
+		 * 		RHS expression multiplied by -1.</li>
+		 * 	<li>Negation expressions to multiplications of the expression
+		 * 		and -1.</li>
+		 * </ul>
+		 * 
+		 * @param feq	The equation with expressions to convert.
+		 * @see			<code>convertNegativeExpressions</code>
+		 */ 
+		private void convertNegations(FEquation feq) {
+			// Copy to avoid parental issues.
+			FExp newExp = feq.nonZeroSide().fullCopy();
 		
-		// Remove FNegExps and FSubExps.
-		newExp = convertNegativeExpressions(newExp);
+			// Remove FNegExps and FSubExps.
+			newExp = convertNegativeExpressions(newExp);
 		
-		// Update the equation.
-		feq.setNonZeroSide(newExp);
-	}
-	
-	/**
-	 * Recursively translates all negations and subtractions.<p>
-	 * Recursive method, intial call is made with <code>convertNegations</code>.
-	 * 
-	 * @param exp	The parent expression with children to convert.
-	 * @return		The converted expression.
-	 * @see			<code>convertNegations</code>
-	 */ 
-	private FExp convertNegativeExpressions(FExp exp) {
-		FExp returnExp = exp;
-		if (exp.isFSubExp()) {
-			FSubExp sub = exp.asFSubExp();
-			returnExp = new FAddExp(sub.getLeft(),
-				new FMulExp(sub.getRight(), new FIntegerLitExp(-1)));;
-		} else if (exp.isFBinExp()) {
-			FBinExp bin = exp.asFBinExp();
-			bin.setLeft(convertNegativeExpressions(bin.getLeft()));
-			bin.setRight(convertNegativeExpressions(bin.getRight()));
-			returnExp = bin;
+			// Update the equation.
+			feq.setNonZeroSide(newExp);
 		}
-		return returnExp;
-	}
+	
+		/**
+		 * Recursively translates all negations and subtractions.<p>
+	 	* Recursive method, intial call is made with <code>convertNegations</code>.
+		 * 
+		 * @param exp	The parent expression with children to convert.
+	 	* @return		The converted expression.
+		 * @see			<code>convertNegations</code>
+		 */ 
+		private FExp convertNegativeExpressions(FExp exp) {
+			FExp returnExp = exp;
+			if (exp.isFSubExp()) {
+				FSubExp sub = exp.asFSubExp();
+				returnExp = new FAddExp(sub.getLeft(),
+					new FMulExp(sub.getRight(), new FIntegerLitExp(-1)));;
+			} else if (exp.isFBinExp()) {
+				FBinExp bin = exp.asFBinExp();
+				bin.setLeft(convertNegativeExpressions(bin.getLeft()));
+				bin.setRight(convertNegativeExpressions(bin.getRight()));
+				returnExp = bin;
+			}
+			return returnExp;
+		}
 	    
 	    /**
          * A set class for constants and variables which are joined in multiplication.<p>
@@ -307,10 +252,10 @@ aspect CanonizeEquations {
          * avoiding creating new expressions until members of the old equation
          * (parents) are no longer needed.
          */ 
-	private class FactorSet {
-            private FactorComparator comparator = CE.factorComparator;
+		private class FactorSet {
+            private FactorComparator comparator = Canonizer.factorComparator;
         	private PriorityQueue<FExp> factors;
-			
+
 			/**
 			 *	Creates a new factor set using the standard comparator.
 			 */        
@@ -506,7 +451,7 @@ aspect CanonizeEquations {
           * Refers to the <code>String</code> comparator in order to sort
           * terms alphabetically.
           */
-         private static class FactorComparator implements Comparator<FExp> {
+        private static class FactorComparator implements Comparator<FExp> {
             public int compare(FExp exp1, FExp exp2) {
                 int result = 0;
                 
@@ -568,7 +513,7 @@ aspect CanonizeEquations {
             		return false;
             	return last.asFIntegerLitExp().getValue() < 0;
             }
-         }
+        }
     }
     
 	/**
