@@ -52,13 +52,8 @@ const double jmi_block_solver_canari = 3.14159;
  */
 int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr, 
                            jmi_callbacks_t* cb, 
-                           jmi_log_t* log,                          
-                           jmi_block_solver_residual_func_t F, 
-                           jmi_block_solver_dir_der_func_t dF,
-                           jmi_block_solver_jacobian_func_t Jacobian, 
-                           jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
-                           jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
-                           jmi_block_solver_log_discrete_variables log_discrete_variables,
+                           jmi_log_t* log,
+                           jmi_block_solver_callbacks_t solver_callbacks,
                            int n,
                            jmi_block_solver_options_t* options,
                            void* problem_data){
@@ -182,12 +177,12 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->init = 1;
     block_solver->at_event = 1;
 
-    block_solver->F = F;
-    block_solver->dF =dF;
-    block_solver->Jacobian = Jacobian;
-    block_solver->check_discrete_variables_change = check_discrete_variables_change;
-    block_solver->update_discrete_variables = update_discrete_variables;
-    block_solver->log_discrete_variables = log_discrete_variables;
+    block_solver->F = solver_callbacks.F;
+    block_solver->dF = solver_callbacks.dF;
+    block_solver->Jacobian = solver_callbacks.Jacobian;
+    block_solver->check_discrete_variables_change = solver_callbacks.check_discrete_variables_change;
+    block_solver->update_discrete_variables = solver_callbacks.update_discrete_variables;
+    block_solver->log_discrete_variables = solver_callbacks.log_discrete_variables;
 
     block_solver->nb_calls = 0;                    /**< \brief Nb of times the block has been solved */
     block_solver->nb_iters = 0;                     /**< \breif Total nb if iterations of non-linear solver */
@@ -459,9 +454,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         
         /* Save the initial values of the discrete variables for the iteration */
         block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
-
-        if(block_solver->log_discrete_variables)
-            block_solver->log_discrete_variables(block_solver->problem_data,top_node);
+        block_solver->log_discrete_variables(block_solver->problem_data,top_node);
         
         converged = 0;
         ef = 0;
@@ -498,8 +491,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             ef = block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);
             
             jmi_log_reals(log, iter_node, logInfo, "ivs", block_solver->x, block_solver->n);
-            if(block_solver->log_discrete_variables)
-                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+            block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
             if(ef != 0) { 
                 jmi_log_node(log, logInfo, "Info", "Error in discrete variables update: "
@@ -615,13 +607,10 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 /* Log iteration variables and discrete variables. */
                 jmi_log_reals(log, iter_node, logInfo, "ivs (old)", x, block_solver->n);
                 jmi_log_reals(log, iter_node, logInfo, "ivs (new)", x_new, block_solver->n);
-                if(block_solver->log_discrete_variables)
-                    block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 non_reals_not_changed_flag = block_solver->check_discrete_variables_change(block_solver->problem_data, x_new);
-                
-                if(block_solver->log_discrete_variables)
-                    block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
+                block_solver->log_discrete_variables(block_solver->problem_data, iter_node);
 
                 /* Check for consistency */
                 if (non_reals_not_changed_flag > 0){
@@ -744,6 +733,36 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->jacobian_variability = JMI_CONTINUOUS_VARIABILITY;
     bsop->label = "";
     bsop->block_profiling = 0;
+}
+
+static jmi_block_solver_status_t jmi_block_default_update_discrete_variables(void* b, int* non_reals_changed_flag) {
+    JMI_VAR_NOT_USED(b);
+    
+    /* Default implementation is that here is no
+     * discrete variables, no changes: */
+    *non_reals_changed_flag = 0;
+    return jmi_block_solver_status_success;
+}
+
+static int jmi_block_default_log_discrete_variables(void* b, jmi_log_node_t node) {
+    JMI_VAR_NOT_USED(b);
+    JMI_VAR_NOT_USED(node);
+    
+    /* Default implementation is that here is no
+     * discrete variables, don't log anything */
+    return 0;
+}
+
+jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void) {
+    jmi_block_solver_callbacks_t cb;
+    cb.F = NULL; /* The user must set this */
+    cb.dF = NULL; /* NULL is ok to pass on */
+    cb.Jacobian = NULL; /* NULL is ok to pass on */
+    cb.check_discrete_variables_change = NULL; /* NULL is ok to pass on */
+    cb.update_discrete_variables = jmi_block_default_update_discrete_variables;
+    cb.log_discrete_variables = jmi_block_default_log_discrete_variables;
+    
+    return cb;
 }
 
 /* 

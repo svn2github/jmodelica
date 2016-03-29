@@ -60,6 +60,7 @@
 #define JMI_BLOCK_GET_DEPENDENCY_MATRIX                         1048576
 
 #define JMI_LIMIT_VALUE 1e30
+#define JMI_VAR_NOT_USED(x) ((void)x)
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -230,6 +231,7 @@ typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_l
 
 typedef struct jmi_block_solver_t jmi_block_solver_t;
 typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
+typedef struct jmi_block_solver_callbacks_t jmi_block_solver_callbacks_t;
 
 /**
  * \brief Allocate the internal structure for the block solver.
@@ -237,12 +239,7 @@ typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
 int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                          jmi_callbacks_t* cb,
                          jmi_log_t* log,
-                         jmi_block_solver_residual_func_t F,
-                         jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
-                         jmi_block_solver_jacobian_func_t Jacobian, /* can be NULL if, e.g., kin_dF should be used for Jacobian calculation */
-                         jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
-                         jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
-                         jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
+                         jmi_block_solver_callbacks_t solver_callbacks,
                          int n,
                          jmi_block_solver_options_t* options,
                          void* problem_data);
@@ -324,6 +321,15 @@ struct jmi_block_solver_options_t {
 
 };
 
+struct jmi_block_solver_callbacks_t {
+    jmi_block_solver_residual_func_t F;                                                         /**< \brief Function for evaluation of the block residual. */
+    jmi_block_solver_dir_der_func_t dF;                                                         /**< \brief Directional derivative, can be NULL. */
+    jmi_block_solver_jacobian_func_t Jacobian;                                                  /**< \brief Function for evaluation of the block residual, can be NULL if, e.g., kin_dF should be used. */
+    jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change;    /**< \brief Function for checking if discrete variables change, used in enhanced event iteration, can be NULL. */
+    jmi_block_solver_update_discrete_variables_func_t update_discrete_variables;                /**< \brief Function for updating discrete variables. */
+    jmi_block_solver_log_discrete_variables log_discrete_variables;                             /**< \brief Function for logging the discrete variables. */
+};
+
 /** \brief Solve the equations in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
 
@@ -353,6 +359,9 @@ int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_rea
 
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
+
+/** \brief Retrive a block solver callback struct with defaults */
+jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void);
 
 /** \brief Update function scaling based on Jacobian information */
 void jmi_update_f_scale(jmi_block_solver_t *block);

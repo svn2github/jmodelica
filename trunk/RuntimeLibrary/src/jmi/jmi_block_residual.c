@@ -372,6 +372,7 @@ int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
 
 int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
+    jmi_block_solver_callbacks_t solver_callbacks;
     int flag = 0;
     if(!b) return -1;
     *block = b;
@@ -438,21 +439,22 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->options->label = label;
     b->options->solver = solver;
     b->options->jacobian_variability = (jmi_block_solver_jac_variability_t)jacobian_variability;
-
+    
+    solver_callbacks = jmi_block_solver_default_callbacks();
+    solver_callbacks.F = jmi_block_residual;
+    solver_callbacks.dF = dF ? jmi_block_dir_der : NULL;
+    solver_callbacks.check_discrete_variables_change = jmi_block_check_discrete_variables_change;
+    solver_callbacks.update_discrete_variables = jmi_block_update_discrete_variables;
+    solver_callbacks.log_discrete_variables = jmi_block_log_discrete_variables;
+   
     jmi_new_block_solver(
         & b->block_solver,
         &jmi->jmi_callbacks,
         jmi->log,
-        jmi_block_residual,
-        dF ? jmi_block_dir_der:0,
-        0, /* jacobian calculation callback */
-        jmi_block_check_discrete_variables_change,
-        jmi_block_update_discrete_variables,
-        jmi_block_log_discrete_variables,
+        solver_callbacks,
         n,
         b->options,
         b);
-
 
 
     switch(solver) {
