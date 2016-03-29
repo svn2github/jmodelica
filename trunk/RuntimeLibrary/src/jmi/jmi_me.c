@@ -913,11 +913,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_residual_scaling_aggressive_auto:
             bsop->residual_equation_scaling_mode = jmi_residual_scaling_aggressive_auto;
             break;
-        case jmi_residual_scaling_full_jacobian_auto:
-            bsop->residual_equation_scaling_mode = jmi_residual_scaling_full_jacobian_auto;
+        case jmi_residual_scaling_auto:
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
             break;
         default:
-            bsop->residual_equation_scaling_mode = jmi_residual_scaling_auto;
+            bsop->residual_equation_scaling_mode = jmi_residual_scaling_full_jacobian_auto; 
             break;
         }
     } 
@@ -926,14 +926,15 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     if(index) {
         int fl = (int)z[index];
         switch(fl) {
-        case jmi_broyden_jacobian_update_mode:
-            bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
+        case jmi_reuse_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
             break;
         case jmi_full_jacobian_update_mode:
             bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
             break;
         default:
-            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+            bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
+			break;
         }
     } 
 

@@ -646,7 +646,7 @@ abstract public class OptionRegistry {
             ("residual_equation_scaling",
              OptionType.runtime, 
              Category.user,
-             1,
+             5,
              "Equations scaling mode in equation block solvers: " +
              "0 - no scaling, 1 - automatic scaling, 2 - manual scaling, 3 - hybrid, 4- aggressive automatic scaling, 5 - automatic rescaling at full Jacobian update",
              0, 5),
@@ -662,7 +662,7 @@ abstract public class OptionRegistry {
             ("nle_jacobian_update_mode",
              OptionType.runtime, 
              Category.user,
-             2,
+             1,
              "Mode for how to update the Jacobian: " +
              "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
              0, 2),

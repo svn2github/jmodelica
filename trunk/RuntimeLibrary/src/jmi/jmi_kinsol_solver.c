@@ -1988,7 +1988,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
     KINGetNumNonlinSolvIters(kin_mem, &nniters);
     solver->current_nni = nniters;
 
-    if(block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode) {
+    if(block->init && block->options->jacobian_update_mode == jmi_broyden_jacobian_update_mode) {
         if(!solver->updated_jacobian_flag) {
             /* Never do update in the first iteration */
             if (nniters > 0) {        
@@ -2018,10 +2018,10 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         }
     }
 
-    if(((block->options->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto) &&
+    if(block->init && ( ( (block->options->residual_equation_scaling_mode == jmi_residual_scaling_aggressive_auto) &&
         nniters > 1 && solver->is_first_newton_solve_flag) 
         || (block->options->residual_equation_scaling_mode == jmi_residual_scaling_full_jacobian_auto 
-        && nniters > 1 && solver->updated_jacobian_flag && solver->is_first_newton_solve_flag)) {
+        && nniters > 1 && solver->updated_jacobian_flag && solver->is_first_newton_solve_flag))) {
         int i;
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
         N_VScale(1.0, block->f_scale, solver->work_vector);
