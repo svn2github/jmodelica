@@ -183,6 +183,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->check_discrete_variables_change = solver_callbacks.check_discrete_variables_change;
     block_solver->update_discrete_variables = solver_callbacks.update_discrete_variables;
     block_solver->log_discrete_variables = solver_callbacks.log_discrete_variables;
+    block_solver->restore_solver_state_mode = solver_callbacks.restore_solver_state_mode;
 
     block_solver->nb_calls = 0;                    /**< \brief Nb of times the block has been solved */
     block_solver->nb_iters = 0;                     /**< \breif Total nb if iterations of non-linear solver */
@@ -690,6 +691,11 @@ int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_rea
     return all_iter_vars_equal;
 }
 
+int jmi_block_solver_use_save_restore_state_behaviour(jmi_block_solver_t* block_solver) {
+    return block_solver->options->start_from_last_integrator_step             &&
+           block_solver->restore_solver_state_mode(block_solver->problem_data);
+}
+
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->res_tol = 1e-6;
     /* Default Kinsol tolerance (machine precision pwr 1/3)  -> 1e-6 */
@@ -753,6 +759,15 @@ static int jmi_block_default_log_discrete_variables(void* b, jmi_log_node_t node
     return 0;
 }
 
+static int jmi_block_default_restore_solver_state_mode(void* b) {
+    JMI_VAR_NOT_USED(b);
+    
+    /* Default implementation is to always retstore 
+     * the solver state (inactivating it sometimes 
+     * should be seen as an optimization) */
+    return 1;
+}
+
 jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void) {
     jmi_block_solver_callbacks_t cb;
     cb.F = NULL; /* The user must set this */
@@ -761,6 +776,7 @@ jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void) {
     cb.check_discrete_variables_change = NULL; /* NULL is ok to pass on */
     cb.update_discrete_variables = jmi_block_default_update_discrete_variables;
     cb.log_discrete_variables = jmi_block_default_log_discrete_variables;
+    cb.restore_solver_state_mode = jmi_block_default_restore_solver_state_mode;
     
     return cb;
 }

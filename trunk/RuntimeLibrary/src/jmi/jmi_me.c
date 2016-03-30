@@ -607,14 +607,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             return -1;
         }
         
-        /* This is an implicit accepted step. */
-        retval = jmi_block_completed_integrator_step(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
         /* Compare current values with the pre values. If there is an element that differs, set
          * event_info->iteration_converged to false. */
         event_info->iteration_converged = TRUE; /* Assume the iteration converged */

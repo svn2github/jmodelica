@@ -226,6 +226,14 @@ typedef int (*jmi_block_solver_check_discrete_variables_change_func_t)(void* pro
  */
 typedef jmi_block_solver_status_t (*jmi_block_solver_update_discrete_variables_func_t)(void* problem_data, int* non_reals_changed_flag);
 
+/**
+ * \brief Function signature for checking if in "restore solver state"-mode.
+ *
+ * @param problem_data (Input) Problem data pointer passed in the jmi_block_solver_new.
+ * @return 1 if in mode otherwise 0.
+ */
+typedef int (*jmi_block_restore_solver_state_mode_t)(void* problem_data);
+
 /* TODO: log_discrete_variables is not really needed. Kept just to make sure there are not changes during refactoring */
 typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_log_node_t node);
 
@@ -328,6 +336,7 @@ struct jmi_block_solver_callbacks_t {
     jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change;    /**< \brief Function for checking if discrete variables change, used in enhanced event iteration, can be NULL. */
     jmi_block_solver_update_discrete_variables_func_t update_discrete_variables;                /**< \brief Function for updating discrete variables. */
     jmi_block_solver_log_discrete_variables log_discrete_variables;                             /**< \brief Function for logging the discrete variables. */
+    jmi_block_restore_solver_state_mode_t restore_solver_state_mode;                            /**< \brief Function for deciding when during the simulation/solver phase the solver state should be saved/restored. */
 };
 
 /** \brief Solve the equations in the associated problem. */
@@ -356,6 +365,16 @@ int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver
  * @param x_post The second set of iteration varilabes
  */
 int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_real_t* x_pre, jmi_real_t* x_post);
+
+/**
+ * \brief Checks if the "restore to last ingegrator step" behaviour is active.
+ * 
+ * Returns (1) if the option start_from_last_integrator_step and the return
+ * value of the callback restore_solver_state_mode are true otherwise (0).
+ * 
+ * @param block_solver A jmi_block_solver_t struct
+ */
+int jmi_block_solver_use_save_restore_state_behaviour(jmi_block_solver_t* block_solver);
 
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);

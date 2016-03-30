@@ -272,6 +272,12 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
     return jmi_block_solver_status_success;
 }
 
+int jmi_block_restore_solver_state_mode(void* b) {
+    jmi_block_residual_t* block = (jmi_block_residual_t*)b;
+    
+    return (!block->jmi->atInitial && !block->jmi->atEvent);
+}
+
 int jmi_block_update_pre(jmi_block_residual_t* block) {
     jmi_t* jmi = block->jmi;
     int i = 0;
@@ -446,6 +452,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     solver_callbacks.check_discrete_variables_change = jmi_block_check_discrete_variables_change;
     solver_callbacks.update_discrete_variables = jmi_block_update_discrete_variables;
     solver_callbacks.log_discrete_variables = jmi_block_log_discrete_variables;
+    solver_callbacks.restore_solver_state_mode = jmi_block_restore_solver_state_mode;
    
     jmi_new_block_solver(
         & b->block_solver,
