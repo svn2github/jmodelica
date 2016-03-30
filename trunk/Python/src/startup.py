@@ -33,6 +33,8 @@ import os, os.path
 import sys
 import logging
 import jpype
+from required_defaults import get_required_paths_dict as _get_required_paths_dict
+from required_defaults import optimica_compiler_included as _optimica_compiler_included
 
 _jm_home = os.environ['JMODELICA_HOME']
 #exception here if jm_home not found
@@ -43,7 +45,9 @@ environ['JMODELICA_HOME'] = _jm_home
 MC_JAR = os.path.join(_jm_home,'lib','ModelicaCompiler.jar')     #Path to ModelicaCompiler jar file
 OC_JAR = os.path.join(_jm_home,'lib','OptimicaCompiler.jar')     #Path to OptimicaCompiler jar file
 UTIL_JAR = os.path.join(_jm_home,'lib','util.jar')               #Path to org.jmodelica.Util jar file
-COMPILER_JARS = MC_JAR + os.pathsep + OC_JAR + os.pathsep + UTIL_JAR
+COMPILER_JARS = MC_JAR + os.pathsep + UTIL_JAR
+if _optimica_compiler_included():
+    COMPILER_JARS = COMPILER_JARS + os.pathsep + OC_JAR
 
 # Compiler classes
 _modelica_class = 'org.jmodelica.modelica.compiler.ModelicaCompiler'
@@ -53,17 +57,18 @@ _optimica_class = 'org.jmodelica.optimica.compiler.OptimicaCompiler'
 def _create_compiler(comp, options):
     return comp(options)
 
-_defaults = [('IPOPT_HOME','',True),
-             ('SUNDIALS_HOME','',True),
-             ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD'),True),
-             ('COMPILER_JARS',COMPILER_JARS,True),
-             ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib'),True),
-             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL'),True),
-             ('JPYPE_JVM',jpype.getDefaultJVMPath(),True),
-             ('JVM_ARGS','-Xmx700m',False)]
+_reqired_path = _get_required_paths_dict()
+_defaults = [('IPOPT_HOME',''),
+             ('SUNDIALS_HOME',''),
+             ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD')),
+             ('COMPILER_JARS',COMPILER_JARS),
+             ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib')),
+             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL')),
+             ('JPYPE_JVM',jpype.getDefaultJVMPath()),
+             ('JVM_ARGS','-Xmx700m')]
 
 if sys.platform == 'win32':
-    _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw'),True))
+    _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw')))
 
 # read values for system environment if possible, otherwise set default
 for _e in _defaults:
@@ -96,10 +101,10 @@ for _e in _defaults:
         else:
             paths = environ[_e[0]].split(':') #On other platforms they are separeted with colons, so split.
         for p in paths:
-            if _e[2] and not os.path.exists(p):
+            if _reqired_path[_e[0]] and not os.path.exists(p):
                 logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],p))
     else:
-        if _e[2] and not os.path.exists(environ[_e[0]]):
+        if _reqired_path[_e[0]] and not os.path.exists(environ[_e[0]]):
             if _e[0] == 'IPOPT_HOME':
                 logging.warning('%s=%s path does not exist. An IPOPT installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
             elif _e[0] == 'SUNDIALS_HOME':
