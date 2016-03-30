@@ -59,7 +59,6 @@ aspect AliasVariables {
                 fclass.setDAEBLT(BLT.EMPTY_BLT);
                 fclass.setDAEInitBLT(BLT.EMPTY_BLT);
                 fclass.DAEBiPGraph = null;
-                fclass.root().flushAllRecursiveClearFinal();
      	}
 	 }
 	 

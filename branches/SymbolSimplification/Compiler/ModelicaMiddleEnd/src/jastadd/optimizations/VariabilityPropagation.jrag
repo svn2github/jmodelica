@@ -14,7 +14,6 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 aspect VariabilityPropagation {
 	
     public boolean FFunctionCallEquation.taggedForCleanup = false;
@@ -163,7 +162,6 @@ aspect VariabilityPropagation {
     		if (variabilityPropagation(feq)) {
             	fclass.enableConstantFolding();
             	fclass.forceRewrites();
-            	fclass.root().flushAllRecursiveClearFinal(); // Enable expression rewrites
             	System.out.println("Done with Variability Propagation.");
             	return true;
             }
@@ -271,8 +269,6 @@ aspect VariabilityPropagation {
         if (!solutionVariability.knownParameterOrLess()) {
             workData.addParameterEquation(new FEquation(fVariable.createUseExp(), solution));
         }
-        
-        System.out.println("Performing VariabilityPropagation...");
         
         this.taggedByVProp = true;
         workData.removeEquation(this);
@@ -479,15 +475,13 @@ aspect VariabilityPropagation {
                 setFixedAttribute(true);
             }
         }
-        
+        System.out.println("Performing VariabilityPropagation...");
         // Uses
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 equation.variables().remove(this);
-                if (workData.hasRemovedEquation(equation)) {
-                	continue;
-                }
+                
                 if (isZero) {
                     // Adjust variable set for special case y = 0 * z
                     FExp topFactorExp = use.myTopFactorFExp();
@@ -507,7 +501,6 @@ aspect VariabilityPropagation {
                         topFactorExp.taggedByVProp = true;
                     }
                 }
-                
                 if (!workData.hasRemovedEquation(equation)) {
                 	System.out.println("\tAdded equation to worklist: "+ equation.toString());
                 	workData.addToWorklist(equation);
@@ -545,8 +538,9 @@ aspect VariabilityPropagation {
                 boolean neg = av.isNegated() ^ thisAlias.isNegated();
                 if (fv != this) {
                     fv.setFTypePrefixVariability(variability);
-                    if (variability.knownParameterOrLess())
+                    if (variability.knownParameterOrLess()) {
                         fv.setBindingExp(bindingExp.negated(neg));
+                    }
                     if (unAlias && variability.parameterVariability() && !fv.isTemporary())
                         workData.addParameterEquation(new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
                 }

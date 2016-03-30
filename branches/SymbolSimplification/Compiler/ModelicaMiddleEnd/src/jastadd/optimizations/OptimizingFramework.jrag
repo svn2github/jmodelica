@@ -117,7 +117,7 @@ aspect OptimizingFramework {
 	    				break;
 	        }
 	        
-	        fixStructure();
+	        flushIt();
 	    }
 	    
 	    /**
@@ -224,6 +224,8 @@ aspect OptimizingFramework {
 		 * rewrites after performing all the optimization. Atm, a rewrite is performed if an 
 		 * algorithm changes the structure.
 		 */
-	    public void fixStructure() {}
+	    public void flushIt() {
+	    	fclass.root().flushAllRecursiveClearFinal(); // Enable expression rewrites
+	    }
     }
 }
