@@ -2911,6 +2911,45 @@ end RecordTests.RecordConstructor26;
 end RecordConstructor26;
 
 
+model RecordConstructor27
+    package A
+        record B
+            C c = C(1);
+        end B;
+        
+        record C
+            Real x;
+        end C;
+        
+        record D
+            extends B(c = C(2));
+        end D;
+    end A;
+    
+    A.D d = A.D();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor27",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor27
+ RecordTests.RecordConstructor27.A.D d(c = RecordTests.RecordConstructor27.A.C(2)) = RecordTests.RecordConstructor27.A.D(RecordTests.RecordConstructor27.A.C(2));
+
+public
+ record RecordTests.RecordConstructor27.A.C
+  Real x;
+ end RecordTests.RecordConstructor27.A.C;
+
+ record RecordTests.RecordConstructor27.A.D
+  RecordTests.RecordConstructor27.A.C c;
+ end RecordTests.RecordConstructor27.A.D;
+
+end RecordTests.RecordConstructor27;
+")})));
+end RecordConstructor27;
+
+
 model RecordScalarize1
  record A
   Real a;
