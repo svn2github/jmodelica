@@ -21,7 +21,7 @@
  *  </ol>
  * </ul>
  * 
- * @author  Johan Calvén, Zimon Kuhs
+ * @author  Johan Calvï¿½n, Zimon Kuhs
  * @date    2016-02-0?
  * @version 0?
  */
@@ -254,13 +254,13 @@ aspect CanonizeEquations {
          */ 
 		private class FactorSet {
             private FactorComparator comparator = Canonizer.factorComparator;
-        	private PriorityQueue<FExp> factors;
+        	private ArrayList<FExp> factors;
 
 			/**
 			 *	Creates a new factor set using the standard comparator.
 			 */        
         	public FactorSet() {
-        	   factors = new PriorityQueue<FExp>(comparator);
+        	   factors = new ArrayList<FExp>();
         	}
         
         	/**
@@ -270,7 +270,7 @@ aspect CanonizeEquations {
 			 *	@param exp	The initial FExp set member.
 			 */
         	public FactorSet(FExp exp) {
-        		factors = new PriorityQueue<FExp>(comparator);
+        		factors = new ArrayList<FExp>();
        			add(exp);
         	}
         	
@@ -282,15 +282,15 @@ aspect CanonizeEquations {
         	public FExp multiply() {
 				FExp mulExp = FExp.ZERO_EXP;
 
+                setEvenOrOdd();
+
 				if (factors.size() == 1) {
-					mulExp = factors.poll();
+					mulExp = factors.remove(0);
 				} else {
 				    ArrayList<FExp> list = new ArrayList<FExp>();
 				    
-				    for (FExp factor : factors)
-				        list.add(factor);
-				    
-				    setEvenOrOdd();
+				    list.addAll(factors);
+				    Collections.sort(list, comparator);
 				    
 					mulExp = FExp.createBalancedBinaryTree(new FMulExp(), list);
                 }
@@ -298,6 +298,13 @@ aspect CanonizeEquations {
                 return mulExp;					
         	}
         	
+        	/*
+        	 *	Removes unnecessary literal -1 from the <code>FactorSet</code><p>.
+        	 * 	If an even number of -1 exists, all are removed. If an odd number
+        	 * 	exists, all but one are removed. Since <code>FactorSet</code>s
+        	 * 	concerns factors in a multiplication, only zero or one -1s will
+        	 *  determine whether or not the resulting expression is negative or not.
+        	 */
         	private void setEvenOrOdd() {
         		int result = 0;
         		ArrayList<FExp> literalOnes = new ArrayList<FExp>();
@@ -419,29 +426,29 @@ aspect CanonizeEquations {
          *  @return     The top level addition or subtraction.
          */
 	    private FExp createAddTree(HashSet<FactorSet> factors) {
-	    	PriorityQueue<FExp> queue =
-	    		new PriorityQueue<FExp>(factorComparator);
+	    	ArrayList<FExp> list = new ArrayList<FExp>();
 	    		
 	    	// Gather all factors from the FactorSets.
 	    	for (FactorSet fs : factors)
-	    		queue.add(fs.multiply());
+	    		list.add(fs.multiply());
+	    	Collections.sort(list, factorComparator);
 	    	
 	    	FExp exp = FExp.ZERO_EXP;
-	       	int length = queue.size();
+	       	int length = list.size();
 	       
 	       	// If there is only one expression, return it.
 	       	if (length == 1)
-	        	exp = queue.poll();
+	        	exp = list.remove(0);
 	        	
 	        // If there is two expressions add them together.
 	       	else if (length == 2)
-	           	exp = new FAddExp(queue.poll(), queue.poll());
+	           	exp = new FAddExp(list.remove(0), list.remove(0));
 	            	
 	        // If there are numerous expressions, build an FAddExp-tree
 	        // joining them all together.
 	       	else
 	        	exp = FExp.createBalancedBinaryTree(new FAddExp(),
-	        		new ArrayList<FExp>(queue));
+	        		new ArrayList<FExp>(list));
 	        	
 	        return exp; 
 	    }
@@ -452,66 +459,97 @@ aspect CanonizeEquations {
           * terms alphabetically.
           */
         private static class FactorComparator implements Comparator<FExp> {
+			/**
+			 *	Compares two <code>FExp</code>-instances.<p>
+			 *	Used by <code>FactorSet</code> to order <code>FMulExp</code>s,
+			 *	<code>FIdUseExp</code>s, and <code>FIntegerLitExp</code>s.
+			 *	
+			 *	@param	exp1	An <code>FExp</code>.
+			 *	@param	exp2	An <code>FExp</code>.
+			 *	@return	Less than 0 if exp1 should be ordered first,
+			 *				more than 0 if exp2 should be ordered first,
+			 *				and 0 if they have the same priority.
+			 */
             public int compare(FExp exp1, FExp exp2) {
-                int result = 0;
-                
-                // For ids, we compare the strings.
-                if (exp1.isFIdUseExp() && exp2.isFIdUseExp()) {
-                    String id1 = exp1.asFIdUseExp().name(),
-                        id2 = exp2.asFIdUseExp().name();
-                    
-                    result = id1.compareTo(id2);
-                    
-                // For constants, we order them from lowest to greatest.
-                } else if (exp1.isLiteralExp() && exp2.isLiteralExp()) {
-                    FIntegerLitExp lit1 = exp1.asFIntegerLitExp(),
-                        lit2 = exp2.asFIntegerLitExp();
-                        
-                    result = lit1.getValue() - lit2.getValue();
-                    
-                // MulExps are ordered according to their first id.
-                } else if (exp1.isFMulExp() && exp2.isFMulExp()) {
-                    ArrayList<FExp> ids1 = exp1.factors(),
-                    	ids2 = exp2.factors();
-                    
-                    // Positive expressions before negative expressions.
-					if (hasNegative(ids1) && !hasNegative(ids2))
-						return 1;
-					else if (!hasNegative(ids1) && hasNegative(ids2))
-						return -1;
-					
-					// More IDs mean greater priority.
-					if (ids1.size() > ids2.size())
-						return -1;
-					else if (ids1.size() < ids2.size())
-						return 1;
-                    
-                    // The first lexically greater id-use in
-                    // either expression has priority.
-                    while (!(ids1.isEmpty() || ids2.isEmpty())) {
-                    	FExp f1 = ids1.remove(0),
-                    		f2 = ids2.remove(0);
-                    	if ((result = compare(f1, f2)) != 0)
-                    		break;
-                    } 
-                
-                // Ids are ordered before constants.
-                } else if (exp1.isFIdUseExp() && exp2.isLiteralExp()) {
-                    result = -1;
-                } else if (exp1.isLiteralExp() && exp2.isFIdUseExp()) {
-                    result = 1;
-                } else {
+                if (exp1 == exp2)
                     return 0;
+                
+                if (exp1.isFMulExp()) {
+                	if (exp2.isFMulExp()) {
+                		// FMulExp and FMulExp.
+                        return compare(exp1.asFMulExp(), exp2.asFMulExp());
+                    } else if (exp2.isFIdUseExp()) {
+                    	// FMulExp and FIdUseExp.
+                    	return compare(exp1.asFMulExp(), exp2.asFIdUseExp());
+                    }
+                } else if (exp1.isFIdUseExp()) {
+                	if (exp2.isFMulExp()) {
+                		// FIdUseExp and FMulExp.
+                        return compare(exp1.asFIdUseExp(), exp2.asFMulExp());
+                    } else if (exp2.isFIdUseExp()) {
+                    	// FIdUseExp and FIdUseExp.
+                    	return compare(exp1.asFIdUseExp(), exp2.asFIdUseExp());
+                    }
+                } else if (exp1.isLiteralExp() && exp2.isLiteralExp()) {
+                		// FIntegerLitExp and FIntegerLitExp.
+                        return compare(exp1.asFIntegerLitExp(), exp2.asFIntegerLitExp());
                 }
                 
-                return result;
+                // The remaining comparisons only concern type priority.
+                return exp1.orderPriority() - exp2.orderPriority();
             }
             
-            private boolean hasNegative(ArrayList<FExp> ids) {
-            	FExp last = ids.get(ids.size() - 1);
-            	if (!last.isLiteralExp())
-            		return false;
-            	return last.asFIntegerLitExp().getValue() < 0;
+            /*
+			 *	Comparator method for FMulExps.
+			 */
+            private int compare(FMulExp exp1, FMulExp exp2) {
+                // Rule #1: Positives before negatives.
+                boolean neg1 = exp1.isNegative(), neg2 = exp2.isNegative();
+                if (neg1 != neg2)
+                    return neg1 ? 1 : -1;
+                    
+                // Rule #2: More ids have priority.
+                ArrayList<FExp> ids1 = exp1.factors(),
+                    ids2 = exp2.factors();
+                int size1 = ids1.size(), size2 = ids2.size();
+                int cmp = size1 - size2;
+                
+                if (cmp != 0)
+                    return cmp;    
+                
+                // Rule #3: First non-equal id determines order.
+                for (int i = 0; i < size1; ++i)
+                    if ((cmp = compare(ids1.get(i), ids2.get(i))) != 0)
+                        return cmp;
+                
+                return 0;
+            }
+            
+            /*
+			 *	Comparator method for FMulExps and FIdUseExps.
+			 */
+            private int compare(FMulExp exp1, FIdUseExp exp2) {
+                return exp1.isNegative() ? 1 : -1;
+            }
+            
+            private int compare(FIdUseExp exp1, FMulExp exp2) {
+                return -compare(exp2, exp1);
+            }
+            
+			/*
+			 *	Comparator method for FIdUseExps.
+			 */
+            private int compare(FIdUseExp exp1, FIdUseExp exp2) {
+                // Rule: Lexical ordering.
+                return exp1.name().compareTo(exp2.name());
+            }
+            
+			/*
+			 *	Comparator method for FIntegerLitExps.
+			 */
+            private int compare(FIntegerLitExp exp1, FIntegerLitExp exp2) {
+                // Rule: Greatest value first.
+                return exp1.getValue() - exp2.getValue();
             }
         }
     }
@@ -588,12 +626,22 @@ aspect CanonizeEquations {
     /*
      * Casts.
      */
-     
+    
     syn FBinExp FExp.asFBinExp() = (FBinExp) this;
+    syn FMulExp FExp.asFMulExp() = (FMulExp) this;
     syn FSubExp FExp.asFSubExp() = (FSubExp) this;
     syn FNegExp FExp.asFNegExp() = (FNegExp) this;
     syn FEquation FAbstractEquation.asFEquation() = (FEquation) this;
 	syn FIntegerLitExp FExp.asFIntegerLitExp() = (FIntegerLitExp) this;
+    
+    /*
+     *  Ordering priorities.
+     */
+    
+    syn int FExp.orderPriority() = Integer.MAX_VALUE;
+    syn int FMulExp.orderPriority() = 0;
+    syn int FIdUseExp.orderPriority() = 1;
+    syn int FIntegerLitExp.orderPriority() = 2;
     
     /*
      * Attributes used by divToMul.
@@ -616,6 +664,20 @@ aspect CanonizeEquations {
     syn boolean FMulExp.lookupLeft(FExp child) {
         return child == getChild(0);
     }
+    
+    /*
+     *  Negation identity.
+     */
+     
+     syn boolean FExp.isNegative() = false;
+     syn boolean FMulExp.isNegative() {
+        int result = 0;
+        for (FExp exp : factors())
+            if (exp.isNegative())
+                ++result;
+        return result % 2 != 0;
+     }
+     syn boolean FIntegerLitExp.isNegative() = getValue() < 0;
     
     /* ---------------- Attribute list end. ---------------- */
 }
