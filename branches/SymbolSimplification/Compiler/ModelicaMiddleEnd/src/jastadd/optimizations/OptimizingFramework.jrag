@@ -225,7 +225,7 @@ aspect OptimizingFramework {
 		 * algorithm changes the structure.
 		 */
 	    public void flushIt() {
-	    	fclass.root().flushAllRecursiveClearFinal(); // Enable expression rewrites
+	    	root().flushAllRecursiveClearFinal(); // Enable expression rewrites
 	    }
     }
 }
