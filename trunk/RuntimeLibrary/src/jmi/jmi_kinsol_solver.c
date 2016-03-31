@@ -1004,6 +1004,39 @@ static int get_print_level(jmi_block_solver_t* bs) {
     else return 3;
 }
 
+static int jmi_kinsol_use_nominals_as_start(jmi_block_solver_t * block) {
+    int i;
+    
+    if (!block->options->use_nominals_as_fallback_in_init ||
+        !block->init)
+    {
+        return 0; /* Option set to false or not at init: return false */
+    }
+    
+    for (i = 0; i < block->n; i++) {
+        if (block->start_set[i] == 0) {
+            return 1; /* At least one start value not specified: return true */
+        }
+    }
+    
+    return 0; /* All iteration variables have start values: return false */
+}
+
+static void jmi_kinsol_set_nominals_as_start(jmi_block_solver_t * block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int i;
+
+    for (i = 0; i < block->n; i++) {
+        if (block->start_set[i] == 0) {
+            if (block->nominal[i] <= block->max[i]) {
+                N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i];
+            } else {
+                N_VGetArrayPointer(solver->kin_y)[i] = -block->nominal[i];
+            }
+        }
+    }
+}
+
 /* Initialize solver structures */
 static int jmi_kinsol_init(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = block->solver;
@@ -1122,30 +1155,18 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* evaluate the function at initial */
     ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
     if(ef) {
-        if (!block->options->use_nominals_as_fallback_in_init) {
-            jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
-                     "<block: %s>", block->label);
-        } else {
-            int changed_start = 0;
-                     
-            for (i = 0; i < block->n; i++) {
-                if (block->start_set[i] == 0) {
-                    changed_start = 1;
-                    N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
-                }
-            }
-            if (changed_start) {
-                jmi_log_node(block->log, logWarning, "Warning", "Residual function evaluation failed at initial point for "
-                     "<block: %s>", block->label);
-                     
-                jmi_log_node(block->log, logInfo, "NominalsAsInitialGuess", "Failed to evaluate the residual using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
-            
-                ef =  kin_f(solver->kin_y, kin_mem->kin_fval, block);
-                if(ef) {
-                    jmi_log_node(block->log, logError, "Error", "Residual function evaluation failed at initial point for "
-                             "<block: %s>", block->label);
-                }
-            }
+        if (jmi_kinsol_use_nominals_as_start(block)) {
+            jmi_kinsol_set_nominals_as_start(block);
+            jmi_log_node(block->log, logWarning, "NominalsAsInitialGuess",
+                "Failed to evaluate the residual using the default initial "
+                "guess. Attempting using the nominal values in <block:%s>",
+                block->label);
+            ef = kin_f(solver->kin_y, kin_mem->kin_fval, block);
+        }
+        if (ef) {
+            jmi_log_node(block->log, logError, "InitalEvaluation",
+                "Residual function evaluation failed at initial point for "
+                "<block: %s>", block->label);
         }
     }
     kin_mem->kin_uscale = solver->kin_y_scale;
@@ -1173,7 +1194,7 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     /* evaluate Jacobian at initial */
     if(jmi_kin_lsetup(kin_mem)) {
         ef = 1;
-        jmi_log_node(block->log, logError, "Error", "Jacobian evaluation failed at initial point for "
+        jmi_log_node(block->log, logError, "InitalEvaluation", "Jacobian evaluation failed at initial point for "
                      "<block: %s>", block->label);
     }
     return ef;
@@ -2826,27 +2847,21 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
         if(flag != KIN_SUCCESS) {
             /* If Kinsol failed, force a new Jacobian and new rescaling in the next try. */
             solver->force_new_J_flag = 1;
-            block->force_rescaling = 1;            
+            block->force_rescaling = 1;
 
             if (flagNonscaled == 0) {
                 jmi_log_node(log, logError, "Error", "The equations with initial scaling solved fine, "
                              "re-scaled equations failed in <block: %s>", block->label); 
             } else {
-                if (block->init && block->options->use_nominals_as_fallback_in_init) { /* Try perturbing the initial guess if bounded. */
-                    int i = 0;
-                    int changed_start = 0;
-                    for (i = 0; i < block->n; i++) {
-                        if (block->start_set[i] == 0) { /* If start is not set */
-                            changed_start = 1;
-                            N_VGetArrayPointer(solver->kin_y)[i] = block->nominal[i] <= block->max[i] ? block->nominal[i] : -block->nominal[i];
-                        }
-                    }
-                    if (changed_start) {
-                        jmi_log_node(log, logInfo, "NominalsAsInitialGuess", "Failed to compute a solution using the default initial guess. Attempting using the nominal values in <block:%s>", block->label);
-                    
-                        flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
-                    }
+                if (jmi_kinsol_use_nominals_as_start(block)) {
+                    jmi_kinsol_set_nominals_as_start(block);
+                    jmi_log_node(log, logWarning, "NominalsAsInitialGuess",
+                        "Failed to compute a solution using the default initial "
+                        "guess. Attempting using the nominal values in <block:%s>",
+                        block->label);
+                    flag = jmi_kinsol_invoke_kinsol(block, KIN_LINESEARCH);
                 }
+                
                 if (flag != KIN_SUCCESS) {
                     jmi_log_node(log, logError, "Error", "Could not converge after re-scaling equations in <block: %s>",
                                  block->label);
