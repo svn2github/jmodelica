@@ -37,7 +37,7 @@ import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.collections.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.munkres.MunkresProblem;
+import org.jmodelica.util.munkres.DenseMunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
 
 
@@ -3054,7 +3054,7 @@ aspect IfEquations {
                     weights[i][j] += rightVars.contains(var) ? -1 : 1;
             }
         }
-        return new MunkresProblem(IntegerCost.create(weights)).solve();
+        return new DenseMunkresProblem(IntegerCost.create(weights)).solve();
 	}
 	
 	private void FIfEquation.sortOutMatchedEquations(ArrayList<FEquation> eqns, int[][] match, int col, 

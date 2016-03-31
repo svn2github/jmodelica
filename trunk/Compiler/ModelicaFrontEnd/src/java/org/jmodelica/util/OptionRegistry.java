@@ -146,7 +146,7 @@ abstract public class OptionRegistry {
 
     public enum OptionType { compiler, runtime }
 
-    public enum Category { common, user, uncommon, experimental, debug, internal }
+    public enum Category { common, user, uncommon, experimental, debug, internal, deprecated }
 
     private enum Default {
         // Compiler options
@@ -305,8 +305,8 @@ abstract public class OptionRegistry {
         MUNKRES_MAX_INCIDENCES
             ("munkres_max_incidences", 
              OptionType.compiler, 
-             Category.uncommon,
-             2500, 
+             Category.deprecated,
+             0, 
              "The maximum number of incidences that can be in a graph when solving a munkres problem. " +
              "A value of zero or less results in no limit."),
         PROPAGATE_DERIVATIVES

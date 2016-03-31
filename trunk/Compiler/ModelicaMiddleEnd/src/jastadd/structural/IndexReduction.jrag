@@ -21,8 +21,9 @@ import java.util.Stack;
 
 import org.jmodelica.util.exceptions.MunkresException;
 import org.jmodelica.util.exceptions.IndexReductionException;
+import org.jmodelica.util.munkres.SparseMunkresProblem;
 import org.jmodelica.util.munkres.MunkresProblem;
-import org.jmodelica.util.munkres.MunkresCost;
+import org.jmodelica.util.munkres.SparseMunkresCost;
 
 aspect IndexReduction {
     
@@ -1043,7 +1044,7 @@ aspect IndexReduction {
                 ASTNode.beginStep("Munkres");
                 int numIncidences = countNumberOfIncidences();
                 if (maximumNbrOfMunkresIncidences > 0 && numIncidences > maximumNbrOfMunkresIncidences) {
-                    throw new MunkresException("The munkres problem is to big, there is " + numIncidences +
+                    throw new MunkresException("The munkres problem is too big, there is " + numIncidences +
                             " incidences in the graph, limit is set to " + maximumNbrOfMunkresIncidences +
                             ". The limit can be changed by setting the option 'munkres_max_incidences'");
                 }
@@ -1226,7 +1227,7 @@ aspect IndexReduction {
     
     public abstract class AbstractBiPGraph {
         
-        public static class IndexReductionCost implements MunkresCost<IndexReductionCost> {
+        public static class IndexReductionCost implements SparseMunkresCost<IndexReductionCost> {
             
             public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
@@ -1333,7 +1334,7 @@ aspect IndexReduction {
             i++;
         }
         
-        MunkresProblem<IndexReductionCost> munk = new MunkresProblem<IndexReductionCost>(cost);
+        MunkresProblem<IndexReductionCost> munk = new SparseMunkresProblem<IndexReductionCost>(cost);
         int[][] result = munk.solve();
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
         ASTNode.log.verbose("Munkres result:");
