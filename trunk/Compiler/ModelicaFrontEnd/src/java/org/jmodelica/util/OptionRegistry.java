@@ -805,7 +805,7 @@ abstract public class OptionRegistry {
             ("nle_solver_use_last_integrator_step",
              OptionType.runtime, 
              Category.uncommon,
-             false,
+             true,
              "If enabled, the intial guess for the iteration variables will be set to the iteration variables from the last integrator step."),
         EVENTS_DEFAULT_TOL
             ("events_default_tol",
