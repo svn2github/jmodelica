@@ -15,13 +15,12 @@
 */
 
 aspect VariabilityPropagation {
-	
     public boolean FFunctionCallEquation.taggedForCleanup = false;
-	public boolean FAbstractEquation.taggedByVProp = false;
-	public boolean FAbstractVariable.taggedByVProp = false;
-	public boolean FFunctionCallLeft.taggedByVProp = false;
-	public boolean FExp.taggedByVProp              = false;
-	
+    public boolean FAbstractEquation.taggedByVProp = false;
+    public boolean FAbstractVariable.taggedByVProp = false;
+    public boolean FFunctionCallLeft.taggedByVProp = false;
+    public boolean FExp.taggedByVProp              = false;
+    
     public void FAbstractEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
         if (!taggedByVProp) {
             l.add(this);
@@ -79,10 +78,10 @@ aspect VariabilityPropagation {
     }
     
     
-	
-	/**
-	 * Checks if equation is eligible for var. prop.
-	 */
+    
+    /**
+     * Checks if equation is eligible for var. prop.
+     */
     syn boolean FAbstractEquation.canPropagate() =
             canPropagateContext() && !containsActiveAnnotations();
     eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
@@ -114,158 +113,159 @@ aspect VariabilityPropagation {
         return super.potentialPartialVariability();
     }
     
-	/**
-	 * Checks if left hand side variable(s) is eligible for var. prop.
-	 */
-	syn boolean FExp.canPropagate() {
-		throw new UnsupportedOperationException();
-	}
+    /**
+     * Checks if left hand side variable(s) is eligible for var. prop.
+     */
+    syn boolean FExp.canPropagate() {
+        throw new UnsupportedOperationException();
+    }
     eq FNoExp.canPropagate() = true;
-	eq FRecordConstructor.canPropagate() {
-		for (FExp exp : getArgs()) {
-			if (!exp.canPropagate()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	eq FArray.canPropagate() {
-		for (FExp exp : getFExps()) {
-			if (!exp.canPropagate()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	eq FIdUseExp.canPropagate() {
-		return myFV().canPropagate();
-	}
-	syn boolean FAbstractVariable.canPropagate() = false;
-	eq FVariable.canPropagate() = !isOutput() && !containsActiveAnnotations();
-	eq FDerivativeVariable.canPropagate() = false;
-	
-	// Hook for checks that are needed in optimica
-	syn boolean FEquation.canPropagate(FVariable var, FExp solution) = true;
-	
-    public class VariabilityPropagator extends OptimizingAlgorithm {
-		public VariabilityPropagator(FClass fclass, FClass.WorkData workData) {
-    		super(fclass, workData);
-    	}
-		
-		@Override
-    	public boolean isUsed() {
-    		return fclass.myOptions().getBooleanOption("variability_propagation");
-    	}
-    	
-    	@Override
-    	public boolean run(FAbstractEquation feq) {
-    		if (variabilityPropagation(feq)) {
-            	fclass.enableConstantFolding();
-            	fclass.forceRewrites();
-            	System.out.println("Done with Variability Propagation.");
-            	return true;
+    eq FRecordConstructor.canPropagate() {
+        for (FExp exp : getArgs()) {
+            if (!exp.canPropagate()) {
+                return false;
             }
-            return false;
-		}
+        }
+        return true;
+    }
+    eq FArray.canPropagate() {
+        for (FExp exp : getFExps()) {
+            if (!exp.canPropagate()) {
+                return false;
+            }
+        }
+        return true;
+    }
+    eq FIdUseExp.canPropagate() {
+        return myFV().canPropagate();
+    }
+    syn boolean FAbstractVariable.canPropagate() = false;
+    eq FVariable.canPropagate() = !isOutput() && !containsActiveAnnotations();
+    eq FDerivativeVariable.canPropagate() = false;
     
-	
-		/**
-		 * Runs variability propagation.
-		 */
-		public boolean variabilityPropagation(FAbstractEquation feq) {
-			// Work
-			if(!feq.variabilityPropagation(workData))
-				return false;
-			
-			// Clean variables
-	        ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
-	        ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
-	        AliasManager am = fclass.getAliasManager();
-	        for (FVariable fVariable: fclass.getFVariables()) {
-	            if (!fVariable.taggedByVProp) {
-	                newVariables.add(fVariable);
-	            }
-	        }
-	        for (FVariable fVariable: fclass.getAliasVariables()) {
-	            if (am.getAliasSet(fVariable) != null) {
-	                newAliases.add(fVariable);
-	            } else if (!fVariable.isTemporary()) {
-	                newVariables.add(fVariable);
-	            }
-	        }
-	        fclass.setFVariableList(new List<FVariable>(newVariables));
-	        fclass.setAliasVariableList(new List<FVariable>(newAliases));
-	
-			// Clean equations
-			ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation equation: fclass.getFAbstractEquations()) {
-				equation.cleanEquations(newEquations);
-			}
-			fclass.setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
-			
-			// Clean initial equations
-			newEquations = new ArrayList<FAbstractEquation>();
-			for (FAbstractEquation equation: fclass.initialEquations()) {
-				if (!equation.taggedByVProp) {
-					newEquations.add(equation);
-				}
-			}
-			
-			fclass.setFParameterEquationList(workData.getparameterEquations());
-			
-			fclass.setFInitialEquationList(new List<FAbstractEquation>(newEquations));
-			return true;
-		}
-	}
-		
-	public boolean FAbstractEquation.variabilityPropagation(FClass.WorkData workData) {
-		return false;
-	}
-		
-	public boolean FEquation.variabilityPropagation(FClass.WorkData workData) {
-		
-		FVariable fVariable;
-		FExp solution;
-		FTypePrefixVariability solutionVariability;
-
-		if (!canPropagate()) {
-			return false; // Unbalanced equation
-		}
-
-		fVariable = variables().iterator().next();
-
-		if (!fVariable.canPropagate()) {
-			return false;
-		}
-
-		solution = solution(fVariable);
-		solution.resetOriginalReferences();
-		
-		if (!solution.isValidExp()) {
-			return false;
-		}
-		
-		if (!canPropagate(fVariable, solution)) {
-			return false;
-		}
-		
-		solutionVariability = solution.variability();
-
-		if (!solutionVariability.parameterOrLess()) {
-			// Sometimes combinations of parameters and constants yield 
-			// discrete variability. IfExpr, sample() etc.
-			return false;
-		}
-
-		if (solutionVariability.knownParameterOrLess()) {
-			try {
-				solution = solution.ceval().buildLiteral();
-			} catch (ConstantEvaluationException e) {
-				// If we can't evaluate right now, set it as parameter
-				solutionVariability = fParameter();
-			}
-		}
-		
+    // Hook for checks that are needed in optimica
+    syn boolean FEquation.canPropagate(FVariable var, FExp solution) = true;
+    
+    public class symbolicTransformationFramework {
+        public class VariabilityPropagator extends Algorithm {
+            public VariabilityPropagator(FClass fclass, WorkData workData) {
+                super(fclass, workData);
+            }
+            
+            @Override
+            public boolean isUsed() {
+                return fclass.myOptions().getBooleanOption("variability_propagation");
+            }
+            
+            @Override
+            public boolean run(FAbstractEquation feq) {
+                if (variabilityPropagation(feq)) {
+                    fclass.enableConstantFolding();
+                    fclass.forceRewrites();
+                    return true;
+                }
+                return false;
+            }
+            
+            
+            /**
+             * Runs variability propagation.
+             */
+            public boolean variabilityPropagation(FAbstractEquation feq) {
+                // Work
+                if(!feq.variabilityPropagation(workData))
+                    return false;
+                
+                // Clean variables
+                ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
+                ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
+                AliasManager am = fclass.getAliasManager();
+                for (FVariable fVariable: fclass.getFVariables()) {
+                    if (!fVariable.taggedByVProp) {
+                        newVariables.add(fVariable);
+                    }
+                }
+                for (FVariable fVariable: fclass.getAliasVariables()) {
+                    if (am.getAliasSet(fVariable) != null) {
+                        newAliases.add(fVariable);
+                    } else if (!fVariable.isTemporary()) {
+                        newVariables.add(fVariable);
+                    }
+                }
+                fclass.setFVariableList(new List<FVariable>(newVariables));
+                fclass.setAliasVariableList(new List<FVariable>(newAliases));
+                
+                // Clean equations
+                ArrayList<FAbstractEquation> newEquations = new ArrayList<FAbstractEquation>();
+                for (FAbstractEquation equation: fclass.getFAbstractEquations()) {
+                    equation.cleanEquations(newEquations);
+                }
+                fclass.setFAbstractEquationList(new List<FAbstractEquation>(newEquations));
+                
+                // Clean initial equations
+                newEquations = new ArrayList<FAbstractEquation>();
+                for (FAbstractEquation equation: fclass.initialEquations()) {
+                    if (!equation.taggedByVProp) {
+                        newEquations.add(equation);
+                    }
+                }
+                
+                fclass.setFParameterEquationList(workData.getparameterEquations());
+                
+                fclass.setFInitialEquationList(new List<FAbstractEquation>(newEquations));
+                return true;
+            }
+        }
+    }
+        
+    public boolean FAbstractEquation.variabilityPropagation(symbolicTransformationFramework.WorkData workData) {
+        return false;
+    }
+        
+    public boolean FEquation.variabilityPropagation(symbolicTransformationFramework.WorkData workData) {
+        
+        FVariable fVariable;
+        FExp solution;
+        FTypePrefixVariability solutionVariability;
+        
+        if (!canPropagate()) {
+            return false; // Unbalanced equation
+        }
+        
+        fVariable = variables().iterator().next();
+        
+        if (!fVariable.canPropagate()) {
+            return false;
+        }
+        
+        solution = solution(fVariable);
+        solution.resetOriginalReferences();
+        
+        if (!solution.isValidExp()) {
+            return false;
+        }
+        
+        if (!canPropagate(fVariable, solution)) {
+            return false;
+        }
+        
+        solutionVariability = solution.variability();
+        
+        if (!solutionVariability.parameterOrLess()) {
+            // Sometimes combinations of parameters and constants yield 
+            // discrete variability. IfExpr, sample() etc.
+            return false;
+        }
+        
+        if (solutionVariability.knownParameterOrLess()) {
+            try {
+                solution = solution.ceval().buildLiteral();
+            } catch (ConstantEvaluationException e) {
+                // If we can't evaluate right now, set it as parameter
+                solutionVariability = fParameter();
+            }
+        }
+        
         if (!solutionVariability.knownParameterOrLess()) {
             workData.addParameterEquation(new FEquation(fVariable.createUseExp(), solution));
         }
@@ -274,10 +274,9 @@ aspect VariabilityPropagation {
         workData.removeEquation(this);
         fVariable.variabilityPropagation(workData, solutionVariability, solution);
         return true;
-        
     }
     
-    public boolean FFunctionCallEquation.variabilityPropagation(FClass.WorkData workData) {
+    public boolean FFunctionCallEquation.variabilityPropagation(symbolicTransformationFramework.WorkData workData) {
         
         if (!canPropagate()) {
             return false;
@@ -332,25 +331,25 @@ aspect VariabilityPropagation {
         this.taggedForCleanup = true;
         return true;
     }
-	
-	public boolean FExp.variabilityPropagation(
-            FClass.WorkData workData,
+    
+    public boolean FExp.variabilityPropagation(
+            symbolicTransformationFramework.WorkData workData,
             CValue value,
             boolean canBeParam) {
-		throw new UnsupportedOperationException();
-	}
+        throw new UnsupportedOperationException();
+    }
     
     @Override
     public boolean FNoExp.variabilityPropagation(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             CValue value,
             boolean canBeParam) {
         return true;
     }
     
     @Override
-	public boolean FRecordConstructor.variabilityPropagation(
-            FClass.WorkData workData,
+    public boolean FRecordConstructor.variabilityPropagation(
+            symbolicTransformationFramework.WorkData workData,
             CValue value,
             boolean canBeParam) {
         
@@ -358,23 +357,23 @@ aspect VariabilityPropagation {
             return taggedByVProp;
         }
         
-	    boolean res = true;
-		CValueRecord frc = null;
-		if (!value.isUnknown()) {
-			frc = (CValueRecord) value;
-		}
+        boolean res = true;
+        CValueRecord frc = null;
+        if (!value.isUnknown()) {
+            frc = (CValueRecord) value;
+        }
 
-		for (int i = 0; i < getNumArg(); i++) {
+        for (int i = 0; i < getNumArg(); i++) {
             res &= getArg(i).variabilityPropagation(workData, 
                     frc != null ? frc.getMember(i) : CValue.UNKNOWN, canBeParam);
-		}
-		taggedByVProp = res;
-		return res;
-	}
-	
+        }
+        taggedByVProp = res;
+        return res;
+    }
+    
     @Override
     public boolean FArray.variabilityPropagation(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             CValue value,
             boolean canBeParam) {
         
@@ -382,16 +381,16 @@ aspect VariabilityPropagation {
             return taggedByVProp;
         }
         
-		CValueArray a = null;
-		if (value != CValue.UNKNOWN) {
-			a = (CValueArray) value;
-		}
+        CValueArray a = null;
+        if (value != CValue.UNKNOWN) {
+            a = (CValueArray) value;
+        }
         taggedByVProp = this.variabilityPropagationArray(workData, a, canBeParam, new Enumerator());
         return taggedByVProp;
     }
     
     public boolean FExp.variabilityPropagationArray(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             CValueArray value,
             boolean canBeParam,
             Enumerator enumerator) {
@@ -401,7 +400,7 @@ aspect VariabilityPropagation {
     
     @Override
     public boolean FArray.variabilityPropagationArray(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             CValueArray value,
             boolean canBeParam,
             Enumerator enumerator) {
@@ -414,7 +413,7 @@ aspect VariabilityPropagation {
     
     @Override
     public boolean FIdUseExp.variabilityPropagation(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             CValue value,
             boolean canBeParam) {
         
@@ -445,7 +444,7 @@ aspect VariabilityPropagation {
     
     
     public void FAbstractVariable.variabilityPropagation(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             FTypePrefixVariability variability,
             FExp bindingExp) {
         
@@ -454,7 +453,7 @@ aspect VariabilityPropagation {
     
     @Override
     public void FVariable.variabilityPropagation(
-            FClass.WorkData workData,
+            symbolicTransformationFramework.WorkData workData,
             FTypePrefixVariability variability,
             FExp bindingExp) {
         
@@ -475,7 +474,6 @@ aspect VariabilityPropagation {
                 setFixedAttribute(true);
             }
         }
-        System.out.println("Performing VariabilityPropagation...");
         // Uses
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
@@ -502,10 +500,8 @@ aspect VariabilityPropagation {
                     }
                 }
                 if (!workData.hasRemovedEquation(equation)) {
-                	System.out.println("\tAdded equation to worklist: "+ equation.toString());
-                	workData.addToWorklist(equation);
-                } else
-                	System.out.println("\tDo nothing, equation is removed: "+ equation.toString());
+                    workData.addToWorklist(equation);
+                }
                 
                 if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.nonFixedParameters().size() == 0) {
@@ -550,7 +546,7 @@ aspect VariabilityPropagation {
             }
         }
     }
-	
+    
     inh FExp FExp.myTopFactorFExp();
     eq BaseNode.getChild().myTopFactorFExp() = null;
     eq FMulExp.getChild().myTopFactorFExp() = topFactorFExp();
@@ -578,26 +574,26 @@ aspect VariabilityPropagation {
 }
 
 aspect ConstantFolding {
-	public boolean FAbstractExp.constantFoldingEnabled = false;
-	
-	/**
-	 * Enables constant folding
-	 */
-	public void ASTNode.enableConstantFolding() {
-	    for (ASTNode n : this)
-	        n.enableConstantFolding();
-	}
+    public boolean FAbstractExp.constantFoldingEnabled = false;
+    
+    /**
+     * Enables constant folding
+     */
+    public void ASTNode.enableConstantFolding() {
+        for (ASTNode n : this)
+            n.enableConstantFolding();
+    }
     
     public void FFunctionDecl.enableConstantFolding() {
         
     }
     
-	public void FFunctionCallEquation.enableConstantFolding() {
-		for (FExp childExp : getCall().childFExps()) {
-			childExp.enableConstantFolding();
-		}
-	}
-	
+    public void FFunctionCallEquation.enableConstantFolding() {
+        for (FExp childExp : getCall().childFExps()) {
+            childExp.enableConstantFolding();
+        }
+    }
+    
     public void FAlgorithm.enableConstantFolding() {
        
     }
@@ -606,70 +602,70 @@ aspect ConstantFolding {
         for (ASTNode n : this)
             n.enableConstantFolding();
     }
-	
-	public void FIfExp.enableConstantFolding() {
-		super.enableConstantFolding();
+    
+    public void FIfExp.enableConstantFolding() {
+        super.enableConstantFolding();
         if (!constantFoldingEnabled && getIfExp().variability().knownParameterOrLess()) {
-			eliminateIfEquation = true;
-			is$Final = false;
-		}
-	}
-	
-	public void FAbstractExp.enableConstantFolding() {
+            eliminateIfEquation = true;
+            is$Final = false;
+        }
+    }
+    
+    public void FAbstractExp.enableConstantFolding() {
         if (variability().knownParameterOrLess()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-		super.enableConstantFolding();
-	}
-	public void FIdUseExp.enableConstantFolding() {
-		if (type().isString()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-		super.enableConstantFolding();
-	}
-	public void FPreExp.enableConstantFolding() {
-		if (variability().parameterOrLess()) {
-			constantFoldingEnabled = true;
-			is$Final = false;
-			return;
-		}
-	}
+            constantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+        super.enableConstantFolding();
+    }
+    public void FIdUseExp.enableConstantFolding() {
+        if (type().isString()) {
+            constantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+        super.enableConstantFolding();
+    }
+    public void FPreExp.enableConstantFolding() {
+        if (variability().parameterOrLess()) {
+            constantFoldingEnabled = true;
+            is$Final = false;
+            return;
+        }
+    }
 
-	rewrite FAbstractExp {
+    rewrite FAbstractExp {
         when (constantFoldingEnabled && variability().knownParameterOrLess()) to FExp {
-			try {
-				CValue value = ceval();
-				if (!value.size().isEmpty()) 
-					return value.buildLiteral();
-			} catch (ConstantEvaluationException e) {
-			}
-			constantFoldingEnabled = false;
-			return this;
-		}
-	}
+            try {
+                CValue value = ceval();
+                if (!value.size().isEmpty()) 
+                    return value.buildLiteral();
+            } catch (ConstantEvaluationException e) {
+            }
+            constantFoldingEnabled = false;
+            return this;
+        }
+    }
 
-	rewrite FIdUseExp {
-		when (constantFoldingEnabled && type().isString()) to FExp {
-			try {
-				CValue value = ceval();
-				if (!value.size().isEmpty()) 
-					return value.buildLiteral();
-			} catch (ConstantEvaluationException e) {
-				compliance("Could not evaluate string variable " + name());
-			}
-			constantFoldingEnabled = false;
-			return this;
-		}
-	}
-	
-	rewrite FPreExp {
-		when (constantFoldingEnabled) to FExp {
-			return new FIdUseExp(getFIdUse().fullCopy());
-		}
-	}
-	
+    rewrite FIdUseExp {
+        when (constantFoldingEnabled && type().isString()) to FExp {
+            try {
+                CValue value = ceval();
+                if (!value.size().isEmpty()) 
+                    return value.buildLiteral();
+            } catch (ConstantEvaluationException e) {
+                compliance("Could not evaluate string variable " + name());
+            }
+            constantFoldingEnabled = false;
+            return this;
+        }
+    }
+    
+    rewrite FPreExp {
+        when (constantFoldingEnabled) to FExp {
+            return new FIdUseExp(getFIdUse().fullCopy());
+        }
+    }
+    
 }

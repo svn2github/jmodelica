@@ -1,0 +1,206 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+aspect SymbolicTransformationFramework {
+    public class symbolicTransformationFramework extends FClass.Transformation {
+        private FClass fclass = null;
+        private ArrayList<Algorithm> algorithmsInFramework;
+        
+        public symbolicTransformationFramework(FClass fclass) {
+            fclass.super("symbolic_transformation_framework");
+            this.fclass = fclass;
+            algorithmsInFramework = new ArrayList();
+        }
+        
+        public void perform() {
+            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
+            WorkData workData = new WorkData(worklist);
+            ArrayList<Algorithm> algorithmList = new ArrayList();
+            Canonizer canonizer = new Canonizer(fclass, workData);
+            addAlgorithmsToFramework(workData);
+            
+            // Collect algorithms that are enabled.
+            for (Algorithm algorithm: algorithmsInFramework) {
+                if (algorithm.isUsed()) {
+                    algorithmList.add(algorithm);
+                }
+            }
+            
+            // Worklist will contain all equations at the beginning.
+            for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
+                workData.addToWorklist(equation);
+            }
+            
+            // If canonization is enabled it is performed before any algorithm.
+            if (canonizer.isUsed()) {
+                for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
+                    canonizer.run(equation);
+                }
+            }
+            
+            // Start using algorithms on the equations.
+            while (!worklist.isEmpty()) {
+                FAbstractEquation equation = worklist.iterator().next();
+                worklist.remove(equation);
+                
+                for (Algorithm algorithm : algorithmList) {
+                    if (algorithm.run(equation)) {
+                        break;
+                    }
+                }
+            }
+            
+            fclass.root().flushAllRecursiveClearFinal(); // TODO: Fråga igenom om att använda changed()
+        }
+        
+        /**
+         * Algorithms that are used by the framework are added here.
+         * 
+         * @param workData Data that is shared and updated in and between algorithms.
+         */ 
+        private void addAlgorithmsToFramework(WorkData workData) {
+            algorithmsInFramework.add(new AliasEliminator(fclass, workData));
+            algorithmsInFramework.add(new VariabilityPropagator(fclass, workData));
+        }
+        
+        /*
+         * Abstract class that algorithms in the framework will implement. 
+         */
+        public abstract class Algorithm {
+            protected FClass fclass;
+            protected WorkData workData;
+            public Algorithm(FClass fclass, WorkData workData) {
+                this.fclass = fclass;
+                this.workData = workData;
+            }
+            
+            /*
+             * Checks if the algorithm is enabled. The algorithm must have an option added
+             * to the enum Default in {JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
+             * Use {code fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
+             * 
+             * @return {code true} if it is enabled, {code false} otherwise.
+             */
+            public abstract boolean isUsed();
+            
+            /*
+             * Starts the algorithm.<p>
+             * 
+             * @param equation The equation to optimize.
+             * @return {@code true} if the equation was updated, {@code false} otherwise.
+             */
+            public abstract boolean run(FAbstractEquation equation);
+        }
+        
+        /**
+         * Class that contains data that is shared and updated in and between algorithms.
+         *
+         * When adding a new algorithm to the framework, update this class with needed methods 
+         * and variables.
+         */
+        public class WorkData {
+            // Used by all
+            private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
+            // Used by VariabilityPropagation
+            private ArrayList<FAbstractEquation> parameterEquations = new ArrayList();
+            // Used by all
+            private HashSet<FAbstractEquation> removedEquations = new HashSet();
+            // Used by VariabilityPropagator
+            private boolean splitAliasParameters = !(fclass.myOptions().getBooleanOption("eliminate_alias_variables") 
+                    && fclass.myOptions().getBooleanOption("eliminate_alias_parameters"));
+            // Used by VariabilityPropagator
+            private boolean splitAliasConstants  = !(fclass.myOptions().getBooleanOption("eliminate_alias_variables") 
+                    && fclass.myOptions().getBooleanOption("eliminate_alias_constants"));
+            
+            /**
+             * Constructs a class containing data needed throughout the execution time 
+             * of the algorithms, that are added to the framework.
+             *
+             * @param worklist The working list of equations to modify with the algorithms.
+             */
+            public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
+                this.worklist = worklist;
+                for (FAbstractEquation equation : fclass.getFParameterEquations())
+                    parameterEquations.add(equation);
+            }
+            
+            /*
+             * Getter for the <code>splitAliasParameters</code> boolean.
+             *
+             * @return the constant.
+             */
+            public boolean splitAliasParameters() {
+                return splitAliasParameters;
+            }
+            
+            /*
+             * Getter for the <code>splitAliasConstants</code> boolean.
+             *
+             * @return the constant.
+             */
+            public boolean splitAliasConstants() {
+                return splitAliasConstants;
+            }
+                        
+            /**
+             * If an equation is switched to a parameter equation it should be
+             * added to this list.
+             *
+             * @param equation The equation that is added to the parameter equations list.
+             */
+            public void addParameterEquation(FAbstractEquation equation) {
+                parameterEquations.add(equation);
+            }
+            
+            /**
+             * Method to add an equation to the worklist.
+             *
+             * @param equation The equation to be added.
+             */
+            public void addToWorklist(FAbstractEquation equation) {
+                worklist.add(equation);
+            }
+            
+            /**
+             * Checks if an equation has been removed by one of
+             * the algorithms.
+             *
+             * @param equation The equation that is checked. 
+             * @return {@code true} if it has been removed, {@code false} otherwise.
+             */
+            public boolean hasRemovedEquation(FAbstractEquation equation) {
+                return removedEquations.contains(equation);
+            }
+            
+            /**
+             * Adds an equation to the list of removed equations.
+             *
+             * @param equation The equation that is added to the list of removed equations.
+             */
+            public void removeEquation(FAbstractEquation equation) {
+                removedEquations.add(equation);
+            }
+            
+            /**
+             * Returns a list containing the parameter equations.
+             *
+             * @return The list containing all parameter equations. 
+             */
+            public List<FAbstractEquation> getparameterEquations() {
+                return new List<FAbstractEquation>(parameterEquations);
+            }
+        }
+    }
+}

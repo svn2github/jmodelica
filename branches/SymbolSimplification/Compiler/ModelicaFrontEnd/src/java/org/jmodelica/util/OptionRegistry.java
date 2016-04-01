@@ -241,7 +241,7 @@ abstract public class OptionRegistry {
             ("eliminate_alias_variables", 
              OptionType.compiler, 
              Category.uncommon,
-             false, // --------------------- HÃ„R -------------------
+             true,
              "If enabled, then alias variables are eliminated from the model."),
         ELIM_ALIAS_PARAM
             ("eliminate_alias_parameters", 
@@ -259,33 +259,21 @@ abstract public class OptionRegistry {
             ("variability_propagation", 
              OptionType.compiler, 
              Category.uncommon,
-             false, // --------------------- HÃ„R -------------------
+             true,
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
-        OPTIMIZING_FRAMEWORK
-            ("optimizing_framework",
+        SYMBOLIC_TRANSFORMATION_FRAMEWORK
+            ("symbolic_tranformation_framework",
               OptionType.compiler,
               Category.experimental,
-              true, // --------------------- HÃ„R -------------------
-              "If enabled the optimizing framework will run"),
-        SIMPLE_AE
-            ("simple_ae",
-              OptionType.compiler,
-              Category.experimental,
-              true, // --------------------- HÃ„R -------------------
-              "If enabled the simple AE algorithm will run within the optimizing framework"),
-        SIMPLE_VP
-            ("simple_vp",
-              OptionType.compiler,
-              Category.experimental,
-              true, // --------------------- HÃ„R -------------------
-              "If enabled the simple VP algorithm will run within the optimizing framework"),
+              true,
+              "If enabled the symbolic transformation framework will run"),
         CANONIZE_EQUATIONS
         	("canonize_equations",
         	 OptionType.compiler,
         	 Category.experimental,
-        	 false, // --------------------- HÃ„R -------------------
-        	 "If enabled, equations will be put in canonical form."),            
+        	 false,
+        	 "If enabled, equations will be put in canonical form."),
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 
