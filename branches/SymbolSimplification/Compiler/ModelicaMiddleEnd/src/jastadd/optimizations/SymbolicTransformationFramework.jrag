@@ -62,7 +62,7 @@ aspect SymbolicTransformationFramework {
                 }
             }
             
-            fclass.root().flushAllRecursiveClearFinal(); // TODO: Fråga igenom om att använda changed()
+            change();
         }
         
         /**
