@@ -758,6 +758,15 @@ equation
 x^3-3*x^2+x=1;
 end NominalStart5;
 
+model NominalStart6
+    Real x(nominal=1, min=-1, max=1);
+    Real y(start=0, min=-1, max=1);
+    final constant Real e = Modelica.Math.exp(1.0);
+equation
+    0 = (x - 0.680716920494911)^2 + y^2;
+    0 = noEvent(if ((x - y) > 0) then e^(x - y) -(e^(2*(x - y)) - 1) * (x - y) else e^(x - y));
+end NominalStart6;
+
 model DoubleRoot1
     Real x(start=p);
     parameter Real p=1.5;

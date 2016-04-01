@@ -1033,6 +1033,8 @@ static void jmi_kinsol_set_nominals_as_start(jmi_block_solver_t * block) {
             } else {
                 N_VGetArrayPointer(solver->kin_y)[i] = -block->nominal[i];
             }
+        } else {
+            N_VGetArrayPointer(solver->kin_y)[i] = block->initial[i];
         }
     }
 }

@@ -468,6 +468,7 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart3", file_name)
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
+        compile_fmu("NonLinear.NominalStart6", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
         compile_fmu("NonLinear.NonLinear3", file_name)
         compile_fmu("NonLinear.NonLinear4", file_name)
@@ -602,6 +603,15 @@ class Test_NonLinear_Systems:
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
+        
+    @testattr(stddist = True)
+    def test_nominals_fallback_7(self):
+        model = load_fmu("NonLinear_NominalStart6.fmu")
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x"), 0.680716920494911)
+        nose.tools.assert_almost_equal(model.get("y"), 0.0)
         
     @testattr(stddist = True)
     def test_residual_scaling_heuristics(self):
