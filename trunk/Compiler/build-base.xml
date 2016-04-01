@@ -36,9 +36,8 @@
     <property name="junit_output" value="${target}/src/junit-generated" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
+    <property name="test_class_output" value="${target}/bin-test" />
     <property name="jar_output" value="${target}/bin" />
-    
-    <property name="test_jar" value="${jar_output}/junit-tests.jar"/>
 
     <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
     <property name="junit_dir" value="${base.dir}/../ThirdParty/Junit" />
@@ -181,6 +180,20 @@
     </for>
     <property name="java_dirs" value="${java_dirs_temp}" />
     
+    <!-- calculate set of junit source file dirs to use -->
+    <var name="junit_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <available file="${@{module}.path}/src/junit" />
+                <then>
+                    <var name="junit_dirs_temp" value="${junit_dirs_temp}:${@{module}.path}/src/junit" />
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <property name="junit_dirs" value="${junit_dirs_temp}" />
+    
     <!-- calculate set of test helpers to use -->
     <var name="test_helper_java_patterns_temp" value=""/>
     <var name="test_helper_class_patterns_temp" value=""/>
@@ -211,7 +224,7 @@
         </sequential>
     </for>
     <property name="compiler_jars" value="${compiler_jars_temp}" />
-    <property name="test_jars" value="${compiler_jars}:${test_jar}:${junit_jar}" />
+    <property name="test_jars" value="${compiler_jars}:${junit_jar}" />
     
     
     <!-- Build compiler jars. -->
@@ -502,23 +515,20 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     
     <!-- Build a jar file from generated tests. -->
     <target name="build-test" depends="build">
+        <mkdir dir="${test_class_output}" />
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
-                destdir="${class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
-                srcdir="${test_package_output}:${test_helper_dirs}"/>
-        <jar destfile="${test_jar}">
-            <fileset dir="${class_output}" includes="${test_helper_class_patterns}" />
-            <fileset dir="${class_output}" includes="${test_package_dir}/*.class" />
-        </jar>
+                destdir="${test_class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
+                srcdir="${test_package_output}:${test_helper_dirs}${junit_dirs}"/>  <!-- junit_dirs begins with a : -->
     </target>
 
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
         <junit printsummary="yes" fork="true" maxmemory="1G">
-            <classpath path="${test_jars}" />
+            <classpath path="${test_jars}:${test_class_output}${junit_dirs}" />  <!-- junit_dirs begins with a : -->
             <formatter type="xml" />
-            <batchtest fork="yes" todir="${test_output}">
-                <fileset dir="${junit_output}" includes="${test_package_dir}/*.java" />
+            <batchtest fork="yes" todir="${test_output}" >
+                <fileset dir="${test_class_output}" excludes="${test_helper_class_patterns}" />
             </batchtest>
         </junit>
         <junitreport todir="${test_output}">
@@ -530,6 +540,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <!-- cleans all files -->
     <target name="clean" depends="clean-gen" description="Deletes all generated files.">
         <delete dir="${class_output}" />
+        <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />
     </target>
 
