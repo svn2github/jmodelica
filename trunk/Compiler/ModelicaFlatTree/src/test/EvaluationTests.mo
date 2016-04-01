@@ -1441,6 +1441,39 @@ end EvaluationTests.FunctionEval40;
 ")})));
 end FunctionEval40;
 
+model FunctionEval41
+    function F
+        input Real[:] i;
+        output Real o;
+    algorithm
+        o:= sqrt(i * i);
+    end F;
+    
+    parameter Real a = F({1,2});
+    parameter Real b = F({2,1});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval41",
+            description="Evaluation of non-slice use",
+            flatModel="
+fclass EvaluationTests.FunctionEval41
+ parameter Real a = EvaluationTests.FunctionEval41.F({1, 2}) /* evaluation error */;
+ parameter Real b = EvaluationTests.FunctionEval41.F({2, 1}) /* evaluation error */;
+
+public
+ function EvaluationTests.FunctionEval41.F
+  input Real[:] i;
+  output Real o;
+ algorithm
+  o := sqrt(i[:] * i[:]);
+  return;
+ end EvaluationTests.FunctionEval41.F;
+
+end EvaluationTests.FunctionEval41;
+")})));
+end FunctionEval41;
+
 model VectorFuncEval1
     function f
         input Real x;

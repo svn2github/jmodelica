@@ -2451,17 +2451,14 @@ aspect ConstantEvaluation {
     /**
      * Create a copy with all array subscripts replaced by literals.
      */
-    public FSubscript FSubscript.resolveSubscripts(VariableEvaluator evaluator) {
-        return this;
+    syn FSubscript FSubscript.resolveSubscripts(VariableEvaluator evaluator) {
+        throw new ConstantEvaluationException();
     }
-
-    /**
-     * Create a copy with all array subscripts replaced by literals.
-     */
-    public FExpSubscript FExpSubscript.resolveSubscripts(VariableEvaluator evaluator) {
-        return new FExpSubscript(ceval(evaluator).buildLiteral());
-    }
-
+    
+    eq FIntegerSubscript.resolveSubscripts(VariableEvaluator evaluator) = fullCopy();
+    eq FExpSubscript.resolveSubscripts(VariableEvaluator evaluator) = 
+            new FExpSubscript(ceval(evaluator).buildLiteral());
+    
     /**
      * Perform constant evaluation of an access to a record member.
      */
