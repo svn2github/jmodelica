@@ -72,7 +72,7 @@ class SparseIndex<T extends MunkresCost<T>> implements Iterable<RowOrColumn<T>> 
 
             @Override
             public int compare(Incidence<T> a, Incidence<T> b) {
-                return type.getInnerCompare(a) - type.getOuterCompare(b);
+                return type.getInnerCompare(a) - type.getInnerCompare(b);
             }
         };
     }
