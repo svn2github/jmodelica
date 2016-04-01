@@ -1,5 +1,5 @@
-package canonicalFormTestDivToMul
-model canonicalFormTestDivToMul
+package testCanonicalDivisionRemoval
+model testCanonicalDivisionRemoval
 
 	Real a;
 	Real b;
@@ -16,15 +16,14 @@ equation
     
        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="CanonicalFormTest",
+            name="Canonize equations division removal",
             eliminate_alias_variables=false,
             variability_propagation=false,
-            iterative_symbol_simplification = false,
             canonize_equations = true,
             description="",
             flatModel="
             
-fclass canonicalFormTestDivToMul.canonicalFormTestDivToMul
+fclass testCanonicalDivisionRemoval.testCanonicalDivisionRemoval
  Real a;
  Real b;
  Real c;
@@ -37,9 +36,9 @@ equation
  a + b = 0;
  x * c + (- a * b) + x * d = 0;
 
-end canonicalFormTestDivToMul.canonicalFormTestDivToMul;
+end testCanonicalDivisionRemoval.testCanonicalDivisionRemoval;
 
 ")})));
 
-end canonicalFormTestDivToMul;
-end canonicalFormTestDivToMul;
+end testCanonicalDivisionRemoval;
+end testCanonicalDivisionRemoval;

@@ -1,5 +1,5 @@
-package canonicalFormTestAddMulTree
-model canonicalFormTestAddMulTree
+package testCanonicalAddMulTree
+model testCanonicalAddMulTree
 
     Real a;
     Real b;
@@ -16,15 +16,14 @@ equation
     
        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="canonicalFormTestAddMulTree",
+            name="Canonize equations transformation to add- and mul-tree",
             eliminate_alias_variables=false,
             variability_propagation=false,
-            iterative_symbol_simplification = false,
             canonize_equations = true,
             description="",
             flatModel="
             
-fclass canonicalFormTestAddMulTree.canonicalFormTestAddMulTree
+fclass testCanonicalAddMulTree.testCanonicalAddMulTree
  Real x;
  Real a;
  Real b;
@@ -35,9 +34,9 @@ equation
  a * c - a * d - b * c + b * d = 0;
  a * b * c * d - a * b * c * e = 0;
 
-end canonicalFormTestAddMulTree.canonicalFormTestAddMulTree;
+end testCanonicalAddMulTree.testCanonicalAddMulTree;
 
 ")})));
 
-end canonicalFormTestAddMulTree;
-end canonicalFormTestAddMulTree;
+end testCanonicalAddMulTree;
+end testCanonicalAddMulTree;

@@ -1,5 +1,5 @@
-package canonicalFormTest
-model canonicalFormTest
+package testCanonicalMoveToOneSide
+model testCanonicalMoveToOneSide
 
 	Real a;
 	Real b;
@@ -10,23 +10,22 @@ equation
     
        annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="CanonicalFormTest",
+            name="Canonize equations move to one side",
             eliminate_alias_variables=false,
             variability_propagation=false,
-            iterative_symbol_simplification = false,
             canonize_equations = true,
             description="",
             flatModel="
             
-fclass canonicalFormTest.canonicalFormTest
+fclass testCanonicalMoveToOneSide.testCanonicalMoveToOneSide
  Real a;
  Real b;
 equation
 a = 0;
-a + (- b) = 0;
-end canonicalFormTest.canonicalFormTest;
+a + b * -1 = 0;
+end testCanonicalMoveToOneSide.testCanonicalMoveToOneSide;
 
 ")})));
 
-end canonicalFormTest;
-end canonicalFormTest;
+end testCanonicalMoveToOneSide;
+end testCanonicalMoveToOneSide;

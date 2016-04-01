@@ -263,7 +263,7 @@ abstract public class OptionRegistry {
              "If enabled, the compiler performs a global analysis on the equation system and reduces variables to " +
              "constants and parameters where applicable."),
         SYMBOLIC_TRANSFORMATION_FRAMEWORK
-            ("symbolic_tranformation_framework",
+            ("symbolic_transformation_framework",
               OptionType.compiler,
               Category.experimental,
               true,
