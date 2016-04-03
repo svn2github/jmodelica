@@ -273,7 +273,13 @@ abstract public class OptionRegistry {
         	 OptionType.compiler,
         	 Category.experimental,
         	 false,
-        	 "If enabled, equations will be put in canonical form."),
+        	 "If enabled, equations will be put in canonical form each algorithm step."),
+         PRE_CANONIZE_EQUATIONS
+            ("pre_canonize_equations",
+             OptionType.compiler,
+             Category.experimental,
+             false,
+             "If enabled, equations will be transformed to canonical form once before using other algorithms."),
         COMMON_SUBEXP_ELIM
             ("common_subexp_elim", 
              OptionType.compiler, 

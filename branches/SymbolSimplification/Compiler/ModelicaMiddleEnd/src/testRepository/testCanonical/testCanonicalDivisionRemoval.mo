@@ -1,11 +1,11 @@
 package testCanonicalDivisionRemoval
 model testCanonicalDivisionRemoval
 
-	Real a;
-	Real b;
-	Real c;
-	Real d;
-	Real x;
+    Real a;
+    Real b;
+    Real c;
+    Real d;
+    Real x;
 
 equation
     0 = a / b + c;
@@ -30,11 +30,11 @@ fclass testCanonicalDivisionRemoval.testCanonicalDivisionRemoval
  Real d;
  Real x;
 equation
- c * b + a = 0;
- a + b + d * c = 0;
+ b * c + a = 0;
+ c * d + a + b = 0;
  a = 0;
  a + b = 0;
- x * c + (- a * b) + x * d = 0;
+ c * x + d * x + a * b * -1 = 0;
 
 end testCanonicalDivisionRemoval.testCanonicalDivisionRemoval;
 

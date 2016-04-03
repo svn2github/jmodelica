@@ -29,10 +29,10 @@ fclass testCanonicalAddMulTree.testCanonicalAddMulTree
  Real b;
 equation
  a * c + b * c = 0;
- a * c + a * d + b * c + b * d = 0;
- a * c - a * d + b * c - b * d = 0;
- a * c - a * d - b * c + b * d = 0;
- a * b * c * d - a * b * c * e = 0;
+ a * c + a * d + (b * c + b * d) = 0;
+ a * c + b * c + (a * d * -1 + b * d * -1) = 0;
+ a * c + b * d + (a * d * -1 + b * c * -1) = 0;
+ a * b * (c * d) + a * b * c * (e * -1) = 0;
 
 end testCanonicalAddMulTree.testCanonicalAddMulTree;
 

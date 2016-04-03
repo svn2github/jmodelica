@@ -15,8 +15,9 @@
 */
 aspect SymbolicTransformationFramework {
     public class symbolicTransformationFramework extends FClass.Transformation {
-        private FClass fclass = null;
-        private ArrayList<Algorithm> algorithmsInFramework;
+        private static FClass fclass = null;
+        private static ArrayList<Algorithm> algorithmsInFramework;
+        private static Canonizer canonizer;
         
         public symbolicTransformationFramework(FClass fclass) {
             fclass.super("symbolic_transformation_framework");
@@ -28,7 +29,7 @@ aspect SymbolicTransformationFramework {
             LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
             WorkData workData = new WorkData(worklist);
             ArrayList<Algorithm> algorithmList = new ArrayList();
-            Canonizer canonizer = new Canonizer(fclass, workData);
+            canonizer = new Canonizer(fclass, workData);
             addAlgorithmsToFramework(workData);
             
             // Collect algorithms that are enabled.
@@ -44,9 +45,9 @@ aspect SymbolicTransformationFramework {
             }
             
             // If canonization is enabled it is performed before any algorithm.
-            if (canonizer.isUsed()) {
+            if (canonizer.isPreUsed()) {
                 for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
-                    canonizer.run(equation);
+                    canonizer.runPre(equation);
                 }
             }
             
@@ -66,6 +67,15 @@ aspect SymbolicTransformationFramework {
         }
         
         /**
+         *  Returns a copy of an FExp.<p>
+         * 
+         *  @param  exp the expression to copy.
+         */
+         public static FExp symbolicCopy(FExp exp) {
+            return exp.treeCopy();
+        }
+        
+        /**
          * Algorithms that are used by the framework are added here.
          * 
          * @param workData Data that is shared and updated in and between algorithms.
@@ -73,6 +83,7 @@ aspect SymbolicTransformationFramework {
         private void addAlgorithmsToFramework(WorkData workData) {
             algorithmsInFramework.add(new AliasEliminator(fclass, workData));
             algorithmsInFramework.add(new VariabilityPropagator(fclass, workData));
+            algorithmsInFramework.add(canonizer);
         }
         
         /*
