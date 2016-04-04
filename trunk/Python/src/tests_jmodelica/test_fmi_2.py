@@ -901,6 +901,16 @@ class Test_FMUModelME2:
         nose.tools.assert_almost_equal(dir_der2[1], 4.)
         
     @testattr(fmi = True)
+    def test_simulate_with_debug_option(self):
+        coupled = load_fmu(self.coupled_name)
+
+        opts=coupled.simulate_options()
+        opts["logging"] = True
+        
+        #Verify that a simulation is successful
+        res=coupled.simulate(options=opts)
+        
+    @testattr(fmi = True)
     def test_simulate_options(self):
         """
         Test the method simulate_options in FMUModelME2
