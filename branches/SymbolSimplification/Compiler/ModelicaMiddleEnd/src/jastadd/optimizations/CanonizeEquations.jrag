@@ -234,10 +234,19 @@ aspect CanonizeEquations {
     syn boolean FAbstractEquation.convertNegations() { return false; }
     syn boolean FAbstractEquation.toAddMulTree() { return false; }
     
+    /*
+     * Priority order.
+     *  0.  Positive multiplications.
+     *  1.  Variables.
+     *  2.  Positive literals.
+     *  3.  Negative multiplications.
+     *  4.  Negative literals.
+     *  5.  Anything else.
+     */
     syn int FExp.orderPriority() = Integer.MAX_VALUE;
-    syn int FMulExp.orderPriority() = 0;
+    syn int FMulExp.orderPriority() = isNegative() ? 3 : 0;
     syn int FIdUseExp.orderPriority() = 1;
-    syn int FIntegerLitExp.orderPriority() = 2;
+    syn int FIntegerLitExp.orderPriority() = getValue() < 0 ? 4 : 2;
     
     /*
      *  Retrieves the side of an equation which isn't zero.<p>
@@ -458,77 +467,50 @@ aspect CanonizeEquations {
          *          and 0 if they have the same ordering.
          */
         public int compare(FExp exp1, FExp exp2) {
-            if (exp1.isFMulExp()) {
-                if (exp2.isFMulExp()) {
-                    return exp1.asFMulExp().compareTo(exp2.asFMulExp());
-                } else if (exp2.isFIdUseExp()) {
-                    return exp1.asFMulExp().compareTo(exp2.asFIdUseExp());
-                } else if (exp2.isLiteralExp()) {
-                    return exp1.asFMulExp().compareTo(exp2.asFIntegerLitExp());
-                }
-            } else if (exp1.isFIdUseExp()) {
-                if (exp2.isFMulExp()) {
-                    return exp1.asFIdUseExp().compareTo(exp2.asFMulExp());
-                } else if (exp2.isFIdUseExp()) {
-                    return exp1.asFIdUseExp().compareTo(exp2.asFIdUseExp());
-                } else if (exp2.isLiteralExp()) {
-                    return exp1.asFIdUseExp().compareTo(exp2.asFIntegerLitExp());
-                }
-            } else if (exp1.isLiteralExp()) {
-                if (exp2.isFMulExp()) {
-                    return exp1.asFIntegerLitExp().compareTo(exp2.asFMulExp());
-                } else if (exp2.isFIdUseExp()) {
-                    return exp1.asFIntegerLitExp().compareTo(exp2.asFIdUseExp());
-                } else if (exp2.isLiteralExp()) {
-                    return exp1.asFIntegerLitExp().compareTo(exp2.asFIntegerLitExp());
+            int cmp = exp1.orderPriority() - exp2.orderPriority();
+            if (cmp == 0) {
+                ArrayList<Integer> cmp1 = exp1.comparisonValues();
+                ArrayList<Integer> cmp2 = exp2.comparisonValues();
+                for (int i = 0; i < cmp1.size() && i < cmp2.size(); ++i) {
+                    if ((cmp = cmp1.get(i) - cmp2.get(i)) != 0) {
+                        break;
+                    }
                 }
             }
-            return exp1.compareTo(exp2);
+            return cmp;
         }
     }
     
-    syn int FExp.compareTo(FExp exp) {
-        return orderPriority() - exp.orderPriority();
+    syn ArrayList<Integer> FExp.comparisonValues() {
+        return new ArrayList<Integer>(Integer.MAX_VALUE);
     }
-    syn int FMulExp.compareTo(FMulExp exp) {
-        // Rule #1: Positives before negatives.
-        boolean neg1 = isNegative();
-        boolean neg2 = exp.isNegative();
+    
+    syn ArrayList<Integer> FMulExp.comparisonValues() {
+        ArrayList<Integer> cmp = new ArrayList<Integer>();
         
-        if (neg1 != neg2) {
-            return neg1 ? 1 : -1;
+        // Rule: More ids have priority.
+        ArrayList<FIdUseExp> ids = getFIdUseExps();
+        cmp.add(- ids.size());
+
+        // Rule: First non-equal id determines order.
+        for (FIdUseExp exp : ids) {
+            cmp.addAll(exp.comparisonValues());
+        } 
+
+        return cmp;
+    }
+    
+    syn ArrayList<Integer> FIdUseExp.comparisonValues() {
+        ArrayList<Integer> cmp = new ArrayList<Integer>();
+        String name = name();
+        for (int i = 0; i < name.length(); ++i) {
+            cmp.add((int) name.charAt(i));
         }
-
-        // Rule #2: More ids have priority.
-        ArrayList<FIdUseExp> ids1 = getFIdUseExps();
-        ArrayList<FIdUseExp> ids2 = exp.getFIdUseExps();
-        
-        int cmp = ids2.size() - ids1.size();
-
-        if (cmp != 0) {
-            return cmp;
-        }
-
-        // Rule #3: First non-equal id determines order.
-        for (int i = 0; i < ids1.size(); ++i) {
-            if ((cmp = (ids1.get(i)).compareTo(ids2.get(i))) != 0) {
-                return cmp;
-            }
-        }
-
-        return 0;
+        cmp.add((int) Short.MIN_VALUE);
+        return cmp;
     }
-    syn int FMulExp.compareTo(FIdUseExp exp) {
-        return isNegative() ? 1 : -1;
-    }
-    syn int FIdUseExp.compareTo(FMulExp exp) {
-        return - exp.compareTo(this);
-    }
-    syn int FIdUseExp.compareTo(FIdUseExp exp) {
-        return (name()).compareTo(exp.name());
-    }
-    syn int FIntegerLitExp.compareTo(FIntegerLitExp exp) {
-        return exp.getValue() - getValue();
+    syn ArrayList<Integer> FIntegerLitExp.comparisonValues() {
+        return new ArrayList<Integer>(getValue());
     }
     
     syn ArrayList<FIdUseExp> FExp.getFIdUseExps() {
