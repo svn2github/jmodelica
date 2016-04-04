@@ -90,6 +90,16 @@
     <property name="test_file" value="${test_package_output}/${test_class_name}.java" />
     <property name="test_file_module_separator" value=", ${line.separator}              " />
 
+    <!-- If javadoc.packages is set, make sure javadoc.path is as well -->
+    <if>
+        <and>
+            <isset property="javadoc.packages"/>
+            <not><isset property="javadoc.path"/></not>
+        </and>
+        <then>
+            <property name="javadoc.path" value="doc/javadoc"/>
+        </then>
+    </if>
     
     <!-- calculate module list -->
     <var name="modules_temp" value=""/>
@@ -178,7 +188,7 @@
             </if>
         </sequential>
     </for>
-    <property name="java_dirs" value="${java_dirs_temp}" />
+    <propertyregex property="java_dirs" input="${java_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate set of junit source file dirs to use -->
     <var name="junit_dirs_temp" value=""/>
@@ -192,11 +202,12 @@
             </if>
         </sequential>
     </for>
-    <property name="junit_dirs" value="${junit_dirs_temp}" />
+    <propertyregex property="junit_dirs" input="${junit_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate set of test helpers to use -->
     <var name="test_helper_java_patterns_temp" value=""/>
     <var name="test_helper_class_patterns_temp" value=""/>
+    <var name="test_helper_packages_temp" value=""/>
     <var name="test_helper_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
@@ -207,6 +218,7 @@
                             defaultValue="${@{module}.test_helpers}" override="true" global="true" />
                     <var name="test_helper_java_patterns_temp" value="${test_helper_java_patterns_temp},${test_helper_dir_temp}/*.java"/>
                     <var name="test_helper_class_patterns_temp" value="${test_helper_class_patterns_temp},${test_helper_dir_temp}/*.class"/>
+                    <var name="test_helper_packages_temp" value="${test_helper_packages_temp},${@{module}.test_helpers}"/>
                     <var name="test_helper_dirs_temp" value="${test_helper_dirs_temp}:${@{module}.path}/src/java/${test_helper_dir_temp}"/>
                 </then>
             </if>
@@ -214,6 +226,7 @@
     </for>
     <propertyregex property="test_helper_java_patterns" input="${test_helper_java_patterns_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_class_patterns" input="${test_helper_class_patterns_temp}" regexp="^," replace="" defaultvalue="" />
+    <propertyregex property="test_helper_packages" input="${test_helper_packages_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate sets of jar files  -->
@@ -273,9 +286,36 @@
     <!-- Compile all java files required by compiler (generated and static). -->
     <target name="compile-ast" depends="gen">
         <mkdir dir="${class_output}" />
-        <javac classpath="${beaver-rt_jar}" compiler="${java_compiler}" source="${java_version}" 
-                target="${java_version}" debug="true" destdir="${class_output}" includeantruntime="false"
-                srcdir="${java_output}${java_dirs}" excludes="${test_helper_java_patterns}" /> <!-- java_dirs begins with a : -->
+        <javac 
+            classpath="${beaver-rt_jar}" 
+            compiler="${java_compiler}" 
+            source="${java_version}" 
+            target="${java_version}" 
+            debug="true" 
+            destdir="${class_output}" 
+            includeantruntime="false"
+            srcdir="${java_output}:${java_dirs}" 
+            excludes="${test_helper_java_patterns}" />
+    </target>
+    
+    <!-- Generate JavaDoc. -->
+    <target name="doc" depends="gen" description="Generate JavaDoc.">
+        <if>
+            <isset property="javadoc.packages"/>
+            <then>
+            	<echo>
+            		sourcepath="${java_output}:${java_dirs}"
+            		packagenames="${javadoc.packages}"
+            	</echo>
+                <mkdir dir="${javadoc.path}" />
+                <javadoc 
+                    sourcepath="${java_output}:${java_dirs}" 
+                    destdir="${javadoc.path}" 
+                    packagenames="${javadoc.packages}" 
+                    excludepackagenames="${test_helper_packages}" 
+                    classpath="${beaver-rt_jar}" />
+            </then>
+        </if>
     </target>
 
     <!-- generates ast files with JastAdd -->
@@ -518,14 +558,14 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
         <mkdir dir="${test_class_output}" />
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
                 destdir="${test_class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
-                srcdir="${test_package_output}:${test_helper_dirs}${junit_dirs}"/>  <!-- junit_dirs begins with a : -->
+                srcdir="${test_package_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
         <junit printsummary="yes" fork="true" maxmemory="1G">
-            <classpath path="${test_jars}:${test_class_output}${junit_dirs}" />  <!-- junit_dirs begins with a : -->
+            <classpath path="${test_jars}:${test_class_output}:${junit_dirs}" />
             <formatter type="xml" />
             <batchtest fork="yes" todir="${test_output}" >
                 <fileset dir="${test_class_output}" excludes="${test_helper_class_patterns}" />
