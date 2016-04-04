@@ -2642,29 +2642,34 @@ aspect ConstantEvaluation {
     eq FLog10Exp.cevalCalc(VariableEvaluator evaluator) = new CValueReal(StrictMath.log10(getFExp().ceval(evaluator).realValue()));
 
     eq FExInStream.cevalCalc(VariableEvaluator evaluator) {
-        double eps = -1.0;
-        double val = 0.0;
-        double sum = 0.0;
-        double div = 0.0;
         int n = 0;
         for (InStreamPart cont : contributors()) {
-            val = cont.stream.ceval(evaluator).realValue();
-            double flow = cont.flow.ceval(evaluator).realValue();
-            if (!cont.outside)
-                flow = -flow;
-            if (eps < 0.0)
-                eps = getEps().ceval(evaluator).realValue();
-            flow = Math.max(flow, eps);
-            sum += flow * val;
-            div += flow;
             n++;
+            break;
         }
         if (n == 0) {
-            val = getDefault().ceval(evaluator).realValue();
-        } else if (n > 1) {
-            val = sum / div;
+            return getDefault().ceval(evaluator);
+        } else if (n == 1) {
+            return contributors().iterator().next().stream.ceval(evaluator);
+        } else {
+            double eps = -1.0;
+            double val = 0.0;
+            double sum = 0.0;
+            double div = 0.0;
+            for (InStreamPart cont : contributors()) {
+                double flow = cont.flow.ceval(evaluator).realValue();
+                if (!cont.outside) {
+                    flow = -flow;
+                }
+                if (eps < 0.0) {
+                    eps = getEps().ceval(evaluator).realValue();
+                }
+                flow = Math.max(flow, eps);
+                sum += flow * cont.stream.ceval(evaluator).realValue();
+                div += flow;
+            }
+            return new CValueReal(sum / div);
         }
-        return new CValueReal(val);
     }
 
     eq FScalarExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator).array().getCell(0);
