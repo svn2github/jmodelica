@@ -880,6 +880,7 @@ aspect FlatTypeCheck {
 
     syn int FInfArgsFunctionCall.numArgs() = getNumFExp();
     eq FFillExp.numArgs()                  = getNumFExp() + 1;
+    eq FCatExp.numArgs()                   = getNumFExp() + 1;
 
   syn boolean FInfArgsFunctionCall.typeOfArgIsOK(FExp exp)        = 
 		  fIntegerScalarType().typeCompatible(exp.type());

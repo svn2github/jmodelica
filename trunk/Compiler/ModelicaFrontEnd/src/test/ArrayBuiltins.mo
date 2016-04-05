@@ -2257,6 +2257,58 @@ end ArrayBuiltins.Cat.ArrayCat11;
 ")})));
 end ArrayCat11;
 
+model ArrayCat12
+    function f
+        input Real[:] x;
+        output Real[:] y = cat(1,x);
+    algorithm
+        annotation(Inline=false);
+    end f; 
+    
+    constant Real[:] k = {1,2};
+    constant Real[:] a = cat(1, k);
+    constant Real[:] b = f(k);
+    Real[:] c = cat(1, {time,time});
+    Real[:] d = f({time,time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayCat12",
+            description="Single argument cat",
+            flatModel="
+fclass ArrayBuiltins.Cat.ArrayCat12
+ constant Real k[1] = 1;
+ constant Real k[2] = 2;
+ Real c[1];
+ Real c[2];
+ Real d[1];
+ Real d[2];
+equation
+ c[1] = time;
+ c[2] = time;
+ ({d[1], d[2]}) = ArrayBuiltins.Cat.ArrayCat12.f({time, time});
+
+public
+ function ArrayBuiltins.Cat.ArrayCat12.f
+  input Real[:] x;
+  output Real[:] y;
+  Real[:] temp_1;
+ algorithm
+  size(y) := {size(x, 1)};
+  size(temp_1) := {size(x, 1)};
+  for i2 in 1:size(x, 1) loop
+   temp_1[i2] := x[i2];
+  end for;
+  for i1 in 1:size(x, 1) loop
+   y[i1] := temp_1[i1];
+  end for;
+  return;
+ annotation(Inline = false);
+ end ArrayBuiltins.Cat.ArrayCat12.f;
+
+end ArrayBuiltins.Cat.ArrayCat12;
+")})));
+end ArrayCat12;
 
 
 model ArrayShortCat1
