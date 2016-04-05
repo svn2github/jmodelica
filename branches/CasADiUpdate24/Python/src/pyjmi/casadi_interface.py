@@ -46,6 +46,9 @@ if modelicacasadi_present:
     from modelicacasadi_wrapper import Model as CI_Model
     from modelicacasadi_transfer import transfer_model as _transfer_model
     from modelicacasadi_transfer import transfer_optimization_problem as _transfer_optimization_problem 
+    
+import warnings
+warnings.filterwarnings("ignore",category=DeprecationWarning)
 
 def transfer_model(class_name, file_name=[],
                    compiler_options={}, compiler_log_level='warning'):

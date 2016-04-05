@@ -67,6 +67,9 @@ except ImportError:
 from pyjmi.common.algorithm_drivers import JMResultBase
 from pyjmi.common.io import ResultDymolaTextual
 
+import warnings
+warnings.filterwarnings("ignore",category=DeprecationWarning)
+
 class CasadiCollocatorException(Exception):
     """
     A CasadiCollocator Exception.
