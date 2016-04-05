@@ -180,7 +180,7 @@ if(NOT MSVC)
 endif()
 
 #Install the libraries
-install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
+install(TARGETS jmi ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
     DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
@@ -188,6 +188,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     DESTINATION "${RTLIB_INCLUDE_DIR}"
     FILES_MATCHING PATTERN "*.h")
     
-install(FILES "${MSLCSOURCES}/ModelicaStandardTables.h"
-    DESTINATION "${RTLIB_INCLUDE_DIR}")
+install(DIRECTORY "${MSLCSOURCES}"
+    DESTINATION "${RTLIB_INCLUDE_DIR}"
+    FILES_MATCHING PATTERN "*.h")
 
