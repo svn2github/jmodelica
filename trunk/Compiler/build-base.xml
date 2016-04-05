@@ -196,14 +196,28 @@
     <for list="${modules}" param="module">
         <sequential>
             <if>
-                <available file="${@{module}.path}/src/junit" />
+                <available file="${@{module}.path}/test/junit" />
                 <then>
-                    <var name="junit_dirs_temp" value="${junit_dirs_temp}:${@{module}.path}/src/junit" />
+                    <var name="junit_dirs_temp" value="${junit_dirs_temp}:${@{module}.path}/test/junit" />
                 </then>
             </if>
         </sequential>
     </for>
     <propertyregex property="junit_dirs" input="${junit_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
+    
+    <!-- calculate set of test resource dirs to use -->
+    <var name="test_resource_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <available file="${@{module}.path}/test/resources" />
+                <then>
+                    <var name="test_resource_dirs_temp" value="${test_resource_dirs_temp}:${@{module}.path}/test/resources" />
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <propertyregex property="test_resource_dirs" input="${test_resource_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate set of test helpers to use -->
     <var name="test_helper_java_patterns_temp" value=""/>
@@ -566,7 +580,7 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
         <junit printsummary="yes" fork="true" maxmemory="1G">
-            <classpath path="${test_jars}:${test_class_output}:${junit_dirs}" />
+            <classpath path="${test_jars}:${test_class_output}:${junit_dirs}:${test_resource_dirs}" />
             <formatter type="xml" />
             <batchtest fork="yes" todir="${test_output}" >
                 <fileset dir="${test_class_output}" excludes="${test_helper_class_patterns}" />
