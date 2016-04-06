@@ -172,6 +172,9 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         inputs[i].active = fmi2False;
     }
     
+    /* Set the inputs updated flag to False */
+    fmi2_cs->inputs_updated = FALSE;
+    
     return fmi2OK;
 }
 
@@ -232,6 +235,7 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
     jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
                         jmi->n_relations, jmi->n_real_u, jmi->log);
     fmi2_cs -> ode_problem = ode_problem;
+    fmi2_cs->inputs_updated = TRUE;
     
     return fmi2OK;
 }

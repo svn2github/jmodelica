@@ -468,12 +468,15 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
 		return fmi2Fatal;
     }
     
-    /* Negate the values before setting the "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
+        /* Negate the values before setting the "negate alias" variables. */
         if (is_negated(vr[i])) {
             fmi2_me->work_real_array[i] = -value[i];
         } else {
             fmi2_me->work_real_array[i] = value[i];
+        }
+        if (fmi2_me->fmu_type == fmi2CoSimulation && !(((fmi2_cs_t *)c)->inputs_updated) && is_real_input(&((fmi2_me_t *)c)->jmi, vr[i])) {
+            ((fmi2_cs_t *)c)->inputs_updated = TRUE;
         }
     }
     
