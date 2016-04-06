@@ -33,6 +33,7 @@
 
     <property name="target" value="${user.dir}"/>
     <property name="java_output" value="${target}/src/java-generated" />
+    <property name="java_temp" value="${target}/src/java-generated-temporary" />
     <property name="junit_output" value="${target}/src/junit-generated" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
@@ -169,8 +170,17 @@
     <var name="java_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
+            <condition property="@{module}.has_java_replace" value="true" else="false">
+                <and>
+                    <isset property="@{module}.java_replace" />
+                    <not><equals arg1="${@{module}.java_replace}" arg2="${@{module}.java_replace_to}" /></not>
+                </and>
+            </condition>
             <if>
-                <available file="${@{module}.path}/src/java" />
+                <and>
+                    <available file="${@{module}.path}/src/java" />
+                    <not><istrue value="${@{module}.has_java_replace}" /></not>
+                </and>
                 <then>
                     <var name="java_dirs_temp" value="${java_dirs_temp}:${@{module}.path}/src/java" />
                 </then>
@@ -276,7 +286,7 @@
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test,patch-java" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -410,6 +420,41 @@
                                         classname="${@{module}.patch}" failonerror="true">
                                     <arg line="${ast_output}" />
                                 </java>
+                            </then>
+                        </if>
+                    </then>
+                </if>
+            </sequential>
+        </for>
+    </target>
+
+    <!-- adds changes that need to be patched into the static java files -->
+    <target name="patch-java">
+    	<!-- currently this uses a simple search-replace, but could be expanded to use the same patch tool as above -->
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <istrue value="${@{module}.has_java_replace}" />
+                    <then>
+                        <echo message="Doing patch-java for @{module}" />
+                        <uptodate property="@{module}.patch-java.uptodate">
+                            <srcfiles dir= "${@{module}.path}/src/java" includes="**/*.java"/>
+                            <globmapper from="*" to="${java_output}/*" />
+                        </uptodate>
+                        <echo message="    @{module}.patch-java.uptodate=${@{module}.patch-java.uptodate}" />
+                        <if>
+                            <not><isset property="${@{module}.patch-java.uptodate}" /></not>
+                            <then>
+                                <mkdir dir="${java_temp}" />
+                                <copy todir="${java_temp}">
+                                    <fileset dir="${@{module}.path}/src/java" includes="**/*.java" />
+                                </copy>
+                                <replace dir="${java_temp}" includes="**/*.java" 
+                                    token="${@{module}.java_replace}" value="${@{module}.java_replace_to}" />
+                                <copy todir="${java_output}">
+                                    <fileset dir="${java_temp}" includes="**/*.java" />
+                                </copy>
+                                <delete dir="${java_temp}"/>
                             </then>
                         </if>
                     </then>
