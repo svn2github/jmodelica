@@ -268,6 +268,12 @@ abstract public class OptionRegistry {
               Category.experimental,
               true,
               "If enabled the symbolic transformation framework will run"),
+         SYMBOLIC_SIMPLIFICATION
+            ("symbolic_simplification",
+              OptionType.compiler,
+              Category.experimental,
+              false,
+              "If enabled the algorithm-based symbolic transformation will run."),
         CANONIZE_EQUATIONS
         	("canonize_equations",
         	 OptionType.compiler,
