@@ -1159,6 +1159,74 @@ aspect AlgorithmDifferentiation{
 }
 
 aspect ExpressionSimplification {
+    public class symbolicTransformationFramework {
+    private class ExpressionSimplifier extends Algorithm {
+    
+        public ExpressionSimplifier(FClass fclass, WorkData workData) {
+            super(fclass, workData);
+        }
+
+        @Override
+        public boolean isUsed() {
+           return fclass.myOptions().getBooleanOption("symbolic_simplification");
+        }
+        
+        @Override
+        public boolean run(FAbstractEquation feq) {
+            return feq.performRewrites();
+        }
+    }
+}
+    syn boolean FAbstractEquation.performRewrites() { return false; }
+    eq FEquation.performRewrites() {
+        setRight(getRight().rewriteFExp());
+        setLeft(getLeft().rewriteFExp());
+        return true;
+    }
+    syn FExp FExp.rewriteFExp() {
+        return this;
+    }
+    eq FBinExp.rewriteFExp() {
+        setRight(getRight().rewriteFExp());
+        setLeft(getLeft().rewriteFExp());
+        return this;
+    }
+    
+    eq FDotAddExp.rewriteFExp() {
+        FExp lhs = getLeft();
+        FExp rhs = getRight();
+        if (rhs.isLiteralZero()) {
+            return lhs;
+        } else if (lhs.isLiteralZero()) {
+            return rhs;
+        }
+        return this;
+    }
+    eq FDotSubExp.rewriteFExp() {
+        FExp lhs = getLeft();
+        FExp rhs = getRight();
+        if (lhs.isLiteralZero()) {
+            return rhs.isNegativeTerm() ? rhs.makeNegated() : rhs;
+        } else if (rhs.isLiteralZero()) {
+            return lhs.isNegativeTerm() ? lhs.makeNegated() : lhs;
+        } else if (rhs.isNegativeTerm()) {
+            return new FDotAddExp(lhs, rhs.makeNegated());
+        }
+        return this;
+    }
+    eq FDotMulExp.rewriteFExp() {
+        return this;
+    }
+    eq FDotDivExp.rewriteFExp() {
+        return this;
+    }
+    eq FNegExp.rewriteFExp() {
+        return this;
+    }
+    eq FIfExp.rewriteFExp() {
+        return this;
+    }
+    
     /**
      * Is this expression a literal zero?
      */
@@ -1214,7 +1282,7 @@ aspect ExpressionSimplification {
         when (getRightNoTransform() instanceof FNegExp) to FExp convertToAddition();
         when (getRightNoTransform().isLiteralZero())    to FExp getLeft();
     }
-
+    
     rewrite FDotAddExp {
         when (getLeftNoTransform().isLiteralZero())  to FExp getRight();
         when (getRightNoTransform().isLiteralZero()) to FExp getLeft();
