@@ -58,6 +58,8 @@
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
 #define JMI_BLOCK_EVALUATE_JAC                                  524288
 #define JMI_BLOCK_GET_DEPENDENCY_MATRIX                         1048576
+#define JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE                 1 << 21
+#define JMI_BLOCK_DISCRETE_REAL_NOMINAL                         1 << 22
 
 #define JMI_LIMIT_VALUE 1e30
 #define JMI_VAR_NOT_USED(x) ((void)x)

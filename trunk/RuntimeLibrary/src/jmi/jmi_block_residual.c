@@ -35,10 +35,10 @@
 #define nbr_allocated_iterations 30
 
 
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
 #ifdef JMI_PROFILE_RUNTIME
 	if (b != 0) {
@@ -49,10 +49,10 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     return flag;
 }
 
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index) {
     jmi_block_residual_t* b;
     int flag;
-    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
+    flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
 #ifdef JMI_PROFILE_RUNTIME
 	if (b != 0) {
 		b->parent_index = parent_index;
@@ -376,7 +376,7 @@ int jmi_block_set_sw_nr(jmi_block_residual_t* block, jmi_real_t* switches, jmi_r
     return 0;
 }
 
-int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
+int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_solver_kind_t solver, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_sw, int n_disw, int jacobian_variability, int index, jmi_string_t label){
     jmi_block_residual_t* b = (jmi_block_residual_t*)calloc(1,sizeof(jmi_block_residual_t));
     jmi_block_solver_callbacks_t solver_callbacks;
     int flag = 0;
@@ -390,6 +390,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->dF = dF;
     b->n = n;
     b->n_sr = n_sr;
+    b->n_dr = n_dr;
     b->n_nr = n_nr;
     b->n_nrt = n_nrt;
     b->n_sw = n_sw;
@@ -404,12 +405,6 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->label = (jmi_string_t) calloc(strlen(label) + 1, sizeof(char));
     strcpy(b->label, label);
     b->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    /*
-        b->x_nr - doesn't seem to be used anywhere
-    if (n_nr>0) {
-        b->x_nr = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
-    }
-    */
     b->sw_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_sw, sizeof(jmi_real_t));
     b->nr_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_nr, sizeof(jmi_real_t));
     b->x_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n, sizeof(jmi_real_t));
@@ -656,9 +651,6 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     if (b == NULL) { return 0; }
     jmi_delete_block_solver(&b->block_solver);
     free(b->x);
-/*    if (b->n_nr>0) {
-        free(b->x_nr);
-    } */
     free(b->dx);
     free(b->dv);
     free(b->res);
