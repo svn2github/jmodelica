@@ -66,7 +66,9 @@ if _optimica_compiler_included():
 
 # Compiler classes
 _modelica_class = 'org.jmodelica.modelica.compiler.ModelicaCompiler'
-_optimica_class = 'org.jmodelica.optimica.compiler.OptimicaCompiler'
+_optimica_class = None
+if _optimica_compiler_included():
+    _optimica_class = 'org.jmodelica.optimica.compiler.OptimicaCompiler'
 
 # Compiler constructors
 def _create_compiler(comp, options):
