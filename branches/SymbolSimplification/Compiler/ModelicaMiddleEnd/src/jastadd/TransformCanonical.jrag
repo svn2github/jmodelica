@@ -1719,29 +1719,6 @@ aspect TransformCanonical {
             }
         }
     }
-
-    public class FClass {
-        /**
-         * Perform alias elimination if it is activated.
-         */
-        public class aliasEliminationIfSet extends Transformation {
-            public aliasEliminationIfSet() {
-                super("eliminate_alias_variables");
-            }
-            
-            public void perform() {
-                //genAlias();
-                //eliminateAliasVariables();
-                //removeUnusedTemporaries();
-                //mergeEquivalentRecords();
-                //insertTempsInLHS();
-                //remoteRedundantInitialEquations();
-                //change();
-            }
-        }
-        
-        public aliasEliminationIfSet aliasElimination = new aliasEliminationIfSet();
-    }
     
     ArrayList<String> FClass.aliasErrors = new ArrayList<String>();
     

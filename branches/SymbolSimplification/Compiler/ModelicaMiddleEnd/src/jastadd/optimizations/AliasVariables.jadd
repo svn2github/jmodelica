@@ -39,21 +39,12 @@ aspect AliasVariables {
                 if(fclass.genAlias(feq)) {
                     fclass.eliminateAliasVariables(workData, feq);
                     fclass.removeUnusedTemporaries();
-                    fclass.mergeEquivalentRecords();
                     fclass.insertTempsInLHS();
                     fclass.remoteRedundantInitialEquations();
-                    change();
                     return true;
                 }
                 return false;
             }
-            
-            // Not sure where to put this, was part of Transformation interface.
-            void change() {
-                fclass.setDAEBLT(BLT.EMPTY_BLT);
-                fclass.setDAEInitBLT(BLT.EMPTY_BLT);
-                fclass.DAEBiPGraph = null;
-             }
         }
      }
 

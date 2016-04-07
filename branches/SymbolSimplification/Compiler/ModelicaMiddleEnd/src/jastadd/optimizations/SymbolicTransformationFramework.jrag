@@ -63,6 +63,9 @@ aspect SymbolicTransformationFramework {
                 }
             }
             
+            // Needed for FRecordTypes.
+            fclass.mergeEquivalentRecords();
+            
             change();
         }
         
@@ -81,7 +84,7 @@ aspect SymbolicTransformationFramework {
          * @param workData Data that is shared and updated in and between algorithms.
          */ 
         private void addAlgorithmsToFramework(WorkData workData) {
-            algorithmsInFramework.add(new AliasEliminator(fclass, workData));
+            //algorithmsInFramework.add(new AliasEliminator(fclass, workData));
             algorithmsInFramework.add(new VariabilityPropagator(fclass, workData));
             algorithmsInFramework.add(canonizer);
         }
