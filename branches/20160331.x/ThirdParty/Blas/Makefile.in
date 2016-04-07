@@ -59,13 +59,11 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
-CASADI_HOME = @CASADI_HOME@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
 CP = @CP@
 CPP = @CPP@
-CPPAD_HOME = @CPPAD_HOME@
 CPPFLAGS = @CPPFLAGS@
 CURR_DIR = @CURR_DIR@
 CXX = @CXX@
@@ -81,7 +79,6 @@ DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
-ECLIPSE_HOME = @ECLIPSE_HOME@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 F77 = @F77@
@@ -93,9 +90,6 @@ INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
-IPOPT_HOME = @IPOPT_HOME@
-IPOPT_INC = @IPOPT_INC@
-IPOPT_LIB = @IPOPT_LIB@
 LD = @LD@
 LDFLAGS = @LDFLAGS@
 LIBOBJS = @LIBOBJS@
@@ -144,8 +138,6 @@ STRIP = @STRIP@
 SUNDIALS_HOME = @SUNDIALS_HOME@
 SUPERLU_HOME = @SUPERLU_HOME@
 VERSION = @VERSION@
-WITH_CASADI = @WITH_CASADI@
-WITH_CPPAD = @WITH_CPPAD@
 WITH_SUNDIALS = @WITH_SUNDIALS@
 _JAVA_HOME_ = @_JAVA_HOME_@
 abs_builddir = @abs_builddir@
@@ -183,9 +175,6 @@ htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
-ipoptlib = @ipoptlib@
-jmi_cppadlib = @jmi_cppadlib@
-jmilib = @jmilib@
 libdir = @libdir@
 libexecdir = @libexecdir@
 localedir = @localedir@
@@ -240,9 +229,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/Blas/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile
+	  $(AUTOMAKE) --foreign ThirdParty/Blas/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
