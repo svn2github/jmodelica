@@ -1451,7 +1451,9 @@ This package contains basic analog electrical multiphase components.
 <p>
 Contains m ideal diodes (Modelica.Electrical.Analog.Ideal.IdealDiode).
 </p>
-</HTML>"));
+</HTML>"),
+        Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},
+                {100,100}}), graphics));
     end IdealDiode;
 
     model IdealThyristor "Multiphase ideal thyristor"

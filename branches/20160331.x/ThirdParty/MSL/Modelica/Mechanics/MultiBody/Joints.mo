@@ -2269,7 +2269,10 @@ its tip position, is shown in
             extent={{-30,-5},{-50,5}},
             lineColor={0,0,0},
             fillColor={192,192,192},
-            fillPattern=FillPattern.Solid)}));
+            fillPattern=FillPattern.Solid)}),
+      Diagram(coordinateSystem(
+          preserveAspectRatio=false,
+          extent={{-100,-100},{100,100}}), graphics));
   end FreeMotionScalarInit;
 
   model SphericalSpherical
@@ -8740,7 +8743,8 @@ menu of \"Joints.SphericalSpherical\" or \"Joints.UniversalSpherical\".
      equation
        r_b_0 = r_a_0 + Frames.resolve1(R_a, {r_rel_a[1], r_rel_a[2], r_rel_a[3]});
 
-       annotation ( Icon(coordinateSystem(
+       annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                 -100},{100,100}}), graphics), Icon(coordinateSystem(
               preserveAspectRatio=false, extent={{-100,-100},{100,100}}),
             graphics={Text(
               extent={{-88,16},{82,-12}},
@@ -8790,7 +8794,8 @@ menu of \"Joints.SphericalSpherical\" or \"Joints.UniversalSpherical\".
        frame_b.f = zeros(3);
        frame_b.t = zeros(3);
 
-       annotation ( Icon(graphics={Text(
+       annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                -100},{100,100}}),  graphics), Icon(graphics={Text(
               extent={{-84,-58},{86,-86}},
               lineColor={0,0,0},
               textString="angle")}));
@@ -8811,7 +8816,8 @@ menu of \"Joints.SphericalSpherical\" or \"Joints.UniversalSpherical\".
      equation
       Frames.angularVelocity2(R_b) = Frames.resolve2(R_b,Frames.angularVelocity1(R_a)) + w_rel_b;
 
-       annotation ( Icon(graphics={Text(
+       annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
+                 -100},{100,100}}), graphics), Icon(graphics={Text(
               extent={{-86,16},{84,-12}},
               lineColor={0,0,0},
               textString="w_rel_b")}));

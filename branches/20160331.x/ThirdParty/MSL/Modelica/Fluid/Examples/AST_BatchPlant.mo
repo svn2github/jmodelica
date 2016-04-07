@@ -662,7 +662,9 @@ package AST_BatchPlant
      alt=\"BatchPlant_StandardWater.png\">
 </html>"),
       Diagram(coordinateSystem(preserveAspectRatio=false,extent={{-200,-280},{200,
-              280}})));
+              280}})),
+      Icon(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{100,
+              100}})));
   end BatchPlant_StandardWater;
 
   package BaseClasses
@@ -1959,7 +1961,9 @@ Implemented trace substances and missing equation for outflow of multi substance
           points={{-39,70},{-24,70},{-24,60},{-12,60}},
           color={0,0,127},
           smooth=Smooth.None));
-      annotation (experiment(StopTime=100));
+      annotation (experiment(StopTime=100), Diagram(coordinateSystem(
+              preserveAspectRatio=false, extent={{-100,-100},{100,100}}),
+            graphics));
     end OneTank;
 
     model TwoTanks

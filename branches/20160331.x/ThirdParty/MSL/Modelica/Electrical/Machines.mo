@@ -5596,7 +5596,8 @@ Resistance and stray inductance of stator is modeled directly in stator phases, 
 <td valign=\"top\">XDqs/(2*pi*fNominal)</td><td valign=\"top\"> </td>
 </tr>
 </table>
-</HTML>"));
+</HTML>"),Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},
+                  {100,100}}), graphics));
       end SM_PermanentMagnet;
 
       model SM_ElectricalExcited
@@ -6025,7 +6026,8 @@ Resistance and stray inductance of stator is modeled directly in stator phases, 
 <td valign=\"top\">XDqs/(2*pi*fNominal)</td><td valign=\"top\"> </td>
 </tr>
 </table>
-</HTML>"));
+</HTML>"),Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},
+                  {100,100}}), graphics));
       end SM_ElectricalExcited;
 
       model SM_ReluctanceRotor
@@ -6311,7 +6313,8 @@ Resistance and stray inductance of stator is modeled directly in stator phases, 
 <td valign=\"top\">(Xsq-Xss)/(2*pi*fNominal)</td><td valign=\"top\"> </td>
 </tr>
 </table>
-</HTML>"));
+</HTML>"),Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},
+                  {100,100}}), graphics));
       end SM_ReluctanceRotor;
       annotation (Documentation(info="<HTML>
 This package contains models of synchronous induction machines, based on space phasor theory:
@@ -11213,7 +11216,7 @@ Model of voltage drop and losses of carbon brushes. This three-phase model uses 
                       lineColor={0,0,255},
                       textString="%name")}), Documentation(info="<html>
 <p>
-Stray load losses are modeled similar to standards EN 60034-2 and IEEE 112, i.e., they are dependent on square of current,
+Stray load losses are modeled similar to standards EN 60034-2 and IEEE 512, i.e., they are dependent on square of current,
 but without scaling them to zero at no-load current.
 </p>
 <p>
@@ -11302,8 +11305,8 @@ If it is desired to neglect permanent magnet losses, set <code>strayLoadParamete
       end PermanentMagnetLosses;
 
       model Core "Model of core losses"
-        parameter Machines.Losses.CoreParameters coreParameters;
-        final parameter Integer m=coreParameters.m "Number of phases";
+        parameter Machines.Losses.CoreParameters coreParameters(final m=m);
+        final parameter Integer m=3 "Number of phases";
         parameter Real turnsRatio(final min=Modelica.Constants.small)
           "Effective number of stator turns / effective number of rotor turns (if used as rotor core)";
         extends
@@ -11562,7 +11565,7 @@ If it is desired to neglect stray load losses, set <code>strayLoadParameters.PRe
 
       model Core "Model of core losses"
         extends Modelica.Electrical.Analog.Interfaces.OnePort;
-        parameter Machines.Losses.CoreParameters coreParameters
+        parameter Machines.Losses.CoreParameters coreParameters(final m=1)
           "Armature core losses";
         extends
           Modelica.Thermal.HeatTransfer.Interfaces.PartialElementaryConditionalHeatPortWithoutT(
@@ -14153,7 +14156,9 @@ Circuit layout (vector group) of primary and secondary windings have to be defin
 <td valign=\"top\">300</td><td valign=\"top\">W</td>
 </tr>
 </table>
-</html>"));
+</html>"),
+        Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},
+                {100,100}}), graphics));
     end PartialBasicTransformer;
 
     connector ThermalPortTransformer "Thermal port of transformers"
@@ -15020,20 +15025,21 @@ Simple Current-Controller.
 </p>
 <p>
 The desired rms values of d- and q-component of the space phasor current in rotor fixed coordinate system are given by inputs \"id_rms\" and \"iq_rms\".
-Using the given rotor position (input \"phi\"), the correct three-phase currents (output \"y[3]\") are calculated.
+Using the given rotor position (input \"phi\"), the correct three-phase currents (output \"i[3]\") are calculated.
 They can be used to feed a current source which in turn feeds an induction machine.
 </p>
 </HTML>"));
     end CurrentController;
 
-    model VoltageController "Voltage controller"
+    model VoltageController "Current controller"
       import Modelica.Constants.pi;
       constant Integer m=3 "Number of phases";
       parameter Integer p "Number of pole pairs";
       parameter Modelica.SIunits.Frequency fsNominal "Nominal frequency";
       parameter Modelica.SIunits.Voltage VsOpenCircuit
         "Open circuit RMS voltage per phase @ fsNominal";
-      parameter Modelica.SIunits.Resistance Rs "Stator resistance per phase";
+      parameter Modelica.SIunits.Resistance Rs
+        "Stator resistance per phase at TOperational";
       parameter Modelica.SIunits.Inductance Ld "Inductance in d-axis";
       parameter Modelica.SIunits.Inductance Lq "Inductance in q-axis";
       //Decoupling
