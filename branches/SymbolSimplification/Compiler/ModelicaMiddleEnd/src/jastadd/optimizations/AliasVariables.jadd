@@ -38,16 +38,21 @@ aspect AliasVariables {
             public boolean run(FAbstractEquation feq) {
                 if(fclass.genAlias(feq)) {
                     fclass.eliminateAliasVariables(workData, feq);
-                    fclass.removeUnusedTemporaries();
-                    fclass.insertTempsInLHS();
-                    fclass.remoteRedundantInitialEquations();
                     return true;
                 }
                 return false;
             }
+            
+            @Override
+            public void postFix() {
+                fclass.removeUnusedTemporaries();
+                fclass.mergeEquivalentRecords();
+                fclass.insertTempsInLHS();
+                fclass.remoteRedundantInitialEquations();
+            }
         }
      }
-
+     
         /**
          * An FClass has an alias manager.
           */

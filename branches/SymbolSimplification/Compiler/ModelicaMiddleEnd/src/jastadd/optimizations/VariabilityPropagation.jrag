@@ -159,14 +159,14 @@ aspect VariabilityPropagation {
             
             @Override
             public boolean run(FAbstractEquation feq) {
-                if (variabilityPropagation(feq)) {
-                    fclass.enableConstantFolding();
-                    fclass.forceRewrites();
-                    return true;
-                }
-                return false;
+                return variabilityPropagation(feq);
             }
             
+            @Override
+            public void postFix() {
+                fclass.enableConstantFolding();
+                fclass.forceRewrites();
+            }
             
             /**
              * Runs variability propagation.

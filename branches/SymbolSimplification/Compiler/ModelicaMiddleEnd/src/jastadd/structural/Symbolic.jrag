@@ -1175,6 +1175,11 @@ aspect ExpressionSimplification {
         public boolean run(FAbstractEquation feq) {
             return feq.performRewrites();
         }
+        
+        @Override
+        public void postFix() {
+            
+        }
     }
 }
     syn boolean FAbstractEquation.performRewrites() { return false; }

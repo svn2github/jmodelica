@@ -312,7 +312,7 @@
                     <arg value="--indent=4space" />
                     <arg line="${jastadd_files}" />
                 </java>
-            	<!-- delete stale java files created in earlier runs -->
+                <!-- delete stale java files created in earlier runs -->
                 <delete verbose="true">
                     <fileset dir="${ast_output}">
                         <date datetime="${ast_creation_time}" when="before" pattern="${timestamp_format}" />
@@ -489,7 +489,7 @@ import org.junit.runner.RunWith;
 public class ${test_class_name} extends ${ast_package}.TestSpecification {
 
     public ${test_class_name}() { 
-        super("D:/Kod/Exjobb/JModelica/Compiler/ModelicaMiddleEnd");
+        super(${module_dirs});
     }
 
     protected ${jm_package}.util.test.Assert createAssert() {

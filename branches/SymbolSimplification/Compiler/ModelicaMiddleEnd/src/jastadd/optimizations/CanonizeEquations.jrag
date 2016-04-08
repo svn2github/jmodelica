@@ -92,6 +92,11 @@ aspect CanonizeEquations {
                 return true;
             }
             
+            @Override
+            public void postFix() {
+                // NOP.
+            }
+            
             public boolean runPre(FAbstractEquation feq) {
                 if (!feq.isFEquation()) {
                     return false;
