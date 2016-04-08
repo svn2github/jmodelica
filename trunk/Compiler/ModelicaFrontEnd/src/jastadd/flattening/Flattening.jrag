@@ -2572,8 +2572,9 @@ aspect FlatExpressions {
     }
     
     inh FQName FExp.sizeFlatteningPrefix();
-    eq Root.getChild().sizeFlatteningPrefix()              = new FQNameEmpty();
-    eq InstNode.getChild().sizeFlatteningPrefix()          = retrieveFQName();
+    eq Root.getChild().sizeFlatteningPrefix()          = new FQNameEmpty();
+    eq InstNode.getChild().sizeFlatteningPrefix()      = retrieveFQName();
+    eq InstClassDecl.getChild().sizeFlatteningPrefix() = new FQNameEmpty();
     
     inh FExp DummyModification.myFExp();
     eq InstFunctionArgument.getChild().myFExp()   = null;

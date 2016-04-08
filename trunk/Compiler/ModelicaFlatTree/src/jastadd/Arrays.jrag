@@ -2433,7 +2433,7 @@ aspect ArrayHelpers {
 		 * Get length in the <code>i</code>th dimension.
 		 */
 		public int get(int i) {
-			return (i >= 0 && i < size.length) ? size[i] : UNKNOWN;
+			return has(i) ? size[i] : UNKNOWN;
 		}
 		
 		/**
@@ -2447,7 +2447,7 @@ aspect ArrayHelpers {
 		 * Check if this size has an <code>i</code>th dimension.
 		 */
 		public boolean has(int i) {
-			return size.length > i;
+			return i >= 0 && i < size.length;
 		}
 		
 		/**
@@ -2520,7 +2520,7 @@ aspect ArrayHelpers {
          * Check if length in dimension d is unknown.
          */
         public boolean isUnknown(int d) {
-            return size[d] == UNKNOWN;
+            return !has(d) || size[d] == UNKNOWN;
         }
         
 		/**

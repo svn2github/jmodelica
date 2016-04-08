@@ -1238,6 +1238,41 @@ end FunctionTests.FunctionFlatten26;
 end FunctionFlatten26;
 
 
+model FunctionFlatten27
+    model A
+        function f
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := x[end];
+        end f;
+        Real x = f({1,2});
+    end A;
+    
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionFlatten27",
+            description="Flattening of end in function that is in a component",
+            flatModel="
+fclass FunctionTests.FunctionFlatten27
+ Real a.x = FunctionTests.FunctionFlatten27.a.f({1, 2});
+
+public
+ function FunctionTests.FunctionFlatten27.a.f
+  input Real[:] x;
+  output Real y;
+ algorithm
+  y := x[size(x, 1)];
+  return;
+ end FunctionTests.FunctionFlatten27.a.f;
+
+end FunctionTests.FunctionFlatten27;
+")})));
+end FunctionFlatten27;
+
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1
