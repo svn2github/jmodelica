@@ -45,11 +45,44 @@ aspect AliasVariables {
             
             @Override
             public void postFix() {
+                removeAliasConstants();
+                removeAliasParameters();
                 fclass.removeUnusedTemporaries();
                 fclass.mergeEquivalentRecords();
                 fclass.insertTempsInLHS();
                 fclass.remoteRedundantInitialEquations();
             }
+            
+            private void removeAliasConstants() {
+                  if (!fclass.myOptions().getBooleanOption("eliminate_alias_constants")) {
+                      return;
+                  }
+                  Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
+                  Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
+                  for (FVariable fv : fclass.getFVariables()) {
+                      fv.classifyAliasConstant(fclass.getAliasManager(), firstOccurencesReal, firstOccurencesNonReal);
+                  }
+            }
+            
+            private void removeAliasParameters() {
+                if (!fclass.myOptions().getBooleanOption("eliminate_alias_parameters")) {
+                    return;
+                }
+                
+                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
+                        equation.aliasClassified = false;
+                    if (equation.isAliasEquation()) {
+                        fclass.getAliasManager().addAliasVariables(equation.aliasVariables());
+                    }
+               }
+            }
+        }
+        
+        public static void applyAlias() {
+                fclass.removeUnusedTemporaries();
+                fclass.mergeEquivalentRecords();
+                fclass.insertTempsInLHS();
+                fclass.remoteRedundantInitialEquations();
         }
      }
      

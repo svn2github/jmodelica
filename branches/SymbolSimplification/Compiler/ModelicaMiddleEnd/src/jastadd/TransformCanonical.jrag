@@ -1857,8 +1857,6 @@ aspect TransformCanonical {
     
     /**
      * Generate alias information and remove alias equations.
-     * 
-     * Johan/Zimon CHANGED
      */
     public boolean FClass.genAlias(FAbstractEquation equation) {
         if (aliasManager == null) {
@@ -1871,24 +1869,8 @@ aspect TransformCanonical {
         } else {
             return false;
         }
-/*
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            equation.aliasClassified = false; 
-            if (equation.isAliasEquation()) 
-                aliasManager.addAliasVariables(equation.aliasVariables());
-        }
         
-        if (myOptions().getBooleanOption("eliminate_alias_constants")) {
-            Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
-            Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
-            
-            for (FVariable fv : getFVariables()) {
-                fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
-            }
-        }
-*/        
         aliasManager.reportAliasErrors(this);
-
         root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
         return true;
     }

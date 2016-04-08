@@ -63,7 +63,7 @@ aspect SymbolicTransformationFramework {
                 }
             }
             
-            postConfiguration();
+            postConfiguration(algorithmList);
             change();
         }
         
@@ -90,8 +90,8 @@ aspect SymbolicTransformationFramework {
         /*
          *  Performs methods that are required after all algorithms have run.<p>
          */
-        private void postConfiguration() {
-            for (Algorithm alg : algorithmsInFramework) {
+        private void postConfiguration(ArrayList<Algorithm> algorithmList) {
+            for (Algorithm alg : algorithmList) {
                 alg.postFix();
             }
         }

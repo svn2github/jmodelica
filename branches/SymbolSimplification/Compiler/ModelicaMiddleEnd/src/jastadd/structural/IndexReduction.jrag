@@ -162,7 +162,7 @@ aspect IndexReduction {
         // trigger rewrites of FDerExp -> FDummyDerExp
         root().flushAllRecursiveClearFinal();
 
-        // aliasElimination.apply();
+        symbolicTransformationFramework.applyAlias();
         // Add derivative variables
         setFDerivativeVariables.apply();
 
