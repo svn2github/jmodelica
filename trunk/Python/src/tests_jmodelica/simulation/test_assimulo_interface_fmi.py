@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 """Tests for the pyfmi.simulation.assimulo module."""
 import logging
 import nose
@@ -287,6 +286,7 @@ class Test_Events:
         compile_fmu("EventIter.EnhancedEventIteration2", file_name)
         compile_fmu("EventIter.SingularSystem1", file_name)
         compile_fmu("EventIter.InitialPhasing1", file_name)
+        compile_fmu("EventIter.EventIterDiscreteReals", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -344,6 +344,14 @@ class Test_Events:
         res = model.simulate(final_time=0.1)
         nose.tools.assert_almost_equal(res["b1"][0], 0.0)
         nose.tools.assert_almost_equal(res["b2"][0], 1.0)
+        
+    @testattr(stddist=True)
+    def test_discrete_real_event_iteration(self):
+        model = load_fmu("EventIter_EventIterDiscreteReals.fmu")
+        res = model.simulate(final_time=1.0)
+        nose.tools.assert_almost_equal(res["T1"][0], 0.0)
+        nose.tools.assert_almost_equal(res["start"][0], 1.0)
+        nose.tools.assert_almost_equal(res["T2"][0], 0.0)
 
 class Test_Relations:
     @classmethod

@@ -140,12 +140,12 @@ static int jmi_linear_check_active_variable(jmi_block_solver_t * block, int set,
     
     x[index] = val+eps+THRESHOLD;
     flag = block->check_discrete_variables_change(block->problem_data, x);
-    if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED) { active = 1; }
+    if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED) { active = 1; }
     
     if (!active) {
         x[index] = val-eps-THRESHOLD;
         flag = block->check_discrete_variables_change(block->problem_data, x);
-        if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED) { active = 1; }
+        if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED) { active = 1; }
     }
     
     x[index] = val;

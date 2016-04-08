@@ -1400,6 +1400,20 @@ int jmi_generic_func(jmi_t *jmi, jmi_generic_func_t func);
 int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size);
 
 /**
+ * \brief Compares two sets of discrete reals.
+ * 
+ * Compares two sets of discrete reals and returns (1) if they are equal and
+ * (0) if not.
+ * 
+ * @param dr_pre The first set of discrete reals
+ * @param dr_post The second set of discrete reals
+ * @param nominals Nominal values of the discrete reals used in comparison
+ * @param size The size of the switches
+ * @return 1 if equal, 0 if not
+ */
+int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real_t* nominals, jmi_int_t size);
+
+/**
  * \brief Turns a switch.
  * 
  * Turns a switch depending on the indicator value and the relation 

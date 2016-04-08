@@ -2027,6 +2027,18 @@ int jmi_compare_switches(jmi_real_t* sw_pre, jmi_real_t* sw_post, jmi_int_t size
     return all_switches_equal;
 }
 
+int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real_t* nominals, jmi_int_t size) {
+    int i, all_discrete_reals_equal = 1;
+    
+    for (i = 0; i < size; i++){
+        if (RAbs(dr_pre[i] - dr_post[i])/nominals[i] > JMI_ALMOST_EPS ){
+            all_discrete_reals_equal = 0;
+            break;
+        }
+    }
+    return all_discrete_reals_equal;
+}
+
 jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {
     /* x >= 0
      * x >  0

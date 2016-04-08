@@ -146,5 +146,32 @@ model InitialPhasing1
     end when;
 end InitialPhasing1;
 
+model EventIterDiscreteReals
+  parameter Real v = -1;
+  parameter Real x = 8.60925774e-17;
+  parameter Real y = 4;
+  
+  //Iteration variables:
+  Real T1(start=0);
+  Real m;
+  Real T2(start=0);
+  
+  //Torn variables
+  Real w;
+  Real start(start=0);
+  
+equation
+  //Torn equations
+  w = if x * T2 > -0.5 then x + m + T1 else x^2;
+  when initial() then
+      start = noEvent(if v < 0 then T2+1 else T1+1);
+  end when;
+  
+  //Residual equations
+  T1 = sqrt(T2^2) + v + start;
+  m = if y * max(T1,1) > 3 then w else w - 2;
+  T2 = sqrt(T1^2) + w + m^2;
+end EventIterDiscreteReals;
+
 end EventIter;
 

@@ -25,6 +25,7 @@
 #define _JMI_LINEAR_SOLVER_H
 
 #include "jmi_block_solver.h"
+#include "jmi.h"
 
 #define JMI_SWITCHES_AND_NON_REALS_CHANGED -1
 #define JMI_SWITCHES_CHANGED               -3
