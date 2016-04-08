@@ -1203,6 +1203,41 @@ end FunctionTests.FunctionFlatten25;
 ")})));
 end FunctionFlatten25;
 
+
+model FunctionFlatten26
+    function f1
+        input Integer x;
+        output Integer y;
+    algorithm
+        y := mod(sum(1:x), 3);
+    end f1;
+    
+    function f2
+        input Integer x;
+        input Real y;
+        output Real z[f1(x)];
+    algorithm
+        z := (1:size(z,1)) * y;
+    end f2;
+    
+    parameter Integer n = f1(4);
+    Real x[n] = f2(4, time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionFlatten26",
+            description="Check that function eval of already scalarized function works during scalarization of another function",
+            flatModel="
+fclass FunctionTests.FunctionFlatten26
+ structural parameter Integer n = 1 /* 1 */;
+ Real x[1];
+equation
+ x[1] = time;
+end FunctionTests.FunctionFlatten26;
+")})));
+end FunctionFlatten26;
+
+
 /* ====================== Function calls ====================== */
 
 model FunctionBinding1

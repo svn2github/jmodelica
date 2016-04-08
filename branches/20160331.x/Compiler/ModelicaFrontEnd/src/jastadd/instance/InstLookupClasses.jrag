@@ -60,10 +60,12 @@ aspect InstLookupClasses {
     eq InstNormalExtends.getInstClassModification().lookupInstClass(String name) = lookupInstClassFromMod(name);
 
     inh InstLookupResult<InstClassDecl> InstExtends.lookupInstClassFromMod(String name);
-    eq InstNode.getInstExtends().lookupInstClassFromMod(String name)          = genericLookupInstClass(name);
-    eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name) = genericLookupInstClass(name);
-    eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)       = genericLookupInstClassInExtends(name);
-    eq Root.getChild().lookupInstClassFromMod(String name)                    = InstLookupResult.notFound();
+    eq InstNode.getInstExtends().lookupInstClassFromMod(String name)              = genericLookupInstClass(name);
+    eq InstComponentDecl.getInstExtends().lookupInstClassFromMod(String name)     = genericLookupInstClass(name);
+    eq InstExtends.getInstExtends().lookupInstClassFromMod(String name)           = genericLookupInstClassInExtends(name);
+    eq Root.getChild().lookupInstClassFromMod(String name)                        = InstLookupResult.notFound();
+    eq InstRecordConstructor.getInstExtends().lookupInstClassFromMod(String name) = 
+            myInstClassDecl().genericLookupInstClass(name);
 
     eq InstInlineExtends.getClassName().lookupInstClass(String name) = 
         getClassName().name().equals(name) ? lookupRedeclareExtendsInstClass(name) : lookupInstClass(name);

@@ -2218,6 +2218,7 @@ aspect Scalarization {
         setFAlgorithm(new FAlgorithm(stmts));
         setFAttributeList(attrs);
         clearScalarized();  // Functions need scalarized = false in FQNames
+        flushAllRecursive();
     }
 
 	
