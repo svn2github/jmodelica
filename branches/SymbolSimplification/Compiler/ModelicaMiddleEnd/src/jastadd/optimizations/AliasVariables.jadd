@@ -24,6 +24,13 @@ import java.util.BitSet;
  */
 aspect AliasVariables {
     public class symbolicTransformationFramework {
+         public static void applyAlias() {
+                fclass.removeUnusedTemporaries();
+                fclass.mergeEquivalentRecords();
+                fclass.insertTempsInLHS();
+                fclass.remoteRedundantInitialEquations();
+        }
+    
         public class AliasEliminator extends Algorithm {
             public AliasEliminator(FClass fclass, WorkData workData) {
                 super(fclass, workData);
@@ -53,6 +60,17 @@ aspect AliasVariables {
                 fclass.remoteRedundantInitialEquations();
             }
             
+            
+            @Override
+            public boolean isPreUsed() {
+                return false;
+            }
+                         
+            @Override
+            public void preRun() {
+                // NOP
+            }
+            
             private void removeAliasConstants() {
                   if (!fclass.myOptions().getBooleanOption("eliminate_alias_constants")) {
                       return;
@@ -76,13 +94,6 @@ aspect AliasVariables {
                     }
                }
             }
-        }
-        
-        public static void applyAlias() {
-                fclass.removeUnusedTemporaries();
-                fclass.mergeEquivalentRecords();
-                fclass.insertTempsInLHS();
-                fclass.remoteRedundantInitialEquations();
         }
      }
      

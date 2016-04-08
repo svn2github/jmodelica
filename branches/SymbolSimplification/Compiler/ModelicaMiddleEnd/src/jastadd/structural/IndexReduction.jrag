@@ -161,8 +161,12 @@ aspect IndexReduction {
         // flushAllRecursiveClearFinal must be used here in order to
         // trigger rewrites of FDerExp -> FDummyDerExp
         root().flushAllRecursiveClearFinal();
-
-        symbolicTransformationFramework.applyAlias();
+        
+        // aliasElimination.apply();
+        // symbolicTransformationFramework runs a separate alias elimination
+        symbolicTransformationFramework symTransFramework = new symbolicTransformationFramework(this);
+        symTransFramework.performAliasEliminator();
+        
         // Add derivative variables
         setFDerivativeVariables.apply();
 

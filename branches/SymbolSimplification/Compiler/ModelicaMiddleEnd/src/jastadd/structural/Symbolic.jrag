@@ -1177,8 +1177,18 @@ aspect ExpressionSimplification {
         }
         
         @Override
-        public void postFix() {
+        public boolean isPreUsed() {
+            return false;
+        }
             
+        @Override
+        public void postFix() {
+            // NOP
+        }
+             
+        @Override
+        public void preRun() {
+            // NOP
         }
     }
 }

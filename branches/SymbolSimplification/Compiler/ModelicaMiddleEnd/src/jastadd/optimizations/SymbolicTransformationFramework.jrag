@@ -44,12 +44,7 @@ aspect SymbolicTransformationFramework {
                 workData.addToWorklist(equation);
             }
             
-            // If canonization is enabled it is performed before any algorithm.
-            if (canonizer.isPreUsed()) {
-                for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
-                    canonizer.runPre(equation);
-                }
-            }
+            preConfiguration(algorithmList);
             
             // Start using algorithms on the equations.
             while (!worklist.isEmpty()) {
@@ -61,6 +56,33 @@ aspect SymbolicTransformationFramework {
                         break;
                     }
                 }
+            }
+            
+            postConfiguration(algorithmList);
+            change();
+        }
+        
+        /**
+         * Separate perform method for only running Alias Elimination. It is used in reduceIndex method
+         * in FClass. 
+         */ 
+        public void performAliasEliminator() {
+            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
+            WorkData workData = new WorkData(worklist);
+            ArrayList<Algorithm> algorithmList = new ArrayList();
+            AliasEliminator ae = new AliasEliminator(fclass, workData);
+            algorithmList.add(ae);
+            
+            // Worklist will contain all equations at the beginning.
+            for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
+                workData.addToWorklist(equation);
+            }
+            
+             // Perform Alias Eliminination on the equations.
+            while (!worklist.isEmpty()) {
+                FAbstractEquation equation = worklist.iterator().next();
+                worklist.remove(equation);
+                ae.run(equation);
             }
             
             postConfiguration(algorithmList);
@@ -88,10 +110,20 @@ aspect SymbolicTransformationFramework {
         }
         
         /*
+         *  Performs methods that are required before all algorithms have run.<p>
+         */
+        private void preConfiguration(ArrayList<Algorithm> algorithms) {
+            for (Algorithm alg : algorithms) {
+                if (alg.isPreUsed())
+                    alg.preRun();
+            }
+        }
+        
+        /*
          *  Performs methods that are required after all algorithms have run.<p>
          */
-        private void postConfiguration(ArrayList<Algorithm> algorithmList) {
-            for (Algorithm alg : algorithmList) {
+        private void postConfiguration(ArrayList<Algorithm> algorithms) {
+            for (Algorithm alg : algorithms) {
                 alg.postFix();
             }
         }
@@ -107,16 +139,18 @@ aspect SymbolicTransformationFramework {
                 this.workData = workData;
             }
             
-            /*
+            /**
              * Checks if the algorithm is enabled. The algorithm must have an option added
-             * to the enum Default in {JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
+             * to the enum Default in 
+             * {code JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
              * Use {code fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
              * 
              * @return {code true} if it is enabled, {code false} otherwise.
              */
             public abstract boolean isUsed();
             
-            /*
+            
+            /**
              * Starts the algorithm.<p>
              * 
              * @param equation The equation to optimize.
@@ -125,9 +159,27 @@ aspect SymbolicTransformationFramework {
             public abstract boolean run(FAbstractEquation equation);
             
             /**
-             *  Performs methods that are to be performed after all algorithms have run.<p>
+             * Checks if the algorithm should perform preRun.
+             * Algorithms that should not perform preRun should only return {code false}.
+             * Algorithms that should perform preRun needs to have an option added
+             * to the enum Default in 
+             * {code JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
+             * Override this method and use {code fclass.myOptions().getBooleanOption("pre_algorithm_name")} 
+             * to check if its enabled.
+             * @return {code true} if performing preRun, {code false} otherwise.
              */
-             public abstract void postFix();
+            public abstract boolean isPreUsed();
+            
+            /**
+             * Performs methods that are to be performed after all algorithms have run.
+             */
+            public abstract void postFix();
+            
+            /**
+             * Algorithms can perform work on the equations independently before
+             * the framework moves on with iterating over the worklist.
+             */
+            public abstract void preRun();
         }
         
         /**

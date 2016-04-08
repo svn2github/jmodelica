@@ -77,8 +77,6 @@ aspect VariabilityPropagation {
         return res;
     }
     
-    
-    
     /**
      * Checks if equation is eligible for var. prop.
      */
@@ -166,6 +164,16 @@ aspect VariabilityPropagation {
             public void postFix() {
                 fclass.enableConstantFolding();
                 fclass.forceRewrites();
+            }
+            
+            @Override
+            public boolean isPreUsed() {
+                return false;
+            }
+            
+            @Override
+            public void preRun() {
+                // NOP
             }
             
             /**

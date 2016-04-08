@@ -1954,9 +1954,7 @@ aspect TransformCanonical {
                 if (use.inFEquation()) {
                     fae = use.myFEquation();
                     if (!workData.hasRemovedEquation(fae)) {
-                        System.out.println("\tEquation was added to worklist: "
-                            + fae.toString());
-                          workData.addToWorklist(fae);
+                        workData.addToWorklist(fae);
                     }    
                 }
             }

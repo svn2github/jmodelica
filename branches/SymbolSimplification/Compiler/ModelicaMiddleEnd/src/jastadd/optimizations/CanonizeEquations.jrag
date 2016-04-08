@@ -56,7 +56,7 @@ aspect CanonizeEquations {
         public class Canonizer extends Algorithm {
             // Specifies whether the LHS or RHS should be zero.
             private FactorComparator factorComparator = new FactorComparator();
-            private static final boolean LEFT_SIDE = true;
+            private static final boolean LEFT_SIDE = false;
 
             /*
              *  DivToMul data.
@@ -73,6 +73,7 @@ aspect CanonizeEquations {
                return fclass.myOptions().getBooleanOption("canonize_equations");
             }
             
+            @Override
             public boolean isPreUsed() {
                 return fclass.myOptions().getBooleanOption("pre_canonize_equations");
             }
@@ -93,24 +94,16 @@ aspect CanonizeEquations {
             }
             
             @Override
-            public void postFix() {
-                // NOP.
+            public void preRun() {
+                for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
+                    run(equation);
+                }
             }
             
-            public boolean runPre(FAbstractEquation feq) {
-                if (!feq.isFEquation()) {
-                    return false;
-                }
-                
-                FEquation equation = feq.asFEquation();
-                feq.moveToOneSide(LEFT_SIDE);
-                eliminateDivision(equation);
-                feq.convertNegations();
-                feq.toAddMulTree(factorComparator);
-                
-                return true;
+            @Override
+            public void postFix() {
+                // NOP
             }
-
             
             /*
              *  Eliminates all divisions in an equation.<p>
