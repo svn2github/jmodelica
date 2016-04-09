@@ -164,8 +164,7 @@ aspect IndexReduction {
         
         // aliasElimination.apply();
         // symbolicTransformationFramework runs a separate alias elimination
-        symbolicTransformationFramework symTransFramework = new symbolicTransformationFramework(this);
-        symTransFramework.performAliasEliminator();
+        new symbolicTransformationFramework(this).performAliasElimination();
         
         // Add derivative variables
         setFDerivativeVariables.apply();

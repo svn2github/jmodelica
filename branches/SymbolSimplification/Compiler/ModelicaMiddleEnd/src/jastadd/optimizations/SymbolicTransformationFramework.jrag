@@ -40,9 +40,7 @@ aspect SymbolicTransformationFramework {
             }
             
             // Worklist will contain all equations at the beginning.
-            for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
-                workData.addToWorklist(equation);
-            }
+            workData.addAllToWorklist(fclass.getFAbstractEquations());
             
             preConfiguration(algorithmList);
             
@@ -66,26 +64,22 @@ aspect SymbolicTransformationFramework {
          * Separate perform method for only running Alias Elimination. It is used in reduceIndex method
          * in FClass. 
          */ 
-        public void performAliasEliminator() {
+        public void performAliasElimination() {
             LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
             WorkData workData = new WorkData(worklist);
-            ArrayList<Algorithm> algorithmList = new ArrayList();
             AliasEliminator ae = new AliasEliminator(fclass, workData);
-            algorithmList.add(ae);
             
-            // Worklist will contain all equations at the beginning.
-            for (FAbstractEquation equation : fclass.getFAbstractEquations()) {
-                workData.addToWorklist(equation);
-            }
+            workData.addAllToWorklist(fclass.getFAbstractEquations());
             
-             // Perform Alias Eliminination on the equations.
+            ae.preRun();
+            
             while (!worklist.isEmpty()) {
                 FAbstractEquation equation = worklist.iterator().next();
                 worklist.remove(equation);
                 ae.run(equation);
             }
             
-            postConfiguration(algorithmList);
+            ae.postRun();
             change();
         }
         
@@ -114,7 +108,6 @@ aspect SymbolicTransformationFramework {
          */
         private void preConfiguration(ArrayList<Algorithm> algorithms) {
             for (Algorithm alg : algorithms) {
-                if (alg.isPreUsed())
                     alg.preRun();
             }
         }
@@ -124,7 +117,7 @@ aspect SymbolicTransformationFramework {
          */
         private void postConfiguration(ArrayList<Algorithm> algorithms) {
             for (Algorithm alg : algorithms) {
-                alg.postFix();
+                alg.postRun();
             }
         }
         
@@ -149,7 +142,6 @@ aspect SymbolicTransformationFramework {
              */
             public abstract boolean isUsed();
             
-            
             /**
              * Starts the algorithm.<p>
              * 
@@ -159,21 +151,9 @@ aspect SymbolicTransformationFramework {
             public abstract boolean run(FAbstractEquation equation);
             
             /**
-             * Checks if the algorithm should perform preRun.
-             * Algorithms that should not perform preRun should only return {code false}.
-             * Algorithms that should perform preRun needs to have an option added
-             * to the enum Default in 
-             * {code JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
-             * Override this method and use {code fclass.myOptions().getBooleanOption("pre_algorithm_name")} 
-             * to check if its enabled.
-             * @return {code true} if performing preRun, {code false} otherwise.
-             */
-            public abstract boolean isPreUsed();
-            
-            /**
              * Performs methods that are to be performed after all algorithms have run.
              */
-            public abstract void postFix();
+            public abstract void postRun();
             
             /**
              * Algorithms can perform work on the equations independently before
@@ -249,6 +229,17 @@ aspect SymbolicTransformationFramework {
              */
             public void addToWorklist(FAbstractEquation equation) {
                 worklist.add(equation);
+            }
+            
+            /**
+             * Method to add many equations to the worklist.
+             *
+             * @param   equations the equations to be added.
+             */
+            public void addAllToWorklist(List<FAbstractEquation> equations) {
+                for (FAbstractEquation eqn : equations) {
+                    worklist.add(eqn);
+                }
             }
             
             /**

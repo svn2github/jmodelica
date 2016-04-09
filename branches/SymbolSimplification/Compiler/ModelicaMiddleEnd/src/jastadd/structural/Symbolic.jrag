@@ -1177,17 +1177,12 @@ aspect ExpressionSimplification {
         }
         
         @Override
-        public boolean isPreUsed() {
-            return false;
+        public void preRun() {
+            // NOP
         }
             
         @Override
-        public void postFix() {
-            // NOP
-        }
-             
-        @Override
-        public void preRun() {
+        public void postRun() {
             // NOP
         }
     }
@@ -1276,16 +1271,18 @@ aspect ExpressionSimplification {
      */
     syn FExp FDotSubExp.convertToAddition() = new FDotAddExp(getLeft(), getRight().makeNegated());
     eq FSubExp.convertToAddition()          = new FAddExp(getLeft(), getRight().makeNegated());
-/*
+
     rewrite FDotMulExp {
         when (getLeftNoTransform().isLiteralZero())      to FExp getRight().size().createZeroFExp();
         when (getLeftNoTransform().isLiteralOne())       to FExp getRight();
-        when (getLeftNoTransform().isLiteralMinusOne())  to FExp getRight().makeNegated();
         when (getRightNoTransform().isLiteralZero())     to FExp getLeft().size().createZeroFExp();
         when (getRightNoTransform().isLiteralOne())      to FExp getLeft();
+        
+        // These two need to be disabled if CanonizeEquations.jrag is to work properly.
+        when (getLeftNoTransform().isLiteralMinusOne())  to FExp getRight().makeNegated();
         when (getRightNoTransform().isLiteralMinusOne()) to FExp getLeft().makeNegated();
     }
-*/
+
     rewrite FDotDivExp {
         when (getLeftNoTransform().isLiteralZero())       to FExp getRight().size().createZeroFExp();
         when (getRightNoTransform().isLiteralOne())       to FExp getLeft();

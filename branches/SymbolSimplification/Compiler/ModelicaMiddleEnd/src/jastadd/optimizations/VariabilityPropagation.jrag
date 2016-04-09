@@ -161,19 +161,14 @@ aspect VariabilityPropagation {
             }
             
             @Override
-            public void postFix() {
-                fclass.enableConstantFolding();
-                fclass.forceRewrites();
-            }
-            
-            @Override
-            public boolean isPreUsed() {
-                return false;
-            }
-            
-            @Override
             public void preRun() {
                 // NOP
+            }
+            
+            @Override
+            public void postRun() {
+                fclass.enableConstantFolding();
+                fclass.forceRewrites();
             }
             
             /**
@@ -675,5 +670,4 @@ aspect ConstantFolding {
             return new FIdUseExp(getFIdUse().fullCopy());
         }
     }
-    
 }

@@ -1929,25 +1929,6 @@ aspect TransformCanonical {
                 eqns.add(equation);
         }
         
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            for (FAbstractEquation parEquation : getFParameterEquations()) { 
-                if (!parEquation.isAliasEquation()) {
-                    pEqns.add(parEquation);
-                }
-            }
-        }
-        
-        /*
-        System.out.println("\talias variables:");
-        for (FVariable fv : aliasVars) {
-            System.out.println("\t* "+fv.toString());
-        }
-        System.out.println("\tnormal variables:");
-        for (FVariable fv : nonAliasVars) {
-            System.out.println("\t* "+fv.toString());
-        }
-        */
-
         for (FVariable fv : aliasVars) {
             for (FIdUseExp use : fv.uses()) {
                 FAbstractEquation fae;
@@ -1960,26 +1941,12 @@ aspect TransformCanonical {
             }
         }
         
-  /*      
-        // Collect derivative binding equations, however only if we are going
-        // to perform index reduction!
-        if (myOptions().getBooleanOption("propagate_derivatives")) {
-            for (FAbstractEquation eqn : eqns) {
-                eqn.propagateDerivativeBindings();
-            }
-        }
-*/    
         setFVariableList(new List(nonAliasVars));
         setAliasVariableList(new List(aliasVars));
         setFAbstractEquationList(new List(eqns));
         
-        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
-            setFParameterEquationList(new List(pEqns));
-        }
-        
         aliasVariablesEliminated = true;
         enableAliasRewrite();
-        
         flush();
     }
     

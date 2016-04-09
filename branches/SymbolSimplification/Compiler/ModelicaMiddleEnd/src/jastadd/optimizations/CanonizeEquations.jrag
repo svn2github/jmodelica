@@ -74,11 +74,6 @@ aspect CanonizeEquations {
             }
             
             @Override
-            public boolean isPreUsed() {
-                return fclass.myOptions().getBooleanOption("pre_canonize_equations");
-            }
-            
-            @Override
             public boolean run(FAbstractEquation feq) {
                 if (!feq.isFEquation()) {
                     return false;
@@ -101,7 +96,7 @@ aspect CanonizeEquations {
             }
             
             @Override
-            public void postFix() {
+            public void postRun() {
                 // NOP
             }
             

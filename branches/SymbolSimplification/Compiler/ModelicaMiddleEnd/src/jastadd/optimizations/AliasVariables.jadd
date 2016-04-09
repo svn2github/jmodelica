@@ -24,16 +24,12 @@ import java.util.BitSet;
  */
 aspect AliasVariables {
     public class symbolicTransformationFramework {
-         public static void applyAlias() {
-                fclass.removeUnusedTemporaries();
-                fclass.mergeEquivalentRecords();
-                fclass.insertTempsInLHS();
-                fclass.remoteRedundantInitialEquations();
-        }
-    
         public class AliasEliminator extends Algorithm {
+            private AliasManager aliasManager;
+        
             public AliasEliminator(FClass fclass, WorkData workData) {
                 super(fclass, workData);
+                aliasManager = fclass.getAliasManager();
             }
             
             @Override
@@ -51,7 +47,10 @@ aspect AliasVariables {
             }
             
             @Override
-            public void postFix() {
+            public void preRun() {}
+            
+            @Override
+            public void postRun() {
                 removeAliasConstants();
                 removeAliasParameters();
                 fclass.removeUnusedTemporaries();
@@ -60,39 +59,43 @@ aspect AliasVariables {
                 fclass.remoteRedundantInitialEquations();
             }
             
-            
-            @Override
-            public boolean isPreUsed() {
-                return false;
-            }
-                         
-            @Override
-            public void preRun() {
-                // NOP
-            }
-            
             private void removeAliasConstants() {
-                  if (!fclass.myOptions().getBooleanOption("eliminate_alias_constants")) {
-                      return;
-                  }
-                  Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
-                  Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
-                  for (FVariable fv : fclass.getFVariables()) {
-                      fv.classifyAliasConstant(fclass.getAliasManager(), firstOccurencesReal, firstOccurencesNonReal);
-                  }
+                if (!fclass.myOptions().getBooleanOption("eliminate_alias_constants")) {
+                    return;
+                }
+                Map<String, FVariable> firstOccurencesReal = new HashMap<String, FVariable>();
+                Map<String, FVariable> firstOccurencesNonReal = new HashMap<String, FVariable>();
+                
+                for (FVariable fv : fclass.getFVariables()) {
+                    fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
+                }
+                
+                aliasManager.reportAliasErrors(fclass);
             }
             
             private void removeAliasParameters() {
                 if (!fclass.myOptions().getBooleanOption("eliminate_alias_parameters")) {
                     return;
                 }
-                
+
                 for (FAbstractEquation equation : fclass.getFParameterEquations()) {
                         equation.aliasClassified = false;
                     if (equation.isAliasEquation()) {
-                        fclass.getAliasManager().addAliasVariables(equation.aliasVariables());
+                        aliasManager.addAliasVariables(equation.aliasVariables());
                     }
-               }
+                }
+                aliasManager.reportAliasErrors(fclass);
+                ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+                
+                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
+                    if (!equation.isAliasEquation()) {
+                        pEqns.add(equation);
+                    }
+                }
+                fclass.setFParameterEquationList(new List(pEqns));
+                fclass.aliasVariablesEliminated = true;
+                fclass.enableAliasRewrite();
+                fclass.flush();
             }
         }
      }
