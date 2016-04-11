@@ -1871,7 +1871,6 @@ aspect TransformCanonical {
         }
         
         aliasManager.reportAliasErrors(this);
-        root().flushAllRecursive(); // TODO: is this really needed? the tree isn't changed
         return true;
     }
     
@@ -1906,50 +1905,58 @@ aspect TransformCanonical {
     public void FClass.eliminateAliasVariables(
            symbolicTransformationFramework.WorkData workData, 
            FAbstractEquation feq) {
-        ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
-        ArrayList<FVariable> aliasVars    = new ArrayList<FVariable>();
-        ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
-        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+        AliasPair pair = feq.aliasVariables();
         
-        //log.debug("FClass.eliminateAliasVariables(): l1 " + nonAliasVars + " l2 " + aliasVars);
+        // Assume var1 will replace var2.
+        FVariable replacement = pair.fv1;
+        FVariable toBeReplaced = pair.fv2;
         
-        // Go through all variables and insert in correct list
-        for (FVariable fv : getAliasVariables()) {
-                aliasVars.add(fv);
-        }
-        for (FVariable fv : getFVariables()) {
-            fv.aliasSort(nonAliasVars, aliasVars);
+        // If v1 was the alias, switch, else do nothing.
+        if (pair.fv1.isAlias()) {
+            replacement = pair.fv2;
+            toBeReplaced = pair.fv1;
         }
         
+        // All equations using the variable should be re-checked.
+        for (FIdUseExp id : toBeReplaced.uses()) {
+            workData.addToWorklist(id.myFEquation());
+        }
+        
+        // Replace all uses of the alias variable.
+        toBeReplaced.replaceUses(replacement);
+        
+        // We're done with this equation.
         workData.removeEquation(feq);
-        
-        for (FAbstractEquation equation: getFAbstractEquations()) {
-            // Remove equation if alias.
-            if (!workData.hasRemovedEquation(equation)) 
-                eqns.add(equation);
-        }
-        
-        for (FVariable fv : aliasVars) {
-            for (FIdUseExp use : fv.uses()) {
-                FAbstractEquation fae;
-                if (use.inFEquation()) {
-                    fae = use.myFEquation();
-                    if (!workData.hasRemovedEquation(fae)) {
-                        workData.addToWorklist(fae);
-                    }    
-                }
+    }
+    
+    /*
+     *  Replaces all uses of the variable with the one supplied.<p>
+     * 
+     *  @param  var the variable to replace <code>this</code>.
+     */
+    public void FVariable.replaceUses(FVariable var) {
+        HashSet<FIdUseExp> toRemove = new HashSet<FIdUseExp>();
+        for (FIdUseExp id : uses()) {
+            id.replaceUses(var);
+            
+            // If the variable is used in an equation,
+            // schedule the use for removal.
+            if (id.inFEquation()) {
+                toRemove.add(id);
             }
         }
         
-        setFVariableList(new List(nonAliasVars));
-        setAliasVariableList(new List(aliasVars));
-        setFAbstractEquationList(new List(eqns));
-        
-        aliasVariablesEliminated = true;
-        enableAliasRewrite();
-        flush();
+        // Remove the equations scheduled for removal.
+        for (FIdUseExp id : toRemove) {
+            uses().remove(id);
+        }
     }
     
+    public void FIdUseExp.replaceUses(FVariable var) {
+        replaceMe(var.createUseExp());
+        myFEquation().flushCache();
+    }
+        
     /**
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.
