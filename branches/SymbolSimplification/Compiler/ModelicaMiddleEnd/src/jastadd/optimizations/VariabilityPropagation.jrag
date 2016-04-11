@@ -118,6 +118,7 @@ aspect VariabilityPropagation {
         throw new UnsupportedOperationException();
     }
     eq FNoExp.canPropagate() = true;
+    eq FRealLitExp.canPropagate() = false;
     eq FRecordConstructor.canPropagate() {
         for (FExp exp : getArgs()) {
             if (!exp.canPropagate()) {
@@ -274,7 +275,6 @@ aspect VariabilityPropagation {
         }
         
         this.taggedByVProp = true;
-        workData.removeEquation(this);
         fVariable.variabilityPropagation(workData, solutionVariability, solution);
         return true;
     }
@@ -481,30 +481,13 @@ aspect VariabilityPropagation {
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                equation.variables().remove(this);
+                equation.flushCache();
                 
-                if (isZero) {
-                    // Adjust variable set for special case y = 0 * z
-                    FExp topFactorExp = use.myTopFactorFExp();
-                    if (topFactorExp != null) {
-                        Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
-                        Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
-                        usesInEq.removeAll(usesInTop);
-                        Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
-                        Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
-                        
-                        for (FVariable tFV : fvsInTop) {
-                            if (!fvsInEq.contains(tFV)) {
-                                equation.variables().remove(tFV);
-                            }
-                        }
-                        
-                        topFactorExp.taggedByVProp = true;
-                    }
+                if (bindingExp != null) {
+                    use.replaceMe(bindingExp);
                 }
-                if (!workData.hasRemovedEquation(equation)) {
-                    workData.addToWorklist(equation);
-                }
+                
+                workData.addToWorklist(equation);
                 
                 if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.nonFixedParameters().size() == 0) {

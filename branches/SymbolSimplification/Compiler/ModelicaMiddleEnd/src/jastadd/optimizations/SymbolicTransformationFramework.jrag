@@ -56,6 +56,7 @@ aspect SymbolicTransformationFramework {
                 }
             }
             
+            change();
             postConfiguration(algorithmList);
             change();
         }
@@ -258,8 +259,10 @@ aspect SymbolicTransformationFramework {
              *
              * @param equation The equation that is added to the list of removed equations.
              */
+             // Currently unused, remove?
             public void removeEquation(FAbstractEquation equation) {
                 removedEquations.add(equation);
+                worklist.remove(equation);
             }
             
             /**

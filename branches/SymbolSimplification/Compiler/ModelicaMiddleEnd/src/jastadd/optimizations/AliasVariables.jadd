@@ -26,7 +26,7 @@ aspect AliasVariables {
     public class symbolicTransformationFramework {
         public class AliasEliminator extends Algorithm {
             private AliasManager aliasManager;
-        
+            
             public AliasEliminator(FClass fclass, WorkData workData) {
                 super(fclass, workData);
                 aliasManager = fclass.getAliasManager();
@@ -47,7 +47,9 @@ aspect AliasVariables {
             }
             
             @Override
-            public void preRun() {}
+            public void preRun() {
+                // NOP;
+            }
             
             @Override
             public void postRun() {
@@ -57,6 +59,7 @@ aspect AliasVariables {
                 fclass.mergeEquivalentRecords();
                 fclass.insertTempsInLHS();
                 fclass.remoteRedundantInitialEquations();
+                fclass.updateLists(workData);
             }
             
             private void removeAliasConstants() {
@@ -69,8 +72,6 @@ aspect AliasVariables {
                 for (FVariable fv : fclass.getFVariables()) {
                     fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
                 }
-                
-                aliasManager.reportAliasErrors(fclass);
             }
             
             private void removeAliasParameters() {
@@ -84,18 +85,6 @@ aspect AliasVariables {
                         aliasManager.addAliasVariables(equation.aliasVariables());
                     }
                 }
-                aliasManager.reportAliasErrors(fclass);
-                ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
-                
-                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
-                    if (!equation.isAliasEquation()) {
-                        pEqns.add(equation);
-                    }
-                }
-                fclass.setFParameterEquationList(new List(pEqns));
-                fclass.aliasVariablesEliminated = true;
-                fclass.enableAliasRewrite();
-                fclass.flush();
             }
         }
      }
@@ -207,6 +196,48 @@ aspect AliasVariables {
                 map.propagate();
             }
         }
+    }
+    
+    public void FClass.updateLists(symbolicTransformationFramework.WorkData workData) {
+        ArrayList<FVariable> nonAliasVars = new ArrayList<FVariable>();
+        ArrayList<FVariable> aliasVars = new ArrayList<FVariable>();
+        ArrayList<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+        
+        for (FVariable fv : getAliasVariables()) {
+             aliasVars.add(fv);
+        }
+        for (FVariable fv : getFVariables()) {
+            fv.aliasSort(nonAliasVars, aliasVars);
+        }
+        
+        for (FAbstractEquation equation: getFAbstractEquations()) {
+            if (!workData.hasRemovedEquation(equation)) 
+                eqns.add(equation);
+        }
+        
+        if (myOptions().getBooleanOption("propagate_derivatives")) {
+            for (FAbstractEquation eqn : eqns) {
+                eqn.propagateDerivativeBindings();
+            }
+        }
+        
+        setFVariableList(new List(nonAliasVars));
+        setAliasVariableList(new List(aliasVars));
+        setFAbstractEquationList(new List(eqns));
+        
+        if (myOptions().getBooleanOption("eliminate_alias_parameters")) {
+            for (FAbstractEquation equation : getFParameterEquations()) {
+                if (!equation.isAliasEquation()) {
+                    pEqns.add(equation);
+                }
+            }
+            setFParameterEquationList(new List(pEqns));
+        }
+        
+        aliasVariablesEliminated = true;
+        enableAliasRewrite();
+        flush();
     }
 
     /**
