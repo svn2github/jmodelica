@@ -396,5 +396,51 @@ public
 ")})));
 end ReinitTest2;
 
+model ParameterPre1
+    constant Real c = 3;
+    Real c2;
+    Real x(start = 0);
+    Real y(start = 0);
+    parameter Real p = 1;
+equation
+    c2 = pre(c);
+    when time > 0.5 then
+        x = pre(p) + pre(c);
+    end when;
+algorithm
+    when time > 0.25 then
+        y := pre(p) + pre(c);
+    end when;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ParameterPre1",
+            description="pre() of parameter and constant",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass WhenTests.ParameterPre1
+ constant Real c = 3;
+ constant Real c2 = 3.0;
+ discrete Real x(start = 0);
+ discrete Real y(start = 0);
+ parameter Real p = 1 /* 1 */;
+ discrete Boolean temp_1;
+ discrete Boolean temp_2;
+initial equation 
+ pre(x) = 0;
+ pre(y) = 0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
+equation
+ temp_1 = time > 0.5;
+ x = if temp_1 and not pre(temp_1) then p + 3.0 else pre(x);
+algorithm
+ if temp_2 and not pre(temp_2) then
+  y := p + 3.0;
+ end if;
+equation
+ temp_2 = time > 0.25;
+end WhenTests.ParameterPre1;
+")})));
+end ParameterPre1;
 
 end WhenTests;
