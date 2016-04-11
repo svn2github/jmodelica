@@ -634,6 +634,11 @@ aspect PrettyPrint {
 		p.print(getExp(),str,indent);
 	}
 	
+    public void DummyModification.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" = ");
+        p.print(myFExp(),str,indent);
+    }
+	
 	public void ClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("(");
 		for (int i = 0; i < getNumArgument(); i++) {

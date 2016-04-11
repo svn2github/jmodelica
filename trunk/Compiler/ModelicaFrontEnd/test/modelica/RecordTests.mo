@@ -2777,7 +2777,7 @@ model RecordConstructor23
             description="Record constructor for record with final parameter",
             flatModel="
 fclass RecordTests.RecordConstructor23
- parameter RecordTests.RecordConstructor23.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor23.B(1, 2, {{1}, {2}});
+ parameter RecordTests.RecordConstructor23.A a(x(size() = {2, 1})) = RecordTests.RecordConstructor23.B(1, 1 + 1, {{1}, {2}});
 
 public
  record RecordTests.RecordConstructor23.A
@@ -2949,6 +2949,102 @@ end RecordTests.RecordConstructor27;
 ")})));
 end RecordConstructor27;
 
+model RecordConstructor28
+
+    record R
+        parameter Real[:] a = {1};
+        final parameter Real[size(a,1)] b = a;
+    end R;
+    
+    parameter Real p;
+    parameter R r = R(a={p});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor28",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor28
+ parameter Real p;
+ parameter RecordTests.RecordConstructor28.R r(a(size() = {1}),b(size() = {1})) = RecordTests.RecordConstructor28.R({p}, {p});
+
+public
+ record RecordTests.RecordConstructor28.R
+  parameter Real a[1];
+  parameter Real b[1];
+ end RecordTests.RecordConstructor28.R;
+
+end RecordTests.RecordConstructor28;
+")})));
+end RecordConstructor28;
+
+model RecordConstructor29
+
+    record R
+        parameter Real[:] a = {1};
+        final parameter Real[size(a,1) + 1] b = cat(1,vector(0),a);
+    end R;
+    
+    model B
+        parameter R[:] d = {R()};
+    end B;
+    
+    model C
+        parameter Real p = -20;
+        B a(d={R(a={p})});
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordConstructor29",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor29
+ parameter Real c.p = -20 /* -20 */;
+ parameter RecordTests.RecordConstructor29.R c.a.d[1](a(size() = {1}),b(size() = {2})) = {RecordTests.RecordConstructor29.R({c.p}, cat(1, vector(0), {c.p}))};
+
+public
+ record RecordTests.RecordConstructor29.R
+  parameter Real a[1];
+  parameter Real b[2];
+ end RecordTests.RecordConstructor29.R;
+
+end RecordTests.RecordConstructor29;
+")})));
+end RecordConstructor29;
+
+model RecordConstructor30
+
+    record R
+        parameter Real[:] a = {1};
+        final parameter Real[size(a,1) + 1] b = cat(1,vector(0),a);
+    end R;
+    
+    model B
+        parameter R[:] d = {R()};
+    end B;
+    
+    model C
+        parameter Real p = -20;
+        B a(d={R(a={p})});
+    end C;
+    
+    C c;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="RecordConstructor30",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 0, column 0, in file '...', ASSUMING_EACH,
+In component c:
+  Assuming 'each' for the modification ' = {p}'
+")})));
+end RecordConstructor30;
 
 model RecordScalarize1
  record A

@@ -2583,23 +2583,9 @@ aspect FlatExpressions {
     eq Root.getChild().myFExp()                   = null;
 
     public FRecordConstructor InstRecordConstructor.flatten(FQName prefix) {
-        List args = new List();
-        int i = 0;
-        Iterator<InstComponentDecl> constructorComponents = allInstComponentDecls().iterator();
-        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
-            InstComponentDecl cicd = constructorComponents.next();
-            if (icd.isModifiable()) {
-                args.add(getArg(i++).flatten(prefix));
-            } else {
-                if (cicd.variability().knownParameterOrLess()) {
-                    try {
-                        args.add(cicd.ceval().buildLiteral());
-                        continue;
-                    } catch (ConstantEvaluationException e) {
-                    }
-                }
-                args.add(icd.flattenInRecordConstructor(prefix));
-            }
+        List<FExp> args = new List();
+        for (InstFunctionArgument ifa : getArgs()) {
+            args.add(ifa.flatten(prefix));
         }
         return new FRecordConstructor(getRecord().flattenRecordName(), args);
     }
