@@ -4327,4 +4327,29 @@ Error at line 4135, column 17, in file 'Compiler/ModelicaFlatTree/src/test/Evalu
 ")})));
 end FScalarExpEval;
 
+model Atan2
+    constant Real x1 = atan2(1,5);
+    Real x2 = atan2(1,5);
+    
+    constant Real x3 = atan2(0,5);
+    constant Real x4 = atan2(1,0);
+
+    constant Real x5 = atan2(0,0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Atan2",
+            description="Basic test of atan2().",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass EvaluationTests.Atan2
+ constant Real x1 = 0.19739555984988078;
+ constant Real x2 = 0.19739555984988078;
+ constant Real x3 = 0.0;
+ constant Real x4 = 1.5707963267948966;
+ constant Real x5 = 0.0;
+end EvaluationTests.Atan2;
+")})));
+end Atan2;
+
 end EvaluationTests;

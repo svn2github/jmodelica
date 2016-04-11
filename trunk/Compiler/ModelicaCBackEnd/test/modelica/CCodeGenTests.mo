@@ -1669,6 +1669,47 @@ jmi_ad_var_t func_CCodeGenTests_CCodeGenTanOp_f_exp0(jmi_ad_var_t x_v) {
 ")})));
 end CCodeGenTanOp;
 
+model CCodeGenATan2Op
+    function f
+        input Real x;
+        output Real y = atan2(x,x+1);
+      algorithm
+    end f;
+    Real y = atan2(time,time+1) + f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CCodeGenATan2Op",
+            description="C code generation of tan operator",
+            inline_functions="none",
+            template="
+$C_ode_derivatives$
+$C_functions$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    _y_0 = jmi_atan2_equation(jmi, _time,_time + AD_WRAP_LITERAL(1),\"atan2(time, time + 1)\") + func_CCodeGenTests_CCodeGenATan2Op_f_exp0(_time);
+    return ef;
+}
+
+void func_CCodeGenTests_CCodeGenATan2Op_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    y_v = jmi_atan2_function(\"CCodeGenTests.CCodeGenATan2Op.f\", x_v,x_v + AD_WRAP_LITERAL(1),\"atan2(x, x + 1)\");
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_CCodeGenATan2Op_f_exp0(jmi_ad_var_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_CCodeGenATan2Op_f_def0(x_v, &y_v);
+    return y_v;
+}
+")})));
+end CCodeGenATan2Op;
+
 
 model CCodeGenMinMax
  Real x[2,2] = {{1,2},{3,4}};

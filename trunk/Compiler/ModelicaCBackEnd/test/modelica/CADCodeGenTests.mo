@@ -168,7 +168,7 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
-    (*res)[0] = atan2(_x1_1, _x2_2) - (_y_0);
+    (*res)[0] = jmi_atan2_equation(jmi, _x1_1,_x2_2,\"atan2(x1, x2)\") - (_y_0);
     (*dF)[0] = ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _x2_2 - _x1_1 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]) / (_x2_2 * _x2_2 + _x1_1 * _x1_1) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = 1 - (_x1_1);
     (*dF)[1] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);

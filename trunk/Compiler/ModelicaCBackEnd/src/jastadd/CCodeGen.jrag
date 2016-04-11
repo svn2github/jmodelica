@@ -344,14 +344,9 @@ aspect CCodeGen {
     }
     
     syn String FExp.guardedFunctionName_C() { throw new UnsupportedOperationException(); }
-    eq FDotDivExp.guardedFunctionName_C() = "divide";
-    eq FDotPowExp.guardedFunctionName_C() = "pow";
-    eq FExpExp.guardedFunctionName_C()    = "exp";
-    eq FLogExp.guardedFunctionName_C()    = "log";
-    eq FLog10Exp.guardedFunctionName_C()  = "log10";
-    eq FSinhExp.guardedFunctionName_C()   = "sinh";
-    eq FCoshExp.guardedFunctionName_C()   = "cosh";
-    eq FTanExp.guardedFunctionName_C()    = "tan";
+    eq FDotDivExp.guardedFunctionName_C()           = "divide";
+    eq FDotPowExp.guardedFunctionName_C()           = "pow";
+    eq FBuiltInFunctionCall.guardedFunctionName_C() = builtInName();
     
     public void FExpExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         prettyPrintGuarded_C(p, str, indent, getFExp());
@@ -375,6 +370,10 @@ aspect CCodeGen {
     
     public void  FTanExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         prettyPrintGuarded_C(p, str, indent, getFExp());
+    }
+    
+    public void FAtan2Exp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        prettyPrintGuarded_C(p, str, indent, getFExp(), getY());
     }
 	
 	public void FMinMaxExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
