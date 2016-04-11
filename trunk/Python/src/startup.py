@@ -75,24 +75,26 @@ def _create_compiler(comp, options):
     return comp(options)
 
 _reqired_path = _get_required_paths_dict()
-_defaults = [('IPOPT_HOME',''),
-             ('SUNDIALS_HOME',''),
-             ('CPPAD_HOME',os.path.join(_jm_home,'ThirdParty','CppAD')),
-             ('COMPILER_JARS',COMPILER_JARS),
-             ('BEAVER_PATH',os.path.join(_jm_home,'ThirdParty','Beaver','lib')),
-             ('MODELICAPATH',os.path.join(_jm_home,'ThirdParty','MSL')),
-             ('JPYPE_JVM',jpype.getDefaultJVMPath()),
-             ('JVM_ARGS','-Xmx700m')]
+_no_inst_msg = ' installation could not be found, some modules and examples will therefore not work properly.'
+# Format of _expected_env item: (name, should_split, default, error_msg_if_not_set)  
+_expected_env = [('IPOPT_HOME',    False, '', 'An IPOPT' + _no_inst_msg),
+                 ('SUNDIALS_HOME', False, '', 'A SUNDIALS' + _no_inst_msg),
+                 ('CPPAD_HOME',    False, os.path.join(_jm_home,'ThirdParty','CppAD')),
+                 ('COMPILER_JARS', True,  COMPILER_JARS),
+                 ('BEAVER_PATH',   False, os.path.join(_jm_home,'ThirdParty','Beaver','lib')),
+                 ('MODELICAPATH',  True,  os.path.join(_jm_home,'ThirdParty','MSL')),
+                 ('JPYPE_JVM',     False, jpype.getDefaultJVMPath() or ''),
+                 ('JVM_ARGS',      False, '-Xmx700m')]
 
 if sys.platform == 'win32':
-    _defaults.append(('MINGW_HOME',os.path.join(_jm_home,'mingw')))
+    _expected_env.append(('MINGW_HOME', False, os.path.join(os.path.dirname(_jm_home), 'MinGW')))
 
 # read values for system environment if possible, otherwise set default
-for _e in _defaults:
+for _e in _expected_env:
     try:
         environ[_e[0]] = os.environ[_e[0]]
     except KeyError:
-        environ[_e[0]] = _e[1]
+        environ[_e[0]] = _e[2]
   
 if sys.platform == 'win32':
     # add mingw to path (win32)
@@ -111,23 +113,18 @@ except IOError:
     None
 
 # check paths
-for _e in _defaults:
-    if _e[0] == 'MODELICAPATH' or 'COMPILER_JARS':
-        if sys.platform == 'win32':
-            paths = environ[_e[0]].split(';') #On windows the paths are separeted with semicolons, so split.
-        else:
-            paths = environ[_e[0]].split(':') #On other platforms they are separeted with colons, so split.
-        for p in paths:
-            if _reqired_path[_e[0]] and not os.path.exists(p):
-                logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],p))
-    else:
-        if _reqired_path[_e[0]] and not os.path.exists(environ[_e[0]]):
-            if _e[0] == 'IPOPT_HOME':
-                logging.warning('%s=%s path does not exist. An IPOPT installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
-            elif _e[0] == 'SUNDIALS_HOME':
-                logging.warning('%s=%s path does not exist. An SUNDIALS installation could not be found, some modules and examples will therefore not work properly.\0' % (_e[0],environ[_e[0]]))
-            else:
-                logging.warning('%s=%s path does not exist. Environment may be corrupt.' % (_e[0],environ[_e[0]]))
+_separator = ';' if sys.platform == 'win32' else ':'
+for _e in _expected_env:
+    if _reqired_path[_e[0]]:
+        _value = environ[_e[0]]
+        _msg = _e[3] if len(_e) > 3 else 'Environment may be corrupt.'
+        if _e[1]:
+            _paths = _value.split(_separator)
+            for p in _paths:
+                if not os.path.exists(p):
+                    logging.warning('%s: Path "%s" does not exist. %s' % (_e[0], p, msg))
+        elif not os.path.exists(environ[_e[0]]):
+            logging.warning('%s="%s": Path does not exist. %s' % (_e[0], environ[_e[0]], _msg))
 
 def check_packages():
     import sys, time
