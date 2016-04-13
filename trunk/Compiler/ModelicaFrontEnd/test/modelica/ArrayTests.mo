@@ -6532,6 +6532,7 @@ algorithm
 		TransformCanonicalTestCase(
 			name="ForAlgorithm1",
 			description="Array expressions depending on for loop index",
+            variability_propagation=false,
 			flatModel="
 fclass ArrayTests.For.ForAlgorithm1
  constant Integer n = 3;
@@ -7021,10 +7022,11 @@ algorithm
         TransformCanonicalTestCase(
             name="VariableIndex_Algorithm",
             description="Test array index with discrete variability in algorithm",
+            variability_propagation=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Algorithm
- constant Real table[1] = 42;
- constant Real table[2] = 3.14;
+ Real table[1];
+ Real table[2];
  discrete Integer i;
  Real x;
 initial equation 
@@ -7032,6 +7034,8 @@ initial equation
 algorithm
  x := ({table[1], table[2]})[i];
 equation
+ table[1] = 42;
+ table[2] = 3.14;
  i = if time > 1 then 1 else 2;
 end ArrayTests.VariableIndex.Algorithm;
 ")})));

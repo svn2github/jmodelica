@@ -2142,4 +2142,55 @@ end VariabilityPropagationTests.AlgebraicLoopParameter1;
 ")})));
 end AlgebraicLoopParameter1;
 
+model AlgorithmFolding1
+    function f
+        input Real x;
+        output Real y1 = x;
+        output Real y2 = x;
+        algorithm
+    end f;
+    Real y;
+    Real x = 1;
+    Real z;
+    parameter Real p;
+    Real a = p;
+algorithm
+    y := x;
+    (y, ) := f(x);
+    x := z + pre(p);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmFolding1",
+            description="Folding in algorithm",
+            flatModel="
+fclass VariabilityPropagationTests.AlgorithmFolding1
+ Real y;
+ constant Real x = 1;
+ Real z;
+ parameter Real p;
+ parameter Real a;
+parameter equation
+ a = p;
+algorithm
+ y := 1.0;
+ (y, ) := VariabilityPropagationTests.AlgorithmFolding1.f(1.0);
+ x := z + p;
+
+public
+ function VariabilityPropagationTests.AlgorithmFolding1.f
+  input Real x;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y1 := x;
+  y2 := x;
+  return;
+ end VariabilityPropagationTests.AlgorithmFolding1.f;
+
+end VariabilityPropagationTests.AlgorithmFolding1;
+")})));
+end AlgorithmFolding1;
+
+
 end VariabilityPropagationTests;

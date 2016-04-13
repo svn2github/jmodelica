@@ -630,9 +630,15 @@ aspect ConstantFolding {
 			childExp.enableConstantFolding();
 		}
 	}
-	
-    public void FAlgorithm.enableConstantFolding() {
-       
+    
+    public void FAssignStmt.enableConstantFolding() {
+        getRight().enableConstantFolding();
+    }
+    
+    public void FFunctionCallStmt.enableConstantFolding() {
+        for (FExp childExp : getCall().childFExps()) {
+            childExp.enableConstantFolding();
+        }
     }
     
     public void FPartialFunctionCall.enableConstantFolding() {
@@ -701,7 +707,9 @@ aspect ConstantFolding {
 	
 	rewrite FPreExp {
 		when (constantFoldingEnabled) to FExp {
-			return new FIdUseExp(getFIdUse().fullCopy());
+            FIdUseExp res = new FIdUseExp(getFIdUse().fullCopy());
+            res.constantFoldingEnabled = true;
+            return res;
 		}
 	}
 	
