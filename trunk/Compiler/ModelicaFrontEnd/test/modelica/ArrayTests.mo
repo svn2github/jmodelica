@@ -7724,6 +7724,60 @@ end ArrayTests.VariableIndex.Slice5;
 ")})));
 end Slice5;
 
+model Slice6
+    function F
+        input Real x;
+        output Real[2] y;
+    algorithm
+        y := {x,x};
+        annotation(Inline=false);
+    end F;
+    Real a[3];
+    Integer b[:] = {1,3};
+equation
+    a[b] = F(time);
+    a[2] = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Slice6",
+            description="Using variable index in slice over models, complex example",
+            variability_propagation=false,
+            flatModel="
+fclass ArrayTests.VariableIndex.Slice6
+ Real a[1];
+ Real a[2];
+ Real a[3];
+ discrete Integer b[1];
+ discrete Integer b[2];
+ Real temp_1[1];
+ Real temp_1[2];
+initial equation 
+ pre(b[1]) = 0;
+ pre(b[2]) = 0;
+equation
+ ({temp_1[1], temp_1[2]}) = ArrayTests.VariableIndex.Slice6.F(time);
+ ({a[1], a[2], a[3]})[b[1]] = temp_1[1];
+ ({a[1], a[2], a[3]})[b[2]] = temp_1[2];
+ a[2] = time;
+ b[1] = 1;
+ b[2] = 3;
+
+public
+ function ArrayTests.VariableIndex.Slice6.F
+  input Real x;
+  output Real[2] y;
+ algorithm
+  y[1] := x;
+  y[2] := x;
+  return;
+ annotation(Inline = false);
+ end ArrayTests.VariableIndex.Slice6.F;
+
+end ArrayTests.VariableIndex.Slice6;
+")})));
+end Slice6;
+
 end VariableIndex;
 
 
