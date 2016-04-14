@@ -7778,6 +7778,43 @@ end ArrayTests.VariableIndex.Slice6;
 ")})));
 end Slice6;
 
+model Slice7
+    model M
+        Real[:] x = 1:2;
+    end M;
+    
+    record R
+        Real[1] x;
+    end R;
+    
+    model A
+        R r;
+    end A;
+    
+    A[2] a(r(x=transpose(m.x)));
+    M[1] m;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Slice7",
+            description="Using variable index in slice over models, complex example",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
+fclass ArrayTests.VariableIndex.Slice7
+ Real a[1].r.x[1];
+ Real a[2].r.x[1];
+ Real m[1].x[1];
+ Real m[1].x[2];
+equation
+ a[1].r.x[1] = m[1].x[1];
+ a[2].r.x[1] = m[1].x[2];
+ m[1].x[1] = 1;
+ m[1].x[2] = 2;
+end ArrayTests.VariableIndex.Slice7;
+")})));
+end Slice7;
+
 end VariableIndex;
 
 

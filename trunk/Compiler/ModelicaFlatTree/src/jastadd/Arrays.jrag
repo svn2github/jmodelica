@@ -4481,7 +4481,7 @@ aspect ArrayHelpers {
                 if (fs.variability().indexParameterOrLess()) {
                     int[] i = fs.myIndices();
                     newInd.add(i);
-                    newTrim[k] = i.length == 1;
+                    newTrim[k] = fs.ndims() == 0;
                 } else {
                     newInd.add(ASTNode.range(fs.mySize().get(0)));
                     newTrim[k] = true;
