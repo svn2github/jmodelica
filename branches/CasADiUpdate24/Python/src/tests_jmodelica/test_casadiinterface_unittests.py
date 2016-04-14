@@ -843,9 +843,9 @@ def test_ModelFunctionPrinting():
 """
 ModelFunction : myFunction
  Number of inputs: 1
-  Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+ 0. i0, 1-by-1 (dense), No description available
  Number of outputs: 1
-  Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+ 0. o0, 1-by-1 (dense), No description available
 @0 = 2
 @1 = input[0][0]
 @0 = (@0+@1)

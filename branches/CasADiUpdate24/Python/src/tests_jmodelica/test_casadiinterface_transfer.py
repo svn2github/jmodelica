@@ -296,11 +296,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : simpleModelWithFunctions.f
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = input[1][0]
             {@2, @3} = simpleModelWithFunctions.f2(@0, @1)
@@ -309,11 +309,11 @@ class ModelicaTransfer(object):
 
             ModelFunction : simpleModelWithFunctions.f2
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = 0.5
             @1 = input[0][0]
             @0 = (@0*@1)
@@ -411,11 +411,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelVector1.f
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @0 = (-@0)
             output[0] = @0
@@ -433,11 +433,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelVector2.f
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = input[1][0]
             {@2, @3} = AtomicModelVector2.f2(@0, @1)
@@ -454,15 +454,15 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelVector3.f
              Number of inputs: 4
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
-              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
-              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
+             2. i2, 1-by-1 (dense), No description available
+             3. i3, 1-by-1 (dense), No description available
              Number of outputs: 4
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @0 = (-@0)
             output[0] = @0
@@ -492,9 +492,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : atomicModelFunctionCallStatementIgnoredOuts.f2
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = 10
             @1 = input[0][0]
             {NULL, NULL, @2} = atomicModelFunctionCallStatementIgnoredOuts.f(@0, @1)
@@ -507,14 +507,14 @@ class ModelicaTransfer(object):
         expectedFunction = """
             ModelFunction : atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f2
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 6
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
-              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
-              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
+             4. o4, 1-by-1 (dense), No description available
+             5. o5, 1-by-1 (dense), No description available
             @0 = 10
             @1 = input[0][0]
             {@2, @3, @4, NULL, NULL, @5, @6, @7} = atomicModelFunctionCallStatementIgnoredArrayRecordOuts.f(@0, @1)
@@ -534,13 +534,13 @@ class ModelicaTransfer(object):
         model = self.load_model("AtomicModelMatrix", modelFile, compiler_options={"inline_functions":"none","variability_propagation":False})
         expected = """ModelFunction : AtomicModelMatrix.f
              Number of inputs: 4
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
-              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
-              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
+             2. i2, 1-by-1 (dense), No description available
+             3. i3, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[2][0]
             output[0] = @0
             @0 = input[3][0]
@@ -556,19 +556,19 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelLargerThanTwoDimensionArray.f
              Number of inputs: 6
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
-              Input 2, a.k.a. "i2", 1-by-1 (dense), No description available
-              Input 3, a.k.a. "i3", 1-by-1 (dense), No description available
-              Input 4, a.k.a. "i4", 1-by-1 (dense), No description available
-              Input 5, a.k.a. "i5", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
+             2. i2, 1-by-1 (dense), No description available
+             3. i3, 1-by-1 (dense), No description available
+             4. i4, 1-by-1 (dense), No description available
+             5. i5, 1-by-1 (dense), No description available
              Number of outputs: 6
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
-              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
-              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
+             4. o4, 1-by-1 (dense), No description available
+             5. o5, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @0 = (-@0)
             output[0] = @0
@@ -597,16 +597,16 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelRecordNestedArray.generateCurves
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 8
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
-              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
-              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
-              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
-              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
+             4. o4, 1-by-1 (dense), No description available
+             5. o5, 1-by-1 (dense), No description available
+             6. o6, 1-by-1 (dense), No description available
+             7. o7, 1-by-1 (dense), No description available
             @0 = 0
             output[0] = @0
             @0 = input[0][0]
@@ -633,9 +633,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelRecordInOutFunctionCallStatement.f1
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = 2
             @1 = input[0][0]
             @0 = (@0+@1)
@@ -645,11 +645,11 @@ class ModelicaTransfer(object):
 
             ModelFunction : AtomicModelRecordInOutFunctionCallStatement.f2
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = 10
@@ -669,16 +669,16 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelRecordArbitraryDimension.f
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 8
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
-              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
-              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
-              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
-              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
+             4. o4, 1-by-1 (dense), No description available
+             5. o5, 1-by-1 (dense), No description available
+             6. o6, 1-by-1 (dense), No description available
+             7. o7, 1-by-1 (dense), No description available
             @0 = 1
             output[0] = @0
             @0 = 2
@@ -709,10 +709,10 @@ class ModelicaTransfer(object):
             ModelFunction : atomicModelSimpleArrayIndexing.f
              Number of inputs: 0
              Number of outputs: 4
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
             @0 = 1
             output[0] = @0
             @0 = 2
@@ -730,18 +730,18 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelRecordSeveralVars.f
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 10
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
-              Output 2, a.k.a. "o2", 1-by-1 (dense), No description available
-              Output 3, a.k.a. "o3", 1-by-1 (dense), No description available
-              Output 4, a.k.a. "o4", 1-by-1 (dense), No description available
-              Output 5, a.k.a. "o5", 1-by-1 (dense), No description available
-              Output 6, a.k.a. "o6", 1-by-1 (dense), No description available
-              Output 7, a.k.a. "o7", 1-by-1 (dense), No description available
-              Output 8, a.k.a. "o8", 1-by-1 (dense), No description available
-              Output 9, a.k.a. "o9", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
+             2. o2, 1-by-1 (dense), No description available
+             3. o3, 1-by-1 (dense), No description available
+             4. o4, 1-by-1 (dense), No description available
+             5. o5, 1-by-1 (dense), No description available
+             6. o6, 1-by-1 (dense), No description available
+             7. o7, 1-by-1 (dense), No description available
+             8. o8, 1-by-1 (dense), No description available
+             9. o9, 1-by-1 (dense), No description available
             @0 = 1
             output[0] = @0
             @0 = 2
@@ -799,9 +799,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             """
@@ -818,10 +818,10 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.polyInMonoOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = input[1][0]
             @0 = (@0+@1)
@@ -840,10 +840,10 @@ class ModelicaTransfer(object):
         expected = ("""
             ModelFunction : AtomicModelAtomicRealFunctions.monoInPolyOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = 2
             @1 = input[0][0]
             @0 = (@0<@1)
@@ -869,11 +869,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = input[1][0]
@@ -892,9 +892,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutReturn
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             """
@@ -909,9 +909,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.functionCallInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = AtomicModelAtomicRealFunctions.monoInMonoOut(@0)
             output[0] = @1
@@ -928,9 +928,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.functionCallEquationInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             {@1, NULL} = AtomicModelAtomicRealFunctions.monoInPolyOut(@0)
             output[0] = @1
@@ -950,9 +950,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.monoInMonoOutInternal
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = sin(@0)
             @1 = (@0*@1)
@@ -979,11 +979,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicRealFunctions.polyInPolyOutInternal
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = 1
@@ -1004,9 +1004,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             """
@@ -1023,10 +1023,10 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.polyInMonoOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = input[1][0]
             @0 = (@0+@1)
@@ -1045,10 +1045,10 @@ class ModelicaTransfer(object):
         expected = ("""
             ModelFunction : AtomicModelAtomicIntegerFunctions.monoInPolyOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = 2
             @1 = input[0][0]
             @0 = (@0<@1)
@@ -1074,11 +1074,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = input[1][0]
@@ -1097,9 +1097,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutReturn
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             """
@@ -1114,9 +1114,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = AtomicModelAtomicIntegerFunctions.monoInMonoOut(@0)
             output[0] = @1
@@ -1133,9 +1133,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.functionCallEquationInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             {@1, NULL} = AtomicModelAtomicIntegerFunctions.monoInPolyOut(@0)
             output[0] = @1
@@ -1155,9 +1155,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.monoInMonoOutInternal
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = 3
             @1 = input[0][0]
             @0 = (@0*@1)
@@ -1186,11 +1186,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicIntegerFunctions.polyInPolyOutInternal
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = 1
@@ -1211,9 +1211,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0"""
         check_strnorm(model.getModelFunction("AtomicModelAtomicBooleanFunctions.monoInMonoOut"), expected) 
@@ -1228,10 +1228,10 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.polyInMonoOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = input[1][0]
             @0 = (@0&&@1)
@@ -1250,10 +1250,10 @@ class ModelicaTransfer(object):
         expected = ("""
             ModelFunction : AtomicModelAtomicBooleanFunctions.monoInPolyOut
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             """ +
             #"@1 = if_else(@0, 0, @0)" +
@@ -1277,11 +1277,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOut
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = input[1][0]
@@ -1300,9 +1300,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutReturn
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             """
@@ -1317,9 +1317,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @1 = AtomicModelAtomicBooleanFunctions.monoInMonoOut(@0)
             output[0] = @1
@@ -1336,9 +1336,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.functionCallEquationInFunction
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             {@1, NULL} = AtomicModelAtomicBooleanFunctions.monoInPolyOut(@0)
             output[0] = @1
@@ -1358,9 +1358,9 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.monoInMonoOutInternal
              Number of inputs: 1
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
              Number of outputs: 1
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
             @0 = input[0][0]
             @0 = (@0&&@0)
             @1 = 0
@@ -1388,11 +1388,11 @@ class ModelicaTransfer(object):
         expected = """
             ModelFunction : AtomicModelAtomicBooleanFunctions.polyInPolyOutInternal
              Number of inputs: 2
-              Input 0, a.k.a. "i0", 1-by-1 (dense), No description available
-              Input 1, a.k.a. "i1", 1-by-1 (dense), No description available
+             0. i0, 1-by-1 (dense), No description available
+             1. i1, 1-by-1 (dense), No description available
              Number of outputs: 2
-              Output 0, a.k.a. "o0", 1-by-1 (dense), No description available
-              Output 1, a.k.a. "o1", 1-by-1 (dense), No description available
+             0. o0, 1-by-1 (dense), No description available
+             1. o1, 1-by-1 (dense), No description available
             @0 = input[0][0]
             output[0] = @0
             @0 = 1
