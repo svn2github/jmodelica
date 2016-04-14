@@ -154,7 +154,7 @@ aspect AliasVariables {
         if (aliasVariable() == null) {
             return null;
         } else {
-            return aliasVariable().getFVariable();            
+            return aliasVariable().getFVariable();
         }
     }
 
@@ -363,8 +363,9 @@ aspect AliasVariables {
             } else {
                 join(fvA, fvB, neg);
             }
-            if (fvA.isTemporary())
+            if (fvA.isTemporary()) {
                 getAliasVariable(fvA).setTempAssignRight(fvB);
+            }
         }
         
         private static final String MERGE_ERROR_MESSAGE = 

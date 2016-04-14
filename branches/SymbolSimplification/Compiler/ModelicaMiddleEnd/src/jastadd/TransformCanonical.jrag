@@ -1853,7 +1853,7 @@ aspect TransformCanonical {
     syn lazy boolean FAbstractEquation.isAliasEquation() = false;
     // If an equation has been classified, the result needs to be cached 
     // in order to avoid reclassification after alias rewrites.
-    eq FEquation.isAliasEquation() = aliasClassified? classifiedAsAlias: aliasVariables()!=null;
+    eq FEquation.isAliasEquation() = aliasClassified ? classifiedAsAlias : aliasVariables() != null;
     
     /**
      * Generate alias information and remove alias equations.
@@ -1864,6 +1864,7 @@ aspect TransformCanonical {
         }
         
         equation.aliasClassified = false; 
+        
         if (equation.isAliasEquation()) {
             aliasManager.addAliasVariables(equation.aliasVariables());
         } else {

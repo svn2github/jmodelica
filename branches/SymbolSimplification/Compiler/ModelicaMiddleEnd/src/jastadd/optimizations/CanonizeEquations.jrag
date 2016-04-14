@@ -516,7 +516,7 @@ aspect CanonizeEquations {
         }
 
         public void add(FExp exp) {
-            factors.add(symbolicTransformationFramework.symbolicCopy(exp));
+            factors.add(symbolicTransformationFramework.copyFExp(exp));
         }
     }
     

@@ -158,7 +158,7 @@ aspect VariabilityPropagation {
             
             @Override
             public boolean run(FAbstractEquation feq) {
-                return variabilityPropagation(feq);
+                return feq.variabilityPropagation(workData);
             }
             
             @Override
@@ -168,6 +168,7 @@ aspect VariabilityPropagation {
             
             @Override
             public void postRun() {
+                postVariabilityPropagation();
                 fclass.enableConstantFolding();
                 fclass.forceRewrites();
             }
@@ -175,11 +176,7 @@ aspect VariabilityPropagation {
             /**
              * Runs variability propagation.
              */
-            public boolean variabilityPropagation(FAbstractEquation feq) {
-                // Work
-                if(!feq.variabilityPropagation(workData))
-                    return false;
-                
+            public void postVariabilityPropagation() {
                 // Clean variables
                 ArrayList<FVariable> newVariables = new ArrayList<FVariable>();
                 ArrayList<FVariable> newAliases   = new ArrayList<FVariable>();
@@ -196,6 +193,7 @@ aspect VariabilityPropagation {
                         newVariables.add(fVariable);
                     }
                 }
+                
                 fclass.setFVariableList(new List<FVariable>(newVariables));
                 fclass.setAliasVariableList(new List<FVariable>(newAliases));
                 
@@ -215,9 +213,7 @@ aspect VariabilityPropagation {
                 }
                 
                 fclass.setFParameterEquationList(workData.getparameterEquations());
-                
                 fclass.setFInitialEquationList(new List<FAbstractEquation>(newEquations));
-                return true;
             }
         }
     }
@@ -454,6 +450,10 @@ aspect VariabilityPropagation {
         throw new UnsupportedOperationException();
     }
     
+    syn FExp FExp.asRealLitExp() = null;
+    eq FRealLitExp.asRealLitExp() = this;
+    eq FIntegerLitExp.asRealLitExp() = new FRealLitExp(getValue());
+    
     @Override
     public void FVariable.variabilityPropagation(
             symbolicTransformationFramework.WorkData workData,
@@ -471,33 +471,42 @@ aspect VariabilityPropagation {
         setFTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {
             setBindingExp(bindingExp.fullCopy());
+            if (isReal()) {
+                bindingExp = bindingExp.asRealLitExp();
+            }
         }
         if (variability.parameterVariability()) {
             if (fixedAttributeSet()) {
                 setFixedAttribute(true);
             }
         }
+        
         // Uses
+        HashSet<FIdUseExp> usesToKeep = new HashSet<FIdUseExp>();
         for (FIdUseExp use : uses()) {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                equation.flushCache();
                 
                 if (bindingExp != null) {
-                    use.replaceMe(bindingExp);
+                    // Replace the IdUse with the constant.
+                    use.replaceMe(symbolicTransformationFramework.copyFExp(bindingExp));
+                    workData.addToWorklist(equation);
                 }
                 
-                workData.addToWorklist(equation);
-                
-                if (equation.inInitialEquationSection() && equation.variables().size() == 0
-                        && equation.nonFixedParameters().size() == 0) {
-                    equation.taggedByVProp = true; // Initial equation
+                if (equation.inInitialEquationSection() && equation.variables().size() == 1
+                        && equation.nonFixedParameters().size() == 1) {
+                    workData.removeEquation(equation); // Initial equation
                 }
+                equation.flushCache();
+            } else {
+                usesToKeep.add(use);
             }
         }
         
+        FAbstractVariable_uses_value = usesToKeep;
+        
         // Pre var
-        if (wasDiscrete) {
+        if (wasDiscrete && !isPreVariable()) {
             FAbstractVariable pre = myPreVariable();
             pre.taggedByVProp = true;
             pre.variabilityPropagation(workData, variability, bindingExp);

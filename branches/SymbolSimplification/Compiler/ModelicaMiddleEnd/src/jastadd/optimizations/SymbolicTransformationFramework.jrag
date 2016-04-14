@@ -89,7 +89,7 @@ aspect SymbolicTransformationFramework {
          * 
          *  @param  exp the expression to copy.
          */
-         public static FExp symbolicCopy(FExp exp) {
+         public static FExp copyFExp(FExp exp) {
             return exp.treeCopy();
         }
         
@@ -263,6 +263,7 @@ aspect SymbolicTransformationFramework {
             public void removeEquation(FAbstractEquation equation) {
                 removedEquations.add(equation);
                 worklist.remove(equation);
+                equation.markForRemoval();
             }
             
             /**
