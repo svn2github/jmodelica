@@ -491,16 +491,18 @@ aspect VariabilityPropagation {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 
-                if (bindingExp != null) {
-                    // Replace the IdUse with the constant.
-                    use.replaceMe(symbolicTransformationFramework.copyFExp(bindingExp));
-                    workData.scheduleFlush(equation);
-                    workData.addToWorklist(equation);
+                if (equation != workData.getCurrentEquation()) {
+                	if (bindingExp != null) {
+                    	// Replace the IdUse with the constant.
+                    	use.replaceMe(symbolicTransformationFramework.copyFExp(bindingExp));
+                    	workData.scheduleFlush(equation);
+                    	workData.addToWorklist(equation);
+                	}
                 }
                 
                 if (equation.inInitialEquationSection() && equation.variables().size() == 1
                         && equation.nonFixedParameters().size() == 1) {
-                    workData.removeEquation(equation); // Initial equation
+                    //workData.removeEquation(equation); // Initial equation
                 }
             } else {
                 usesToKeep.add(use);
