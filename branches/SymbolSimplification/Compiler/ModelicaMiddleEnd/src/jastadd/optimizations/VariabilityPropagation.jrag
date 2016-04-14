@@ -158,7 +158,11 @@ aspect VariabilityPropagation {
             
             @Override
             public boolean run(FAbstractEquation feq) {
-                return feq.variabilityPropagation(workData);
+                boolean result = feq.variabilityPropagation(workData);
+                if (result) {
+                    workData.flushEquations();
+                }
+                return result;
             }
             
             @Override
@@ -470,7 +474,7 @@ aspect VariabilityPropagation {
             variability = fStructParameter();
         setFTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {
-            setBindingExp(bindingExp.fullCopy());
+            setBindingExp(symbolicTransformationFramework.copyFExp(bindingExp));
             if (isReal()) {
                 bindingExp = bindingExp.asRealLitExp();
             }
@@ -490,6 +494,7 @@ aspect VariabilityPropagation {
                 if (bindingExp != null) {
                     // Replace the IdUse with the constant.
                     use.replaceMe(symbolicTransformationFramework.copyFExp(bindingExp));
+                    workData.scheduleFlush(equation);
                     workData.addToWorklist(equation);
                 }
                 
@@ -497,11 +502,11 @@ aspect VariabilityPropagation {
                         && equation.nonFixedParameters().size() == 1) {
                     workData.removeEquation(equation); // Initial equation
                 }
-                equation.flushCache();
             } else {
                 usesToKeep.add(use);
             }
         }
+        workData.flushEquations();
         
         FAbstractVariable_uses_value = usesToKeep;
         

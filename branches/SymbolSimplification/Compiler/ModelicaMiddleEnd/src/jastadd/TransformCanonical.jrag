@@ -1955,7 +1955,7 @@ aspect TransformCanonical {
     
     public void FIdUseExp.replaceUses(FVariable var) {
         replaceMe(var.createUseExp());
-        myFEquation().flushCache();
+        myFEquation().flushAllRecursiveClearFinal();
     }
         
     /**
