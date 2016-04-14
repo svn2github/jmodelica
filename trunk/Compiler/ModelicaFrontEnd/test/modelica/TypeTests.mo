@@ -2799,4 +2799,23 @@ Warning at line 0, column 0, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION
 ")})));
 end ParameterNoBindingExp2;
 
+
+model ConstantTypeError1
+    constant Real x[2,2] = transpose(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ConstantTypeError1",
+            description="Check that no additional errors are reported for constant with type error in binding exp",
+            errorMessage="
+1 errors found:
+
+Error at line 2804, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/TypeTests.mo':
+  Calling function transpose(): types of positional argument 1 and input A are not compatible
+    type of '1' is Integer
+    expected type is matrix of Real, Integer, Boolean, String or enumeration
+")})));
+end ConstantTypeError1;
+
+
 end TypeTests;

@@ -1069,7 +1069,7 @@ model ConstantLookup16
             name="ConstantLookup16",
             description="Using constant with bad value as array index",
             errorMessage="
-3 errors found:
+2 errors found:
 
 Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Could not evaluate binding expression for constant 'a': 'b[c]'
@@ -1077,9 +1077,6 @@ Error at line 1054, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/NameT
 
 Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for d
-
-Error at line 1056, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Could not evaluate binding expression for constant 'c': 'd'
 ")})));
 end ConstantLookup16;
 
@@ -1973,13 +1970,10 @@ model ConstantLookup39
             name="ConstantLookup39",
             description="Error in constant used from other package",
             errorMessage="
-2 errors found:
+1 errors found:
 
 Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
   Cannot find class or component declaration for e
-
-Error at line 1945, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
-  Could not evaluate binding expression for constant 'f': 'e'
 ")})));
 end ConstantLookup39;
 

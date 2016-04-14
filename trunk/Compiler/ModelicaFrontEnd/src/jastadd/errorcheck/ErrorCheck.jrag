@@ -919,7 +919,7 @@ aspect InstanceErrorCheck {
                 // TODO: Check structural parameters as well
                 bexp.collectErrors(checkType);
                 // Check if the binding expression of constants can be evaluated
-                if (isConstant()) 
+                if (isConstant() && !bexp.type().isUnknown()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
                 else if (isParameter() && bexp.isCircular())
                     bexp.error("Circularity in binding expression of parameter: %s = %s", 
