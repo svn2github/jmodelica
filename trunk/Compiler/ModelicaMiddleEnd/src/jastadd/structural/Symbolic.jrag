@@ -333,20 +333,21 @@ aspect EquationSolve {
     }
     
     
-    public FRelExp FRelExp.originalFRelExp          = null;
-    public FSampleExp FSampleExp.originalFSampleExp = null;
-    public FDelayExp FDelayExp.originalFDelayExp    = null;
-    public FSpatialDistExp FSpatialDistExp.originalFSpatialDistExp = null;
+    private FRelExp FRelExp.originalFRelExp                         = null;
+    private FSampleExp FSampleExp.originalFSampleExp                = null;
+    private FDelayExp FDelayExp.originalFDelayExp                   = null;
+    private FSpatialDistExp FSpatialDistExp.originalFSpatialDistExp = null;
     
     syn FExp FExp.originalFExp() { throw new UnsupportedOperationException(); }
-    syn FRelExp FRelExp.originalFExp() = (originalFRelExp == null)    ? this : originalFRelExp;
-    syn FSampleExp FSampleExp.originalFExp() = (originalFSampleExp == null) ? this : originalFSampleExp;
-    syn FDelayExp FDelayExp.originalFExp() = (originalFDelayExp == null)  ? this : originalFDelayExp;
+    syn FRelExp         FRelExp.originalFExp()         = (originalFRelExp == null)          ? this : originalFRelExp;
+    syn FSampleExp      FSampleExp.originalFExp()      = (originalFSampleExp == null)       ? this : originalFSampleExp;
+    syn FDelayExp       FDelayExp.originalFExp()       = (originalFDelayExp == null)        ? this : originalFDelayExp;
     syn FSpatialDistExp FSpatialDistExp.originalFExp() = (originalFSpatialDistExp == null)  ? this : originalFSpatialDistExp;
     
-    public void FRelExp.setOriginalFExp(FRelExp original) {
-        this.originalFRelExp = original;
-    }
+    public void FRelExp.setOriginalFExp(FRelExp original)                 { this.originalFRelExp         = original; }
+    public void FSampleExp.setOriginalFExp(FSampleExp original)           { this.originalFSampleExp      = original; }
+    public void FDelayExp.setOriginalFExp(FDelayExp original)             { this.originalFDelayExp       = original; }
+    public void FSpatialDistExp.setOriginalFExp(FSpatialDistExp original) { this.originalFSpatialDistExp = original; }
     
     /**
      * This method is used when the original node has been discarded and the
@@ -370,19 +371,19 @@ aspect EquationSolve {
     
     @Override
     protected void FSampleExp.resetOriginalReferences() {
-        originalFSampleExp = null;
+        setOriginalFExp(this);
         super.resetOriginalReferences();
     }
     
     @Override
     protected void FDelayExp.resetOriginalReferences() {
-        originalFDelayExp = null;
+        setOriginalFExp(this);
         super.resetOriginalReferences();
     }
     
     @Override
     protected void FSpatialDistExp.resetOriginalReferences() {
-        originalFSpatialDistExp = null;
+        setOriginalFExp(this);
         super.resetOriginalReferences();
     }
 
@@ -394,29 +395,25 @@ aspect EquationSolve {
     
     @Override
 	protected void FRelExp.traverseSymbolic(ASTNode e) {
-		FRelExp re = (FRelExp) e;
-        setOriginalFExp(re.originalFRelExp);
+        setOriginalFExp(((FRelExp)e).originalFExp());
 		super.traverseSymbolic(e);
 	}
     
     @Override
 	protected void FSampleExp.traverseSymbolic(ASTNode e) {
-		FSampleExp se = (FSampleExp) e;
-		originalFSampleExp = (se.originalFSampleExp == null) ? se : se.originalFSampleExp;
+        setOriginalFExp(((FSampleExp)e).originalFExp());
 		super.traverseSymbolic(e);
 	}
 	
     @Override
     protected void FDelayExp.traverseSymbolic(ASTNode e) {
-        FDelayExp de = (FDelayExp) e;
-        originalFDelayExp = (de.originalFDelayExp == null) ? de : de.originalFDelayExp;
+        setOriginalFExp(((FDelayExp)e).originalFExp());
         super.traverseSymbolic(e);
     }
     
     @Override
     protected void FSpatialDistExp.traverseSymbolic(ASTNode e) {
-        FSpatialDistExp de = (FSpatialDistExp) e;
-        originalFSpatialDistExp = (de.originalFSpatialDistExp == null) ? de : de.originalFSpatialDistExp;
+        setOriginalFExp(((FSpatialDistExp)e).originalFExp());
         super.traverseSymbolic(e);
     }
 	

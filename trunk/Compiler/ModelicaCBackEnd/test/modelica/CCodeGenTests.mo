@@ -11939,6 +11939,58 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 end InactiveBlockSwitch1;
 
 
+model ActiveBlockSwitch1
+    parameter Real p1(fixed=false);
+    parameter Boolean p2 = p1*p1 > time;
+initial equation
+    p1 = if p2 then 1 else 2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ActiveBlockSwitch1",
+            description="Test code gen for inactive block switches that need temp variables",
+            template="
+$C_dae_init_blocks_residual_functions$
+",
+            generatedCode="
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Init block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870913;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870913;
+    } else if (evaluation_mode == JMI_BLOCK_ACTIVE_SWITCH_INDEX) {
+        x[0] = jmi->offs_sw_init + 0;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _p1_0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 1 * sizeof(jmi_real_t));
+        residual[0] = 1.0;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _p1_0 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw_init(0) = jmi_turn_switch_time(_p1_0 * _p1_0 - (_time), _sw_init(0), JMI_ALMOST_EPS, JMI_REL_GT);
+            }
+            _p2_1 = _sw_init(0);
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = COND_EXP_EQ(_p2_1, JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(2)) - (_p1_0);
+        }
+    }
+    return ef;
+}
+")})));
+end ActiveBlockSwitch1;
+
 
 model Algorithm1
  Real x;
