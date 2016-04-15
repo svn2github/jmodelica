@@ -119,6 +119,7 @@ aspect VariabilityPropagation {
     }
     eq FNoExp.canPropagate() = true;
     eq FRealLitExp.canPropagate() = false;
+    eq FIntegerLitExp.canPropagate() = false;
     eq FRecordConstructor.canPropagate() {
         for (FExp exp : getArgs()) {
             if (!exp.canPropagate()) {
@@ -280,7 +281,6 @@ aspect VariabilityPropagation {
     }
     
     public boolean FFunctionCallEquation.variabilityPropagation(symbolicTransformationFramework.WorkData workData) {
-        
         if (!canPropagate()) {
             return false;
         }
