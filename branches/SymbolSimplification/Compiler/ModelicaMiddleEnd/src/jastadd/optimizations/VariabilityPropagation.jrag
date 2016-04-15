@@ -274,7 +274,7 @@ aspect VariabilityPropagation {
             workData.addParameterEquation(new FEquation(fVariable.createUseExp(), solution));
         }
         
-        this.taggedByVProp = true;
+        workData.removeEquation(this);
         fVariable.variabilityPropagation(workData, solutionVariability, solution);
         return true;
     }
@@ -491,13 +491,14 @@ aspect VariabilityPropagation {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 
-                if (equation != workData.getCurrentEquation()) {
-                	if (bindingExp != null) {
-                    	// Replace the IdUse with the constant.
-                    	use.replaceMe(symbolicTransformationFramework.copyFExp(bindingExp));
-                    	workData.scheduleFlush(equation);
-                    	workData.addToWorklist(equation);
-                	}
+                if (!workData.hasRemovedEquation(equation) && bindingExp != null) {
+                    // Replace the IdUse with a copy of the propagated expression.
+                    FExp newIdUse = symbolicTransformationFramework.copyFExp(bindingExp);
+                    //workData.registerNode(newIdUse);
+                    use.replaceMe(newIdUse);
+                    //workData.disposeNode(use);
+                    workData.scheduleFlush(equation);
+                    workData.addToWorklist(equation);
                 }
                 
                 if (equation.inInitialEquationSection() && equation.variables().size() == 1
@@ -508,9 +509,9 @@ aspect VariabilityPropagation {
                 usesToKeep.add(use);
             }
         }
-        workData.flushEquations();
         
         FAbstractVariable_uses_value = usesToKeep;
+        workData.flushEquations();
         
         // Pre var
         if (wasDiscrete && !isPreVariable()) {

@@ -1919,42 +1919,28 @@ aspect TransformCanonical {
         }
         
         // All equations using the variable should be re-checked.
-        for (FIdUseExp id : toBeReplaced.uses()) {
+        ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
+        for (int i = 0; i < ids.size(); ++i) {
+            FIdUseExp id = ids.get(i);
+            id.replaceUses(workData, replacement);
             workData.addToWorklist(id.myFEquation());
         }
-        
-        // Replace all uses of the alias variable.
-        toBeReplaced.replaceUses(replacement);
         
         // We're done with this equation.
         workData.removeEquation(feq);
     }
     
-    /*
-     *  Replaces all uses of the variable with the one supplied.<p>
-     * 
-     *  @param  var the variable to replace <code>this</code>.
-     */
-    public void FVariable.replaceUses(FVariable var) {
-        HashSet<FIdUseExp> toRemove = new HashSet<FIdUseExp>();
-        for (FIdUseExp id : uses()) {
-            id.replaceUses(var);
-            
-            // If the variable is used in an equation,
-            // schedule the use for removal.
-            if (id.inFEquation()) {
-                toRemove.add(id);
-            }
-        }
+    public void FIdUseExp.replaceUses(
+            symbolicTransformationFramework.WorkData workData, 
+            FVariable var) {
+        FIdUseExp newIdUse = var.createUseExp();
+        // Disconnect this id use from the tree.
+        workData.disposeNode(this);
+        // Replace all occurances of the old id use.
+        replaceMe(newIdUse);
+        // Insert the new id use into the tree.
         
-        // Remove the equations scheduled for removal.
-        for (FIdUseExp id : toRemove) {
-            uses().remove(id);
-        }
-    }
-    
-    public void FIdUseExp.replaceUses(FVariable var) {
-        replaceMe(var.createUseExp());
+        workData.registerNode(newIdUse);
         myFEquation().flushAllRecursiveClearFinal();
     }
         

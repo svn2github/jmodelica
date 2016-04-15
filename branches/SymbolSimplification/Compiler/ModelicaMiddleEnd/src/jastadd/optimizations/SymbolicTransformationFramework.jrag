@@ -167,7 +167,7 @@ aspect SymbolicTransformationFramework {
          * and variables.
          */
         public class WorkData {
-        	private FAbstractEquation currentEquation = null;
+            private FAbstractEquation currentEquation = null;
             // Used by all
             private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
             // Used by VariabilityPropagation
@@ -277,6 +277,29 @@ aspect SymbolicTransformationFramework {
             /**
              *
              */
+            public void registerNode(ASTNode n) {
+                Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
+                FIdUseExp newNode = n.asFIdUseExp();
+                
+                for (FIdUseExp id : idUsesInTree) {
+                    id.myFV().uses().add(newNode);
+                }
+            }
+            
+            /**
+             *
+             */
+            public void disposeNode(ASTNode n) {
+                Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
+                FIdUseExp badNode = n.asFIdUseExp();
+                
+                for (FIdUseExp id : idUsesInTree) {
+                    id.myFV().uses().remove(badNode);
+                }
+            }
+            /**
+             *
+             */
             public void scheduleFlush(FAbstractEquation fae) {
                 scheduledFlushes.add(fae);
             }
@@ -315,4 +338,6 @@ aspect SymbolicTransformationFramework {
             }
         }
     }
+    
+    syn FIdUseExp ASTNode.asFIdUseExp() = (FIdUseExp) this;
 }
