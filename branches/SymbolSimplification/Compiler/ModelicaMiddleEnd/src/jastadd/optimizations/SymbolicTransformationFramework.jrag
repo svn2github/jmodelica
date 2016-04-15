@@ -228,7 +228,9 @@ aspect SymbolicTransformationFramework {
              * @param equation The equation to be added.
              */
             public void addToWorklist(FAbstractEquation equation) {
-                worklist.add(equation);
+                if (!equation.equalSides()) {
+                    worklist.add(equation);
+                }
             }
             
             /**
@@ -282,7 +284,9 @@ aspect SymbolicTransformationFramework {
                 FIdUseExp newNode = n.asFIdUseExp();
                 
                 for (FIdUseExp id : idUsesInTree) {
-                    id.myFV().uses().add(newNode);
+                    if (id.myFEquation() != currentEquation) {
+                        id.myFV().uses().add(newNode);
+                    }
                 }
             }
             
@@ -340,4 +344,6 @@ aspect SymbolicTransformationFramework {
     }
     
     syn FIdUseExp ASTNode.asFIdUseExp() = (FIdUseExp) this;
+    syn boolean FAbstractEquation.equalSides() = false;
+    eq FEquation.equalSides() = getLeft().equals(getRight());
 }

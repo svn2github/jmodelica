@@ -1923,7 +1923,9 @@ aspect TransformCanonical {
         for (int i = 0; i < ids.size(); ++i) {
             FIdUseExp id = ids.get(i);
             id.replaceUses(workData, replacement);
-            workData.addToWorklist(id.myFEquation());
+            if (feq != workData.getCurrentEquation()) {
+                workData.addToWorklist(id.myFEquation());
+            }
         }
         
         // We're done with this equation.
