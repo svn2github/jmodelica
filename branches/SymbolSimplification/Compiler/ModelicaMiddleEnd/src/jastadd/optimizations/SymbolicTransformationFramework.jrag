@@ -281,11 +281,10 @@ aspect SymbolicTransformationFramework {
              */
             public void registerNode(ASTNode n) {
                 Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
-                FIdUseExp newNode = n.asFIdUseExp();
                 
                 for (FIdUseExp id : idUsesInTree) {
                     if (id.myFEquation() != currentEquation) {
-                        id.myFV().uses().add(newNode);
+                        id.myFV().uses().add(n.asFIdUseExp());
                     }
                 }
             }
@@ -295,10 +294,9 @@ aspect SymbolicTransformationFramework {
              */
             public void disposeNode(ASTNode n) {
                 Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
-                FIdUseExp badNode = n.asFIdUseExp();
                 
                 for (FIdUseExp id : idUsesInTree) {
-                    id.myFV().uses().remove(badNode);
+                    id.myFV().uses().remove(n);
                 }
             }
             /**
@@ -312,10 +310,10 @@ aspect SymbolicTransformationFramework {
              *
              */
             public void flushEquations() {
-            	for (FAbstractEquation fae : scheduledFlushes) {
-                	fae.flushAllRecursiveClearFinal();
+                for (FAbstractEquation fae : scheduledFlushes) {
+                    fae.flushAllRecursiveClearFinal();
                 }
-            	scheduledFlushes.clear();
+                scheduledFlushes.clear();
             }
             
             /**

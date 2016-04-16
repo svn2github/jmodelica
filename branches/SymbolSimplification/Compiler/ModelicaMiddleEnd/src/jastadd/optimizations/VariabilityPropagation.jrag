@@ -83,6 +83,7 @@ aspect VariabilityPropagation {
     syn boolean FAbstractEquation.canPropagate() =
             canPropagateContext() && !containsActiveAnnotations();
     eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
+    
     eq FFunctionCallEquation.canPropagate() {
         getCall().flushAllRecursiveClearFinal();
         return super.canPropagate() && variables().size() > 0 && numScalarEquations() > 0 && 
@@ -486,31 +487,24 @@ aspect VariabilityPropagation {
         }
         
         // Uses
-        HashSet<FIdUseExp> usesToKeep = new HashSet<FIdUseExp>();
-        for (FIdUseExp use : uses()) {
+        ArrayList<FIdUseExp> uses = new ArrayList<FIdUseExp>(uses());
+        for (int i = 0; i < uses.size(); ++i) {
+            FIdUseExp use = uses.get(i);
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 
-                if (!workData.hasRemovedEquation(equation) && bindingExp != null) {
-                    // Replace the IdUse with a copy of the propagated expression.
-                    FExp newIdUse = symbolicTransformationFramework.copyFExp(bindingExp);
-                    //workData.registerNode(newIdUse);
-                    use.replaceMe(newIdUse);
-                    //workData.disposeNode(use);
-                    workData.scheduleFlush(equation);
+                FExp newId = isParameter() ? createUseExp() :
+                    symbolicTransformationFramework.copyFExp(bindingExp);
+
+                workData.disposeNode(use);
+                use.replaceMe(newId);
+                workData.registerNode(newId);
+                equation.variables().remove(this);
+                if (equation != workData.getCurrentEquation()) {
                     workData.addToWorklist(equation);
                 }
-                
-                if (equation.inInitialEquationSection() && equation.variables().size() == 1
-                        && equation.nonFixedParameters().size() == 1) {
-                    //workData.removeEquation(equation); // Initial equation
-                }
-            } else {
-                usesToKeep.add(use);
             }
         }
-        
-        FAbstractVariable_uses_value = usesToKeep;
         workData.flushEquations();
         
         // Pre var

@@ -1922,7 +1922,7 @@ aspect TransformCanonical {
         ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
         for (int i = 0; i < ids.size(); ++i) {
             FIdUseExp id = ids.get(i);
-            id.replaceUses(workData, replacement);
+            id.replaceUses(workData, replacement, pair.negated);
             if (feq != workData.getCurrentEquation()) {
                 workData.addToWorklist(id.myFEquation());
             }
@@ -1934,15 +1934,16 @@ aspect TransformCanonical {
     
     public void FIdUseExp.replaceUses(
             symbolicTransformationFramework.WorkData workData, 
-            FVariable var) {
-        FIdUseExp newIdUse = var.createUseExp();
+            FVariable var,
+            boolean negated) {
+        FExp newId = var.createUseExp();
         // Disconnect this id use from the tree.
         workData.disposeNode(this);
         // Replace all occurances of the old id use.
-        replaceMe(newIdUse);
+        replaceMe(negated ? new FNegExp(newId) : newId);
         // Insert the new id use into the tree.
         
-        workData.registerNode(newIdUse);
+        workData.registerNode(newId);
         myFEquation().flushAllRecursiveClearFinal();
     }
         
