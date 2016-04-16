@@ -24,7 +24,7 @@ import java.util.BitSet;
  */
 aspect AliasVariables {
     public class symbolicTransformationFramework {
-        public class AliasEliminator extends Algorithm {
+        public class AliasEliminator extends SymbolicTransformationAlgorithm {
             private AliasManager aliasManager;
             
             public AliasEliminator(FClass fclass, WorkData workData) {

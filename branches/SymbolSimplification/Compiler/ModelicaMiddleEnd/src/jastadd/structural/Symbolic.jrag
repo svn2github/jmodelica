@@ -1160,7 +1160,7 @@ aspect AlgorithmDifferentiation{
 
 aspect ExpressionSimplification {
     public class symbolicTransformationFramework {
-    private class ExpressionSimplifier extends Algorithm {
+    private class ExpressionSimplifier extends SymbolicTransformationAlgorithm {
     
         public ExpressionSimplifier(FClass fclass, WorkData workData) {
             super(fclass, workData);

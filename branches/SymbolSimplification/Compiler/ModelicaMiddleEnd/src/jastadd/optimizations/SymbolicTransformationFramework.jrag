@@ -16,7 +16,7 @@
 aspect SymbolicTransformationFramework {
     public class symbolicTransformationFramework extends FClass.Transformation {
         private static FClass fclass = null;
-        private static ArrayList<Algorithm> algorithmsInFramework;
+        private static ArrayList<SymbolicTransformationAlgorithm> algorithmsInFramework;
         private static Canonizer canonizer;
         
         public symbolicTransformationFramework(FClass fclass) {
@@ -26,14 +26,13 @@ aspect SymbolicTransformationFramework {
         }
         
         public void perform() {
-            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
-            WorkData workData = new WorkData(worklist);
-            ArrayList<Algorithm> algorithmList = new ArrayList();
+            WorkData workData = new WorkData();
+            ArrayList<SymbolicTransformationAlgorithm> algorithmList = new ArrayList();
             canonizer = new Canonizer(fclass, workData);
             addAlgorithmsToFramework(workData);
             
             // Collect algorithms that are enabled.
-            for (Algorithm algorithm: algorithmsInFramework) {
+            for (SymbolicTransformationAlgorithm algorithm: algorithmsInFramework) {
                 if (algorithm.isUsed()) {
                     algorithmList.add(algorithm);
                 }
@@ -47,7 +46,7 @@ aspect SymbolicTransformationFramework {
             // Start using algorithms on the equations.
             while (workData.hasNextInWorklist()) {
             	FAbstractEquation equation = workData.nextInWorklist();
-            	for (Algorithm algorithm : algorithmList) {
+            	for (SymbolicTransformationAlgorithm algorithm : algorithmList) {
                     if (algorithm.run(equation)) {
                         break;
                     }
@@ -64,8 +63,7 @@ aspect SymbolicTransformationFramework {
          * in FClass. 
          */ 
         public void performAliasElimination() {
-            LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet<FAbstractEquation>();
-            WorkData workData = new WorkData(worklist);
+            WorkData workData = new WorkData();
             AliasEliminator ae = new AliasEliminator(fclass, workData);
             
             workData.addAllToWorklist(fclass.getFAbstractEquations());
@@ -104,8 +102,8 @@ aspect SymbolicTransformationFramework {
         /*
          *  Performs methods that are required before all algorithms have run.<p>
          */
-        private void preConfiguration(ArrayList<Algorithm> algorithms) {
-            for (Algorithm alg : algorithms) {
+        private void preConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
+            for (SymbolicTransformationAlgorithm alg : algorithms) {
                     alg.preRun();
             }
         }
@@ -113,8 +111,8 @@ aspect SymbolicTransformationFramework {
         /*
          *  Performs methods that are required after all algorithms have run.<p>
          */
-        private void postConfiguration(ArrayList<Algorithm> algorithms) {
-            for (Algorithm alg : algorithms) {
+        private void postConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
+            for (SymbolicTransformationAlgorithm alg : algorithms) {
                 alg.postRun();
             }
         }
@@ -122,10 +120,10 @@ aspect SymbolicTransformationFramework {
         /*
          * Abstract class that algorithms in the framework will implement. 
          */
-        public abstract class Algorithm {
+        public abstract class SymbolicTransformationAlgorithm {
             protected FClass fclass;
             protected WorkData workData;
-            public Algorithm(FClass fclass, WorkData workData) {
+            public SymbolicTransformationAlgorithm(FClass fclass, WorkData workData) {
                 this.fclass = fclass;
                 this.workData = workData;
             }
@@ -188,8 +186,7 @@ aspect SymbolicTransformationFramework {
              *
              * @param worklist The working list of equations to modify with the algorithms.
              */
-            public WorkData(LinkedHashSet<FAbstractEquation> worklist) {
-                this.worklist = worklist;
+            public WorkData() {
                 for (FAbstractEquation equation : fclass.getFParameterEquations())
                     parameterEquations.add(equation);
             }

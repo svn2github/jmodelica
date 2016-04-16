@@ -53,7 +53,7 @@
  */
 aspect CanonizeEquations {
     public class symbolicTransformationFramework {
-        public class Canonizer extends Algorithm {
+        public class Canonizer extends SymbolicTransformationAlgorithm {
             // Specifies whether the LHS or RHS should be zero.
             private FactorComparator factorComparator = new FactorComparator();
             private static final boolean LEFT_SIDE = false;
