@@ -79,13 +79,22 @@ aspect AliasVariables {
                 if (!fclass.myOptions().getBooleanOption("eliminate_alias_parameters")) {
                     return;
                 }
-
+                
                 for (FAbstractEquation equation : fclass.getFParameterEquations()) {
-                        equation.aliasClassified = false;
-                    if (equation.isAliasEquation()) {
-                        aliasManager.addAliasVariables(equation.aliasVariables());
+                    equation.aliasClassified = false;
+                    if(fclass.genAlias(equation)) {
+                        fclass.eliminateAliasVariables(workData, equation);
                     }
                 }
+                
+            	ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
+            	for (FAbstractEquation equation : fclass.getFParameterEquations()) {
+            		if (!equation.isAliasEquation()) {
+            			pEqns.add(equation);
+            		}
+            	}
+            	
+            	fclass.setFParameterEquationList(new List(pEqns));
             }
         }
      }
