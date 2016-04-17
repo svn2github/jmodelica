@@ -494,6 +494,8 @@ aspect VariabilityPropagation {
                 equation = use.myFEquation();
                 if (equation.isFAlgorithm()) {
                 	equation.variables().remove(this);
+                } else if (variability.parameterVariability()) {
+                	equation.variables().remove(this);
                 } else if (equation.isFFunctionCallEquation()) {
                 	equation.variables().remove(this);
                 } else {
@@ -503,6 +505,7 @@ aspect VariabilityPropagation {
                 	use.replaceMe(newId);
                 	workData.registerNode(newId);
                 	equation.variables().remove(this);
+                	workData.scheduleFlush(equation);
                 }
                 if (equation != workData.getCurrentEquation()) {
                     workData.addToWorklist(equation);
