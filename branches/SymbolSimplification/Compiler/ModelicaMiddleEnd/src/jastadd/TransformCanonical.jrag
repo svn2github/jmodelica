@@ -1916,6 +1916,11 @@ aspect TransformCanonical {
         if (pair.fv1.isAlias()) {
             replacement = pair.fv2;
             toBeReplaced = pair.fv1;
+        } else if (!pair.fv1.isAlias() && !pair.fv1.isAlias()) {
+        	if (pair.fv1.aliasHeuristicScore() < pair.fv2.aliasHeuristicScore()) {
+        		replacement = pair.fv2;
+        		toBeReplaced = pair.fv1;
+        	}
         }
         
         // All equations using the variable should be re-checked.
