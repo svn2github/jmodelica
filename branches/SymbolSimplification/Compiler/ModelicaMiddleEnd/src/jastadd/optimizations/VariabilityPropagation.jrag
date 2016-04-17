@@ -493,15 +493,16 @@ aspect VariabilityPropagation {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 if (equation.isFAlgorithm()) {
-                	equation.variables().remove(this);	
+                	equation.variables().remove(this);
+                } else if (equation.isFFunctionCallEquation()) {
+                	equation.variables().remove(this);
                 } else {
-                FExp newId = isParameter() ? createUseExp() :
+                	FExp newId = isParameter() ? createUseExp() :
                     symbolicTransformationFramework.copyFExp(bindingExp);
-
-                workData.disposeNode(use);
-                use.replaceMe(newId);
-                workData.registerNode(newId);
-                equation.variables().remove(this);
+                	workData.disposeNode(use);
+                	use.replaceMe(newId);
+                	workData.registerNode(newId);
+                	equation.variables().remove(this);
                 }
                 if (equation != workData.getCurrentEquation()) {
                     workData.addToWorklist(equation);
@@ -549,6 +550,8 @@ aspect VariabilityPropagation {
     
     syn boolean FAbstractEquation.isFAlgorithm() = false;
     eq FAlgorithm.isFAlgorithm() = true;
+    syn boolean FAbstractEquation.isFFunctionCallEquation() = false;
+    eq FFunctionCallEquation.isFFunctionCallEquation() = true;
     
     inh FExp FExp.myTopFactorFExp();
     eq BaseNode.getChild().myTopFactorFExp() = null;
