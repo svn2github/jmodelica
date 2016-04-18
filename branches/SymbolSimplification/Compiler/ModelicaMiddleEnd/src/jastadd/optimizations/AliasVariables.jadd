@@ -22,7 +22,7 @@ import java.util.BitSet;
 /**
  * Computation of alias sets.
  */
-aspect AliasVariables {
+aspect AliasVariables { 
     public class symbolicTransformationFramework {
         public class AliasEliminator extends SymbolicTransformationAlgorithm {
             private AliasManager aliasManager;
@@ -245,6 +245,7 @@ aspect AliasVariables {
         
         aliasVariablesEliminated = true;
         enableAliasRewrite();
+        // TODO: This needs to be here?
         flush();
     }
 

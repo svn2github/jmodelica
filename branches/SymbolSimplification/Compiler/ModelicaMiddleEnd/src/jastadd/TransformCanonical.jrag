@@ -1911,46 +1911,28 @@ aspect TransformCanonical {
         FVariable replacement = pair.fv1;
         FVariable toBeReplaced = pair.fv2;
         
-        // If v1 was the alias, switch, else do nothing.
+        // If v1 was the alias, switch, else sort by heuristics score.
         if (pair.fv1.isAlias()) {
             replacement = pair.fv2;
             toBeReplaced = pair.fv1;
         } else if (!pair.fv1.isAlias() && !pair.fv1.isAlias()) {
-        	if (pair.fv1.aliasHeuristicScore() < pair.fv2.aliasHeuristicScore()) {
-        		replacement = pair.fv2;
-        		toBeReplaced = pair.fv1;
-        	}
+            if (pair.fv1.aliasHeuristicScore() < pair.fv2.aliasHeuristicScore()) {
+                replacement = pair.fv2;
+                toBeReplaced = pair.fv1;
+            }
         }
         
         // All equations using the variable should be re-checked.
         ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
         for (int i = 0; i < ids.size(); ++i) {
             FIdUseExp id = ids.get(i);
-            id.replaceUses(workData, replacement, pair.negated);
-            if (feq != workData.getCurrentEquation()) {
-                workData.addToWorklist(id.myFEquation());
-            }
+            id.replaceUses(workData, replacement.createUseExp(), pair.negated);
+            workData.addToWorklist(id.myFEquation());
         }
         
-        // We're done with this equation.
         workData.removeEquation(feq);
     }
     
-    public void FIdUseExp.replaceUses(
-            symbolicTransformationFramework.WorkData workData, 
-            FVariable var,
-            boolean negated) {
-        FExp newId = var.createUseExp();
-        // Disconnect this id use from the tree.
-        workData.disposeNode(this);
-        // Replace all occurances of the old id use.
-        replaceMe(negated ? new FNegExp(newId) : newId);
-        // Insert the new id use into the tree.
-        
-        workData.registerNode(newId);
-        myFEquation().flushAllRecursiveClearFinal();
-    }
-        
     /**
      * Adds this variable to <code>aliasVars</code>, if it is an alias, or 
      * <code>nonAliasVars</code>, if it is not.

@@ -29,6 +29,10 @@ aspect SymbolicTransformationFramework {
         }
     }
 
+    /**
+     *  A framework class for a collection of transformation algorithms to use
+     *  upon the equations in an <code>FClass</code>.
+     */ 
     public class symbolicTransformationFramework extends FClass.Transformation {
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithmsInFramework;
@@ -40,12 +44,19 @@ aspect SymbolicTransformationFramework {
             algorithmsInFramework = new ArrayList();
         }
         
+        /**
+         *  Runs the algorithm framework.<p>
+         *  The Framework iterates over all algorithms in its algorithm-list,
+         *  transforming an equation from the worklist. If an algorithm changes the structure
+         *  of the equation, the iteration breaks and restarts from the first algorithm.
+         *  Transformations are performed until there are no equations left in the worklist.
+         */ 
         // TODO: Refactor to take alg-list as argument. Create perform() to add all algs to worklist.
         public void perform() {
             WorkData workData = new WorkData();
             ArrayList<SymbolicTransformationAlgorithm> algorithmList = new ArrayList();
             canonizer = new Canonizer(fclass, workData);
-            addAlgorithmsToFramework(workData);
+            addAlgorithms(workData);
             
             // Collect algorithms that are enabled.
             for (SymbolicTransformationAlgorithm algorithm: algorithmsInFramework) {
@@ -60,9 +71,9 @@ aspect SymbolicTransformationFramework {
             preConfiguration(algorithmList);
             
             // Start using algorithms on the equations.
-            while (workData.hasNextInWorklist()) {
-            	FAbstractEquation equation = workData.nextInWorklist();
-            	for (SymbolicTransformationAlgorithm algorithm : algorithmList) {
+            while (!workData.emptyWorklist()) {
+                FAbstractEquation equation = workData.pollWorklist();
+                for (SymbolicTransformationAlgorithm algorithm : algorithmList) {
                     if (algorithm.run(equation)) {
                         break;
                     }
@@ -75,10 +86,10 @@ aspect SymbolicTransformationFramework {
         }
         
         /**
-         * Separate perform method for only running Alias Elimination. It is used in reduceIndex method
-         * in FClass. 
+         *  Separate perform method for only running Alias Elimination. It is used in reduceIndex method
+         *  in FClass. 
          * 
-         * TODO: break out and make perform() take an argument of all algorithms to be run.
+         *  TODO: break out and make perform() take an argument of all algorithms to be run.
          *  (for this only add AE)
          */ 
         public void performAliasElimination() {
@@ -89,8 +100,8 @@ aspect SymbolicTransformationFramework {
             
             aliasEliminator.preRun();
             
-            while (workData.hasNextInWorklist()) {
-                FAbstractEquation equation = workData.nextInWorklist();
+            while (!workData.emptyWorklist()) {
+                FAbstractEquation equation = workData.pollWorklist();
                 aliasEliminator.run(equation);
             }
             
@@ -108,11 +119,11 @@ aspect SymbolicTransformationFramework {
         }
         
         /**
-         * Algorithms that are used by the framework are added here.
+         *  Algorithms that are used by the framework are added here.
          * 
-         * @param workData Data that is shared and updated in and between algorithms.
+         *  @param  workData Data that is shared and updated in and between algorithms.
          */ 
-        private void addAlgorithmsToFramework(WorkData workData) {
+        private void addAlgorithms(WorkData workData) {
             algorithmsInFramework.add(new AliasEliminator(fclass, workData));
             algorithmsInFramework.add(new VariabilityPropagator(fclass, workData));
             algorithmsInFramework.add(canonizer);
@@ -120,6 +131,9 @@ aspect SymbolicTransformationFramework {
         
         /*
          *  Performs methods that are required before all algorithms have run.<p>
+         *
+         *  @param  algorithms a collection of <code>SymbolicTransformationAlgorithm</code>s
+         *          which specify what transformation algorithms should be used.
          */
         private void preConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
             for (SymbolicTransformationAlgorithm alg : algorithms) {
@@ -129,6 +143,9 @@ aspect SymbolicTransformationFramework {
         
         /*
          *  Performs methods that are required after all algorithms have run.<p>
+         *
+         *  @param  algorithms a collection of <code>SymbolicTransformationAlgorithm</code>s
+         *          which specify what transformation algorithms should be used.
          */
         private void postConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
             for (SymbolicTransformationAlgorithm alg : algorithms) {
@@ -136,8 +153,8 @@ aspect SymbolicTransformationFramework {
             }
         }
         
-        /*
-         * Abstract class that algorithms in the framework will implement. 
+        /**
+         *  Abstract class that algorithms in the framework must implement. 
          */
         public abstract class SymbolicTransformationAlgorithm {
             protected FClass fclass;
@@ -148,61 +165,62 @@ aspect SymbolicTransformationFramework {
             }
             
             /**
-             * Checks if the algorithm is enabled. The algorithm must have an option added
-             * to the enum Default in 
-             * {code JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
-             * Use {code fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
+             *  Checks if the algorithm is enabled.<p>
+             *  The algorithm must have an option added to the enum Default in 
+             *  {code JModelica/Compiler/ModelicaFrontEnd/src/java/org/jmodelica/util/OptionRegistry.java}.
+             *  Use {code fclass.myOptions().getBooleanOption("algorithm_name")} to check if its enabled.
              * 
-             * @return {code true} if it is enabled, {code false} otherwise.
+             *  @return {code true} if it is enabled, {code false} otherwise.
              */
             public abstract boolean isUsed();
             
             /**
-             * Starts the algorithm.<p>
+             *  Starts the algorithm.<p>
              * 
-             * @param equation The equation to optimize.
-             * @return {@code true} if the equation was updated, {@code false} otherwise.
+             *  @param  equation The equation to optimize.
+             *  @return {@code true} if the equation was updated, {@code false} otherwise.
              */
             public abstract boolean run(FAbstractEquation equation);
-            
             /**
-             * Performs methods that are to be performed after all algorithms have run.
-             */
-            public abstract void postRun();
-            
-            /**
-             * Algorithms can perform work on the equations independently before
-             * the framework moves on with iterating over the worklist.
+             *  Performs methods that are to be performed before all algorithms have run.
              */
             public abstract void preRun();
+            
+            /**
+             *  Performs methods that are to be performed after all algorithms have run.
+             */
+            public abstract void postRun();
         }
         
         /**
-         * Class that contains data that is shared and updated in and between algorithms.
-         *
-         * When adding a new algorithm to the framework, update this class with needed methods 
-         * and variables.
+         *  Data class for the framework, also used for data required by algorithms.<p>
          */
         public class WorkData {
             private FAbstractEquation currentEquation = null;
-            // Used by all
             private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
-            // Used by VariabilityPropagation
-            private ArrayList<FAbstractEquation> parameterEquations = new ArrayList();
-            // Used by all
             private HashSet<FAbstractEquation> removedEquations = new HashSet();
-            // Used by VariabilityPropagator
-            private boolean splitAliasParameters = !(fclass.myOptions().getBooleanOption("eliminate_alias_variables") 
-                    && fclass.myOptions().getBooleanOption("eliminate_alias_parameters"));
-            // Used by VariabilityPropagator
-            private boolean splitAliasConstants  = !(fclass.myOptions().getBooleanOption("eliminate_alias_variables") 
-                    && fclass.myOptions().getBooleanOption("eliminate_alias_constants"));
+            
+            /*
+             *  Data required for the <code>AliasEliminator</code> algorithm.
+             */
+            private boolean splitAliasParameters = !(
+                fclass.myOptions().getBooleanOption("eliminate_alias_variables") &&
+                fclass.myOptions().getBooleanOption("eliminate_alias_parameters"));
+            private boolean splitAliasConstants  = !(
+                fclass.myOptions().getBooleanOption("eliminate_alias_variables") &&
+                fclass.myOptions().getBooleanOption("eliminate_alias_constants"));
+            
+            /*
+             *  Data required for the <code>VariabilityPropagator</code> algorithm.
+             */
+            private ArrayList<FAbstractEquation> parameterEquations = new ArrayList();
             
             /**
-             * Constructs a class containing data needed throughout the execution time 
-             * of the algorithms, that are added to the framework.
+             *  Default constructor for <code>WorkData</code>.<p>
+             *  A <code>WorkData</code> instance contains data required for some algorithms,
+             *  but is used by them and the framework to keep track of equations.
              *
-             * @param worklist The working list of equations to modify with the algorithms.
+             *  @param  worklist The working list of equations to modify with the algorithms.
              */
             public WorkData() {
                 for (FAbstractEquation equation : fclass.getFParameterEquations())
@@ -210,49 +228,52 @@ aspect SymbolicTransformationFramework {
             }
             
             /*
-             * Getter for the <code>splitAliasParameters</code> boolean.
+             *  Getter for the <code>splitAliasParameters</code> boolean.
              *
-             * @return the constant.
+             *  @return the constant.
              */
             public boolean splitAliasParameters() {
                 return splitAliasParameters;
             }
             
             /*
-             * Getter for the <code>splitAliasConstants</code> boolean.
+             *  Getter for the <code>splitAliasConstants</code> boolean.
              *
-             * @return the constant.
+             *  @return the constant.
              */
             public boolean splitAliasConstants() {
                 return splitAliasConstants;
             }
-                        
+            
             /**
-             * If an equation is switched to a parameter equation it should be
-             * added to this list.
+             *  If an equation is switched to a parameter equation it should be
+             *  added to this list.
              *
-             * @param equation The equation that is added to the parameter equations list.
+             *  @param  equation The equation that is added to the parameter equations list.
              */
             public void addParameterEquation(FAbstractEquation equation) {
                 parameterEquations.add(equation);
             }
             
             /**
-             * Method to add an equation to the worklist.
+             *  Method to add an equation to the worklist.
              *
-             * @param equation The equation to be added.
+             *  @param  equation The equation to be added.
              */
             public void addToWorklist(FAbstractEquation equation) {
-                // IF-check for debug OK
-                if (!equation.equalSides() && !hasRemovedEquation(equation)) {
+                // IF-check for debug OK.
+                if (!equation.equalSides() &&
+                    !hasRemovedEquation(equation) &&
+                    equation != currentEquation) {
+                    
                     worklist.add(equation);
                 }
             }
             
             /**
-             * Method to add many equations to the worklist.
+             *  Method to add many equations to the worklist.
              *
-             * @param   equations the equations to be added.
+             *  @param  equations the equations to be added.
              */
             public void addAllToWorklist(List<FAbstractEquation> equations) {
                 for (FAbstractEquation eqn : equations) {
@@ -261,22 +282,21 @@ aspect SymbolicTransformationFramework {
             }
             
             /**
-             * Checks if an equation has been removed by one of
-             * the algorithms.
+             *  Checks if an equation has been removed by one of
+             *  the algorithms.
              *
-             * @param equation The equation that is checked. 
-             * @return {@code true} if it has been removed, {@code false} otherwise.
+             *  @param  equation the equation that is checked. 
+             *  @return {@code true} if it has been removed, {@code false} otherwise.
              */
             public boolean hasRemovedEquation(FAbstractEquation equation) {
                 return removedEquations.contains(equation);
             }
             
             /**
-             * Adds an equation to the list of removed equations.
+             *  Adds an equation to the list of removed equations.
              *
-             * @param equation The equation that is added to the list of removed equations.
+             *  @param  equation The equation that is added to the list of removed equations.
              */
-             // Currently unused, remove?
             public void removeEquation(FAbstractEquation equation) {
                 removedEquations.add(equation);
                 worklist.remove(equation);
@@ -284,61 +304,120 @@ aspect SymbolicTransformationFramework {
             }
             
             /**
-             * Returns a list containing the parameter equations.
+             *  Returns a list containing the parameter equations.
              *
-             * @return The list containing all parameter equations. 
+             *  @return The list containing all parameter equations. 
              */
-			public List<FAbstractEquation> getparameterEquations() {
+            public List<FAbstractEquation> getparameterEquations() {
                 return new List<FAbstractEquation>(parameterEquations);
             }
             
             /**
-             *
+             *  Inserts a new FIdUseExp into the tree.<p>
+             *  The use-list of the variable corresponding to the id-use
+             *  is updated with a new entry.
+             * 
+             *  @param  n the new id-use expression (<code>FIdUseExp</code>).
              */
             public void registerNode(ASTNode n) {
                 Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
                 
                 for (FIdUseExp id : idUsesInTree) {
                     if (id.myFEquation() != currentEquation) {
-                        id.myFV().uses().add(n.asFIdUseExp());
+                        FAbstractVariable var = id.myFV();
+                        var.addUse(n);
                     }
                 }
             }
             
             /**
-             *
+             *  Removes an FIdUseExp from the tree.<p>
+             *  The use-list of the variable corresponding to the id-use
+             *  is updated to not contain the argument entry.
+             * 
+             *  @param  n the id-use expression to remove.
              */
             public void disposeNode(ASTNode n) {
                 Set<FIdUseExp> idUsesInTree = n.findFIdUseExpsInTree();
                 
                 for (FIdUseExp id : idUsesInTree) {
-                    id.myFV().uses().remove(n);
+                    FAbstractVariable var = id.myFV();
+                    var.removeUse(n);
                 }
             }
             
             /**
-             *
+             *  Checks whether or not the worklist is empty.
+             * 
+             *  @return <code>false</code> if the worklist is empty,
+             *          <code>true</code> otherwise.
              */
-            public boolean hasNextInWorklist() {
-            	return !worklist.isEmpty();
+            public boolean emptyWorklist() {
+                return worklist.isEmpty();
             }
             
             /**
+             *  Returns the next item in the worklist.<p>
              *
+             *  @return the next equation in the worklist.
              */
-            public FAbstractEquation nextInWorklist() {
-            	currentEquation = worklist.iterator().next();
+            public FAbstractEquation pollWorklist() {
+                currentEquation = worklist.iterator().next();
                 worklist.remove(currentEquation);
                 return currentEquation;
             }
-            
-            /**
-             *
-             */
-            public FAbstractEquation getCurrentEquation() {
-            	return currentEquation;
+        }
+    }
+    
+    /**
+     *  Replaces all <code>FIdUseExps</code> with a new <code>FExp</code>.<p>
+     *  
+     *  @param  workData the <code>WorkData</code> instance used by the
+     *          transformation algorithms.
+     *  @param  newExp the expression to replace the id-use expression.
+     *  @param  negated 
+     */
+    public void FIdUseExp.replaceUses(
+            symbolicTransformationFramework.WorkData workData, 
+            FExp newExp,
+            boolean negated) {
+        FAbstractEquation equation = myFEquation();
+        // Disconnect this id use from the tree.
+        workData.disposeNode(this);
+        // Replace all occurances of the old id use.
+        replaceMe(negated ? new FNegExp(newExp) : newExp);
+        // Insert the new id use into the tree.
+        workData.registerNode(newExp);
+        
+        // TODO: Remove and fix without.
+        equation.flushAllRecursiveClearFinal();
+    }
+    
+    public void FAbstractVariable.addUse(ASTNode n) {
+        uses().add(n.asFIdUseExp());
+    }
+    public void FAbstractVariable.removeUse(ASTNode n) {
+        uses().remove(n);
+    }
+    
+    public void FAbstractEquation.removeVariable(FAbstractVariable var) {
+        variables().remove(var);
+    }
+    
+    public void FAbstractEquation.addVariable(FAbstractVariable var) {
+        if (var.isFVariable()) {
+            variables().add(var.asFVariable());
+        }
+    }
+    
+    syn boolean FAbstractEquation.hasUse(FIdUseExp id) { return false; }
+    eq FEquation.hasUse(FIdUseExp id) {
+        for (FIdUseExp use : collectUses()) {
+            if (id.name().equals(use.name())) {
+                return true;
             }
         }
+        return false;
     }
     
     syn FIdUseExp ASTNode.asFIdUseExp() = (FIdUseExp) this;

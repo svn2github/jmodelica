@@ -84,6 +84,7 @@ aspect VariabilityPropagation {
             canPropagateContext() && !containsActiveAnnotations();
     eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
     
+    // TODO: Do we need the flush here?
     eq FFunctionCallEquation.canPropagate() {
         getCall().flushAllRecursiveClearFinal();
         return super.canPropagate() && variables().size() > 0 && numScalarEquations() > 0 && 
@@ -489,24 +490,16 @@ aspect VariabilityPropagation {
             if (use.inFEquation()) {
                 equation = use.myFEquation();
                 if (isConstant() && equation.shouldBeOverwritten()) {
-                    workData.disposeNode(use);
                     FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
-                    use.replaceMe(newId);
-                    workData.registerNode(newId);
-                }
-                equation.flushAllRecursiveClearFinal();
-                // Temporary hack until better solution is found.
-                if (isParameter()) {
-                    equation.variables().remove(this);
+                    use.replaceUses(workData, newId, false);
                 }
                     
-                    // TODO: Hack fix, will work improperly in some cases.
-                    if (isParameter()) {
-                        equation.variables().remove(this);
-                    }
-                if (equation != workData.getCurrentEquation()) {
-                    workData.addToWorklist(equation);
+                // TODO: Hack fix, will work improperly in some cases.
+                if (isParameter()) {
+                    equation.removeVariable(this);
                 }
+                
+                workData.addToWorklist(equation);
             }
         }
         
