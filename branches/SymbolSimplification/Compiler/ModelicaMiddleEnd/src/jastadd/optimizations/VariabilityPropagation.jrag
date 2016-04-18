@@ -160,11 +160,7 @@ aspect VariabilityPropagation {
             
             @Override
             public boolean run(FAbstractEquation feq) {
-                boolean result = feq.variabilityPropagation(workData);
-                if (result) {
-                    workData.flushEquations();
-                }
-                return result;
+                return feq.variabilityPropagation(workData);
             }
             
             @Override
@@ -492,27 +488,18 @@ aspect VariabilityPropagation {
             FIdUseExp use = uses.get(i);
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                if (equation.isFAlgorithm()) {
-                	equation.variables().remove(this);
-                } else if (variability.parameterVariability()) {
-                	equation.variables().remove(this);
-                } else if (equation.isFFunctionCallEquation()) {
-                	equation.variables().remove(this);
-                } else {
-                	FExp newId = isParameter() ? createUseExp() :
-                    symbolicTransformationFramework.copyFExp(bindingExp);
-                	workData.disposeNode(use);
-                	use.replaceMe(newId);
-                	workData.registerNode(newId);
-                	equation.variables().remove(this);
-                	workData.scheduleFlush(equation);
-                }
+                workData.disposeNode(use);
+                    if (isConstant() && equation.shouldBeOverwritten()) {
+                        FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
+                        use.replaceMe(newId);
+                        workData.registerNode(newId);
+                    }
+                    equation.flushAllRecursiveClearFinal();
                 if (equation != workData.getCurrentEquation()) {
                     workData.addToWorklist(equation);
                 }
             }
         }
-        workData.flushEquations();
         
         // Pre var
         if (wasDiscrete && !isPreVariable()) {
@@ -551,10 +538,9 @@ aspect VariabilityPropagation {
         }
     }
     
-    syn boolean FAbstractEquation.isFAlgorithm() = false;
-    eq FAlgorithm.isFAlgorithm() = true;
-    syn boolean FAbstractEquation.isFFunctionCallEquation() = false;
-    eq FFunctionCallEquation.isFFunctionCallEquation() = true;
+    syn boolean FAbstractEquation.shouldBeOverwritten() = true;
+    eq FAlgorithm.shouldBeOverwritten() = false;
+    eq FFunctionCallEquation.shouldBeOverwritten() = false;
     
     inh FExp FExp.myTopFactorFExp();
     eq BaseNode.getChild().myTopFactorFExp() = null;

@@ -131,13 +131,11 @@ aspect TransformCanonical {
             
             /* Iterative Symbol Simplification. */
             
-            transformations.add(new symbolicTransformationFramework(this));
+            symbolicTransformationFramework framework = new symbolicTransformationFramework(this);
+            transformations.add(framework);
             
             /* -------------------------------- */
-
-            //transformations.add(new aliasEliminationIfSet()); 
-            //transformations.add(new variabilityPropagationIfSet());
-            //transformations.add(new aliasEliminationIfSet());
+            
             transformations.add(new enableExpandedInStreamRewrite());
             transformations.add(new evaluateAsserts());
             transformations.add(new enableSemiLinearRewrite());
@@ -150,7 +148,8 @@ aspect TransformCanonical {
             transformations.add(new LateFunctionInliningIfSet());
             transformations.add(new commonSubexpressionEliminationIfSet());
             transformations.add(new addFPreVariables());
-            //transformations.add(new aliasEliminationIfSet());
+            // An alias elimination is required here.
+            transformations.add(new aliasEliminationIfSet(this));
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
             transformations.add(new computeMatchingsAndBLT());

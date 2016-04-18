@@ -47,9 +47,7 @@ aspect AliasVariables {
             }
             
             @Override
-            public void preRun() {
-                // NOP;
-            }
+            public void preRun() { /* NOP */ }
             
             @Override
             public void postRun() {

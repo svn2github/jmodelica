@@ -14,6 +14,21 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 aspect SymbolicTransformationFramework {
+    public class FClass {
+        // Needed in a later stage of transformations.
+        public class aliasEliminationIfSet extends Transformation {
+            private FClass fclass;
+            public aliasEliminationIfSet(FClass fclass) {
+                super("eliminate_alias_variables");
+                this.fclass = fclass;
+            }
+            
+            public void perform() {
+                new symbolicTransformationFramework(fclass).performAliasElimination();
+            }
+        }
+    }
+
     public class symbolicTransformationFramework extends FClass.Transformation {
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithmsInFramework;
@@ -25,6 +40,7 @@ aspect SymbolicTransformationFramework {
             algorithmsInFramework = new ArrayList();
         }
         
+        // TODO: Refactor to take alg-list as argument. Create perform() to add all algs to worklist.
         public void perform() {
             WorkData workData = new WorkData();
             ArrayList<SymbolicTransformationAlgorithm> algorithmList = new ArrayList();
@@ -61,21 +77,24 @@ aspect SymbolicTransformationFramework {
         /**
          * Separate perform method for only running Alias Elimination. It is used in reduceIndex method
          * in FClass. 
+         * 
+         * TODO: break out and make perform() take an argument of all algorithms to be run.
+         *  (for this only add AE)
          */ 
         public void performAliasElimination() {
             WorkData workData = new WorkData();
-            AliasEliminator ae = new AliasEliminator(fclass, workData);
+            AliasEliminator aliasEliminator = new AliasEliminator(fclass, workData);
             
             workData.addAllToWorklist(fclass.getFAbstractEquations());
             
-            ae.preRun();
+            aliasEliminator.preRun();
             
             while (workData.hasNextInWorklist()) {
-            	FAbstractEquation equation = workData.nextInWorklist();
-            	ae.run(equation);
+                FAbstractEquation equation = workData.nextInWorklist();
+                aliasEliminator.run(equation);
             }
             
-            ae.postRun();
+            aliasEliminator.postRun();
             change();
         }
         
@@ -170,7 +189,6 @@ aspect SymbolicTransformationFramework {
             private LinkedHashSet<FAbstractEquation> worklist = new LinkedHashSet();
             // Used by VariabilityPropagation
             private ArrayList<FAbstractEquation> parameterEquations = new ArrayList();
-            private HashSet<FAbstractEquation> scheduledFlushes = new HashSet<FAbstractEquation>();
             // Used by all
             private HashSet<FAbstractEquation> removedEquations = new HashSet();
             // Used by VariabilityPropagator
@@ -225,6 +243,7 @@ aspect SymbolicTransformationFramework {
              * @param equation The equation to be added.
              */
             public void addToWorklist(FAbstractEquation equation) {
+                // IF-check for debug OK
                 if (!equation.equalSides()) {
                     worklist.add(equation);
                 }
@@ -295,22 +314,6 @@ aspect SymbolicTransformationFramework {
                 for (FIdUseExp id : idUsesInTree) {
                     id.myFV().uses().remove(n);
                 }
-            }
-            /**
-             *
-             */
-            public void scheduleFlush(FAbstractEquation fae) {
-                scheduledFlushes.add(fae);
-            }
-            
-            /**
-             *
-             */
-            public void flushEquations() {
-                for (FAbstractEquation fae : scheduledFlushes) {
-                    fae.flushAllRecursiveClearFinal();
-                }
-                scheduledFlushes.clear();
             }
             
             /**
