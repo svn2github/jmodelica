@@ -244,7 +244,7 @@ aspect SymbolicTransformationFramework {
              */
             public void addToWorklist(FAbstractEquation equation) {
                 // IF-check for debug OK
-                if (!equation.equalSides()) {
+                if (!equation.equalSides() && !hasRemovedEquation(equation)) {
                     worklist.add(equation);
                 }
             }

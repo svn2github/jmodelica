@@ -488,13 +488,17 @@ aspect VariabilityPropagation {
             FIdUseExp use = uses.get(i);
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                workData.disposeNode(use);
-                    if (isConstant() && equation.shouldBeOverwritten()) {
-                        FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
-                        use.replaceMe(newId);
-                        workData.registerNode(newId);
-                    }
-                    equation.flushAllRecursiveClearFinal();
+                if (isConstant() && equation.shouldBeOverwritten()) {
+                    workData.disposeNode(use);
+                    FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
+                    use.replaceMe(newId);
+                    workData.registerNode(newId);
+                }
+                equation.flushAllRecursiveClearFinal();
+                // Temporary hack until better solution is found.
+                if (isParameter()) {
+                    equation.variables().remove(this);
+                }
                     
                     // TODO: Hack fix, will work improperly in some cases.
                     if (isParameter()) {
