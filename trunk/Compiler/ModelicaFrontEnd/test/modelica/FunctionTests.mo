@@ -6016,6 +6016,13 @@ public
   size(o) := {size(a, 1), size(a, 2) + size(b, 2), size(a, 3)};
   assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
   size(temp_1) := {size(a, 1), size(a, 2) + size(b, 2), size(b, 3) + size(c, 3)};
+  for i4 in 1:size(a, 1) loop
+   for i5 in 1:size(a, 2) loop
+    for i6 in 1:size(b, 3) + size(c, 3) loop
+     temp_1[i4,i5,i6] := a[i4,i5,i6];
+    end for;
+   end for;
+  end for;
   size(temp_2) := {size(a, 1), size(b, 2), size(b, 3) + size(c, 3)};
   for i7 in 1:size(a, 1) loop
    for i8 in 1:size(b, 2) loop
@@ -6028,13 +6035,6 @@ public
    for i8 in 1:size(b, 2) loop
     for i9 in 1:size(c, 3) loop
      temp_2[i7,i8,i9 + size(b, 3)] := c[i7,i8,i9];
-    end for;
-   end for;
-  end for;
-  for i4 in 1:size(a, 1) loop
-   for i5 in 1:size(a, 2) loop
-    for i6 in 1:size(b, 3) + size(c, 3) loop
-     temp_1[i4,i5,i6] := a[i4,i5,i6];
     end for;
    end for;
   end for;

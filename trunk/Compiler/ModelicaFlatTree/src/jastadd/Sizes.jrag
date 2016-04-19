@@ -135,7 +135,7 @@ aspect AccessSizes {
             new FIdUseExp(new FIdUseInstAccess(new InstDot(buildAccessContext(name(), null))));
     eq FQNamePart.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUse(new FQNameFull(buildAccessContext(name(), null))));
-    eq FIdUse.getExpandedSubscripts().buildAccessContextSizeExp() =
+    eq FIdUse.getChild().buildAccessContextSizeExp() =
             new FIdUseExp(new FIdUse(new FQNameFull(getFQName().buildAccessContext())));
     
     syn List<FQNamePart> FQName.buildAccessContext() = null;

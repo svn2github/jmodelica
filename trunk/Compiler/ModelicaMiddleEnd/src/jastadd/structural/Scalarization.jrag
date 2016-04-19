@@ -1809,26 +1809,10 @@ aspect Scalarization {
     }
 
     public boolean FStatement.scalarizeStmt(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-        int n1 = stmts.getNumChild();
         addSizeAsserts(stmts);
-        boolean breaker = scalarize(vars, stmts, indexMap);
-        if (shouldBeSorted) {
-            int n2 = stmts.getNumChild();
-            for (int i = n1; i < n2; i++) 
-                stmts.getChild(i).shouldBeSorted = true;
-            if (hasExtraSortingDependencies()) {
-                /* Might contain assert statements added by addSizeAsserts() */
-                for (int i = n1; i < n2; i++)  {
-                    if (!extraSortingDependencies().contains(stmts.getChild(i))) {
-                        stmts.getChild(i).extraSortingDependencies().addAll(extraSortingDependencies());
-                        break;
-                    }
-                }
-            }
-        }
-        return breaker;
+        return scalarize(vars, stmts, indexMap);
     }
-
+    
     /**
      * Creates assert statements to check sizes in assignments between known
      * and unknown sizes. 
@@ -1844,9 +1828,6 @@ aspect Scalarization {
             if (!vis.contains(s)) {
                 vis.add(s);
                 stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), a);
-                stmt.shouldBeSorted = this.shouldBeSorted;
-                if (stmt.shouldBeSorted)
-                    extraSortingDependencies().add(stmt);
                 clauses.add(stmt);
             }
         }
