@@ -15678,6 +15678,82 @@ end FunctionTests.UnusedFunction2;
 ")})));
 end UnusedFunction2;
 
+model AnnotationFlattening1
+    function F
+        input Real i1;
+        input Integer i2;
+        output Real o1;
+    protected
+        Real x = i1;
+    algorithm
+        o1 := x * i2 + x;
+    annotation(Inline=false, derivative=F_der, smoothOrder=2);
+    end F;
+    
+    function F_der
+        input Real i1;
+        input Integer i2;
+        input Real i1_der;
+        output Real o1_der;
+    algorithm
+        o1_der := i1_der * i2 + i1_der;
+    annotation(Inline=false);
+    end F_der;
+    
+    model B
+        replaceable function func = F(i2=2);
+        Real x,y;
+    equation
+        x = func(y);
+        der(x) * der(y) = 1;
+    end B;
+    
+    model C = B(redeclare function func = F(i2=3));
+    
+    C c;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AnnotationFlattening1",
+            description="Test so that annotations are flattened correctly even if the function is a replacing short class decl",
+            flatModel="
+fclass FunctionTests.AnnotationFlattening1
+ Real c.x;
+ Real c.y;
+ Real c._der_x;
+initial equation 
+ c.y = 0.0;
+equation
+ c.x = FunctionTests.AnnotationFlattening1.c.func(c.y, 3);
+ c._der_x * der(c.y) = 1;
+ c._der_x = FunctionTests.AnnotationFlattening1.F_der(c.y, 3, der(c.y));
 
+public
+ function FunctionTests.AnnotationFlattening1.c.func
+  input Real i1;
+  input Integer i2;
+  output Real o1;
+  Real x;
+ algorithm
+  x := i1;
+  o1 := x * i2 + x;
+  return;
+ annotation(derivative = FunctionTests.AnnotationFlattening1.F_der,Inline = false,smoothOrder = 2);
+ end FunctionTests.AnnotationFlattening1.c.func;
+
+ function FunctionTests.AnnotationFlattening1.F_der
+  input Real i1;
+  input Integer i2;
+  input Real i1_der;
+  output Real o1_der;
+ algorithm
+  o1_der := i1_der * i2 + i1_der;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.AnnotationFlattening1.F_der;
+
+end FunctionTests.AnnotationFlattening1;
+")})));
+end AnnotationFlattening1;
 
 end FunctionTests;

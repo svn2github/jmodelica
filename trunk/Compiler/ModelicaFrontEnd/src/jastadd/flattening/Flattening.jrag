@@ -287,12 +287,9 @@ aspect Flattening {
 
     public void InstBaseClassDecl.flattenThisFunction(FClass fc) {
         if (fc.lookupFunc(qualifiedName()) == null) {
-            InstExternal ie = findFunctionExternal();
-            
-            FFunctionDecl ffd = createFFunction(fc, ie);
-            copyDerivativeAnnotations(fc, ie, ffd.annotation());
-            // TODO: should we look in extends as well?
-            ffd.copyInlineAnnotation(annotation());
+            FFunctionDecl ffd = createFFunction(fc, findFunctionExternal());
+            copyDerivativeAnnotations(fc, ffd.annotation());
+            ffd.copyInlineAnnotation(findInlineAnnotationRoot());
             ffd.smoothOrder(smoothOrder());
             
             ffd.ensureFQNamesFull();
@@ -343,14 +340,67 @@ aspect Flattening {
         fab.addFStatement(ie.flatten(this, new FQNameEmpty()));
     }
     
-    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, InstExternal ie, AnnotationNode dest) {
-        copyDerivativeAnnotations(fc, annotation(), dest);
-        if (ie != null)
-            copyDerivativeAnnotations(fc, ie.annotation(), dest);
+    private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, AnnotationNode dest) {
+        copyDerivativeAnnotations(fc, findDerivativeAnnotationRoot(), dest);
+    }
+
+    /**
+     * Utility method for finding an annotation tree that contains one of the
+     * provided subpaths. It will optionaly look in the external and the
+     * annotation of extending classes.
+     */
+    protected AnnotationNode InstClassDecl.findAnnotationRoot(boolean lookInExternal, boolean lookInExtends, String ... subPaths) {
+        return AnnotationNode.NO_ANNOTATION;
+    }
+
+    @Override
+    protected AnnotationNode InstBaseClassDecl.findAnnotationRoot(boolean lookInExternal, boolean lookInExtends, String ... subPaths) {
+        for (String subPath : subPaths) {
+            AnnotationNode node = annotation(subPath);
+            if (node.exists()) {
+                return annotation();
+            }
+        }
+        if (lookInExternal) {
+            InstExternal ie = findFunctionExternal();
+            if (ie != null) {
+                for (String subPath : subPaths) {
+                    AnnotationNode node = ie.annotation(subPath);
+                    if (node.exists()) {
+                        return ie.annotation();
+                    }
+                }
+            }
+        }
+        if (lookInExtends) {
+            for (InstExtends instExtends : getInstExtendss()) {
+                AnnotationNode node = instExtends.myInstClass().findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
+                if (node.exists()) {
+                    return node;
+                }
+            }
+        }
+        return super.findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
+    }
+
+    @Override
+    protected AnnotationNode InstSimpleShortClassDecl.findAnnotationRoot(boolean lookInExternal, boolean lookInExtends, String ... subPaths) {
+        return myTargetInstClassDecl().findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
+    }
+
+    protected AnnotationNode InstClassDecl.findDerivativeAnnotationRoot() {
+        return findAnnotationRoot(true, true, "derivative");
+    }
+
+    protected AnnotationNode InstClassDecl.findInlineAnnotationRoot() {
+        return findAnnotationRoot(true, true, "Inline", "LateInline", "InlineAfterIndexReduction");
+    }
+
+    protected AnnotationNode InstClassDecl.findSmoothOrderAnnotationRoot() {
+        return findAnnotationRoot(true, true, "smoothOrder");
     }
 
     private void InstBaseClassDecl.copyDerivativeAnnotations(FClass fc, AnnotationNode src, AnnotationNode dest) {
-        
         for (AnnotationNode derSrcNode : src) {
             if (!"derivative".equals(derSrcNode.name()))
                 continue;

@@ -726,16 +726,15 @@ aspect InstanceErrorCheck {
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
-        errorCheckDerivativeAnnotations(checkType, annotation());
-        InstExternal ie = findFunctionExternal();
-        if (ie != null)
-            errorCheckDerivativeAnnotations(checkType, ie.annotation());
+        errorCheckDerivativeAnnotations(checkType, findDerivativeAnnotationRoot());
     }
     
     private void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType, AnnotationNode src) {
-        for (AnnotationNode derivative : src)
-            if ("derivative".equals(derivative.name()))
+        for (AnnotationNode derivative : src) {
+            if ("derivative".equals(derivative.name())) {
                 errorCheckDerivativeAnnotation(checkType, derivative);
+            }
+        }
     }
 
     private void InstBaseClassDecl.errorCheckDerivativeAnnotation(ErrorCheckType checkType, AnnotationNode derivative) {

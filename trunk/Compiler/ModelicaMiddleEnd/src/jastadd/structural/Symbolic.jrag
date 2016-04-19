@@ -977,7 +977,7 @@ aspect SmoothOrder{
     
     syn int FFunctionDecl.smoothOrder()     = readSmoothOrderAnnotation(annotation());
     syn int FFunctionVariable.smoothOrder() = myFCallable().smoothOrder();
-    syn int InstClassDecl.smoothOrder()     = readSmoothOrderAnnotation(annotation());
+    syn int InstClassDecl.smoothOrder()     = readSmoothOrderAnnotation(findSmoothOrderAnnotationRoot());
     syn int InstFunctionCall.smoothOrder()  = myInstClassDecl().smoothOrder();
     syn int FFunctionCall.smoothOrder()     = myFCallable().smoothOrder();
     
