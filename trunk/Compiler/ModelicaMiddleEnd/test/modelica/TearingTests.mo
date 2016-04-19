@@ -967,4 +967,211 @@ Jacobian:
 ")})));
 end MetaEquation2;
 
+model NoEventLinear1
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(if p > 2 then x else -x);
+    parameter Real p = 3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventLinear1",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn linear system (Block 1) of 1 iteration variables and 2 solved variables ---
+Coefficient variability: parameter
+Torn variables:
+  z
+  y
+
+Iteration variables:
+  x
+
+Torn equations:
+  z := noEvent(if p > 2 then x else - x)
+  y := z / 2
+
+Residual equations:
+  x = y * 2
+    Iteration variables: x
+
+Jacobian:
+  |1.0, 0.0, - noEvent(if p > 2 then 1.0 else -1.0)|
+  |(- 1.0 / 2), 1.0, 0.0|
+  |0.0, -2, 1.0|
+-------------------------------
+")})));
+end NoEventLinear1;
+
+model NoEventLinear2
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(if noEvent(time > 2) then x else -x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventLinear2",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn linear system (Block 1) of 1 iteration variables and 2 solved variables ---
+Coefficient variability: continuous-time
+Torn variables:
+  z
+  y
+
+Iteration variables:
+  x
+
+Torn equations:
+  z := noEvent(if noEvent(time > 2) then x else - x)
+  y := z / 2
+
+Residual equations:
+  x = y * 2
+    Iteration variables: x
+
+Jacobian:
+  |1.0, 0.0, - noEvent(if noEvent(time > 2) then 1.0 else -1.0)|
+  |(- 1.0 / 2), 1.0, 0.0|
+  |0.0, -2, 1.0|
+-------------------------------
+")})));
+end NoEventLinear2;
+
+model NoEventLinear3
+    Boolean b = time > 2;
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(if b then x else -x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventLinear3",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+b := time > 2
+
+--- Torn linear system (Block 1) of 1 iteration variables and 2 solved variables ---
+Coefficient variability: discrete-time
+Torn variables:
+  z
+  y
+
+Iteration variables:
+  x
+
+Torn equations:
+  z := noEvent(if b then x else - x)
+  y := z / 2
+
+Residual equations:
+  x = y * 2
+    Iteration variables: x
+
+Jacobian:
+  |1.0, 0.0, - noEvent(if b then 1.0 else -1.0)|
+  |(- 1.0 / 2), 1.0, 0.0|
+  |0.0, -2, 1.0|
+-------------------------------
+")})));
+end NoEventLinear3;
+
+model NoEventNonlinear
+    
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(if y > 0 then x else -x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventNonlinear",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  x
+  z
+
+Iteration variables:
+  y ()
+
+Torn equations:
+  x := y * 2
+  z := noEvent(if y > 0 then x else - x)
+
+Residual equations:
+  y = z / 2
+    Iteration variables: y
+-------------------------------
+")})));
+end NoEventNonlinear; 
+
+
+model NoEventNonlinear1
+    
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(x*x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventNonlinear1",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  z
+  y
+
+Iteration variables:
+  x ()
+
+Torn equations:
+  z := noEvent(x * x)
+  y := z / 2
+
+Residual equations:
+  x = y * 2
+    Iteration variables: x
+-------------------------------
+")})));
+end NoEventNonlinear1; 
+
+model NoEventNonlinear2
+    
+    Real x = y * 2;
+    Real y = z / 2;
+    Real z = noEvent(x)*noEvent(x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="NoEventNonlinear2",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
+Torn variables:
+  z
+  y
+
+Iteration variables:
+  x ()
+
+Torn equations:
+  z := noEvent(x) * noEvent(x)
+  y := z / 2
+
+Residual equations:
+  x = y * 2
+    Iteration variables: x
+-------------------------------
+")})));
+end NoEventNonlinear2; 
+
 end TearingTests;
