@@ -499,6 +499,27 @@ aspect VariabilityPropagation {
                     equation.removeVariable(this);
                 }
                 
+                if (isZero) {
+                    // Adjust variable set for special case y = 0 * z
+                    FExp topFactorExp = use.myTopFactorFExp();
+                    if (topFactorExp != null) {
+                        Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
+                        Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
+                        usesInEq.removeAll(usesInTop);
+                        Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
+                        Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
+                        
+                        for (FVariable tFV : fvsInTop) {
+                            if (!fvsInEq.contains(tFV)) {
+                                equation.variables().remove(tFV);
+                            }
+                        }
+                        
+                        topFactorExp.taggedByVProp = true;
+                    }
+                    equation.flushChildren();
+                }
+                
                 workData.addToWorklist(equation);
             }
         }
@@ -537,6 +558,12 @@ aspect VariabilityPropagation {
             if (unAlias) {
                 myFClass().getAliasManager().unAlias(this);
             }
+        }
+    }
+    
+    public void FAbstractEquation.flushChildren() {
+        for (int i = 0; i < getNumChild(); ++i) {
+            getChild(i).flushAllRecursiveClearFinal();
         }
     }
     

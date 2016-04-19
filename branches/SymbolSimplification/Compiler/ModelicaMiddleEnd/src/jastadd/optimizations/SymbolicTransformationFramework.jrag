@@ -327,7 +327,9 @@ aspect SymbolicTransformationFramework {
                     if (id.myFEquation() != currentEquation) {
                         FAbstractVariable var = id.myFV();
                         var.addUse(n);
-                        id.myFEquation().addVariable(var);
+                        if (!var.isParameter()) {
+                            id.myFEquation().addVariable(var);
+                        }
                     }
                 }
             }
