@@ -2245,6 +2245,8 @@ aspect ConstantEvaluation {
         return (v <= 0) ? CValue.UNKNOWN : new CValueInteger(v);
     }
 
+    eq FDecouple.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator);
+
     eq FConnectionsOp.cevalCalc(VariableEvaluator evaluator) {
         throw new ConstantEvaluationException();
     }

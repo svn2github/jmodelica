@@ -2818,4 +2818,21 @@ Error at line 2804, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/
 end ConstantTypeError1;
 
 
+model DecoupleTest1
+    Real x[2] = time * (1:2);
+    Real y[:] = Subtask.decouple(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DecoupleTest1",
+            description="Test flattening of Subtask.decouple() operator",
+            flatModel="
+fclass TypeTests.DecoupleTest1
+ Real x[2] = time * (1:2);
+ Real y[2] = x[1:2];
+end TypeTests.DecoupleTest1;
+")})));
+end DecoupleTest1;
+
+
 end TypeTests;

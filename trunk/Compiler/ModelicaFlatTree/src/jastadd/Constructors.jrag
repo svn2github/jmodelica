@@ -1168,15 +1168,16 @@ aspect InheritedFactoryMethods {
     public FExInStream      FExInStream.createEmptyNode()      { return new FExInStream();      }
     public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
 
-	// Operators for overconstrained connection graphs
-	public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
-	public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
-	public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
-	public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
-	public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
-	public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
-	public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
-	
+    // Operators for overconstrained connection graphs
+    public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
+    public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
+    public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
+    public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
+    public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
+    public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
+    public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
+    public FDecouple          FDecouple.createEmptyNode()          { return new FDecouple();          }
+
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */

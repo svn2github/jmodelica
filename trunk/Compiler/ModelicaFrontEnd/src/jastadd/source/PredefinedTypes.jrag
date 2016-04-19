@@ -340,6 +340,12 @@ aspect PredefinedTypes {
             + "  input Real x;\n"      // Type not used
             + "  output Integer y;\n"  // Type not used
             + "end cardinality;\n"
+            + "package Subtask"
+            + "  function decouple"
+            + "    input Real x;\n"      // Type not used
+            + "    output Integer y;\n"  // Type not used
+            + "  end decouple;\n"
+            + "end Subtask;\n"
             + "function ndims\n"
             + "  input Real A;\n"      // Type not used
             + "  output Integer n;\n"

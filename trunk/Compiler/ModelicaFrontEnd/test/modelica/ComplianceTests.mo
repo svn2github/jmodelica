@@ -832,4 +832,21 @@ Compliance error at line 815, column 24, in file 'Compiler/ModelicaFrontEnd/src/
 ")})));
 end ExtObjInFunction2;
 
+
+model DeprecatedDecoupleTest1
+    Real x[2] = time * (1:2);
+    Real y[:] = Subtask.decouple(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="DeprecatedDecoupleTest1",
+            description="Deprecation warning for Subtask.decouple()",
+            errorMessage="
+1 warnings found:
+
+Warning at line 838, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', DEPRECATED_DECOUPLE:
+  The Subtask.decouple() function-like operator is removed as of Modelica version 3.2r2
+")})));
+end DeprecatedDecoupleTest1;
+
 end ComplianceTests;

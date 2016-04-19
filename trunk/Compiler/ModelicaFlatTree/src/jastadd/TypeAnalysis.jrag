@@ -436,6 +436,7 @@ aspect FlatTypeAnalysis {
     eq FConnBoolOp.type()    = fBooleanScalarType();
 
     eq FCardinality.type() = fIntegerScalarType();
+    eq FDecouple.type()    = getFExp().type();
 
     eq FTerminate.type() = fNoType();
     eq FReinit.type() = fNoType();

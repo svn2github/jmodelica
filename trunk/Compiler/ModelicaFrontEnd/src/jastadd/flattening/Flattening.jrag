@@ -2539,8 +2539,11 @@ aspect FlatExpressions {
 	}
 
     public FCardinality FCardinality.flatten(FQName prefix) { 
-        FCardinality res = new FCardinality(getFExp().flatten(prefix));
-        return res;
+        return new FCardinality(getFExp().flatten(prefix));
+    }
+
+    public FExp FDecouple.flatten(FQName prefix) { 
+        return getFExp().flatten(prefix);
     }
 
 	public FConnectionsOp FConnectionsOp.flatten(FQName prefix) { throw new UnsupportedOperationException(); }

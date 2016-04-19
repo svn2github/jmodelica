@@ -1908,6 +1908,7 @@ aspect FlatPrettyPrint {
 	eq FLinspace.builtInName()           = "linspace";
 	eq FHomotopyExp.builtInName()        = "homotopy";
     eq FCardinality.builtInName()        = "cardinality";
+    eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
 	eq FDerInStream.builtInName()        = "derInStream";

@@ -316,6 +316,8 @@ aspect InstFunctionBinding {
                 map.put("actualStream",    new BuiltInCreator(BIT.NONE, new FActualStream(),    1));
                 map.put("cardinality",     new BuiltInCreator(BIT.NONE, new FCardinality(),     1));
                 map.put("getInstanceName", new BuiltInCreator(BIT.NONE, new FGetInstanceName(), 0));
+                map.put("Subtask.decouple", 
+                        new BuiltInCreator(BIT.NONE, new FDecouple(),     1));
                 map.put("Modelica.Utilities.Files.loadResource", 
                         new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
                 map.put("ModelicaServices.ExternalReferences.loadResource", 

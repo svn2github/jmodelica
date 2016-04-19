@@ -478,6 +478,7 @@ aspect Variability {
     eq FHomotopyExp.expVariability() = getActual().variability();
 
     eq FCardinality.expVariability() = fParameter();
+    eq FDecouple.expVariability()    = getFExp().variability();
 
 	eq FIterExp.expVariability() {
         FTypePrefixVariability total;

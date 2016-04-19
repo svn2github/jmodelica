@@ -1231,6 +1231,7 @@ aspect FlatTypeCheck {
     eq FDimensionConvert.getOriginalArg().argumentDefinedTypeValid()         = false;
     eq FEventGenExp.getOriginalArg().argumentDefinedTypeValid()              = false;
     eq FCardinality.getOriginalArg().argumentDefinedTypeValid()              = false;
+    eq FDecouple.getOriginalArg().argumentDefinedTypeValid()                 = false;
     eq FMathematicalFunctionCall.getOriginalArg().argumentDefinedTypeValid() = false;
     eq FConnectionsOp.getOriginalArg().argumentDefinedTypeValid()            = false;
     eq FStringExp.getOriginalArg(int i).argumentDefinedTypeValid()           = i > 0;
@@ -1265,6 +1266,7 @@ aspect FlatTypeCheck {
     eq FDimensionConvert.getChild().argumentTypeValid(FType type)         = argumentSizeValid(type.size());
     eq FCardinality.getChild().argumentTypeValid(FType type)              = 
         type.isScalar() && getFExp().isComponentReference(ALLOWED_COMPONENTS);
+    eq FDecouple.getChild().argumentTypeValid(FType type)                 = true;
     eq FConnectionsOp.getOriginalArg(int i).argumentTypeValid(FType type) = 
         getOriginalArg(i).getFExp().isComponentReference(ALLOWED_COMPONENTS);
     eq FStringExp.getChild().argumentTypeValid(FType type)                = 

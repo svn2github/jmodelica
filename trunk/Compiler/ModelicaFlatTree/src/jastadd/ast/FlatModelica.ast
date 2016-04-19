@@ -659,6 +659,11 @@ FConnRootedDep : FConnRooted;
 FCardinality : FUnaryBuiltIn;
 
 /**
+ * The Subtask.decouple() function-like operator.
+ */
+FDecouple : FUnaryBuiltIn;
+
+/**
  * For equation clause.
  */
 FForClauseE : FAbstractEquation ::= FForIndex* FAbstractEquation*;
