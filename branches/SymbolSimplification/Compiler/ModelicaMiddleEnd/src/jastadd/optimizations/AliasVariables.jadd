@@ -245,7 +245,7 @@ aspect AliasVariables {
         
         aliasVariablesEliminated = true;
         enableAliasRewrite();
-        // TODO: This needs to be here?
+        
         flush();
     }
 

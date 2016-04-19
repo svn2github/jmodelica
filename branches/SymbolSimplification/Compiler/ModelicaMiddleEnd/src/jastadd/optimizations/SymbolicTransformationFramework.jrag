@@ -105,6 +105,7 @@ aspect SymbolicTransformationFramework {
                 aliasEliminator.run(equation);
             }
             
+            change();
             aliasEliminator.postRun();
             change();
         }
@@ -326,6 +327,7 @@ aspect SymbolicTransformationFramework {
                     if (id.myFEquation() != currentEquation) {
                         FAbstractVariable var = id.myFV();
                         var.addUse(n);
+                        id.myFEquation().addVariable(var);
                     }
                 }
             }
@@ -342,7 +344,9 @@ aspect SymbolicTransformationFramework {
                 
                 for (FIdUseExp id : idUsesInTree) {
                     FAbstractVariable var = id.myFV();
+                    FAbstractEquation eqn = id.myFEquation();
                     var.removeUse(n);
+                    eqn.removeVariable(var);
                 }
             }
             
@@ -375,7 +379,8 @@ aspect SymbolicTransformationFramework {
      *  @param  workData the <code>WorkData</code> instance used by the
      *          transformation algorithms.
      *  @param  newExp the expression to replace the id-use expression.
-     *  @param  negated 
+     *  @param  negated specifies whether or not the replacing expression
+     *          should be negated.
      */
     public void FIdUseExp.replaceUses(
             symbolicTransformationFramework.WorkData workData, 
@@ -388,9 +393,6 @@ aspect SymbolicTransformationFramework {
         replaceMe(negated ? new FNegExp(newExp) : newExp);
         // Insert the new id use into the tree.
         workData.registerNode(newExp);
-        
-        // TODO: Remove and fix without.
-        equation.flushAllRecursiveClearFinal();
     }
     
     public void FAbstractVariable.addUse(ASTNode n) {
