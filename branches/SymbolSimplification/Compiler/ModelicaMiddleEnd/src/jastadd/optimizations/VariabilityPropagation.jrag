@@ -155,6 +155,11 @@ aspect VariabilityPropagation {
             }
             
             @Override
+            protected String getName() {
+                return "Variability_Propagation";
+            }
+            
+            @Override
             public boolean isUsed() {
                 return fclass.myOptions().getBooleanOption("variability_propagation");
             }
@@ -495,8 +500,10 @@ aspect VariabilityPropagation {
                     if (topFactorExp != null) {
                         Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
                         Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
+                        
                         usesInEq.removeAll(usesInTop);
                         usesInEq.remove(use);
+                        
                         Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
                         Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
                         

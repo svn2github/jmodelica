@@ -67,7 +67,12 @@ aspect CanonizeEquations {
             public Canonizer(FClass fclass, WorkData workData) {
                 super(fclass, workData);
             }
-    
+            
+            @Override
+            protected String getName() {
+                return "Canonize_Equations";
+            }
+            
             @Override
             public boolean isUsed() {
                return fclass.myOptions().getBooleanOption("canonize_equations");

@@ -1165,6 +1165,11 @@ aspect ExpressionSimplification {
         public ExpressionSimplifier(FClass fclass, WorkData workData) {
             super(fclass, workData);
         }
+        
+        @Override
+        protected String getName() {
+            return "Expression_Simplifier";
+        }
 
         @Override
         public boolean isUsed() {

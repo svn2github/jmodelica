@@ -34,6 +34,7 @@ aspect SymbolicTransformationFramework {
      *  upon the equations in an <code>FClass</code>.
      */ 
     public class symbolicTransformationFramework extends FClass.Transformation {
+        private static ModelicaLogger log = ASTNode.log;
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithmsInFramework;
         private static Canonizer canonizer;
@@ -62,27 +63,45 @@ aspect SymbolicTransformationFramework {
             for (SymbolicTransformationAlgorithm algorithm: algorithmsInFramework) {
                 if (algorithm.isUsed()) {
                     algorithmList.add(algorithm);
+                    log.debug("%s added to the algorithm list.", algorithm.name());
                 }
             }
             
             // Worklist will contain all equations at the beginning.
             workData.addAllToWorklist(fclass.getFAbstractEquations());
+            log.debug("Constructed worklist of %d equations:\n%s",
+                workData.worklist.size(), workData.worklist);
             
+            log.debug("Running pre-configuration.");
             preConfiguration(algorithmList);
+            log.debug("Pre-configuration done.");
             
+            log.debug("Algorithm loop starting.");
             // Start using algorithms on the equations.
             while (!workData.emptyWorklist()) {
                 FAbstractEquation equation = workData.pollWorklist();
+                log.debug("Working on equation [%s], ", equation);
                 for (SymbolicTransformationAlgorithm algorithm : algorithmList) {
+                    log.debug("\twith %s.", algorithm.name());
                     if (algorithm.run(equation)) {
+                    log.debug("Algorithm performed changes, tracing back to first " +
+                        "equation in the worklist.");
                         break;
                     }
                 }
             }
+            log.debug("Worklist empty, algorithm loop done.");
             
+            log.debug("Running first change().");
             change();
+            
+            log.debug("Running post-configuration.");
             postConfiguration(algorithmList);
+            
+            log.debug("Running second change().");
             change();
+            
+            log.debug("Symbolic transformation framework is done.");
         }
         
         /**
@@ -158,12 +177,32 @@ aspect SymbolicTransformationFramework {
          *  Abstract class that algorithms in the framework must implement. 
          */
         public abstract class SymbolicTransformationAlgorithm {
+            protected String name;
             protected FClass fclass;
             protected WorkData workData;
+            
             public SymbolicTransformationAlgorithm(FClass fclass, WorkData workData) {
                 this.fclass = fclass;
                 this.workData = workData;
+                this.name = getName();
             }
+            
+            /*
+             *  Returns the name of the algorithm.<p>
+             *  Primarily used for debugging.
+             * 
+             *  @return the name of the algorithm.
+             */
+            public String name() {
+                return name;
+            }
+            
+            /*
+             *  Ensures that the algorithm has a name.<p>
+             * 
+             *  @return the name of the algorithm.
+             */
+            protected abstract String getName();
             
             /**
              *  Checks if the algorithm is enabled.<p>
@@ -266,6 +305,7 @@ aspect SymbolicTransformationFramework {
                 if (!equation.equalSides() &&
                     !hasRemovedEquation(equation) &&
                     equation != currentEquation) {
+                    log.debug("\tAdded equation <%s> to the worklist.", equation);
                     worklist.add(equation);
                 }
             }
@@ -277,7 +317,7 @@ aspect SymbolicTransformationFramework {
              */
             public void addAllToWorklist(List<FAbstractEquation> equations) {
                 for (FAbstractEquation eqn : equations) {
-                    worklist.add(eqn);
+                    addToWorklist(eqn);
                 }
             }
             
@@ -301,6 +341,7 @@ aspect SymbolicTransformationFramework {
                 removedEquations.add(equation);
                 worklist.remove(equation);
                 equation.markForRemoval();
+                log.debug("Equation <%s> marked for removal.", equation);
             }
             
             /**
@@ -326,9 +367,10 @@ aspect SymbolicTransformationFramework {
                     if (id.myFEquation() != currentEquation) {
                         FAbstractVariable var = id.myFV();
                         var.addUse(n);
-                        if (!var.isParameter() && !var.isConstant()) {
-                            id.myFEquation().addVariable(var);
-                        }
+                        id.myFEquation().addVariable(var);
+                        log.debug("\t\tAdded id use <%s> to variable <%s>," +
+                            " variable added to equation [%s].",
+                            id, var, id.myFEquation());
                     }
                 }
             }
@@ -348,6 +390,8 @@ aspect SymbolicTransformationFramework {
                     FAbstractEquation eqn = id.myFEquation();
                     var.removeUse(n);
                     eqn.removeVariable(var);
+                    log.debug("\t\tRemoved id use <%s> from variable <%s>," +
+                        " variable removed from equation [%s].", id, var, eqn);
                 }
             }
             
@@ -408,7 +452,7 @@ aspect SymbolicTransformationFramework {
     }
     
     public void FAbstractEquation.addVariable(FAbstractVariable var) {
-        if (var.isFVariable()) {
+        if (var.isFVariable() && !var.isParameter() && !var.isConstant()) {
             variables().add(var.asFVariable());
         }
     }

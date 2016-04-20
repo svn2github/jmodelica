@@ -33,6 +33,11 @@ aspect AliasVariables {
             }
             
             @Override
+            protected String getName() {
+                return "Alias_Elimination";
+            }
+            
+            @Override
             public boolean isUsed() {
                 return fclass.myOptions().getBooleanOption("eliminate_alias_variables");
             }
