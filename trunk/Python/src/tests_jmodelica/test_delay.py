@@ -397,6 +397,10 @@ class TestSpatialDistribution:
 
     @testattr(stddist = True)
     def test_feed_loop_no_pvel_events(self):
+        if self.get_class_postfix() != "":
+            def get_class_postfix():
+                return "(redeclare block SD=TestFeedLoopNoPVelEvents.SpatialDistReverse)"
+            self.get_class_postfix = get_class_postfix
         self.test_feed_loop(model_name = 'TestFeedLoopNoPVelEvents')
 
 class TestSpatialDistributionRev(TestSpatialDistribution):
