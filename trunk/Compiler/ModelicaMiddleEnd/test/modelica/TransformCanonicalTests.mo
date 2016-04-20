@@ -7848,4 +7848,84 @@ y := time
     end Homotopy;
 end Operators;
 
+
+model ScalarizeIfInLoop1
+    parameter Real x[:] = {1} annotation(Evaluate=true);
+    Real y[2];
+equation
+    for i in 1:2 loop
+        y[i] = if size(x, 1) < i then 0.0 else time * x[i];
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeIfInLoop1",
+            description="Check scalarization of if expression in loop where one branch is invalid for some indices",
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeIfInLoop1
+ eval parameter Real x[1] = 1 /* 1 */;
+ Real y[1];
+ constant Real y[2] = 0.0;
+equation
+ y[1] = time;
+end TransformCanonicalTests.ScalarizeIfInLoop1;
+")})));
+end ScalarizeIfInLoop1;
+
+
+model ScalarizeIfInLoop2
+    parameter Real x[:] = {1} annotation(Evaluate=true);
+    Real y[2];
+equation
+    for i in 1:2 loop
+        if size(x, 1) < i then
+            y[i] = 0.0; 
+        else 
+            y[i] = time * x[i];
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeIfInLoop2",
+            description="Check scalarization of if equation in loop where one branch is invalid for some indices",
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeIfInLoop2
+ eval parameter Real x[1] = 1 /* 1 */;
+ Real y[1];
+ constant Real y[2] = 0.0;
+equation
+ y[1] = time;
+end TransformCanonicalTests.ScalarizeIfInLoop2;
+")})));
+end ScalarizeIfInLoop2;
+
+
+model ScalarizeIfInLoop3
+    parameter Real x[:] = {1} annotation(Evaluate=true);
+    Real y[2];
+equation
+    for i in 1:2 loop
+        if size(x, 1) >= i then
+            y[i] = time * x[i];
+        else 
+            y[i] = 0.0; 
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeIfInLoop3",
+            description="Check scalarization of if equation in loop where one branch is invalid for some indices",
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeIfInLoop3
+ eval parameter Real x[1] = 1 /* 1 */;
+ Real y[1];
+ constant Real y[2] = 0.0;
+equation
+ y[1] = time;
+end TransformCanonicalTests.ScalarizeIfInLoop3;
+")})));
+end ScalarizeIfInLoop3;
+
 end TransformCanonicalTests;

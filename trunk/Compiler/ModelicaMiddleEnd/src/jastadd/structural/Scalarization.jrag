@@ -2549,7 +2549,30 @@ aspect Scalarization {
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		eqns.add(scalarize(vars, indexMap));
 	}
-	
+
+    public void FIfEquation.scalarize(List<FAbstractEquation> eqns, 
+            List<FVariable> vars, Map<String,FExp> indexMap) {
+        boolean lockedBranch = false;
+        if (getTest().variability().indexParameterOrLess()) {
+            try {
+                if (getTest().ceval().booleanValue()) {
+                    scalarizeList(getFAbstractEquations(), eqns, vars, indexMap);
+                } else {
+                    getElse().scalarize(eqns, vars, indexMap);
+                }
+                lockedBranch = true;
+            } catch (ConstantEvaluationException e) {}
+        }
+        if (!lockedBranch) {
+            super.scalarize(eqns, vars, indexMap);
+        }
+    }
+
+    public void FElseEquation.scalarize(List<FAbstractEquation> eqns, 
+            List<FVariable> vars, Map<String,FExp> indexMap) {
+        scalarizeList(getFAbstractEquations(), eqns, vars, indexMap);
+    }
+
 	public FIfWhenElseEquation FIfWhenElseEquation.scalarize(
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		FIfWhenElseEquation res = createEmptyNode();
@@ -3071,13 +3094,18 @@ aspect Scalarization {
 	eq FFunctionCall.getArg(int i).wantsRecordCon() = !getArg(i).isFFunctionCall() && !inFunction();
 	eq FRecordConstructor.getArg().wantsRecordCon() = wantsRecordCon();
 	eq FArray.getFExp().wantsRecordCon()            = wantsRecordCon();
- 
+
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
-		return new FIfExp(getIfExp().scalarize(indexMap),
-		                  getThenExp().scalarize(indexMap),
-		                  getElseExp().scalarize(indexMap));
-	}
-	
+        if (getIfExp().variability().indexParameterOrLess()) {
+            try {
+                return cevalSelectExp().scalarize(indexMap);
+            } catch (ConstantEvaluationException e) {}
+        }
+        return new FIfExp(getIfExp().scalarize(indexMap),
+                getThenExp().scalarize(indexMap),
+                getElseExp().scalarize(indexMap));
+    }
+
 	public FExp FMulExp.scalarizeExp(Map<String,FExp> indexMap) {
 		if (getLeft().isArray() && !isArray()) 
 			return dynamicFExp(composeMulScalarCellExp(Index.NULL)).scalarize(indexMap);

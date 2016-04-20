@@ -2538,7 +2538,12 @@ aspect ExtractSampleExpressions {
 }
 
 aspect IfEquations {
-	
+
+    /*
+     *  TODO: We shouldn't need this now that scalarization can do this anyway. 
+     *        Just removing it and making obviously necessary changes causes lots of tests to fail. 
+     */
+
 	/*
 	 * First rewrite those if equations that has constant or stuctural parameter test
 	 * by evaluating the expressions and eliminating unreachable branches.
