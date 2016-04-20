@@ -406,29 +406,37 @@ aspect ContentCheck {
 		"All branches in if equation with non-parameter tests must have the same number of equations";
 	public static final String FIfEquation.UNBALANCED_ERROR_WHEN = 
 		"All branches in if equation with non-parameter tests within when equation must assign the same variables";
-	
-	public void FIfEquation.contentCheck(ErrorCheckType checkType) {
-		super.contentCheck(checkType);
-		if (isTopWhenIfEquation()) {
-			boolean inWhen = inWhen();
-			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
-			boolean functionCallEqu = hasFunctionCallEquations(); 
+
+    public void FIfEquation.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        if (isTopWhenIfEquation()) {
+            boolean inWhen = inWhen();
+            boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
+            boolean functionCallEqu = hasFunctionCallEquations(); 
             if (hasOnlyFixedParamTests()) {
-				setEliminateOnParamTest(checkType);
-			} else {
-				if (!balanced) {
-					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-				}
-			}
-		}
-	}
-	
+                markTestsAsStructuralParameter(checkType);
+            } else {
+                if (!balanced) {
+                    error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
+                }
+            }
+        }
+    }
+
 	public void FEquation.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
 		if (inWhen() && !isAssignmentEqn())
 			error("Only assignment equations are allowed in when clauses");
 	}
-	
+
+    protected void FIfWhenElseEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {}
+
+    protected void FIfEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {
+        getTest().markAsStructuralParameter(checkType);
+        if (hasElse())
+            getElse().markTestsAsStructuralParameter(checkType);
+    }
+
 	syn boolean FIfWhenElseEquation.isBalancedEquations() = true; 
 	eq FIfEquation.isBalancedEquations() = hasElse() ? elseIsBalancedEquations() : numScalarEquations() == 0;
 	

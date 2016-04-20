@@ -2587,20 +2587,7 @@ aspect IfEquations {
 	private boolean FIfEquation.eliminateIfEquation = false;
 	private boolean FIfExp.eliminateIfEquation = false;
 
-	// TODO: not needed, since structural parameters are replaced 
-	protected boolean FIfWhenElseEquation.eliminateOnParamTest = false;
-
-	protected void FIfWhenElseEquation.setEliminateOnParamTest(ErrorCheckType checkType) {}
-
-	protected void FIfEquation.setEliminateOnParamTest(ErrorCheckType checkType) {
-		eliminateOnParamTest = true;
-		getTest().markAsStructuralParameter(checkType);
-		if (hasElse())
-			getElse().setEliminateOnParamTest(checkType);
-	}
-	
-	syn boolean FIfEquation.shouldEliminateIf() = 
-		getTest().isConstantExp() || getTest().isParameterExp() && eliminateOnParamTest;
+	syn boolean FIfEquation.shouldEliminateIf() = getTest().isConstantExp();
 	
 	rewrite FIfEquation {
 		when (eliminateIfEquation) to FIfWhenElseEquation {

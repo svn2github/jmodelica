@@ -2577,7 +2577,6 @@ aspect Scalarization {
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		FIfWhenElseEquation res = createEmptyNode();
 		res.setType((FEquationType) getType().fullCopy());
-		res.eliminateOnParamTest = eliminateOnParamTest;
 		scalarizeList(getFAbstractEquations(), res.getFAbstractEquations(), vars, indexMap);
 		scalarizeTestAndElse(res, vars, indexMap);
 		return res;
