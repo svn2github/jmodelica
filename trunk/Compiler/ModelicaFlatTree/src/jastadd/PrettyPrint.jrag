@@ -967,60 +967,72 @@ aspect PrettyPrint {
 }
 
 aspect FlatPrettyPrint {
-	
-	public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
-		String nextInd = p.indent(indent);
-		str.print(indent + "fclass " + name() + "\n");
-		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
-	  		        !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
-	  			p.print(fv, str, nextInd);
-	  			str.print(";\n");  
-	  		}
-		}
 
-		if (getNumFInitialEquation()>0)
-			str.print(indent + "initial equation \n");
-		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+    public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
+        String nextInd = p.indent(indent);
+        str.print(indent + "fclass " + name() + "\n");
+        ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
+        for (FVariable fv : getFVariables()) {
+            if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
+                    !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
+                if (fv.isProtected()) {
+                  protectedVars.add(fv);
+                } else {
+                    p.print(fv, str, nextInd);
+                    str.print(";\n");
+                }
+            }
+        }
+        if (!protectedVars.isEmpty()) {
+            str.print(indent + "protected\n");
+            for (FVariable fv : protectedVars) {
+                p.print(fv, str, nextInd);
+                str.print(";\n");
+            }
+        }
 
-		if (getNumFParameterEquation()>0)
-			str.print(indent + "parameter equation\n");
-		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
-	
-	    boolean wroteEquation = false;
-    	for (FAbstractEquation e : getFAbstractEquations()) {
-    		if (e instanceof FAlgorithm) {
-    			p.print(e, str, indent);
-    			wroteEquation = false;
-    		} else {
-    			if (!e.isIgnored()) {
-	    			if (!wroteEquation) {
-	    				str.print(indent);
-	    				str.print("equation\n");
-	    				wroteEquation = true;
-	    			}
-	    			p.print(e, str, nextInd);
-		    		str.print(";\n");
-    			}
-    		}
-    	}
-	    
-  		if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
-  				getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
-	  		str.print("\n" + indent + "public\n");
-	    	p.print(getFFunctionDecls(), str, nextInd);
-	    	p.print(getFRecordDecls(), str, nextInd);
-	    	p.print(getFEnumDecls(), str, nextInd);
-	    	p.print(getFDerivedTypes(), str, nextInd);
-  		}
-    	
+        if (getNumFInitialEquation()>0)
+            str.print(indent + "initial equation \n");
+        getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+
+        if (getNumFParameterEquation()>0)
+            str.print(indent + "parameter equation\n");
+        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+    
+        boolean wroteEquation = false;
+        for (FAbstractEquation e : getFAbstractEquations()) {
+            if (e instanceof FAlgorithm) {
+                p.print(e, str, indent);
+                wroteEquation = false;
+            } else {
+                if (!e.isIgnored()) {
+                    if (!wroteEquation) {
+                        str.print(indent);
+                        str.print("equation\n");
+                        wroteEquation = true;
+                    }
+                    p.print(e, str, nextInd);
+                    str.print(";\n");
+                }
+            }
+        }
+        
+        if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
+                getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
+            str.print("\n" + indent + "public\n");
+            p.print(getFFunctionDecls(), str, nextInd);
+            p.print(getFRecordDecls(), str, nextInd);
+            p.print(getFEnumDecls(), str, nextInd);
+            p.print(getFDerivedTypes(), str, nextInd);
+        }
+        
         getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
 
-  		str.print(indent);
-  		str.print("end ");
-  		str.print(name());
-  		str.print(";\n");
-	}
+        str.print(indent);
+        str.print("end ");
+        str.print(name());
+        str.print(";\n");
+    }
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();

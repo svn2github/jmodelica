@@ -476,6 +476,7 @@ protected Real x=1;
 			description="Check correct flattening of protected variable",
 			flatModel="
 fclass NameTests.NameTest15
+protected
  Real x = 1;
 
 end NameTests.NameTest15;
@@ -3863,5 +3864,37 @@ fclass NameTests.LibWithVerTest1
 end NameTests.LibWithVerTest1;
 ")})));
 end LibWithVerTest1;
+
+
+model ProtectedComponent1
+    model A
+        B b;
+    protected
+        Real y = time;
+    end A;
+    
+    model B
+    protected 
+        C c;
+    end B;
+    
+    model C
+        Real x = time;
+    end C;
+    
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ProtectedComponent1",
+            description="Check that variables in protected components are marked as protected in the flat model",
+            flatModel="
+fclass NameTests.ProtectedComponent1
+protected
+ Real a.b.c.x = time;
+ Real a.y = time;
+end NameTests.ProtectedComponent1;
+")})));
+end ProtectedComponent1;
 
 end NameTests;

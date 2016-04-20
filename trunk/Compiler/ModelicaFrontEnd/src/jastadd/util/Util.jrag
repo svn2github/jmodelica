@@ -1103,6 +1103,13 @@ aspect Visibility {
     syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
 
+    inh boolean InstNode.inProtectedComponent();
+    eq InstComponentDecl.getChild().inProtectedComponent() = isProtected() || inProtectedComponent();
+    eq InstClassDecl.getChild().inProtectedComponent()     = false;
+    eq InstRoot.getChild().inProtectedComponent()          = false;
+
+    syn boolean InstAssignable.isPublicVar() = isPublic() && !inProtectedComponent();
+
     syn boolean VisibilityType.isPublic() = false;
     eq PublicVisibilityType.isPublic()    = true;
 
