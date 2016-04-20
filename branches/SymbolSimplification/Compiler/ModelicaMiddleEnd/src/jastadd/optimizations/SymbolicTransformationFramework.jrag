@@ -266,7 +266,6 @@ aspect SymbolicTransformationFramework {
                 if (!equation.equalSides() &&
                     !hasRemovedEquation(equation) &&
                     equation != currentEquation) {
-                    
                     worklist.add(equation);
                 }
             }
@@ -327,7 +326,7 @@ aspect SymbolicTransformationFramework {
                     if (id.myFEquation() != currentEquation) {
                         FAbstractVariable var = id.myFV();
                         var.addUse(n);
-                        if (!var.isParameter()) {
+                        if (!var.isParameter() && !var.isConstant()) {
                             id.myFEquation().addVariable(var);
                         }
                     }

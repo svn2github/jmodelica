@@ -489,16 +489,6 @@ aspect VariabilityPropagation {
             FIdUseExp use = uses.get(i);
             if (use.inFEquation()) {
                 equation = use.myFEquation();
-                if (isConstant() && equation.shouldBeOverwritten()) {
-                    FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
-                    use.replaceUses(workData, newId, false);
-                }
-                    
-                // TODO: Hack fix, will work improperly in some cases.
-                if (isParameter()) {
-                    equation.removeVariable(this);
-                }
-                
                 if (isZero) {
                     // Adjust variable set for special case y = 0 * z
                     FExp topFactorExp = use.myTopFactorFExp();
@@ -506,18 +496,42 @@ aspect VariabilityPropagation {
                         Set<FIdUseExp> usesInEq = equation.findFIdUseExpsInTree();
                         Set<FIdUseExp> usesInTop = topFactorExp.findFIdUseExpsInTree();
                         usesInEq.removeAll(usesInTop);
+                        usesInEq.remove(use);
                         Set<FVariable> fvsInEq = lookupFVariablesInSet(usesInEq);
                         Set<FVariable> fvsInTop = lookupFVariablesInSet(usesInTop);
                         
                         for (FVariable tFV : fvsInTop) {
                             if (!fvsInEq.contains(tFV)) {
-                                equation.variables().remove(tFV);
+                                equation.removeVariable(tFV);
                             }
                         }
                         
                         topFactorExp.taggedByVProp = true;
                     }
                     equation.flushChildren();
+                    
+                    /*
+                     * TODO: Hack-fix so that constants do not persist
+                     *       within the variable sets. Consider revision.
+                     */
+                    Set<FVariable> toRemove = new HashSet<FVariable>();
+                    for (FVariable fv : equation.variables()) {
+                        if (fv.isConstant())
+                            toRemove.add(fv);
+                    }
+                    
+                    for (FVariable fv : toRemove) {
+                        equation.removeVariable(fv);
+                    }
+                    
+                } else if (isConstant() && equation.shouldBeOverwritten()) {
+                    FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
+                    use.replaceUses(workData, newId, false);
+                }
+                    
+                // TODO: Hack fix, will work improperly in some cases.
+                if (isParameter()) {
+                    equation.removeVariable(this);
                 }
                 
                 workData.addToWorklist(equation);
