@@ -2284,7 +2284,10 @@ aspect FlatExpressions {
     }
     
     public FQName InstDot.flattenOuterAccess(FQName prefix) {
-        return getLastInstAccess().flattenOuterAccess(prefix);
+        int i;
+        for (i = getNumInstAccess() - 1; i > 0 && !getInstAccess(i).myInstComponentDecl().isInner(); i--) {}
+        FQName innerPrefix = getInstAccess(i).myInstComponentDecl().getFQName().copyPrefix();
+        return flattenName(prefix, innerPrefix, i);
     }
     
     public FArraySubscripts InstAccess.flattenFAS(FQName prefix) {

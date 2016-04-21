@@ -1224,6 +1224,65 @@ end ArrayTests.General.ArrayTest46;
 end ArrayTest46;
 
 
+model ArrayTest47
+    record R
+        Real x;
+    end R;
+    connector R_input = input R;
+    connector R_output = output R;
+    record B
+        constant Integer n = 2;
+        R_output r[n];
+    end B;
+    
+    inner B b;
+    
+    model C
+        outer B b;
+        R_input r[b.n];
+    equation
+    end C;
+    
+    C c;
+equation
+    connect(b.r, c.r);
+    for i in 1:b.n loop
+        b.r[i].x = 1;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest47",
+            description="",
+            flatModel="
+fclass ArrayTests.General.ArrayTest47
+ ArrayTests.General.ArrayTest47.B b(n = 2,r(size() = {2}));
+ ArrayTests.General.ArrayTest47.R_input c.r[2];
+equation
+ for i in 1:2 loop
+  b.r[i].x = 1;
+ end for;
+ b.r[1].x = c.r[1].x;
+ b.r[2].x = c.r[2].x;
+
+public
+ record ArrayTests.General.ArrayTest47.R_output
+  Real x;
+ end ArrayTests.General.ArrayTest47.R_output;
+
+ record ArrayTests.General.ArrayTest47.B
+  constant Integer n;
+  output ArrayTests.General.ArrayTest47.R_output r[2];
+ end ArrayTests.General.ArrayTest47.B;
+
+ record ArrayTests.General.ArrayTest47.R_input
+  Real x;
+ end ArrayTests.General.ArrayTest47.R_input;
+
+end ArrayTests.General.ArrayTest47;
+")})));
+end ArrayTest47;
+
 end General;
 
 
