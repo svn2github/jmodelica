@@ -789,56 +789,72 @@ aspect Flattening {
     
 	public FFunctionVariable InstAssignable.createFFunctionVariable(Opt eo, FQName fqn) {
 		// TODO: if we need separate variable class for records, override this
-        FType type = type().flatten(new FQNameEmpty(), this);
+        FType type = type().flatten(new FQNameEmpty(), this, !isInput());
 		FFunctionVariable ffv;
 		if (isArray())
 			ffv = new FFunctionArray(new Opt(), type, eo, fqn);
 		else
 			ffv = new FFunctionVariable(new Opt(), type, eo, fqn);
-		type.flattenSize(new FQNameEmpty(), ffv);
 		return ffv;
 	}
 	
-    public FType FType.flatten(FQName prefix, InstAssignable ia) {
-        return fullCopy();
+    public FType FType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        FType res = fullCopy();
+        res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        return res;
     }
-    public FType FExternalObjectType.flatten(FQName prefix, InstAssignable ia) {
-        return new FExternalObjectType(getSize(), getName(), getConstructor().flatten(prefix), getDestructor().flatten(prefix));
+    
+    public FRecordComponentType FRecordComponentType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        return new FRecordComponentType(getName(), getFType().flatten(prefix, ia, keepSizeExpressions));
     }
-    public FType FFunctionType.flatten(FQName prefix, InstAssignable ia) {
-        return new FFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), getInputs().fullCopy(), getOutputs().fullCopy(), getFClass());
+    
+    @Override
+    public FType FRecordType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        List<FRecordComponentType> comps = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getComponents()) {
+            comps.add(frct.flatten(prefix, ia, keepSizeExpressions));
+        }
+        FType res = new FRecordType(getSize(), getName(), comps, getFClass());
+        res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        return res;
     }
-	
-	public void FType.flattenSize(FQName prefix, ASTNode context) {
-		setSize(getSize().flatten(prefix, context));
-	}
-	
-	public void FRecordType.flattenSize(FQName prefix, ASTNode context) {
-		super.flattenSize(prefix, context);
-		for (FRecordComponentType comp : getComponents())
-			comp.getFType().flattenSize(prefix, context);
-	}
-	
-    public void FFunctionType.flattenSize(FQName prefix, ASTNode context) {
-        super.flattenSize(prefix, context);
-        for (FRecordComponentType comp : getInputs())
-            comp.getFType().flattenSize(prefix, context);
-        for (FRecordComponentType comp : getOutputs())
-            comp.getFType().flattenSize(prefix, context);
+    
+    @Override
+    public FType FFunctionType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        List<FRecordComponentType> inputs = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getInputs()) {
+            inputs.add(frct.flatten(prefix, ia, keepSizeExpressions));
+        }
+        List<FRecordComponentType> outputs = new List<FRecordComponentType>();
+        for (FRecordComponentType frct : getOutputs()) {
+            outputs.add(frct.flatten(prefix, ia, keepSizeExpressions));
+        }
+        FType res = new FFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), inputs, outputs, getFClass());
+        res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        return res;
     }
-	
-	public Size Size.flatten(FQName prefix, ASTNode context) {
+    
+    @Override
+    public FType FExternalObjectType.flatten(FQName prefix, InstAssignable ia, boolean keepSizeExpressions) {
+        FType res = new FExternalObjectType(getSize(), getName(), getConstructor().flatten(prefix), getDestructor().flatten(prefix));
+        res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
+        return res;
+    }
+    
+    public Size Size.flatten(FQName prefix, ASTNode context, boolean keepSizeExpressions) {
 		return this;
 	}
 	
-	public MutableSize MutableSize.flatten(FQName prefix, ASTNode context) {
+    public MutableSize MutableSize.flatten(FQName prefix, ASTNode context, boolean keepSizeExpressions) {
 		MutableSize res = new MutableSize(size.length);
 		System.arraycopy(size, 0, res.size, 0, size.length);
-		for (int i = 0; i < exps.length; i++) {
-			if (size[i] == Size.UNKNOWN && exps[i] != null && !(exps[i] instanceof FColonSizeExp)) {
-				res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
-			}
-		}
+        if (keepSizeExpressions) {
+            for (int i = 0; i < exps.length; i++) {
+                if (size[i] == Size.UNKNOWN && exps[i] != null && !(exps[i] instanceof FColonSizeExp)) {
+                    res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
+                }
+            }
+        }
 		return res;
 	}
 	
@@ -865,7 +881,7 @@ aspect Flattening {
 		return exp;
 	}
 	
-	public FExp FAbstractVariable.affixExpression(FExp exp) {
+    public FExp FType.affixExpression(FExp exp) {
 		// TODO: need better way of including exp in tree
 		exp.parent = this;
 		return exp;
@@ -2700,11 +2716,13 @@ aspect FlatExpressions {
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
 		Size[] sizes = new Size[myCallOutputs().size()];
 		FFunctionCall res = createFFunctionCall(name, args, sizes);
-		if (isFunctionCallClause()) 
-			for (int i = 0; i < myLefts().size(); i++)
-				sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res) : null;
-		else
-			sizes[0] = size().flatten(prefix, res);
+        if (isFunctionCallClause()) {
+            for (int i = 0; i < myLefts().size(); i++) {
+                sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res, true) : null;
+            }
+        } else {
+            sizes[0] = size().flatten(prefix, res, true);
+        }
 		return res;	
 	}
 

@@ -4419,23 +4419,23 @@ void func_CCodeGenTests_CUnknownArray5_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
         y_a = y_an;
     }
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i2_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i2_a, 0))
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i2_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i2_a, 0))
     i7_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
     for (i7_0i = 1; i7_0i < i7_0ie; i7_0i += 1) {
-        i8_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        i8_1ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
         for (i8_1i = 1; i8_1i < i8_1ie; i8_1i += 1) {
             jmi_array_ref_2(temp_2_a, i7_0i, i8_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i7_0i), jmi_array_val_1(i2_a, i8_1i));
         }
     }
     i5_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
     for (i5_2i = 1; i5_2i < i5_2ie; i5_2i += 1) {
-        i6_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        i6_3ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
         for (i6_3i = 1; i6_3i < i6_3ie; i6_3i += 1) {
             jmi_array_ref_2(temp_1_a, i5_2i, i6_3i) = jmi_array_val_2(temp_2_a, i5_2i, i6_3i);
         }
     }
-    i3_4ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    i3_4ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
     for (i3_4i = 1; i3_4i < i3_4ie; i3_4i += 1) {
         i4_5ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
         for (i4_5i = 1; i4_5i < i4_5ie; i4_5i += 1) {
@@ -4490,23 +4490,23 @@ void func_CCodeGenTests_CUnknownArray6_f_def0(jmi_array_t* i1_a, jmi_array_t* i2
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, (jmi_array_size(i1_a, 0) * 2 - 2) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0) * 2 - 2, jmi_array_size(i1_a, 0))
         y_a = y_an;
     }
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i1_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i1_a, 0))
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(i1_a, 0) * jmi_array_size(i2_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i2_a, 0))
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, jmi_array_size(i1_a, 0) * jmi_array_size(i2_a, 0), 2, jmi_array_size(i1_a, 0), jmi_array_size(i2_a, 0))
     i7_0ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
     for (i7_0i = 1; i7_0i < i7_0ie; i7_0i += 1) {
-        i8_1ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        i8_1ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
         for (i8_1i = 1; i8_1i < i8_1ie; i8_1i += 1) {
             jmi_array_ref_2(temp_2_a, i7_0i, i8_1i) = jmi_array_val_2(x_a, jmi_array_val_1(i1_a, i7_0i), jmi_array_val_1(i2_a, i8_1i));
         }
     }
     i5_2ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
     for (i5_2i = 1; i5_2i < i5_2ie; i5_2i += 1) {
-        i6_3ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+        i6_3ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
         for (i6_3i = 1; i6_3i < i6_3ie; i6_3i += 1) {
             jmi_array_ref_2(temp_1_a, i5_2i, i6_3i) = jmi_array_val_2(temp_2_a, i5_2i, i6_3i);
         }
     }
-    i3_4ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
+    i3_4ie = jmi_array_size(i2_a, 0) + 1 / 2.0;
     for (i3_4i = 1; i3_4i < i3_4ie; i3_4i += 1) {
         i4_5ie = jmi_array_size(i1_a, 0) + 1 / 2.0;
         for (i4_5i = 1; i4_5i < i4_5ie; i4_5i += 1) {
@@ -15046,7 +15046,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
-        i2_1ie = jmi_array_size(A_a, 0) + 1 / 2.0;
+        i2_1ie = jmi_array_size(A_a, 1) + 1 / 2.0;
         for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
@@ -16599,14 +16599,14 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         x_a = x_an;
     }
-    i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(b_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_1ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
-        i2_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
+        i2_2ie = jmi_array_size(A_a, 1) + 1 / 2.0;
         for (i2_2i = 1; i2_2i < i2_2ie; i2_2i += 1) {
             jmi_array_ref_2(Awork_a, i1_1i, i2_2i) = jmi_array_val_2(A_a, i1_1i, i2_2i);
         }
@@ -16697,7 +16697,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), 2, jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
         X_a = X_an;
     }
-    i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
+    i1_0ie = jmi_array_size(B_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         i2_1ie = jmi_array_size(B_a, 1) + 1 / 2.0;
         for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
@@ -16707,7 +16707,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
-        i2_3ie = jmi_array_size(A_a, 0) + 1 / 2.0;
+        i2_3ie = jmi_array_size(A_a, 1) + 1 / 2.0;
         for (i2_3i = 1; i2_3i < i2_3ie; i2_3i += 1) {
             jmi_array_ref_2(Awork_a, i1_2i, i2_3i) = jmi_array_val_2(A_a, i1_2i, i2_3i);
         }

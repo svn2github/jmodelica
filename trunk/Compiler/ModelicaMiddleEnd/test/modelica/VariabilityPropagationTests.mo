@@ -769,12 +769,12 @@ no or infinitely many solutions (A is singular).\");
   Integer[:] ipiv;
  algorithm
   init x as Real[size(A, 1)];
-  for i1 in 1:size(A, 1) loop
+  for i1 in 1:size(b, 1) loop
    x[i1] := b[i1];
   end for;
   init Awork as Real[size(A, 1), size(A, 1)];
   for i1 in 1:size(A, 1) loop
-   for i2 in 1:size(A, 1) loop
+   for i2 in 1:size(A, 2) loop
     Awork[i1,i2] := A[i1,i2];
    end for;
   end for;

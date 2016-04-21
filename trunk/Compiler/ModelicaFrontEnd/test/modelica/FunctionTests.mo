@@ -1129,10 +1129,11 @@ model FunctionFlatten24
         TransformCanonicalTestCase(
             name="FunctionFlatten24",
             description="Flattening of size in function",
+            variability_propagation=false,
             flatModel="
 fclass FunctionTests.FunctionFlatten24
- parameter Real y;
-parameter equation
+ Real y;
+equation
  y = FunctionTests.FunctionFlatten24.f(FunctionTests.FunctionFlatten24.R(1, 1, {1, 2}));
 
 public
@@ -4958,12 +4959,12 @@ public
  algorithm
   init y as Real[size(is1, 1), size(is1, 1)];
   for i1 in 1:size(is1, 1) loop
-   for i2 in 1:size(is1, 1) loop
+   for i2 in 1:size(is2, 1) loop
     y[i1,i2] := x[is1[i1],is2[i2]];
    end for;
   end for;
   init temp_1 as Real[size(is1, 1), size(is1, 1)];
-  for i1 in 1:size(is1, 1) loop
+  for i1 in 1:size(is2, 1) loop
    for i2 in 1:size(is1, 1) loop
     temp_1[i1,i2] := x[is2[i1],is1[i2]] + y[i1,i2];
    end for;
@@ -5567,19 +5568,19 @@ public
     y[i1,i2] := temp_1[i2,i1];
    end for;
   end for;
-  init temp_3 as Real[size(a, 1), size(a, 1)];
-  init temp_4 as Real[size(a, 1), size(a, 1)];
+  init temp_3 as Real[size(a, 1), size(b, 1)];
+  init temp_4 as Real[size(a, 1), size(b, 1)];
   for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(a, 1) loop
+   for i6 in 1:size(b, 1) loop
     temp_4[i5,i6] := x[a[i5],b[i6]];
    end for;
   end for;
   for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
+   for i4 in 1:size(b, 1) loop
     temp_3[i3,i4] := temp_4[i3,i4];
    end for;
   end for;
-  for i1 in 1:size(a, 1) loop
+  for i1 in 1:size(b, 1) loop
    for i2 in 1:size(a, 1) loop
     y[i1,i2] := temp_3[i2,i1];
    end for;
@@ -5628,7 +5629,7 @@ public
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(b, 2) loop
     temp_2 := 0;
-    for i3 in 1:size(a, 2) loop
+    for i3 in 1:size(b, 1) loop
      temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
     end for;
     temp_1[i1,i2] := temp_2;
@@ -5733,7 +5734,7 @@ public
   for i5 in 1:size(a, 1) loop
    for i6 in 1:size(b, 2) loop
     temp_3 := 0;
-    for i7 in 1:size(a, 2) loop
+    for i7 in 1:size(b, 1) loop
      temp_3 := temp_3 + a[i5,i7] * b[i7,i6];
     end for;
     temp_2[i5,i6] := temp_3;
@@ -6035,31 +6036,34 @@ public
   Real[:,:,:] temp_2;
  algorithm
   init o as Real[size(a, 1), size(a, 2) + size(b, 2), size(a, 3)];
-  assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
-  init temp_1 as Real[size(a, 1), size(a, 2) + size(b, 2), size(b, 3) + size(c, 3)];
+  assert(size(a, 1) == size(b, 1), \"Mismatching size in dimension 1 of expression cat(2, a[:,:,:], cat(3, b[:,:,:], c[:,:,:])) in function FunctionTests.ArrayExpInFunc30.f\");
+  assert(size(a, 3) == size(b, 3) + size(c, 3), \"Mismatching size in dimension 3 of expression cat(2, a[:,:,:], cat(3, b[:,:,:], c[:,:,:])) in function FunctionTests.ArrayExpInFunc30.f\");
+  assert(size(b, 1) == size(c, 1), \"Mismatching size in dimension 1 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
+  assert(size(b, 2) == size(c, 2), \"Mismatching size in dimension 2 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
+  init temp_1 as Real[size(a, 1), size(a, 2) + size(b, 2), size(a, 3)];
   for i4 in 1:size(a, 1) loop
    for i5 in 1:size(a, 2) loop
-    for i6 in 1:size(b, 3) + size(c, 3) loop
+    for i6 in 1:size(a, 3) loop
      temp_1[i4,i5,i6] := a[i4,i5,i6];
     end for;
    end for;
   end for;
-  init temp_2 as Real[size(a, 1), size(b, 2), size(b, 3) + size(c, 3)];
-  for i7 in 1:size(a, 1) loop
+  init temp_2 as Real[size(b, 1), size(b, 2), size(b, 3) + size(c, 3)];
+  for i7 in 1:size(b, 1) loop
    for i8 in 1:size(b, 2) loop
     for i9 in 1:size(b, 3) loop
      temp_2[i7,i8,i9] := b[i7,i8,i9];
     end for;
    end for;
   end for;
-  for i7 in 1:size(b, 1) loop
-   for i8 in 1:size(b, 2) loop
+  for i7 in 1:size(c, 1) loop
+   for i8 in 1:size(c, 2) loop
     for i9 in 1:size(c, 3) loop
      temp_2[i7,i8,i9 + size(b, 3)] := c[i7,i8,i9];
     end for;
    end for;
   end for;
-  for i4 in 1:size(a, 1) loop
+  for i4 in 1:size(b, 1) loop
    for i5 in 1:size(b, 2) loop
     for i6 in 1:size(b, 3) + size(c, 3) loop
      temp_1[i4,i5 + size(a, 2),i6] := temp_2[i4,i5,i6];
@@ -6068,7 +6072,7 @@ public
   end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:size(a, 2) + size(b, 2) loop
-    for i3 in 1:size(b, 3) + size(c, 3) loop
+    for i3 in 1:size(a, 3) loop
      o[i1,i2,i3] := temp_1[i1,i2,i3];
     end for;
    end for;
@@ -6724,8 +6728,8 @@ public
   init temp_2 as Real[size(a, 2)];
   for i2 in 1:size(a, 2) loop
    init temp_3 as Real[1];
-   init temp_5 as Real[size(a, 1), 1];
-   for i5 in 1:size(a, 1) loop
+   init temp_5 as Real[size(b, 1), 1];
+   for i5 in 1:size(b, 1) loop
     temp_5[i5,1] := b[i5];
    end for;
    for i3 in 1:1 loop
@@ -8799,7 +8803,7 @@ public
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(b, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(a, 2) loop
+    for i5 in 1:size(b, 1) loop
      temp_2 := temp_2 + a[i3,i5] * b[i5,i4];
     end for;
     temp_1[i3,i4] := temp_2;
@@ -8848,7 +8852,7 @@ public
   Real temp_2;
  algorithm
   temp_2 := 0.0;
-  for i1 in 1:size(a, 1) loop
+  for i1 in 1:size(b, 1) loop
    temp_2 := temp_2 + a[i1] * b[i1];
   end for;
   temp_1 := temp_2;
@@ -8895,7 +8899,7 @@ public
  algorithm
   o := 1;
   temp_2 := 0.0;
-  for i1 in 1:size(a, 1) loop
+  for i1 in 1:size(b, 1) loop
    temp_2 := temp_2 + a[i1] * b[i1];
   end for;
   temp_1 := temp_2;
@@ -8961,7 +8965,7 @@ public
   for i6 in 1:size(a, 1) loop
    for i7 in 1:size(b, 2) loop
     temp_4 := 0.0;
-    for i8 in 1:size(a, 2) loop
+    for i8 in 1:size(b, 1) loop
      temp_4 := temp_4 + a[i6,i8] * b[i8,i7];
     end for;
     temp_3[i6,i7] := temp_4;
@@ -8970,7 +8974,7 @@ public
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(c, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(b, 2) loop
+    for i5 in 1:size(c, 1) loop
      temp_2 := temp_2 + temp_3[i3,i5] * c[i5,i4];
     end for;
     temp_1[i3,i4] := temp_2;
@@ -11831,7 +11835,7 @@ public
   Real temp_1;
  algorithm
   temp_1 := 0.0;
-  for i1 in 1:n loop
+  for i1 in 1:size(y, 1) loop
    temp_1 := temp_1 + y[i1];
   end for;
   x := temp_1;
