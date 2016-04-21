@@ -1089,6 +1089,7 @@ struct jmi_t {
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
     jmi_real_t atTimeEvent;              /**< \brief A boolean variable indicating if the model equations are evaluated at an time event time */
     int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
+    int save_restore_solver_state_mode;  /**< \brief A boolean variable indicating if in a mode where solver state should be saved and restored */
     
     jmi_time_event_t nextTimeEvent;
 

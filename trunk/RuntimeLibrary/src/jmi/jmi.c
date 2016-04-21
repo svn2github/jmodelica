@@ -261,6 +261,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->atInitial = JMI_FALSE;
     jmi_->eventPhase = JMI_TIME_EXACT;
     jmi_->nextTimeEvent.defined = 0;
+    jmi_->save_restore_solver_state_mode = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 

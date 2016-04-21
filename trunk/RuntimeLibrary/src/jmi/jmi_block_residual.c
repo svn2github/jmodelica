@@ -299,7 +299,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
 int jmi_block_restore_solver_state_mode(void* b) {
     jmi_block_residual_t* block = (jmi_block_residual_t*)b;
     
-    return (!block->jmi->atInitial && !block->jmi->atEvent && !block->init);
+    return (block->jmi->save_restore_solver_state_mode && !block->init);
 }
 
 int jmi_block_update_pre(jmi_block_residual_t* block) {
