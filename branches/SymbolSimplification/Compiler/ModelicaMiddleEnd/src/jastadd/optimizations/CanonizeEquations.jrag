@@ -90,6 +90,14 @@ aspect CanonizeEquations {
                 feq.convertNegations();
                 feq.toAddMulTree(factorComparator);
                 
+                // Are we doing debug logging? Count node types.
+                if (log.getLevel().shouldLog(Level.DEBUG)) {
+                    TypeMap map = fclass.typeCount();
+                    log.debug("< --- Node Type Count --- >");
+                    log.debug(map.resultString());
+                    log.debug("< ----------------------- >");
+                }
+                
                 return true;
             }
             
@@ -560,6 +568,48 @@ aspect CanonizeEquations {
             return cmp;
         }
     }
+    
+    /*
+     *  Class for node counting.<p>
+     *  Used to investigate tree size
+     */
+    public class TypeMap {
+        private HashMap<FType, Integer> counter = new HashMap<FType, Integer>();
+
+        public TypeMap() {}
+
+        public void increaseAmount(FType type) {
+            int amount = 1 + (counter.containsKey(type) ? counter.get(type) : 0);
+            counter.put(type, amount);
+        }
+        
+        public int numNodes() {
+            return counter.size();
+        }
+        
+        public int numNodeTypes(FType type) {
+            if (!counter.containsKey(type)) {
+                return -1;
+            }
+            return counter.get(type);
+        }
+        
+        public String resultString() {
+            StringBuilder sb = new StringBuilder();
+            for (FType type : counter.keySet()) {
+                sb.append("[" + type + "]:\t" + counter.get(type) + "\n");
+            }
+            return sb.append("[Total]:\t" + counter.size() + "\n").toString();
+        }
+    }
+    
+    coll TypeMap FClass.typeCount() [new TypeMap()]
+        with increaseAmount
+        root FClass;
+
+    FExp contributes type()
+        to FClass.typeCount()
+        for myFClass();
     
     syn ArrayList<Integer> FExp.comparisonValues() {
         return new ArrayList<Integer>(Integer.MAX_VALUE);
