@@ -36,13 +36,28 @@ aspect SymbolicTransformationFramework {
     public class symbolicTransformationFramework extends FClass.Transformation {
         private static ModelicaLogger log = ASTNode.log;
         private static FClass fclass = null;
-        private static ArrayList<SymbolicTransformationAlgorithm> algorithmsInFramework;
-        private static Canonizer canonizer;
+        private static ArrayList<SymbolicTransformationAlgorithm> algorithms;
         
         public symbolicTransformationFramework(FClass fclass) {
             fclass.super("symbolic_transformation_framework");
             this.fclass = fclass;
-            algorithmsInFramework = new ArrayList();
+            algorithms = new ArrayList<SymbolicTransformationAlgorithm>();
+        }
+        
+        public void perform() {
+            WorkData workData = new WorkData();
+            addAlgorithms(workData);
+            perform(workData);
+        }
+        /**
+         *  Separate perform method for only running Alias Elimination. It is used in reduceIndex method
+         *  in FClass. 
+         */ 
+        public void performAliasElimination() {
+            algorithms.clear();
+            WorkData workData = new WorkData();
+            algorithms.add(new AliasEliminator(fclass, workData));
+            perform(workData);
         }
         
         /**
@@ -52,81 +67,44 @@ aspect SymbolicTransformationFramework {
          *  of the equation, the iteration breaks and restarts from the first algorithm.
          *  Transformations are performed until there are no equations left in the worklist.
          */ 
-        // TODO: Refactor to take alg-list as argument. Create perform() to add all algs to worklist.
-        public void perform() {
-            WorkData workData = new WorkData();
-            ArrayList<SymbolicTransformationAlgorithm> algorithmList = new ArrayList();
-            canonizer = new Canonizer(fclass, workData);
-            addAlgorithms(workData);
+        public void perform(WorkData workData) {
+            ArrayList<SymbolicTransformationAlgorithm> activeAlgorithms = new ArrayList();
             
             // Collect algorithms that are enabled.
-            for (SymbolicTransformationAlgorithm algorithm: algorithmsInFramework) {
+            for (SymbolicTransformationAlgorithm algorithm: algorithms) {
                 if (algorithm.isUsed()) {
-                    algorithmList.add(algorithm);
-                    log.debug("%s added to the algorithm list.", algorithm.name());
+                    activeAlgorithms.add(algorithm);
+                    log.info("%s added to the algorithm list.", algorithm.name());
                 }
             }
             
-            // Worklist will contain all equations at the beginning.
             workData.addAllToWorklist(fclass.getFAbstractEquations());
-            log.debug("Constructed worklist of %d equations:\n%s",
-                workData.worklist.size(), workData.worklist);
             
-            log.debug("Running pre-configuration.");
-            preConfiguration(algorithmList);
-            log.debug("Pre-configuration done.");
+            preConfiguration(activeAlgorithms);
             
-            log.debug("Algorithm loop starting.");
+            log.info("Algorithm loop starting.");
             // Start using algorithms on the equations.
             while (!workData.emptyWorklist()) {
                 FAbstractEquation equation = workData.pollWorklist();
-                log.debug("Working on equation [%s], ", equation);
-                for (SymbolicTransformationAlgorithm algorithm : algorithmList) {
-                    log.debug("\twith %s.", algorithm.name());
+                for (SymbolicTransformationAlgorithm algorithm : activeAlgorithms) {
+                    log.info("\twith %s.", algorithm.name());
                     if (algorithm.run(equation)) {
-                    log.debug("Algorithm performed changes, tracing back to first " +
+                    log.info("Algorithm performed changes, tracing back to first " +
                         "equation in the worklist.");
                         break;
                     }
                 }
             }
-            log.debug("Worklist empty, algorithm loop done.");
             
-            log.debug("Running first change().");
+            log.info("Running first change().");
             change();
             
-            log.debug("Running post-configuration.");
-            postConfiguration(algorithmList);
+            postConfiguration(activeAlgorithms);
             
-            log.debug("Running second change().");
+            log.info("Running second change().");
             change();
             
-            log.debug("Symbolic transformation framework is done.");
-        }
-        
-        /**
-         *  Separate perform method for only running Alias Elimination. It is used in reduceIndex method
-         *  in FClass. 
-         * 
-         *  TODO: break out and make perform() take an argument of all algorithms to be run.
-         *  (for this only add AE)
-         */ 
-        public void performAliasElimination() {
-            WorkData workData = new WorkData();
-            AliasEliminator aliasEliminator = new AliasEliminator(fclass, workData);
-            
-            workData.addAllToWorklist(fclass.getFAbstractEquations());
-            
-            aliasEliminator.preRun();
-            
-            while (!workData.emptyWorklist()) {
-                FAbstractEquation equation = workData.pollWorklist();
-                aliasEliminator.run(equation);
-            }
-            
-            change();
-            aliasEliminator.postRun();
-            change();
+            log.info("Symbolic transformation framework is done.");
         }
         
         /**
@@ -134,7 +112,7 @@ aspect SymbolicTransformationFramework {
          * 
          *  @param  exp the expression to copy.
          */
-         public static FExp copyFExp(FExp exp) {
+        public static FExp copyFExp(FExp exp) {
             return exp.treeCopy();
         }
         
@@ -144,9 +122,9 @@ aspect SymbolicTransformationFramework {
          *  @param  workData Data that is shared and updated in and between algorithms.
          */ 
         private void addAlgorithms(WorkData workData) {
-            algorithmsInFramework.add(new AliasEliminator(fclass, workData));
-            algorithmsInFramework.add(new VariabilityPropagator(fclass, workData));
-            algorithmsInFramework.add(canonizer);
+            algorithms.add(new AliasEliminator(fclass, workData));
+            algorithms.add(new VariabilityPropagator(fclass, workData));
+            algorithms.add(new Canonizer(fclass, workData));
         }
         
         /*
@@ -156,9 +134,11 @@ aspect SymbolicTransformationFramework {
          *          which specify what transformation algorithms should be used.
          */
         private void preConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
+            log.info("Running pre-configuration.");
             for (SymbolicTransformationAlgorithm alg : algorithms) {
                     alg.preRun();
             }
+            log.info("Pre-configuration done.");
         }
         
         /*
@@ -168,9 +148,11 @@ aspect SymbolicTransformationFramework {
          *          which specify what transformation algorithms should be used.
          */
         private void postConfiguration(ArrayList<SymbolicTransformationAlgorithm> algorithms) {
+            log.info("Running post-configuration.");
             for (SymbolicTransformationAlgorithm alg : algorithms) {
                 alg.postRun();
             }
+            log.info("Post-configuration done.");
         }
         
         /**
@@ -305,7 +287,7 @@ aspect SymbolicTransformationFramework {
                 if (!equation.equalSides() &&
                     !hasRemovedEquation(equation) &&
                     equation != currentEquation) {
-                    log.debug("\tAdded equation <%s> to the worklist.", equation);
+                    log.info("\tAdded equation <%s> to the worklist.", equation);
                     worklist.add(equation);
                 }
             }
@@ -319,6 +301,8 @@ aspect SymbolicTransformationFramework {
                 for (FAbstractEquation eqn : equations) {
                     addToWorklist(eqn);
                 }
+                log.info("Constructed worklist of %d equations:\n%s",
+                    worklist.size(), worklist);
             }
             
             /**
@@ -341,7 +325,7 @@ aspect SymbolicTransformationFramework {
                 removedEquations.add(equation);
                 worklist.remove(equation);
                 equation.markForRemoval();
-                log.debug("Equation <%s> marked for removal.", equation);
+                log.info("Equation <%s> marked for removal.", equation);
             }
             
             /**
@@ -368,7 +352,7 @@ aspect SymbolicTransformationFramework {
                         FAbstractVariable var = id.myFV();
                         var.addUse(n);
                         id.myFEquation().addVariable(var);
-                        log.debug("\t\tAdded id use <%s> to variable <%s>," +
+                        log.info("\t\tAdded id use <%s> to variable <%s>," +
                             " variable added to equation [%s].",
                             id, var, id.myFEquation());
                     }
@@ -390,7 +374,7 @@ aspect SymbolicTransformationFramework {
                     FAbstractEquation eqn = id.myFEquation();
                     var.removeUse(n);
                     eqn.removeVariable(var);
-                    log.debug("\t\tRemoved id use <%s> from variable <%s>," +
+                    log.info("\t\tRemoved id use <%s> from variable <%s>," +
                         " variable removed from equation [%s].", id, var, eqn);
                 }
             }
@@ -402,7 +386,11 @@ aspect SymbolicTransformationFramework {
              *          <code>true</code> otherwise.
              */
             public boolean emptyWorklist() {
-                return worklist.isEmpty();
+                boolean empty = worklist.isEmpty();
+                if (empty) {
+                    log.info("Worklist empty, algorithm loop done.");
+                }
+                return empty;
             }
             
             /**
@@ -413,6 +401,7 @@ aspect SymbolicTransformationFramework {
             public FAbstractEquation pollWorklist() {
                 currentEquation = worklist.iterator().next();
                 worklist.remove(currentEquation);
+                log.info("Working on equation [%s], ", currentEquation);
                 return currentEquation;
             }
         }

@@ -517,14 +517,13 @@ aspect VariabilityPropagation {
                         
                         topFactorExp.taggedByVProp = true;
                         equation.flushChildren();
-                    } 
                     
-                    // E.g. expression of type: [z + 0]
-                    else if (isConstant() && equation.shouldBeOverwritten()) {
+                    // E.g. expression of type: [z + 0] 
+                    } else if (isConstant() && equation.shouldBeOverwritten()) {
                         FExp newId = symbolicTransformationFramework.copyFExp(bindingExp);
                         use.replaceUses(workData, newId, false);
                         // Flush if variable set size is 2 (e.g. y = z + 0)
-                        if (equation.variables().size() < 2 && !workData.hasRemovedEquation(equation)) {
+                        if (equation.variables().size() <= 2 && !workData.hasRemovedEquation(equation)) {
                             equation.flushChildren();
                         }
                     }
