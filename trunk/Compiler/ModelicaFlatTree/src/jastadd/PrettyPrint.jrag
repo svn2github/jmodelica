@@ -1220,18 +1220,17 @@ aspect FlatPrettyPrint {
     		str.print(getFTypePrefixInputOutput());
     		str.print(" ");
     	}
-    	if (hasInitArrayStmt) {
-    		str.print(getType().scalarType());
-    		str.print("[");
-    		for (int i = 0; i < ndims(); i++) {
-    			str.print(":");
-    			if (i < ndims()-1)
-    				str.print(",");
-    		}
-    		str.print("]");
-    	} else {
-    		str.print(getType());
-    	}
+        str.print(getType().scalarType());
+        if (isArray()) {
+            str.print("[");
+            for (int i = 0; i < ndims(); i++) {
+                str.print(":");
+                if (i < ndims()-1) {
+                    str.print(",");
+                }
+            }
+            str.print("]");
+        }
     	str.print(" ");
     	str.print(name());
     	getFAttributeList().prettyPrintFAttributeList(str, p);
@@ -1466,9 +1465,15 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
-		FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
-		str.print("size(" + fv.name() + ") := {");
-		str.print(fv.size().toUnclosedString() + "}");
+        str.print("init ");
+        p.print(getFIdUseExp(), str, indent);
+        str.print(" as ");
+        str.print(type().scalarType());
+        if (type().isArray()) {
+            str.print("[");
+            str.print(type().size().toUnclosedString());
+            str.print("]");
+        }
 	}
 	
 	public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {

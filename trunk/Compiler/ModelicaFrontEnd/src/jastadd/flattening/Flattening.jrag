@@ -682,12 +682,28 @@ aspect Flattening {
 				ffv.setFTypePrefixInputOutput(new FOutput());
 			ffd.addFFunctionVariable(ffv);
             if (!isInput()) {
-                addBindingAssignments(ffd.getFAlgorithm().getFStatements());
+                List<FStatement> stmts = ffd.getFAlgorithm().getFStatements();
+                addFInitArrayStmt(stmts);
+                addBindingAssignments(stmts);
             }
 			myInstClass().flattenRecord(fc);
 			temporarilyInFunction = old;
 		}
 	}
+    
+    public void InstComponentDecl.addFInitArrayStmt(List<FStatement> l) {
+        
+    }
+    
+    public void InstAssignable.addFInitArrayStmt(List<FStatement> l) {
+        if (isArray()) {
+            FInitArrayStmt stmt = new FInitArrayStmt(new FIdUseExp(expandedFQNameCalc()));
+            stmt.shouldBeSorted = true;
+            l.add(stmt);
+        } else {
+            super.addFInitArrayStmt(l);
+        }
+    }
     
     public void InstComponentDecl.addBindingAssignments(List<FStatement> l) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
@@ -1809,7 +1825,7 @@ aspect FlatExpressions {
     }
     
 	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
-		return new FInitArrayStmt((FIdUseExp) getFIdUseExp().flatten(prefix));
+        throw new UnsupportedOperationException();
 	}
 	
 	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {

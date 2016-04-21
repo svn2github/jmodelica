@@ -246,17 +246,17 @@ equation
 
 public
  function AlgorithmTests.TempAssign1.f
-  input Real[:, :] x;
+  input Real[:,:] x;
   output Real[:,:] y;
   Real[:,:] temp_1;
  algorithm
-  size(y) := {size(x, 2), size(x, 1)};
+  init y as Real[size(x, 2), size(x, 1)];
   for i1 in 1:size(x, 2) loop
    for i2 in 1:size(x, 1) loop
     y[i1,i2] := x[i2,i1];
    end for;
   end for;
-  size(temp_1) := {size(x, 2), size(x, 1)};
+  init temp_1 as Real[size(x, 2), size(x, 1)];
   for i1 in 1:size(x, 1) loop
    for i2 in 1:size(x, 2) loop
     temp_1[i1,i2] := y[i2,i1];
@@ -346,14 +346,14 @@ public
   AlgorithmTests.TempAssign2.R[:] temp_1;
   Integer[:] temp_2;
  algorithm
-  size(y) := {size(x, 1)};
+  init y as AlgorithmTests.TempAssign2.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    y[i1].a := x[i1].a;
    y[i1].b := x[i1].b;
   end for;
   t := size(x, 1);
-  size(temp_1) := {max(t, 0)};
-  size(temp_2) := {max(t, 0)};
+  init temp_1 as AlgorithmTests.TempAssign2.R[max(t, 0)];
+  init temp_2 as Integer[max(t, 0)];
   for i2 in 1:max(t, 0) loop
    temp_2[i2] := t + 1 - i2;
   end for;
@@ -450,14 +450,14 @@ public
   AlgorithmTests.TempAssign3.R[:] temp_1;
   Integer[:] temp_2;
  algorithm
-  size(y) := {size(x, 1)};
+  init y as AlgorithmTests.TempAssign3.R[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    y[i1].a[1] := x[i1].a[1];
    y[i1].a[2] := x[i1].a[2];
   end for;
   t := size(x, 1);
-  size(temp_1) := {max(t, 0)};
-  size(temp_2) := {max(t, 0)};
+  init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
+  init temp_2 as Integer[max(t, 0)];
   for i2 in 1:max(t, 0) loop
    temp_2[i2] := t + 1 - i2;
   end for;

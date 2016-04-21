@@ -49,11 +49,11 @@ equation
 	Connections.root(c1.t);
 	c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect1",
-			description="Basic test of overconstrained connection graphs",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect1",
+            description="Basic test of overconstrained connection graphs",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect1
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -68,10 +68,11 @@ equation
 
 public
  function OverconstrainedConnection.T1.equalityConstraint
-  input Real[2] i1;
-  input Real[2] i2;
-  output Real[1] o;
+  input Real[:] i1;
+  input Real[:] i2;
+  output Real[:] o;
  algorithm
+  init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
  end OverconstrainedConnection.T1.equalityConstraint;
@@ -98,11 +99,11 @@ equation
     Connections.potentialRoot(c2.t);
     c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect2",
-			description="Overconstrained connection graphs with potential roots",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect2",
+            description="Overconstrained connection graphs with potential roots",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect2
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -117,10 +118,11 @@ equation
 
 public
  function OverconstrainedConnection.T1.equalityConstraint
-  input Real[2] i1;
-  input Real[2] i2;
-  output Real[1] o;
+  input Real[:] i1;
+  input Real[:] i2;
+  output Real[:] o;
  algorithm
+  init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
  end OverconstrainedConnection.T1.equalityConstraint;
@@ -145,11 +147,11 @@ equation
     Connections.potentialRoot(c2.t);
     c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect3",
-			description="Simple root selection and isRoot()",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect3",
+            description="Simple root selection and isRoot()",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect3
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -181,11 +183,11 @@ equation
     Connections.potentialRoot(c2.t);
     c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect4",
-			description="Simple root selection and isRoot()",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect4",
+            description="Simple root selection and isRoot()",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect4
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -218,11 +220,11 @@ equation
     Connections.potentialRoot(c2.t);
     c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect5",
-			description="Simple root selection and isRoot(), unbreakable branch",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect5",
+            description="Simple root selection and isRoot(), unbreakable branch",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect5
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -248,11 +250,11 @@ connector C1
 end C1;
 	C1 c1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect6",
-			description="Unconnected connector",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect6",
+            description="Unconnected connector",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect6
  Real c1.x;
  Real c1.y;
@@ -277,11 +279,11 @@ equation
     Connections.potentialRoot(c2.t);
     c1.t[1] = 0;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect7",
-			description="Simple root selection and isRoot(), breakable branch",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect7",
+            description="Simple root selection and isRoot(), breakable branch",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect7
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -315,11 +317,11 @@ equation
     Connections.root(c2.t);
     connect(c1, c2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect8",
-			description="Test model that failed due to ordering of roots",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect8",
+            description="Test model that failed due to ordering of roots",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect8
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -346,11 +348,11 @@ equation
     connect(c1,c2);
     Connections.root(c1.t);
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="OverconstrainedCorrect9",
-			description="Ensure that we handle multiple connections between the same nodes",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="OverconstrainedCorrect9",
+            description="Ensure that we handle multiple connections between the same nodes",
+            flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect9
  OverconstrainedConnection.T1 c1.t[2];
  OverconstrainedConnection.T1 c2.t[2];
@@ -381,7 +383,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c3.t
     c4.t
@@ -403,13 +405,13 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c1.t
     c2.t
     c3.t
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Set of unrooted connectors in overconstrained connection graph:
     c4.t
     c5.t
@@ -433,7 +435,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c2.t
@@ -460,7 +462,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple definite roots in unbreakable subgraph in overconstrained connection graph
     Selected root: c1.t
     Other root: c3.t
@@ -483,7 +485,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c1.t
 ")})));
@@ -508,7 +510,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Unbreakable loop in overconstrained connection graph
     Selected root: c4.t
 ")})));
@@ -532,11 +534,11 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c1.t
 
-Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/OverconstrainedConnection.mo':
+Error at line 33, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/OverconstrainedConnection.mo':
   Multiple root definitions for single connector in overconstrained connection graph
     Connector: c2.t
 ")})));

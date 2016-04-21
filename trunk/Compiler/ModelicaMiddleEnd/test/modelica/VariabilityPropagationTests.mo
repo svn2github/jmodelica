@@ -633,17 +633,19 @@ parameter equation
 public
  function VariabilityPropagationTests.FunctionCallEquation2.f
   input Real i1;
-  output Real[2] c;
+  output Real[:] c;
  algorithm
+  init c as Real[2];
   c[1] := i1;
   c[2] := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.f;
- 
+
  function VariabilityPropagationTests.FunctionCallEquation2.e
   input Real i1;
-  output Real[2] c;
+  output Real[:] c;
  algorithm
+  init c as Real[2];
   external \"C\" e(i1, c, size(c, 1));
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
@@ -743,12 +745,12 @@ parameter equation
 
 public
  function Modelica.Math.Matrices.solve
-  input Real[:, size(A, 1)] A;
-  input Real[size(A, 1)] b;
+  input Real[:,:] A;
+  input Real[:] b;
   output Real[:] x;
   Integer info;
  algorithm
-  size(x) := {size(b, 1)};
+  init x as Real[size(b, 1)];
   (x, info) := Modelica.Math.Matrices.LAPACK.dgesv_vec(A, b);
   assert(info == 0, \"Solving a linear system of equations with function
 \\\"Matrices.solve\\\" is not possible, because the system has either
@@ -757,8 +759,8 @@ no or infinitely many solutions (A is singular).\");
  end Modelica.Math.Matrices.solve;
 
  function Modelica.Math.Matrices.LAPACK.dgesv_vec
-  input Real[:, size(A, 1)] A;
-  input Real[size(A, 1)] b;
+  input Real[:,:] A;
+  input Real[:] b;
   output Real[:] x;
   output Integer info;
   Real[:,:] Awork;
@@ -766,12 +768,11 @@ no or infinitely many solutions (A is singular).\");
   Integer ldb;
   Integer[:] ipiv;
  algorithm
-  size(x) := {size(A, 1)};
-  size(Awork) := {size(A, 1), size(A, 1)};
-  size(ipiv) := {size(A, 1)};
+  init x as Real[size(A, 1)];
   for i1 in 1:size(A, 1) loop
    x[i1] := b[i1];
   end for;
+  init Awork as Real[size(A, 1), size(A, 1)];
   for i1 in 1:size(A, 1) loop
    for i2 in 1:size(A, 1) loop
     Awork[i1,i2] := A[i1,i2];
@@ -779,6 +780,7 @@ no or infinitely many solutions (A is singular).\");
   end for;
   lda := max(1, size(A, 1));
   ldb := max(1, size(b, 1));
+  init ipiv as Integer[size(A, 1)];
   external \"FORTRAN 77\" dgesv(size(A, 1), 1, Awork, lda, ipiv, x, ldb, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgesv_vec;
@@ -1110,8 +1112,9 @@ public
  function VariabilityPropagationTests.PartiallyKnownComposite1.f
   input Real x1;
   input Real x2;
-  output Real[2] y;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -1196,8 +1199,9 @@ public
  function VariabilityPropagationTests.PartiallyKnownComposite3.f
   input Real x1;
   input Real x2;
-  output Real[2] y;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -1316,7 +1320,7 @@ public
   input Integer n;
   output Real[:] y;
  algorithm
-  size(y) := {size(x, 1)};
+  init y as Real[size(x, 1)];
   for i1 in 1:size(x, 1) loop
    y[i1] := x[i1];
   end for;
@@ -1651,8 +1655,9 @@ parameter equation
 
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
-  output Real[2] o;
+  output Real[:] o;
  algorithm
+  init o as Real[2];
   o[1] := 1;
   o[2] := 2;
   return;
@@ -2109,8 +2114,9 @@ parameter equation
 
 public
  function VariabilityPropagationTests.EvalFail2.f
-  output Real[1] y;
+  output Real[:] y;
  algorithm
+  init y as Real[1];
   y[1] := 1;
   assert(false, \"nope\");
   return;

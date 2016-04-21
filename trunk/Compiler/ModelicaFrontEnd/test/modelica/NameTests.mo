@@ -49,11 +49,11 @@ end A;
 	A a;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest2",
-			description="Basic test of name lookup",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest2",
+            description="Basic test of name lookup",
+            flatModel="
 fclass NameTests.NameTest2
  Real a.b.x;
  Real a.b.c.y;
@@ -63,7 +63,7 @@ fclass NameTests.NameTest2
  Real a.y;
  Real a.x;
 equation
- a.x = - 1 - (2 + 1) ^ 3 + a.x ^ (- 3 + 2);
+ a.x = -1 - (2 + 1) ^ 3 + a.x ^ (-3 + 2);
  a.b.c.y + 1 = a.b.c.y;
  a.c.y = 0;
  a.b.x = a.b.c.y;
@@ -89,7 +89,7 @@ A a;
             errorMessage="
 1 errors found:
 
-Error at line 82, column 1, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 82, column 1, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for A
 ")})));
   end NameTest3_Err;
@@ -116,7 +116,7 @@ model NameTest4_Err
             errorMessage="
 1 errors found:
 
-Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 106, column 4, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component m:
   Cannot find class declaration for B
 ")})));
@@ -142,10 +142,10 @@ equation
             errorMessage="
 2 errors found:
 
-Error at line 135, column 3, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 136, column 3, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for b
 
-Error at line 135, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 136, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for x
 ")})));
 end NameTest5_Err;
@@ -168,7 +168,7 @@ model NameTest55_Err
             errorMessage="
 1 errors found:
 
-Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 159, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Cannot find class or component declaration for x
 ")})));
@@ -191,7 +191,7 @@ model NameTest6_Err
             errorMessage="
 1 errors found:
 
-Error at line 180, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 182, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component a:
   Cannot find class or component declaration for y
 ")})));
@@ -214,7 +214,7 @@ model NameTest7_Err
             errorMessage="
 1 errors found:
 
-Error at line 201, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 204, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In components:
     a1
     a2
@@ -236,7 +236,7 @@ model NameTest8_Err
             errorMessage="
 1 errors found:
 
-Error at line 222, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 228, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component c:
   Cannot find class declaration for D
 ")})));
@@ -267,7 +267,7 @@ model NameTest9_Err
             errorMessage="
 1 warnings found:
 
-Warning at line 260, column 9, in file '...', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 260, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to component y not recommended, it is not present in constraining type of declaration 'replaceable B b constrainedby A'
 ")})));
   end NameTest9_Err;
@@ -305,7 +305,7 @@ model NameTest10_Err
             errorMessage="
 1 warnings found:
 
-Warning at line 298, column 5, in file '...', NOT_IN_CONSTRAINING_TYPE:
+Warning at line 298, column 5, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo', NOT_IN_CONSTRAINING_TYPE:
   Access to class B not recommended, it is not present in constraining type of declaration 'replaceable package P = P2 constrainedby P1'
 ")})));
   end NameTest10_Err;
@@ -327,7 +327,7 @@ Warning at line 298, column 5, in file '...', NOT_IN_CONSTRAINING_TYPE:
             errorMessage="
 1 errors found:
 
-Error at line 313, column 9, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 320, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for p1
 ")})));
   end NameTest11_Err;
@@ -361,7 +361,7 @@ M m(redeclare B a);
             errorMessage="
 1 errors found:
 
-Error at line 346, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 353, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class declaration for B
 ")})));
 end NameTest12_Err;
@@ -403,18 +403,18 @@ end NameTest12_Err;
             errorMessage="
 4 errors found:
 
-Error at line 381, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 388, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 386, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 393, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find class declaration for C
 
-Error at line 386, column 39, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo',
+Error at line 393, column 39, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo',
 In component bb:
   Cannot find component declaration for y
 
-Error at line 389, column 12, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 396, column 12, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for y
 ")})));
 end NameTest13_Err;
@@ -456,13 +456,13 @@ end NameTest13_Err;
             errorMessage="
 3 errors found:
 
-Error at line 438, column 56, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 447, column 56, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 440, column 13, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 449, column 13, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find component declaration for z
 
-Error at line 440, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/NameTests.mo':
+Error at line 449, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/NameTests.mo':
   Cannot find class or component declaration for pp
 ")})));
 end NameTest14_Err;
@@ -507,16 +507,15 @@ model NameTest17
 equation
   x=2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest17",
-			description="Check that modifiers without binding expressions are accepted.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest17",
+            description="Check that modifiers without binding expressions are accepted.",
+            flatModel="
 fclass NameTests.NameTest17
  Real x;
 equation
  x = 2;
-
 end NameTests.NameTest17;
 ")})));
 end NameTest17;
@@ -547,14 +546,13 @@ model NameTest18
 	
 	E.F.M y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest18",
-			description="Constraining class extending local class",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest18",
+            description="Constraining class extending local class",
+            flatModel="
 fclass NameTests.NameTest18
  Real y.x;
-
 end NameTests.NameTest18;
 ")})));
 end NameTest18;
@@ -573,16 +571,15 @@ model NameTest19
 equation
     y.x[A.b] = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest19",
-			description="Lookup of classes from array subscripts of dotted access",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest19",
+            description="Lookup of classes from array subscripts of dotted access",
+            flatModel="
 fclass NameTests.NameTest19
  Real y.x[1];
 equation
  y.x[1] = 1;
-
 end NameTests.NameTest19;
 ")})));
 end NameTest19;
@@ -609,11 +606,11 @@ model NameTest20
 	
 	C y;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest20",
-			description="Extending class with call to function in surrounding class",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest20",
+            description="Extending class with call to function in surrounding class",
+            flatModel="
 fclass NameTests.NameTest20
  Real y.x;
 equation
@@ -663,14 +660,13 @@ model NameTest21
     
     D d;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest21",
-			description="Chain of redeclared short class declarations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest21",
+            description="Chain of redeclared short class declarations",
+            flatModel="
 fclass NameTests.NameTest21
  Real d.b.c.x = 2.0;
-
 end NameTests.NameTest21;
 ")})));
 end NameTest21;
@@ -696,14 +692,13 @@ model NameTest22
 
  D d;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NameTest22",
-			description="Chain of short class declarations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest22",
+            description="Chain of short class declarations",
+            flatModel="
 fclass NameTests.NameTest22
  Real d.x = 3.0;
-
 end NameTests.NameTest22;
 ")})));
 end NameTest22;
@@ -1636,10 +1631,11 @@ fclass NameTests.ConstantLookup32
 
 public
  function NameTests.ConstantLookup32.f
-  NameTests.ConstantLookup32.A[2] d;
+  NameTests.ConstantLookup32.A[:] d;
   input Integer i;
   output Real x;
  algorithm
+  init d as NameTests.ConstantLookup32.A[2];
   d := {NameTests.ConstantLookup32.A(3), NameTests.ConstantLookup32.A(4)};
   x := d[i].b;
   return;
@@ -1693,10 +1689,11 @@ fclass NameTests.ConstantLookup33
 
 public
  function NameTests.ConstantLookup33.f
-  NameTests.ConstantLookup33.D.A[2] d;
+  NameTests.ConstantLookup33.D.A[:] d;
   input Integer i;
   output Real x;
  algorithm
+  init d as NameTests.ConstantLookup33.D.A[2];
   d := {NameTests.ConstantLookup33.D.A(3), NameTests.ConstantLookup33.D.A(4)};
   x := d[i].b;
   return;
@@ -1743,10 +1740,11 @@ parameter equation
 
 public
  function NameTests.ConstantLookup34.f
-  NameTests.ConstantLookup34.A.B[2] temp_1;
+  NameTests.ConstantLookup34.A.B[:] temp_1;
   input Integer i;
   output Real x;
  algorithm
+  init temp_1 as NameTests.ConstantLookup34.A.B[2];
   temp_1[1].y[1] := 1;
   temp_1[1].y[2] := 2;
   temp_1[2].y[1] := 3;
@@ -1827,11 +1825,12 @@ parameter equation
 
 public
  function NameTests.ConstantLookup35.J.f1
-  Real[2] a;
+  Real[:] a;
   input Integer i;
   output Real x;
   Real y;
  algorithm
+  init a as Real[2];
   a[1] := 1;
   a[2] := 2;
   y := a[i];
@@ -1874,10 +1873,11 @@ parameter equation
 
 public
  function NameTests.ConstantLookup36.f
-  NameTests.ConstantLookup36.B[2] a;
+  NameTests.ConstantLookup36.B[:] a;
   input Integer i;
   output Real x;
  algorithm
+  init a as NameTests.ConstantLookup36.B[2];
   a[1].b[1] := 1;
   a[1].b[2] := 2;
   a[2].b[1] := 3;

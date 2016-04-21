@@ -2394,7 +2394,7 @@ aspect CADCodeGen {
         } else {
             genVarDecls_CAD(p, str, indent);
             for (FFunctionVariable ffv : myNonInputs()) {
-                if (!ffv.hasInitArrayStmt) {
+                if (!ffv.isArray()) {
                     p.print(ffv, str, indent);
                 }
             }

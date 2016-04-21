@@ -787,7 +787,7 @@ public
 
  function OperatorRecordTests.Cplx.'*'.prod
   input OperatorRecordTests.Cplx[:] a;
-  input OperatorRecordTests.Cplx[size(a, 1)] b;
+  input OperatorRecordTests.Cplx[:] b;
   output OperatorRecordTests.Cplx c;
  algorithm
   c := Complex.'constructor'.fromReal(0, 0);
@@ -3207,8 +3207,9 @@ equation
 public
  function OperatorRecordTests.BuildArrayInInst1.f
   input Integer n;
-  output OperatorRecordTests.Cplx[n] y;
+  output OperatorRecordTests.Cplx[:] y;
  algorithm
+  init y as OperatorRecordTests.Cplx[n];
   y[:] := {OperatorRecordTests.Cplx.'constructor'(i, 0) for i in 1:n};
   return;
  end OperatorRecordTests.BuildArrayInInst1.f;

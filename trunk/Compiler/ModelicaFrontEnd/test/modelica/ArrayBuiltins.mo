@@ -24,11 +24,11 @@ package Size
 model SizeExp1
  Real x = size(ones(2), 1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Size_SizeExp1",
-			description="Size operator: first dim",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Size_SizeExp1",
+            description="Size operator: first dim",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp1
  constant Real x = 2;
 end ArrayBuiltins.Size.SizeExp1;
@@ -39,11 +39,11 @@ end SizeExp1;
 model SizeExp2
  Real x = size(ones(2, 3), 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Size_SizeExp2",
-			description="Size operator: second dim",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Size_SizeExp2",
+            description="Size operator: second dim",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp2
  constant Real x = 3;
 end ArrayBuiltins.Size.SizeExp2;
@@ -54,11 +54,11 @@ end SizeExp2;
 model SizeExp3
  Real x[1] = size(ones(2));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Size_SizeExp3",
-			description="Size operator: without dim",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Size_SizeExp3",
+            description="Size operator: without dim",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp3
  constant Real x[1] = 2;
 end ArrayBuiltins.Size.SizeExp3;
@@ -69,11 +69,11 @@ end SizeExp3;
 model SizeExp4
  Real x[2] = size(ones(2, 3));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Size_SizeExp4",
-			description="Size operator: without dim",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Size_SizeExp4",
+            description="Size operator: without dim",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp4
  constant Real x[1] = 2;
  constant Real x[2] = 3;
@@ -86,11 +86,11 @@ model SizeExp5
  parameter Integer p = 1;
  Real x = size(ones(2, 3), p);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Size_SizeExp5",
-			description="Size operator: using parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Size_SizeExp5",
+            description="Size operator: using parameter",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp5
  structural parameter Integer p = 1 /* 1 */;
  constant Real x = 2;
@@ -110,7 +110,7 @@ model SizeExp6
             errorMessage="
 1 errors found:
 
-Error at line 104, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 104, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     'd' is of discrete-time variability
 ")})));
@@ -127,7 +127,7 @@ model SizeExp7
             errorMessage="
 1 errors found:
 
-Error at line 122, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 121, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is Integer
@@ -145,7 +145,7 @@ model SizeExp8
             errorMessage="
 1 errors found:
 
-Error at line 140, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 139, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function size(): types of positional argument 2 and input d are not compatible
     type of '1.0' is Real
     expected type is Integer
@@ -163,7 +163,7 @@ model SizeExp9
             errorMessage="
 1 errors found:
 
-Error at line 158, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 157, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '0' evaluates to 0, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -180,7 +180,7 @@ model SizeExp10
             errorMessage="
 1 errors found:
 
-Error at line 176, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 174, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Second argument of size() must be a scalar parameter Integer expression that evaluates to a valid dimension of the first argument
     '3' evaluates to 3, and 'ones(2, 3)' has 2 dimensions
 ")})));
@@ -195,11 +195,11 @@ model SizeExp11
     A[2] y(x = ones(z));
 	parameter Integer z = size(y, 1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="Size_SizeExp11",
-			description="",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Size_SizeExp11",
+            description="",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp11
  Real y[1].x = 1;
  Real y[2].x = 1;
@@ -216,11 +216,11 @@ model SizeExp12
     
     A[2] y = fill(A(1), size(y, 1));
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="Size_SizeExp12",
-			description="Size operator: array of records",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Size_SizeExp12",
+            description="Size operator: array of records",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeExp12
  ArrayBuiltins.Size.SizeExp12.A y[2] = fill(ArrayBuiltins.Size.SizeExp12.A(1), size(y[1:2], 1));
 
@@ -242,11 +242,11 @@ model SizeStructural1
 	parameter Real p3[1] = {2};
 	parameter Integer p4 = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="Size_SizeStructural1",
-			description="Using parameter as first arg of size() expression that is used as structural parameter should not make that parameter a structural parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Size_SizeStructural1",
+            description="Using parameter as first arg of size() expression that is used as structural parameter should not make that parameter a structural parameter",
+            flatModel="
 fclass ArrayBuiltins.Size.SizeStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1] + 1;
@@ -267,12 +267,12 @@ package Fill
 model FillExp1
  Real x[2] = fill(1 + 2, 2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Fill_FillExp1",
-			description="Fill operator: one dim",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Fill_FillExp1",
+            description="Fill operator: one dim",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Fill.FillExp1
  constant Real x[1] = 3;
  constant Real x[2] = 3;
@@ -284,12 +284,12 @@ end FillExp1;
 model FillExp2
  Real x[2,3,4] = fill(1 + 2, 2, 3, 4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Fill_FillExp2",
-			description="Fill operator: three dims",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Fill_FillExp2",
+            description="Fill operator: three dims",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Fill.FillExp2
  constant Real x[1,1,1] = 3;
  constant Real x[1,1,2] = 3;
@@ -330,7 +330,7 @@ model FillExp3
             errorMessage="
 1 errors found:
 
-Error at line 320, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 324, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Too few arguments to fill(), must have at least 2
 ")})));
 end FillExp3;
@@ -346,7 +346,7 @@ model FillExp4
             errorMessage="
 1 errors found:
 
-Error at line 336, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 340, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [3]
 ")})));
 end FillExp4;
@@ -362,7 +362,7 @@ model FillExp5
             errorMessage="
 1 errors found:
 
-Error at line 352, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 356, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of fill() is not compatible with Integer: 2.0
 ")})));
 end FillExp5;
@@ -379,10 +379,10 @@ model FillExp6
             errorMessage="
 2 errors found:
 
-Error at line 369, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 373, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is [n]
 
-Error at line 369, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 373, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of fill() does not have constant or parameter variability: n
 ")})));
 end FillExp6;
@@ -398,10 +398,10 @@ model FillExp7
             errorMessage="
 2 errors found:
 
-Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 392, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of x, size of declaration is [2] and size of binding expression is scalar
 
-Error at line 388, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 392, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function fill(): missing argument for required input s
 ")})));
 end FillExp7;
@@ -410,12 +410,12 @@ end FillExp7;
 model FillExp8
  Real x[3,2] = fill({1,2}, 3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Fill_FillExp8",
-			description="Fill operator: filling with array",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Fill_FillExp8",
+            description="Fill operator: filling with array",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Fill.FillExp8
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -437,11 +437,11 @@ model MinExp1
  constant Real x = min(1+2, 3+4);
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Min_MinExp1",
-			description="Min operator: 2 scalar args",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp1",
+            description="Min operator: 2 scalar args",
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp1
  constant Real x = 3;
  constant Real y = 3.0;
@@ -454,11 +454,11 @@ model MinExp2
  constant Real x = min({{1,2},{3,4}});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Min_MinExp2",
-			description="Min operator: 1 array arg",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp2",
+            description="Min operator: 1 array arg",
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp2
  constant Real x = 1;
  constant Real y = 1.0;
@@ -471,12 +471,12 @@ model MinExp3
  constant String x = min("foo", "bar");
  parameter String y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MinExp3",
-			description="Min operator: strings",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp3",
+            description="Min operator: strings",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp3
  constant String x = \"bar\";
  structural parameter String y = \"bar\" /* \"bar\" */;
@@ -489,12 +489,12 @@ model MinExp4
  constant Boolean x = min(true, false);
  Boolean y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Min_MinExp4",
-			description="Min operator: booleans",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp4",
+            description="Min operator: booleans",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp4
  constant Boolean x = false;
  constant Boolean y = false;
@@ -513,7 +513,7 @@ model MinExp5
             errorMessage="
 1 errors found:
 
-Error at line 500, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 507, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: min(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -531,12 +531,12 @@ model MinExp6
             errorMessage="
 2 errors found:
 
-Error at line 518, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 525, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
 
-Error at line 518, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 525, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
@@ -554,7 +554,7 @@ model MinExp7
             errorMessage="
 1 errors found:
 
-Error at line 539, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 548, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function min(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is array of Real, Integer, Boolean, String or enumeration
@@ -566,12 +566,12 @@ model MinExp8
  constant Real x = min(1.0 for i in 1:4, j in {2,3,5});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Min_MinExp8",
-			description="Reduction-expression with min(): constant expression",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp8",
+            description="Reduction-expression with min(): constant expression",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp8
  constant Real x = 1.0;
  constant Real y = 1.0;
@@ -583,11 +583,11 @@ end MinExp8;
 model MinExp9
  Real x = min(i * j for i in 1:3, j in {2,3,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Min_MinExp9",
-			description="Reduction-expression with min(): basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Min_MinExp9",
+            description="Reduction-expression with min(): basic test",
+            flatModel="
 fclass ArrayBuiltins.Min.MinExp9
  constant Real x = 2;
 end ArrayBuiltins.Min.MinExp9;
@@ -605,10 +605,10 @@ model MinExp10
             errorMessage="
 2 errors found:
 
-Error at line 588, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 599, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 
-Error at line 588, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 599, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MinExp10;
@@ -624,7 +624,7 @@ model MinExp11
             errorMessage="
 1 errors found:
 
-Error at line 607, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 618, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of a reduction-expression must be scalar, except for sum(): {i * j, 2} has 1 dimension(s)
 ")})));
 end MinExp11;
@@ -640,7 +640,7 @@ model MinExp12
             errorMessage="
 1 errors found:
 
-Error at line 623, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 634, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MinExp12;
@@ -655,11 +655,11 @@ model MaxExp1
  constant Real x = max(1+2, 3+4);
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Max_MaxExp1",
-			description="Max operator: 2 scalar args",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp1",
+            description="Max operator: 2 scalar args",
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp1
  constant Real x = 7;
  constant Real y = 7.0;
@@ -672,11 +672,11 @@ model MaxExp2
  constant Real x = max({{1,2},{3,4}});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Max_MaxExp2",
-			description="Max operator: 1 array arg",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp2",
+            description="Max operator: 1 array arg",
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp2
  constant Real x = 4;
  constant Real y = 4.0;
@@ -689,12 +689,12 @@ model MaxExp3
  constant String x = max("foo", "bar");
  parameter String y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="MaxExp3",
-			description="Max operator: strings",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp3",
+            description="Max operator: strings",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp3
  constant String x = \"foo\";
  structural parameter String y = \"foo\" /* \"foo\" */;
@@ -707,12 +707,12 @@ model MaxExp4
  constant Boolean x = max(true, false);
  Boolean y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Max_MaxExp4",
-			description="Max operator: booleans",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp4",
+            description="Max operator: booleans",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp4
  constant Boolean x = true;
  constant Boolean y = true;
@@ -731,7 +731,7 @@ model MaxExp5
             errorMessage="
 1 errors found:
 
-Error at line 712, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 725, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: max(true, 0)
     type of 'true' is Boolean
     type of '0' is Integer
@@ -749,12 +749,12 @@ model MaxExp6
             errorMessage="
 2 errors found:
 
-Error at line 730, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 743, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '{1, 2}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
 
-Error at line 730, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 743, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 2 and input y are not compatible
     type of '{3, 4}' is Integer[2]
     expected type is scalar Real, Integer, Boolean, String or enumeration
@@ -772,7 +772,7 @@ model MaxExp7
             errorMessage="
 1 errors found:
 
-Error at line 751, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 766, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function max(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is array of Real, Integer, Boolean, String or enumeration
@@ -783,11 +783,11 @@ end MaxExp7;
 model MaxExp8
  Real x = max(1.0 for i in 1:4, j in {2,3,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Max_MaxExp8",
-			description="Reduction-expression with max(): constant expression",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp8",
+            description="Reduction-expression with max(): constant expression",
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp8
  constant Real x = 1.0;
 end ArrayBuiltins.Max.MaxExp8;
@@ -799,11 +799,11 @@ model MaxExp9
  constant Real x = max(i * j for i in 1:4, j in {2,3,5});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Max_MaxExp9",
-			description="Reduction-expression with max(): basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Max_MaxExp9",
+            description="Reduction-expression with max(): basic test",
+            flatModel="
 fclass ArrayBuiltins.Max.MaxExp9
  constant Real x = 20;
  constant Real y = 20.0;
@@ -822,19 +822,13 @@ model MaxExp10
             errorMessage="
 2 errors found:
 
-Error at line 800, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 816, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index i must be a vector expression: {{1, 2}, {3, 4}} has 2 dimension(s)
 
-Error at line 800, column 45, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 816, column 45, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The expression of for index j must be a vector expression: 2 has 0 dimension(s)
 ")})));
 end MaxExp10;
-
-
-model MaxExp11
- Real x = max({i * j, 2} for i in 1:4, j in 2:5);
-end MaxExp11;
-
 
 model MaxExp12
  Real x = max(false for i in 1:4, j in 2:5);
@@ -846,7 +840,7 @@ model MaxExp12
             errorMessage="
 1 errors found:
 
-Error at line 824, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 834, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end MaxExp12;
@@ -861,11 +855,11 @@ model SumExp1
  constant Real x = sum({1,2,3,4});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp1",
-			description="sum() expressions: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp1",
+            description="sum() expressions: basic test",
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp1
  constant Real x = 10;
  constant Real y = 10.0;
@@ -878,11 +872,11 @@ model SumExp2
  constant Real x = sum(i * j for i in 1:3, j in 1:3);
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp2",
-			description="sum() expressions: reduction-expression",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp2",
+            description="sum() expressions: reduction-expression",
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp2
  constant Real x = 36;
  constant Real y = 36.0;
@@ -895,11 +889,11 @@ model SumExp3
  constant Real x[2] = sum({i, j} for i in 1:3, j in 2:4);
  Real y[2] = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp3",
-			description="sum() expressions: reduction-expression over array",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp3",
+            description="sum() expressions: reduction-expression over array",
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp3
  constant Real x[1] = 18;
  constant Real x[2] = 27;
@@ -914,11 +908,11 @@ model SumExp4
  constant Real x = sum( { {i, j} for i in 1:3, j in 2:4 } );
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp4",
-			description="sum() expressions: over array constructor with iterators",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp4",
+            description="sum() expressions: over array constructor with iterators",
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp4
  constant Real x = 45;
  constant Real y = 45.0;
@@ -937,7 +931,7 @@ model SumExp5
             errorMessage="
 1 errors found:
 
-Error at line 915, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 925, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function sum(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is Real array
@@ -955,12 +949,12 @@ equation
 		wbar[j] = sum(dMdt[1:j+1]) + dMdt[j] / 2;
 	end for;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp6",
-			description="",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp6",
+            description="",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp6
  structural parameter Integer N = 3 /* 3 */;
  constant Real wbar[1] = 3.5;
@@ -974,27 +968,14 @@ end ArrayBuiltins.Sum.SumExp6;
 ")})));
 end SumExp6;
 
-
-model SumExp7
-	parameter Integer N = 3;
-	Real wbar[N + 1];
-	Real dMdt[N] ;
-equation
-	dMdt = 1:N;
-	for j in 1:(N + 1) loop
-		wbar[j] = sum(dMdt[1:j-1]) + dMdt[j] / 2;
-	end for;
-end SumExp7;
-
-
 model SumExp8
 	parameter Real x = sum(fill(2, 0));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Sum_SumExp8",
-			description="sum() expressions: empty array",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Sum_SumExp8",
+            description="sum() expressions: empty array",
+            flatModel="
 fclass ArrayBuiltins.Sum.SumExp8
  parameter Real x = 0 /* 0 */;
 end ArrayBuiltins.Sum.SumExp8;
@@ -1011,11 +992,11 @@ model ProductExp1
  constant Real x = product({1,2,3,4});
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp1",
-			description="product() expressions: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp1",
+            description="product() expressions: basic test",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp1
  constant Real x = 24;
  constant Real y = 24.0;
@@ -1027,11 +1008,11 @@ model ProductExp2
  constant Real x = product(i * j for i in 1:3, j in 1:3);
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp2",
-			description="product() expressions: reduction-expression",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp2",
+            description="product() expressions: reduction-expression",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp2
  constant Real x = 46656;
  constant Real y = 46656.0;
@@ -1043,11 +1024,11 @@ model ProductExp3
  constant Real x[2] = product({i, j} for i in 1:3, j in 2:4);
  Real y[2] = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp3",
-			description="product() expressions: reduction-expression over array",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp3",
+            description="product() expressions: reduction-expression over array",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp3
  constant Real x[1] = 216;
  constant Real x[2] = 13824;
@@ -1061,11 +1042,11 @@ model ProductExp4
  constant Real x = product( { {i, j} for i in 1:3, j in 2:4 } );
  Real y = x;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp4",
-			description="product() expressions: over array constructor with iterators",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp4",
+            description="product() expressions: over array constructor with iterators",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp4
  constant Real x = 2985984;
  constant Real y = 2985984.0;
@@ -1083,7 +1064,7 @@ model ProductExp5
             errorMessage="
 1 errors found:
 
-Error at line 1059, column 11, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1058, column 11, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function product(): missing argument for required input A
 ")})));
 end ProductExp5;
@@ -1098,7 +1079,7 @@ model ProductExp6
             errorMessage="
 1 errors found:
 
-Error at line 1074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1073, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function product(): types of positional argument 1 and input A are not compatible
     type of '42' is Integer
     expected type is Real array
@@ -1108,13 +1089,13 @@ end ProductExp6;
 model ProductExp7
  parameter Real x = product(fill(2, 0));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp7",
-			description="product() expressions: empty array",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp7",
+            description="product() expressions: empty array",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp7
- parameter Real x = 1 /* 0 */;
+ parameter Real x = 1 /* 1 */;
 end ArrayBuiltins.Product.ProductExp7;
 ")})));
 end ProductExp7;
@@ -1130,11 +1111,11 @@ model ProductExp8
  parameter Real x = f({{1,2},{3,4}});
     
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp8",
-			description="product() expressions: in a function",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp8",
+            description="product() expressions: in a function",
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp8
  parameter Real x = 24.0 /* 24.0 */;
 end ArrayBuiltins.Product.ProductExp8;
@@ -1153,12 +1134,12 @@ model ProductExp9
  Real[2,2] v2 = {{5,6},{7,8}};
  parameter Real x = f(v1,v2);
  
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Product_ProductExp9",
-			description="product() expressions: in a function",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Product_ProductExp9",
+            description="product() expressions: in a function",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayBuiltins.Product.ProductExp9
  Real v1[1,1];
  Real v1[1,2];
@@ -1211,11 +1192,11 @@ package Transpose
 model Transpose1
  Real x[2,2] = transpose({{1,2},{3,4}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose1",
-			description="Scalarization of transpose operator: Integer[2,2]",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose1",
+            description="Scalarization of transpose operator: Integer[2,2]",
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose1
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 3;
@@ -1229,11 +1210,11 @@ end Transpose1;
 model Transpose2
  Real x[2,3] = transpose({{1,2},{3,4},{5,6}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose2",
-			description="Scalarization of transpose operator: Integer[3,2]",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose2",
+            description="Scalarization of transpose operator: Integer[3,2]",
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose2
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 3;
@@ -1249,11 +1230,11 @@ end Transpose2;
 model Transpose3
  Real x[2,1] = transpose({{1,2}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose3",
-			description="Scalarization of transpose operator: Integer[1,2]",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose3",
+            description="Scalarization of transpose operator: Integer[1,2]",
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose3
  constant Real x[1,1] = 1;
  constant Real x[2,1] = 2;
@@ -1265,11 +1246,11 @@ end Transpose3;
 model Transpose4
  Integer x[2,2,2] = transpose({{{1,2},{3,4}},{{5,6},{7,8}}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose4",
-			description="Scalarization of transpose operator: Integer[2,2,2]",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose4",
+            description="Scalarization of transpose operator: Integer[2,2,2]",
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose4
  constant Integer x[1,1,1] = 1;
  constant Integer x[1,1,2] = 2;
@@ -1297,7 +1278,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1272, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
     expected type is matrix of Real, Integer, Boolean, String or enumeration
@@ -1315,7 +1296,7 @@ model Transpose6
             errorMessage="
 1 errors found:
 
-Error at line 1289, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1290, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function transpose(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is matrix of Real, Integer, Boolean, String or enumeration
@@ -1333,7 +1314,7 @@ model Transpose7
             errorMessage="
 1 errors found:
 
-Error at line 1306, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 1308, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Transpose7;
@@ -1343,11 +1324,11 @@ model Transpose8
     Real[3,2] x = {{1,2},{3,4},{5,6}};
     Real[2,3] y = transpose(x) .+ 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose8",
-			description="Scalarization of transpose operator: access to variable",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose8",
+            description="Scalarization of transpose operator: access to variable",
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose8
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -1375,13 +1356,13 @@ model Transpose9
 	
 	Real[2,3] x = f({{1,3},{5,7},{9,11}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose9",
-			description="Scalarization of transpose operator: unknown size",
-			inline_functions="none",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose9",
+            description="Scalarization of transpose operator: unknown size",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose9
  Real x[1,1];
  Real x[1,2];
@@ -1394,10 +1375,10 @@ equation
 
 public
  function ArrayBuiltins.Transpose.Transpose9.f
-  input Real[:, :] a;
+  input Real[:,:] a;
   output Real[:,:] b;
  algorithm
-  size(b) := {size(a, 2), size(a, 1)};
+  init b as Real[size(a, 2), size(a, 1)];
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     b[i1,i2] := a[i2,i1];
@@ -1407,7 +1388,6 @@ public
  end ArrayBuiltins.Transpose.Transpose9.f;
 
 end ArrayBuiltins.Transpose.Transpose9;
-
 ")})));
 end Transpose9;
 
@@ -1421,13 +1401,13 @@ model Transpose10
 	
 	Real[2,3,2] x = f({{{1,2},{3,4}},{{5,6},{7,8}},{{9,10},{11,12}}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose10",
-			description="Scalarization of transpose operator: unknown size",
-			inline_functions="none",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose10",
+            description="Scalarization of transpose operator: unknown size",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose10
  Real x[1,1,1];
  Real x[1,1,2];
@@ -1446,10 +1426,10 @@ equation
 
 public
  function ArrayBuiltins.Transpose.Transpose10.f
-  input Real[:, :, :] a;
+  input Real[:,:,:] a;
   output Real[:,:,:] b;
  algorithm
-  size(b) := {size(a, 2), size(a, 1), size(a, 3)};
+  init b as Real[size(a, 2), size(a, 1), size(a, 3)];
   for i1 in 1:size(a, 2) loop
    for i2 in 1:size(a, 1) loop
     for i3 in 1:size(a, 3) loop
@@ -1461,7 +1441,6 @@ public
  end ArrayBuiltins.Transpose.Transpose10.f;
 
 end ArrayBuiltins.Transpose.Transpose10;
-
 ")})));
 end Transpose10;
 
@@ -1475,13 +1454,13 @@ model Transpose11
 	
 	Real[2,3] x = f({{1,3},{5,7},{9,11}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Transpose_Transpose11",
-			description="Scalarization of transpose operator: unknown size",
-			inline_functions="none",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Transpose_Transpose11",
+            description="Scalarization of transpose operator: unknown size",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayBuiltins.Transpose.Transpose11
  Real x[1,1];
  Real x[1,2];
@@ -1494,14 +1473,13 @@ equation
 
 public
  function ArrayBuiltins.Transpose.Transpose11.f
-  input Real[:, :] a;
+  input Real[:,:] a;
   output Real[:,:] b;
   Real[:,:] temp_1;
   Real temp_2;
  algorithm
-  size(b) := {size(a, 2), size(a, 1)};
-  size(temp_1) := {size(a, 1), size(a, 1)};
-  for i3 in 1:size(a, 1) loop
+  init b as Real[size(a, 2), size(a, 1)];
+  init temp_1 as Real[size(a, 1), size(a, 1)];  for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
     temp_2 := 0.0;
     for i5 in 1:size(a, 2) loop
@@ -1519,7 +1497,6 @@ public
  end ArrayBuiltins.Transpose.Transpose11.f;
 
 end ArrayBuiltins.Transpose.Transpose11;
-			
 ")})));
 end Transpose11;
 
@@ -1530,12 +1507,12 @@ package Symmetric
 model Symmetric1
  Real x[2,2] = symmetric({{1,2},{3,4}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Symmetric_Symmetric1",
-			description="Scalarization of symmetric operator: Integer[2,2]",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Symmetric_Symmetric1",
+            description="Scalarization of symmetric operator: Integer[2,2]",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric1
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -1549,12 +1526,12 @@ end Symmetric1;
 model Symmetric2
  Real x[3,3] = symmetric({{1,2,3},{4,5,6},{7,8,9}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Symmetric_Symmetric2",
-			description="Scalarization of symmetric operator: Integer[3,3]",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Symmetric_Symmetric2",
+            description="Scalarization of symmetric operator: Integer[3,3]",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric2
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -1573,11 +1550,11 @@ end Symmetric2;
 model Symmetric3
  Real x[1,1] = symmetric({{3}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Symmetric_Symmetric3",
-			description="Scalarization of symmetric operator: Integer[1,1]",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Symmetric_Symmetric3",
+            description="Scalarization of symmetric operator: Integer[1,1]",
+            flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric3
  constant Real x[1,1] = 3;
 end ArrayBuiltins.Symmetric.Symmetric3;
@@ -1588,12 +1565,12 @@ end Symmetric3;
 model Symmetric4
  Integer x[4,4] = symmetric({{1,2,3,4},{5,6,7,8},{11,12,13,14},{15,16,17,18}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Symmetric_Symmetric4",
-			description="Scalarization of symmetric operator: Integer[2,2,2]",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Symmetric_Symmetric4",
+            description="Scalarization of symmetric operator: Integer[2,2,2]",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric4
  constant Integer x[1,1] = 1;
  constant Integer x[1,2] = 2;
@@ -1629,7 +1606,7 @@ equation
             errorMessage="
 1 errors found:
 
-Error at line 1599, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1601, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[2]
     expected type is square matrix
@@ -1647,7 +1624,7 @@ model Symmetric6
             errorMessage="
 1 errors found:
 
-Error at line 1616, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1619, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function symmetric(): types of positional argument 1 and input A are not compatible
     type of '1' is Integer
     expected type is square matrix
@@ -1665,7 +1642,7 @@ model Symmetric7
             errorMessage="
 1 errors found:
 
-Error at line 1633, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 1637, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Symmetric7;
@@ -1675,12 +1652,12 @@ model Symmetric8
     Real[2,2] x = {{1,2},{3,4}};
     Real[2,2] y = symmetric(x) .+ 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Symmetric_Symmetric8",
-			description="Scalarization of symmetric operator: access to variable",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Symmetric_Symmetric8",
+            description="Scalarization of symmetric operator: access to variable",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric8
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -1701,11 +1678,11 @@ package Cross
 model Cross1
  Real x[3] = cross({1,2,3}, {4.0,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cross_Cross1",
-			description="cross() operator: Real result",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cross_Cross1",
+            description="cross() operator: Real result",
+            flatModel="
 fclass ArrayBuiltins.Cross.Cross1
  constant Real x[1] = -3;
  constant Real x[2] = 6.0;
@@ -1718,14 +1695,13 @@ end Cross1;
 model Cross2
  Integer x[3] = cross({1,2,3}, {4,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="Cross2",
-			description="cross() operator: Integer result",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cross_Cross2",
+            description="cross() operator: Integer result",
+            flatModel="
 fclass ArrayBuiltins.Cross.Cross2
- discrete Integer x[3] = cross({1,2,3}, {4,5,6});
-
+ discrete Integer x[3] = cross({1, 2, 3}, {4, 5, 6});
 end ArrayBuiltins.Cross.Cross2;
 ")})));
 end Cross2; 
@@ -1741,7 +1717,7 @@ model Cross3
             errorMessage="
 1 errors found:
 
-Error at line 1708, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 1712, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Cross3; 
@@ -1757,12 +1733,12 @@ model Cross4
             errorMessage="
 2 errors found:
 
-Error at line 1724, column 20, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1728, column 20, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is Real[3]
 
-Error at line 1724, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1728, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
     expected type is Real[3]
@@ -1780,12 +1756,12 @@ model Cross5
             errorMessage="
 2 errors found:
 
-Error at line 1745, column 23, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1751, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
     expected type is Real[3]
 
-Error at line 1745, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1751, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{4, 5, 6, 7}' is Integer[4]
     expected type is Real[3]
@@ -1803,12 +1779,12 @@ model Cross6
             errorMessage="
 2 errors found:
 
-Error at line 1766, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1774, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[3]
 
-Error at line 1766, column 37, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1774, column 37, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
     expected type is Real[3]
@@ -1826,12 +1802,12 @@ model Cross7
             errorMessage="
 2 errors found:
 
-Error at line 1787, column 25, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1797, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
     expected type is Real[3]
 
-Error at line 1787, column 52, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1797, column 52, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function cross(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
     expected type is Real[3]
@@ -1848,12 +1824,12 @@ model Skew1
 	Real x[3] = {1,2,3};
     Real y[3,3] = skew(x);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Skew_Skew1",
-			description="skew() operator: basic test",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Skew_Skew1",
+            description="skew() operator: basic test",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass ArrayBuiltins.Skew.Skew1
  constant Real x[1] = 1;
  constant Real x[2] = 2;
@@ -1883,12 +1859,12 @@ model Skew2
             errorMessage="
 2 errors found:
 
-Error at line 1841, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1853, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{1, 2, 3, 4}' is Integer[4]
     expected type is Real[3]
 
-Error at line 1842, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1854, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function skew(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[3]
@@ -1904,11 +1880,11 @@ package OuterProduct
 model OuterProduct1
  Real x[3,2] = outerProduct({1,2,3}, {4.0,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="OuterProduct_OuterProduct1",
-			description="outerProduct() operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="OuterProduct_OuterProduct1",
+            description="outerProduct() operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct1
  constant Real x[1,1] = 4.0;
  constant Real x[1,2] = 5;
@@ -1924,12 +1900,12 @@ end OuterProduct1;
 model OuterProduct2
  Integer x[3,3] = outerProduct({1,2,3}, {4,5,6});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="OuterProduct_OuterProduct2",
-			description="outerProduct() operator: basic test",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="OuterProduct_OuterProduct2",
+            description="outerProduct() operator: basic test",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct2
  constant Integer x[1,1] = 4;
  constant Integer x[1,2] = 5;
@@ -1955,7 +1931,7 @@ model OuterProduct3
             errorMessage="
 1 errors found:
 
-Error at line 1911, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 1926, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end OuterProduct3; 
@@ -1971,12 +1947,12 @@ model OuterProduct4
             errorMessage="
 2 errors found:
 
-Error at line 1927, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1942, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '1' is Integer
     expected type is Real[:]
 
-Error at line 1927, column 30, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1942, column 30, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '2' is Integer
     expected type is Real[:]
@@ -1994,12 +1970,12 @@ model OuterProduct5
             errorMessage="
 2 errors found:
 
-Error at line 1948, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1965, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{\"1\", \"2\", \"3\"}' is String[3]
     expected type is Real[:]
 
-Error at line 1948, column 46, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1965, column 46, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{\"4\", \"5\", \"6\"}' is String[3]
     expected type is Real[:]
@@ -2017,12 +1993,12 @@ model OuterProduct6
             errorMessage="
 2 errors found:
 
-Error at line 1969, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1988, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 1 and input x are not compatible
     type of '{{1, 2, 3}, {1, 2, 3}, {1, 2, 3}}' is Integer[3, 3]
     expected type is Real[:]
 
-Error at line 1969, column 63, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 1988, column 63, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function outerProduct(): types of positional argument 2 and input y are not compatible
     type of '{{4, 5, 6}, {4, 5, 6}, {4, 5, 6}}' is Integer[3, 3]
     expected type is Real[:]
@@ -2037,11 +2013,11 @@ package Cat
 model ArrayCat1
  Real x[5,2] = cat(1, {{1,2},{3,4}}, {{5,6}}, {{7,8},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cat_ArrayCat1",
-			description="cat() operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayCat1",
+            description="cat() operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat1
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -2061,11 +2037,11 @@ end ArrayCat1;
 model ArrayCat2
  Real x[2,5] = cat(2, {{1.0,2.0},{6,7}}, {{3},{8}}, {{4,5},{9,0}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cat_ArrayCat2",
-			description="cat() operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayCat2",
+            description="cat() operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat2
  constant Real x[1,1] = 1.0;
  constant Real x[1,2] = 2.0;
@@ -2085,14 +2061,13 @@ end ArrayCat2;
 model ArrayCat3
  String x[2,5] = cat(2, {{"1","2"},{"6","7"}}, {{"3"},{"8"}}, {{"4","5"},{"9","0"}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ArrayCat3",
-			description="cat() operator: using strings",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cat_ArrayCat3",
+            description="cat() operator: using strings",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat3
- discrete String x[2,5] = cat(2, {{\"1\",\"2\"},{\"6\",\"7\"}}, {{\"3\"},{\"8\"}}, {{\"4\",\"5\"},{\"9\",\"0\"}});
-
+ discrete String x[2,5] = cat(2, {{\"1\", \"2\"}, {\"6\", \"7\"}}, {{\"3\"}, {\"8\"}}, {{\"4\", \"5\"}, {\"9\", \"0\"}});
 end ArrayBuiltins.Cat.ArrayCat3;
 ")})));
 end ArrayCat3;
@@ -2108,7 +2083,7 @@ model ArrayCat4
             errorMessage="
 1 errors found:
 
-Error at line 2058, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2078, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat4;
@@ -2124,7 +2099,7 @@ model ArrayCat5
             errorMessage="
 1 errors found:
 
-Error at line 2074, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2094, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat5;
@@ -2140,7 +2115,7 @@ model ArrayCat6
             errorMessage="
 1 errors found:
 
-Error at line 2090, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2110, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end ArrayCat6;
@@ -2156,7 +2131,7 @@ model ArrayCat6b
             errorMessage="
 1 errors found:
 
-Error at line 2106, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2126, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat6b;
@@ -2173,7 +2148,7 @@ model ArrayCat7
             errorMessage="
 1 errors found:
 
-Error at line 2123, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2143, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Dimension argument of cat() does not have constant variability: d
 ")})));
 end ArrayCat7;
@@ -2183,15 +2158,14 @@ model ArrayCat8
  parameter Integer d = 1;
  Integer x[4] = cat(d, {1,2}, {4,5});
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ArrayCat8",
-			description="cat() operator: parameter dim",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Cat_ArrayCat8",
+            description="cat() operator: parameter dim",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat8
  parameter Integer d = 1 /* 1 */;
- discrete Integer x[4] = cat(d, {1,2}, {4,5});
-
+ discrete Integer x[4] = cat(d, {1, 2}, {4, 5});
 end ArrayBuiltins.Cat.ArrayCat8;
 ")})));
 end ArrayCat8;
@@ -2207,7 +2181,7 @@ model ArrayCat9
             errorMessage="
 1 errors found:
 
-Error at line 2157, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2176, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Dimension argument of cat() is not compatible with Integer: 1.0
 ")})));
 end ArrayCat9;
@@ -2223,7 +2197,7 @@ model ArrayCat10
             errorMessage="
 1 errors found:
 
-Error at line 2173, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2192, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayCat10;
@@ -2294,8 +2268,8 @@ public
   output Real[:] y;
   Real[:] temp_1;
  algorithm
-  size(y) := {size(x, 1)};
-  size(temp_1) := {size(x, 1)};
+  init y as Real[size(x, 1)];
+  init temp_1 as Real[size(x, 1)];
   for i2 in 1:size(x, 1) loop
    temp_1[i2] := x[i2];
   end for;
@@ -2314,11 +2288,11 @@ end ArrayCat12;
 model ArrayShortCat1
  Real x[2,3] = [1,2,3; 4,5,6];
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cat_ArrayShortCat1",
-			description="Shorthand array concatenation operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayShortCat1",
+            description="Shorthand array concatenation operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat1
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 2;
@@ -2337,12 +2311,12 @@ model ArrayShortCat2
  Real c[2] = {4,7};
  Real d[2,2] = {{5,6},{8,9}};
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cat_ArrayShortCat2",
-			description="Shorthand array concatenation operator: different sizes",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayShortCat2",
+            description="Shorthand array concatenation operator: different sizes",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat2
  constant Real x[1,1] = 1.0;
  constant Real x[1,2] = 2.0;
@@ -2363,7 +2337,6 @@ fclass ArrayBuiltins.Cat.ArrayShortCat2
  constant Real d[2,1] = 8;
  constant Real d[2,2] = 9;
 end ArrayBuiltins.Cat.ArrayShortCat2;
-			
 ")})));
 end ArrayShortCat2;
 
@@ -2371,11 +2344,11 @@ end ArrayShortCat2;
 model ArrayShortCat3
  Real x[2,2,2,1] = [{{{{1},{2}}}}, {{{3,4}}}; {{{5,6}}}, {{{7,8}}}];
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Cat_ArrayShortCat3",
-			description="Shorthand array concatenation operator: more than 2 dimensions",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Cat_ArrayShortCat3",
+            description="Shorthand array concatenation operator: more than 2 dimensions",
+            flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat3
  constant Real x[1,1,1,1] = 1;
  constant Real x[1,1,2,1] = 2;
@@ -2400,7 +2373,7 @@ model ArrayShortCat4
             errorMessage="
 1 errors found:
 
-Error at line 2297, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2368, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat4;
@@ -2416,7 +2389,7 @@ model ArrayShortCat5
             errorMessage="
 1 errors found:
 
-Error at line 2313, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2384, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Types do not match in array concatenation
 ")})));
 end ArrayShortCat5;
@@ -2431,11 +2404,11 @@ model ArrayEnd1
  Real x[4] = {1,2,3,4};
  Real y[2] = x[2:end-1] * 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="End_ArrayEnd1",
-			description="end operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="End_ArrayEnd1",
+            description="end operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.End.ArrayEnd1
  constant Real x[1] = 1;
  constant Real x[2] = 2;
@@ -2459,7 +2432,7 @@ model ArrayEnd2
             errorMessage="
 1 errors found:
 
-Error at line 2356, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2427, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   The end operator may only be used in array subscripts
 ")})));
 end ArrayEnd2;
@@ -2470,12 +2443,12 @@ model ArrayEnd3
  Real x2[5] = {5,6,7,8,9};
  Real y[2] = x2[end.-x1[2:end-1]];
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="End_ArrayEnd3",
-			description="End operator: nestled array subscripts",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="End_ArrayEnd3",
+            description="End operator: nestled array subscripts",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass ArrayBuiltins.End.ArrayEnd3
  constant Integer x1[1] = 1;
  constant Integer x1[2] = 2;
@@ -2503,11 +2476,11 @@ model Scalar1
 	Real y = scalar(x) + 1;
 	Real z = scalar({{{{2}}}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="DimensionConvert_Scalar1",
-			description="Scalar operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DimensionConvert_Scalar1",
+            description="Scalar operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.DimensionConvert.Scalar1
  constant Real x[1,1,1] = 1;
  constant Real y = 2.0;
@@ -2529,12 +2502,12 @@ model Scalar2
             errorMessage="
 2 errors found:
 
-Error at line 2424, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2495, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of 'x' is Real[1, 1, 2]
     expected type is array with exactly 1 element
 
-Error at line 2425, column 21, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2496, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function scalar(): types of positional argument 1 and input A are not compatible
     type of '{{{{3}, {4}}}}' is Integer[1, 1, 2, 1]
     expected type is array with exactly 1 element
@@ -2547,11 +2520,11 @@ model Vector1
     Real[1] y = vector(x) .+ 1;
     Real[1] z = vector(2);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="DimensionConvert_Vector1",
-			description="Vector operator: scalar arg",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DimensionConvert_Vector1",
+            description="Vector operator: scalar arg",
+            flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector1
  constant Real x[1,1,1] = 1;
  constant Real y[1] = 2.0;
@@ -2566,12 +2539,12 @@ model Vector2
     Real[2] z = vector({{1,2}});
     Real[2] w = vector({{{{1}},{{2}}}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="DimensionConvert_Vector2",
-			description="Vector operator: basic test",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DimensionConvert_Vector2",
+            description="Vector operator: basic test",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector2
  constant Real x[1] = 1;
  constant Real x[2] = 2;
@@ -2596,12 +2569,12 @@ model Vector3
             errorMessage="
 2 errors found:
 
-Error at line 2489, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2563, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     expected type is scalar or vector-shaped array
 
-Error at line 2490, column 24, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2564, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function vector(): types of positional argument 1 and input A are not compatible
     type of '{{{{{1}, {2}}}, {{{3}, {4}}}}}' is Integer[1, 2, 1, 2, 1]
     expected type is scalar or vector-shaped array
@@ -2615,12 +2588,12 @@ model Matrix1
     Real[2,2] z = matrix({{1,2},{3,4}});
     Real[2,2] w = matrix({{{1},{2}},{{3},{4}}});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="DimensionConvert_Matrix1",
-			description="Matrix operator: basic test",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="DimensionConvert_Matrix1",
+            description="Matrix operator: basic test",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.DimensionConvert.Matrix1
  constant Real x[1,1] = 1;
  constant Real y[1,1] = 1;
@@ -2647,7 +2620,7 @@ model Matrix2
             errorMessage="
 1 errors found:
 
-Error at line 2538, column 26, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2615, column 26, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function matrix(): types of positional argument 1 and input A are not compatible
     type of '{{{1, 2}, {3, 4}}}' is Integer[1, 2, 2]
     expected type is scalar, vector or matrix-shaped array
@@ -2661,11 +2634,11 @@ end DimensionConvert;
 model Linspace1
  Real x[4] = linspace(1, 3, 4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Linspace1",
-			description="Linspace operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Linspace1",
+            description="Linspace operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.Linspace1
  constant Real x[1] = 1;
  constant Real x[2] = 1.6666666666666665;
@@ -2682,13 +2655,13 @@ model Linspace2
  parameter Integer c = 3;
  Real x[3] = linspace(a, b, c);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Linspace2",
-			description="Linspace operator: using parameter component as n",
-			variability_propagation=false,
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Linspace2",
+            description="Linspace operator: using parameter component as n",
+            variability_propagation=false,
+            eliminate_alias_variables=false,
+            flatModel="
 fclass ArrayBuiltins.Linspace2
  Real a;
  Real b;
@@ -2720,7 +2693,7 @@ model Linspace3
             errorMessage="
 1 errors found:
 
-Error at line 2610, column 29, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2688, column 29, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function linspace(): types of positional argument 3 and input n are not compatible
     type of 'c' is Real
     expected type is Integer
@@ -2741,7 +2714,7 @@ model Linspace4
             errorMessage="
 1 errors found:
 
-Error at line 2630, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2709, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' is of discrete-time variability
 ")})));
@@ -2758,7 +2731,7 @@ model Linspace5
             errorMessage="
 1 errors found:
 
-Error at line 2647, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+Error at line 2726, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
   The binding expression of the variable x does not match the declared type of the variable
 ")})));
 end Linspace5;
@@ -2775,11 +2748,11 @@ model Linspace6
 	
 	A a[d](x = linspace(b, c, d));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Linspace6",
-			description="Linspace operator: parameter args",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Linspace6",
+            description="Linspace operator: parameter args",
+            flatModel="
 fclass ArrayBuiltins.Linspace6
  parameter Real b = 1.5 /* 1.5 */;
  parameter Real c = 3 /* 3 */;
@@ -2806,13 +2779,13 @@ model Linspace7
 
  Real x[3] = f(1,4,3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Linspace7",
-			description="Linspace operator: basic test",
-			inline_functions="none",
-			variability_propagation=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Linspace7",
+            description="Linspace operator: basic test",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
 fclass ArrayBuiltins.Linspace7
  Real x[1];
  Real x[2];
@@ -2827,7 +2800,7 @@ public
   input Integer n;
   output Real[:] a;
  algorithm
-  size(a) := {n};
+  init a as Real[n];
   for i1 in 1:n loop
    a[i1] := x1 + (i1 - 1) * ((x2 - x1) / (n - 1));
   end for;
@@ -2852,7 +2825,7 @@ model Linspace8
             errorMessage="
 1 errors found:
 
-Error at line 2741, column 14, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 2820, column 14, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Third argument of linspace() must be a scalar parameter Integer expression that is greater than 1
     'c' evaluates to 1
 ")})));
@@ -2880,11 +2853,11 @@ model NdimsExp1
  constant Integer n = ndims({{1,2},{3,4}});
  Integer x = n * 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NdimsExp1",
-			description="Ndims operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NdimsExp1",
+            description="Ndims operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.NdimsExp1
  constant Integer n = 2;
  constant Integer x = 4;
@@ -2900,11 +2873,11 @@ model NdimsStructural1
     parameter Real p2[1] = {1};
     parameter Real p3[1] = {2};
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="NdimsStructural1",
-			description="Using parameter in ndims() expression that is used as structural parameter should not make that parameter a structural parameter",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NdimsStructural1",
+            description="Using parameter in ndims() expression that is used as structural parameter should not make that parameter a structural parameter",
+            flatModel="
 fclass ArrayBuiltins.NdimsStructural1
  Real x[1,1];
  Real y = 1 + p2[1:1] * p3[1:1];
@@ -2924,11 +2897,11 @@ model ArrayIfExp1
 equation
   der(x) = if time>=3 then A*x/N else -A*x/N;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayIfExp1",
-			description="Array if expressions",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayIfExp1",
+            description="Array if expressions",
+            flatModel="
 fclass ArrayBuiltins.ArrayIfExp1
  structural parameter Integer N = 3 /* 3 */;
  parameter Real A[1,1] = 1 /* 1 */;
@@ -2960,11 +2933,11 @@ model ArrayIfExp2
   constant Real a = if 1 > 2 then 5 elseif 1 < 2 then 6 else 7;
   Real b = a;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayIfExp2",
-			description="Constant evaluation of if expression",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayIfExp2",
+            description="Constant evaluation of if expression",
+            flatModel="
 fclass ArrayBuiltins.ArrayIfExp2
  constant Real a = 6;
  constant Real b = 6.0;
@@ -2981,12 +2954,12 @@ model ArrayIfExp3
 equation
     y = if useTableA then tableA[1, 1] else tableB[1, 1];
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ArrayIfExp3",
-			description="Eliminate branches causing index out of bounds",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayIfExp3",
+            description="Eliminate branches causing index out of bounds",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass ArrayBuiltins.ArrayIfExp3
  parameter Real tableB[1,1] = 1.0 /* 1.0 */;
  parameter Real tableB[1,2] = 1.0 /* 1.0 */;
@@ -3003,22 +2976,21 @@ end ArrayIfExp3;
 model Identity1
   parameter Real A[3,3] = identity(3);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Identity1",
-			description="identity() operator: basic test",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Identity1",
+            description="identity() operator: basic test",
+            flatModel="
 fclass ArrayBuiltins.Identity1
- parameter Real A[1,1] = 1 /* 1.0 */;
- parameter Real A[1,2] = 0 /* 0.0 */;
- parameter Real A[1,3] = 0 /* 0.0 */;
- parameter Real A[2,1] = 0 /* 0.0 */;
- parameter Real A[2,2] = 1 /* 1.0 */;
- parameter Real A[2,3] = 0 /* 0.0 */;
- parameter Real A[3,1] = 0 /* 0.0 */;
- parameter Real A[3,2] = 0 /* 0.0 */;
- parameter Real A[3,3] = 1 /* 1.0 */;
-
+ parameter Real A[1,1] = 1 /* 1 */;
+ parameter Real A[1,2] = 0 /* 0 */;
+ parameter Real A[1,3] = 0 /* 0 */;
+ parameter Real A[2,1] = 0 /* 0 */;
+ parameter Real A[2,2] = 1 /* 1 */;
+ parameter Real A[2,3] = 0 /* 0 */;
+ parameter Real A[3,1] = 0 /* 0 */;
+ parameter Real A[3,2] = 0 /* 0 */;
+ parameter Real A[3,3] = 1 /* 1 */;
 end ArrayBuiltins.Identity1;
 ")})));
 end Identity1;
@@ -3034,7 +3006,7 @@ model Identity2
             errorMessage="
 1 errors found:
 
-Error at line 2922, column 22, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
+Error at line 3001, column 22, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
   Array size mismatch in declaration of A, size of declaration is scalar and size of binding expression is [3, 3]
 ")})));
 end Identity2;
@@ -3051,7 +3023,7 @@ model Identity3
             errorMessage="
 1 errors found:
 
-Error at line 2939, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3018, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Argument of identity() must be a scalar parameter Integer expression
     'n' is of discrete-time variability
 ")})));
@@ -3068,7 +3040,7 @@ model Identity4
             errorMessage="
 1 errors found:
 
-Error at line 2956, column 36, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3035, column 36, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function identity(): types of positional argument 1 and input n are not compatible
     type of '3.0' is Real
     expected type is Integer
@@ -3081,12 +3053,12 @@ model Diagonal1
 	Real x[2,2] = diagonal({1,2});
     Integer y[3,3] = diagonal({1,2,3});
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Diagonal1",
-			description="diagonal() operator: basic test",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Diagonal1",
+            description="diagonal() operator: basic test",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass ArrayBuiltins.Diagonal1
  constant Real x[1,1] = 1;
  constant Real x[1,2] = 0;
@@ -3118,17 +3090,17 @@ model Diagonal2
             errorMessage="
 3 errors found:
 
-Error at line 3002, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3083, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{{1, 2}, {3, 4}}' is Integer[2, 2]
     expected type is Real[:]
 
-Error at line 3003, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3084, column 28, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '1' is Integer
     expected type is Real[:]
 
-Error at line 3004, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3085, column 31, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function diagonal(): types of positional argument 1 and input v are not compatible
     type of '{true, true}' is Boolean[2]
     expected type is Real[:]
@@ -3140,11 +3112,11 @@ end Diagonal2;
 model ScalarSize1
   Real x[1] = cat(1, {1}, size(Modelica.Constants.pi));
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="ScalarSize1",
-			description="Size of zero-length vector",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ScalarSize1",
+            description="Size of zero-length vector",
+            flatModel="
 fclass ArrayBuiltins.ScalarSize1
  Real x[1] = cat(1, {1}, size(3.141592653589793));
 end ArrayBuiltins.ScalarSize1;
@@ -3162,7 +3134,7 @@ model ScalarSize2
             errorMessage="
 1 errors found:
 
-Error at line 3046, column 15, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
+Error at line 3129, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo', TYPE_MISMATCH_IN_EXPRESSION:
   Type error in expression: {1} + Modelica.Constants.pi
     type of '{1}' is Integer[1]
     type of 'Modelica.Constants.pi' is Real
@@ -3188,11 +3160,11 @@ model NonVectorizedScalarization1
     Real x[3] = {1,2,3};
     Real y[3] = f1(x);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NonVectorizedScalarization1",
-			description="Test of accesses that should be kept without indices during scalarization",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonVectorizedScalarization1",
+            description="Test of accesses that should be kept without indices during scalarization",
+            flatModel="
 fclass ArrayBuiltins.NonVectorizedScalarization1
  constant Real x[1] = 1;
  constant Real x[2] = 2;
@@ -3223,11 +3195,11 @@ model NonVectorizedScalarization2
     Real x[3] = {1,2,3};
     Real y[3] = f1(x);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NonVectorizedScalarization2",
-			description="Test of accesses that should be kept without indices during scalarization",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonVectorizedScalarization2",
+            description="Test of accesses that should be kept without indices during scalarization",
+            flatModel="
 fclass ArrayBuiltins.NonVectorizedScalarization2
  constant Real x[1] = 1;
  constant Real x[2] = 2;
@@ -3286,7 +3258,7 @@ public
   input Real eps;
   output Real[:] result;
  algorithm
-  size(result) := {size(v, 1)};
+  init result as Real[size(v, 1)];
   for i1 in 1:size(v, 1) loop
    result[i1] := smooth(0, if ArrayBuiltins.NonVectorizedScalarization3.length(v) >= eps then v[i1] / ArrayBuiltins.NonVectorizedScalarization3.length(v) else v[i1] / eps);
   end for;
@@ -3323,7 +3295,7 @@ model InfArgsWithNamed
             errorMessage="
 1 errors found:
 
-Error at line 3194, column 27, in file 'Compiler/ModelicaFrontEnd/src/test/ArrayBuiltins.mo':
+Error at line 3290, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayBuiltins.mo':
   Calling function ones(): no input matching named argument xxx found
 ")})));
 end InfArgsWithNamed;

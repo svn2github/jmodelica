@@ -28,12 +28,12 @@ equation
 end B;
 B b;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InnerOuterTest1",
-			description="Basic test of inner outer.",
-			equation_sorting=true,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InnerOuterTest1",
+            description="Basic test of inner outer.",
+            equation_sorting=true,
+            flatModel="
 fclass InnerOuterTests.InnerOuterTest1
  Real b.T0;
  Real b.a1.z;
@@ -86,13 +86,13 @@ model InnerOuterTest2
 	end I;
 	I i;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InnerOuterTest2",
-			description="Basic test of inner outer.",
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InnerOuterTest2",
+            description="Basic test of inner outer.",
             eliminate_alias_variables=false,
-			equation_sorting=true,
-			flatModel="
+            equation_sorting=true,
+            flatModel="
 fclass InnerOuterTests.InnerOuterTest2
  Real i.TI;
  Real i.e.TI;
@@ -615,9 +615,10 @@ fclass InnerOuterTests.InnerOuterTest21
 
 public
  function InnerOuterTests.InnerOuterTest21.b.m.f
-  input Real[2] x;
-  output Real[2] y;
+  input Real[:] x;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1:2] := x[1:2];
   return;
  end InnerOuterTests.InnerOuterTest21.b.m.f;
@@ -662,8 +663,9 @@ fclass InnerOuterTests.InnerOuterTest22
 public
  function InnerOuterTests.InnerOuterTest22.m.f2
   input Real[:] x;
-  output Real[size(x, 1)] y;
+  output Real[:] y;
  algorithm
+  init y as Real[size(x, 1)];
   y := x[:];
   return;
  end InnerOuterTests.InnerOuterTest22.m.f2;

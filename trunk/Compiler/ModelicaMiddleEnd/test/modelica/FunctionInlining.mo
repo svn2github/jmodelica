@@ -27,13 +27,13 @@ package FunctionInlining
         
         Real x = f(1);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline1",
-			description="Most basic inlining case",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline1",
+            description="Most basic inlining case",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline1
  Real x;
 equation
@@ -64,13 +64,13 @@ end FunctionInlining.BasicInline1;
         Real x = f(y - 1);
         constant Real y = 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline2",
-			description="More complicated inlining case with only assignments and constant argument",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline2",
+            description="More complicated inlining case with only assignments and constant argument",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline2
  Real x;
  constant Real y = 2;
@@ -102,14 +102,14 @@ end FunctionInlining.BasicInline2;
         Real x = f(y + 1);
         Real y = time;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline3",
-			description="More complicated inlining case with only assignments and continous argument",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline3",
+            description="More complicated inlining case with only assignments and continous argument",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.BasicInline3
  Real x;
  Real y;
@@ -148,13 +148,13 @@ end FunctionInlining.BasicInline3;
         Real x = f(y);
         Real y = time;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline4",
-			description="Test of alias elimination after inlining",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline4",
+            description="Test of alias elimination after inlining",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline4
  Real x;
  Real y;
@@ -182,13 +182,13 @@ end FunctionInlining.BasicInline4;
         Real x[:] = f(y);
         Real y[3] = { 1, 2, 3 };
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline6",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline6",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline6
  Real x[1];
  Real x[2];
@@ -212,7 +212,6 @@ equation
  temp_11 = y[3] .+ 2;
  temp_20 = y[1] * temp_7 + y[2] * temp_9 + y[3] * temp_11;
 end FunctionInlining.BasicInline6;
-			
 ")})));
     end BasicInline6;
     
@@ -241,14 +240,14 @@ end FunctionInlining.BasicInline6;
 	    Real x = f2(y);
         Real y = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline7",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline7",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.BasicInline7
  Real x;
  Real y;
@@ -292,13 +291,13 @@ end FunctionInlining.BasicInline7;
         Real x[:] = f2(y);
         Real y[3] = { 1, 2, 3 };
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline8",
-			description="Inlining function with both function calls and arrays",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline8",
+            description="Inlining function with both function calls and arrays",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline8
  Real x[1];
  Real x[2];
@@ -336,7 +335,6 @@ equation
  temp_56 = temp_50 .+ 1;
  temp_65 = temp_48 * temp_52 + temp_49 * temp_54 + temp_50 * temp_56;
 end FunctionInlining.BasicInline8;
-			
 ")})));
     end BasicInline8;
     
@@ -362,14 +360,14 @@ end FunctionInlining.BasicInline8;
         parameter Real x = f(y - 1);
         parameter Real y = 2;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline9",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline9",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.BasicInline9
  parameter Real temp_1;
  parameter Real y = 2 /* 2 */;
@@ -401,15 +399,15 @@ end FunctionInlining.BasicInline9;
         Real y = 2.2;
         Real[:] z = { 1, 2, 3 };
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline10",
-			description="Using array indices",
-			variability_propagation=false,
-			inline_functions="all",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline10",
+            description="Using array indices",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
 fclass FunctionInlining.BasicInline10
- constant Integer e = 2 /* 2 */;
+ constant Integer e = 2;
  Real x;
  Real y;
  Real z[1];
@@ -438,14 +436,14 @@ end FunctionInlining.BasicInline10;
         Real x = y[f(e)];
         Real[:] y = { 1, 2, 3 };
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="BasicInline11",
-			description="Function call as array index",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="BasicInline11",
+            description="Function call as array index",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.BasicInline11
  parameter Integer e = 1 /* 1 */;
  Real x;
@@ -4161,10 +4159,10 @@ equation
 
 public
  function FunctionInlining.ChainedCallInlining11.f2
-  input Real[:, :] x;
+  input Real[:,:] x;
   output Real[:,:] y;
  algorithm
-  size(y) := {size(x, 1), size(x, 2)};
+  init y as Real[size(x, 1), size(x, 2)];
   for i1 in 1:size(x, 1) loop
    for i2 in 1:size(x, 2) loop
     y[i1,i2] := x[i1,i2];

@@ -3874,8 +3874,8 @@ void func_CCodeGenTests_CArrayOutputs3_f1_def0(jmi_ad_var_t* o_o) {
     JMI_DEF(REA, o_v)
     JMI_DEF(REA, x_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
     o_v = 0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
     func_CCodeGenTests_CArrayOutputs3_f2_def1(temp_1_a);
     x_v = jmi_array_val_1(temp_1_a, 1) * 3 + jmi_array_val_1(temp_1_a, 2) * 4;
     JMI_RET(GEN, o_o, o_v)
@@ -3948,8 +3948,8 @@ void func_CCodeGenTests_CArrayOutputs4_f1_def0(jmi_ad_var_t* o_o) {
     JMI_DEF(REA, o_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
     o_v = 0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
     func_CCodeGenTests_CArrayOutputs4_f2_def1(x_a, &y_v);
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -4026,8 +4026,8 @@ void func_CCodeGenTests_CArrayOutputs5_f1_def0(jmi_array_t* i_a, jmi_ad_var_t* o
     JMI_DEF(REA, o_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
     o_v = 0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, x_a, 2, 1, 2)
     func_CCodeGenTests_CArrayOutputs5_f2_def1(i_a, x_a, &y_v);
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()
@@ -4160,12 +4160,12 @@ void func_CCodeGenTests_CUnknownArray2_f_def0(jmi_array_t* x_a, jmi_array_t* y_a
     jmi_ad_var_t i1_3ie;
     jmi_ad_var_t i2_4i;
     jmi_ad_var_t i2_4ie;
-    JMI_ARRAY_INIT_2(STAT, jmi_ad_var_t, jmi_array_t, temp_3_a, 4, 2, 2, 2)
     if (y_a == NULL) {
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, jmi_array_size(x_a, 0) * 2, 2, jmi_array_size(x_a, 0), 2)
         y_a = y_an;
     }
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_array_size(x_a, 0) * 2, 2, jmi_array_size(x_a, 0), 2)
+    JMI_ARRAY_INIT_2(STAT, jmi_ad_var_t, jmi_array_t, temp_3_a, 4, 2, 2, 2)
     jmi_array_ref_2(temp_3_a, 1, 1) = 1;
     jmi_array_ref_2(temp_3_a, 1, 2) = 2;
     jmi_array_ref_2(temp_3_a, 2, 1) = 3;
@@ -6751,8 +6751,8 @@ void func_CCodeGenTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     c_v = 3;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     jmi_array_ref_1(d_a, 1) = 3;
     y_v = f(x_v, c_v, d_a->var);
     JMI_RET(GEN, y_o, y_v)
@@ -6771,8 +6771,8 @@ void func_CCodeGenTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
     JMI_DEF(REA, y_v)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     c_v = 3;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     jmi_array_ref_1(d_a, 1) = 3;
     y_v = f2(x_v, c_v, d_a->var, jmi_array_size(d_a, 0));
     JMI_RET(GEN, y_o, y_v)
@@ -12838,10 +12838,10 @@ void func_CCodeGenTests_Algorithm9_fw_def1(R_0_r* r_v) {
         r_v = r_vn;
     }
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(temp_1_a);
     jmi_array_ref_1(r_v->a, 1) = 2 * jmi_array_val_1(temp_1_a, 1);
     jmi_array_ref_1(r_v->a, 2) = 2 * jmi_array_val_1(temp_1_a, 2);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_2_a, 2, 1, 2)
     func_CCodeGenTests_Algorithm9_f_def0(temp_2_a);
     jmi_array_ref_1(r_v->a, 2) = jmi_array_val_1(temp_2_a, 1);
     jmi_array_ref_1(r_v->a, 3) = jmi_array_val_1(temp_2_a, 2);
@@ -15028,7 +15028,6 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
     JMI_DEF(INT_EXT, tmp_9)
     JMI_DEF(INT_EXT, tmp_10)
     extern void dgeev_(char*, char*, int*, double*, int*, double*, double*, double*, int*, double*, int*, double*, int*, int*);
-    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
     if (eigenReal_a == NULL) {
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenReal_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         eigenReal_a = eigenReal_an;
@@ -15041,10 +15040,10 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, eigenVectors_an, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
         eigenVectors_a = eigenVectors_an;
     }
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
+    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, dummy_a, 1, 2, 1, 1)
     n_v = jmi_array_size(A_a, 0);
     lwork_v = 12 * n_v;
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         i2_1ie = jmi_array_size(A_a, 0) + 1 / 2.0;
@@ -15052,6 +15051,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgeev_def0(jmi_array_t* A_a, jmi_array_t
             jmi_array_ref_2(Awork_a, i1_0i, i2_1i) = jmi_array_val_2(A_a, i1_0i, i2_1i);
         }
     }
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, work_a, 12 * jmi_array_size(A_a, 0), 1, 12 * jmi_array_size(A_a, 0))
     JMI_ASG(STR, tmp_1, \"N\")
     JMI_ASG(STR, tmp_2, \"V\")
     tmp_3 = (int)n_v;
@@ -16599,12 +16599,11 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, x_an, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
         x_a = x_an;
     }
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         jmi_array_ref_1(x_a, i1_0i) = jmi_array_val_1(b_a, i1_0i);
     }
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_1ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
         i2_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
@@ -16614,6 +16613,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_vec_def1(jmi_array_t* A_a, jmi_arr
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(b_a, 0));
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
     tmp_1 = (int)1;
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_2, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_2->var);
@@ -16697,8 +16697,6 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, X_an, jmi_array_size(A_a, 0) * jmi_array_size(B_a, 1), 2, jmi_array_size(A_a, 0), jmi_array_size(B_a, 1))
         X_a = X_an;
     }
-    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
-    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
     i1_0ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
         i2_1ie = jmi_array_size(B_a, 1) + 1 / 2.0;
@@ -16706,6 +16704,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
             jmi_array_ref_2(X_a, i1_0i, i2_1i) = jmi_array_val_2(B_a, i1_0i, i2_1i);
         }
     }
+    JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, Awork_a, jmi_array_size(A_a, 0) * jmi_array_size(A_a, 0), 2, jmi_array_size(A_a, 0), jmi_array_size(A_a, 0))
     i1_2ie = jmi_array_size(A_a, 0) + 1 / 2.0;
     for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
         i2_3ie = jmi_array_size(A_a, 0) + 1 / 2.0;
@@ -16715,6 +16714,7 @@ void func_Modelica_Math_Matrices_LAPACK_dgesv_def1(jmi_array_t* A_a, jmi_array_t
     }
     lda_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(A_a, 0));
     ldb_v = jmi_max(AD_WRAP_LITERAL(1), jmi_array_size(B_a, 0));
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, ipiv_a, jmi_array_size(A_a, 0), 1, jmi_array_size(A_a, 0))
     JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, jmi_array_size(Awork_a, 0) * jmi_array_size(Awork_a, 1), 2, jmi_array_size(Awork_a, 0), jmi_array_size(Awork_a, 1))
     jmi_matrix_to_fortran_real(Awork_a, Awork_a->var, tmp_1->var);
     tmp_2 = (int)lda_v;

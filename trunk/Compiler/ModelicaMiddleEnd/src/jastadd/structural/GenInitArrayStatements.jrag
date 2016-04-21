@@ -23,7 +23,6 @@ aspect GenInitArrayStatements {
         public class genInitArrayStatements extends Transformation {
             public void perform() {
                 for (FFunctionDecl ffd : getFFunctionDecls()) {
-                    ffd.genInitArrayStatements();
                     ffd.sortBindingAssignments();
                 }
             }
@@ -39,31 +38,15 @@ aspect GenInitArrayStatements {
      */
     public boolean FStatement.shouldBeSorted = false;
     
-    public void FFunctionDecl.genInitArrayStatements() {
-        List<FStatement> stmts = new List<FStatement>();
-        for (FFunctionVariable ffv : getFFunctionVariables())
-            ffv.genInitArrayStatements(stmts, true);
-        for (FStatement stmt : getFAlgorithm().getFStatements())
-            stmts.add(stmt);
-        getFAlgorithm().setFStatementList(stmts);
-    }
-
-    protected boolean FFunctionVariable.hasInitArrayStmt = false;
-
-    public ASTNode FFunctionVariable.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        return this;
+    public void FFunctionVariable.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
+        
     }
     
     @Override
-    public ASTNode FFunctionArray.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        if (!hasInitArrayStmt && size().isUnknown() && !isInput()) {
-            FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
-            stmt.shouldBeSorted = sort;
-            stmts.add(stmt);
-            hasInitArrayStmt = true;
-            return stmt;
-        }
-        return this;
+    public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
+        FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
+        stmt.shouldBeSorted = sort;
+        stmts.add(stmt);
     }
 
     

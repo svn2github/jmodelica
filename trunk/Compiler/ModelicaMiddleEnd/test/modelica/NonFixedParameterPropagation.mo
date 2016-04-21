@@ -169,8 +169,9 @@ initial equation
 public
  function NonFixedParameterPropagation.FunctionCall1.F
   input Real i;
-  output Real[2] o;
+  output Real[:] o;
  algorithm
+  init o as Real[2];
   o[1] := i;
   o[2] := - i;
   return;

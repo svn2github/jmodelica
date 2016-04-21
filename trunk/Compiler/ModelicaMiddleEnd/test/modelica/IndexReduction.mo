@@ -524,10 +524,11 @@ equation
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f
-  input Real[2] x;
-  input Real[2, 2] A;
-  output Real[2] y;
+  input Real[:] x;
+  input Real[:,:] A;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := A[1,1] * x[1] + A[1,2] * x[2];
   y[2] := A[2,1] * x[1] + A[2,2] * x[2];
   return;
@@ -535,12 +536,13 @@ public
  end IndexReduction.IndexReduction27_DerFunc.f;
 
  function IndexReduction.IndexReduction27_DerFunc.f_der
-  input Real[2] x;
-  input Real[2, 2] A;
-  input Real[2] der_x;
-  input Real[2, 2] der_A;
-  output Real[2] der_y;
+  input Real[:] x;
+  input Real[:,:] A;
+  input Real[:] der_x;
+  input Real[:,:] der_A;
+  output Real[:] der_y;
  algorithm
+  init der_y as Real[2];
   der_y[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
   der_y[2] := A[2,1] * der_x[1] + A[2,2] * der_x[2];
   return;
@@ -620,8 +622,8 @@ equation
 
 public
  function IndexReduction.IndexReduction28_Record.f
-  input Real[2] x;
-  input Real[2, 2] A;
+  input Real[:] x;
+  input Real[:,:] A;
   output IndexReduction.IndexReduction28_Record.R y;
  algorithm
   y.a[1] := A[1,1] * x[1] + A[1,2] * x[2];
@@ -631,10 +633,10 @@ public
  end IndexReduction.IndexReduction28_Record.f;
 
  function IndexReduction.IndexReduction28_Record.f_der
-  input Real[2] x;
-  input Real[2, 2] A;
-  input Real[2] der_x;
-  input Real[2, 2] der_A;
+  input Real[:] x;
+  input Real[:,:] A;
+  input Real[:] der_x;
+  input Real[:,:] der_A;
   output IndexReduction.IndexReduction28_Record.R der_y;
  algorithm
   der_y.a[1] := A[1,1] * der_x[1] + A[1,2] * der_x[2];
@@ -1830,7 +1832,7 @@ equation
 public
  function IndexReduction.FunctionAttributeScalarization2.F1
   input Real x;
-  input Real[2] a;
+  input Real[:] a;
   output Real y;
  algorithm
   y := x + (a[1] + a[2]);
@@ -1840,7 +1842,7 @@ public
 
  function IndexReduction.FunctionAttributeScalarization2.F1_der
   input Real x;
-  input Real[2] a;
+  input Real[:] a;
   input Real x_der;
   output Real y_der;
  algorithm
@@ -2088,8 +2090,9 @@ equation
 public
  function IndexReduction.FunctionCallEquation1.f
   input Real x;
-  output Real[2] y;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := x;
   y[2] := - x;
   return;
@@ -2099,9 +2102,11 @@ public
  function IndexReduction.FunctionCallEquation1._der_f
   input Real x;
   input Real _der_x;
-  output Real[2] _der_y;
-  Real[2] y;
+  output Real[:] _der_y;
+  Real[:] y;
  algorithm
+  init y as Real[2];
+  init _der_y as Real[2];
   _der_y[1] := _der_x;
   y[1] := x;
   _der_y[2] := - _der_x;
@@ -2300,9 +2305,10 @@ equation
 
 public
  function IndexReduction.FunctionCallEquation4.F2
-  input Real[2] a;
-  output Real[2] y;
+  input Real[:] a;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
@@ -2310,10 +2316,11 @@ public
  end IndexReduction.FunctionCallEquation4.F2;
 
  function IndexReduction.FunctionCallEquation4.F2_der
-  input Real[2] a;
-  input Real[2] a_der;
-  output Real[2] y_der;
+  input Real[:] a;
+  input Real[:] a_der;
+  output Real[:] y_der;
  algorithm
+  init y_der as Real[2];
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
@@ -2384,9 +2391,10 @@ equation
 
 public
  function IndexReduction.FunctionCallEquation5.F2
-  input Real[2] a;
-  output Real[2] y;
+  input Real[:] a;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := a[1] + a[2];
   y[2] := a[1] - a[2];
   return;
@@ -2394,10 +2402,11 @@ public
  end IndexReduction.FunctionCallEquation5.F2;
 
  function IndexReduction.FunctionCallEquation5.F2_der
-  input Real[2] a;
-  input Real[2] a_der;
-  output Real[2] y_der;
+  input Real[:] a;
+  input Real[:] a_der;
+  output Real[:] y_der;
  algorithm
+  init y_der as Real[2];
   y_der[1] := a_der[1] + a_der[2];
   y_der[2] := a_der[1] - a_der[2];
   return;
@@ -2725,8 +2734,9 @@ public
  function IndexReduction.PartiallyPropagatedComposite1.f
   input Real x1;
   input Real x2;
-  output Real[2] y;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   y[1] := x1;
   y[2] := x2;
   return;
@@ -2738,9 +2748,11 @@ public
   input Real x2;
   input Real _der_x1;
   input Real _der_x2;
-  output Real[2] _der_y;
-  Real[2] y;
+  output Real[:] _der_y;
+  Real[:] y;
  algorithm
+  init y as Real[2];
+  init _der_y as Real[2];
   _der_y[1] := _der_x1;
   y[1] := x1;
   _der_y[2] := _der_x2;
@@ -2942,8 +2954,9 @@ equation
 public
  function IndexReduction.FunctionInlining.Test2.F
   input Real i;
-  output Real[2] o1;
+  output Real[:] o1;
  algorithm
+  init o1 as Real[2];
   o1[1] := i;
   o1[2] := - i;
   return;
@@ -3137,8 +3150,9 @@ equation
 public
  function IndexReduction.FunctionInlining.Test4.F
   input Real i;
-  output Real[2] o1;
+  output Real[:] o1;
  algorithm
+  init o1 as Real[2];
   o1[1] := i;
   o1[2] := - i;
   return;
@@ -3585,7 +3599,7 @@ equation
 
 public
  function IndexReduction.FunctionInlining.Test9.F
-  input Real[1] i1;
+  input Real[:] i1;
   input Real i2;
   output Real o1;
  algorithm

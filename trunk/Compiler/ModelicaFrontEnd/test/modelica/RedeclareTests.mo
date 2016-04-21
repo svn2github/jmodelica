@@ -37,14 +37,14 @@ model RedeclareTestOx1 "Basic redeclare test"
    C c(redeclare B a);
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx1",
-			description="Basic redeclares.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx1",
+            description="Basic redeclares.",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx1
- Real c.a.x = 2 /*(2)*/;
- Real c.a.y = 3 /*(3)*/;
+ Real c.a.x = 2;
+ Real c.a.y = 3;
 end RedeclareTests.RedeclareTestOx1;
 ")})));
 end RedeclareTestOx1;
@@ -85,7 +85,7 @@ model RedeclareTestOx2_Err "Basic redeclare test, erroneous"
             errorMessage="
 1 errors found:
 
-Error at line 78, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 78, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx2_Err;
@@ -116,14 +116,14 @@ model RedeclareTestOx3 "Redeclare deeper into instance hierarchy."
    D d(c(redeclare B a));
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx3",
-			description="Basic test of redeclares.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx3",
+            description="Basic test of redeclares.",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx3
- Real d.c.a.x = 2 /*(2)*/;
- Real d.c.a.y = 3 /*(3)*/;
+ Real d.c.a.x = 2;
+ Real d.c.a.y = 3;
 end RedeclareTests.RedeclareTestOx3;
 ")})));
 end RedeclareTestOx3;
@@ -170,7 +170,7 @@ model RedeclareTestOx4_Err "Redeclare deeper into instance hierarchy."
             errorMessage="
 1 errors found:
 
-Error at line 163, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 163, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A b', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B b'
 ")})));
 end RedeclareTestOx4_Err;
@@ -202,15 +202,15 @@ model RedeclareTestOx5 "Redeclare deeper into instance hierarchy and redeclarati
    E e(d(redeclare C a));
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx5",
-			description="Basic test of redeclares.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx5",
+            description="Basic test of redeclares.",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx5
- Real e.d.a.x = 2 /*(2)*/;
- Real e.d.a.y = 3 /*(3)*/;
- Real e.d.a.z = 4 /*(4)*/;
+ Real e.d.a.x = 2;
+ Real e.d.a.y = 3;
+ Real e.d.a.z = 4;
 end RedeclareTests.RedeclareTestOx5;
 ")})));
 end RedeclareTestOx5;
@@ -250,7 +250,7 @@ model RedeclareTestOx6_Err
             errorMessage="
 1 errors found:
 
-Error at line 241, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Error at line 241, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo',
 In component e:
   Cannot find class or component declaration for z
 ")})));
@@ -290,7 +290,7 @@ model RedeclareTestOx65_Err "Redeclare deeper into instance hierarchy and redecl
             errorMessage="
 1 errors found:
 
-Error at line 270, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 281, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable A a', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B a'
 ")})));
 end RedeclareTestOx65_Err;
@@ -332,7 +332,7 @@ model RedeclareTestOx7_Err
             errorMessage="
 1 errors found:
 
-Error at line 312, column 19, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo',
+Error at line 323, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo',
 In component e:
   Cannot find class or component declaration for z
 ")})));
@@ -363,14 +363,14 @@ model RedeclareTestOx8 "Constraining clause example"
    D d(redeclare B c);
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx8",
-			description="Basic test of redeclares.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx8",
+            description="Basic test of redeclares.",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx8
- Real d.c.x = 2 /*(2)*/;
- Real d.c.y = 3 /*(3)*/;
+ Real d.c.x = 2;
+ Real d.c.y = 3;
 end RedeclareTests.RedeclareTestOx8;
 ")})));
 end RedeclareTestOx8;
@@ -405,7 +405,7 @@ model RedeclareTestOx9_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 386, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 398, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare A c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby B'
 ")})));
 end RedeclareTestOx9_Err;
@@ -441,7 +441,7 @@ model RedeclareTestOx95_Err "Constraining clause example, errouneous"
             errorMessage="
 1 errors found:
 
-Error at line 418, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 430, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable B b constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx95_Err;
@@ -477,11 +477,11 @@ model RedeclareTestOx10 "Constraining clause example."
    E e(redeclare D d(redeclare B c));
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx10",
-			description="Basic test of redeclares.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx10",
+            description="Basic test of redeclares.",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx10
  Real e.d.c.x = 2;
  Real e.d.c.y = 3;
@@ -525,7 +525,7 @@ model RedeclareTestOx11_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 503, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 515, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx11_Err;
@@ -571,7 +571,7 @@ Semantic error at line 431, column 32:
             errorMessage="
 1 errors found:
 
-Error at line 553, column 81, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 562, column 81, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTestOx115_Err;
@@ -618,7 +618,7 @@ Semantic error at line 470, column 58:
             errorMessage="
 1 errors found:
 
-Error at line 600, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 609, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable C c constrainedby A', the replacing class is not a subtype of the constraining class from the declaration 'replaceable B c'
 ")})));
 end RedeclareTestOx116_Err;
@@ -643,11 +643,11 @@ model RedeclareTestOx12 "Constraining clause example."
  
    D d(redeclare A c);
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx12",
-			description="Check that the declaration is a subtype of the constraining clause",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx12",
+            description="Check that the declaration is a subtype of the constraining clause",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx12
  Real d.c.x = 5;
 end RedeclareTests.RedeclareTestOx12;
@@ -711,15 +711,15 @@ model RedeclareTestOx13 "Constraining clause example."
    E e(d(redeclare C c(z=5)));
  
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTestOx13",
-			description="Check that the declaration is a subtype of the constraining clause",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTestOx13",
+            description="Check that the declaration is a subtype of the constraining clause",
+            flatModel="
 fclass RedeclareTests.RedeclareTestOx13
- Real e.d.c.x = 4 /*(4)*/;
- Real e.d.c.y = 3 /*(3)*/;
- Real e.d.c.z = 5 /*(5)*/;
+ Real e.d.c.x = 4;
+ Real e.d.c.y = 3;
+ Real e.d.c.z = 5;
 end RedeclareTests.RedeclareTestOx13;
 ")})));
 end RedeclareTestOx13;
@@ -760,7 +760,7 @@ model RedeclareTest_Constr_14_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 741, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 750, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_14_Err;
@@ -800,7 +800,7 @@ model RedeclareTest_Constr_15_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 782, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 791, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c constrainedby C', the declared class is not a subtype of the constraining class
 ")})));
 end RedeclareTest_Constr_15_Err;
@@ -840,7 +840,7 @@ model RedeclareTest_Constr_16_Err "Constraining clause example."
             errorMessage="
 1 errors found:
 
-Error at line 825, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 834, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable A c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable B c constrainedby B'
 ")})));
 end RedeclareTest_Constr_16_Err;
@@ -880,10 +880,10 @@ model RedeclareTest_Constr_17_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 865, column 8, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 874, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable D d(redeclare replaceable B c) constrainedby D (redeclare replaceable C c constrainedby C)', the declared class is not a subtype of the constraining class
 
-Error at line 865, column 34, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 874, column 34, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'redeclare replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_17_Err;
@@ -924,10 +924,10 @@ model RedeclareTest_Constr_18_Err "Constraining clause example."
             errorMessage="
 2 errors found:
 
-Error at line 903, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 912, column 10, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'replaceable D d constrainedby D (redeclare replaceable B c)', the declared class is not a subtype of the constraining class
 
-Error at line 906, column 38, in file 'Compiler/ModelicaFrontEnd/src/test/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
+Error at line 915, column 38, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS:
   In the declaration 'redeclare replaceable B c', the replacing class is not a subtype of the constraining class from the declaration 'replaceable C c constrainedby C'
 ")})));
 end RedeclareTest_Constr_18_Err;
@@ -960,15 +960,15 @@ model RedeclareTest_Classes_1 "Redeclaration of classes example."
  
    E e;
 
-	annotation(__JModelica(UnitTesting(tests={
-		FlatteningTestCase(
-			name="RedeclareTest_Classes_1",
-			description="Test of parametrized classes.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest_Classes_1",
+            description="Test of parametrized classes.",
+            flatModel="
 fclass RedeclareTests.RedeclareTest_Classes_1
- Real e.d.a.x = 4 /*(4)*/;
- Real e.d.a.y = 3 /*(3)*/;
- Real e.d.a.z = 4 /*(4)*/;
+ Real e.d.a.x = 4;
+ Real e.d.a.y = 3;
+ Real e.d.a.z = 4;
 end RedeclareTests.RedeclareTest_Classes_1;
 ")})));
 end RedeclareTest_Classes_1;
@@ -5855,9 +5855,10 @@ fclass RedeclareTests.RedeclareFunction1
 
 public
  function RedeclareTests.RedeclareFunction1.C.B
-  input Real[2] i;
-  output Real[2] o;
+  input Real[:] i;
+  output Real[:] o;
  algorithm
+  init o as Real[2];
   o[1:2] := i[1:2];
   return;
  end RedeclareTests.RedeclareFunction1.C.B;
@@ -5905,7 +5906,7 @@ fclass RedeclareTests.RedeclareFunction2
 
 public
  function RedeclareTests.RedeclareFunction2.C.B
-  input Real[2] i;
+  input Real[:] i;
   output RedeclareTests.RedeclareFunction2.C.D o;
  algorithm
   o.a[1:2] := i[1:2];

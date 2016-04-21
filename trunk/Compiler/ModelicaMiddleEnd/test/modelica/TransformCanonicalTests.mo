@@ -2425,11 +2425,13 @@ equation
 
 public
  function TransformCanonicalTests.f2
-  input Real[3] x;
-  input Real[4] y;
-  output Real[3] w;
-  output Real[4] z;
+  input Real[:] x;
+  input Real[:] y;
+  output Real[:] w;
+  output Real[:] z;
  algorithm
+  init w as Real[3];
+  init z as Real[4];
   w[1] := x[1];
   w[2] := x[2];
   w[3] := x[3];
@@ -2479,11 +2481,13 @@ equation
 
 public
  function TransformCanonicalTests.f2
-  input Real[3] x;
-  input Real[4] y;
-  output Real[3] w;
-  output Real[4] z;
+  input Real[:] x;
+  input Real[:] y;
+  output Real[:] w;
+  output Real[:] z;
  algorithm
+  init w as Real[3];
+  init z as Real[4];
   w[1] := x[1];
   w[2] := x[2];
   w[3] := x[3];
@@ -2531,11 +2535,13 @@ equation
 
 public
  function TransformCanonicalTests.f2
-  input Real[3] x;
-  input Real[4] y;
-  output Real[3] w;
-  output Real[4] z;
+  input Real[:] x;
+  input Real[:] y;
+  output Real[:] w;
+  output Real[:] z;
  algorithm
+  init w as Real[3];
+  init z as Real[4];
   w[1] := x[1];
   w[2] := x[2];
   w[3] := x[3];
@@ -4691,9 +4697,10 @@ equation
 
 public
  function TransformCanonicalTests.IfEqu22.f
-  input Real[2] u;
-  output Real[2] y;
+  input Real[:] u;
+  output Real[:] y;
  algorithm
+  init y as Real[2];
   u[1] := 2 * y[1];
   u[2] := 2 * y[2];
   return;

@@ -894,7 +894,7 @@ aspect CCodeGen {
 		str.print(next + "JMI_DYNAMIC_INIT()\n");
 		genVarDecls_C(p, str, p.indent(indent));
         for (FFunctionVariable ffv : myNonInputs()) {
-            if (!ffv.hasInitArrayStmt) {
+            if (!ffv.isArray()) {
                 p.print(ffv, str, next);
             }
         }

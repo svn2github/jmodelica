@@ -1404,11 +1404,11 @@ aspect Scalarization {
     
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         boolean func = inFunction();
+        if (vars != null)
+            addTemporaryVars(clauses, vars, !func);
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
         FExp temp = func ? tempExp() : buildRecordConstructor(indexMap);
         createFunctionCallClause(clauses, indexMap, temp);
-        if (vars != null)
-            addTemporaryVars(clauses, vars, !func);
     }
     
     public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
@@ -2731,9 +2731,9 @@ aspect Scalarization {
             FFunctionVariable v = type.isArray() ?
                     new FFunctionArray((FType)type.unboundCopy(), name) :
                     new FFunctionVariable((FType)type.unboundCopy(), name);
-            if (type.size().isUnknown()) {
+            if (isArray()) {
                 v.parent = this; // Needed for genInitArrayStatements
-                ASTNode n = v.genInitArrayStatements(clauses, false);
+                v.genInitArrayStatements(clauses, false);
             }
             vars.add(v);
         }
