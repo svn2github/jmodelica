@@ -4006,7 +4006,9 @@ aspect LoadResource {
             n.collectResourcesToLoad(list);
     }
     public void FLoadResource.collectResourcesToLoad(LinkedHashSet<String> list) {
-        list.add(ceval().stringValue());
+        if (!inFunction()) {
+            list.add(ceval().stringValue());
+        }
     }
     
     syn String FLoadResource.resourceName() {
