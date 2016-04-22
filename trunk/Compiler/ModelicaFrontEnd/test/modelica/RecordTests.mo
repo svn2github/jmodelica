@@ -6492,8 +6492,8 @@ model RecordEval1
             description="Test that evaluation before scalarization of record variable without binding expression works",
             flatModel="
 fclass RecordTests.RecordEval1
- parameter Real a.x = 1 /* 1 */;
- parameter Real a.y = 2 /* 2 */;
+ structural parameter Real a.x = 1 /* 1 */;
+ structural parameter Real a.y = 2 /* 2 */;
  Real z[1];
  Real z[2];
 equation
@@ -6520,8 +6520,8 @@ model RecordEval2
             description="Test that evaluation before scalarization of record variable without binding expression works",
             flatModel="
 fclass RecordTests.RecordEval2
- parameter Real a.x = 1 /* 1 */;
- parameter Real a.y = 2 /* 2 */;
+ structural parameter Real a.x = 1 /* 1 */;
+ structural parameter Real a.y = 2 /* 2 */;
  Real z[1];
  Real z[2];
 equation

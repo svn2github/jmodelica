@@ -11604,12 +11604,12 @@ model InputAsArraySize2
             inline_functions="none",
             flatModel="
 fclass FunctionTests.InputAsArraySize2
- parameter Integer n = 3 /* 3 */;
+ structural parameter Integer n = 3 /* 3 */;
  Real x[1];
  Real x[2];
  Real x[3];
 equation
- ({x[1], x[2], x[3]}) = FunctionTests.InputAsArraySize2.f(n);
+ ({x[1], x[2], x[3]}) = FunctionTests.InputAsArraySize2.f(3);
 
 public
  function FunctionTests.InputAsArraySize2.f
@@ -11880,6 +11880,152 @@ equation
 end FunctionTests.InputAsArraySize11;
 ")})));
 end InputAsArraySize11;
+
+
+model InputAsArraySize12
+    parameter Integer p = 3;
+    Real x = sum(1:p);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize12",
+            description="Parameters that decide size of array expression should be structural",
+            flatModel="
+fclass FunctionTests.InputAsArraySize12
+ structural parameter Integer p = 3 /* 3 */;
+ Real x = sum(1:3);
+end FunctionTests.InputAsArraySize12;
+")})));
+end InputAsArraySize12;
+
+
+model InputAsArraySize13
+    function f
+        input Integer n;
+        output Real y[n];
+    algorithm
+        y := 1:n;
+    end f;
+    
+    parameter Integer p = 3;
+    Real x = sum(f(p));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize13",
+            description="Parameters that decide size of array expression should be structural",
+            flatModel="
+fclass FunctionTests.InputAsArraySize13
+ structural parameter Integer p = 3 /* 3 */;
+ Real x = sum(FunctionTests.InputAsArraySize13.f(3));
+
+public
+ function FunctionTests.InputAsArraySize13.f
+  input Integer n;
+  output Real[:] y;
+ algorithm
+  init y as Real[n];
+  y[:] := 1:n;
+  return;
+ end FunctionTests.InputAsArraySize13.f;
+
+end FunctionTests.InputAsArraySize13;
+")})));
+end InputAsArraySize13;
+
+
+model InputAsArraySize14
+    function f
+        input Integer n;
+        input Integer m;
+        output Real y[n];
+        output Real z[m];
+    algorithm
+        y := 1:n;
+        y := 1:m;
+    end f;
+    
+    parameter Integer p1 = 2;
+    parameter Integer p2 = 3;
+    Real x[2];
+    Real y[3];
+equation
+    (x, y) = f(p1, p2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize14",
+            description="Parameters that decide size of array expression should be structural",
+            flatModel="
+fclass FunctionTests.InputAsArraySize14
+ structural parameter Integer p1 = 2 /* 2 */;
+ structural parameter Integer p2 = 3 /* 3 */;
+ Real x[2];
+ Real y[3];
+equation
+ (x[1:2], y[1:3]) = FunctionTests.InputAsArraySize14.f(2, 3);
+
+public
+ function FunctionTests.InputAsArraySize14.f
+  input Integer n;
+  input Integer m;
+  output Real[:] y;
+  output Real[:] z;
+ algorithm
+  init y as Real[n];
+  init z as Real[m];
+  y[:] := 1:n;
+  y[:] := 1:m;
+  return;
+ end FunctionTests.InputAsArraySize14.f;
+
+end FunctionTests.InputAsArraySize14;
+")})));
+end InputAsArraySize14;
+
+
+model InputAsArraySize15
+    function f
+        input Integer n;
+        input Integer m;
+        output Real y[n];
+        output Real z[m];
+    algorithm
+        y := 1:n;
+        y := 1:m;
+    end f;
+    
+    parameter Integer p1 = 2;
+    parameter Integer p2 = 3;
+    Real x = sum(f(p1, p2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize15",
+            description="Parameters that decide size of array expression should be structural",
+            flatModel="
+fclass FunctionTests.InputAsArraySize15
+ structural parameter Integer p1 = 2 /* 2 */;
+ parameter Integer p2 = 3 /* 3 */;
+ Real x = sum(FunctionTests.InputAsArraySize15.f(2, p2));
+
+public
+ function FunctionTests.InputAsArraySize15.f
+  input Integer n;
+  input Integer m;
+  output Real[:] y;
+  output Real[:] z;
+ algorithm
+  init y as Real[n];
+  init z as Real[m];
+  y[:] := 1:n;
+  y[:] := 1:m;
+  return;
+ end FunctionTests.InputAsArraySize15.f;
+
+end FunctionTests.InputAsArraySize15;
+")})));
+end InputAsArraySize15;
 
 
 

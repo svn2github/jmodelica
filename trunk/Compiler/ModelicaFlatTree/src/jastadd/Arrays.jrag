@@ -844,14 +844,14 @@ aspect Arrays {
 	
 	eq FCross.size()     = new Size(3);
 	eq FSkew.size()      = new Size(3, 3);
-	
-	eq FOuterProduct.size() {
-		MutableSize s = new MutableSize(2);
-		s.append(getX().size());
-		s.append(getY().size());
-		return s;
-	}
-	
+
+    eq FOuterProduct.size() {
+        MutableSize s = new MutableSize(2);
+        s.append(getX().size(), 0);
+        s.append(getY().size(), 0);
+        return s;
+    }
+
 	eq FIdentity.size() {
 		MutableSize s = new MutableSize(2);
 		s.append(getFExp());
@@ -3060,18 +3060,23 @@ aspect ArrayHelpers {
 			size[d] = s;
 			exps[d] = (s == UNKNOWN) ? e : null;
 		}
-		
-		/**
-		 * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
-		 *        of <code>s</code>.
-		 * 
-		 * May overwrite lengths set with <code>set()</code>.
-		 */
-		public void set(int d1, Size s, int d2) {
-			size[d1] = s.size[d2];
-			exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
-		}
-		
+
+        /**
+         * Sets length <code>d1</code> to the length of dimension <code>d2</code> 
+         *        of <code>s</code>.
+         * 
+         * May overwrite lengths set with <code>set()</code>.
+         */
+        public void set(int d1, Size s, int d2) {
+            if (d2 >= s.size.length) {
+                size[d1] = -1;
+                exps[d1] = null;
+            } else {
+                size[d1] = s.size[d2];
+                exps[d1] = (s instanceof MutableSize) ? ((MutableSize) s).exps[d2] : null;
+            }
+        }
+
 		/**
 		 * Make sure dimension i of size is ready to use.
 		 */

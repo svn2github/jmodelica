@@ -203,7 +203,7 @@ model SizeExp11
 fclass ArrayBuiltins.Size.SizeExp11
  Real y[1].x = 1;
  Real y[2].x = 1;
- parameter Integer z = size(y[1:2], 1) /* 2 */;
+ structural parameter Integer z = 2 /* 2 */;
 end ArrayBuiltins.Size.SizeExp11;
 ")})));
 end SizeExp11;

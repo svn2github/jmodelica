@@ -728,10 +728,11 @@ aspect Flattening {
             return expandedFQName().append(name());
         }
     }
-    
+
     inh FQName InstComponentDecl.expandedFQName();
-    eq InstClassDecl.getChild().expandedFQName()     = new FQNameFull();
-    eq InstComponentDecl.getChild().expandedFQName() = expandedFQName();
+    eq InstClassDecl.getChild().expandedFQName()          = new FQNameFull();
+    eq InstRecordConstructor.getChild().expandedFQName()  = new FQNameFull();
+    eq InstComponentDecl.getChild().expandedFQName()      = expandedFQName();
     eq InstArrayComponentDecl.getChild().expandedFQName() = appendMyName(expandedFQName());
     eq InstAssignable.getChild().expandedFQName() {
         if (temporarilyInFunction != null) {
@@ -743,7 +744,7 @@ aspect Flattening {
             return expandedFQName().append(name());
         }
     }
-    
+
     /**
      * Get the list of constants that need to be added to the surrounding function.
      */
