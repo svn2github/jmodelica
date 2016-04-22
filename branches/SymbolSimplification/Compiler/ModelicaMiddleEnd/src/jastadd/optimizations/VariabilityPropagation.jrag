@@ -81,7 +81,7 @@ aspect VariabilityPropagation {
      * Checks if equation is eligible for var. prop.
      */
     syn boolean FAbstractEquation.canPropagate() =
-            canPropagateContext() && !containsActiveAnnotations();
+            canSymbolicTransformContext() && !containsActiveAnnotations();
     eq FEquation.canPropagate() = super.canPropagate() && variables().size() == 1;
     
     // TODO: Do we need the flush here?
@@ -92,10 +92,10 @@ aspect VariabilityPropagation {
                         || potentialPartialVariability().knownParameterOrLess());
     }
     
-    inh boolean FAbstractEquation.canPropagateContext();
-    eq Root.getChild().canPropagateContext() = false;
-    eq FClass.getFAbstractEquation().canPropagateContext() = true;
-    eq FIfWhenElseEquation.getChild().canPropagateContext() = false;
+    inh boolean FAbstractEquation.canSymbolicTransformContext();
+    eq Root.getChild().canSymbolicTransformContext() = false;
+    eq FClass.getFAbstractEquation().canSymbolicTransformContext() = true;
+    eq FIfWhenElseEquation.getChild().canSymbolicTransformContext() = false;
     
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.
@@ -478,10 +478,10 @@ aspect VariabilityPropagation {
         setFTypePrefixVariability(variability);
         if (variability.knownParameterOrLess()) {
             // TODO: Move setBindingExp below if statement. Will allow more Symbolic simplifications.
-            setBindingExp(symbolicTransformationFramework.copyFExp(bindingExp));
             if (isReal()) {
                 bindingExp = bindingExp.asRealLitExp();
             }
+            setBindingExp(symbolicTransformationFramework.copyFExp(bindingExp));
         }
         if (variability.parameterVariability()) {
             if (fixedAttributeSet()) {

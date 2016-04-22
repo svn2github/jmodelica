@@ -286,9 +286,10 @@ aspect SymbolicTransformationFramework {
                 // IF-check for debug OK.
                 if (!equation.equalSides() &&
                     !hasRemovedEquation(equation) &&
-                    equation != currentEquation) {
-                    log.info("\tAdded equation <%s> to the worklist.", equation);
-                    worklist.add(equation);
+                    equation != currentEquation &&
+                    equation.canSymbolicTransformContext()) {
+                        log.info("\tAdded equation <%s> to the worklist.", equation);
+                        worklist.add(equation);
                 }
             }
             
