@@ -199,19 +199,25 @@ aspect Scalarization {
      * list vars.
      */
     public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
-        if (size().isZero())
-            return;
-        
-        if (hasBindingExp())
-            getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
-        
-        if (isRecord()) {
-            scalarRecordFVariables(new Scalarizer(vars, equs, pEqus), new ScalarizingVariableInstance(this));
-        } else {
-            getFAttributes().createArrayTemporaries(pEqus, vars);
-            for (Index i : indices()) {
-                vars.add(createScalarFVariable(vars, equs, pEqus, i));
+        try {
+            if (size().isZero())
+                return;
+            
+            if (hasBindingExp())
+                getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
+            
+            if (isRecord()) {
+                scalarRecordFVariables(new Scalarizer(vars, equs, pEqus), new ScalarizingVariableInstance(this));
+            } else {
+                getFAttributes().createArrayTemporaries(pEqus, vars);
+                for (Index i : indices()) {
+                    vars.add(createScalarFVariable(vars, equs, pEqus, i));
+                }
             }
+        } catch (ModelicaException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while scalarizing component'" + name() + "'", e);
         }
     }
 	

@@ -1769,7 +1769,7 @@ aspect FunctionInlining {
      * We want to be able to scalarize all expressions (except size exps) fully during inlining.
      */
     refine Scalarization eq FFunctionCallLeft.getFExp().canAcceptArray() = 
-        Scalarization.FFunctionCallLeft.getFExp().canAcceptArray() && !duringFunctionInlining();
+        refined() && !duringFunctionInlining();
     refine Scalarization eq FFunctionCall.getArg(int i).canAcceptArray()      = 
         refined() && (!duringFunctionInlining() || getArg(i).isFFunctionCall());
     refine Scalarization eq FFunctionCall.getArg(int i).wantsRecordCon()      = 
