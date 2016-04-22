@@ -13519,8 +13519,13 @@ public
  function FunctionTests.UnknownSize.Misc.Misc1.f
   input Integer n;
   output Integer[:] b;
+  Integer temp_1;
  algorithm
-  init b as Integer[sum(1:n)];
+  temp_1 := 0;
+  for i1 in 1:max(n, 0) loop
+   temp_1 := temp_1 + i1;
+  end for;
+  init b as Integer[temp_1];
   for i in 1:n loop
    b[i] := i;
   end for;
@@ -13561,8 +13566,13 @@ public
  function FunctionTests.UnknownSize.Misc.Misc2.f
   input Integer[:] a;
   output Integer[:] b;
+  Integer temp_1;
  algorithm
-  init b as Integer[max(a[:])];
+  temp_1 := -2147483648;
+  for i1 in 1:size(a, 1) loop
+   temp_1 := if temp_1 > a[i1] then temp_1 else a[i1];
+  end for;
+  init b as Integer[temp_1];
   for i in 1:size(b, 1) loop
    b[i] := i;
   end for;
@@ -13572,6 +13582,56 @@ public
 end FunctionTests.UnknownSize.Misc.Misc2;
 ")})));
 end Misc2;
+
+model Misc3
+    record R
+        parameter Integer[:] n;
+        Real[sum(n)] x;
+    end R;
+    
+    function f
+      input R x;
+      output Real y;
+      algorithm
+        y := sum(x.x);
+    end f;
+    
+    Real y = f(R({1,2},{1,2,3}));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownSize_Misc_Misc3",
+            description="Scalarization of functions: size described with reduction expression",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownSize.Misc.Misc3
+ Real y;
+equation
+ y = FunctionTests.UnknownSize.Misc.Misc3.f(FunctionTests.UnknownSize.Misc.Misc3.R({1, 2}, {1, 2, 3}));
+
+public
+ function FunctionTests.UnknownSize.Misc.Misc3.f
+  input FunctionTests.UnknownSize.Misc.Misc3.R x;
+  output Real y;
+  Real temp_1;
+ algorithm
+  temp_1 := 0.0;
+  for i1 in 1:size(x.x, 1) loop
+   temp_1 := temp_1 + x.x[i1];
+  end for;
+  y := temp_1;
+  return;
+ end FunctionTests.UnknownSize.Misc.Misc3.f;
+
+ record FunctionTests.UnknownSize.Misc.Misc3.R
+  parameter Integer n[:];
+  Real x[sum(n[:])];
+ end FunctionTests.UnknownSize.Misc.Misc3.R;
+
+end FunctionTests.UnknownSize.Misc.Misc3;
+")})));
+end Misc3;
 
 end Misc;
 
