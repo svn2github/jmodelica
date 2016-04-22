@@ -807,6 +807,14 @@ class Test_FMI_ODE_CS_2:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        model = load_fmu("TimeEvents_Basic5.fmu")
+        opts = model.simulate_options()
+        opts["initialize"] = False
+
+        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
     
     @testattr(stddist = True)
     def test_time_event_basic_5(self):
@@ -848,6 +856,24 @@ class Test_FMI_ODE_CS:
         res = model.simulate(final_time=1,options=opts)
         
         nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
+        
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["initialize"] = False
+
+        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
+        
+    @testattr(stddist = True)
+    def test_no_returned_result(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["return_result"] = False
+        
+        res = model.simulate(options=opts)
+
+        nose.tools.assert_raises(Exception,res._get_result_data)
             
     @testattr(stddist = True)
     def test_updated_values_in_result(self):
@@ -858,6 +884,7 @@ class Test_FMI_ODE_CS:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
 
 class Test_FMI_ODE:
     """
@@ -922,6 +949,23 @@ class Test_FMI_ODE:
         res = self._bounce.simulate(options=opts)
         
         nose.tools.assert_raises(Exception,res._get_result_data)
+        
+    @testattr(stddist = True)
+    def test_no_returned_result(self):
+        opts = self._bounce.simulate_options()
+        opts["return_result"] = False
+        opts["initialize"] = False
+        res = self._bounce.simulate(options=opts)
+        
+        nose.tools.assert_raises(Exception,res._get_result_data)
+    
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        opts = bounce.simulate_options()
+        opts["initialize"] = False
+        
+        nose.tools.assert_raises(FMUException, bounce.simulate, options=opts)
     
     @testattr(stddist = True)
     def test_reset_internal_variables(self):
@@ -1387,7 +1431,7 @@ class Test_FMI_ODE:
         opts = model.simulate_options()
         opts["sensitivities"] = ["J1.w"]
         
-        nose.tools.assert_raises(Exception,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
+        nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
 
     @testattr(stddist = True)
     def test_event_iteration(self):
