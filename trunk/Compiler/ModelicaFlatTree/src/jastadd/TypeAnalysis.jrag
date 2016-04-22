@@ -620,16 +620,19 @@ aspect FlatTypeAnalysis {
     eq FIntegerSubscript.type() = fIntegerScalarType();
     eq FExpSubscript.type()     = getFExp().type();
 
-    public FType FType.lookupHierarchical(FQName name, int part) {
+    public FType FType.lookupHierarchical(FQName name, int part, int last) {
         return this;
     }
     
-    public FType FRecordType.lookupHierarchical(FQName name, int part) {
+    public FType FRecordType.lookupHierarchical(FQName name, int part, int last) {
+        if (part == last) {
+            return this;
+        }
         FAbstractVariable res = null;
         String pn = name.partName(part);
         for (FRecordComponentType frct : getComponents())
             if (frct.getName().equals(pn))
-                return frct.getFType().lookupHierarchical(name, part + 1);
+                return frct.getFType().lookupHierarchical(name, part + 1, last);
         return null;
     }
 }

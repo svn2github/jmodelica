@@ -41,20 +41,18 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() {
+    eq FIdUse.getChild().mySize() = getFQName().calcMySize(-1);
+    eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
+    
+    syn Size FQName.calcMySize(int i) = lookupFV(asFQNameFull()).size();
+    eq FQNameFull.calcMySize(int i) {
         if (inFunction()) {
-            FQNameFull fqn = getFQName().asFQNameFull();
-            if (fqn.numParts() > 1) {
-                FType type = lookupFV(fqn.copyPrefix(1)).type();
-                return type.lookupHierarchical(fqn, 1).size();
+            if (numParts() > 1) {
+                FType type = lookupFV(copyPrefix(1)).type();
+                return type.lookupHierarchical(this, 1, i).size();
             }
         }
-        return myFV().size();
-    }
-    eq FQNameFull.getFQNamePart(int i).mySize() {
-        FQName n = copyPrefix(i + 1).removeFArraySubscripts();
-        n.setParent(this);
-        return lookupFV(n).size();
+        return super.calcMySize(i);
     }
     
     public Size Size.contract(int i) {

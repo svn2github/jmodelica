@@ -154,7 +154,7 @@ aspect FunctionInlining {
         private FFunctionDecl func;
         private Map<String,FExp> replMap;
         private FlatVariableMap lookupMap;
-        private Map<String,Size> sizeMap;
+        private Map<String,FType> typeMap;
         private Queue<FAbstractEquation> outerMostWorklist = null;
 
         /**
@@ -209,12 +209,12 @@ aspect FunctionInlining {
         public FlatVariableMap startFunction(FFunctionDecl f) {
             replMap = new HashMap<String,FExp>();
             lookupMap = new FlatVariableMap();
-            sizeMap = new HashMap<String,Size>();
+            typeMap = new HashMap<String,FType>();
             return lookupMap;
         }
 
-        public void setSizeOf(String name, Size size) {
-            sizeMap.put(name, size);
+        public void setTypeOf(String name, FType type) {
+            typeMap.put(name, type);
         }
 
         /**
@@ -252,8 +252,8 @@ aspect FunctionInlining {
          * 
          * @param name  the name of the variable
          */
-        public Size lookupSize(String name) {
-            return sizeMap.get(name);
+        public FType lookupType(String name) {
+            return typeMap.get(name);
         }
 
         /**
@@ -349,7 +349,7 @@ aspect FunctionInlining {
                     new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
                     new FQNameString(n);
             FVariable var = addVar(name, variability, type, nonFixedParam);
-            setSizeOf(oldName, type.size());
+            setTypeOf(oldName, type);
             replMap.put(oldName, var.createUseExp());
             return var;
         }
@@ -478,7 +478,6 @@ aspect FunctionInlining {
     }
     
     public void FArray.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        fi.setSizeOf(oldName, size());
         Array arr = getArray();
         for (Index i : indices())
             arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
@@ -501,7 +500,6 @@ aspect FunctionInlining {
                     
                 }
             }
-            fi.setSizeOf(oldName, size());
             String tempName = fi.nextTempVarName();
             FExp exp = type().addInliningVarsAndEqns(fi, oldName, noEvent, this, tempName);
             List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
@@ -1284,17 +1282,19 @@ aspect FunctionInlining {
         tempLookupMap = fi.startFunction(this);
         flushAllRecursive();
         
-        for (FFunctionVariable var : getFFunctionVariables())
-            var.functionInliner = fi;
-        
+        int i = 0;
         ArrayList<FFunctionVariable> inp = myInputs();
-        for (int i = 0; i < inp.size(); i++) 
-            args.getChild(i).addInliningVarsAndEqns(fi, inp.get(i).name(), false);
+        for (FFunctionVariable var : myInputs()) {
+            FExp arg = args.getChild(i++);
+            fi.setTypeOf(var.name(), arg.type());
+            arg.addInliningVarsAndEqns(fi, var.name(), false);
+            var.functionInliner = fi;
+        }
         
-        ArrayList<FFunctionVariable> outp = myOutputs();
-        for (FFunctionVariable fv : outp) 
-            if (fv.isArray())
-                fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getDummyExp()));
+        for (FFunctionVariable var : myNonInputs()) {
+            fi.setTypeOf(var.name(), var.getType().copyAndReplaceReferences(fi, getDummyExp()));
+            var.functionInliner = fi;
+        }
         
         for (FStatement stmt : getFAlgorithm().getFStatements()) 
             stmt.inline(fi);
@@ -1352,7 +1352,7 @@ aspect FunctionInlining {
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
         FAbstractVariable fv = getFIdUseExp().myFV();
-        fi.setSizeOf(fv.name(), fv.size().copyAndReplaceReferences(fi, getFIdUseExp()));
+        fi.setTypeOf(fv.name(), fv.type().copyAndReplaceReferences(fi, getFIdUseExp()));
         fv.flushCache();
     }
 
@@ -1525,16 +1525,11 @@ aspect FunctionInlining {
     }
 
     public FExp FSizeExp.replaceReferences(AbstractFunctionInliner fi) {
-        if (getFExp() instanceof FIdUseExp) {
-            String name = ((FIdUseExp) getFExp()).getFIdUse().name();
-            FExp exp = fi.lookupSize(name).createFExp(dimension());
-            replaceMe(exp);
-            return exp;
-        } else {
-            return super.replaceReferences(fi);
-        }
+        FExp res = getFExp().size().createFExp(dimension());
+        replaceMe(res);
+        return res;
     }
-
+    
     // TODO: Should probably be removed after simplification step has been added
     public FExp FIfExp.replaceReferences(AbstractFunctionInliner fi) {
         super.replaceReferences(fi);
@@ -1677,7 +1672,7 @@ aspect FunctionInlining {
         Size[] sizes = new Size[old.length];
         for (int i = 0; i < old.length; i++)
             if (old[i] != null)
-                sizes[i] = old[i].copyAndReplaceReferences(fi, this);
+                sizes[i] = old[i].replaceReferences(fi, this);
         setSizes(sizes);
         return this;
     }
@@ -1722,14 +1717,41 @@ aspect FunctionInlining {
     }
 
     /**
-     * Make a copy of this size with all variable references replaced according to the 
+     * Make a copy of this type with all variable references replaced according to the 
      * function inliner.
      */
-    public Size Size.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
-        return clone();
+    public FType FType.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
+        FType res = fullCopy();
+        res.replaceReferences(fi, context);
+        return res;
     }
-
-    public MutableSize MutableSize.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
+    
+    public void FType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+        setSize(getSize().replaceReferences(fi, context));
+    }
+    
+    public void FRecordType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+        super.replaceReferences(fi, context);
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().replaceReferences(fi, context);
+        }
+    }
+    
+    public void FFunctionType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+        super.replaceReferences(fi, context);
+        for (FRecordComponentType frct : getInputs()) {
+            frct.getFType().replaceReferences(fi, context);
+        }
+        for (FRecordComponentType frct : getOutputs()) {
+            frct.getFType().replaceReferences(fi, context);
+        }
+    }
+    
+    public Size Size.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+        return this;
+    }
+    
+    public MutableSize MutableSize.replaceReferences(AbstractFunctionInliner fi, FExp context) {
         MutableSize res = clone();
         for (int i = 0; i < exps.length; i++)
             if (res.exps[i] != null)
@@ -1763,11 +1785,11 @@ aspect FunctionInlining {
     /*
      * Use the information we have on unknown sizes during inlining.
      */
-    refine Arrays eq FFunctionArray.size() {
-        Size s = null;
-        if (functionInliner != null)
-            s = functionInliner.lookupSize(name());
-        return (s == null) ? Arrays.FFunctionArray.size() : s;
+    refine FlatTypeAnalysis eq FFunctionVariable.type() {
+        FType res = null;
+        if (functionInliner != null) {
+            res = functionInliner.lookupType(name());
+        }
+        return res == null ? refined() : res;
     }
-
 }

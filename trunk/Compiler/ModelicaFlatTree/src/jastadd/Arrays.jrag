@@ -529,13 +529,15 @@ aspect Arrays {
 	 */		
 	syn int FQName.accessNdims() = 0;
 	eq FQNameFull.accessNdims() {
-		FQNamePart last = getFQNamePart(getNumFQNamePart()-1);
-		if (last.hasFArraySubscripts()) {
-			return last.getFArraySubscripts().accessNdims(); 
-		} else {
-			return 0;
-		}
-	}
+        int res = 0;
+        for (FQNamePart fqnp : getFQNameParts()) {
+            res = res + fqnp.accessNdims();
+        }
+        return res;
+    }
+    
+    syn int FQNamePart.accessNdims() = 0;
+    eq FQNamePartArray.accessNdims() = getFArraySubscripts().accessNdims();
 
 	
 	// Array sizes
@@ -1065,7 +1067,7 @@ aspect Arrays {
 	 */	
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
-	eq FFunctionArray.size() = getType().size();
+	eq FFunctionArray.size() = type().size();
 		
 	/**
 	 * Get the array sizes of the loop index expression. 
