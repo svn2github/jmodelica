@@ -1142,9 +1142,9 @@ model ConstantLookup18
 			flatModel="
 fclass NameTests.ConstantLookup18
  structural parameter Integer b.n = 3 /* 3 */;
- constant Real b.x[1] = 1;
- constant Real b.x[2] = 1;
- constant Real b.x[3] = 1;
+ constant Real b.x[1] = 1.0;
+ constant Real b.x[2] = 1.0;
+ constant Real b.x[3] = 1.0;
 end NameTests.ConstantLookup18;
 ")})));
 end ConstantLookup18;
@@ -1545,7 +1545,7 @@ model ConstantLookup29
 			description="Extending class using imported constant",
 			flatModel="
 fclass NameTests.ConstantLookup29
- constant Real a.x(start = 1.0) = 2;
+ constant Real a.x(start = 1.0) = 2.0;
 end NameTests.ConstantLookup29;
 ")})));
 end ConstantLookup29;
@@ -1572,7 +1572,7 @@ model ConstantLookup30
 			flatModel="
 fclass NameTests.ConstantLookup30
  parameter Real p = 3.1 /* 3.1 */;
- constant Modelica.SIunits.Force f = 1;
+ constant Modelica.SIunits.Force f = 1.0;
 
 public
  type Modelica.SIunits.Force = Real(final quantity = \"Force\",final unit = \"N\");

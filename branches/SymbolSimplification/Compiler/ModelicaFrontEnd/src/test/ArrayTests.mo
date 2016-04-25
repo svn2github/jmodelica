@@ -108,10 +108,10 @@ end ArrayTests.General.ArrayTest1c;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
 end ArrayTests.General.ArrayTest2;
 ")})));
   end ArrayTest2;
@@ -145,10 +145,10 @@ end ArrayTests.General.ArrayTest2;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest4
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[2].x[1] = 3;
- constant Real m[2].x[2] = 4;
+ constant Real m[1].x[1] = 1.0;
+ constant Real m[1].x[2] = 2.0;
+ constant Real m[2].x[1] = 3.0;
+ constant Real m[2].x[2] = 4.0;
 end ArrayTests.General.ArrayTest4;
 ")})));
   end ArrayTest4;
@@ -165,12 +165,12 @@ end ArrayTests.General.ArrayTest4;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest5
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[1].x[3] = 3;
- constant Real m[2].x[1] = 4;
- constant Real m[2].x[2] = 5;
- constant Real m[2].x[3] = 6;
+ constant Real m[1].x[1] = 1.0;
+ constant Real m[1].x[2] = 2.0;
+ constant Real m[1].x[3] = 3.0;
+ constant Real m[2].x[1] = 4.0;
+ constant Real m[2].x[2] = 5.0;
+ constant Real m[2].x[3] = 6.0;
 end ArrayTests.General.ArrayTest5;
 ")})));
   end ArrayTest5;
@@ -189,12 +189,12 @@ end ArrayTests.General.ArrayTest5;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest6
- constant Real m[1].x[1] = 1;
- constant Real m[1].x[2] = 2;
- constant Real m[1].x[3] = 3;
- constant Real m[2].x[1] = 4;
- constant Real m[2].x[2] = 5;
- constant Real m[2].x[3] = 6;
+ constant Real m[1].x[1] = 1.0;
+ constant Real m[1].x[2] = 2.0;
+ constant Real m[1].x[3] = 3.0;
+ constant Real m[2].x[1] = 4.0;
+ constant Real m[2].x[2] = 5.0;
+ constant Real m[2].x[3] = 6.0;
 end ArrayTests.General.ArrayTest6;
 ")})));
   end ArrayTest6;
@@ -211,9 +211,9 @@ end ArrayTests.General.ArrayTest6;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest7
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
 end ArrayTests.General.ArrayTest7;
 ")})));
   end ArrayTest7;
@@ -261,23 +261,23 @@ end ArrayTests.General.ArrayTest8;
 fclass ArrayTests.General.ArrayTest9
  structural parameter Integer nn.n2 = 2 /* 2 */;
  structural parameter Integer nn.m[1,1].n1 = 2 /* 2 */;
- constant Real nn.m[1,1].x[1] = 1;
- constant Real nn.m[1,1].x[2] = 1;
+ constant Real nn.m[1,1].x[1] = 1.0;
+ constant Real nn.m[1,1].x[2] = 1.0;
  structural parameter Integer nn.m[1,2].n1 = 2 /* 2 */;
- constant Real nn.m[1,2].x[1] = 1;
- constant Real nn.m[1,2].x[2] = 1;
+ constant Real nn.m[1,2].x[1] = 1.0;
+ constant Real nn.m[1,2].x[2] = 1.0;
  structural parameter Integer nn.m[1,3].n1 = 2 /* 2 */;
- constant Real nn.m[1,3].x[1] = 1;
- constant Real nn.m[1,3].x[2] = 1;
+ constant Real nn.m[1,3].x[1] = 1.0;
+ constant Real nn.m[1,3].x[2] = 1.0;
  structural parameter Integer nn.m[2,1].n1 = 2 /* 2 */;
- constant Real nn.m[2,1].x[1] = 1;
- constant Real nn.m[2,1].x[2] = 1;
+ constant Real nn.m[2,1].x[1] = 1.0;
+ constant Real nn.m[2,1].x[2] = 1.0;
  structural parameter Integer nn.m[2,2].n1 = 2 /* 2 */;
- constant Real nn.m[2,2].x[1] = 1;
- constant Real nn.m[2,2].x[2] = 1;
+ constant Real nn.m[2,2].x[1] = 1.0;
+ constant Real nn.m[2,2].x[2] = 1.0;
  structural parameter Integer nn.m[2,3].n1 = 2 /* 2 */;
- constant Real nn.m[2,3].x[1] = 1;
- constant Real nn.m[2,3].x[2] = 1;
+ constant Real nn.m[2,3].x[1] = 1.0;
+ constant Real nn.m[2,3].x[2] = 1.0;
 end ArrayTests.General.ArrayTest9;
 ")})));
       end ArrayTest9;
@@ -347,16 +347,16 @@ end ArrayTests.General.ArrayTest10;
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest11
- constant Real m1[1].x[1] = 1;
- constant Real m1[1].x[2] = 2;
- constant Real m1[2].x[1] = 3;
- constant Real m1[2].x[2] = 4;
- constant Real m2[1].x[1] = 1;
- constant Real m2[1].x[2] = 2;
- constant Real m2[2].x[1] = 3;
- constant Real m2[2].x[2] = 4;
- constant Real m2[3].x[1] = 1;
- constant Real m2[3].x[2] = 2;
+ constant Real m1[1].x[1] = 1.0;
+ constant Real m1[1].x[2] = 2.0;
+ constant Real m1[2].x[1] = 3.0;
+ constant Real m1[2].x[2] = 4.0;
+ constant Real m2[1].x[1] = 1.0;
+ constant Real m2[1].x[2] = 2.0;
+ constant Real m2[2].x[1] = 3.0;
+ constant Real m2[2].x[2] = 4.0;
+ constant Real m2[3].x[1] = 1.0;
+ constant Real m2[3].x[2] = 2.0;
 end ArrayTests.General.ArrayTest11;
 ")})));
    end ArrayTest11;
@@ -380,12 +380,12 @@ end ArrayTests.General.ArrayTest11;
 			description="Test scalarization of variables",
 			flatModel="
 fclass ArrayTests.General.ArrayTest12
- constant Real n[1].m[1].x[1] = 1;
- constant Real n[1].m[1].x[2] = 2;
- constant Real n[1].m[2].x[1] = 3;
- constant Real n[1].m[2].x[2] = 4;
- constant Real n[1].m[3].x[1] = 5;
- constant Real n[1].m[3].x[2] = 6;
+ constant Real n[1].m[1].x[1] = 1.0;
+ constant Real n[1].m[1].x[2] = 2.0;
+ constant Real n[1].m[2].x[1] = 3.0;
+ constant Real n[1].m[2].x[2] = 4.0;
+ constant Real n[1].m[3].x[1] = 5.0;
+ constant Real n[1].m[3].x[2] = 6.0;
 end ArrayTests.General.ArrayTest12;
 ")})));
       end ArrayTest12;
@@ -430,12 +430,12 @@ end ArrayTests.General.ArrayTest13;
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest14
- constant Real n.m[1,1].x[1] = 1;
- constant Real n.m[1,2].x[1] = 1;
- constant Real n.m[2,1].x[1] = 1;
- constant Real n.m[2,2].x[1] = 1;
- constant Real n.m[3,1].x[1] = 1;
- constant Real n.m[3,2].x[1] = 1;
+ constant Real n.m[1,1].x[1] = 1.0;
+ constant Real n.m[1,2].x[1] = 1.0;
+ constant Real n.m[2,1].x[1] = 1.0;
+ constant Real n.m[2,2].x[1] = 1.0;
+ constant Real n.m[3,1].x[1] = 1.0;
+ constant Real n.m[3,2].x[1] = 1.0;
 end ArrayTests.General.ArrayTest14;
 ")})));
       end ArrayTest14;
@@ -490,14 +490,14 @@ model ArrayTest17
 			automatic_add_initial_equations=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest17
- constant Real n[1].m[1,1].x[1] = 1;
- constant Real n[1].m[1,1].x[2] = 1;
- constant Real n[1].m[2,1].x[1] = 2;
- constant Real n[1].m[2,1].x[2] = 1;
- constant Real n[2].m[1,1].x[1] = 3;
- constant Real n[2].m[1,1].x[2] = 1;
- constant Real n[2].m[2,1].x[1] = 4;
- constant Real n[2].m[2,1].x[2] = 1;
+ constant Real n[1].m[1,1].x[1] = 1.0;
+ constant Real n[1].m[1,1].x[2] = 1.0;
+ constant Real n[1].m[2,1].x[1] = 2.0;
+ constant Real n[1].m[2,1].x[2] = 1.0;
+ constant Real n[2].m[1,1].x[1] = 3.0;
+ constant Real n[2].m[1,1].x[2] = 1.0;
+ constant Real n[2].m[2,1].x[1] = 4.0;
+ constant Real n[2].m[2,1].x[2] = 1.0;
 end ArrayTests.General.ArrayTest17;
 ")})));
 end ArrayTest17;
@@ -516,8 +516,8 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest21
- constant Real x[1] = 0;
- constant Real x[2] = 0;
+ constant Real x[1] = 0.0;
+ constant Real x[2] = 0.0;
  constant Real y[1] = 0.0;
  constant Real y[2] = 0.0;
 end ArrayTests.General.ArrayTest21;
@@ -538,8 +538,8 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest22
- constant Real x[1] = 1;
- constant Real x[2] = 1;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 1.0;
  constant Real y[1] = 1.0;
  constant Real y[2] = 1.0;
 end ArrayTests.General.ArrayTest22;
@@ -561,10 +561,10 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest23
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[2,1] = 1;
- constant Real x[2,2] = 1;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 1.0;
+ constant Real x[2,1] = 1.0;
+ constant Real x[2,2] = 1.0;
  constant Real y[1,1] = 1.0;
  constant Real y[1,2] = 1.0;
  constant Real y[2,1] = 1.0;
@@ -591,10 +591,10 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest24
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 1.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 2.0;
  constant Real y[1,1] = 2.0;
  constant Real y[1,2] = 3.0;
  constant Real y[2,1] = 3.0;
@@ -622,12 +622,12 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest25
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 1;
- constant Real x[1,3] = 1;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 2;
- constant Real x[2,3] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 1.0;
+ constant Real x[1,3] = 1.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 2.0;
+ constant Real x[2,3] = 2.0;
  constant Real y[1,1] = 2.0;
  constant Real y[1,2] = 3.0;
  constant Real y[1,3] = 4.0;
@@ -679,22 +679,22 @@ equation
 			enable_structural_diagnosis=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest26
- constant Real x[1,1] = 3;
+ constant Real x[1,1] = 3.0;
  Real x[1,2];
- constant Real x[1,3] = 3;
+ constant Real x[1,3] = 3.0;
  Real x[1,4];
- constant Real x[2,1] = 4;
- constant Real x[2,2] = 2;
- constant Real x[2,3] = 4;
- constant Real x[2,4] = 2;
- constant Real x[3,1] = 5;
+ constant Real x[2,1] = 4.0;
+ constant Real x[2,2] = 2.0;
+ constant Real x[2,3] = 4.0;
+ constant Real x[2,4] = 2.0;
+ constant Real x[3,1] = 5.0;
  Real x[3,2];
- constant Real x[3,3] = 5;
+ constant Real x[3,3] = 5.0;
  Real x[3,4];
- constant Real x[4,1] = 6;
- constant Real x[4,2] = 4;
- constant Real x[4,3] = 6;
- constant Real x[4,4] = 4;
+ constant Real x[4,1] = 6.0;
+ constant Real x[4,2] = 4.0;
+ constant Real x[4,3] = 6.0;
+ constant Real x[4,4] = 4.0;
  constant Real y[1,1] = 6.0;
  Real y[1,2];
  constant Real y[1,3] = 8.0;
@@ -954,11 +954,11 @@ model ArrayTest35
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.General.ArrayTest35
- constant Real z[1] = 1;
- constant Real z[2] = 2;
- constant Real z[3] = 0;
- constant Real z[4] = 0;
- constant Real z[5] = 0;
+ constant Real z[1] = 1.0;
+ constant Real z[2] = 2.0;
+ constant Real z[3] = 0.0;
+ constant Real z[4] = 0.0;
+ constant Real z[5] = 0.0;
 end ArrayTests.General.ArrayTest35;
 ")})));
 end ArrayTest35;
@@ -1269,10 +1269,10 @@ model UnknownSize1
 			description="Using unknown array sizes: deciding with binding exp",
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
 end ArrayTests.UnknownSize.UnknownSize1;
 ")})));
 end UnknownSize1;
@@ -1296,14 +1296,14 @@ model UnknownSize2
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize2
- constant Real x[1].y[1].z[1] = 1;
- constant Real x[1].y[1].z[2] = 2;
- constant Real x[1].y[2].z[1] = 3;
- constant Real x[1].y[2].z[2] = 4;
- constant Real x[2].y[1].z[1] = 1;
- constant Real x[2].y[1].z[2] = 2;
- constant Real x[2].y[2].z[1] = 3;
- constant Real x[2].y[2].z[2] = 4;
+ constant Real x[1].y[1].z[1] = 1.0;
+ constant Real x[1].y[1].z[2] = 2.0;
+ constant Real x[1].y[2].z[1] = 3.0;
+ constant Real x[1].y[2].z[2] = 4.0;
+ constant Real x[2].y[1].z[1] = 1.0;
+ constant Real x[2].y[1].z[2] = 2.0;
+ constant Real x[2].y[2].z[1] = 3.0;
+ constant Real x[2].y[2].z[2] = 4.0;
 end ArrayTests.UnknownSize.UnknownSize2;
 ")})));
 end UnknownSize2;
@@ -1318,8 +1318,8 @@ model UnknownSize3
 			description="Using unknown array sizes: one dim known, one unknown",
 			flatModel="
 fclass ArrayTests.UnknownSize.UnknownSize3
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
 end ArrayTests.UnknownSize.UnknownSize3;
 ")})));
 end UnknownSize3;
@@ -1399,7 +1399,7 @@ equation
 			description="Replacing expressions in array subscripts with literals: basic test",
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression1
- constant Real x[1] = 1;
+ constant Real x[1] = 1.0;
  constant Real x[2] = 2.0;
  constant Real x[3] = 4.0;
  constant Real x[4] = 8.0;
@@ -1498,22 +1498,22 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression6
- constant Real x[1] = 3;
- constant Real x[2] = 5;
- constant Real x[3] = 7;
- constant Real x[4] = 9;
- constant Real x[5] = 4;
- constant Real x[6] = 6;
- constant Real x[7] = 8;
- constant Real x[8] = 10;
- constant Real x[9] = 5;
- constant Real x[10] = 7;
- constant Real x[11] = 9;
- constant Real x[12] = 11;
- constant Real x[13] = 6;
- constant Real x[14] = 8;
- constant Real x[15] = 10;
- constant Real x[16] = 12;
+ constant Real x[1] = 3.0;
+ constant Real x[2] = 5.0;
+ constant Real x[3] = 7.0;
+ constant Real x[4] = 9.0;
+ constant Real x[5] = 4.0;
+ constant Real x[6] = 6.0;
+ constant Real x[7] = 8.0;
+ constant Real x[8] = 10.0;
+ constant Real x[9] = 5.0;
+ constant Real x[10] = 7.0;
+ constant Real x[11] = 9.0;
+ constant Real x[12] = 11.0;
+ constant Real x[13] = 6.0;
+ constant Real x[14] = 8.0;
+ constant Real x[15] = 10.0;
+ constant Real x[16] = 12.0;
 end ArrayTests.Subscripts.SubscriptExpression6;
 ")})));
 end SubscriptExpression6;
@@ -1535,22 +1535,22 @@ equation
 			enable_structural_diagnosis=false,
 			flatModel="
 fclass ArrayTests.Subscripts.SubscriptExpression7
- constant Real x[1,1] = 3;
- constant Real x[1,2] = 5;
- constant Real x[1,3] = 7;
- constant Real x[1,4] = 9;
+ constant Real x[1,1] = 3.0;
+ constant Real x[1,2] = 5.0;
+ constant Real x[1,3] = 7.0;
+ constant Real x[1,4] = 9.0;
  Real x[2,1];
- constant Real x[2,2] = 4;
- constant Real x[2,3] = 8;
- constant Real x[2,4] = 10;
+ constant Real x[2,2] = 4.0;
+ constant Real x[2,3] = 8.0;
+ constant Real x[2,4] = 10.0;
  Real x[3,1];
  Real x[3,2];
- constant Real x[3,3] = 5;
- constant Real x[3,4] = 11;
+ constant Real x[3,3] = 5.0;
+ constant Real x[3,4] = 11.0;
  Real x[4,1];
  Real x[4,2];
  Real x[4,3];
- constant Real x[4,4] = 6;
+ constant Real x[4,4] = 6.0;
 equation
  4.0 = 6;
  5.0 = 7;
@@ -1733,9 +1733,9 @@ model Enum1
             description="Test subscripting with enums.",
             flatModel="
 fclass ArrayTests.Subscripts.Enum1
- constant Real w[1] = 1;
+ constant Real w[1] = 1.0;
  constant Real w[2] = 1.5;
- constant Real w[3] = 2;
+ constant Real w[3] = 2.0;
  Real w[4];
 algorithm
  w[4] := 2.28;
@@ -1789,7 +1789,7 @@ model Bool1
             description="Test subscripting with bools.",
             flatModel="
 fclass ArrayTests.Subscripts.Bool1
- constant Real b2[1] = 5;
+ constant Real b2[1] = 5.0;
  Real b2[2];
 algorithm
  b2[2] := 10.0;
@@ -1941,8 +1941,8 @@ equation
 fclass ArrayTests.Algebra.Add.ArrayAdd1
  constant Real x[1] = 11.0;
  constant Real x[2] = 22.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Add.ArrayAdd1;
 ")})));
 end ArrayAdd1;
@@ -1964,10 +1964,10 @@ fclass ArrayTests.Algebra.Add.ArrayAdd2
  constant Real x[1,2] = 22.0;
  constant Real x[2,1] = 33.0;
  constant Real x[2,2] = 44.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Add.ArrayAdd2;
 ")})));
 end ArrayAdd2;
@@ -1993,14 +1993,14 @@ fclass ArrayTests.Algebra.Add.ArrayAdd3
  constant Real x[2,1,2] = 66.0;
  constant Real x[2,2,1] = 77.0;
  constant Real x[2,2,2] = 88.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Add.ArrayAdd3;
 ")})));
 end ArrayAdd3;
@@ -2210,8 +2210,8 @@ equation
 fclass ArrayTests.Algebra.Add.ArrayDotAdd1
  constant Real x[1] = 11.0;
  constant Real x[2] = 22.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd1;
 ")})));
 end ArrayDotAdd1;
@@ -2233,10 +2233,10 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd2
  constant Real x[1,2] = 22.0;
  constant Real x[2,1] = 33.0;
  constant Real x[2,2] = 44.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd2;
 ")})));
 end ArrayDotAdd2;
@@ -2262,14 +2262,14 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd3
  constant Real x[2,1,2] = 66.0;
  constant Real x[2,2,1] = 77.0;
  constant Real x[2,2,2] = 88.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd3;
 ")})));
 end ArrayDotAdd3;
@@ -2289,8 +2289,8 @@ equation
 fclass ArrayTests.Algebra.Add.ArrayDotAdd4
  constant Real x[1] = 11.0;
  constant Real x[2] = 12.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd4;
 ")})));
 end ArrayDotAdd4;
@@ -2312,10 +2312,10 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd5
  constant Real x[1,2] = 12.0;
  constant Real x[2,1] = 13.0;
  constant Real x[2,2] = 14.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd5;
 ")})));
 end ArrayDotAdd5;
@@ -2341,14 +2341,14 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd6
  constant Real x[2,1,2] = 16.0;
  constant Real x[2,2,1] = 17.0;
  constant Real x[2,2,2] = 18.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd6;
 ")})));
 end ArrayDotAdd6;
@@ -2368,7 +2368,7 @@ equation
 fclass ArrayTests.Algebra.Add.ArrayDotAdd7
  constant Real x[1] = 11.0;
  constant Real x[2] = 21.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd7;
 ")})));
 end ArrayDotAdd7;
@@ -2390,7 +2390,7 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd8
  constant Real x[1,2] = 21.0;
  constant Real x[2,1] = 31.0;
  constant Real x[2,2] = 41.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd8;
 ")})));
 end ArrayDotAdd8;
@@ -2416,7 +2416,7 @@ fclass ArrayTests.Algebra.Add.ArrayDotAdd9
  constant Real x[2,1,2] = 61.0;
  constant Real x[2,2,1] = 71.0;
  constant Real x[2,2,2] = 81.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Add.ArrayDotAdd9;
 ")})));
 end ArrayDotAdd9;
@@ -2503,8 +2503,8 @@ equation
 fclass ArrayTests.Algebra.Sub.ArraySub1
  constant Real x[1] = -9.0;
  constant Real x[2] = -18.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Sub.ArraySub1;
 ")})));
 end ArraySub1;
@@ -2526,10 +2526,10 @@ fclass ArrayTests.Algebra.Sub.ArraySub2
  constant Real x[1,2] = -18.0;
  constant Real x[2,1] = -27.0;
  constant Real x[2,2] = -36.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Sub.ArraySub2;
 ")})));
 end ArraySub2;
@@ -2555,14 +2555,14 @@ fclass ArrayTests.Algebra.Sub.ArraySub3
  constant Real x[2,1,2] = -54.0;
  constant Real x[2,2,1] = -63.0;
  constant Real x[2,2,2] = -72.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Sub.ArraySub3;
 ")})));
 end ArraySub3;
@@ -2772,8 +2772,8 @@ equation
 fclass ArrayTests.Algebra.Sub.ArrayDotSub1
  constant Real x[1] = -9.0;
  constant Real x[2] = -18.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub1;
 ")})));
 end ArrayDotSub1;
@@ -2795,10 +2795,10 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub2
  constant Real x[1,2] = -18.0;
  constant Real x[2,1] = -27.0;
  constant Real x[2,2] = -36.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub2;
 ")})));
 end ArrayDotSub2;
@@ -2824,14 +2824,14 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub3
  constant Real x[2,1,2] = -54.0;
  constant Real x[2,2,1] = -63.0;
  constant Real x[2,2,2] = -72.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub3;
 ")})));
 end ArrayDotSub3;
@@ -2851,8 +2851,8 @@ equation
 fclass ArrayTests.Algebra.Sub.ArrayDotSub4
  constant Real x[1] = -9.0;
  constant Real x[2] = -8.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub4;
 ")})));
 end ArrayDotSub4;
@@ -2874,10 +2874,10 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub5
  constant Real x[1,2] = -8.0;
  constant Real x[2,1] = -7.0;
  constant Real x[2,2] = -6.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub5;
 ")})));
 end ArrayDotSub5;
@@ -2903,14 +2903,14 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub6
  constant Real x[2,1,2] = -4.0;
  constant Real x[2,2,1] = -3.0;
  constant Real x[2,2,2] = -2.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub6;
 ")})));
 end ArrayDotSub6;
@@ -2930,7 +2930,7 @@ equation
 fclass ArrayTests.Algebra.Sub.ArrayDotSub7
  constant Real x[1] = -9.0;
  constant Real x[2] = -19.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub7;
 ")})));
 end ArrayDotSub7;
@@ -2952,7 +2952,7 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub8
  constant Real x[1,2] = -19.0;
  constant Real x[2,1] = -29.0;
  constant Real x[2,2] = -39.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub8;
 ")})));
 end ArrayDotSub8;
@@ -2978,7 +2978,7 @@ fclass ArrayTests.Algebra.Sub.ArrayDotSub9
  constant Real x[2,1,2] = -59.0;
  constant Real x[2,2,1] = -69.0;
  constant Real x[2,2,2] = -79.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Sub.ArrayDotSub9;
 ")})));
 end ArrayDotSub9;
@@ -3064,9 +3064,9 @@ equation
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK1
  constant Real x = 140.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
- constant Real y[3] = 3;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
+ constant Real y[3] = 3.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK1;
 ")})));
 end ArrayMulOK1;
@@ -3088,10 +3088,10 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK2
  constant Real x[1,2] = 100.0;
  constant Real x[2,1] = 150.0;
  constant Real x[2,2] = 220.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK2;
 ")})));
 end ArrayMulOK2;
@@ -3121,14 +3121,14 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK3
  constant Real x[3,2] = 460.0;
  constant Real x[3,3] = 570.0;
  constant Real x[3,4] = 680.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[1,3] = 3;
- constant Real y[1,4] = 4;
- constant Real y[2,1] = 5;
- constant Real y[2,2] = 6;
- constant Real y[2,3] = 7;
- constant Real y[2,4] = 8;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[1,3] = 3.0;
+ constant Real y[1,4] = 4.0;
+ constant Real y[2,1] = 5.0;
+ constant Real y[2,2] = 6.0;
+ constant Real y[2,3] = 7.0;
+ constant Real y[2,4] = 8.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK3;
 ")})));
 end ArrayMulOK3;
@@ -3148,8 +3148,8 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayMulOK4
  constant Real x[1] = 70.0;
  constant Real x[2] = 100.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK4;
 ")})));
 end ArrayMulOK4;
@@ -3169,10 +3169,10 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayMulOK5
  constant Real x[1] = 50.0;
  constant Real x[2] = 110.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK5;
 ")})));
 end ArrayMulOK5;
@@ -3192,8 +3192,8 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayMulOK6
  constant Real x[1] = 10.0;
  constant Real x[2] = 20.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK6;
 ")})));
 end ArrayMulOK6;
@@ -3215,10 +3215,10 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK7
  constant Real x[1,2] = 20.0;
  constant Real x[2,1] = 30.0;
  constant Real x[2,2] = 40.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK7;
 ")})));
 end ArrayMulOK7;
@@ -3244,14 +3244,14 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK8
  constant Real x[2,1,2] = 60.0;
  constant Real x[2,2,1] = 70.0;
  constant Real x[2,2,2] = 80.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK8;
 ")})));
 end ArrayMulOK8;
@@ -3271,7 +3271,7 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayMulOK9
  constant Real x[1] = 10.0;
  constant Real x[2] = 20.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK9;
 ")})));
 end ArrayMulOK9;
@@ -3293,7 +3293,7 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK10
  constant Real x[1,2] = 20.0;
  constant Real x[2,1] = 30.0;
  constant Real x[2,2] = 40.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK10;
 ")})));
 end ArrayMulOK10;
@@ -3319,7 +3319,7 @@ fclass ArrayTests.Algebra.Mul.ArrayMulOK11
  constant Real x[2,1,2] = 60.0;
  constant Real x[2,2,1] = 70.0;
  constant Real x[2,2,2] = 80.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK11;
 ")})));
 end ArrayMulOK11;
@@ -3339,10 +3339,10 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayMulOK12
  constant Real x[1,1] = 50.0;
  constant Real x[2,1] = 110.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayMulOK12;
 ")})));
 end ArrayMulOK12;
@@ -3358,9 +3358,9 @@ model ArrayMulOK13
 			description="Scalarization of multiplication: check that type() of Real[3] * Real[3] is correct",
 			flatModel="
 fclass ArrayTests.Algebra.Mul.ArrayMulOK13
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
  constant Real y[1] = 14.0;
  constant Real y[2] = 28.0;
  constant Real y[3] = 42.0;
@@ -3573,8 +3573,8 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayDotMul1
  constant Real x[1] = 10.0;
  constant Real x[2] = 40.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul1;
 ")})));
 end ArrayDotMul1;
@@ -3596,10 +3596,10 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul2
  constant Real x[1,2] = 40.0;
  constant Real x[2,1] = 90.0;
  constant Real x[2,2] = 160.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul2;
 ")})));
 end ArrayDotMul2;
@@ -3625,14 +3625,14 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul3
  constant Real x[2,1,2] = 360.0;
  constant Real x[2,2,1] = 490.0;
  constant Real x[2,2,2] = 640.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul3;
 ")})));
 end ArrayDotMul3;
@@ -3652,8 +3652,8 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayDotMul4
  constant Real x[1] = 10.0;
  constant Real x[2] = 20.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul4;
 ")})));
 end ArrayDotMul4;
@@ -3675,10 +3675,10 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul5
  constant Real x[1,2] = 20.0;
  constant Real x[2,1] = 30.0;
  constant Real x[2,2] = 40.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul5;
 ")})));
 end ArrayDotMul5;
@@ -3704,14 +3704,14 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul6
  constant Real x[2,1,2] = 60.0;
  constant Real x[2,2,1] = 70.0;
  constant Real x[2,2,2] = 80.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul6;
 ")})));
 end ArrayDotMul6;
@@ -3731,7 +3731,7 @@ equation
 fclass ArrayTests.Algebra.Mul.ArrayDotMul7
  constant Real x[1] = 10.0;
  constant Real x[2] = 20.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul7;
 ")})));
 end ArrayDotMul7;
@@ -3753,7 +3753,7 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul8
  constant Real x[1,2] = 20.0;
  constant Real x[2,1] = 30.0;
  constant Real x[2,2] = 40.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul8;
 ")})));
 end ArrayDotMul8;
@@ -3779,7 +3779,7 @@ fclass ArrayTests.Algebra.Mul.ArrayDotMul9
  constant Real x[2,1,2] = 60.0;
  constant Real x[2,2,1] = 70.0;
  constant Real x[2,2,2] = 80.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Mul.ArrayDotMul9;
 ")})));
 end ArrayDotMul9;
@@ -3908,8 +3908,8 @@ equation
 fclass ArrayTests.Algebra.Div.ArrayDiv3
  constant Real x[1] = 0.1;
  constant Real x[2] = 0.2;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Div.ArrayDiv3;
 ")})));
 end ArrayDiv3;
@@ -3931,10 +3931,10 @@ fclass ArrayTests.Algebra.Div.ArrayDiv4
  constant Real x[1,2] = 0.2;
  constant Real x[2,1] = 0.3;
  constant Real x[2,2] = 0.4;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Div.ArrayDiv4;
 ")})));
 end ArrayDiv4;
@@ -3960,14 +3960,14 @@ fclass ArrayTests.Algebra.Div.ArrayDiv5
  constant Real x[2,1,2] = 0.6;
  constant Real x[2,2,1] = 0.7;
  constant Real x[2,2,2] = 0.8;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Div.ArrayDiv5;
 ")})));
 end ArrayDiv5;
@@ -4052,8 +4052,8 @@ equation
 fclass ArrayTests.Algebra.Div.ArrayDotDiv1
  constant Real x[1] = 0.1;
  constant Real x[2] = 0.1;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv1;
 ")})));
 end ArrayDotDiv1;
@@ -4076,10 +4076,10 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv2
  constant Real x[1,2] = 0.1;
  constant Real x[2,1] = 0.1;
  constant Real x[2,2] = 0.1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv2;
 ")})));
 end ArrayDotDiv2;
@@ -4106,14 +4106,14 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv3
  constant Real x[2,1,2] = 0.1;
  constant Real x[2,2,1] = 0.1;
  constant Real x[2,2,2] = 0.1;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv3;
 ")})));
 end ArrayDotDiv3;
@@ -4133,8 +4133,8 @@ equation
 fclass ArrayTests.Algebra.Div.ArrayDotDiv4
  constant Real x[1] = 0.1;
  constant Real x[2] = 0.2;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv4;
 ")})));
 end ArrayDotDiv4;
@@ -4156,10 +4156,10 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv5
  constant Real x[1,2] = 0.2;
  constant Real x[2,1] = 0.3;
  constant Real x[2,2] = 0.4;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv5;
 ")})));
 end ArrayDotDiv5;
@@ -4185,14 +4185,14 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv6
  constant Real x[2,1,2] = 0.6;
  constant Real x[2,2,1] = 0.7;
  constant Real x[2,2,2] = 0.8;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,1] = 1.0;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv6;
 ")})));
 end ArrayDotDiv6;
@@ -4212,7 +4212,7 @@ equation
 fclass ArrayTests.Algebra.Div.ArrayDotDiv7
  constant Real x[1] = 0.1;
  constant Real x[2] = 0.05;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv7;
 ")})));
 end ArrayDotDiv7;
@@ -4234,7 +4234,7 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv8
  constant Real x[1,2] = 0.05;
  constant Real x[2,1] = 0.03333333333333333;
  constant Real x[2,2] = 0.025;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv8;
 ")})));
 end ArrayDotDiv8;
@@ -4260,7 +4260,7 @@ fclass ArrayTests.Algebra.Div.ArrayDotDiv9
  constant Real x[2,1,2] = 0.016666666666666666;
  constant Real x[2,2,1] = 0.014285714285714285;
  constant Real x[2,2,2] = 0.0125;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Div.ArrayDotDiv9;
 ")})));
 end ArrayDotDiv9;
@@ -4347,8 +4347,7 @@ equation
 fclass ArrayTests.Algebra.Pow.ArrayDotPow1
  constant Real x[1] = 1.0;
  constant Real x[2] = 1048576.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow1;
 ")})));
 end ArrayDotPow1;
@@ -4370,10 +4369,9 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow2
  constant Real x[1,2] = 1048576.0;
  constant Real x[2,1] = 2.05891132094649E14;
  constant Real x[2,2] = 1.2089258196146292E24;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow2;
 ")})));
 end ArrayDotPow2;
@@ -4399,14 +4397,13 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow3
  constant Real x[2,1,2] = 4.887367798068926E46;
  constant Real x[2,2,1] = 1.4350360160986845E59;
  constant Real x[2,2,2] = 1.7668470647783843E72;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow3;
 ")})));
 end ArrayDotPow3;
@@ -4426,8 +4423,7 @@ equation
 fclass ArrayTests.Algebra.Pow.ArrayDotPow4
  constant Real x[1] = 1.0;
  constant Real x[2] = 1024.0;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
+ constant Real y[2] = 2.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow4;
 ")})));
 end ArrayDotPow4;
@@ -4449,10 +4445,9 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow5
  constant Real x[1,2] = 1024.0;
  constant Real x[2,1] = 59049.0;
  constant Real x[2,2] = 1048576.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow5;
 ")})));
 end ArrayDotPow5;
@@ -4478,14 +4473,13 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow6
  constant Real x[2,1,2] = 6.0466176E7;
  constant Real x[2,2,1] = 2.82475249E8;
  constant Real x[2,2,2] = 1.073741824E9;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,2,1] = 3;
- constant Real y[1,2,2] = 4;
- constant Real y[2,1,1] = 5;
- constant Real y[2,1,2] = 6;
- constant Real y[2,2,1] = 7;
- constant Real y[2,2,2] = 8;
+ constant Real y[1,1,2] = 2.0;
+ constant Real y[1,2,1] = 3.0;
+ constant Real y[1,2,2] = 4.0;
+ constant Real y[2,1,1] = 5.0;
+ constant Real y[2,1,2] = 6.0;
+ constant Real y[2,2,1] = 7.0;
+ constant Real y[2,2,2] = 8.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow6;
 ")})));
 end ArrayDotPow6;
@@ -4506,7 +4500,7 @@ equation
 fclass ArrayTests.Algebra.Pow.ArrayDotPow7
  constant Real x[1] = 1.0;
  constant Real x[2] = 1.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow7;
 ")})));
 end ArrayDotPow7;
@@ -4529,7 +4523,7 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow8
  constant Real x[1,2] = 1.0;
  constant Real x[2,1] = 1.0;
  constant Real x[2,2] = 1.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow8;
 ")})));
 end ArrayDotPow8;
@@ -4556,7 +4550,7 @@ fclass ArrayTests.Algebra.Pow.ArrayDotPow9
  constant Real x[2,1,2] = 1.0;
  constant Real x[2,2,1] = 1.0;
  constant Real x[2,2,2] = 1.0;
- constant Real y = 1;
+ constant Real y = 1.0;
 end ArrayTests.Algebra.Pow.ArrayDotPow9;
 ")})));
 end ArrayDotPow9;
@@ -4636,10 +4630,10 @@ model ArrayPow1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 0;
- constant Real x[2,1] = 0;
- constant Real x[2,2] = 1;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 0.0;
+ constant Real x[2,1] = 0.0;
+ constant Real x[2,2] = 1.0;
 end ArrayTests.Algebra.Pow.ArrayPow1;
 ")})));
 end ArrayPow1;
@@ -4654,10 +4648,10 @@ model ArrayPow2
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 1",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
 end ArrayTests.Algebra.Pow.ArrayPow2;
 ")})));
 end ArrayPow2;
@@ -4672,10 +4666,10 @@ model ArrayPow3
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow3
- constant Real x[1,1] = 7;
- constant Real x[1,2] = 10;
- constant Real x[2,1] = 15;
- constant Real x[2,2] = 22;
+ constant Real x[1,1] = 7.0;
+ constant Real x[1,2] = 10.0;
+ constant Real x[2,1] = 15.0;
+ constant Real x[2,2] = 22.0;
 end ArrayTests.Algebra.Pow.ArrayPow3;
 ")})));
 end ArrayPow3;
@@ -4690,10 +4684,10 @@ model ArrayPow4
 			description="Scalarization of element-wise exponentiation: Integer[2,2] ^ 3",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow4
- constant Real x[1,1] = 37;
- constant Real x[1,2] = 54;
- constant Real x[2,1] = 81;
- constant Real x[2,2] = 118;
+ constant Real x[1,1] = 37.0;
+ constant Real x[1,2] = 54.0;
+ constant Real x[2,1] = 81.0;
+ constant Real x[2,2] = 118.0;
 end ArrayTests.Algebra.Pow.ArrayPow4;
 ")})));
 end ArrayPow4;
@@ -4708,15 +4702,15 @@ model ArrayPow5
 			description="Scalarization of element-wise exponentiation: Integer[3,3] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow5
- constant Real x[1,1] = 30;
- constant Real x[1,2] = 36;
- constant Real x[1,3] = 42;
- constant Real x[2,1] = 66;
- constant Real x[2,2] = 81;
- constant Real x[2,3] = 96;
- constant Real x[3,1] = 102;
- constant Real x[3,2] = 126;
- constant Real x[3,3] = 150;
+ constant Real x[1,1] = 30.0;
+ constant Real x[1,2] = 36.0;
+ constant Real x[1,3] = 42.0;
+ constant Real x[2,1] = 66.0;
+ constant Real x[2,2] = 81.0;
+ constant Real x[2,3] = 96.0;
+ constant Real x[3,1] = 102.0;
+ constant Real x[3,2] = 126.0;
+ constant Real x[3,3] = 150.0;
 end ArrayTests.Algebra.Pow.ArrayPow5;
 ")})));
 end ArrayPow5;
@@ -4738,10 +4732,10 @@ fclass ArrayTests.Algebra.Pow.ArrayPow6
  constant Real x[1,2] = 10.0;
  constant Real x[2,1] = 15.0;
  constant Real x[2,2] = 22.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Pow.ArrayPow6;
 ")})));
 end ArrayPow6;
@@ -4760,14 +4754,14 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow7
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 0;
- constant Real x[2,1] = 0;
- constant Real x[2,2] = 1;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 0.0;
+ constant Real x[2,1] = 0.0;
+ constant Real x[2,2] = 1.0;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
 end ArrayTests.Algebra.Pow.ArrayPow7;
 ")})));
 end ArrayPow7;
@@ -4874,10 +4868,10 @@ model ArrayPow13
 			description="Scalarization of element-wise exponentiation: Real[2,2] ^ constant Integer component",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow13
- constant Real x[1,1] = 7;
- constant Real x[1,2] = 10;
- constant Real x[2,1] = 15;
- constant Real x[2,2] = 22;
+ constant Real x[1,1] = 7.0;
+ constant Real x[1,2] = 10.0;
+ constant Real x[2,1] = 15.0;
+ constant Real x[2,2] = 22.0;
  constant Integer y = 2;
 end ArrayTests.Algebra.Pow.ArrayPow13;
 ")})));
@@ -4912,7 +4906,7 @@ model ArrayPow15
 			description="Scalarization of element-wise exponentiation: Integer[1,1] ^ 2",
 			flatModel="
 fclass ArrayTests.Algebra.Pow.ArrayPow15
- constant Real x[1,1] = 1;
+ constant Real x[1,1] = 1.0;
 end ArrayTests.Algebra.Pow.ArrayPow15;
 ")})));
 end ArrayPow15;
@@ -5531,9 +5525,9 @@ model LongArrayForm2
 			description="Long form of array constructor",
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm2
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
 end ArrayTests.Constructors.LongForm.LongArrayForm2;
 ")})));
 end LongArrayForm2;
@@ -5571,21 +5565,21 @@ model LongArrayForm4
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.LongForm.LongArrayForm4
- constant Real x1[1] = 1;
- constant Real x1[2] = 2;
- constant Real x1[3] = 3;
- constant Real x2[1] = 4;
- constant Real x2[2] = 5;
- constant Real x2[3] = 6;
+ constant Real x1[1] = 1.0;
+ constant Real x1[2] = 2.0;
+ constant Real x1[3] = 3.0;
+ constant Real x2[1] = 4.0;
+ constant Real x2[2] = 5.0;
+ constant Real x2[3] = 6.0;
  constant Real x3[1,1] = 1.0;
  constant Real x3[1,2] = 2.0;
  constant Real x3[1,3] = 3.0;
  constant Real x3[2,1] = 4.0;
  constant Real x3[2,2] = 5.0;
  constant Real x3[2,3] = 6.0;
- constant Real x3[3,1] = 7;
- constant Real x3[3,2] = 8;
- constant Real x3[3,3] = 9;
+ constant Real x3[3,1] = 7.0;
+ constant Real x3[3,2] = 8.0;
+ constant Real x3[3,3] = 9.0;
 end ArrayTests.Constructors.LongForm.LongArrayForm4;
 ")})));
 end LongArrayForm4;
@@ -5641,10 +5635,10 @@ model EmptyArray3
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray3
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
  constant Real xx[1,1] = 1.0;
  constant Real xx[1,2] = 2.0;
  constant Real xx[2,1] = 3.0;
@@ -5666,10 +5660,10 @@ model EmptyArray4
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray4
- constant Real y[1,1] = 0;
- constant Real y[1,2] = 0;
- constant Real y[2,1] = 0;
- constant Real y[2,2] = 0;
+ constant Real y[1,1] = 0.0;
+ constant Real y[1,2] = 0.0;
+ constant Real y[2,1] = 0.0;
+ constant Real y[2,2] = 0.0;
 end ArrayTests.Constructors.EmptyArray.EmptyArray4;
 ")})));
 end EmptyArray4;
@@ -5730,7 +5724,7 @@ model EmptyArray6
             description="Empty arrays, composite array",
             flatModel="
 fclass ArrayTests.Constructors.EmptyArray.EmptyArray6
- constant Real t = 0;
+ constant Real t = 0.0;
 end ArrayTests.Constructors.EmptyArray.EmptyArray6;
 ")})));
 end EmptyArray6;
@@ -5750,15 +5744,15 @@ model ArrayIterTest1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest1
- constant Real x[1,1] = 2;
- constant Real x[1,2] = 4;
- constant Real x[1,3] = 6;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 6;
- constant Real x[2,3] = 9;
- constant Real x[3,1] = 5;
- constant Real x[3,2] = 10;
- constant Real x[3,3] = 15;
+ constant Real x[1,1] = 2.0;
+ constant Real x[1,2] = 4.0;
+ constant Real x[1,3] = 6.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 6.0;
+ constant Real x[2,3] = 9.0;
+ constant Real x[3,1] = 5.0;
+ constant Real x[3,2] = 10.0;
+ constant Real x[3,3] = 15.0;
 end ArrayTests.Constructors.Iterators.ArrayIterTest1;
 ")})));
 end ArrayIterTest1;
@@ -5774,14 +5768,14 @@ model ArrayIterTest2
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest2
- constant Real x[1,1,1] = 1;
- constant Real x[1,1,2] = 2;
- constant Real x[1,2,1] = 4;
- constant Real x[1,2,2] = 2;
- constant Real x[2,1,1] = 1;
- constant Real x[2,1,2] = 5;
- constant Real x[2,2,1] = 4;
- constant Real x[2,2,2] = 5;
+ constant Real x[1,1,1] = 1.0;
+ constant Real x[1,1,2] = 2.0;
+ constant Real x[1,2,1] = 4.0;
+ constant Real x[1,2,2] = 2.0;
+ constant Real x[2,1,1] = 1.0;
+ constant Real x[2,1,2] = 5.0;
+ constant Real x[2,2,1] = 4.0;
+ constant Real x[2,2,2] = 5.0;
 end ArrayTests.Constructors.Iterators.ArrayIterTest2;
 ")})));
 end ArrayIterTest2;
@@ -5798,23 +5792,23 @@ model ArrayIterTest3
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest3
- constant Real i = 1;
- constant Real x[1,1,1,1] = 3;
- constant Real x[1,1,1,2] = 1;
- constant Real x[1,1,2,1] = 3;
- constant Real x[1,1,2,2] = 2;
- constant Real x[1,2,1,1] = 4;
- constant Real x[1,2,1,2] = 1;
- constant Real x[1,2,2,1] = 4;
- constant Real x[1,2,2,2] = 2;
- constant Real x[2,1,1,1] = 3;
- constant Real x[2,1,1,2] = 1;
- constant Real x[2,1,2,1] = 3;
- constant Real x[2,1,2,2] = 2;
- constant Real x[2,2,1,1] = 4;
- constant Real x[2,2,1,2] = 1;
- constant Real x[2,2,2,1] = 4;
- constant Real x[2,2,2,2] = 2;
+ constant Real i = 1.0;
+ constant Real x[1,1,1,1] = 3.0;
+ constant Real x[1,1,1,2] = 1.0;
+ constant Real x[1,1,2,1] = 3.0;
+ constant Real x[1,1,2,2] = 2.0;
+ constant Real x[1,2,1,1] = 4.0;
+ constant Real x[1,2,1,2] = 1.0;
+ constant Real x[1,2,2,1] = 4.0;
+ constant Real x[1,2,2,2] = 2.0;
+ constant Real x[2,1,1,1] = 3.0;
+ constant Real x[2,1,1,2] = 1.0;
+ constant Real x[2,1,2,1] = 3.0;
+ constant Real x[2,1,2,2] = 2.0;
+ constant Real x[2,2,1,1] = 4.0;
+ constant Real x[2,2,1,2] = 1.0;
+ constant Real x[2,2,2,1] = 4.0;
+ constant Real x[2,2,2,2] = 2.0;
 end ArrayTests.Constructors.Iterators.ArrayIterTest3;
 ")})));
 end ArrayIterTest3;
@@ -5829,7 +5823,7 @@ model ArrayIterTest4
 			description="Array constructor with iterators: vectors of length 1",
 			flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest4
- constant Real x[1,1,1] = 1;
+ constant Real x[1,1,1] = 1.0;
 end ArrayTests.Constructors.Iterators.ArrayIterTest4;
 ")})));
 end ArrayIterTest4;
@@ -6349,9 +6343,9 @@ fclass ArrayTests.For.ForEquation2
  structural parameter Integer a.rev[1] = 3 /* 3 */;
  structural parameter Integer a.rev[2] = 2 /* 2 */;
  structural parameter Integer a.rev[3] = 1 /* 1 */;
- constant Real a.x[1] = 1;
- constant Real a.x[2] = 2;
- constant Real a.x[3] = 3;
+ constant Real a.x[1] = 1.0;
+ constant Real a.x[2] = 2.0;
+ constant Real a.x[3] = 3.0;
  constant Real a.y[1] = 3.0;
  constant Real a.y[2] = 2.0;
  constant Real a.y[3] = 1.0;
@@ -6604,10 +6598,7 @@ model SliceTest2
 			description="Slice operations: basic test",
 			flatModel="
 fclass ArrayTests.Slices.SliceTest2
- constant Real x[1].a[1] = 1;
- constant Real x[1].a[2] = 2;
- constant Real x[2].a[1] = 3;
- constant Real x[2].a[2] = 4;
+ constant Real x[1].a[1] = 1.0;
  constant Real y[1,1] = 2.0;
  constant Real y[1,2] = 3.0;
  constant Real y[2,1] = 4.0;
@@ -6632,22 +6623,22 @@ model SliceTest3
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.SliceTest3
- constant Real x[1].a[1] = 1;
- constant Real x[1].a[2] = 2;
- constant Real x[1].a[3] = 3;
- constant Real x[1].a[4] = 4;
- constant Real x[2].a[1] = 1;
- constant Real x[2].a[2] = 2;
- constant Real x[2].a[3] = 3;
- constant Real x[2].a[4] = 4;
- constant Real x[3].a[1] = 1;
- constant Real x[3].a[2] = 2;
- constant Real x[3].a[3] = 3;
- constant Real x[3].a[4] = 4;
- constant Real x[4].a[1] = 1;
- constant Real x[4].a[2] = 2;
- constant Real x[4].a[3] = 3;
- constant Real x[4].a[4] = 4;
+ constant Real x[1].a[1] = 1.0;
+ constant Real x[1].a[2] = 2.0;
+ constant Real x[1].a[3] = 3.0;
+ constant Real x[1].a[4] = 4.0;
+ constant Real x[2].a[1] = 1.0;
+ constant Real x[2].a[2] = 2.0;
+ constant Real x[2].a[3] = 3.0;
+ constant Real x[2].a[4] = 4.0;
+ constant Real x[3].a[1] = 1.0;
+ constant Real x[3].a[2] = 2.0;
+ constant Real x[3].a[3] = 3.0;
+ constant Real x[3].a[4] = 4.0;
+ constant Real x[4].a[1] = 1.0;
+ constant Real x[4].a[2] = 2.0;
+ constant Real x[4].a[3] = 3.0;
+ constant Real x[4].a[4] = 4.0;
  constant Real y[1,1] = 3.0;
  constant Real y[1,2] = 5.0;
  constant Real y[2,1] = 3.0;
@@ -6679,14 +6670,14 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayTests.Slices.MixedIndices1
- constant Real m[1].x[1,1] = 1;
- constant Real m[1].x[1,2] = 0;
- constant Real m[1].x[2,1] = 0;
- constant Real m[1].x[2,2] = 1;
- constant Real m[2].x[1,1] = 1;
- constant Real m[2].x[1,2] = 0;
- constant Real m[2].x[2,1] = 0;
- constant Real m[2].x[2,2] = 1;
+ constant Real m[1].x[1,1] = 1.0;
+ constant Real m[1].x[1,2] = 0.0;
+ constant Real m[1].x[2,1] = 0.0;
+ constant Real m[1].x[2,2] = 1.0;
+ constant Real m[2].x[1,1] = 1.0;
+ constant Real m[2].x[1,2] = 0.0;
+ constant Real m[2].x[2,1] = 0.0;
+ constant Real m[2].x[2,2] = 1.0;
  Real y[1,1,1];
  Real y[1,1,2];
  Real y[1,2,1];
@@ -6749,10 +6740,10 @@ fclass ArrayTests.Slices.MixedIndices2
  constant Real y[3,2] = 0.0;
  constant Real y[4,1] = 0.0;
  constant Real y[4,2] = 2.0;
- constant Real z[1,1] = 1;
- constant Real z[1,2] = 0;
- constant Real z[2,1] = 0;
- constant Real z[2,2] = 1;
+ constant Real z[1,1] = 1.0;
+ constant Real z[1,2] = 0.0;
+ constant Real z[2,1] = 0.0;
+ constant Real z[2,2] = 1.0;
 end ArrayTests.Slices.MixedIndices2;
 ")})));
 end MixedIndices2;
@@ -6794,7 +6785,7 @@ model Equation
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.Equation
- constant Real table[1] = 42;
+ constant Real table[1] = 42.0;
  constant Real table[2] = 3.14;
  discrete Integer i;
  Real x;
@@ -6818,10 +6809,10 @@ model TwoDim1
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim1
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
  discrete Integer i;
  Real x;
 initial equation 
@@ -6844,10 +6835,10 @@ model TwoDim2
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim2
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
  discrete Integer i;
  Real x;
 initial equation 
@@ -6871,10 +6862,10 @@ model TwoDim3
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim3
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
  discrete Integer i1;
  discrete Integer i2;
  Real x;
@@ -6900,10 +6891,10 @@ model TwoDim4
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim4
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
  discrete Integer i;
  Real x[1];
  Real x[2];
@@ -6928,10 +6919,10 @@ model TwoDim5
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim5
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
  discrete Integer i;
  Real x[1];
  Real x[2];
@@ -6956,14 +6947,14 @@ model TwoDim6
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim6
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[2,1] = 3;
- constant Real table[2,2] = 4;
- constant Real table[3,1] = 5;
- constant Real table[3,2] = 6;
- constant Real table[4,1] = 7;
- constant Real table[4,2] = 8;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[2,1] = 3.0;
+ constant Real table[2,2] = 4.0;
+ constant Real table[3,1] = 5.0;
+ constant Real table[3,2] = 6.0;
+ constant Real table[4,1] = 7.0;
+ constant Real table[4,2] = 8.0;
  discrete Integer i;
  Real x[1];
  Real x[2];
@@ -6988,14 +6979,14 @@ model TwoDim7
             description="Test array index with discrete variability in equation",
             flatModel="
 fclass ArrayTests.VariableIndex.TwoDim7
- constant Real table[1,1] = 1;
- constant Real table[1,2] = 2;
- constant Real table[1,3] = 3;
- constant Real table[1,4] = 4;
- constant Real table[2,1] = 5;
- constant Real table[2,2] = 6;
- constant Real table[2,3] = 7;
- constant Real table[2,4] = 8;
+ constant Real table[1,1] = 1.0;
+ constant Real table[1,2] = 2.0;
+ constant Real table[1,3] = 3.0;
+ constant Real table[1,4] = 4.0;
+ constant Real table[2,1] = 5.0;
+ constant Real table[2,2] = 6.0;
+ constant Real table[2,3] = 7.0;
+ constant Real table[2,4] = 8.0;
  discrete Integer i;
  Real x[1];
  Real x[2];
@@ -7022,7 +7013,7 @@ algorithm
             description="Test array index with discrete variability in algorithm",
             flatModel="
 fclass ArrayTests.VariableIndex.Algorithm
- constant Real table[1] = 42;
+ constant Real table[1] = 42.0;
  constant Real table[2] = 3.14;
  discrete Integer i;
  Real x;
@@ -7812,7 +7803,7 @@ model ArrayConst3
 			description="Array constants used with index of discrete variability",
 			flatModel="
 fclass ArrayTests.Other.ArrayConst3
- constant Real x = 1;
+ constant Real x = 1.0;
 end ArrayTests.Other.ArrayConst3;
 ")})));
 end ArrayConst3;
@@ -7877,10 +7868,10 @@ equation
 			flatModel="
 fclass ArrayTests.Other.ArraySize3
  structural parameter Integer n = 2 /* 2 */;
- constant Real b[1].x[1] = 1;
- constant Real b[1].x[2] = 2;
- constant Real b[2].x[1] = 1;
- constant Real b[2].x[2] = 2;
+ constant Real b[1].x[1] = 1.0;
+ constant Real b[1].x[2] = 2.0;
+ constant Real b[2].x[1] = 1.0;
+ constant Real b[2].x[2] = 2.0;
  constant Real c[1] = 3.0;
  constant Real c[2] = 3.0;
 end ArrayTests.Other.ArraySize3;
@@ -7983,9 +7974,9 @@ fclass ArrayTests.Other.ArraySizeInIf1
  structural parameter Integer b = 5 /* 5 */;
  structural parameter Integer c = 2 /* 2 */;
  structural parameter Integer d = 1 /* 1 */;
- constant Real e[1] = 1;
- constant Real e[2] = 2;
- constant Real f[1] = 1;
+ constant Real e[1] = 1.0;
+ constant Real e[2] = 2.0;
+ constant Real f[1] = 1.0;
 end ArrayTests.Other.ArraySizeInIf1;
 ")})));
 end ArraySizeInIf1;
@@ -8078,11 +8069,11 @@ fclass ArrayTests.Other.ArraySizeInIf3
  structural parameter Integer b = 5 /* 5 */;
  structural parameter Integer c = 5 /* 5 */;
  structural parameter Integer d = 0 /* 0 */;
- constant Real e[1] = 1;
- constant Real e[2] = 2;
- constant Real e[3] = 3;
- constant Real e[4] = 4;
- constant Real e[5] = 5;
+ constant Real e[1] = 1.0;
+ constant Real e[2] = 2.0;
+ constant Real e[3] = 3.0;
+ constant Real e[4] = 4.0;
+ constant Real e[5] = 5.0;
 end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
@@ -8108,8 +8099,8 @@ model ArraySizeInComp1
             eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp1
- constant Real r1.x[1] = 1;
- constant Real r1.x[2] = 2;
+ constant Real r1.x[1] = 1.0;
+ constant Real r1.x[2] = 2.0;
  structural parameter Integer r1.n = 2 /* 2 */;
  constant Real x[1] = 0.0;
  constant Real x[2] = 0.0;
@@ -8139,12 +8130,12 @@ model ArraySizeInComp2
             eliminate_alias_variables=false,
             flatModel="
 fclass ArrayTests.Other.ArraySizeInComp2
- constant Real r1.x[1] = 1;
- constant Real r1.x[2] = 2;
+ constant Real r1.x[1] = 1.0;
+ constant Real r1.x[2] = 2.0;
  structural parameter Integer r1.n = 2 /* 2 */;
- constant Real r2.x[1] = 1;
- constant Real r2.x[2] = 2;
- constant Real r2.x[3] = 3;
+ constant Real r2.x[1] = 1.0;
+ constant Real r2.x[2] = 2.0;
+ constant Real r2.x[3] = 3.0;
  structural parameter Integer r2.n = 3 /* 3 */;
  constant Real x[1] = 0.0;
  constant Real x[2] = 0.0;
@@ -8169,10 +8160,10 @@ equation
 fclass ArrayTests.Other.ArraySimplify1
  Real x[1];
  Real x[2];
- constant Real y[1] = 0;
- constant Real y[2] = 0;
- constant Real z[1] = 0;
- constant Real z[2] = 0;
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 0.0;
+ constant Real z[1] = 0.0;
+ constant Real z[2] = 0.0;
 initial equation 
  x[1] = 0.0;
  x[2] = 0.0;

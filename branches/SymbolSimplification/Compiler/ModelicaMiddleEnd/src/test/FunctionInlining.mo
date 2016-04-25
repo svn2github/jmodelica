@@ -4229,10 +4229,10 @@ equation
 fclass FunctionInlining.InputAsIndex4
  Real y;
  discrete Integer i;
- constant Real r[1].x[1] = 1;
- constant Real r[1].x[2] = 2;
- constant Real r[2].x[1] = 3;
- constant Real r[2].x[2] = 4;
+ constant Real r[1].x[1] = 1.0;
+ constant Real r[1].x[2] = 2.0;
+ constant Real r[2].x[1] = 3.0;
+ constant Real r[2].x[2] = 4.0;
 initial equation 
  pre(i) = 0;
 equation

@@ -1260,8 +1260,8 @@ model FixedFalseIndex1
 fclass CheckTests.FixedFalseIndex1
  parameter Integer p(fixed = false);
  parameter Real xp(fixed = false);
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
 initial equation 
  p = 1;
  xp = ({1.0, 2.0})[p];

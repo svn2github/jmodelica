@@ -5103,14 +5103,14 @@ end FunctionTests.ArrayExpInFunc20;
             inline_functions="none",
             flatModel="
 fclass FunctionTests.ArrayExpInFunc20
- constant Real ae[1,1] = 1;
- constant Real ae[1,2] = 2;
- constant Real ae[1,3] = 1;
- constant Real ae[1,4] = 2;
- constant Real ae[2,1] = 3;
- constant Real ae[2,2] = 1;
- constant Real ae[2,3] = 2;
- constant Real ae[2,4] = 4;
+ constant Real ae[1,1] = 1.0;
+ constant Real ae[1,2] = 2.0;
+ constant Real ae[1,3] = 1.0;
+ constant Real ae[1,4] = 2.0;
+ constant Real ae[2,1] = 3.0;
+ constant Real ae[2,2] = 1.0;
+ constant Real ae[2,3] = 2.0;
+ constant Real ae[2,4] = 4.0;
 end FunctionTests.ArrayExpInFunc20;
 ")})));
 end ArrayExpInFunc20;
@@ -5798,15 +5798,15 @@ end FunctionTests.ArrayExpInFunc30;
             inline_functions="none",
             flatModel="
 fclass FunctionTests.ArrayExpInFunc30
- constant Real y[1,1,1] = 0;
- constant Real y[1,1,2] = 1;
- constant Real y[1,1,3] = 2;
- constant Real y[1,2,1] = 10;
- constant Real y[1,2,2] = 11;
- constant Real y[1,2,3] = 12;
- constant Real y[1,3,1] = 3;
- constant Real y[1,3,2] = 4;
- constant Real y[1,3,3] = 5;
+ constant Real y[1,1,1] = 0.0;
+ constant Real y[1,1,2] = 1.0;
+ constant Real y[1,1,3] = 2.0;
+ constant Real y[1,2,1] = 10.0;
+ constant Real y[1,2,2] = 11.0;
+ constant Real y[1,2,3] = 12.0;
+ constant Real y[1,3,1] = 3.0;
+ constant Real y[1,3,2] = 4.0;
+ constant Real y[1,3,3] = 5.0;
 end FunctionTests.ArrayExpInFunc30;
 ")})));
 end ArrayExpInFunc30;
@@ -13385,10 +13385,10 @@ fclass FunctionTests.FunctionLike.NumericConversion.Sign2
  constant Real y[1,2] = 1.0;
  constant Real y[2,1] = 1.0;
  constant Real y[2,2] = -1.0;
- constant Real z[1,1] = -1;
- constant Real z[1,2] = 1;
- constant Real z[2,1] = 1;
- constant Real z[2,2] = -1;
+ constant Real z[1,1] = -1.0;
+ constant Real z[1,2] = 1.0;
+ constant Real z[2,1] = 1.0;
+ constant Real z[2,2] = -1.0;
 end FunctionTests.FunctionLike.NumericConversion.Sign2;
 ")})));
 end Sign2;
@@ -14261,7 +14261,7 @@ equation
 			description="Test of the semiLinear() operator.",
 			flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear3
- constant Real x = 0;
+ constant Real x = 0.0;
  Real sa;
  parameter Real p1(fixed = false);
  parameter Real p2 = 2 /* 2 */;
@@ -14520,10 +14520,8 @@ model NoEventArray1
 			description="noEvent() for Real array",
 			flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventArray1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real y[1] = 1.0;
- constant Real y[2] = 2.0;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
 end FunctionTests.FunctionLike.EventRel.NoEventArray1;
 ")})));
 end NoEventArray1;
@@ -14564,10 +14562,8 @@ model NoEventRecord1
 			description="",
 			flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventRecord1
- constant Real x.a = 1;
- constant Real x.b = 2;
- constant Real y.a = 1.0;
- constant Real y.b = 2.0;
+ constant Real x.a = 1.0;
+ constant Real x.b = 2.0;
 end FunctionTests.FunctionLike.EventRel.NoEventRecord1;
 ")})));
 end NoEventRecord1;

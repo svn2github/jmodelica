@@ -645,7 +645,7 @@ end Differentiation.Expressions.MaxExp;
                 description="Test of index reduction. Homotopy expression.",
                 flatModel="
 fclass Differentiation.Expressions.Homotopy
- constant Real x1 = 0;
+ constant Real x1 = 0.0;
  Real x2;
 initial equation 
  x2 = 0.0;
@@ -1142,7 +1142,7 @@ fclass Differentiation.DerivativeAnnotation.Test2
  parameter Real A[2,1] = 3 /* 3 */;
  parameter Real A[2,2] = 4 /* 4 */;
  Real x1[1];
- constant Real x1[2] = 0;
+ constant Real x1[2] = 0.0;
  Real x2[1];
  Real x2[2];
  Real _der_x1[1];
@@ -1212,7 +1212,7 @@ end Differentiation.DerivativeAnnotation.Test2;
                 flatModel="
 fclass Differentiation.DerivativeAnnotation.Test3
  Real x1[1];
- constant Real x1[2] = 0;
+ constant Real x1[2] = 0.0;
  Real x2[1];
  Real x2[2];
  Real _der_x1[1];

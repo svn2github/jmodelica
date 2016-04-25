@@ -97,14 +97,14 @@ fclass InnerOuterTests.InnerOuterTest2
  Real i.TI;
  Real i.e.TI;
  Real i.e.f.TI;
- constant Real i.e.f.g.TI = 5;
+ constant Real i.e.f.g.TI = 5.0;
  Real i.e.f.g.h.a.x;
- constant Real i.e.f.g.h.a.b.TI = 1;
- constant Real i.e.f.g.h.a.b.c.TI = 2;
+ constant Real i.e.f.g.h.a.b.TI = 1.0;
+ constant Real i.e.f.g.h.a.b.c.TI = 2.0;
  Real i.e.f.g.h.a.b.c.d.x;
  Real i.a.x;
- constant Real i.a.b.TI = 1;
- constant Real i.a.b.c.TI = 2;
+ constant Real i.a.b.TI = 1.0;
+ constant Real i.a.b.c.TI = 2.0;
  Real i.a.b.c.d.x;
 equation
  i.TI = 2 * time;
@@ -269,10 +269,10 @@ model InnerOuterTest7
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest7
- constant Real d.a.x = 6;
- constant Real d.a.y = 9;
- constant Real d.c.a.x = 6;
- constant Real d.c.a.y = 9;
+ constant Real d.a.x = 6.0;
+ constant Real d.a.y = 9.0;
+ constant Real d.c.a.x = 6.0;
+ constant Real d.c.a.y = 9.0;
  constant Real d.c.z = 6.0;
 end InnerOuterTests.InnerOuterTest7;
 ")})));
@@ -309,8 +309,8 @@ model InnerOuterTest8
 			eliminate_alias_variables=false,
 			flatModel="
 fclass InnerOuterTests.InnerOuterTest8
- constant Real d.c.a.x = 6;
- constant Real d.c.a.y = 9;
+ constant Real d.c.a.x = 6.0;
+ constant Real d.c.a.y = 9.0;
  constant Real d.c.z = 6.0;
 end InnerOuterTests.InnerOuterTest8;
 ")})));

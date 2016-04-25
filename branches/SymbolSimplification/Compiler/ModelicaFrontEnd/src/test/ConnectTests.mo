@@ -2677,7 +2677,7 @@ fclass ConnectTests.StreamTest6
  Real x[1];
  Real x[2];
  Real a[1].a;
- constant Real a[1].b = 0;
+ constant Real a[1].b = 0.0;
  Real a[1].c;
  Real a[2].a;
  Real a[2].c;
@@ -2752,7 +2752,7 @@ equation
             flatModel="
 fclass ConnectTests.Cardinality2
  Real x.a;
- constant Real x.b = 1;
+ constant Real x.b = 1.0;
 equation
  x.a = 2 * time;
 end ConnectTests.Cardinality2;
@@ -2893,7 +2893,7 @@ equation
 fclass ConnectTests.Cardinality7
  structural parameter Integer n = 2 /* 2 */;
  Real x[1];
- constant Real x[2] = 0;
+ constant Real x[2] = 0.0;
  Real y[2];
 equation
  x[1] = time;

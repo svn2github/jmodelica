@@ -36,7 +36,7 @@ package TransformCanonicalTests
 fclass TransformCanonicalTests.TransformCanonicalTest1
  Real x(start = 1,fixed = true);
  Real y(start = 3,fixed = true);
- constant Real w(start = 1) = 2;
+ constant Real w(start = 1) = 2.0;
  Real v;
 initial equation 
  x = 1;
@@ -221,8 +221,8 @@ end TransformCanonicalTests.TransformCanonicalTest6;
 fclass TransformCanonicalTests.TransformCanonicalTest7
  structural parameter Integer p1 = 2 /* 2 */;
  structural parameter Integer p2 = 2 /* 2 */;
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Real y = 2.0;
 end TransformCanonicalTests.TransformCanonicalTest7;
 ")})));
@@ -1159,7 +1159,7 @@ equation
 fclass TransformCanonicalTests.AliasTest30
  parameter Boolean f = true /* true */;
  parameter Real x(start = 3,fixed = true);
- constant Real y = -0.0;
+ constant Real y = 0.0;
  parameter Real p = 5 /* 5 */;
 parameter equation
  x = p;
@@ -1859,7 +1859,7 @@ equation
             flatModel="
 fclass TransformCanonicalTests.AliasPropNegSecondRound1
  Real x(stateSelect = StateSelect.always,max = - ymin);
- constant Real z = 1;
+ constant Real z = 1.0;
  parameter Real ymin = 2 /* 2 */;
 initial equation 
  x = 0.0;
@@ -2167,7 +2167,7 @@ end TransformCanonicalTests.InitialEqTest1;
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
- constant Real v1 = 1;
+ constant Real v1 = 1.0;
  Real v3;
  Real v4;
  Real v5;
@@ -2345,8 +2345,8 @@ end TransformCanonicalTests.InitialEqTest6;
 			description="Test algorithm for adding additional initial equations.",
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest7
- constant Real x = 1;
- constant Real y = 2;
+ constant Real x = 1.0;
+ constant Real y = 2.0;
 end TransformCanonicalTests.InitialEqTest7;
 ")})));
   end InitialEqTest7;
@@ -2735,7 +2735,7 @@ equation
 			flatModel="
 fclass TransformCanonicalTests.InitialEqTest16
  structural parameter Boolean a = false /* false */;
- constant Real b(start = 1) = 1;
+ constant Real b(start = 1) = 1.0;
 end TransformCanonicalTests.InitialEqTest16;
 ")})));
 end InitialEqTest16;
@@ -4077,9 +4077,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu2
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
 end TransformCanonicalTests.IfEqu2;
 ")})));
 end IfEqu2;
@@ -4102,9 +4102,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu3
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ constant Real x[1] = 4.0;
+ constant Real x[2] = 5.0;
+ constant Real x[3] = 6.0;
 end TransformCanonicalTests.IfEqu3;
 ")})));
 end IfEqu3;
@@ -4127,9 +4127,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu4
- constant Real x[1] = 7;
- constant Real x[2] = 8;
- constant Real x[3] = 9;
+ constant Real x[1] = 7.0;
+ constant Real x[2] = 8.0;
+ constant Real x[3] = 9.0;
 end TransformCanonicalTests.IfEqu4;
 ")})));
 end IfEqu4;
@@ -4150,9 +4150,9 @@ equation
 			description="If equations: branch elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu5
- constant Real x[1] = 7;
- constant Real x[2] = 8;
- constant Real x[3] = 9;
+ constant Real x[1] = 7.0;
+ constant Real x[2] = 8.0;
+ constant Real x[3] = 9.0;
 end TransformCanonicalTests.IfEqu5;
 ")})));
 end IfEqu5;
@@ -4176,9 +4176,9 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu6
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ constant Real x[1] = 4.0;
+ constant Real x[2] = 5.0;
+ constant Real x[3] = 6.0;
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu6;
@@ -4204,9 +4204,9 @@ equation
 			description="If equations: scalarization without elimination",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu7
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ constant Real x[1] = 4.0;
+ constant Real x[2] = 5.0;
+ constant Real x[3] = 6.0;
  constant Boolean y[1] = false;
  constant Boolean y[2] = true;
 end TransformCanonicalTests.IfEqu7;
@@ -4233,9 +4233,9 @@ equation
 			description="If equations: branch elimination with parameter test expressions",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu8
- constant Real x[1] = 4;
- constant Real x[2] = 5;
- constant Real x[3] = 6;
+ constant Real x[1] = 4.0;
+ constant Real x[2] = 5.0;
+ constant Real x[3] = 6.0;
  structural parameter Boolean y[1] = false /* false */;
  structural parameter Boolean y[2] = true /* true */;
 end TransformCanonicalTests.IfEqu8;
@@ -4263,8 +4263,8 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu9
- constant Real x[1] = 3;
- constant Real x[2] = 4;
+ constant Real x[1] = 3.0;
+ constant Real x[2] = 4.0;
  constant Boolean y = true;
 end TransformCanonicalTests.IfEqu9;
 ")})));
@@ -4291,8 +4291,8 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu10
- constant Real x[1] = 3;
- constant Real x[2] = 4;
+ constant Real x[1] = 3.0;
+ constant Real x[2] = 4.0;
  constant Boolean y = true;
 end TransformCanonicalTests.IfEqu10;
 ")})));
@@ -4319,8 +4319,8 @@ equation
 			description="If equations: branch elimination with one test non-parameter",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu11
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Boolean y = true;
 end TransformCanonicalTests.IfEqu11;
 ")})));
@@ -4528,8 +4528,8 @@ end TransformCanonicalTests.IfEqu16;
 			description="Check that if equations with function call equations are eliminated",
 			flatModel="
 fclass TransformCanonicalTests.IfEqu17
- constant Real y1 = 1;
- constant Real y2 = 2;
+ constant Real y1 = 1.0;
+ constant Real y2 = 2.0;
  structural parameter Boolean p = false /* false */;
 end TransformCanonicalTests.IfEqu17;
 ")})));
@@ -5515,7 +5515,7 @@ der(x) := (- x) / (-1.0 + 1.0 + -1.0)
             description="Test bug found in solution framework",
             flatModel="
 fclass TransformCanonicalTests.SolveEqTest9
- constant Real x = 0;
+ constant Real x = 0.0;
 end TransformCanonicalTests.SolveEqTest9;
 ")})));
   end SolveEqTest9;

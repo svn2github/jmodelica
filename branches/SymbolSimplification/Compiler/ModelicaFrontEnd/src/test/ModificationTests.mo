@@ -530,12 +530,12 @@ model ArrayModifications1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications1
- constant Real a[1](start = 3) = 0;
- constant Real a[2](start = 3) = 0;
- constant Real a[3](start = 3) = 0;
- constant Real b[1](start = 1) = 0;
- constant Real b[2](start = 2) = 0;
- constant Real b[3](start = 3) = 0;
+ constant Real a[1](start = 3) = 0.0;
+ constant Real a[2](start = 3) = 0.0;
+ constant Real a[3](start = 3) = 0.0;
+ constant Real b[1](start = 1) = 0.0;
+ constant Real b[2](start = 2) = 0.0;
+ constant Real b[3](start = 3) = 0.0;
 end ModificationTests.ArrayModifications1;
 ")})));
 end ArrayModifications1;
@@ -604,18 +604,18 @@ model ArrayModifications5
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications5
- constant Real b[1].x[1] = 1;
- constant Real b[1].x[2] = 2;
- constant Real b[1].x[3] = 3;
- constant Real b[1].y[1] = 10;
- constant Real b[1].y[2] = 20;
- constant Real b[1].y[3] = 30;
- constant Real b[2].x[1] = 4;
- constant Real b[2].x[2] = 5;
- constant Real b[2].x[3] = 6;
- constant Real b[2].y[1] = 10;
- constant Real b[2].y[2] = 20;
- constant Real b[2].y[3] = 30;
+ constant Real b[1].x[1] = 1.0;
+ constant Real b[1].x[2] = 2.0;
+ constant Real b[1].x[3] = 3.0;
+ constant Real b[1].y[1] = 10.0;
+ constant Real b[1].y[2] = 20.0;
+ constant Real b[1].y[3] = 30.0;
+ constant Real b[2].x[1] = 4.0;
+ constant Real b[2].x[2] = 5.0;
+ constant Real b[2].x[3] = 6.0;
+ constant Real b[2].y[1] = 10.0;
+ constant Real b[2].y[2] = 20.0;
+ constant Real b[2].y[3] = 30.0;
 end ModificationTests.ArrayModifications5;
 ")})));
 end ArrayModifications5;
@@ -680,18 +680,18 @@ model ArrayModifications8
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications8
- constant Real x[1].y[1].x[1] = 1;
- constant Real x[1].y[1].x[2] = 2;
- constant Real x[1].y[2].x[1] = 1;
- constant Real x[1].y[2].x[2] = 2;
- constant Real x[1].x[1] = 10;
- constant Real x[1].x[2] = 20;
- constant Real x[2].y[1].x[1] = 1;
- constant Real x[2].y[1].x[2] = 2;
- constant Real x[2].y[2].x[1] = 1;
- constant Real x[2].y[2].x[2] = 2;
- constant Real x[2].x[1] = 30;
- constant Real x[2].x[2] = 40;
+ constant Real x[1].y[1].x[1] = 1.0;
+ constant Real x[1].y[1].x[2] = 2.0;
+ constant Real x[1].y[2].x[1] = 1.0;
+ constant Real x[1].y[2].x[2] = 2.0;
+ constant Real x[1].x[1] = 10.0;
+ constant Real x[1].x[2] = 20.0;
+ constant Real x[2].y[1].x[1] = 1.0;
+ constant Real x[2].y[1].x[2] = 2.0;
+ constant Real x[2].y[2].x[1] = 1.0;
+ constant Real x[2].y[2].x[2] = 2.0;
+ constant Real x[2].x[1] = 30.0;
+ constant Real x[2].x[2] = 40.0;
 end ModificationTests.ArrayModifications8;
 ")})));
 end ArrayModifications8;
@@ -716,18 +716,18 @@ model ArrayModifications9
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications9
- constant Real x[1].y[1].x[1](start = 1) = 0;
- constant Real x[1].y[1].x[2](start = 1) = 0;
- constant Real x[1].y[2].x[1](start = 1) = 0;
- constant Real x[1].y[2].x[2](start = 1) = 0;
- constant Real x[1].x[1](start = 10) = 0;
- constant Real x[1].x[2](start = 20) = 0;
- constant Real x[2].y[1].x[1](start = 1) = 0;
- constant Real x[2].y[1].x[2](start = 1) = 0;
- constant Real x[2].y[2].x[1](start = 1) = 0;
- constant Real x[2].y[2].x[2](start = 1) = 0;
- constant Real x[2].x[1](start = 30) = 0;
- constant Real x[2].x[2](start = 40) = 0;
+ constant Real x[1].y[1].x[1](start = 1) = 0.0;
+ constant Real x[1].y[1].x[2](start = 1) = 0.0;
+ constant Real x[1].y[2].x[1](start = 1) = 0.0;
+ constant Real x[1].y[2].x[2](start = 1) = 0.0;
+ constant Real x[1].x[1](start = 10) = 0.0;
+ constant Real x[1].x[2](start = 20) = 0.0;
+ constant Real x[2].y[1].x[1](start = 1) = 0.0;
+ constant Real x[2].y[1].x[2](start = 1) = 0.0;
+ constant Real x[2].y[2].x[1](start = 1) = 0.0;
+ constant Real x[2].y[2].x[2](start = 1) = 0.0;
+ constant Real x[2].x[1](start = 30) = 0.0;
+ constant Real x[2].x[2](start = 40) = 0.0;
 end ModificationTests.ArrayModifications9;
 ")})));
 end ArrayModifications9;
@@ -750,18 +750,18 @@ model ArrayModifications10
 			description="Modifications to arrays: arrays of composites: 3 levels deep, literal modifier on outer",
 			flatModel="
 fclass ModificationTests.ArrayModifications10
- constant Real x[1].y[1].z[1] = 1;
- constant Real x[1].y[1].z[2] = 2;
- constant Real x[1].y[1].z[3] = 3;
- constant Real x[1].y[2].z[1] = 4;
- constant Real x[1].y[2].z[2] = 5;
- constant Real x[1].y[2].z[3] = 6;
- constant Real x[2].y[1].z[1] = 7;
- constant Real x[2].y[1].z[2] = 8;
- constant Real x[2].y[1].z[3] = 9;
- constant Real x[2].y[2].z[1] = 10;
- constant Real x[2].y[2].z[2] = 11;
- constant Real x[2].y[2].z[3] = 12;
+ constant Real x[1].y[1].z[1] = 1.0;
+ constant Real x[1].y[1].z[2] = 2.0;
+ constant Real x[1].y[1].z[3] = 3.0;
+ constant Real x[1].y[2].z[1] = 4.0;
+ constant Real x[1].y[2].z[2] = 5.0;
+ constant Real x[1].y[2].z[3] = 6.0;
+ constant Real x[2].y[1].z[1] = 7.0;
+ constant Real x[2].y[1].z[2] = 8.0;
+ constant Real x[2].y[1].z[3] = 9.0;
+ constant Real x[2].y[2].z[1] = 10.0;
+ constant Real x[2].y[2].z[2] = 11.0;
+ constant Real x[2].y[2].z[3] = 12.0;
 end ModificationTests.ArrayModifications10;
 ")})));
 end ArrayModifications10;
@@ -785,18 +785,18 @@ model ArrayModifications11
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications11
- constant Real x[1].y[1].z[1](start = 1) = 0;
- constant Real x[1].y[1].z[2](start = 2) = 0;
- constant Real x[1].y[1].z[3](start = 3) = 0;
- constant Real x[1].y[2].z[1](start = 4) = 0;
- constant Real x[1].y[2].z[2](start = 5) = 0;
- constant Real x[1].y[2].z[3](start = 6) = 0;
- constant Real x[2].y[1].z[1](start = 7) = 0;
- constant Real x[2].y[1].z[2](start = 8) = 0;
- constant Real x[2].y[1].z[3](start = 9) = 0;
- constant Real x[2].y[2].z[1](start = 10) = 0;
- constant Real x[2].y[2].z[2](start = 11) = 0;
- constant Real x[2].y[2].z[3](start = 12) = 0;
+ constant Real x[1].y[1].z[1](start = 1) = 0.0;
+ constant Real x[1].y[1].z[2](start = 2) = 0.0;
+ constant Real x[1].y[1].z[3](start = 3) = 0.0;
+ constant Real x[1].y[2].z[1](start = 4) = 0.0;
+ constant Real x[1].y[2].z[2](start = 5) = 0.0;
+ constant Real x[1].y[2].z[3](start = 6) = 0.0;
+ constant Real x[2].y[1].z[1](start = 7) = 0.0;
+ constant Real x[2].y[1].z[2](start = 8) = 0.0;
+ constant Real x[2].y[1].z[3](start = 9) = 0.0;
+ constant Real x[2].y[2].z[1](start = 10) = 0.0;
+ constant Real x[2].y[2].z[2](start = 11) = 0.0;
+ constant Real x[2].y[2].z[3](start = 12) = 0.0;
 end ModificationTests.ArrayModifications11;
 ")})));
 end ArrayModifications11;
@@ -850,18 +850,18 @@ model ArrayModifications13
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications13
- constant Real xa[1].yb[1].zc[1](start = 1.0) = 0;
- constant Real xa[1].yb[1].zc[2](start = 2.0) = 0;
- constant Real xa[1].yb[1].zc[3](start = 3.0) = 0;
- constant Real xa[1].yb[2].zc[1](start = 4.0) = 0;
- constant Real xa[1].yb[2].zc[2](start = 5.0) = 0;
- constant Real xa[1].yb[2].zc[3](start = 6.0) = 0;
- constant Real xa[2].yb[1].zc[1](start = 7.0) = 0;
- constant Real xa[2].yb[1].zc[2](start = 8.0) = 0;
- constant Real xa[2].yb[1].zc[3](start = 9.0) = 0;
- constant Real xa[2].yb[2].zc[1](start = 10.0) = 0;
- constant Real xa[2].yb[2].zc[2](start = 11.0) = 0;
- constant Real xa[2].yb[2].zc[3](start = 12.0) = 0;
+ constant Real xa[1].yb[1].zc[1](start = 1.0) = 0.0;
+ constant Real xa[1].yb[1].zc[2](start = 2.0) = 0.0;
+ constant Real xa[1].yb[1].zc[3](start = 3.0) = 0.0;
+ constant Real xa[1].yb[2].zc[1](start = 4.0) = 0.0;
+ constant Real xa[1].yb[2].zc[2](start = 5.0) = 0.0;
+ constant Real xa[1].yb[2].zc[3](start = 6.0) = 0.0;
+ constant Real xa[2].yb[1].zc[1](start = 7.0) = 0.0;
+ constant Real xa[2].yb[1].zc[2](start = 8.0) = 0.0;
+ constant Real xa[2].yb[1].zc[3](start = 9.0) = 0.0;
+ constant Real xa[2].yb[2].zc[1](start = 10.0) = 0.0;
+ constant Real xa[2].yb[2].zc[2](start = 11.0) = 0.0;
+ constant Real xa[2].yb[2].zc[3](start = 12.0) = 0.0;
  constant Real za[1,1,1] = 1;
  constant Real za[1,1,2] = 2;
  constant Real za[1,1,3] = 3;
@@ -892,10 +892,10 @@ model ArrayModifications14
 			description="Modifications to arrays: arrays of composites: array expression modifier on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications14
- constant Real x[1].yb[1] = 70;
- constant Real x[1].yb[2] = 100;
- constant Real x[2].yb[1] = 150;
- constant Real x[2].yb[2] = 220;
+ constant Real x[1].yb[1] = 70.0;
+ constant Real x[1].yb[2] = 100.0;
+ constant Real x[2].yb[1] = 150.0;
+ constant Real x[2].yb[2] = 220.0;
 end ModificationTests.ArrayModifications14;
 ")})));
 end ArrayModifications14;
@@ -920,14 +920,14 @@ fclass ModificationTests.ArrayModifications15
  constant Real x[1].yb[2] = 100.0;
  constant Real x[2].yb[1] = 150.0;
  constant Real x[2].yb[2] = 220.0;
- constant Real y[1,1] = 1;
- constant Real y[1,2] = 2;
- constant Real y[2,1] = 3;
- constant Real y[2,2] = 4;
- constant Real z[1,1] = 10;
- constant Real z[1,2] = 20;
- constant Real z[2,1] = 30;
- constant Real z[2,2] = 40;
+ constant Real y[1,1] = 1.0;
+ constant Real y[1,2] = 2.0;
+ constant Real y[2,1] = 3.0;
+ constant Real y[2,2] = 4.0;
+ constant Real z[1,1] = 10.0;
+ constant Real z[1,2] = 20.0;
+ constant Real z[2,1] = 30.0;
+ constant Real z[2,2] = 40.0;
 end ModificationTests.ArrayModifications15;
 ")})));
 end ArrayModifications15;
@@ -1208,18 +1208,7 @@ fclass ModificationTests.ArrayModifications26
  constant Real x2[2,1] = 11.0;
  constant Real x2[2,2] = 12.0;
  constant Real x2[2,3] = 13.0;
- constant Real y[1,1,1] = 1;
- constant Real y[1,1,2] = 2;
- constant Real y[1,1,3] = 3;
- constant Real y[1,2,1] = 4;
- constant Real y[1,2,2] = 5;
- constant Real y[1,2,3] = 6;
- constant Real y[2,1,1] = 7;
- constant Real y[2,1,2] = 8;
- constant Real y[2,1,3] = 9;
- constant Real y[2,2,1] = 10;
- constant Real y[2,2,2] = 11;
- constant Real y[2,2,3] = 12;
+ constant Real y[1,1,1] = 1.0;
 end ModificationTests.ArrayModifications26;
 ")})));
 end ArrayModifications26;
@@ -1238,10 +1227,10 @@ model ArrayModifications27
 			description="Modifications to arrays: arrays of composites: array expression attribute on outer level",
 			flatModel="
 fclass ModificationTests.ArrayModifications27
- constant Real x[1].yb[1](start = 70) = 1;
- constant Real x[1].yb[2](start = 100) = 2;
- constant Real x[2].yb[1](start = 150) = 3;
- constant Real x[2].yb[2](start = 220) = 4;
+ constant Real x[1].yb[1](start = 70) = 1.0;
+ constant Real x[1].yb[2](start = 100) = 2.0;
+ constant Real x[2].yb[1](start = 150) = 3.0;
+ constant Real x[2].yb[2](start = 220) = 4.0;
 end ModificationTests.ArrayModifications27;
 ")})));
 end ArrayModifications27;
@@ -1263,10 +1252,10 @@ model ArrayModifications28
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications28
- constant Real x[1].yb[1](start = 70.0) = 1;
- constant Real x[1].yb[2](start = 100.0) = 2;
- constant Real x[2].yb[1](start = 150.0) = 3;
- constant Real x[2].yb[2](start = 220.0) = 4;
+ constant Real x[1].yb[1](start = 70.0) = 1.0;
+ constant Real x[1].yb[2](start = 100.0) = 2.0;
+ constant Real x[2].yb[1](start = 150.0) = 3.0;
+ constant Real x[2].yb[2](start = 220.0) = 4.0;
  constant Real y[1,1] = 1;
  constant Real y[1,2] = 2;
  constant Real y[2,1] = 3;
@@ -1340,14 +1329,14 @@ model ArrayModifications31
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications31
- constant Real x[1].y[1].x[1] = 1;
- constant Real x[1].y[1].x[2] = 2;
- constant Real x[1].y[2].x[1] = 1;
- constant Real x[1].y[2].x[2] = 2;
- constant Real x[2].y[1].x[1] = 1;
- constant Real x[2].y[1].x[2] = 2;
- constant Real x[2].y[2].x[1] = 1;
- constant Real x[2].y[2].x[2] = 2;
+ constant Real x[1].y[1].x[1] = 1.0;
+ constant Real x[1].y[1].x[2] = 2.0;
+ constant Real x[1].y[2].x[1] = 1.0;
+ constant Real x[1].y[2].x[2] = 2.0;
+ constant Real x[2].y[1].x[1] = 1.0;
+ constant Real x[2].y[1].x[2] = 2.0;
+ constant Real x[2].y[2].x[1] = 1.0;
+ constant Real x[2].y[2].x[2] = 2.0;
 end ModificationTests.ArrayModifications31;
 ")})));
 end ArrayModifications31;
@@ -1371,14 +1360,14 @@ model ArrayModifications32
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications32
- constant Real x[1].y[1].x[1](start = 1) = 3;
- constant Real x[1].y[1].x[2](start = 2) = 4;
- constant Real x[1].y[2].x[1](start = 1) = 3;
- constant Real x[1].y[2].x[2](start = 2) = 4;
- constant Real x[2].y[1].x[1](start = 1) = 3;
- constant Real x[2].y[1].x[2](start = 2) = 4;
- constant Real x[2].y[2].x[1](start = 1) = 3;
- constant Real x[2].y[2].x[2](start = 2) = 4;
+ constant Real x[1].y[1].x[1](start = 1) = 3.0;
+ constant Real x[1].y[1].x[2](start = 2) = 4.0;
+ constant Real x[1].y[2].x[1](start = 1) = 3.0;
+ constant Real x[1].y[2].x[2](start = 2) = 4.0;
+ constant Real x[2].y[1].x[1](start = 1) = 3.0;
+ constant Real x[2].y[1].x[2](start = 2) = 4.0;
+ constant Real x[2].y[2].x[1](start = 1) = 3.0;
+ constant Real x[2].y[2].x[2](start = 2) = 4.0;
 end ModificationTests.ArrayModifications32;
 ")})));
 end ArrayModifications32;
@@ -1402,14 +1391,14 @@ model ArrayModifications33
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications33
- constant Real x[1].y[1].x[1] = 1;
- constant Real x[1].y[1].x[2] = 2;
- constant Real x[1].y[2].x[1] = 3;
- constant Real x[1].y[2].x[2] = 4;
- constant Real x[2].y[1].x[1] = 1;
- constant Real x[2].y[1].x[2] = 2;
- constant Real x[2].y[2].x[1] = 3;
- constant Real x[2].y[2].x[2] = 4;
+ constant Real x[1].y[1].x[1] = 1.0;
+ constant Real x[1].y[1].x[2] = 2.0;
+ constant Real x[1].y[2].x[1] = 3.0;
+ constant Real x[1].y[2].x[2] = 4.0;
+ constant Real x[2].y[1].x[1] = 1.0;
+ constant Real x[2].y[1].x[2] = 2.0;
+ constant Real x[2].y[2].x[1] = 3.0;
+ constant Real x[2].y[2].x[2] = 4.0;
 end ModificationTests.ArrayModifications33;
 ")})));
 end ArrayModifications33;
@@ -1433,14 +1422,14 @@ model ArrayModifications34
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications34
- constant Real x[1].y[1].x[1](start = 1) = 3;
- constant Real x[1].y[1].x[2](start = 2) = 4;
- constant Real x[1].y[2].x[1](start = 3) = 3;
- constant Real x[1].y[2].x[2](start = 4) = 4;
- constant Real x[2].y[1].x[1](start = 1) = 3;
- constant Real x[2].y[1].x[2](start = 2) = 4;
- constant Real x[2].y[2].x[1](start = 3) = 3;
- constant Real x[2].y[2].x[2](start = 4) = 4;
+ constant Real x[1].y[1].x[1](start = 1) = 3.0;
+ constant Real x[1].y[1].x[2](start = 2) = 4.0;
+ constant Real x[1].y[2].x[1](start = 3) = 3.0;
+ constant Real x[1].y[2].x[2](start = 4) = 4.0;
+ constant Real x[2].y[1].x[1](start = 1) = 3.0;
+ constant Real x[2].y[1].x[2](start = 2) = 4.0;
+ constant Real x[2].y[2].x[1](start = 3) = 3.0;
+ constant Real x[2].y[2].x[2](start = 4) = 4.0;
 end ModificationTests.ArrayModifications34;
 ")})));
 end ArrayModifications34;
@@ -1522,14 +1511,14 @@ model ArrayModifications37
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.ArrayModifications37
- constant Real x[1].y[1].x[1] = 1;
- constant Real x[1].y[1].x[2] = 2;
- constant Real x[1].y[2].x[1] = 1;
- constant Real x[1].y[2].x[2] = 2;
- constant Real x[2].y[1].x[1] = 1;
- constant Real x[2].y[1].x[2] = 2;
- constant Real x[2].y[2].x[1] = 1;
- constant Real x[2].y[2].x[2] = 2;
+ constant Real x[1].y[1].x[1] = 1.0;
+ constant Real x[1].y[1].x[2] = 2.0;
+ constant Real x[1].y[2].x[1] = 1.0;
+ constant Real x[1].y[2].x[2] = 2.0;
+ constant Real x[2].y[1].x[1] = 1.0;
+ constant Real x[2].y[1].x[2] = 2.0;
+ constant Real x[2].y[2].x[1] = 1.0;
+ constant Real x[2].y[2].x[2] = 2.0;
 end ModificationTests.ArrayModifications37;
 ")})));
 end ArrayModifications37;
@@ -2721,9 +2710,9 @@ model TypeModifications5
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications5
- constant ModificationTests.TypeModifications5.T a[1](min = 1) = 4;
- constant ModificationTests.TypeModifications5.T a[2](min = 2) = 4;
- constant ModificationTests.TypeModifications5.T a[3](min = 3) = 4;
+ constant ModificationTests.TypeModifications5.T a[1](min = 1) = 4.0;
+ constant ModificationTests.TypeModifications5.T a[2](min = 2) = 4.0;
+ constant ModificationTests.TypeModifications5.T a[3](min = 3) = 4.0	;
 
 public
  type ModificationTests.TypeModifications5.T = Real;
@@ -2750,12 +2739,12 @@ model TypeModifications6
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications6
- constant ModificationTests.TypeModifications6.T z.x[1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications6.T z.x[2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications6.T z.x[3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications6.T z.y[1](each min = 0.4) = 1;
- constant ModificationTests.TypeModifications6.T z.y[2](each min = 0.4) = 1;
- constant ModificationTests.TypeModifications6.T z.y[3](each min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.x[1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications6.T z.x[2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications6.T z.x[3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications6.T z.y[1](each min = 0.4) = 1.0;
+ constant ModificationTests.TypeModifications6.T z.y[2](each min = 0.4) = 1.0;
+ constant ModificationTests.TypeModifications6.T z.y[3](each min = 0.4) = 1.0;
 
 public
  type ModificationTests.TypeModifications6.T = Real;
@@ -2777,12 +2766,12 @@ model TypeModifications7
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications7
- constant ModificationTests.TypeModifications7.T x[1,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications7.T x[1,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications7.T x[1,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications7.T x[2,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications7.T x[2,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications7.T x[2,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications7.T x[1,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications7.T x[1,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications7.T x[1,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications7.T x[2,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications7.T x[2,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications7.T x[2,3](min = 0.3) = 1.0;
 
 public
  type ModificationTests.TypeModifications7.T = Real;
@@ -2808,30 +2797,30 @@ model TypeModifications8
             eliminate_alias_variables=false,
 			flatModel="
 fclass ModificationTests.TypeModifications8
- constant ModificationTests.TypeModifications8.T y[1].x[1,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[1].x[1,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[1].x[1,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[1].x[2,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[1].x[2,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[1].x[2,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[1,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[1,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[1,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[2,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[2,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[2].x[2,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[1,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[1,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[1,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[2,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[2,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[3].x[2,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[1,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[1,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[1,3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[2,1](min = 0.1) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[2,2](min = 0.2) = 1;
- constant ModificationTests.TypeModifications8.T y[4].x[2,3](min = 0.3) = 1;
+ constant ModificationTests.TypeModifications8.T y[1].x[1,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[1].x[1,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[1].x[1,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[1].x[2,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[1,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[2].x[2,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[1,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[3].x[2,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[1,3](min = 0.3) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,1](min = 0.1) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,2](min = 0.2) = 1.0;
+ constant ModificationTests.TypeModifications8.T y[4].x[2,3](min = 0.3) = 1.0;
 
 public
  type ModificationTests.TypeModifications8.T = Real;

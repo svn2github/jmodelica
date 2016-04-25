@@ -30,7 +30,7 @@ model SizeExp1
 			description="Size operator: first dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp1
- constant Real x = 2;
+ constant Real x = 2.0;
 end ArrayBuiltins.Size.SizeExp1;
 ")})));
 end SizeExp1;
@@ -45,7 +45,7 @@ model SizeExp2
 			description="Size operator: second dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp2
- constant Real x = 3;
+ constant Real x = 3.0;
 end ArrayBuiltins.Size.SizeExp2;
 ")})));
 end SizeExp2;
@@ -60,7 +60,7 @@ model SizeExp3
 			description="Size operator: without dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp3
- constant Real x[1] = 2;
+ constant Real x[1] = 2.0;
 end ArrayBuiltins.Size.SizeExp3;
 ")})));
 end SizeExp3;
@@ -75,8 +75,8 @@ model SizeExp4
 			description="Size operator: without dim",
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp4
- constant Real x[1] = 2;
- constant Real x[2] = 3;
+ constant Real x[1] = 2.0;
+ constant Real x[2] = 3.0;
 end ArrayBuiltins.Size.SizeExp4;
 ")})));
 end SizeExp4;
@@ -93,7 +93,7 @@ model SizeExp5
 			flatModel="
 fclass ArrayBuiltins.Size.SizeExp5
  structural parameter Integer p = 1 /* 1 */;
- constant Real x = 2;
+ constant Real x = 2.0;
 end ArrayBuiltins.Size.SizeExp5;
 ")})));
 end SizeExp5;
@@ -274,8 +274,8 @@ model FillExp1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp1
- constant Real x[1] = 3;
- constant Real x[2] = 3;
+ constant Real x[1] = 3.0;
+ constant Real x[2] = 3.0;
 end ArrayBuiltins.Fill.FillExp1;
 ")})));
 end FillExp1;
@@ -291,30 +291,30 @@ model FillExp2
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp2
- constant Real x[1,1,1] = 3;
- constant Real x[1,1,2] = 3;
- constant Real x[1,1,3] = 3;
- constant Real x[1,1,4] = 3;
- constant Real x[1,2,1] = 3;
- constant Real x[1,2,2] = 3;
- constant Real x[1,2,3] = 3;
- constant Real x[1,2,4] = 3;
- constant Real x[1,3,1] = 3;
- constant Real x[1,3,2] = 3;
- constant Real x[1,3,3] = 3;
- constant Real x[1,3,4] = 3;
- constant Real x[2,1,1] = 3;
- constant Real x[2,1,2] = 3;
- constant Real x[2,1,3] = 3;
- constant Real x[2,1,4] = 3;
- constant Real x[2,2,1] = 3;
- constant Real x[2,2,2] = 3;
- constant Real x[2,2,3] = 3;
- constant Real x[2,2,4] = 3;
- constant Real x[2,3,1] = 3;
- constant Real x[2,3,2] = 3;
- constant Real x[2,3,3] = 3;
- constant Real x[2,3,4] = 3;
+ constant Real x[1,1,1] = 3.0;
+ constant Real x[1,1,2] = 3.0;
+ constant Real x[1,1,3] = 3.0;
+ constant Real x[1,1,4] = 3.0;
+ constant Real x[1,2,1] = 3.0;
+ constant Real x[1,2,2] = 3.0;
+ constant Real x[1,2,3] = 3.0;
+ constant Real x[1,2,4] = 3.0;
+ constant Real x[1,3,1] = 3.0;
+ constant Real x[1,3,2] = 3.0;
+ constant Real x[1,3,3] = 3.0;
+ constant Real x[1,3,4] = 3.0;
+ constant Real x[2,1,1] = 3.0;
+ constant Real x[2,1,2] = 3.0;
+ constant Real x[2,1,3] = 3.0;
+ constant Real x[2,1,4] = 3.0;
+ constant Real x[2,2,1] = 3.0;
+ constant Real x[2,2,2] = 3.0;
+ constant Real x[2,2,3] = 3.0;
+ constant Real x[2,2,4] = 3.0;
+ constant Real x[2,3,1] = 3.0;
+ constant Real x[2,3,2] = 3.0;
+ constant Real x[2,3,3] = 3.0;
+ constant Real x[2,3,4] = 3.0;
 end ArrayBuiltins.Fill.FillExp2;
 ")})));
 end FillExp2;
@@ -417,12 +417,12 @@ model FillExp8
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Fill.FillExp8
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 1;
- constant Real x[2,2] = 2;
- constant Real x[3,1] = 1;
- constant Real x[3,2] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 1.0;
+ constant Real x[2,2] = 2.0;
+ constant Real x[3,1] = 1.0;
+ constant Real x[3,2] = 2.0;
 end ArrayBuiltins.Fill.FillExp8;
 ")})));
 end FillExp8;
@@ -589,7 +589,7 @@ model MinExp9
 			description="Reduction-expression with min(): basic test",
 			flatModel="
 fclass ArrayBuiltins.Min.MinExp9
- constant Real x = 2;
+ constant Real x = 2.0;
 end ArrayBuiltins.Min.MinExp9;
 ")})));
 end MinExp9;
@@ -966,10 +966,10 @@ fclass ArrayBuiltins.Sum.SumExp6
  constant Real wbar[1] = 3.5;
  constant Real wbar[2] = 7.0;
  constant Real wbar[3] = 11.5;
- constant Real dMdt[1] = 1;
- constant Real dMdt[2] = 2;
- constant Real dMdt[3] = 3;
- constant Real dMdt[4] = 4;
+ constant Real dMdt[1] = 1.0;
+ constant Real dMdt[2] = 2.0;
+ constant Real dMdt[3] = 3.0;
+ constant Real dMdt[4] = 4.0;
 end ArrayBuiltins.Sum.SumExp6;
 ")})));
 end SumExp6;
@@ -1217,10 +1217,10 @@ model Transpose1
 			description="Scalarization of transpose operator: Integer[2,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 3;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 3.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 4.0;
 end ArrayBuiltins.Transpose.Transpose1;
 ")})));
 end Transpose1;
@@ -1235,12 +1235,12 @@ model Transpose2
 			description="Scalarization of transpose operator: Integer[3,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 3;
- constant Real x[1,3] = 5;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 4;
- constant Real x[2,3] = 6;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 3.0;
+ constant Real x[1,3] = 5.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 4.0;
+ constant Real x[2,3] = 6.0;
 end ArrayBuiltins.Transpose.Transpose2;
 ")})));
 end Transpose2;
@@ -1255,8 +1255,8 @@ model Transpose3
 			description="Scalarization of transpose operator: Integer[1,2]",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose3
- constant Real x[1,1] = 1;
- constant Real x[2,1] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[2,1] = 2.0;
 end ArrayBuiltins.Transpose.Transpose3;
 ")})));
 end Transpose3;
@@ -1349,17 +1349,12 @@ model Transpose8
 			description="Scalarization of transpose operator: access to variable",
 			flatModel="
 fclass ArrayBuiltins.Transpose.Transpose8
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
- constant Real x[3,1] = 5;
- constant Real x[3,2] = 6;
- constant Real y[1,1] = 2.0;
- constant Real y[1,2] = 4.0;
- constant Real y[1,3] = 6.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 5.0;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
+ constant Real x[3,1] = 5.0;
+ constant Real x[3,2] = 6.0;
  constant Real y[2,3] = 7.0;
 end ArrayBuiltins.Transpose.Transpose8;
 ")})));
@@ -1537,10 +1532,10 @@ model Symmetric1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 4.0;
 end ArrayBuiltins.Symmetric.Symmetric1;
 ")})));
 end Symmetric1;
@@ -1556,15 +1551,15 @@ model Symmetric2
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric2
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[1,3] = 3;
- constant Real x[2,1] = 2;
- constant Real x[2,2] = 5;
- constant Real x[2,3] = 6;
- constant Real x[3,1] = 3;
- constant Real x[3,2] = 6;
- constant Real x[3,3] = 9;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[1,3] = 3.0;
+ constant Real x[2,1] = 2.0;
+ constant Real x[2,2] = 5.0;
+ constant Real x[2,3] = 6.0;
+ constant Real x[3,1] = 3.0;
+ constant Real x[3,2] = 6.0;
+ constant Real x[3,3] = 9.0;
 end ArrayBuiltins.Symmetric.Symmetric2;
 ")})));
 end Symmetric2;
@@ -1579,7 +1574,7 @@ model Symmetric3
 			description="Scalarization of symmetric operator: Integer[1,1]",
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric3
- constant Real x[1,1] = 3;
+ constant Real x[1,1] = 3.0;
 end ArrayBuiltins.Symmetric.Symmetric3;
 ")})));
 end Symmetric3;
@@ -1682,10 +1677,10 @@ model Symmetric8
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Symmetric.Symmetric8
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
  constant Real y[1,1] = 2.0;
  constant Real y[1,2] = 3.0;
  constant Real y[2,1] = 3.0;
@@ -1707,9 +1702,8 @@ model Cross1
 			description="cross() operator: Real result",
 			flatModel="
 fclass ArrayBuiltins.Cross.Cross1
- constant Real x[1] = -3;
+ constant Real x[1] = -3.0;
  constant Real x[2] = 6.0;
- constant Real x[3] = -3.0;
 end ArrayBuiltins.Cross.Cross1;
 ")})));
 end Cross1; 
@@ -1855,18 +1849,18 @@ model Skew1
 			eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Skew.Skew1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
- constant Real y[1,1] = 0;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
+ constant Real y[1,1] = 0.0;
  constant Real y[1,2] = -3.0;
  constant Real y[1,3] = 2.0;
  constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 0;
+ constant Real y[2,2] = 0.0;
  constant Real y[2,3] = -1.0;
  constant Real y[3,1] = -2.0;
  constant Real y[3,2] = 1.0;
- constant Real y[3,3] = 0;
+ constant Real y[3,3] = 0.0;
 end ArrayBuiltins.Skew.Skew1;
 ")})));
 end Skew1;
@@ -1911,11 +1905,11 @@ model OuterProduct1
 			flatModel="
 fclass ArrayBuiltins.OuterProduct.OuterProduct1
  constant Real x[1,1] = 4.0;
- constant Real x[1,2] = 5;
+ constant Real x[1,2] = 5.0;
  constant Real x[2,1] = 8.0;
- constant Real x[2,2] = 10;
+ constant Real x[2,2] = 10.0;
  constant Real x[3,1] = 12.0;
- constant Real x[3,2] = 15;
+ constant Real x[3,2] = 15.0;
 end ArrayBuiltins.OuterProduct.OuterProduct1;
 ")})));
 end OuterProduct1; 
@@ -2043,16 +2037,16 @@ model ArrayCat1
 			description="cat() operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[2,1] = 3;
- constant Real x[2,2] = 4;
- constant Real x[3,1] = 5;
- constant Real x[3,2] = 6;
- constant Real x[4,1] = 7;
- constant Real x[4,2] = 8;
- constant Real x[5,1] = 9;
- constant Real x[5,2] = 0;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[2,1] = 3.0;
+ constant Real x[2,2] = 4.0;
+ constant Real x[3,1] = 5.0;
+ constant Real x[3,2] = 6.0;
+ constant Real x[4,1] = 7.0;
+ constant Real x[4,2] = 8.0;
+ constant Real x[5,1] = 9.0;
+ constant Real x[5,2] = 0.0;
 end ArrayBuiltins.Cat.ArrayCat1;
 ")})));
 end ArrayCat1;
@@ -2069,14 +2063,14 @@ model ArrayCat2
 fclass ArrayBuiltins.Cat.ArrayCat2
  constant Real x[1,1] = 1.0;
  constant Real x[1,2] = 2.0;
- constant Real x[1,3] = 3;
- constant Real x[1,4] = 4;
- constant Real x[1,5] = 5;
- constant Real x[2,1] = 6;
- constant Real x[2,2] = 7;
- constant Real x[2,3] = 8;
- constant Real x[2,4] = 9;
- constant Real x[2,5] = 0;
+ constant Real x[1,3] = 3.0;
+ constant Real x[1,4] = 4.0;
+ constant Real x[1,5] = 5.0;
+ constant Real x[2,1] = 6.0;
+ constant Real x[2,2] = 7.0;
+ constant Real x[2,3] = 8.0;
+ constant Real x[2,4] = 9.0;
+ constant Real x[2,5] = 0.0;
 end ArrayBuiltins.Cat.ArrayCat2;
 ")})));
 end ArrayCat2;
@@ -2268,12 +2262,12 @@ model ArrayShortCat1
 			description="Shorthand array concatenation operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 2;
- constant Real x[1,3] = 3;
- constant Real x[2,1] = 4;
- constant Real x[2,2] = 5;
- constant Real x[2,3] = 6;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 2.0;
+ constant Real x[1,3] = 3.0;
+ constant Real x[2,1] = 4.0;
+ constant Real x[2,2] = 5.0;
+ constant Real x[2,3] = 6.0;
 end ArrayBuiltins.Cat.ArrayShortCat1;
 ")})));
 end ArrayShortCat1;
@@ -2301,15 +2295,15 @@ fclass ArrayBuiltins.Cat.ArrayShortCat2
  constant Real x[3,1] = 7.0;
  constant Real x[3,2] = 8.0;
  constant Real x[3,3] = 9.0;
- constant Real a = 1;
- constant Real b[1,1] = 2;
- constant Real b[1,2] = 3;
- constant Real c[1] = 4;
- constant Real c[2] = 7;
- constant Real d[1,1] = 5;
- constant Real d[1,2] = 6;
- constant Real d[2,1] = 8;
- constant Real d[2,2] = 9;
+ constant Real a = 1.0;
+ constant Real b[1,1] = 2.0;
+ constant Real b[1,2] = 3.0;
+ constant Real c[1] = 4.0;
+ constant Real c[2] = 7.0;
+ constant Real d[1,1] = 5.0;
+ constant Real d[1,2] = 6.0;
+ constant Real d[2,1] = 8.0;
+ constant Real d[2,2] = 9.0;
 end ArrayBuiltins.Cat.ArrayShortCat2;
 			
 ")})));
@@ -2325,14 +2319,14 @@ model ArrayShortCat3
 			description="Shorthand array concatenation operator: more than 2 dimensions",
 			flatModel="
 fclass ArrayBuiltins.Cat.ArrayShortCat3
- constant Real x[1,1,1,1] = 1;
- constant Real x[1,1,2,1] = 2;
- constant Real x[1,2,1,1] = 3;
- constant Real x[1,2,2,1] = 4;
- constant Real x[2,1,1,1] = 5;
- constant Real x[2,1,2,1] = 6;
- constant Real x[2,2,1,1] = 7;
- constant Real x[2,2,2,1] = 8;
+ constant Real x[1,1,1,1] = 1.0;
+ constant Real x[1,1,2,1] = 2.0;
+ constant Real x[1,2,1,1] = 3.0;
+ constant Real x[1,2,2,1] = 4.0;
+ constant Real x[2,1,1,1] = 5.0;
+ constant Real x[2,1,2,1] = 6.0;
+ constant Real x[2,2,1,1] = 7.0;
+ constant Real x[2,2,2,1] = 8.0;
 end ArrayBuiltins.Cat.ArrayShortCat3;
 ")})));
 end ArrayShortCat3;
@@ -2385,11 +2379,10 @@ model ArrayEnd1
 			description="end operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.End.ArrayEnd1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
- constant Real x[4] = 4;
- constant Real y[1] = 4.0;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
+ constant Real x[4] = 4.0;
  constant Real y[2] = 6.0;
 end ArrayBuiltins.End.ArrayEnd1;
 ")})));
@@ -2429,11 +2422,11 @@ fclass ArrayBuiltins.End.ArrayEnd3
  constant Integer x1[2] = 2;
  constant Integer x1[3] = 3;
  constant Integer x1[4] = 4;
- constant Real x2[1] = 5;
- constant Real x2[2] = 6;
- constant Real x2[3] = 7;
- constant Real x2[4] = 8;
- constant Real x2[5] = 9;
+ constant Real x2[1] = 5.0;
+ constant Real x2[2] = 6.0;
+ constant Real x2[3] = 7.0;
+ constant Real x2[4] = 8.0;
+ constant Real x2[5] = 9.0;
  constant Real y[1] = 7.0;
  constant Real y[2] = 6.0;
 end ArrayBuiltins.End.ArrayEnd3;
@@ -2457,9 +2450,8 @@ model Scalar1
 			description="Scalar operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Scalar1
- constant Real x[1,1,1] = 1;
+ constant Real x[1,1,1] = 1.0;
  constant Real y = 2.0;
- constant Real z = 2;
 end ArrayBuiltins.DimensionConvert.Scalar1;
 ")})));
 end Scalar1;
@@ -2501,9 +2493,8 @@ model Vector1
 			description="Vector operator: scalar arg",
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector1
- constant Real x[1,1,1] = 1;
+ constant Real x[1,1,1] = 1.0;
  constant Real y[1] = 2.0;
- constant Real z[1] = 2;
 end ArrayBuiltins.DimensionConvert.Vector1;
 ")})));
 end Vector1;
@@ -2521,14 +2512,14 @@ model Vector2
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Vector2
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real y[1] = 1;
- constant Real y[2] = 2;
- constant Real z[1] = 1;
- constant Real z[2] = 2;
- constant Real w[1] = 1;
- constant Real w[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
+ constant Real z[1] = 1.0;
+ constant Real z[2] = 2.0;
+ constant Real w[1] = 1.0;
+ constant Real w[2] = 2.0;
 end ArrayBuiltins.DimensionConvert.Vector2;
 ")})));
 end Vector2;
@@ -2570,17 +2561,17 @@ model Matrix1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.DimensionConvert.Matrix1
- constant Real x[1,1] = 1;
- constant Real y[1,1] = 1;
- constant Real y[2,1] = 2;
- constant Real z[1,1] = 1;
- constant Real z[1,2] = 2;
- constant Real z[2,1] = 3;
- constant Real z[2,2] = 4;
- constant Real w[1,1] = 1;
- constant Real w[1,2] = 2;
- constant Real w[2,1] = 3;
- constant Real w[2,2] = 4;
+ constant Real x[1,1] = 1.0;
+ constant Real y[1,1] = 1.0;
+ constant Real y[2,1] = 2.0;
+ constant Real z[1,1] = 1.0;
+ constant Real z[1,2] = 2.0;
+ constant Real z[2,1] = 3.0;
+ constant Real z[2,2] = 4.0;
+ constant Real w[1,1] = 1.0;
+ constant Real w[1,2] = 2.0;
+ constant Real w[2,1] = 3.0;
+ constant Real w[2,2] = 4.0;
 end ArrayBuiltins.DimensionConvert.Matrix1;
 ")})));
 end Matrix1;
@@ -2615,7 +2606,7 @@ model Linspace1
 			description="Linspace operator: basic test",
 			flatModel="
 fclass ArrayBuiltins.Linspace1
- constant Real x[1] = 1;
+ constant Real x[1] = 1.0;
  constant Real x[2] = 1.6666666666666665;
  constant Real x[3] = 2.333333333333333;
  constant Real x[4] = 3.0;
@@ -2818,7 +2809,7 @@ model Linspace9
             flatModel="
 fclass ArrayBuiltins.Linspace9
  structural parameter Integer n = 1 /* 1 */;
- constant Real x[1] = 1;
+ constant Real x[1] = 1.0;
 end ArrayBuiltins.Linspace9;
 ")})));
 end Linspace9;
@@ -3036,10 +3027,10 @@ model Diagonal1
             eliminate_alias_variables=false,
 			flatModel="
 fclass ArrayBuiltins.Diagonal1
- constant Real x[1,1] = 1;
- constant Real x[1,2] = 0;
- constant Real x[2,1] = 0;
- constant Real x[2,2] = 2;
+ constant Real x[1,1] = 1.0;
+ constant Real x[1,2] = 0.0;
+ constant Real x[2,1] = 0.0;
+ constant Real x[2,2] = 2.0;
  constant Integer y[1,1] = 1;
  constant Integer y[1,2] = 0;
  constant Integer y[1,3] = 0;
@@ -3143,9 +3134,9 @@ model NonVectorizedScalarization1
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedScalarization1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;
@@ -3178,9 +3169,9 @@ model NonVectorizedScalarization2
 			description="Test of accesses that should be kept without indices during scalarization",
 			flatModel="
 fclass ArrayBuiltins.NonVectorizedScalarization2
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real x[3] = 3;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
+ constant Real x[3] = 3.0;
  constant Real y[1] = 6.0;
  constant Real y[2] = 12.0;
  constant Real y[3] = 18.0;

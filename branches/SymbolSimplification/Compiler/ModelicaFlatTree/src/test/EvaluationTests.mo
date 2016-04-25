@@ -1277,7 +1277,7 @@ model FunctionEval35
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.FunctionEval35
- constant Real y[1,1] = 1;
+ constant Real y[1,1] = 1.0;
 end EvaluationTests.FunctionEval35;
 ")})));
 end FunctionEval35;
@@ -1333,7 +1333,6 @@ equation
             flatModel="
 fclass EvaluationTests.FunctionEval36
  constant Real x = 1.0;
- constant Real y = 1;
 end EvaluationTests.FunctionEval36;
 ")})));
 end FunctionEval36;
@@ -2453,7 +2452,7 @@ model Delay1
             flatModel="
 fclass EvaluationTests.Delay1
  constant Real x1 = 1;
- constant Real x2 = 2;
+ constant Real x2 = 2.0;
 end EvaluationTests.Delay1;
 ")})));
 end Delay1;
@@ -2470,8 +2469,8 @@ model SpatialDistribution1
             flatModel="
 fclass EvaluationTests.SpatialDistribution1
  constant Real x1 = 0.0;
- constant Real x2 = 3;
- constant Real x3 = 4;
+ constant Real x2 = 3.0;
+ constant Real x3 = 4.0;
 end EvaluationTests.SpatialDistribution1;
 ")})));
 end SpatialDistribution1;
@@ -2525,7 +2524,7 @@ model Functional1
             flatModel="
 fclass EvaluationTests.Functional1
  constant Real c1 = 3;
- constant Real y1 = 3;
+ constant Real y1 = 3.0;
 end EvaluationTests.Functional1;
 ")})));
 end Functional1;
@@ -3010,8 +3009,8 @@ end EvaluationTests.Partial.Mul4;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.AssignStmt1
- constant Real y2[1] = 1;
- constant Real y2[2] = 2;
+ constant Real y2[1] = 1.0;
+ constant Real y2[2] = 2.0;
 end EvaluationTests.Partial.AssignStmt1;
 ")})));
     end AssignStmt1;
@@ -3039,8 +3038,8 @@ end EvaluationTests.Partial.AssignStmt1;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.FunctionCallStmt1
- constant Real y2[1] = 1;
- constant Real y2[2] = 2;
+ constant Real y2[1] = 1.0;
+ constant Real y2[2] = 2.0;
 end EvaluationTests.Partial.FunctionCallStmt1;
 ")})));
     end FunctionCallStmt1;
@@ -3069,8 +3068,8 @@ end EvaluationTests.Partial.FunctionCallStmt1;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.FunctionCallStmt2
- constant Real y2[1] = 1;
- constant Real y2[2] = 2;
+ constant Real y2[1] = 1.0;
+ constant Real y2[2] = 2.0;
 end EvaluationTests.Partial.FunctionCallStmt2;
 ")})));
     end FunctionCallStmt2;
@@ -3563,10 +3562,10 @@ end EvaluationTests.Partial.IfStmt10;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.IfStmt11
- constant Real y[1] = 0;
- constant Real y[2] = 1;
- constant Real y[3] = 2;
- constant Real y[4] = 3;
+ constant Real y[1] = 0.0;
+ constant Real y[2] = 1.0;
+ constant Real y[3] = 2.0;
+ constant Real y[4] = 3.0;
 end EvaluationTests.Partial.IfStmt11;
 ")})));
     end IfStmt11;
@@ -3668,8 +3667,8 @@ end EvaluationTests.Partial.IfStmt12;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.IfStmt13
- constant Real y.a = 1;
- constant Real y.b = 1;
+ constant Real y.a = 1.0;
+ constant Real y.b = 1.0;
 end EvaluationTests.Partial.IfStmt13;
 ")})));
     end IfStmt13;
@@ -3702,7 +3701,7 @@ end EvaluationTests.Partial.IfStmt13;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.IfStmt14
- constant Real y.a = 1;
+ constant Real y.a = 1.0;
  Real y.b;
 equation
  (EvaluationTests.Partial.IfStmt14.R(, y.b)) = EvaluationTests.Partial.IfStmt14.f(1, time);
@@ -3756,7 +3755,7 @@ end EvaluationTests.Partial.IfStmt14;
             inline_functions="none",
             flatModel="
 fclass EvaluationTests.Partial.IfStmt15
- constant Real y[1] = 1;
+ constant Real y[1] = 1.0;
  Real y[2];
 equation
  ({, y[2]}) = EvaluationTests.Partial.IfStmt15.f(1, time);

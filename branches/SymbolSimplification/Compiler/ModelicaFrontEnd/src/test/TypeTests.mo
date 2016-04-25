@@ -822,9 +822,9 @@ model ArrayTypeTest1
 			description="Check that short type declarations with array indices are expanded correctly.",
 			flatModel="
 fclass TypeTests.ArrayTypeTest1
- constant TypeTests.ArrayTypeTest1.T x[1] = 1;
- constant TypeTests.ArrayTypeTest1.T x[2] = 2;
- constant TypeTests.ArrayTypeTest1.T x[3] = 4;
+ constant TypeTests.ArrayTypeTest1.T x[1] = 1.0;
+ constant TypeTests.ArrayTypeTest1.T x[2] = 2.0;
+ constant TypeTests.ArrayTypeTest1.T x[3] = 4.0;
 
 public
  type TypeTests.ArrayTypeTest1.T = Real(unit = \"m\");
@@ -845,21 +845,21 @@ model ArrayTypeTest2
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest2
- constant TypeTests.ArrayTypeTest2.T x[1] = 1;
- constant TypeTests.ArrayTypeTest2.T x[2] = 2;
- constant TypeTests.ArrayTypeTest2.T x[3] = 4;
- constant TypeTests.ArrayTypeTest2.S y[1,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[1,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[1,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[2,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[3,3] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,1] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,2] = 0;
- constant TypeTests.ArrayTypeTest2.S y[4,3] = 0;
+ constant TypeTests.ArrayTypeTest2.T x[1] = 1.0;
+ constant TypeTests.ArrayTypeTest2.T x[2] = 2.0;
+ constant TypeTests.ArrayTypeTest2.T x[3] = 4.0;
+ constant TypeTests.ArrayTypeTest2.S y[1,1] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[1,2] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[1,3] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[2,1] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[2,2] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[2,3] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[3,1] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[3,2] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[3,3] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[4,1] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[4,2] = 0.0;
+ constant TypeTests.ArrayTypeTest2.S y[4,3] = 0.0;
 
 public
  type TypeTests.ArrayTypeTest2.T = Real(unit = \"l\");
@@ -890,13 +890,13 @@ model ArrayTypeTest3
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest3
- constant Real y[1].x(start = 1) = 1;
- constant Real y[2].x(start = 1) = 1;
- constant Real y[3].x(start = 1) = 1;
- constant Real z[1].x = 1;
- constant Real z[2].x = 1;
- constant Real z[3].x = 1;
- constant Real w.x = 1;
+ constant Real y[1].x(start = 1) = 1.0;
+ constant Real y[2].x(start = 1) = 1.0;
+ constant Real y[3].x(start = 1) = 1.0;
+ constant Real z[1].x = 1.0;
+ constant Real z[2].x = 1.0;
+ constant Real z[3].x = 1.0;
+ constant Real w.x = 1.0;
 end TypeTests.ArrayTypeTest3;
 ")})));
 end ArrayTypeTest3;
@@ -925,16 +925,16 @@ model ArrayTypeTest4
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest4
- constant Real y[1,1].x(start = 1) = 1;
- constant Real y[1,2].x(start = 1) = 1;
- constant Real y[2,1].x(start = 1) = 1;
- constant Real y[2,2].x(start = 1) = 1;
- constant Real y[3,1].x(start = 1) = 1;
- constant Real y[3,2].x(start = 1) = 1;
- constant Real z[1].x = 1;
- constant Real z[2].x = 1;
- constant Real z[3].x = 1;
- constant Real w.x = 1;
+ constant Real y[1,1].x(start = 1) = 1.0;
+ constant Real y[1,2].x(start = 1) = 1.0;
+ constant Real y[2,1].x(start = 1) = 1.0;
+ constant Real y[2,2].x(start = 1) = 1.0;
+ constant Real y[3,1].x(start = 1) = 1.0;
+ constant Real y[3,2].x(start = 1) = 1.0;
+ constant Real z[1].x = 1.0;
+ constant Real z[2].x = 1.0;
+ constant Real z[3].x = 1.0;
+ constant Real w.x = 1.0;
 end TypeTests.ArrayTypeTest4;
 ")})));
 end ArrayTypeTest4;
@@ -964,16 +964,16 @@ model ArrayTypeTest5
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ArrayTypeTest5
- constant Real y[1,1].x(start = 1) = 3;
- constant Real y[1,2].x(start = 1) = 3;
- constant Real y[2,1].x(start = 1) = 3;
- constant Real y[2,2].x(start = 1) = 3;
- constant Real y[3,1].x(start = 1) = 3;
- constant Real y[3,2].x(start = 1) = 3;
- constant Real z[1].x = 3;
- constant Real z[2].x = 3;
- constant Real z[3].x = 3;
- constant Real w.x = 3;
+ constant Real y[1,1].x(start = 1) = 3.0;
+ constant Real y[1,2].x(start = 1) = 3.0;
+ constant Real y[2,1].x(start = 1) = 3.0;
+ constant Real y[2,2].x(start = 1) = 3.0;
+ constant Real y[3,1].x(start = 1) = 3.0;
+ constant Real y[3,2].x(start = 1) = 3.0;
+ constant Real z[1].x = 3.0;
+ constant Real z[2].x = 3.0;
+ constant Real z[3].x = 3.0;
+ constant Real w.x = 3.0;
 end TypeTests.ArrayTypeTest5;
 ")})));
 end ArrayTypeTest5;
@@ -1216,7 +1216,7 @@ model DivTest1
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.DivTest1
- constant Real aReal = 3;
+ constant Real aReal = 3.0;
  constant Integer anInt = 3;
  Real x;
  discrete Real temp_1;
@@ -1270,7 +1270,7 @@ model ModTest1
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.ModTest1
- constant Real aReal = 3;
+ constant Real aReal = 3.0;
  constant Integer anInt = 3;
  Real x;
  discrete Integer temp_1;
@@ -1327,7 +1327,7 @@ model RemTest1
             eliminate_alias_variables=false,
 			flatModel="
 fclass TypeTests.RemTest1
- constant Real aReal = 3;
+ constant Real aReal = 3.0;
  constant Integer anInt = 3;
  Real x;
  discrete Real temp_1;
@@ -1635,9 +1635,9 @@ model IfExpType1
 fclass TypeTests.IfExpType1
  structural parameter Integer n = 3 /* 3 */;
  structural parameter Integer m.n = 3 /* 3 */;
- constant Real m.y[1] = 1;
- constant Real m.y[2] = 2;
- constant Real m.y[3] = 3;
+ constant Real m.y[1] = 1.0;
+ constant Real m.y[2] = 2.0;
+ constant Real m.y[3] = 3.0;
 end TypeTests.IfExpType1;
 ")})));
 end IfExpType1;
@@ -2647,8 +2647,8 @@ model DivType1
             flatModel="
 fclass TypeTests.DivType1
  parameter Real x[1];
- constant Real x[2] = 1;
- constant Real x[3] = 1;
+ constant Real x[2] = 1.0;
+ constant Real x[3] = 1.0;
 parameter equation
  ({x[1], , }) = TypeTests.DivType1.f(3);
 

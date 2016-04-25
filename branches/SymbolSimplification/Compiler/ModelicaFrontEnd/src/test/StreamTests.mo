@@ -55,7 +55,7 @@ end LinearResistance;
 fclass StreamTests.StreamTest1
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
- constant Real r.fluidPort.m_flow = 0;
+ constant Real r.fluidPort.m_flow = 0.0;
  parameter Real r.fluidPort.p;
  parameter Real r.fluidPort.h_outflow;
  parameter Real h;
@@ -80,7 +80,7 @@ model StreamTest2
 fclass StreamTests.StreamTest2
  parameter Real r.p0 = 1 /* 1 */;
  parameter Real r.h0 = 1 /* 1 */;
- constant Real r.fluidPort.m_flow = 0;
+ constant Real r.fluidPort.m_flow = 0.0;
  parameter Real r.fluidPort.p;
  parameter Real r.fluidPort.h_outflow;
  parameter Real h;
@@ -153,12 +153,12 @@ end StreamTests.StreamTest3;
 fclass StreamTests.StreamTest4
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- constant Real r[1].fluidPort.m_flow = 0;
+ constant Real r[1].fluidPort.m_flow = 0.0;
  parameter Real r[1].fluidPort.p;
  parameter Real r[1].fluidPort.h_outflow;
  parameter Real r[2].p0 = 1 /* 1 */;
  parameter Real r[2].h0 = 1 /* 1 */;
- constant Real r[2].fluidPort.m_flow = 0;
+ constant Real r[2].fluidPort.m_flow = 0.0;
  parameter Real r[2].fluidPort.p;
  parameter Real r[2].fluidPort.h_outflow;
  parameter Real h[1];
@@ -188,12 +188,12 @@ model StreamTest5
 fclass StreamTests.StreamTest5
  parameter Real r[1].p0 = 1 /* 1 */;
  parameter Real r[1].h0 = 1 /* 1 */;
- constant Real r[1].fluidPort.m_flow = 0;
+ constant Real r[1].fluidPort.m_flow = 0.0;
  parameter Real r[1].fluidPort.p;
  parameter Real r[1].fluidPort.h_outflow;
  parameter Real r[2].p0 = 1 /* 1 */;
  parameter Real r[2].h0 = 1 /* 1 */;
- constant Real r[2].fluidPort.m_flow = 0;
+ constant Real r[2].fluidPort.m_flow = 0.0;
  parameter Real r[2].fluidPort.p;
  parameter Real r[2].fluidPort.h_outflow;
  parameter Real h[1];
@@ -230,12 +230,12 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamTest6
- constant Real d.a = 0;
+ constant Real d.a = 0.0;
  constant Real d.b[1] = 1.0;
  constant Real d.b[2] = 2.0;
- constant Real d.c = 0;
- constant Real f[1] = 1;
- constant Real f[2] = 2;
+ constant Real d.c = 0.0;
+ constant Real f[1] = 1.0;
+ constant Real f[2] = 2.0;
 end StreamTests.StreamTest6;
 ")})));
 end StreamTest6;
@@ -270,7 +270,7 @@ fclass StreamTests.StreamTest7
  constant Real f.e.a = 0.0;
  Real f.e.b;
  Real f.e.c;
- constant Real g.a = 0;
+ constant Real g.a = 0.0;
  Real g.b;
  Real g.c;
  Real h;
@@ -1504,15 +1504,15 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.InStreamDer2
- constant Real a.c1.p = 7;
+ constant Real a.c1.p = 7.0;
  Real a.c1.f;
- constant Real a.c1.s = 4;
+ constant Real a.c1.s = 4.0;
  constant Real a.c2.p = 7.0;
  Real a.c2.f;
- constant Real a.c2.s = 5;
+ constant Real a.c2.s = 5.0;
  constant Real a.c3.p = 7.0;
  Real a.c3.f;
- constant Real a.c3.s = 6;
+ constant Real a.c3.s = 6.0;
  Real a.x1;
  Real a.x2;
  Real a.x3;
@@ -1559,8 +1559,8 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst1
- constant Real a1.c.p = 0;
- constant Real a1.c.f = 0;
+ constant Real a1.c.p = 0.0;
+ constant Real a1.c.f = 0.0;
  Real a1.c.s;
  constant Real a2.c.p = 0.0;
  Real a2.c.f;
@@ -1608,17 +1608,17 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst2
- constant Real a1.c.p = 4;
- constant Real a1.c.f = 1;
- constant Real a1.c.s = 1;
+ constant Real a1.c.p = 4.0;
+ constant Real a1.c.f = 1.0;
+ constant Real a1.c.s = 1.0;
  constant Real a2.c.p = 4.0;
  constant Real a2.c.f = -1.0;
- constant Real a2.c.s = 2;
+ constant Real a2.c.s = 2.0;
  constant Real c1.p = 4.0;
- constant Real c1.f = 0;
+ constant Real c1.f = 0.0;
  Real c1.s;
  constant Real c2.p = 4.0;
- constant Real c2.f = 0;
+ constant Real c2.f = 0.0;
  Real c2.s;
  Real x1;
  Real x2;
@@ -1655,29 +1655,29 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst3
- constant Real a1[1].c.p = 3;
- constant Real a1[1].c.f = 1;
- constant Real a1[1].c.s = 1;
+ constant Real a1[1].c.p = 3.0;
+ constant Real a1[1].c.f = 1.0;
+ constant Real a1[1].c.s = 1.0;
  Real a1[2].c.p;
  Real a1[2].c.f;
  Real a1[2].c.s;
  constant Real a2[1].c.p = 3.0;
  constant Real a2[1].c.f = -1.0;
- constant Real a2[1].c.s = 5;
+ constant Real a2[1].c.s = 5.0;
  Real a2[2].c.p;
  Real a2[2].c.f;
  Real a2[2].c.s;
  constant Real c1[1].p = 3.0;
- constant Real c1[1].f = 0;
+ constant Real c1[1].f = 0.0;
  Real c1[1].s;
  Real c1[2].p;
- constant Real c1[2].f = 0;
+ constant Real c1[2].f = 0.0;
  Real c1[2].s;
  constant Real c2[1].p = 3.0;
- constant Real c2[1].f = 0;
+ constant Real c2[1].f = 0.0;
  Real c2[1].s;
  Real c2[2].p;
- constant Real c2[2].f = 0;
+ constant Real c2[2].f = 0.0;
  Real c2[2].s;
  Real x1[1];
  Real x1[2];
@@ -1726,15 +1726,15 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamWithConst4
- constant Real a1.c.p = 0;
- constant Real a1.c.f = 0;
+ constant Real a1.c.p = 0.0;
+ constant Real a1.c.f = 0.0;
  Real a1.c.s;
  constant Real a2.c.p = 0.0;
  Real a2.c.f;
- constant Real a2.c.s = 3;
+ constant Real a2.c.s = 3.0;
  constant Real a3.c.p = 0.0;
  Real a3.c.f;
- constant Real a3.c.s = 4;
+ constant Real a3.c.s = 4.0;
  Real x1;
  Real x2;
  Real x3;
@@ -1785,12 +1785,12 @@ equation
             flatModel="
 fclass StreamTests.StreamWithArrays1
  constant Real a.c1.p = 1.0;
- constant Real a.c1.f = -0.0;
+ constant Real a.c1.f = 0.0;
  constant Real a.c2.p = 1.0;
- constant Real a.c2.f = 0;
+ constant Real a.c2.f = 0.0;
  constant Real a.c3.p = 1.0;
- constant Real a.c3.f = 0;
- constant Real b.c.p = 1;
+ constant Real a.c3.f = 0.0;
+ constant Real b.c.p = 1.0;
  constant Real b.c.f = 0.0;
 end StreamTests.StreamWithArrays1;
 ")})));
@@ -1832,15 +1832,15 @@ equation
             flatModel="
 fclass StreamTests.StreamWithArrays2
  constant Real a.c1.p = 1.0;
- constant Real a.c1.f = -0.0;
+ constant Real a.c1.f = 0.0;
  Real a.c1.s[1];
  Real a.c1.s[2];
  constant Real a.c2.p = 1.0;
- constant Real a.c2.f = 0;
+ constant Real a.c2.f = 0.0;
  Real a.c2.s[1];
  Real a.c2.s[2];
  constant Real a.c3.p = 1.0;
- constant Real a.c3.f = 0;
+ constant Real a.c3.f = 0.0;
  Real a.c3.s[1];
  Real a.c3.s[2];
  constant Real a.x1[1] = 1.0;
@@ -1849,10 +1849,10 @@ fclass StreamTests.StreamWithArrays2
  Real a.x2[2];
  Real a.x3[1];
  Real a.x3[2];
- constant Real b.c.p = 1;
+ constant Real b.c.p = 1.0;
  constant Real b.c.f = 0.0;
- constant Real b.c.s[1] = 1;
- constant Real b.c.s[2] = 2;
+ constant Real b.c.s[1] = 1.0;
+ constant Real b.c.s[2] = 2.0;
 equation
  a.x2[1] = a.c2.s[1];
  a.x2[2] = a.c2.s[2];
@@ -1900,69 +1900,69 @@ equation
             flatModel="
 fclass StreamTests.StreamWithArrays3
  constant Real a[1].c1[1].p = 1.0;
- constant Real a[1].c1[1].f = -0.0;
+ constant Real a[1].c1[1].f = 0.0;
  Real a[1].c1[1].s[1];
  Real a[1].c1[1].s[2];
  constant Real a[1].c1[2].p = 2.0;
- constant Real a[1].c1[2].f = -0.0;
+ constant Real a[1].c1[2].f = 0.0;
  Real a[1].c1[2].s[1];
  Real a[1].c1[2].s[2];
  constant Real a[1].c2[1].p = 1.0;
- constant Real a[1].c2[1].f = 0;
+ constant Real a[1].c2[1].f = 0.0;
  Real a[1].c2[1].s[1];
  Real a[1].c2[1].s[2];
  constant Real a[1].c2[2].p = 2.0;
- constant Real a[1].c2[2].f = 0;
+ constant Real a[1].c2[2].f = 0.0;
  Real a[1].c2[2].s[1];
  Real a[1].c2[2].s[2];
  constant Real a[1].c3[1].p = 1.0;
- constant Real a[1].c3[1].f = 0;
+ constant Real a[1].c3[1].f = 0.0;
  Real a[1].c3[1].s[1];
  Real a[1].c3[1].s[2];
  constant Real a[1].c3[2].p = 2.0;
- constant Real a[1].c3[2].f = 0;
+ constant Real a[1].c3[2].f = 0.0;
  Real a[1].c3[2].s[1];
  Real a[1].c3[2].s[2];
  constant Real a[2].c1[1].p = 1.0;
- constant Real a[2].c1[1].f = -0.0;
+ constant Real a[2].c1[1].f = 0.0;
  Real a[2].c1[1].s[1];
  Real a[2].c1[1].s[2];
  constant Real a[2].c1[2].p = 2.0;
- constant Real a[2].c1[2].f = -0.0;
+ constant Real a[2].c1[2].f = 0.0;
  Real a[2].c1[2].s[1];
  Real a[2].c1[2].s[2];
  constant Real a[2].c2[1].p = 1.0;
- constant Real a[2].c2[1].f = 0;
+ constant Real a[2].c2[1].f = 0.0;
  Real a[2].c2[1].s[1];
  Real a[2].c2[1].s[2];
  constant Real a[2].c2[2].p = 2.0;
- constant Real a[2].c2[2].f = 0;
+ constant Real a[2].c2[2].f = 0.0;
  Real a[2].c2[2].s[1];
  Real a[2].c2[2].s[2];
  constant Real a[2].c3[1].p = 1.0;
- constant Real a[2].c3[1].f = 0;
+ constant Real a[2].c3[1].f = 0.0;
  Real a[2].c3[1].s[1];
  Real a[2].c3[1].s[2];
  constant Real a[2].c3[2].p = 2.0;
- constant Real a[2].c3[2].f = 0;
+ constant Real a[2].c3[2].f = 0.0;
  Real a[2].c3[2].s[1];
  Real a[2].c3[2].s[2];
- constant Real b[1].c[1].p = 1;
+ constant Real b[1].c[1].p = 1.0;
  constant Real b[1].c[1].f = 0.0;
- constant Real b[1].c[1].s[1] = 1;
- constant Real b[1].c[1].s[2] = 2;
- constant Real b[1].c[2].p = 2;
+ constant Real b[1].c[1].s[1] = 1.0;
+ constant Real b[1].c[1].s[2] = 2.0;
+ constant Real b[1].c[2].p = 2.0;
  constant Real b[1].c[2].f = 0.0;
- constant Real b[1].c[2].s[1] = 3;
- constant Real b[1].c[2].s[2] = 4;
- constant Real b[2].c[1].p = 1;
+ constant Real b[1].c[2].s[1] = 3.0;
+ constant Real b[1].c[2].s[2] = 4.0;
+ constant Real b[2].c[1].p = 1.0;
  constant Real b[2].c[1].f = 0.0;
- constant Real b[2].c[1].s[1] = 1;
- constant Real b[2].c[1].s[2] = 2;
- constant Real b[2].c[2].p = 2;
+ constant Real b[2].c[1].s[1] = 1.0;
+ constant Real b[2].c[1].s[2] = 2.0;
+ constant Real b[2].c[2].p = 2.0;
  constant Real b[2].c[2].f = 0.0;
- constant Real b[2].c[2].s[1] = 3;
- constant Real b[2].c[2].s[2] = 4;
+ constant Real b[2].c[2].s[1] = 3.0;
+ constant Real b[2].c[2].s[2] = 4.0;
 equation
  a[1].c1[1].s[1] = 0.0;
  a[1].c1[1].s[2] = 0.0;
@@ -2019,7 +2019,7 @@ equation
             description="Check expansion of inStream() when flow variables are alias eliminated against derivative variable",
             flatModel="
 fclass StreamTests.StreamDerAlias1
- constant Real a1.c.p = 0;
+ constant Real a1.c.p = 0.0;
  Real a1.c.f;
  Real a1.c.s;
  Real a2.c.f;
@@ -2072,7 +2072,7 @@ equation
             eliminate_alias_variables=false,
             flatModel="
 fclass StreamTests.StreamSemiLinear1
- constant Real a.c1.p = 1;
+ constant Real a.c1.p = 1.0;
  Real a.c1.f;
  Real a.c1.s;
  constant Real a.c2.p = 1.0;

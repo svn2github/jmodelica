@@ -4796,9 +4796,9 @@ equation
 			description="Redeclare class as element, short replacing declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement5
- constant Real c.b.y(start = 2) = 1;
- constant Real c.b.z(start = 1) = 2;
- constant Real c.b.x(start = 5) = 3;
+ constant Real c.b.y(start = 2) = 1.0;
+ constant Real c.b.z(start = 1) = 2.0;
+ constant Real c.b.x(start = 5) = 3.0;
 end RedeclareTests.RedeclareElement5;
 ")})));
 end RedeclareElement5;
@@ -4835,9 +4835,9 @@ equation
 			description="Redeclare class as element, long replacing declaration, with equation",
 			flatModel="
 fclass RedeclareTests.RedeclareElement6
- constant Real c.b.y = 1;
- constant Real c.b.z = 2;
- constant Real c.b.x = 3;
+ constant Real c.b.y = 1.0;
+ constant Real c.b.z = 2.0;
+ constant Real c.b.x = 3.0;
 end RedeclareTests.RedeclareElement6;
 ")})));
 end RedeclareElement6;
@@ -4873,10 +4873,10 @@ model RedeclareElement7
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement7
- constant Real c.b.z = 1;
- constant Real c.b.y(start = 10) = 2;
- constant Real c.b.x(start = 20) = 3;
- constant Real c.b.w = 4;
+ constant Real c.b.z = 1.0;
+ constant Real c.b.y(start = 10) = 2.0;
+ constant Real c.b.x(start = 20) = 3.0;
+ constant Real c.b.w = 4.0;
 end RedeclareTests.RedeclareElement7;
 ")})));
 end RedeclareElement7;
@@ -4912,10 +4912,10 @@ model RedeclareElement8
 			description="Redeclare class as element, long extending declaration, with equation and modifications",
 			flatModel="
 fclass RedeclareTests.RedeclareElement8
- constant Real c.b.z = 1;
- constant Real c.b.y(start = 10) = 2;
- constant Real c.b.x(start = 20) = 3;
- constant Real c.b.w = 4;
+ constant Real c.b.z = 1.0;
+ constant Real c.b.y(start = 10) = 2.0;
+ constant Real c.b.x(start = 20) = 3.0;
+ constant Real c.b.w = 4.0;
 end RedeclareTests.RedeclareElement8;
 ")})));
 end RedeclareElement8;
@@ -5127,8 +5127,8 @@ model RedeclareElement14
 			description="Looking up replacing class through extends",
 			flatModel="
 fclass RedeclareTests.RedeclareElement14
- constant Real d.y = 2;
- constant Real d.x = 1;
+ constant Real d.y = 2.0;
+ constant Real d.x = 1.0;
 end RedeclareTests.RedeclareElement14;
 ")})));
 end RedeclareElement14;
@@ -5165,7 +5165,7 @@ model RedeclareElement15
 			flatModel="
 fclass RedeclareTests.RedeclareElement15
  constant Real z.y = 2.0;
- constant Real z.x = 1;
+ constant Real z.x = 1.0;
 end RedeclareTests.RedeclareElement15;
 ")})));
 end RedeclareElement15;
@@ -5206,7 +5206,7 @@ model RedeclareElement16
 			description="Class declared in same scope as replacing class",
 			flatModel="
 fclass RedeclareTests.RedeclareElement16
- constant Real z.x = 1;
+ constant Real z.x = 1.0;
  constant Real z.y = 2.0;
 end RedeclareTests.RedeclareElement16;
 ")})));
@@ -5246,7 +5246,7 @@ model RedeclareElement17
 			description="Class declared in same scope as replacing class",
 			flatModel="
 fclass RedeclareTests.RedeclareElement17
- constant Real z.x = 1;
+ constant Real z.x = 1.0;
  constant Real z.y = 2.0;
 end RedeclareTests.RedeclareElement17;
 ")})));
@@ -5480,8 +5480,8 @@ model RedeclareElement22
 			description="Redeclare class extends used directly in redeclare",
 			flatModel="
 fclass RedeclareTests.RedeclareElement22
- constant Real f.e.z = 2;
- constant Real f.e.y = 1;
+ constant Real f.e.z = 2.0;
+ constant Real f.e.y = 1.0;
 end RedeclareTests.RedeclareElement22;
 ")})));
 end RedeclareElement22;
@@ -5513,10 +5513,10 @@ model RedeclareElement23
             eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareElement23
- constant Real b[1].z = 2;
- constant Real b[1].y = 1;
- constant Real b[2].z = 2;
- constant Real b[2].y = 1;
+ constant Real b[1].z = 2.0;
+ constant Real b[1].y = 1.0;
+ constant Real b[2].z = 2.0;
+ constant Real b[2].y = 1.0;
  constant Real x = 1.0;
 end RedeclareTests.RedeclareElement23;
 ")})));
@@ -5960,7 +5960,7 @@ model RedeclareFunction3
 			flatModel="
 fclass RedeclareTests.RedeclareFunction3
  constant Real z.x = 2.0;
- constant Real z.y = 1;
+ constant Real z.y = 1.0;
 end RedeclareTests.RedeclareFunction3;
 ")})));
 end RedeclareFunction3;
@@ -6084,8 +6084,8 @@ model RedeclareEach1
             eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareEach1
- constant Real a[1].a[1] = 0;
- constant Real a[2].a[1] = 0;
+ constant Real a[1].a[1] = 0.0;
+ constant Real a[2].a[1] = 0.0;
 end RedeclareTests.RedeclareEach1;
 ")})));
 end RedeclareEach1;
@@ -6118,8 +6118,8 @@ model RedeclareEach2
             eliminate_alias_variables=false,
 			flatModel="
 fclass RedeclareTests.RedeclareEach2
- constant Real a[1].a[1] = 0;
- constant Real a[2].a[1] = 0;
+ constant Real a[1].a[1] = 0.0;
+ constant Real a[2].a[1] = 0.0;
 end RedeclareTests.RedeclareEach2;
 ")})));
 end RedeclareEach2;

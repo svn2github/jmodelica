@@ -1004,7 +1004,7 @@ fclass IndexReduction.IndexReduction51
  Real c2_w(stateSelect = c2_ss);
  Real c2_a;
  Real x(start = 2);
- constant Real y = 0;
+ constant Real y = 0.0;
  Real _der_c2_w;
  Real _der_der_x;
 initial equation 
@@ -2710,7 +2710,7 @@ equation
             inline_functions="none",
             flatModel="
 fclass IndexReduction.PartiallyPropagatedComposite1
- constant Real y[1] = 2;
+ constant Real y[1] = 2.0;
  Real y[2];
  constant Real x1[1] = 0.0;
  Real x1[2];

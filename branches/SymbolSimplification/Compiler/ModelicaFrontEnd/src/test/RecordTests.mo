@@ -1589,18 +1589,18 @@ model UnmodifiableComponent1
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.UnmodifiableComponent1
- constant Real rec.x1 = -1;
+ constant Real rec.x1 = -1.0;
  constant Real rec.y = 2;
  final parameter Real rec.z = 3 /* 3 */;
- constant Real rec.x2 = 4;
- constant Real recs[1].x1 = 1;
+ constant Real rec.x2 = 4.0;
+ constant Real recs[1].x1 = 1.0;
  constant Real recs[1].y = 2;
  final parameter Real recs[1].z = 3 /* 3 */;
- constant Real recs[1].x2 = 4;
- constant Real recs[2].x1 = 1;
+ constant Real recs[1].x2 = 4.0;
+ constant Real recs[2].x1 = 1.0;
  constant Real recs[2].y = 2;
  final parameter Real recs[2].z = 3 /* 3 */;
- constant Real recs[2].x2 = 4;
+ constant Real recs[2].x2 = 4.0;
 end RecordTests.UnmodifiableComponent1;
 ")})));
 end UnmodifiableComponent1;
@@ -3306,8 +3306,8 @@ fclass RecordTests.RecordScalarize27
  structural parameter Integer r1.n = 0 /* 0 */;
  structural parameter Integer r2.n = 0 /* 0 */;
  structural parameter Integer r3.n = 0 /* 0 */;
- constant Real r4.x[1] = 1;
- constant Real r4.x[2] = 2;
+ constant Real r4.x[1] = 1.0;
+ constant Real r4.x[2] = 2.0;
  structural parameter Integer r4.n = 2 /* 2 */;
 end RecordTests.RecordScalarize27;
 ")})));
@@ -3332,16 +3332,16 @@ model RecordScalarize28
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordScalarize28
- constant Real r1.x[1] = 1;
+ constant Real r1.x[1] = 1.0;
  structural parameter Integer r1.n = 1 /* 1 */;
- constant Real r2.x[1] = 1;
- constant Real r2.x[2] = 2;
+ constant Real r2.x[1] = 1.0;
+ constant Real r2.x[2] = 2.0;
  structural parameter Integer r2.n = 2 /* 2 */;
- constant Real r3.x[1] = 1;
+ constant Real r3.x[1] = 1.0;
  structural parameter Integer r3.n = 1 /* 1 */;
- constant Real r4.x[1] = 1;
- constant Real r4.x[2] = 3;
- constant Real r4.x[3] = 2;
+ constant Real r4.x[1] = 1.0;
+ constant Real r4.x[2] = 3.0;
+ constant Real r4.x[3] = 2.0;
  structural parameter Integer r4.n = 3 /* 3 */;
 end RecordTests.RecordScalarize28;
 ")})));
@@ -6118,22 +6118,22 @@ model RecordModification3
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordModification3
- constant Real a1[1].b[1].x[1] = 1;
- constant Real a1[1].b[1].x[2] = 2;
- constant Real a1[1].b[2].x[1] = 1;
- constant Real a1[1].b[2].x[2] = 2;
- constant Real a1[2].b[1].x[1] = 1;
- constant Real a1[2].b[1].x[2] = 2;
- constant Real a1[2].b[2].x[1] = 1;
- constant Real a1[2].b[2].x[2] = 2;
- constant Real a2[1].b[1].x[1] = 3;
- constant Real a2[1].b[1].x[2] = 4;
- constant Real a2[1].b[2].x[1] = 3;
- constant Real a2[1].b[2].x[2] = 4;
- constant Real a2[2].b[1].x[1] = 3;
- constant Real a2[2].b[1].x[2] = 4;
- constant Real a2[2].b[2].x[1] = 3;
- constant Real a2[2].b[2].x[2] = 4;
+ constant Real a1[1].b[1].x[1] = 1.0;
+ constant Real a1[1].b[1].x[2] = 2.0;
+ constant Real a1[1].b[2].x[1] = 1.0;
+ constant Real a1[1].b[2].x[2] = 2.0;
+ constant Real a1[2].b[1].x[1] = 1.0;
+ constant Real a1[2].b[1].x[2] = 2.0;
+ constant Real a1[2].b[2].x[1] = 1.0;
+ constant Real a1[2].b[2].x[2] = 2.0;
+ constant Real a2[1].b[1].x[1] = 3.0;
+ constant Real a2[1].b[1].x[2] = 4.0;
+ constant Real a2[1].b[2].x[1] = 3.0;
+ constant Real a2[1].b[2].x[2] = 4.0;
+ constant Real a2[2].b[1].x[1] = 3.0;
+ constant Real a2[2].b[1].x[2] = 4.0;
+ constant Real a2[2].b[2].x[1] = 3.0;
+ constant Real a2[2].b[2].x[2] = 4.0;
 end RecordTests.RecordModification3;
 ")})));
 end RecordModification3;

@@ -435,7 +435,7 @@ Connection sets: 0 sets
 			flatModel="
 fclass EnumerationTests.ShortEnumDecl
  parameter EnumerationTests.ShortEnumDecl.A b = EnumerationTests.ShortEnumDecl.A.one /* EnumerationTests.ShortEnumDecl.A.one */;
- constant Real x = 1;
+ constant Real x = 1.0;
 
 public
  type EnumerationTests.ShortEnumDecl.A = enumeration(one, two);

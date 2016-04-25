@@ -35,7 +35,7 @@ equation
 			inferred from equations is propagated to declarations",
 			flatModel="
 fclass VariabilityPropagationTests.VariabilityInference
- constant Real x1 = 1;
+ constant Real x1 = 1.0;
  constant Boolean x2 = true;
  parameter Real p1 = 4 /* 4 */;
  parameter Real r1;
@@ -80,7 +80,7 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.ConstantFolding1
- constant Real x1 = 1;
+ constant Real x1 = 1.0;
  constant Real x2 = 2.0;
  constant Real x3 = 1.0;
  constant Real x4 = 2.0;
@@ -327,7 +327,7 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.Output2
  output Real a;
- constant Real b = 2;
+ constant Real b = 2.0;
 equation
  (a, ) = VariabilityPropagationTests.Output2.f();
 
@@ -364,7 +364,7 @@ equation
             eliminate_alias_variables=false,
 			flatModel="
 fclass VariabilityPropagationTests.Der1
- constant Real x1 = 3;
+ constant Real x1 = 3.0;
  constant Real x2 = 0.0;
  Real x3;
  Real x4;
@@ -396,7 +396,7 @@ equation
 			description="Test removal of der var",
 			flatModel="
 fclass VariabilityPropagationTests.Der2
- constant Real x = 0;
+ constant Real x = 0.0;
  constant Real y = 1.0;
  Real z;
 equation
@@ -421,9 +421,9 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.WhenEq1
  discrete Real x1;
- constant Real x2 = 3;
+ constant Real x2 = 3.0;
  discrete Boolean temp_1;
-initial equation
+initial equation 
  pre(x1) = 0.0;
  pre(temp_1) = false;
 equation
@@ -456,7 +456,7 @@ equation
 fclass VariabilityPropagationTests.IfEq1
  constant Real p1 = 4;
  constant Real x1 = 3.0;
- constant Real x2 = 3;
+ constant Real x2 = 3.0;
 end VariabilityPropagationTests.IfEq1;
 ")})));
 end IfEq1;
@@ -488,10 +488,10 @@ equation
 fclass VariabilityPropagationTests.IfEq2
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
- constant Real x1 = 2;
+ constant Real x1 = 2.0;
  parameter Real x2;
- constant Real x3 = 3;
- constant Real x4 = 3;
+ constant Real x3 = 3.0;
+ constant Real x4 = 3.0;
 parameter equation
  x2 = p1 + 2;
 end VariabilityPropagationTests.IfEq2;
@@ -557,7 +557,6 @@ fclass VariabilityPropagationTests.FunctionCallEquation1
  constant Real x2 = 10.0;
  parameter Real x3;
  parameter Real x4;
- constant Real x5 = 5;
  parameter Real x6;
  parameter Real x7;
  parameter Real p = 3 /* 3 */;
@@ -584,7 +583,7 @@ public
   external \"C\" e(i1, o1, o2);
   return;
  end VariabilityPropagationTests.FunctionCallEquation1.e;
- 
+
 end VariabilityPropagationTests.FunctionCallEquation1;
 ")})));
 end FunctionCallEquation1;
@@ -619,7 +618,7 @@ equation
 			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation2
- constant Real z1[1] = 1;
+ constant Real z1[1] = 1.0;
  constant Real z1[2] = 2.0;
  parameter Real z2[1];
  parameter Real z2[2];
@@ -639,7 +638,7 @@ public
   c[2] := 2 * i1;
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.f;
- 
+
  function VariabilityPropagationTests.FunctionCallEquation2.e
   input Real i1;
   output Real[2] c;
@@ -647,7 +646,7 @@ public
   external \"C\" e(i1, c, size(c, 1));
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
- 
+
 end VariabilityPropagationTests.FunctionCallEquation2;
 ")})));
 end FunctionCallEquation2;
@@ -681,7 +680,7 @@ equation
 			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation3
- constant Real a.a = 3;
+ constant Real a.a = 3.0;
  constant Real a.b = 6.0;
  parameter Real b.a;
  parameter Real b.b;
@@ -730,10 +729,10 @@ Also tests that when it is constant and can't evaluate, variability is propagate
             inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation4
- constant Real a[1,1] = 1;
- constant Real a[1,2] = 2;
- constant Real a[2,1] = 3;
- constant Real a[2,2] = 4;
+ constant Real a[1,1] = 1.0;
+ constant Real a[1,2] = 2.0;
+ constant Real a[2,1] = 3.0;
+ constant Real a[2,2] = 4.0;
  constant Real b[1] = 1;
  constant Real b[2] = 2;
  parameter Real x1[1];
@@ -841,7 +840,7 @@ model FunctionCallEquationPartial1
             flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquationPartial1
  Real x1;
- constant Real x2 = 7;
+ constant Real x2 = 7.0;
 equation
  (x1, ) = VariabilityPropagationTests.fp(time, 7);
 
@@ -876,7 +875,6 @@ model FunctionCallEquationPartial2
 fclass VariabilityPropagationTests.FunctionCallEquationPartial2
  Real x1;
  constant Real x2 = 7.0;
- constant Real x3 = 7;
 equation
  (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
 
@@ -911,7 +909,6 @@ model FunctionCallEquationPartial3
 fclass VariabilityPropagationTests.FunctionCallEquationPartial3
  Real x1;
  constant Real x2 = 7.0;
- constant Real x3 = 7;
 equation
  (x1, ) = VariabilityPropagationTests.fp(time, 7.0);
 
@@ -950,7 +947,7 @@ fclass VariabilityPropagationTests.FunctionCallEquationPartial4
  constant Real x2 = 7.0;
  constant Real x3 = 7.0;
  constant Real x4 = 7.0;
- constant Real x5 = 7;
+ constant Real x5 = 7.0;
 end VariabilityPropagationTests.FunctionCallEquationPartial4;
 ")})));
 end FunctionCallEquationPartial4;
@@ -985,7 +982,7 @@ fclass VariabilityPropagationTests.FunctionCallEquationPartial5
  constant Real x1 = 3.0;
  constant Real x2 = 6.0;
  constant Real x3 = 12.0;
- constant Real x4 = 3;
+ constant Real x4 = 3.0;
  constant Real x5 = 6.0;
  constant Real x6 = 12.0;
 end VariabilityPropagationTests.FunctionCallEquationPartial5;
@@ -1010,7 +1007,6 @@ fclass VariabilityPropagationTests.FunctionCallEquationPartial6
  parameter Real x1;
  constant Real x2 = 7.0;
  parameter Real x3;
- constant Real x4 = 7;
 parameter equation
  (x1, ) = VariabilityPropagationTests.fp(x3, 7.0);
 
@@ -1060,7 +1056,7 @@ fclass VariabilityPropagationTests.FunctionCallEquationPartial7
  parameter Real x3;
  constant Real x4 = 7.0;
  parameter Real x5;
- constant Real c = 7;
+ constant Real c = 7.0;
  parameter Real p;
 parameter equation
  (x1, ) = VariabilityPropagationTests.FunctionCallEquationPartial7.fp(p, 7.0);
@@ -1101,7 +1097,7 @@ end FunctionCallEquationPartial7;
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite1
- constant Real y[1] = 2;
+ constant Real y[1] = 2.0;
  Real y[2];
 equation
  ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite1.f(2, time);
@@ -1142,7 +1138,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite1;
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite2
- constant Real y.a = 2;
+ constant Real y.a = 2.0;
  Real y.b;
 equation
  (VariabilityPropagationTests.PartiallyKnownComposite2.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite2.f(2, time);
@@ -1187,7 +1183,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite2;
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite3
  parameter Real p = 2 /* 2 */;
- constant Real y[1] = 2;
+ constant Real y[1] = 2.0;
  parameter Real y[2];
 parameter equation
  ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite3.f(2, p);
@@ -1230,7 +1226,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite3;
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite4
  parameter Real p = 2 /* 2 */;
- constant Real y.a = 2;
+ constant Real y.a = 2.0;
  parameter Real y.b;
 parameter equation
  (VariabilityPropagationTests.PartiallyKnownComposite4.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite4.f(2, p);
@@ -1305,7 +1301,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite5;
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite6
- constant Real y[1] = 1;
+ constant Real y[1] = 1.0;
  Real y[2];
 equation
  ({, y[2]}) = VariabilityPropagationTests.PartiallyKnownComposite6.f({1, 1 - time}, 3);
@@ -1347,7 +1343,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite6;
             inline_functions="none",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite7
- constant Real y.a = 1;
+ constant Real y.a = 1.0;
  Real y.b;
 equation
  (VariabilityPropagationTests.PartiallyKnownComposite7.R(, y.b)) = VariabilityPropagationTests.PartiallyKnownComposite7.f(VariabilityPropagationTests.PartiallyKnownComposite7.R(1, 1 - time), 3);
@@ -1443,7 +1439,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
             description="Test propagation to FNoExp in lhs",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite9
- constant Real x = 3;
+ constant Real x = 3.0;
  Real y;
 equation
  (VariabilityPropagationTests.PartiallyKnownComposite9.R(, y, )) = VariabilityPropagationTests.PartiallyKnownComposite9.f1(3, time, time);
@@ -1573,9 +1569,9 @@ int model_ode_derivatives_base(jmi_t* jmi) {
             description="Failing on second evaluation of constant function",
             flatModel="
 fclass VariabilityPropagationTests.PartiallyKnownComposite12
- constant Real y1 = 1;
+ constant Real y1 = 1.0;
  parameter Real y2;
- constant Real y3 = 3;
+ constant Real y3 = 3.0;
 parameter equation
  (, y2) = VariabilityPropagationTests.PartiallyKnownComposite12.f(1, 3.0);
 
@@ -1618,10 +1614,10 @@ model ConstantRecord1
 			description="Tests propagation of a constant record.",
 			flatModel="
 fclass VariabilityPropagationTests.ConstantRecord1
- constant Real c.a[1] = 1;
- constant Real c.a[2] = 2;
- constant Real c.a[3] = 3;
- constant Real c.b = 4;
+ constant Real c.a[1] = 1.0;
+ constant Real c.a[2] = 2.0;
+ constant Real c.a[3] = 3.0;
+ constant Real c.b = 4.0;
 end VariabilityPropagationTests.ConstantRecord1;
 ")})));
 end ConstantRecord1;
@@ -1642,12 +1638,12 @@ model ConstantStartFunc1
 			inline_functions="none",
 			flatModel="
 fclass VariabilityPropagationTests.ConstantStartFunc1
- constant Real x[1](start = temp_1[1]) = 3;
- constant Real x[2](start = temp_1[2]) = 4;
+ constant Real x[1](start = temp_1[1]) = 3.0;
+ constant Real x[2](start = temp_1[2]) = 4.0;
  parameter Real temp_1[1];
  parameter Real temp_1[2];
 parameter equation
- ({temp_1[1],temp_1[2]}) = VariabilityPropagationTests.ConstantStartFunc1.f();
+ ({temp_1[1], temp_1[2]}) = VariabilityPropagationTests.ConstantStartFunc1.f();
 
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
@@ -1759,18 +1755,18 @@ equation
 			flatModel="
 fclass VariabilityPropagationTests.AliasVariabilities1
  parameter Real a;
+ parameter Real b;
  constant Real c = 3.0;
+ constant Real d = 3.0;
  parameter Real p1;
  parameter Real p2;
  constant Real c1 = 1;
  constant Real c2 = 2;
- parameter Real b;
- constant Real d = 3.0;
 parameter equation
  a = p1 + p2;
  b = a;
 end VariabilityPropagationTests.AliasVariabilities1;
-			
+
 "),
 		XMLCodeGenTestCase(
 			name="AliasVariabilities1XML",
@@ -1794,17 +1790,17 @@ end VariabilityPropagationTests.AliasVariabilities1;
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"c1\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"c1\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"1.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"c2\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"c2\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"2.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
 		</ScalarVariable>
-		<ScalarVariable name=\"d\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<ScalarVariable name=\"d\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
 			<Real relativeQuantity=\"false\" start=\"3.0\" />
 			<isLinear>true</isLinear>
 			<VariableCategory>independentConstant</VariableCategory>
@@ -1884,7 +1880,7 @@ model ZeroFactor1
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor1
- constant Real c = 0;
+ constant Real c = 0.0;
  constant Real x1 = 0.0;
  constant Real x2 = 0.0;
  constant Real x3 = 0.0;
@@ -1908,7 +1904,7 @@ model ZeroFactor2
             description="Test elimination of factors that can be reduced to zero.",
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor2
- constant Real c = 0;
+ constant Real c = 0.0;
  Real x1;
 equation
  x1 = time;
@@ -1931,7 +1927,7 @@ model ZeroFactor3
             eliminate_alias_variables=false,
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor3
- constant Real c = 0;
+ constant Real c = 0.0;
  Real z1;
  Real z2;
  Real z3;
@@ -2066,12 +2062,12 @@ initial equation
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse5
  parameter Real p1(fixed = false);
- parameter Real p3(fixed = false);
  parameter Real p2(fixed = false);
+ parameter Real p3(fixed = false);
 initial equation 
- p1 = p3 * 23;
- p3 = p1 + 1;
- p2 = p3;
+ p1 = p2 * 23;
+ p2 = p1 + 1;
+ p3 = p2;
 end VariabilityPropagationTests.FixedFalse5;
 ")})));
 end FixedFalse5;
@@ -2150,7 +2146,7 @@ model AlgebraicLoopParameter1
             flatModel="
 fclass VariabilityPropagationTests.AlgebraicLoopParameter1
  parameter Real p = 1 /* 1 */;
- constant Real zero = 0;
+ constant Real zero = 0.0;
  parameter Real y;
  parameter Real x;
 parameter equation
