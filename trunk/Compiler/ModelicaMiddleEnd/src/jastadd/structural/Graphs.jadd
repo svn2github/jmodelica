@@ -380,8 +380,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * side (one variable on the left hand side per scalar equation)
      */
     protected interface AssignmentIncidenceMap {
-        public Iterable<FIdUseExp> rhs(String assignedLHS) = null;
-        public Collection<FIdUseExp> assigned() = null;
+        public Iterable<FIdUseExp> rhs(String assignedLHS);
+        public Collection<FIdUseExp> assigned();
     }
     
     /**
