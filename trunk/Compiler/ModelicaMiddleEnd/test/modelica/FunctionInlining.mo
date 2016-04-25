@@ -2940,6 +2940,79 @@ end FunctionInlining.TrivialInline10;
 ")})));
 end TrivialInline10;
 
+model TrivialInline11
+    function F
+        input Real i1;
+        output Real o1;
+    algorithm
+        o1 := G(i1);
+    annotation(derivative=F_der);
+    end F;
+    function F_der
+        input Real i1;
+        input Real i1_der;
+        output Real o1_der;
+    algorithm
+        o1_der := F(i1_der);
+    annotation(Inline=true);
+    end F_der;
+    
+    function G
+        input Real i1;
+        output Real o1;
+    algorithm
+        o1 := i1;
+    annotation(Inline=false);
+    end G;
+    
+    Real a1,a2,a3,a4;
+equation
+    der(a1) = a2;
+    der(a2) = a3;
+    a4 = time;
+    a4 = F(a1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TrivialInline11",
+            description="Test that functions without inline annotation but with derivative annotation are treated as InlineAfterIndexReduction (test will fail if it isn't inlined)",
+            inline_functions="trivial",
+            flatModel="
+fclass FunctionInlining.TrivialInline11
+ Real a1;
+ Real a2;
+ Real a3;
+ Real a4;
+ Real _der_a1;
+ Real _der_a2;
+ Real _der_a4;
+ Real _der_der_a1;
+ Real _der_der_a4;
+equation
+ _der_a1 = a2;
+ _der_a2 = a3;
+ a4 = time;
+ a4 = FunctionInlining.TrivialInline11.G(a1);
+ _der_a4 = 1.0;
+ _der_a4 = FunctionInlining.TrivialInline11.G(_der_a1);
+ _der_der_a1 = _der_a2;
+ _der_der_a4 = 0.0;
+ _der_der_a4 = FunctionInlining.TrivialInline11.G(_der_der_a1);
+
+public
+ function FunctionInlining.TrivialInline11.G
+  input Real i1;
+  output Real o1;
+ algorithm
+  o1 := i1;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.TrivialInline11.G;
+
+end FunctionInlining.TrivialInline11;
+")})));
+end TrivialInline11;
+
 
 model InlineAnnotation1
 	function f

@@ -1077,6 +1077,8 @@ aspect FunctionInlining {
             return false;
         if (inlineAnnotation().always())
             return isInlinable(late);
+        if (!late && annotation("derivative").exists())
+            return false;
         if (myProtected().size() > 0)
             return false;
         if (!hasInlinableIO())  // TODO: shouldn't this be before checking always()?
