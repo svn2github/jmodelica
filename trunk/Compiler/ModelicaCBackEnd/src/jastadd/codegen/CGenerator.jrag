@@ -1467,22 +1467,88 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            ext.genSerializeDecl_C(p, str, indent, cgc, tempMap);
+            indent = p.indent(indent);
+            TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
+            for (CommonVariableDecl cvd : ext.externalObjectsToSerialize()) {
+                 tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+                 tp.print(cvd.type());
+            }
         }
     }
     
-    public class ECETag_init extends ExternalCEvalTag {
-        public ECETag_init(AbstractGenerator myGenerator, FClass fClass) {
-            super("ECE_init", myGenerator, fClass);
+    public class ECETag_free extends ExternalCEvalTag {
+        public ECETag_free(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_free", myGenerator, fClass);
         }
         
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            ext.genSerializeInit_C(p, str, indent, cgc, tempMap);
+            indent = p.indent(indent);
+            TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
+            for (CommonVariableDecl cvd : ext.externalObjectsToSerialize()) {
+                 tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+                 tp.printExt((FExternalObjectType)cvd.type());
+            }
         }
     }
     
+    public class ECETag_setup_decl extends ExternalCEvalTag {
+        public ECETag_setup_decl(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_setup_decl", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            indent = p.indent(indent);
+            TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
+        }
+    }
+    
+    public class ECETag_setup_init extends ExternalCEvalTag {
+        public ECETag_setup_init(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_setup_init", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            indent = p.indent(indent);
+            TypePrinter_C tp = new InitPrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
+        }
+    }
+    
+    public class ECETag_setup_free extends ExternalCEvalTag {
+        public ECETag_setup_free(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_setup_free", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            indent = p.indent(indent);
+            TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
+        }
+    }
+    
+    public class ECETag_calc_decl extends ExternalCEvalTag {
+        public ECETag_calc_decl(AbstractGenerator myGenerator, FClass fClass) {
+            super("ECE_calc_decl", myGenerator, fClass);
+        }
+        
+        @Override
+        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
+                CodeGenContext cgc, Map<String,String> tempMap) {
+            indent = p.indent(indent);
+            TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
+            ext.genVarDecls_C(p, str, indent);
+        }
+    }
     
     public class ECETag_calc_init extends ExternalCEvalTag {
         public ECETag_calc_init(AbstractGenerator myGenerator, FClass fClass) {
@@ -1492,7 +1558,9 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            ext.genSerializeCalcInit_C(p, str, indent, cgc, tempMap);
+            indent = p.indent(indent);
+            TypePrinter_C tp = new InitPrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
     }
     
@@ -1504,6 +1572,8 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
+            indent = p.indent(indent);
+            indent = p.indent(indent);
             ext.genSerializeCalc_C(p, str, indent, cgc, tempMap);
         }
     }
@@ -1516,22 +1586,12 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            ext.genSerializeCalcFree_C(p, str, indent, cgc, tempMap);
+            indent = p.indent(indent);
+            TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
     }
     
-    public class ECETag_end extends ExternalCEvalTag {
-        public ECETag_end(AbstractGenerator myGenerator, FClass fClass) {
-            super("ECE_end", myGenerator, fClass);
-        }
-        
-        @Override
-        public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
-                CodeGenContext cgc, Map<String,String> tempMap) {
-            ext.genSerializeEnd_C(p, str, indent, cgc, tempMap);
-        }
-    }
-
     /**
      * C: Add the DAE block functions to the JMI struct
      */

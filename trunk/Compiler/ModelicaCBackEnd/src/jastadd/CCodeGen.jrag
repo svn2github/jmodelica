@@ -1421,7 +1421,7 @@ aspect CCodeGen {
         }
         
         public void print(FExternalObjectType type) {
-            print((FType) type);
+            printComposite(type);
         }
         
         public void printComposite(FType type) {
@@ -1464,6 +1464,10 @@ aspect CCodeGen {
         
         protected boolean shouldPrintComp(FRecordComponentType comp) {
             return comp.getFType().isComposite();
+        }
+        
+        protected void printExt(FExternalObjectType type) {
+            
         }
         
         protected void printComps(FExternalObjectType type) {
@@ -1580,9 +1584,25 @@ aspect CCodeGen {
         protected void printDynArray(FType type) {
             String ind    = acquireTemp(name());
             String maxind = ind + "_max";
-            str.print(indent() + maxind + " = ");
-            printNumElements(type);
-            str.println(" + 1;");
+            if (initMaxInd()) {
+                str.print(indent() + maxind + " = ");
+                printNumElements(type);
+                str.println(" + 1;");
+            }
+            str.formatln("%sfor (%s = 1; %s < %s; %s++) {", indent(), ind, ind, maxind, ind);
+            pushLevel(type.arrayAccess(1, name(), ind), true, true);
+            printComps(type);
+            popLevel();
+            str.println(indent() + "}");
+        }
+        public boolean initMaxInd() { return true; }
+        protected void printDynArray(FType type, String ind, boolean initMaxInd) {
+            String maxind = ind + "_max";
+            if (initMaxInd) {
+                str.print(indent() + maxind + " = ");
+                printNumElements(type);
+                str.println(" + 1;");
+            }
             str.formatln("%sfor (%s = 1; %s < %s; %s++) {", indent(), ind, ind, maxind, ind);
             pushLevel(type.arrayAccess(1, name(), ind), true, true);
             printComps(type);
