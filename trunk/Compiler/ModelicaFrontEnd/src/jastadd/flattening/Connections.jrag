@@ -46,8 +46,16 @@ aspect Connections {
 		//System.out.println(connectionSetManager.printConnectionSets());
 		
         List<FAbstractEquation> equationList = getFAbstractEquations();
+        int numBefore = equationList.getNumChild();
         for (ConnectionSet set : l) 
             set.generateEquations(equationList);
+        int count = 0;
+        for (FAbstractEquation eqn : equationList) {
+            if (count >= numBefore) {
+//                eqn.annotation("src").setValue(new FStringLitExp("Connect #" + (count - numBefore)));
+            }
+            count++;
+        }
 		connectionSetManager.generateEqualityConstraints(this);
 		connectionSetManager.disconnectFromInstanceTree();
         endStep("genConnectionEquations()");

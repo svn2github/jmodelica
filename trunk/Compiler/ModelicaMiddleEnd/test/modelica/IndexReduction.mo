@@ -3614,5 +3614,114 @@ end IndexReduction.FunctionInlining.Test9;
 
 end FunctionInlining;
 
+    package IncidencesThroughFunctions
+        
+        model RevoluteWithTranslation
+            parameter Real[3] r(each stateSelect=StateSelect.never) = {1,0,0};
+            inner Modelica.Mechanics.MultiBody.World world(n={0,0,-1});
+            Modelica.Mechanics.MultiBody.Joints.Revolute revolute(w(start=1, fixed=true),phi(stateSelect=StateSelect.avoid),animation=false);
+            Modelica.Mechanics.MultiBody.Parts.Body body(animation=false);
+            Real[3] r_0(each stateSelect={StateSelect.never,StateSelect.never,StateSelect.prefer}), v_0, a_0;
+        equation 
+            connect(revolute.frame_a, world.frame_b);
+            connect(body.frame_a, revolute.frame_b);
+            r_0 = revolute.frame_b.r_0 + Modelica.Mechanics.MultiBody.Frames.resolve1(revolute.frame_b.R, r);
+            v_0 = der(r_0);
+            a_0 = der(v_0);
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="IncidencesThroughFunctions_RevoluteWithTranslation",
+                description="Test a specific case where we need to look at the incidences through functions",
+                methodName="stateDiagnosticsObj",
+                methodResult="
+States:
+  Modelica.SIunits.Angle revolute.phi(stateSelect = StateSelect.avoid,start = 0) \"Relative rotation angle from frame_a to frame_b\"
+  Modelica.SIunits.AngularVelocity revolute.w(start = 1,fixed = true,stateSelect = revolute.stateSelect) \"First derivative of angle phi (relative angular velocity)\"
+")})));
+        end RevoluteWithTranslation;
+        
+        model InlinedFunctionCall
+            function F
+                input Real i1;
+                input Real i2;
+                output Real o1;
+                output Real o2;
+            algorithm
+                o1 := i1;
+                o2 := i2;
+                annotation(InlineAfterIndexReduction=true, derivative=F_der);
+            end F;
+            function F_der
+                input Real i1;
+                input Real i2;
+                input Real i1_der;
+                input Real i2_der;
+                output Real o1_der;
+                output Real o2_der;
+            algorithm
+                (o1_der, o2_der) := F(i1_der, i2_der);
+                annotation(Inline=true);
+            end F_der;
+            
+            Real a1,a2,a3,a4,b1,b2,b3,b4;
+        equation
+            der(a1) = a2;
+            der(a2) = a3;
+            der(b1) = b2;
+            der(b2) = b3;
+            a4 = time;
+            b4 = time * 2;
+            (a4,b4) = F(a1,b1);
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="IncidencesThroughFunctions_InlinedFunctionCall",
+                description="Ensure that all variables referenced in the function call equation are differentiated as expected",
+                flatModel="
+fclass IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall
+ Real a1;
+ Real a2;
+ Real a3;
+ Real a4;
+ Real b1;
+ Real b2;
+ Real b3;
+ Real b4;
+ Real _der_a1;
+ Real _der_a2;
+ Real _der_b1;
+ Real _der_b2;
+ Real _der_b4;
+ Real _der_a4;
+ Real _der_der_a1;
+ Real _der_der_a4;
+ Real _der_der_b4;
+ Real _der_der_b1;
+equation
+ _der_a1 = a2;
+ _der_a2 = a3;
+ _der_b1 = b2;
+ _der_b2 = b3;
+ a4 = time;
+ b4 = time * 2;
+ a4 = a1;
+ b4 = b1;
+ _der_b4 = 2;
+ _der_a4 = _der_a1;
+ _der_b4 = _der_b1;
+ _der_a4 = 1.0;
+ _der_der_a1 = _der_a2;
+ _der_der_a4 = _der_der_a1;
+ _der_der_b4 = _der_der_b1;
+ _der_der_a4 = 0.0;
+ _der_der_b1 = _der_b2;
+ _der_der_b4 = 0;
+end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
+")})));
+        end InlinedFunctionCall;
+        
+    end IncidencesThroughFunctions;
+
 end IndexReduction;
 

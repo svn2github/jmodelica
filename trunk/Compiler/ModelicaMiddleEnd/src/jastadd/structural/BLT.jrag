@@ -513,7 +513,7 @@ aspect BLT{
     public void AbstractBiPGraph.removeHomotopyActualIncidences() {
         for (E eqn : getEquations()) {
             if (eqn.getEquation().containsFHomotopyExp()) {
-                eqn.removeIncidencesNotInSet(lookupVarsInSet(eqn.getEquation().homotopySimplifiedVarUseLookupVisitor()));
+                eqn.removeIncidencesNotInSet(lookupVars(eqn.getEquation().homotopySimplifiedVarUseLookupVisitor()));
             }
         }
         

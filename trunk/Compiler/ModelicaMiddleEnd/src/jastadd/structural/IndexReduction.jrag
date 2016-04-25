@@ -605,6 +605,68 @@ aspect IndexReduction {
         return inliner.dynamicEquation(diffedFEqns.iterator().next());
     }
     
+
+    public <V> AbstractBiPGraph.AssignmentIncidenceMap FAbstractEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        throw new UnsupportedOperationException("FAbstractEquation.assignmentIncidenceMap() isn't implemented for equations of type " + getClass().getSimpleName() + "!");
+    }
+
+    @Override
+    public <V> AbstractBiPGraph.AssignmentIncidenceMap FEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        return g.new SingleAssignmentIncidenceMap(this, resolver);
+    }
+
+    @Override
+    public <V> AbstractBiPGraph.AssignmentIncidenceMap FFunctionCallEquation.assignmentIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        return g.new SplitIncidenceMap(this, resolver, variableTypes);
+    }
+
+    public class IndexReductionBiPGraph {
+        private class ExtraEquationVariableResolver implements VariableResolver<IndexReductionEq, IndexReductionVar> {
+            
+            private final Map<String, AssignmentIncidenceMap> extraEqMap;
+            private final Set<String> evaluationStack = new LinkedHashSet<String>();
+            
+            private ExtraEquationVariableResolver(Collection<FAbstractEquation> equations) {
+                extraEqMap = new HashMap<String, AssignmentIncidenceMap>();
+                for (FAbstractEquation equation : equations) {
+                    AssignmentIncidenceMap incidenceMap = equation.assignmentIncidenceMap(IndexReductionBiPGraph.this, null, this);
+                    for (FIdUseExp lhs : incidenceMap.assigned()) {
+                        extraEqMap.put(lhs.name(), incidenceMap);
+                    }
+                }
+            }
+            
+            @Override
+            public Set<IndexReductionVar> lookupVars(Iterable<FIdUseExp> set) {
+                Set<IndexReductionVar> res = new LinkedHashSet<IndexReductionVar>();
+                lookupVars(set, res);
+                return res;
+            }
+    
+            private void lookupVars(Iterable<FIdUseExp> set, Set<IndexReductionVar> resolvedVars) {
+                for (FIdUseExp use : set) {
+                    String varName = use.name();
+                    IndexReductionVar var = getVariable(varName);
+                    if (var != null) {
+                        resolvedVars.add(var);
+                    } else {
+                        AssignmentIncidenceMap incidenceMap = extraEqMap.get(varName);
+                        if (incidenceMap != null) {
+                            if (!evaluationStack.add(varName)) {
+                                throw new UnsupportedOperationException("Oh boy, we have a circularity in our evaluation of extra equations during index reduction, this is not supported. Stack: " + evaluationStack);
+                            }
+                            try {
+                                lookupVars(incidenceMap.rhs(varName), resolvedVars);
+                            } finally {
+                                evaluationStack.remove(varName);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
     /**
      * This method is big and complex due to that function inlining has to be
      * done on the differentiated equation. This results in additional
@@ -641,14 +703,15 @@ aspect IndexReduction {
             throw new IndexReductionException("Maximum number of differentiations has been reached");
         
         // Handle nonscalar equations and LHS variables that needs to be differentiated
-        for (FAbstractEquation originalFEqn : originalFEqns) {
-            for (IndexReductionVar variable : lookupVarsInSet(originalFEqn.FIdUseExpsInLHS())) {
-                if (variable.getMatching() != null && variable.getMatching() != baseEqn)
-                    eqToMatchStack.add(variable.getMatching());
-                differentiateVariable(variable, newDiffedVars, varsToRemove);
+        for (IndexReductionEq eqn : baseEqn.getGroupMembers()) {
+            for (IndexReductionVar var : eqn.getVariables()) {
+                if (!eqn.isNonDiffUse(var)) {
+                    if (var.getMatching() != null && var.getMatching() != eqn)
+                        eqToMatchStack.add(var.getMatching());
+                    differentiateVariable(var, newDiffedVars, varsToRemove);
+                }
             }
         }
-        
         
         // Differentiate equations
         java.util.List<FAbstractEquation> diffedFEqns = new ArrayList<FAbstractEquation>();
@@ -752,9 +815,7 @@ aspect IndexReduction {
         // Construct a list of all the variables that should be common in all
         // of the equations.
         // Always add variables from extra equations
-        Set<IndexReductionVar> additionalDependencies = new HashSet<IndexReductionVar>();
-        for (FAbstractEquation extraFEqn : extraEquations)
-            additionalDependencies.addAll(lookupVarsInSet(extraFEqn.referencedFIdUseExps()));
+        ExtraEquationVariableResolver extraResolver = new ExtraEquationVariableResolver(extraEquations);
         
         Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         
@@ -775,7 +836,7 @@ aspect IndexReduction {
         for (FAbstractEquation newEqn : originalDiffedFEqns) {
             result.addEquation(newEqn);
             
-            IncidenceMap incMap = newEqn.createIncidenceMap(this, additionalDependencies, null);
+            IncidenceMap incMap = newEqn.createIncidenceMap(this, null, extraResolver);
             
             // Build new differentiated BiP equations for each scalar.
             for (int i = 0; i < newEqn.numScalarEquations(); i++) {

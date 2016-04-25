@@ -1297,8 +1297,8 @@ end AliasTest34;
     
         function F_der
             input Real i1;
-            input Real i1_der;
             input Real i2;
+            input Real i1_der;
             input Real i2_der;
             output Real o1_der;
             output Real o2_der;

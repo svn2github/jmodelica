@@ -1720,8 +1720,10 @@ aspect FlatExpressions {
 
     public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
         FAbstractEquation eqn = flattenEqn(prefix, fc);
-        if (eqn != null)
+        if (eqn != null) {
             getType().addEquationTo(fc, eqn);
+//            eqn.annotation("src").setValue(new FStringLitExp(fileName() + ":" + beginLine()));;
+        }
     }
 	
 	public FEquationType FEquationType.flatten(FQName prefix) {
