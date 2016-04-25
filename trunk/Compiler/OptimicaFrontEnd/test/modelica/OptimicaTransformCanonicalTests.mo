@@ -593,7 +593,7 @@ end MinTimeTest3;
 			flatModel="
 fclass OptimicaTransformCanonicalTests.DAETest1
  structural parameter Integer N = 5 \"Number of linear ODEs/DAEs\" /* 5 */;
- parameter Integer N_states = 3 \"Number of states: < N\" /* 3 */;
+ structural parameter Integer N_states = 3 \"Number of states: < N\" /* 3 */;
  Real x[1](start = 3,fixed = dynamic[1]) \"States/algebraics\";
  Real x[2](start = 3,fixed = dynamic[2]) \"States/algebraics\";
  Real x[3](start = 3,fixed = dynamic[3]) \"States/algebraics\";
@@ -606,21 +606,15 @@ fclass OptimicaTransformCanonicalTests.DAETest1
  structural parameter Real a[3] = 2.0 \"Time constants\" /* 2.0 */;
  structural parameter Real a[4] = 1.5 \"Time constants\" /* 1.5 */;
  structural parameter Real a[5] = 1.0 \"Time constants\" /* 1.0 */;
- parameter Boolean dynamic[1] \"Switches for turning ODEs into DAEs\";
- parameter Boolean dynamic[2] \"Switches for turning ODEs into DAEs\";
- parameter Boolean dynamic[3] \"Switches for turning ODEs into DAEs\";
- parameter Boolean dynamic[4] \"Switches for turning ODEs into DAEs\";
- parameter Boolean dynamic[5] \"Switches for turning ODEs into DAEs\";
+ parameter Boolean dynamic[1] = true \"Switches for turning ODEs into DAEs\" /* true */;
+ parameter Boolean dynamic[2] = true \"Switches for turning ODEs into DAEs\" /* true */;
+ parameter Boolean dynamic[3] = true \"Switches for turning ODEs into DAEs\" /* true */;
+ parameter Boolean dynamic[4] = false \"Switches for turning ODEs into DAEs\" /* false */;
+ parameter Boolean dynamic[5] = false \"Switches for turning ODEs into DAEs\" /* false */;
 initial equation 
  x[1] = 3;
  x[2] = 3;
  x[3] = 3;
-parameter equation
- dynamic[1] = if 1 <= N_states then true else false;
- dynamic[2] = if 2 <= N_states then true else false;
- dynamic[3] = if 3 <= N_states then true else false;
- dynamic[4] = if 4 <= N_states then true else false;
- dynamic[5] = if 5 <= N_states then true else false;
 equation
  der(x[1]) = -3.0 * x[1] + 3.0 * x[2];
  der(x[2]) = -2.5 * x[2] + 2.5 * x[3];
