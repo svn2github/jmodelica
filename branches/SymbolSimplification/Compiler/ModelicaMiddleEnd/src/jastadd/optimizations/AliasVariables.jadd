@@ -60,8 +60,7 @@ aspect AliasVariables {
                 removeAliasParameters();
                 fclass.removeUnusedTemporaries();
                 fclass.mergeEquivalentRecords();
-                // Causes errors.
-                //fclass.insertTempsInLHS();
+                fclass.insertTempsInLHS();
                 fclass.remoteRedundantInitialEquations();
                 fclass.updateLists(workData);
             }
