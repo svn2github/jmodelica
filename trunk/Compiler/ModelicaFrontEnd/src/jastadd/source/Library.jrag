@@ -391,7 +391,7 @@ aspect Library {
             private LibraryDef(File path, boolean structured, LibNode.LoadReason reason) {
                 String name = path.getName();
                 if (!structured) {
-                    name = name.substring(0, name.lastIndexOf('.')-1);
+                    name = name.substring(0, name.lastIndexOf('.'));
                 }
                 String[] parts = name.split(" ", 2);
                 if (parts.length > 1) {
