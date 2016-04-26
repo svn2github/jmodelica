@@ -613,10 +613,18 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             if (resolvedDependencies == null) {
                 DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
                 FFunctionCallEquation equation = (FFunctionCallEquation) this.equation;
-                equation.getCall().evaluate(pve);
-                Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies = pve.resolveDependencies(equation);
-                
-                resolvedDependencies = sortDependencies(pve.resolveDependencies(equation));
+                try {
+                    equation.getCall().evaluate(pve);
+                    Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies = pve.resolveDependencies(equation);
+                    resolvedDependencies = sortDependencies(unsortedDependencies);
+                } catch (ConstantEvaluationException e) {
+                    ASTNode.log.debug("SplitIncidenceMap failed to compute dependency information, falling back to normal heuristics!");
+                    resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
+                    Collection<FIdUseExp> rhs = equation.FIdUseExpsInRHS();
+                    for (FIdUseExp lhs : lhsUses()) {
+                        resolvedDependencies.put(lhs, rhs);
+                    }
+                }
             }
             return resolvedDependencies;
         }

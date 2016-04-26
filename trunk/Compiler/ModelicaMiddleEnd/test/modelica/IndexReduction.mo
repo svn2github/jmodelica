@@ -3721,6 +3721,97 @@ end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
 ")})));
         end InlinedFunctionCall;
         
+        model AllIncidencesFallback
+            record R
+                Real a,b;
+            end R;
+            function F1
+                input Real i1;
+                input R i2;
+                output Real o1;
+            algorithm
+                o1 := i1 * i2.a + i1 * i2.b;
+                annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
+            end F1;
+            function F1_der
+                input Real i1;
+                input R i2;
+                input Real i1_der;
+                output Real o1_der;
+            algorithm
+                o1_der := F1(i1_der, i2) * i1_der;
+                annotation(Inline=true);
+            end F1_der;
+            
+            function F2
+                input Real i1;
+                output R o1;
+            algorithm
+                if i1 > 3.14 then
+                    o1.a := i1 + 1;
+                end if;
+                o1.a := -i1;
+                o1.b := i1;
+            annotation(InlineAfterIndexReduction=false);
+            end F2;
+            
+            function F3
+                input Real i1;
+                output Real o1;
+            algorithm
+                o1 := i1 - 1;
+            annotation(InlineAfterIndexReduction=false);
+            end F3;
+            
+            Real x,y;
+        equation
+            der(y) * der(x) = 1;
+            y = F1(x, F2(x));
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="IncidencesThroughFunctions_AllIncidencesFallback",
+                description="If we fail with the incidence calculation (if statement in F2) then we should fall back to using all incidences",
+                flatModel="
+fclass IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback
+ Real x;
+ Real y;
+ Real _der_y;
+ Real temp_12;
+ Real temp_13;
+ Real temp_14;
+initial equation 
+ x = 0.0;
+equation
+ _der_y * der(x) = 1;
+ y = x * temp_13 + x * temp_14;
+ temp_12 = der(x);
+ _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
+ (IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R(temp_13, temp_14)) = IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2(x);
+
+public
+ function IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2
+  input Real i1;
+  output IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R o1;
+ algorithm
+  if i1 > 3.14 then
+   o1.a := i1 + 1;
+  end if;
+  o1.a := - i1;
+  o1.b := i1;
+  return;
+ annotation(InlineAfterIndexReduction = false);
+ end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.F2;
+
+ record IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R
+  Real a;
+  Real b;
+ end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback.R;
+
+end IndexReduction.IncidencesThroughFunctions.AllIncidencesFallback;
+")})));
+        end AllIncidencesFallback;
+        
     end IncidencesThroughFunctions;
 
 end IndexReduction;
