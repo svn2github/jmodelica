@@ -149,7 +149,7 @@ aspect TransformCanonical {
             transformations.add(new commonSubexpressionEliminationIfSet());
             transformations.add(new addFPreVariables());
             // An alias elimination is required here.
-            transformations.add(new aliasEliminationIfSet(this));
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new sortDependentParameters());
             transformations.add(new addRuntimeOptionParameters());
             transformations.add(new computeMatchingsAndBLT());

@@ -550,7 +550,9 @@ aspect VariabilityPropagation {
                     equation.removeVariable(this);
                 }
                 
-                workData.addToWorklist(equation);
+                if (equation.canPropagate()) {
+                    workData.addToWorklist(equation);
+                }
             }
         }
         

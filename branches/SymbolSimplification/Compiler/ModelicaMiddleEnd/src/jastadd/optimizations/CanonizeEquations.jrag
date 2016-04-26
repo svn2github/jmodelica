@@ -575,48 +575,6 @@ aspect CanonizeEquations {
         }
     }
     
-    /*
-     *  Class for node counting.<p>
-     *  Used to investigate tree size
-     */
-    public class TypeMap {
-        private HashMap<FType, Integer> counter = new HashMap<FType, Integer>();
-
-        public TypeMap() {}
-
-        public void increaseAmount(FType type) {
-            int amount = 1 + (counter.containsKey(type) ? counter.get(type) : 0);
-            counter.put(type, amount);
-        }
-        
-        public int numNodes() {
-            return counter.size();
-        }
-        
-        public int numNodeTypes(FType type) {
-            if (!counter.containsKey(type)) {
-                return -1;
-            }
-            return counter.get(type);
-        }
-        
-        public String resultString() {
-            StringBuilder sb = new StringBuilder();
-            for (FType type : counter.keySet()) {
-                sb.append("[" + type + "]:\t" + counter.get(type) + "\n");
-            }
-            return sb.append("[Total]:\t" + counter.size() + "\n").toString();
-        }
-    }
-    
-    coll TypeMap FClass.typeCount() [new TypeMap()]
-        with increaseAmount
-        root FClass;
-
-    FExp contributes type()
-        to FClass.typeCount()
-        for myFClass();
-    
     syn ArrayList<Integer> FExp.comparisonValues() {
         ArrayList<Integer> cmpVal = new ArrayList<Integer>();
         cmpVal.add(Integer.MAX_VALUE);
@@ -667,46 +625,9 @@ aspect CanonizeEquations {
     }
     
     /*
-     *  Class identity attributes.
-     */
-
-    syn boolean FExp.isFExp() = true;
-    syn boolean ASTNode.isFExp() = false;
-
-    syn boolean FBinExp.isFBinExp() = true;
-    syn boolean FExp.isFBinExp() = false;
-
-    syn boolean FAddExp.isFAddExp() = true;
-    syn boolean FExp.isFAddExp() = false;
-
-    syn boolean FSubExp.isFSubExp() = true;
-    syn boolean FExp.isFSubExp() = false;
-
-    syn boolean FMulExp.isFMulExp() = true;
-    syn boolean FExp.isFMulExp() = false;
-
-    syn boolean FDivExp.isFDivExp() = true;
-    syn boolean FExp.isFDivExp() = false;
-
-    syn boolean FIdUseExp.isFIdUseExp() = true;
-    syn boolean FExp.isFIdUseExp() = false;
-
-    syn boolean FAbstractEquation.isFEquation() = false;
-    syn boolean FEquation.isFEquation() = true;
-
-    /*
-     *  Casts.
-     */
-    
-    syn FBinExp FExp.asFBinExp() = (FBinExp) this;
-    syn FMulExp FExp.asFMulExp() = (FMulExp) this;
-    syn FEquation FAbstractEquation.asFEquation() = (FEquation) this;
-    syn FIntegerLitExp FExp.asFIntegerLitExp() = (FIntegerLitExp) this;
-
-    /*
      *  Attributes used by divToMul.
      */
-
+    
     syn boolean FExp.isLeftChildOfMul() { 
         if (parentFExp() == null) {
             return false;
@@ -724,4 +645,80 @@ aspect CanonizeEquations {
     syn boolean FMulExp.lookupLeft(FExp child) {
         return child == getChild(0);
     }
+    
+    /*
+     *  Cast and identity attributes.
+     *
+     *  // TODO: Eliminate the need for these.
+     */
+    syn boolean ASTNode.isFExp() = false;
+    eq FExp.isFExp() = true;
+
+    syn boolean FAbstractEquation.isFEquation() = false;
+    eq FEquation.isFEquation() = true;
+    
+    syn boolean FExp.isFBinExp() = false;
+    eq FBinExp.isFBinExp() = true;
+    
+    syn boolean FExp.isFAddExp() = false;
+    eq FAddExp.isFAddExp() = true;
+    
+    syn boolean FExp.isFSubExp() = false;
+    eq FSubExp.isFSubExp() = true;
+
+    syn boolean FExp.isFMulExp() = false;
+    eq FMulExp.isFMulExp() = true;
+
+    syn boolean FExp.isFDivExp() = false;
+    eq FDivExp.isFDivExp() = true;
+    
+    syn boolean FExp.isFIdUseExp() = false;
+    eq FIdUseExp.isFIdUseExp() = true;
+    
+    syn FEquation FAbstractEquation.asFEquation() = (FEquation) this;
+    syn FBinExp FExp.asFBinExp() = (FBinExp) this;
+    syn FMulExp FExp.asFMulExp() = (FMulExp) this;
+    syn FIdUseExp ASTNode.asFIdUseExp() = (FIdUseExp) this;
+    syn FIntegerLitExp FExp.asFIntegerLitExp() = (FIntegerLitExp) this;
+    
+    /*
+     *  Classes and methods for bench-marking and debugging.
+     */
+    public class TypeMap {
+        private HashMap<FType, Integer> counter = new HashMap<FType, Integer>();
+
+        public TypeMap() {}
+
+        public void increaseAmount(FType type) {
+            int amount = 1 + (counter.containsKey(type) ? counter.get(type) : 0);
+            counter.put(type, amount);
+        }
+        
+        public int numNodes() {
+            return counter.size();
+        }
+        
+        public int numNodeTypes(FType type) {
+            if (!counter.containsKey(type)) {
+                return -1;
+            }
+            return counter.get(type);
+        }
+        
+        public String resultString() {
+            StringBuilder sb = new StringBuilder();
+            for (FType type : counter.keySet()) {
+                sb.append("[" + type + "]:\t" + counter.get(type) + "\n");
+            }
+            return sb.append("[Total]:\t" + counter.size() + "\n").toString();
+        }
+    }
+    
+    coll TypeMap FClass.typeCount() [new TypeMap()]
+        with increaseAmount
+        root FClass;
+
+    FExp contributes type()
+        to FClass.typeCount()
+        for myFClass();
 }

@@ -15,19 +15,32 @@
 */
 aspect SymbolicTransformationFramework {
     public class FClass {
-        public static HashMap<String, Integer> modifications =
+        protected symbolicTransformationFramework framework =
+            new symbolicTransformationFramework(this);
+            
+        // Needed for debugging.
+        protected static HashMap<String, Integer> modifications =
             new HashMap<String, Integer>();
-        // Needed in a later stage of transformations.
+
+        /*
+         *  IfSets in case the pre-framework algorithms are needed.
+         */
         public class aliasEliminationIfSet extends Transformation {
-            private FClass fclass;
-            public aliasEliminationIfSet(FClass fclass) {
+            public aliasEliminationIfSet() {
                 super("eliminate_alias_variables");
-                this.fclass = fclass;
             }
             
             public void perform() {
-                new symbolicTransformationFramework(fclass).performAliasElimination();
-                // symbolicTransformationFramework.FRAMEWORK_DONE = true;
+                framework.performAliasElimination();
+            }
+        }
+        public class variabilityPropagationIfSet extends Transformation {
+            public variabilityPropagationIfSet() {
+                super("variability_propagation");
+            }
+            
+            public void perform() {
+                framework.performVariabilityPropagation();
             }
         }
     }
@@ -37,13 +50,8 @@ aspect SymbolicTransformationFramework {
      *  upon the equations in an <code>FClass</code>.
      */
     public class symbolicTransformationFramework extends FClass.Transformation {
-        /*
-         *  Debug data.
-         */
-        private static HashMap<String, Integer> modifications = FClass.modifications;
-        private static boolean DEBUG = false;
-        private static final String RESULT_PATH = "C:\\Test_Results\\modifications\\";
-            
+        
+    
         private static ModelicaLogger log = ASTNode.log;
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithms;
@@ -54,107 +62,10 @@ aspect SymbolicTransformationFramework {
             algorithms = new ArrayList<SymbolicTransformationAlgorithm>();
         }
         
-        /*
-         *  Debug and bench-marking.
-         */
-        private void algorithmPerformedChanges(SymbolicTransformationAlgorithm algorithm) {
-            if (!DEBUG) {
-                return;
-            }
-            String name = algorithm.name();
-            modifications.put(name, algorithmChanges(name) + 1);
-        }
-        
-        private void addAlgorithmsToModifications() {
-            if (!DEBUG) {
-                return;
-            }
-            modifications.put("Variability_Propagation", 0);
-            modifications.put("Alias_Elimination", 0);
-        }
-        
-        private void printModificationsSingleFile(String filePath) {
-            if (!DEBUG) {
-                return;
-            }
-            File resultFile = new File(RESULT_PATH + "_dataToCopyIntoExcel" + ".txt");
-            String testFile = fclass.toString().split("\n")[0].split(" ")[1];
-            StringBuilder sb = new StringBuilder();
-            sb.append(testFile);
-            for (String algorithm : modifications.keySet()) {
-                String name = algorithm;
-                if (name == "Variability_Propagation") {
-                    sb.append("\t"+algorithmChanges(name));
-                } else if (name == "Alias_Elimination") {
-                    sb.append("\t"+algorithmChanges(name));
-                }
-            }
-            sb.append("\n");
-            
-            try{
-                if (resultFile.exists() == false) {
-                    resultFile.createNewFile();
-                    FileWriter fileWriter = new FileWriter(resultFile, true);
-                    BufferedWriter writer = new BufferedWriter(fileWriter);
-                    writer.write("Model\tVariabilityPropagation\tAliasElimination\n");
-                    writer.close();
-                }
-                FileWriter fileWriter = new FileWriter(resultFile, true);
-                BufferedWriter writer = new BufferedWriter(fileWriter);
-                writer.write(sb.toString());
-                writer.close();
-            } catch (IOException e) {
-                    System.out.println("Error writing to file <" + resultFile + ">.");
-            }
-        }
-        
-        private void printModifications(String filePath) {
-            if (!DEBUG) {
-                return;
-            }
-            String resultFile = RESULT_PATH + fclass.toString().split("\n")[0].split(" ")[1].replaceAll("\\.","") + ".txt";
-            StringBuilder sb = new StringBuilder("< ----- Algorithm Modifications ----- >\n");
-            for (String algorithm : modifications.keySet()) {
-                sb.append("[" + algorithm + "]:\t" + algorithmChanges(algorithm) + ".\n");
-            }
-            sb.append("< ----- ----------------------- ----- >\n");
-            
-            BufferedWriter writer;
-            try {
-                writer = new BufferedWriter(new FileWriter(resultFile));
-                writer.write(sb.toString());
-                writer.flush();
-                writer.close();
-            } catch (IOException e) {
-                System.out.println("Error writing to file <" + resultFile + ">.");
-            }
-        }
-        
-        private int algorithmChanges(String algorithm) {
-            int res = 0;
-            if (modifications.containsKey(algorithm)) {
-                res = modifications.get(algorithm);
-            }
-            return res;
-        }
-        
         public void perform() {
             WorkData workData = new WorkData();
             addAlgorithms(workData);
             perform(workData);
-        }
-        /**
-         *  Separate perform method for only running Alias Elimination. It is used in reduceIndex method
-         *  in FClass. 
-         */ 
-        public void performAliasElimination() {
-            boolean oldDebug = DEBUG;
-            DEBUG = false;
-            algorithms.clear();
-            WorkData workData = new WorkData();
-            algorithms.add(new AliasEliminator(fclass, workData));
-            perform(workData);
-            DEBUG = oldDebug;
         }
         
         /**
@@ -188,6 +99,8 @@ aspect SymbolicTransformationFramework {
                 for (SymbolicTransformationAlgorithm algorithm : activeAlgorithms) {
                     log.info("\twith %s.", algorithm.name());
                     if (algorithm.run(equation)) {
+                    
+                        // Debug.
                         algorithmPerformedChanges(algorithm);
                         log.info("Algorithm performed changes, tracing back to first " +
                             "equation in the worklist.");
@@ -204,12 +117,43 @@ aspect SymbolicTransformationFramework {
             log.info("Running second change().");
             change();
             
+            // Debug.
             if (DEBUG) {
                 printModifications(RESULT_PATH);
                 printModificationsSingleFile(RESULT_PATH);
                 FClass.modifications.clear();
             }
             log.info("Symbolic transformation framework is done.");
+        }
+        
+        /**
+         *  Performs only alias elimination.<p>
+         *  
+         *  //TODO: Refactor to use one method for all specific algorithm runs.
+         */ 
+        public void performAliasElimination() {
+            boolean oldDebug = DEBUG;
+            DEBUG = false;
+            algorithms.clear();
+            WorkData workData = new WorkData();
+            algorithms.add(new AliasEliminator(fclass, workData));
+            perform(workData);
+            DEBUG = oldDebug;
+        }
+        
+        /**
+         *  Performs only variability propagation.<p>
+         *  
+         *  //TODO: Refactor to use one method for all specific algorithm runs.
+         */ 
+        public void performVariabilityPropagation() {
+            boolean oldDebug = DEBUG;
+            DEBUG = false;
+            algorithms.clear();
+            WorkData workData = new WorkData();
+            algorithms.add(new VariabilityPropagator(fclass, workData));
+            perform(workData);
+            DEBUG = oldDebug;
         }
         
         /**
@@ -562,7 +506,96 @@ aspect SymbolicTransformationFramework {
         return false;
     }
     
-    syn FIdUseExp ASTNode.asFIdUseExp() = (FIdUseExp) this;
-    syn boolean FAbstractEquation.equalSides() = false;
     eq FEquation.equalSides() = getLeft().equals(getRight());
+    syn boolean FAbstractEquation.equalSides() = false;
+
+    /*
+     *  Methods for debugging and bench-marking.
+     */
+    public class symbolicTransformationFramework {
+        private static HashMap<String, Integer> modifications = FClass.modifications;
+        private static boolean DEBUG = false;
+        private static final String RESULT_PATH = "C:\\Test_Results\\modifications\\";
+        
+        private void algorithmPerformedChanges(SymbolicTransformationAlgorithm algorithm) {
+            if (!DEBUG) {
+                return;
+            }
+            String name = algorithm.name();
+            modifications.put(name, algorithmChanges(name) + 1);
+        }
+        
+        private void addAlgorithmsToModifications() {
+            if (!DEBUG) {
+                return;
+            }
+            modifications.put("Variability_Propagation", 0);
+            modifications.put("Alias_Elimination", 0);
+        }
+        
+        private void printModificationsSingleFile(String filePath) {
+            if (!DEBUG) {
+                return;
+            }
+            File resultFile = new File(RESULT_PATH + "_dataToCopyIntoExcel" + ".txt");
+            String testFile = fclass.toString().split("\n")[0].split(" ")[1];
+            StringBuilder sb = new StringBuilder();
+            sb.append(testFile);
+            for (String algorithm : modifications.keySet()) {
+                String name = algorithm;
+                if (name == "Variability_Propagation") {
+                    sb.append("\t"+algorithmChanges(name));
+                } else if (name == "Alias_Elimination") {
+                    sb.append("\t"+algorithmChanges(name));
+                }
+            }
+            sb.append("\n");
+            
+            try{
+                if (resultFile.exists() == false) {
+                    resultFile.createNewFile();
+                    FileWriter fileWriter = new FileWriter(resultFile, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter);
+                    writer.write("Model\tVariabilityPropagation\tAliasElimination\n");
+                    writer.close();
+                }
+                FileWriter fileWriter = new FileWriter(resultFile, true);
+                BufferedWriter writer = new BufferedWriter(fileWriter);
+                writer.write(sb.toString());
+                writer.close();
+            } catch (IOException e) {
+                    System.out.println("Error writing to file <" + resultFile + ">.");
+            }
+        }
+        
+        private void printModifications(String filePath) {
+            if (!DEBUG) {
+                return;
+            }
+            String resultFile = RESULT_PATH + fclass.toString().split("\n")[0].split(" ")[1].replaceAll("\\.","") + ".txt";
+            StringBuilder sb = new StringBuilder("< ----- Algorithm Modifications ----- >\n");
+            for (String algorithm : modifications.keySet()) {
+                sb.append("[" + algorithm + "]:\t" + algorithmChanges(algorithm) + ".\n");
+            }
+            sb.append("< ----- ----------------------- ----- >\n");
+            
+            BufferedWriter writer;
+            try {
+                writer = new BufferedWriter(new FileWriter(resultFile));
+                writer.write(sb.toString());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                System.out.println("Error writing to file <" + resultFile + ">.");
+            }
+        }
+        
+        private int algorithmChanges(String algorithm) {
+            int res = 0;
+            if (modifications.containsKey(algorithm)) {
+                res = modifications.get(algorithm);
+            }
+            return res;
+        }
+    }
 }
