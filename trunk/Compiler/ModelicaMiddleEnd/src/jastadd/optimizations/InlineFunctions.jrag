@@ -199,7 +199,7 @@ aspect FunctionInlining {
         /**
          * Check if a given function should be inlined under the current inlining level.
          */
-        public abstract boolean isInlinable(FFunctionDecl func);
+        public abstract boolean isInlinable(FFunctionDecl func, FFunctionCall call);
 
         /**
          * Prepare for inlining a new function call.
@@ -400,11 +400,11 @@ aspect FunctionInlining {
         }
         
         @Override
-        public boolean isInlinable(FFunctionDecl func) {
+        public boolean isInlinable(FFunctionDecl func, FFunctionCall call) {
             if (level == OptionRegistry.Inlining.ALL)
-                return func.isInlinable(late);
+                return func.isInlinable(late, call);
             if (level == OptionRegistry.Inlining.TRIVIAL)
-                return func.isTrivialInlinable(late);
+                return func.isTrivialInlinable(late, call);
             return false;
         }
 
@@ -755,7 +755,7 @@ aspect FunctionInlining {
      * Check if an expression is a call to a function that we can inline.
      */
     syn boolean FExp.isInlinableFunctionCall(AbstractFunctionInliner fi) = false;
-    eq FFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = myFCallable().isInlinable(fi);
+    eq FFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = myFCallable().isInlinable(fi, this);
     eq FPartialFunctionCall.isInlinableFunctionCall(AbstractFunctionInliner fi) = false;
 
 
@@ -1026,8 +1026,8 @@ aspect FunctionInlining {
     }
 
     public interface FCallable {
-        public boolean isInlinable(AbstractFunctionInliner fi);
-        public boolean isTrivialInlinable(boolean last);
+        public boolean isInlinable(AbstractFunctionInliner fi, FFunctionCall call);
+        public boolean isTrivialInlinable(boolean last, FFunctionCall call);
         public void inline(AbstractFunctionInliner fi, List<FExp> args);
     }
 
@@ -1035,10 +1035,10 @@ aspect FunctionInlining {
     /**
      * Check if we can inline this function, given the inlining level set in <code>fi</code>.
      */
-    syn boolean FFunctionDecl.isInlinable(AbstractFunctionInliner fi) =
-        fi.isInlinable(this);
+    syn boolean FFunctionDecl.isInlinable(AbstractFunctionInliner fi, FFunctionCall call) =
+        fi.isInlinable(this, call);
     
-    syn boolean FFunctionVariable.isInlinable(AbstractFunctionInliner fi) = false;
+    syn boolean FFunctionVariable.isInlinable(AbstractFunctionInliner fi, FFunctionCall call) = false;
 
     private boolean FFunctionDecl.containsExtObjArrays(ArrayList<FFunctionVariable> variables) {
         for (FFunctionVariable var : variables)
@@ -1062,7 +1062,7 @@ aspect FunctionInlining {
     /**
      * Check if we can inline this function.
      */
-    syn lazy boolean FFunctionDecl.isInlinable(boolean late) =
+    syn lazy boolean FFunctionDecl.isInlinable(boolean late, FFunctionCall call) =
         inlineAnnotation().may() && (late || !inlineAnnotation().late()) && 
         isAllInlinable(getFAlgorithm().getFStatements()) && hasInlinableIO();
     // TODO: Add warning if a function where user suggests inlining can't be inlined?
@@ -1070,18 +1070,18 @@ aspect FunctionInlining {
     /**
      * Check if this function falls under the "trivial" inlining category.
      */
-    syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late) {
+    syn lazy boolean FFunctionDecl.isTrivialInlinable(boolean late, FFunctionCall call) {
         if (!inlineAnnotation().may())
             return false;
         if (!late && inlineAnnotation().late())
             return false;
         if (inlineAnnotation().always())
-            return isInlinable(late);
-        if (!late && annotation("derivative").exists())
+            return isInlinable(late, call);
+        if (!late && call.derivativeAnnotation().exists())
             return false;
         if (myProtected().size() > 0)
             return false;
-        if (!hasInlinableIO())  // TODO: shouldn't this be before checking always()?
+        if (!hasInlinableIO())
             return false;
         for (FStatement stmt : getFAlgorithm().getFStatements())
             if (!stmt.isOkTrivialInline(late))
@@ -1095,8 +1095,8 @@ aspect FunctionInlining {
         }
         return true;
     }
-    
-    syn boolean FFunctionVariable.isTrivialInlinable(boolean late) = false;
+
+    syn boolean FFunctionVariable.isTrivialInlinable(boolean late, FFunctionCall call) = false;
 
     /**
      * Helper method to find unsupported statements in isTrivialInlinable().
@@ -1112,7 +1112,7 @@ aspect FunctionInlining {
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
     syn boolean FAbstractFunctionCall.isOkTrivialInline(boolean last) = isIgnored();
-    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFCallable().isTrivialInlinable(last);
+    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFCallable().isTrivialInlinable(last, this);
 
     /**
      * Helper method to unsupported statements in isTrivialInlinable().

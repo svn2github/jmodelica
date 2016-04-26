@@ -2285,26 +2285,28 @@ aspect CADCodeGen {
         genNonADFunctionCall_CAD(p, str, indent);
         
         // Print the call to the specified derivative function
+        AnnotationNode derNode = derivativeAnnotationUnrestricted();
         str.print(indent);
-        str.print(derivativeFunction().funcNameUnderscore("def") + "(");
+        str.print(derivativeFunction(derNode).funcNameUnderscore("def") + "(");
         String sep = "";
         for (FFunctionVariable ffv : myInputs()){
             str.print(sep);
             sep = ", ";
-            if(ffv.shouldBeDifferentiated())
+            if (ffv.shouldBeDifferentiated(derNode)) {
                 str.print(ffv.varName_CAD());
-            else
+            } else {
                 str.print(ffv.name_C());
+            }
         }
         for (FFunctionVariable ffv : myInputs()){
-            if(ffv.shouldBeDifferentiated()){
+            if (ffv.shouldBeDifferentiated(derNode)){
                 str.print(sep);
                 sep = ", ";
                 str.print(ffv.derName_CAD());
             }
         }
         for (FFunctionVariable ffv : myOutputs()){
-            if(ffv.shouldBeDifferentiated()) {
+            if (ffv.shouldBeDifferentiated(derNode)) {
                 str.print(sep);
                 sep = ", ";
                 if (!ffv.isComposite()) {
@@ -2328,8 +2330,9 @@ aspect CADCodeGen {
         
         genNonADFunctionCall_CAD(p, str, indent);
         
+        AnnotationNode derNode = derivativeAnnotationUnrestricted();
         for (FFunctionVariable ffv : myOutputs())
-            if(ffv.shouldBeDifferentiated())
+            if(ffv.shouldBeDifferentiated(derNode))
                 str.format("%s%s = 0;\n", indent, ffv.derName_CAD());
     }
 
@@ -2340,13 +2343,15 @@ aspect CADCodeGen {
         str.print(indent);
         str.print(funcNameUnderscore("def") + "(");
         String sep = "";
+        AnnotationNode derNode = derivativeAnnotationUnrestricted();
         for (FFunctionVariable ffv : myInputs()){
             str.print(sep);
             sep = ", ";
-            if(ffv.shouldBeDifferentiated())
+            if (ffv.shouldBeDifferentiated(derNode)) {
                 str.print(ffv.varName_CAD());
-            else
+            } else {
                 str.print(ffv.name_C());
+            }
         }
         for (FFunctionVariable ffv : myOutputs()){
             str.print(sep);
@@ -2354,7 +2359,7 @@ aspect CADCodeGen {
             if (!ffv.isComposite()) {
                 str.print("&");
             }
-            if(ffv.shouldBeDifferentiated()) {
+            if (ffv.shouldBeDifferentiated(derNode)) {
                 str.print(ffv.varName_CAD());
             } else {
                 str.print(ffv.name_C());
@@ -2385,10 +2390,10 @@ aspect CADCodeGen {
         prettyPrintHead_CAD(p, str, outerIndent, "void", "der_AD", true);
         str.print(" {\n");
         str.print(indent + "JMI_DYNAMIC_INIT()\n");
-        if (derivativeFunction() != null){
+        if (derivativeFunctionUnrestricted() != null){
             genFuncAnnotation_CAD(p, str, indent);
             genReturnStmt_CAD(p, str, indent);
-        } else if (derivativEqualsZero()){
+        } else if (derivativeEqualsZero()){
             genZeroDerivativeFunction_CAD(p, str, indent);
             genReturnStmt_CAD(p, str, indent);
         } else {
@@ -2432,8 +2437,9 @@ aspect CADCodeGen {
      * @param indent  used to get a consistently formated c-code
      */
     public void FunctionReturnDefinition.printReturnWrite_CAD(CodeStream str, String indent) {
+        AnnotationNode derNode = decl.derivativeAnnotationUnrestricted();
         for (FFunctionVariable v : outputs)
-            if (v.shouldBeDifferentiated())
+            if (v.shouldBeDifferentiated(derNode))
                 v.printReturnWrite_CAD(str, indent);
             else
                 v.printReturnWrite_C(str, indent);
@@ -2492,16 +2498,18 @@ aspect CADCodeGen {
         str.print(funcNameUnderscore(suffix));
         str.print("(");
         String sep = "";
+        AnnotationNode derNode = derivativeAnnotationUnrestricted();
         for (FFunctionVariable v : myInputs()) {
             str.print(sep);
-            if (v.shouldBeDifferentiated())
+            if (v.shouldBeDifferentiated(derNode)) {
                 v.printArgument_var_CAD(str);
-            else
+            } else {
                 v.printArgument_C(str);
+            }
             sep = ", ";
         }
         for (FFunctionVariable v : myInputs()) {
-            if(v.shouldBeDifferentiated()){
+            if (v.shouldBeDifferentiated(derNode)){
                 str.print(sep);
                 v.printArgument_der_CAD(str);
             }
@@ -2509,16 +2517,17 @@ aspect CADCodeGen {
         if (returnArgs) {
             for (FFunctionVariable v : myOutputs()) {
                 str.print(sep);
-                if (v.shouldBeDifferentiated())
+                if (v.shouldBeDifferentiated(derNode)) {
                     v.printReturnArgument_var_CAD(str);
-                else
+                } else {
                     v.printReturnArgument_C(str);
+                }
                 sep = ", ";
             }
         }
         if (returnArgs) {
             for (FFunctionVariable v : myOutputs()) {
-                if(v.shouldBeDifferentiated()){
+                if (v.shouldBeDifferentiated(derNode)) {
                     str.print(sep);
                     v.printReturnArgument_der_CAD(str);
                     sep = ", ";

@@ -15,6 +15,7 @@
 */
 
 
+import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.SortedSet;
@@ -217,35 +218,106 @@ aspect DerivativeFunctions {
 	syn boolean FFunctionCallLeft.shouldBeDifferentiated() = hasFExp() ? getFExp().shouldBeDifferentiated() : false;
 
 
-    syn AnnotationNode FFunctionDecl.derivativeAnnotation() = annotation().forPath("derivative");
-    syn FFunctionDecl FFunctionDecl.derivativeFunction() {
-        if (derivativeAnnotation().exists()) {
-            FCallable fc = derivativeAnnotation().fExp().asFIdUse().myFCallable();
-            return fc == null ? null : fc.asFFunctionDecl();
-        } else
-            return null;
-    }
-    
-    inh FFunctionDecl FFunctionDecl.myDifferentiatedFunction();
-    eq Root.getChild().myDifferentiatedFunction() = null;
-    eq FClass.getFFunctionDecl(int i).myDifferentiatedFunction() = differentiatedFunctions().get(getFFunctionDecl(i));
-    
-    syn lazy Map<FFunctionDecl, FFunctionDecl> FClass.differentiatedFunctions() {
-        HashMap<FFunctionDecl, FFunctionDecl> res = new HashMap<FFunctionDecl, FFunctionDecl>();
-        for (FFunctionDecl ffd : getFFunctionDecls()) {
-            FFunctionDecl der = ffd.derivativeFunction();
-            if (der != null) {
-                res.put(der, ffd);
+    /**
+     * Get the first derivative annotation on this function that match the given restrictions.
+     * 
+     * If no annotation matches, an empty AnnotationNode is returned.
+     */
+    syn AnnotationNode FFunctionDecl.derivativeAnnotation(int order, Set<String> zero) {
+        AnnotationNode orderOne = null;
+        for (AnnotationNode derNode : annotation().allFor("derivative")) {
+            int myOrder = derivativeOrder(derNode);
+            if ((myOrder == order || myOrder == 1) && zero.containsAll(zeroDerivative(derNode))) {
+                return derNode;
             }
         }
-        return res;
+        // None found, return a null node
+        return annotation().emptyNode("derivative");
+    }
+
+    /**
+     * Return the first derivative annotation without restrictions on this function.
+     */
+    syn AnnotationNode FFunctionDecl.derivativeAnnotationUnrestricted() = 
+        derivativeAnnotation(1, Collections.<String>emptySet());
+
+    /**
+     * Return the derivative annotation matching this function call.
+     */
+    syn AnnotationNode FFunctionCall.derivativeAnnotation() {
+        FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
+        if (myDecl == null)
+            return null;
+        
+        Set<String> zeroDer = new HashSet<String>();
+        for (int i = 0, n = getNumArg(); i < n; i++) {
+            if (getArg(i).variability().parameterOrLess()) {
+                zeroDer.add(myDecl.myInput(i).name());
+            }
+        }
+        return myDecl.derivativeAnnotation(order + 1, zeroDer);
+    }
+
+    /**
+     * Get the order of a given derivative annotation.
+     */
+    syn int FFunctionDecl.derivativeOrder(AnnotationNode derNode) {
+        AnnotationNode orderNode = derNode.forPath("order");
+        return orderNode.exists() ? orderNode.integer() : 1;
+    }
+
+    /**
+     * Get the set of names given as zeroDerivative for a given derivative annotation.
+     */
+    syn Set<String> FFunctionDecl.zeroDerivative(AnnotationNode derNode) {
+        Set<String> set = new HashSet<String>();
+        for (AnnotationNode zeroNode : derNode.allFor("zeroDerivative")) {
+            set.add(zeroNode.fExp().asFIdUse().name());
+        }
+        return set;
+    }
+
+    /**
+     * Get the set of names given as noDerivative for a given derivative annotation.
+     */
+    syn Set<String> FFunctionDecl.noDerivative(AnnotationNode derNode) {
+        Set<String> set = new HashSet<String>();
+        for (AnnotationNode noDerNode : derNode.allFor("noDerivative")) {
+            set.add(noDerNode.fExp().asFIdUse().name());
+        }
+        return set;
+    }
+
+    /**
+     * Find the derivative function for the first derivative annotation without restrictions on this function.
+     */
+    syn FFunctionDecl FFunctionDecl.derivativeFunctionUnrestricted() = 
+        derivativeFunction(derivativeAnnotationUnrestricted());
+
+    /**
+     * Find the derivative function for the given annotation node.
+     */
+    syn FFunctionDecl FFunctionDecl.derivativeFunction(AnnotationNode derNode) {
+        FCallable fc = null;
+        if (derNode != null && derNode.exists()) {
+            fc = derNode.fExp().asFIdUse().myFCallable();
+        }
+        return (fc == null) ? null : fc.asFFunctionDecl();
     }
 
     inh boolean FFunctionVariable.delegateShouldBeDifferentiated();
-    eq Root.getChild().delegateShouldBeDifferentiated() = true;
-    eq FFunctionDecl.getFFunctionVariable(int i).delegateShouldBeDifferentiated() {
-        if (derivativeAnnotation().exists())
-            return calculateShouldBeDifferentiated(i);
+    eq Root.getChild().delegateShouldBeDifferentiated()                           = true;
+    eq FFunctionDecl.getFFunctionVariable(int i).delegateShouldBeDifferentiated() = 
+        shouldVarBeDifferentiated(i, derivativeAnnotationUnrestricted());
+
+    inh boolean FFunctionVariable.shouldBeDifferentiated(AnnotationNode derNode);
+    eq Root.getChild().shouldBeDifferentiated(AnnotationNode derNode)                           = true;
+    eq FFunctionDecl.getFFunctionVariable(int i).shouldBeDifferentiated(AnnotationNode derNode) = 
+        shouldVarBeDifferentiated(i, derNode);
+
+    syn boolean FFunctionDecl.shouldVarBeDifferentiated(int i, AnnotationNode derNode) {
+        if (derNode.exists())
+            return calculateShouldBeDifferentiated(i, derNode);
         else
             return getFFunctionVariable(i).type().shouldBeDifferentiated();
     }
@@ -255,12 +327,11 @@ aspect DerivativeFunctions {
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
         if (myDecl == null)
             return false;
-        if (!myDecl.getFFunctionVariable(i).shouldBeDifferentiated())
+        if (!myDecl.getFFunctionVariable(i).shouldBeDifferentiated(derivativeAnnotation()))
             return true;
         return inNonDiffArg();
     }
-    eq InstRoot.getChild().inNonDiffArg() = false;
-    eq FlatRoot.getChild().inNonDiffArg() = false;
+    eq Root.getChild().inNonDiffArg() = false;
 
     /**
      * Calculate if variable no <code>i</code> in the variables the function should be differentiated.
@@ -268,30 +339,20 @@ aspect DerivativeFunctions {
      * Result is cached for all variables in list, and in subsequent calls it will be assumed that 
      * the list is the same.
      */
-    syn boolean FFunctionDecl.calculateShouldBeDifferentiated(int i) {
-        if (cachedShouldBeDifferentiated == null) {
-            AnnotationNode derNode = derivativeAnnotation();
+    syn boolean FFunctionDecl.calculateShouldBeDifferentiated(int i, AnnotationNode derNode) {
+        if (cachedShouldBeDifferentiatedFor != derNode) {
             List<FFunctionVariable> vars = getFFunctionVariables();
             cachedShouldBeDifferentiated = new boolean[vars.getNumChild()];
-            
-            Set<String> dfin = new HashSet<String>();
-            FFunctionDecl differentiatedFunction = myDifferentiatedFunction();
-            if (differentiatedFunction != null) {
-                for (FFunctionVariable ffv : differentiatedFunction.myInputs()) {
-                    dfin.add(ffv.name());
-                }
-            }
+            cachedShouldBeDifferentiatedFor = derNode;
             
             // Type
             boolean[] okType = new boolean[cachedShouldBeDifferentiated.length];
             boolean[] input = new boolean[cachedShouldBeDifferentiated.length];
-            boolean[] alreadyDiffed = new boolean[cachedShouldBeDifferentiated.length];
             int n = 0;
             int k = 0;
             for (FFunctionVariable var : vars) {
                 okType[k] = var.type().shouldBeDifferentiated();
                 input[k] = var.isInput();
-                alreadyDiffed[k] = dfin.contains(var.name());
                 if (okType[k] && input[k]) 
                     n++;
                 k++;
@@ -299,10 +360,8 @@ aspect DerivativeFunctions {
             
             // noDerivative && zeroDerivative
             Set<String> exclude = new HashSet<String>();
-            for (AnnotationNode attrNode : derNode) {
-                if ("noDerivative".equals(attrNode.name()) || "zeroDerivative".equals(attrNode.name()))
-                    exclude.add(attrNode.fExp().asFIdUse().name());
-            }
+            exclude.addAll(zeroDerivative(derNode));
+            exclude.addAll(noDerivative(derNode));
             
             int j = k = 0;
             boolean[] hasDerivative = new boolean[n];
@@ -316,11 +375,7 @@ aspect DerivativeFunctions {
             }
             
             // order
-            int order = 1;
-            for (AnnotationNode attrNode : derNode) {
-                if ("order".equals(attrNode.name()))
-                    order = attrNode.integer();
-            }
+            int order = derivativeOrder(derNode);
             int[] part = new int[order];
             partitionArgumentsByOrder(hasDerivative, 0, n, order, part);
             
@@ -330,17 +385,17 @@ aspect DerivativeFunctions {
                 if (okType[k]) { 
                     if (input[k]) {
                         if (j >= ignore && hasDerivative[j])
-                            cachedShouldBeDifferentiated[k] = !alreadyDiffed[k];
+                            cachedShouldBeDifferentiated[k] = true;
                         j++;
                     } else {
                         cachedShouldBeDifferentiated[k] = true;
                     }
                 }
             }
-	    }
-	    return cachedShouldBeDifferentiated[i];
-	}
-	
+        }
+        return cachedShouldBeDifferentiated[i];
+    }
+
 	private static boolean FFunctionDecl.partitionArgumentsByOrder(boolean[] hasDerivative, int start, int max, int order, int[] result) {
 	    int n = hasDerivative.length - start;
 	    if (order <= 1) {
@@ -361,7 +416,8 @@ aspect DerivativeFunctions {
 	    }
 	    return false;
 	}
-	
-	private boolean[] FFunctionDecl.cachedShouldBeDifferentiated = null;
+
+    private boolean[] FFunctionDecl.cachedShouldBeDifferentiated = null;
+    private AnnotationNode FFunctionDecl.cachedShouldBeDifferentiatedFor = null;
 
 }

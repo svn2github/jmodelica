@@ -540,9 +540,9 @@ aspect IndexReduction {
         }
 
         @Override
-        public boolean isInlinable(FFunctionDecl func) {
+        public boolean isInlinable(FFunctionDecl func, FFunctionCall call) {
             if (inlineEnabled)
-                return func.isTrivialInlinable(false);
+                return func.isTrivialInlinable(false, call);
             else
                 return false;
         }

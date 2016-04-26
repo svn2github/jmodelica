@@ -2799,4 +2799,324 @@ end Differentiation.TempDiff;
 ")})));
 end TempDiff;
 
+
+model MultipleDerivativeAnnotation1
+    function f
+        input Real x;
+        output Real y;
+    algorithm
+        y := x;
+        annotation (derivative(order=1) = df,
+                    Inline=false);
+    end f;
+
+    function df
+        input Real x;
+        input Real dx;
+        output Real dy;
+    algorithm
+        dy := x + dx;
+        annotation (derivative(order=2) = d2f,
+                    derivative(order=1) = ddf,
+                    Inline=false);
+    end df;
+
+    function ddf
+        input Real x;
+        input Real dx;
+        input Real dx2;
+        input Real ddx;
+        output Real ddy;
+    algorithm
+        ddy := 0;
+        annotation (Inline=false);
+     end ddf;
+
+    function d2f
+        input Real x;
+        input Real dx;
+        input Real d2x;
+        output Real d2y;
+    algorithm
+        d2y := x + dx + d2x;
+        annotation (Inline=false);
+    end d2f;
+
+    Real x;
+    Real y;
+    Real z;
+    Real dx;
+    Real dy;
+equation
+    x = f(time);
+    der(x) = y;
+    der(y) = z;
+    dx = df(2.0 * time, 2.0);
+    der(dx) = dy;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleDerivativeAnnotation1",
+            description="Multiple derivative annotation - different order",
+            flatModel="
+fclass Differentiation.MultipleDerivativeAnnotation1
+ Real x;
+ Real y;
+ Real z;
+ Real dx;
+ Real dy;
+ Real _der_x;
+ Real _der_y;
+ Real _der_dx;
+ Real _der_der_x;
+equation
+ x = Differentiation.MultipleDerivativeAnnotation1.f(time);
+ _der_x = y;
+ _der_y = z;
+ dx = Differentiation.MultipleDerivativeAnnotation1.df(2.0 * time, 2.0);
+ _der_dx = dy;
+ _der_x = Differentiation.MultipleDerivativeAnnotation1.df(time, 1.0);
+ _der_der_x = _der_y;
+ _der_der_x = Differentiation.MultipleDerivativeAnnotation1.d2f(time, 1.0, 0.0);
+ _der_dx = Differentiation.MultipleDerivativeAnnotation1.ddf(2.0 * time, 2.0, 2.0, 0.0);
+
+public
+ function Differentiation.MultipleDerivativeAnnotation1.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ annotation(derivative(order = 1) = Differentiation.MultipleDerivativeAnnotation1.df,Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation1.f;
+
+ function Differentiation.MultipleDerivativeAnnotation1.df
+  input Real x;
+  input Real dx;
+  output Real dy;
+ algorithm
+  dy := x + dx;
+  return;
+ annotation(derivative(order = 2) = Differentiation.MultipleDerivativeAnnotation1.d2f,derivative(order = 1) = Differentiation.MultipleDerivativeAnnotation1.ddf,Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation1.df;
+
+ function Differentiation.MultipleDerivativeAnnotation1.d2f
+  input Real x;
+  input Real dx;
+  input Real d2x;
+  output Real d2y;
+ algorithm
+  d2y := x + dx + d2x;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation1.d2f;
+
+ function Differentiation.MultipleDerivativeAnnotation1.ddf
+  input Real x;
+  input Real dx;
+  input Real dx2;
+  input Real ddx;
+  output Real ddy;
+ algorithm
+  ddy := 0;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation1.ddf;
+
+end Differentiation.MultipleDerivativeAnnotation1;
+")})));
+end MultipleDerivativeAnnotation1;
+
+
+model MultipleDerivativeAnnotation2
+    function f
+        input Real x;
+        input Real y;
+        input Real t;
+        output Real z;
+    algorithm
+        z := x + y;
+        annotation (derivative(zeroDerivative=x, zeroDerivative=y, noDerivative=t) = dfcxy,
+                    derivative(zeroDerivative=x, noDerivative=t) = dfcx,
+                    derivative(zeroDerivative=y, noDerivative=t) = dfcy,
+                    derivative(order=1, noDerivative=t) = df,
+                    Inline=false);
+    end f;
+
+    function df
+        input Real x;
+        input Real y;
+        input Real t;
+        input Real dx;
+        input Real dy;
+        output Real dz;
+    algorithm
+        dz := dx + dy;
+        annotation (Inline=false);
+    end df;
+
+    function dfcx
+        input Real x;
+        input Real y;
+        input Real t;
+        input Real dy;
+        output Real dz;
+    algorithm
+        dz := dy;
+        annotation (Inline=false);
+     end dfcx;
+
+    function dfcy
+        input Real x;
+        input Real y;
+        input Real t;
+        input Real dx;
+        output Real dz;
+    algorithm
+        dz := dx;
+        annotation (Inline=false);
+     end dfcy;
+
+    function dfcxy
+        input Real x;
+        input Real y;
+        input Real t;
+        output Real dz;
+    algorithm
+        dz := 0;
+        annotation (Inline=false);
+     end dfcxy;
+
+    Real t[4] = (1:4) * time;
+    Real x1;
+    Real y1;
+    Real x2;
+    Real y2;
+    Real x3;
+    Real y3;
+    Real x4;
+    Real y4;
+equation
+    x1 = f(t[1], t[2], time);
+    der(x1) = y1;
+    x2 = f(t[3], 5, time);
+    der(x2) = y2;
+    x3 = f(6, t[4], time);
+    der(x3) = y3;
+    x4 = f(7, 8, time);
+    der(x4) = y4;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="MultipleDerivativeAnnotation2",
+            description="Multiple derivative annotation - different zeroDerivative",
+            flatModel="
+fclass Differentiation.MultipleDerivativeAnnotation2
+ Real t[1];
+ Real t[2];
+ Real t[3];
+ Real t[4];
+ Real x1;
+ Real y1;
+ Real x2;
+ Real y2;
+ Real x3;
+ Real y3;
+ Real x4;
+ Real y4;
+ Real _der_x1;
+ Real _der_x2;
+ Real _der_x3;
+ Real _der_x4;
+ Real _der_t[1];
+ Real _der_t[2];
+ Real _der_t[3];
+ Real _der_t[4];
+equation
+ x1 = Differentiation.MultipleDerivativeAnnotation2.f(t[1], t[2], time);
+ _der_x1 = y1;
+ x2 = Differentiation.MultipleDerivativeAnnotation2.f(t[3], 5, time);
+ _der_x2 = y2;
+ x3 = Differentiation.MultipleDerivativeAnnotation2.f(6, t[4], time);
+ _der_x3 = y3;
+ x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
+ _der_x4 = y4;
+ t[1] = time;
+ t[2] = 2 * time;
+ t[3] = 3 * time;
+ t[4] = 4 * time;
+ _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
+ _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
+ _der_t[1] = 1.0;
+ _der_t[2] = 2;
+ _der_x2 = Differentiation.MultipleDerivativeAnnotation2.dfcy(t[3], 5, time, _der_t[3]);
+ _der_t[3] = 3;
+ _der_x3 = Differentiation.MultipleDerivativeAnnotation2.dfcx(6, t[4], time, _der_t[4]);
+ _der_t[4] = 4;
+
+public
+ function Differentiation.MultipleDerivativeAnnotation2.f
+  input Real x;
+  input Real y;
+  input Real t;
+  output Real z;
+ algorithm
+  z := x + y;
+  return;
+ annotation(derivative(zeroDerivative = x,zeroDerivative = y,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcxy,derivative(zeroDerivative = x,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcx,derivative(zeroDerivative = y,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.dfcy,derivative(order = 1,noDerivative = t) = Differentiation.MultipleDerivativeAnnotation2.df,Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation2.f;
+
+ function Differentiation.MultipleDerivativeAnnotation2.dfcxy
+  input Real x;
+  input Real y;
+  input Real t;
+  output Real dz;
+ algorithm
+  dz := 0;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation2.dfcxy;
+
+ function Differentiation.MultipleDerivativeAnnotation2.dfcx
+  input Real x;
+  input Real y;
+  input Real t;
+  input Real dy;
+  output Real dz;
+ algorithm
+  dz := dy;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation2.dfcx;
+
+ function Differentiation.MultipleDerivativeAnnotation2.dfcy
+  input Real x;
+  input Real y;
+  input Real t;
+  input Real dx;
+  output Real dz;
+ algorithm
+  dz := dx;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation2.dfcy;
+
+ function Differentiation.MultipleDerivativeAnnotation2.df
+  input Real x;
+  input Real y;
+  input Real t;
+  input Real dx;
+  input Real dy;
+  output Real dz;
+ algorithm
+  dz := dx + dy;
+  return;
+ annotation(Inline = false);
+ end Differentiation.MultipleDerivativeAnnotation2.df;
+
+end Differentiation.MultipleDerivativeAnnotation2;
+")})));
+end MultipleDerivativeAnnotation2;
+
+
 end Differentiation;

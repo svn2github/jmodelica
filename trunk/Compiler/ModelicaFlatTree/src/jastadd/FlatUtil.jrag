@@ -1495,15 +1495,15 @@ aspect FlatFunctionUtils {
     eq FConstructorDecl.requiresDerivative()       = false;
     eq FDestructorDecl.requiresDerivative()        = false;
     
-    syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+    syn boolean FFunctionDecl.derivativeEqualsZero() = !containsRealInputs() || !containsRealOutputs();
     
     /**
      * Determines if the compiler is able to differentiate this function declaration
      */
     syn boolean FFunctionDecl.canDifferentiate() {
-        if (derivativeFunction() != null)
+        if (derivativeFunctionUnrestricted() != null)
             return true;
-        if (derivativEqualsZero())
+        if (derivativeEqualsZero())
             return true;
         for (FStatement statement : getFAlgorithm().getFStatements())
             if (!statement.canDifferentiate())

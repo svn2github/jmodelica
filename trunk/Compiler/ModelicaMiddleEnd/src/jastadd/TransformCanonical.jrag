@@ -4139,8 +4139,8 @@ aspect FunctionAndRecordCleanup {
                 myOptions().getBooleanOption("generate_ode_jacobian"))) {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
-                } else if (derivativeFunction() != null) {
-                    derivativeFunction().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                } else if (derivativeFunctionUnrestricted() != null) {
+                    derivativeFunctionUnrestricted().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
                 }
             }
             super.markUsedFunctionsAndRecords(functionUsed);

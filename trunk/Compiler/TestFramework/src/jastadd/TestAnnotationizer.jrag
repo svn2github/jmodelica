@@ -683,18 +683,28 @@ abstract public class TestAnnotationizerHelper {
 		protected String dataName() {
 			return "template";
 		}
-		
-		protected void process() throws Exception {
-			super.process();
-			checkData(data);
-			template = prepare(data.replaceAll("\\\\n", "\n"));
-			FClass fc = compile();
-			AbstractGenerator generator = createGenerator(fc);
-			ByteArrayOutputStream os = new ByteArrayOutputStream();
-			generator.generate(new StringReader(template), new NotNullCodeStream(os));
-			code = prepare(os.toString());
-		}
-		
+
+        protected void process() throws Exception {
+            super.process();
+            checkData(data);
+            template = prepare(data.replaceAll("\\\\n", "\n"));
+            FClass fc = compile();
+            AbstractGenerator generator = createGenerator(fc);
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            generator.generate(new StringReader(template), createCodeStream(os));
+            code = prepare(os.toString());
+        }
+
+        private NotNullCodeStream createCodeStream(OutputStream os) {
+            PrintStream ps;
+            if (or.getBooleanOption("debug_duplicate_generated")) {
+                ps = new PrintStream(new CloneOutputStream(os, System.out).setClose(true, false), true);
+            } else {
+                ps = new PrintStream(os);
+            }
+            return new NotNullCodeStream(ps);
+        }
+
 		/**
 		 * Create the code generator to use.
 		 */

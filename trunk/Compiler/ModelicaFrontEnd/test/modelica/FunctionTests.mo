@@ -15889,7 +15889,7 @@ model UnusedFunction2
         input Real dx;
         output Real dy = 6 * dx^2;
     algorithm
-        annotation(Inline=false,derivative=fdd);
+        annotation(Inline=false,derivative(order=2)=fdd);
     end fd;
     
     function fdd
