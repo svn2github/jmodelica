@@ -65,6 +65,49 @@ aspect SymbolicTransformationFramework {
             modifications.put(name, algorithmChanges(name) + 1);
         }
         
+        private void addAlgorithmsToModifications() {
+            if (!DEBUG) {
+                return;
+            }
+            modifications.put("Variability_Propagation", 0);
+            modifications.put("Alias_Elimination", 0);
+        }
+        
+        private void printModificationsSingleFile(String filePath) {
+            if (!DEBUG) {
+                return;
+            }
+            File resultFile = new File(RESULT_PATH + "_dataToCopyIntoExcel" + ".txt");
+            String testFile = fclass.toString().split("\n")[0].split(" ")[1];
+            StringBuilder sb = new StringBuilder();
+            sb.append(testFile);
+            for (String algorithm : modifications.keySet()) {
+                String name = algorithm;
+                if (name == "Variability_Propagation") {
+                    sb.append("\t"+algorithmChanges(name));
+                } else if (name == "Alias_Elimination") {
+                    sb.append("\t"+algorithmChanges(name));
+                }
+            }
+            sb.append("\n");
+            
+            try{
+                if (resultFile.exists() == false) {
+                    resultFile.createNewFile();
+                    FileWriter fileWriter = new FileWriter(resultFile, true);
+                    BufferedWriter writer = new BufferedWriter(fileWriter);
+                    writer.write("Model\tVariabilityPropagation\tAliasElimination\n");
+                    writer.close();
+                }
+                FileWriter fileWriter = new FileWriter(resultFile, true);
+                BufferedWriter writer = new BufferedWriter(fileWriter);
+                writer.write(sb.toString());
+                writer.close();
+            } catch (IOException e) {
+                    System.out.println("Error writing to file <" + resultFile + ">.");
+            }
+        }
+        
         private void printModifications(String filePath) {
             if (!DEBUG) {
                 return;
@@ -136,6 +179,8 @@ aspect SymbolicTransformationFramework {
             
             preConfiguration(activeAlgorithms);
             
+            addAlgorithmsToModifications();
+            
             log.info("Algorithm loop starting.");
             // Start using algorithms on the equations.
             while (!workData.emptyWorklist()) {
@@ -161,6 +206,7 @@ aspect SymbolicTransformationFramework {
             
             if (DEBUG) {
                 printModifications(RESULT_PATH);
+                printModificationsSingleFile(RESULT_PATH);
                 FClass.modifications.clear();
             }
             log.info("Symbolic transformation framework is done.");
