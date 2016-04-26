@@ -15,7 +15,8 @@
 */
 aspect SymbolicTransformationFramework {
     public class FClass {
-        public static final HashMap<String, Integer> modifications = new HashMap<String, Integer>();
+        public static HashMap<String, Integer> modifications =
+            new HashMap<String, Integer>();
         // Needed in a later stage of transformations.
         public class aliasEliminationIfSet extends Transformation {
             private FClass fclass;
@@ -39,10 +40,8 @@ aspect SymbolicTransformationFramework {
         /*
          *  Debug data.
          */
-         
-        public static boolean FRAMEWORK_DONE = false;
         private static HashMap<String, Integer> modifications = FClass.modifications;
-        private static final boolean DEBUG = false;
+        private static boolean DEBUG = false;
         private static final String RESULT_PATH = "C:\\Test_Results\\modifications\\";
             
         private static ModelicaLogger log = ASTNode.log;
@@ -63,7 +62,7 @@ aspect SymbolicTransformationFramework {
                 return;
             }
             String name = algorithm.name();
-            modifications.put(name, algorithmChanges(name));
+            modifications.put(name, algorithmChanges(name) + 1);
         }
         
         private void printModifications(String filePath) {
@@ -72,10 +71,10 @@ aspect SymbolicTransformationFramework {
             }
             String resultFile = RESULT_PATH + fclass.toString().split("\n")[0].split(" ")[1].replaceAll("\\.","") + ".txt";
             StringBuilder sb = new StringBuilder("< ----- Algorithm Modifications ----- >\n");
-            for (SymbolicTransformationAlgorithm algorithm : algorithms) {
-                String name = algorithm.name();
-                sb.append("[" + name + "]:\t" + algorithmChanges(name) + ".\n");
+            for (String algorithm : modifications.keySet()) {
+                sb.append("[" + algorithm + "]:\t" + algorithmChanges(algorithm) + ".\n");
             }
+            sb.append("< ----- ----------------------- ----- >\n");
             
             BufferedWriter writer;
             try {
@@ -106,10 +105,13 @@ aspect SymbolicTransformationFramework {
          *  in FClass. 
          */ 
         public void performAliasElimination() {
+            boolean oldDebug = DEBUG;
+            DEBUG = false;
             algorithms.clear();
             WorkData workData = new WorkData();
             algorithms.add(new AliasEliminator(fclass, workData));
             perform(workData);
+            DEBUG = oldDebug;
         }
         
         /**
@@ -157,8 +159,9 @@ aspect SymbolicTransformationFramework {
             log.info("Running second change().");
             change();
             
-            if (FRAMEWORK_DONE && DEBUG) {
+            if (DEBUG) {
                 printModifications(RESULT_PATH);
+                FClass.modifications.clear();
             }
             log.info("Symbolic transformation framework is done.");
         }
