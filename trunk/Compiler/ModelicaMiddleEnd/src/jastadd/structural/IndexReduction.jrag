@@ -1220,6 +1220,15 @@ aspect IndexReduction {
             FTypePrefixVariability variability = ASTNode.fConstant();
             for (FAbstractEquation feqd : feqds)
                 variability = variability.combine(feqd.variability());
+            if (feqds.size() > 1) {
+                Iterator<FAbstractEquation> it = feqds.iterator();
+                while (it.hasNext() && feqds.size() > 1) {
+                    FAbstractEquation eqn = it.next();
+                    if (eqn.isZeroEquation()) {
+                        it.remove();
+                    }
+                }
+            }
             FAbstractEquation eqn = feqds.iterator().next();
             coefficients.put(var, new IndexReductionBiPGraph.Coefficient(feqds.size() > 1 ? new FNoExp() : eqn.asSubExp(), IndexReductionBiPGraph.COEFFICIENT_STATE.create(variability)));
             

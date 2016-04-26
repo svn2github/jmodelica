@@ -1822,6 +1822,140 @@ der(_ds.1.s1) := dsDer(1, 1)
 -------------------------------
 ")})));
         end FunctionCallEquation1;
+        model FunctionCallEquationJacobian
+            function F1
+                input Real i1;
+                input Real i2;
+                output Real[2] o1;
+            algorithm
+                o1 := {i1 + i2, i1 - i2};
+            annotation(derivative(order = 1) = F1_der, Inline=false);
+            end F1;
+        
+            function F1_der
+                input Real i1;
+                input Real i2;
+                input Real i1_der;
+                input Real i2_der;
+                output Real[2] o1_der;
+            algorithm
+                o1_der := {i1_der + i2_der, i1_der - i2_der};
+            annotation(derivative(order = 2) = F1_der_der, Inline=false);
+            end F1_der;
+        
+            function F1_der_der
+                input Real i1;
+                input Real i2;
+                input Real i1_der;
+                input Real i2_der;
+                input Real i1_der_der;
+                input Real i2_der_der;
+                output Real[2] o1_der_der;
+            algorithm
+                o1_der_der := {i1_der_der + i2_der_der,i1_der_der - i2_der_der};
+                annotation(Inline=false);
+            end F1_der_der;
+        
+            Real sx;
+            Real der_sx = cos(time);
+            Real sy;
+            Real der_sy = sin(time);
+            Real der2_sx = der(der_sx);
+            Real der2_sy = der(der_sy);
+            Real r[2] = F1(sx, sy);
+            Real der_r[2] = der(r);
+            Real der_r_check[2] = F1_der(sx, sy, der_sx, der_sy);
+            Real der_der_r[2] = der(der_r);
+            Real der_der_r_check[2] = F1_der_der(sx, sy, der_sx, der_sy, der2_sx, der2_sy);
+        equation
+            der(sx) = der_sx;
+            der(sy) = der_sy;
+
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="FunctionCallEquationJacobian",
+                description="Test that verifies that we are able to compute the jacobian for a function call equation correctly, no dynamic states should be needed for this model!",
+                dynamic_states=true,
+                methodName="printDAEBLT",
+                methodResult="
+--- Solved equation ---
+der(sx) := cos(time)
+
+--- Solved equation ---
+der_sx := der(sx)
+
+--- Solved equation ---
+der(sy) := sin(time)
+
+--- Solved equation ---
+der_sy := der(sy)
+
+--- Solved equation ---
+_der_der_sx := - sin(time)
+
+--- Solved equation ---
+_der_der_sx := _der_der_sx
+
+--- Solved equation ---
+der2_sx := _der_der_sx
+
+--- Solved equation ---
+_der_der_sy := cos(time)
+
+--- Solved equation ---
+_der_der_sy := _der_der_sy
+
+--- Solved equation ---
+der2_sy := _der_der_sy
+
+--- Solved function call equation ---
+({r[1], r[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1(sx, sy)
+  Assigned variables: r[1]
+                      r[2]
+
+--- Solved function call equation ---
+({der_r_check[1], der_r_check[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der(sx, sy, der(sx), der(sy))
+  Assigned variables: der_r_check[2]
+                      der_r_check[1]
+
+--- Solved equation ---
+_der_r[1] := der_r_check[1]
+
+--- Solved equation ---
+der_r[1] := _der_r[1]
+
+--- Solved equation ---
+_der_r[2] := der_r_check[2]
+
+--- Solved equation ---
+der_r[2] := _der_r[2]
+
+--- Solved function call equation ---
+({der_der_r_check[1], der_der_r_check[2]}) = DynamicStates.Special.FunctionCallEquationJacobian.F1_der_der(sx, sy, der(sx), der(sy), _der_der_sx, _der_der_sy)
+  Assigned variables: der_der_r_check[2]
+                      der_der_r_check[1]
+
+--- Solved equation ---
+_der_der_r[1] := der_der_r_check[1]
+
+--- Solved equation ---
+_der_der_r[1] := _der_der_r[1]
+
+--- Solved equation ---
+der_der_r[1] := _der_der_r[1]
+
+--- Solved equation ---
+_der_der_r[2] := der_der_r_check[2]
+
+--- Solved equation ---
+_der_der_r[2] := _der_der_r[2]
+
+--- Solved equation ---
+der_der_r[2] := _der_der_r[2]
+-------------------------------
+")})));
+        end FunctionCallEquationJacobian;
+        
         model NoDerivative1
             function F
                 input Real i;
