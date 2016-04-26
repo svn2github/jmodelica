@@ -74,17 +74,17 @@ aspect CanonizeEquations {
             
             @Override
             public boolean run(FAbstractEquation feq) {
-                if (!feq.isFEquation()) {
-                    return false;
-                }
-                
                 boolean res = false;
                 
-                FEquation equation = feq.asFEquation();
-                res = res || feq.moveToOneSide(LEFT_SIDE);
-                res = res || feq.eliminateDivision();    // TODO: Extract to attribute as with the others.
-                res = res || feq.convertNegations();
-                res = res || feq.toAddMulTree(factorComparator);
+                if (feq.moveToOneSide(LEFT_SIDE)) {
+                    res = true;
+                } else if (feq.eliminateDivision()) {
+                    res = true;
+                } else if (feq.convertNegations()) {
+                    res = true;
+                } else if (feq.toAddMulTree(factorComparator)) {
+                    res = true;
+                }
                 
                 // Are we doing debug logging? Count node types.
                 if (log.getLevel().shouldLog(Level.DEBUG)) {

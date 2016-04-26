@@ -15,6 +15,7 @@
 */
 aspect SymbolicTransformationFramework {
     public class FClass {
+        public static final HashMap<String, Integer> modifications = new HashMap<String, Integer>();
         // Needed in a later stage of transformations.
         public class aliasEliminationIfSet extends Transformation {
             private FClass fclass;
@@ -25,6 +26,7 @@ aspect SymbolicTransformationFramework {
             
             public void perform() {
                 new symbolicTransformationFramework(fclass).performAliasElimination();
+                // symbolicTransformationFramework.FRAMEWORK_DONE = true;
             }
         }
     }
@@ -32,8 +34,17 @@ aspect SymbolicTransformationFramework {
     /**
      *  A framework class for a collection of transformation algorithms to use
      *  upon the equations in an <code>FClass</code>.
-     */ 
+     */
     public class symbolicTransformationFramework extends FClass.Transformation {
+        /*
+         *  Debug data.
+         */
+         
+        public static boolean FRAMEWORK_DONE = false;
+        private static HashMap<String, Integer> modifications = FClass.modifications;
+        private static final boolean DEBUG = false;
+        private static final String RESULT_PATH = "C:\\Test_Results\\modifications\\";
+            
         private static ModelicaLogger log = ASTNode.log;
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithms;
@@ -42,6 +53,47 @@ aspect SymbolicTransformationFramework {
             fclass.super("symbolic_transformation_framework");
             this.fclass = fclass;
             algorithms = new ArrayList<SymbolicTransformationAlgorithm>();
+        }
+        
+        /*
+         *  Debug and bench-marking.
+         */
+        private void algorithmPerformedChanges(SymbolicTransformationAlgorithm algorithm) {
+            if (!DEBUG) {
+                return;
+            }
+            String name = algorithm.name();
+            modifications.put(name, algorithmChanges(name));
+        }
+        
+        private void printModifications(String filePath) {
+            if (!DEBUG) {
+                return;
+            }
+            String resultFile = RESULT_PATH + fclass.toString().split("\n")[0].split(" ")[1].replaceAll("\\.","") + ".txt";
+            StringBuilder sb = new StringBuilder("< ----- Algorithm Modifications ----- >\n");
+            for (SymbolicTransformationAlgorithm algorithm : algorithms) {
+                String name = algorithm.name();
+                sb.append("[" + name + "]:\t" + algorithmChanges(name) + ".\n");
+            }
+            
+            BufferedWriter writer;
+            try {
+                writer = new BufferedWriter(new FileWriter(resultFile));
+                writer.write(sb.toString());
+                writer.flush();
+                writer.close();
+            } catch (IOException e) {
+                System.out.println("Error writing to file <" + resultFile + ">.");
+            }
+        }
+        
+        private int algorithmChanges(String algorithm) {
+            int res = 0;
+            if (modifications.containsKey(algorithm)) {
+                res = modifications.get(algorithm);
+            }
+            return res;
         }
         
         public void perform() {
@@ -89,8 +141,9 @@ aspect SymbolicTransformationFramework {
                 for (SymbolicTransformationAlgorithm algorithm : activeAlgorithms) {
                     log.info("\twith %s.", algorithm.name());
                     if (algorithm.run(equation)) {
-                    log.info("Algorithm performed changes, tracing back to first " +
-                        "equation in the worklist.");
+                        algorithmPerformedChanges(algorithm);
+                        log.info("Algorithm performed changes, tracing back to first " +
+                            "equation in the worklist.");
                         break;
                     }
                 }
@@ -104,6 +157,9 @@ aspect SymbolicTransformationFramework {
             log.info("Running second change().");
             change();
             
+            if (FRAMEWORK_DONE && DEBUG) {
+                printModifications(RESULT_PATH);
+            }
             log.info("Symbolic transformation framework is done.");
         }
         
