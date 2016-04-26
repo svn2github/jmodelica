@@ -905,6 +905,9 @@ aspect InstanceErrorCheck {
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
 
+    syn boolean InstModification.collectErrorsInBindingExp() = true;
+    eq InstDefaultRecordModification.collectErrorsInBindingExp() = false;
+    
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
@@ -916,7 +919,9 @@ aspect InstanceErrorCheck {
             if (bexp != null) {
                 String type = isParameter() ? "parameter" : "constant";
                 // TODO: Check structural parameters as well
-                bexp.collectErrors(checkType);
+                if (myInstValueMod().collectErrorsInBindingExp()) {
+                    bexp.collectErrors(checkType);
+                }
                 // Check if the binding expression of constants can be evaluated
                 if (isConstant() && !bexp.type().isUnknown()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());

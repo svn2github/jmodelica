@@ -3024,12 +3024,12 @@ model RecordConstructor30
     end R;
     
     model B
-        parameter R[:] d = {R()};
+        parameter R[1] d = {R()};
     end B;
     
     model C
         parameter Real p = -20;
-        B a(d={R(a={p})});
+        B[1] a(d={R(a={p})});
     end C;
     
     C c;
@@ -3043,9 +3043,37 @@ model RecordConstructor30
 
 Warning at line 3032, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo', ASSUMING_EACH,
 In component c:
-  Assuming 'each' for the modification ' = {p}'
+  Assuming 'each' for the modification 'd = {R()}'
 ")})));
 end RecordConstructor30;
+
+model RecordConstructor31
+// Should give two errors #4908
+record R
+    Real[size(x,1)] y = 1:5;
+    Real[:] x = {1,2,3};
+end R;
+
+model M
+    R[:] r = R();
+end M;
+
+M m(r={R(x={1},y=1:2),R(x={2,3})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="RecordConstructor31",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 3061, column 16, in file '...':
+  Record constructor for R: types of named argument y and input y are not compatible
+    type of '1:2' is Integer[2]
+    expected type is Real[1]
+
+")})));
+end RecordConstructor31;
 
 model RecordScalarize1
  record A
