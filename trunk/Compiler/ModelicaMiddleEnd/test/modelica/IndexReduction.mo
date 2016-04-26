@@ -2049,6 +2049,104 @@ end IndexReduction.NonDiffArgsTest2;
 ")})));
 end NonDiffArgsTest2;
 
+model NonDiffArgsTest3
+    record R
+        Real a,b;
+    end R;
+    function F1
+        input Real i1;
+        input R i2;
+        output Real o1;
+    algorithm
+        o1 := i1 * i2.a + i1 * i2.b;
+        annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
+    end F1;
+    function F1_der
+        input Real i1;
+        input R i2;
+        input Real i1_der;
+        output Real o1_der;
+    algorithm
+        o1_der := F1(i1_der, i2) * i1_der;
+        annotation(Inline=true);
+    end F1_der;
+    
+    function F2
+        input Real i1;
+        output R o1;
+    algorithm
+        o1.a := -i1;
+        o1.b := i1;
+    annotation(InlineAfterIndexReduction=false);
+    end F2;
+    
+    function F3
+        input Real i1;
+        output Real o1;
+    algorithm
+        o1 := i1 + 1;
+    annotation(InlineAfterIndexReduction=false);
+    end F3;
+    
+    
+    Real x,y,z;
+equation
+    der(y) * der(x) = 1;
+    z = F3(time);
+    y = F1(x, F2(z));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonDiffArgsTest3",
+            description="Test so that no diff for variables in nested function calls is computed correctly",
+            flatModel="
+fclass IndexReduction.NonDiffArgsTest3
+ Real x;
+ Real y;
+ Real z;
+ Real _der_y;
+ Real temp_12;
+ Real temp_13;
+ Real temp_14;
+initial equation 
+ x = 0.0;
+equation
+ _der_y * der(x) = 1;
+ z = IndexReduction.NonDiffArgsTest3.F3(time);
+ y = x * temp_13 + x * temp_14;
+ temp_12 = der(x);
+ _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
+ (IndexReduction.NonDiffArgsTest3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgsTest3.F2(z);
+
+public
+ function IndexReduction.NonDiffArgsTest3.F3
+  input Real i1;
+  output Real o1;
+ algorithm
+  o1 := i1 + 1;
+  return;
+ annotation(InlineAfterIndexReduction = false);
+ end IndexReduction.NonDiffArgsTest3.F3;
+
+ function IndexReduction.NonDiffArgsTest3.F2
+  input Real i1;
+  output IndexReduction.NonDiffArgsTest3.R o1;
+ algorithm
+  o1.a := - i1;
+  o1.b := i1;
+  return;
+ annotation(InlineAfterIndexReduction = false);
+ end IndexReduction.NonDiffArgsTest3.F2;
+
+ record IndexReduction.NonDiffArgsTest3.R
+  Real a;
+  Real b;
+ end IndexReduction.NonDiffArgsTest3.R;
+
+end IndexReduction.NonDiffArgsTest3;
+")})));
+end NonDiffArgsTest3;
+
 model FunctionCallEquation1
     function f
         input Real x;

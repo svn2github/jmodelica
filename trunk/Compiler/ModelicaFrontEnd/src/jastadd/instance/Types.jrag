@@ -255,8 +255,9 @@ aspect DerivativeFunctions {
         FFunctionDecl myDecl = myFCallable().asFFunctionDecl();
         if (myDecl == null)
             return false;
-        return !myDecl.getFFunctionVariable(i).shouldBeDifferentiated();
-        
+        if (!myDecl.getFFunctionVariable(i).shouldBeDifferentiated())
+            return true;
+        return inNonDiffArg();
     }
     eq InstRoot.getChild().inNonDiffArg() = false;
     eq FlatRoot.getChild().inNonDiffArg() = false;
