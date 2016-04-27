@@ -3165,7 +3165,7 @@ public
  end RedeclareTests.RedeclareTest37.G.D;
 
  record RedeclareTests.RedeclareTest37.A
-  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1,e(y = c.x));
+  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1);
  end RedeclareTests.RedeclareTest37.A;
 
 end RedeclareTests.RedeclareTest37;
@@ -7033,7 +7033,7 @@ public
  end RedeclareTests.RedeclareInRecord1.P2.R;
 
  record RedeclareTests.RedeclareInRecord1:a
-  RedeclareTests.RedeclareInRecord1.P2.R pr(x = time);
+  RedeclareTests.RedeclareInRecord1.P2.R pr;
   Real x;
  end RedeclareTests.RedeclareInRecord1:a;
 
@@ -7070,7 +7070,7 @@ public
  end RedeclareTests.RedeclareInRecord2.R2;
 
  record RedeclareTests.RedeclareInRecord2:a
-  RedeclareTests.RedeclareInRecord2.R2 pr(x = time);
+  RedeclareTests.RedeclareInRecord2.R2 pr;
  end RedeclareTests.RedeclareInRecord2:a;
 
 end RedeclareTests.RedeclareInRecord2;
@@ -7114,11 +7114,11 @@ public
  end RedeclareTests.RedeclareInRecord3.B2;
 
  record RedeclareTests.RedeclareInRecord3:r.a
-  RedeclareTests.RedeclareInRecord3.B2 b(x = time);
+  RedeclareTests.RedeclareInRecord3.B2 b;
  end RedeclareTests.RedeclareInRecord3:r.a;
 
  record RedeclareTests.RedeclareInRecord3:r
-  RedeclareTests.RedeclareInRecord3:r.a a(b(x = time));
+  RedeclareTests.RedeclareInRecord3:r.a a;
  end RedeclareTests.RedeclareInRecord3:r;
 
 end RedeclareTests.RedeclareInRecord3;
@@ -7165,11 +7165,11 @@ public
  end RedeclareTests.RedeclareInRecord4.B2;
 
  record RedeclareTests.RedeclareInRecord4.R2:a
-  RedeclareTests.RedeclareInRecord4.B2 b(x = time);
+  RedeclareTests.RedeclareInRecord4.B2 b;
  end RedeclareTests.RedeclareInRecord4.R2:a;
 
  record RedeclareTests.RedeclareInRecord4.R2
-  RedeclareTests.RedeclareInRecord4.R2:a a(b(x = time));
+  RedeclareTests.RedeclareInRecord4.R2:a a;
  end RedeclareTests.RedeclareInRecord4.R2;
 
 end RedeclareTests.RedeclareInRecord4;

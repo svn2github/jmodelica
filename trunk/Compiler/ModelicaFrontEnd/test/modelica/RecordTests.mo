@@ -3004,7 +3004,7 @@ model RecordConstructor29
             flatModel="
 fclass RecordTests.RecordConstructor29
  parameter Real c.p = -20 /* -20 */;
- parameter RecordTests.RecordConstructor29.R c.a.d[1](a(size() = {1}),b(size() = {2})) = {RecordTests.RecordConstructor29.R({c.p}, cat(1, vector(0), {c.p}))};
+ parameter RecordTests.RecordConstructor29.R c.a.d[1](a(size() = {{1}}),b(size() = {{2}})) = {RecordTests.RecordConstructor29.R({c.p}, cat(1, vector(0), {c.p}))};
 
 public
  record RecordTests.RecordConstructor29.R
@@ -3074,6 +3074,103 @@ Error at line 3061, column 16, in file '...':
 
 ")})));
 end RecordConstructor31;
+
+model RecordConstructor32
+
+record R
+    Real[:] x = {1,2,3};
+end R;
+
+model M
+    R[:] r = R();
+end M;
+
+M m(r={R(x={1}),R(x={2,3})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor32",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor32
+ constant Real m.r[1].x[1] = 1;
+ constant Real m.r[2].x[1] = 2;
+ constant Real m.r[2].x[2] = 3;
+end RecordTests.RecordConstructor32;
+")})));
+end RecordConstructor32;
+
+model RecordConstructor33
+
+record R1
+    parameter Integer n=1;
+    Real[n] x = 1:n;
+end R1;
+
+record R2
+    R1 r1;
+    R1[:] r1s;
+end R2;
+
+model M
+    R2[:] r2;
+end M;
+
+M m(r2={R2(R1(0),{R1(1)}),R2(R1(2),{R1(3),R1(4)})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor33",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordConstructor33
+ structural parameter Integer m.r2[1].r1.n = 0 /* 0 */;
+ structural parameter Integer m.r2[1].r1s[1].n = 1 /* 1 */;
+ constant Real m.r2[1].r1s[1].x[1] = 1;
+ structural parameter Integer m.r2[2].r1.n = 2 /* 2 */;
+ constant Real m.r2[2].r1.x[1] = 1;
+ constant Real m.r2[2].r1.x[2] = 2;
+ structural parameter Integer m.r2[2].r1s[1].n = 3 /* 3 */;
+ constant Real m.r2[2].r1s[1].x[1] = 1;
+ constant Real m.r2[2].r1s[1].x[2] = 2;
+ constant Real m.r2[2].r1s[1].x[3] = 3;
+ structural parameter Integer m.r2[2].r1s[2].n = 4 /* 4 */;
+ constant Real m.r2[2].r1s[2].x[1] = 1;
+ constant Real m.r2[2].r1s[2].x[2] = 2;
+ constant Real m.r2[2].r1s[2].x[3] = 3;
+ constant Real m.r2[2].r1s[2].x[4] = 4;
+end RecordTests.RecordConstructor33;
+")})));
+end RecordConstructor33;
+
+model RecordConstructor34
+record R1
+    Real[:] x;
+end R1;
+
+record R2
+    R1 r1;
+    R1[:] r1s;
+end R2;
+
+record M
+    R2[:] r2={R2(R1(1:0),{R1(1:1)})};
+end M;
+
+M[1] m();
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor34",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordConstructor34
+ constant Real m[1].r2[1].r1s[1].x[1] = 1;
+end RecordTests.RecordConstructor34;
+")})));
+end RecordConstructor34;
 
 model RecordScalarize1
  record A
@@ -6736,7 +6833,7 @@ public
 
  record RecordTests.RecordEval7.A
   parameter Real x;
-  parameter RecordTests.RecordEval7.SB b(final n = 2,y = b.x + 1);
+  parameter RecordTests.RecordEval7.SB b(final n = 2);
  end RecordTests.RecordEval7.A;
 
  record RecordTests.RecordEval7.B

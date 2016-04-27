@@ -516,7 +516,7 @@ aspect Scalarization {
         public Indices indices(FVariable comp) {
             FAttribute sa = mattrs.get(FAttribute.SIZE);
             if (sa != null && sa.hasValue()) {
-                return Indices.create(new MutableSize(sa.getValue()));
+                return Indices.create(new MutableSize(sa.getValue().splitArrayExp(index)));
             } else {
                 return comp.indices();
             }

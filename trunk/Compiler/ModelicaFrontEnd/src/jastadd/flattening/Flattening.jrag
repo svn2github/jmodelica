@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Stack;
 
 aspect FlatTree {
 
@@ -1103,7 +1104,7 @@ aspect Flattening {
 		return exo;
 	}
 	
-	public void InstAssignable.addAttributesToFV(List<FAttribute> attr) {
+	public void InstAssignable.addAttributesToFV(List<FAttribute> attr, boolean excludeBinding) {
 		AttributeExpRetriever mut = new AttributeExpRetriever() {
 			public FExp retrieve(InstValueModification im, boolean isEach) {
 				FExp exp = super.retrieve(im, isEach);
@@ -1126,39 +1127,50 @@ aspect Flattening {
 			im.collectAttributes(attr, im.myInstNode().getFQNamePrefix(), aer, cls);
 	}
 	
-	public void InstRecord.addAttributesToFV(List<FAttribute> attr) {
-		super.addAttributesToFV(attr);
-        generateAdditionalAttributes(attr, addAttributesToFVAsBound(), false);
+	public void InstRecord.addAttributesToFV(List<FAttribute> attr, boolean excludeBinding) {
+		super.addAttributesToFV(attr, excludeBinding);
+        generateAdditionalAttributesInComps(attr, new Stack<Integer>(), excludeBinding,
+                excludeBinding || hasBindingFExp() || variability().knownParameterOrLess());
     }
     
-    syn boolean InstRecord.addAttributesToFVAsBound() = hasBindingFExp() 
-            || ((!inFunction() || isInput() || isOutput()) && variability().knownParameterOrLess());
-    
-    public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, boolean isBound, boolean array) {
+    public void InstComponentDecl.generateAdditionalAttributesInComps(List<FAttribute> attr, Stack<Integer> indexStack,
+            boolean excludeBinding, boolean isBound) {
         if (isArray()) {
-            if (allInstComponentDecls().iterator().hasNext()) {
-                allInstComponentDecls().iterator().next().generateAdditionalAttributes(attr, isBound, true);
+            int i = 0;
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                indexStack.push(i++);
+                icd.generateAdditionalAttributesInComps(attr, indexStack, excludeBinding, isBound);
+                indexStack.pop();
+                isBound = true;
             }
         } else {
             for (InstComponentDecl icd : allInstComponentDecls()) {
-                icd.generateAdditionalAttributesCell(attr, isBound, array);
+                icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
             }
         }
     }
     
-    public void InstComponentDecl.generateAdditionalAttributesCell(List<FAttribute> attr, boolean isBound, boolean array) {
+    public void InstComponentDecl.generateAdditionalAttributes(List<FAttribute> attr, Stack<Integer> indexStack,
+            boolean excludeBinding, boolean isBound) {
         
     }
     
-    public void InstAssignable.generateAdditionalAttributesCell(List<FAttribute> attr, boolean isBound, boolean array) {
+    public void InstAssignable.generateAdditionalAttributes(List<FAttribute> attr, Stack<Integer> indexStack,
+            boolean excludeBinding, boolean isBound) {
         FAttribute a = findMatching(attr, name());
         boolean create = (a == null);
         boolean canBind = hasBindingFExp() || variability().knownParameterOrLess();
         isBound = isBound || (a != null && a.hasValue());
         List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
-        if (declaredSizeCalc().isUnknownNoEval())
-            list.add(new FInternalAttribute("size()", size().createFExp()));
-        generateAdditionalAttributes(list, isBound || canBind, false);
+        if (!excludeBinding && declaredSizeCalc().isUnknownNoEval()) {
+            FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
+            if (ia == null) {
+                ia = new FInternalAttribute(FAttribute.SIZE, new FArray(new List<FExp>()));
+                list.add(ia);
+            }
+            ia.setValue(size().createFExp().addInDim(indexStack, 0, (FArray)ia.getValue()));
+        }
+        generateAdditionalAttributesInComps(list, indexStack, excludeBinding, isBound || canBind);
         if (create && (list.getNumChild() > 0 || (!isBound && canBind))) {
             a = new FAttribute(new FIdUse(getClassName().flatten(new FQNameEmpty())), 
                     new FIdDecl(new FQNameString(name())), 
@@ -1168,11 +1180,25 @@ aspect Flattening {
         
         if (!isBound && canBind) {
             a.setValue(flattenBindingFExp());
-            if (array) {
+            if (indexStack.size() > 0) {
                 a.setFEach(new FEach());
             }
         }
     }
+    
+    public FExp FExp.addInDim(Stack<Integer> s, int d, FArray arr) {
+        if (d == s.size()) {
+            return this;
+        } else {
+            if (arr == null) {
+                arr = new FArray();
+            }
+            List<FExp> l = arr.getFExpListNoTransform();
+            l.setChild(addInDim(s, d+1, (FArray)l.getChild(s.get(d))), s.get(d));
+            return arr;
+        }
+    }
+    
 	
 	private boolean InstClassDecl.derivedTypeAdded;
 	
@@ -1205,10 +1231,10 @@ aspect Flattening {
         if (isTopLevelInputOutput()) 
             fv.setFTypePrefixInputOutput(isInput() ? new FInput() : new FOutput());
 
-        addAttributesToFV(fv.getFAttributes());
         if (myInstClass().extendsPrimitive())
             fv.setDerivedType(myInstClass().actualInstClass().qualifiedName());
 
+        addAttributesToFV(fv.getFAttributes(), excludeBinding);
         if (!excludeBinding) {
             FExp e = flattenBindingFExp();
             if (e != null)
