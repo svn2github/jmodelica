@@ -1683,6 +1683,43 @@ end IndexReduction.AlgorithmVariability2;
 ")})));
   end AlgorithmVariability2;
 
+  model AlgorithmVariability2
+    Real y;
+    Real x;
+    Real z;
+equation
+    // Trigger index reduction
+    y = time * 2;
+    z = x + der(y);
+algorithm
+    when time > 0.25 then
+        x := y / 2;
+    end when;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="AlgorithmVariability3",
+            description="Test so that variability calculations are done propperly for algorithms, it should honor in discrete location",
+            flatModel="
+fclass IndexReduction.AlgorithmVariability2
+ Real x;
+ Real y;
+ Real z;
+ parameter Integer p = 1 /* 1 */;
+ parameter Integer it[1] = 1 /* 1 */;
+ parameter Real rt[1] = 2.0 /* 2.0 */;
+ Real _der_y;
+equation
+ y = time;
+ z = x + _der_y;
+algorithm
+ x := if it[1] == p then rt[1] else 0;
+equation
+ _der_y = 1.0;
+end IndexReduction.AlgorithmVariability2;
+")})));
+  end AlgorithmVariability2;
+
     model Variability1
         function F1
             input Real a;
