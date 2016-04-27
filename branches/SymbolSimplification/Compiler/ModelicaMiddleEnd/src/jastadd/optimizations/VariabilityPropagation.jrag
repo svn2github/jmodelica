@@ -215,7 +215,7 @@ aspect VariabilityPropagation {
                 // Clean initial equations
                 newEquations = new ArrayList<FAbstractEquation>();
                 for (FAbstractEquation equation: fclass.initialEquations()) {
-                    if (!equation.taggedByVProp) {
+                    if (!workData.hasRemovedEquation(equation) || !equation.taggedByVProp) {
                         newEquations.add(equation);
                     }
                 }
@@ -327,11 +327,12 @@ aspect VariabilityPropagation {
         }
         
         if (allRemoved) {
-            this.taggedByVProp = true;
+            workData.removeEquation(this);
         } else {
             if (param) {
                 workData.addParameterEquation(this);
                 this.taggedByVProp = true;
+                // Only tag equation here so it can be removed from initial equations?
             }
         }
         this.taggedForCleanup = true;
@@ -550,8 +551,12 @@ aspect VariabilityPropagation {
                     equation.removeVariable(this);
                 }
                 
-                if (equation.canPropagate()) {
-                    workData.addToWorklist(equation);
+                if (!workData.addToWorklist(equation)) {
+                    if (equation.inInitialEquationSection() && 
+                            equation.variables().size() == 0 && 
+                            equation.nonFixedParameters().size() == 0) {
+                        workData.removeEquation(equation);
+                    }
                 }
             }
         }
