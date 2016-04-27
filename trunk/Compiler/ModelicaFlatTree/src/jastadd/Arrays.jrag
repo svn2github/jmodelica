@@ -1094,7 +1094,12 @@ aspect Arrays {
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean FExp.isArray() = ndims()>0;
-	
+
+    /**
+     * Check if an expression is an array expression.
+     */
+    syn boolean FIdUse.isArray() = ndims() > 0;
+
 	/**
 	 * check if an access is an array expression.
 	 * 

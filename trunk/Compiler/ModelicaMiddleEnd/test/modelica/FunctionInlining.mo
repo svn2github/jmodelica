@@ -3013,6 +3013,58 @@ end FunctionInlining.TrivialInline11;
 ")})));
 end TrivialInline11;
 
+model TrivialInline12
+    function f1
+        input Real x;
+        output Real[2] y;
+    algorithm
+        (y) := f2(x);
+    end f1;
+    
+    function f2
+        input Real x;
+        output Real[2] y;
+    algorithm
+        y[1] := x;
+        y[1] := y[1] + 1;
+        y[2] := x * y[1];
+        y[1] := 2;
+    end f2;
+    
+    Real x = time;
+    Real y[2] = f1(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TrivialInline12",
+            description="Test that function call statements works properly in trivial inlining mode",
+            inline_functions="trivial",
+            flatModel="
+fclass FunctionInlining.TrivialInline12
+ Real x;
+ Real y[1];
+ Real y[2];
+equation
+ x = time;
+ ({y[1], y[2]}) = FunctionInlining.TrivialInline12.f2(x);
+
+public
+ function FunctionInlining.TrivialInline12.f2
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[1] := y[1] + 1;
+  y[2] := x * y[1];
+  y[1] := 2;
+  return;
+ end FunctionInlining.TrivialInline12.f2;
+
+end FunctionInlining.TrivialInline12;
+")})));
+end TrivialInline12;
+
 
 model InlineAnnotation1
 	function f

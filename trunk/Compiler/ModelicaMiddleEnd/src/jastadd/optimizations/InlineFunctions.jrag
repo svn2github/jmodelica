@@ -1084,7 +1084,7 @@ aspect FunctionInlining {
         if (!hasInlinableIO())
             return false;
         for (FStatement stmt : getFAlgorithm().getFStatements())
-            if (!stmt.isOkTrivialInline(late))
+            if (!stmt.isOkTrivialInline())
                 return false;
         for (FFunctionVariable out : myOutputs()) {
             TrivialInlineCheck chk = out.createTrivialInlineCheck();
@@ -1101,18 +1101,18 @@ aspect FunctionInlining {
     /**
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
-    syn boolean FStatement.isOkTrivialInline(boolean last) = false;
-    eq FInitArrayStmt.isOkTrivialInline(boolean last)      = true;
-    eq FAssignStmt.isOkTrivialInline(boolean last)         = true;
-    eq FFunctionCallStmt.isOkTrivialInline(boolean last)   = getCall().isOkTrivialInline(last);
-    eq FReturnStmt.isOkTrivialInline(boolean last)         = isLast();
-    eq FForStmt.isOkTrivialInline(boolean last)            = isOkTrivialInlineInFor();
+    syn boolean FStatement.isOkTrivialInline() = false;
+    eq FInitArrayStmt.isOkTrivialInline()      = true;
+    eq FAssignStmt.isOkTrivialInline()         = true;
+    eq FFunctionCallStmt.isOkTrivialInline()   = getCall().isOkTrivialInline();
+    eq FReturnStmt.isOkTrivialInline()         = isLast();
+    eq FForStmt.isOkTrivialInline()            = isOkTrivialInlineInFor();
 
     /**
      * Helper method to find unsupported statements in isTrivialInlinable().
      */
-    syn boolean FAbstractFunctionCall.isOkTrivialInline(boolean last) = isIgnored();
-    eq FFunctionCall.isOkTrivialInline(boolean last)                  = myFCallable().isTrivialInlinable(last, this);
+    syn boolean FAbstractFunctionCall.isOkTrivialInline() = isIgnored();
+    eq FFunctionCall.isOkTrivialInline()                  = true;
 
     /**
      * Helper method to unsupported statements in isTrivialInlinable().
@@ -1172,9 +1172,10 @@ aspect FunctionInlining {
         public static class KnownArray extends Scalar {
             // TODO: check that each cell is assigned?
             protected int size;
-            public KnownArray(int nElems)       { size = nElems; };
-            protected void checkAll(FIdUse use) { n += size; }
-            public boolean isOk()               { return n == size; }
+            public KnownArray(int nElems)           { size = nElems; };
+            protected void check(FIdUse use, int i) { n += use.isArray() ? size : 1; }
+            protected void checkAll(FIdUse use)     { n += size; }
+            public boolean isOk()                   { return n == size; }
         }
 
         public static class UnknownArray extends Scalar {
