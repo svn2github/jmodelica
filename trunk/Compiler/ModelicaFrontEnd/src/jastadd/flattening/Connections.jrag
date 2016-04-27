@@ -1532,122 +1532,167 @@ aspect OverconstrainedConnections {
 		public void addPotentialRoot(InstComponentDecl var, int priority) {
 			getNode(var).setPotentialRoot(priority);
 		}
-		
-		/**
-		 * Convert graph to a set of spanning trees.
-		 * 
-		 * See Modelica Language Specification 3.3, section 9.4.2.
-		 */
-		public void buildTrees(ConnectionSetManager csm) {
-            // Check for redundant edges (endges that connect the same nodes)
+
+        /**
+         * Convert graph to a set of spanning trees.
+         * 
+         * See Modelica Language Specification 3.3, section 9.4.2.
+         */
+        public void buildTrees(ConnectionSetManager csm) {
+            breakPureConnectLoops();
+            Queue<Node> roots = collectRoots();
+            java.util.List<Node> selected = new ArrayList<Node>(roots.size());
+            if (selectRoots(roots, selected))
+                return;
+            
+            buildTrees(csm, selected);
+            unrootedErrors();
+            buildOpsMap();
+        }
+
+        /**
+         * Break loops comprised entirely of connect edges.
+         */
+        private void breakPureConnectLoops() {
             for (Node n : nodes) {
-                Map<Node, Edge> currentEdgeMap = new HashMap<Node, Edge>();
-                for (Edge e : n.edges) {
-                    // TODO: Is this sufficient, what happens if we have one
-                    // connect() and one branch edge which point between the
-                    // same nodes?
-                    if (e.isIgnored() || !e.isBreakable()) {
-                        continue;
+                n.breakPureConnectLoops();
+            }
+        }
+
+        /**
+         * Collect roots sorted by priority.
+         */
+        private Queue<Node> collectRoots() {
+            Queue<Node> roots = new PriorityQueue<Node>();
+            for (Node n : nodes)
+                if (n.canBeRoot())
+                    roots.add(n);
+            return roots;
+        }
+
+        /**
+         * Select a root for each unbreakable sub-graph, and generate any root-related errors.
+         * 
+         * @param roots     list of roots sorted in priority order
+         * @param selected  list where the selected roots will be added
+         * @return  true if any errors were generated
+         */
+        private boolean selectRoots(Queue<Node> roots, java.util.List<Node> selected) {
+            clearVisited();
+            boolean foundError = false;
+            java.util.List<Node> otherRoots = new ArrayList<Node>();
+            for (Node root = roots.poll(); root != null; root = roots.poll()) {
+                if (!root.visited) {
+                    boolean loop = root.markSelectedRoot(root, otherRoots);
+                    selected.add(root);
+                    
+                    // Generate errors for unbreakable loops.
+                    if (loop) {
+                        genError(LOOP_ERR_MSG, root, "Selected root: ");
+                        foundError = true;
                     }
-                    Node other = e.other(n);
-                    Edge otherEdge = currentEdgeMap.get(other);
-                    if (otherEdge == null) {
-                        currentEdgeMap.put(other, e);
-                    } else {
-                        e.setAsIgnored();
+                    // Generate errors for multiple roots.
+                    if (otherRoots.size() > 0) {
+                        genError(MULTIROOT_ERR_MSG, root, "Selected root: ", otherRoots, "Other root: ");
+                        otherRoots = new ArrayList<Node>();
+                        foundError = true;
                     }
                 }
             }
-            
-			// Collect roots
-			Queue<Node> roots = new PriorityQueue<Node>();
-			for (Node n : nodes)
-				if (n.canBeRoot())
-					roots.add(n);
-			
-			// Select roots among unbreakable sub-graphs
-			boolean abort = false;
-			java.util.List<Node> selected = new ArrayList<Node>(roots.size());
-			java.util.List<Node> otherRoots = new ArrayList<Node>();
-			Node root;
-			while ((root = roots.poll()) != null) {
-				if (!root.visited) {
-					boolean loop = root.markSelectedRoot(root, otherRoots);
-					selected.add(root);
-					
-					// Generate errors for unbreakable loops.
-					if (loop) {
-						StringBuilder errorMsg = new StringBuilder();
-						errorMsg.append(LOOP_ERR_MSG);
-						errorMsg.append(ERR_SEP);
-						errorMsg.append("Selected root: ");
-						errorMsg.append(root.flatName());
-						root.var.error(errorMsg.toString());
-						abort = true;
-					}
-					// Generate errors for multiple roots.
-					if (otherRoots.size() > 0) {
-						StringBuilder errorMsg = new StringBuilder();
-						errorMsg.append(MULTIROOT_ERR_MSG);
-						errorMsg.append(ERR_SEP);
-						errorMsg.append("Selected root: ");
-						errorMsg.append(root.flatName());
-						for (Node n : otherRoots) {
-							errorMsg.append(ERR_SEP);
-							errorMsg.append("Other root: ");
-							errorMsg.append(n.flatName());
-						}
-						root.var.error(errorMsg.toString());
-						otherRoots = new ArrayList<Node>();
-						abort = true;
-					}
-				}
-			}
-			
-			if (abort)
-				return;
-			
-			// Clear visited for next step
-			for (Node n : nodes)
-				n.visited = false;
-			for (Edge e : edges)
-				e.visited = false;
-			
-			// Create trees
-			for (Node sel : selected) {
-				if (!sel.visited) {
-					Queue<Node> work = new ArrayDeque<Node>();
-					work.add(sel);
-					sel.level = 0;
-					sel.visited = true;
-					for (Node n = work.poll(); n != null; n = work.poll()) 
-						n.buildTree(work, csm);
-				}
-			}
-			
-			// Generate errors for unrooted nodes
-			for (Node n : nodes) {
-				if (!n.visited) {
-					ArrayList<Node> subGraph = new ArrayList<Node>();
-					n.subGraph(subGraph);
-					StringBuilder errorMsg = new StringBuilder();
-					errorMsg.append(UNROOTED_ERR_MSG);
-					for (Node unrooted : subGraph) {
-						errorMsg.append(ERR_SEP);
-						errorMsg.append(unrooted.flatName());
-					}
-					n.var.error(errorMsg.toString());
-				}
-			}
-			
-			// Build map for dependents
-			opsMap = new HashMap<String,OpsResult>();
-			for (Node n : nodes) 
-				opsMap.put(n.flatName(), n.opsResult());
-		}
-		
+            return foundError;
+        }
+
+        /**
+         * Build spanning trees from graph, starting from selected roots.
+         */
+        private void buildTrees(ConnectionSetManager csm, java.util.List<Node> selected) {
+            clearVisited();
+            for (Node sel : selected) {
+                if (!sel.visited) {
+                    Queue<Node> work = new ArrayDeque<Node>();
+                    work.add(sel);
+                    sel.level = 0;
+                    sel.visited = true;
+                    for (Node n = work.poll(); n != null; n = work.poll()) {
+                        n.buildTree(work, csm);
+                    }
+                }
+            }
+        }
+
+        /**
+         * Generate errors for subgraphs without roots.
+         */
+        private void unrootedErrors() {
+            for (Node n : nodes) {
+                if (!n.visited) {
+                    ArrayList<Node> subGraph = new ArrayList<Node>();
+                    n.subGraph(subGraph);
+                    genError(UNROOTED_ERR_MSG, n, subGraph, null);
+                }
+            }
+        }
+
+        /**
+         * Build lookup map for operators that are dependent on the result.
+         */
+        private void buildOpsMap() {
+            opsMap = new HashMap<String,OpsResult>();
+            for (Node n : nodes) 
+                opsMap.put(n.flatName(), n.opsResult());
+        }
+
+        /**
+         * Clear visited flags.
+         */
+        private void clearVisited() {
+            for (Node n : nodes)
+                n.visited = false;
+            for (Edge e : edges)
+                e.visited = false;
+        }
+
+        /**
+         * Generate error message.
+         */
+        private void genError(String msg, Node node, 
+                java.util.List<Node> nodeList, String listMsg) {
+            genError(msg, node, null, nodeList, listMsg);
+        }
+
+        /**
+         * Generate error message.
+         */
+        private void genError(String msg, Node node, String nodeMsg) {
+            genError(msg, node, nodeMsg, null, null);
+        }
+
+        /**
+         * Generate error message.
+         */
+        private void genError(String msg, Node node, String nodeMsg, 
+                java.util.List<Node> nodeList, String listMsg) {
+            StringBuilder errorMsg = new StringBuilder();
+            errorMsg.append(msg);
+            if (nodeMsg != null) {
+                errorMsg.append(ERR_SEP);
+                errorMsg.append(nodeMsg);
+                errorMsg.append(node.flatName());
+            }
+            if (nodeList != null) {
+                for (Node n : nodeList) {
+                    errorMsg.append(ERR_SEP);
+                    if (listMsg != null) {
+                        errorMsg.append(listMsg);
+                    }
+                    errorMsg.append(n.flatName());
+                }
+            }
+            node.var.error(errorMsg.toString());
+        }
+
 		/**
-		 * Check if conversion to spanning trrees is finished.
+		 * Check if conversion to spanning trees is finished.
 		 */
 		public boolean builtTreesDone() {
 			return opsMap != null;
@@ -1951,6 +1996,26 @@ aspect OverconstrainedConnections {
                     n.level = level + 1;
                     work.add(n);
                     n.buildTreeForUnbreakable(work, csm);
+                }
+            }
+
+            /**
+             * Find and break loops consisting only of connect edges.
+             */
+            public void breakPureConnectLoops() {
+                if (!visited) {
+                    visited = true;
+                    for (Edge e : edges) {
+                        if (!e.isIgnored() && !e.visited && e.isBreakable()) {
+                            e.visited = true;
+                            Node n = e.other(this);
+                            if (n.visited) {
+                                e.setAsIgnored();
+                            } else {
+                                n.breakPureConnectLoops();
+                            }
+                        }
+                    }
                 }
             }
 

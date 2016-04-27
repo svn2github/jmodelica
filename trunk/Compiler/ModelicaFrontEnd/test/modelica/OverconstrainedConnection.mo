@@ -589,4 +589,215 @@ end OverconstrainedConnection.OverconstrainedArray1;
 ")})));
 end OverconstrainedArray1;
 
+
+model PureConnectLoop1
+    C1 c1;
+    C1 c2;
+equation
+    c1.t = {time, -time};
+    connect(c1, c2);
+    connect(c1, c2);
+    Connections.potentialRoot(c1.t);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="PureConnectLoop1",
+            description="Two overconstrained connectors double connected to each other",
+            flatModel="
+fclass OverconstrainedConnection.PureConnectLoop1
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c1.t[1:2] = c2.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.PureConnectLoop1;
+")})));
+end PureConnectLoop1;
+
+
+model PureConnectLoop2
+    C1 c1;
+    C1 c2;
+    C1 c3;
+equation
+    c1.t = {time, -time};
+    connect(c1, c2);
+    connect(c2, c3);
+    connect(c3, c1);
+    Connections.potentialRoot(c1.t);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="PureConnectLoop2",
+            description="Three overconstrained connectors connected in a loop",
+            flatModel="
+fclass OverconstrainedConnection.PureConnectLoop2
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c1.t[1:2] = c2.t[1:2];
+ c2.t[1:2] = c3.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.PureConnectLoop2;
+")})));
+end PureConnectLoop2;
+
+
+model PureConnectLoop3
+    C1 c1;
+    C1 c2;
+    C1 c3;
+    C1 c4;
+equation
+    c1.t = {time, -time};
+    connect(c1, c2);
+    connect(c1, c2);
+    Connections.branch(c2.t, c3.t);
+    c2.t = c3.t;
+    connect(c3, c4);
+    Connections.branch(c4.t, c1.t);
+    c4.t = c1.t;
+    Connections.potentialRoot(c1.t);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="PureConnectLoop3",
+            description="Two overconstrained connectors double connected to each other, as part of a normal overconstrained loop",
+            flatModel="
+fclass OverconstrainedConnection.PureConnectLoop3
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+ OverconstrainedConnection.T1 c4.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c2.t[1:2] = c3.t[1:2];
+ c4.t[1:2] = c1.t[1:2];
+ c1.t[1:2] = c2.t[1:2];
+ zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c3.t[1:2], c4.t[1:2]);
+
+public
+ function OverconstrainedConnection.T1.equalityConstraint
+  input Real[:] i1;
+  input Real[:] i2;
+  output Real[:] o;
+ algorithm
+  init o as Real[1];
+  o[1:1] := sum(i1[1:2] .+ i2[1:2]);
+  return;
+ end OverconstrainedConnection.T1.equalityConstraint;
+
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.PureConnectLoop3;
+")})));
+end PureConnectLoop3;
+
+
+model PureConnectLoop4
+    C1 c1;
+    C1 c2;
+    C1 c3;
+    C1 c4;
+    C1 c5;
+equation
+    c1.t = {time, -time};
+    connect(c1, c2);
+    connect(c2, c3);
+    connect(c3, c1);
+    Connections.branch(c2.t, c4.t);
+    c2.t = c4.t;
+    connect(c4, c5);
+    Connections.branch(c5.t, c1.t);
+    c5.t = c1.t;
+    Connections.potentialRoot(c1.t);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="PureConnectLoop4",
+            description="Three overconstrained connectors connected in a loop, as part of a normal overconstrained loop",
+            flatModel="
+fclass OverconstrainedConnection.PureConnectLoop4
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+ OverconstrainedConnection.T1 c4.t[2];
+ OverconstrainedConnection.T1 c5.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c2.t[1:2] = c4.t[1:2];
+ c5.t[1:2] = c1.t[1:2];
+ c1.t[1:2] = c2.t[1:2];
+ c2.t[1:2] = c3.t[1:2];
+ zeros(1) = OverconstrainedConnection.T1.equalityConstraint(c4.t[1:2], c5.t[1:2]);
+
+public
+ function OverconstrainedConnection.T1.equalityConstraint
+  input Real[:] i1;
+  input Real[:] i2;
+  output Real[:] o;
+ algorithm
+  init o as Real[1];
+  o[1:1] := sum(i1[1:2] .+ i2[1:2]);
+  return;
+ end OverconstrainedConnection.T1.equalityConstraint;
+
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.PureConnectLoop4;
+")})));
+end PureConnectLoop4;
+
+
+model PureConnectLoop5
+    C1 c1;
+    C1 c2;
+    C1 c3;
+    C1 c4;
+    C1 c5;
+equation
+    c1.t = {time, -time};
+    connect(c1, c1);
+    connect(c1, c2);
+    connect(c1, c3);
+    connect(c1, c4);
+    connect(c1, c5);
+    connect(c2, c1);
+    connect(c2, c3);
+    connect(c2, c4);
+    connect(c2, c5);
+    connect(c3, c4);
+    connect(c3, c5);
+    connect(c4, c5);
+    Connections.potentialRoot(c1.t);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="PureConnectLoop5",
+            description="Five overconstrained connectors with multiple redundant connects between them",
+            flatModel="
+fclass OverconstrainedConnection.PureConnectLoop5
+ OverconstrainedConnection.T1 c1.t[2];
+ OverconstrainedConnection.T1 c2.t[2];
+ OverconstrainedConnection.T1 c3.t[2];
+ OverconstrainedConnection.T1 c4.t[2];
+ OverconstrainedConnection.T1 c5.t[2];
+equation
+ c1.t[1:2] = {time, - time};
+ c1.t[1:2] = c2.t[1:2];
+ c2.t[1:2] = c3.t[1:2];
+ c3.t[1:2] = c4.t[1:2];
+ c4.t[1:2] = c5.t[1:2];
+
+public
+ type OverconstrainedConnection.T1 = Real;
+end OverconstrainedConnection.PureConnectLoop5;
+")})));
+end PureConnectLoop5;
+
 end OverconstrainedConnection;
