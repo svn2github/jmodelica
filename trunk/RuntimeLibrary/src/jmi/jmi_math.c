@@ -90,7 +90,6 @@ jmi_ad_var_t static jmi_atan2(jmi_t *jmi, const char func_name[], jmi_ad_var_t x
         
         if (jmi == NULL) jmi = jmi_get_current();
         jmi_log_func_or_eq(jmi, "IllegalAtan2Input", func_name, msg, val);
-		to_return = x/y; /* Create Nan as output. */
     }
     
     return to_return;
