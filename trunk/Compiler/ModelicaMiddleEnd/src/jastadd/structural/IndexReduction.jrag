@@ -1068,8 +1068,7 @@ aspect IndexReduction {
 
         java.util.List<FVariable> zHat = new ArrayList<FVariable>();
 
-        // Disabled for now, causes problems
-//        lookForHigherOrderVars();
+        lookForHigherOrderVars();
 
         // Initialize variable to keep track of there are still 
         // differentiated equations
