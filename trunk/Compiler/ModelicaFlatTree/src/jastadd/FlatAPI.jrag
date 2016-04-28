@@ -3856,8 +3856,15 @@ aspect FlatExternalFunctionAPI {
             if (uri.getScheme().equals("file")) {
                 return uri.getPath();
             } else if (uri.getScheme().equals("modelica")) {
-                String pack = new File(packagePath(uri.getAuthority())).getAbsolutePath();
-                return pack != null ? pack + uri.getPath() : null;
+                String pack = packagePath(uri.getAuthority());
+                if (pack != null) {
+                    File path = new File(pack + uri.getPath());
+                    try {
+                        return path.getCanonicalPath();
+                    } catch (IOException e) {
+                        return path.getAbsolutePath();
+                    }
+                }
             }
         } catch (URISyntaxException e) {
         }
