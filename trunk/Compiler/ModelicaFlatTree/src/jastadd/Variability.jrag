@@ -170,11 +170,15 @@ aspect Variability {
         return var;
     }
     eq FAlgorithm.variability() {
-        FTypePrefixVariability var = fConstant();
-        for (FIdUseExp exp : findFIdUseExpsInTree()) {
-            var = var.combine(exp.variability());
+        FTypePrefixVariability rhsVar = containsFTimeExp() ? fContinuous() : fConstant();
+        FTypePrefixVariability lhsVar = fConstant();
+        for (FVariable fv : referencedFVariablesInLHS()) {
+            lhsVar = lhsVar.combine(fv.variability());
         }
-        return var;
+        for (FVariable fv : referencedFVariablesInRHS()) {
+            rhsVar = rhsVar.combine(fv.variability());
+        }
+        return lhsVar.combineDown(rhsVar);
     }
 
     syn boolean FAbstractEquation.isConstant() = false;

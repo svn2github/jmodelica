@@ -1601,8 +1601,7 @@ algorithm
         i := -1;
     end if;
 
-    // This test seems to be invalid, i is assinged within a test which uses continuous variability. See #4900.
-    annotation(__JModelica_disabled(UnitTesting(tests={
+    annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="AlgorithmVariability1",
             description="Test so that variability calculations are done propperly for algorithms",
@@ -1644,81 +1643,6 @@ equation
  2 * x * _der_der_x + 2 * _der_x * _der_x + (2 * y * _der_der_y + 2 * der(y) * der(y)) = 0.0;
 end IndexReduction.AlgorithmVariability1;")})));
   end AlgorithmVariability1;
-
-  model AlgorithmVariability2
-    Real x;
-    Real y;
-    Real z;
-    parameter Integer p = 1;
-    parameter Integer[:] it = {1};
-    parameter Real[:] rt = {2.0};
-equation
-    // Trigger index reduction
-    y = time;
-    z = x + der(y);
-algorithm
-    x := if it[1] == p then rt[1] else 0;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmVariability2",
-            description="Test so that variability calculations are done propperly for algorithms",
-            flatModel="
-fclass IndexReduction.AlgorithmVariability2
- Real x;
- Real y;
- Real z;
- parameter Integer p = 1 /* 1 */;
- parameter Integer it[1] = 1 /* 1 */;
- parameter Real rt[1] = 2.0 /* 2.0 */;
- Real _der_y;
-equation
- y = time;
- z = x + _der_y;
-algorithm
- x := if it[1] == p then rt[1] else 0;
-equation
- _der_y = 1.0;
-end IndexReduction.AlgorithmVariability2;
-")})));
-  end AlgorithmVariability2;
-
-  model AlgorithmVariability2
-    Real y;
-    Real x;
-    Real z;
-equation
-    // Trigger index reduction
-    y = time * 2;
-    z = x + der(y);
-algorithm
-    when time > 0.25 then
-        x := y / 2;
-    end when;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AlgorithmVariability3",
-            description="Test so that variability calculations are done propperly for algorithms, it should honor in discrete location",
-            flatModel="
-fclass IndexReduction.AlgorithmVariability2
- Real x;
- Real y;
- Real z;
- parameter Integer p = 1 /* 1 */;
- parameter Integer it[1] = 1 /* 1 */;
- parameter Real rt[1] = 2.0 /* 2.0 */;
- Real _der_y;
-equation
- y = time;
- z = x + _der_y;
-algorithm
- x := if it[1] == p then rt[1] else 0;
-equation
- _der_y = 1.0;
-end IndexReduction.AlgorithmVariability2;
-")})));
-  end AlgorithmVariability2;
 
     model Variability1
         function F1
