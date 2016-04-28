@@ -3837,40 +3837,12 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = n.uri2path(includeDir);
+            includeDir = n.resolve(includeDir);
         if (libraryDir != null) {
-            libraryDir = n.uri2path(libraryDir);
+            libraryDir = n.resolve(libraryDir);
         }
     }
-    
-    /**
-     * Converts an URI to a file-system path.
-     * 
-     * Only modelica:// and file:// URIs are supported.
-     * 
-     * @param str  the string to interpret as an URI
-     */
-    public String InstExternal.uri2path(String str) {
-        try {
-            URI uri = new URI(str);
-            if (uri.getScheme().equals("file")) {
-                return uri.getPath();
-            } else if (uri.getScheme().equals("modelica")) {
-                String pack = packagePath(uri.getAuthority());
-                if (pack != null) {
-                    File path = new File(pack + uri.getPath());
-                    try {
-                        return path.getCanonicalPath();
-                    } catch (IOException e) {
-                        return path.getAbsolutePath();
-                    }
-                }
-            }
-        } catch (URISyntaxException e) {
-        }
-        return null;
-    }
-    
+
 }
 
 aspect Sparsity {
