@@ -275,7 +275,7 @@ aspect VariabilityPropagation {
         }
         
         if (!solutionVariability.knownParameterOrLess()) {
-            workData.addParameterEquation(new FEquation(fVariable.createUseExp(), solution));
+            workData.addParameterEquation(new FEquation(fVariable.createUseExp(), solution.asRealLitExp()));
         }
         
         workData.removeEquation(this);
@@ -458,7 +458,7 @@ aspect VariabilityPropagation {
         throw new UnsupportedOperationException();
     }
     
-    syn FExp FExp.asRealLitExp() = null;
+    syn FExp FExp.asRealLitExp() = ceval().buildLiteral().asRealLitExp();
     eq FRealLitExp.asRealLitExp() = this;
     eq FIntegerLitExp.asRealLitExp() = new FRealLitExp(getValue());
     

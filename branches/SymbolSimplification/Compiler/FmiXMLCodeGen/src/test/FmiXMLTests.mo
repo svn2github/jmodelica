@@ -1229,24 +1229,24 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
-        <Real relativeQuantity=\"false\" start=\"3.0\" />
-    </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
-        <Real relativeQuantity=\"false\" start=\"3.0\" />
-    </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435459\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
-        <Integer start=\"3\" />
-    </ScalarVariable>
-    <ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" start=\"1.0\" />
-    </ScalarVariable>
-    <ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" start=\"2.0\" />
-    </ScalarVariable>
-    <ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
-        <Real relativeQuantity=\"false\" start=\"3.0\" />
-    </ScalarVariable>
+	<ScalarVariable name=\"a\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<Real relativeQuantity=\"false\" start=\"3.0\" />
+	</ScalarVariable>
+	<ScalarVariable name=\"b\" valueReference=\"3\" variability=\"constant\" causality=\"internal\" alias=\"alias\">
+		<Real relativeQuantity=\"false\" start=\"3.0\" />
+	</ScalarVariable>
+	<ScalarVariable name=\"n\" valueReference=\"268435460\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<Integer start=\"3\" />
+	</ScalarVariable>
+	<ScalarVariable name=\"x[1]\" valueReference=\"0\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<Real relativeQuantity=\"false\" start=\"1.0\" />
+	</ScalarVariable>
+	<ScalarVariable name=\"x[2]\" valueReference=\"1\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<Real relativeQuantity=\"false\" start=\"2.0\" />
+	</ScalarVariable>
+	<ScalarVariable name=\"x[3]\" valueReference=\"2\" variability=\"constant\" causality=\"internal\" alias=\"noAlias\">
+		<Real relativeQuantity=\"false\" start=\"3.0\" />
+	</ScalarVariable>
 </ModelVariables>
 ")})));
 end StructuralStartValue1;
@@ -1263,13 +1263,13 @@ $modelVariables$
 ",
             generatedCode="
 <ModelVariables>
-    <ScalarVariable name=\"a\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+    <ScalarVariable name=\"a\" valueReference=\"3\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"b\" valueReference=\"2\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+    <ScalarVariable name=\"b\" valueReference=\"3\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Real relativeQuantity=\"false\" start=\"3.0\" />
     </ScalarVariable>
-    <ScalarVariable name=\"n\" valueReference=\"268435459\" causality=\"local\" variability=\"constant\" initial=\"exact\">
+    <ScalarVariable name=\"n\" valueReference=\"268435460\" causality=\"local\" variability=\"constant\" initial=\"exact\">
         <Integer start=\"3\" />
     </ScalarVariable>
     <ScalarVariable name=\"x[1]\" valueReference=\"0\" causality=\"local\" variability=\"constant\" initial=\"exact\">

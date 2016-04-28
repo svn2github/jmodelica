@@ -337,8 +337,8 @@ constraint
             eliminate_alias_variables=false,
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest1(objective = y(finalTime),startTime = 0,finalTime = 2)
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Real y = 1.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
@@ -361,8 +361,8 @@ constraint
 			description="Timed array variables: scalarizing vector multiplication",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.TimedArrayTest2(objective = y(finalTime),startTime = 0,finalTime = 2)
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Real y = 4.0;
  parameter Real startTime = 0 /* 0 */;
  parameter Real finalTime = 2 /* 2 */;
@@ -427,8 +427,8 @@ constraint
 			description="Scalarization of for constraints",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.ForConstraint1(objective = y[1](finalTime) + y[2](finalTime),startTime = 0,finalTime = 2)
- constant Real x[1] = 1;
- constant Real x[2] = 2;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Real y[1] = 4.0;
  constant Real y[2] = 6.0;
  parameter Real startTime = 0 /* 0 */;

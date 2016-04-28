@@ -211,18 +211,18 @@ parameter equation
  damper.d = damping;
  sine.amplitude = amplitude;
  sine.freqHz = freqHz;
- torque.phi_support = fixed.phi0;
- damper.flange_b.phi = torque.phi_support;
- fixed.flange.phi = torque.phi_support;
- idealGear.support.phi = torque.phi_support;
- torque.support.phi = torque.phi_support;
- idealGear.phi_support = torque.phi_support;
+ fixed.flange.phi = fixed.phi0;
+ damper.flange_b.phi = fixed.flange.phi;
+ idealGear.support.phi = fixed.flange.phi;
+ torque.support.phi = idealGear.support.phi;
+ idealGear.phi_support = idealGear.support.phi;
+ torque.phi_support = torque.support.phi;
 equation
  inertia1.w = inertia1._der_phi;
  inertia1.a = inertia1._der_w;
  inertia1.J * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
- idealGear.phi_a = inertia1.phi - torque.phi_support;
- idealGear.phi_b = inertia2.phi - torque.phi_support;
+ idealGear.phi_a = inertia1.phi - idealGear.phi_support;
+ idealGear.phi_b = inertia2.phi - idealGear.phi_support;
  idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
@@ -235,7 +235,7 @@ equation
  inertia3.J * der(inertia3.w) = - spring.tau;
  damper.tau = damper.d * der(damper.phi_rel);
  damper.lossPower = damper.tau * der(damper.phi_rel);
- damper.phi_rel = torque.phi_support - inertia2.phi;
+ damper.phi_rel = damper.flange_b.phi - inertia2.phi;
  damper.w_rel = der(damper.phi_rel);
  damper.a_rel = der(damper.w_rel);
  torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
