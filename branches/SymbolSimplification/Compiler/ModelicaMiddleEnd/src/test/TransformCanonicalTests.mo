@@ -783,7 +783,7 @@ Alias sets:
 1 errors found:
 
 Error in flattened model:
-  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,x2,x3}
+  Alias error: trying to add the negated alias pair (x1,-x1) to the alias set {x1,x2,x3}
 ")})));
   end AliasTest16_Err;
 
@@ -804,7 +804,7 @@ Error in flattened model:
 1 errors found:
 
 Error in flattened model:
-  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,x2,-x3}
+  Alias error: trying to add the negated alias pair (x1,-x1) to the alias set {x1,x2,-x3}
 ")})));
   end AliasTest17_Err;
 
@@ -825,7 +825,7 @@ Error in flattened model:
 1 errors found:
 
 Error in flattened model:
-  Alias error: trying to add the alias pair (x3,x1) to the alias set {x1,-x2,-x3}
+  Alias error: trying to add the negated alias pair (x1,-x1) to the alias set {x1,-x2,-x3}
 ")})));
   end AliasTest18_Err;
 
@@ -846,7 +846,7 @@ Error in flattened model:
 1 errors found:
 
 Error in flattened model:
-  Alias error: trying to add the negated alias pair (x3,-x1) to the alias set {x1,-x2,x3}
+  Alias error: trying to add the negated alias pair (x1,-x1) to the alias set {x1,-x2,x3}
 ")})));
   end AliasTest19_Err;
 
@@ -5979,15 +5979,15 @@ equation
 w[1] := time
 
 --- Solved function call equation ---
-({temp_6, temp_7}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
-  Assigned variables: temp_6
-                      temp_7
+({temp_4, temp_5}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  Assigned variables: temp_4
+                      temp_5
 
 --- Solved equation ---
-z[1] := - temp_6
+z[1] := - temp_4
 
 --- Solved equation ---
-z[2] := - temp_7
+z[2] := - temp_5
 -------------------------------
 ")})));
 end BlockTest10;
@@ -7643,11 +7643,11 @@ equation
             flatModel="
 fclass TransformCanonicalTests.InsertTempLHS1
  Real x;
- constant Real y = 0;
- Real temp_3;
+ constant Real y = 0.0;
+ Real temp_2;
 equation
- (TransformCanonicalTests.InsertTempLHS1.R(temp_3)) = TransformCanonicalTests.InsertTempLHS1.f(x);
- -0.0 = temp_3;
+ (TransformCanonicalTests.InsertTempLHS1.R(temp_2)) = TransformCanonicalTests.InsertTempLHS1.f(x);
+ -0.0 = temp_2;
 
 public
  function TransformCanonicalTests.InsertTempLHS1.f

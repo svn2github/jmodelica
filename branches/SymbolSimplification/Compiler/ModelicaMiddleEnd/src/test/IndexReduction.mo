@@ -138,21 +138,25 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Real ratio = 10 \"Gear ratio\" /* 10 */;
  parameter Real damping = 10 \"Damping in bearing of gear\" /* 10 */;
  parameter Modelica.SIunits.Angle fixed.phi0 = 0 \"Fixed offset angle of housing\" /* 0 */;
+ parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Torque fixed.flange.tau \"Cut torque in the flange\";
  Modelica.Blocks.Interfaces.RealInput torque.tau(unit = \"N.m\") \"Accelerating torque acting at flange (= -flange.tau)\";
  eval parameter Boolean torque.useSupport = true \"= true, if support flange enabled, otherwise implicitly grounded\" /* true */;
- parameter Modelica.SIunits.MomentOfInertia inertia1.J(min = 0,start = 1) \"Moment of inertia\";
  parameter Real idealGear.ratio(start = 1) \"Transmission ratio (flange_a.phi/flange_b.phi)\";
+ parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
  parameter StateSelect inertia1.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia1.phi(stateSelect = inertia1.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia1.w(stateSelect = inertia1.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia1.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
+ parameter Real sine.amplitude \"Amplitude of sine wave\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
  Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
  Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
+ parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
  Modelica.SIunits.Torque inertia2.flange_b.tau \"Cut torque in the flange\";
  parameter Modelica.SIunits.MomentOfInertia inertia2.J(min = 0,start = 1) = 2 \"Moment of inertia\" /* 2 */;
  parameter StateSelect inertia2.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
@@ -163,31 +167,27 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle spring.phi_rel0 = 0 \"Unstretched spring angle\" /* 0 */;
  Modelica.SIunits.Angle spring.phi_rel(fixed = true,start = 0) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.Torque spring.tau \"Torque between flanges (= flange_b.tau)\";
- constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0 \"Cut torque in the flange\";
- parameter Modelica.SIunits.RotationalDampingConstant damper.d(final min = 0,start = 0) \"Damping constant\";
+ constant Modelica.SIunits.Torque inertia3.flange_b.tau = 0.0 \"Cut torque in the flange\";
+ parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
  parameter StateSelect inertia3.stateSelect = StateSelect.default \"Priority to use phi and w as states\" /* StateSelect.default */;
  Modelica.SIunits.Angle inertia3.phi(stateSelect = inertia3.stateSelect) \"Absolute rotation angle of component\";
  Modelica.SIunits.AngularVelocity inertia3.w(fixed = true,start = 0,stateSelect = inertia3.stateSelect) \"Absolute angular velocity of component (= der(phi))\";
  Modelica.SIunits.AngularAcceleration inertia3.a \"Absolute angular acceleration of component (= der(w))\";
- parameter Real sine.amplitude \"Amplitude of sine wave\";
+ parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
  Modelica.SIunits.Angle damper.phi_rel(stateSelect = StateSelect.always,start = 0,nominal = if damper.phi_nominal >= 1.0E-15 then damper.phi_nominal else 1) \"Relative rotation angle (= flange_b.phi - flange_a.phi)\";
  Modelica.SIunits.AngularVelocity damper.w_rel(stateSelect = StateSelect.always,start = 0) \"Relative angular velocity (= der(phi_rel))\";
  Modelica.SIunits.AngularAcceleration damper.a_rel(start = 0) \"Relative angular acceleration (= der(w_rel))\";
  Modelica.SIunits.Torque damper.tau \"Torque between flanges (= flange_b.tau)\";
+ parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
  parameter Modelica.SIunits.Angle damper.phi_nominal(displayUnit = \"rad\",min = 0.0) = 1.0E-4 \"Nominal value of phi_rel (used for scaling)\" /* 1.0E-4 */;
  parameter StateSelect damper.stateSelect = StateSelect.prefer \"Priority to use phi_rel and w_rel as states\" /* StateSelect.prefer */;
  eval parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
- parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
+ parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
- parameter Modelica.SIunits.Angle damper.flange_b.phi \"Absolute rotation angle of flange\";
- parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
- parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
- parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
- parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  Real inertia1._der_phi;
  Real inertia1._der_w;
  Real inertia2._der_phi;
@@ -504,22 +504,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real _der_x1[1];
  Real _der_x1[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_2;
+ Real temp_3;
+ Real _der_temp_2;
+ Real _der_temp_3;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  _der_x1[1] + der(x2[1]) = 2;
  _der_x1[2] + der(x2[2]) = 3;
- ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- ({_der_temp_4, _der_temp_5}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - _der_x1[1] = _der_temp_4;
- - _der_x1[2] = _der_temp_5;
+ ({temp_2, temp_3}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1[1] = temp_2;
+ - x1[2] = temp_3;
+ ({_der_temp_2, _der_temp_3}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - _der_x1[1] = _der_temp_2;
+ - _der_x1[2] = _der_temp_3;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f
@@ -600,22 +600,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real x1._der_a[2];
  Real x2._der_a[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_2;
+ Real temp_3;
+ Real _der_temp_2;
+ Real _der_temp_3;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  der(x1.a[1]) + der(x2.a[1]) = 2;
  x1._der_a[2] + x2._der_a[2] = 3;
- (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1.a[1] = temp_4;
- - x1.a[2] = temp_5;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
- - der(x1.a[1]) = _der_temp_4;
- - x1._der_a[2] = _der_temp_5;
+ (IndexReduction.IndexReduction28_Record.R({temp_2, temp_3})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1.a[1] = temp_2;
+ - x1.a[2] = temp_3;
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_2, _der_temp_3})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ - der(x1.a[1]) = _der_temp_2;
+ - x1._der_a[2] = _der_temp_3;
 
 public
  function IndexReduction.IndexReduction28_Record.f
@@ -648,6 +648,7 @@ public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end IndexReduction.IndexReduction28_Record;
+
 ")})));
 end IndexReduction28_Record;
 
@@ -1444,30 +1445,30 @@ fclass IndexReduction.TemporaryVarStates1
  Real _der_x2[1];
  Real _der_x1[2];
  Real _der_x2[2];
+ Real temp_2;
+ Real temp_3;
  Real temp_4;
  Real temp_5;
- Real temp_6;
- Real temp_7;
- Real temp_20;
- Real temp_21;
+ Real temp_18;
+ Real temp_19;
 initial equation 
- temp_4 = 0.0;
- temp_5 = 0.0;
+ temp_2 = 0.0;
+ temp_3 = 0.0;
 equation
  _der_x1[1] + _der_x2[1] = 2;
  _der_x1[2] + _der_x2[2] = 3;
- temp_4 = A[1,1] * temp_6 + A[1,2] * temp_7;
- temp_5 = A[2,1] * temp_6 + A[2,2] * temp_7;
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- der(temp_4) = A[1,1] * temp_20 + A[1,2] * temp_21;
- der(temp_5) = A[2,1] * temp_20 + A[2,2] * temp_21;
- - _der_x1[1] = der(temp_4);
- - _der_x1[2] = der(temp_5);
- temp_6 = x2[1];
- temp_7 = x2[2];
- temp_20 = _der_x2[1];
- temp_21 = _der_x2[2];
+ temp_2 = A[1,1] * temp_4 + A[1,2] * temp_5;
+ temp_3 = A[2,1] * temp_4 + A[2,2] * temp_5;
+ - x1[1] = temp_2;
+ - x1[2] = temp_3;
+ der(temp_2) = A[1,1] * temp_18 + A[1,2] * temp_19;
+ der(temp_3) = A[2,1] * temp_18 + A[2,2] * temp_19;
+ - _der_x1[1] = der(temp_2);
+ - _der_x1[2] = der(temp_3);
+ temp_4 = x2[1];
+ temp_5 = x2[2];
+ temp_18 = _der_x2[1];
+ temp_19 = _der_x2[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
