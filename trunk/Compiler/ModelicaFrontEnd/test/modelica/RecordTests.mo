@@ -3155,7 +3155,7 @@ record R2
 end R2;
 
 record M
-    R2[:] r2={R2(R1(1:0),{R1(1:1)})};
+    R2[:] r2={R2(R1(1:0),{R1(1:0),R1(1:2),R1(1:0),R1(1:0),R1(1:3)})};
 end M;
 
 M[1] m();
@@ -3167,7 +3167,11 @@ M[1] m();
             eliminate_alias_variables=false,
             flatModel="
 fclass RecordTests.RecordConstructor34
- constant Real m[1].r2[1].r1s[1].x[1] = 1;
+ constant Real m[1].r2[1].r1s[2].x[1] = 1;
+ constant Real m[1].r2[1].r1s[2].x[2] = 2;
+ constant Real m[1].r2[1].r1s[5].x[1] = 1;
+ constant Real m[1].r2[1].r1s[5].x[2] = 2;
+ constant Real m[1].r2[1].r1s[5].x[3] = 3;
 end RecordTests.RecordConstructor34;
 ")})));
 end RecordConstructor34;

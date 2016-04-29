@@ -1193,13 +1193,17 @@ aspect Flattening {
             if (arr == null) {
                 arr = new FArray();
             }
+            int i = s.get(d);
             List<FExp> l = arr.getFExpListNoTransform();
-            l.setChild(addInDim(s, d+1, (FArray)l.getChild(s.get(d))), s.get(d));
+            if (i < l.getNumChildNoTransform()) {
+                l.setChild(addInDim(s, d+1, (FArray)l.getChildNoTransform(i)), i);
+            } else {
+                l.addChild(addInDim(s, d+1, null));
+            }
             return arr;
         }
     }
     
-	
 	private boolean InstClassDecl.derivedTypeAdded;
 	
 	public void InstClassDecl.addFDerivedType(FClass fc) {
