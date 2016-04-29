@@ -17146,6 +17146,56 @@ int jmi_set_start_values_base(jmi_t* jmi) {
 ")})));
 end TestExtObject7;
 
+model TestExtObject8
+    model EO
+        extends ExternalObject;
+        function constructor
+            input Real x;
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    record R
+        parameter EO eo;
+    end r;
+    
+    parameter Real x;
+    parameter EO eo = EO(x);
+    R r(eo=eo);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestExtObject8",
+            description="Test that constructor and destructor calls are generated for external objects in records.",
+            variability_propagation=false,
+            template="
+$C_DAE_initial_dependent_parameter_assignments$
+$C_destruct_external_object$
+",
+            generatedCode="
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    if (_eo_1 != NULL) {
+        func_CCodeGenTests_TestExtObject8_EO_destructor_def0(_eo_1);
+        _eo_1 = NULL;
+    }
+    _eo_1 = (func_CCodeGenTests_TestExtObject8_EO_constructor_exp1(_x_0));
+    _r_eo_2 = (_eo_1);
+    return ef;
+}
+
+    if (_eo_1 != NULL) {
+        func_CCodeGenTests_TestExtObject8_EO_destructor_def0(_eo_1);
+        _eo_1 = NULL;
+    }
+")})));
+end TestExtObject8;
+
 model TestExtObjectArray1
     ExtObject myEOs[2] = { ExtObject(), ExtObject() };
     Real z;

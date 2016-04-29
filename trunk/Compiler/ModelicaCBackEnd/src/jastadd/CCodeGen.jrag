@@ -4891,7 +4891,7 @@ aspect CCodeGen {
 	}
     
     public void FExternalObjectVariable.genDestructorCall_C(CodePrinter p, CodeStream str, String indent) {
-        if (hasDestructorCall()) {
+        if (hasConstructorCall(Index.NULL)) {
             str.formatln("%sif (%s != NULL) {", indent, name_C());
             p.print(getDestructorCall(), str, p.indent(indent));
             str.formatln("%s%s = NULL;", p.indent(indent), name_C());
