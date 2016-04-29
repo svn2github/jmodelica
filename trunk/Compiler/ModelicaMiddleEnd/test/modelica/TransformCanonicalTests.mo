@@ -4463,8 +4463,8 @@ fclass TransformCanonicalTests.IfEqu15
 equation
  x = if time < 1 then y * y elseif time < 3 then y + 4 else 4;
  y = if time < 1 then z2 - 1 elseif time < 3 then 2 else x + 2;
- 0.0 = if time < 1 then z1 - 2 elseif time < 3 then z1 - z2 - (x + y) else z1 + z2 - (x - y);
- 0.0 = if time < 1 then z1 + z2 - (x + y) else z2 - (if time < 3 then y * x else 4 * x);
+ 0.0 = if time < 1 then z1 - 2 else z2 - (if time < 3 then y * x else 4 * x);
+ 0.0 = if time < 1 then z1 + z2 - (x + y) elseif time < 3 then z1 - z2 - (x + y) else z1 + z2 - (x - y);
 end TransformCanonicalTests.IfEqu15;
 ")})));
   end IfEqu15;

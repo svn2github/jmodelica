@@ -2806,9 +2806,9 @@ aspect IfEquations {
         int[][] weights = new int[nl][nr];
         for (int i = 0; i < nl; i++) {
             for (int j = 0; j < nr; j++) {
-                Set<FVariable> rightVars = right.get(j).variables();
+                Set<String> rightVars = right.get(j).referencedVariablesAsStrings();
                 weights[i][j] = rightVars.size();
-                for (FVariable var : left.get(i).variables()) 
+                for (String var : left.get(i).referencedVariablesAsStrings()) 
                     weights[i][j] += rightVars.contains(var) ? -1 : 1;
             }
         }

@@ -2161,6 +2161,18 @@ aspect ReferencedVariables {
         return res;
     }
 
+    /***
+     * DANGER! Use this method and its results with caution. It will probably
+     * not work before saclarization but should be safe afterwards!
+     */
+    syn Set<String> FAbstractEquation.referencedVariablesAsStrings() {
+        Set<FIdUseExp> exps = new LinkedHashSet<FIdUseExp>();
+        Set<String> res = new LinkedHashSet<String>();
+        for (FIdUseExp exp : exps) {
+            res.add(exp.name());
+        }
+        return res;
+    }
     public static Set<FVariable> ASTNode.lookupFVariablesInSet(Set<FIdUseExp> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();
         for (FIdUseExp use : set)
