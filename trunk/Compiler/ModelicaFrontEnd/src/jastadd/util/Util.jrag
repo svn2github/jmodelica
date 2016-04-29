@@ -792,7 +792,7 @@ aspect Names {
      * 
      * Supports file URI and modelica URI only.
      * Returns null for unsupported schemes and malformed URIs.
-     * If error is true, also generate an error when returning null.
+     * If error is true, also generate an error for unsupported schemes.
      */
     public String ASTNode.resolveURI(String str, boolean error) {
         try {
@@ -810,9 +810,6 @@ aspect Names {
                 }
             }
         } catch (URISyntaxException e) {
-            if (error) {
-                error("Malformed URI: '%s'.", str);
-            }
         }
         return null;
     }

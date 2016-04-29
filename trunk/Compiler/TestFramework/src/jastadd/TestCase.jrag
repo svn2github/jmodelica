@@ -156,6 +156,7 @@ abstract public class TestCase implements GenericTestCase {
 	 * @param sourceFileName the sourceFileName to set
 	 */
 	public void setSourceFileName(String sourceFileName) {
+	    
 		this.sourceFileName = sourceFileName;
 	}
 
@@ -232,11 +233,8 @@ abstract public class TestCase implements GenericTestCase {
      * Get the path to the directory containing the test file.
      */
     protected String testFileDirectory() {
-        String file = getSourceFileName();
-        if (File.separatorChar == '\\') {
-            file = file.replace('\\', '/');
-        }
-        return file.replaceFirst("/[^/]*$", "");
+        File file = new File(getSourceFileName());
+        return ASTNode.canonicalPath(file.getParentFile());
     }
 
 	/**
