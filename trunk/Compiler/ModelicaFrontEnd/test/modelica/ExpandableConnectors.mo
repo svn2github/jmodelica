@@ -991,7 +991,8 @@ end ExpandableConnectors.Expandable25;
 ")})));
 	end Expandable25;
     
-    
+
+// TODO: This is the wrong result! ec.x should be an array
     model Expandable26
         expandable connector EC
         end EC;

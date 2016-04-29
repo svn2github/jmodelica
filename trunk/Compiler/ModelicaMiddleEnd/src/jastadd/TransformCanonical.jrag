@@ -235,9 +235,10 @@ aspect TransformCanonical {
                         perform();
                     } finally {
                         completedTransformationSteps++;
+                        lastCompletedTransformationStep = name();
                         endStep(name());
                     }
-                    generateStepMof(name());
+                    transformationStepDebug();
                 }
             }
 
@@ -256,17 +257,24 @@ aspect TransformCanonical {
 
     }
 
-	
+    /**
+     * Perform transformation step debug operations that are activated.
+     */
+    public void FClass.transformationStepDebug() {
+        generateStepMof();
+        sanityCheck();
+    }
+
     /**
      * Generate a .mof file with the current flat tree.
      */
-    public void FClass.generateStepMof(String stepName) {
+    public void FClass.generateStepMof() {
         String value = myOptions().getStringOption("debug_transformation_steps");
         if ("full".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
-            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, stepName);
+            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
-            log.debug("Writing flat tree after step " + stepName + " to " + fileName);
+            log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
@@ -277,9 +285,9 @@ aspect TransformCanonical {
         }
         if ("full".equals(value) || "diag".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
-            String fileName = String.format("%02d_%s.txt", completedTransformationSteps, stepName);
+            String fileName = String.format("%02d_%s.txt", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
-            log.debug("Writing diag after step " + stepName + " to " + fileName);
+            log.debug("Writing diag after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
                 out.print(modelDiagnostics());
@@ -291,9 +299,10 @@ aspect TransformCanonical {
     }
     
     private static final File FClass.TRANSFORMATION_STEP_DIR = new File("transformation_steps");
-    
-	private int FClass.completedTransformationSteps = 0;
-	
+
+    private int FClass.completedTransformationSteps = 0;
+    private String FClass.lastCompletedTransformationStep = "flattening";
+
 	/**
 	 * After scalarization, binding expressions on members of record declarations are no longer needed. 
 	 */

@@ -487,6 +487,12 @@ abstract public class OptionRegistry {
              "after each transformation step. Allowed values are 'none', 'diag' (only fixed-size model diagnostics), " +
              "'full' (write diagnostics and flat tree).",
              "none", "diag", "full"),
+         DEBUG_SAN_CHECK 
+            ("debug_sanity_check", 
+             OptionType.compiler, 
+             Category.debug,
+             false,
+             "If enabled, flat tree will be checked for consistency between transformation steps."),
         RUNTIME_PARAM
             ("generate_runtime_option_parameters",
              OptionType.compiler,

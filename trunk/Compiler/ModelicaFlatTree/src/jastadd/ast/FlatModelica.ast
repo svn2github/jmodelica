@@ -493,7 +493,7 @@ FAttribute : BaseNode ::= Type:FIdUse
 FInternalAttribute : FAttribute;
 
 /**
- * Represents and attribute that was generated from an annotation.
+ * Represents an attribute that was generated from an annotation.
  */
 FAnnotationAttribute : FAttribute;
 
