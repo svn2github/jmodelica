@@ -308,6 +308,7 @@ aspect IndexReduction {
         private IndexReductionEq meIntegrated = null;
         private Set<String> nonDiffVars;
         private Set<FAbstractEquation> nonDiffEqns;
+        private Set<IndexReductionVar> remoteVars = null;
 
         public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
             super(name, eqn, groupNumber, variability, type, isMeta);
@@ -465,6 +466,32 @@ aspect IndexReduction {
                 sb.append(eqn.toString());
             }
             return sb.toString();
+        }
+        
+        /**
+         * Used by index reduction for indicating that the incidence isn't
+         * direct but through other low order equations and variables.
+         */
+        public void addVariable(IndexReductionVar var, boolean remote) {
+            super.addVariable(var);
+            if (remote) {
+                if (remoteVars == null) {
+                    remoteVars = new HashSet<IndexReductionVar>();
+                }
+                remoteVars.add(var);
+            }
+        }
+        
+        /**
+         * Used by index reduction for indicating that the incidence isn't
+         * direct but through other low order equations and variables.
+         */
+        public boolean isRemoteVar(IndexReductionVar var) {
+            if (remoteVars == null) {
+                return false;
+            } else {
+                return remoteVars.contains(var);
+            }
         }
     }
 
@@ -1295,22 +1322,23 @@ aspect IndexReduction {
     }
     eq FVariable.stateSelection() = getTopIntegrated().stateSelectAttribute();
     
-    public abstract class AbstractBiPGraph {
+    public class IndexReductionBiPGraph {
         
         public static class IndexReductionCost implements SparseMunkresCost<IndexReductionCost> {
             
             public static IndexReductionCost UNMATCHED_WEIGHT = new IndexReductionCost();
             
-            private static final int NUM_WEIGHTS = 9;
+            private static final int NUM_WEIGHTS = 10;
             public static final int UNMATCHED  = 0;
             public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
             public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
             public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 3;
             public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 4;
             public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
-            private static final int FIXED_WEIGHT_POSITION               = 6;
-            private static final int ORDER_WEIGHT_POSITION               = 7;
-            private static final int LINEARITY_WEIGHT_POSITION           = 8;
+            public static final int REMOTE_VAR_POSITION                  = 6;
+            private static final int FIXED_WEIGHT_POSITION               = 7;
+            private static final int ORDER_WEIGHT_POSITION               = 8;
+            private static final int LINEARITY_WEIGHT_POSITION           = 9;
             
             private int[] weights = new int[NUM_WEIGHTS];
             
@@ -1399,8 +1427,19 @@ aspect IndexReduction {
         
         for (IndexReductionEq eqn : getEquations()) {
             int j = 0;
-            for (IndexReductionVar var : variableMap.values())
-                cost[i][j++] = eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations() ? weights.get(var) : IndexReductionCost.UNMATCHED_WEIGHT;
+            for (IndexReductionVar var : variableMap.values()) {
+                IndexReductionCost incideceCost;
+                if (eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations()) {
+                    incideceCost = weights.get(var);
+                    if (eqn.isRemoteVar(var)) {
+                        incideceCost = incideceCost.copy();
+                        incideceCost.weights[IndexReductionCost.REMOTE_VAR_POSITION]++;
+                    }
+                } else {
+                    incideceCost = IndexReductionCost.UNMATCHED_WEIGHT;
+                }
+                cost[i][j++] = incideceCost;
+            }
             i++;
         }
         
@@ -1493,7 +1532,7 @@ aspect IndexReduction {
             }
         }
         for (IndexReductionVar incidence : newIncidences) {
-            addVariable(incidence);
+            addVariable(incidence, true);
         }
     }
 
