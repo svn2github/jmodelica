@@ -41,18 +41,44 @@ aspect AccessSizes {
     inh Size FEndExp.mySize();
     eq FExpSubscript.getChild().mySize()   = accessContextSize();
     
-    eq FIdUse.getChild().mySize() = getFQName().calcMySize(-1);
+    eq FIdUse.getChild().mySize() = getFQName().calcMySize(getFQName().numParts());
     eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
     
     syn Size FQName.calcMySize(int i) = lookupFV(asFQNameFull()).size();
     eq FQNameFull.calcMySize(int i) {
-        if (inFunction()) {
-            if (numParts() > 1) {
-                FType type = lookupFV(copyPrefix(1)).type();
-                return type.lookupHierarchical(this, 1, i).size();
+        if (numParts() > 1) {
+            int j;
+            FAbstractVariable fv = null;
+            FQNameFull fqn = new FQNameFull();
+            fqn.parent = this;
+            for (j = 0; j < i; j++) {
+                fqn.addFQNamePart(getFQNamePart(j).copyFirstElement());
+                fv = lookupFV(fqn);
+                if (!fv.isUnknown()) {
+                    break;
+                }
             }
+            return fv.lookupHierarchicalSize(this, j, i);
         }
         return super.calcMySize(i);
+    }
+    
+    syn FQNamePart FQNamePart.copyFirstElement() = new FQNamePart(getName());
+    eq FQNamePartArray.copyFirstElement()        = new FQNamePartArray(getName(), accessContextFAS());
+    
+    public Size FAbstractVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+        return type().lookupHierarchical(name, part+1, last).size();
+    }
+    
+    public Size FRecordVariable.lookupHierarchicalSize(FQNameFull name, int part, int last) {
+        FExp res = findHierarchicalAttributeValue(name, last, FAttribute.SIZE);
+        if (res != null) {
+            for (int i = part; i < last - 1; i++) {
+                res = res.cell(name.getFQNamePart(i).getFArraySubscripts());
+            }
+            return new MutableSize(res);
+        }
+        return super.lookupHierarchicalSize(name, part, last);
     }
     
     public Size Size.contract(int i) {
@@ -70,7 +96,7 @@ aspect AccessSizes {
     }
     
     public Size MutableSize.accessContextSize(FSubscript sub) {
-        if (size[0] != Size.UNKNOWN || sub == null || isCircular()) {
+        if (isCircular(0) || size[0] != Size.UNKNOWN) {
             return super.accessContextSize(sub);
         }
         MutableSize ms = new MutableSize(1);

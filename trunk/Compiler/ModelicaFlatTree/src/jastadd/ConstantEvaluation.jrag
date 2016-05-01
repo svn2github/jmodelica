@@ -2468,6 +2468,7 @@ aspect ConstantEvaluation {
           return CValue.UNKNOWN;
         String last = name.lastActualPartName();
         FQName prefix = name.copyPrefix();
+        prefix.parent = this;
         FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
         if (prefix.hasFArraySubscripts())
@@ -2500,7 +2501,7 @@ aspect ConstantEvaluation {
         CValue res = CValue.UNKNOWN;
         if (myInstComponentDecl().isAssignable()) {
           Index iHere = Index.NULL;
-          InstAssignable var = (InstAssignable) myInstComponentDecl();
+          InstComponentDecl var = myInstComponentDecl();
           
           if (isSlice()) {
               FArraySubscripts fas = getFArraySubscripts();

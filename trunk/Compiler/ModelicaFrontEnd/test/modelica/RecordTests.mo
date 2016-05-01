@@ -4716,6 +4716,128 @@ end RecordTests.RecordScalarize42;
 ")})));
 end RecordScalarize42;
 
+model RecordScalarize43
+    Integer i = integer(time);
+    record R
+        Real[:] x;
+    end R;
+    
+    R[:] r = {R(1:3),R(1:2)};
+    Real[size(r,1)] x;
+equation
+    for j in 1:size(r,1) loop
+        x[j] = r[j].x[i];
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize43",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize43
+ discrete Integer i;
+ constant Real r[1].x[1] = 1;
+ constant Real r[1].x[2] = 2;
+ constant Real r[1].x[3] = 3;
+ constant Real r[2].x[1] = 1;
+ constant Real r[2].x[2] = 2;
+ Real x[1];
+ Real x[2];
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+ pre(i) = 0;
+equation
+ x[1] = ({1.0, 2.0, 3.0})[i];
+ x[2] = ({1.0, 2.0})[i];
+ i = temp_1;
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize43;
+")})));
+end RecordScalarize43;
+
+model RecordScalarize44
+    record R
+        Real[:] x;
+    end R;
+    model M
+        Integer i = integer(time);
+        R[:] r = {R(1:3),R(1:2)};
+        Real[size(r,1)] x;
+    end M;
+    M m;
+equation
+    for j in 1:size(m.r, 1) loop
+        m.x[j] = m.r[j].x[m.i];
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize44",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize44
+ discrete Integer m.i;
+ constant Real m.r[1].x[1] = 1;
+ constant Real m.r[1].x[2] = 2;
+ constant Real m.r[1].x[3] = 3;
+ constant Real m.r[2].x[1] = 1;
+ constant Real m.r[2].x[2] = 2;
+ Real m.x[1];
+ Real m.x[2];
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+ pre(m.i) = 0;
+equation
+ m.x[1] = ({1.0, 2.0, 3.0})[m.i];
+ m.x[2] = ({1.0, 2.0})[m.i];
+ m.i = temp_1;
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize44;
+")})));
+end RecordScalarize44;
+
+model RecordScalarize45
+    record R
+        Real[:] x;
+    end R;
+    model M
+        Integer i = integer(time);
+        R[:] r = {R(1:3),R(1:2)};
+        Real[size(r,1)] x;
+    end M;
+    M m;
+equation
+    for j in 1:size(m.r,1) loop
+        m.x[j] = m.r[j].x[end];
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize45",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize45
+ discrete Integer m.i;
+ constant Real m.r[1].x[1] = 1;
+ constant Real m.r[1].x[2] = 2;
+ constant Real m.r[1].x[3] = 3;
+ constant Real m.r[2].x[1] = 1;
+ constant Real m.r[2].x[2] = 2;
+ constant Real m.x[1] = 3.0;
+ constant Real m.x[2] = 2.0;
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+ pre(m.i) = 0;
+equation
+ m.i = temp_1;
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize45;
+")})));
+end RecordScalarize45;
 
 model RecordFunc1
  record A

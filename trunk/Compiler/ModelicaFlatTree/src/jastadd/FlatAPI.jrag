@@ -2428,14 +2428,29 @@ aspect Attributes {
     syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
     syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
     
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) = null;
-    eq FVariable.findHierarchicalAttribute(FQName name) = name.findHierarchicalAttribute(getFQName(), this);
+    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQName name, int n, String attrName) {
+        FAttribute attr = findHierarchicalAttribute(name, n);
+        if (attr != null) {
+            attr = attr.findAttribute(attrName);
+            if (attr != null) {
+                return attr.getValue();
+            }
+        }
+        return null;
+    }
     
-    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var) = null;
-    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var)       = var.findAttribute(getName());
-    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var) {
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) =
+            findHierarchicalAttribute(name, name.numParts());
+    
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name, int n) = null;
+    eq FVariable.findHierarchicalAttribute(FQName name, int n) =
+            name.findHierarchicalAttribute(getFQName(), this, n);
+    
+    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var, int n) = null;
+    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var, int n)       =
+            var.findAttribute(getName());
+    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var, int n) {
         int i = prefix.numMatchingParts(this);
-        int n = getNumFQNamePart();
         if (i >= n)
             return null;
         FAttribute attr = var.findAttribute(getFQNamePart(i).getName());

@@ -1159,6 +1159,10 @@ aspect Scalarization {
             fi.clearEvaluationValue();
 	}
 	
+    public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
+        return mySize().createFExp(0);
+    }
+	
 	public void FIfWhenElseEquation.scalarize(List<FAbstractEquation> eqns, 
 			List<FVariable> vars, Map<String,FExp> indexMap) {
 		eqns.add(scalarize(vars, indexMap));
@@ -1579,7 +1583,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FIdUseExp.buildRecordConstructor(Map<String,FExp> indexMap) {
-		return type().createRecordConstructor(getFIdUse().getFQName().scalarize(indexMap));
+        return type().createRecordConstructor(getFIdUse().getFQName());
 	}
 	
 	public FExp FRecordConstructor.buildRecordConstructor(Map<String,FExp> indexMap) {

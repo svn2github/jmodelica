@@ -1967,8 +1967,26 @@ aspect FlatExpressions {
 
     abstract public FSubscript FSubscript.flatten(FQName prefix);
 
-    public FSubscript FColonSubscript.flatten(FQName prefix) { 
-        return size().flattenSubscript(0);
+    public FSubscript FColonSubscript.flatten(FQName prefix) {
+        if (expandSize()) {
+            return size().flattenSubscript(0);
+        } else {
+            return new FColonSubscript();
+        }
+    }
+    
+    inh boolean FSubscript.expandSize();
+    inh boolean FEndExp.expandSize();
+    eq Root.getChild().expandSize()             = true;
+    eq InstNode.getChild().expandSize()         = true;
+    eq FIdUse.getChild().expandSize()           = true;
+    eq InstDot.getInstAccess(int i).expandSize() {
+        for (int j = 0; j < i; j++) {
+            if (!getInstAccess(j).indexVariability().knownParameterOrLess()) {
+                return false;
+            }
+        }
+        return true;
     }
     
     public FSubscript Size.flattenSubscript(int i) {
@@ -2684,8 +2702,12 @@ aspect FlatExpressions {
 	}
 	
 	public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
-    public FExp FEndExp.flatten(FQName prefix)  { 
-        return mySize().flattenFExp(0);
+    public FExp FEndExp.flatten(FQName prefix)  {
+        if (expandSize()) {
+            return mySize().flattenFExp(0);
+        } else {
+            return new FEndExp();
+        }
     }
     
     public FExp Size.flattenFExp(int d) {
