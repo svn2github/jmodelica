@@ -52,9 +52,9 @@ const char* fStringScalar(const char* in)
 const char* fStringScalarLit(const char* in)
 {
     static char c[4];
-    c[0] = in[3];
-    c[1] = in[2];
-    c[2] = in[1];
+    c[0] = in[2];
+    c[1] = in[1];
+    c[2] = in[0];
     c[3] = '\0';
     return c;
 }
