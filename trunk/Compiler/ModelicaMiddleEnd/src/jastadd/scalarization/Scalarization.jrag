@@ -1403,6 +1403,7 @@ aspect Scalarization {
 		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
 			FQName next = name.copyAndAppend(comp.getName());
+			next.parent = name;
 			rc.addArg(comp.getFType().createRecordConstructor(next));
 		}
 		return rc;
@@ -1583,7 +1584,7 @@ aspect Scalarization {
 	}
 	
 	public FExp FIdUseExp.buildRecordConstructor(Map<String,FExp> indexMap) {
-        return type().createRecordConstructor(getFIdUse().getFQName());
+        return type().createRecordConstructor(getFIdUse().getFQName().scalarize(indexMap));
 	}
 	
 	public FExp FRecordConstructor.buildRecordConstructor(Map<String,FExp> indexMap) {

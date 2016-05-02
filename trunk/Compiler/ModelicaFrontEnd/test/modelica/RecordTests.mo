@@ -4839,6 +4839,36 @@ end RecordTests.RecordScalarize45;
 ")})));
 end RecordScalarize45;
 
+model RecordScalarize46
+    function f
+        input R r;
+        output Real y = r.x;
+        algorithm
+    end f;
+    record R
+        Real x;
+    end R;
+    Real[2] y;
+    R[:] r = {R(1),R(2)};
+equation
+    for i in 1:2 loop
+        y[i] = f(r[i]);
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize46",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize46
+ constant Real y[1] = 1.0;
+ constant Real y[2] = 2.0;
+ constant Real r[1].x = 1;
+ constant Real r[2].x = 2;
+end RecordTests.RecordScalarize46;
+")})));
+end RecordScalarize46;
+
 model RecordFunc1
  record A
   Real x;
