@@ -1080,6 +1080,7 @@ public class ModelicaCompiler {
     
     public SourceRoot doParseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
+        checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
         SourceRoot sr = ParserHandler.parseModel(createUtilInterface(), names);
@@ -2071,6 +2072,9 @@ public class ModelicaCompiler {
      *@param IErrorHandler The error handler to use when compiling. If null the
      *                     default will be used.
      */
+    public void ModelicaCompiler.setUp() {
+        setUp(null);
+    }
     protected void ModelicaCompiler.setUp(IErrorHandler eh) {
         if (eh == null) {
             eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
@@ -2080,6 +2084,12 @@ public class ModelicaCompiler {
         }
         setErrorHandler(eh);
         isSetUp = true;
+    }
+    
+    public void ModelicaCompiler.checkSetUp() {
+        if (!isSetUp) {
+            throw new CompilerException("Compiler setup not performed. Use ModelicaCompiler.setUp()");
+        }
     }
     
     /**
