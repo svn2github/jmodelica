@@ -308,7 +308,7 @@
                             <fileset dir="${class_output}" includes="${build_file_patterns}" />
                             <fileset dir="${resources_temp}" />
                         </jar>
-                        <!--<delete dir="${resources_temp}" />-->
+                        <delete dir="${resources_temp}" />
                     </then>
                     <else>
                         <jar destfile="${jar_output}/@{jar}.jar">
