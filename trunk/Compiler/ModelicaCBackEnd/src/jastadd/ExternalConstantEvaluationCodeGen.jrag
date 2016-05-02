@@ -150,26 +150,35 @@ aspect Serialize {
      * @param tempMap maps expressions that should be replaced with temporaries
      */
     public void FExternalStmt.genSerialize_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
+            boolean skipOutputs) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-             cvd.type().print(tp);
+            if (!skipOutputs || !cvd.isOutput()) {
+               tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+               cvd.type().print(tp);
+            }
         }
     }
     
     public void FExternalStmt.genSerializeComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
+            boolean skipOutputs) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-             tp.printComps((FExternalObjectType)cvd.type());
+            if (!skipOutputs || !cvd.isOutput()) {
+               tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+               tp.printComps((FExternalObjectType)cvd.type());
+            }
         }
     }
     
     public void FExternalStmt.genSerializeNoComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
+            boolean skipOutputs) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-             tp.printExt((FExternalObjectType)cvd.type());
+            if (!skipOutputs || !cvd.isOutput()) {
+                tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+                tp.printExt((FExternalObjectType)cvd.type());
+            }
         }
     }
     
