@@ -995,15 +995,16 @@ end Differentiation.IntegerVariable;
 ")})));
 end IntegerVariable;
 
-model DifferentiatedDiscreteVariable
-    Real x1,x2;
-equation
-    der(x1) + der(x2) = 1;
-    when time > 2 then
-        x1 = sin(x2) + time;
-    end when;
-
-    annotation(__JModelica(UnitTesting(tests={
+package DiscreteTime
+    model DifferentiatedDiscreteVariable
+        Real x1,x2;
+    equation
+        der(x1) + der(x2) = 1;
+        when time > 2 then
+            x1 = sin(x2) + time;
+        end when;
+    
+        annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="DifferentiatedDiscreteVariable",
             description="Test error given when differentiating a discrete real",
@@ -1013,7 +1014,152 @@ equation
 Error in flattened model, DIFFERENTIATED_DISCRETE_VARIALBE:
   Unable to differentiate the variable x1 which is declared or infered to be discrete
 ")})));
-end DifferentiatedDiscreteVariable;
+    end DifferentiatedDiscreteVariable;
+    
+    model AutoDiffOfDiscrete1
+        Real L(start=3.14) "Pendulum length";
+        parameter Real g =9.81 "Acceleration due to gravity";
+        Real x "Cartesian x coordinate";
+        Real y "Cartesian x coordinate";
+        Real vx "Velocity in x coordinate";
+        Real vy "Velocity in y coordinate";
+        Real lambda "Lagrange multiplier";
+    equation
+        when time > 5 then
+            L = 6.28;
+        end when;
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = lambda*x;
+        der(vy) + 0 = lambda*y - g;
+        x^2 + y^2 = L;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IntegerVariable1",
+            description="Ensure that we allow the index reduction to differentiate discete variable references",
+            flatModel="
+fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
+ discrete Real L(start = 3.14) \"Pendulum length\";
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ discrete Boolean temp_1;
+ Real _der_vx;
+ Real _der_vy;
+ Real _der_x;
+ Real _der_y;
+ Real _ds.1.a1;
+ Real _ds.1.s1;
+ Real _ds.2.a1;
+ Real _ds.2.s1;
+ Real dynDer(x);
+ Real dynDer(y);
+ Real dynDer(_der_x);
+ Real dynDer(_der_y);
+initial equation 
+ _ds.1.s1 = 0.0;
+ _ds.2.s1 = 0.0;
+ y = 0.0;
+ _der_y = 0.0;
+ pre(L) = 3.14;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 5;
+ L = if temp_1 and not pre(temp_1) then 6.28 else pre(L);
+ dynDer(x) = vx;
+ dynDer(y) = vy;
+ _der_vx = lambda * ds(2, x);
+ _der_vy = lambda * ds(2, y) - g;
+ ds(2, x) ^ 2 + ds(2, y) ^ 2 = L;
+ 2 * ds(2, x) * dynDer(x) + 2 * ds(2, y) * dynDer(y) = 0.0;
+ dynDer(_der_x) = _der_vx;
+ dynDer(_der_y) = _der_vy;
+ 2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
+ ds(1, _der_x) = dynDer(x);
+ ds(1, _der_y) = dynDer(y);
+ der(_ds.1.s1) = dsDer(1, 1);
+ der(_ds.2.s1) = dsDer(2, 1);
+end Differentiation.DiscreteTime.AutoDiffOfDiscrete1;
+")})));
+    end AutoDiffOfDiscrete1;
+    
+    model AutoDiffOfDiscrete2
+        Real L(start=3.14) "Pendulum length";
+        parameter Real g =9.81 "Acceleration due to gravity";
+        Real x "Cartesian x coordinate";
+        Real y "Cartesian x coordinate";
+        Real vx "Velocity in x coordinate";
+        Real vy "Velocity in y coordinate";
+        Real lambda "Lagrange multiplier";
+    equation
+        when time > 5 then
+            L = 6.28;
+        end when;
+        der(x) = vx;
+        der(y) = vy;
+        der(vx) = lambda*x;
+        der(vy) + 0 = lambda*y - g;
+        x^2 + y^2 = L;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IntegerVariable2",
+            description="Ensure that we allow the index reduction to differentiate discete variable references",
+            flatModel="
+fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
+ discrete Real L(start = 3.14) \"Pendulum length\";
+ parameter Real g = 9.81 \"Acceleration due to gravity\" /* 9.81 */;
+ Real x \"Cartesian x coordinate\";
+ Real y \"Cartesian x coordinate\";
+ Real vx \"Velocity in x coordinate\";
+ Real vy \"Velocity in y coordinate\";
+ Real lambda \"Lagrange multiplier\";
+ discrete Boolean temp_1;
+ Real _der_vx;
+ Real _der_vy;
+ Real _der_x;
+ Real _der_y;
+ Real _ds.1.a1;
+ Real _ds.1.s1;
+ Real _ds.2.a1;
+ Real _ds.2.s1;
+ Real dynDer(x);
+ Real dynDer(y);
+ Real dynDer(_der_x);
+ Real dynDer(_der_y);
+initial equation 
+ _ds.1.s1 = 0.0;
+ _ds.2.s1 = 0.0;
+ y = 0.0;
+ _der_y = 0.0;
+ pre(L) = 3.14;
+ pre(temp_1) = false;
+equation
+ temp_1 = time > 5;
+ L = if temp_1 and not pre(temp_1) then 6.28 else pre(L);
+ dynDer(x) = vx;
+ dynDer(y) = vy;
+ _der_vx = lambda * ds(2, x);
+ _der_vy = lambda * ds(2, y) - g;
+ ds(2, x) ^ 2 + ds(2, y) ^ 2 = L;
+ 2 * ds(2, x) * dynDer(x) + 2 * ds(2, y) * dynDer(y) = 0.0;
+ dynDer(_der_x) = _der_vx;
+ dynDer(_der_y) = _der_vy;
+ 2 * ds(2, x) * dynDer(_der_x) + 2 * dynDer(x) * dynDer(x) + (2 * ds(2, y) * dynDer(_der_y) + 2 * dynDer(y) * dynDer(y)) = 0.0;
+ ds(1, _der_x) = dynDer(x);
+ ds(1, _der_y) = dynDer(y);
+ der(_ds.1.s1) = dsDer(1, 1);
+ der(_ds.2.s1) = dsDer(2, 1);
+end Differentiation.DiscreteTime.AutoDiffOfDiscrete2;
+")})));
+    end AutoDiffOfDiscrete2;
+    
+    
+end DiscreteTime;
 
 model ErrorMessage1
   Real x1;
