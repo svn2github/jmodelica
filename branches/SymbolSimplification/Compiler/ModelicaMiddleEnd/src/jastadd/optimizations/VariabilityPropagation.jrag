@@ -215,12 +215,12 @@ aspect VariabilityPropagation {
                 // Clean initial equations
                 newEquations = new ArrayList<FAbstractEquation>();
                 for (FAbstractEquation equation: fclass.initialEquations()) {
-                    if (!workData.hasRemovedEquation(equation) || !equation.taggedByVProp) {
+                    if (!workData.hasRemovedEquation(equation) && !equation.taggedByVProp) {
                         newEquations.add(equation);
                     }
                 }
                 
-                fclass.setFParameterEquationList(workData.getparameterEquations());
+                fclass.setFParameterEquationList(workData.getParameterEquations());
                 fclass.setFInitialEquationList(new List<FAbstractEquation>(newEquations));
             }
         }
@@ -231,7 +231,6 @@ aspect VariabilityPropagation {
     }
         
     public boolean FEquation.variabilityPropagation(symbolicTransformationFramework.WorkData workData) {
-        
         FVariable fVariable;
         FExp solution;
         FTypePrefixVariability solutionVariability;
@@ -279,6 +278,7 @@ aspect VariabilityPropagation {
         }
         
         workData.removeEquation(this);
+        this.taggedByVProp = true; 
         fVariable.variabilityPropagation(workData, solutionVariability, solution);
         return true;
     }
@@ -328,11 +328,13 @@ aspect VariabilityPropagation {
         
         if (allRemoved) {
             workData.removeEquation(this);
+            this.taggedByVProp = true;
         } else {
             if (param) {
                 workData.addParameterEquation(this);
                 this.taggedByVProp = true;
-                // Only tag equation here so it can be removed from initial equations?
+                // Only tag equation here. Equation will  be moved to parameter equation list 
+                // and not removed entirely.
             }
         }
         this.taggedForCleanup = true;
@@ -556,6 +558,7 @@ aspect VariabilityPropagation {
                             equation.variables().size() == 0 && 
                             equation.nonFixedParameters().size() == 0) {
                         workData.removeEquation(equation);
+                        equation.taggedByVProp = true;
                     }
                 }
             }

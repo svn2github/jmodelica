@@ -1904,7 +1904,8 @@ aspect TransformCanonical {
      
     public void FClass.eliminateAliasVariables(
            symbolicTransformationFramework.WorkData workData, 
-           FAbstractEquation feq) {
+           FAbstractEquation feq,
+           boolean isInPostRunStage) {
         AliasPair pair = feq.aliasVariables();
         
         // Assume var1 will replace var2.
@@ -1922,15 +1923,19 @@ aspect TransformCanonical {
             }
         }
         
-        // All equations using the variable should be re-checked.
-        ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
-        for (int i = 0; i < ids.size(); ++i) {
-            FIdUseExp id = ids.get(i);
-            id.replaceUses(workData, replacement.createUseExp(), pair.negated);
-            workData.addToWorklist(id.myFEquation());
-        }
+        workData.removeEquation(feq); // This equation has been alias eliminated and will be removed.
         
-        workData.removeEquation(feq);
+        // This step is unnecessary when looping through the parameter equations in postRun.
+        // Each parameter equation is visited once and worklist is not used.
+        if (!isInPostRunStage) {
+	        // All equations using the variable should be added to worklist for further possible simplifications.
+	        ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
+	        for (int i = 0; i < ids.size(); ++i) {
+	            FIdUseExp id = ids.get(i);
+	            id.replaceUses(workData, replacement.createUseExp(), pair.negated);
+	            workData.addToWorklist(id.myFEquation());
+	        }
+        }
     }
     
     /**

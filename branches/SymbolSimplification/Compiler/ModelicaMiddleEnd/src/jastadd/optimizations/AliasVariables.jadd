@@ -45,7 +45,7 @@ aspect AliasVariables {
             @Override
             public boolean run(FAbstractEquation feq) {
                 if(fclass.genAlias(feq)) {
-                    fclass.eliminateAliasVariables(workData, feq);
+                    fclass.eliminateAliasVariables(workData, feq, false);
                     return true;
                 }
                 return false;
@@ -56,13 +56,26 @@ aspect AliasVariables {
             
             @Override
             public void postRun() {
-                removeAliasConstants();
                 removeAliasParameters();
+                removeAliasConstants();
+                fclass.updateLists(workData);
                 fclass.removeUnusedTemporaries();
                 fclass.mergeEquivalentRecords();
                 fclass.insertTempsInLHS();
                 fclass.remoteRedundantInitialEquations();
-                fclass.updateLists(workData);
+            }
+            
+            private void removeAliasParameters() {
+                if (!fclass.myOptions().getBooleanOption("eliminate_alias_parameters")) {
+                    return;
+                }
+                
+                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
+                    equation.aliasClassified = false;
+                    if(fclass.genAlias(equation)) {
+                        fclass.eliminateAliasVariables(workData, equation, true);
+                    }
+                }
             }
             
             private void removeAliasConstants() {
@@ -75,28 +88,6 @@ aspect AliasVariables {
                 for (FVariable fv : fclass.getFVariables()) {
                     fv.classifyAliasConstant(aliasManager, firstOccurencesReal, firstOccurencesNonReal);
                 }
-            }
-            
-            private void removeAliasParameters() {
-                if (!fclass.myOptions().getBooleanOption("eliminate_alias_parameters")) {
-                    return;
-                }
-                
-                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
-                    equation.aliasClassified = false;
-                    if(fclass.genAlias(equation)) {
-                        fclass.eliminateAliasVariables(workData, equation);
-                    }
-                }
-                
-            	ArrayList<FAbstractEquation> pEqns = new ArrayList<FAbstractEquation>();
-            	for (FAbstractEquation equation : fclass.getFParameterEquations()) {
-            		if (!equation.isAliasEquation()) {
-            			pEqns.add(equation);
-            		}
-            	}
-            	
-            	fclass.setFParameterEquationList(new List(pEqns));
             }
         }
      }
@@ -203,8 +194,9 @@ aspect AliasVariables {
             if (myAv.getFVariable() == this && shouldPropagateAttributesForAlias()) {
                 AliasManager.AttributePropagatorMap map = new AliasManager.AttributePropagatorMap(myAv);
                 for (AliasManager.AliasVariable av : aliasSet) 
-                    if (av.getFVariable() != this) 
+                    if (av.getFVariable() != this) {
                         map.addAlias(av);
+                    }
                 map.propagate();
             }
         }
@@ -224,8 +216,9 @@ aspect AliasVariables {
         }
         
         for (FAbstractEquation equation: getFAbstractEquations()) {
-            if (!workData.hasRemovedEquation(equation)) 
+            if (!workData.hasRemovedEquation(equation)) {
                 eqns.add(equation);
+            }
         }
         
         if (myOptions().getBooleanOption("propagate_derivatives")) {
