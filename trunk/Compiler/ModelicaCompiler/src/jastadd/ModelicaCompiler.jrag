@@ -60,6 +60,7 @@ import org.jmodelica.util.Arguments;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
+import org.jmodelica.util.exceptions.InternalCompilerError;
 import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
@@ -2088,7 +2089,7 @@ public class ModelicaCompiler {
     
     public void ModelicaCompiler.checkSetUp() {
         if (!isSetUp) {
-            throw new CompilerException("Compiler setup not performed. Use ModelicaCompiler.setUp()");
+            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()", null);
         }
     }
     
