@@ -260,14 +260,6 @@ package CEval
         Include="#include \"externalFunctionsC.h\"");
       end fStringScalar;
       
-      function fStringScalarLit
-        input  String x_in;
-        output String x_out;
-      external "C" annotation(
-        Library="externalFunctionsC",
-        Include="#include \"externalFunctionsC.h\"");
-      end fStringScalarLit;
-      
       function fStringArray
         input  String[2] x_in;
         output String[size(x_in,1)] x_out;
@@ -285,7 +277,6 @@ package CEval
       end fStringArrayUnknown;
 
       constant String    xScalar        = fStringScalar("abcde");
-      constant String    xScalarLit     = fStringScalarLit("abcde");
       constant String[2] xArray         = fStringArray({"abc","def"});
       constant String[2] xArrayUnknown  = fStringArrayUnknown({"abc","def"});
     end StringTest;

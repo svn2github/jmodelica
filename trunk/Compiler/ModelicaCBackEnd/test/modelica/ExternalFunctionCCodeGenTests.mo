@@ -128,6 +128,7 @@ $ECE_free$
 
 ---
         JMCEVAL_free(a4_v);
+        JMCEVAL_free(b4_v);
 
 ---
 
@@ -268,6 +269,7 @@ $ECE_free$
 
 ---
         JMCEVAL_freeArray(a4_a);
+        JMCEVAL_freeArray(b4_a);
 
 ---
 
