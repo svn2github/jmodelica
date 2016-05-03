@@ -142,7 +142,7 @@ MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
 
 # Libraries necessary to link with jmi
 # Reused parts
-LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -ljmi -lModelicaExternalC -lzlib -static-libstdc++
+LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC -lzlib -static-libstdc++ -ljmi
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) $(SUNDIALS_HOME)/lib/libsundials_kinsol.a $(SUNDIALS_HOME)/lib/libsundials_nvecserial.a
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) ${JMODELICA_HOME}/ThirdParty/Minpack/lib/libcminpack.a
 LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK)
