@@ -179,7 +179,6 @@ fclass IndexReduction.IndexReduction2_Mechanical
  eval parameter Boolean damper.useHeatPort = false \"=true, if heatPort is enabled\" /* false */;
  Modelica.SIunits.Power damper.lossPower \"Loss power leaving component via heatPort (> 0, if heat is flowing out of component)\";
  parameter Modelica.SIunits.Frequency sine.freqHz(start = 1) \"Frequency of sine wave\";
- parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle sine.phase = 0 \"Phase of sine wave\" /* 0 */;
  parameter Real sine.offset = 0 \"Offset of output signal\" /* 0 */;
  parameter Modelica.SIunits.Time sine.startTime = 0 \"Output = offset for time < startTime\" /* 0 */;
@@ -187,7 +186,6 @@ fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Angle fixed.flange.phi \"Absolute rotation angle of flange\";
  parameter Modelica.SIunits.Angle idealGear.support.phi \"Absolute rotation angle of the support/housing\";
  parameter Modelica.SIunits.Angle torque.support.phi \"Absolute rotation angle of the support/housing\";
- parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
  Real inertia1._der_phi;
  Real inertia1._der_w;
  Real inertia2._der_phi;
@@ -199,6 +197,9 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Real idealGear._der_der_phi_a;
  Real idealGear._der_der_phi_b;
  Real damper._der_der_phi_rel;
+protected
+ parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
+ parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
 initial equation 
  inertia2.phi = 0;
  inertia2.w = 0;

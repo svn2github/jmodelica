@@ -35,5 +35,8 @@
     <property name="util.jar.packages" value="org.jmodelica.util"/>
     <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.separateProcess"/>
     
+    <property name="javadoc.path" value="ModelicaCompiler/doc/javadoc"/>
+    <property name="javadoc.packages" value="org.jmodelica.*"/>
+    
     <import file="../build-base.xml"/>
 </project>
