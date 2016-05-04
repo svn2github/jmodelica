@@ -206,6 +206,18 @@ void* jmi_global_calloc(size_t n, size_t s) {
 }
 
 /**
+ * \brief Free memory allocated with jmi_global_calloc
+ */
+void jmi_global_free(void* p) {
+    jmi_t* jmi = jmi_get_current();
+    if (jmi->jmi_callbacks.free_memory != NULL) {
+        jmi->jmi_callbacks.free_memory(p);
+    } else {
+        free(p);
+    }
+}
+
+/**
  * Signal a failed assertion.
  *
  * If level is JMI_ASSERT_ERROR, then function will not return.

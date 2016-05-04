@@ -83,15 +83,15 @@ void jmi_free_str_arr(jmi_string_array_t* arr);
  * Might be called several times for the same name. */
 #define JMI_ARRAY_INIT_DYNA(type, arr, name, ne, nd) \
     if (name == NULL) {\
-        name            = (arr*) calloc((int) 1, sizeof(arr));\
+        name            = (arr*) jmi_global_calloc((int) 1, sizeof(arr));\
         name->num_dims  = (int)  (nd);\
-        name->size      = (int*) calloc(name->num_dims, sizeof(int));\
+        name->size      = (int*) jmi_global_calloc(name->num_dims, sizeof(int));\
         JMI_DYNAMIC_ADD_POINTER(name)\
         JMI_DYNAMIC_ADD_POINTER(name->size)\
     }\
     name->num_elems = (int) (ne);\
     if (name == NULL || name->num_elems > name->num_elems_alloced) { \
-        name->var = (type*) calloc(name->num_elems, sizeof(type));\
+        name->var = (type*) jmi_global_calloc(name->num_elems, sizeof(type));\
         name->num_elems_alloced = name->num_elems;\
         JMI_DYNAMIC_ADD_POINTER(name->var)\
     }

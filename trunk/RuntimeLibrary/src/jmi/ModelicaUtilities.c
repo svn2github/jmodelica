@@ -91,8 +91,8 @@ char* ModelicaAllocateString(size_t len)
 
 char* ModelicaAllocateStringWithErrorReturn(size_t len) 
 {
-    /*JMI_DYNAMIC_INIT()*/
+    JMI_DYNAMIC_INIT()
     char* res = (char*) jmi_global_calloc(len + 1, sizeof(char));
-    /*JMI_DYNAMIC_ADD(res);*/
+    JMI_DYNAMIC_ADD_POINTER(res);
     return res;
 }

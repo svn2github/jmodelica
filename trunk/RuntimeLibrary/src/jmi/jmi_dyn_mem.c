@@ -18,6 +18,7 @@
 */
 
 #include "jmi_dyn_mem.h"
+#include "jmi_global.h"
 
 #include <stdlib.h>
 
@@ -27,8 +28,8 @@ void jmi_dynamic_list_free(jmi_dynamic_list* head) {
     jmi_dynamic_list* curr;
     while ((curr = next)) {
         next = curr->next;
-        free(curr->data);
-        free(curr);
+        jmi_global_free(curr->data);
+        jmi_global_free(curr);
     }
     head->next = NULL;
 }
@@ -40,7 +41,7 @@ void jmi_dyn_mem_init(jmi_dyn_mem_t* mem, jmi_dynamic_list* head, jmi_dynamic_li
 }
 
 void jmi_dyn_mem_add(jmi_dyn_mem_t* mem, void* data) {
-    jmi_dynamic_list* l = (jmi_dynamic_list*)calloc(1, sizeof(jmi_dynamic_list));
+    jmi_dynamic_list* l = (jmi_dynamic_list*)jmi_global_calloc(1, sizeof(jmi_dynamic_list));
     (*mem->last)->next = l;
     l->data = data;
     l->next = NULL;

@@ -102,6 +102,11 @@ void* jmi_global_calloc(size_t n, size_t s)
     return calloc(n, s);
 }
 
+void jmi_global_free(void* p)
+{
+    free(p);
+}
+
 jmp_buf jmceval_try_location;
 
 int JMCEVAL_try() {
