@@ -126,8 +126,6 @@ aspect InstTypeAnalysis {
 
     eq InstRecordConstructor.type() = getRecord().recordType();
     
-    eq InstDeferComponentExp.type() = getFExp().type().componentType(getName());
-    
     public FType FType.componentType(String name) {
         return fUnknownType();
     }

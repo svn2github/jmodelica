@@ -2222,7 +2222,7 @@ aspect ConstantEvaluation {
         return res;
     }
     
-    eq InstDeferComponentExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval().component(getName());
+    eq FComponentExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval().component(getName());
     
     public CValue CValue.component(String name) {
         return CValue.UNKNOWN;

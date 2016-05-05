@@ -194,5 +194,3 @@ abstract InstElementRedeclare    : InstNamedModification;
 InstComponentModification : InstElementModification; 
 InstClassRedeclare        : InstElementRedeclare ::= /InstClassDecl/;
 InstComponentRedeclare    : InstElementRedeclare ::= /InstComponentDecl/;
-
-InstDeferComponentExp : FExp ::= <FExp:FExp> <Name:String>;

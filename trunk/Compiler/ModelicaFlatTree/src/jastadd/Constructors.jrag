@@ -1020,7 +1020,7 @@ aspect InheritedFactoryMethods {
 	public abstract FConnBoolOp      	      FConnBoolOp.createEmptyNode();
 	
     // Misc expressions
-    public InstDeferComponentExp InstDeferComponentExp.createEmptyNode() { return new InstDeferComponentExp(); }
+    public FComponentExp FComponentExp.createEmptyNode() { return new FComponentExp(); }
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }

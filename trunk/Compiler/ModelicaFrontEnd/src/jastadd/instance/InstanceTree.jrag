@@ -546,7 +546,7 @@ aspect Environments {
             FRecordType rt = (FRecordType)t;
             for (FRecordComponentType frct : rt.getComponents()) {
                 String name = frct.getName();
-                FExp exp = new InstDeferComponentExp(this, name);
+                FExp exp = dynamicFExp(extractRecordFExp(name));
                 list.add(new InstValueRecordModification(mod, name, exp));
             }
         }

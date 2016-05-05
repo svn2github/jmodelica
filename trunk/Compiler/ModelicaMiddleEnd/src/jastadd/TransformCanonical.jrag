@@ -815,9 +815,9 @@ aspect TransformCanonical {
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
 	public FExp FExp.extractRecordFExp(String suffix) {
-		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
+        return new FComponentExp(treeCopy(), suffix);
 	}
-	
+    
     public FExp FIdUseExp.extractRecordFExp(String suffix) {
         return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
     }
@@ -832,6 +832,17 @@ aspect TransformCanonical {
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
         return myArgFExp(suffix).fullCopy();
+    }
+    
+    public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
+        InstLookupResult<InstComponentDecl> res = localLookupInstComponent(suffix);
+        if (res.successful()) {
+            int i = res.target().argIndexInRecordConstructor();
+            if (i >= 0 && i < getNumArg()) {
+                return getArg(i).getFExp().fullCopy();
+            }
+        }
+        return super.extractRecordFExp(suffix);
     }
 	
 	public FExp FArray.extractRecordFExp(String suffix) {

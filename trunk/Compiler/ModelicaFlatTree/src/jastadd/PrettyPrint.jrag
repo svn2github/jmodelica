@@ -1995,7 +1995,7 @@ aspect FlatPrettyPrint {
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
-    protected void InstDeferComponentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+    protected void FComponentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
         str.print("(");
         p.print(getFExp(), str, indent);
         str.print(")");

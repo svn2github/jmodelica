@@ -1582,7 +1582,7 @@ model RecordBinding30
             description="Flattening and scalarization of record with if binding expression",
             flatModel="
 fclass RecordTests.RecordBinding30
- parameter Boolean b.b = false /* false */;
+ structural parameter Boolean b.b = false /* false */;
  structural parameter Integer b.rw.r.n = 1 /* 1 */;
  constant Real b.rw.r.x[1] = 1;
 end RecordTests.RecordBinding30;
@@ -2017,8 +2017,8 @@ model RecordArray8
             flatModel="
 fclass RecordTests.RecordArray8
  structural parameter Integer m = 2 /* 2 */;
- parameter RecordTests.RecordArray8.A a(x(size() = {2})) = RecordTests.RecordArray8.f(2);
- Real y[2] = a.x[1:2];
+ structural parameter RecordTests.RecordArray8.A a(x(size() = {2})) = RecordTests.RecordArray8.A(2, {1, 2}) /* RecordTests.RecordArray8.A(2, { 1, 2 }) */;
+ Real y[2] = {1.0, 2.0};
 
 public
  function RecordTests.RecordArray8.f
