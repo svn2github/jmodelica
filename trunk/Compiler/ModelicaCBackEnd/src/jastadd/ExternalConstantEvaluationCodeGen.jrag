@@ -119,7 +119,7 @@ aspect Serialize {
             return tempMap.get(key);
         }
         public void print(FType type) {
-            type.genFreeStrings_C(str, indent(), name());
+            
         }
         protected void printComps(FType type) {
             if (type.isExternalObject()) {
@@ -150,35 +150,26 @@ aspect Serialize {
      * @param tempMap maps expressions that should be replaced with temporaries
      */
     public void FExternalStmt.genSerialize_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
-            boolean skipOutputs) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-            if (!skipOutputs || !cvd.isOutput()) {
-               tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-               cvd.type().print(tp);
-            }
+             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             cvd.type().print(tp);
         }
     }
     
     public void FExternalStmt.genSerializeComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
-            boolean skipOutputs) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-            if (!skipOutputs || !cvd.isOutput()) {
-               tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-               tp.printComps((FExternalObjectType)cvd.type());
-            }
+             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             tp.printComps((FExternalObjectType)cvd.type());
         }
     }
     
     public void FExternalStmt.genSerializeNoComps_C(TypePrinter_C tp, String indent,
-            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds,
-            boolean skipOutputs) {
+            CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-            if (!skipOutputs || !cvd.isOutput()) {
-                tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-                tp.printExt((FExternalObjectType)cvd.type());
-            }
+             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             tp.printExt((FExternalObjectType)cvd.type());
         }
     }
     
@@ -215,15 +206,6 @@ aspect Serialize {
                 isArray() ? "Array" : "",
                 isEnum() ? "Enum" : name(),
                 name);
-    }
-    
-    /**
-     * Generate code to free strings.
-     */
-    public void FType.genFreeStrings_C(CodeStream str, String indent, String name) {
-        if (isString()) {
-            str.formatln("%sJMCEVAL_free%s(%s);", indent, isArray() ? "Array" : "", name);
-        }
     }
     
     /**

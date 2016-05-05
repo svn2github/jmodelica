@@ -127,7 +127,6 @@ $ECE_free$
 
 
 ---
-        JMCEVAL_free(a4_v);
 
 ---
 
@@ -267,7 +266,6 @@ $ECE_free$
 
 
 ---
-        JMCEVAL_freeArray(a4_a);
 
 ---
 
@@ -402,7 +400,6 @@ $ECE_free$
         my_constructor2(tmp_15_arg0->var, tmp_13->var, &o2_v, tmp_14->var, tmp_15_arg3->var);
 
 ---
-        JMCEVAL_freeArray(tmp_15_arg3);
 
 ---
         JMI_DEF(REA, x_v)
@@ -511,10 +508,8 @@ $ECE_free$
         my_constructor3(tmp_16_arg0, tmp_16_arg1->var, &o3_v);
 
 ---
-        JMCEVAL_free(tmp_19_arg3);
         destructor(tmp_16_arg0);
         for (tmp_20 = 1; tmp_20 < tmp_20_max; tmp_20++) {
-            JMCEVAL_freeArray(tmp_23_arg3);
             destructor(jmi_array_ref_1(tmp_16_arg1, tmp_20));
         }
 

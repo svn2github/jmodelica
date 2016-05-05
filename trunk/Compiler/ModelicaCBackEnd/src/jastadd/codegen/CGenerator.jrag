@@ -1487,10 +1487,8 @@ public class CGenerator extends GenericGenerator {
             indent = p.indent(indent);
             TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
             for (CommonVariableDecl cvd : ext.externalObjectsToSerialize()) {
-                if (!cvd.isOutput()) {
-                    tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
-                    tp.printExt((FExternalObjectType)cvd.type());
-                }
+                 tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+                 tp.printExt((FExternalObjectType)cvd.type());
             }
         }
     }
@@ -1505,7 +1503,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize(), false);
+            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
         }
     }
     
@@ -1519,7 +1517,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new InitPrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize(), false);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
         }
     }
     
@@ -1533,7 +1531,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize(), true);
+            ext.genSerializeComps_C(tp, indent, cgc, tempMap, ext.externalObjectsToSerialize());
         }
     }
     
@@ -1547,7 +1545,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new DeclPrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize(), false);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
             ext.genVarDecls_C(p, str, indent);
         }
     }
@@ -1562,7 +1560,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new InitPrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize(), false);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
     }
     
@@ -1590,7 +1588,7 @@ public class CGenerator extends GenericGenerator {
                 CodeGenContext cgc, Map<String,String> tempMap) {
             indent = p.indent(indent);
             TypePrinter_C tp = new FreePrinter_ECE(p, str, tempMap, cgc);
-            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize(), true);
+            ext.genSerialize_C(tp, indent, cgc, tempMap, ext.functionArgsToSerialize());
         }
     }
     
