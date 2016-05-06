@@ -74,7 +74,10 @@ aspect AccessSizes {
         FExp res = findHierarchicalAttributeValue(name, last, FAttribute.SIZE);
         if (res != null) {
             for (int i = part; i < last - 1; i++) {
-                res = res.cell(name.getFQNamePart(i).getFArraySubscripts());
+                FArraySubscripts fas = name.getFQNamePart(i).getFArraySubscripts();
+                if (fas != null) {
+                    res = res.cell(fas.createIndex());
+                }
             }
             return new MutableSize(res);
         }
@@ -339,7 +342,7 @@ aspect FunctionCallSizes {
         InstComponentDecl var = myInstComponentDecl();
         InstFunctionArgument arg = crp.getMap().get(var);
         if (arg != null) {
-            return arg.createSizeFExp(crp).cell(getFArraySubscripts());
+            return arg.createSizeFExp(crp).cell(crp, getFArraySubscripts());
         } else {
             return copyReplaceAccess(crp).createFExp();
         }
@@ -361,8 +364,7 @@ aspect FunctionCallSizes {
             if (exp == null) {
                 exp = ia.createSizeFExp(crp);
             } else {
-                InstAccess temp = ia.copyReplaceAccess(crp);
-                exp = exp.component(temp.name()).cell(temp.getFArraySubscripts());
+                exp = exp.component(ia.name()).cell(crp, ia.getFArraySubscripts());
             }
         }
         return exp;
@@ -372,9 +374,16 @@ aspect FunctionCallSizes {
         return extractRecordFExp(name);
     }
     
-    public FExp FExp.cell(FArraySubscripts fas) {
+    public FExp FExp.cell(FExp.FunctionSizeContextReplacer crp, FArraySubscripts fas) {
         if (fas != null) {
-            return splitArrayExp(fas.createIndex());
+            if (fas.variability().knownParameterOrLess()) {
+                try {
+                    return splitArrayExp(fas.createIndex());
+                } catch (ConstantEvaluationException e) {
+                    
+                }
+            }
+            return new FSubscriptedExp(this, fas.copyReplaceAccess(crp));
         }
         return this;
     }

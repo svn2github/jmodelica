@@ -8038,6 +8038,38 @@ end ArrayTests.Other.ArraySize4;
 ")})));
 end ArraySize4;
 
+model ArraySize5
+    function f
+      input Integer n;
+      input Real x[:];
+      input Real y[:] = x[1:n];
+      output Real z[:] = y;
+    algorithm
+    end f;
+    Real[:] y = f(2,1:3);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Other_ArraySize5",
+            description="",
+            flatModel="
+fclass ArrayTests.Other.ArraySize5
+ Real y[2] = ArrayTests.Other.ArraySize5.f(2, 1:3, 1:3);
+
+public
+ function ArrayTests.Other.ArraySize5.f
+  input Integer n;
+  input Real[:] x;
+  input Real[:] y;
+  output Real[:] z;
+ algorithm
+  init z as Real[size(y, 1)];
+  z := y[:];
+  return;
+ end ArrayTests.Other.ArraySize5.f;
+
+end ArrayTests.Other.ArraySize5;
+")})));
+end ArraySize5;
 
 model ArraySizeInIf1
     function f1
