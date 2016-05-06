@@ -240,7 +240,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= Constructor:FIdUse [DestructorCall:FFunctionCallStmt];
+FExternalObjectVariable : FVariable ::= Constructor:FIdUse /DestructorCall:FFunctionCallStmt/;
 
 /**
  * Pre FVariable of type Real.

@@ -4901,6 +4901,15 @@ aspect CCodeGen {
         }
     }
     
+    syn FFunctionCallStmt FExternalObjectVariable.getDestructorCall() {
+        FIdUse name = new FIdUse(type().name() + ".destructor");
+        Size[] sizes = new Size[0];
+        List<FExp> args = new List<FExp>();
+        args.add(createUseExp());
+        FFunctionCall call = new FFunctionCall(name, args, sizes);
+        return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
+    }
+    
     @Override
     public void FFunctionCallEquation.genAssignment_C(CodePrinter p, CodeStream str, String indent) {
         genBlock_C(p, str, indent, null, null, null);

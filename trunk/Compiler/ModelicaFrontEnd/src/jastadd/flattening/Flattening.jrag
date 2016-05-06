@@ -1100,7 +1100,6 @@ aspect Flattening {
 	public FVariable InstExternalObject.createEmptyFVariable() {
 		FExternalObjectVariable exo = new FExternalObjectVariable();
 		exo.setConstructor(new FIdUse(myConstructor().qualifiedName()));
-		exo.setDestructorCall(getDestructorCall().flatten(getFQNamePrefix()));
 		return exo;
 	}
 	

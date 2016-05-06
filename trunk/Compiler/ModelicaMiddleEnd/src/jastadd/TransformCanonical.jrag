@@ -4138,6 +4138,11 @@ aspect FunctionAndRecordCleanup {
         super.markUsedFunctionsAndRecords(type);
     }
     
+    public void FExternalObjectVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        getDestructorCall().markUsedFunctionsAndRecords(type);
+    }
+    
     @Override
     public void FFunctionCall.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         myFCallable().markUsedFunctionsAndRecords(type);
