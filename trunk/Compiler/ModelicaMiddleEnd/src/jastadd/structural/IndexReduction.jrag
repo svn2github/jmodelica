@@ -292,7 +292,7 @@ aspect IndexReduction {
 
         @Override
         public boolean canMatch(IndexReductionEq e, IndexReductionVar v) {
-            return super.canMatch(e, v) && !e.isNonDiffUse(v);
+            return super.canMatch(e, v) && !e.isNonDiffUse(v) && getVariable(v.getName()) != null;
         }
 
         @Override
