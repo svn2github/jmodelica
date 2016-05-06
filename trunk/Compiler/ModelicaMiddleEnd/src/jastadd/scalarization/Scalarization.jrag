@@ -585,7 +585,11 @@ aspect Scalarization {
             }
             fv.setFTypePrefixVariability(variability);
             fv.setFTypePrefixInputOutputOpt(inputOutput.treeCopy());
-            inheritMerge(scalarizer, fv.getFAttributeList(), mattrs);
+            List<FAttribute> attrs = new List<FAttribute>();
+            for (FAttribute attr : mattrs.values()) {
+                attr.scalarize(attrs, index, Collections.<String,FExp>emptyMap());
+            }
+            fv.setFAttributeList(attrs);
             fv.addArrayAttributesFromType(myCell(), comp.myFDerivedType());
             scalarizer.add(fv);
         }
@@ -595,35 +599,6 @@ aspect Scalarization {
                 return name.getFArraySubscripts().asIndex();
             } else {
                 return Index.NULL;
-            }
-        }
-        
-        /**
-         * Merge attributes from other into self
-         */
-        public void inheritMerge(Scalarizer scalarizer, List<FAttribute> selfa, Map<String,FAttribute> other) {
-            Map<String, FAttribute> self = ScalarizingVariableInstance.mapped(selfa);
-            for (String sa : other.keySet()) {
-                // TODO: support attributes on single cell in array (#599)
-                if (self.containsKey(sa)) {
-                    FAttribute s = self.get(sa);
-                    FAttribute o = other.get(sa);
-                    inheritMerge(scalarizer, s.getFAttributes(), ScalarizingVariableInstance.mapped(o.getFAttributes()));
-                    if (o.hasValue()) {
-                        s.setValue(o.getValue());
-                    }
-                    s.setLevel(o.getLevel());
-                } else if (!sa.equals(FAttribute.SIZE)){
-                    FAttribute orig = other.get(sa);
-                    FAttribute copy = orig.fullCopy();
-                    copy.parent = orig;
-                    if (copy.hasValue()) {
-                        Index ni = index.subIndex(index.ndims() - copy.getValue().ndims());
-                        copy.getValue().createArrayTemporaries(scalarizer, variability);
-                        copy.setValue(copy.getValue().extractArrayCell(Collections.<String, FExp>emptyMap(), ni));
-                    }
-                    selfa.add(copy);
-                }
             }
         }
     }
@@ -713,8 +688,10 @@ aspect Scalarization {
 		return res;
 	}
 	
-    public FAttribute FAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
-        return scalarizeInternal(attrs, i, indexMap);
+    public void FAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+        if (!name().equals(FAttribute.SIZE)) {
+            scalarizeInternal(attrs, i, indexMap);
+        }
     }
     /**
      * Scalarize the attribute, picking out the specific element from an array 
@@ -736,12 +713,11 @@ aspect Scalarization {
     }
 	
     @Override
-    public FAttribute FAnnotationAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
+    public void FAnnotationAttribute.scalarize(List<FAttribute> attrs, Index i, Map<String,FExp> indexMap) {
         if (i.ndims() == 0)
             scalarize(attrs, indexMap);
         else
             scalarizeInternal(attrs, i, indexMap);
-        return null;
     }
     /**
      * Scalarize the attribute and create multiple instances for non-scalar

@@ -2753,9 +2753,9 @@ fclass ModificationTests.TypeModifications6
  constant ModificationTests.TypeModifications6.T z.x[1](min = 0.1) = 1;
  constant ModificationTests.TypeModifications6.T z.x[2](min = 0.2) = 1;
  constant ModificationTests.TypeModifications6.T z.x[3](min = 0.3) = 1;
- constant ModificationTests.TypeModifications6.T z.y[1](each min = 0.4) = 1;
- constant ModificationTests.TypeModifications6.T z.y[2](each min = 0.4) = 1;
- constant ModificationTests.TypeModifications6.T z.y[3](each min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[1](min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[2](min = 0.4) = 1;
+ constant ModificationTests.TypeModifications6.T z.y[3](min = 0.4) = 1;
 
 public
  type ModificationTests.TypeModifications6.T = Real;
@@ -3298,7 +3298,7 @@ equation
             description="Flattening of functions used in modifications",
             flatModel="
 fclass ModificationTests.ModificationFlattening1
- ModificationTests.ModificationFlattening1.R r;
+ ModificationTests.ModificationFlattening1.R r(x(min = ModificationTests.ModificationFlattening1.f(0)));
 equation
  r.x = time + 2;
 

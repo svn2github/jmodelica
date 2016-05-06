@@ -1942,7 +1942,7 @@ model EvaluateAnnotation10
             description="Evaluate annotation on record with mixed variabilities",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation10
- eval parameter EvaluationTests.EvaluateAnnotation10.R r1(a = 2) = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
+ eval parameter EvaluationTests.EvaluateAnnotation10.R r1 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
  eval parameter EvaluationTests.EvaluateAnnotation10.R m.r2 = EvaluationTests.EvaluateAnnotation10.R(2, 2, 3);
 
 public
@@ -2154,8 +2154,8 @@ model EvalNoBinding1
             description="Evaluate primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding1
- eval parameter Real x(start = 1) = 1 /* 1 */;
- eval parameter Real y(start = 3) = 3 /* 3 */;
+ eval parameter Real x = 1 /* 1 */;
+ eval parameter Real y = 3 /* 3 */;
  eval parameter Real z = 4.0 /* 4.0 */;
 end EvaluationTests.EvalNoBinding1;
 ")})));
@@ -2173,8 +2173,8 @@ model EvalNoBinding2
             description="Evaluate array primitives without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding2
- eval parameter Real x[2,2](start = {{1, 2}, {3, 4}}) = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
- eval parameter Real y[2,2](each start = 5) = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
+ eval parameter Real x[2,2] = {{1, 2}, {3, 4}} /* { { 1, 2 }, { 3, 4 } } */;
+ eval parameter Real y[2,2] = {{5, 5}, {5, 5}} /* { { 5, 5 }, { 5, 5 } } */;
  eval parameter Real z1[2,2] = {{6.0, 7.0}, {8.0, 9.0}} /* { { 6.0, 7.0 }, { 8.0, 9.0 } } */;
  structural parameter Real z2 = 30.0 /* 30.0 */;
 end EvaluationTests.EvalNoBinding2;
@@ -2228,7 +2228,7 @@ model EvalNoBinding4
             description="Evaluate primitives in record array without binding exp",
             flatModel="
 fclass EvaluationTests.EvalNoBinding4
- eval parameter EvaluationTests.EvalNoBinding4.R r[2,2] = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
+ eval parameter EvaluationTests.EvalNoBinding4.R r[2,2](x(start = 2),c(start = {{3, 4}, {5, 6}}),d(each start = 7)) = {{EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}, {EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}}), EvaluationTests.EvalNoBinding4.R(2, {{3, 4}, {5, 6}}, {{7, 7}, {7, 7}})}} /* { { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) }, { EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }), EvaluationTests.EvalNoBinding4.R(2, { { 3, 4 }, { 5, 6 } }, { { 7, 7 }, { 7, 7 } }) } } */;
  eval parameter Real x[2,2] = {{10.0, 11.0}, {12.0, 13.0}} /* { { 10.0, 11.0 }, { 12.0, 13.0 } } */;
  eval parameter Real y = 8.0 /* 8.0 */;
 
@@ -4084,7 +4084,7 @@ model ParameterMinMax1
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax1
- structural parameter Integer n(min = 1) = 1 /* 1 */;
+ structural parameter Integer n = 1 /* 1 */;
  Real x[1] = {2};
 end EvaluationTests.ParameterMinMax1;
 ")})));
@@ -4101,7 +4101,7 @@ model ParameterMinMax2
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax2
- structural parameter Integer n(min = 1,start = 2) = 2 /* 2 */;
+ structural parameter Integer n = 2 /* 2 */;
  Real x[2] = 1:2;
 end EvaluationTests.ParameterMinMax2;
 ")})));
@@ -4118,7 +4118,7 @@ model ParameterMinMax3
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax3
- structural parameter Integer n(max = -1) = -1 /* -1 */;
+ structural parameter Integer n = -1 /* -1 */;
  Real x[1] = {2};
 end EvaluationTests.ParameterMinMax3;
 ")})));
@@ -4135,7 +4135,7 @@ model ParameterMinMax4
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax4
- structural parameter Integer n(max = -1,start = -2) = -2 /* -2 */;
+ structural parameter Integer n = -2 /* -2 */;
  Real x[2] = 1:2;
 end EvaluationTests.ParameterMinMax4;
 ")})));
@@ -4152,7 +4152,7 @@ model ParameterMinMax5
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax5
- structural parameter Real n(min = 1.2) = 1.2 /* 1.2 */;
+ structural parameter Real n = 1.2 /* 1.2 */;
  Real x[1] = 1:size(x[1:1], 1);
 end EvaluationTests.ParameterMinMax5;
 ")})));
@@ -4169,7 +4169,7 @@ model ParameterMinMax6
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax6
- structural parameter Real n(max = -1.2) = -1.2 /* -1.2 */;
+ structural parameter Real n = -1.2 /* -1.2 */;
  Real x[1] = 1:size(x[1:1], 1);
 end EvaluationTests.ParameterMinMax6;
 ")})));
@@ -4188,7 +4188,7 @@ model ParameterMinMax7
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax7
- structural parameter EvaluationTests.ParameterMinMax7.B n(min = EvaluationTests.ParameterMinMax7.A.d) = EvaluationTests.ParameterMinMax7.A.d /* EvaluationTests.ParameterMinMax7.A.d */;
+ structural parameter EvaluationTests.ParameterMinMax7.B n = EvaluationTests.ParameterMinMax7.A.d /* EvaluationTests.ParameterMinMax7.A.d */;
  Real x[4] = 1:size(x[1:4], 1);
 
 public
@@ -4213,7 +4213,7 @@ model ParameterMinMax8
             description="Constricting evaluation of parameters without binding expression to min-max range",
             flatModel="
 fclass EvaluationTests.ParameterMinMax8
- structural parameter EvaluationTests.ParameterMinMax8.B n(max = EvaluationTests.ParameterMinMax8.A.b) = EvaluationTests.ParameterMinMax8.A.b /* EvaluationTests.ParameterMinMax8.A.b */;
+ structural parameter EvaluationTests.ParameterMinMax8.B n = EvaluationTests.ParameterMinMax8.A.b /* EvaluationTests.ParameterMinMax8.A.b */;
  Real x[2] = 1:size(x[1:2], 1);
 
 public

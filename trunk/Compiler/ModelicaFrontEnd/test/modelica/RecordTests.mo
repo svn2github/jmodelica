@@ -284,7 +284,7 @@ model RecordFlat8
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat8
- constant RecordTests.RecordFlat8.R r(x = 12) = RecordTests.RecordFlat8.R(12);
+ constant RecordTests.RecordFlat8.R r = RecordTests.RecordFlat8.R(12);
  discrete RecordTests.RecordFlat8.R r2 = RecordTests.RecordFlat8.R(12);
 
 public
@@ -315,7 +315,7 @@ model RecordFlat9
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat9
- constant RecordTests.RecordFlat9.B b(y = 2) = RecordTests.RecordFlat9.B(0.0, 2);
+ constant RecordTests.RecordFlat9.B b = RecordTests.RecordFlat9.B(0.0, 2);
  RecordTests.RecordFlat9.B b2 = RecordTests.RecordFlat9.B(0.0, 2);
 
 public
@@ -350,7 +350,7 @@ model RecordFlat10
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat10
- eval parameter RecordTests.RecordFlat10.R2 r.r2(x = 3) = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
+ eval parameter RecordTests.RecordFlat10.R2 r.r2 = RecordTests.RecordFlat10.R2(3, 3) /* RecordTests.RecordFlat10.R2(3, 3) */;
  eval parameter Real r.x = 3 /* 3 */;
 
 public
@@ -408,7 +408,7 @@ model RecordFlat11
             description="Flattening records with modifiers.",
             flatModel="
 fclass RecordTests.RecordFlat11
- constant RecordTests.RecordFlat11.C c(c1 = 1,c2 = 2,c3 = 3,a = 1.5,b = 2.5,b1 = 2.25,b2 = 2.75) = RecordTests.RecordFlat11.C(1.5, 2.25, 2.75, 2.5, 1, 2, 3);
+ constant RecordTests.RecordFlat11.C c = RecordTests.RecordFlat11.C(1.5, 2.25, 2.75, 2.5, 1, 2, 3);
  RecordTests.RecordFlat11.C c2 = RecordTests.RecordFlat11.C(1.5, 2.25, 2.75, 2.5, 1, 2, 3);
 
 public
@@ -1397,7 +1397,7 @@ model RecordBinding24
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
  final parameter Real r1.r2.y2 = 51 /* 51 */;
- final parameter Real r1.r2.r3.x3 = 51 /* 51 */;
+ final parameter Real r1.r2.r3.x3 = 51.0 /* 51 */;
  parameter Real r1.r2.r3.y3;
 parameter equation
  r1.r2.r3.y3 = r1.y1;
@@ -6974,7 +6974,7 @@ equation
             description="Test that evaluation before scalarization of record variable works",
             flatModel="
 fclass RecordTests.RecordEval7
- parameter RecordTests.RecordEval7.A a1(x = 3,b(y = a1.b.x + 1,n = 2));
+ parameter RecordTests.RecordEval7.A a1(x = 3,b(final n = 2,y = a1.b.x + 1));
  parameter RecordTests.RecordEval7.B b1 = a1.b;
  Real x;
 equation
