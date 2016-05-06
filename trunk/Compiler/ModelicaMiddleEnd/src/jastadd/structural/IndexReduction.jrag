@@ -1171,7 +1171,7 @@ aspect IndexReduction {
                 insert(inEqn);
                 for (IndexReductionVar var : eqn.getVariables()) {
                     if (var.getMeIntegrated() != null)
-                        addEdge(inEqn, var.getMeIntegrated());
+                        inEqn.addVariable(var.getMeIntegrated(), eqn.isRemoteVar(var));
                 }
                 removeEquation(eqn);
             }
