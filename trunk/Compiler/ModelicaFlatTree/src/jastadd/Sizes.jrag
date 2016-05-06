@@ -76,7 +76,7 @@ aspect AccessSizes {
             for (int i = part; i < last - 1; i++) {
                 FArraySubscripts fas = name.getFQNamePart(i).getFArraySubscripts();
                 if (fas != null) {
-                    res = res.cell(fas.createIndex());
+                    res = res.splitArrayExp(fas.createIndex());
                 }
             }
             return new MutableSize(res);
