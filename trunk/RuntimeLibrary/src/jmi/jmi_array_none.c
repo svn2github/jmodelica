@@ -18,7 +18,6 @@
 */
 
 #include "jmi_util.h"
-#include "jmi_global.h"
 
 #define TRANSPOSE_FUNC(name, src_type, dst_type, to_fortran) \
 void name(jmi_array_t* arr, src_type* src, dst_type* dest) { \

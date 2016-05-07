@@ -77,10 +77,7 @@ void jmi_global_log(int warning, const char* name, const char* attr, const char*
  * \brief Allocate memory with user-supplied function, if any. Otherwise use calloc().
  */
 void* jmi_global_calloc(size_t n, size_t s);
-/**
- * \brief Free memory allocated with jmi_global_calloc
- */
-void jmi_global_free(void* p);
+
 
 /* For use as arguments to jmi_assert_failed(). */
 #define JMI_ASSERT_ERROR   0

@@ -138,7 +138,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
     }
     
 #define JMI_SET_STR(DEST, SRC) \
-    DEST = jmi_global_calloc(JMI_MIN(JMI_LEN(SRC), JMI_STR_MAX) + 1, 1); \
+    DEST = calloc(JMI_MIN(JMI_LEN(SRC), JMI_STR_MAX) + 1, 1); \
     strcpy(DEST,SRC);
     
 /* Handle return value */
@@ -159,7 +159,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
     }
 
 /* Free string */
-#define JMI_FREE(NAME) jmi_global_free(NAME);
+#define JMI_FREE(NAME) free(NAME);
 
 /* Length of string */
 #define JMI_LEN(NAME) \
