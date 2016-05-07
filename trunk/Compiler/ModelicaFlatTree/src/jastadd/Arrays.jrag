@@ -207,8 +207,7 @@ aspect Arrays {
 	eq FCross.ndims()        = 1;
 	eq FSkew.ndims()         = 2;
 	eq FOuterProduct.ndims() = 2;
-	eq FIdentity.ndims()     = 2;
-	eq FDiagonal.ndims()     = 2;
+    eq FAbstractDiagonal.ndims() = 2;
 	
 	eq FScalarExp.ndims() = 0;
 	eq FVectorExp.ndims() = 1;

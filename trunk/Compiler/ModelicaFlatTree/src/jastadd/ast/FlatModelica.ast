@@ -1623,15 +1623,18 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
  */
 FSkew : FUnaryBuiltIn;
 
+
+abstract FAbstractDiagonal : FUnaryBuiltIn;
+
 /**
  * Identity built-in function.
  */
-FIdentity : FUnaryBuiltIn;
+FIdentity : FAbstractDiagonal;
 
 /**
  * Diagonal built-in function.
  */
-FDiagonal : FUnaryBuiltIn;
+FDiagonal : FAbstractDiagonal;
 
 /**
  * Outer product built-in function.

@@ -67,7 +67,7 @@ aspect FunctionScalarization {
     eq FFunctionCall.extractTemp() = !isFunctionCallArg() && isComposite() && !isFunctionCallClause();
     eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
     eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
-    eq FIdentity.extractTemp()     = size().isUnknown() || inUnknownSize();
+    eq FAbstractDiagonal.extractTemp() = size().isUnknown() || inUnknownSize();
     eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
@@ -76,7 +76,7 @@ aspect FunctionScalarization {
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractAsUnknown()    = getX().size().isUnknown();
     eq FMulExp.extractAsUnknown()       = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FIdentity.extractAsUnknown()     = size().isUnknown();
+    eq FAbstractDiagonal.extractAsUnknown() = size().isUnknown();
     eq FVectorExp.extractAsUnknown()    = getFExp().size().isUnknown();
     eq FMatrixExp.extractAsUnknown()    = getFExp().size().isUnknown();
     
@@ -418,7 +418,7 @@ aspect FunctionScalarization {
         }
     }
     
-    public void FIdentity.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+    public void FAbstractDiagonal.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         names.addLayer(ndims());
         names.fillLayer(this);
         
@@ -429,12 +429,16 @@ aspect FunctionScalarization {
         FIdUseExp left = tempExp(fas);
         FIfExp right = new FIfExp(
                 new FEqExp(new FIdUseExp(names.get(0)), new FIdUseExp(names.get(1))),
-                new FIntegerLitExp(1),
+                scalarizeDiagonalElement(indexMap),
                 new FIntegerLitExp(0)
         );
         names.createForLoops(clauses, this).add(new FAssignStmt(left, right));
         names.removeLayer();
     }
+    
+    syn FExp FAbstractDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap);
+    eq FIdentity.scalarizeDiagonalElement(Map<String,FExp> indexMap) = new FIntegerLitExp(1);
+    eq FDiagonal.scalarizeDiagonalElement(Map<String,FExp> indexMap) = getFExp().scalarize(indexMap);
     
     public void FVectorExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         names.addLayer(getFExp().ndims());
