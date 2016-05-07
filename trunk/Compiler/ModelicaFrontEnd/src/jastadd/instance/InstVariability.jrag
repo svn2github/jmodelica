@@ -255,8 +255,7 @@ aspect InstVariability {
         Collections.singleton(myInstComponentDecl());
 
 
-    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability();
-
+    eq FIdUseInstAccess.variability() = getInstAccess().myInstComponentDecl().variability().combine(indexVariability());
 
     eq FIdUseInstAccess.indexVariability() = getInstAccess().indexVariability();
 

@@ -2057,10 +2057,10 @@ aspect FlatExpressions {
             }
             int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && variability().flattenExtractIndices(getInstAccess().indexVariability())) {
+        } else if (!inFunction() && getInstAccess().myInstComponentDecl().variability().flattenExtractIndices(getInstAccess().indexVariability())) {
             FIdUseExp copy = (FIdUseExp) use.dynamicFExp(use.fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
-            ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, variability());
+            ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, getInstAccess().myInstComponentDecl().variability());
             FExp res = use.dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
             return res.flatten(prefix);
         } else {
@@ -2602,6 +2602,12 @@ aspect FlatExpressions {
     public FExp FSubscriptedExp.createFPreExp() {
         return new FSubscriptedExp(getFExpNoTransform().createFPreExp(), 
                 getFArraySubscriptsNoTransform());
+    }
+    public FExp FArray.createFPreExp() {
+        return this; // Assume literal;
+    }
+    public FExp FRecordConstructor.createFPreExp() {
+        return this; // Assume literal;
     }
     
 	public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
