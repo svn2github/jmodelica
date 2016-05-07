@@ -1416,7 +1416,7 @@ aspect VariabilityCheck {
      * to <code>source</code>.
      */
     public static FExp FPreExp.create(FExp exp, FExp source) {
-        exp = create(exp);
+        exp = exp.createFPreExp();
         exp.setInstanceTreeSource(source);
         return exp;
     }

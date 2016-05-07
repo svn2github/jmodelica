@@ -7844,6 +7844,23 @@ end ArrayTests.VariableIndex.Slice7;
 ")})));
 end Slice7;
 
+model Slice8
+    Integer i = integer(time);
+    Integer[2] x = {1,2};
+    Integer y = pre(x[i]);
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="VariableIndex_Slice8",
+            description="Variable index in pre",
+            flatModel="
+fclass ArrayTests.VariableIndex.Slice8
+ discrete Integer i = integer(time);
+ discrete Integer x[2] = {1, 2};
+ discrete Integer y = (pre(x[1:2]))[i];
+end ArrayTests.VariableIndex.Slice8;
+")})));
+end Slice8;
+
 end VariableIndex;
 
 

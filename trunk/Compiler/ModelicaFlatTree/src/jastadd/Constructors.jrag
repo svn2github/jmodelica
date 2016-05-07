@@ -256,13 +256,6 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Surrounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
-	 */
-	public static FExp FPreExp.create(FExp exp) {
-		return exp.isLiteralExp() ? exp : new FPreExp(exp.asFIdUse());
-	}
-	
-	/**
 	 * Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
