@@ -1912,8 +1912,15 @@ aspect TransformCanonical {
         FVariable replacement = pair.fv1;
         FVariable toBeReplaced = pair.fv2;
         
-        // If v1 was the alias, switch, else sort by heuristics score.
-        if (pair.fv1.isAlias()) {
+        // First check if one of the variables is differentiated. If so we want to keep this
+        // as the replacement.
+        // Otherwise, if v1 was the alias, switch, else sort by heuristics score.
+        if (replacement.isDifferentiatedVariable()) {
+            // lets keep them like this
+        } else if (toBeReplaced.isDifferentiatedVariable()) {
+            replacement = pair.fv2;
+            toBeReplaced = pair.fv1;
+        } else if (pair.fv1.isAlias()) {
             replacement = pair.fv2;
             toBeReplaced = pair.fv1;
         } else if (!pair.fv1.isAlias() && !pair.fv1.isAlias()) {
@@ -1923,31 +1930,31 @@ aspect TransformCanonical {
             }
         }
         
-        workData.removeEquation(feq); // This equation has been alias eliminated and will be removed.
+        // This equation has been alias eliminated and will be removed.
+        workData.removeEquation(feq);
         
-        // This step is unnecessary when looping through the parameter equations in postRun.
-        // Each parameter equation is visited once and worklist is not used.
-        if (!isInPostRunStage) {
-	        // All equations using the variable should be added to worklist for further possible simplifications.
-            ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
-            
-            // Update derivative variables.
-	        if (toBeReplaced.isDifferentiatedVariable()) {
-	           ids.addAll(toBeReplaced.myDerivativeVariable().uses());
-	           FAbstractVariable replacementDer = replacement.createFDerivativeVariable();
-	           for (int i = 0; i < ids.size(); ++i) {
-	               FIdUseExp id = ids.get(i);
-	               id.replaceUses(workData, replacementDer.createUseExp(), pair.negated);
-	               workData.addToWorklist(id.myFEquation());
-	           }
-	        }
-	        
-	        ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
-	        for (int i = 0; i < ids.size(); ++i) {
-	            FIdUseExp id = ids.get(i);
-	            id.replaceUses(workData, replacement.createUseExp(), pair.negated);
-	            workData.addToWorklist(id.myFEquation());
-	        }
+        // Start with changing equations that uses a differentiated variable of toBeReplaced
+        if (toBeReplaced.isDifferentiatedVariable()) {
+            FDerivativeVariable toBeReplacedDiv = toBeReplaced.myDerivativeVariable();
+            ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplacedDiv.uses());
+            FAbstractDerivativeVariable replacementDiv = replacement.myDerivativeVariable();
+            for (int i = 0; i < ids.size(); ++i) {
+                FIdUseExp id = ids.get(i);
+                id.replaceUses(workData, replacementDiv.createUseExp(), pair.negated);
+                if (!isInPostRunStage) {
+                    workData.addToWorklist(id.myFEquation());
+                }
+            }
+        }
+        
+        // Continue with equations that uses the variable toBeReplaced
+        ArrayList<FIdUseExp> ids = new ArrayList<FIdUseExp>(toBeReplaced.uses());
+        for (int i = 0; i < ids.size(); ++i) {
+            FIdUseExp id = ids.get(i);
+            id.replaceUses(workData, replacement.createUseExp(), pair.negated);
+            if (!isInPostRunStage) {
+                workData.addToWorklist(id.myFEquation());
+            }
         }
     }
     
