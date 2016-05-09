@@ -2415,19 +2415,16 @@ aspect CADCodeGen {
 	}
 	
 	public void FFunctionVariable.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            if (isOutput()) {
-                prettyPrintInitOutput_C(p, str, indent, varName_CAD());
-                prettyPrintInitOutput_C(p, str, indent, derName_CAD());
-            } else {
-                TypePrinter_C ip = p.createInitPrinter(str);
-                print(ip, varName_CAD(), indent);
-                print(ip, derName_CAD(), indent);
-            }
-        }
-	}
-
-
+        FInitArrayStmt.genInit_C(p, str, indent, varName_CAD(), this, type());
+        FInitArrayStmt.genInit_C(p, str, indent, derName_CAD(), this, type());
+    }
+    
+    public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
+        FFunctionVariable fv = getFIdUseExp().myFuncVar();
+        FInitArrayStmt.genInit_C(p, str, indent, fv.varName_CAD(), fv, type());
+        FInitArrayStmt.genInit_C(p, str, indent, fv.derName_CAD(), fv, type());
+    }
+    
     /**
      *  Loops through its FFunctionVariables, calls a function on each that prints
      * code for checking if the corresponding function variables input was set as NULL. 

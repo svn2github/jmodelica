@@ -225,7 +225,7 @@ aspect AlgorithmScalarization {
     }
     
     public boolean FInitArrayStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-        getFIdUseExp().myFV().type().scalarizeInitArray(new Scalarizer.Algorithm(vars, stmts, indexMap));
+        type().scalarizeInitArray(new Scalarizer.Algorithm(vars, stmts, indexMap));
         return super.scalarize(vars, stmts, indexMap);
     }
     

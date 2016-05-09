@@ -1355,7 +1355,7 @@ aspect FunctionInlining {
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
         FAbstractVariable fv = getFIdUseExp().myFV();
-        fi.setTypeOf(fv.name(), fv.type().copyAndReplaceReferences(fi, getFIdUseExp()));
+        fi.setTypeOf(fv.name(), type().copyAndReplaceReferences(fi, getFIdUseExp()));
         fv.flushCache();
     }
 

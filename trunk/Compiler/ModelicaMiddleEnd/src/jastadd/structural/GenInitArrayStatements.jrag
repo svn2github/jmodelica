@@ -163,7 +163,7 @@ aspect GenInitArrayStatements {
     eq FAssignStmt.sortingDependencies()       = 
         getRight().sortingAddNamesUsed(baseSortingDependencies());
     eq FInitArrayStmt.sortingDependencies()    = 
-        getFIdUseExp().myFV().size().sortingAddNamesUsed(new LinkedHashSet<String>());
+        type().sortingAddNamesUsed(new LinkedHashSet<String>());
     eq FFunctionCallStmt.sortingDependencies() = 
         getCall().sortingAddNamesUsed(baseSortingDependencies());
     eq FForStmt.sortingDependencies()          = 
@@ -218,6 +218,12 @@ aspect GenInitArrayStatements {
                 name = "size(" + name + ")";
             set.add(name);
         }
+        return set;
+    }
+    
+    public Set<String> FType.sortingAddNamesUsed(Set<String> set) {
+        super.sortingAddNamesUsed(set);
+        getSize().sortingAddNamesUsed(set);
         return set;
     }
     

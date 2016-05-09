@@ -4216,7 +4216,7 @@ aspect ConstantEvaluation {
   
   @Override
   public int FInitArrayStmt.evaluate(AlgorithmEvaluator evaluator) {
-      getFIdUseExp().assignToInFuncEval(evaluator, getFIdUseExp().type().zeroCValue());
+        getFIdUseExp().assignToInFuncEval(evaluator, type().zeroCValue());
 	  return EVAL_CONT;
   }
 

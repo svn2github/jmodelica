@@ -1296,24 +1296,14 @@ aspect CCodeGen {
 	}
     
     public void FFunctionVariable.print(TypePrinter_C tp, String name, String indent) {
-        tp.print(this, name, indent);
-    }
-	
-    public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite() && isOutput() && !isString()) {
-            prettyPrintInitOutput_C(p, str, indent, name_C());
-        } else {
-            print(p.createInitSetPrinter(str), name_C(), indent);
-        }
+        setDummyExp();
+        tp.reset(name, getBindingExp(), size().isUnknown(), false, indent);
+        type().print(tp);
+        resetDummyExp();
     }
     
-    public void FFunctionVariable.prettyPrintInitOutput_C(CodePrinter p, CodeStream str, String indent, String name) {
-        String next = p.indent(indent);
-        String iniName = name + C_SUFFIX_NULL;
-        str.print(indent + "if (" + name + " == NULL) {\n");
-        print(p.createInitSetPrinter(str), iniName, next);
-        str.print(next + name + " = " + iniName + ";\n");
-        str.print(indent + "}\n");
+    public void FFunctionVariable.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        FInitArrayStmt.genInit_C(p, str, indent, name_C(), this, type());
     }
     
     public void FType.printDecl_C(CodePrinter p, CodeStream str, String indent, String name, FExp src) {
@@ -1396,16 +1386,6 @@ aspect CCodeGen {
         protected String dynStr(FType type) {
             // Note: The "REAL" part here is only relevant in JMU/cppad
             return (dynamic() ? "DYNA" : "STAT") + (type.isReal() ? "REAL" : "");
-        }
-        
-        public void print(FFunctionVariable fv, String name, String indent) {
-            // This is a rather ugly hack, but we temporarily need an FExp that is in the tree
-            if (!fv.hasBindingExp()) {
-                fv.setDummyExp();
-            }
-            reset(name, fv.getBindingExp(), fv.size().isUnknown(), false, indent);
-            fv.type().print(this);
-            fv.resetDummyExp();
         }
         
         public void print(FType type) {
@@ -1954,11 +1934,31 @@ aspect CCodeGen {
 			return (e == null) ? "0.0" : e.prettyPrint("");
 		}
 	}
-	
-	public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        p.print((FFunctionVariable) getFIdUseExp().myFV(), str, indent);
-	}
-	
+    
+    public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        FFunctionVariable fv = getFIdUseExp().myFuncVar();
+        FInitArrayStmt.genInit_C(p, str, indent, fv.name_C(), fv, type());
+    }
+    
+    public static void FInitArrayStmt.genInit_C(CodePrinter p, CodeStream str, String indent, String name,
+            FFunctionVariable fv, FType type) {
+        fv.setDummyExp();
+        TypePrinter_C tp = p.createInitSetPrinter(str);
+        if (fv.isComposite() && fv.isOutput() && !fv.isString()) {
+            String next = p.indent(indent);
+            String iniName = name + C_SUFFIX_NULL;
+            str.print(indent + "if (" + name + " == NULL) {\n");
+            tp.reset(iniName, fv.getBindingExp(), type.size().isUnknown(), false, next);
+            type.print(tp);
+            str.print(next + name + " = " + iniName + ";\n");
+            str.print(indent + "}\n");
+        } else {
+            tp.reset(name, fv.getBindingExp(), type.size().isUnknown(), false, indent);
+            type.print(tp);
+        }
+        fv.resetDummyExp();
+    }
+    
 	public void FFunctionCallStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		if (!getCall().isIgnored()) {
 			p.printPreSteps(this, str, indent);
