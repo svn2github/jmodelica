@@ -638,7 +638,7 @@ static int emitted_category(log_t *log, category_t c) {
     }
 
     /* interim solution to allow to pass a log level >= 4 instead of a category */
-    if (c >= 4) {
+    if (((int)c) >= 4) {
         if (cb->log_options.log_level < c) return FALSE;
         c = logInfo;
     }

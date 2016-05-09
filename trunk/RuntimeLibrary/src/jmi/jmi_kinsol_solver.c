@@ -2646,7 +2646,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         realtype fnorm;
         N_VProd(block->f_scale, kin_mem->kin_fval, solver->work_vector);
         fnorm =N_VMaxNorm(solver->work_vector);
-        if((fnorm <= solver->kin_stol && !block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual)
+        if((fnorm <= solver->kin_stol && !(block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual))
             || (block->options->solver_exit_criterion_mode == jmi_exit_criterion_step && flag == KIN_STEP_LT_STPTOL) ||
             (fnorm <= solver->kin_stol && block->options->solver_exit_criterion_mode == jmi_exit_criterion_step_residual 
              && flag == KIN_STEP_LT_STPTOL)) {
