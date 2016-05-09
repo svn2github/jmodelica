@@ -1330,12 +1330,12 @@ aspect IndexReduction {
             
             private static final int NUM_WEIGHTS = 10;
             public static final int UNMATCHED  = 0;
-            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
-            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
-            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 3;
-            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 4;
-            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
-            public static final int REMOTE_VAR_POSITION                  = 6;
+            public static final int REMOTE_VAR_POSITION                  = 1;
+            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 2;
+            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 3;
+            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 4;
+            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 5;
+            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 6;
             private static final int FIXED_WEIGHT_POSITION               = 7;
             private static final int ORDER_WEIGHT_POSITION               = 8;
             private static final int LINEARITY_WEIGHT_POSITION           = 9;
