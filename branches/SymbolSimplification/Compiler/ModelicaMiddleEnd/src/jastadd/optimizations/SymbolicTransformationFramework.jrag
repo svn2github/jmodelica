@@ -165,6 +165,15 @@ aspect SymbolicTransformationFramework {
         }
         
         /**
+         *  Returns a copy of an FAbstractVariable.<p>
+         * 
+         *  @param  exp the expression to copy.
+         */
+        public static FAbstractVariable copyFAbstractVariable(FAbstractVariable var) {
+            return var.treeCopy();
+        }
+        
+        /**
          *  Algorithms that are used by the framework are added here.
          * 
          *  @param  workData Data that is shared and updated in and between algorithms.
@@ -472,7 +481,6 @@ aspect SymbolicTransformationFramework {
             symbolicTransformationFramework.WorkData workData, 
             FExp newExp,
             boolean negated) {
-        FAbstractEquation equation = myFEquation();
         // Disconnect this id use from the tree.
         workData.disposeNode(this);
         // Replace all occurances of the old id use.
