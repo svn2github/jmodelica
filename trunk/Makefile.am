@@ -291,12 +291,13 @@ if HAVE_ANT
 endif
 
 # Paths for doc
-DOC_BUILD_DIR=$(abs_builddir)/docbook/UsersGuide
+DOC_BUILD_PARENT=$(abs_builddir)/docbook
+DOC_BUILD_DIR=$(DOC_BUILD_PARENT)/UsersGuide
 DOC_SRC_DIR=$(abs_top_srcdir)/docbook/UsersGuide
 
 prepare-doc-src: build-compiler
-	mkdir -p "$(DOC_BUILD_DIR)"
-	cp -rT "$(DOC_SRC_DIR)" "$(DOC_BUILD_DIR)"
+	mkdir -p "$(DOC_BUILD_PARENT)"
+	cp -r "$(DOC_SRC_DIR)" "$(DOC_BUILD_DIR)"
 	rm "$(DOC_BUILD_DIR)/Options.xml" "$(DOC_BUILD_DIR)/JModelicaUsersGuide.pdf"
 	java -cp "$(JAVA_EXEC_CP)" org.jmodelica.modelica.compiler.ModelicaCompiler\$$OptionExporter -t "$(DOC_SRC_DIR)/Options.xml" -d "$(DOC_BUILD_DIR)/Options.xml"
 

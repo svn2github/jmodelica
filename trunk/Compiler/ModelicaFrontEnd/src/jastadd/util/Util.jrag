@@ -723,18 +723,18 @@ aspect Names {
   eq InstNode.getChild().findLibraryName() = libraryName();
   eq InstRoot.getChild().findLibraryName() = null;
   eq Root.getChild().findLibraryName()     = null;
-  
-  inh String ASTNode.packagePath(String name);
-  eq Root.getChild().packagePath(String name) = null;
-  eq InstNode.getChild().packagePath(String name) {
-      InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(name);
-      return icd.successful() ? icd.target().dirName() : null;
-  }
-  eq FullClassDecl.getChild().packagePath(String name) {
-	  ClassDecl cd = simpleLookupClassDotted(name);
-	  return (cd == null) ? null : cd.dirName();
-  }
-  
+
+    inh String ASTNode.packagePath(String name);
+    eq Root.getChild().packagePath(String name) = null;
+    eq InstNode.getChild().packagePath(String name) {
+        InstLookupResult<InstClassDecl> icd = lookupInstClassQualifiedGlobal(name);
+        return icd.successful() ? icd.target().dirName() : null;
+    }
+    eq FullClassDecl.getChild().packagePath(String name) {
+        ClassDecl cd = simpleLookupClassDottedGlobal(name);
+        return (cd == null) ? null : cd.dirName();
+    }
+
   inh String ASTNode.topPackagePath();
   eq Root.getChild().topPackagePath() = null;
   eq InstClassDecl.getChild().topPackagePath() {

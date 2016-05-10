@@ -548,7 +548,35 @@ aspect Derivatives {
         }
         return dynamicFExp(diff_farray);
     }
-    
+
+    /**
+     * Generic implementation of {@link #diff(String)} for array expressions 
+     * that delegates to the elements of array expansion.
+     */
+    protected FExp FExp.diffArray(String name) {
+        return getArray().buildDiff(name);
+    }
+
+    /**
+     * Generic implementation of {@link #diff(String)} for expressions that are 
+     * always constant during simulation.
+     */
+    protected FExp FExp.diffZero(String name) {
+        return type().zeroLiteral();
+    }
+
+    /**
+     * Build an FArray containing the differentiated elements of this array 
+     * (by calling {@link FExp#diff(String)} on each one).
+     */
+    public FExp Array.buildDiff(final String name) {
+        return buildFArray(new ElementBuilder() {
+            public FExp build(FExp exp) {
+                return exp.diff(name);
+            }
+        });
+    }
+
 }
 
 aspect SmoothOrder{

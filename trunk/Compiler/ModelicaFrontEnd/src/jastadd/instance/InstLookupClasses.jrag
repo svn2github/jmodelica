@@ -135,6 +135,7 @@ aspect InstLookupClasses {
     eq InstReplacingShortClassDecl.superLookupInstClassFromChain(String name)                    = getInstExtends(0).lookupInstClass(name);
 
     inh InstLookupResult<InstClassDecl> InstAccess.lookupInstClassFromTop(String name);
+    inh InstLookupResult<InstClassDecl> InstNode.lookupInstClassFromTop(String name);
     eq InstRoot.getChild().lookupInstClassFromTop(String name) = genericLookupInstClass(name);
     eq Root.getChild().lookupInstClassFromTop(String name)     = InstLookupResult.notFound();
 
@@ -655,15 +656,34 @@ aspect SimpleInstClassLookup {
     /**
      * Look up qualified class names in the instance class structure.
      * 
-     * @param name A string containing a qualified name, for example 'A.B.C'.
+     * @param name  a qualified name, for example 'A.B.C'
      */
     syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualified(String name) {
+        return lookupInstClassQualified(name, false);
+    }
+
+    /**
+     * Look up qualified class names in the instance class structure.
+     * 
+     * @param name  a qualified name, for example 'A.B.C'
+     */
+    syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualifiedGlobal(String name) {
+        return lookupInstClassQualified(name, true);
+    }
+
+    /**
+     * Look up qualified class names in the instance class structure.
+     * 
+     * @param name    a qualified name, for example 'A.B.C'
+     * @param global  should the lookup start in the global scope?
+     */
+    syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualified(String name, boolean global) {
         String[] parts = name.split("\\.");
         InstNode icd = this;
         InstLookupResult<InstClassDecl> res = null;
         boolean first = true;
         for (String part : parts) {
-            res = icd.lookupInstClassQualifiedPart(part, first);
+            res = icd.lookupInstClassQualifiedPart(part, first, global);
             if (!res.successful())
                 return res;
             icd = res.target();
@@ -672,9 +692,17 @@ aspect SimpleInstClassLookup {
         return res;
     }
 
-    syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualifiedPart(String name, boolean first) = 
-        first ? lookupInstClass(name) : memberInstClass(name);
-    eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first)                           = 
+    syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassQualifiedPart(
+            String name, boolean first, boolean global) {
+        if (!first) {
+            return memberInstClass(name);
+        } else if (global) {
+            return lookupInstClassFromTop(name);
+        } else {
+            return lookupInstClass(name);
+        }
+    }
+    eq InstProgramRoot.lookupInstClassQualifiedPart(String name, boolean first, boolean global) = 
         genericLookupInstClass(name);
 
     syn InstLookupResult<InstClassDecl> InstModification.lookupInstClassQualified(String name) = myInstNode().lookupInstClassQualified(name);
