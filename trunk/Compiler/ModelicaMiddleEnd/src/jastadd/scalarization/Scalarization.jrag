@@ -1182,13 +1182,13 @@ aspect Scalarization {
 	 * @param vars      list of variable to add the new variables to
 	 * @param equation  if <code>true</code>, generate FVariables, otherwise a FFunctionVariable
 	 */
-    protected void FExp.addTemporaryVars(List clauses, List vars, boolean equation) {
+    protected void FExp.addTemporaryVars(List clauses, List vars, Map<String,FExp> indexMap, boolean equation) {
         if (vars != null) {
             FType type = type();
             if (equation || expandWithIterExp()) {
                 type = type.sizedType(expandSizeForIterExp(type.size()));
             }
-            addTempVar(clauses, vars, type, equation, tempVarName());
+            addTempVar(clauses, vars, indexMap, type, equation, tempVarName());
         }
     }
     
@@ -1201,19 +1201,20 @@ aspect Scalarization {
      * @param vars      list of variable to add the new variables to
      * @param type      type of the new variable
      */
-    public void FExp.addFunctionTempVar(List clauses, List vars, FType type) {
+    public void FExp.addFunctionTempVar(List clauses, List vars, Map<String,FExp> indexMap, FType type) {
         if (vars != null) {
-            addTempVar(clauses, vars, type, false, tempVarName());
+            addTempVar(clauses, vars, indexMap, type, false, tempVarName());
         }
     }
     
-    public void FAssignStmt.addTempVar(List clauses, List vars, FType type) {
+    public void FAssignStmt.addTempVar(List clauses, List vars, Map<String,FExp> indexMap, FType type) {
         if (vars != null) {
-            getRight().addTempVar(clauses, vars, type, !inFunction(), tempVarName());
+            getRight().addTempVar(clauses, vars, indexMap, type, !inFunction(), tempVarName());
         }
     }
     
-    public void FExp.addTempVar(List clauses, List vars, FType type, boolean equation, String name) {
+    public void FExp.addTempVar(List clauses, List vars, Map<String,FExp> indexMap, FType type, boolean equation, 
+            String name) {
         if (equation) {
             boolean init = inInitialEquationSection();
             FTypePrefixVariability v = bindingExpVariability();
@@ -1225,12 +1226,14 @@ aspect Scalarization {
             type.createTempFVariables(vars, new FQNameString(name), v, !init);
             notifyIfWhenEquationsOfTemporaryVar();
         } else {
+            type = type.treeCopy();
             FFunctionVariable v = type.isArray() ?
-                    new FFunctionArray((FType)type.unboundCopy(), name) :
-                    new FFunctionVariable((FType)type.unboundCopy(), name);
+                    new FFunctionArray(type, name) :
+                    new FFunctionVariable(type, name);
             if (isArray()) {
-                v.parent = this; // Needed for genInitArrayStatements
-                v.genInitArrayStatements(clauses, false);
+                FInitArrayStmt stmt = new FInitArrayStmt(tempExp(name));
+                clauses.add(stmt);
+                type.scalarizeInitArray(new Scalarizer.Algorithm(vars, clauses, indexMap), stmt);
             }
             vars.add(v);
         }

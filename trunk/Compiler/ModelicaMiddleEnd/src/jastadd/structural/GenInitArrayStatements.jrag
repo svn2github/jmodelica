@@ -38,18 +38,6 @@ aspect GenInitArrayStatements {
      */
     public boolean FStatement.shouldBeSorted = false;
     
-    public void FFunctionVariable.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        
-    }
-    
-    @Override
-    public void FFunctionArray.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
-        stmt.shouldBeSorted = sort;
-        stmts.add(stmt);
-    }
-
-    
     public void FFunctionDecl.sortBindingAssignments() {
         Map<String,FStatement> map = new LinkedHashMap<String,FStatement>();
         for (FStatement stmt : getFAlgorithm().getFStatements())

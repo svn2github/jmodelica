@@ -4862,6 +4862,64 @@ jmi_ad_var_t func_CCodeGenTests_CUnknownArray12_f_exp0(jmi_ad_var_t i_v) {
 ")})));
 end CUnknownArray12;
 
+model CUnknownArray13
+    function f
+        input Real[:] x;
+        output Real[size(x,1)*2] y;
+    algorithm
+        for i in 1:size(x,1) loop
+            y[:] := cat(1,x,1:i);
+        end for;
+        annotation(Inline=false);
+    end f;
+    
+    Real[:] y = f({time});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CUnknownArray13",
+            description="Size depending on for index",
+            variability_propagation=false,
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_CUnknownArray13_f_def0(jmi_array_t* x_a, jmi_array_t* y_a) {
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, -1, 1)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    jmi_ad_var_t i2_1i;
+    jmi_ad_var_t i2_1ie;
+    jmi_ad_var_t i2_2i;
+    jmi_ad_var_t i2_2ie;
+    jmi_ad_var_t i1_3i;
+    jmi_ad_var_t i1_3ie;
+    if (y_a == NULL) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, y_an, jmi_array_size(x_a, 0) * 2, 1, jmi_array_size(x_a, 0) * 2)
+        y_a = y_an;
+    }
+    i_0ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, (jmi_array_size(x_a, 0) + jmi_max(i_0i, AD_WRAP_LITERAL(0))), 1, jmi_array_size(x_a, 0) + jmi_max(i_0i, AD_WRAP_LITERAL(0)))
+        i2_1ie = jmi_array_size(x_a, 0) + 1 / 2.0;
+        for (i2_1i = 1; i2_1i < i2_1ie; i2_1i += 1) {
+            jmi_array_ref_1(temp_1_a, i2_1i) = jmi_array_val_1(x_a, i2_1i);
+        }
+        i2_2ie = jmi_max(i_0i, AD_WRAP_LITERAL(0)) + 1 / 2.0;
+        for (i2_2i = 1; i2_2i < i2_2ie; i2_2i += 1) {
+            jmi_array_ref_1(temp_1_a, i2_2i + jmi_array_size(x_a, 0)) = i2_2i;
+        }
+        i1_3ie = jmi_array_size(x_a, 0) + jmi_max(i_0i, AD_WRAP_LITERAL(0)) + 1 / 2.0;
+        for (i1_3i = 1; i1_3i < i1_3ie; i1_3i += 1) {
+            jmi_array_ref_1(y_a, i1_3i) = jmi_array_val_1(temp_1_a, i1_3i);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return;
+}
+")})));
+end CUnknownArray13;
 
 model CRecordDecl1
     record A

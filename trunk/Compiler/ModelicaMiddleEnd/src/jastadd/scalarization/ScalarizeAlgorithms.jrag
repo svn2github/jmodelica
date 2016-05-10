@@ -60,7 +60,7 @@ aspect AlgorithmScalarization {
         } else {
             FType t = left.size().isUnknown() ? left.type() : right.type();
             if (extractTemp()) {
-                addTempVar(stmts, vars, t);
+                addTempVar(stmts, vars, indexMap, t);
                 FIdUseExp temp = getRight().tempExp(tempVarName());
                 t.scalarizeAssignment(vars, stmts, indexMap, temp, right);
                 right = temp;
@@ -225,26 +225,30 @@ aspect AlgorithmScalarization {
     }
     
     public boolean FInitArrayStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
-        type().scalarizeInitArray(new Scalarizer.Algorithm(vars, stmts, indexMap));
+        type().scalarizeInitArray(new Scalarizer.Algorithm(vars, stmts, indexMap), null);
         return super.scalarize(vars, stmts, indexMap);
     }
     
-    public void FType.scalarizeInitArray(Scalarizer.Algorithm scalarizer) {
-        getSize().scalarizeInitArray(scalarizer, this);
+    public void FType.scalarizeInitArray(Scalarizer.Algorithm scalarizer, ASTNode context) {
+        setSize(getSize().scalarizeInitArray(scalarizer, context == null ? this : context));
     }
     
-    public void Size.scalarizeInitArray(Scalarizer.Algorithm scalarizer, FType context) {
-        
+    public Size Size.scalarizeInitArray(Scalarizer.Algorithm scalarizer, ASTNode context) {
+        return this;
     }
     
-    public void MutableSize.scalarizeInitArray(Scalarizer.Algorithm scalarizer, FType context) {
+    @Override
+    public Size MutableSize.scalarizeInitArray(Scalarizer.Algorithm scalarizer, ASTNode context) {
+        MutableSize res = new MutableSize(ndims());
         for (int i = 0; i < exps.length; i++) {
+            res.size[i] = size[i];
             if (exps[i] != null) {
                 exps[i].createArrayTemporaries(scalarizer.stmts, scalarizer.vars, scalarizer.indexMap, new ForNames());
-                exps[i] = exps[i].scalarize(scalarizer.indexMap);
-                exps[i].parent = context;
+                res.exps[i] = exps[i].scalarize(scalarizer.indexMap);
+                res.exps[i].parent = context;
             }
         }
+        return res;
     }
 }
 

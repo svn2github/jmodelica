@@ -230,7 +230,7 @@ aspect FunctionScalarization {
      */
     public void FExp.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         /* Assumes we are in function */
-        addFunctionTempVar(clauses, vars, type());
+        addFunctionTempVar(clauses, vars, indexMap, type());
         Array arr = getArray();
         for (Index i : indices()) {
             FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
@@ -243,7 +243,7 @@ aspect FunctionScalarization {
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
         boolean func = inFunction();
         if (vars != null)
-            addTemporaryVars(clauses, vars, !func);
+            addTemporaryVars(clauses, vars, indexMap, !func);
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
         FExp temp = func ? tempExp() : buildRecordConstructor(indexMap);
         createFunctionCallClause(clauses, indexMap, temp);
@@ -258,8 +258,8 @@ aspect FunctionScalarization {
      * Performs some common operations
      */
     public void FExp.unknownFunctionArrayTemporaries_pre(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        addFunctionTempVar(clauses, vars, type());
         Map<String,FExp> localIndexMap = new HashMap<String,FExp>(indexMap);
+        addFunctionTempVar(clauses, vars, localIndexMap, type());
         unknownFunctionArrayTemporaries(clauses, vars, localIndexMap, names);
         useTempVar = true;
     }

@@ -521,6 +521,7 @@ aspect FlatFunctionBinding {
     
     inh FCallable FIdUse.lookupFCallable(String name);
     inh FCallable FFunctionDecl.lookupFCallable(String name);
+    inh FCallable FFunctionType.lookupFCallable(String name);
     inh FCallable FFunctionVariable.lookupFCallable(String name);
     eq Root.getChild().lookupFCallable(String name)          = null;
     eq FClass.getChild().lookupFCallable(String name)        = lookupFunc(name);
@@ -556,14 +557,14 @@ aspect FlatRecordBinding {
 	eq FFunctionVariable.myFRecordDecl() = type().myFRecordDecl();
 	
 	syn lazy FRecordDecl FIdUse.myFRecordDecl() = lookupFRec(name());
-	
-	syn lazy FRecordDecl FType.myFRecordDecl() = null;
-	eq FRecordType.myFRecordDecl()             = 
-		(getFClass() != null) ? getFClass().lookupFRec(getName()) : null;
-    syn lazy FFunctionDecl FType.myFFunctionDecl() = null;
-    eq FFunctionType.myFFunctionDecl() = 
-        (getFClass() != null) ? getFClass().lookupFunc(getName()) : null;
-	
+    
+    syn FRecordDecl FType.myFRecordDecl() = null;
+    syn lazy FRecordDecl FRecordType.myFRecordDecl()  = 
+            (getFClass() != null) ? getFClass().lookupFRec(getName()) : lookupFRec(getName());
+    syn FFunctionDecl FType.myFFunctionDecl() = null;
+    syn lazy FFunctionDecl FFunctionType.myFFunctionDecl() = 
+            (getFClass() != null) ? getFClass().lookupFunc(getName()) : (FFunctionDecl)lookupFCallable(getName());
+    
 	inh FRecordDecl FRecordVariable.lookupFRec(String name);
 	inh FRecordDecl FRecordType.lookupFRec(String name);
 	inh FRecordDecl FIdUse.lookupFRec(String name);
