@@ -72,12 +72,14 @@ aspect AlgorithmScalarization {
     
     
     syn boolean FAssignStmt.scalarizedAsFFunctionCallStmt() = 
-            getRight().isFunctionCall() && getLeft().type().isComposite() && 
+            getRight().isNonVectorizedFunctionCall() && getLeft().type().isComposite() && 
             inFunction() && !getLeft().isSlice();
     
-    syn boolean FExp.isFunctionCall() = false;
-    eq InstFunctionCall.isFunctionCall() = true;
-    eq FFunctionCall.isFunctionCall()    = true;
+    syn boolean FExp.isNonVectorizedFunctionCall()          = false;
+    eq InstFunctionCall.isNonVectorizedFunctionCall()       = true;
+    eq InstVectorFunctionCall.isNonVectorizedFunctionCall() = false;
+    eq FFunctionCall.isNonVectorizedFunctionCall()          = true;
+    eq FVectorFunctionCall.isNonVectorizedFunctionCall()    = false;
     
     public boolean FFunctionCallStmt.scalarize(List vars, List<FStatement> stmts, Map<String,FExp> indexMap) {
         indexMap = new HashMap<String, FExp>(indexMap);

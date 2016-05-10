@@ -402,4 +402,13 @@ aspect ComplianceCheck {
             UNSUPPORTED_EXTERNAL_OBJECT_CONSTRUCTORS.invoke(this);
         }
     }
+    
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED =
+        new SimpleErrorProducer("UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED", ProblemKind.COMPLIANCE, "Vectorized function calls of unknown size is not supported");
+        
+    public void InstVectorFunctionCall.complianceCheck(ErrorCheckType checkType) {
+        if (size().isUnknown()) {
+            UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED.invoke(this);
+        }
+    }
 }

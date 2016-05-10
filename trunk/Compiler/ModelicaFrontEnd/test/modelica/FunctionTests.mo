@@ -12603,6 +12603,79 @@ end FunctionTests.VectorizedCall7;
 ")})));
 end VectorizedCall7;
 
+model VectorizedCall8
+function fv
+    input Real x;
+    output Real y;
+    algorithm
+end fv;
+function f
+    input Real[1] x;
+    output Real[1] y= fv(x);
+algorithm
+    annotation(Inline=false);
+end f;
+
+Real[:] y = f({time});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VectorizedCall8",
+            description="",
+            flatModel="
+fclass FunctionTests.VectorizedCall8
+ Real y[1];
+equation
+ ({y[1]}) = FunctionTests.VectorizedCall8.f({time});
+
+public
+ function FunctionTests.VectorizedCall8.f
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[1];
+  y[1] := FunctionTests.VectorizedCall8.fv(x[1]);
+  return;
+ annotation(Inline = false);
+ end FunctionTests.VectorizedCall8.f;
+
+ function FunctionTests.VectorizedCall8.fv
+  input Real x;
+  output Real y;
+ algorithm
+  return;
+ end FunctionTests.VectorizedCall8.fv;
+
+end FunctionTests.VectorizedCall8;
+")})));
+end VectorizedCall8;
+
+model VectorizedCall9
+function fv
+    input Real x;
+    output Real y;
+    algorithm
+end fv;
+function f
+    input Real[:] x;
+    output Real[:] y= fv(x);
+algorithm
+    annotation(Inline=false);
+end f;
+
+Real[:] y = f({time});
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="VectorizedCall9",
+            description="",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 12661, column 23, in file '...', UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED:
+  Vectorized function calls of unknown size is not supported
+")})));
+end VectorizedCall9;
+
 
 model Lapack_dgeqpf
   Real A[2,2] = {{1,2},{3,4}};
