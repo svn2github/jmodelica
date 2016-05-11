@@ -339,6 +339,44 @@ Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
 ")})));
 end ParamBinding2;
 
+model ConstantBinding1
+    parameter Real p = 1;
+    constant Real c = p;
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantBinding1",
+            description="Check that no error messages are generated for structural parameters that can't be evaluated in check mode",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end ConstantBinding1;
+
+model ConstantBinding2
+    function f
+        input Real x;
+        constant Real c = x;
+        output real y = c;
+        algorithm
+    end f;
+    
+    constant Real p = f(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantBinding2",
+            description="Check constant binding expression",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 196, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable y does not match the declared type of the variable
+")})));
+end ConstantBinding2;
 
 model ArraySize1
 	parameter Integer n = size(x, 1);

@@ -10835,6 +10835,25 @@ Error at line 10763, column 42, in file 'Compiler/ModelicaFrontEnd/test/modelica
 ")})));
 end UnknownArray50;
 
+model UnknownArray51
+    function f
+        input Real[:,size(x,1)] x;
+        output Real y[size(x,1)] = x[1,:];
+        algorithm
+    end f;
+    constant Real[:] y = f({{1}});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray51",
+            description="Non-circular sizes",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray51
+ constant Real y[1] = 1;
+end FunctionTests.UnknownArray51;
+")})));
+end UnknownArray51;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

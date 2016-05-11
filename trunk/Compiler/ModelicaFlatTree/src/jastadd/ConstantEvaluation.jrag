@@ -2295,7 +2295,7 @@ aspect ConstantEvaluation {
     eq FSizeExp.cevalCalc(VariableEvaluator evaluator) =
             getFExp().size().ceval(evaluator, dimension());
     eq FUnknownSizeExp.cevalCalc(VariableEvaluator evaluator) =
-            getFExp().cevalCalc(evaluator).size().ceval(evaluator, dimension());
+            inFunction() ? getFExp().cevalCalc(evaluator).size().ceval(evaluator, dimension()) : CValue.UNKNOWN;
     
     public CValue Size.ceval(VariableEvaluator evaluator, int d) {
         int s = get(d);
@@ -4674,10 +4674,10 @@ aspect CircularExpressions {
 	
 	private boolean FAbstractExp.inIsCircular = false; 
 	
-	eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular();
-	
-	syn boolean FIdUse.isCircular()  = myFV().isCircular();
-	eq FIdUseInstAccess.isCircular() = getInstAccess().myInstComponentDecl().isCircular();
+    eq FIdUseExp.isCircularCalc() = getFIdUse().isCircular(-1);
+    
+    syn boolean FIdUse.isCircular(int dim)  = myFV().isCircular();
+    eq FIdUseInstAccess.isCircular(int dim) = getInstAccess().myInstComponentDecl().isCircular(dim);
 
 	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 
@@ -4685,7 +4685,7 @@ aspect CircularExpressions {
 		Size s = getFExp().size();
 		return hasDim() ? s.isCircular(dimension()) : s.isCircular();
 	}
-    eq FUnknownSizeExp.isCircularCalc() = getFExp().isCircular() || getDim().isCircular();
+    eq FUnknownSizeExp.isCircularCalc() = getDim().isCircular() || ((FIdUseExp)getFExp()).getFIdUse().isCircular(dimension());
     
     eq FIfExp.isCircularCalc() {
         if (getIfExp().variability().evalOrLess()) {
@@ -4765,10 +4765,20 @@ aspect CircularExpressions {
 	syn boolean FQNamePart.isCircular() = false;
 	eq FQNamePartArray.isCircular()     = getFArraySubscripts().isCircular();
 	
-	syn lazy boolean InstComponentDecl.isCircular() circular [true] = false;
-	eq InstPrimitive.isCircular() {
-		return (hasFArraySubscripts() && getFArraySubscripts().isCircular()) || 
-			(myBindingInstExp() != null && myBindingInstExp().isCircular());
+	syn lazy boolean InstComponentDecl.isCircular(int dim) circular [true] = false;
+	eq InstPrimitive.isCircular(int dim) {
+	    if (hasFArraySubscripts()) {
+	        if (dim == -1) {
+	            if (getFArraySubscripts().isCircular()) {
+	                return true;
+	            }
+	        } else {
+	            if (getFArraySubscripts().getFSubscript(dim).isCircular()) {
+	                return true;
+	            }
+	        }
+	    }
+	    return (myBindingInstExp() != null && myBindingInstExp().isCircular());
 	}	
 	
 	syn boolean FArraySubscripts.isCircular() {
