@@ -31,16 +31,23 @@ aspect SymbolicTransformationFramework {
             }
             
             public void perform() {
+                framework.reset();
+                framework.disableDebugging();
                 framework.performAliasElimination();
+                framework.restoreDebugging();
             }
         }
+        
         public class variabilityPropagationIfSet extends Transformation {
             public variabilityPropagationIfSet() {
                 super("variability_propagation");
             }
             
             public void perform() {
+                framework.reset();
+                framework.disableDebugging();
                 framework.performVariabilityPropagation();
+                framework.restoreDebugging();
             }
         }
     }
@@ -51,7 +58,7 @@ aspect SymbolicTransformationFramework {
      */
     public class symbolicTransformationFramework extends FClass.Transformation {
         
-    
+        private static WorkData workData;
         private static ModelicaLogger log = ASTNode.log;
         private static FClass fclass = null;
         private static ArrayList<SymbolicTransformationAlgorithm> algorithms;
@@ -63,9 +70,9 @@ aspect SymbolicTransformationFramework {
         }
         
         public void perform() {
-            WorkData workData = new WorkData();
-            addAlgorithms(workData);
-            perform(workData);
+            workData = new WorkData();
+            addAlgorithms();
+            runAlgorithms();
         }
         
         /**
@@ -75,7 +82,7 @@ aspect SymbolicTransformationFramework {
          *  of the equation, the iteration breaks and restarts from the first algorithm.
          *  Transformations are performed until there are no equations left in the worklist.
          */ 
-        public void perform(WorkData workData) {
+        public void runAlgorithms() {
             ArrayList<SymbolicTransformationAlgorithm> activeAlgorithms = new ArrayList();
             
             // Collect algorithms that are enabled.
@@ -109,12 +116,12 @@ aspect SymbolicTransformationFramework {
             }
             
             log.info("Running first change().");
-            change();
+            changesPerformed();
             
             postConfiguration(activeAlgorithms);
             
             log.info("Running second change().");
-            change();
+            changesPerformed();
             
             // Debug.
             if (DEBUG) {
@@ -125,19 +132,24 @@ aspect SymbolicTransformationFramework {
             log.info("Symbolic transformation framework is done.");
         }
         
+        public void reset() {
+            workData = new WorkData();
+            algorithms.clear();
+        }
+        
+        private void changesPerformed() {
+            change();
+            fclass.updateLists(workData);
+        }
+        
         /**
          *  Performs only alias elimination.<p>
          *  
          *  //TODO: Refactor to use one method for all specific algorithm runs.
          */ 
         public void performAliasElimination() {
-            boolean oldDebug = DEBUG;
-            DEBUG = false;
-            algorithms.clear();
-            WorkData workData = new WorkData();
             algorithms.add(new AliasEliminator(fclass, workData));
-            perform(workData);
-            DEBUG = oldDebug;
+            perform();
         }
         
         /**
@@ -146,13 +158,8 @@ aspect SymbolicTransformationFramework {
          *  //TODO: Refactor to use one method for all specific algorithm runs.
          */ 
         public void performVariabilityPropagation() {
-            boolean oldDebug = DEBUG;
-            DEBUG = false;
-            algorithms.clear();
-            WorkData workData = new WorkData();
             algorithms.add(new VariabilityPropagator(fclass, workData));
-            perform(workData);
-            DEBUG = oldDebug;
+            perform();
         }
         
         /**
@@ -178,7 +185,7 @@ aspect SymbolicTransformationFramework {
          * 
          *  @param  workData Data that is shared and updated in and between algorithms.
          */ 
-        private void addAlgorithms(WorkData workData) {
+        private void addAlgorithms() {
             algorithms.add(new AliasEliminator(fclass, workData));
             algorithms.add(new VariabilityPropagator(fclass, workData));
             algorithms.add(new Canonizer(fclass, workData));
@@ -487,6 +494,8 @@ aspect SymbolicTransformationFramework {
         replaceMe(negated ? new FNegExp(newExp) : newExp);
         // Insert the new id use into the tree.
         workData.registerNode(newExp);
+        // Flush children of the equation.
+        myFEquation().flushChildren();
     }
     
     public void FAbstractVariable.addUse(ASTNode n) {
@@ -525,7 +534,17 @@ aspect SymbolicTransformationFramework {
     public class symbolicTransformationFramework {
         private static HashMap<String, Integer> modifications = FClass.modifications;
         private static boolean DEBUG = false;
+        private static boolean OLD_DEBUG = DEBUG;
         private static final String RESULT_PATH = "C:\\Test_Results\\modifications\\";
+        
+        public void disableDebugging() {
+            OLD_DEBUG = DEBUG;
+            DEBUG = false;
+        }
+        
+        public void restoreDebugging() {
+            DEBUG = OLD_DEBUG;
+        }
         
         private void algorithmPerformedChanges(SymbolicTransformationAlgorithm algorithm) {
             if (!DEBUG) {
@@ -607,5 +626,6 @@ aspect SymbolicTransformationFramework {
             }
             return res;
         }
+        
     }
 }
