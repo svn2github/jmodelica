@@ -361,6 +361,48 @@ Error at line 218, column 17, in file 'Compiler/ModelicaFrontEnd/src/test/CheckT
 ")})));
 end ArraySize1;
 
+model ArraySize2
+    function f
+        input Integer n;
+        input Integer[n] x;
+        output Integer[n] y;
+    algorithm
+        for k in 1:n loop
+            y[1:k] := y[1:k] + fill(x[k],k);
+        end for;
+    end f;
+    model M
+        constant Integer n = sum(f(1, {1}));
+        constant Real[:] y1 = 1:n;
+    end M;
+    constant Real[:] c = m.y1;
+    M m;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArraySize2",
+            description="Check that functions is error checked before evaluation",
+            flatModel="
+fclass CheckTests.ArraySize2
+ constant Real c[1] = {1};
+ constant Integer m.n = 1;
+ constant Real m.y1[1] = {1};
+
+public
+ function CheckTests.ArraySize2.f
+  input Integer n;
+  input Integer[:] x;
+  output Integer[:] y;
+ algorithm
+  init y as Integer[n];
+  for k in 1:n loop
+   y[1:k] := y[1:k] + fill(x[k], k);
+  end for;
+  return;
+ end CheckTests.ArraySize2.f;
+
+end CheckTests.ArraySize2;
+")})));
+end ArraySize2;
 
 model FunctionNoAlgorithm1
     replaceable function f

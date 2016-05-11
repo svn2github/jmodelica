@@ -536,10 +536,10 @@ aspect ErrorCheck {
     }
   
   public void ASTNode.collectErrors(ErrorCheckType checkType) {
-	  allChecks(checkType);
 	  for(int i = 0; i < getNumChild(); i++) {
 		  getChild(i).collectErrors(checkType);
 	  }
+        allChecks(checkType);
   }
 
 
