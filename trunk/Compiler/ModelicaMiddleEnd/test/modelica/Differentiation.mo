@@ -459,7 +459,7 @@ end Differentiation.Expressions.If;
 ")})));
         end If;
 
-        model Pow
+        model Pow1
             Real x1,x2;
             parameter Real p = 2;
         equation
@@ -468,10 +468,10 @@ end Differentiation.Expressions.If;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="Expressions_Pow",
+            name="Expressions_Pow1",
             description="Test of index reduction",
             flatModel="
-fclass Differentiation.Expressions.Pow
+fclass Differentiation.Expressions.Pow1
  Real x1;
  Real x2;
  parameter Real p = 2 /* 2 */;
@@ -482,9 +482,74 @@ equation
  _der_x1 + der(x2) = 1;
  x1 + x2 ^ p + x2 ^ 1.4 = 0;
  _der_x1 + p * x2 ^ (p - 1) * der(x2) + 1.4 * x2 ^ 0.3999999999999999 * der(x2) = 0;
-end Differentiation.Expressions.Pow;
+end Differentiation.Expressions.Pow1;
 ")})));
-        end Pow;
+        end Pow1;
+
+        model Pow2
+            Real x1,x2,x3;
+        equation
+            der(x1) + der(x2) = 1;
+            x1 + x2 = 10^x3;
+            10 ^ x3 - x2 = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Expressions_Pow2",
+            description="Differentiation of power with continuous expression as exponent",
+            flatModel="
+fclass Differentiation.Expressions.Pow2
+ Real x1;
+ Real x2;
+ Real x3;
+ Real _der_x1;
+ Real _der_x2;
+initial equation 
+ x3 = 0.0;
+equation
+ _der_x1 + _der_x2 = 1;
+ x1 + x2 = 10 ^ x3;
+ 10 ^ x3 - x2 = 1;
+ _der_x1 + _der_x2 = 10 ^ x3 * (der(x3) * log(10));
+ 10 ^ x3 * (der(x3) * log(10)) - _der_x2 = 0;
+end Differentiation.Expressions.Pow2;
+")})));
+        end Pow2;
+
+        model Pow3
+            Real x1,x2,x3,x4;
+        equation
+            der(x1) + der(x2) = 1;
+            x1 + x2 = x3^x4;
+            x3^x4 - x2 = 1;
+            x3 * x3 = x4;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Expressions_Pow3",
+            description="Differentiation of power with continuous expressions as both base and exponent",
+            flatModel="
+fclass Differentiation.Expressions.Pow3
+ Real x1;
+ Real x2;
+ Real x3;
+ Real x4;
+ Real _der_x1;
+ Real _der_x2;
+ Real _der_x4;
+initial equation 
+ x3 = 0.0;
+equation
+ _der_x1 + _der_x2 = 1;
+ x1 + x2 = x3 ^ x4;
+ x3 ^ x4 - x2 = 1;
+ x3 * x3 = x4;
+ _der_x1 + _der_x2 = x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * log(x3));
+ x3 ^ x4 * (der(x3) * (x4 / x3) + _der_x4 * log(x3)) - _der_x2 = 0;
+ x3 * der(x3) + der(x3) * x3 = _der_x4;
+end Differentiation.Expressions.Pow3;
+")})));
+        end Pow3;
 
         model Div1
             Real x1,x2;
@@ -771,32 +836,35 @@ end Differentiation.Expressions.DotDiv;
 
         model DotPow
             Real x1[2],x2[2];
+            parameter Real p2[2] = {2,3};
         equation
             der(x1) .+ der(x2) = {1,1};
-            x1 .^ x2 = {0,0};
+            x1 .^ p2 - x2 = {0,0};
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Expressions_DotPow",
-            description="Test of index reduction",
+            description="Cifferentiation of .^ operator",
             flatModel="
 fclass Differentiation.Expressions.DotPow
  Real x1[1];
  Real x1[2];
  Real x2[1];
  Real x2[2];
- Real _der_x1[1];
- Real _der_x1[2];
+ parameter Real p2[1] = 2 /* 2 */;
+ parameter Real p2[2] = 3 /* 3 */;
+ Real _der_x2[1];
+ Real _der_x2[2];
 initial equation 
- x2[1] = 0.0;
- x2[2] = 0.0;
+ x1[1] = 0.0;
+ x1[2] = 0.0;
 equation
- _der_x1[1] .+ der(x2[1]) = 1;
- _der_x1[2] .+ der(x2[2]) = 1;
- x1[1] .^ x2[1] = 0;
- x1[2] .^ x2[2] = 0;
- x2[1] .* x1[1] .^ (x2[1] .- 1) .* _der_x1[1] = 0;
- x2[2] .* x1[2] .^ (x2[2] .- 1) .* _der_x1[2] = 0;
+ der(x1[1]) .+ _der_x2[1] = 1;
+ der(x1[2]) .+ _der_x2[2] = 1;
+ x1[1] .^ p2[1] - x2[1] = 0;
+ x1[2] .^ p2[2] - x2[2] = 0;
+ p2[1] .* x1[1] .^ (p2[1] .- 1) .* der(x1[1]) - _der_x2[1] = 0;
+ p2[2] .* x1[2] .^ (p2[2] .- 1) .* der(x1[2]) - _der_x2[2] = 0;
 end Differentiation.Expressions.DotPow;
 ")})));
         end DotPow;

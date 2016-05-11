@@ -24,6 +24,9 @@ aspect Sanity {
     public void FClass.sanityCheck() {
         if (myOptions().getBooleanOption("debug_sanity_check")) {
             sanityCheckFIdUseConsistency(this);
+            for (FAbstractEquation eqn : getFParameterEquations()) {
+                eqn.sanityCheckParameterEquations(this);
+            }
             
             // Break execution and print any errors 
             breakOnErrors();
@@ -92,6 +95,31 @@ aspect Sanity {
     }
 
     public void FCardinality.sanityCheckFIdUseConsistency(FClass fc) {
+    }
+
+
+
+    public void FAbstractEquation.sanityCheckParameterEquations(FClass fc) {}
+
+    public void FEquation.sanityCheckParameterEquations(FClass fc) {
+        getLeft().sanityCheckParameterEquationLeft(fc);
+    }
+    
+    public void FFunctionCallEquation.sanityCheckParameterEquations(FClass fc) {
+        for (FFunctionCallLeft left : getLefts())
+            if (left.hasFExp())
+                left.getFExp().sanityCheckParameterEquationLeft(fc);
+    }
+    
+    public void FExp.sanityCheckParameterEquationLeft(FClass fc) {
+        for (FExp e : childFExps())
+            e.sanityCheckParameterEquationLeft(fc);
+    }
+    
+    public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc) {
+        if (!getFIdUse().myFV().isParameter()) {
+            fc.sanityProblem(this, "Non-parameter set in parameter equation: %s", this);
+        }
     }
 
 }

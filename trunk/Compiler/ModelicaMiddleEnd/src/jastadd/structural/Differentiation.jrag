@@ -192,23 +192,35 @@ aspect Derivatives {
     }
 
     public FExp FDotPowExp.diff(String name) {
-        FExp exponent;
-        FExp e;
-        if (getRight().variability().constantVariability()) {
-            double exponentValue = getRight().ceval().realValue();
-            if (exponentValue==2.0) {
-                e = getLeft().copySymbolic();
+        if (getRight().variability().discreteOrLess()) {
+            FExp e1;
+            if (getRight().variability().knownParameterOrLess()) {
+                double exponentValue = getRight().ceval().realValue();
+                if (exponentValue == 2.0) {
+                    e1 = getLeft().copySymbolic();
+                } else {
+                    FExp exponent = new FRealLitExp(getRight().ceval().realValue() - 1);
+                    e1 = newFPowExp(getLeft().copySymbolic(),exponent);
+                }
             } else {
-                exponent = new FRealLitExp(getRight().ceval().realValue() - 1);
-                e = newFPowExp(getLeft().copySymbolic(),exponent);
+                FExp exponent = newFSubExp(getRight().copySymbolic(),new FIntegerLitExp(1));
+                e1 = newFPowExp(getLeft().copySymbolic(),exponent);
             }
+            
+            FExp e2 = newFMulExp(getRight().copySymbolic(), e1);
+            return dynamicFExp(newFMulExp(e2, getLeft().diff(name)));
         } else {
-            exponent = newFSubExp(getRight().copySymbolic(),new FIntegerLitExp(1));
-            e = newFPowExp(getLeft().copySymbolic(),exponent);
+            // der(x^y) = x^y * (der(x) * (y / x) + der(y) * log(x))
+            //            e1-    -------e2-------   -------e3------
+            FExp x = getLeft();
+            FExp y = getRight();
+            FExp dx = x.diff(name);
+            FExp dy = y.diff(name);
+            FExp e1 = copySymbolic();
+            FExp e2 = newFMulExp(dx, newFDivExp(y.copySymbolic(), x.copySymbolic()));
+            FExp e3 = newFMulExp(dy, new FLogExp(x.copySymbolic()));
+            return dynamicFExp(newFMulExp(e1, newFAddExp(e2, e3)));
         }
-        
-        FExp e2 = newFMulExp(getRight().copySymbolic(), e);
-        return dynamicFExp(newFMulExp(e2, getLeft().diff(name)));   
     }
 
     public FExp FNegExp.diff(String name) {
