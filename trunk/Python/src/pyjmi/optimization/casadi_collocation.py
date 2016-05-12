@@ -4552,14 +4552,6 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
-        #~ self.solver_object.setOption("monitor", ["eval_g"])
-        #~ self.solver_object.setOption("verbose", True)
-        #~ cnstr = self.get_named_var_expr(constraints[714])
-        #~ dbg_f = casadi.SXFunction([self.named_xx, self.named_pp], [cnstr])
-        #~ dbg_f.init()
-        #~ val = dbg_f.call([x, self._par_vals])
-        #~ dh()
-
         if self.equation_scaling:
             self.solver_object.init() # Probably needed before extracting the nlp function
             nlp = self.solver_object.nlp()
