@@ -220,7 +220,6 @@ aspect VariabilityPropagation {
                     }
                 }
                 
-                fclass.setFParameterEquationList(workData.getParameterEquations());
                 fclass.setFInitialEquationList(new List<FAbstractEquation>(newEquations));
             }
         }

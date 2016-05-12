@@ -70,7 +70,7 @@ aspect SymbolicTransformationFramework {
         }
         
         public void perform() {
-            workData = new WorkData();
+            workData = new WorkData(fclass);
             addAlgorithms();
             runAlgorithms();
         }
@@ -133,7 +133,7 @@ aspect SymbolicTransformationFramework {
         }
         
         public void reset() {
-            workData = new WorkData();
+            workData = new WorkData(fclass);
             algorithms.clear();
         }
         
@@ -299,7 +299,7 @@ aspect SymbolicTransformationFramework {
             /*
              *  Data required for the <code>VariabilityPropagator</code> algorithm.
              */
-            private ArrayList<FAbstractEquation> parameterEquations = new ArrayList();
+            private List<FAbstractEquation> parameterEquations;
             
             /**
              *  Default constructor for <code>WorkData</code>.<p>
@@ -308,10 +308,8 @@ aspect SymbolicTransformationFramework {
              *
              *  @param  worklist The working list of equations to modify with the algorithms.
              */
-            public WorkData() {
-                for (FAbstractEquation equation : fclass.getFParameterEquations()) {
-                    parameterEquations.add(equation);
-                }
+            public WorkData(FClass fclass) {
+                parameterEquations = fclass.getFParameterEquations();
             }
             
             /*
@@ -394,15 +392,6 @@ aspect SymbolicTransformationFramework {
                 worklist.remove(equation);
                 equation.markForRemoval();
                 log.info("Equation <%s> marked for removal.", equation);
-            }
-            
-            /**
-             *  Returns a list containing the parameter equations.
-             *
-             *  @return The list containing all parameter equations. 
-             */
-            public List<FAbstractEquation> getParameterEquations() {
-                return new List<FAbstractEquation>(parameterEquations);
             }
             
             /**
