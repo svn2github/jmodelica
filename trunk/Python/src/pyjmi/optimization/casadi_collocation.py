@@ -531,13 +531,17 @@ class CasadiCollocator(object):
                 Nonlinear programming solver execution time.
         """
         stats = self.solver_object.getStats()
-        #return_status = stats['return_status']
-        # 'Maximum_CPU_Time_Exceeded' fails to fill in stats['return_status'].
-        # Hopefully this is the only case
-        return_status = stats.get('return_status', 'Maximum_CPU_Time_Exceeded')
         nbr_iter = stats['iter_count']
         objective = float(self.solver_object.output(casadi.NLP_SOLVER_F))
         total_exec_time = stats['t_mainloop']
+        
+        # 'Maximum_CPU_Time_Exceeded' fails to fill in stats['return_status'].
+        # Hopefully this is the only case
+        if (self.solver_object.hasSetOption('max_cpu_time') and
+            total_exec_time >= self.solver_object.getOption('max_cpu_time')):
+            return_status = 'Maximum_CPU_Time_Exceeded'
+        else:
+            return_status = stats['return_status']
         return (return_status, nbr_iter, objective, total_exec_time)
 
     def _update_equation_scaling(self):
@@ -4548,6 +4552,13 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
+        #~ self.solver_object.setOption("monitor", ["eval_g"])
+        #~ self.solver_object.setOption("verbose", True)
+        #~ cnstr = self.get_named_var_expr(constraints[714])
+        #~ dbg_f = casadi.SXFunction([self.named_xx, self.named_pp], [cnstr])
+        #~ dbg_f.init()
+        #~ val = dbg_f.call([x, self._par_vals])
+        #~ dh()
 
         if self.equation_scaling:
             self.solver_object.init() # Probably needed before extracting the nlp function
