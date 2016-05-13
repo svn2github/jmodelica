@@ -2266,6 +2266,92 @@ end IndexReduction.NonDiffArgsTest3;
 ")})));
 end NonDiffArgsTest3;
 
+model NonDiffArgsTest4
+    function F
+        input Real[3] x;
+        input Real dummy;
+        output Real res;
+    algorithm
+        res := x[1];
+    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x)=F_der);
+    end F;
+    function F_der
+        input Real[3] x;
+        input Real dummy;
+        input Real dummy_der;
+        output Real res;
+    algorithm
+        res := x[2];
+    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x,order=2)=F_der_der);
+    end F_der;
+    function F_der_der
+        input Real[3] x;
+        input Real dummy;
+        input Real dummy_der;
+        input Real dummy_der_der;
+        output Real res;
+    algorithm
+        res := x[3];
+    annotation(InlineAfterIndexReduction=true);
+    end F_der_der;
+    
+    Real p1,p3(stateSelect=StateSelect.avoid);
+    Real v1,v3,v3_1;
+    Real a1,a3,a3_1;
+equation
+    der(p1) = v1;
+    der(v1) = a1;
+    der(p3) = v3;
+    der(v3) = a3;
+    der(p3) = v3_1;
+    der(v3_1) = a3_1;
+    p1 = F({p3,v3,a3},time);
+    a1 * v1 = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NonDiffArgsTest4",
+            description="Test so that munkres doesn't match to nonDiff arg during dummy derivative selection'",
+            flatModel="
+fclass IndexReduction.NonDiffArgsTest4
+ Real p1;
+ Real p3(stateSelect = StateSelect.avoid);
+ Real v1;
+ Real v3;
+ Real v3_1;
+ Real a1;
+ Real a3;
+ Real a3_1;
+ Real _der_p1;
+ Real _der_v1;
+ Real _der_v3_1;
+ Real _der_der_p3;
+ Real _der_der_p1;
+initial equation 
+ p3 = 0.0;
+ v3 = 0.0;
+equation
+ _der_p1 = v1;
+ _der_v1 = a1;
+ der(p3) = v3;
+ der(v3) = a3;
+ der(p3) = v3_1;
+ _der_v3_1 = a3_1;
+ p1 = p3;
+ _der_v1 * _der_p1 = 1;
+ _der_der_p3 = der(v3);
+ _der_der_p3 = _der_v3_1;
+ _der_p1 = der(p3);
+ _der_der_p1 = _der_v1;
+ _der_der_p1 = der(v3);
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.NonDiffArgsTest4;
+")})));
+end NonDiffArgsTest4;
+
 model FunctionCallEquation1
     function f
         input Real x;

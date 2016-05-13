@@ -1429,7 +1429,7 @@ aspect IndexReduction {
             int j = 0;
             for (IndexReductionVar var : variableMap.values()) {
                 IndexReductionCost incideceCost;
-                if (eqn.getVariables().contains(var) && var.numDifferentiations() >= eqn.numDifferentiations()) {
+                if (eqn.getVariables().contains(var) && canMatch(eqn, var) && var.numDifferentiations() >= eqn.numDifferentiations()) {
                     incideceCost = weights.get(var);
                     if (eqn.isRemoteVar(var)) {
                         incideceCost = incideceCost.copy();
