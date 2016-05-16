@@ -1275,7 +1275,7 @@ model FixedFalseIfEquTest1
             flatModel="
 fclass CheckTests.FixedFalseIfEquTest1
  Real x;
- parameter Boolean b(fixed = false);
+ initial parameter Boolean b(fixed = false);
 initial equation 
  b = true;
 equation
@@ -1300,8 +1300,8 @@ model FixedFalseIndex1
             description="Test that fixed false parameter index is handled correctly",
             flatModel="
 fclass CheckTests.FixedFalseIndex1
- parameter Integer p(fixed = false);
- parameter Real xp(fixed = false);
+ initial parameter Integer p(fixed = false);
+ initial parameter Real xp;
  constant Real x[1] = 1;
  constant Real x[2] = 2;
 initial equation 

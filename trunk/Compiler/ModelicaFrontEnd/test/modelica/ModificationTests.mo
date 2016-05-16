@@ -1810,7 +1810,7 @@ initial equation
 			description="Test setting boolean attribute of a member of an array component to a scalar constant without each",
 			flatModel="
 fclass ModificationTests.ArrayModifications48
- parameter Real a.b[1].x(fixed = false);
+ initial parameter Real a.b[1].x(fixed = false);
 initial equation 
  a.b[1].x = 1;
 end ModificationTests.ArrayModifications48;

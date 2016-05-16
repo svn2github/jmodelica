@@ -158,7 +158,7 @@ FDiscrete : FTypePrefixVariability;
  */
 abstract FParameter : FTypePrefixVariability;
 
-FNonFixedParameter : FParameter;
+FInitialParameter : FParameter;
 
 FFixedParameter : FParameter;
 

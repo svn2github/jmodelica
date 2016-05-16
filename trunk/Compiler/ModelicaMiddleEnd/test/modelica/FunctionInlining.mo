@@ -3569,10 +3569,10 @@ equation
             description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
             flatModel="
 fclass FunctionInlining.InlineAnnotation12
- parameter Real p(fixed = false);
+ initial parameter Real p(fixed = false);
  Real x[1](start = 1);
  Real x[2](start = 2);
- parameter Real temp_2(fixed = false);
+ initial parameter Real temp_2;
  Real temp_3;
 initial equation 
  x[1] = p - 2;
@@ -3616,10 +3616,10 @@ equation
             description="Inlining function call depending on fixed=false parameter should generate fixed=false parameters",
             flatModel="
 fclass FunctionInlining.InlineAnnotation13
- parameter Real p(fixed = false);
+ initial parameter Real p(fixed = false);
  Real x.a;
  Real x.b;
- parameter Real temp_2(fixed = false);
+ initial parameter Real temp_2;
  Real temp_3;
 initial equation 
  x.a = p - 2;
@@ -3792,7 +3792,7 @@ model InitialSystemInlining1
             description="Test inlining in the initial system",
             flatModel="
 fclass FunctionInlining.InitialSystemInlining1
- parameter Real x(fixed = false);
+ initial parameter Real x(fixed = false);
 initial equation 
  x = time;
 end FunctionInlining.InitialSystemInlining1;
@@ -3826,7 +3826,7 @@ initial equation
             description="Test inlining in the initial system. This test ensures that F2 is inlined correctly",
             flatModel="
 fclass FunctionInlining.InitialSystemInlining2
- parameter Real x(fixed = false);
+ initial parameter Real x(fixed = false);
  Real temp_2;
  Real temp_3;
  Real temp_5;

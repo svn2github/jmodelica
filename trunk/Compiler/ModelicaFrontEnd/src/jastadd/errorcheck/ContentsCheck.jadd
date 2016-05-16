@@ -456,7 +456,7 @@ aspect ContentCheck {
 	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
 	
     syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
-    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().isFixedParamOrLessExp() 
+    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
             && (!hasElse() || getElse().hasOnlyFixedParamTests());
 	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
@@ -744,10 +744,11 @@ aspect ForceVariability {
         if (forcedVariability.lessOrEqual(v)) {
             return;
         }
-        if (!variability().combine().parameterVariability() || inFunction() || isForIndex())
+        FTypePrefixVariability currentVariability = variability().combine();
+        if (!currentVariability.parameterVariability() || inFunction() || isForIndex())
             return;
         // TODO: hierarchical check for records?
-        if (indices().numElements() > 0 && isPrimitive() && !fixedAttributeCValue().reduceBooleanOr()) {
+        if (indices().numElements() > 0 && currentVariability.initialParameterVariability()) {
             compliance("Parameters with fixed=false can not be used as structural parameters");
             return;
         }

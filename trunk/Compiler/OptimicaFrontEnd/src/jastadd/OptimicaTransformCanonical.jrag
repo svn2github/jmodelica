@@ -145,9 +145,9 @@ aspect OptimicaTransformCanonical {
 	// Don't add initial equations for optimization problems
 	public void FOptClass.addInitialEquations() {}
 	
-    protected void FOptClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
-        super.scalarizeVars(vars, alias_vars);
-		scalarizeConstraints(vars);
+    protected void FOptClass.scalarizeVars(Scalarizer scalarizer) {
+        super.scalarizeVars(scalarizer);
+        scalarizeConstraints(scalarizer.getVars());
 		scalarizeClassAttributes();
 	}
 	

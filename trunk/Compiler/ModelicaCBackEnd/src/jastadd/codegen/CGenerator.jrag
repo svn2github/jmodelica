@@ -272,12 +272,14 @@ public class CGenerator extends GenericGenerator {
 	
 		public void generate(CodeStream genPrinter) {
 			for (FRealVariable fv : fclass.realVariables())
-				if (!fv.fixedAttribute())
+                if (!fv.isFixed()) {
 					fv.genVarDecls_C(ASTNode.printer_C, genPrinter, INDENT);
+                }
 			Enumerator enumerator = new Enumerator();
 			for (FRealVariable fv : fclass.realVariables())
-				if (!fv.fixedAttribute())
+                if (!fv.isFixed()) {
 					fv.genStartAttributeResidual_C(ASTNode.printer_C, genPrinter, INDENT, enumerator);
+                }
 		}
 	
 	}
@@ -1234,7 +1236,7 @@ public class CGenerator extends GenericGenerator {
                     element.genStartValue_C(p, str, indent);
                 }
             };
-            for (FVariable fv : fclass.nonFixedParameters()) {
+            for (FVariable fv : fclass.initialParameters()) {
                 if (!fv.hasParameterEquation()) {
                     cs2.add(fv);
                 }

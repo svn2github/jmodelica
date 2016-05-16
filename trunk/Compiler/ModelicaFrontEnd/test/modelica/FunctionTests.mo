@@ -8092,8 +8092,8 @@ fclass FunctionTests.ArrayOutputScalarization24
  Real y;
  Real z[1];
  Real z[2];
- parameter Real temp_1[1](fixed = false);
- parameter Real temp_1[2](fixed = false);
+ initial parameter Real temp_1[1](fixed = false);
+ initial parameter Real temp_1[2](fixed = false);
 initial equation 
  y = x / 2;
  ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization24.f(y);
@@ -14931,7 +14931,7 @@ equation
 fclass FunctionTests.FunctionLike.Special.SemiLinear3
  constant Real x = 0;
  Real sa;
- parameter Real p1(fixed = false);
+ initial parameter Real p1(fixed = false);
  parameter Real p2 = 2 /* 2 */;
  discrete Real r1;
  discrete Real r2;

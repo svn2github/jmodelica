@@ -7087,7 +7087,7 @@ equation
             flatModel="
 fclass TransformCanonicalTests.FixedFalseParam1
  Real x;
- parameter Real p(fixed = false);
+ initial parameter Real p(fixed = false);
 initial equation
  2 * x = p;
  x = 3;

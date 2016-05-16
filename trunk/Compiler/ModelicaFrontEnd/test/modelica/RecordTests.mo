@@ -1365,7 +1365,7 @@ model RecordBinding23
             flatModel="
 fclass RecordTests.RecordBinding23
  parameter Real r1.x = 1 /* 1 */;
- parameter Real r1.y = 1 /* 1 */;
+ final parameter Real r1.y = 1 /* 1 */;
 end RecordTests.RecordBinding23;
 ")})));
 end RecordBinding23;

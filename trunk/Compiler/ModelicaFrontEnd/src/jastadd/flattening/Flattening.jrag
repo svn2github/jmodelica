@@ -1759,10 +1759,6 @@ aspect FlatExpressions {
         }
     }
 	
-	public FEquationType FEquationType.flatten(FQName prefix) {
-		return (FEquationType) fullCopy();
-	}
-	
 	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
 	
 	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
@@ -1786,7 +1782,7 @@ aspect FlatExpressions {
 
 
 	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		FEquation flattened = new FEquation(getType().flatten(prefix), getLeft().flatten(prefix), getRight().flatten(prefix));
+		FEquation flattened = new FEquation(getLeft().flatten(prefix), getRight().flatten(prefix));
 		flattenAttrs(flattened, prefix);
 		return flattened;
 	}
@@ -1846,7 +1842,7 @@ aspect FlatExpressions {
 		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 		for (FFunctionCallLeft l : getLefts()) 
 			lefts.add(l.flatten(prefix));
-		FFunctionCallEquation flattened =  new FFunctionCallEquation(getType().flatten(prefix), lefts, (FAbstractFunctionCall) call);
+		FFunctionCallEquation flattened =  new FFunctionCallEquation(lefts, (FAbstractFunctionCall) call);
 		flattenAttrs(flattened, prefix);
 		return flattened;
 	}

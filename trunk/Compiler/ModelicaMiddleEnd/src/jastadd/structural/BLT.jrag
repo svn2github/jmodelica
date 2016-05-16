@@ -1040,7 +1040,7 @@ aspect BLT{
 				s.addAll(e.algebraicVariables());
 				s.addAll(e.derivativeVariables());
 				s.addAll(e.differentiatedRealVariables());
-				s.addAll(e.nonFixedParameters());
+				s.addAll(e.initialParameters());
 			}
 			s.removeAll(allVariables());
 			return s;	

@@ -585,7 +585,7 @@ aspect IndexReduction {
         }
 
         @Override
-        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability, boolean nonFixedParam) {
+        protected void addEquation(FAbstractEquation eqn, FTypePrefixVariability variability) {
             eqn.flushAllRecursiveClearFinal();
             dynamicEquation(eqn);
             newEquations.add(eqn);
@@ -1121,7 +1121,7 @@ aspect IndexReduction {
                 int linearity = calculateLinearityWeight(var, coefficientsMatrix);
                 if (var.getMeIntegrated() != null)
                     linearity += calculateLinearityWeight(var.getMeIntegrated(), coefficientsMatrix);
-                boolean fixed = fv.getTopIntegrated().fixedAttribute();
+                boolean fixed = fv.getTopIntegrated().isFixed();
                 IndexReductionCost weight = new IndexReductionCost(fv.stateSelection(), fixed, fv.order(), linearity);
                 ASTNode.log.verbose("Weight: %s %s", var, weight);
                 weights.put(var, weight);

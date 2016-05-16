@@ -135,7 +135,6 @@ aspect TransformCanonical {
             transformations.add(new genInitialEquations());
             transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new setFDerivativeVariablesPreBLT());
-            transformations.add(new propagateNonFixedParameters());
             transformations.add(new indexReduction());
             transformations.add(new LateFunctionInliningIfSet());
             transformations.add(new commonSubexpressionEliminationIfSet());
@@ -1379,13 +1378,13 @@ aspect TransformCanonical {
                 for (FVariable fv : variables()) {
                     boolean generate = false;
                     if (!myOptions().getBooleanOption("state_initial_equations") &&
-                            fv.isDifferentiatedVariable() && (fv.fixedAttribute() ||
+                            fv.isDifferentiatedVariable() && (fv.isFixed() ||
                             myOptions().getBooleanOption("state_start_values_fixed")))
                         generate = true;
                     else if (!myOptions().getBooleanOption("state_initial_equations") &&
-                            fv.isAlgebraicContinousRealVariable() && fv.fixedAttribute())
+                            fv.isAlgebraicContinousRealVariable() && fv.isFixed())
                         generate = true;
-                    else if (fv.isDiscrete() && !fv.isString() && fv.fixedAttribute())
+                    else if (fv.isDiscrete() && !fv.isString() && fv.isFixed())
                         generate = true;
                     
                     if (generate) {
@@ -3261,7 +3260,7 @@ aspect TransformCanonicalErrorCheck {
         */
        syn int FClass.numDAEInitVariables() = numDAEVariables() +
                numDifferentiatedRealVariables() + numDiscretePreVariables() +
-               numNonFixedParameters() + numDynamicStates() - numDynamicAlgebraicVariables();
+               numInitialParameters() + numDynamicStates() - numDynamicAlgebraicVariables();
 
        public void FClass.checkFClassDimensions() {
                // Check dimensions of DAE
@@ -3372,7 +3371,7 @@ aspect StateInitialEquations {
         
         for (FRealVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fNonFixedParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fFixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else

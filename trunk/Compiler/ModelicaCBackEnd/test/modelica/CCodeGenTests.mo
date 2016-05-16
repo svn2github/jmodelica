@@ -12084,9 +12084,10 @@ end InactiveBlockSwitch1;
 
 model ActiveBlockSwitch1
     parameter Real p1(fixed=false);
-    parameter Boolean p2 = p1*p1 > time;
+    parameter Boolean p2(fixed=false);
 initial equation
     p1 = if p2 then 1 else 2;
+    p2 = p1*p1 > time;
     
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -13730,17 +13731,11 @@ end Algorithm16;
 
 model Algorithm17
 	parameter Real x(fixed=false);
-	parameter Real y(fixed=false) = 1;
 	parameter Boolean b = false;
 initial algorithm
 	if b then
 		x := 2;
 	end if;
-initial algorithm
-	if b then
-		y := 2;
-	end if;
-
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="Algorithm17",
@@ -13755,12 +13750,8 @@ initial algorithm
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     _x_0 = 0.0;
-    if (_b_2) {
+    if (_b_1) {
         _x_0 = 2;
-    }
-    _y_1 = 1;
-    if (_b_2) {
-        _y_1 = 2;
     }
     return ef;
 }
@@ -19795,7 +19786,6 @@ int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     _x2_1 = _y_3;
     _x3_2 = _x2_1 + 1;
-    _x1_0 = _z_4;
     return ef;
 }
 ")})));

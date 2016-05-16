@@ -816,7 +816,7 @@ public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] 
                 Integer pos = varFilter.get(var);
                 boolean contains = (equation.variables().contains(var) 
                         || equation.discretePreVariables().contains(var)
-                        || equation.nonFixedParameters().contains(var))
+                        || equation.initialParameters().contains(var))
                         && (pos == null || pos == i);
                 if (contains)
                     out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var, inTearBlock)));

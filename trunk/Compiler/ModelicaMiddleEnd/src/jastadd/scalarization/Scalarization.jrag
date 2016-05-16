@@ -24,13 +24,22 @@ import java.util.Collections;
 aspect Scalarization {
 
     public class Scalarizer {
+        
         private List<FVariable> vars;
-        private List<FAbstractEquation> equs;
+        private List<FAbstractEquation> iEqus;
         private List<FAbstractEquation> pEqus;
-        public Scalarizer(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
+        private List<FAbstractEquation> equs;
+        
+        public Scalarizer() {
+            this(new List<FVariable>(), new List<FAbstractEquation>(), 
+                    new List<FAbstractEquation>(), new List<FAbstractEquation>());
+        }
+        public Scalarizer(List<FVariable> vars, List<FAbstractEquation> iEqus, 
+                List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) {
             this.vars = vars;
-            this.equs = equs;
+            this.iEqus = iEqus;
             this.pEqus = pEqus;
+            this.equs = equs;
         }
         
         public void add(FVariable fv) {
@@ -38,21 +47,36 @@ aspect Scalarization {
         }
         
         public void add(FTypePrefixVariability v, FAbstractEquation e) {
-            getEqus(v).add(e);
+            getEquations(v).add(e);
         }
         
-        public List<FAbstractEquation> getEqus() {
-            return getEqus(ASTNode.fContinuous());
+        public List<FAbstractEquation> getEquations(FTypePrefixVariability v) {
+            return v.selectEquations(iEqus, pEqus, equs);
         }
         
-        public List<FAbstractEquation> getEqus(FTypePrefixVariability v) {
-            return v.parameterVariability() ? pEqus : equs;
+        public List<FAbstractEquation> getInitialEquations() {
+            return iEqus;
+        }
+        
+        public List<FAbstractEquation> getParameterEquations() {
+            return pEqus;
+        }
+        
+        public List<FAbstractEquation> getEquations() {
+            return equs;
         }
         
         public List<FVariable> getVars() {
             return vars;
         }
     }
+    
+    syn List<FAbstractEquation> FTypePrefixVariability.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = equs;
+    eq FParameter.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = pEqus;
+    eq FInitialParameter.selectEquations(List<FAbstractEquation> iEqus,
+            List<FAbstractEquation> pEqus, List<FAbstractEquation> equs) = iEqus;
     
 	/**
 	 * Flag indicating if a variable is scalarized.
@@ -73,10 +97,9 @@ aspect Scalarization {
          */
         public class scalarize extends Transformation {
             public void perform() {
-                List<FVariable> vars = new List<FVariable>();
-                List<FVariable> alias_vars = new List<FVariable>();
-                scalarizeVars(vars, alias_vars);
-                replaceScalarizedVars(vars, alias_vars);
+                Scalarizer scalarizer = new Scalarizer();
+                scalarizeVars(scalarizer);
+                replaceScalarizedVars(scalarizer);
                 scalarizeFuncs();
                 scalarizeTypes();
                 scalarizeAttributes();
@@ -91,28 +114,23 @@ aspect Scalarization {
     /**
      * Scalarize variable declarations and equations.
      */
-    protected void FClass.scalarizeVars(List<FVariable> vars, List<FVariable> alias_vars) {
-        List<FAbstractEquation> equs = new List<FAbstractEquation>();
-        List<FAbstractEquation> pEqus = new List<FAbstractEquation>();
-        List<FAbstractEquation> iEqus = new List<FAbstractEquation>();
+    protected void FClass.scalarizeVars(Scalarizer scalarizer) {
         
-        FAbstractEquation.scalarizeList(getFAbstractEquations(),  equs,  vars);
-        FAbstractEquation.scalarizeList(getFInitialEquations(),   iEqus, vars);
-        FAbstractEquation.scalarizeList(getFParameterEquations(), pEqus, vars);
+        FAbstractEquation.scalarizeList(getFAbstractEquations(),  scalarizer.getEquations(), scalarizer.getVars());
+        FAbstractEquation.scalarizeList(getFInitialEquations(),   scalarizer.getInitialEquations(), scalarizer.getVars());
+        FAbstractEquation.scalarizeList(getFParameterEquations(), scalarizer.getParameterEquations(), scalarizer.getVars());
         
-        for (FVariable fv : getFVariables()) 
-            fv.scalarize(vars, equs, pEqus);
-        for (FVariable fv : getAliasVariables()) 
-            fv.scalarize(alias_vars, equs, pEqus);
+        for (FVariable fv : getFVariables()) {
+            fv.scalarize(scalarizer);
+        }
         
-        setFAbstractEquationList(equs);
-        setFInitialEquationList(iEqus);
-        setFParameterEquationList(pEqus);
+        setFAbstractEquationList(scalarizer.getEquations());
+        setFInitialEquationList(scalarizer.getInitialEquations());
+        setFParameterEquationList(scalarizer.getParameterEquations());
     }
     
-    protected void FClass.replaceScalarizedVars(List<FVariable> vars, List<FVariable> alias_vars) {
-        setFVariableList(vars);
-        setAliasVariableList(alias_vars);
+    protected void FClass.replaceScalarizedVars(Scalarizer scalarizer) {
+        setFVariableList(scalarizer.getVars());
     }
     
 	protected void FClass.scalarizeFuncs() {
@@ -198,20 +216,21 @@ aspect Scalarization {
      * Scalarize the FVariable and put all scalarized variables in the
      * list vars.
      */
-    public void FVariable.scalarize(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus) {
+    public void FVariable.scalarize(Scalarizer scalarizer) {
         try {
             if (size().isZero())
                 return;
             
-            if (hasBindingExp())
-                getBindingExp().createArrayTemporaries(variability().parameterOrLess(), equs, pEqus, vars);
+            if (hasBindingExp()) {
+                getBindingExp().createArrayTemporaries(scalarizer, variability());
+            }
             
             if (isRecord()) {
-                scalarRecordFVariables(new Scalarizer(vars, equs, pEqus), new ScalarizingVariableInstance(this));
+                scalarRecordFVariables(scalarizer, new ScalarizingVariableInstance(this));
             } else {
-                getFAttributes().createArrayTemporaries(pEqus, vars);
+                getFAttributes().createArrayTemporaries(scalarizer, fParameter());
                 for (Index i : indices()) {
-                    vars.add(createScalarFVariable(vars, equs, pEqus, i));
+                    scalarizer.add(createScalarFVariable(scalarizer, i));
                 }
             }
         } catch (ModelicaException e) {
@@ -227,7 +246,7 @@ aspect Scalarization {
 	 * @param i  the Index of the cell to create an FVariable for. Should be Index.NULL for 
 	 *           already scalar FVariables.
 	 */
-    protected FVariable FVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
+    protected FVariable FVariable.createScalarFVariable(Scalarizer scalarizer, Index i) {
 		// Create new variable and copy fields that should be same
 		FVariable fv = createEmptyNode();
 		fv.setFVisibilityType((FVisibilityType) getFVisibilityType().fullCopy());
@@ -251,7 +270,7 @@ aspect Scalarization {
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                (isParameter() ? pEqus : equs).add(new FEquation(new FIdUseExp(name), bexp));
+                scalarizer.add(variability(), new FEquation(new FIdUseExp(name), bexp));
             }
 		}
 		
@@ -264,14 +283,14 @@ aspect Scalarization {
 		return fv;
 	}
 	
-    protected FVariable FExternalObjectVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
-        FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(vars, equs, pEqus, i);
+    protected FVariable FExternalObjectVariable.createScalarFVariable(Scalarizer scalarizer, Index i) {
+        FExternalObjectVariable fex = (FExternalObjectVariable) super.createScalarFVariable(scalarizer, i);
 		fex.setConstructor(getConstructor().fullCopy());
 		return fex;
 	}
 	
-    protected FEnumVariable FEnumVariable.createScalarFVariable(List<FVariable> vars, List<FAbstractEquation> equs, List<FAbstractEquation> pEqus, Index i) {
-        FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(vars, equs, pEqus, i);
+    protected FEnumVariable FEnumVariable.createScalarFVariable(Scalarizer scalarizer, Index i) {
+        FEnumVariable fv = (FEnumVariable) super.createScalarFVariable(scalarizer, i);
 		fv.setEnum(getEnum().fullCopy());
 		return fv;
 	}
@@ -461,7 +480,6 @@ aspect Scalarization {
             String cName = comp.name();
             
             FTypePrefixVariability nv = variability.component(cName);
-            nv = nv.combineDown(comp.variability()); // Covers bug in flattening
             
             List<FAttribute> attrs = null;
             FAttribute a = mattrs.get(cName);
@@ -1098,7 +1116,7 @@ aspect Scalarization {
 	public void FIfWhenElseEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
         if (tempsForThen != null) 
             for (FExp e : tempsForThen)
-                e.type().addDummyEqnsForTemp(getFAbstractEquations(), e.tempVarName(), getType());
+                e.type().addDummyEqnsForTemp(getFAbstractEquations(), e.tempVarName());
 	}
     
     public void FIfWhenEquation.addDummyEqnsForTemps(ArrayList<FExp> tempsForThen, ArrayList<FExp> tempsForElse) {
@@ -1107,22 +1125,22 @@ aspect Scalarization {
             getElse().addDummyEqnsForTemps(tempsForElse, tempsForElse);
     }
     
-    public void FType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+    public void FType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name) {
         if (isArray()) {
             FType scalar = scalarType();
             for (Index i : indices()) 
-                scalar.addDummyEqnsForTemp(l, name + i, eqType);
+                scalar.addDummyEqnsForTemp(l, name + i);
         } else {
-            l.add(new FEquation(eqType.fullCopy(), new FIdUseExp(name), zeroLiteral()));
+            l.add(new FEquation(new FIdUseExp(name), zeroLiteral()));
         }
     }
     
-    public void FRecordType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name, FEquationType eqType) {
+    public void FRecordType.addDummyEqnsForTemp(List<FAbstractEquation> l, String name) {
         if (isArray()) {
-            super.addDummyEqnsForTemp(l, name, eqType);
+            super.addDummyEqnsForTemp(l, name);
         } else {
             for (FRecordComponentType comp : getComponents())
-                comp.getFType().addDummyEqnsForTemp(l, name + '.' + comp.getName(), eqType);
+                comp.getFType().addDummyEqnsForTemp(l, name + '.' + comp.getName());
         }
     }
 	
@@ -1219,7 +1237,7 @@ aspect Scalarization {
             boolean init = inInitialEquationSection();
             FTypePrefixVariability v = bindingExpVariability();
             if (init) {
-                v = v.combineDown(fParameter());
+                v = v.combineDown(fInitialParameter());
             } else {
                 v = v.combineDown(type().funcOutputVariability());
             }

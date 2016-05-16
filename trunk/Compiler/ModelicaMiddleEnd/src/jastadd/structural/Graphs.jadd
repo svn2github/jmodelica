@@ -253,8 +253,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
-            public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.initialParameters(); }
+            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
             public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 

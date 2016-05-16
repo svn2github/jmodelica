@@ -1676,7 +1676,7 @@ initial equation
             description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation2
- parameter Real p(fixed = false);
+ initial parameter Real p(fixed = false);
 initial equation 
  p = 1;
 end EvaluationTests.EvaluateAnnotation2;
@@ -1712,7 +1712,7 @@ initial equation
             description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation3
- parameter Real p[2](fixed = {false, true});
+ initial parameter Real p[2](fixed = {false, true});
 initial equation 
  p[1] = 1;
 end EvaluationTests.EvaluateAnnotation3;
@@ -1734,8 +1734,8 @@ initial equation
             description="Check that annotation(Evaluate=true) is ignored when fixed equals false",
             flatModel="
 fclass EvaluationTests.EvaluateAnnotation4
- parameter Real a.p = p;
- parameter Real p(fixed = false);
+ initial parameter Real a.p = p;
+ initial parameter Real p(fixed = false);
 initial equation 
  p = 1;
 end EvaluationTests.EvaluateAnnotation4;
@@ -2093,7 +2093,7 @@ initial equation
             description="Check that final parameters with fixed=false are not evaluated",
             flatModel="
 fclass EvaluationTests.FinalParameterEval5
- parameter Real p(fixed = false);
+ initial parameter Real p(fixed = false);
  Real x = p;
 initial equation 
  p = 1;

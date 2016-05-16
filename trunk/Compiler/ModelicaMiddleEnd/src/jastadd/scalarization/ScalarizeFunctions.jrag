@@ -130,7 +130,7 @@ aspect FunctionScalarization {
     
 
     public void ASTNode.createArrayTemporaries(Scalarizer s, FTypePrefixVariability v) {
-        createArrayTemporaries(s.getEqus(v), s.getVars());
+        createArrayTemporaries(s.getEquations(v), s.getVars());
     }
     
     /**

@@ -1943,8 +1943,8 @@ initial equation
             description="Test propagation of fixed false parameters",
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse1
- parameter Real p1(fixed = false);
- parameter Real p2(fixed = false);
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2;
 initial equation 
  p1 = 23;
  p2 = p1 + 1;
@@ -1975,9 +1975,9 @@ equation
             description="Test propagation of fixed false parameters, function call equation",
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse2
- parameter Real p1(fixed = false);
- parameter Real p2(fixed = false);
- parameter Real p3(fixed = false);
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2;
+ initial parameter Real p3;
 initial equation 
  p1 = 23;
  (p2, p3) = VariabilityPropagationTests.FixedFalse2.f(p1);
@@ -2008,8 +2008,8 @@ initial equation
             description="Test propagation of fixed false parameters, originally discrete",
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse3
- parameter Real p1(fixed = false);
- parameter Real p2(fixed = false);
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2;
 initial equation 
  p1 = 23;
  p2 = p1 + 1;
@@ -2029,9 +2029,9 @@ initial equation
             description="Test propagation of fixed false parameters, chained",
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse4
- parameter Real p1(fixed = false);
- parameter Real p2(fixed = false);
- parameter Real p3(fixed = false);
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p2;
+ initial parameter Real p3;
 initial equation 
  p1 = 23;
  p2 = p1 + 1;
@@ -2052,9 +2052,9 @@ initial equation
             description="Test propagation of fixed false parameters, alias",
             flatModel="
 fclass VariabilityPropagationTests.FixedFalse5
- parameter Real p1(fixed = false);
- parameter Real p3(fixed = false);
- parameter Real p2(fixed = false);
+ initial parameter Real p1(fixed = false);
+ initial parameter Real p3;
+ initial parameter Real p2;
 initial equation 
  p1 = p3 * 23;
  p3 = p1 + 1;

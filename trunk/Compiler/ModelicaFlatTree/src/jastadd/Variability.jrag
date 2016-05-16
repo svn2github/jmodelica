@@ -32,8 +32,12 @@ aspect Variability {
     eq FKnownParameter.knownParameterVariability() = true;
     syn boolean FTypePrefixVariability.indexParameterVariability() = false;
     eq FIndexParameter.indexParameterVariability() = true;
-    syn boolean FTypePrefixVariability.parameterVariability() = false;
-    eq FParameter.parameterVariability() = true;	
+    syn boolean FTypePrefixVariability.fixedParameterVariability()    = false;
+    eq FFixedParameter.fixedParameterVariability()                    = true;
+    syn boolean FTypePrefixVariability.initialParameterVariability() = false;
+    eq FInitialParameter.initialParameterVariability()              = true;
+    syn boolean FTypePrefixVariability.parameterVariability()         = false;
+    eq FParameter.parameterVariability()                              = true;
     syn boolean FTypePrefixVariability.discreteVariability() = false;
     eq FDiscrete.discreteVariability() = true;	
     syn boolean FTypePrefixVariability.continuousVariability() = false;
@@ -57,7 +61,7 @@ aspect Variability {
 	
     syn boolean FTypePrefixVariability.evalOrLess()           = lessOrEqual(fEvalParameter());
     syn boolean FTypePrefixVariability.knownParameterOrLess() = lessOrEqual(fFinalParameter());
-    syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fNonFixedParameter());
+    syn boolean FTypePrefixVariability.parameterOrLess()      = lessOrEqual(fInitialParameter());
     syn boolean FTypePrefixVariability.indexParameterOrLess() = lessOrEqual(fIndexParameter());
     syn boolean FTypePrefixVariability.fixedParameterOrLess() = lessOrEqual(fFixedParameter());
     syn boolean FTypePrefixVariability.discreteOrLess()       = lessOrEqual(fDiscrete());
@@ -79,7 +83,7 @@ aspect Variability {
     protected int FFinalParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
     protected int FIndexParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
     protected int FFixedParameter.variabilityLevel()  { return VARIABILITY_LEVEL; }
-    protected int FNonFixedParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
+    protected int FInitialParameter.variabilityLevel() { return VARIABILITY_LEVEL; }
     protected int FDiscrete.variabilityLevel()        { return VARIABILITY_LEVEL; }
     protected int FContinuous.variabilityLevel()      { return VARIABILITY_LEVEL; }
     protected int FCompositeVariability.variabilityLevel() { return combine().variabilityLevel(); }
@@ -89,7 +93,7 @@ aspect Variability {
     protected static final int FFinalParameter.VARIABILITY_LEVEL    = 5;
     protected static final int FIndexParameter.VARIABILITY_LEVEL    = 8;
     protected static final int FFixedParameter.VARIABILITY_LEVEL    = 10;
-    protected static final int FNonFixedParameter.VARIABILITY_LEVEL = 11;
+    protected static final int FInitialParameter.VARIABILITY_LEVEL = 11;
     protected static final int FDiscrete.VARIABILITY_LEVEL          = 20;
     protected static final int FContinuous.VARIABILITY_LEVEL        = 30;
     
@@ -356,38 +360,11 @@ aspect Variability {
         throw new UnsupportedOperationException("Unable to get variability of FAbstractVariable type " + getClass().getSimpleName());
     }
     eq FVariable.variability() = getFTypePrefixVariability();
-
-
-    /**
-     * Check if all referenced parameters have fixed values.
-     */
-    syn boolean FExp.valueIsFixed() {
-        for (FExp n : childFExps())
-            if (!n.valueIsFixed())
-                return false;
-        return true;
-    }
-    eq FIdUseExp.valueIsFixed()       = getFIdUse().valueIsFixed();
-    syn boolean FIdUse.valueIsFixed() = myFV().valueIsFixed();
-
-    syn boolean FAbstractVariable.valueIsFixed() = true;
-    eq FVariable.valueIsFixed() = fixedAttribute();
-
-    syn boolean FAbstractEquation.rhsIsFixed() = true;
-    eq FEquation.rhsIsFixed()                  = getRight().valueIsFixed();
-    eq FFunctionCallEquation.rhsIsFixed()      = getCall().valueIsFixed();
-
+    
     syn boolean FExp.isConstantExp()   = variability().constantVariability();
     syn boolean FExp.isParameterExp()  = variability().parameterVariability();
     syn boolean FExp.isDiscreteExp()   = variability().discreteVariability();
     syn boolean FExp.isContinuousExp() = variability().continuousVariability();
-    
-    syn boolean FExp.isFixedParamOrLessExp() {
-        if (variability().parameterVariability()) {
-            return !containsNonFixedParameter();
-        }
-        return variability().parameterOrLess();
-    }
     
     syn boolean FSubscript.isConstant() = true;
     eq FExpSubscript.isConstant() = getFExp().isConstantExp();
@@ -670,7 +647,7 @@ aspect VariabilitySingletons {
 
     public static final FContinuous      FContinuous.instance      = new FContinuous();
     public static final FDiscrete        FDiscrete.instance        = new FDiscrete();
-    public static final FNonFixedParameter FNonFixedParameter.instance = new FNonFixedParameter();
+    public static final FInitialParameter FInitialParameter.instance = new FInitialParameter();
     public static final FFixedParameter  FFixedParameter.instance  = new FFixedParameter();
     public static final FIndexParameter  FIndexParameter.instance  = new FIndexParameter();
     public static final FFinalParameter  FFinalParameter.instance  = new FFinalParameter();
@@ -693,8 +670,8 @@ aspect VariabilitySingletons {
         return fFixedParameter();
     }
     
-    public static FParameter ASTNode.fNonFixedParameter() {
-        return FNonFixedParameter.instance;
+    public static FParameter ASTNode.fInitialParameter() {
+        return FInitialParameter.instance;
     }
     
     public static FParameter ASTNode.fFixedParameter() {

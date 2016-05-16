@@ -1180,11 +1180,6 @@ aspect FlatPrettyPrint {
     	str.print(";\n\n");
     }
     
-    public void FEquationType.prettyPrint(Printer p, CodeStream str, String indent) {}
-    public void FInitialEquation.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(indent + "initial ");
-    }
-    
     public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "type " + getName() + " = ");
@@ -2011,7 +2006,9 @@ aspect FlatPrettyPrint {
     eq FInput.toString()      = "input";
     eq FOutput.toString()     = "output";
     syn String FTypePrefixVariability.toString();
-    eq FParameter.toString()       = "parameter ";
+    eq FFixedParameter.toString()    = "parameter ";
+    eq FInitialParameter.toString() = "initial parameter ";
+    eq FIndexParameter.toString()  = "index parameter";
     eq FEvalParameter.toString()   = "eval parameter ";
     eq FFinalParameter.toString()  = "final parameter ";
     eq FStructParameter.toString() = "structural parameter ";
