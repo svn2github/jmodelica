@@ -1772,8 +1772,9 @@ aspect InstanceAST_API {
     eq InstExtends.name() = getClassName().name();
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
 
-	syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
-	syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
+    syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
+    syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getClassDecl();
+    syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
     syn String InstNode.qualifiedName();
     syn lazy String InstClassDecl.qualifiedName();
