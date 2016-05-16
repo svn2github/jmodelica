@@ -1259,6 +1259,73 @@ public
 end FunctionInlining.ExternalInline2;
 ")})));
 	end ExternalInline2;
+	
+model ExternalInline3
+    function F1
+        input Real i1;
+        input O obj;
+        output Real[2] o1;
+    algorithm
+        o1 := F2(i1, obj);
+    annotation(Inline=true);
+    end F1;
+    function F2
+        input Real i1;
+        input O obj;
+        output Real[2] o1;
+    algorithm
+        o1[1] := i1 + i1;
+        o1[2] := i1 * i1;
+    annotation(Inline=false);
+    end F2;
+    parameter O obj = O();
+    parameter Real p1 = 0;
+    parameter Real[2] x2 = F1(p1, obj);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ExternalInline3",
+            description="Inlining function with external object",
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.ExternalInline3
+ parameter FunctionInlining.O obj = FunctionInlining.O.constructor() /* {} */;
+ parameter Real p1 = 0 /* 0 */;
+ parameter Real x2[1];
+ parameter Real x2[2];
+parameter equation
+ ({x2[1], x2[2]}) = FunctionInlining.ExternalInline3.F2(p1, obj);
+
+public
+ function FunctionInlining.O.destructor
+  input FunctionInlining.O o;
+ algorithm
+  external \"C\" destructor(o);
+  return;
+ end FunctionInlining.O.destructor;
+
+ function FunctionInlining.O.constructor
+  output FunctionInlining.O o;
+ algorithm
+  external \"C\" o = constructor();
+  return;
+ end FunctionInlining.O.constructor;
+
+ function FunctionInlining.ExternalInline3.F2
+  input Real i1;
+  input FunctionInlining.O obj;
+  output Real[:] o1;
+ algorithm
+  init o1 as Real[2];
+  o1[1] := i1 + i1;
+  o1[2] := i1 * i1;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ExternalInline3.F2;
+
+ type FunctionInlining.O = ExternalObject;
+end FunctionInlining.ExternalInline3;
+")})));
+end ExternalInline3;
 
     model UninlinableFunction1
         function f1

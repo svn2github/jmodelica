@@ -1415,8 +1415,12 @@ aspect Scalarization {
 			FTypePrefixVariability variability) {
 		return new FEnumVariable(fvt, variability.combineDown(fDiscrete()), name, new FQNameString(getName()));
 	}	
-	
-	
+    
+    public FVariable FExternalObjectType.createFVariable(FVisibilityType fvt, FQName name, 
+            FTypePrefixVariability variability) {
+        return new FExternalObjectVariable(fvt, variability.combineDown(fParameter()), name, getConstructor().fullCopy());
+    }
+    
 	/* Scalarization of expressions is needed in order to compute a simple
 	 * scalar expression from an expression with ndims==0. For example, an
 	 * FIdUse 'x[2]' needs to be marked as scalarized, and the expression

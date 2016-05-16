@@ -732,6 +732,14 @@ aspect Constructors {
 			FTypePrefixVariability variability, FQName name, FQName record) {
 		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
+	
+    /**
+     * Create an external object variable with only the required children.
+     */
+    public FExternalObjectVariable.FExternalObjectVariable(FVisibilityType fvt, 
+            FTypePrefixVariability variability, FQName name, FIdUse constructorName) {
+        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, constructorName);
+    }
 
     /**
      * Constructs a new dynamic state variable

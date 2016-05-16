@@ -269,25 +269,21 @@ aspect FunctionInlining {
         
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent, FType type,
                 FTypePrefixVariability variability) {
-            if (type.addVarInInline()) {
-                FVariable var = addVar(oldName, variability, type);
-                if (variability.constantVariability()) {
-                    try {
-                        value = value.ceval().buildLiteral();
-                        var.setBindingExp(value);
-                        replMap.put(oldName, value);
-                        return;
-                    } catch (ConstantEvaluationException e) {
-                        
-                    }
+            FVariable var = addVar(oldName, variability, type);
+            if (variability.constantVariability()) {
+                try {
+                    value = value.ceval().buildLiteral();
+                    var.setBindingExp(value);
+                    replMap.put(oldName, value);
+                    return;
+                } catch (ConstantEvaluationException e) {
+                    
                 }
-                if (noEvent)
-                    value = value.preventEvents();
-                FEquation eqn = new FEquation(var.createUseExp(), value);
-                addEquation(eqn, variability);
-            } else {
-                replMap.put(oldName, value);
             }
+            if (noEvent)
+                value = value.preventEvents();
+            FEquation eqn = new FEquation(var.createUseExp(), value);
+            addEquation(eqn, variability);
         }
 
         /**
@@ -511,13 +507,6 @@ aspect FunctionInlining {
         return buildFExp(b, "");
      }
     
-    /**
-     * Should expressions of this type generate new varriables during inlining?
-     */
-    syn boolean FType.addVarInInline()      = true;
-    eq FExternalObjectType.addVarInInline() = false;
-
-
     /**
      * Create temporary variable(s) for this access when inlining a function call that 
      * it is a left of, and return an access.
