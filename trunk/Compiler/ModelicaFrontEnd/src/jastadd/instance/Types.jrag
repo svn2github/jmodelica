@@ -224,7 +224,6 @@ aspect DerivativeFunctions {
      * If no annotation matches, an empty AnnotationNode is returned.
      */
     syn AnnotationNode FFunctionDecl.derivativeAnnotation(int order, Set<String> zero) {
-        AnnotationNode orderOne = null;
         for (AnnotationNode derNode : annotation().allFor("derivative")) {
             int myOrder = derivativeOrder(derNode);
             if ((myOrder == order || myOrder == 1) && zero.containsAll(zeroDerivative(derNode))) {

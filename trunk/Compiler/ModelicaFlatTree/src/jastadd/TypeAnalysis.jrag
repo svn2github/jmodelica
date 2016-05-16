@@ -1118,9 +1118,22 @@ aspect BuiltInFlatTypes {
     /**
      * Create a literal with the zero value for this type, if applicable.
      * 
-     * For operator records, a function call is created.
+     * For operator records, a record constructor call is created.
      */
-    public FExp FType.zeroLiteral()        { return new FNoExp(); }
+     public FExp FType.sizedZeroLiteral() {
+         if (isArray()) {
+             return size().fillDimsOfExp(createArrayZeroLiteralNoSize());
+         } else {
+             return zeroLiteral();
+         }
+     }
+
+     /**
+      * Create a literal with the zero value for the scalar version of this type, if applicable.
+      * 
+      * For operator records, a record constructor call is created.
+      */
+    public FExp FType.zeroLiteral()        { throw new UnsupportedOperationException(); }
     public FExp FRealType.zeroLiteral()    { return new FRealLitExp(0.0); }
     public FExp FIntegerType.zeroLiteral() { return new FIntegerLitExp(0); }
     public FExp FStringType.zeroLiteral()  { return new FStringLitExp(""); }
@@ -1134,16 +1147,55 @@ aspect BuiltInFlatTypes {
     }
 
     /**
-     * Create a literal of the given integer value for this type, if applicable.
+     * Create a fill or zeros expression, as appropriate to describe a zero-value 
+     * literal of this type, without the size filled in.
      */
-    public FExp FType.createLiteral(int v)        { return null; }
+   protected FArrayDimAsArgsExp FType.createArrayZeroLiteralNoSize() {
+       return new FFillExp(new List<FExp>(), zeroLiteral());
+   }
+   protected FArrayDimAsArgsExp FPrimitiveNumericType.createArrayZeroLiteralNoSize() {
+       return new FZeros();
+   }
+
+    /**
+     * Create a literal with the given integer value for this type, if applicable.
+     */
+   public FExp FType.createSizedLiteral(int v) {
+       if (isArray()) {
+           return size().fillDimsOfExp(createArrayLiteralNoSize(v));
+       } else {
+           return createLiteral(v);
+       }
+   }
+
+   /**
+    * Create a literal with the given integer value for the scalar version of this type, if applicable.
+    */
+    public FExp FType.createLiteral(int v)        { throw new UnsupportedOperationException(); }
     public FExp FIntegerType.createLiteral(int v) { return new FIntegerLitExp(v); }
     public FExp FRealType.createLiteral(int v)    { return new FRealLitExp(v); }
     public FExp FEnumType.createLiteral(int v)    { return new FEnumLitExp(this, v); }
-
     public FExp FBooleanType.createLiteral(int v) { 
         return (v == 1 || v == 2) ? FBooleanLitExp.create(v == 2) : null; 
     }
+
+    /**
+     * Create a fill, zeros or ones expression, as appropriate for the given integer value, 
+     * without the size filled in.
+     */
+   protected FArrayDimAsArgsExp FType.createArrayLiteralNoSize(int v) {
+       return new FFillExp(new List<FExp>(), createLiteral(v));
+   }
+   protected FArrayDimAsArgsExp FPrimitiveNumericType.createArrayLiteralNoSize(int v) {
+       switch (v) {
+       case 0:
+           return new FZeros();
+       case 1:
+           return new FOnes();
+       default:
+           return super.createArrayLiteralNoSize(v);
+       }
+   }
 
 }
 

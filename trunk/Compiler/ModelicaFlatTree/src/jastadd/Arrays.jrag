@@ -2935,21 +2935,28 @@ aspect ArrayHelpers {
 		public FExp createNumElementsFExp() {
 			return new FIntegerLitExp(numElements());
 		}
-		
-		/**
-		 * Create a zero expression of this size.
-		 */
-		public FExp createZeroFExp() {
-			if (size.length == 0) {
-				return new FIntegerLitExp(0);
-			} else {
-				FZeros res = new FZeros();
-				for (int i = 0; i < size.length; i++)
-					res.addFExp(createFExp(i));
-				return res;
-			}
-		}
-		
+
+        /**
+         * Create a zero expression of this size.
+         */
+        public FExp createZeroFExp() {
+            if (size.length == 0) {
+                return new FIntegerLitExp(0);
+            } else {
+                return fillDimsOfExp(new FZeros());
+            }
+        }
+
+        /**
+         * Add dimensions to an FArrayDimAsArgsExp so that it will have this size 
+         * (assuming a scalar expression for fill).
+         */
+        public FArrayDimAsArgsExp fillDimsOfExp(FArrayDimAsArgsExp exp) {
+            for (int i = 0; i < size.length; i++)
+                exp.addFExp(createFExp(i));
+            return exp;
+        }
+
 		public FFunctionVariable createFunctionVariable(String name, FType type) {
 		    return createFunctionVariable(name, type, new Opt<FTypePrefixInputOutput>());
 		}

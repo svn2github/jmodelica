@@ -953,6 +953,471 @@ public
 end Differentiation.Expressions.FunctionCall1;
 ")})));
         end FunctionCall1;
+        
+        model Transpose
+            Real x[2,3] = { { 1,2,3 }, { 4,5,6 } } * time;
+            Real y[3,2] = der(transpose(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Transpose",
+            description="Derivative of transpose()",
+            flatModel="
+fclass Differentiation.Expressions.Transpose
+ Real x[2,3] = {{1, 2, 3}, {4, 5, 6}} * time;
+ Real y[3,2] = transpose(der(x[1:2,1:3]));
+end Differentiation.Expressions.Transpose;
+")})));
+        end Transpose;
+        
+        model OuterProduct
+            Real x[2] = { 1,2 } * time;
+            Real y[2] = { 3,4 } * time;
+            Real z[2,2] = der(outerProduct(x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_OuterProduct",
+            description="Derivative of outerProduct()",
+            flatModel="
+fclass Differentiation.Expressions.OuterProduct
+ Real x[2] = {1, 2} * time;
+ Real y[2] = {3, 4} * time;
+ Real z[2,2] = outerProduct(der(x[1:2]), der(y[1:2]));
+end Differentiation.Expressions.OuterProduct;
+")})));
+        end OuterProduct;
+        
+        model Symmetric
+            Real x[2,2] = { { 1,2 }, { 3,4 } } * time;
+            Real y[2,2] = der(symmetric(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Symmetric",
+            description="Derivative of symmetric()",
+            flatModel="
+fclass Differentiation.Expressions.Symmetric
+ Real x[2,2] = {{1, 2}, {3, 4}} * time;
+ Real y[2,2] = {{der(x[1,1]), der(x[1,2])}, {der(x[1,2]), der(x[2,2])}};
+end Differentiation.Expressions.Symmetric;
+")})));
+        end Symmetric;
+        
+        model Cross
+            Real x[3] = { 1,2,3 } * time;
+            Real y[3] = { 4,5,6 } * time;
+            Real z[3] = der(cross(x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Cross",
+            description="Derivative of cross()",
+            flatModel="
+fclass Differentiation.Expressions.Cross
+ Real x[3] = {1, 2, 3} * time;
+ Real y[3] = {4, 5, 6} * time;
+ Real z[3] = cross(der(x[1:3]), der(y[1:3]));
+end Differentiation.Expressions.Cross;
+")})));
+        end Cross;
+        
+        model Skew
+            Real x[3] = { 1,2,3 } * time;
+            Real y[3,3] = der(skew(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Skew",
+            description="Derivative of skew()",
+            flatModel="
+fclass Differentiation.Expressions.Skew
+ Real x[3] = {1, 2, 3} * time;
+ Real y[3,3] = skew(der(x[1:3]));
+end Differentiation.Expressions.Skew;
+")})));
+        end Skew;
+        
+        model Div
+            Real x = time;
+            Real y = 2 * time;
+            Real z = der(div(x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Div",
+            description="Derivative of div()",
+            flatModel="
+fclass Differentiation.Expressions.Div
+ Real x = time;
+ Real y = 2 * time;
+ Real z = 0.0;
+end Differentiation.Expressions.Div;
+")})));
+        end Div;
+        
+        model Mod
+            Real x = time;
+            Real y = 2 * time;
+            Real z = der(mod(x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Mod",
+            description="Derivative of mod()",
+            flatModel="
+fclass Differentiation.Expressions.Mod
+ Real x = time;
+ Real y = 2 * time;
+ Real z = der(x) .- floor(x ./ y) .* der(y);
+end Differentiation.Expressions.Mod;
+")})));
+        end Mod;
+        
+        model Rem
+            Real x = time;
+            Real y = 2 * time;
+            Real z = der(rem(x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Rem",
+            description="Derivative of rem()",
+            flatModel="
+fclass Differentiation.Expressions.Rem
+ Real x = time;
+ Real y = 2 * time;
+ Real z = der(x) .- div(x, y) .* der(y);
+end Differentiation.Expressions.Rem;
+")})));
+        end Rem;
+        
+        model Ceil
+            Real x;
+            Real y;
+        equation
+            der(x) + der(y) = 1;
+            x + ceil(y) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Expressions_Ceil",
+            description="Derivative of ceil()",
+            flatModel="
+fclass Differentiation.Expressions.Ceil
+ Real x;
+ Real y;
+ discrete Real temp_1;
+ Real _der_x;
+initial equation 
+ pre(temp_1) = 0.0;
+ y = 0.0;
+equation
+ _der_x + der(y) = 1;
+ x + temp_1 = 1;
+ temp_1 = if y <= pre(temp_1) - 1 or y > pre(temp_1) or initial() then ceil(y) else pre(temp_1);
+ _der_x = 0;
+end Differentiation.Expressions.Ceil;
+")})));
+        end Ceil;
+        
+        model Floor
+            Real x;
+            Real y;
+        equation
+            der(x) + der(y) = 1;
+            x + floor(y) = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Expressions_Floor",
+            description="Derivative of floor()",
+            flatModel="
+fclass Differentiation.Expressions.Floor
+ Real x;
+ Real y;
+ discrete Real temp_1;
+ Real _der_x;
+initial equation 
+ pre(temp_1) = 0.0;
+ y = 0.0;
+equation
+ _der_x + der(y) = 1;
+ x + temp_1 = 1;
+ temp_1 = if y < pre(temp_1) or y >= pre(temp_1) + 1 or initial() then floor(y) else pre(temp_1);
+ _der_x = 0;
+end Differentiation.Expressions.Floor;
+")})));
+        end Floor;
+        
+        model Cat
+            Real x[2] = { 1,2 } * time;
+            Real y[2] = { 3,4 } * time;
+            Real z[4] = der(cat(1, x, y));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Cat",
+            description="Derivative of cat()",
+            flatModel="
+fclass Differentiation.Expressions.Cat
+ Real x[2] = {1, 2} * time;
+ Real y[2] = {3, 4} * time;
+ Real z[4] = cat(1, der(x[1:2]), der(y[1:2]));
+end Differentiation.Expressions.Cat;
+")})));
+        end Cat;
+        
+        model ShortMatrix
+            Real x[2] = { 1,2 } * time;
+            Real y[2] = { 3,4 } * time;
+            Real z[2,2] = der([x[1], x[2]; y[1], y[2]]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_ShortMatrix",
+            description="Derivative of short-hand matrix constructor",
+            flatModel="
+fclass Differentiation.Expressions.ShortMatrix
+ Real x[2] = {1, 2} * time;
+ Real y[2] = {3, 4} * time;
+ Real z[2,2] = [der(x[1]), der(x[2]); der(y[1]), der(y[2])];
+end Differentiation.Expressions.ShortMatrix;
+")})));
+        end ShortMatrix;
+        
+        model Fill
+            Real x = time;
+            Real z[3] = der(fill(sin(x), 3));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Fill",
+            description="Derivative of fill()",
+            flatModel="
+fclass Differentiation.Expressions.Fill
+ Real x = time;
+ Real z[3] = fill(cos(x) * der(x), 3);
+end Differentiation.Expressions.Fill;
+")})));
+        end Fill;
+        
+        model Linspace
+            Real x = time;
+            Real y = 2 * time;
+            Real z[3] = der(linspace(x, y, 3));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Linspace",
+            description="Derivative of linspace()",
+            flatModel="
+fclass Differentiation.Expressions.Linspace
+ Real x = time;
+ Real y = 2 * time;
+ Real z[3] = linspace(der(x), der(y), 3);
+end Differentiation.Expressions.Linspace;
+")})));
+        end Linspace;
+        
+        model SemiLinear
+            Real x = 1 - time;
+            Real y = 2 * time;
+            Real z = - y + 1;
+            Real w = der(semiLinear(x, y, z));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_SemiLinear",
+            description="Derivative of semiLinear()",
+            flatModel="
+fclass Differentiation.Expressions.SemiLinear
+ Real x = 1 - time;
+ Real y = 2 * time;
+ Real z = - y + 1;
+ Real w = if x >= 0.0 then der(y) .* x .+ y .* der(x) else der(z) .* x .+ z .* der(x);
+end Differentiation.Expressions.SemiLinear;
+")})));
+        end SemiLinear;
+        
+        model Diagonal
+            Real x[2] = { 1,2 } * time;
+            Real y[2,2] = der(diagonal(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Diagonal",
+            description="Derivative of diagonal()",
+            flatModel="
+fclass Differentiation.Expressions.Diagonal
+ Real x[2] = {1, 2} * time;
+ Real y[2,2] = diagonal(der(x[1:2]));
+end Differentiation.Expressions.Diagonal;
+")})));
+        end Diagonal;
+        
+        model Scalar
+            Real x[1,1,1] = {{{ time }}};
+            Real y = der(scalar(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Scalar",
+            description="Derivative of scalar()",
+            flatModel="
+fclass Differentiation.Expressions.Scalar
+ Real x[1,1,1] = {{{time}}};
+ Real y = scalar(der(x[1:1,1:1,1:1]));
+end Differentiation.Expressions.Scalar;
+")})));
+        end Scalar;
+        
+        model Vector
+            Real x[1,1,1] = {{{ time }}};
+            Real y[1] = der(vector(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Vector",
+            description="Derivative of vector()",
+            flatModel="
+fclass Differentiation.Expressions.Vector
+ Real x[1,1,1] = {{{time}}};
+ Real y[1] = vector(der(x[1:1,1:1,1:1]));
+end Differentiation.Expressions.Vector;
+")})));
+        end Vector;
+        
+        model Matrix
+            Real x[1,1,1] = {{{ time }}};
+            Real y[1,1] = der(matrix(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Matrix",
+            description="Derivative of matrix()",
+            flatModel="
+fclass Differentiation.Expressions.Matrix
+ Real x[1,1,1] = {{{time}}};
+ Real y[1,1] = matrix(der(x[1:1,1:1,1:1]));
+end Differentiation.Expressions.Matrix;
+")})));
+        end Matrix;
+        
+        model Product
+            Real x[3] = { 1,2,3 } * time;
+            Real y = der(product(x));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Product",
+            description="Derivative of product()",
+            flatModel="
+fclass Differentiation.Expressions.Product
+ Real x[3] = {1, 2, 3} * time;
+ Real y = der(x[1]) .* x[2] .* x[3] .+ x[1] .* der(x[2]) .* x[3] .+ x[1] .* x[2] .* der(x[3]);
+end Differentiation.Expressions.Product;
+")})));
+        end Product;
+        
+        model Sum
+            Real x[3] = { 1,2,3 } * time;
+            Real y = der(sum(x));
+        end Sum;
+        
+        model ActualStream
+            connector C
+                Real p;
+                flow Real f;
+                stream Real s;
+            end C;
+            
+            model A
+                C c;
+                Real x = actualStream(c.s);
+                Real dx = der(actualStream(c.s));
+            equation
+                der(c.s) = time / 2;
+            end A;
+            
+            A a1(c(f = time - 1, p = time, s(start = -1)));
+            A a2(c(s(start = 1)));
+        equation
+            connect(a1.c, a2.c);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Expressions_ActualStream",
+            description="Derivative of actualStream()",
+            flatModel="
+fclass Differentiation.Expressions.ActualStream
+ Real a1.c.p;
+ Real a1.c.f;
+ Real a1.c.s(start = -1);
+ Real a1.x;
+ Real a1.dx;
+ Real a2.c.s(start = 1);
+ Real a2.x;
+ Real a2.dx;
+initial equation 
+ a1.c.s = -1;
+ a2.c.s = 1;
+equation
+ der(a1.c.s) = time / 2;
+ der(a2.c.s) = time / 2;
+ a1.c.p = time;
+ a1.c.f = time - 1;
+ a1.x = if a1.c.f > 0.0 then a2.c.s else a1.c.s;
+ a1.dx = if a1.c.f > 0.0 then der(a2.c.s) else der(a1.c.s);
+ a2.x = if - a1.c.f > 0.0 then a1.c.s else a2.c.s;
+ a2.dx = if - a1.c.f > 0.0 then der(a1.c.s) else der(a2.c.s);
+end Differentiation.Expressions.ActualStream;
+")})));
+        end ActualStream;
+        
+        model Iter
+            Real x[3] = { 1,2,3 } * time;
+            Real y[3] = der({ x[i] for i in 3:-1:1 });
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Iter",
+            description="Derivative of iteration expression",
+            flatModel="
+fclass Differentiation.Expressions.Iter
+ Real x[3] = {1, 2, 3} * time;
+ Real y[3] = {der(x[i]) for i in 3:-1:1};
+end Differentiation.Expressions.Iter;
+")})));
+        end Iter;
+        
+        model Range
+            Real x[3] = der(1.0:3.0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Range",
+            description="Derivative of range expression",
+            flatModel="
+fclass Differentiation.Expressions.Range
+ Real x[3] = zeros(3);
+end Differentiation.Expressions.Range;
+")})));
+        end Range;
+        
+        model Literal
+            Real x = der(1.0);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Expressions_Literal",
+            description="Derivative of literal",
+            flatModel="
+fclass Differentiation.Expressions.Literal
+ Real x = 0.0;
+end Differentiation.Expressions.Literal;
+")})));
+        end Literal;
     end Expressions;
 
     model ComponentArray

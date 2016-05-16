@@ -1273,11 +1273,16 @@ FEndExp : FAbstractScalarExp;
  * Base class for all function calls and function call-like operators.
  */
 abstract FAbstractFunctionCall : FAbstractArrayExp;
- 
+  
 /**
  * Generic function call expression.
  */
-FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
+abstract CommonFunctionCall : FAbstractFunctionCall;
+ 
+/**
+ * Generic function call expression in flat tree.
+ */
+FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
  
 /**
  * Partial function call expression in flat tree.
@@ -1292,7 +1297,7 @@ FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>
 /**
  * Generic function call expression in instance trees.
  */
-InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+InstFunctionCall : CommonFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
 
 /**
  * Partial function call expression in instance trees.
@@ -1727,10 +1732,10 @@ abstract FStreamBuiltIn : FVectUnaryBuiltIn;
 FInStream : FStreamBuiltIn;
 
 /**
- * Derivative of inStream(). Temporary expression created by der(inStream()) rewrites
- * and removed after symbolic manipulations.
+ * Derivative of inStream() or actualStream(). Temporary expression created by 
+ * der(inStream()) and der(actualStream()) rewrites and removed after symbolic manipulations.
  */
-FDerInStream : FInStream;
+FDerStream : FInStream;
 
 /**
  * ActualStream built-in function.

@@ -98,19 +98,18 @@ aspect Connections {
         return cs.expandInStreamExp(name);
     }
 
-    protected FExp FDerInStream.expandInStreamExp() {
+    protected FExp FDerStream.expandInStreamExp() {
         // Note: this handles both enableStreamsRewrite and enableExpandedInStreamRewrite
-        FExp arg = getFExp();
-        if (arg.needsLaterInStreamRewrite()) {
-            return new FDerInStream(arg.treeCopy());
+        if (getFExp().needsLaterInStreamRewrite()) {
+            return new FDerStream(getFExp().treeCopy());
         } else {
-            return arg.diff(FExp.TIME);
+            return getFExp().diff(FExp.TIME);
         }
     }
 
     syn boolean FExp.needsLaterInStreamRewrite() = false;
     eq FExInStream.needsLaterInStreamRewrite()   = true;
-    eq FDerInStream.needsLaterInStreamRewrite()  = true;
+    eq FDerStream.needsLaterInStreamRewrite()    = true;
 
 
     public void ASTNode.enableExpandedInStreamRewrite() {
@@ -124,7 +123,7 @@ aspect Connections {
         is$Final = false;
     }
 
-    public void FDerInStream.enableExpandedInStreamRewrite() {
+    public void FDerStream.enableExpandedInStreamRewrite() {
         super.enableExpandedInStreamRewrite();
         rewriteStreams = true;
         is$Final = false;
