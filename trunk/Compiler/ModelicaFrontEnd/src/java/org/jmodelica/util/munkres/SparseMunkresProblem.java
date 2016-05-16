@@ -8,7 +8,7 @@ import java.util.Collection;
  * based on the description at:
  * http://csclab.murraystate.edu/bob.pilgrim/445/munkres.html
  */
-public class SparseMunkresProblem<T extends SparseMunkresCost<T>> extends MunkresProblem<T> {
+public class SparseMunkresProblem<T extends MunkresCost<T>> extends MunkresProblem<T> {
     private final SparseIndex<T> rowIndex;
     private final SparseIndex<T> columnIndex;
     private Collection<Incidence<T>> incidences;
@@ -24,11 +24,11 @@ public class SparseMunkresProblem<T extends SparseMunkresCost<T>> extends Munkre
         columnIndex = new SparseIndex<T>(SparseIndex.Type.COLUMN, incidences);
     }
 
-    private static <T extends SparseMunkresCost<T>> Collection<Incidence<T>> constructWeights(T[][] initialCost) {
+    private static <T extends MunkresCost<T>> Collection<Incidence<T>> constructWeights(T[][] initialCost) {
         Collection<Incidence<T>> incidences = new ArrayList<Incidence<T>>();
         for (int row = 0; row < initialCost.length; row++) {
             for (int col = 0; col < initialCost[row].length; col++) {
-                if (!initialCost[row][col].isUnmatched()) {
+                if (initialCost[row][col] != null) {
                     incidences.add(new Incidence<T>(row, col, initialCost[row][col]));
                 }
             }

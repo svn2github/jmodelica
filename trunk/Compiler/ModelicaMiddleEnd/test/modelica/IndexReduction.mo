@@ -3000,6 +3000,71 @@ Error in flattened model:
 ")})));
 end MaxNumFExpError1;
 
+model NoMunkresSolutionError1
+    function F
+        input Real[3] x;
+        input Real dummy;
+        output Real res;
+    algorithm
+        res := x[1];
+    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x)=F_der);
+    end F;
+    function F_der
+        input Real[3] x;
+        input Real dummy;
+        input Real dummy_der;
+        output Real res;
+    algorithm
+        res := x[2];
+    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x,order=2)=F_der_der);
+    end F_der;
+    function F_der_der
+        input Real[3] x;
+        input Real dummy;
+        input Real dummy_der;
+        input Real dummy_der_der;
+        output Real res;
+    algorithm
+        res := x[3];
+    annotation(InlineAfterIndexReduction=true);
+    end F_der_der;
+    
+    Real p1,p2,p3;
+    Real v1,v2,v3;
+    Real a1,a2,a3;
+equation
+    der(p1) = v1;
+    der(v1) = a1;
+    der(p2) = v2;
+    der(v2) = a2;
+    der(p3) = v3;
+    der(v3) = a3;
+    p1 = F({p3,v3,a3},time);
+    p2 = F({p3,v3,a3},time);
+    v2 * v1 = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NoMunkresSolutionError1",
+            description="Test error check that prevents runaway index reduction",
+            errorMessage="
+2 errors found:
+
+Error in flattened model:
+  Index reduction failed: Munkres algorithm was unable to find a matching; Unable to find any uncovered incidence
+
+Error in flattened model:
+  The system is structurally singular. The following varible(s) could not be matched to any equation:
+     a1
+     a2
+
+  The following equation(s) could not be matched to any variable:
+    p2 = IndexReduction.NoMunkresSolutionError1.F({p3, der(p3), der(v3)}, time)
+    der(p2) * der(p1) = 1
+
+")})));
+end NoMunkresSolutionError1;
+
 model PartiallyPropagatedComposite1
     function f
         input Real x1;

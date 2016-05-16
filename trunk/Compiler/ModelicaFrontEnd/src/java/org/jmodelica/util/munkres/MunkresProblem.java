@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.jmodelica.util.exceptions.MunkresException;
+
 /**
  * An abstract class with the implementation of the Munkres (Hungarian)
  * algorithm: based on the description at:
@@ -135,6 +137,9 @@ public abstract class MunkresProblem<T extends MunkresCost<T>> {
                 if (row_min == null || incidence.getCost().compareTo(row_min) < 0) {
                     row_min = incidence.getCost();
                 }
+            }
+            if (row_min == null) {
+                throw new MunkresException("No incidences found in row");
             }
             row_min = row_min.copy();
             for (Incidence<T> incidence : row) {
@@ -255,6 +260,9 @@ public abstract class MunkresProblem<T extends MunkresCost<T>> {
                     minValue = incidence.getCost();
                 }
             }
+        }
+        if (minValue == null) {
+            throw new MunkresException("Unable to find any uncovered incidence");
         }
         return minValue.copy();
     }
