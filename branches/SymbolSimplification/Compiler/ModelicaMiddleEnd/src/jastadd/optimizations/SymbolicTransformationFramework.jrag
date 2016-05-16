@@ -139,7 +139,6 @@ aspect SymbolicTransformationFramework {
         
         private void changesPerformed() {
             change();
-            fclass.updateLists(workData);
         }
         
         /**
@@ -390,7 +389,6 @@ aspect SymbolicTransformationFramework {
             public void removeEquation(FAbstractEquation equation) {
                 removedEquations.add(equation);
                 worklist.remove(equation);
-                equation.markForRemoval();
                 log.info("Equation <%s> marked for removal.", equation);
             }
             
