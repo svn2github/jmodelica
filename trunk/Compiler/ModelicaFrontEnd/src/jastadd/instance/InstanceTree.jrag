@@ -1774,6 +1774,7 @@ aspect InstanceAST_API {
 
     syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
     syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getClassDecl();
+    syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getClassDecl();
     syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
     syn String InstNode.qualifiedName();
