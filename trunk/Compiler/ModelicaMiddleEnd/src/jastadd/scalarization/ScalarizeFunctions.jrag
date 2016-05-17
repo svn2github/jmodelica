@@ -71,6 +71,7 @@ aspect FunctionScalarization {
     eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
+    eq FIfExp.extractTemp()        = super.extractTemp() || (type().isRecord() && wantsRecordCon());
     
     syn boolean FExp.extractAsUnknown() = size().isUnknown();
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
@@ -229,15 +230,16 @@ aspect FunctionScalarization {
      * @param indexMap Maps id uses to replacing expressions.
      */
     public void FExp.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
-        /* Assumes we are in function */
-        addFunctionTempVar(clauses, vars, indexMap, type());
+        boolean function = inFunction();
+        String name = tempVarName();
+        FQName fqn = function ? new FQNameFull(name) : new FQNameString(name);
+        addTempVar(clauses, vars, indexMap, type(), !function, name);
         Array arr = getArray();
         for (Index i : indices()) {
-            FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
-            name.scalarized = true;
-            clauses.add(new FAssignStmt(new FIdUseExp(name), arr.get(i).scalarize(indexMap)));
+            type().scalarRecordClauses(clauses, !function, new FQNameEmpty(), indexMap,
+                    new FIdTempExp(new FIdUse(fqn.copyAndAddFas(i.createFArraySubscripts()))), arr.get(i));
         }
-        useTempVar = true;
+        useTempVar = function;
     }
     
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
