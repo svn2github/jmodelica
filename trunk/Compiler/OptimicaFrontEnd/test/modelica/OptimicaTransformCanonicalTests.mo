@@ -731,7 +731,7 @@ optimization DepParTest5 (
 			description="Test update of objective for free dependent parameters.",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.DepParTest5(objectiveIntegrand = x ^ 2 + y ^ 2,objective = x ^ 2 + y(startTime) ^ 2)
- parameter Real x(free = true,start = 5);
+ free parameter Real x(free = true,start = 5);
  Real y;
  parameter Real startTime = 0.0 /* 0.0 */;
  parameter Real finalTime = 1.0 /* 1.0 */;
@@ -751,7 +751,7 @@ optimization VariabilityPropagation1
 			description="Test so that variability propagation of free parameters is prevented",
 			flatModel="
 optimization OptimicaTransformCanonicalTests.VariabilityPropagation1
- parameter Real a(free = true);
+ free parameter Real a(free = true);
  Real b;
  parameter Real startTime = 0.0 /* 0.0 */;
  parameter Real finalTime = 1.0 /* 1.0 */;

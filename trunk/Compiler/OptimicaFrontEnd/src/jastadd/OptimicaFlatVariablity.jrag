@@ -22,29 +22,23 @@
 aspect OptimicaVariability {
 
 	syn boolean FTypePrefixVariability.timedVariability() = false;
-	eq FTimed.timedVariability() = true;	
+	eq FTimed.timedVariability() = true;
+	
 	syn boolean FExp.isTimedExp() = variability().timedVariability();
 	
-	eq FTimedVariable.variability() = fTimed();
+	eq FTimedVariable.variability()    = fTimed();
 	eq InstTimedVariable.variability() = fTimed();
-	eq FStartTimeExp.variability() = fParameter();
-	eq FFinalTimeExp.variability() = fParameter();
+	eq FStartTimeExp.variability()     = fParameter();
+	eq FFinalTimeExp.variability()     = fParameter();
 	
 	public static final FTimed FTimed.instance = new FTimed();	
-
-	public static FTimed ASTNode.fTimed() {
-		return FTimed.instance;
-	}
+	public static FTimed ASTNode.fTimed() { return FTimed.instance; }
 		
 	public static final FOptParameter FOptParameter.instance = new FOptParameter();	
-	
-	public static FOptParameter ASTNode.fOptParameter() {
-		return FOptParameter.instance;
-	}
+	public static FOptParameter ASTNode.fOptParameter() { return FOptParameter.instance; }
 	
 	syn boolean FTypePrefixVariability.optParameterVariability() = false;
 	eq FOptParameter.optParameterVariability() = true;	
-	eq FOptParameter.parameterVariability()    = true;	
 	syn boolean FExp.isOptParameterExp() = variability().optParameterVariability();
 	
 	protected int FTimed.variabilityLevel()        { return VARIABILITY_LEVEL; }
@@ -60,53 +54,33 @@ aspect OptimicaVariability {
     syn boolean FVariable.isOptParameter() = variability().optParameterVariability();
 	
 	// TODO: Change to be more in line with Variability and more extensible
-	refine Variability eq FVariable.variability() {
-		FTypePrefixVariability var = Variability.FVariable.variability();
-		return (var.parameterVariability() && freeAttribute()) ? fOptParameter() : var;
-	}
-	
-	refine Variability eq FExp.isParameterExp() = 
-		variability().parameterVariability() || variability().optParameterVariability(); 
-	
-   	eq FTimed.toString() = "timed";
-   	eq FOptParameter.toString() = "opt_parameter";
-   	eq FTimed.toStringLiteral() = "timed";
-   	eq FOptParameter.toStringLiteral() = "opt_parameter";
-	
-   	// TODO: Perhaps FTypePrefixVariability.lessOrEqual() should be used here?
-	syn boolean FConstraint.isTimed();
-	eq FRelationConstraint.isTimed() = 
-		(getRight().isTimedExp() || getRight().isParameterExp() || getRight().isConstantExp()) & 
-		(getLeft().isTimedExp() || getLeft().isParameterExp() || getLeft().isConstantExp());
-	eq FForClauseC.isTimed() {
-		for (FConstraint c : getFConstraints())
-			if (!c.isTimed())
-				return false;
-		return true;
-	}
-	eq InstForClauseC.isTimed() {
-		for (FConstraint c : getFConstraints())
-			if (!c.isTimed())
-				return false;
-		return true;
-	}
-
-	syn boolean FConstraint.isParameter();
-	eq FRelationConstraint.isParameter() = 
-		(getRight().isParameterExp() || getRight().isConstantExp()) & 
-		(getLeft().isParameterExp() || getLeft().isConstantExp());
-	eq InstForClauseC.isParameter() {
-		for (FConstraint c : getFConstraints())
-			if (!c.isParameter())
-				return false;
-		return true;
-	}
-	eq FForClauseC.isParameter() {
-		for (FConstraint c : getFConstraints())
-			if (!c.isParameter())
-				return false;
-		return true;
-	}
-
-	
+    refine InstVariability eq InstAssignable.calcVariability() {
+        FTypePrefixVariability v = refined();
+        if (v.parameterVariability() && freeAttribute()) {
+            v = fOptParameter();
+        }
+        return v;
+    }
+    
+    eq FTimed.toString()               = "timed ";
+    eq FOptParameter.toString()        = "free parameter ";
+    
+    eq FTimed.toStringLiteral()        = "timed";
+    eq FOptParameter.toStringLiteral() = "free parameter";
+    
+    syn boolean FConstraint.isTimed()     = variability().lessOrEqual(fTimed());
+    syn boolean FConstraint.isParameter() = variability().parameterOrLess();
+    
+    syn FTypePrefixVariability FConstraint.variability();
+    eq FRelationConstraint.variability() = getLeft().variability().combine(getRight().variability());
+    eq FForClauseC.variability()    = combineFConstraintsListVariability(getFConstraints());
+    eq InstForClauseC.variability() = combineFConstraintsListVariability(getFConstraints());
+    
+    syn FTypePrefixVariability FConstraint.combineFConstraintsListVariability(List<FConstraint> l) {
+        FTypePrefixVariability res = fConstant();
+        for (FConstraint c : l) {
+            res = res.combine(c.variability());
+        }
+        return res;
+    }
 }
