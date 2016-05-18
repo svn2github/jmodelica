@@ -464,7 +464,7 @@ optimization OptimicaTransformCanonicalTests.MinTimeTest1(objective = finalTime,
  Real dx(start = 0,fixed = true);
  input Real u;
  parameter Real startTime = 0.0 /* 0.0 */;
- parameter Real finalTime(free = true,start = 1,initialGuess = 3);
+ free parameter Real finalTime(free = true,start = 1,initialGuess = 3);
  Real der(x);
  Real der(dx);
 initial equation 
@@ -475,7 +475,7 @@ equation
  der(dx) / (finalTime - startTime) = u;
 constraint 
  u <= 1;
- u >= - 1;
+ u >= -1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest1;
@@ -504,7 +504,7 @@ optimization OptimicaTransformCanonicalTests.MinTimeTest2(objective = - startTim
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
  input Real u;
- parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
+ free parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
  parameter Real finalTime = 1.0 /* 1.0 */;
  Real der(x);
  Real der(dx);
@@ -516,7 +516,7 @@ equation
  der(dx) / (finalTime - startTime) = u;
 constraint 
  u <= 1;
- u >= - 1;
+ u >= -1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest2;
@@ -545,8 +545,8 @@ optimization OptimicaTransformCanonicalTests.MinTimeTest3(objective = finalTime,
  Real x(start = 1,fixed = true);
  Real dx(start = 0,fixed = true);
  input Real u;
- parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
- parameter Real finalTime(free = true,initialGuess = 2,start = 2);
+ free parameter Real startTime(free = true,initialGuess = - 1,start = - 1);
+ free parameter Real finalTime(free = true,initialGuess = 2,start = 2);
  Real der(x);
  Real der(dx);
 initial equation 
@@ -556,9 +556,9 @@ equation
  der(x) / (finalTime - startTime) = dx;
  der(dx) / (finalTime - startTime) = u;
 constraint 
- startTime = - 1;
+ startTime = -1;
  u <= 1;
- u >= - 1;
+ u >= -1;
  x(finalTime) = 0;
  dx(finalTime) = 0;
 end OptimicaTransformCanonicalTests.MinTimeTest3;

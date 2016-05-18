@@ -131,7 +131,14 @@ aspect OptimicaTransformCanonical {
 	
 	private FRealVariable FOptClass.addExperimentTimeParameter(
 			String name, FAttribute attr, double defaultValue) {
-		FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), fParameter(), new FQNameString(name));
+        FTypePrefixVariability v = fParameter();
+        if (attr != null) {
+            FAttribute freeAttr = findMatching(attr.getFAttributes(), FAttribute.FREE);
+            if (freeAttr != null && freeAttr.hasValue() && freeAttr.getValue().ceval().booleanValue()) {
+                v = fOptParameter();
+            }
+        }
+        FRealVariable fv = new FRealVariable(new FPublicVisibilityType(), v, new FQNameString(name));
 		if (attr != null) 
 			fv.setFAttributeList(attr.getFAttributeList().fullCopy());
 		if (attr != null && attr.hasValue())
