@@ -19,6 +19,8 @@ aspect SymbolicTransformationFramework {
             new symbolicTransformationFramework(this);
             
         // Needed for debugging.
+        protected static HashMap<String, Integer> attempts =
+            new HashMap<String, Integer>();
         protected static HashMap<String, Integer> modifications =
             new HashMap<String, Integer>();
 
@@ -104,6 +106,7 @@ aspect SymbolicTransformationFramework {
             while (!workData.emptyWorklist()) {
                 FAbstractEquation equation = workData.pollWorklist();
                 for (SymbolicTransformationAlgorithm algorithm : activeAlgorithms) {
+                    algorithmWasTried(algorithm);
                     log.info("\twith %s.", algorithm.name());
                     if (algorithm.run(equation)) {
                         // Debug.
@@ -519,6 +522,7 @@ aspect SymbolicTransformationFramework {
      *  Methods for debugging and bench-marking.
      */
     public class symbolicTransformationFramework {
+        private static HashMap<String, Integer> attempts = FClass.attempts;
         private static HashMap<String, Integer> modifications = FClass.modifications;
         private static boolean DEBUG = false;
         private static boolean OLD_DEBUG = DEBUG;
@@ -531,6 +535,14 @@ aspect SymbolicTransformationFramework {
         
         public void restoreDebugging() {
             DEBUG = OLD_DEBUG;
+        }
+        
+        private void algorithmWasTried(SymbolicTransformationAlgorithm algorithm) {
+            if (!DEBUG) {
+                return;
+            }
+            String name = algorithm.name();
+            attempts.put(name, algorithmAttempts(name) + 1);
         }
         
         private void algorithmPerformedChanges(SymbolicTransformationAlgorithm algorithm) {
@@ -560,9 +572,9 @@ aspect SymbolicTransformationFramework {
             for (String algorithm : modifications.keySet()) {
                 String name = algorithm;
                 if (name == "Variability_Propagation") {
-                    sb.append("\t"+algorithmChanges(name));
+                    sb.append("\t" + algorithmChanges(name) + "/" + algorithmAttempts(name));
                 } else if (name == "Alias_Elimination") {
-                    sb.append("\t"+algorithmChanges(name));
+                    sb.append("\t" + algorithmChanges(name) + "/" + algorithmAttempts(name));
                 }
             }
             sb.append("\n");
@@ -604,6 +616,14 @@ aspect SymbolicTransformationFramework {
             } catch (IOException e) {
                 System.out.println("Error writing to file <" + resultFile + ">.");
             }
+        }
+        
+        private int algorithmAttempts(String algorithm) {
+            int res = 0;
+            if (attempts.containsKey(algorithm)) {
+                res = attempts.get(algorithm);
+            }
+            return res;
         }
         
         private int algorithmChanges(String algorithm) {
