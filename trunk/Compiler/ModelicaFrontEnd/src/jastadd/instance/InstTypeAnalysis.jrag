@@ -623,7 +623,6 @@ aspect InstModificationType {
      */
     syn boolean InstModification.isFinal() = inheritsFinal();
     eq InstArgument.isFinal()              = getFinal() || inheritsFinal();
-    eq InstDefaultRecordModification.isFinal() = getArg().getBoundInput().myInstValueMod().isFinal();
     
     /**
      * Is this modification within another modification or component that is declared final?

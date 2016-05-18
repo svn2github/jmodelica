@@ -1365,7 +1365,7 @@ model RecordBinding23
             flatModel="
 fclass RecordTests.RecordBinding23
  parameter Real r1.x = 1 /* 1 */;
- final parameter Real r1.y = 1 /* 1 */;
+ parameter Real r1.y = 1 /* 1 */;
 end RecordTests.RecordBinding23;
 ")})));
 end RecordBinding23;
@@ -1609,15 +1609,15 @@ model UnmodifiableComponent1
 fclass RecordTests.UnmodifiableComponent1
  constant Real rec.x1 = -1;
  constant Real rec.y = 2;
- final parameter Real rec.z = 3 /* 3 */;
+ parameter Real rec.z = 3 /* 3 */;
  constant Real rec.x2 = 4;
  constant Real recs[1].x1 = 1;
  constant Real recs[1].y = 2;
- final parameter Real recs[1].z = 3 /* 3 */;
+ parameter Real recs[1].z = 3 /* 3 */;
  constant Real recs[1].x2 = 4;
  constant Real recs[2].x1 = 1;
  constant Real recs[2].y = 2;
- final parameter Real recs[2].z = 3 /* 3 */;
+ parameter Real recs[2].z = 3 /* 3 */;
  constant Real recs[2].x2 = 4;
 end RecordTests.UnmodifiableComponent1;
 ")})));
@@ -1682,7 +1682,7 @@ model UnmodifiableComponent4
             description="Record constructor for record of unmodifiable components",
             flatModel="
 fclass RecordTests.UnmodifiableComponent4
- final parameter Real r.p1 = 1 /* 1 */;
+ parameter Real r.p1 = 1 /* 1 */;
  parameter Real r.p2 = 0.0 /* 0.0 */;
  Real r.x;
 equation
