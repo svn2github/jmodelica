@@ -470,7 +470,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
         n,
         b->options,
         b);
-
+        
+    b->block_solver->n_sr = n_sr;
 
     switch(solver) {
     case JMI_SIMPLE_NEWTON_SOLVER:

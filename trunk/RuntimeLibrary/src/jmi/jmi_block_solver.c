@@ -72,6 +72,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->label = options->label;
 
     block_solver->n = n;                         /**< \brief The number of iteration variables */
+    block_solver->n_sr = 0; /**< \brief The number of solved variables */
     block_solver->x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));                 /**< \brief Work vector for the real iteration variables */
     block_solver->last_accepted_x = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
 
@@ -81,6 +82,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->scale_update_time = -1.0;
 	if(n>0) {
 		block_solver->J = NewDenseMat(n ,n);
+        SetToZero(block_solver->J);
 		block_solver->J_scale = NewDenseMat(n ,n);
 	}
 

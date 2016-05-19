@@ -39,6 +39,7 @@ struct jmi_block_solver_t {
     N_Vector f_scale;          /**< \brief Work vector for scaling of f */
     realtype scale_update_time; /**< \brief The last time when f scale was updated */
     int n;                         /**< \brief The number of iteration variables */
+    int n_sr;                         /**< \brief The number of solved variables */
     jmi_real_t* x;                 /**< \brief Work vector for the real iteration variables */
     jmi_real_t* last_accepted_x;   /**< \brief Work vector for the real iteration variables holding the last accepted vales by the integrator */
     DlsMat J;                       /**< \brief The Jacobian matrix  */
