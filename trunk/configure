@@ -640,6 +640,8 @@ COMPILE_WITH_CPPAD_FALSE
 COMPILE_WITH_CPPAD_TRUE
 _JAVA_HOME_
 MINGW_HOME
+NUMPY_NO_MSVCR_FALSE
+NUMPY_NO_MSVCR_TRUE
 COPY_PTHREADS_LIB_FALSE
 COPY_PTHREADS_LIB_TRUE
 WITH_MINGW_FALSE
@@ -19262,6 +19264,14 @@ else
   COPY_PTHREADS_LIB_FALSE=
 fi
 
+ if test "$with_mingw" != no -a "$with_tdm" = no; then
+  NUMPY_NO_MSVCR_TRUE=
+  NUMPY_NO_MSVCR_FALSE='#'
+else
+  NUMPY_NO_MSVCR_TRUE='#'
+  NUMPY_NO_MSVCR_FALSE=
+fi
+
 
 
 # Set output variables to be exported to the Makefiles
@@ -19962,6 +19972,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COPY_PTHREADS_LIB_TRUE}" && test -z "${COPY_PTHREADS_LIB_FALSE}"; then
   as_fn_error $? "conditional \"COPY_PTHREADS_LIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NUMPY_NO_MSVCR_TRUE}" && test -z "${NUMPY_NO_MSVCR_FALSE}"; then
+  as_fn_error $? "conditional \"NUMPY_NO_MSVCR\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_WITH_CPPAD_TRUE}" && test -z "${COMPILE_WITH_CPPAD_FALSE}"; then
