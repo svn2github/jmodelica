@@ -1278,6 +1278,7 @@ aspect Flattening {
 	/**
 	 * Retrieve the part of the binding expression that applies to this InstAssignable.
 	 */
+    syn FExp InstComponentDecl.getBindingFExp() = null;
 	syn lazy FExp InstAssignable.getBindingFExp() {
 		//log.debug("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
 		if (hasInstValueMod()) {
