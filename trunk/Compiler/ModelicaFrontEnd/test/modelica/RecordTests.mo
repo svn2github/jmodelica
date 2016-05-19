@@ -4869,50 +4869,6 @@ end RecordTests.RecordScalarize46;
 ")})));
 end RecordScalarize46;
 
-model RecordScalarize47
-    record R
-        Real x;
-    end R;
-    
-    function f
-        input R x;
-        output Real y;
-    algorithm
-        y := x.x;
-    end f;
-    
-        function f2
-        input R[:] x;
-        output Real y;
-    algorithm
-        y := x[1].x;
-    end f2;
-    
-    parameter Boolean p = true;
-    R r1 = R(time);
-    R r2 = R(2 * time);
-    Real x = f(if p then r1 else r2);
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="RecordScalarize47",
-            description="",
-            eliminate_alias_variables=false,
-            flatModel="
-fclass RecordTests.RecordScalarize47
- parameter Boolean p = true /* true */;
- Real r1.x;
- Real r2.x;
- Real x;
- Real temp_1.x;
-equation
- r1.x = time;
- r2.x = 2 * time;
- temp_1.x = if p then r1.x else r2.x;
- x = temp_1.x;
-end RecordTests.RecordScalarize47;
-")})));
-end RecordScalarize47;
-
 model RecordFunc1
  record A
   Real x;
