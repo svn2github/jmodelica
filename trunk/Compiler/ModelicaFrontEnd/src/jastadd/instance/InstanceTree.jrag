@@ -1773,7 +1773,7 @@ aspect InstanceAST_API {
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
 
     syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
-    syn ShortClassDecl InstShortClassDecl.getShortClassDecl() = (ShortClassDecl)getClassDecl();
+    syn ShortClassDecl InstAbstractShortClassDecl.getShortClassDecl() = (ShortClassDecl)getClassDecl();
     syn FullClassDecl InstFullClassDecl.getFullClassDecl() = (FullClassDecl)getClassDecl();
     syn BuiltInClassDecl InstBuiltInClassDecl.getBuiltInClassDecl() = (BuiltInClassDecl)getClassDecl();
 
