@@ -19255,7 +19255,7 @@ else
   COPY_PTHREADS_LIB_FALSE=
 fi
 
- if test "$with_mingw" != no -a "$with_tdm" = no; then
+ if test "$with_mingw" != no -a "$with_tdm" = yes; then
   NUMPY_NO_MSVCR_TRUE=
   NUMPY_NO_MSVCR_FALSE='#'
 else

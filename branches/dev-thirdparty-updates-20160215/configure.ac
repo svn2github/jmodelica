@@ -331,7 +331,7 @@ AS_IF([test "$with_mingw" != no],
       ])
 
 AM_CONDITIONAL([COPY_PTHREADS_LIB],[test "$with_mingw" != no -a "$with_tdm" = no])
-AM_CONDITIONAL([NUMPY_NO_MSVCR],[test "$with_mingw" != no -a "$with_tdm" = no])
+AM_CONDITIONAL([NUMPY_NO_MSVCR],[test "$with_mingw" != no -a "$with_tdm" = yes])
 
 
 # Set output variables to be exported to the Makefiles
