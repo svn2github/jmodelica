@@ -928,12 +928,6 @@ aspect CADCodeGen {
         String innerIndent = ASTNode.printer_CAD.indent(indent);
         
         str.format("%s/***** %s: %s *****/\n", indent, inInitial ? "Init block" : "Block", getLabel());
-        int i = 0;//TODO: This should be done in genVarDecls_CAD().
-        Set<ASTNode> visited = new HashSet<ASTNode>();
-        for (FAbstractEquation e : allLocalEquations()){
-            e.genTempForFunc_CAD(i, indent, str, visited);
-            i += e.numScalarEquations();
-        }
         
         genVarDecls_CAD(str, indent, null);
         
@@ -1308,51 +1302,7 @@ aspect CADCodeGen {
         str.print(" = ");
         str.print(name + ";\n");
     }
-
-    /**
-     * Used to generate temporary variables for use in a function call with several outputs. 
-     * Checks so that the temporary variables are declared only once by checking against a 
-     * set of already declared variables before declaration.
-     * 
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     * 
-     * @param i        sets base index for its FFunctionCallLeft to i
-     * @param indent   used to get a consistently formated c-code
-     * @param str      the c-code is written to this stream
-     * @param visited  contains a set with the already declared variables, only variables not in this set a
-     */
-    @Override
-    public void FFunctionCallEquation.genTempForFunc_CAD(int i, String indent, CodeStream str, Set<ASTNode> visited) {
-        if (!getCall().isIgnored()) {
-            for (FFunctionCallLeft l : getLefts()) {
-                if(visited == null || visited.add(l)){
-                    l.setBaseIndex(i);
-                    l.genTempVar_var_CAD(indent, str);
-                    l.genTempVar_der_CAD(indent,str);
-                }
-                
-            }
-        }
-        super.genTempForFunc_CAD(i, indent, str, visited);
-    }
-
-    /**
-     * Iterates over the ASTNode:s and generates temporary variable declarations for FFunctionCallEquations. 
-     * Checks so that the variables are declared only once. 
-     * 
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     * 
-     * @param i        sets base index for its FFunctionCallLeft to i
-     * @param indent   used to get a consistently formated c-code
-     * @param str      the c-code is written to this stream
-     * @param visited  contains a set with the already declared variables, only variables not in this set a
-     */
-    public void ASTNode.genTempForFunc_CAD(int i, String indent, CodeStream str, Set<ASTNode> visited) {
-        for(ASTNode n: this){
-            n.genTempForFunc_CAD(i,indent,str,visited);
-        }
-    }
-
+    
     /**
      * Generates variable declarations for all active variables. 
      * 
@@ -1397,37 +1347,7 @@ aspect CADCodeGen {
                 eb.genVarDecls_CAD(str, indent, null);
             }
         }
-        for (AbstractEquationBlock eb : getAllBlocks()){
-            if(eb.isSolvable()){
-                for (FAbstractEquation e : eb.allLocalEquations()){
-                    e.genTempForFunc_CAD(i, indent, str, null);
-                    i += e.numScalarEquations();
-                }
-            }
-        }
     }
-
-//  /**
-//   * Generates variable declarations and temporary variables for 
-//   * all blocks in this BLT. 
-//  * 
-//   * TODO: This method is a duplicate from c-codegen. Should be refactored!
-//   * 
-//   * @param str  the c-code is written to this stream
-//   * @param indent   used to get a consistently formated c-code
-//   */
-//  public void BLT.genVarDecls_CAD(CodeStream str, String indent) {
-//      int i = 0;
-//      for (AbstractEquationBlock eb : getAllBlocks()){
-//          eb.genVarDecls_CAD(str, indent, null);
-//      }
-//      for (AbstractEquationBlock eb : getAllBlocks()){
-//          for (FAbstractEquation e : eb.allEquations()){
-//              e.genTempForFunc_CAD(i, indent, str,null);
-//              i += e.numScalarEquations();
-//          }
-//      }
-//  }
 
     /**
      * Generates AD code for this block. If a block needs iteration then
@@ -1648,8 +1568,9 @@ aspect CADCodeGen {
      */
     @Override
     public void FFunctionCallLeft.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        if (hasFExp())
-            getFExp().genTempOutputDecls_CAD(p, str, indent);
+        if (hasFExp()) {
+            getFExp().genTempIODecls_CAD(p, str, indent, true);
+        }
     }
 
     /**
@@ -1754,8 +1675,9 @@ aspect CADCodeGen {
                 str.println(derName_CAD() + ";");
             }
         }
-        for (FExp arg : getArgs())
-            arg.genTempInputDecls_CAD(p, str, indent);
+        for (FExp arg : getArgs()) {
+            arg.genTempIODecls_CAD(p, str, indent, false);
+        }
     }
 
     @Override
@@ -1835,8 +1757,7 @@ aspect CADCodeGen {
     }
 
     /**
-     * Generates temporary output declarations. Other types suchs as arrays may override
-     * this empty implementation. 
+     * Generates temporary input or output declarations.
      * 
      * TODO: This method is a duplicate from c-codegen. Should be refactored!
      * 
@@ -1844,44 +1765,15 @@ aspect CADCodeGen {
      * @param str  the c-code is written to this stream 
      * @param indent  used to get a consistently formated c-code
      */
-    public void FExp.genTempOutputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite() && !keepAsArray()) {
+    public void FExp.genTempIODecls_CAD(CodePrinter p, CodeStream str, String indent, boolean output) {
+        if (!output) {
+            genVarDecls_CAD(p, str, indent);
+        }
+        if (replaceWithTemp(output)) {
             printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
         }
     }
-
-    /**
-     * Generates temporary output declarations.
-     * 
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     * 
-     * @param p  use CADPrettyPrinter for p.print to call prettyPrint_CAD
-     * @param str  the c-code is written to this stream 
-     * @param indent  used to get a consistently formated c-code
-     */
-    @Override
-    public void FArray.genTempOutputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
-    }
-
-
-    /**
-     * Generates temporary variables for records and arrays typically used
-     * in function calls. 
-     * 
-     * TODO: This method is a duplicate from c-codegen. Should be refactored!
-     * 
-     * @param p  use CADPrettyPrinter for p.print to call prettyPrint_CAD
-     * @param str  the c-code is written to this stream 
-     * CodePrinterdent, used to get a consistently formated c-code
-     */
-    public void FExp.genTempInputDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        genVarDecls_CAD(p, str, indent);
-        if (isComposite() && !keepAsArray()) {
-            printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
-        }
-    }
-
+    
 	/**
 	 * Used to assign a unique temporary variable for this expression.	
 	 */
@@ -1945,7 +1837,7 @@ aspect CADCodeGen {
      * @param indent  used to get a consistently formated c-code
      */
     public void FExp.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite() && !keepAsArray()) {
+        if (replaceWithTemp(false)) {
             type().printInit_C(p, str, indent, tempName_var_CAD(), this);
             type().printInit_C(p, str, indent, tempName_der_CAD(), this);
             genTempInputAssigns_CAD(p, str, indent);
@@ -1975,51 +1867,21 @@ aspect CADCodeGen {
         genDer_CAD(p, str, indent);
         str.print(";\n");
     }
-
-	syn String FFunctionCallLeft.varName_CAD() {
-		// TODO: use getFExp().tempName_C() instead of first case as well?
-		if (equationIndex >= 0 && !getFExp().isComposite()) {
-			return getFExp().tempName_var_CAD();
-		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
-			return ((FIdUseExp) getFExp()).getFIdUse().varName_CAD();
-		} else {
-			return getFExp().tempName_var_CAD();
-		}
-	}
-	
-	// TODO: Declare in genVarDecls_C instead
-	public void FFunctionCallLeft.genTempVar_var_CAD(String indent, CodeStream str) {
-		if (hasFExp() && !getFExp().isComposite()) {
-			str.print(indent);
-			str.print(type_C());
-			str.print(" ");
-			str.print(varName_CAD());
-			str.print(";\n");
-		}
-	}
-	
-	syn String FFunctionCallLeft.derName_CAD() {
-		// TODO: use getFExp().tempName_C() instead of first case as well?
-		if (equationIndex >= 0 && !getFExp().isComposite()) {
-			return getFExp().tempName_der_CAD();
-		} else if (equationIndex < 0 || getFExp().keepAsArray()) {
-			return ((FIdUseExp) getFExp()).getFIdUse().derName_CAD();
-		} else {
-			return getFExp().tempName_der_CAD();
-		}
-	}
-	
-	// TODO: Declare in genVarDecls_C instead
-	public void FFunctionCallLeft.genTempVar_der_CAD(String indent, CodeStream str) {
-		if (hasFExp() && !getFExp().isComposite()) {
-			str.print(indent);
-			str.print(type_C());
-			str.print(" ");
-			str.print(derName_CAD());
-			str.print(";\n");
-		}
-	}
-
+    
+    syn String FFunctionCallLeft.varName_CAD() {
+        if (replaceWithTemp()) {
+            return getFExp().tempName_var_CAD();
+        }
+        return ((FIdUseExp) getFExp()).getFIdUse().varName_CAD();
+    }
+    
+    syn String FFunctionCallLeft.derName_CAD() {
+        if (replaceWithTemp()) {
+            return getFExp().tempName_der_CAD();
+        }
+        return ((FIdUseExp) getFExp()).getFIdUse().derName_CAD();
+    }
+    
     /**
      * Used when function calls are printed. It is used to  generate outputs for the function call and the  
      * arguments are written as references to be filled (if they are not arrays or records). 
@@ -2061,10 +1923,11 @@ aspect CADCodeGen {
      * @param str  the c-code is written to this stream 
      */
     public void FExp.genArgument_var_CAD(CodeStream str) {
-        if (isComposite() && !keepAsArray())
+        if (replaceWithTemp(false)) {
             str.print(tempName_var_CAD());
-        else
+        } else {
             genVar_CAD(printer_CAD, str, "");
+        }
     }
 
     /**
@@ -2074,9 +1937,9 @@ aspect CADCodeGen {
      * @param str  the c-code is written to this stream 
      */
     public void FExp.genArgument_der_CAD(CodeStream str) {
-        if (isComposite() && !keepAsArray()){
+        if (replaceWithTemp(false)) {
             str.print(tempName_der_CAD());
-        } else{
+        } else {
             genDer_CAD(printer_CAD, str, "");
         }
     }

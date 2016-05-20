@@ -74,10 +74,6 @@ public class CADGenerator extends CGenerator {
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genVarDecls_CAD(ASTNode.printer_C, genPrinter, INDENT);
 				}
-				for (FAbstractEquation e : fclass.equations()) {
-					e.genTempForFunc_CAD(i,"",genPrinter,null);
-					i += e.numScalarEquations();
-				}
 				Enumerator enumerator = new Enumerator();
 				for (FAbstractEquation e : fclass.equations()) {
 					e.genResidual_CAD(enumerator, INDENT, genPrinter, null, new HashSet<Integer>());

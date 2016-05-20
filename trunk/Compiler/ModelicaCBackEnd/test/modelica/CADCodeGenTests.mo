@@ -1423,7 +1423,20 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_va
     return;
 }
 
-
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
+    JMI_DEF(REA, tmp_var_4)
+    JMI_DEF(REA, tmp_der_4)
+    JMI_DEF(REA, tmp_var_5)
+    JMI_DEF(REA, tmp_der_5)
+    JMI_DEF(REA, tmp_var_6)
+    JMI_DEF(REA, tmp_der_6)
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
@@ -1432,20 +1445,6 @@ void func_CADCodeGenTests_CADFunction5_F_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_va
     jmi_ad_var_t d_4;
     jmi_ad_var_t v_5;
     jmi_ad_var_t d_5;
-jmi_ad_var_t tmp_var_0;
-jmi_ad_var_t tmp_der_0;
-jmi_ad_var_t tmp_var_1;
-jmi_ad_var_t tmp_der_1;
-jmi_ad_var_t tmp_var_2;
-jmi_ad_var_t tmp_der_2;
-jmi_ad_var_t tmp_var_3;
-jmi_ad_var_t tmp_der_3;
-jmi_ad_var_t tmp_var_4;
-jmi_ad_var_t tmp_der_4;
-jmi_ad_var_t tmp_var_5;
-jmi_ad_var_t tmp_der_5;
-jmi_ad_var_t tmp_var_6;
-jmi_ad_var_t tmp_der_6;
     (*res)[0] = _x1_1 * _U_12 - (_der_x_14);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_12 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     func_CADCodeGenTests_CADFunction5_F_der_AD0(_x_0, _x1_1, _x2_2, _x3_3, _x4_4, (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(7)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx], (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_var_2, &tmp_var_3, &tmp_var_4, &tmp_var_5, &tmp_var_6, &tmp_der_0, &tmp_der_1, &tmp_der_2, &tmp_der_3, &tmp_der_4, &tmp_der_5, &tmp_der_6);
@@ -1636,14 +1635,14 @@ void func_CADCodeGenTests_CADFunction6_F2_der_AD1(jmi_ad_var_t x1_var_v, jmi_ad_
     jmi_ad_var_t d_3;
     jmi_ad_var_t v_4;
     jmi_ad_var_t d_4;
-jmi_ad_var_t tmp_var_0;
-jmi_ad_var_t tmp_der_0;
-jmi_ad_var_t tmp_var_1;
-jmi_ad_var_t tmp_der_1;
-jmi_ad_var_t tmp_var_2;
-jmi_ad_var_t tmp_der_2;
-jmi_ad_var_t tmp_var_3;
-jmi_ad_var_t tmp_der_3;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
     (*res)[0] = _x1_1 * _U_9 - (_der_x_11);
     (*dF)[0] = (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx] * _U_9 + _x1_1 * (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = _b_6 - (_der_x1_12);
@@ -1725,13 +1724,12 @@ void func_CADCodeGenTests_CADFunction7_F_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_va
     return;
 }
 
-
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
-jmi_ad_var_t tmp_var_0;
-jmi_ad_var_t tmp_der_0;
-jmi_ad_var_t tmp_var_1;
-jmi_ad_var_t tmp_der_1;
     func_CADCodeGenTests_CADFunction7_F_der_AD0(_a_2, (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx], &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
     (*res)[0] = tmp_var_0 - (_x_0);
     (*dF)[0] = tmp_der_0 - ((*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx]);
@@ -3420,14 +3418,14 @@ jmi_real_t** dz = jmi->dz;
 
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
-    jmi_ad_var_t tmp_var_2;
-    jmi_ad_var_t tmp_der_2;
-    jmi_ad_var_t tmp_var_3;
-    jmi_ad_var_t tmp_der_3;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
     jmi_real_t** res = &residual;
     int ef = 0;
     jmi_real_t** dF = &dRes;
@@ -3635,7 +3633,7 @@ model CADRes6
 
     annotation(__JModelica(UnitTesting(tests={
         CADCodeGenTestCase(
-            name="CADRes5",
+            name="CADRes6",
             description="Test cad code gen for function call with composite returning function call as agrument",
             generate_ode_jacobian=true,
             template="$CAD_dae_blocks_residual_functions$",
@@ -4115,14 +4113,14 @@ equation
     jmi_ad_var_t d_7;
     jmi_ad_var_t v_8;
     jmi_ad_var_t d_8;
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
-    jmi_ad_var_t tmp_var_2;
-    jmi_ad_var_t tmp_der_2;
-    jmi_ad_var_t tmp_var_3;
-    jmi_ad_var_t tmp_der_3;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
 
 jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
@@ -4635,10 +4633,10 @@ equation
             generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_real_t** res = &residual;
     int ef = 0;
     jmi_real_t** dF = &dRes;
@@ -5299,13 +5297,13 @@ equation
             inline_functions="none",
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t v_2;
-jmi_ad_var_t tmp_var_0;
-jmi_ad_var_t tmp_der_0;
-jmi_ad_var_t tmp_var_1;
-jmi_ad_var_t tmp_der_1;
     (*res)[0] = _time - (_a_2);
     (*dF)[0] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     (*res)[1] = _time * 2 - (_b_3);
@@ -5360,10 +5358,10 @@ equation
             generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
     jmi_real_t** res = &residual;
     int ef = 0;
@@ -5443,15 +5441,15 @@ equation
             generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
-    jmi_ad_var_t tmp_var_2;
-    jmi_ad_var_t tmp_der_2;
-    jmi_ad_var_t tmp_var_3;
-    jmi_ad_var_t tmp_der_3;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
     jmi_ad_var_t v_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t v_3;
@@ -5572,26 +5570,26 @@ equation
             generate_dae_jacobian=true,
             template="$C_DAE_equation_directional_derivative$",
             generatedCode="
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t d_2;
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
     jmi_ad_var_t v_3;
     jmi_ad_var_t d_3;
-jmi_ad_var_t tmp_var_0;
-jmi_ad_var_t tmp_der_0;
-jmi_ad_var_t tmp_var_1;
-jmi_ad_var_t tmp_der_1;
-jmi_ad_var_t tmp_var_2;
-jmi_ad_var_t tmp_der_2;
-jmi_ad_var_t tmp_var_3;
-jmi_ad_var_t tmp_der_3;
-jmi_ad_var_t tmp_var_4;
-jmi_ad_var_t tmp_der_4;
-jmi_ad_var_t tmp_var_5;
-jmi_ad_var_t tmp_der_5;
+    JMI_DEF(REA, tmp_var_4)
+    JMI_DEF(REA, tmp_der_4)
+    JMI_DEF(REA, tmp_var_5)
+    JMI_DEF(REA, tmp_der_5)
     if (_sw(0)) {
       v_2 = _time * _time;
       d_2 = (*dz)[jmi->offs_t] * _time + _time * (*dz)[jmi->offs_t];
@@ -5646,14 +5644,14 @@ equation
             generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
-    jmi_ad_var_t tmp_var_2;
-    jmi_ad_var_t tmp_der_2;
-    jmi_ad_var_t tmp_var_3;
-    jmi_ad_var_t tmp_der_3;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
     jmi_real_t** res = &residual;
     int ef = 0;
     jmi_real_t** dF = &dRes;
@@ -5724,22 +5722,22 @@ equation
             generatedCode="
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
-    jmi_ad_var_t tmp_var_0;
-    jmi_ad_var_t tmp_der_0;
-    jmi_ad_var_t tmp_var_1;
-    jmi_ad_var_t tmp_der_1;
-    jmi_ad_var_t tmp_var_2;
-    jmi_ad_var_t tmp_der_2;
-    jmi_ad_var_t tmp_var_3;
-    jmi_ad_var_t tmp_der_3;
-    jmi_ad_var_t tmp_var_4;
-    jmi_ad_var_t tmp_der_4;
-    jmi_ad_var_t tmp_var_5;
-    jmi_ad_var_t tmp_der_5;
-    jmi_ad_var_t tmp_var_6;
-    jmi_ad_var_t tmp_der_6;
-    jmi_ad_var_t tmp_var_7;
-    jmi_ad_var_t tmp_der_7;
+    JMI_DEF(REA, tmp_var_0)
+    JMI_DEF(REA, tmp_der_0)
+    JMI_DEF(REA, tmp_var_1)
+    JMI_DEF(REA, tmp_der_1)
+    JMI_DEF(REA, tmp_var_2)
+    JMI_DEF(REA, tmp_der_2)
+    JMI_DEF(REA, tmp_var_3)
+    JMI_DEF(REA, tmp_der_3)
+    JMI_DEF(REA, tmp_var_4)
+    JMI_DEF(REA, tmp_der_4)
+    JMI_DEF(REA, tmp_var_5)
+    JMI_DEF(REA, tmp_der_5)
+    JMI_DEF(REA, tmp_var_6)
+    JMI_DEF(REA, tmp_der_6)
+    JMI_DEF(REA, tmp_var_7)
+    JMI_DEF(REA, tmp_der_7)
     jmi_real_t** res = &residual;
     int ef = 0;
     jmi_real_t** dF = &dRes;
