@@ -134,6 +134,12 @@ aspect DuplicateComponents {
     syn boolean InstComponentDecl.isDuplicate() = duplicateOf() != null;
 
     /**
+     * If this component is a duplicate of one or more other components, 
+     * return the component chosen to be considered the original.
+     */
+    syn InstComponentDecl InstComponentDecl.duplicateOriginal() = isDuplicate() ? duplicateOf() : this;
+
+    /**
      * Get the component that this component is a duplicate of, if any.
      */
     syn InstComponentDecl InstComponentDecl.duplicateOf() {

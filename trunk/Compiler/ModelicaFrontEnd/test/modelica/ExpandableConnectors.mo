@@ -2499,4 +2499,88 @@ Error at line 2453, column 5, in file 'Compiler/ModelicaFrontEnd/src/test/Expand
 ")})));
 end ArrayIndexationType4;
 
+
+model DuplicatedExpandable1
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    model A
+        extends D;
+        EC ec;
+        B b;
+    equation
+        connect(b.c, ec.c);
+    end A;
+    
+    model B
+        C c = time;
+    end B;
+    
+    model D
+        EC ec;
+    end D;
+    
+    A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicatedExpandable1",
+            description="Expandable connector with same name declared in both instantiated class and inherited class",
+            flatModel="
+fclass ExpandableConnectors.DuplicatedExpandable1
+ Real a.b.c = time;
+ Real a.ec.c;
+equation
+ a.b.c = a.ec.c;
+end ExpandableConnectors.DuplicatedExpandable1;
+")})));
+end DuplicatedExpandable1;
+
+
+model DuplicatedExpandable2
+    expandable connector EC
+    end EC;
+    
+    connector C = Real;
+    
+    model A
+        extends D;
+        EC ec;
+        B b;
+    equation
+        connect(b.c, ec.c);
+    end A;
+    
+    model B
+        C c = time;
+    end B;
+    
+    model D
+        EC ec;
+        B b2;
+    equation
+        connect(b2.c, ec.c2);
+    end D;
+    
+     A a;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="DuplicatedExpandable2",
+            description="Expandable connector with same name declared in both instantiated class and inherited class",
+            flatModel="
+fclass ExpandableConnectors.DuplicatedExpandable2
+ Real a.b.c = time;
+ Real a.ec.c;
+ Real a.ec.c2;
+ Real a.b2.c = time;
+equation
+ a.b.c = a.ec.c;
+ a.b2.c = a.ec.c2;
+end ExpandableConnectors.DuplicatedExpandable2;
+")})));
+end DuplicatedExpandable2;
+
 end ExpandableConnectors;

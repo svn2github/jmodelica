@@ -2171,9 +2171,14 @@ aspect ExpandableConnectors {
         }
         
         private ExpandableSet setFor(InstComponentDecl comp) {
-            ExpandableSet set = map.get(comp);
-            if (set == null)
-                set = new ExpandableSet(comp);
+            InstComponentDecl org = comp.duplicateOriginal();
+            ExpandableSet set = map.get(org);
+            if (set == null) {
+                set = new ExpandableSet(org);
+            }
+            if (org != comp) {
+                set.addDuplicate(comp);
+            }
             return set;
         }
 
@@ -2315,6 +2320,15 @@ aspect ExpandableConnectors {
                 ConnectorMember member = members.get(name);
                 if (member == null) 
                     members.put(name, new ConnectorMember(name));
+            }
+            
+            /**
+             * Add a duplicate version of the expandable connector.
+             * 
+             * All encountered duplicate versions are expanded.
+             */
+            public void addDuplicate(InstComponentDecl connector) {
+                connectors.add(connector);
             }
             
             /**
