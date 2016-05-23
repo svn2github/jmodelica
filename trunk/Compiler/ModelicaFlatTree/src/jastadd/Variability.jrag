@@ -167,11 +167,8 @@ aspect Variability {
                 var = var.combine(fl.getFExp().variability());
             }
         }
-        // Check all input arguments
-        for (FVariable fv : referencedFVariablesInRHS()) {
-            var = var.combine(fv.variability());
-        }
-        return var;
+        // Check call
+        return var.combine(getCall().variability());
     }
     eq FAlgorithm.variability() {
         FTypePrefixVariability var = fConstant();
@@ -487,13 +484,12 @@ aspect Variability {
     }
 
 
-    // TODO: Maybe there should be a special variability for "no return value"
-    eq FConnectionsOp.expVariability() = null;
+    eq FConnectionsOp.expVariability() = fConstant();
     eq FConnBoolOp.expVariability()    = fConstant();
 
-    eq FTerminate.expVariability() = null;
-    eq FReinit.expVariability() = null;
-    eq FAssert.expVariability() = null;
+    eq FTerminate.expVariability() = getFExp().variability();
+    eq FReinit.expVariability() = fDiscrete();
+    eq FAssert.expVariability() = getTest().variability().combine(getMsg().variability());
 
     eq FDelayExp.expVariability() = getFExp().variability();
 

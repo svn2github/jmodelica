@@ -283,4 +283,106 @@ end CommonSubexpressionEliminationTests.FunctionCall7;
 ")})));
 end FunctionCall7;
 
+
+model ParameterFunctionCall1
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y1;
+        output Real y2;
+    algorithm
+        y1 := x1 + x2;
+        y2 := x1 * x2;
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p1 = 1;
+    parameter Real p2 = 2;
+    Real x1, x2, x3, x4;
+equation
+    (x1, x2) = f(p1, p2);
+    (x3, x4) = f(p1, p2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ParameterFunctionCall1",
+            description="",
+            variability_propagation=false,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.ParameterFunctionCall1
+ parameter Real p1 = 1 /* 1 */;
+ parameter Real p2 = 2 /* 2 */;
+ Real x1;
+ Real x2;
+equation
+ (x1, x2) = CommonSubexpressionEliminationTests.ParameterFunctionCall1.f(p1, p2);
+
+public
+ function CommonSubexpressionEliminationTests.ParameterFunctionCall1.f
+  input Real x1;
+  input Real x2;
+  output Real y1;
+  output Real y2;
+ algorithm
+  y1 := x1 + x2;
+  y2 := x1 * x2;
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.ParameterFunctionCall1.f;
+
+end CommonSubexpressionEliminationTests.ParameterFunctionCall1;
+")})));
+end ParameterFunctionCall1;
+
+
+model ParameterFunctionCall2
+    function f
+        input Real x1;
+        input Real x2;
+        output Real y;
+    algorithm
+        y := x1 * x2;
+        annotation(Inline=false);
+    end f;
+    
+    parameter Real p1 = 1;
+    parameter Real p2 = 2;
+    Real x1, x2;
+equation
+    x1 = f(p1, p2);
+    x2 = f(p1, p2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ParameterFunctionCall2",
+            description="",
+            variability_propagation=false,
+            flatModel="
+fclass CommonSubexpressionEliminationTests.ParameterFunctionCall2
+ parameter Real p1 = 1 /* 1 */;
+ parameter Real p2 = 2 /* 2 */;
+ Real x1;
+ Real x2;
+ parameter Real temp_1;
+parameter equation
+ temp_1 = CommonSubexpressionEliminationTests.ParameterFunctionCall2.f(p1, p2);
+equation
+ x1 = temp_1;
+ x2 = temp_1;
+
+public
+ function CommonSubexpressionEliminationTests.ParameterFunctionCall2.f
+  input Real x1;
+  input Real x2;
+  output Real y;
+ algorithm
+  y := x1 * x2;
+  return;
+ annotation(Inline = false);
+ end CommonSubexpressionEliminationTests.ParameterFunctionCall2.f;
+
+end CommonSubexpressionEliminationTests.ParameterFunctionCall2;
+")})));
+end ParameterFunctionCall2;
+
 end CommonSubexpressionEliminationTests;
