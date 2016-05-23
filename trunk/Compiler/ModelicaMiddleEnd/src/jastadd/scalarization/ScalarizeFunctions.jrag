@@ -245,7 +245,10 @@ aspect FunctionScalarization {
         if (vars != null)
             addTemporaryVars(clauses, vars, indexMap, !func);
         getArgs().createArrayTemporaries(clauses, vars, indexMap);
-        FExp temp = func ? tempExp() : buildRecordConstructor(indexMap);
+        FExp temp = tempExp();
+        if (!func) {
+            temp = type().createRecordConstructor(indexMap, temp);
+        }
         createFunctionCallClause(clauses, indexMap, temp);
     }
     

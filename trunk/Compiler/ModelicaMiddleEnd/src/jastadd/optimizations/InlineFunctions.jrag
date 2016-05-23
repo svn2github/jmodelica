@@ -1536,7 +1536,7 @@ aspect FunctionInlining {
                 if (isArray() && !size().isUnknown()) { 
                     exp = getArray().buildWithReplacedReferences(fi, this);
                 } else if (type().isRecord()) {
-                    exp = dynamicFExp(type().createRecordConstructor(getFIdUse().getFQName()));
+                    exp = dynamicFExp(type().createRecordConstructor(Collections.<String,FExp>emptyMap(), this));
                     exp = exp.replaceReferences(fi);
                 } else {
                     exp = type().zeroLiteral();
