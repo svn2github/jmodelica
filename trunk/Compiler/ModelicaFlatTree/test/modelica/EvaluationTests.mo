@@ -1455,6 +1455,44 @@ end EvaluationTests.FunctionEval41;
 ")})));
 end FunctionEval41;
 
+model FunctionEval42
+    function f1
+        input Real x;
+        output Real y;
+    end f1;
+    
+    function f2
+        extends f1;
+        input Real x;
+        output Real y;
+    algorithm
+        y := x + 1;
+    end f2;
+    
+    constant Real a = f2(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval42",
+            description="Evaluation in instance tree of function that declares inherited inputs again",
+            flatModel="
+fclass EvaluationTests.FunctionEval42
+ constant Real a = 2.0;
+
+public
+ function EvaluationTests.FunctionEval42.f2
+  input Real x;
+  output Real y;
+ algorithm
+  y := x + 1;
+  return;
+ end EvaluationTests.FunctionEval42.f2;
+
+end EvaluationTests.FunctionEval42;
+")})));
+end FunctionEval42;
+
+
 model VectorFuncEval1
     function f
         input Real x;

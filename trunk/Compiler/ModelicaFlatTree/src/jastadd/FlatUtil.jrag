@@ -1278,10 +1278,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (icd.isInput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (icd.isInput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
@@ -1292,10 +1301,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (!icd.isInput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (!icd.isInput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
@@ -1305,10 +1323,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (icd.isOutput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (icd.isOutput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
