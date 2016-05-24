@@ -289,6 +289,10 @@ assimulo_install_dir = $(abs_builddir)/Assimulo_install
 pymodelica_install_dir = $(abs_builddir)/pymodelica_install
 pyfmi_install_dir = $(abs_builddir)/PyFMI_install
 pyjmi_install_dir = $(abs_builddir)/PyJMI_install
+assimulo_build_dir = $(abs_builddir)/Assimulo_build
+pymodelica_build_dir = $(abs_builddir)/pymodelica_build
+pyfmi_build_dir = $(abs_builddir)/PyFMI_build
+pyjmi_build_dir = $(abs_builddir)/PyJMI_build
 bindistdir = JModelica.org-$(VERSION)-bin
 MC_INTERFACE = $(abs_top_srcdir)/ModelicaCasADiInterface
 MC_SRC = $(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
@@ -934,7 +938,11 @@ modelicacasadi_wrapper: $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/Optimic
 	cp $(MC_INTERFACE)/python/modelica_casadi_transfer_wrapper.py $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
 
 build-python-packages:
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/external/Assimulo; \
+
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	mkdir -p $(assimulo_build_dir); \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(abs_top_srcdir)/external; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	cd $(assimulo_build_dir)/Assimulo; \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	case $(build) in \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	*-cygwin*) \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -943,7 +951,10 @@ build-python-packages:
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	*) \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --prefix=$(assimulo_install_dir) ;; \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_TRUE@	esac
-@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/external/Assimulo; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	mkdir -p $(assimulo_build_dir); \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(abs_top_srcdir)/external; \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
+@WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	cd $(assimulo_build_dir)/Assimulo; \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	case $(build) in \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	*-cygwin*) \
 @WITH_SUNDIALS_TRUE@@WITH_SUPERLU_FALSE@	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -956,7 +967,10 @@ build-python-packages:
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
 
-	cd $(abs_top_srcdir)/external/PyFMI; \
+	mkdir -p $(pyfmi_build_dir); \
+	cd $(abs_top_srcdir)/external; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
+	cd $(pyfmi_build_dir)/PyFMI; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
@@ -1160,14 +1174,22 @@ clean-casadi-interface:
 @HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/ifcasadi 
 
 clean-python-packages:
-@WITH_SUNDIALS_TRUE@	cd $(abs_top_srcdir)/external/Assimulo; \
-@WITH_SUNDIALS_TRUE@	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+@WITH_SUNDIALS_TRUE@	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
+@WITH_SUNDIALS_TRUE@		cd $(assimulo_build_dir)/Assimulo; \
+@WITH_SUNDIALS_TRUE@		python setup.py clean --all --sundials-home=$(SUNDIALS_HOME); \
+@WITH_SUNDIALS_TRUE@		cd $(abs_builddir); \
+@WITH_SUNDIALS_TRUE@	fi;
+@WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_build_dir) || echo  Could not remove $(assimulo_build_dir)
 @WITH_SUNDIALS_TRUE@	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py clean --all 
 	-rm -rf $(pymodelica_install_dir) || echo  Could not remove $(pymodelica_install_dir)
-	-cd $(abs_top_srcdir)/external/PyFMI; \
-	python setup.py  clean --all 
+	if [ -d $(pyfmi_build_dir)/PyFMI ]; then \
+		-cd $(pyfmi_build_dir)/PyFMI; \
+		python setup.py  clean --all; \
+		cd $(abs_builddir); \
+	fi;
+	-rm -rf $(pyfmi_build_dir) || echo  Could not remove $(pyfmi_build_dir)
 	-rm -rf $(pyfmi_install_dir) || echo  Could not remove $(pyfmi_install_dir)
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py clean --all 
