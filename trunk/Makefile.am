@@ -27,11 +27,6 @@ pymodelica_install_dir=$(abs_builddir)/pymodelica_install
 pyfmi_install_dir=$(abs_builddir)/PyFMI_install
 pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
-assimulo_build_dir=$(abs_builddir)/Assimulo_build
-pymodelica_build_dir=$(abs_builddir)/pymodelica_build
-pyfmi_build_dir=$(abs_builddir)/PyFMI_build
-pyjmi_build_dir=$(abs_builddir)/PyJMI_build
-
 bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
@@ -171,13 +166,9 @@ NUMPY_NO_MSVCR_ARG=
 endif
 
 build-python-packages:
-
 if WITH_SUNDIALS
 if WITH_SUPERLU
-	mkdir -p $(assimulo_build_dir); \
-	cd $(abs_top_srcdir)/external; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
-	cd $(assimulo_build_dir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -190,10 +181,7 @@ endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
-	mkdir -p $(assimulo_build_dir); \
-	cd $(abs_top_srcdir)/external; \
-	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
-	cd $(assimulo_build_dir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -208,10 +196,7 @@ endif
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
 
-	mkdir -p $(pyfmi_build_dir); \
-	cd $(abs_top_srcdir)/external; \
-	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
-	cd $(pyfmi_build_dir)/PyFMI; \
+	cd $(abs_top_srcdir)/external/PyFMI; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
@@ -451,14 +436,14 @@ endif
 
 clean-python-packages:
 if WITH_SUNDIALS
-	cd $(assimulo_build_dir)/Assimulo; \
+	cd $(abs_top_srcdir)/external/Assimulo; \
 	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
 	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 endif
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py clean --all 
 	-rm -rf $(pymodelica_install_dir) || echo  Could not remove $(pymodelica_install_dir)
-	-cd $(pyfmi_build_dir)/PyFMI; \
+	-cd $(abs_top_srcdir)/external/PyFMI; \
 	python setup.py  clean --all 
 	-rm -rf $(pyfmi_install_dir) || echo  Could not remove $(pyfmi_install_dir)
 	-cd $(abs_top_srcdir)/Python/src; \
