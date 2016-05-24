@@ -60,7 +60,8 @@ aspect FunctionScalarization {
     /**
      * Should this expression be extracted into its own statement?
      */
-    syn boolean FExp.extractTemp() = isArray() && size().isUnknown() && !canKeepAsArray(true) && canAcceptArray();
+    syn boolean FExp.extractTemp() = isComposite() && size().isUnknown() && isFunctionCallIO();
+    eq FIdUseExp.extractTemp()     = super.extractTemp() && isSlice();
     eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
     eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
     eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
@@ -71,6 +72,11 @@ aspect FunctionScalarization {
     eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
     eq FIdTempExp.extractTemp()    = false;
+    
+    inh boolean FExp.isFunctionCallIO();
+    eq BaseNode.getChild().isFunctionCallIO()         = false;
+    eq FFunctionCall.getArg().isFunctionCallIO()      = true;
+    eq FFunctionCallLeft.getFExp().isFunctionCallIO() = true;
     
     syn boolean FExp.extractAsUnknown() = size().isUnknown();
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
@@ -250,6 +256,7 @@ aspect FunctionScalarization {
             temp = type().createRecordConstructor(indexMap, temp);
         }
         createFunctionCallClause(clauses, indexMap, temp);
+        useTempVar = true;
     }
     
     public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
@@ -595,7 +602,7 @@ aspect FunctionScalarization {
     public void FExp.addArrayUsesToIndexMap(Map<String,FExp> indexMap, FExp[] names) {
         if (useTempVar) {
             if (isArray()) {
-                indexMap.put(tempVarName(), tempExp(names));
+                indexNames = names;
             }
         } else {
             super.addArrayUsesToIndexMap(indexMap, names);

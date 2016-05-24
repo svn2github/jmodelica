@@ -1848,7 +1848,7 @@ aspect CCodeGen {
     syn boolean FFunctionCallLeft.replaceWithTemp() = hasFExp() && getFExp().replaceWithTemp(true);
     syn boolean FExp.replaceWithTemp(boolean output) = isComposite() || (output && type().isString());
     eq FLitExp.replaceWithTemp(boolean output)   = output;
-    eq FIdUseExp.replaceWithTemp(boolean output) = (output && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FIdUseExp.replaceWithTemp(boolean output) = isSlice() || (output && (!inFunction() || alsoInRHS() || type().isString()));
     
     syn boolean FIdUseExp.alsoInRHS() {
         FAbstractFunctionCall call = myFunctionCall();
