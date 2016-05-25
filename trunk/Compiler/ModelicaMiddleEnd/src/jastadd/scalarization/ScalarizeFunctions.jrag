@@ -300,6 +300,8 @@ aspect FunctionScalarization {
             useTempVar = false;
             type().scalarizeAssignment(vars, clauses, indexMap, left, right);
             useTempVar = true;
+            left.indexNames = null;
+            right.indexNames = null;
         }
     }
     

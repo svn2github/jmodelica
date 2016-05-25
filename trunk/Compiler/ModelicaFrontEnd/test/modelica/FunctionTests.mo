@@ -6852,6 +6852,69 @@ end FunctionTests.ArrayExpInFunc44;
 ")})));
 end ArrayExpInFunc44;
 
+model ArrayExpInFunc45
+    function f1
+        input Real[:] x;
+        output Real[:] y = x;
+        algorithm 
+    end f1;
+    function f2
+        input Integer n;
+        output Real s = sum(f1(1:n));
+        algorithm
+        annotation(Inline = false);
+    end f2;
+    Real y = f2(3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayExpInFunc45",
+            description="Scalarization of functions: unknown size in scalar operator",
+            variability_propagation=false,
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc45
+ Real y;
+equation
+ y = FunctionTests.ArrayExpInFunc45.f2(3);
+
+public
+ function FunctionTests.ArrayExpInFunc45.f2
+  input Integer n;
+  output Real s;
+  Real temp_1;
+  Real[:] temp_2;
+  Integer[:] temp_3;
+ algorithm
+  init temp_2 as Real[max(n, 0)];
+  init temp_3 as Integer[max(n, 0)];
+  for i1 in 1:max(n, 0) loop
+   temp_3[i1] := i1;
+  end for;
+  (temp_2) := FunctionTests.ArrayExpInFunc45.f1(temp_3);
+  temp_1 := 0.0;
+  for i1 in 1:max(n, 0) loop
+   temp_1 := temp_1 + temp_2[i1];
+  end for;
+  s := temp_1;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayExpInFunc45.f2;
+
+ function FunctionTests.ArrayExpInFunc45.f1
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i1];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc45.f1;
+
+end FunctionTests.ArrayExpInFunc45;
+")})));
+end ArrayExpInFunc45;
+
 model ArrayOutputScalarization1
  function f
   output Real x[2] = {1,2};
