@@ -910,14 +910,16 @@ aspect Scalarization {
     
     public FExp FIdUseExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
       FQName fqn = getFIdUse().getFQName();
-      if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization())
-            fqn = ((FIdUseExp) indexMap.get(name())).getFIdUse().getFQName();
-      if (indexNames != null)
-            fqn = fqn.copyAndAddFas(createIndexNameFas());
+      if (indexMap.containsKey(name())) {
+          fqn = ((FIdUseExp) indexMap.get(name())).getFIdUse().getFQName();
+      }
+      if (indexNames != null) {
+          fqn = fqn.copyAndAddFas(createIndexNameFas());
+      }
       fqn = fqn.copyAndAppend(suffix);
-      fqn.parent = this;
-      fqn = fqn.scalarize(indexMap);
-      return createNode(new FIdUse(fqn));
+      FExp res = createNode(new FIdUse(fqn));
+      res = dynamicFExp(res).scalarize(indexMap);
+      return res;
     }
     
     public FExp FIdTempExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -930,8 +932,7 @@ aspect Scalarization {
     }
     
     public FExp FSubscriptedExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-        FExp e = dynamicFExp(getFExp().getArray().buildFArray());
-        return new FSubscriptedExp(e.scalarRecordFExp(indexMap, suffix), getFArraySubscripts().scalarize(indexMap));
+        return new FSubscriptedExp(getFExp().scalarRecordFExp(indexMap, suffix), getFArraySubscripts().scalarize(indexMap));
     }
     
     public FExp FArray.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
@@ -1420,32 +1421,6 @@ aspect Scalarization {
 	 * scalar(x*A*x) needs to be replaced by a double sum.
 	 */
 
-    /**
-     * Create an FArray containing scalarized subexpressions.
-     */
-    public FExp Array.buildScalarized(Map<String,FExp> indexMap, FExp context) {
-        return buildFArray(new ScalarizedBuilder(indexMap, context));
-    }
-
-    public class Array {
-        /**
-         * Helper object for {@link #buildScalarized(java.util.Map,FExp)}.
-         */
-        protected static class ScalarizedBuilder implements ElementBuilder {
-            private Map<String,FExp> indexMap;
-            private FExp context;
-            
-            public ScalarizedBuilder(Map<String,FExp> indexMap, FExp context) {
-                this.indexMap = indexMap;
-                this.context = context;
-            }
-            
-            public FExp build(FExp e) {
-                return context.dynamicFExp(e).scalarize(indexMap);
-            }
-        }
-    }
-
 	/**
 	 * Flag that signals that this expression should be replaced with a use of a temporary variable.
 	 */
@@ -1552,17 +1527,13 @@ aspect Scalarization {
     }
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
-        if (indexMap.containsKey(name()) && !shouldKeepArrayDuringScalarization()) 
+        if (indexMap.containsKey(name())) {
             return indexMap.get(name()).fullCopy();
+        }
         if (indexNames != null)
             return createUseFas(name());
         return new FIdUseExp(getFIdUse().scalarize(indexMap));
     }
-    
-    inh boolean FIdUseExp.shouldKeepArrayDuringScalarization();
-    eq BaseNode.getChild().shouldKeepArrayDuringScalarization() = false;
-    eq FFunctionCall.getArg(int i).shouldKeepArrayDuringScalarization() = 
-    	getArg(i).isArray() && myCallInputs().get(i).ndims() == getArg(i).ndims();
     
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (getIfExp().variability().indexParameterOrLess()) {
