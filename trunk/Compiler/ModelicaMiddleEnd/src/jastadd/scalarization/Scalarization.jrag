@@ -979,7 +979,7 @@ aspect Scalarization {
     
     
     public FExp FExp.extractArrayCell(Map<String,FExp> indexMap, Index i) {
-        if (useTempVar || size().isUnknown()) {
+        if (size().isUnknown()) {
             int[] ind = i.index();
             FExp[] subs = new FExp[ind.length];
             for (int k = 0; k < ind.length; k++) {

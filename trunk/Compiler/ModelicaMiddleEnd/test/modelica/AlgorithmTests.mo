@@ -480,4 +480,59 @@ end AlgorithmTests.TempAssign3;
 ")})));
 end TempAssign3;
 
+model TempAssign4
+    function f
+        input Real x;
+        output Real[3] y = {x,x,x};
+        algorithm
+    end f;
+    Real[2,3] y;
+algorithm
+    for i in 1:2 loop
+        y[i,:] := f(time);
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TempAssign4",
+            description="Scalarizing assignment temp generation",
+            flatModel="
+fclass AlgorithmTests.TempAssign4
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_1[3];
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_2[3];
+algorithm
+ ({temp_1[1], temp_1[2], temp_1[3]}) := AlgorithmTests.TempAssign4.f(time);
+ y[1,1] := temp_1[1];
+ y[1,2] := temp_1[2];
+ y[1,3] := temp_1[3];
+ ({temp_2[1], temp_2[2], temp_2[3]}) := AlgorithmTests.TempAssign4.f(time);
+ y[2,1] := temp_2[1];
+ y[2,2] := temp_2[2];
+ y[2,3] := temp_2[3];
+
+public
+ function AlgorithmTests.TempAssign4.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[3];
+  y[1] := x;
+  y[2] := x;
+  y[3] := x;
+  return;
+ end AlgorithmTests.TempAssign4.f;
+
+end AlgorithmTests.TempAssign4;
+")})));
+end TempAssign4;
+
 end AlgorithmTests;
