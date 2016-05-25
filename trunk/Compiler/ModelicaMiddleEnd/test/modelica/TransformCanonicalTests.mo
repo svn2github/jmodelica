@@ -6095,9 +6095,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_5 : b@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_6 : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
+eq_4[1] : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
+eq_4[2] : b@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
+eq_4[3] : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
 ")})));
 end IncidenceComputation1;
 
@@ -6135,9 +6135,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_5 : b@ a@ c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_6 : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
+eq_4[1] : a@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
+eq_4[2] : b@ a@ c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
+eq_4[3] : c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
 ")})));
 end IncidenceComputation2;
 
@@ -6171,9 +6171,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_6 : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
+eq_4[1] : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
+eq_4[2] : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
+eq_4[3] : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
 ")})));
 end IncidenceComputation3;
 
@@ -6213,9 +6213,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_5 : b@ a@ c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_6 : c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
+eq_4[1] : a@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
+eq_4[2] : b@ a@ c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
+eq_4[3] : c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
 ")})));
 end IncidenceComputation4;
 
@@ -6259,9 +6259,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_6 : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
+eq_4[1] : a@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
+eq_4[2] : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
+eq_4[3] : c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
 ")})));
 end IncidenceComputation5;
 
@@ -6293,9 +6293,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_6 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_4[1] : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_4[2] : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_4[3] : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
 ")})));
 end IncidenceComputation6;
 
@@ -6331,9 +6331,9 @@ Variables: {der(d) der(e) der(f) a b c }
 eq_1 : der(d)@ // der(d) = time
 eq_2 : der(e)@ // der(e) = time
 eq_3 : der(f)@ // der(f) = time
-eq_4 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_5 : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_6 : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_4[1] : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_4[2] : b@ a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_4[3] : a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
 ")})));
 end IncidenceComputation7;
 

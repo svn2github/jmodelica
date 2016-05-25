@@ -685,7 +685,7 @@ aspect TransformCanonical {
             }
             
             if (!eq_list.isEmpty())
-                g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName(), new Enumerator(1));
+                g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_init_", new Enumerator(1));
         }
         
         log.verbose(g);

@@ -37,7 +37,8 @@ aspect Graphs {
 
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
 
-    private static final String DEFAULT_EQ_PREFIX = "eq";
+    private static final String DEFAULT_EQ_PREFIX = "eq_";
+    private static final String DEFAULT_EQ_SUBFIX = "";
     
     protected Map<String, V> variableMap = new LinkedHashMap<String, V>();
     protected Map<String, E> equationMap = new LinkedHashMap<String, E>();
@@ -124,20 +125,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type) {
-        return addEquation(eqn, groupNumber, variability, type, false);
+        return addEquation(eqn, groupNumber, variability, type, false, DEFAULT_EQ_PREFIX, DEFAULT_EQ_SUBFIX, enumerator);
         
     }
     
-    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return addEquation(eqn, groupNumber, variability, type, isMeta, DEFAULT_EQ_PREFIX, enumerator);
-        
-    }
-    
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, Enumerator enumerator) {
+    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
         String name;
-        prefix = prefix + "_";
         do {
-            name = prefix + enumerator.next();
+            name = prefix + enumerator.next() + subfix;
         } while (getEquation(name) != null);
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
@@ -300,13 +295,21 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
+                Enumerator subEnumerator = enumerator;
+                String prefix = eqNamePrefix;
+                String subfix = "";
+                if (n_eq > 1) {
+                    subEnumerator = new Enumerator(1);
+                    prefix += enumerator.next() + "[";
+                    subfix = "]";
+                }
                 if (n_eq == 0) {
-                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, eqNamePrefix, enumerator);
+                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, prefix, subfix, subEnumerator);
                     groupMembers.add(eqn);
                 } else {
                     for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
                         // need to reverse here to preserve the initial order.
-                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, eqNamePrefix, enumerator);
+                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, prefix, subfix, subEnumerator);
                         groupMembers.add(eqn);
                     }
                 }

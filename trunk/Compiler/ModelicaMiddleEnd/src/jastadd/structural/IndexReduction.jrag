@@ -86,9 +86,16 @@ aspect IndexReduction {
             log.verbose(g.printMatchingObj());
             
             try {
+                boolean printPantelidesSteps = g.getEquations().size() <= myOptions().getIntegerOption("diagnostics_limit");
+                if (!printPantelidesSteps) {
+                    log.verbose("The BiPGraph will not be printed during pantelides, the model is too big. "
+                            + "Limit, compiler option 'diagnostics_limit', is set to %d and model size is %d. ",
+                            myOptions().getIntegerOption("diagnostics_limit"), g.getEquations().size());
+                }
                 result = g.reduceIndex(new IndexReductionFunctionInliner(this),
                         myOptions().getBooleanOption("dynamic_states"),
-                        myOptions().getIntegerOption("munkres_max_incidences"));
+                        myOptions().getIntegerOption("munkres_max_incidences"),
+                        printPantelidesSteps);
                 break;
             } catch (EquationDifferentiationException e) {
                 ASTNode.log.verbose("Unable to differentiate equation:\n%s", e.equation);
@@ -930,7 +937,8 @@ aspect IndexReduction {
         }
     }
     
-    public IndexReductionResult IndexReductionBiPGraph.reduceIndex(IndexReductionFunctionInliner inliner, boolean computeDynamicStates, int maximumNbrOfMunkresIncidences) {
+    public IndexReductionResult IndexReductionBiPGraph.reduceIndex(IndexReductionFunctionInliner inliner,
+            boolean computeDynamicStates, int maximumNbrOfMunkresIncidences, boolean printPantelidesSteps) {
         IndexReductionResult result = new IndexReductionResult();
         FClass fclass = null;
         Stack<IndexReductionEq> eqToMatchStack = new Stack<IndexReductionEq>();
@@ -1016,13 +1024,16 @@ aspect IndexReduction {
                 // Step 3b-5iv
                 // Push the matched equation to the stack of equations to be matched
                 eqToMatchStack.push(eqToMatch);
-                
-                ASTNode.log.verbose("Graph after addition of equations and variables:");
-                ASTNode.log.verbose(this);
+                if (printPantelidesSteps) {
+                    ASTNode.log.verbose("Graph after addition of equations and variables:");
+                    ASTNode.log.verbose(this);
+                }
             }
-            ASTNode.log.verbose("Matching:");
-            ASTNode.log.verbose(printMatchingObj());
-            ASTNode.log.verbose("*************");
+            if (printPantelidesSteps) {
+                ASTNode.log.verbose("Matching:");
+                ASTNode.log.verbose(printMatchingObj());
+                ASTNode.log.verbose("*************");
+            }
         }
         fclass.addFDerivativeVariables(newDiffedVars);
         for (FAbstractEquation eqn : result.getEquations())
