@@ -1872,7 +1872,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
                 'explicit_hessian': False,
-                'IPOPT_options': {},
+                'IPOPT_options': {'dual_inf_tol': N.inf,
+								  'constr_viol_tol': N.inf,
+								  'compl_inf_tol': N.inf,
+								  'acceptable_dual_inf_tol': N.inf,
+								  'acceptable_constr_viol_tol': N.inf,
+								  'acceptable_compl_inf_tol': N.inf},
                 'WORHP_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
