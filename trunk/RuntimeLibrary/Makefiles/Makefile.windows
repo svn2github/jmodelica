@@ -152,7 +152,7 @@ EXT_OPTION =
 CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -DJMI_AD=${JMI_AD}
 
 # C Compiler options
-CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -msse2 -mfpmath=sse
+CFLAGS = $(PLATFORM_FLAG) -static $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -msse2 -mfpmath=sse
 
 SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 
@@ -188,7 +188,7 @@ LIB_PTHREADS =
 endif
 
 # Libraries necessary to link with jmi
-LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC -lzlib -lstdc++ -static-libstdc++ -ljmi
+LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC -lzlib -lstdc++ -ljmi
 LIBS_FMU_ALL = $(LIBS_FMU_STD) $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_PTHREADS)
 LIBS_FMUME10 = -lfmi1_me           $(LIBS_FMU_ALL)
 LIBS_FMUCS10 = -lfmi1_cs -lfmi1_me $(LIBS_FMU_ALL)
