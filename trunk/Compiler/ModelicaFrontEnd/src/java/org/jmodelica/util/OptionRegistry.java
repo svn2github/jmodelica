@@ -1428,7 +1428,23 @@ abstract public class OptionRegistry {
         return o.getDescription();
     }
 
-    public Set<Map.Entry<String, Option>> getAllOptions() {
+    public OptionType getOptionType(String key){
+        Option o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getOptionType();
+    }
+
+    public Category getCategory(String key){
+        Option o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getCategory();
+    }
+
+    private Set<Map.Entry<String, Option>> getAllOptions() {
         return optionsMap.entrySet();
     }
 
@@ -1543,6 +1559,10 @@ abstract public class OptionRegistry {
 
         public String getDescription() {
             return description;
+        }
+
+        public OptionType getOptionType() {
+            return type;
         }
 
         public Boolean isLimited() {
