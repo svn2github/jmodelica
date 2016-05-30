@@ -4920,6 +4920,58 @@ end RecordTests.RecordScalarize47;
 ")})));
 end RecordScalarize47;
 
+model RecordScalarize48
+    record R
+        Real x[3];
+    end R;
+    
+    model M
+        R r1;
+        R r2 = r1;
+    end M;
+    
+    R[:] r1 ={R(x),R(x)};
+    R[:] r2 ={R(x),R(x)};
+    Real[:] x = {1,2,3};
+    M[2] m(r1=if true then r1 else r2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize48",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize48
+ constant Real r1[1].x[1] = 1.0;
+ constant Real r1[1].x[2] = 2.0;
+ constant Real r1[1].x[3] = 3.0;
+ constant Real r1[2].x[1] = 1.0;
+ constant Real r1[2].x[2] = 2.0;
+ constant Real r1[2].x[3] = 3.0;
+ constant Real r2[1].x[1] = 1.0;
+ constant Real r2[1].x[2] = 2.0;
+ constant Real r2[1].x[3] = 3.0;
+ constant Real r2[2].x[1] = 1.0;
+ constant Real r2[2].x[2] = 2.0;
+ constant Real r2[2].x[3] = 3.0;
+ constant Real x[1] = 1;
+ constant Real x[2] = 2;
+ constant Real x[3] = 3;
+ constant Real m[1].r1.x[1] = 1.0;
+ constant Real m[1].r1.x[2] = 2.0;
+ constant Real m[1].r1.x[3] = 3.0;
+ constant Real m[1].r2.x[1] = 1.0;
+ constant Real m[1].r2.x[2] = 2.0;
+ constant Real m[1].r2.x[3] = 3.0;
+ constant Real m[2].r1.x[1] = 1.0;
+ constant Real m[2].r1.x[2] = 2.0;
+ constant Real m[2].r1.x[3] = 3.0;
+ constant Real m[2].r2.x[1] = 1.0;
+ constant Real m[2].r2.x[2] = 2.0;
+ constant Real m[2].r2.x[3] = 3.0;
+end RecordTests.RecordScalarize48;
+")})));
+end RecordScalarize48;
+
 model RecordFunc1
  record A
   Real x;

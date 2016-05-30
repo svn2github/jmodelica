@@ -932,6 +932,13 @@ aspect Scalarization {
     }
     
     public FExp FSubscriptedExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
+        if (indexVariability().indexParameterOrLess()) {
+            try {
+                return select().scalarRecordFExp(indexMap, suffix);
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
         return new FSubscriptedExp(getFExp().scalarRecordFExp(indexMap, suffix), getFArraySubscripts().scalarize(indexMap));
     }
     
