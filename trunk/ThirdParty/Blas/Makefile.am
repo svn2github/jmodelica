@@ -41,13 +41,13 @@ $(BLAS_BUILD_DIR64):
 	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/
 
 all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
-	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
+	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 else !JM_WIN64
 
 all-local: $(BLAS_BUILD_DIR)
-	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 endif !JM_WIN64
 

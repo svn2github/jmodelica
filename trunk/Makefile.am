@@ -357,7 +357,7 @@ if JM_WIN64
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
 endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
-	cp -r $(DESTDIR)$(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
+	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD

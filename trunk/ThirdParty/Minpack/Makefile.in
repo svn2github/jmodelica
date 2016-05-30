@@ -421,14 +421,14 @@ $(MINPACK_DIR):
 @JM_WIN64_TRUE@	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS)
 
 @JM_WIN64_TRUE@install-exec-local: $(MINPACK_DIR) $(MINPACK_DIR64)
-@JM_WIN64_TRUE@	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install
-@JM_WIN64_TRUE@	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS) install
+@JM_WIN64_TRUE@	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 @JM_WIN64_FALSE@all-local: $(MINPACK_DIR)
 @JM_WIN64_FALSE@	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS)
 
 @JM_WIN64_FALSE@install-exec-local: $(MINPACK_DIR)
-@JM_WIN64_FALSE@	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install
+@JM_WIN64_FALSE@	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 check-local:
 	cd $(MINPACK_DIR) && $(MAKE) $(AM_MAKEFLAGS) test

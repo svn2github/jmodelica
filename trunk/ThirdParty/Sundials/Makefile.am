@@ -25,13 +25,13 @@ $(SUNDIALS_DIR64):
 	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64 -fPIC" -DCMAKE_INSTALL_PREFIX:PATH=$(abs_builddir)/../../sundials_install64 $(abs_top_srcdir)/ThirdParty/Sundials/sundials-2.5.0/
 
 all-local: $(SUNDIALS_DIR) $(SUNDIALS_DIR64)
-	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install
-	cd $(SUNDIALS_DIR64) && make $(AM_MAKEFLAGS) install
+	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+	cd $(SUNDIALS_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 else !JM_WIN64
 
 all-local: $(SUNDIALS_DIR)
-	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install
+	cd $(SUNDIALS_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 endif !JM_WIN64
 

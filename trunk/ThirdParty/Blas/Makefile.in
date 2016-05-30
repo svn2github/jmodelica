@@ -434,11 +434,11 @@ $(BLAS_BUILD_DIR):
 @JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/
 
 @JM_WIN64_TRUE@all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 @JM_WIN64_FALSE@all-local: $(BLAS_BUILD_DIR)
-@JM_WIN64_FALSE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+@JM_WIN64_FALSE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 install-exec-local:
 	mkdir -p $(DESTDIR)$(prefix)/lib/RuntimeLibrary
