@@ -583,7 +583,15 @@ class Test_FMUModelME2:
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
-        cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")
+        cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
+        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
+    
+    @testattr(fmi = True)
+    def test_get_string(self):
+		model = load_fmu(self.string1)
+		
+		for i in range(100): #Test so that memory issues are detected
+			assert model.get("str")[0] == "hej"
     
     @testattr(stddist = True)
     def test_get_enum(self):

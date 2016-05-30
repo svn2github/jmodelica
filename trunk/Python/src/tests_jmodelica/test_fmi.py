@@ -484,6 +484,14 @@ class Test_FMUModelME1:
         """
         cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
         cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
+        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"))
+    
+    @testattr(fmi = True)
+    def test_get_string(self):
+		model = load_fmu(self.string1)
+		
+		for i in range(100): #Test so that memory issues are detected
+			assert model.get("str")[0] == "hej"
     
     @testattr(fmi = True)
     def test_check_against_unneccesary_derivatives_eval(self):
