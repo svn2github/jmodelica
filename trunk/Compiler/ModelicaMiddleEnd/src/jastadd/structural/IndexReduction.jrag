@@ -1337,16 +1337,15 @@ aspect IndexReduction {
         
         public static class IndexReductionCost implements MunkresCost<IndexReductionCost> {
             
-            private static final int NUM_WEIGHTS = 9;
-            public static final int REMOTE_VAR_POSITION                  = 0;
-            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 1;
-            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 2;
-            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 3;
-            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 4;
-            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 5;
-            private static final int FIXED_WEIGHT_POSITION               = 6;
-            private static final int ORDER_WEIGHT_POSITION               = 7;
-            private static final int LINEARITY_WEIGHT_POSITION           = 8;
+            private static final int NUM_WEIGHTS = 8;
+            public static final int STATE_SELECT_ALWAYS_WEIGHT_POSITION  = 0;
+            public static final int STATE_SELECT_PREFER_WEIGHT_POSITION  = 1;
+            public static final int STATE_SELECT_DEFAULT_WEIGHT_POSITION = 2;
+            public static final int STATE_SELECT_AVOID_WEIGHT_POSITION   = 3;
+            public static final int STATE_SELECT_NEVER_WEIGHT_POSITION   = 4;
+            private static final int FIXED_WEIGHT_POSITION               = 5;
+            private static final int ORDER_WEIGHT_POSITION               = 6;
+            private static final int LINEARITY_WEIGHT_POSITION           = 7;
             
             private int[] weights = new int[NUM_WEIGHTS];
             
@@ -1398,6 +1397,7 @@ aspect IndexReduction {
                 return copy;
             }
             
+            
             public String toString() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(");
@@ -1416,26 +1416,15 @@ aspect IndexReduction {
         }
     }
 
-    public void IndexReductionBiPGraph.matchMunkres(Map<IndexReductionVar, IndexReductionCost> weights) {
-
-        if (equationMap.size()==0 || variableMap.size()==0) {
-            throw new IndexReductionException("Empty set of equations or variables was given to the dummy derivative algorithm");
-        }
-
-        IndexReductionCost cost[][] = new IndexReductionCost[equationMap.size()][variableMap.size()];
-
+    public int[][] IndexReductionBiPGraph.matchMunkres(Map<IndexReductionVar, IndexReductionCost> weights, IndexReductionCost cost[][], boolean useRemote) {
         int i = 0;
         
         for (IndexReductionEq eqn : getEquations()) {
             int j = 0;
             for (IndexReductionVar var : variableMap.values()) {
                 IndexReductionCost incideceCost;
-                if (eqn.getVariables().contains(var) && canMatch(eqn, var) && var.numDifferentiations() >= eqn.numDifferentiations()) {
+                if (eqn.getVariables().contains(var) && canMatch(eqn, var) && var.numDifferentiations() >= eqn.numDifferentiations() && (!eqn.isRemoteVar(var) || useRemote)) {
                     incideceCost = weights.get(var);
-                    if (eqn.isRemoteVar(var)) {
-                        incideceCost = incideceCost.copy();
-                        incideceCost.weights[IndexReductionCost.REMOTE_VAR_POSITION]++;
-                    }
                 } else {
                     incideceCost = null;
                 }
@@ -1445,17 +1434,33 @@ aspect IndexReduction {
         }
         
         MunkresProblem<IndexReductionCost> munk = new SparseMunkresProblem<IndexReductionCost>(cost);
+        return munk.solve();
+    }
+
+    public void IndexReductionBiPGraph.matchMunkres(Map<IndexReductionVar, IndexReductionCost> weights) {
+
+        if (equationMap.size()==0 || variableMap.size()==0) {
+            throw new IndexReductionException("Empty set of equations or variables was given to the dummy derivative algorithm");
+        }
+
+        IndexReductionCost cost[][] = new IndexReductionCost[equationMap.size()][variableMap.size()];
         int[][] result;
         try {
-            result = munk.solve();
+            result = matchMunkres(weights, cost, false);
         } catch (MunkresException e) {
-            throw new IndexReductionException("Munkres algorithm was unable to find a matching; " + e.getMessage());
+            try {
+                ASTNode.log.verbose("No munkres matching found, retrying with remote incidences!");
+                result = matchMunkres(weights, cost, true);
+            } catch (MunkresException e2) {
+                throw new IndexReductionException("Munkres algorithm was unable to find a matching; " + e.getMessage());
+            }
         }
+
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
         ASTNode.log.verbose("Munkres result:");
         java.util.List<IndexReductionEq> eqs = new ArrayList<IndexReductionEq>(equationMap.values());
         java.util.List<IndexReductionVar> vars = new ArrayList<IndexReductionVar>(variableMap.values());
-        for (i=0;i<result.length;i++) {
+        for (int i = 0; i < result.length; i++) {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
             IndexReductionEq eqn = eqs.get(result[i][0]);
             IndexReductionVar var = vars.get(result[i][1]);
