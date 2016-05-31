@@ -1,6 +1,6 @@
 CASADI_SRC_DIR=$(abs_top_srcdir)/ThirdParty/CasADi/CasADi/
 CASADI_PYTHON_INST_DIR=$(abs_builddir)/../../casadi_install
-CASADI_INST_DIR=$(DESTDIR)$(prefix)/ThirdParty/CasADi
+CASADI_INST_DIR=$(prefix)/ThirdParty/CasADi
 CASADI_PLUGIN_INST_DIR=$(CASADI_INST_DIR)/lib
 CMAKE_PYTHON_LIBRARY=
 CMAKE_PYTHON_INCLUDE_DIR=
@@ -45,7 +45,7 @@ $(CASADI_BUILD_DIR): swigcheck
 
 
 all-local: $(CASADI_BUILD_DIR)
-	cd $(CASADI_BUILD_DIR) && make $(AM_MAKEFLAGS) install_python
+	cd $(CASADI_BUILD_DIR) && make $(AM_MAKEFLAGS) install_python DESTDIR=
 
 install:
 	cd $(CASADI_BUILD_DIR) && make $(AM_MAKEFLAGS) install
