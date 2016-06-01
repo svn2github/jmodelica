@@ -176,10 +176,10 @@ def test_identification_object():
 		
     #Assert value of free variables
     res = identification.result
-    assert abs(res.final('GreyBox_r_E') - 99.999995739422701) <1e-6
-    assert abs(res.final('GreyBox_r_P') - 74.464755778693103) <1e-6
-    assert abs(res.final('x10') - 138.77236665852601) <1e-6
-    assert abs(res.final('x20') - 40.696009354038303) <1e-6
+    N.testing.assert_allclose(res.final('GreyBox_r_E'), 99.999995739422701, 1e-3)
+    N.testing.assert_allclose(res.final('GreyBox_r_P'), 74.464755778693103, 1e-3)
+    N.testing.assert_allclose(res.final('x10'), 138.77236665852601, 1e-3)
+    N.testing.assert_allclose(res.final('x20'), 40.696009354038303, 1e-3)
 
 
 @testattr(casadi = True)
@@ -304,11 +304,10 @@ def test_compare():
     result = identification.compare([idObj1, idObj2])
     
     # assert results
-    assert abs(result[0]['cost'] - 5466.596970228651) < 1e-6
-    assert abs(result[1]['cost'] - 5630.90033894926) <1e-6
-    
-    assert abs(result[0]['costred'] - 164.47186155134114) < 1e-6
-    assert abs(result[1]['costred'] - 0.16849283073224797) < 1e-6
+    N.testing.assert_allclose(result[0]['cost'], 5466.596970228651, 1e-3)
+    N.testing.assert_allclose(result[1]['cost'], 5630.90033894926, 1e-3)
+    N.testing.assert_allclose(result[0]['costred'], 164.47186155134114, 5e-3)
+    N.testing.assert_allclose(result[1]['costred'], 0.16849283073224797, 5e-3)
     
     # assert risk
     assert identification.calculate_risk(identification.get_cost()-idObj2.get_cost(),1,2) == result[1]['risk'] 
