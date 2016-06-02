@@ -22,7 +22,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1223,7 +1222,7 @@ abstract public class OptionRegistry {
         return findStringOption(key, false).getDefault();
     }
 
-    public Collection<String> getStringOptionAllowed(String key) {
+    public Set<String> getStringOptionAllowed(String key) {
         return findStringOption(key, false).getAllowed();
     }
 
@@ -1762,11 +1761,11 @@ abstract public class OptionRegistry {
             }
         }
 
-        public Collection<String> getAllowed() {
+        public Set<String> getAllowed() {
             if (vals == null) {
-                return new HashSet<String>();
+                return Collections.unmodifiableSet(Collections.<String> emptySet());
             }
-            return vals.values();
+            return Collections.<String> unmodifiableSet(vals.keySet());
         }
 
         public String getValue() {
