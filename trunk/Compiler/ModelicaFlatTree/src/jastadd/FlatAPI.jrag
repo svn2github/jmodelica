@@ -1664,6 +1664,12 @@ aspect FlatAPI {
     eq FClass.getFParameterEquation().isParameterEquation() = true;
     eq Root.getChild().isParameterEquation() = false;
     
+    inh boolean FAbstractEquation.isNormalEquation();
+    eq FClass.getFAbstractEquation().isNormalEquation() = true;
+    eq FClass.getChild().isNormalEquation()             = false;
+    eq InstNode.getChild().isNormalEquation()           = true;
+    eq Root.getChild().isNormalEquation()               = false;
+    
     coll ArrayList<FExp> FAbstractEquation.replacedAtInitialExps()
         [new ArrayList<FExp>()] with add root FAbstractEquation;
     FDelayExp contributes this

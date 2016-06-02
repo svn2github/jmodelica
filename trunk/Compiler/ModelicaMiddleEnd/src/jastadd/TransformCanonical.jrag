@@ -1969,7 +1969,7 @@ aspect TransformCanonical {
         if (nonDefiningUses().size() > 0) {
             FIdUseExp nonDefineUse = nonDefiningUses().iterator().next();
             value = nonDefineUse.inlineUsesFunctionCallLeft();
-            if (value == null) {
+            if (value == null || (defineUse.isParameterExp() && value.myFEquation().isNormalEquation())) {
                 return false;
             }
             value.myFEquation().markForRemoval();

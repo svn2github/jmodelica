@@ -1086,6 +1086,53 @@ end FunctionInlining.RecordInline11;
     end RecordInline11;
 
 
+model RecordInline12
+    function F1
+        input Real i1;
+        output Real[1] o1;
+    algorithm
+        o1[1] := i1 * 2;
+    annotation(Inline=false);
+    end F1;
+    
+    function F2
+        input Real[1] i1;
+        input Real dummy;
+        output Real[1] o1;
+    algorithm
+        o1[1] := i1[1];
+    end F2;
+    
+    parameter Real r = 1;
+    Real x[1] = F2(F1(r), sin(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline12",
+            description="Check that removal of temporaries does not leave non-parameter defined by parameter equation",
+            flatModel="
+fclass FunctionInlining.RecordInline12
+ parameter Real r = 1 /* 1 */;
+ parameter Real x[1];
+parameter equation
+ ({x[1]}) = FunctionInlining.RecordInline12.F1(r);
+
+public
+ function FunctionInlining.RecordInline12.F1
+  input Real i1;
+  output Real[:] o1;
+ algorithm
+  init o1 as Real[1];
+  o1[1] := i1 * 2;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.RecordInline12.F1;
+
+end FunctionInlining.RecordInline12;
+")})));
+end RecordInline12;
+
+
 model Test2
   Modelica.Blocks.Sources.Ramp ramp(
     height=-25,
