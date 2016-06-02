@@ -42,6 +42,21 @@ package VDP_pack
   constraint 
      u<=0.75;
   end VDP_Opt;
+        
+    optimization VDP_Opt_Simple (objectiveIntegrand = x1^2 + x2^2 + u^2,
+                      startTime = 0,
+                      finalTime = 20)
+      // The states
+      Real x1(start=0,fixed=true);
+      Real x2(start=1,fixed=true);
+      // The control signal
+      input Real u;
+    equation
+      der(x1) = (1 - x2^2) * x1 - x2 + u;
+      der(x2) = x1;
+    constraint 
+       u<=0.75;
+    end VDP_Opt_Simple;
   
   optimization VDP_Opt2 (objective = cost(finalTime),
                          startTime = 0,
