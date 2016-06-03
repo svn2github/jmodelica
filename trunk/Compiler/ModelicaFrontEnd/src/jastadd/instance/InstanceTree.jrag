@@ -700,10 +700,10 @@ aspect Environments {
 	eq Root.getChild().myInstNode() {
 		throw new UnsupportedOperationException();
 	}
-	
-	//The lexical scope of modifiers for short classes are "outside" of the short declaration
-    eq InstExtendsShortClass.getChild().myInstNode() = myInstNode();
-	
+
+    //The lexical scope of modifiers for short classes are "outside" of the short declaration
+    eq InstExtendsShortClass.getChild().myInstNode() = getLookupNode();
+
 	/**
 	 * InstPrimitive:s may have children of type InstExtends, if the InstPrimitive is instantiated
 	 * either from a short class declaration that references a primitive type or from a 'type' class
@@ -900,35 +900,32 @@ aspect InstanceTreeConstruction {
     
     syn boolean ClassDecl.hasRedeclare() = false;
 
-	syn lazy List InstNode.getInstExtendsList() {
-		List l = new List();
-		for (ExtendsClause e : superClasses()) 
-			l.add(createInstExtends(e));
-		
-		return l;
-	}
-	
-	eq InstComponentDecl.getInstExtendsList() {
-		List l = new List();
-		if (!isArrayDecl()) {
-			for (ExtendsClause e : superClasses()) 
-				l.add(createInstExtends(e));
-		}
-		
-		return l;
-	}
+    syn lazy List InstNode.getInstExtendsList() {
+        List l = new List();
+        if (shouldHaveInstExtendsList()) {
+            InstNode lookup = instLookupNodeForShortClassExtends();
+            for (ExtendsClause e : superClasses()) { 
+                l.add(createInstExtends(e, lookup));
+            }
+        }
+        return l;
+    }
 
-	eq InstArrayComponentDecl.getInstExtendsList() {
-		List l = new List();
-		if (childDimensionLength() == Size.UNKNOWN) {
-			// Loop over indices and create new 
-			for (ExtendsClause e : superClasses()) {
-				l.add(createInstExtends(e));
-			}			
-		} 
-		return l;
-	}
-	
+    syn boolean InstNode.shouldHaveInstExtendsList()      = true;
+    eq InstComponentDecl.shouldHaveInstExtendsList()      = !isArrayDecl();
+    eq InstArrayComponentDecl.shouldHaveInstExtendsList() = childDimensionLength() == Size.UNKNOWN;
+
+    /**
+     * Find the instance tree node an extends below this node, from a short class declaration, 
+     * should look up right hand side names in its modification from.
+     */
+    syn InstNode InstNode.instLookupNodeForShortClassExtends()          = myInstClass().instLookupNodeForShortClassExtends();
+    eq InstClassDecl.instLookupNodeForShortClassExtends()               = null;
+    eq InstShortClassDecl.instLookupNodeForShortClassExtends()          = this;
+    eq InstReplacingShortClassDecl.instLookupNodeForShortClassExtends() = getInstClassRedeclare().instLookupNodeForShortClassExtends();
+
+    syn InstNode InstClassRedeclare.instLookupNodeForShortClassExtends() = myInstNode();
+
 	eq InstPrimitive.getInstComponentDeclList() = new List();
 	eq InstPrimitive.getInstClassDeclList() = new List();
 
@@ -948,8 +945,9 @@ aspect InstanceTreeConstruction {
     syn nta List<InstExtends> InstRecordConstructor.getInstExtendsList() {
         InstClassDecl rec = getRecord().myInstClassDecl().actualInstClass();
         List l = new List();
+        InstNode lookup = myInstClassDecl().instLookupNodeForShortClassExtends();
         for (ExtendsClause e : rec.superClasses()) 
-            l.add(rec.createInstExtends(e));
+            l.add(rec.createInstExtends(e, lookup));
         return l;
     }
 
@@ -1042,6 +1040,7 @@ aspect InstanceTreeConstruction {
          public InstLookupResult<InstClassDecl> lookupInstClassQualified(String name);
          public ClassDecl redeclaringClassDecl();
          public InstClassDecl redeclaringInstClassDecl();
+         public InstNode instLookupNodeForShortClassExtends();
      }
     InstClassDecl implements InstRedeclareClassNode;
     InstClassRedeclare implements InstRedeclareClassNode;
@@ -1052,65 +1051,65 @@ aspect InstanceTreeConstruction {
     syn InstClassDecl InstClassDecl.redeclaringInstClassDecl()      = this;
     syn InstClassDecl InstClassRedeclare.redeclaringInstClassDecl() = getInstClassDecl();
 
-	public InstNode InstNode.createInstExtends(ExtendsClause ec) {
-   		// This cannot be redeclared. Just create and return.
-   		return ec.newInstExtends();
-	}
+    public InstNode InstNode.createInstExtends(ExtendsClause ec, InstNode lookup) {
+        // This cannot be redeclared. Just create and return.
+        return ec.newInstExtends(lookup);
+    }
 
-	public InstNode InstReplacingShortClassDecl.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsCheckReplacing(ec);
-	}
+    public InstNode InstReplacingShortClassDecl.createInstExtends(ExtendsClause ec, InstNode lookup) {
+        return createInstExtendsCheckReplacing(ec, lookup);
+    }
 
-	public InstNode InstReplacingSimpleShortClassDecl.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsCheckReplacing(ec);
-	}
-	
-	public InstNode InstExtendsShortClass.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsCheckReplacing(ec);
-	}
-	
-	public InstNode InstReplacingExtendsShortClass.createInstExtends(ExtendsClause ec) {
-		return createInstExtendsCheckReplacing(ec);
-	}
+    public InstNode InstReplacingSimpleShortClassDecl.createInstExtends(ExtendsClause ec, InstNode lookup) {
+        return createInstExtendsCheckReplacing(ec, lookup);
+    }
 
-	public InstNode InstNode.createInstExtendsCheckReplacing(ExtendsClause ec) {
-		if (!isInInstModification() && ec.needsReplacingExtends()) {
-			Environment e = myEnvironment();
-			InstModification im = findMatching(e, name());
-			if (im != null)
-				return im.createInstReplacingExtends(ec);
-		}
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstModification.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstClassRedeclare.createInstReplacingExtends(ExtendsClause ec) {
-		for (InstExtends ie : getInstClassDecl().actualInstClass().getInstExtendss())
-			return ie.createInstReplacingExtends(ec);
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstShortClassDecl.createInstReplacingExtends(ExtendsClause ec) {
-		for (InstExtends ie : getInstExtendss())
-			return ie.createInstReplacingExtends(ec);
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstSimpleShortClassDecl.createInstReplacingExtends(ExtendsClause ec) {
-		return actualInstClass().createInstReplacingExtends(ec);
-	}
-	
-	public InstExtends InstNode.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstExtends();
-	}
-	
-	public InstExtends InstExtendsShortClass.createInstReplacingExtends(ExtendsClause ec) {
-		return ec.newInstReplacingExtends(this);
-	}
-	
+    public InstNode InstExtendsShortClass.createInstExtends(ExtendsClause ec, InstNode lookup) {
+        return createInstExtendsCheckReplacing(ec, lookup);
+    }
+
+    public InstNode InstReplacingExtendsShortClass.createInstExtends(ExtendsClause ec, InstNode lookup) {
+        return createInstExtendsCheckReplacing(ec, lookup);
+    }
+
+    public InstNode InstNode.createInstExtendsCheckReplacing(ExtendsClause ec, InstNode lookup) {
+        if (!isInInstModification() && ec.needsReplacingExtends()) {
+            Environment e = myEnvironment();
+            InstModification im = findMatching(e, name());
+            if (im != null)
+                return im.createInstReplacingExtends(ec, lookup);
+        }
+        return ec.newInstExtends(lookup);
+    }
+
+    public InstExtends InstModification.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        return ec.newInstExtends(lookup);
+    }
+
+    public InstExtends InstClassRedeclare.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        for (InstExtends ie : getInstClassDecl().actualInstClass().getInstExtendss())
+            return ie.createInstReplacingExtends(ec, lookup);
+        return ec.newInstExtends(lookup);
+    }
+
+    public InstExtends InstShortClassDecl.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        for (InstExtends ie : getInstExtendss())
+            return ie.createInstReplacingExtends(ec, lookup);
+        return ec.newInstExtends(lookup);
+    }
+
+    public InstExtends InstSimpleShortClassDecl.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        return actualInstClass().createInstReplacingExtends(ec, lookup);
+    }
+
+    public InstExtends InstNode.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        return ec.newInstExtends(lookup);
+    }
+
+    public InstExtends InstExtendsShortClass.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
+        return ec.newInstReplacingExtends(this);
+    }
+
 	eq InstNamedModification.matches(String str) = name().equals(str);
 	
 	inh boolean InstNode.isInInstModification();
@@ -1388,36 +1387,38 @@ aspect InstanceTreeConstruction {
     }
 
     // Build an InstExtends
-	public InstExtends ExtendsClause.newInstExtends() {
-		InstNormalExtends ie = newEmptyInstExtends();
-		ie.setClassName(getSuper().newInstAccess());
-		ie.setExtendsClause(this);
-		if (hasClassModification())
-			ie.setInstClassModification(getClassModification().newInstModification());
-		ie.setLocation(this);
-		return ie;
-	}
-	
-	public InstExtends ExtendsClause.newInstReplacingExtends(InstExtendsShortClass iesc) {
-		InstReplacingExtendsShortClass ie = new InstReplacingExtendsShortClass();
-		ie.setClassName(getSuper().newInstAccess());
-		ie.setExtendsClause(this);
-		ie.setInstExtendsShortClass(iesc);
-		ie.setLocation(this);
-		return ie;
-	}
-	
-	public InstNormalExtends ExtendsClause.newEmptyInstExtends() {
-		return new InstNormalExtends();
-	}
-	
-	public InstNormalExtends ExtendsClauseShortClass.newEmptyInstExtends() {
-		return new InstExtendsShortClass();
-	}
-	
-	public InstNormalExtends InlineExtendsClause.newEmptyInstExtends() {
-		return new InstInlineExtends();
-	}
+    public InstExtends ExtendsClause.newInstExtends(InstNode lookup) {
+        InstNormalExtends ie = newEmptyInstExtends(lookup);
+        ie.setClassName(getSuper().newInstAccess());
+        ie.setExtendsClause(this);
+        if (hasClassModification())
+            ie.setInstClassModification(getClassModification().newInstModification());
+        ie.setLocation(this);
+        return ie;
+    }
+
+    public InstExtends ExtendsClause.newInstReplacingExtends(InstExtendsShortClass iesc) {
+        InstReplacingExtendsShortClass ie = new InstReplacingExtendsShortClass();
+        ie.setClassName(getSuper().newInstAccess());
+        ie.setExtendsClause(this);
+        ie.setInstExtendsShortClass(iesc);
+        ie.setLocation(this);
+        return ie;
+    }
+
+    public InstNormalExtends ExtendsClause.newEmptyInstExtends(InstNode lookup) {
+        return new InstNormalExtends();
+    }
+
+    public InstNormalExtends ExtendsClauseShortClass.newEmptyInstExtends(InstNode lookup) {
+        InstExtendsShortClass res = new InstExtendsShortClass();
+        res.setLookupNode(lookup);
+        return res;
+    }
+
+    public InstNormalExtends InlineExtendsClause.newEmptyInstExtends(InstNode lookup) {
+        return new InstInlineExtends();
+    }
 
 	public InstAccess ComponentDecl.newInstClassAccess() {
 		return getClassName().newInstAccess();

@@ -785,6 +785,88 @@ Warning at line 777, column 18, in file '...', NOT_IN_CONSTRAINING_TYPE:
 end NameTest25_Err;
 
 
+model NameTest26
+    model A
+        Real x = time;
+    end A;
+    
+    model B = A(x(start = c));
+    
+    parameter Real c = 2;
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest26",
+            description="Test lookup of names used in modifiers in short class declarations",
+            flatModel="
+fclass NameTests.NameTest26
+ parameter Real c = 2 /* 2 */;
+ Real b.x(start = c) = time;
+end NameTests.NameTest26;
+")})));
+end NameTest26;
+
+
+model NameTest27
+    model A
+        Real x = time;
+    end A;
+    
+    model D
+        model B = A(x(start = c));
+    
+        parameter Real c = 2;
+        
+        B b;
+    end D;
+    
+    D d(c = 3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest27",
+            description="Test lookup of names used in modifiers in short class declarations",
+            flatModel="
+fclass NameTests.NameTest27
+ parameter Real d.c = 3 /* 3 */;
+ Real d.b.x(start = d.c) = time;
+end NameTests.NameTest27;
+")})));
+end NameTest27;
+
+
+model NameTest28
+    model A
+        Real x = time;
+    end A;
+    
+    model D
+        replaceable model B = A;
+        B b;
+    end D;
+    
+    model E
+        parameter Real c = 2;
+        
+        D d(redeclare model B = A(x(start = c)));
+    end E;
+    
+    E e(c = 3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NameTest28",
+            description="Test lookup of names used in modifiers in short class declarations",
+            flatModel="
+fclass NameTests.NameTest28
+ parameter Real e.c = 3 /* 3 */;
+ Real e.d.b.x(start = e.c) = time;
+end NameTests.NameTest28;
+")})));
+end NameTest28;
+
+
 
 /* Used for tests ConstantLookup1-3. */
 constant Real constant_1 = 1.0;

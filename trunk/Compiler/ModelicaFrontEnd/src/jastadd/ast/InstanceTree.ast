@@ -144,7 +144,7 @@ InstExtends : InstNode ::=  ClassName:InstAccess <ExtendsClause:ExtendsClause>
                             /[ClassAnnotation:InstClassModification]/
                             /[ClassAnnotationExtends:InstClassModification]/;
 InstNormalExtends : InstExtends ::= [InstClassModification];
-InstExtendsShortClass : InstNormalExtends;
+InstExtendsShortClass : InstNormalExtends ::= <LookupNode:InstNode>;
 InstInlineExtends     : InstNormalExtends;
 InstReplacingExtendsShortClass : InstExtends ::= <InstExtendsShortClass:InstExtendsShortClass>;
 
