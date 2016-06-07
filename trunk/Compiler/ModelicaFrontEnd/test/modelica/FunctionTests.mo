@@ -11262,7 +11262,7 @@ model ExternalFuncLibs1
             description="External function annotations, Library",
             variability_propagation=false,
             methodName="externalLibraries",
-            methodResult="[foo, bar, m]"
+            methodResult="[foo, m, bar]"
  )})));
 end ExternalFuncLibs1;
 
@@ -11303,7 +11303,7 @@ model ExternalFuncLibs2
             description="External function annotations, Include",
             variability_propagation=false,
             methodName="externalIncludes",
-            methodResult="[#include \"foo.h\", #include \"bar.h\"]"
+            methodResult="[#include \"bar.h\", #include \"foo.h\"]"
  )})));
 end ExternalFuncLibs2;
 
@@ -11338,7 +11338,7 @@ model ExternalFuncLibs3
             description="External function annotations, LibraryDirectory",
             variability_propagation=false,
             methodName="externalLibraryDirectories",
-            methodResult="[/c:/foo/lib, /c:/bar/lib]"
+            methodResult="[/c:/bar/lib, /c:/foo/lib]"
  )})));
 end ExternalFuncLibs3;
 
@@ -11494,7 +11494,7 @@ model ExternalFuncLibs7
             description="External function annotations, compiler args",
             variability_propagation=false,
             methodName="externalCompilerArgs",
-            methodResult=" -lfoo -lbar -L/c:/foo/lib -L/c:/bar/lib -L/c:/std/lib -I/c:/foo/inc -I/c:/bar/inc -I/c:/std/inc"
+            methodResult=" -lfoo -lbar -L/c:/bar/lib -L/c:/std/lib -L/c:/foo/lib -I/c:/foo/inc -I/c:/std/inc -I/c:/bar/inc"
  )})));
 end ExternalFuncLibs7;
 
