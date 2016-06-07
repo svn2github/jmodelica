@@ -562,7 +562,7 @@ aspect FlatTypeAnalysis {
     eq FDiagonal.type() = getFExp().type().arrayType(size());
 
     eq FSubscriptedExp.type() = getFExp().type().sizedType(size());
-    eq FComponentExp.type()   = getFExp().type().componentType(getName());
+    eq FComponentExp.type()   = getFExp().type().declared(this).component(getName()).sizedType(size());
 
     eq FArrayDimAsArgsExp.type() = (size().ndims() > 0) ? fIntegerArrayType(size()) : fUnknownType();
     eq FFillExp.type()           = (size().ndims() > 0) ? getFillExp().type().arrayType(size()) : fUnknownType();

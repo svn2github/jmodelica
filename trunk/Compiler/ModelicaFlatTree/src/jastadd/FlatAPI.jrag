@@ -182,7 +182,8 @@ aspect FlatAPI {
     syn int FAbstractVariable.indexInZ() = -1;
     eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
     
-    syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
+    syn boolean FAssignableExp.isConsecutiveInZ(FAssignableExp use) = false;
+    eq FIdUseExp.isConsecutiveInZ(FAssignableExp use) = (use instanceof FIdUseExp) && myFV().isConsecutiveInZ(((FIdUseExp)use).myFV());
     
     syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
     eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
@@ -2855,12 +2856,13 @@ aspect FVariableUses {
     /**
      * Check if this is the left hand side of an assignment or function call statement.
      */
-    inh boolean FAssignableExp.isAssignedTo();
-    inh boolean FFunctionCallLeft.isAssignedTo();
+    inh boolean FExp.isAssignedTo();
     eq BaseNode.getChild().isAssignedTo()         = false;
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
-    eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
-    eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
+    eq FFunctionCallLeft.getFExp().isAssignedTo() = true;
+    eq FDecomposeExp.getFExp().isAssignedTo()     = isAssignedTo();
+    eq FRecordConstructor.getArg().isAssignedTo() = isAssignedTo();
+    eq FArray.getFExp().isAssignedTo()            = isAssignedTo();
     
     inh boolean FExp.inBindingExp();
     eq Root.getChild().inBindingExp() = false;

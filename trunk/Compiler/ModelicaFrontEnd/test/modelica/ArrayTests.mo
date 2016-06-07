@@ -7039,6 +7039,111 @@ end ArrayTests.VariableIndex.TwoDim7;
 ")})));
 end TwoDim7;
 
+model Record1
+    record R
+        parameter Integer n;
+        Real x[n] = 1:n;
+    end R;
+    
+    Integer[3] is = {1,2,3};
+    Real[3] y;
+    constant R[3] r = {R(5),R(4),R(3)};
+equation
+    for i in 1:3 loop
+        y[i] = r[i].x[is[i]];
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Record1",
+            description="Test array index with discrete variability in record",
+            variability_propagation=false,
+            flatModel="
+fclass ArrayTests.VariableIndex.Record1
+ discrete Integer is[1];
+ discrete Integer is[2];
+ discrete Integer is[3];
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ constant Integer r[1].n = 5;
+ constant Real r[1].x[1] = 1;
+ constant Real r[1].x[2] = 2;
+ constant Real r[1].x[3] = 3;
+ constant Real r[1].x[4] = 4;
+ constant Real r[1].x[5] = 5;
+ constant Integer r[2].n = 4;
+ constant Integer r[3].n = 3;
+initial equation 
+ pre(is[1]) = 0;
+ pre(is[2]) = 0;
+ pre(is[3]) = 0;
+equation
+ y[1] = ({1, 2, 3, 4, 5})[is[1]];
+ y[2] = ({1, 2, 3, 4})[is[2]];
+ y[3] = ({1, 2, 3})[is[3]];
+ is[1] = 1;
+ is[2] = 2;
+ is[3] = 3;
+end ArrayTests.VariableIndex.Record1;
+")})));
+end Record1;
+
+model Record2
+    record R
+        parameter Integer n;
+        Real x[n] = 1:n;
+    end R;
+    
+    Integer[3] is = {1,2,3};
+    Real y;
+    constant R[3] r = {R(5),R(4),R(3)};
+    Integer i = integer(time);
+equation
+    y = r[i].x[is[i]];
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariableIndex_Record2",
+            description="Test array index with discrete variability in record",
+            variability_propagation=false,
+            flatModel="
+fclass ArrayTests.VariableIndex.Record2
+ discrete Integer is[1];
+ discrete Integer is[2];
+ discrete Integer is[3];
+ Real y;
+ constant Integer r[1].n = 5;
+ constant Real r[1].x[1] = 1;
+ constant Real r[1].x[2] = 2;
+ constant Real r[1].x[3] = 3;
+ constant Real r[1].x[4] = 4;
+ constant Real r[1].x[5] = 5;
+ constant Integer r[2].n = 4;
+ constant Integer r[3].n = 3;
+ discrete Integer i;
+initial equation 
+ pre(i) = 0;
+ pre(is[1]) = 0;
+ pre(is[2]) = 0;
+ pre(is[3]) = 0;
+equation
+ y = ({ArrayTests.VariableIndex.Record2.R(5, {1, 2, 3, 4, 5}), ArrayTests.VariableIndex.Record2.R(4, {1, 2, 3, 4}), ArrayTests.VariableIndex.Record2.R(3, {1, 2, 3})})[i].x[({is[1], is[2], is[3]})[i]];
+ is[1] = 1;
+ is[2] = 2;
+ is[3] = 3;
+ i = if time < pre(i) or time >= pre(i) + 1 or initial() then integer(time) else pre(i);
+
+public
+ record ArrayTests.VariableIndex.Record2.R
+  parameter Integer n;
+  Real x[n];
+ end ArrayTests.VariableIndex.Record2.R;
+
+end ArrayTests.VariableIndex.Record2;
+")})));
+end Record2;
+
 model Algorithm
     Real table[:] = {42, 3.14};
     Integer i = if time > 1 then 1 else 2;

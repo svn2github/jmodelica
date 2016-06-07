@@ -5651,8 +5651,8 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl14_f_exp0(A_1_r* x_v) {
 
     JMI_RECORD_STATIC(A_1_r, tmp_1)
     JMI_RECORD_STATIC(B_0_r, tmp_2)
-    tmp_1->b = tmp_2;
     tmp_1->a = AD_WRAP_LITERAL(1);
+    tmp_1->b = tmp_2;
     tmp_1->b->c = AD_WRAP_LITERAL(2);
     (*res)[0] = func_CCodeGenTests_CRecordDecl14_f_exp0(tmp_1) - (_x_0);
 ")})));
@@ -5707,8 +5707,8 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl15_f_exp0(A_0_r* x_v) {
 
 
     JMI_RECORD_STATIC(A_0_r, tmp_1)
-    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     tmp_1->a = tmp_2;
     jmi_array_ref_1(tmp_1->a, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1->a, 2) = AD_WRAP_LITERAL(2);
@@ -5774,19 +5774,19 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a) {
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_3, 2, 1)
     JMI_ARR(STAT, B_0_r, B_0_ra, tmp_4, 2, 1)
     JMI_ARRAY_INIT_1(STAT, A_1_r, A_1_ra, tmp_1, 3, 1, 3)
+    jmi_array_rec_1(tmp_1, 1)->a = AD_WRAP_LITERAL(1);
     JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_2, 2, 1, 2)
     jmi_array_rec_1(tmp_1, 1)->b = tmp_2;
-    JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_3, 2, 1, 2)
-    jmi_array_rec_1(tmp_1, 2)->b = tmp_3;
-    JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_4, 2, 1, 2)
-    jmi_array_rec_1(tmp_1, 3)->b = tmp_4;
-    jmi_array_rec_1(tmp_1, 1)->a = AD_WRAP_LITERAL(1);
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 1)->c = AD_WRAP_LITERAL(2);
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 1)->b, 2)->c = AD_WRAP_LITERAL(3);
     jmi_array_rec_1(tmp_1, 2)->a = AD_WRAP_LITERAL(4);
+    JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_3, 2, 1, 2)
+    jmi_array_rec_1(tmp_1, 2)->b = tmp_3;
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 1)->c = AD_WRAP_LITERAL(5);
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 2)->b, 2)->c = AD_WRAP_LITERAL(6);
     jmi_array_rec_1(tmp_1, 3)->a = AD_WRAP_LITERAL(7);
+    JMI_ARRAY_INIT_1(STAT, B_0_r, B_0_ra, tmp_4, 2, 1, 2)
+    jmi_array_rec_1(tmp_1, 3)->b = tmp_4;
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 1)->c = AD_WRAP_LITERAL(8);
     jmi_array_rec_1(jmi_array_rec_1(tmp_1, 3)->b, 2)->c = AD_WRAP_LITERAL(9);
     (*res)[0] = func_CCodeGenTests_CRecordDecl16_f_exp0(tmp_1) - (_x_0);
@@ -17908,9 +17908,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_1, 2) = _y_2_1;
     jmi_array_ref_1(tmp_1, 3) = _y_3_2;
     jmi_array_val_1(tmp_1, _i_4) = _x_3;
-    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    memcpy(&_y_1_0, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
@@ -17970,13 +17968,70 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_4, 2) = _x_2_4;
     jmi_array_ref_1(tmp_4, 3) = _x_3_5;
     jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
-    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    memcpy(&_y_1_0, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
 end VariableArrayIndex6;
+
+model VariableArrayIndex7
+    record R
+        parameter Integer n;
+        Real x[n] = 1:n;
+    end R;
+    
+    Real y = r[i].x[i];
+    constant R[3] r = {R(5),R(4),R(3)};
+    Integer i = integer(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex7",
+            description="Test of variable array index",
+            template="$C_ode_derivatives$",
+            variability_propagation=false,
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STAT, R_0_r, R_0_ra, tmp_1, 3, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 4, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(_time - (pre_i_9), _sw(0), JMI_ALMOST_EPS, JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(_time - (pre_i_9 + AD_WRAP_LITERAL(1)), _sw(1), JMI_ALMOST_EPS, JMI_REL_GEQ);
+    }
+    _i_9 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_9);
+    pre_i_9 = _i_9;
+    JMI_ARRAY_INIT_1(STAT, R_0_r, R_0_ra, tmp_1, 3, 1, 3)
+    jmi_array_rec_1(tmp_1, 1)->n = AD_WRAP_LITERAL(5);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 5, 1, 5)
+    jmi_array_rec_1(tmp_1, 1)->x = tmp_2;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 4) = AD_WRAP_LITERAL(4);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 1)->x, 5) = AD_WRAP_LITERAL(5);
+    jmi_array_rec_1(tmp_1, 2)->n = AD_WRAP_LITERAL(4);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 4, 1, 4)
+    jmi_array_rec_1(tmp_1, 2)->x = tmp_3;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 2)->x, 4) = AD_WRAP_LITERAL(4);
+    jmi_array_rec_1(tmp_1, 3)->n = AD_WRAP_LITERAL(3);
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
+    jmi_array_rec_1(tmp_1, 3)->x = tmp_4;
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 3)->x, 1) = AD_WRAP_LITERAL(1);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 3)->x, 2) = AD_WRAP_LITERAL(2);
+    jmi_array_ref_1(jmi_array_rec_1(tmp_1, 3)->x, 3) = AD_WRAP_LITERAL(3);
+    _y_0 = jmi_array_val_1(jmi_array_rec_1(tmp_1, _i_9)->x, _i_9);
+    return ef;
+}
+")})));
+end VariableArrayIndex7;
 
 model TestRelationalOp1
 Real v1(start=-1);

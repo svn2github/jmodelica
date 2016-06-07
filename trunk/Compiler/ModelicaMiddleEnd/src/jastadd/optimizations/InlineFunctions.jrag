@@ -1101,7 +1101,7 @@ aspect FunctionInlining {
     
     syn boolean FAssignableExp.isOkTrivialInlineInFor();
     eq FIdUseExp.isOkTrivialInlineInFor() = myFV().size().isUnknown();
-    eq FSubscriptedExp.isOkTrivialInlineInFor() = false;
+    eq FDecomposeExp.isOkTrivialInlineInFor() = false;
 
     /**
      * Create a TrivialInlineCheck object for this variable.
