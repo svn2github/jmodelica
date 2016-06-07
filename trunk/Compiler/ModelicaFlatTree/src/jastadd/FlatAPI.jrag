@@ -3799,12 +3799,12 @@ aspect FlatExternalFunctionAPI {
     }
     
     coll HashSet<FExternalStmt> FClass.myExternals()
-        [new HashSet<FExternalStmt>()] with add root FClass;
+        [new LinkedHashSet<FExternalStmt>()] with add root FClass;
     FExternalStmt contributes this
         to FClass.myExternals() for myFClass();
     
     syn HashSet<String> FClass.externalLibraries() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.library() != null)
                 for (String lib : ext.library())
@@ -3813,7 +3813,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalIncludes() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.include() != null)
                 res.add(ext.include());
@@ -3821,7 +3821,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalLibraryDirectories() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.libraryDirectory() != null)
                 res.add(ext.libraryDirectory());
@@ -3829,7 +3829,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalIncludeDirectories() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.includeDirectory() != null)
                 res.add(ext.includeDirectory());

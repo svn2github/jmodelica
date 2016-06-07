@@ -6028,8 +6028,8 @@ model ExtStmtInclude2
             variability_propagation=false,
             template="$external_func_includes$",
             generatedCode="
-#include \"extFunc2.h\"
 #include \"extFunc1.h\"
+#include \"extFunc2.h\"
 ")})));
 end ExtStmtInclude2;
 
