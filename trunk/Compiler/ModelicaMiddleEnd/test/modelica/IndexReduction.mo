@@ -1974,50 +1974,52 @@ end IndexReduction.FunctionAttributeScalarization2;
 ")})));
 end FunctionAttributeScalarization2;
 
-model NonDiffArgsTest1
-    function F1
-        input Real x;
-        input Real r;
-        output Real y;
-    algorithm
-        y := x + r;
-    annotation(Inline=false,derivative(noDerivative=r)=F1_der);
-    end F1;
-    
-    function F1_der
-        input Real x;
-        input Real r;
-        input Real x_der;
-        output Real y_der;
-    algorithm
-        y_der := x_der;
-    annotation(Inline=false);
-    end F1_der;
-    
-    function F2
-        input Real x;
-        output Real r;
-    algorithm
-        r := x;
-    annotation(Inline=false);
-    end F2;
+package NonDiffArgs
 
-    Real x;
-    Real der_y;
-    Real y;
-    Real r;
-equation
-    x * y = time;
-    r = F2(x);
-    y + 42 = F1(x, r);
-    der_y = der(y);
+    model Test1
+        function F1
+            input Real x;
+            input Real r;
+            output Real y;
+        algorithm
+            y := x + r;
+        annotation(Inline=false,derivative(noDerivative=r)=F1_der);
+        end F1;
+        
+        function F1_der
+            input Real x;
+            input Real r;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        annotation(Inline=false);
+        end F1_der;
+        
+        function F2
+            input Real x;
+            output Real r;
+        algorithm
+            r := x;
+        annotation(Inline=false);
+        end F2;
+    
+        Real x;
+        Real der_y;
+        Real y;
+        Real r;
+    equation
+        x * y = time;
+        r = F2(x);
+        y + 42 = F1(x, r);
+        der_y = der(y);
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="NonDiffArgsTest1",
+            name="NonDiffArgs_Test1",
             description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
             dynamic_states=false,
             flatModel="
-fclass IndexReduction.NonDiffArgsTest1
+fclass IndexReduction.NonDiffArgs.Test1
  Real x;
  Real der_y;
  Real y;
@@ -2026,33 +2028,33 @@ fclass IndexReduction.NonDiffArgsTest1
  Real _der_x;
 equation
  x * y = time;
- r = IndexReduction.NonDiffArgsTest1.F2(x);
- y + 42 = IndexReduction.NonDiffArgsTest1.F1(x, r);
+ r = IndexReduction.NonDiffArgs.Test1.F2(x);
+ y + 42 = IndexReduction.NonDiffArgs.Test1.F1(x, r);
  der_y = _der_y;
  x * _der_y + _der_x * y = 1.0;
- _der_y = IndexReduction.NonDiffArgsTest1.F1_der(x, r, _der_x);
+ _der_y = IndexReduction.NonDiffArgs.Test1.F1_der(x, r, _der_x);
 
 public
- function IndexReduction.NonDiffArgsTest1.F2
+ function IndexReduction.NonDiffArgs.Test1.F2
   input Real x;
   output Real r;
  algorithm
   r := x;
   return;
  annotation(Inline = false);
- end IndexReduction.NonDiffArgsTest1.F2;
+ end IndexReduction.NonDiffArgs.Test1.F2;
 
- function IndexReduction.NonDiffArgsTest1.F1
+ function IndexReduction.NonDiffArgs.Test1.F1
   input Real x;
   input Real r;
   output Real y;
  algorithm
   y := x + r;
   return;
- annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest1.F1_der,Inline = false);
- end IndexReduction.NonDiffArgsTest1.F1;
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgs.Test1.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.Test1.F1;
 
- function IndexReduction.NonDiffArgsTest1.F1_der
+ function IndexReduction.NonDiffArgs.Test1.F1_der
   input Real x;
   input Real r;
   input Real x_der;
@@ -2061,60 +2063,60 @@ public
   y_der := x_der;
   return;
  annotation(Inline = false);
- end IndexReduction.NonDiffArgsTest1.F1_der;
+ end IndexReduction.NonDiffArgs.Test1.F1_der;
 
-end IndexReduction.NonDiffArgsTest1;
+end IndexReduction.NonDiffArgs.Test1;
 ")})));
-end NonDiffArgsTest1;
-
-model NonDiffArgsTest2
-    record R
-        Real a;
-    end R;
-
-    function F1
-        input Real x;
-        input R r;
-        output Real y;
-    algorithm
-        y := x + r.a;
-    annotation(Inline=false,derivative(noDerivative=r)=F1_der);
-    end F1;
+    end Test1;
     
-    function F1_der
-        input Real x;
-        input R r;
-        input Real x_der;
-        output Real y_der;
-    algorithm
-        y_der := x_der;
-    annotation(Inline=false);
-    end F1_der;
+    model Test2
+        record R
+            Real a;
+        end R;
     
-    function F2
-        input Real x;
-        output R r;
-    algorithm
-        r := R(x);
-    annotation(Inline=false);
-    end F2;
-
-    Real x;
-    Real der_y;
-    Real y;
-    R r;
-equation
-    x * y = time;
-    r = F2(x);
-    y + 42 = F1(x, r);
-    der_y = der(y);
+        function F1
+            input Real x;
+            input R r;
+            output Real y;
+        algorithm
+            y := x + r.a;
+        annotation(Inline=false,derivative(noDerivative=r)=F1_der);
+        end F1;
+        
+        function F1_der
+            input Real x;
+            input R r;
+            input Real x_der;
+            output Real y_der;
+        algorithm
+            y_der := x_der;
+        annotation(Inline=false);
+        end F1_der;
+        
+        function F2
+            input Real x;
+            output R r;
+        algorithm
+            r := R(x);
+        annotation(Inline=false);
+        end F2;
+    
+        Real x;
+        Real der_y;
+        Real y;
+        R r;
+    equation
+        x * y = time;
+        r = F2(x);
+        y + 42 = F1(x, r);
+        der_y = der(y);
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="NonDiffArgsTest2",
+            name="NonDiffArgs_Test2",
             description="Test so that noDerivative and zeroDerivative augmenting are ignored in augmenting path",
             dynamic_states=false,
             flatModel="
-fclass IndexReduction.NonDiffArgsTest2
+fclass IndexReduction.NonDiffArgs.Test2
  Real x;
  Real der_y;
  Real y;
@@ -2123,103 +2125,103 @@ fclass IndexReduction.NonDiffArgsTest2
  Real _der_x;
 equation
  x * y = time;
- (IndexReduction.NonDiffArgsTest2.R(r.a)) = IndexReduction.NonDiffArgsTest2.F2(x);
- y + 42 = IndexReduction.NonDiffArgsTest2.F1(x, IndexReduction.NonDiffArgsTest2.R(r.a));
+ (IndexReduction.NonDiffArgs.Test2.R(r.a)) = IndexReduction.NonDiffArgs.Test2.F2(x);
+ y + 42 = IndexReduction.NonDiffArgs.Test2.F1(x, IndexReduction.NonDiffArgs.Test2.R(r.a));
  der_y = _der_y;
  x * _der_y + _der_x * y = 1.0;
- _der_y = IndexReduction.NonDiffArgsTest2.F1_der(x, IndexReduction.NonDiffArgsTest2.R(r.a), _der_x);
+ _der_y = IndexReduction.NonDiffArgs.Test2.F1_der(x, IndexReduction.NonDiffArgs.Test2.R(r.a), _der_x);
 
 public
- function IndexReduction.NonDiffArgsTest2.F2
+ function IndexReduction.NonDiffArgs.Test2.F2
   input Real x;
-  output IndexReduction.NonDiffArgsTest2.R r;
+  output IndexReduction.NonDiffArgs.Test2.R r;
  algorithm
   r.a := x;
   return;
  annotation(Inline = false);
- end IndexReduction.NonDiffArgsTest2.F2;
+ end IndexReduction.NonDiffArgs.Test2.F2;
 
- function IndexReduction.NonDiffArgsTest2.F1
+ function IndexReduction.NonDiffArgs.Test2.F1
   input Real x;
-  input IndexReduction.NonDiffArgsTest2.R r;
+  input IndexReduction.NonDiffArgs.Test2.R r;
   output Real y;
  algorithm
   y := x + r.a;
   return;
- annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgsTest2.F1_der,Inline = false);
- end IndexReduction.NonDiffArgsTest2.F1;
+ annotation(derivative(noDerivative = r) = IndexReduction.NonDiffArgs.Test2.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.Test2.F1;
 
- function IndexReduction.NonDiffArgsTest2.F1_der
+ function IndexReduction.NonDiffArgs.Test2.F1_der
   input Real x;
-  input IndexReduction.NonDiffArgsTest2.R r;
+  input IndexReduction.NonDiffArgs.Test2.R r;
   input Real x_der;
   output Real y_der;
  algorithm
   y_der := x_der;
   return;
  annotation(Inline = false);
- end IndexReduction.NonDiffArgsTest2.F1_der;
+ end IndexReduction.NonDiffArgs.Test2.F1_der;
 
- record IndexReduction.NonDiffArgsTest2.R
+ record IndexReduction.NonDiffArgs.Test2.R
   Real a;
- end IndexReduction.NonDiffArgsTest2.R;
+ end IndexReduction.NonDiffArgs.Test2.R;
 
-end IndexReduction.NonDiffArgsTest2;
+end IndexReduction.NonDiffArgs.Test2;
 ")})));
-end NonDiffArgsTest2;
-
-model NonDiffArgsTest3
-    record R
-        Real a,b;
-    end R;
-    function F1
-        input Real i1;
-        input R i2;
-        output Real o1;
-    algorithm
-        o1 := i1 * i2.a + i1 * i2.b;
-        annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
-    end F1;
-    function F1_der
-        input Real i1;
-        input R i2;
-        input Real i1_der;
-        output Real o1_der;
-    algorithm
-        o1_der := F1(i1_der, i2) * i1_der;
-        annotation(Inline=true);
-    end F1_der;
+    end Test2;
     
-    function F2
-        input Real i1;
-        output R o1;
-    algorithm
-        o1.a := -i1;
-        o1.b := i1;
-    annotation(InlineAfterIndexReduction=false);
-    end F2;
-    
-    function F3
-        input Real i1;
-        output Real o1;
-    algorithm
-        o1 := i1 + 1;
-    annotation(InlineAfterIndexReduction=false);
-    end F3;
-    
-    
-    Real x,y,z;
-equation
-    der(y) * der(x) = 1;
-    z = F3(time);
-    y = F1(x, F2(z));
-    
+    model Test3
+        record R
+            Real a,b;
+        end R;
+        function F1
+            input Real i1;
+            input R i2;
+            output Real o1;
+        algorithm
+            o1 := i1 * i2.a + i1 * i2.b;
+            annotation(InlineAfterIndexReduction=true, derivative(noDerivative=i2)=F1_der);
+        end F1;
+        function F1_der
+            input Real i1;
+            input R i2;
+            input Real i1_der;
+            output Real o1_der;
+        algorithm
+            o1_der := F1(i1_der, i2) * i1_der;
+            annotation(Inline=true);
+        end F1_der;
+        
+        function F2
+            input Real i1;
+            output R o1;
+        algorithm
+            o1.a := -i1;
+            o1.b := i1;
+        annotation(InlineAfterIndexReduction=false);
+        end F2;
+        
+        function F3
+            input Real i1;
+            output Real o1;
+        algorithm
+            o1 := i1 + 1;
+        annotation(InlineAfterIndexReduction=false);
+        end F3;
+        
+        
+        Real x,y,z;
+    equation
+        der(y) * der(x) = 1;
+        z = F3(time);
+        y = F1(x, F2(z));
+        
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="NonDiffArgsTest3",
+            name="NonDiffArgs_Test3",
             description="Test so that no diff for variables in nested function calls is computed correctly",
             flatModel="
-fclass IndexReduction.NonDiffArgsTest3
+fclass IndexReduction.NonDiffArgs.Test3
  Real x;
  Real y;
  Real z;
@@ -2231,89 +2233,89 @@ initial equation
  x = 0.0;
 equation
  _der_y * der(x) = 1;
- z = IndexReduction.NonDiffArgsTest3.F3(time);
+ z = IndexReduction.NonDiffArgs.Test3.F3(time);
  y = x * temp_13 + x * temp_14;
  temp_12 = der(x);
  _der_y = (temp_12 * temp_13 + temp_12 * temp_14) * temp_12;
- (IndexReduction.NonDiffArgsTest3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgsTest3.F2(z);
+ (IndexReduction.NonDiffArgs.Test3.R(temp_13, temp_14)) = IndexReduction.NonDiffArgs.Test3.F2(z);
 
 public
- function IndexReduction.NonDiffArgsTest3.F3
+ function IndexReduction.NonDiffArgs.Test3.F3
   input Real i1;
   output Real o1;
  algorithm
   o1 := i1 + 1;
   return;
  annotation(InlineAfterIndexReduction = false);
- end IndexReduction.NonDiffArgsTest3.F3;
+ end IndexReduction.NonDiffArgs.Test3.F3;
 
- function IndexReduction.NonDiffArgsTest3.F2
+ function IndexReduction.NonDiffArgs.Test3.F2
   input Real i1;
-  output IndexReduction.NonDiffArgsTest3.R o1;
+  output IndexReduction.NonDiffArgs.Test3.R o1;
  algorithm
   o1.a := - i1;
   o1.b := i1;
   return;
  annotation(InlineAfterIndexReduction = false);
- end IndexReduction.NonDiffArgsTest3.F2;
+ end IndexReduction.NonDiffArgs.Test3.F2;
 
- record IndexReduction.NonDiffArgsTest3.R
+ record IndexReduction.NonDiffArgs.Test3.R
   Real a;
   Real b;
- end IndexReduction.NonDiffArgsTest3.R;
+ end IndexReduction.NonDiffArgs.Test3.R;
 
-end IndexReduction.NonDiffArgsTest3;
+end IndexReduction.NonDiffArgs.Test3;
 ")})));
-end NonDiffArgsTest3;
-
-model NonDiffArgsTest4
-    function F
-        input Real[3] x;
-        input Real dummy;
-        output Real res;
-    algorithm
-        res := x[1];
-    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x)=F_der);
-    end F;
-    function F_der
-        input Real[3] x;
-        input Real dummy;
-        input Real dummy_der;
-        output Real res;
-    algorithm
-        res := x[2];
-    annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x,order=2)=F_der_der);
-    end F_der;
-    function F_der_der
-        input Real[3] x;
-        input Real dummy;
-        input Real dummy_der;
-        input Real dummy_der_der;
-        output Real res;
-    algorithm
-        res := x[3];
-    annotation(InlineAfterIndexReduction=true);
-    end F_der_der;
+    end Test3;
     
-    Real p1,p3(stateSelect=StateSelect.avoid);
-    Real v1,v3,v3_1;
-    Real a1,a3,a3_1;
-equation
-    der(p1) = v1;
-    der(v1) = a1;
-    der(p3) = v3;
-    der(v3) = a3;
-    der(p3) = v3_1;
-    der(v3_1) = a3_1;
-    p1 = F({p3,v3,a3},time);
-    a1 * v1 = 1;
-
+    model Test4
+        function F
+            input Real[3] x;
+            input Real dummy;
+            output Real res;
+        algorithm
+            res := x[1];
+        annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x)=F_der);
+        end F;
+        function F_der
+            input Real[3] x;
+            input Real dummy;
+            input Real dummy_der;
+            output Real res;
+        algorithm
+            res := x[2];
+        annotation(InlineAfterIndexReduction=true, derivative(noDerivative=x,order=2)=F_der_der);
+        end F_der;
+        function F_der_der
+            input Real[3] x;
+            input Real dummy;
+            input Real dummy_der;
+            input Real dummy_der_der;
+            output Real res;
+        algorithm
+            res := x[3];
+        annotation(InlineAfterIndexReduction=true);
+        end F_der_der;
+        
+        Real p1,p3(stateSelect=StateSelect.avoid);
+        Real v1,v3,v3_1;
+        Real a1,a3,a3_1;
+    equation
+        der(p1) = v1;
+        der(v1) = a1;
+        der(p3) = v3;
+        der(v3) = a3;
+        der(p3) = v3_1;
+        der(v3_1) = a3_1;
+        p1 = F({p3,v3,a3},time);
+        a1 * v1 = 1;
+    
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="NonDiffArgsTest4",
+            name="NonDiffArgs_Test4",
             description="Test so that munkres doesn't match to nonDiff arg during dummy derivative selection'",
             flatModel="
-fclass IndexReduction.NonDiffArgsTest4
+fclass IndexReduction.NonDiffArgs.Test4
  Real p1;
  Real p3(stateSelect = StateSelect.avoid);
  Real v1;
@@ -2348,9 +2350,465 @@ equation
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
-end IndexReduction.NonDiffArgsTest4;
+end IndexReduction.NonDiffArgs.Test4;
 ")})));
-end NonDiffArgsTest4;
+    end Test4;
+
+    package ExtraIncidences
+
+        model Test1
+            function F1
+                input Real x;
+                input Real y;
+                input Real T;
+                output Real z;
+            algorithm
+                z := x * y * T;
+            annotation(Inline=false, derivative(noDerivative=y,noDerivative=T)=F1_der);
+            end F1;
+            function F1_der
+                input Real x;
+                input Real y;
+                input Real T;
+                input Real x_der;
+                output Real z;
+            algorithm
+                z := F1(x_der * y, y, T); /* Yes I know, this is despicable and wrong! */
+            annotation(Inline=true);
+            end F1_der;
+            Real s1,s2;
+            Real v1,v2;
+            Real a1,a2;
+            Real w;
+            Real T;
+        equation
+            v1 = der(s1);
+            a1 = der(v1);
+            v2 = der(s2);
+            a2 = der(v2);
+            s1 = F1(sin(time), w, T);
+            s1 = F1(cos(time), w, T);
+            w = der(s2) + sin(time);
+            T = sin(s2);
+        
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NonDiffArgs_ExtraIncidences_Test1",
+                description="Test that has an remote high order variable and needs extra incidences in order for dummy derivative selection to succeed.",
+                flatModel="
+fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test1
+ Real s1;
+ Real s2;
+ Real v1;
+ Real v2;
+ Real a1;
+ Real a2;
+ Real w;
+ Real T;
+ Real _der_s1;
+ Real _der_v1;
+ Real _der_s2;
+ Real _der_v2;
+ Real _der_der_s1;
+ Real _der_der_s2;
+ Real _der_w;
+ Real temp_4;
+ Real temp_7;
+ Real temp_14;
+ Real temp_17;
+equation
+ v1 = _der_s1;
+ a1 = _der_v1;
+ v2 = _der_s2;
+ a2 = _der_v2;
+ s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(sin(time), w, T);
+ s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(cos(time), w, T);
+ w = _der_s2 + sin(time);
+ T = sin(s2);
+ temp_7 = w;
+ temp_4 = cos(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_4 * temp_7, temp_7, T);
+ _der_v1 = _der_der_s1;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = w;
+ temp_14 = - sin(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1(temp_14 * temp_17, temp_17, T);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1((temp_14 * _der_w + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+
+public
+ function IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1
+  input Real x;
+  input Real y;
+  input Real T;
+  output Real z;
+ algorithm
+  z := x * y * T;
+  return;
+ annotation(derivative(noDerivative = y,noDerivative = T) = IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.ExtraIncidences.Test1.F1;
+
+end IndexReduction.NonDiffArgs.ExtraIncidences.Test1;
+")})));
+        end Test1;
+
+        model Test2
+            function F1
+                input Real x;
+                input Real y;
+                input Real T;
+                output Real z;
+            algorithm
+                z := x * y * T;
+            annotation(Inline=false, derivative(noDerivative=y,noDerivative=T)=F1_der);
+            end F1;
+            function F1_der
+                input Real x;
+                input Real y;
+                input Real T;
+                input Real x_der;
+                output Real z;
+            algorithm
+                z := F1(x_der * y, y, T); /* Yes I know, this is despicable and wrong! */
+            annotation(Inline=true);
+            end F1_der;
+            Real s1,s2,s3;
+            Real v1,v2,v3;
+            Real a1,a2,a3;
+            Real w;
+            Real T;
+        equation
+            v1 = der(s1);
+            a1 = der(v1);
+            v2 = der(s2);
+            a2 = der(v2);
+            v3 = der(s3);
+            a3 = der(v3);
+            s1 = F1(sin(time), w, T);
+            s1 = F1(cos(time), sin(time), T);
+            s1 + s2 + s3 = 0;
+            w = der(s2) + sin(time);
+            T = sin(s2);
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NonDiffArgs_ExtraIncidences_Test2",
+                description="Test that needs extra incidences in order for dummy derivative selection to succeed even though all high order variables and equation are connected.",
+                flatModel="
+fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test2
+ Real s1;
+ Real s2;
+ Real s3;
+ Real v1;
+ Real v2;
+ Real v3;
+ Real a1;
+ Real a2;
+ Real a3;
+ Real w;
+ Real T;
+ Real _der_s1;
+ Real _der_v1;
+ Real _der_s2;
+ Real _der_v2;
+ Real _der_s3;
+ Real _der_v3;
+ Real _der_der_s1;
+ Real _der_der_s2;
+ Real _der_w;
+ Real _der_der_s3;
+ Real temp_4;
+ Real temp_7;
+ Real temp_14;
+ Real temp_17;
+equation
+ v1 = _der_s1;
+ a1 = _der_v1;
+ v2 = _der_s2;
+ a2 = _der_v2;
+ v3 = _der_s3;
+ a3 = _der_v3;
+ s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(sin(time), w, T);
+ s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(cos(time), sin(time), T);
+ s1 + s2 + s3 = 0;
+ w = _der_s2 + sin(time);
+ T = sin(s2);
+ temp_7 = w;
+ temp_4 = cos(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_4 * temp_7, temp_7, T);
+ _der_v1 = _der_der_s1;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = sin(time);
+ temp_14 = - sin(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1(temp_14 * temp_17, temp_17, T);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1((temp_14 * cos(time) + (- cos(time)) * temp_17) * temp_17, temp_17, T);
+ _der_s1 + _der_s2 + _der_s3 = 0;
+ _der_v3 = _der_der_s3;
+ _der_der_s1 + _der_der_s2 + _der_der_s3 = 0;
+
+public
+ function IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1
+  input Real x;
+  input Real y;
+  input Real T;
+  output Real z;
+ algorithm
+  z := x * y * T;
+  return;
+ annotation(derivative(noDerivative = y,noDerivative = T) = IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.ExtraIncidences.Test2.F1;
+
+end IndexReduction.NonDiffArgs.ExtraIncidences.Test2;
+")})));
+        end Test2;
+
+        model Test3
+            function F1
+                input Real x;
+                input Real y;
+                input Real T;
+                output Real z;
+            algorithm
+                z := x * y * T;
+            annotation(Inline=false, derivative(noDerivative=y,noDerivative=T)=F1_der);
+            end F1;
+            function F1_der
+                input Real x;
+                input Real y;
+                input Real T;
+                input Real x_der;
+                output Real z;
+            algorithm
+                z := F1(x_der * y, y, T); /* Yes I know, this is despicable and wrong! */
+            annotation(Inline=true);
+            end F1_der;
+            Real s1a,s1b,s2,s3;
+            Real v1a,v1b,v2,v3;
+            Real a1a,a1b,a2,a3;
+            Real w;
+            Real T;
+        equation
+            v1a = der(s1a);
+            a1a = der(v1a);
+            v1b = der(s1b);
+            a1b = der(v1b);
+            v2 = der(s2);
+            a2 = der(v2);
+            v3 = der(s3);
+            a3 = der(v3);
+            s1a + s1b = F1(sin(time), w, T);
+            s1a - s1b = F1(sin(time), cos(time), T);
+            s1a + s1b = F1(cos(time), sin(time), T);
+            s1a + s1b + s2 + s3 = 0;
+            w = der(s2) + sin(time);
+            T = sin(s2);
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NonDiffArgs_ExtraIncidences_Test3",
+                description="Test that needs extra incidences in order for dummy derivative selection to succeed even though all high order variables and equation are connected (more advanced case).",
+                flatModel="
+fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test3
+ Real s1a;
+ Real s1b;
+ Real s2;
+ Real s3;
+ Real v1a;
+ Real v1b;
+ Real v2;
+ Real v3;
+ Real a1a;
+ Real a1b;
+ Real a2;
+ Real a3;
+ Real w;
+ Real T;
+ Real _der_s1a;
+ Real _der_v1a;
+ Real _der_s1b;
+ Real _der_v1b;
+ Real _der_s2;
+ Real _der_v2;
+ Real _der_s3;
+ Real _der_v3;
+ Real _der_der_s1a;
+ Real _der_der_s1b;
+ Real _der_der_s2;
+ Real _der_w;
+ Real _der_der_s3;
+ Real temp_4;
+ Real temp_7;
+ Real temp_14;
+ Real temp_17;
+ Real temp_24;
+ Real temp_27;
+equation
+ v1a = _der_s1a;
+ a1a = _der_v1a;
+ v1b = _der_s1b;
+ a1b = _der_v1b;
+ v2 = _der_s2;
+ a2 = _der_v2;
+ v3 = _der_s3;
+ a3 = _der_v3;
+ s1a + s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(sin(time), w, T);
+ s1a - s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(sin(time), cos(time), T);
+ s1a + s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(cos(time), sin(time), T);
+ s1a + s1b + s2 + s3 = 0;
+ w = _der_s2 + sin(time);
+ T = sin(s2);
+ temp_7 = w;
+ temp_4 = cos(time);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_4 * temp_7, temp_7, T);
+ _der_v1a = _der_der_s1a;
+ _der_v1b = _der_der_s1b;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1a + _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ temp_17 = cos(time);
+ temp_14 = cos(time);
+ _der_s1a - _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_14 * temp_17, temp_17, T);
+ _der_der_s1a - _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_14 * (- sin(time)) + (- sin(time)) * temp_17) * temp_17, temp_17, T);
+ temp_27 = sin(time);
+ temp_24 = - sin(time);
+ _der_s1a + _der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1(temp_24 * temp_27, temp_27, T);
+ _der_der_s1a + _der_der_s1b = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1((temp_24 * cos(time) + (- cos(time)) * temp_27) * temp_27, temp_27, T);
+ _der_s1a + _der_s1b + _der_s2 + _der_s3 = 0;
+ _der_v3 = _der_der_s3;
+ _der_der_s1a + _der_der_s1b + _der_der_s2 + _der_der_s3 = 0;
+
+public
+ function IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1
+  input Real x;
+  input Real y;
+  input Real T;
+  output Real z;
+ algorithm
+  z := x * y * T;
+  return;
+ annotation(derivative(noDerivative = y,noDerivative = T) = IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.ExtraIncidences.Test3.F1;
+
+end IndexReduction.NonDiffArgs.ExtraIncidences.Test3;
+")})));
+        end Test3;
+
+        model Test4
+            function F1
+                input Real x;
+                input Real y;
+                input Real T;
+                output Real z;
+            algorithm
+                z := x * y * T;
+            annotation(Inline=false, derivative(noDerivative=y,noDerivative=T)=F1_der);
+            end F1;
+            function F1_der
+                input Real x;
+                input Real y;
+                input Real T;
+                input Real x_der;
+                output Real z;
+            algorithm
+                z := F1(x_der * y, y, T); /* Yes I know, this is despicable and wrong! */
+            annotation(Inline=true);
+            end F1_der;
+            Real s1(stateSelect=StateSelect.prefer),s2,s3;
+            Real v1,v2,v3;
+            Real a1,a2,a3;
+            Real w;
+            Real T;
+        equation
+            v1 = der(s1);
+            a1 = der(v1);
+            v2 = der(s2);
+            a2 = der(v2);
+            v3 = der(s3);
+            a3 = der(v3);
+            a3 = time;
+            s1 = F1(sin(time), w, T);
+            s1 + s2 + s3 = 0;
+            w = der(s2) + sin(time);
+            T = sin(time);
+
+        annotation(__JModelica(UnitTesting(tests={
+            TransformCanonicalTestCase(
+                name="NonDiffArgs_ExtraIncidences_Test4",
+                description="Test that fails if extra incidences are inserted.",
+                flatModel="
+fclass IndexReduction.NonDiffArgs.ExtraIncidences.Test4
+ Real s1(stateSelect = StateSelect.prefer);
+ Real s2;
+ Real s3;
+ Real v1;
+ Real v2;
+ Real v3;
+ Real a1;
+ Real a2;
+ Real a3;
+ Real w;
+ Real T;
+ Real _der_s1;
+ Real _der_v1;
+ Real _der_s2;
+ Real _der_v2;
+ Real _der_der_s1;
+ Real _der_der_s2;
+ Real _der_w;
+ Real _der_der_s3;
+ Real temp_4;
+ Real temp_7;
+initial equation 
+ s3 = 0.0;
+ v3 = 0.0;
+equation
+ v1 = _der_s1;
+ a1 = _der_v1;
+ v2 = _der_s2;
+ a2 = _der_v2;
+ v3 = der(s3);
+ a3 = der(v3);
+ der(v3) = time;
+ s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1(sin(time), w, T);
+ s1 + s2 + s3 = 0;
+ w = _der_s2 + sin(time);
+ T = sin(time);
+ temp_7 = w;
+ temp_4 = cos(time);
+ _der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1(temp_4 * temp_7, temp_7, T);
+ _der_v1 = _der_der_s1;
+ _der_v2 = _der_der_s2;
+ _der_w = _der_der_s2 + cos(time);
+ _der_der_s1 = IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1((temp_4 * _der_w + (- sin(time)) * temp_7) * temp_7, temp_7, T);
+ _der_s1 + _der_s2 + der(s3) = 0;
+ der(v3) = _der_der_s3;
+ _der_der_s1 + _der_der_s2 + _der_der_s3 = 0;
+
+public
+ function IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1
+  input Real x;
+  input Real y;
+  input Real T;
+  output Real z;
+ algorithm
+  z := x * y * T;
+  return;
+ annotation(derivative(noDerivative = y,noDerivative = T) = IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1_der,Inline = false);
+ end IndexReduction.NonDiffArgs.ExtraIncidences.Test4.F1;
+
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end IndexReduction.NonDiffArgs.ExtraIncidences.Test4;
+")})));
+        end Test4;
+
+    end ExtraIncidences;
+
+
+end NonDiffArgs;
 
 model FunctionCallEquation1
     function f
