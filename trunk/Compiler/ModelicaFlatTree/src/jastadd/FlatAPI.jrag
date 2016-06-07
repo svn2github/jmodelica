@@ -2164,6 +2164,19 @@ aspect ReferencedVariables {
         return res;
     }
 
+    syn Set<FVariable> FAbstractEquation.variableDependenciesRHS() = referencedFVariablesInRHS();
+    eq FAlgorithm.variableDependenciesRHS() {
+        Set<FVariable> lhs = referencedFVariablesInLHS();
+        Set<FVariable> rhs = referencedFVariablesInRHS();
+        Set<FVariable> res = new LinkedHashSet<FVariable>();
+        for (FVariable fv : rhs) {
+            if (!lhs.contains(fv)) {
+                res.add(fv);
+            }
+        }
+        return res;
+    }
+    
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
     syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());

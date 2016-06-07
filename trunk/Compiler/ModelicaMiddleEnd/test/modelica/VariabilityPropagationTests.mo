@@ -822,6 +822,137 @@ end VariabilityPropagationTests.FunctionCallEquation5;
 ")})));
 end FunctionCallEquation5;
 
+model Algorithm1
+    parameter Real p;
+    Real y;
+algorithm
+    y := p;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm1",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm1
+ parameter Real p;
+ parameter Real y;
+parameter equation
+ algorithm
+  y := p;
+;
+end VariabilityPropagationTests.Algorithm1;
+")})));
+end Algorithm1;
+
+model Algorithm2
+    parameter Real p;
+    Real y;
+algorithm
+    y := p + time;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm2",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm2
+ parameter Real p;
+ Real y;
+algorithm
+ y := p + time;
+end VariabilityPropagationTests.Algorithm2;
+")})));
+end Algorithm2;
+
+model Algorithm3
+    parameter Real p;
+    Real x;
+    Real y;
+algorithm
+    y := x;
+equation
+    x = p;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm3",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm3
+ parameter Real p;
+ parameter Real x;
+ parameter Real y;
+parameter equation
+ x = p;
+ algorithm
+  y := x;
+;
+end VariabilityPropagationTests.Algorithm3;
+")})));
+end Algorithm3;
+
+model Algorithm4
+    parameter Real p;
+    Real x;
+    Real y;
+algorithm
+    x := p;
+    y := x;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Algorithm4",
+            description="",
+            flatModel="
+fclass VariabilityPropagationTests.Algorithm4
+ parameter Real p;
+ parameter Real x;
+ parameter Real y;
+parameter equation
+ algorithm
+  x := p;
+  y := x;
+;
+end VariabilityPropagationTests.Algorithm4;
+")})));
+end Algorithm4;
+
+model Algorithm5
+    parameter Real p;
+    Real x;
+    Real y;
+algorithm
+    x := p;
+    y := x;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm",
+            description="Parameter algorithm code generation",
+            template="
+$C_set_start_values$
+$C_DAE_initial_dependent_parameter_assignments$
+",
+            generatedCode="
+int jmi_set_start_values_0_0(jmi_t* jmi) {
+    int ef = 0;
+    _p_0 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    return ef;
+}
+
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    _x_1 = _p_0;
+    _y_2 = _x_1;
+    return ef;
+}
+")})));
+end Algorithm5;
+
     function fp
         input Real i1;
         input Real i2;

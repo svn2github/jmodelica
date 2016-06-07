@@ -93,6 +93,8 @@ aspect VariabilityPropagation {
                 ((variables().size() == numScalarEquations() && getCall().variability().parameterOrLess()) 
                         || potentialPartialVariability().knownParameterOrLess());
     }
+    eq FAlgorithm.canPropagate() = super.canPropagate() && variables().size() > 0 &&
+            variables().size() == numScalarEquations() && variabilityRHS().parameterOrLess();
     
     inh boolean FAbstractEquation.canPropagateContext();
     eq Root.getChild().canPropagateContext() = false;
@@ -212,15 +214,15 @@ aspect VariabilityPropagation {
 
 		// Build worklist
 		for (FAbstractEquation equation: equations) {
-			if (equation.canPropagate()) {
-				worklist.add(equation);
-			}
+            worklist.add(equation);
 		}
 
 		// Work
 		while (!worklist.isEmpty()) {
 			FAbstractEquation equation = worklist.iterator().next();
-			equation.variabilityPropagation(propagator);
+            if (equation.canPropagate()) {
+                equation.variabilityPropagation(propagator);
+            }
 			worklist.remove(equation);
 		}
 
@@ -270,10 +272,6 @@ aspect VariabilityPropagation {
 		FExp solution;
 		FTypePrefixVariability solutionVariability;
 
-		if (!canPropagate()) {
-			return; // Unbalanced equation
-		}
-
 		fVariable = variables().iterator().next();
 
 		if (!fVariable.canPropagate()) {
@@ -319,14 +317,11 @@ aspect VariabilityPropagation {
     
     public void FFunctionCallEquation.variabilityPropagation(FClass.VariabilityPropagator propagator) {
         
-        if (!canPropagate()) {
-            return;
-        }
-        
         FTypePrefixVariability variability = getCall().variability();
         for (FFunctionCallLeft left : getLefts()) {
             if (left.hasFExp() && !left.getFExp().canPropagate()) {
                 variability = fContinuous();
+                break;
             }
         }
         boolean eval = potentialPartialVariability().knownParameterOrLess();
@@ -370,6 +365,17 @@ aspect VariabilityPropagation {
             }
         }
         this.taggedForCleanup = true;
+    }
+    
+    public void FAlgorithm.variabilityPropagation(FClass.VariabilityPropagator propagator) {
+        FTypePrefixVariability variability = variabilityRHS();
+        if (variability.parameterVariability()) {
+            for (FVariable fv : referencedFVariablesInLHS()) {
+                fv.variabilityPropagation(propagator, variability, null);
+            }
+            propagator.addEquation(variability, this);
+            this.taggedByVProp = true;
+        }
     }
 	
 	public boolean FExp.variabilityPropagation(
@@ -540,9 +546,8 @@ aspect VariabilityPropagation {
                     }
                 }
                 
-                if (equation.canPropagate()) {
-                    propagator.addWorkEq(equation);
-                } else if (equation.inInitialEquationSection() && equation.variables().size() == 0
+                propagator.addWorkEq(equation);
+                if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.initialParameters().size() == 0) {
                     equation.taggedByVProp = true; // Initial equation
                 }

@@ -479,7 +479,14 @@ aspect ParameterEquations {
 			if (left.hasFExp())
 				left.getFExp().addToParameterEquationsMap(map, this);
 	}
-	
+    
+    public void FAlgorithm.addToParameterEquationsMap(
+            Map<FAbstractVariable,FAbstractEquation> map) {
+        for (FVariable fv : referencedFVariablesInLHS()) {
+            fv.addToParameterEquationsMap(map, this);
+        }
+    }
+    
 	public void FExp.addToParameterEquationsMap(
 			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
 		for (FExp e : childFExps())
@@ -488,10 +495,15 @@ aspect ParameterEquations {
 	
 	public void FIdUseExp.addToParameterEquationsMap(
 			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
-		FAbstractVariable fv = getFIdUse().myFV();
-		if (!fv.isUnknown())
-			map.put(fv, equ);
+        getFIdUse().myFV().addToParameterEquationsMap(map, equ);
 	}
+	
+    public void FAbstractVariable.addToParameterEquationsMap(
+            Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
+        if (!isUnknown()) {
+            map.put(this, equ);
+        }
+    }
 	
 	/**
 	 * Is this expression in a parameter equation?

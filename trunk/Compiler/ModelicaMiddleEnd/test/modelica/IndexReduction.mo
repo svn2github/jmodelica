@@ -1662,6 +1662,7 @@ algorithm
         TransformCanonicalTestCase(
             name="AlgorithmVariability2",
             description="Test so that variability calculations are done propperly for algorithms",
+            variability_propagation=false,
             flatModel="
 fclass IndexReduction.AlgorithmVariability2
  Real x;
