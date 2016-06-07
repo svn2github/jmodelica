@@ -20,7 +20,7 @@ ACLOCAL_AMFLAGS = -I m4
 # EXTRA_DIST =
 
 # SUBDIRS = ThirdParty/Sundials ThirdParty/Zlib ThirdParty/Minizip ThirdParty/Expat JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary
-SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python/src/tests_jmodelica/files/Modelica/Resources
+SUBDIRS = ThirdParty/Sundials ThirdParty/Minpack ThirdParty/CSparse JMI/src ThirdParty/Blas ThirdParty/Lapack external/FMILibrary RuntimeLibrary Python/src/tests_jmodelica/files/Modelica/Resources
 
 assimulo_install_dir=$(abs_builddir)/Assimulo_install
 pymodelica_install_dir=$(abs_builddir)/pymodelica_install
@@ -359,6 +359,11 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
 	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
+	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CSparse  
+	cp -r $(CSPARSE_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/CSparse 
+	cp $(abs_top_srcdir)/ThirdParty/CSparse/csparse/Doc/License.txt $(DESTDIR)$(prefix)/ThirdParty/CSparse
+	cp $(abs_top_srcdir)/ThirdParty/CSparse/README.txt $(DESTDIR)$(prefix)/ThirdParty/CSparse
+	cp $(abs_top_srcdir)/ThirdParty/CSparse/csparse_adding_inplace_methods.patch $(DESTDIR)$(prefix)/ThirdParty/CSparse
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD/cppad	

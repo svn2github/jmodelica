@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = ThirdParty/Blas
+subdir = ThirdParty/CSparse
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -206,29 +206,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-
-#
-#	Copyright (C) 2009 Modelon AB
-#
-#	This program is free software: you can redistribute it and/or modify
-#	it under the terms of the GNU General Public License version 3 as published 
-#	by the Free Software Foundation, or optionally, under the terms of the 
-#	Common Public License version 1.0 as published by IBM.
-#
-#	This program is distributed in the hope that it will be useful,
-#	but WITHOUT ANY WARRANTY; without even the implied warranty of
-#	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#	GNU General Public License, or the Common Public License, for more details.
-#
-#	You should have received copies of the GNU General Public License
-#	and the Common Public License along with this program.  If not, 
-#	see <http://www.gnu.org/licenses/> or 
-#	<http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
-#
-BLAS_BUILD_DIR = ../../blas_build
-BLAS_BUILD_DIR64 = ../../blas_build64
-BLAS_INSTALL_DIR = $(abs_builddir)/../../blas_install
-BLAS_INSTALL_DIR64 = $(abs_builddir)/../../blas_install64
+CSPARSE_DIR = ../../csparse_build
+CSPARSE_DIR64 = ../../csparse_build64
 all: all-am
 
 .SUFFIXES:
@@ -241,9 +220,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/CSparse/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu ThirdParty/Blas/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/CSparse/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -416,43 +395,47 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	uninstall uninstall-am
 
+# This is to ensure that the install target of the Sundials
+# make system is run whenever make all is run. This is needed
+# in order to trigger a complete install, local in the build
+# directory, early in the build process.
 
-$(BLAS_BUILD_DIR):
-	mkdir -p $(BLAS_BUILD_DIR) && \
-	cd $(BLAS_BUILD_DIR) && \
-	case $(build) in \
-	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m32" DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	*-apple*) \
-	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	*) \
-	cmake -DCMAKE_Fortran_FLAGS="-fPIC -O3" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR) $(abs_top_srcdir)/ThirdParty/Blas/ ;; \
-	esac
+$(CSPARSE_DIR):
+	mkdir -p $(CSPARSE_DIR)
+	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR)/
+	mkdir -p $(abs_builddir)/../../csparse_install/lib
+	mkdir -p $(abs_builddir)/../../csparse_install/include
 
-@JM_WIN64_TRUE@$(BLAS_BUILD_DIR64):
-@JM_WIN64_TRUE@	mkdir -p $(BLAS_BUILD_DIR64)
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && \
-@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(BLAS_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Blas/
+@JM_WIN64_TRUE@$(CSPARSE_DIR64):
+@JM_WIN64_TRUE@	mkdir -p $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR64)/	
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/lib
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/include
 
-@JM_WIN64_TRUE@all-local: $(BLAS_BUILD_DIR) $(BLAS_BUILD_DIR64)
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@all-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
 
-@JM_WIN64_FALSE@all-local: $(BLAS_BUILD_DIR)
-@JM_WIN64_FALSE@	cd $(BLAS_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
+@JM_WIN64_TRUE@install-exec-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install64/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Include/* $(abs_builddir)/../../csparse_install64/include/
 
-install-exec-local:
-	mkdir -p $(DESTDIR)$(prefix)/lib/RuntimeLibrary
-	cp $(BLAS_INSTALL_DIR)/* $(DESTDIR)$(prefix)/lib/RuntimeLibrary
-@JM_WIN64_TRUE@	mkdir -p $(DESTDIR)$(prefix)/lib/RuntimeLibrary64 && cp $(BLAS_INSTALL_DIR64)/* $(DESTDIR)$(prefix)/lib/RuntimeLibrary64
+@JM_WIN64_FALSE@all-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+
+@JM_WIN64_FALSE@install-exec-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
 
 check-local:
-	cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-@JM_WIN64_TRUE@	cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
+	cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
-	-cd $(BLAS_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-@JM_WIN64_TRUE@	-cd $(BLAS_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

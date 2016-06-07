@@ -652,6 +652,7 @@ WITH_ECLIPSE_TRUE
 SUPERLU_HOME
 WITH_SUPERLU_FALSE
 WITH_SUPERLU_TRUE
+CSPARSE_HOME
 MINPACK_HOME
 WITH_SUNDIALS_FALSE
 WITH_SUNDIALS_TRUE
@@ -19104,6 +19105,9 @@ SUNDIALS_HOME=$sundials
 MINPACK_HOME="$CURR_DIR/minpack_install"
 
 
+CSPARSE_HOME="$CURR_DIR/csparse_install"
+
+
 # Check whether --with-superlu was given.
 if test "${with_superlu+set}" = set; then :
   withval=$with_superlu; superlu=$withval
@@ -19814,7 +19818,7 @@ REQUIRE_OPTIMICA_COMPILER=True
 
 
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CSparse/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -21065,6 +21069,7 @@ do
     "ThirdParty/Lapack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Lapack/Makefile" ;;
     "ThirdParty/Sundials/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Sundials/Makefile" ;;
     "ThirdParty/Minpack/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/Minpack/Makefile" ;;
+    "ThirdParty/CSparse/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CSparse/Makefile" ;;
     "ThirdParty/CasADi/Makefile") CONFIG_FILES="$CONFIG_FILES ThirdParty/CasADi/Makefile" ;;
     "external/FMILibrary/Makefile") CONFIG_FILES="$CONFIG_FILES external/FMILibrary/Makefile" ;;
     "JMI/src/Makefile") CONFIG_FILES="$CONFIG_FILES JMI/src/Makefile" ;;
