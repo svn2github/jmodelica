@@ -1419,4 +1419,96 @@ Warning at line 1307, column 10, in file 'Compiler/ModelicaFrontEnd/src/test/Che
 ")})));
 end SizeInDisabled4;
 
+model FortranRecord
+    record R
+        Real x;
+    end R;
+    
+    function f1
+        input R r;
+        output R y;
+        external "FORTRAN 77";
+    end f1;
+    
+    function f2
+        input R r;
+        output R y;
+        external "FORTRAN 77" y = f2(r);
+    end f2;
+    
+    R r1 = f1(R(time));
+    R r2 = f2(R(time));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="FortranRecord",
+            description="Error for record in fortran call",
+            checkType=check,
+            errorMessage="
+2 errors found:
+
+Error at line 1427, column 5, in file '...':
+  Passing records to external fortran functions is not allowed
+
+Error at line 1433, column 5, in file '...':
+  Passing records to external fortran functions is not allowed
+")})));
+end FortranRecord;
+
+model ExternalRecordArray1
+    record R1
+        Real[1] x;
+    end R1;
+    
+    record R2
+        R1 r;
+    end R2;
+    
+    function f2
+        input R2 r;
+        output R2 y;
+        external "C" y = f2(r);
+    end f2;
+    
+    R2 r2 = f2(R2(R1({time})));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ExternalRecordArray1",
+            description="Error for array in record in C call",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 1467, column 5, in file '...':
+  Arrays are not allowed when passing records to external functions
+")})));
+end ExternalRecordArray1;
+
+model ExternalRecordArray2
+    record R
+        Real x;
+    end R;
+    
+    function f2
+        input R[1] r;
+        output R[1] y;
+        external;
+    end f2;
+    
+    R[1] r = f2({R(time)});
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ExternalRecordArray2",
+            description="Error for record array in C call",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 1493, column 5, in file '...':
+  Arrays are not allowed when passing records to external functions
+")})));
+end ExternalRecordArray2;
+
 end CheckTests;
