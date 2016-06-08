@@ -660,26 +660,34 @@ aspect ContentCheck {
     
     public void FCExternalLanguage.contentCheck(ErrorCheckType checkType, FExternalStmt stmt) {
         for (FExp arg : stmt.getArgs()) {
-            arg.type().contentCheckCArg(checkType, stmt, false);
+            arg.type().contentCheckCArg(checkType, stmt);
         }
         if (stmt.hasReturnVar()) {
-            stmt.getReturnVar().type().contentCheckCArg(checkType, stmt, false);
+            stmt.getReturnVar().type().contentCheckCArg(checkType, stmt);
         }
     }
     
-    public void FType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt, boolean record) {
-        if (record && isArray()) {
-            stmt.error("Arrays are not allowed when passing records to external functions");
+    public void FType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt) { }
+    public void FRecordType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt) {
+        if (!externalValid()) {
+            stmt.error("Record type used as input or output to external function can only contain scalar record or scalar simple types");
         }
     }
     
-    public void FRecordType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt, boolean record) {
-        super.contentCheckCArg(checkType, stmt, true);
+    syn boolean FType.externalValid() = false;
+    eq FPrimitiveType.externalValid()  = !isArray();
+    eq FRecordType.externalValid() {
+        if (isArray()) {
+            return false;
+        }
         for (FRecordComponentType frct : getComponents()) {
-            frct.getFType().contentCheckCArg(checkType, stmt, true);
+            if (!frct.getFType().externalValid()) {
+                return false;
+            }
         }
+        return true;
     }
-
+    
     /**
      * Get the class this restriction is attached to.
      */

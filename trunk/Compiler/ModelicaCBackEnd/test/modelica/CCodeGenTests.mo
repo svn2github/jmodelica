@@ -5054,11 +5054,18 @@ model CRecordDecl1
             generate_dae=true,
             template="$C_records$",
             generatedCode="
-typedef struct _A_0_r {
+typedef struct A_0_r_ A_0_r;
+struct A_0_r_ {
     jmi_ad_var_t a;
     jmi_ad_var_t b;
-} A_0_r;
+};
 JMI_ARRAY_TYPE(A_0_r, A_0_ra)
+
+typedef struct A_0_r_ext_ A_0_r_ext;
+struct A_0_r_ext_ {
+    jmi_ad_var_t a;
+    jmi_ad_var_t b;
+};
 
 ")})));
 end CRecordDecl1;
@@ -5094,16 +5101,29 @@ model CRecordDecl2
             generate_dae=true,
             template="$C_records$",
             generatedCode="
-typedef struct _B_0_r {
+typedef struct B_0_r_ B_0_r;
+struct B_0_r_ {
     jmi_ad_var_t c;
-} B_0_r;
+};
 JMI_ARRAY_TYPE(B_0_r, B_0_ra)
 
-typedef struct _A_1_r {
+typedef struct B_0_r_ext_ B_0_r_ext;
+struct B_0_r_ext_ {
+    jmi_ad_var_t c;
+};
+
+typedef struct A_1_r_ A_1_r;
+struct A_1_r_ {
     jmi_ad_var_t a;
     B_0_r* b;
-} A_1_r;
+};
 JMI_ARRAY_TYPE(A_1_r, A_1_ra)
+
+typedef struct A_1_r_ext_ A_1_r_ext;
+struct A_1_r_ext_ {
+    jmi_ad_var_t a;
+    B_0_r_ext b;
+};
 
 ")})));
 end CRecordDecl2;
@@ -5132,9 +5152,10 @@ model CRecordDecl3
             generate_dae=true,
             template="$C_records$",
             generatedCode="
-typedef struct _A_0_r {
+typedef struct A_0_r_ A_0_r;
+struct A_0_r_ {
     jmi_array_t* a;
-} A_0_r;
+};
 JMI_ARRAY_TYPE(A_0_r, A_0_ra)
 
 ")})));
@@ -5169,15 +5190,22 @@ model CRecordDecl4
             generate_dae=true,
             template="$C_records$",
             generatedCode="
-typedef struct _B_0_r {
+typedef struct B_0_r_ B_0_r;
+struct B_0_r_ {
     jmi_ad_var_t c;
-} B_0_r;
+};
 JMI_ARRAY_TYPE(B_0_r, B_0_ra)
 
-typedef struct _A_1_r {
+typedef struct B_0_r_ext_ B_0_r_ext;
+struct B_0_r_ext_ {
+    jmi_ad_var_t c;
+};
+
+typedef struct A_1_r_ A_1_r;
+struct A_1_r_ {
     jmi_ad_var_t a;
     B_0_ra* b;
-} A_1_r;
+};
 JMI_ARRAY_TYPE(A_1_r, A_1_ra)
 
 ")})));
@@ -5929,10 +5957,16 @@ model CRecordDecl17
             description="Test that a default field is created for an empty record.",
             template="$C_records$",
             generatedCode="
-typedef struct _A_0_r {
+typedef struct A_0_r_ A_0_r;
+struct A_0_r_ {
     char dummy;
-} A_0_r;
+};
 JMI_ARRAY_TYPE(A_0_r, A_0_ra)
+
+typedef struct A_0_r_ext_ A_0_r_ext;
+struct A_0_r_ext_ {
+    char dummy;
+};
 
 ")})));
 end CRecordDecl17;
@@ -6054,11 +6088,16 @@ $C_functions$
 $C_ode_derivatives$
 ",
             generatedCode="
-typedef struct _b_0_r {
+typedef struct b_0_r_ b_0_r;
+struct b_0_r_ {
     jmi_ad_var_t x;
-} b_0_r;
+};
 JMI_ARRAY_TYPE(b_0_r, b_0_ra)
 
+typedef struct b_0_r_ext_ b_0_r_ext;
+struct b_0_r_ext_ {
+    jmi_ad_var_t x;
+};
 
 void func_CCodeGenTests_CRecordDecl21_f_def0(b_0_r* b_v, jmi_ad_var_t* x_o) {
     JMI_DYNAMIC_INIT()

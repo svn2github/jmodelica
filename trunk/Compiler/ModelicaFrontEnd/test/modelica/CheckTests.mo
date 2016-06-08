@@ -1481,7 +1481,7 @@ model ExternalRecordArray1
 1 errors found:
 
 Error at line 1467, column 5, in file '...':
-  Arrays are not allowed when passing records to external functions
+  Record type used as input or output to external function can only contain scalar record or scalar simple types
 ")})));
 end ExternalRecordArray1;
 
@@ -1507,7 +1507,7 @@ model ExternalRecordArray2
 1 errors found:
 
 Error at line 1493, column 5, in file '...':
-  Arrays are not allowed when passing records to external functions
+  Record type used as input or output to external function can only contain scalar record or scalar simple types
 ")})));
 end ExternalRecordArray2;
 

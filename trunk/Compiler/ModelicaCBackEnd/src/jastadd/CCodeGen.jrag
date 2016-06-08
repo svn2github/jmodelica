@@ -806,7 +806,7 @@ aspect CCodeGen {
     /**
      * \brief Generate first line of struct declaration name_ with typedef to name
      */
-    public void FFunctionDecl.beginStruct_C(CodeStream str, String indent, String name) {
+    public static void FFunctionDecl.beginStruct_C(CodeStream str, String indent, String name) {
         str.formatln("%stypedef struct %s_ %s;", indent, name, name);
         str.formatln("%sstruct %s_ {", indent, name);
     }
@@ -814,7 +814,7 @@ aspect CCodeGen {
     /**
      * \brief Generate last line of struct declaration
      */
-    public void FFunctionDecl.endStruct_C(CodeStream str, String indent) {
+    public static void FFunctionDecl.endStruct_C(CodeStream str, String indent) {
         str.formatln("%s};", indent);
     }
     
@@ -1035,37 +1035,45 @@ aspect CCodeGen {
 	syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + 
 										       recordIndex() + "_" + C_SUFFIX_RECORD;
 	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
+    syn String FRecordDecl.nameExt_C() = name_C() + "_ext";
 	
 	// TODO: Handle arrays of records and arrays in records
 	public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-		// Record type (struct)
-		str.print(indent);
-		str.print("typedef struct _");
-		str.print(name_C());
-		str.print(" {\n");
-		String next = p.indent(indent);
-		for (FVariable fv : getFVariables())
-			fv.printInRecord_C(p, str, next);
-        if (getNumFVariable() == 0)
-            // always generate default field so that C struct is not empty
-            str.print(next + "char dummy;\n");
-		str.print(indent);
-		str.print("} ");
-		str.print(name_C());
-		str.print(";\n");
-		
-		// Array record type
+        // Scalar type
+        printStruct_C(p, str, indent, false);
+        
+        //Array type
 		str.print(indent);
 		str.print("JMI_ARRAY_TYPE(");
 		str.print(name_C());
 		str.print(", ");
 		str.print(nameArray_C());
 		str.print(")\n\n");
-	}
-	
-	public void FVariable.printInRecord_C(CodePrinter p, CodeStream str, String indent) {
+        
+        // External type
+        if (type().externalValid()) {
+            printStruct_C(p, str, indent, true);
+        }
+        str.print("\n");
+    }
+    
+    public void FRecordDecl.printStruct_C(CodePrinter p, CodeStream str, String indent, boolean ext) {
+        String name = ext ? nameExt_C() : name_C();
+        FFunctionDecl.beginStruct_C(str, indent, name);
+        String next = p.indent(indent);
+        for (FVariable fv : getFVariables()) {
+            fv.printInRecord_C(p, str, next, ext);
+        }
+        if (getNumFVariable() == 0) {
+            // always generate default field so that C struct is not empty
+            str.print(next + "char dummy;\n");
+        }
+        FFunctionDecl.endStruct_C(str, indent);
+    }
+    
+    public void FVariable.printInRecord_C(CodePrinter p, CodeStream str, String indent, boolean ext) {
 		str.print(indent);
-		str.print(type_C());
+        str.print(ext ? type().nameScalarExt_C() : type_C());
 		str.print(" ");
 		str.print(nameUnderscore());
 		str.print(";\n");
@@ -1217,6 +1225,7 @@ aspect CCodeGen {
     eq FExternalObjectType.nameArray_C()  = "jmi_extobj_array_t";
     
     syn String FType.nameScalarExt_C()    = nameScalar_C();
+    eq FRecordType.nameScalarExt_C()      = myFRecordDecl().nameExt_C();
     eq FIntegerType.nameScalarExt_C()     = "jmi_int_t";
     eq FBooleanType.nameScalarExt_C()     = "jmi_int_t";
     eq FEnumType.nameScalarExt_C()        = "jmi_int_t";
