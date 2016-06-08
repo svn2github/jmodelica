@@ -1118,9 +1118,9 @@ abstract FAssignableExp : FVarRefExp;
 /**
  * Generated expression that applies array subscripts to any expression.
  */
-FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
-
-FComponentExp : FExp ::= FExp <Name:String>;
+abstract FDecomposeExp : FAssignableExp ::= FExp;
+FSubscriptedExp : FDecomposeExp ::= FArraySubscripts;
+FComponentExp : FDecomposeExp ::= <Name:String>;
 
 /**
  * A qualifed identifier in an expression.

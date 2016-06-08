@@ -138,7 +138,7 @@ aspect GenInitArrayStatements {
     
     syn Set<String> FAssignableExp.sortingAssignedNames();
     eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
-    eq FSubscriptedExp.sortingAssignedNames() {
+    eq FDecomposeExp.sortingAssignedNames() {
         Set<String> res = new LinkedHashSet<String>();
         for (FIdUseExp use : findFIdUseExpsInTree()) {
             res.add(use.name());
