@@ -2122,7 +2122,6 @@ aspect ConstantEvaluation {
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
     eq FIdUseExp.cevalArray(VariableEvaluator evaluator, Index i)        = isSlice() ? super.cevalArray(evaluator, i) : cevalCalc(evaluator);
     eq FIfExp.cevalArray(VariableEvaluator evaluator, Index i)           = cevalSelectExp(evaluator).cevalArray(evaluator, i);
-    eq FComponentExp.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
 
     /**
      * Delegate attribute for ceval().
@@ -2223,6 +2222,8 @@ aspect ConstantEvaluation {
         return res;
     }
     
+    eq FComponentExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval().component(getName());
+    
     public CValue CValue.component(String name) {
         return CValue.UNKNOWN;
     }
@@ -2238,8 +2239,7 @@ aspect ConstantEvaluation {
         Index i = getFArraySubscripts().createIndex();
         return getFExp().ceval(evaluator, i).array().getCell(i);
     }
-    eq FComponentExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval().component(getName());
-    
+
     eq FCardinality.cevalCalc(VariableEvaluator evaluator) {
         final int v = getFExp().cardinalityValue();
         return (v <= 0) ? CValue.UNKNOWN : new CValueInteger(v);
@@ -4007,12 +4007,6 @@ aspect ConstantEvaluation {
         ((FAssignableExp)select()).assignToInFuncEval(evaluator, right);
     }
     
-    @Override
-    public void FComponentExp.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right) {
-        //((FAssignableExp)select()).assignToInFuncEval(evaluator, right);
-        throw new ConstantEvaluationException(right, "FComponentExp.assignToInFuncEval not implemented");
-    }
-    
     syn FExp FSubscriptedExp.select() = getFExp().getArray().get(getFArraySubscripts().createIndex());
     
     /**
@@ -4128,7 +4122,7 @@ aspect ConstantEvaluation {
 	  if (next == null) 
 		  return assignToLastInFuncEval(name, left, right);
 
-	  FType nextType = component(next.name(), getComponents());
+	  FType nextType = componentType(next.name(), getComponents());
 	  if (isArray()) {
           if (left.isUnknown()) {
               left = new CValueArray(size()).markAsCached();
@@ -4179,7 +4173,7 @@ aspect ConstantEvaluation {
    /**
     * \brief Get the type of a specific component.
     */
-    public FType FType.component(String name, List<FRecordComponentType> comps) {
+    public FType FType.componentType(String name, List<FRecordComponentType> comps) {
         for (FRecordComponentType comp : comps)
             if (comp.getName().equals(name))
                 return comp.getFType();
