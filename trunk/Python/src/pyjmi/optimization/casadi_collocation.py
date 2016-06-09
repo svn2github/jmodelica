@@ -553,8 +553,8 @@ class CasadiCollocator(object):
         self._par_vals[offset:offset + self.n_c] = 1
 
         # Evaluate the Jacobian
-        self.residual_jac_fcn.setInput(self.xx_init, 0)
-        self.residual_jac_fcn.setInput(self._par_vals, 1)
+        self.residual_jac_fcn.setInput(self.xx_init, casadi.NLP_SOLVER_X0)
+        self.residual_jac_fcn.setInput(self._par_vals, casadi.NLP_SOLVER_P)
         self.residual_jac_fcn.evaluate()
         J = self.residual_jac_fcn.getOutput(0)
         J = csr_matrix(J.toCsc_matrix())
@@ -587,9 +587,8 @@ class CasadiCollocator(object):
         # Initialize solver
         if self.warm_start:
             # Initialize primal variables and set parameters
-            self.solver_object.setInput(self.get_xx_init(),
-                                        casadi.NLP_SOLVER_X0)
-            self.solver_object.setInput(self._par_vals, casadi.NLP_SOLVER_P)
+            self.solver_object.setInput(self.get_xx_init(), casadi.NLP_SOLVER_X0)
+            self.solver_object.setInput(self._par_vals,     casadi.NLP_SOLVER_P)
 
             # Initialize dual variables
             # The stored dual variables are unscaled, so that we can change
@@ -2865,18 +2864,21 @@ class LocalDAECollocator(CasadiCollocator):
             timed_var_e = []
             for tv in self.op.getTimedVariables():
                 base_name = tv.getBaseVariable().getName()
-                sf_idx = self._name_idx_sf_map[base_name]
                 
-                tp = tv.getTimePoint()
-                if self._normalize_min_time:
-                    cp = self._tp2cp(tp)
+                if self._is_variant[base_name]:
+                    raise NotImplementedError("Currently not supported.")
+                    tp = tv.getTimePoint()
+                    if self._normalize_min_time:
+                        cp = self._tp2cp(tp)
+                    else:
+                        cp = self.op.evaluateExpression(tp)
+                        
+                    (i, k) = collocation_constraint_points[tp]
+                
+                    d, e = self._get_affine_scaling(base_name, i, k)
                 else:
-                    cp = self.op.evaluateExpression(tp)
+                    d, e = self._get_affine_scaling(base_name, -1, -1)
                     
-                (i, k) = collocation_constraint_points[tp]
-                
-                d, e = self._get_affine_scaling(base_name, i, k)
-                
                 timed_var_d.append(d)
                 timed_var_e.append(e)
 
@@ -4049,20 +4051,7 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 sf_index = self._name_idx_sf_map[name]
                 if self._is_variant[name]:
-                    if i is not None and k is not None:
-                        return (self._variant_sf[i][k][sf_index], 0.0)
-                    elif i is None and k is None:
-                        d = {}; e = {}
-                        for i in xrange(1, self.n_e + 1):
-                            d[i] = []; e[i] = []
-                            
-                            for k in self.time_points[i].keys():
-                                d[i].append(self._variant_sf[i][k][sf_index])
-                                e[i].append(0.0)
-                        return (d, e)
-                    else:
-                        raise NotImplementedError("Not supported, use either both i,k None or specific values on both.")
-                        #range_i = [i] if i is not None else range(1, self.n_e + 1)
+                    return (self._variant_sf[i][k][sf_index], 0.0)
                 else:
                     return (self._invariant_d[sf_index], self._invariant_e[sf_index])
         else:
@@ -5259,14 +5248,14 @@ class LocalDAECollocator(CasadiCollocator):
         if point == "fcn":
             return nlp_fcn
         elif point == "init":
-            nlp_fcn.setInput(self.xx_init, 0)
+            nlp_fcn.setInput(self.xx_init, casadi.NLP_SOLVER_X0)
         elif point == "opt":
-            nlp_fcn.setInput(self.primal_opt, 0)
+            nlp_fcn.setInput(self.primal_opt, casadi.NLP_SOLVER_X)
         elif point == "sym":
             return nlp_fcn.call([self.xx, self.pp],True)
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        nlp_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
+        nlp_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), casadi.NLP_SOLVER_P)
         nlp_fcn.evaluate()
         return (nlp_fcn.output(0).getValue(), nlp_fcn.output(1).toArray().ravel())
 
@@ -5303,14 +5292,14 @@ class LocalDAECollocator(CasadiCollocator):
         if point == "fcn":
             return J_fcn
         elif point == "init":
-            J_fcn.setInput(self.xx_init, 0)
+            J_fcn.setInput(self.xx_init, casadi.NLP_SOLVER_X0)
         elif point == "opt":
-            J_fcn.setInput(self.primal_opt, 0)
+            J_fcn.setInput(self.primal_opt, casadi.NLP_SOLVER_X)
         elif point == "sym":
             return J_fcn.call([self.xx, self.pp],True)[0]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
-        J_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
+        J_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), casadi.NLP_SOLVER_P)
         J_fcn.evaluate()
         result = J_fcn.output(0)
         if dense: result = result.toArray()
@@ -5360,16 +5349,16 @@ class LocalDAECollocator(CasadiCollocator):
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
             dual = N.zeros(self.c_e.numel() +
                            self.c_i.numel())
-            H_fcn.setInput(x, 0)
-            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
+            H_fcn.setInput(x, casadi.NLP_SOLVER_X)
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), casadi.NLP_SOLVER_P)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "opt":
             x = self.primal_opt
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
             dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
-            H_fcn.setInput(x, 0)
-            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
+            H_fcn.setInput(x, casadi.NLP_SOLVER_X)
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), casadi.NLP_SOLVER_P)
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "sym":
@@ -5460,8 +5449,8 @@ class LocalDAECollocator(CasadiCollocator):
                 If True, return sigma for the equation scaled NLP.
         """
         grad_fcn = self.solver_object.gradF()
-        grad_fcn.setInput(self.xx_init, 0)
-        grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 1)
+        grad_fcn.setInput(self.xx_init, casadi.NLP_SOLVER_X0)
+        grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), casadi.NLP_SOLVER_P)
         grad_fcn.evaluate()
         grad = grad_fcn.output(0).toArray()
         sigma_inv = N.linalg.norm(grad, N.inf)
