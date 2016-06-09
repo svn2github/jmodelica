@@ -168,6 +168,13 @@ aspect ComplianceCheck {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "semiLinear");
     }
 
+    public static final SimpleProblemProducer ASTNode.DEPRECATED_DECOUPLE =
+            new SimpleWarningProducer("DEPRECATED_DECOUPLE", ProblemKind.SEMANTIC, "The Subtask.decouple() function-like operator is removed as of Modelica version 3.2r2");
+
+    public void FDecouple.complianceCheck(ErrorCheckType checkType) {
+        DEPRECATED_DECOUPLE.invoke(this);
+    }
+
     public static final SimpleProblemProducer ASTNode.DEPRECATED_CARDINALITY =
             new SimpleWarningProducer("DEPRECATED_CARDINALITY", ProblemKind.SEMANTIC, "The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica");
 
@@ -179,7 +186,7 @@ aspect ComplianceCheck {
         if (!inAssert() && !inIfTestWithoutConnect()) 
             INCORRECT_USE_OF_CARDINALITY.invoke(this);
     }
-	
+
     public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "delay");
     }
@@ -282,22 +289,9 @@ aspect ComplianceCheck {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "terminate");
     }
 
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_REINIT_IN_INITIAL =
-            new SimpleErrorProducer("UNSUPPORTED_REINIT_IN_INITIAL", ProblemKind.COMPLIANCE, "Reinit in an initial when equation is not supported");
-
     public void FReinit.complianceCheck(ErrorCheckType checkType) {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "reinit");
-        if (inInitialWhenClause()) {
-            UNSUPPORTED_REINIT_IN_INITIAL.invoke(this);
-        }
     }
-
-    inh boolean FReinit.inInitialWhenClause();
-    inh boolean FAbstractEquation.inInitialWhenClause();
-    eq FClass.getChild().inInitialWhenClause()                          = false;
-    eq InstNode.getChild().inInitialWhenClause()                        = false;
-    eq FIfWhenElseEquation.getFAbstractEquation().inInitialWhenClause() = isWhen() || inInitialWhenClause();
-    eq FIfWhenEquation.getFAbstractEquation().inInitialWhenClause()     = isWhen() && getTest().isInitialGuard() || inInitialWhenClause();
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_STRING_ARGUMENT =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_STRING_ARGUMENT", ProblemKind.COMPLIANCE, "%s with higher than parameter variability is not supported");
@@ -406,6 +400,15 @@ aspect ComplianceCheck {
     public void InstFunctionCall.complianceCheck(ErrorCheckType checkType) {
         if (isConstructorCall() && isBound() && inFunction()) {
             UNSUPPORTED_EXTERNAL_OBJECT_CONSTRUCTORS.invoke(this);
+        }
+    }
+    
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED =
+        new SimpleErrorProducer("UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED", ProblemKind.COMPLIANCE, "Vectorized function calls of unknown size is not supported");
+        
+    public void InstVectorFunctionCall.complianceCheck(ErrorCheckType checkType) {
+        if (size().isUnknown()) {
+            UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED.invoke(this);
         }
     }
 }

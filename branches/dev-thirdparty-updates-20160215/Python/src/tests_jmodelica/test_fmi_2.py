@@ -111,6 +111,28 @@ class Test_FMUModelCS2:
         coupled = load_fmu(self.coupled_name)
         
         assert coupled.get_log_file_name() == file_name.replace(".","_")[:-4]+"_log.txt"
+        
+    @testattr(fmi = True)
+    def test_part_log(self):
+        model = load_fmu(self.coupled_name, log_level=6)
+        
+        model.set("_log_level", 6)
+        
+        model.simulate()
+        
+        num_lines = model.get_number_of_lines_log()
+        assert num_lines > 50 #Assert big log
+        
+        log = model.get_log(start_lines=10)
+        assert len(log) == 10
+        log = model.get_log(end_lines=10)
+        assert len(log) == 10
+        log = model.get_log()
+        assert len(log) == num_lines
+        log = model.get_log(start_lines=10, end_lines=10)
+        assert len(log) == 20
+        log = model.get_log(start_lines=num_lines-10, end_lines=num_lines-10)
+        assert len(log) == num_lines
     
     @testattr(windows = True)
     def test_init(self):
@@ -561,6 +583,30 @@ class Test_FMUModelME2:
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.output2_name = compile_fmu("OutputTest2",os.path.join(path_to_mofiles,"OutputTest.mo"), target="me", version="2.0")
         cls.no_state_name = compile_fmu("NoState.Example1", os.path.join(path_to_mofiles,"noState.mo"), target="me", version="2.0")
+        cls.enum_name = compile_fmu("Enumerations.Enumeration2", os.path.join(path_to_mofiles,"Enumerations.mo"), target="me", version="2.0")    
+        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"), target="me", version="2.0")
+    
+    @testattr(fmi = True)
+    def test_get_string(self):
+		model = load_fmu(self.string1)
+		
+		for i in range(100): #Test so that memory issues are detected
+			assert model.get("str")[0] == "hej"
+    
+    @testattr(stddist = True)
+    def test_get_enum(self):
+        model = load_fmu(self.enum_name)
+        
+        assert model.get("one") == 1
+        
+        model.set("one", 2)
+        assert model.get("one") == 2
+    
+    @testattr(windows = True)
+    def test_malformed_xml(self):
+        malformed = load_fmu(os.path.join(path_to_fmus_me2, "MalFormed.fmu"))
+        
+        nose.tools.assert_raises(FMUException, malformed.get_states_list)
     
     @testattr(fmi = True)
     def test_log_file_name(self):
@@ -877,6 +923,16 @@ class Test_FMUModelME2:
         assert len(dir_der2) == 2
         nose.tools.assert_almost_equal(dir_der2[0], 16.)
         nose.tools.assert_almost_equal(dir_der2[1], 4.)
+        
+    @testattr(fmi = True)
+    def test_simulate_with_debug_option(self):
+        coupled = load_fmu(self.coupled_name)
+
+        opts=coupled.simulate_options()
+        opts["logging"] = True
+        
+        #Verify that a simulation is successful
+        res=coupled.simulate(options=opts)
         
     @testattr(fmi = True)
     def test_simulate_options(self):

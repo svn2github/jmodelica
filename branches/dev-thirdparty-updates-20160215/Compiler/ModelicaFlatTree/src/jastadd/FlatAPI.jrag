@@ -182,7 +182,8 @@ aspect FlatAPI {
     syn int FAbstractVariable.indexInZ() = -1;
     eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
     
-    syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
+    syn boolean FAssignableExp.isConsecutiveInZ(FAssignableExp use) = false;
+    eq FIdUseExp.isConsecutiveInZ(FAssignableExp use) = (use instanceof FIdUseExp) && myFV().isConsecutiveInZ(((FIdUseExp)use).myFV());
     
     syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
     eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
@@ -814,44 +815,20 @@ aspect FlatAPI {
         this when !isParameter() && !isInput() && !isPreVariable() && !isConstant() && shouldContribute()
     to FClass.discreteVariables() for myFClass();   
 
-    syn int FClass.numNonFixedParameters() = nonFixedParameters().size();
-    coll ArrayList<FVariable> FClass.nonFixedParameters()
+    syn int FClass.numInitialParameters() = initialParameters().size();
+    coll ArrayList<FVariable> FClass.initialParameters()
         [new ArrayList<FVariable>()] with add root FClass;
-    FVariable contributes this when isNonFixedParameter() && shouldContribute()
-    to FClass.nonFixedParameters() for myFClass();
-
-    syn boolean FAbstractVariable.isNonFixedParameter() = false;
-    eq FStringVariable.isNonFixedParameter()            = false;
-    eq FVariable.isNonFixedParameter()                  = isParameter() && !fixedAttribute();
+    FVariable contributes this when isInitialParameter() && shouldContribute()
+    to FClass.initialParameters() for myFClass();
     
-    syn boolean ASTNode.containsNonFixedParameter() {
-        for (ASTNode child : this)
-            if (child.containsNonFixedParameter())
-                return true;
-        return false;
-    }
-    eq FIdUseExp.containsNonFixedParameter() = getFIdUse().containsNonFixedParameter();
+    syn boolean FAbstractVariable.isFixed() = true;
+    eq FVariable.isFixed() = !isInitialParameter() && fixedAttribute();
     
-    syn boolean FIdUse.containsNonFixedParameter() = myFV().isNonFixedParameter();
-    eq FIdUseInstAccess.containsNonFixedParameter() = !isCircular() && myInstComponentDecl().isNonFixedParameter();
+    syn boolean FAbstractVariable.isInitialParameter() = false;
+    eq FVariable.isInitialParameter()                  = variability().initialParameterVariability();
     
-    syn boolean InstComponentDecl.isNonFixedParameter() = false;
-    eq InstAssignable.isNonFixedParameter() {
-        if (!isParameter())
-            return false;
-        for (InstModification mod : totalMergedEnvironment()) {
-            FExp exp = mod.findAttribute(FAttribute.FIXED);
-            if (exp == null)
-                continue;
-            if (!exp.ceval().booleanValue())
-                return true;
-        }
-        if (hasBindingFExp())
-            return getBindingFExp().containsNonFixedParameter();
-        return false;
-    }
+    syn boolean InstComponentDecl.isInitialParameter() = variability().initialParameterVariability();
     
-
     syn boolean ASTNode.containsFTimeExp() {
         for (ASTNode child : this)
             if (child.containsFTimeExp())
@@ -1371,29 +1348,29 @@ aspect FlatAPI {
     /**
      * Check if an expression will generate an event.
      * 
-     * @param checkNonFixedParameters  Controls whether parameters with fixed = false should be
+     * @param checkInitialParameters  Controls whether parameters with fixed = false should be
      *                                 considered to generate events.
      */
-    syn boolean FExp.generatesEvent(boolean checkNonFixedParameters) = generatesEvent(false, checkNonFixedParameters);
+    syn boolean FExp.generatesEvent(boolean checkInitialParameters) = generatesEvent(false, checkInitialParameters);
 
     /**
      * Check if an expression will generate an event.
      * 
      * @param ignoreVariability        Controles whether variability should be ignored.
-     * @param checkNonFixedParameters  Controls whether parameters with fixed = false should be
+     * @param checkInitialParameters  Controls whether parameters with fixed = false should be
      *                                 considered to generate events.
      */
-    syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkNonFixedParameters) =
+    syn boolean FExp.generatesEvent(boolean ignoreVariability, boolean checkInitialParameters) =
             inEventGeneratingLocation() && hasEventGeneratingType() &&
-            (ignoreVariability || hasEventGeneratingVariability(checkNonFixedParameters)) &&
+            (ignoreVariability || hasEventGeneratingVariability(checkInitialParameters)) &&
             myOptions().getBooleanOption("generate_event_switches");
 
     /**
      * Check if an expression will generate an event.
      * Does not check context further than expressions.
      */
-    syn boolean FExp.hasEventGeneratingVariability(boolean checkNonFixedParameters) =
-            !variability().parameterOrLess() || (checkNonFixedParameters && containsNonFixedParameter());
+    syn boolean FExp.hasEventGeneratingVariability(boolean checkInitialParameters) =
+            !variability().parameterOrLess() || (checkInitialParameters && variability().initialParameterVariability());
 
     syn boolean FExp.inEventGeneratingLocation() = !inFunction() && !inNoEventExp() && !inSmoothExp(myOptions().getBooleanOption("disable_smooth_events") ? 0 : 1);
 
@@ -1409,7 +1386,7 @@ aspect FlatAPI {
     
     syn boolean FExp.generatesEventInDAE(FExp orig) = inEquationSection() && orig==this && generatesEvent(false);
     syn boolean FRelExp.generatesEventInInitDAE(FExp orig) =
-            (inInitialEquationSection() || inEquationSection() && containsNonFixedParameter())
+            (inInitialEquationSection() || (inEquationSection() && variability().initialParameterVariability()))
             && orig==this && generatesEvent(true);
     
     coll ArrayList<FRelExp> FClass.relExpsWithEvent() 
@@ -1477,7 +1454,7 @@ aspect FlatAPI {
     syn int FClass.numInitialGuessEquations() {
         int n_eq = 0;
         for (FRealVariable fv : realVariables()) {
-            if (!(fv.fixedAttribute())) {
+            if (!fv.isFixed()) {
                 n_eq++;
             }
         }
@@ -1522,6 +1499,14 @@ aspect FlatAPI {
     }
     
     */
+    
+    /**
+     * Utility function that returns true if this equation on the form zero
+     * equal to zero.
+     */
+    syn boolean FAbstractEquation.isZeroEquation() = false;
+    eq FEquation.isZeroEquation() = getLeft().isLiteralZero() && getRight().isLiteralZero();
+    
     
     inh Set<FVariable> FExp.boundParameters();
     eq FVariable.getBindingExp().boundParameters()       = Collections.singleton(this);
@@ -1662,7 +1647,7 @@ aspect FlatAPI {
     
     syn boolean FAbstractVariable.isIndependentParameter() = false;
     syn lazy boolean FVariable.isIndependentParameter() =
-            isParameter() && !isNonFixedParameter() && !hasParameterEquation() && 
+            isParameter() && !isInitialParameter() && !hasParameterEquation() && 
             (!hasBindingExp() || getBindingExp().isIndependentParameterExp());
     
     syn lazy boolean FVariable.isRegularIndependentParameter() =
@@ -1679,6 +1664,12 @@ aspect FlatAPI {
     inh boolean FAbstractEquation.isParameterEquation();
     eq FClass.getFParameterEquation().isParameterEquation() = true;
     eq Root.getChild().isParameterEquation() = false;
+    
+    inh boolean FAbstractEquation.isNormalEquation();
+    eq FClass.getFAbstractEquation().isNormalEquation() = true;
+    eq FClass.getChild().isNormalEquation()             = false;
+    eq InstNode.getChild().isNormalEquation()           = true;
+    eq Root.getChild().isNormalEquation()               = false;
     
     coll ArrayList<FExp> FAbstractEquation.replacedAtInitialExps()
         [new ArrayList<FExp>()] with add root FAbstractEquation;
@@ -2153,6 +2144,18 @@ aspect ReferencedVariables {
         return res;
     }
 
+    /***
+     * DANGER! Use this method and its results with caution. It will probably
+     * not work before saclarization but should be safe afterwards!
+     */
+    syn Set<String> FAbstractEquation.referencedVariablesAsStrings() {
+        Set<FIdUseExp> exps = new LinkedHashSet<FIdUseExp>();
+        Set<String> res = new LinkedHashSet<String>();
+        for (FIdUseExp exp : exps) {
+            res.add(exp.name());
+        }
+        return res;
+    }
     public static Set<FVariable> ASTNode.lookupFVariablesInSet(Set<FIdUseExp> set) {
         Set<FVariable> res = new LinkedHashSet<FVariable>();
         for (FIdUseExp use : set)
@@ -2161,6 +2164,19 @@ aspect ReferencedVariables {
         return res;
     }
 
+    syn Set<FVariable> FAbstractEquation.variableDependenciesRHS() = referencedFVariablesInRHS();
+    eq FAlgorithm.variableDependenciesRHS() {
+        Set<FVariable> lhs = referencedFVariablesInLHS();
+        Set<FVariable> rhs = referencedFVariablesInRHS();
+        Set<FVariable> res = new LinkedHashSet<FVariable>();
+        for (FVariable fv : rhs) {
+            if (!lhs.contains(fv)) {
+                res.add(fv);
+            }
+        }
+        return res;
+    }
+    
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
     syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
@@ -2294,7 +2310,7 @@ aspect FlatTypes {
     eq FRecordDecl.getChild().inRecord() = true;
     eq FClass.getChild().inRecord()      = false;
     eq FForIndex.getChild().inRecord()   = false;
-    
+
     inh boolean InstComponentDecl.inRecord();
     inh boolean InstExtends.inRecord();
     eq InstNode.getInstComponentDecl().inRecord()               = false;
@@ -2304,8 +2320,8 @@ aspect FlatTypes {
     eq InstRecord.getInstExtends().inRecord()                   = true;
     eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
     eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
-    
-    inh boolean FExp.inRecordDecl();
+    eq InstRecordConstructor.getInstComponentDecl().inRecord()  = true;
+
     inh boolean InstComponentDecl.inRecordDecl();
     eq InstNode.getChild().inRecordDecl()                     = false;
     eq InstAssignable.getChild().inRecordDecl()               = inRecordDecl();
@@ -2318,7 +2334,15 @@ aspect FlatTypes {
     eq InstClassDecl.getInstComponentDecl().inRecordDecl()    = isRecord();
     eq FClass.getChild().inRecordDecl()                       = false;
     eq FRecordDecl.getChild().inRecordDecl()                  = true;
-    
+
+    inh boolean InstComponentDecl.inRecordConstructor();
+    inh boolean InstExtends.inRecordConstructor();
+    eq InstRecordConstructor.getInstComponentDecl().inRecordConstructor() = true;
+    eq InstRecordConstructor.getInstExtends().inRecordConstructor()       = true;
+    eq InstExtends.getChild().inRecordConstructor()                       = inRecordConstructor();
+    eq InstNode.getChild().inRecordConstructor()                          = false;
+    eq Root.getChild().inRecordConstructor()                              = false;
+
     syn int FRecordDecl.indexOf(String name) {
         for (int i = 0; i < getNumFVariable(); i++)
             if (getFVariable(i).name().equals(name))
@@ -2401,14 +2425,29 @@ aspect Attributes {
     syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
     syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
     
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) = null;
-    eq FVariable.findHierarchicalAttribute(FQName name) = name.findHierarchicalAttribute(getFQName(), this);
+    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQName name, int n, String attrName) {
+        FAttribute attr = findHierarchicalAttribute(name, n);
+        if (attr != null) {
+            attr = attr.findAttribute(attrName);
+            if (attr != null) {
+                return attr.getValue();
+            }
+        }
+        return null;
+    }
     
-    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var) = null;
-    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var)       = var.findAttribute(getName());
-    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var) {
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) =
+            findHierarchicalAttribute(name, name.numParts());
+    
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name, int n) = null;
+    eq FVariable.findHierarchicalAttribute(FQName name, int n) =
+            name.findHierarchicalAttribute(getFQName(), this, n);
+    
+    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var, int n) = null;
+    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var, int n)       =
+            var.findAttribute(getName());
+    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var, int n) {
         int i = prefix.numMatchingParts(this);
-        int n = getNumFQNamePart();
         if (i >= n)
             return null;
         FAttribute attr = var.findAttribute(getFQNamePart(i).getName());
@@ -2703,7 +2742,7 @@ aspect Nominals {
     eq FIdUseExp.nominal() = myFV().nominal();
     
     syn FExp FAbstractVariable.nominal() {
-        if (variability().parameterOrLess() && valueIsFixed()) {
+        if (variability().fixedParameterOrLess()) {
             return new FAbsExp(createUseExp());
         } else {
             return variableNominal();
@@ -2830,12 +2869,13 @@ aspect FVariableUses {
     /**
      * Check if this is the left hand side of an assignment or function call statement.
      */
-    inh boolean FAssignableExp.isAssignedTo();
-    inh boolean FFunctionCallLeft.isAssignedTo();
+    inh boolean FExp.isAssignedTo();
     eq BaseNode.getChild().isAssignedTo()         = false;
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
-    eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
-    eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
+    eq FFunctionCallLeft.getFExp().isAssignedTo() = true;
+    eq FDecomposeExp.getFExp().isAssignedTo()     = isAssignedTo();
+    eq FRecordConstructor.getArg().isAssignedTo() = isAssignedTo();
+    eq FArray.getFExp().isAssignedTo()            = isAssignedTo();
     
     inh boolean FExp.inBindingExp();
     eq Root.getChild().inBindingExp() = false;
@@ -2858,10 +2898,8 @@ aspect FVariableUses {
     eq Root.getChild().bindingExpVariability() = fContinuous();
     eq FVariable.getChild().bindingExpVariability() = variability();
     eq FVariable.getFAttribute().bindingExpVariability() = fParameter();
-    eq FRecordVariable.getFAttribute(int i).bindingExpVariability() {
-        int partIndex = myFRecordDecl().indexOf(getFAttribute(i).name());
-        return variability().getPart(partIndex);
-    }
+    eq FRecordVariable.getFAttribute(int i).bindingExpVariability() =
+            variability().component(getFAttribute(i).name());
     
     /**
      * Collection attribute returning all dependent parameters which
@@ -3016,11 +3054,11 @@ aspect FVariableUses {
      * Collection attribute returning all non-fixed parameters (FVariables)
      * referenced in an equation.
      */
-    coll LinkedHashSet<FVariable> FAbstractEquation.nonFixedParameters()
+    coll LinkedHashSet<FVariable> FAbstractEquation.initialParameters()
         [new LinkedHashSet<FVariable>()] with add root FAbstractEquation;
 
-    FIdUseExp contributes (FVariable) myFV() when myFV().isNonFixedParameter() to
-        FAbstractEquation.nonFixedParameters() for each enclosingEquationsIterator();
+    FIdUseExp contributes (FVariable) myFV() when myFV().isInitialParameter() to
+        FAbstractEquation.initialParameters() for each enclosingEquationsIterator();
 
     /**
      * Collection attribute returning all pre variables (FPreVariable)
@@ -3168,15 +3206,16 @@ aspect LinearFVariables {
     
     eq FMulExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
     eq FMulExp.getRight().isLinear(Set<FVariable> vars) = getLeft().isIndependent(vars) && isLinear(vars);
-    eq FDivExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);         
+    eq FDivExp.getLeft().isLinear(Set<FVariable> vars)  = getRight().isIndependent(vars) && isLinear(vars);
     eq FDivExp.getRight().isLinear(Set<FVariable> vars) = false;
     eq FPowExp.getChild().isLinear(Set<FVariable> vars) = false;
     eq FFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FMathematicalFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
     eq FAbstractFunctionCall.getChild().isLinear(Set<FVariable> vars) = false;
-    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = !isWhen();
+    eq FIfExp.getIfExp().isLinear(Set<FVariable> vars) = !isWhen() && (!inNoEventExp() || getIfExp().isIndependent(vars)); 
+    eq FNoEventExp.getFExp().isLinear(Set<FVariable> vars) = isLinear(vars);
     
-    syn boolean FExp.isIndependent(Set<FVariable> set) {
+    syn boolean FExp.isIndependent(Set<? extends CommonVariableDecl> set) {
         for (FExp e : childFExps()) {
             if (!e.isIndependent(set)) {
                 return false;
@@ -3185,15 +3224,32 @@ aspect LinearFVariables {
         return true;
     }
 
-    syn boolean FIfExp.isIndependent(Set<FVariable> set) {
+    syn boolean FIfExp.isIndependent(Set<? extends CommonVariableDecl> set) {
         // Don't check the guard exp since it is discrete and does not affect
         // linearity.
         return getThenExp().isIndependent(set) && getElseExp().isIndependent(set);
     }
 
-    eq FIdUseExp.isIndependent(Set<FVariable> set) {
-        return !set.contains(myFV());   
+    eq FAbstractDerExp.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return !set.contains(myFV());
     }
+
+    eq FIdUseExp.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return getFIdUse().isIndependent(set);
+    }
+
+    syn boolean FIdUse.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return !set.contains(myFV());
+    }
+
+    eq FIdUseInstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return getInstAccess().isIndependent(set);
+    }
+
+    syn boolean InstAccess.isIndependent(Set<? extends CommonVariableDecl> set) {
+        return !set.contains(myInstComponentDecl());
+    }
+
 }
 
 aspect FlatDiagnostics {
@@ -3758,12 +3814,12 @@ aspect FlatExternalFunctionAPI {
     }
     
     coll HashSet<FExternalStmt> FClass.myExternals()
-        [new HashSet<FExternalStmt>()] with add root FClass;
+        [new LinkedHashSet<FExternalStmt>()] with add root FClass;
     FExternalStmt contributes this
         to FClass.myExternals() for myFClass();
     
     syn HashSet<String> FClass.externalLibraries() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.library() != null)
                 for (String lib : ext.library())
@@ -3772,7 +3828,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalIncludes() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.include() != null)
                 res.add(ext.include());
@@ -3780,7 +3836,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalLibraryDirectories() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.libraryDirectory() != null)
                 res.add(ext.libraryDirectory());
@@ -3788,7 +3844,7 @@ aspect FlatExternalFunctionAPI {
     }
     
     syn HashSet<String> FClass.externalIncludeDirectories() {
-        HashSet<String> res = new HashSet<String>();
+        HashSet<String> res = new LinkedHashSet<String>();
         for (FExternalStmt ext : myExternals())
             if (ext.includeDirectory() != null)
                 res.add(ext.includeDirectory());
@@ -3823,33 +3879,12 @@ aspect FlatExternalFunctionAPI {
         }
         
         if (includeDir != null) 
-            includeDir = n.uri2path(includeDir);
+            includeDir = n.resolve(includeDir);
         if (libraryDir != null) {
-            libraryDir = n.uri2path(libraryDir);
+            libraryDir = n.resolve(libraryDir);
         }
     }
-    
-    /**
-     * Converts an URI to a file-system path.
-     * 
-     * Only modelica:// and file:// URIs are supported.
-     * 
-     * @param str  the string to interpret as an URI
-     */
-    public String InstExternal.uri2path(String str) {
-        try {
-            URI uri = new URI(str);
-            if (uri.getScheme().equals("file")) {
-                return uri.getPath();
-            } else if (uri.getScheme().equals("modelica")) {
-                String pack = new File(packagePath(uri.getAuthority())).getAbsolutePath();
-                return pack != null ? pack + uri.getPath() : null;
-            }
-        } catch (URISyntaxException e) {
-        }
-        return null;
-    }
-    
+
 }
 
 aspect Sparsity {

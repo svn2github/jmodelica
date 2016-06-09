@@ -261,6 +261,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->atInitial = JMI_FALSE;
     jmi_->eventPhase = JMI_TIME_EXACT;
     jmi_->nextTimeEvent.defined = 0;
+    jmi_->save_restore_solver_state_mode = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
@@ -276,6 +277,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->is_initialized = 0;
 
     jmi_->nbr_event_iter = 0;
+    jmi_->nbr_consec_time_events = 0;
 
     jmi_->dyn_mem_head.next = NULL;
     jmi_->dyn_mem_head.data = NULL;
@@ -553,6 +555,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
         jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
+        jmi_log_reals(jmi->log, node, logInfo, "Inputs", jmi_get_real_u(jmi), jmi->n_real_u);
     }
 
     jmi->block_level = 0; /* to recover from errors */
@@ -637,16 +640,6 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
     }
     jmi_finalize_try(jmi, depth);
     return return_status;
-}
-
-jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
-    jmi_real_t t = jmi_get_t(jmi)[0];
-    if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
-      /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
-        return JMI_FALSE;
-    }
-    /*  printf("jmi_sample2: %f %f %12.12f %12.12f\n",offset,h,fmod((t-offset),h),(t-offset));*/
-    return ALMOST_ZERO(jmi_dremainder((t-offset),h));
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {

@@ -146,7 +146,7 @@ abstract public class OptionRegistry {
 
     public enum OptionType { compiler, runtime }
 
-    public enum Category { common, user, uncommon, experimental, debug, internal }
+    public enum Category { common, user, uncommon, experimental, debug, internal, deprecated }
 
     private enum Default {
         // Compiler options
@@ -302,6 +302,13 @@ abstract public class OptionRegistry {
              Category.user,
              true, 
              "If enabled, then index reduction is performed for high-index systems."),
+        MUNKRES_MAX_INCIDENCES
+            ("munkres_max_incidences", 
+             OptionType.compiler, 
+             Category.deprecated,
+             0, 
+             "The maximum number of incidences that can be in a graph when solving a munkres problem. " +
+             "A value of zero or less results in no limit."),
         PROPAGATE_DERIVATIVES
             ("propagate_derivatives", 
              OptionType.compiler, 
@@ -480,6 +487,12 @@ abstract public class OptionRegistry {
              "after each transformation step. Allowed values are 'none', 'diag' (only fixed-size model diagnostics), " +
              "'full' (write diagnostics and flat tree).",
              "none", "diag", "full"),
+         DEBUG_SAN_CHECK 
+            ("debug_sanity_check", 
+             OptionType.compiler, 
+             Category.debug,
+             false,
+             "If enabled, flat tree will be checked for consistency between transformation steps."),
         RUNTIME_PARAM
             ("generate_runtime_option_parameters",
              OptionType.compiler,
@@ -655,7 +668,7 @@ abstract public class OptionRegistry {
             ("nle_jacobian_update_mode",
              OptionType.runtime, 
              Category.user,
-             0,
+             2,
              "Mode for how to update the Jacobian: " +
              "0 - full Jacobian, 1 - Broyden update, 2 - Reuse Jacobian.",
              0, 2),
@@ -667,6 +680,13 @@ abstract public class OptionRegistry {
              "Mode for how to calculate the Jacobian: " +
              "0 - onesided differences, 1 - central differences, 2 - central differences at bound, 3 - central differences at bound and 0, 4 - central differences in second Newton solve, 5 - central differences at bound in second Newton solve, 6 - central differences at bound and 0 in second Newton solve, 7 - central differences at small residual, 8- calculate Jacobian externally, 9 - Jacobian compresssion.",
              0, 9),
+        NLE_JACOBIAN_FINITE_DIFFERENCE_DELTA
+            ("nle_jacobian_finite_difference_delta",
+             OptionType.runtime, 
+             Category.user,
+             1.490116119384766e-08,
+             "Delta to use when calculating finite difference Jacobians.",
+             2.220446049250313e-16, 1e-1),
         NLE_ACTIVE_BOUNDS_MODE
             ("nle_active_bounds_mode",
              OptionType.runtime, 
@@ -1121,6 +1141,10 @@ abstract public class OptionRegistry {
         findIntegerOption(key, false).setDefault(value);
     }
 
+    public int getIntegerOptionDefault(String key) {
+        return findIntegerOption(key, false).getDefault();
+    }
+
     public void expandIntegerOptionMax(String key, int val) {
         findIntegerOption(key, false).expandMax(val);
     }
@@ -1192,6 +1216,14 @@ abstract public class OptionRegistry {
 
     public void setStringOptionDefault(String key, String value) {
         findStringOption(key, false).setDefault(value);
+    }
+
+    public String getStringOptionDefault(String key) {
+        return findStringOption(key, false).getDefault();
+    }
+
+    public Set<String> getStringOptionAllowed(String key) {
+        return findStringOption(key, false).getAllowed();
     }
 
     public void addStringOptionAllowed(String key, String val) {
@@ -1273,6 +1305,10 @@ abstract public class OptionRegistry {
         findRealOption(key, false).setDefault(value);
     }
 
+    public double getRealOptionDefault(String key) {
+        return findRealOption(key, false).getDefault();
+    }
+
     public void expandRealOptionMax(String key, double val) {
         findRealOption(key, false).expandMax(val);
     }
@@ -1341,6 +1377,10 @@ abstract public class OptionRegistry {
         findBooleanOption(key, false).setDefault(value);
     }
 
+    public Boolean getBooleanOptionDefault(String key) {
+        return findBooleanOption(key, false).getDefault();
+    }
+
     public boolean getBooleanOption(String key) {
         return findBooleanOption(key, false).getValue();
     }
@@ -1360,6 +1400,30 @@ abstract public class OptionRegistry {
         throw new UnknownOptionException(unknownOptionMessage(key));
     }
 
+    public int getIntegerOptionMax(String key) {
+        return findIntegerOption(key, false).getMax();
+    }
+
+    public int getIntegerOptionMin(String key) {
+        return findIntegerOption(key, false).getMin();
+    }
+
+    public double getRealOptionMax(String key) {
+        return findRealOption(key, false).getMax();
+    }
+
+    public double getRealOptionMin(String key) {
+        return findRealOption(key, false).getMin();
+    }
+
+    public Boolean isLimited(String key) {
+        Option o = optionsMap.get(key);
+        if (o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.isLimited();
+    }
+
     public String getDescription(String key){
         Option o = optionsMap.get(key);
         if(o == null) {
@@ -1368,7 +1432,23 @@ abstract public class OptionRegistry {
         return o.getDescription();
     }
 
-    public Set<Map.Entry<String, Option>> getAllOptions() {
+    public OptionType getOptionType(String key){
+        Option o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getOptionType();
+    }
+
+    public Category getCategory(String key){
+        Option o = optionsMap.get(key);
+        if(o == null) {
+            throw new UnknownOptionException(unknownOptionMessage(key));
+        }
+        return o.getCategory();
+    }
+
+    private Set<Map.Entry<String, Option>> getAllOptions() {
         return optionsMap.entrySet();
     }
 
@@ -1485,6 +1565,14 @@ abstract public class OptionRegistry {
             return description;
         }
 
+        public OptionType getOptionType() {
+            return type;
+        }
+
+        public Boolean isLimited() {
+            return false;
+        }
+
         public Category getCategory() {
             return cat;
         }
@@ -1530,6 +1618,7 @@ abstract public class OptionRegistry {
 
     private static class IntegerOption extends Option {
         protected int value;
+        protected int defaultValue;
         private int min;
         private int max;
 
@@ -1540,6 +1629,7 @@ abstract public class OptionRegistry {
         public IntegerOption(String key, OptionType type, Category cat, String description, int value, int min, int max) {
             super(key, description, type, cat);
             this.value = value;
+            this.defaultValue = value;
             this.min = min;
             this.max = max;
         }
@@ -1563,9 +1653,27 @@ abstract public class OptionRegistry {
             return (min == Integer.MIN_VALUE ? "" : ", min: " + min) + (max == Integer.MAX_VALUE ? "" : ", max: " + max);
         }
 
+        public int getMin() {
+            return min;
+        }
+
+        public int getMax() {
+            return max;
+        }
+
+        @Override
+        public Boolean isLimited() {
+            return (min != Integer.MIN_VALUE) || (max != Integer.MAX_VALUE);
+        }
+
         public void setDefault(int value) {
             changeDefault();
             this.value = value;
+            this.defaultValue = value;
+        }
+
+        public Integer getDefault() {
+            return defaultValue;
         }
 
         public int getValue() {
@@ -1595,6 +1703,7 @@ abstract public class OptionRegistry {
 
     private static class StringOption extends Option {
         protected String value;
+        private String defaultValue;
         protected Map<String,String> vals;
 
         public StringOption(String key, OptionType type, Category cat, String description, String value) {
@@ -1634,6 +1743,11 @@ abstract public class OptionRegistry {
         public void setDefault(String value) {
             changeDefault();
             this.value = value;
+            this.defaultValue = value;
+        }
+
+        public String getDefault() {
+            return defaultValue;
         }
 
         public String addAllowed(String value) {
@@ -1645,6 +1759,13 @@ abstract public class OptionRegistry {
                 vals.put(value, value);
                 return value;
             }
+        }
+
+        public Set<String> getAllowed() {
+            if (vals == null) {
+                return Collections.unmodifiableSet(Collections.<String> emptySet());
+            }
+            return Collections.<String> unmodifiableSet(vals.keySet());
         }
 
         public String getValue() {
@@ -1668,6 +1789,7 @@ abstract public class OptionRegistry {
 
     private static class RealOption extends Option {
         protected double value;
+        private double defaultValue;
         protected double min;
         protected double max;
 
@@ -1678,6 +1800,7 @@ abstract public class OptionRegistry {
         public RealOption(String key, OptionType type, Category cat, String description, double value, double min, double max) {
             super(key, description, type, cat);
             this.value = value;
+            this.defaultValue = value;
             this.min = min;
             this.max = max;
         }
@@ -1701,9 +1824,27 @@ abstract public class OptionRegistry {
             return (min == Double.MIN_VALUE ? "" : ", min: " + min) + (max == Double.MAX_VALUE ? "" : ", max: " + max);
         }
 
+        public double getMin() {
+            return min;
+        }
+
+        public double getMax() {
+            return max;
+        }
+
+        @Override
+        public Boolean isLimited() {
+            return (min != Double.MIN_VALUE) || (max != Double.MAX_VALUE);
+        }
+
         public void setDefault(double value) {
             changeDefault();
             this.value = value;
+            this.defaultValue = value;
+        }
+
+        public double getDefault() {
+            return defaultValue;
         }
 
         public double getValue() {
@@ -1733,10 +1874,12 @@ abstract public class OptionRegistry {
 
     private static class BooleanOption extends Option {
         protected boolean value;
+        private boolean defaultValue;
 
         public BooleanOption(String key, OptionType type, Category cat, String description, boolean value) {
             super(key, description, type, cat);
             this.value = value;
+            this.defaultValue = value;
         }
 
         @Override
@@ -1756,6 +1899,11 @@ abstract public class OptionRegistry {
         public void setDefault(boolean value) {
             changeDefault();
             this.value = value;
+            this.defaultValue = value;
+        }
+
+        public boolean getDefault() {
+            return defaultValue;
         }
 
         public boolean getValue() {

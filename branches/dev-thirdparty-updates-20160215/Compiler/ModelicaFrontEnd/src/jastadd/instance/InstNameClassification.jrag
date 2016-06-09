@@ -136,11 +136,11 @@ aspect InstResolveAmbiguousNames {
     rewrite InstAmbiguousAccess {
         when (!rewritten) 
         to InstAccess {
-            if (lookupInstComponent(name()).successful()) {
+            if (myInstLookupComponent().successful()) {
                 InstComponentAccess c = new InstComponentAccess(name());
                 c.setLocation(this);
                 return c;
-            } else if (lookupInstClass(name()).successful()) {
+            } else if (myInstLookupClass().successful()) {
                 InstClassAccess t = new InstClassAccess(name());
                 t.setLocation(this);
                 return t;
@@ -153,11 +153,11 @@ aspect InstResolveAmbiguousNames {
     rewrite InstAmbiguousArrayAccess {
         when (!rewritten) 
         to InstAccess {
-            if (lookupInstComponent(name()).successful()) {
+            if (myInstLookupComponent().successful()) {
                 InstComponentArrayAccess c = new InstComponentArrayAccess(name(), getFArraySubscripts());
                 c.setLocation(this);
                 return c;
-            } else if (lookupInstClass(name()).successful()) {
+            } else if (myInstLookupClass().successful()) {
                 InstClassAccess t = new InstClassAccess(name());
                 t.setLocation(this);
                 return t;

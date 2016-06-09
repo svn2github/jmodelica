@@ -21,7 +21,7 @@ $(FMIL_BUILD_DIR):
 	esac
 
 all-local: $(FMIL_BUILD_DIR)
-	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install
+	cd $(FMIL_BUILD_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 check-local:
 	cd $(FMIL_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test

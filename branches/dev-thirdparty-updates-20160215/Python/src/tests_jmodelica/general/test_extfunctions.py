@@ -384,6 +384,7 @@ class TestCBasic:
         res = model.simulate()
         #TODO: enable when model.get_string implemented
         #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
+        #nose.tools.assert_equals(model.get('xScalarLit'), 'dcb')
         #nose.tools.assert_equals(model.get('xArray[2]'), 'dbf')
         #nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 'dbf')
     

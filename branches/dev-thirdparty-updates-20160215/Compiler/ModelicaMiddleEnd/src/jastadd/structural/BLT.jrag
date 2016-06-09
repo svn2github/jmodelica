@@ -250,8 +250,14 @@ aspect BLT{
                         continue;
                     for (FExp guard : eqn.getEquation().transformedGuards()) {
                         if (guard.dependsOn(vars)) {
+                            StringBuilder sb = new StringBuilder();
+                            for (Eq e : block.getMembers()) {
+                                sb.append(e.printEquation());
+                                sb.append("\n");
+                            }
                             throw new BLTException("A when-guard is involved in an algebraic loop, "
-                                            + "consider breaking it using pre() expressions");
+                                            + "consider breaking it using pre() expressions. Equations in block:\n" 
+                                    + sb.toString());
                         }
                     }
                 }
@@ -507,7 +513,7 @@ aspect BLT{
     public void AbstractBiPGraph.removeHomotopyActualIncidences() {
         for (E eqn : getEquations()) {
             if (eqn.getEquation().containsFHomotopyExp()) {
-                eqn.removeIncidencesNotInSet(lookupVarsInSet(eqn.getEquation().homotopySimplifiedVarUseLookupVisitor()));
+                eqn.removeIncidencesNotInSet(lookupVars(eqn.getEquation().homotopySimplifiedVarUseLookupVisitor()));
             }
         }
         
@@ -981,6 +987,16 @@ aspect BLT{
         public abstract Collection<FVariable> nonRealVariables();
 
         /**
+         * Returns all local variables in this block that are not of real and discrete.
+         * 
+         * Local variables are variables that are computed directly in this
+         * block.
+         * 
+         * @return Collection<FVariable> all local discrete real variables
+         */
+        public abstract Collection<FVariable> localDiscreteRealVariables();
+        
+        /**
          * Returns all local variables in this block that are not of type real.
          * 
          * Local variables are variables that are computed directly in this
@@ -1024,7 +1040,7 @@ aspect BLT{
 				s.addAll(e.algebraicVariables());
 				s.addAll(e.derivativeVariables());
 				s.addAll(e.differentiatedRealVariables());
-				s.addAll(e.nonFixedParameters());
+				s.addAll(e.initialParameters());
 			}
 			s.removeAll(allVariables());
 			return s;	
@@ -1308,6 +1324,7 @@ aspect BLT{
         private Collection<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
         private Collection<SimpleEquationBlock> localRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedBlocks_cache = null;
+        private Collection<SimpleEquationBlock> localDiscreteRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localNonRealBlocks_cache = null;
         private Collection<AbstractEquationBlock> solvedRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedRealBlocks_cache = null;
@@ -1400,6 +1417,28 @@ aspect BLT{
                         localSolvedBlocks_cache.add(block.asSimple());
             }
             return localSolvedBlocks_cache;
+        }
+        
+        /**
+         * Returns all local discrete real blocks in this block.
+         * 
+         * @return Collection<SimpleEquationBlock> all local non-real blocks
+         */
+        public Collection<SimpleEquationBlock> localDiscreteRealBlocks() {
+            if (localDiscreteRealBlocks_cache == null) {
+                localDiscreteRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
+                for (AbstractEquationBlock block : solvedBlocks()) {
+                    if (block.isSimple() && block.asSimple().isDiscreteReal()) {
+                        localDiscreteRealBlocks_cache.add(block.asSimple());
+                    }
+                }
+                for (SimpleEquationBlock block : unsolvedBlocks()) {
+                    if (block.isDiscreteReal()) {
+                        localDiscreteRealBlocks_cache.add(block);
+                    }
+                }
+            }
+            return localDiscreteRealBlocks_cache;
         }
         
         /**
@@ -1558,7 +1597,12 @@ aspect BLT{
                 variables.addAll(block.nonRealVariables());
             return variables;
         }
-
+        
+        @Override
+        public Collection<FVariable> localDiscreteRealVariables() {
+            return collectLocalVariables(localDiscreteRealBlocks());
+        }
+        
         @Override
         public Collection<FVariable> localNonRealVariables() {
             return collectLocalVariables(localNonRealBlocks());
@@ -1754,6 +1798,11 @@ aspect BLT{
         }
 
         @Override
+        public Collection<FVariable> localDiscreteRealVariables() {
+            return Collections.emptyList();
+        }
+        
+        @Override
         public Collection<FVariable> localNonRealVariables() {
             return Collections.emptyList();
         }
@@ -1911,6 +1960,13 @@ aspect BLT{
                     return false;
             return true;
         }
+        
+        public boolean isDiscreteReal() {
+            for (FVariable fv : allVariables())
+                if (!fv.isReal() || !fv.isDiscrete())
+                    return false;
+            return true;
+        }
 
         @Override
         public Collection<FAbstractEquation> allEquations() {
@@ -1987,6 +2043,14 @@ aspect BLT{
             return localNonRealVariables();
         }
 
+        @Override
+        public Collection<FVariable> localDiscreteRealVariables() {
+            if (!isDiscreteReal())
+                return Collections.emptyList();
+            else
+                return allLocalVariables();
+        }
+        
         @Override
         public Collection<FVariable> localNonRealVariables() {
             if (isReal())

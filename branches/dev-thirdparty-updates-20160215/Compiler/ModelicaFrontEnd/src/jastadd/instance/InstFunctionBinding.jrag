@@ -18,36 +18,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 
+import org.jmodelica.util.Criteria;
+import org.jmodelica.util.collections.FilteredIterator;
+
 
 aspect InstFunctionBinding {
-
-    /**
-     * Finds which, if any, of the inputs for its function a single argument should 
-     * bind to, and adds it to an array in the corresponding place.
-     * 
-     * If the place in the array is taken, an InstMultipleBoundArgument containing both arguments 
-     * is placed there.
-     * 
-     * @param arr     the array to place the argument in
-     * @param inputs  the list of inputs for the function
-     * @return        <code>true</code> it the position for the argument could be found, 
-     *                <code>false</code> otherwise.
-     */
-    public boolean InstFunctionArgument.bindArgument(InstFunctionArgument[] arr, 
-                                                     ArrayList<InstComponentDecl> inputs) {
-        int pos = findArgumentPosition(inputs);
-        if (pos < 0 || pos >= arr.length)
-            return false;
-        
-        if (arr[pos] == null)
-            arr[pos] = (InstFunctionArgument) fullCopy();
-        else
-            arr[pos] = arr[pos].addMultipleBoundArgument(this);
-        
-        arr[pos].setBoundInput(inputs.get(pos));
-        arr[pos].parent = parent; // Temporarily add to tree
-        return true;
-    }
 
 	/**
 	 * Return an InstMultipleBoundArgument containing both <code>this</code> and <code>arg</code>.
@@ -66,15 +41,9 @@ aspect InstFunctionBinding {
 	/**
 	 * Return the position of the input the argument corresponds to.
 	 */
-	protected int InstFunctionArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
-		return -1;
-	}
-	
-	protected int InstPositionalArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
-		return getPos();
-	}
-	
-	protected int InstNamedArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
+    syn int InstFunctionArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) = -1;
+    eq InstPositionalArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs)    = getPos();
+    eq InstNamedArgument.findArgumentPosition(ArrayList<InstComponentDecl> inputs) {
 		int i = 0;
 		for (InstComponentDecl in : inputs) {
 			if (getName().name().equals(in.name()))
@@ -107,12 +76,57 @@ aspect InstFunctionBinding {
 		for (InstFunctionArgument arg : getArgs())
 			arg.setBoundInput(input);
 	}
-	
-	/**
-	 * Get the input component this argument is bound to.
-	 */
-	syn InstComponentDecl InstFunctionArgument.getBoundInput() = boundInput;
-	
+
+    /**
+     * Get the input component this argument is bound to.
+     */
+    syn InstComponentDecl InstFunctionArgument.getBoundInput() = 
+        isInstRecordConstructorArg() ? myRecordConstructorVirtualInstComponentDecl() : boundInput;
+
+    /**
+     * Is this an argument to a record constructor in the instance tree?
+     */
+    inh boolean InstFunctionArgument.isInstRecordConstructorArg();
+    eq InstRecordConstructor.getArg().isInstRecordConstructorArg()     = true;
+    eq InstMultipleBoundArgument.getArg().isInstRecordConstructorArg() = isInstRecordConstructorArg();
+    eq BaseNode.getChild().isInstRecordConstructorArg()                = false;
+
+    /**
+     * Get the virtual component instance that is connected to this argument.
+     * 
+     * Only valid for arguments to record constructors in the instance tree.
+     */
+    syn InstComponentDecl InstFunctionArgument.myRecordConstructorVirtualInstComponentDecl() = 
+        lookupRecordConstructorVirtualInstComponentDecl(boundInput.name());
+
+    /**
+     * Lookup the virtual component instance that should be connected to an argument of a given name.
+     * 
+     * Only valid for arguments to record constructors in the instance tree.
+     */
+    inh InstComponentDecl InstFunctionArgument.lookupRecordConstructorVirtualInstComponentDecl(String name);
+    eq BaseNode.getChild().lookupRecordConstructorVirtualInstComponentDecl(String name) = null;
+    eq InstRecordConstructor.getArg(int i).lookupRecordConstructorVirtualInstComponentDecl(String name) {
+        return localLookupInstComponent(name).targetOrNull();
+    }
+
+    /**
+     * Get the expression to use for this argument.
+     */
+    syn FExp InstDefaultArgument.getFExp() {
+        InstComponentDecl bi = getBoundInput();
+        if (bi != boundInput) {
+            InstValueModification mod = bi.myInstValueMod();
+            if (mod != null && !mod.isDefaultRecordMod()) {
+                return mod.getFExp();
+            }
+        }
+        return getDeclarationFExp();
+    }
+
+    syn boolean InstModification.isDefaultRecordMod()     = false;
+    eq InstDefaultRecordModification.isDefaultRecordMod() = true;
+
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
@@ -169,9 +183,10 @@ aspect InstFunctionBinding {
 	public InstFunctionArgument InstAssignable.createInstDefaultArgument() {
 		InstFunctionArgument arg = null;
 		if (hasBindingFExp()) {
-			FExp exp = myBindingInstExp();
-			arg = new InstDefaultArgument(exp);
-		} else {
+            arg = new InstDefaultArgument(myBindingInstExp());
+        } else if (!isModifiable() && surroundingInstClass().isRecord()) {
+            arg = new InstPositionalArgument(cevalNoBExp(ASTNode.defaultVariableEvaluator(), Index.NULL).buildLiteral(), -1);
+        } else {
 			arg = new InstMissingArgument();
 		}
 		arg.setBoundInput(this);
@@ -301,6 +316,8 @@ aspect InstFunctionBinding {
                 map.put("actualStream",    new BuiltInCreator(BIT.NONE, new FActualStream(),    1));
                 map.put("cardinality",     new BuiltInCreator(BIT.NONE, new FCardinality(),     1));
                 map.put("getInstanceName", new BuiltInCreator(BIT.NONE, new FGetInstanceName(), 0));
+                map.put("Subtask.decouple", 
+                        new BuiltInCreator(BIT.NONE, new FDecouple(),     1));
                 map.put("Modelica.Utilities.Files.loadResource", 
                         new BuiltInCreator(BIT.NONE, new FLoadResource(), 1));
                 map.put("ModelicaServices.ExternalReferences.loadResource", 
@@ -485,13 +502,21 @@ aspect InstFunctionBinding {
 
         private InstFunctionArgument[] bound;
         private ArrayList<InstFunctionArgument> unbindable;
-        private ArrayList<InstComponentDecl> inputs;
+        private ArrayList<InstComponentDecl> modifiableInputs;
+        private ArrayList<InstComponentDecl> allInputs;
         private InstCallable target;
         private InstFunctionCall source;
         private boolean ok = true;
 
         public ArgumentBinding(InstCallable target, InstFunctionCall source, boolean infArgs) {
-            inputs = source.myInputsToBind(target);
+            modifiableInputs = source.myInputsToBind(target);
+            allInputs = modifiableInputs;
+            if (target.isRecord()) {
+                allInputs = new ArrayList<InstComponentDecl>();
+                for (InstComponentDecl icd : target.asInstClassDecl().allInstComponentDecls()) {
+                    allInputs.add(icd);
+                }
+            }
             unbindable = new ArrayList<InstFunctionArgument>();
             this.target = target;
             this.source = source;
@@ -538,8 +563,8 @@ aspect InstFunctionBinding {
             int i = 0;
             for (InstFunctionArgument arg : bound) {
                 if (arg.isOKArg()) {
-                    FType argType = arg.getFExp().type();
-                    FType inType = inputs.get(i).type();
+                    FType argType = arg.getFExpNoTransform().type();
+                    FType inType = modifiableInputs.get(i).type();
                     if (!inType.dimensionCompatible(argType, true))
                         score++;
                     if (!inType.scalarType().typeCompatible(argType.scalarType(), true))
@@ -557,30 +582,69 @@ aspect InstFunctionBinding {
          * have been created for the same function call (used for overloaded constructors).
          */
         public void updateBoundInputs() {
-            for (int i = 0; i < inputs.size(); i++) {
-                bound[i].setBoundInput(inputs.get(i));
+            for (int i = 0; i < modifiableInputs.size(); i++) {
+                bound[i].setBoundInput(modifiableInputs.get(i));
                 if (!bound[i].isOKArg())
                     bound[i].setErrorArgLocation(source);
             }
         }
-
+        
+        private int[] argPositions(ArrayList<InstComponentDecl> icds1, ArrayList<InstComponentDecl> icds2) {
+            int[] pos = new int[icds1.size()];
+            int j = 0;
+            for (int i = 0; i < pos.length; i++) {
+                while (icds2.size() > j && icds1.get(i) != icds2.get(j)) {
+                    j++;
+                }
+                pos[i] = j;
+            }
+            return pos;
+        }
+        
         private void bindNormal() {
             // Bind arguments
-            bound = new InstFunctionArgument[inputs.size()];
-            for (InstFunctionArgument arg : source.getArgs()) 
-                if (!arg.bindArgument(bound, inputs))
+            bound = new InstFunctionArgument[allInputs.size()];
+            int[] ap = argPositions(modifiableInputs, allInputs);
+            for (InstFunctionArgument arg : source.getArgs()) {
+                int pos = arg.findArgumentPosition(modifiableInputs);
+                if (!bindArgument(arg, pos, bound, ap)) {
                     unbindable.add(arg);
-
+                }
+            }
+            
             // Add default argument and check for problems.
             for (int i = 0; i < bound.length; i++) {
-                if (bound[i] == null) 
-                    bound[i] = inputs.get(i).createInstDefaultArgument();
+                if (bound[i] == null) {
+                    bound[i] = allInputs.get(i).createInstDefaultArgument();
+                }
                 bound[i].setErrorArgLocation(source);
                 ok = ok && bound[i].isOKArg();
             }
-
             ok = ok && unbindable.isEmpty();
         }
+        
+        public boolean bindArgument(InstFunctionArgument arg, int p1, InstFunctionArgument[] arr, int[] ap) {
+            if (p1 < 0 || p1 >= modifiableInputs.size()) {
+                return false;
+            }
+            
+            int p2 = ap[p1];
+            
+            if (p2 < 0 || p2 >= arr.length) {
+                return false;
+            }
+            
+            if (arr[p2] == null) {
+                arr[p2] = (InstFunctionArgument) arg.fullCopy();
+            } else {
+                arr[p2] = arr[p2].addMultipleBoundArgument(arg);
+            }
+            
+            arr[p2].setBoundInput(modifiableInputs.get(p1));
+            arr[p2].parent = arg.parent; // Temporarily add to tree
+            return true;
+        }
+
 
         private void bindInfArgs() {
             // Just collect all positional arguments
@@ -593,7 +657,7 @@ aspect InstFunctionBinding {
             }
 
             // Make sure we have any fixed arguments
-            for (int i = args.size(); i < inputs.size(); i++) {
+            for (int i = args.size(); i < modifiableInputs.size(); i++) {
                 InstMissingArgument arg = new InstMissingArgument();
                 args.add(arg);
                 ok = false;
@@ -758,7 +822,7 @@ aspect InstFunctionBinding {
         }
         return res;
     }
-    
+
     /**
      * Calculate if this is a vectorized function call.
      */

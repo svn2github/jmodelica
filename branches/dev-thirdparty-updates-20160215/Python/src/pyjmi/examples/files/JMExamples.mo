@@ -1977,13 +1977,13 @@ Simulation time: 7200s
           363.53658537,  364.36585366,  365.19512195,  366.02439024,
           366.85365854,  367.68292683,  368.51219512,  369.34146341,
           370.17073171,  371.0};
-
     // Oridinary Differential Equations (ODEs)
       Real xA[42](start=xA_init, each fixed=true)
         "Liquid Mole Fraction of Component A";
     // Algebraic Equations (AEs)
       SI.MolarFlowRate V[41](start=V_init, each fixed=true) "Vapor Molar Flux";
-      SI.Temp_K Temp[42](start=Temp_init, each fixed=true) "Temperature (K)";
+      SI.Temp_K Temp[42](start=Temp_init, each fixed=true, each max=0.999*c1_A)
+        "Temperature (K)";
     // other variables
       SI.Pressure Press[42](each start=1.4e5);
       SI.MolarVolume V_mol_A[42] "Pure Component Molar Volumes (m^3/mol)";
@@ -2015,8 +2015,8 @@ Simulation time: 7200s
       SI.MolarFlowRate Dist(min=0) "Distillate Molar Flowrate Flowrate";
       SI.MolarFlowRate Bott(min=0) "Determine the Bottoms Molar Flow Rate";
       Real Temp_dot[42] "help variables";
-      Real ent_term_A[42](each max=1) "help variables for vapor enthalpies";
-      Real ent_term_B[42](each max=1) "help variables for vapor enthalpies";
+      Real ent_term_A[42](each min=0) "help variables for vapor enthalpies";
+      Real ent_term_B[42](each min=0) "help variables for vapor enthalpies";
     equation
     //Pressure
       Press[1] = P_top;
@@ -2061,12 +2061,12 @@ Simulation time: 7200s
       end for;
     //Pure Component Vapor Enthalpies (J/mol)"
       for i in 1:42 loop
-         ent_term_A[i] = (Press[i]/Pc_A) / (Temp[i]/Tc_A)^3;
-         ent_term_B[i] = (Press[i]/Pc_B) / (Temp[i]/Tc_B)^3;
-         hV_A[i] = hL_A[i] + Univ_R * Tc_A * sqrt(1 - ent_term_A[i]) *
+         ent_term_A[i] = 1 - (Press[i]/Pc_A) / (Temp[i]/Tc_A)^3;
+         ent_term_B[i] = 1 - (Press[i]/Pc_B) / (Temp[i]/Tc_B)^3;
+         hV_A[i] = hL_A[i] + Univ_R * Tc_A * sqrt(ent_term_A[i]) *
             (c2[1] - c2[2]*(Temp[i]/Tc_A) + c2[3]*(Temp[i]/Tc_A)^7 +
             Omega_A * (c2[4] - c2[5]*(Temp[i]/Tc_A) + c2[6]*(Temp[i]/Tc_A)^7));
-         hV_B[i] = hL_B[i] + Univ_R * Tc_B * sqrt(1 - ent_term_B[i]) *
+         hV_B[i] = hL_B[i] + Univ_R * Tc_B * sqrt(ent_term_B[i]) *
             (c2[1] - c2[2]*(Temp[i]/Tc_B) + c2[3]*(Temp[i]/Tc_B)^7 +
             Omega_A * (c2[4] - c2[5]*(Temp[i]/Tc_B) + c2[6]*(Temp[i]/Tc_B)^7));
          hV[i] = xA[i] * hV_A[i] + (1 - xA[i]) * hV_B[i]

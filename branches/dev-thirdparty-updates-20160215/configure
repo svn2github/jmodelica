@@ -617,6 +617,16 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+REQUIRE_OPTIMICA_COMPILER
+REQUIRE_MINGW_HOME
+REQUIRE_JVM_ARGS
+REQUIRE_JPYPE_JVM
+REQUIRE_MODELICAPATH
+REQUIRE_BEAVER_PATH
+REQUIRE_COMPILER_JARS
+REQUIRE_CPPAD_HOME
+REQUIRE_SUNDIALS_HOME
+REQUIRE_IPOPT_HOME
 CMAKE_PYTHON_INCLUDE
 CMAKE_PYTHON_LIB
 PYTHON_HOME
@@ -19810,7 +19820,29 @@ fi
 
 #AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.5.0])
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests"
+REQUIRE_IPOPT_HOME=True
+REQUIRE_SUNDIALS_HOME=True
+REQUIRE_CPPAD_HOME=True
+REQUIRE_COMPILER_JARS=True
+REQUIRE_BEAVER_PATH=True
+REQUIRE_MODELICAPATH=True
+REQUIRE_JPYPE_JVM=True
+REQUIRE_JVM_ARGS=False
+REQUIRE_MINGW_HOME=True
+REQUIRE_OPTIMICA_COMPILER=True
+
+
+
+
+
+
+
+
+
+
+
+
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -21070,6 +21102,7 @@ do
     "Python/src/tests_jmodelica/files/Modelica/Resources/Makefile") CONFIG_FILES="$CONFIG_FILES Python/src/tests_jmodelica/files/Modelica/Resources/Makefile" ;;
     "RuntimeLibrary/Makefile") CONFIG_FILES="$CONFIG_FILES RuntimeLibrary/Makefile" ;;
     "jm_tests") CONFIG_FILES="$CONFIG_FILES jm_tests" ;;
+    "Python/src/required_defaults.py") CONFIG_FILES="$CONFIG_FILES Python/src/required_defaults.py" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5 ;;
   esac

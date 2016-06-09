@@ -37,7 +37,8 @@ aspect Graphs {
 
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
 
-    private static final String DEFAULT_EQ_PREFIX = "eq";
+    private static final String DEFAULT_EQ_PREFIX = "eq_";
+    private static final String DEFAULT_EQ_SUBFIX = "";
     
     protected Map<String, V> variableMap = new LinkedHashMap<String, V>();
     protected Map<String, E> equationMap = new LinkedHashMap<String, E>();
@@ -109,7 +110,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public void setAsInitialSystem() {
         initialSystem = true;
         for (E eqn : getEquations()) {
-            for (V var : lookupVarsInSet(eqn.getEquation().findInitUniqueDAEVarUsesInTree())) {
+            for (V var : lookupVars(eqn.getEquation().findInitUniqueDAEVarUsesInTree())) {
                 addEdge(eqn, var);
             }
         }
@@ -124,20 +125,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
 
     public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type) {
-        return addEquation(eqn, groupNumber, variability, type, false);
+        return addEquation(eqn, groupNumber, variability, type, false, DEFAULT_EQ_PREFIX, DEFAULT_EQ_SUBFIX, enumerator);
         
     }
     
-    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return addEquation(eqn, groupNumber, variability, type, isMeta, DEFAULT_EQ_PREFIX, enumerator);
-        
-    }
-    
-    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, Enumerator enumerator) {
+    private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
         String name;
-        prefix = prefix + "_";
         do {
-            name = prefix + enumerator.next();
+            name = prefix + enumerator.next() + subfix;
         } while (getEquation(name) != null);
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
@@ -253,8 +248,8 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             public boolean isOk(FTypePrefixVariability variability)               { return variability.discreteVariability(); }
         },
         NON_FIXED_PARAMETERS {
-            public Collection<? extends FVariable> variables(FClass c)            { return c.nonFixedParameters(); }
-            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.nonFixedParameters(); }
+            public Collection<? extends FVariable> variables(FClass c)            { return c.initialParameters(); }
+            public Collection<? extends FVariable> variables(FAbstractEquation e) { return e.initialParameters(); }
             public boolean isOk(FTypePrefixVariability variability)               { return variability.parameterVariability(); }
         };
 
@@ -283,7 +278,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         Set<FVariable> emptySet = Collections.emptySet();
         for (FAbstractEquation e : eqns) {
             
-            IncidenceMap incMap = e.createIncidenceMap(this, Collections.<V>emptySet(), variableTypes);
+            IncidenceMap incMap = e.createIncidenceMap(this, variableTypes);
             int n_eq = incMap.numEqs();
             
             Collection<E> groupMembers = getEquations(e);
@@ -300,13 +295,21 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
+                Enumerator subEnumerator = enumerator;
+                String prefix = eqNamePrefix;
+                String subfix = "";
+                if (n_eq > 1) {
+                    subEnumerator = new Enumerator(1);
+                    prefix += enumerator.next() + "[";
+                    subfix = "]";
+                }
                 if (n_eq == 0) {
-                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, eqNamePrefix, enumerator);
+                    E eqn = addEquation(e, 0, incMap.variability(0), incMap.type(0), true, prefix, subfix, subEnumerator);
                     groupMembers.add(eqn);
                 } else {
                     for (int i = n_eq - 1; 0 <= i; i--) { // During tarjan the order will be reversed,
                         // need to reverse here to preserve the initial order.
-                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, eqNamePrefix, enumerator);
+                        E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, prefix, subfix, subEnumerator);
                         groupMembers.add(eqn);
                     }
                 }
@@ -336,13 +339,20 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * dependent on each other.
      */
     protected class IncidenceMap {
-        protected Set<V> vars;
-        protected FAbstractEquation equation;
+        private Set<V> vars = null;
+        protected final FAbstractEquation equation;
+        protected final VariableResolver<E, V> resolver;
         
-        public IncidenceMap(FAbstractEquation e, Set<V> additionalDeps) {
+        public IncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver) {
             equation = e;
-            vars = lookupVarsInSet(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
-            vars.addAll(additionalDeps);
+            this.resolver = resolver;
+        }
+        
+        protected Set<V> vars() {
+            if (vars == null) {
+                vars = resolver.lookupVars(equation.findFIdUseExpsInTree(getFIdUseExpLookupVisitor()));
+            }
+            return vars;
         }
         
         public FTypePrefixVariability variability(int i) {
@@ -354,7 +364,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         
         public void addEdges(E eqn, boolean log) {
-            for (V var : vars) {
+            for (V var : vars()) {
                 if (log) {
                     ASTNode.log.verbose("*** %s", var);
                 }
@@ -368,33 +378,96 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     }
     
     /**
+     * An interface that should be implemented by all IncidenceMap classes that
+     * represent an equation which only has one or more variables on the left hand
+     * side (one variable on the left hand side per scalar equation)
+     */
+    protected interface AssignmentIncidenceMap {
+        public Iterable<FIdUseExp> rhs(String assignedLHS);
+        public Collection<FIdUseExp> assigned();
+    }
+    
+    /**
+     * Handles normal equations which are on the form "x = ...".
+     */
+    protected class SingleAssignmentIncidenceMap extends IncidenceMap implements AssignmentIncidenceMap {
+        private final FIdUseExp assigned;
+        private Collection<FIdUseExp> rhsUses;
+        
+        public SingleAssignmentIncidenceMap(FEquation eqn, VariableResolver<E, V> resolver) {
+            super(eqn, resolver);
+            assigned = eqn.getLeft().asFIdUseExp();
+           
+        }
+        
+        private Collection<FIdUseExp> rhsUses() {
+            if (rhsUses == null) {
+                rhsUses = equation.FIdUseExpsInRHS(getFIdUseExpLookupVisitor());
+            }
+            return rhsUses;
+        }
+        
+        @Override
+        public Iterable<FIdUseExp> rhs(String assignedLHS) {
+            if (assignedLHS.equals(assigned.name())) {
+                return rhsUses();
+            } else {
+                return Collections.emptyList();
+            }
+        }
+        
+        @Override
+        public Collection<FIdUseExp> assigned() {
+            return Collections.singletonList(assigned);
+        }
+    }
+    
+    /**
      * Handles incidences between variables in a non-scalar FAbstractEquation.
      * Isolates LHS variables from each other.
      */
     protected abstract class MultiIncidenceMap extends IncidenceMap {
-        protected Map<Integer, V> lhs;
-        protected Set<FIdUseExp> lhsUses;
+        private Map<Integer, V> lhs = null;
+        private Set<FIdUseExp> lhsUses = null;
+        protected final EnumSet<VarType> variableTypes;
         
-        public MultiIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
-            super(e, additionalDeps);
-            lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
-            lhs = new HashMap<Integer, V>();
+        public MultiIncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
+            super(e, resolver);
+            this.variableTypes = variableTypes;
         }
         
-        protected void buildLhsFunction(EnumSet<VarType> variableTypes) {
+        protected Set<FIdUseExp> lhsUses() {
+            if (lhsUses == null) {
+                lhsUses = equation.FIdUseExpsInLHS(getFIdUseExpLookupVisitor());
+            }
+            return lhsUses;
+        }
+        
+        protected abstract void computeLHS(Map<Integer, V> lhs);
+        
+        protected Map<Integer, V> lhs() {
+            if (lhs == null) {
+                Map<Integer, V> lhsTmp = new HashMap<Integer, V>();
+                computeLHS(lhsTmp);
+                lhs = lhsTmp;
+            }
+            return lhs;
+        }
+        
+        protected void buildLhsFunction(Map<Integer, V> lhs, EnumSet<VarType> variableTypes) {
             int i = 0;
-            for (FIdUseExp use : lhsUses) {
+            for (FIdUseExp use : lhsUses()) {
                 if (variableTypes != null) {
                     FAbstractVariable fv = use.myFV();
                     if (fv != null && !addLhs(fv, variableTypes)) {
                         continue;
                     }
                 }
-                buildLhsFunction(use, i++);
+                buildLhsFunction(lhs, use, i++);
             }
         }
         
-        protected void buildLhsFunction(FIdUseExp use, int i) {
+        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
             V var = getVariable(use.name());
             lhs.put(i, var);
         }
@@ -410,7 +483,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public FTypePrefixVariability variability(int i) {
-            V var = lhs.get(i);
+            V var = lhs().get(i);
             if (var == null) {
                 return super.variability(i);
             }
@@ -427,7 +500,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         public FType type(int i) {
-            V var = lhs.get(i);
+            V var = lhs().get(i);
             if (var == null) {
                 return super.type(i);
             }
@@ -437,19 +510,19 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         @Override
         public void addEdges(E eqn, boolean log) {
             int i = eqn.groupNumber();
-            V lhsVar = lhs.get(i);
-            for (V var : vars) {
+            V lhsVar = lhs().get(i);
+            for (V var : vars()) {
                 if (var == lhsVar || rhs(i).contains(var)) {
                     addEdge(eqn, var);
                 }
             }
         }
-        
+
         protected abstract Set<V> rhs(int i);
-        
+
         @Override
         public int numEqs() {
-            return lhs.size();
+            return lhs().size();
         }
     }
     
@@ -460,26 +533,33 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      */
     protected class ManyIncidenceMap extends MultiIncidenceMap {
         
-        protected Set<V> rhs;
+        private Set<V> rhs = null;
         
-        public ManyIncidenceMap(FAbstractEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
-            super(e, additionalDeps, variableTypes);
-            rhs = lookupVarsInSet(equation.FIdUseExpsInRHS());
-            if (equation instanceof FAlgorithm) {
-                rhs.removeAll(lookupVarsInSet(lhsUses));
+        public ManyIncidenceMap(FAbstractEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
+            super(e, resolver, variableTypes);
+        }
+        
+        protected Set<V> rhs() {
+            if (rhs == null) {
+                rhs = resolver.lookupVars(equation.FIdUseExpsInRHS());
+                if (equation instanceof FAlgorithm) {
+                    rhs.removeAll(resolver.lookupVars(lhsUses()));
+                }
             }
-            rhs.addAll(additionalDeps);
-            
+            return rhs;
+        }
+        
+        protected void computeLHS(Map<Integer, V> lhs) {
             if (equation instanceof FFunctionCallEquation) {
-                buildLhsFunction(variableTypes);
+                buildLhsFunction(lhs, variableTypes);
             } else {
-                buildLhsOther(variableTypes);
+                buildLhsOther(lhs, variableTypes);
             }
         }
         
-        private void buildLhsOther(EnumSet<VarType> variableTypes) {
+        private void buildLhsOther(Map<Integer, V> lhs, EnumSet<VarType> variableTypes) {
             int i = 0;
-            for (FAbstractVariable fv : ASTNode.lookupFVariablesInSet(lhsUses)) {
+            for (FAbstractVariable fv : ASTNode.lookupFVariablesInSet(lhsUses())) {
                 if (variableTypes != null) {
                     if (!addLhs(fv, variableTypes)) {
                         continue;
@@ -493,7 +573,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         
         @Override
         protected Set<V> rhs(int i) {
-            return rhs;
+            return rhs();
         }
     }
     
@@ -502,36 +582,104 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
      * Isolates LHS variables from each other.
      * Computes RHS dependencies for LHS.
      */
-    protected class SplitIncidenceMap extends MultiIncidenceMap {
+    protected class SplitIncidenceMap extends MultiIncidenceMap implements AssignmentIncidenceMap {
         protected ArrayList<Set<V>> splitMap;
-        protected Map<FIdUseExp, Set<FIdUseExp>> resolvedDependencies;
-        protected Set<V> additionalDeps;
+        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies;
+        private Map<String, FIdUseExp> nameToAssignedMap;
         
-        public SplitIncidenceMap(FFunctionCallEquation e, Set<V> additionalDeps, EnumSet<VarType> variableTypes) {
-            super(e, additionalDeps, variableTypes);
+        public SplitIncidenceMap(FFunctionCallEquation e, VariableResolver<E, V> resolver, EnumSet<VarType> variableTypes) {
+            super(e, resolver, variableTypes);
+        }
+        
+        private Map<FIdUseExp, Collection<FIdUseExp>> sortDependencies(Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies) {
+            final Map<String, Integer> varToPosMap = new HashMap<String, Integer>();
+            int counter = 0;
+            for (FIdUseExp use : equation.FIdUseExpsInRHS()) {
+                if (!varToPosMap.containsKey(use.name())) {
+                    varToPosMap.put(use.name(), counter++);
+                }
+            }
+            Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
+            for (Map.Entry<FIdUseExp, Set<FIdUseExp>> entry : unsortedDependencies.entrySet()) {
+                ArrayList<FIdUseExp> uses = new ArrayList<FIdUseExp>(entry.getValue());
+                Collections.sort(uses, new Comparator<FIdUseExp>() {
+                    public int compare(FIdUseExp a, FIdUseExp b) {
+                        return varToPosMap.get(a.name()) - varToPosMap.get(b.name());
+                    }
+                });
+                resolvedDependencies.put(entry.getKey(), uses);
+            }
+            return resolvedDependencies;
+        }
+        
+        protected Map<FIdUseExp, Collection<FIdUseExp>> resolvedDependencies() {
+            if (resolvedDependencies == null) {
+                DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
+                FFunctionCallEquation equation = (FFunctionCallEquation) this.equation;
+                try {
+                    equation.getCall().evaluate(pve);
+                    Map<FIdUseExp, Set<FIdUseExp>> unsortedDependencies = pve.resolveDependencies(equation);
+                    resolvedDependencies = sortDependencies(unsortedDependencies);
+                } catch (ConstantEvaluationException e) {
+                    ASTNode.log.debug("SplitIncidenceMap failed to compute dependency information, falling back to normal heuristics!");
+                    resolvedDependencies = new HashMap<FIdUseExp, Collection<FIdUseExp>>();
+                    Collection<FIdUseExp> rhs = equation.FIdUseExpsInRHS();
+                    for (FIdUseExp lhs : lhsUses()) {
+                        resolvedDependencies.put(lhs, rhs);
+                    }
+                }
+            }
+            return resolvedDependencies;
+        }
+        
+        protected Map<String, FIdUseExp> nameToAssignedMap() {
+            if (nameToAssignedMap == null) {
+                nameToAssignedMap = new HashMap<String, FIdUseExp>();
+                for (FIdUseExp use : lhsUses()) {
+                    FIdUseExp old = nameToAssignedMap.put(use.name(), use);
+                    if (old != null) {
+                        throw new UnsupportedOperationException("The following equation assignes the same variable twice, " + old + ", this class doesn't handle that:\n" + equation);
+                    }
+                }
+            }
+            return nameToAssignedMap;
+        }
+        
+    
+        @Override
+        protected void computeLHS(Map<Integer, V> lhs) {
             splitMap = new ArrayList<Set<V>>();
-            
-            this.additionalDeps = additionalDeps;
-            
-            DependencyVariableEvaluator pve = new DependencyVariableEvaluator();
-            e.getCall().evaluate(pve);
-            resolvedDependencies = pve.resolveDependencies(e);
-            
-            buildLhsFunction(variableTypes);
+            buildLhsFunction(lhs, variableTypes);
         }
         
         @Override
-        protected void buildLhsFunction(FIdUseExp use, int i) {
-            super.buildLhsFunction(use, i);
-            Set<V> s = lookupVarsInSet(resolvedDependencies.get(use));
-            s.addAll(additionalDeps);
+        protected void buildLhsFunction(Map<Integer, V> lhs, FIdUseExp use, int i) {
+            super.buildLhsFunction(lhs, use, i);
+            Set<V> s = resolver.lookupVars(resolvedDependencies().get(use));
             splitMap.add(s);
         }
-        
+
         @Override
         protected Set<V> rhs(int i) {
+            lhs(); // Just ensure that splitMap is computed.
            return splitMap.get(i);
         }
+
+        @Override
+        public Collection<FIdUseExp> assigned() {
+            return lhsUses();
+        }
+
+        @Override
+        public final Iterable<FIdUseExp> rhs(String assignedLHS) {
+            FIdUseExp use = nameToAssignedMap().get(assignedLHS);
+            if (use == null) {
+                return Collections.emptyList();
+            } else {
+                return resolvedDependencies().get(use);
+            }
+        }
+        
     }
     
     
@@ -1245,6 +1393,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
         return map;
     }
+
+    public int countNumberOfIncidences() {
+        int count = 0;
+        for (E e : getEquations()) {
+            count += e.getVariables().size();
+        }
+        return count;
+    }
 }
 
     public class DAEVarUseLookupVisitor implements FIdUseExpLookupVisitor {
@@ -1905,7 +2061,21 @@ public abstract class AbstractVar<E extends AbstractEq<E, V>, V extends Abstract
     }
 }
 
-public Set<V> AbstractBiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
+public class AbstractBiPGraph {
+    protected static interface VariableResolver<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> {
+        public Set<V> lookupVars(Iterable<FIdUseExp> set);
+    }
+}
+
+public VariableResolver<E, V> AbstractBiPGraph.defaultVariableResolver() {
+    return new VariableResolver<E,V>() {
+        public Set<V> lookupVars(Iterable<FIdUseExp> set) {
+            return AbstractBiPGraph.this.lookupVars(set);
+        }
+    };
+}
+
+public Set<V> AbstractBiPGraph.lookupVars(Iterable<FIdUseExp> set) {
     Set<V> res = new LinkedHashSet<V>();
     for (FIdUseExp use : set) {
         V var = getVariable(use.name());
@@ -1915,27 +2085,36 @@ public Set<V> AbstractBiPGraph.lookupVarsInSet(Set<FIdUseExp> set) {
     return res;
 }
 
-    public <V> AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-        return g.new IncidenceMap(this, additionalDependencies);
+    public AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+        return createIncidenceMap(g, variableTypes, g.defaultVariableResolver());
+    }
+    
+    public AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        return g.new IncidenceMap(this, resolver);
     }
 
-    public <V> AbstractBiPGraph.IncidenceMap FAlgorithm.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
+    @Override
+    public AbstractBiPGraph.IncidenceMap FAlgorithm.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        return g.new ManyIncidenceMap(this, resolver, variableTypes);
     }
 
-    public <V> AbstractBiPGraph.IncidenceMap FIfEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
-        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
+    @Override
+    public AbstractBiPGraph.IncidenceMap FIfEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+        return g.new ManyIncidenceMap(this, resolver, variableTypes);
     }
 
-    public <V> AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, Set<V> additionalDependencies, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+    @Override
+    public AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
         if (myOptions().getStringOption("function_incidence_computation").equals("all")) {
             try {
-                return g.new SplitIncidenceMap(this, additionalDependencies, variableTypes);
+                AbstractBiPGraph.SplitIncidenceMap splitIncidenceMap = g.new SplitIncidenceMap(this, resolver, variableTypes);
+                splitIncidenceMap.lhs(); // trigger cache calculations
+                return splitIncidenceMap;
             } catch (ConstantEvaluationException e) {
                 
             }
         }
-        return g.new ManyIncidenceMap(this, additionalDependencies, variableTypes);
+        return g.new ManyIncidenceMap(this, resolver, variableTypes);
     }
     
 

@@ -29,8 +29,8 @@ all-local: $(MINPACK_DIR) $(MINPACK_DIR64)
 	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS)
 
 install-exec-local: $(MINPACK_DIR) $(MINPACK_DIR64)
-	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install
-	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS) install
+	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
+	cd $(MINPACK_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 else !JM_WIN64
 
@@ -38,7 +38,7 @@ all-local: $(MINPACK_DIR)
 	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS)
 
 install-exec-local: $(MINPACK_DIR)
-	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install
+	cd $(MINPACK_DIR) && make $(AM_MAKEFLAGS) install DESTDIR=
 
 endif !JM_WIN64
 

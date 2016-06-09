@@ -33,12 +33,13 @@
 
     <property name="target" value="${user.dir}"/>
     <property name="java_output" value="${target}/src/java-generated" />
+    <property name="java_temp" value="${target}/src/java-generated-temporary" />
+    <property name="resources_temp" value="${target}/src/resources-temporary" />
     <property name="junit_output" value="${target}/src/junit-generated" />
     <property name="test_output" value="${target}/doc/junit-reports" />
     <property name="class_output" value="${target}/bin" />
+    <property name="test_class_output" value="${target}/bin-test" />
     <property name="jar_output" value="${target}/bin" />
-    
-    <property name="test_jar" value="${jar_output}/junit-tests.jar"/>
 
     <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
     <property name="junit_dir" value="${base.dir}/../ThirdParty/Junit" />
@@ -91,6 +92,17 @@
     <property name="test_file" value="${test_package_output}/${test_class_name}.java" />
     <property name="test_file_module_separator" value=", ${line.separator}              " />
 
+    <!-- If javadoc.packages is set, make sure javadoc.path is as well -->
+    <if>
+        <and>
+            <isset property="javadoc.packages"/>
+            <not><isset property="javadoc.path"/></not>
+        </and>
+        <then>
+            <property name="javadoc.path" value="doc/javadoc"/>
+        </then>
+    </if>
+    <property name="javadoc_output" value="${target}/${javadoc.path}" />
     
     <!-- calculate module list -->
     <var name="modules_temp" value=""/>
@@ -159,10 +171,72 @@
     <var name="java_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
+            <var name="has_java_replace_temp" value="false"/>
+            <var name="has_java_rename_package_temp" value="false"/>
             <if>
-                <available file="${@{module}.path}/src/java" />
+                <isset property="@{module}.java_replace" />
                 <then>
-                    <var name="java_dirs_temp" value="${java_dirs_temp}:${@{module}.path}/src/java" />
+                    <for list="${@{module}.java_replace}" param="replace">
+                        <sequential>
+                            <if>
+                                <and>
+                                    <isset property="@{module}.java_replace.@{replace}.from" />
+                                    <isset property="@{module}.java_replace.@{replace}.to" />
+                                    <not><equals arg1="${@{module}.java_replace.@{replace}.from}" arg2="${@{module}.java_replace.@{replace}.to}" /></not>
+                                </and>
+                                <then>
+                                    <var name="has_java_replace_temp" value="true"/>
+                                </then>
+                                <else>
+                                    <property name="@{module}.java_replace.@{replace}.skip" value="true" />
+                                </else>
+                            </if>
+                        </sequential>
+                    </for>
+                </then>
+            </if>
+            <if>
+                <isset property="@{module}.java_rename_package" />
+                <then>
+                    <for list="${@{module}.java_rename_package}" param="rename">
+                        <sequential>
+                            <if>
+                                <and>
+                                    <isset property="@{module}.java_rename_package.@{rename}.from" />
+                                    <isset property="@{module}.java_rename_package.@{rename}.to" />
+                                    <not><equals arg1="${@{module}.java_rename_package.@{rename}.from}" arg2="${@{module}.java_rename_package.@{rename}.to}" /></not>
+                                </and>
+                                <then>
+                                    <var name="has_java_rename_package_temp" value="true"/>
+                                    <propertyregex property="@{module}.java_rename_dir.@{rename}.from" input="${@{module}.java_rename_package.@{rename}.from}" 
+                                        regexp="\." replace="/" defaultValue="${@{module}.java_rename_package.@{rename}.from}" override="true" global="true" />
+                                    <propertyregex property="@{module}.java_rename_dir.@{rename}.to" input="${@{module}.java_rename_package.@{rename}.to}" 
+                                        regexp="\." replace="/" defaultValue="${@{module}.java_rename_package.@{rename}.to}" override="true" global="true" />
+                                </then>
+                                <else>
+                                    <property name="@{module}.java_rename_package.@{rename}.skip" value="true" />
+                                </else>
+                            </if>
+                        </sequential>
+                    </for>
+                </then>
+            </if>
+            <property name="@{module}.has_java_replace" value="${has_java_replace_temp}" />
+            <property name="@{module}.has_java_rename_package" value="${has_java_rename_package_temp}" />
+            <condition property="@{module}.need_java_copy" else="false">
+                <or>
+                    <istrue value="${@{module}.has_java_replace}" />
+                    <istrue value="${@{module}.has_java_rename_package}" />
+                </or>
+            </condition>
+            <property name="@{module}.java_path" value="${@{module}.path}/src/java"/>
+            <if>
+                <and>
+                    <available file="${@{module}.java_path}" />
+                    <not><istrue value="${@{module}.has_java_replace}" /></not>
+                </and>
+                <then>
+                    <var name="java_dirs_temp" value="${java_dirs_temp}:${@{module}.java_path}" />
                 </then>
             </if>
             <if>
@@ -179,11 +253,73 @@
             </if>
         </sequential>
     </for>
-    <property name="java_dirs" value="${java_dirs_temp}" />
+    <propertyregex property="java_dirs" input="${java_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
+
+    <!-- calculate extra java file generators -->
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <isset property="@{module}.generate"/>
+                <then>
+                    <propertyregex property="@{module}.gen-extra.javafile" 
+                        input="${@{module}.generate}" defaultValue="${@{module}.generate}" 
+                        regexp="\." replace="/" override="true" global="true" />
+                    <property name="@{module}.gen-extra.java_file_path" value="${@{module}.java_path}/${@{module}.gen-extra.javafile}.java"/>
+                    <propertyregex property="@{module}.gen-extra.gen_path.tmp" 
+                        input="${@{module}.package.generated}" defaultValue="${@{module}.package.generated}" 
+                        regexp="\." replace="/" global="true" />
+                    <property name="@{module}.gen-extra.gen_path" value="${java_output}/${@{module}.gen-extra.gen_path.tmp}"/>
+                </then>
+            </if>
+        </sequential>
+    </for>
+
+    <!-- calculate set of junit source file dirs to use -->
+    <var name="junit_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <available file="${@{module}.path}/test/junit" />
+                <then>
+                    <property name="@{module}.junit_path" value="${@{module}.path}/test/junit" />
+                    <if>
+                        <isfalse value="${@{module}.need_java_copy}" />
+                        <then>
+                            <var name="junit_dirs_temp" value="${junit_dirs_temp}:${@{module}.junit_path}" />
+                        </then>
+                    </if>
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <propertyregex property="junit_dirs" input="${junit_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
+    
+    <!-- calculate set of resource dirs to use -->
+    <var name="test_resource_dirs_temp" value=""/>
+    <var name="resource_dirs_temp" value=""/>
+    <for list="${modules}" param="module">
+        <sequential>
+            <if>
+                <available file="${@{module}.path}/test/resources" />
+                <then>
+                    <var name="test_resource_dirs_temp" value="${test_resource_dirs_temp}:${@{module}.path}/test/resources" />
+                </then>
+            </if>
+            <if>
+                <available file="${@{module}.path}/src/resources" />
+                <then>
+                    <var name="resource_dirs_temp" value="${resource_dirs_temp}:${@{module}.path}/src/resources" />
+                </then>
+            </if>
+        </sequential>
+    </for>
+    <propertyregex property="test_resource_dirs" input="${test_resource_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
+    <propertyregex property="resource_dirs" input="${resource_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate set of test helpers to use -->
     <var name="test_helper_java_patterns_temp" value=""/>
     <var name="test_helper_class_patterns_temp" value=""/>
+    <var name="test_helper_packages_temp" value=""/>
     <var name="test_helper_dirs_temp" value=""/>
     <for list="${modules}" param="module">
         <sequential>
@@ -194,13 +330,15 @@
                             defaultValue="${@{module}.test_helpers}" override="true" global="true" />
                     <var name="test_helper_java_patterns_temp" value="${test_helper_java_patterns_temp},${test_helper_dir_temp}/*.java"/>
                     <var name="test_helper_class_patterns_temp" value="${test_helper_class_patterns_temp},${test_helper_dir_temp}/*.class"/>
-                    <var name="test_helper_dirs_temp" value="${test_helper_dirs_temp}:${@{module}.path}/src/java/${test_helper_dir_temp}"/>
+                    <var name="test_helper_packages_temp" value="${test_helper_packages_temp},${@{module}.test_helpers}"/>
+                    <var name="test_helper_dirs_temp" value="${test_helper_dirs_temp}:${@{module}.java_path}/${test_helper_dir_temp}"/>
                 </then>
             </if>
         </sequential>
     </for>
     <propertyregex property="test_helper_java_patterns" input="${test_helper_java_patterns_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_class_patterns" input="${test_helper_class_patterns_temp}" regexp="^," replace="" defaultvalue="" />
+    <propertyregex property="test_helper_packages" input="${test_helper_packages_temp}" regexp="^," replace="" defaultvalue="" />
     <propertyregex property="test_helper_dirs" input="${test_helper_dirs_temp}" regexp="^:" replace="" defaultvalue="" />
     
     <!-- calculate sets of jar files  -->
@@ -211,7 +349,7 @@
         </sequential>
     </for>
     <property name="compiler_jars" value="${compiler_jars_temp}" />
-    <property name="test_jars" value="${compiler_jars}:${test_jar}:${junit_jar}" />
+    <property name="test_jars" value="${compiler_jars}:${junit_jar}" />
     
     
     <!-- Build compiler jars. -->
@@ -227,15 +365,41 @@
                     </sequential>
                 </for>
                 <propertyregex property="build_file_patterns" input="${build_file_patterns_temp}" regexp="^," replace="" override="true" />
-                <jar destfile="${jar_output}/@{jar}.jar">
-                    <fileset dir="${class_output}" includes="${build_file_patterns}" />
-                </jar>
+                <if>
+                    <istrue value="${@{jar}.jar.include_resources}" />
+                    <then>
+                        <mkdir dir="${resources_temp}" />
+                        <for list="${modules}" param="module">
+                            <sequential>
+                                <if>
+                                    <available file="${@{module}.path}/src/resources" />
+                                    <then>
+                                        <echo message="Using resources from @{module} in @{jar}.jar" />
+                                        <copy todir="${resources_temp}">
+                                            <fileset dir="${@{module}.path}/src/resources" />
+                                        </copy>
+                                    </then>
+                                </if>
+                            </sequential>
+                        </for>
+                        <jar destfile="${jar_output}/@{jar}.jar">
+                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
+                            <fileset dir="${resources_temp}" />
+                        </jar>
+                        <delete dir="${resources_temp}" />
+                    </then>
+                    <else>
+                        <jar destfile="${jar_output}/@{jar}.jar">
+                            <fileset dir="${class_output}" includes="${build_file_patterns}" />
+                        </jar>
+                    </else>
+                </if>
             </sequential>
         </for>
     </target>
 
     <!-- Meta target for generating all java files. -->
-    <target name="gen" depends="patch,parser,scanner,gen-test" description="Generate all Java files." />
+    <target name="gen" depends="patch,parser,scanner,gen-test,patch-java,gen-extra,patch-test" description="Generate all Java files." />
 
     <!-- Compile class used in patch target. -->
     <target name="compile-patcher">
@@ -248,8 +412,35 @@
                         <propertyregex property="compile-patcher.javafile" input="${@{module}.patch}" defaultValue="${@{module}.patch}" regexp="\." replace="/" override="true" global="true" />
                         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" 
                                 debug="true" destdir="${class_output}" includeantruntime="false">
-                            <src path="${@{module}.path}/src/java" />
+                            <src path="${@{module}.java_path}" />
                             <include name="${compile-patcher.javafile}.java" />
+                        </javac>
+                    </then>
+                </if>
+            </sequential>
+        </for>
+    </target>
+
+    <!-- Compile class used in gen-extra target. -->
+    <target name="compile-gen-extra" depends="ast,patch-java">
+        <mkdir dir="${class_output}" />
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.generate"/>
+                    <then>
+                        <javac  classpath="${beaver-rt_jar}" 
+                                sourcepath="${java_output}:${java_dirs}" 
+                                compiler="${java_compiler}" 
+                                source="${java_version}" 
+                                target="${java_version}" 
+                                debug="true" 
+                                destdir="${class_output}" 
+                                includeantruntime="false"
+                                excludes="${test_helper_java_patterns}" >
+                            <src path="${@{module}.java_path}" />
+                            <src path="${java_output}" />
+                            <include name="${@{module}.gen-extra.javafile}.java" />
                         </javac>
                     </then>
                 </if>
@@ -260,9 +451,36 @@
     <!-- Compile all java files required by compiler (generated and static). -->
     <target name="compile-ast" depends="gen">
         <mkdir dir="${class_output}" />
-        <javac classpath="${beaver-rt_jar}" compiler="${java_compiler}" source="${java_version}" 
-                target="${java_version}" debug="true" destdir="${class_output}" includeantruntime="false"
-                srcdir="${java_output}${java_dirs}" excludes="${test_helper_java_patterns}" /> <!-- java_dirs begins with a : -->
+        <javac 
+            classpath="${beaver-rt_jar}" 
+            compiler="${java_compiler}" 
+            source="${java_version}" 
+            target="${java_version}" 
+            debug="true" 
+            destdir="${class_output}" 
+            includeantruntime="false"
+            srcdir="${java_output}:${java_dirs}" 
+            excludes="${test_helper_java_patterns}" />
+    </target>
+    
+    <!-- Generate JavaDoc. -->
+    <target name="doc" depends="gen" description="Generate JavaDoc.">
+        <if>
+            <isset property="javadoc.packages"/>
+            <then>
+                <echo>
+                    sourcepath="${java_output}:${java_dirs}"
+                    packagenames="${javadoc.packages}"
+                </echo>
+                <mkdir dir="${javadoc_output}" />
+                <javadoc 
+                    sourcepath="${java_output}:${java_dirs}" 
+                    destdir="${javadoc_output}" 
+                    packagenames="${javadoc.packages}" 
+                    excludepackagenames="${test_helper_packages}" 
+                    classpath="${beaver-rt_jar}" />
+            </then>
+        </if>
     </target>
 
     <!-- generates ast files with JastAdd -->
@@ -331,7 +549,7 @@
                     <then>
                         <propertyregex property="@{module}.patch.path" input="${@{module}.patch}" defaultValue="${@{module}.patch}" regexp="\." replace="/" global="true" />
                         <uptodate property="@{module}.patch.uptodate" targetfile="${ast_output}/ASTNode.java" 
-                                srcfile="${@{module}.path}/src/java/${@{module}.patch.path}.java" />
+                                srcfile="${@{module}.java_path}/${@{module}.patch.path}.java" />
                         <if>
                             <not><and>
                                 <isset property="ast_uptodate" />
@@ -348,6 +566,118 @@
                 </if>
             </sequential>
         </for>
+    </target>
+
+    <!-- generates any additional java files specified in modules -->
+    <target name="gen-extra" depends="compile-gen-extra">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.generate"/>
+                    <then>
+                        <!-- TODO: only generate when needed
+                        <uptodate property="@{module}.gen-extra.uptodate" targetfile="${@{module}.gen-extra.gen_path}">
+                            <srcresources>
+                                <fileset file="${@{module}.gen-extra.java_file_path}" />
+                            </srcresources>
+                        </uptodate>
+                        -->
+                        <mkdir dir="${@{module}.gen-extra.gen_path}" />
+                        <java classpath="${class_output}:${beaver-rt_jar}" 
+                                classname="${@{module}.generate}" failonerror="true">
+                            <arg value="${@{module}.gen-extra.gen_path}" />
+                            <arg value="${@{module}.package.generated}" />
+                        </java>
+                    </then>
+                </if>
+            </sequential>
+        </for>
+    </target>
+
+    <!-- adds changes that need to be patched into the static java files -->
+    <target name="patch-java" depends="ast">
+        <!-- currently this uses a simple search-replace, but could be expanded to use the same patch tool as above -->
+        <for list="${modules}" param="module"> <sequential>
+            <if>
+                <istrue value="${@{module}.need_java_copy}" />
+                <then>
+                    <echo message="Doing patch-java for @{module}" />
+                    <uptodate property="@{module}.patch-java.uptodate">
+                        <srcfiles dir= "${@{module}.java_path}" includes="**/*.java"/>
+                        <srcfiles dir= "${@{module}.junit_path}" includes="**/*.java"/>
+                        <globmapper from="*" to="${java_output}/*" />
+                    </uptodate>
+                    <if>
+                        <not><isset property="${@{module}.patch-java.uptodate}" /></not>
+                        <then>
+                            <mkdir dir="${java_temp}" />
+                            <copy todir="${java_temp}">
+                                <fileset dir="${@{module}.java_path}" includes="**/*.java" />
+                            </copy>
+                            <!-- Perform any java_replace -->
+                            <if>
+                                <istrue value="${@{module}.has_java_replace}" />
+                                <then>
+                                    <for list="${@{module}.java_replace}" param="replace"> <sequential>
+                                        <if>
+                                            <isfalse value="${@{module}.java_replace.@{replace}.skip}"/>
+                                            <then>
+                                                <replace dir="${java_temp}" includes="**/*.java" 
+                                                    token="${@{module}.java_replace.@{replace}.from}" value="${@{module}.java_replace.@{replace}.to}" />
+                                            </then>
+                                        </if>
+                                    </sequential> </for>
+                                </then>
+                            </if>
+                            <!-- Perform replace of accesses for any java_rename_package -->
+                            <if>
+                                <istrue value="${@{module}.has_java_rename_package}" />
+                                <then>
+                                    <for list="${@{module}.java_rename_package}" param="rename"> <sequential>
+                                        <if>
+                                            <isfalse value="${@{module}.java_rename.@{rename}.skip}"/>
+                                            <then>
+                                                <!-- Rename package -->
+                                                <if>
+                                                    <not><available file="${@{module}.junit_path}/${@{module}.java_rename_dir.@{rename}.from}" /></not>
+                                                    <then>
+                                                        <move file="${java_temp}/${@{module}.java_rename_dir.@{rename}.from}" tofile="${java_temp}/${@{module}.java_rename_dir.@{rename}.to}" />
+                                                        <replace dir="${java_temp}/${@{module}.java_rename_dir.@{rename}.to}" includes="**/*.java" 
+                                                            token="package ${@{module}.java_rename_package.@{rename}.from};" value="package ${@{module}.java_rename_package.@{rename}.to};" />
+                                                        <replace dir="${java_temp}" includes="**/*.java" 
+                                                            token="${@{module}.java_rename_package.@{rename}.from}." value="${@{module}.java_rename_package.@{rename}.to}." />
+                                                    </then>
+                                                </if>
+                                             </then>
+                                        </if>
+                                    </sequential> </for>
+                                </then>
+                            </if>
+                             <copy todir="${java_output}">
+                                <fileset dir="${java_temp}" includes="**/*.java" />
+                            </copy>
+                            <delete dir="${java_temp}"/>
+                            <!-- Perform remainder of any java_rename_package -->
+                            <if>
+                                <istrue value="${@{module}.has_java_rename_package}" />
+                                <then>
+                                    <for list="${@{module}.java_rename_package}" param="rename"> <sequential>
+                                        <if>
+                                            <isfalse value="${@{module}.java_rename.@{rename}.skip}"/>
+                                            <then>
+                                                <!-- Update any accesses in generated files -->
+                                                <replace dir="${ast_output}" includes="**/*.java" 
+                                                     token="${@{module}.java_rename_package.@{rename}.from}." value="${@{module}.java_rename_package.@{rename}.to}." />
+                                            </then>
+                                        </if>
+                                    </sequential> </for>
+                                </then>
+                            </if>
+                        </then>
+                    </if>
+                </then>
+            </if>
+        </sequential> </for>
     </target>
     
     <!-- generate all parsers -->
@@ -499,26 +829,95 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
 }
 </echo>
     </target>
+
+    <!-- Generate JUnit test class. -->
+    <target name="patch-test" depends="gen-test">
+        <mkdir dir="${junit_output}" />
+        <for list="${modules}" param="module"> <sequential>
+            <if>
+                <and>
+                    <istrue value="${@{module}.need_java_copy}" />
+                    <isset property="@{module}.junit_path" />
+                </and>
+                <then>
+                    <copy todir="${junit_output}">
+                        <fileset dir="${@{module}.junit_path}" includes="**/*.java" />
+                    </copy>
+                </then>
+            </if>
+        </sequential> </for>
+        <for list="${modules}" param="module"> <sequential>
+            <!-- Perform any java_replace -->
+            <if>
+                <istrue value="${@{module}.has_java_replace}" />
+                <then>
+                    <for list="${@{module}.java_replace}" param="replace"> <sequential>
+                        <if>
+                            <isfalse value="${@{module}.java_replace.@{replace}.skip}"/>
+                            <then>
+                                <replace dir="${junit_output}" includes="**/*.java" 
+                                    token="${@{module}.java_replace.@{replace}.from}" value="${@{module}.java_replace.@{replace}.to}" />
+                            </then>
+                        </if>
+                    </sequential> </for>
+                </then>
+            </if>
+            <!-- Rename any junit packages in java_rename_package -->
+            <if>
+                <istrue value="${@{module}.has_java_rename_package}" />
+                <then>
+                    <for list="${@{module}.java_rename_package}" param="rename"> <sequential>
+                        <if>
+                            <isfalse value="${@{module}.java_rename.@{rename}.skip}"/>
+                            <then>
+                                <!-- Rename package -->
+                                <if>
+                                    <available file="${@{module}.junit_path}/${@{module}.java_rename_dir.@{rename}.from}" />
+                                    <then>
+                                        <move file="${junit_output}/${@{module}.java_rename_dir.@{rename}.from}" tofile="${junit_output}/${@{module}.java_rename_dir.@{rename}.to}" />
+                                        <replace dir="${junit_output}/${@{module}.java_rename_dir.@{rename}.to}" includes="**/*.java" 
+                                            token="package ${@{module}.java_rename_package.@{rename}.from};" value="package ${@{module}.java_rename_package.@{rename}.to};" />
+                                    </then>
+                                </if>
+                             </then>
+                        </if>
+                    </sequential> </for>
+                </then>
+            </if>
+            <!-- Perform replace of accesses for any java_rename_package -->
+            <if>
+                <istrue value="${@{module}.has_java_rename_package}" />
+                <then>
+                    <for list="${@{module}.java_rename_package}" param="rename"> <sequential>
+                        <if>
+                            <isfalse value="${@{module}.java_rename_package.@{rename}.skip}"/>
+                            <then>
+                                <replace dir="${junit_output}" includes="**/*.java" 
+                                    token="${@{module}.java_rename_package.@{rename}.from}." value="${@{module}.java_rename_package.@{rename}.to}." />
+                            </then>
+                        </if>
+                    </sequential> </for>
+                </then>
+            </if>
+        </sequential> </for>
+    </target>
     
     <!-- Build a jar file from generated tests. -->
     <target name="build-test" depends="build">
+        <mkdir dir="${test_class_output}" />
         <javac compiler="${java_compiler}" source="${java_version}" target="${java_version}" debug="true" 
-                destdir="${class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
-                srcdir="${test_package_output}:${test_helper_dirs}"/>
-        <jar destfile="${test_jar}">
-            <fileset dir="${class_output}" includes="${test_helper_class_patterns}" />
-            <fileset dir="${class_output}" includes="${test_package_dir}/*.class" />
-        </jar>
+                destdir="${test_class_output}" classpath="${compiler_jars}:${junit_jar}" includeantruntime="false"
+                srcdir="${test_package_output}:${test_helper_dirs}:${junit_dirs}"/>
     </target>
 
     <!-- Run all generated JUnit tests. -->
     <target name="test" depends="build-test" description="Run all generated JUnit tests.">
         <mkdir dir="${test_output}" />
         <junit printsummary="yes" fork="true" maxmemory="1G">
-            <classpath path="${test_jars}" />
+            <classpath path="${test_jars}:${test_class_output}:${junit_dirs}:${test_resource_dirs}:${resource_dirs}" />
             <formatter type="xml" />
-            <batchtest fork="yes" todir="${test_output}">
-                <fileset dir="${junit_output}" includes="${test_package_dir}/*.java" />
+            <batchtest fork="yes" todir="${test_output}" >
+                <fileset dir="${test_class_output}" excludes="${test_helper_class_patterns}" />
             </batchtest>
         </junit>
         <junitreport todir="${test_output}">
@@ -530,15 +929,30 @@ public class ${test_class_name} extends ${ast_package}.TestSpecification {
     <!-- cleans all files -->
     <target name="clean" depends="clean-gen" description="Deletes all generated files.">
         <delete dir="${class_output}" />
+        <delete dir="${test_class_output}" />
         <delete dir="${jar_output}" />
     </target>
 
     <!-- cleans all generated java files -->
-    <target name="clean-gen" depends="clean-ast,clean-test" description="Deletes all generated Java files." />
+    <target name="clean-gen" depends="clean-ast,clean-test,clean-extra" description="Deletes all generated Java files." />
 
     <!-- cleans all generated java files in the compiler -->
     <target name="clean-ast">
         <delete dir="${java_output}" />
+    </target>
+
+    <!-- cleans all extra generated java files -->
+    <target name="clean-extra">
+        <for list="${modules}" param="module">
+            <sequential>
+                <if>
+                    <isset property="@{module}.generate"/>
+                    <then>
+                        <delete dir="${@{module}.gen-extra.gen_path}" />
+                    </then>
+                </if>
+            </sequential>
+        </for>
     </target>
 
     <!-- cleans all generated junit files -->

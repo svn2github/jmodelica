@@ -256,13 +256,6 @@ aspect Constructors {
 	}
 	
 	/**
-	 * Surrounds the FExp <code>exp</code> with pre if it is an non literal exp, else return exp.
-	 */
-	public static FExp FPreExp.create(FExp exp) {
-		return exp.isLiteralExp() ? exp : new FPreExp(exp.asFIdUse());
-	}
-	
-	/**
 	 * Constructs an if equation.
 	 */
 	public FIfEquation.FIfEquation(FEquationType type, List<FAbstractEquation> eqns, FExp guard, Opt<FIfWhenElseEquation> elseClause) {
@@ -472,7 +465,11 @@ aspect Constructors {
 	public FSizeExp.FSizeExp(FExp exp, int dim) {
 		this(exp, new Opt(new FIntegerLitExp(dim + 1)));
 	}
-	
+    
+    public FUnknownSizeExp.FUnknownSizeExp(FExp exp, int dim) {
+        super(exp, dim);
+    }
+    
 	/**
 	 * Constructs an FRangeExp with the given start and stop expressions.
 	 */
@@ -735,6 +732,14 @@ aspect Constructors {
 			FTypePrefixVariability variability, FQName name, FQName record) {
 		this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, record);
 	}
+	
+    /**
+     * Create an external object variable with only the required children.
+     */
+    public FExternalObjectVariable.FExternalObjectVariable(FVisibilityType fvt, 
+            FTypePrefixVariability variability, FQName name, FIdUse constructorName) {
+        this(fvt, variability, new Opt(), new List(), (String) null, new Opt(), new Opt(), name, constructorName);
+    }
 
     /**
      * Constructs a new dynamic state variable
@@ -1014,6 +1019,9 @@ aspect InheritedFactoryMethods {
 	public abstract FInfArgsFunctionCall      FInfArgsFunctionCall.createEmptyNode();
 	public abstract FMinMaxExp      		  FMinMaxExp.createEmptyNode();
 	public abstract FConnBoolOp      	      FConnBoolOp.createEmptyNode();
+	
+    // Misc expressions
+    public FComponentExp FComponentExp.createEmptyNode() { return new FComponentExp(); }
 
 	// Unsupported expressions
 	public FUnsupportedExp     FUnsupportedExp.createEmptyNode()     { return new FUnsupportedExp();     }
@@ -1070,7 +1078,7 @@ aspect InheritedFactoryMethods {
 	public FTerminate      FTerminate.createEmptyNode()      { return new FTerminate();      }
 	public FAssert         FAssert.createEmptyNode()         { return new FAssert();         }
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
-	public FUnknownSizeExp FUnknownSizeExp.createEmptyNode() { return new FUnknownSizeExp(); }
+    public FColonSizeExp   FColonSizeExp.createEmptyNode()   { return new FColonSizeExp();   }
 	
     // Identifier expressions
     public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
@@ -1156,20 +1164,21 @@ aspect InheritedFactoryMethods {
     public FHomotopyExp     FHomotopyExp.createEmptyNode()     { return new FHomotopyExp();     }
     public FSemiLinearExp   FSemiLinearExp.createEmptyNode()   { return new FSemiLinearExp();   }
     public FInStream        FInStream.createEmptyNode()        { return new FInStream();        }
-    public FDerInStream     FDerInStream.createEmptyNode()     { return new FDerInStream();     }
+    public FDerStream       FDerStream.createEmptyNode()       { return new FDerStream();       }
     public FActualStream    FActualStream.createEmptyNode()    { return new FActualStream();    }
     public FExInStream      FExInStream.createEmptyNode()      { return new FExInStream();      }
     public FGetInstanceName FGetInstanceName.createEmptyNode() { return new FGetInstanceName(); }
 
-	// Operators for overconstrained connection graphs
-	public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
-	public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
-	public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
-	public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
-	public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
-	public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
-	public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
-	
+    // Operators for overconstrained connection graphs
+    public FConnBranch        FConnBranch.createEmptyNode()        { return new FConnBranch();        }
+    public FConnRoot          FConnRoot.createEmptyNode()          { return new FConnRoot();          }
+    public FConnPotentialRoot FConnPotentialRoot.createEmptyNode() { return new FConnPotentialRoot(); }
+    public FConnIsRoot        FConnIsRoot.createEmptyNode()        { return new FConnIsRoot();        }
+    public FConnRooted        FConnRooted.createEmptyNode()        { return new FConnRooted();        }
+    public FConnRootedDep     FConnRootedDep.createEmptyNode()     { return new FConnRootedDep();     }
+    public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
+    public FDecouple          FDecouple.createEmptyNode()          { return new FDecouple();          }
+
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
@@ -1209,7 +1218,7 @@ aspect InheritedFactoryMethods {
     }
 
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FUnaryBuiltIn FUnaryBuiltIn.createNode(FExp exp) {
 		FUnaryBuiltIn node = createEmptyNode();
@@ -1218,7 +1227,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FEventGenExp FEventGenExp.createNode(FExp exp) {
 		FEventGenExp node = createEmptyNode();
@@ -1227,14 +1236,14 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FEventGenExp FBinEventGenExp.createNode(FExp exp) {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FBinEventGenExp FBinEventGenExp.createNode(FExp x, FExp y) {
 		FBinEventGenExp node = createEmptyNode();
@@ -1253,14 +1262,14 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FMathematicalFunctionCall FAtan2Exp.createNode(FExp exp) {
 		throw new UnsupportedOperationException();
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FMathematicalFunctionCall FAtan2Exp.createNode(FExp x, FExp y) {
 		FAtan2Exp node = createEmptyNode();
@@ -1270,7 +1279,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FHomotopyExp FHomotopyExp.createNode(FExp x, FExp y) {
 		FHomotopyExp node = createEmptyNode();
@@ -1280,7 +1289,7 @@ aspect InheritedFactoryMethods {
 	}
 	
 	/**
-	 * \Create new node of same class as this, with the specified children.
+	 * Create new node of same class as this, with the specified children.
 	 */
 	public FSemiLinearExp FSemiLinearExp.createNode(FExp x, FExp y, FExp z) {
 		FSemiLinearExp node = createEmptyNode();

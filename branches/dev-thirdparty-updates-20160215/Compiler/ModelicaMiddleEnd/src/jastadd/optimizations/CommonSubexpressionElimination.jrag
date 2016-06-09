@@ -111,7 +111,8 @@ aspect CommonSubexpressionElimination {
                 }
                 
                 public void add(FAbstractEquation fae) {
-                    if (get(0).variability().parameterOrLess()) {
+                    fae.parent = getFAbstractEquationListNoTransform();
+                    if (fae.variability().parameterOrLess()) {
                         addFParameterEquationNoTransform(fae);
                     } else {
                         addFAbstractEquationNoTransform(fae);
@@ -126,7 +127,9 @@ aspect CommonSubexpressionElimination {
                         ExpFromTypeBuilder b = new ExpFromTypeBuilder() {
                             public FExp build(String suffix, FType type) {
                                 String n = name + suffix;
-                                addFVariable(type.createTempFVariable(new FQNameString(n), v.combineDown(type.funcOutputVariability())));
+                                FVariable var = type.createTempFVariable(new FQNameString(n), v.combineDown(type.funcOutputVariability()));
+                                addFVariable(var);
+                                variablesMap().addVariable(var);
                                 return new FIdUseExp(name + suffix);
                             }
                         };

@@ -38,6 +38,8 @@ set(JMISources
     jmi_delay_impl.h
     jmi_dynamic_state.h
     jmi_chattering.h
+    jmi_math.h
+    jmi_types.h
     
     jmi_util.c
     jmi_global.c
@@ -51,6 +53,7 @@ set(JMISources
     jmi_delay.c
     jmi_dynamic_state.c
     jmi_chattering.c
+    jmi_math.c
 
     # Logging sources
 	jmi_callbacks.h
@@ -103,10 +106,8 @@ set(MODELICAEXTERNALCSources
     ${MSLCSOURCES}/ModelicaFFT.c
 )
 
-# Source files for ModelicaStandardTables
-set(STANDARDTABLESSources
-    ${MSLCSOURCES}/ModelicaStandardTables.c
-    ${MSLCSOURCES}/ModelicaMatIO.c
+# Source files for Zlib
+set(ZLIB_SOURCES
     ${MSLCSOURCES}/zlib/adler32.c
     ${MSLCSOURCES}/zlib/compress.c
     ${MSLCSOURCES}/zlib/crc32.c
@@ -155,13 +156,31 @@ endif()
 
 #Build ModelicaStandardTables library
 add_definitions("-DDUMMY_FUNCTION_USERTAB -DHAVE_ZLIB")
-add_library(ModelicaStandardTables STATIC ${STANDARDTABLESSources})
+add_library(ModelicaStandardTables STATIC ${MSLCSOURCES}/ModelicaStandardTables.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build ModelicaIO library
+add_library(ModelicaIO STATIC ${MSLCSOURCES}/ModelicaIO.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build ModelicaMatIO library
+add_library(ModelicaMatIO STATIC ${MSLCSOURCES}/ModelicaMatIO.c)
+if(NOT MSVC)
+    set_target_properties(ModelicaMatIO PROPERTIES COMPILE_FLAGS "-Wall -g")
+endif()
+
+#Build Zlib library
+add_library(zlib STATIC ${ZLIB_SOURCES})
 if(NOT MSVC)
     set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
 endif()
 
 #Install the libraries
-install(TARGETS jmi ModelicaExternalC ModelicaStandardTables
+install(TARGETS jmi ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
     DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
@@ -169,6 +188,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     DESTINATION "${RTLIB_INCLUDE_DIR}"
     FILES_MATCHING PATTERN "*.h")
     
-install(FILES "${MSLCSOURCES}/ModelicaStandardTables.h"
-    DESTINATION "${RTLIB_INCLUDE_DIR}")
+install(DIRECTORY "${MSLCSOURCES}/"
+    DESTINATION "${RTLIB_INCLUDE_DIR}"
+    FILES_MATCHING PATTERN "*.h")
 

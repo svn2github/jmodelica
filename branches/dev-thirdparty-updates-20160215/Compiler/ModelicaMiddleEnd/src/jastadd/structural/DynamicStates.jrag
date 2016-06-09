@@ -631,6 +631,9 @@ aspect DynamicStateSelect{
             protected boolean shouldVisit(IndexReductionEq eqn, IndexReductionVar var) {
                 if (!super.shouldVisit(eqn, var))
                     return false;
+                if (var.numDifferentiations() < eqn.numDifferentiations()) {
+                    return false;
+                }
                 Map<IndexReductionVar, Coefficient> coefficients =  coefficientsMatrix.get(eqn);
                 if (coefficients != null) {
                     Coefficient coff = coefficients.get(var);
@@ -699,6 +702,9 @@ aspect DynamicStateSelect{
                 if (!super.shouldVisit(eqn, var)) {
                     return false;
                 }
+                if (var.numDifferentiations() < eqn.numDifferentiations()) {
+                    return false;
+                }
                 return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
             }
         }
@@ -723,6 +729,9 @@ aspect DynamicStateSelect{
             Map<DynamicStateSet, FDynamicAlgebraicVariable[]> setVarMap = new LinkedHashMap<DynamicStateSet, FDynamicAlgebraicVariable[]>();
             Collection<V> otherVars = new ArrayList<V>();
             for (E eqn : component.getMembers()) {
+                if (eqn.isMeta()) {
+                    continue;
+                }
                 FVariable fVar = eqn.getMatching().getVariable();
                 if (!fVar.isFDynamicAlgebraicVariable()) {
                     otherVars.add(eqn.getMatching());

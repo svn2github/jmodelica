@@ -15,6 +15,7 @@
 */
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -22,6 +23,8 @@ import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
 
 import org.jmodelica.util.collections.ChainedIterator;
+import org.jmodelica.util.collections.FilteredIterator;
+import org.jmodelica.util.Criteria;
 
 aspect AnnotationAPI {
 
@@ -124,6 +127,40 @@ aspect AnnotationAPI {
         }
 
         /**
+         * Finds all annotation nodes of the given name that are direct children to this one.
+         */
+        public final Iterable<AnnotationNode> allFor(final String name) {
+            return new Iterable<AnnotationNode>() {
+                public Iterator<AnnotationNode> iterator() {
+                    return iteratorFor(name);
+                };
+            };
+        }
+
+        /**
+         * Iterates over all annotation nodes of the given name that are direct children to this one.
+         */
+        public Iterator<AnnotationNode> iteratorFor(final String name) {
+            Criteria<AnnotationNode> crit = new Criteria<AnnotationNode>() {
+                public boolean test(AnnotationNode elem) {
+                    return name.equals(elem.name());
+                }
+            };
+            return new FilteredIterator<AnnotationNode>(iterator(), crit);
+        }
+
+        /**
+         * Creates a new empty annotation node, that if written to adds a new child 
+         * of this annotation.
+         * 
+         * Can be used even if there is already a child with that name, 
+         * then the new node will be beside the existing node.
+         */
+        public AnnotationNode emptyNode(String name) {
+            return new AssignableNullAnnotationNode(this, name);
+        }
+
+        /**
          * Internal definition of {@link #forPath(String)}.
          * 
          * @param path   the path elements to find
@@ -134,7 +171,7 @@ aspect AnnotationAPI {
                 return this;
             AnnotationNode node = lookup(path[i]);
             if (node == null)
-                node = new AssignableNullAnnotationNode(this, path[i]);
+                node = emptyNode(path[i]);
             return node.forPath(path, i + 1);
         }
 
@@ -248,7 +285,7 @@ aspect AnnotationAPI {
          * that does not exist, relative to the directory containing the current file.
          */
         public String path() {
-            return ast().uri2path(string());
+            return ast().resolveInPackage(string());
         }
 
         /**
@@ -1233,6 +1270,11 @@ aspect AnnotationAPI {
         @Override
         protected ASTNode ast() {
             return attrs;
+        }
+
+        @Override
+        public Iterator<AnnotationNode> attributeIterator() {
+            return attrs.getNumChild() > 0 ? new AnnotationIterator(attrs) : super.attributeIterator();
         }
 
         @Override

@@ -158,7 +158,7 @@ FDiscrete : FTypePrefixVariability;
  */
 abstract FParameter : FTypePrefixVariability;
 
-FNonFixedParameter : FParameter;
+FInitialParameter : FParameter;
 
 FFixedParameter : FParameter;
 
@@ -240,7 +240,7 @@ FEnumVariable : FVariable ::= Enum:FQName /Type:FType/;
 /**
  * An external object variable.
  */
-FExternalObjectVariable : FVariable ::= Constructor:FIdUse [DestructorCall:FFunctionCallStmt];
+FExternalObjectVariable : FVariable ::= Constructor:FIdUse /DestructorCall:FFunctionCallStmt/;
 
 /**
  * Pre FVariable of type Real.
@@ -493,7 +493,7 @@ FAttribute : BaseNode ::= Type:FIdUse
 FInternalAttribute : FAttribute;
 
 /**
- * Represents and attribute that was generated from an annotation.
+ * Represents an attribute that was generated from an annotation.
  */
 FAnnotationAttribute : FAttribute;
 
@@ -530,12 +530,12 @@ abstract FSubscript : BaseNode;
 /**
  * The colon subscript used to denote that the array size is inferred.
  */
-FColonSubscript : FSubscript ::= /SizeExp:FExp/;
+FColonSubscript : FSubscript ::= /AccessContextSizeExp:FExp/;
 
 /**
  * Expression subscript.
  */
-FExpSubscript : FSubscript ::= FExp /Expanded:Array/;
+FExpSubscript : FSubscript ::= FExp /AccessContextSizeExp:FExp/;
 
 /**
  * A literal integer subscript.
@@ -657,6 +657,11 @@ FConnRootedDep : FConnRooted;
  * The cardinality() function-like operator.
  */
 FCardinality : FUnaryBuiltIn;
+
+/**
+ * The Subtask.decouple() function-like operator.
+ */
+FDecouple : FUnaryBuiltIn;
 
 /**
  * For equation clause.
@@ -1113,7 +1118,9 @@ abstract FAssignableExp : FVarRefExp;
 /**
  * Generated expression that applies array subscripts to any expression.
  */
-FSubscriptedExp : FAssignableExp ::= FExp FArraySubscripts;
+abstract FDecomposeExp : FAssignableExp ::= FExp;
+FSubscriptedExp : FDecomposeExp ::= FArraySubscripts;
+FComponentExp : FDecomposeExp ::= <Name:String>;
 
 /**
  * A qualifed identifier in an expression.
@@ -1185,7 +1192,11 @@ FRecordConstructor : FBuiltInFunctionCall ::= Record:FIdUse Arg:FExp* /Type:FTyp
 /**
  * Record constructor in instance trees.
  */
-InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess Arg:InstFunctionArgument*;
+InstRecordConstructor : FAbstractFunctionCall ::= Record:InstAccess 
+                                                  Arg:InstFunctionArgument* 
+                                                  /InstComponentDecl*/ 
+                                                  /InstExtends*/
+                                                  /InstModification*/;
 
 /**
  * Array constructor expression.
@@ -1234,7 +1245,7 @@ FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
  * 
  * Only used in Size objects.
  */
-FUnknownSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
+FColonSizeExp : FAbstractArrayExp ::= <Variable:CommonVariableDecl> <Dim:int>;
 
 /**
  * Dummy node.
@@ -1262,11 +1273,16 @@ FEndExp : FAbstractScalarExp;
  * Base class for all function calls and function call-like operators.
  */
 abstract FAbstractFunctionCall : FAbstractArrayExp;
- 
+  
 /**
  * Generic function call expression.
  */
-FFunctionCall : FAbstractFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
+abstract CommonFunctionCall : FAbstractFunctionCall;
+ 
+/**
+ * Generic function call expression in flat tree.
+ */
+FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
  
 /**
  * Partial function call expression in flat tree.
@@ -1281,7 +1297,7 @@ FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>
 /**
  * Generic function call expression in instance trees.
  */
-InstFunctionCall : FAbstractFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+InstFunctionCall : CommonFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
 
 /**
  * Partial function call expression in instance trees.
@@ -1331,7 +1347,7 @@ InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
 /**
  * Function call argument using default value in the instance tree.
  */
-InstDefaultArgument : InstFunctionArgument ::= <FExp:FExp>;
+InstDefaultArgument : InstFunctionArgument ::= <DeclarationFExp:FExp>;
 
 // Built in functions
 /**
@@ -1570,6 +1586,8 @@ FNdimsExp : FUnaryBuiltIn;
  */
 FSizeExp : FBuiltInFunctionCall ::= FExp [Dim:FExp];
 
+FUnknownSizeExp : FSizeExp;
+
 /**
  * Abstract base class for dimension conversion operators (scalar(), vector(), matrix()).
  */
@@ -1610,15 +1628,18 @@ FCross : FBuiltInFunctionCall ::= X:FExp Y:FExp;
  */
 FSkew : FUnaryBuiltIn;
 
+
+abstract FAbstractDiagonal : FUnaryBuiltIn;
+
 /**
  * Identity built-in function.
  */
-FIdentity : FUnaryBuiltIn;
+FIdentity : FAbstractDiagonal;
 
 /**
  * Diagonal built-in function.
  */
-FDiagonal : FUnaryBuiltIn;
+FDiagonal : FAbstractDiagonal;
 
 /**
  * Outer product built-in function.
@@ -1711,10 +1732,10 @@ abstract FStreamBuiltIn : FVectUnaryBuiltIn;
 FInStream : FStreamBuiltIn;
 
 /**
- * Derivative of inStream(). Temporary expression created by der(inStream()) rewrites
- * and removed after symbolic manipulations.
+ * Derivative of inStream() or actualStream(). Temporary expression created by 
+ * der(inStream()) and der(actualStream()) rewrites and removed after symbolic manipulations.
  */
-FDerInStream : FInStream;
+FDerStream : FInStream;
 
 /**
  * ActualStream built-in function.

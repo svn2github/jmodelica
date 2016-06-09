@@ -277,6 +277,10 @@ aspect PredefinedTypes {
             + "  input Real x;\n"
             + "  output Real y;\n"
             + "end sqrt;\n"
+            + "function universeLifeAndEverything\n"
+            + "  output Integer y = 42;\n"
+            + "algorithm\n"
+            + "end universeLifeAndEverything;\n"
             + "function div"
             + "  input Real x1;\n"      // Type not used
             + "  input Real x2;\n"      // Type not used
@@ -336,6 +340,12 @@ aspect PredefinedTypes {
             + "  input Real x;\n"      // Type not used
             + "  output Integer y;\n"  // Type not used
             + "end cardinality;\n"
+            + "package Subtask"
+            + "  function decouple"
+            + "    input Real x;\n"      // Type not used
+            + "    output Integer y;\n"  // Type not used
+            + "  end decouple;\n"
+            + "end Subtask;\n"
             + "function ndims\n"
             + "  input Real A;\n"      // Type not used
             + "  output Integer n;\n"
@@ -560,7 +570,8 @@ aspect PredefinedTypes {
 	    		getName().setID(name);
 	    		getEndDecl().setEndID(name);
 	    	}
-	        setExternalClause(builtin.fullCopy());
+	    	if (getNumAlgorithm() == 0)
+	    	    setExternalClause(builtin.fullCopy());
     	}
     	list.add(this);
     }

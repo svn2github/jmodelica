@@ -27,6 +27,11 @@ pymodelica_install_dir=$(abs_builddir)/pymodelica_install
 pyfmi_install_dir=$(abs_builddir)/PyFMI_install
 pyjmi_install_dir=$(abs_builddir)/PyJMI_install
 
+assimulo_build_dir=$(abs_builddir)/Assimulo_build
+pymodelica_build_dir=$(abs_builddir)/pymodelica_build
+pyfmi_build_dir=$(abs_builddir)/PyFMI_build
+pyjmi_build_dir=$(abs_builddir)/PyJMI_build
+
 bindistdir=JModelica.org-$(VERSION)-bin
 
 casadi:
@@ -75,7 +80,8 @@ ifcasadi: casadi
 	cmake $(MC_SRC_SWIG) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" \
 	    -DIFCASADI_OUTDIR="$(MC_SRC)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
 	*) \
-	cmake $(MC_SRC_SWIG) -DIFCASADI_OUTDIR="$(MC_SRC)" -DCASADI_HOME="$(CASADI_HOME)" ;; \
+	cmake $(MC_SRC_SWIG) \
+	    -DIFCASADI_OUTDIR="$(MC_SRC)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
 
@@ -157,9 +163,13 @@ NUMPY_NO_MSVCR_ARG=
 endif
 
 build-python-packages:
+
 if WITH_SUNDIALS
 if WITH_SUPERLU
-	cd $(abs_top_srcdir)/external/Assimulo; \
+	mkdir -p $(assimulo_build_dir); \
+	cd $(abs_top_srcdir)/external; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
+	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --superlu-home=$(SUPERLU_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -172,7 +182,10 @@ endif
 endif
 if WITH_SUNDIALS
 if !WITH_SUPERLU
-	cd $(abs_top_srcdir)/external/Assimulo; \
+	mkdir -p $(assimulo_build_dir); \
+	cd $(abs_top_srcdir)/external; \
+	find Assimulo -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(assimulo_build_dir); \
+	cd $(assimulo_build_dir)/Assimulo; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --sundials-home=$(SUNDIALS_HOME) --blas-home=$(abs_builddir)/blas_install/ --lapack-home=$(abs_builddir)/lapack_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(assimulo_install_dir) ;; \
@@ -187,7 +200,10 @@ endif
 	python setup_pymodelica.py install --prefix=$(pymodelica_install_dir); \
 	rm -rf build
 
-	cd $(abs_top_srcdir)/external/PyFMI; \
+	mkdir -p $(pyfmi_build_dir); \
+	cd $(abs_top_srcdir)/external; \
+	find PyFMI -type f |grep -v /.svn | grep -v .pyc | grep -v ~ |tar c -T - -f - | tar x -C $(pyfmi_build_dir); \
+	cd $(pyfmi_build_dir)/PyFMI; \
 	case $(build) in \
 	*-cygwin*) \
 	python setup.py install --fmil-home=$(abs_builddir)/FMIL_install/ --force-32bit="true" --extra-c-flags="-mincoming-stack-boundary=2" --prefix=$(pyfmi_install_dir) ;; \
@@ -205,6 +221,7 @@ endif
 install-python-packages: build-python-packages
 	mkdir -p $(DESTDIR)$(prefix)/Python
 	cp $(abs_top_srcdir)/Python/src/startup.py $(DESTDIR)$(prefix)/
+	cp Python/src/required_defaults.py $(DESTDIR)$(prefix)/Python/
 	[ $(abs_top_srcdir) == $(DESTDIR)$(prefix) ] && echo "Installing in dist directory, don't copy LICENSE file" || cp $(abs_top_srcdir)/Python/LICENSE $(DESTDIR)$(prefix)/Python
 if WITH_SUNDIALS
 	for pkgdir in lib/python2.5 lib/python2.6 lib/python2.7 lib64/python2.5 lib64/python2.6 lib64/python2.7 Lib; do \
@@ -332,7 +349,7 @@ if JM_WIN64
 	cp -r $(SUNDIALS_HOME)64/lib/* $(DESTDIR)$(prefix)/ThirdParty/Sundials/lib64
 endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/Minpack	
-	cp -r $(DESTDIR)$(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
+	cp -r $(MINPACK_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	cp $(abs_top_srcdir)/ThirdParty/Minpack/cminpack-1.3.2/CopyrightMINPACK.txt $(DESTDIR)$(prefix)/ThirdParty/Minpack
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
@@ -426,15 +443,23 @@ endif
 
 clean-python-packages:
 if WITH_SUNDIALS
-	cd $(abs_top_srcdir)/external/Assimulo; \
-	python setup.py clean --all --sundials-home=$(SUNDIALS_HOME) 
+	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
+		cd $(assimulo_build_dir)/Assimulo; \
+		python setup.py clean --all --sundials-home=$(SUNDIALS_HOME); \
+		cd $(abs_builddir); \
+	fi;
+	rm -rf $(assimulo_build_dir) || echo  Could not remove $(assimulo_build_dir)
 	rm -rf $(assimulo_install_dir) || echo  Could not remove $(assimulo_install_dir)
 endif
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pymodelica.py clean --all 
 	-rm -rf $(pymodelica_install_dir) || echo  Could not remove $(pymodelica_install_dir)
-	-cd $(abs_top_srcdir)/external/PyFMI; \
-	python setup.py  clean --all 
+	if [ -d $(pyfmi_build_dir)/PyFMI ]; then \
+		-cd $(pyfmi_build_dir)/PyFMI; \
+		python setup.py  clean --all; \
+		cd $(abs_builddir); \
+	fi;
+	-rm -rf $(pyfmi_build_dir) || echo  Could not remove $(pyfmi_build_dir)
 	-rm -rf $(pyfmi_install_dir) || echo  Could not remove $(pyfmi_install_dir)
 	-cd $(abs_top_srcdir)/Python/src; \
 	python setup_pyjmi.py clean --all 

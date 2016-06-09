@@ -536,10 +536,10 @@ aspect ErrorCheck {
     }
   
   public void ASTNode.collectErrors(ErrorCheckType checkType) {
-	  allChecks(checkType);
 	  for(int i = 0; i < getNumChild(); i++) {
 		  getChild(i).collectErrors(checkType);
 	  }
+        allChecks(checkType);
   }
 
 
@@ -726,19 +726,17 @@ aspect InstanceErrorCheck {
     }
 
     public void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType) {
-        errorCheckDerivativeAnnotations(checkType, annotation());
-        InstExternal ie = findFunctionExternal();
-        if (ie != null)
-            errorCheckDerivativeAnnotations(checkType, ie.annotation());
+        errorCheckDerivativeAnnotations(checkType, findDerivativeAnnotationRoot());
     }
     
     private void InstBaseClassDecl.errorCheckDerivativeAnnotations(ErrorCheckType checkType, AnnotationNode src) {
-        for (AnnotationNode derivative : src)
-            if ("derivative".equals(derivative.name()))
-                errorCheckDerivativeAnnotation(checkType, derivative);
+        for (AnnotationNode derivative : src.allFor("derivative")) {
+            errorCheckDerivativeAnnotation(checkType, derivative);
+        }
     }
 
     private void InstBaseClassDecl.errorCheckDerivativeAnnotation(ErrorCheckType checkType, AnnotationNode derivative) {
+        // TODO: Check that inputs/outputs of target function matches this function
         if (!derivative.isValue()) {
             derivative.ast().error("Function name is missing in derivative annotation declaration");
             return;
@@ -749,9 +747,11 @@ aspect InstanceErrorCheck {
             return;
         }
         InstLookupResult<InstClassDecl> lr = lookupDerivativeFunction(name);
-        if (!lr.successful()) {
-            lr.error(derivative.ast(), "function", name);
-            return;
+        if (lr.isProblem()) {
+            lr.problem(derivative.ast(), "function", name);
+            if (lr.isError()) {
+                return;
+            }
         }
         InstClassDecl icd = lr.target();
         if (!icd.isFunction()) {
@@ -904,6 +904,9 @@ aspect InstanceErrorCheck {
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
 
+    syn boolean InstModification.collectErrorsInBindingExp() = true;
+    eq InstDefaultRecordModification.collectErrorsInBindingExp() = false;
+    
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
@@ -915,16 +918,18 @@ aspect InstanceErrorCheck {
             if (bexp != null) {
                 String type = isParameter() ? "parameter" : "constant";
                 // TODO: Check structural parameters as well
-                bexp.collectErrors(checkType);
+                if (myInstValueMod().collectErrorsInBindingExp()) {
+                    bexp.collectErrors(checkType);
+                }
                 // Check if the binding expression of constants can be evaluated
-                if (isConstant()) 
+                if (isConstant() && !bexp.type().isUnknown()) 
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
                 else if (isParameter() && bexp.isCircular())
                     bexp.error("Circularity in binding expression of parameter: %s = %s", 
                             qualifiedName(), bexp);
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
-                if ((isConstant() || isParameter()) && !isForIndex() && !isRecord() && 
+                if (variability().fixedParameterOrLess() && !isForIndex() && !isRecord() && 
                         !hasParentRecordWithBindingExp() && !inFunction()) {
                     if (isParameter()) {
                         PARAMETER_MISSING_BINDING_EXPRESSION.invoke(this, qualifiedName());
@@ -934,12 +939,14 @@ aspect InstanceErrorCheck {
                 }
             }
             
+            FTypePrefixVariability v = variability().combine();
             // Mark parameters with Evaluate=true as structural
-            if (variability().combine().parameterVariability() && annotation().forPath("Evaluate").bool()) {
-                if (isEvalFixed())
+            if (v.parameterVariability() && isEvalAnnotated()) {
+                if (v.fixedParameterOrLess()) {
                     forceVariability(checkType, fEvalParameter());
-                else
+                } else {
                     warning("Evaluate annotation is ignored for parameters with fixed=false");
+                }
             }
             
             // Check array indices
@@ -1138,11 +1145,11 @@ aspect InstanceErrorCheck {
 	
 	public void FArraySubscripts.collectErrors(ErrorCheckType checkType) {
 		// Should this check be in the access instead?
-		int ndims = mySize().ndims();
+        int ndims = myDims();
 		if (getNumFSubscript() > ndims && !isInstComponentSize() && myAccessExists()) {
 			// TODO: shouldn't this check for to few as well? (no [] or all dimensions given)
 			error("Too many array subscripts for access: " + getNumFSubscript() + 
-					" subscripts given, component has " + mySize().ndims() + " dimensions");
+                    " subscripts given, component has " + ndims + " dimensions");
 			allChecks(checkType);
 			for (int i = 0; i < ndims; i++)
 				getFSubscript(i).collectErrors(checkType);
@@ -1272,11 +1279,12 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             errorChecked = true;
             // Check that the function exists
+            InstLookupResult<InstCallable> lp = getName().myInstLookupCallable();
             InstCallable func = getName().myInstCallable();
             String name = getName().name();
-            if (getName().hasLookupError() || func.isUnknown()) {
+            if (lp.isError()) {
                 // Function does not exist or can't be used due to constraining classes, or name refers to component
-                getName().classLookupError("function", name + "()");
+                getName().generateClassLookupProblems(lp, this);
             } else if (!func.isCallable()) {
                 if (func.isExternalObject()) {
                     // Something is be wrong with constructor
