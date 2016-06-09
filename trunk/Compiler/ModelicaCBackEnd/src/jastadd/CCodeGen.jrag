@@ -1907,7 +1907,7 @@ aspect CCodeGen {
     syn boolean FExp.extShouldArgConvert(boolean fortran) = false;
     eq FLitExp.extShouldArgConvert(boolean fortran)       = fortran;
     eq FIdUseExp.extShouldArgConvert(boolean fortran)     =
-            type().isInteger() || type().isBoolean() || type().isEnum() ||
+            type().isInteger() || type().isBoolean() || type().isEnum() || type().isRecord() ||
             (fortran && type().isReal() && ndims() > 1);
 	
 	
@@ -3236,10 +3236,32 @@ aspect CCodeGen {
             else
                 op.genMatrixOp(p, str, indent, src, src, tempName);
         } else {
-            if (writeback)
-                str.formatln("%s%s = %s;", indent, src, tempName);
-            else
-                type().printAssignExt_C(p, str, indent, tempName, src);
+            type().printAssignExt_C(p, str, indent, tempName, src, writeback, true);
+        }
+    }
+    
+    public void FType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src, 
+            boolean wb, boolean first) {
+        if (wb) {
+            str.formatln("%s%s = %s;", indent, src, dst);
+        } else {
+            str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
+        }
+    }
+    
+    @Override
+    public void FStringType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src, 
+            boolean wb, boolean first) {
+        str.formatln("%sJMI_ASG(%s, %s, %s)", indent, macroType(), dst, src);
+    }
+    
+    @Override
+    public void FRecordType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src, 
+            boolean wb, boolean first) {
+        dst = dst + (first ? "->" : ".");
+        src = src + "->";
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().printAssignExt_C(p, str, indent, dst + frct.getName(), src + frct.getName(), wb, false);
         }
     }
     
@@ -4780,15 +4802,6 @@ aspect CCodeGen {
         str.print(", ");
         p.print(src, str, indent);
         str.print(")\n");
-    }
-    
-    public void FType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src) {
-        str.formatln("%s%s = (%s)%s;", indent, dst, argType_C(false), src);
-    }
-    
-    @Override
-    public void FStringType.printAssignExt_C(CodePrinter p, CodeStream str, String indent, String dst, String src) {
-        str.formatln("%sJMI_ASG(%s, %s, %s)", indent, macroType(), dst, src);
     }
     
     public void FType.printReturn_C(CodeStream str, String indent, String dst, String src) {

@@ -6767,6 +6767,213 @@ jmi_ad_var_t func_CCodeGenTests_IntegerExternal4_f_exp0(jmi_ad_var_t a_v, jmi_ad
 ")})));
 end IntegerExternal4;
 
+model RecordExternal1
+    record R
+        Real x;
+        Integer i;
+    end R;
+    
+    function f
+        input R r;
+        output R y;
+        external;
+    end f;
+    
+    R r = f(R(time, 1));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordExternal1",
+            description="External C function with record",
+            template="
+$C_records$
+$C_function_headers$
+$C_functions$
+",
+            generatedCode="
+typedef struct R_0_r_ R_0_r;
+struct R_0_r_ {
+    jmi_ad_var_t x;
+    jmi_ad_var_t i;
+};
+JMI_ARRAY_TYPE(R_0_r, R_0_ra)
+
+typedef struct R_0_r_ext_ R_0_r_ext;
+struct R_0_r_ext_ {
+    jmi_ad_var_t x;
+    jmi_int_t i;
+};
+
+
+void func_CCodeGenTests_RecordExternal1_f_def0(R_0_r* r_v, R_0_r* y_v);
+
+void func_CCodeGenTests_RecordExternal1_f_def0(R_0_r* r_v, R_0_r* y_v) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R_0_r, y_vn)
+    JMI_RECORD_STATIC(R_0_r_ext, tmp_1)
+    if (y_v == NULL) {
+        y_v = y_vn;
+    }
+    tmp_1->x = (double)r_v->x;
+    tmp_1->i = (int)r_v->i;
+    y_v = f(tmp_1);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end RecordExternal1;
+
+model RecordExternal2
+    record R1
+        Real x;
+    end R1;
+    
+    record R2
+        R1 r1;
+    end R2;
+    
+    function f
+        input R2 r;
+        output R2 y;
+        external;
+    end f;
+    
+    R2 r2 = f(R2(R1(time)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordExternal2",
+            description="External C function with record",
+            template="
+$C_records$
+$C_function_headers$
+$C_functions$
+",
+            generatedCode="
+typedef struct R1_0_r_ R1_0_r;
+struct R1_0_r_ {
+    jmi_ad_var_t x;
+};
+JMI_ARRAY_TYPE(R1_0_r, R1_0_ra)
+
+typedef struct R1_0_r_ext_ R1_0_r_ext;
+struct R1_0_r_ext_ {
+    jmi_ad_var_t x;
+};
+
+typedef struct R2_1_r_ R2_1_r;
+struct R2_1_r_ {
+    R1_0_r* r1;
+};
+JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
+
+typedef struct R2_1_r_ext_ R2_1_r_ext;
+struct R2_1_r_ext_ {
+    R1_0_r_ext r1;
+};
+
+
+void func_CCodeGenTests_RecordExternal2_f_def0(R2_1_r* r_v, R2_1_r* y_v);
+
+void func_CCodeGenTests_RecordExternal2_f_def0(R2_1_r* r_v, R2_1_r* y_v) {
+    JMI_DYNAMIC_INIT()
+    JMI_RECORD_STATIC(R2_1_r, y_vn)
+    JMI_RECORD_STATIC(R1_0_r, tmp_1)
+    JMI_RECORD_STATIC(R2_1_r_ext, tmp_2)
+    JMI_RECORD_STATIC(R1_0_r_ext, tmp_3)
+    if (y_v == NULL) {
+        y_vn->r1 = tmp_1;
+        y_v = y_vn;
+    }
+    tmp_2->r1.x = (double)r_v->r1->x;
+    y_v = f(tmp_2);
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+")})));
+end RecordExternal2;
+
+model RecordExternal3
+    record R1
+        Real x;
+        String s;
+    end R1;
+    
+    record R2
+        R1 r1;
+    end R2;
+    
+    function f
+        input R2 r;
+        output Real y;
+        external;
+    end f;
+    
+    Real y = f(R2(R1(time, "str")));
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="RecordExternal3",
+            description="External C function with record",
+            template="
+$C_records$
+$C_function_headers$
+$C_functions$
+",
+            generatedCode="
+typedef struct R1_0_r_ R1_0_r;
+struct R1_0_r_ {
+    jmi_ad_var_t x;
+    jmi_string_t s;
+};
+JMI_ARRAY_TYPE(R1_0_r, R1_0_ra)
+
+typedef struct R1_0_r_ext_ R1_0_r_ext;
+struct R1_0_r_ext_ {
+    jmi_ad_var_t x;
+    jmi_string_t s;
+};
+
+typedef struct R2_1_r_ R2_1_r;
+struct R2_1_r_ {
+    R1_0_r* r1;
+};
+JMI_ARRAY_TYPE(R2_1_r, R2_1_ra)
+
+typedef struct R2_1_r_ext_ R2_1_r_ext;
+struct R2_1_r_ext_ {
+    R1_0_r_ext r1;
+};
+
+
+void func_CCodeGenTests_RecordExternal3_f_def0(R2_1_r* r_v, jmi_ad_var_t* y_o);
+jmi_ad_var_t func_CCodeGenTests_RecordExternal3_f_exp0(R2_1_r* r_v);
+
+void func_CCodeGenTests_RecordExternal3_f_def0(R2_1_r* r_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_RECORD_STATIC(R2_1_r_ext, tmp_1)
+    JMI_RECORD_STATIC(R1_0_r_ext, tmp_2)
+    tmp_1->r1.x = (double)r_v->r1->x;
+    JMI_ASG(STR, tmp_1->r1.s, r_v->r1->s)
+    y_v = f(tmp_1);
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_RecordExternal3_f_exp0(R2_1_r* r_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenTests_RecordExternal3_f_def0(r_v, &y_v);
+    return y_v;
+}
+
+")})));
+end RecordExternal3;
+
+
 model ExternalLiteral1
 	Real a_in = 1;
     Real b_in = 2;
