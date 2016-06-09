@@ -617,6 +617,8 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+CMAKE_PYTHON_INCLUDE
+CMAKE_PYTHON_LIB
 PYTHON_HOME
 HAVE_ANT_FALSE
 HAVE_ANT_TRUE
@@ -813,7 +815,8 @@ FFLAGS
 CC
 CFLAGS
 CPP
-CXXCPP'
+CXXCPP
+PYTHON_HOME'
 
 
 # Initialize some variables set by options.
@@ -1473,6 +1476,7 @@ Some influential environment variables:
   CFLAGS      C compiler flags
   CPP         C preprocessor
   CXXCPP      C++ preprocessor
+  PYTHON_HOME Python installation to use
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -19480,14 +19484,25 @@ as_fn_error $? "Cannot find Apache Ant - please install in order to build compil
 See \`config.log' for more details" "$LINENO" 5 ; }
 fi
 
-if test "x$PYTHON_HOME" != x; then :
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation $PYTHON_HOME" >&5
-$as_echo "Using Python installation $PYTHON_HOME" >&6; }
-      test "x$PYTHON_HOME" = x
+# Detect if Python installation is specified with environment var
+
+if test "${PYTHON_HOME}"; then :
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME}" >&5
+$as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME}/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME}/include"
+
 else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
 $as_echo "Python installation not specified." >&6; }
+          CMAKE_PYTHON_LIB=
+          CMAKE_PYTHON_INCLUDE=
+
 fi
+
+
 
 
 
