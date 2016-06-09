@@ -338,7 +338,7 @@ aspect Variability {
             e.makeContinuousVariablesDiscrete();
     }
     
-    public void FDecomposeExp.makeContinuousVariablesDiscrete() {
+    public void FSubscriptedExp.makeContinuousVariablesDiscrete() {
         getFExp().makeContinuousVariablesDiscrete();
     }
     

@@ -932,38 +932,15 @@ aspect Scalarization {
     }
     
     public FExp FSubscriptedExp.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
-        if (indexVariability().indexParameterOrLess() && !(getFExp() instanceof FComponentExp)) {
+        if (indexVariability().indexParameterOrLess()) {
             try {
                 return select().scalarRecordFExp(indexMap, suffix);
             } catch (ConstantEvaluationException e) {
                 
             }
         }
-        FType tres = type().declared(this).lookupHierarchical(suffix, 0, suffix.numParts());
-        if (tres.size().isUnknown()) {
-            return suffix.buildDecomposeExp(scalarize(indexMap));
-        }
-        List<FSubscript> subs = new List<FSubscript>();
-        for (int i = 0; i < getFExp().ndims() - getFArraySubscripts().getNumFSubscript(); i++) {
-            subs.addChild(new FColonSubscript());
-        }
-        for (FSubscript sub : getFArraySubscripts().scalarize(indexMap).getFSubscripts()) {
-            subs.addChild(sub);
-        }
-        return new FSubscriptedExp(getFExp().scalarRecordFExp(indexMap, suffix), new FArraySubscripts(subs));
+        return new FSubscriptedExp(getFExp().scalarRecordFExp(indexMap, suffix), getFArraySubscripts().scalarize(indexMap));
     }
-    
-    syn FExp FQName.buildDecomposeExp(FExp exp) = new FComponentExp(exp, name());
-    eq FQNameFull.buildDecomposeExp(FExp exp) {
-        for (FQNamePart fqnp : getFQNameParts()) {
-            exp = fqnp.buildDecomposeExp(exp);
-        }
-        return exp;
-    }
-    
-    syn FDecomposeExp FQNamePart.buildDecomposeExp(FExp exp) = new FComponentExp(exp, name());
-    eq FQNamePartArray.buildDecomposeExp(FExp exp) = 
-            new FSubscriptedExp(super.buildDecomposeExp(exp), getFArraySubscripts().treeCopy());
     
     public FExp FArray.scalarRecordFExp(Map<String,FExp> indexMap, FQName suffix) {
         FArray res = createEmptyNode();
@@ -1281,17 +1258,9 @@ aspect Scalarization {
 	 *        with the arguments taken from a record variable with the given name.
 	 */
 	public FExp FType.createRecordConstructor(Map<String,FExp> indexMap, FExp exp) {
-		if (isArray()) {
-            Size s = size();
-            if (s.isEmpty()) {
-                List<FExp> dims = new List<FExp>();
-                for (int i = 0, n = s.ndims(); i < n ; i++) {
-                    dims.add(s.createFExp(i));
-                }
-                return new FFillExp(dims, zeroLiteral());
-            }
-			return createRecordConstructorArray(indexMap, exp, s, Indices.create(s).iterator(), 0);
-		} else 
+		if (isArray()) 
+			return createRecordConstructorArray(indexMap, exp, indices().iterator(), 0);
+		else 
 			return createRecordConstructorCell(indexMap, exp);
 	}
 	
@@ -1299,16 +1268,23 @@ aspect Scalarization {
 	 * Create an FArray of expressions, with the arguments taken from a record 
 	 * variable or member with the given name.
 	 */
-    public FExp FType.createRecordConstructorArray(Map<String,FExp> indexMap, FExp exp, Size s, Iterator<Index> it, int dim) {
+	public FExp FType.createRecordConstructorArray(Map<String,FExp> indexMap, FExp exp, Iterator<Index> it, int dim) {
+        Size s = size();
+        if (s.isEmpty()) {
+            List<FExp> dims = new List<FExp>();
+            for (int i = 0, n = s.ndims(); i < n ; i++) {
+                dims.add(s.createFExp(i));
+            }
+            return new FFillExp(dims, zeroLiteral());
+        }
 		FArray arr = new FArray();
 		boolean last = dim == ndims() - 1;
-        for (int i = 0, n = s.get(dim); i < n; i++) {
+		for (int i = 0, n = size().get(dim); i < n; i++) {
 			FExp res;
-            if (last) {
+			if (last)
 				res = createRecordConstructorCell(indexMap, exp.extractArrayCell(indexMap, it.next()));
-            } else {
-                res = createRecordConstructorArray(indexMap, exp, s, it, dim + 1);
-            }
+			else
+				res = createRecordConstructorArray(indexMap, exp, it, dim + 1);
 			arr.addFExp(res);
 		}
 		return arr;
@@ -1479,7 +1455,6 @@ aspect Scalarization {
     eq FFunctionCall.scalarizeExpanded()       = (useTempVar || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
     eq FRecordConstructor.scalarizeExpanded()  = useTempVar && super.scalarizeExpanded();
-    eq FDecomposeExp.scalarizeExpanded()       = false;
     
     syn boolean FFunctionCall.isVectorized() = false;
     eq FVectorFunctionCall.isVectorized() = true;
@@ -1619,21 +1594,22 @@ aspect Scalarization {
 	}
 
     public FExp FSubscriptedExp.scalarizeExp(Map<String,FExp> indexMap) {
-        if (indexVariability().indexParameterOrLess() && !(getFExp() instanceof FComponentExp)) {
+        if (indexVariability().indexParameterOrLess()) {
             try {
                 return select().scalarize(indexMap);
             } catch (ConstantEvaluationException e) {
                 
             }
         }
-        return new FSubscriptedExp(getFExp().scalarize(indexMap), getFArraySubscripts().scalarize(indexMap));
-    }
-    
-    public FExp FComponentExp.scalarizeExp(Map<String,FExp> indexMap) {
-        if (!getFExp().isArray() || !size().isUnknown()) {
-            return getFExp().scalarRecordFExp(indexMap, getName());
+        FArraySubscripts fas = getFArraySubscripts().scalarize(indexMap);
+        if (inFunction()) {
+            return new FIdUseExp(tempVarName(), fas);
+        } else {
+            FSubscriptedExp res = createEmptyNode();
+            res.setFExp(getFExp().scalarize(indexMap));
+            res.setFArraySubscripts(fas);
+            return res;
         }
-        return new FComponentExp(getFExp().scalarize(indexMap), getName());
     }
 
     public FExp FCardinality.scalarizeExp(Map<String,FExp> indexMap) {
