@@ -1889,8 +1889,29 @@ aspect CCodeGen {
     public void FExternalLanguage.genVarDecls_C(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
         for (FExp arg: stmt.getArgs()) {
             if (extShouldArgConvert(arg)) {
-                arg.type().printDecl_C(p, str, indent, arg.tempName_C(), arg, true);
+                arg.type().printDeclBase_C(p, str, indent, arg.tempName_C(), arg, true);
             }
+        }
+        if (stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
+            stmt.getReturnVar().type().printDeclBase_C(p, str, indent, stmt.getReturnVar().tempName_C(), stmt.getReturnVar(), true);
+        }
+    }
+    
+    public void FType.printDeclBase_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
+        if (isArray()) {
+            if (size().isUnknown()) {
+                printDecl_C(p, str, indent, name, src, external);
+            } else {
+                String type = "STAT" + (isReal() ? "REAL" : "");
+                str.format("%sJMI_ARR(%s, %s, %s, %s, ", indent, type,
+                        nameScalar_C(external), nameArray_C(external), name);
+                size().printNumElements_C(p, str, indent, src);
+                str.print(", ");
+                str.print(ndims());
+                str.println(")");
+            }
+        } else {
+            printScalarDecl_C(str, indent, external, name);
         }
     }
     
@@ -3186,7 +3207,10 @@ aspect CCodeGen {
 		str.print(indent);
 		// return variable?
 		if(hasReturnVar()) {
-            str.print(getCodeGenContext().alias(getReturnVar().name_C()));
+            String name = getReturnVar().type().isRecord() ?
+                    "*"+getReturnVar().tempName_C() :
+                    getReturnVar().getFIdUse().name_C();
+            str.print(getCodeGenContext().alias(name));
             str.print(" = ");
 		}
 		
@@ -3218,11 +3242,16 @@ aspect CCodeGen {
 			str.print(");\n");				
 		}
 	}
-	
+    
     public void FExternalLanguage.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt, boolean writeback){
-        for (FExp arg : stmt.getArgs())
-            if (extShouldArgConvert(arg))
+        for (FExp arg : stmt.getArgs()) {
+            if (extShouldArgConvert(arg)) {
                 arg.prepExternalArg(p, str, indent, this, writeback);
+            }
+        }
+        if (writeback && stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
+            stmt.getReturnVar().prepExternalArg(p, str, indent, this, writeback);
+        }
     }
     
     public void FExp.prepExternalArg(CodePrinter p, CodeStream str, String indent, FExternalLanguage lang, boolean writeback) {

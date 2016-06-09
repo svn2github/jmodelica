@@ -6811,12 +6811,15 @@ void func_CCodeGenTests_RecordExternal1_f_def0(R_0_r* r_v, R_0_r* y_v) {
     JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R_0_r, y_vn)
     JMI_RECORD_STATIC(R_0_r_ext, tmp_1)
+    JMI_RECORD_STATIC(R_0_r_ext, tmp_2)
     if (y_v == NULL) {
         y_v = y_vn;
     }
     tmp_1->x = (double)r_v->x;
     tmp_1->i = (int)r_v->i;
-    y_v = f(tmp_1);
+    *tmp_2 = f(tmp_1);
+    y_v->x = tmp_2->x;
+    y_v->i = tmp_2->i;
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6881,13 +6884,14 @@ void func_CCodeGenTests_RecordExternal2_f_def0(R2_1_r* r_v, R2_1_r* y_v) {
     JMI_RECORD_STATIC(R2_1_r, y_vn)
     JMI_RECORD_STATIC(R1_0_r, tmp_1)
     JMI_RECORD_STATIC(R2_1_r_ext, tmp_2)
-    JMI_RECORD_STATIC(R1_0_r_ext, tmp_3)
+    JMI_RECORD_STATIC(R2_1_r_ext, tmp_3)
     if (y_v == NULL) {
         y_vn->r1 = tmp_1;
         y_v = y_vn;
     }
     tmp_2->r1.x = (double)r_v->r1->x;
-    y_v = f(tmp_2);
+    *tmp_3 = f(tmp_2);
+    y_v->r1->x = tmp_3->r1.x;
     JMI_DYNAMIC_FREE()
     return;
 }
@@ -6955,7 +6959,6 @@ void func_CCodeGenTests_RecordExternal3_f_def0(R2_1_r* r_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_RECORD_STATIC(R2_1_r_ext, tmp_1)
-    JMI_RECORD_STATIC(R1_0_r_ext, tmp_2)
     tmp_1->r1.x = (double)r_v->r1->x;
     JMI_ASG(STR, tmp_1->r1.s, r_v->r1->s)
     y_v = f(tmp_1);

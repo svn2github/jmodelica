@@ -96,17 +96,6 @@ aspect ExternalConstantEvaluation {
         return marked;
     }
     
-    
-    /**
-     * External functions does not have a FAlgorithm in the instance tree
-     * so we have to generate one.
-     */
-    syn nta FAlgorithm InstExternal.getFAlgorithm() {
-        FAlgorithm fab = new FAlgorithm(new List());
-        fab.addFStatement(createStmt(surroundingInstClass(), new FQNameFull(""), false));
-        return fab;
-    }
-    
     /**
      * Evaluate this statement as an external function constructor call. Stores evaluated
      * inputs in a CValueExternalObject.

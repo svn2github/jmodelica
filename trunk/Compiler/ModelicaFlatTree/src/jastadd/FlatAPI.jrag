@@ -3859,6 +3859,13 @@ aspect FlatExternalFunctionAPI {
     private String FExternalStmt.libraryDir;
     private String FExternalStmt.includeDir;
     
+    public void FExternalStmt.extractLibrary(FExternalStmt n) {
+        this.library = n.library;
+        this.include = n.include;
+        this.libraryDir = n.libraryDir;
+        this.includeDir = n.includeDir;
+    }
+    
     public void FExternalStmt.extractLibrary(InstExternal n) {
         library = n.annotation("Library").asStringVector();
         include = n.annotation("Include").string();

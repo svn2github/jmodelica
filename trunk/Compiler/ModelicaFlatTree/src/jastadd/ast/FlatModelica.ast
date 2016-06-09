@@ -800,7 +800,7 @@ FWhileStmt : FStatement ::= Test:FExp WhileStmt:FStatement*;
 /**
  * An external function interface in the flat tree. Implemented as a statement.
  */
-FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUse] <Name> Arg:FExp*;
+FExternalStmt : FStatement ::= FExternalLanguage [ReturnVar:FIdUseExp] <Name> Arg:FExp*;
 
 /**
  * A language specification for an external function.
