@@ -19505,10 +19505,21 @@ $as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
 
 else
 
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
+          if test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"; then :
+
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&5
+$as_echo "Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&6; }
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+
+else
+
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
 $as_echo "Python installation not specified." >&6; }
-          CMAKE_PYTHON_LIB=
-          CMAKE_PYTHON_INCLUDE=
+                CMAKE_PYTHON_LIB=
+                CMAKE_PYTHON_INCLUDE=
+
+fi
 
 fi
 

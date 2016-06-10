@@ -439,9 +439,16 @@ AS_IF([test "${PYTHON_HOME}"],
           CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME}/libs/libpython27.a"
           CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME}/include"
       ], [
-          AC_MSG_RESULT([Python installation not specified.])
-          CMAKE_PYTHON_LIB=
-          CMAKE_PYTHON_INCLUDE=
+          AS_IF([test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"], 
+            [
+                AC_MSG_RESULT([Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}])
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+            ], [
+                AC_MSG_RESULT([Python installation not specified.])
+                CMAKE_PYTHON_LIB=
+                CMAKE_PYTHON_INCLUDE=
+            ])
       ])
 AC_SUBST(CMAKE_PYTHON_LIB)
 AC_SUBST(CMAKE_PYTHON_INCLUDE)
