@@ -71,7 +71,7 @@ aspect InstVariability {
             
             if (isSetAsInitial()) {
                 v = fInitialParameter();
-            } else if (isEvalAnnotated()) {
+            } else if (!isRecord() && isEvalAnnotated()) {
                 v = fEvalParameter();
             } else if (isFinalIndependent()) {
                 v = fFinalParameter();
@@ -101,7 +101,12 @@ aspect InstVariability {
         InstValueModification mod = myInstValueMod();
         return mod != null && mod.isFinal() && mod.getFExp().isIndependentParameterExp();
     }
-    syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool();
+    syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
+    inh boolean InstComponentDecl.inEvalAnnotated();
+    eq InstClassDecl.getChild().inEvalAnnotated()          = false;
+    eq InstComponentDecl.getChild().inEvalAnnotated()      = false;
+    eq InstAssignable.getChild().inEvalAnnotated()         = isEvalAnnotated();
+    eq InstArrayComponentDecl.getChild().inEvalAnnotated() = inEvalAnnotated();
     
     syn boolean InstAssignable.isSetAsInitial() = isPrimitive() && 
             attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 

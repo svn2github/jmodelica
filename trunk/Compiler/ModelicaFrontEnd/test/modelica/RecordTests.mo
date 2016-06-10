@@ -453,6 +453,55 @@ end RecordTests.RecordFlat12;
 ")})));
 end RecordFlat12;
 
+model RecordFlat13
+    model EO
+        extends ExternalObject;
+        function constructor
+            output EO eo;
+            external;
+        end constructor;
+        function destructor
+            input EO eo;
+            external;
+        end destructor;
+    end EO;
+    
+    record R
+        EO eo = EO();
+    end R;
+    
+    parameter EO eo = EO() annotation(Evaluate=true);
+    parameter R r annotation(Evaluate=true);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordFlat13",
+            description="Records: eval true on external object",
+            flatModel="
+fclass RecordTests.RecordFlat13
+ parameter RecordTests.RecordFlat13.EO eo = RecordTests.RecordFlat13.EO.constructor() /* {} */;
+ parameter RecordTests.RecordFlat13.EO r.eo = RecordTests.RecordFlat13.EO.constructor() /* {} */;
+
+public
+ function RecordTests.RecordFlat13.EO.destructor
+  input RecordTests.RecordFlat13.EO eo;
+ algorithm
+  external \"C\" destructor(eo);
+  return;
+ end RecordTests.RecordFlat13.EO.destructor;
+
+ function RecordTests.RecordFlat13.EO.constructor
+  output RecordTests.RecordFlat13.EO eo;
+ algorithm
+  external \"C\" eo = constructor();
+  return;
+ end RecordTests.RecordFlat13.EO.constructor;
+
+ type RecordTests.RecordFlat13.EO = ExternalObject;
+end RecordTests.RecordFlat13;
+")})));
+end RecordFlat13;
+
 model RecordType1
  record A
   Real a;

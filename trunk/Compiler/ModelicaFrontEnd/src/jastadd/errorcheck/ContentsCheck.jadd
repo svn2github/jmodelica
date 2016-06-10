@@ -798,9 +798,9 @@ aspect ForceVariability {
     }
     
     public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        super.forceVariability(checkType, v);
-        for (InstComponentDecl icd : getInstComponentDecls())
+        for (InstComponentDecl icd : allInstComponentDecls()) {
             icd.forceVariability(checkType, v);
+        }
     }
     
     public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
