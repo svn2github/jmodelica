@@ -59,8 +59,20 @@ aspect Units {
         
         /*
          * This function is like equals for units but is **not** transitive because of AnyUnit.
+         * v.isCompatibleWith(u) == v.isCompatibleWithNoOffset(u) && v.isCompatibleOnlyOffset(Unit u);
          */
         public abstract boolean isCompatibleWith(Unit u);
+                
+        /*
+         * Same as isCompatibleWith but ignoring differences in offset
+         */
+        public abstract boolean isCompatibleWithoutOffset(Unit u);
+        
+        /*
+         * Compares only the offset of two units.  
+         */
+        public abstract boolean isCompatibleOnlyOffset(Unit u);
+
         
         // // Factory Functions // //
         public static Unit fromDimension(int dim, String name) {
@@ -155,6 +167,16 @@ aspect Units {
     
         @Override
         public boolean isCompatibleWith(Unit u) {
+            return true;
+        }
+        
+        @Override
+        public boolean isCompatibleOnlyOffset(Unit u) {
+            return true;
+        }
+        
+        @Override
+        public boolean isCompatibleWithoutOffset(Unit u) {
             return true;
         }
         
@@ -400,6 +422,25 @@ aspect Units {
         
         @Override
         public boolean isCompatibleWith(Unit u) {
+            return isCompatibleWithoutOffset(u) && isCompatibleOnlyOffset(u);
+        }
+        
+        @Override
+        public boolean isCompatibleOnlyOffset(Unit u) {
+            if (u == this)
+                return true;
+            if (u instanceof AnyUnit)
+                return true;
+            if (getClass() != u.getClass())
+                return false;
+            CompositeUnit w = (CompositeUnit) u;
+            if (Math.abs(offset - w.offset) > 1e-10)
+                return false;
+            return true;
+        } 
+        
+        @Override
+        public boolean isCompatibleWithoutOffset(Unit u) {
             if (u == this)
                 return true;
             if (u == null)
@@ -413,11 +454,9 @@ aspect Units {
                 return false;
             if (!Arrays.equals(powers, w.powers))
                 return false;
-            if (Math.abs(offset - w.offset) > 1e-10)
-                return false;
             return true;
         }
-    
+        
         @Override
         public int hashCode() {
             final int prime = 31;
