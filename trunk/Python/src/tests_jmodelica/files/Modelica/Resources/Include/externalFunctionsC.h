@@ -14,4 +14,10 @@ void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fBooleanArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fStringArray(const char** in, size_t in_d1, const char** out, size_t out_d1);
 
+typedef struct fRec {
+    double x;
+} fRec_t;
+
+double fRecord(fRec_t *r);
+
 #endif

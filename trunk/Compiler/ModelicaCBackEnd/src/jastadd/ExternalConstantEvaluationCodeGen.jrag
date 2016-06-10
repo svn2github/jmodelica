@@ -290,11 +290,13 @@ aspect Serialize {
     /**
      * Declarations of records used in this function
      */
-    syn Collection<FRecordDecl> FExternalStmt.usedRecords() {
-        Set<FRecordDecl> res = new LinkedHashSet<FRecordDecl>();
-        for (CommonVariableDecl cvd : varsToSerialize())
-            if (cvd.type().isRecord())
-                res.add(cvd.type().myFRecordDecl());
+    syn Collection<FType> FExternalStmt.usedRecords() {
+        Set<FType> res = new LinkedHashSet<FType>();
+        for (CommonVariableDecl cvd : varsToSerialize()) {
+            if (cvd.type().isRecord()) {
+                res.add(cvd.type());
+            }
+        }
         return res;
     }
     

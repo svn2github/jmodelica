@@ -1199,7 +1199,7 @@ aspect CCodeGen {
     syn String FType.nameArray_C(boolean external)  = external ? nameArrayExt_C() : nameArray_C();
     
     syn String FType.nameScalar_C()       = "jmi_ad_var_t";
-    eq FRecordType.nameScalar_C()         = myFRecordDecl().name_C();
+    eq FRecordType.nameScalar_C()         = getFClass() != null ? myFRecordDecl().name_C() : ASTNode.underScore(getName());
     eq FStringType.nameScalar_C()         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C() = "jmi_extobj_t";
     eq FFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";

@@ -132,6 +132,21 @@ class TestExternalBool:
         for i in falseInd:
             assert(not model.get('res[' + str(i) + ']'))
 
+class TestExternalRecord(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
+            'ExtFunctionTests.ExtFunctionRecord')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_result(self):
+        self.assert_end_value('y', 0.1)
+
 class TestExternalShared2:
     
     @classmethod

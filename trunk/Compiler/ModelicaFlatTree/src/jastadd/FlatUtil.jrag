@@ -391,9 +391,13 @@ aspect FlatNames {
     
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
-
+    
+    public static String ASTNode.underScore(String s) {
+        return s.replaceAll("[^0-9a-zA-Z_]", "_");
+    }
+    
     syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
+    syn lazy String FQNameString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
@@ -412,9 +416,9 @@ aspect FlatNames {
         }
         return str.toString();
     }
-
-    syn String FQNamePart.nameUnderscore() = getName().replaceAll("[^0-9a-zA-Z_]", "_");
-
+    
+    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName());
+    
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {

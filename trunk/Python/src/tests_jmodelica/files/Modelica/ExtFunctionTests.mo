@@ -63,6 +63,20 @@ equation
     res = copyBoolArray(arg);
 end ExtFunctionBool;
 
+model ExtFunctionRecord
+    record R
+        Real x;
+    end R;
+    function fRecord
+        input R r;
+        output Real y;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+    end fRecord;
+    Real y = fRecord(R(time));
+end ExtFunctionRecord;
+
 model ExtFunctionTest3
  Real a(start=10);
  Real b;
