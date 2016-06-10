@@ -34,10 +34,13 @@ aspect ExternalConstantEvaluation {
     syn boolean FExternalStmt.canEvaluate() {
         if (myOptions().getIntegerOption("external_constant_evaluation") == 0)
             return false;
-        for (CommonVariableDecl cvd : varsToSerialize()) {
-            if (cvd.type().isRecord()) {
+        for (FExp arg : getArgs()) {
+            if (!arg.type().externalValid()) {
                 return false;
             }
+        }
+        if (hasReturnVar() && !getReturnVar().type().externalValid()) {
+            return false;
         }
         return true;
     }

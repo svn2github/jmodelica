@@ -1482,6 +1482,10 @@ model ExternalRecordArray1
 
 Error at line 1467, column 5, in file '...':
   Record type used as input or output to external function can only contain scalar record or scalar simple types
+  
+Compliance error at line 1467, column 5, in file '...', UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE:
+  Using records as return value from external functions is not supported
+
 ")})));
 end ExternalRecordArray1;
 

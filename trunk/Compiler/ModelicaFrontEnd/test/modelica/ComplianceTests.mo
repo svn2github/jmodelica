@@ -129,25 +129,27 @@ Compliance error at line 104, column 5, in file 'Compiler/ModelicaFrontEnd/src/t
 end ArrayOfRecords_Warn;
 
 
-//model ExternalFunction_ComplErr
-// annotation(JModelica(unitTesting = JModelica.UnitTesting(testCase={
-//     JModelica.UnitTesting.ComplianceErrorTestCase(
-//         name="ExternalFunction_ComplErr",
-//         description="Compliance error for external functions",
-//         errorMessage="
-//1 errors found:
-//Error: in file 'Compiler/ModelicaFrontEnd/src/test/modelica/ComplianceTests.mo':
-//Compliance error at line 105, column 3:
-//  External functions are not supported
-//")})));
-
-// function f
-//  output Real x;
-//  external "C";
-// end f;
+model ExternalFunction_ComplErr
+    record R
+    end R;
+    function f
+        output R x;
+      external "C";
+    end f;
  
-// Real x = f();
-//end ExternalFunction_ComplErr;
+    R x = f();
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="ExternalFunction_ComplErr",
+            description="",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 135, column 5, in file '...', UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE:
+  Using records as return value from external functions is not supported
+
+")})));
+end ExternalFunction_ComplErr;
 
 model UnsupportedBuiltins2_ComplErr
   parameter Boolean x;

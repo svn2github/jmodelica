@@ -1031,56 +1031,47 @@ aspect CCodeGen {
 	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
     syn String FRecordDecl.nameExt_C() = name_C() + "_ext";
 	
-	// TODO: Handle arrays of records and arrays in records
-	public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+    public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        p.print(type(), str, indent);
+    }
+    
+    public void FRecordType.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         // Scalar type
         printStruct_C(p, str, indent, false);
         
         //Array type
 		str.print(indent);
 		str.print("JMI_ARRAY_TYPE(");
-		str.print(name_C());
+        str.print(nameScalar_C());
 		str.print(", ");
 		str.print(nameArray_C());
 		str.print(")\n\n");
         
         // External type
-        if (type().externalValid()) {
+        if (externalValid()) {
             printStruct_C(p, str, indent, true);
         }
         str.print("\n");
     }
     
-    public void FRecordDecl.printStruct_C(CodePrinter p, CodeStream str, String indent, boolean ext) {
-        String name = ext ? nameExt_C() : name_C();
+    public void FRecordType.printStruct_C(CodePrinter p, CodeStream str, String indent, boolean ext) {
+        String name = ext ? nameScalarExt_C() : nameScalar_C();
         FFunctionDecl.beginStruct_C(str, indent, name);
         String next = p.indent(indent);
-        for (FVariable fv : getFVariables()) {
-            fv.printInRecord_C(p, str, next, ext);
+        for (FRecordComponentType frct : getComponents()) {
+            str.print(next);
+            str.print(ext ? frct.getFType().nameScalarExt_C() : frct.getFType().type_C());
+            str.print(" ");
+            str.print(frct.getName());
+            str.print(";\n");
         }
-        if (getNumFVariable() == 0) {
+        if (getNumComponent() == 0) {
             // always generate default field so that C struct is not empty
             str.print(next + "char dummy;\n");
         }
         FFunctionDecl.endStruct_C(str, indent);
     }
     
-    public void FVariable.printInRecord_C(CodePrinter p, CodeStream str, String indent, boolean ext) {
-		str.print(indent);
-        str.print(ext ? type().nameScalarExt_C() : type_C());
-		str.print(" ");
-		str.print(nameUnderscore());
-		str.print(";\n");
-	}
-	
-	public void FExternalObjectVariable.printObjectDecl(CodeStream str, String indent) {
-		str.print(indent);
-		str.print(type_C());
-		str.print(" ");
-		str.print(name_C());
-		str.print(";\n");
-	}
-	
 	// Suffixes that are used with variables in JMI: size, var, arr, rec
 	public static final String ASTNode.C_SUFFIX_DEF      = "def";
 	public static final String ASTNode.C_SUFFIX_EXP      = "exp";

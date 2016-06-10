@@ -674,14 +674,16 @@ aspect ContentCheck {
         }
     }
     
-    syn boolean FType.externalValid() = false;
-    eq FPrimitiveType.externalValid()  = !isArray();
-    eq FRecordType.externalValid() {
+    syn boolean FType.externalValid() = externalValid(false);
+    syn boolean FType.externalValid(boolean rec)      = false;
+    eq FExternalObjectType.externalValid(boolean rec) = !rec || !isArray();
+    eq FPrimitiveType.externalValid(boolean rec)      = !rec || !isArray();
+    eq FRecordType.externalValid(boolean rec) {
         if (isArray()) {
             return false;
         }
         for (FRecordComponentType frct : getComponents()) {
-            if (!frct.getFType().externalValid()) {
+            if (!frct.getFType().externalValid(true)) {
                 return false;
             }
         }
