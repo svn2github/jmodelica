@@ -55,6 +55,35 @@ class Test_FMUModelBase2:
         #cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     @testattr(fmi = True)
+    def test_caching(self):
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
+        
+        assert len(negated_alias.cache) == 0 #No starting cache
+        
+        vars_1 = negated_alias.get_model_variables()
+        vars_2 = negated_alias.get_model_variables()
+        assert id(vars_1) == id(vars_2)
+        
+        vars_3 = negated_alias.get_model_variables(filter="*")
+        assert id(vars_1) != id(vars_3)
+        
+        vars_4 = negated_alias.get_model_variables(type=0)
+        assert id(vars_3) != id(vars_4)
+        
+        vars_5 = negated_alias.get_model_time_varying_value_references()
+        vars_7 = negated_alias.get_model_time_varying_value_references()
+        assert id(vars_5) != id(vars_1)
+        assert id(vars_5) == id(vars_7)
+        
+        negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
+        
+        assert len(negated_alias.cache) == 0 #No starting cache
+        
+        vars_6 = negated_alias.get_model_variables()
+        assert id(vars_1) != id(vars_6)
+
+
+    @testattr(fmi = True)
     def test_set_get_negated_real(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         x,y = negated_alias.get("x"), negated_alias.get("y")
