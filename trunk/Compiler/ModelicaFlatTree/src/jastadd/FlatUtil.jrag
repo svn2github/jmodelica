@@ -99,7 +99,7 @@ aspect FlatNames {
     
     syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
         (isAssignable() && isArrayDecl()) ? 
-                prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
+                prefix.copyAndAppend(name(), size().flattenFArraySubscripts()) :
                 prefix.copyAndAppend(name());
     eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
         (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
