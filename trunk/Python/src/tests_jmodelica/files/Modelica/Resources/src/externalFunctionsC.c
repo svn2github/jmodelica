@@ -87,7 +87,7 @@ void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1)
 		out[i] = in[in_d1 - 1 - i];
 }
 
-double fRecord(fRec_t *r)
+void fRecord(fRec_t *r, fRec_t *y)
 {
-    return r->x;
+    y->x = r->x;
 }

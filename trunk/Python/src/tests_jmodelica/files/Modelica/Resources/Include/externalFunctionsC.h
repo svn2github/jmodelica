@@ -18,6 +18,6 @@ typedef struct fRec {
     double x;
 } fRec_t;
 
-double fRecord(fRec_t *r);
+void fRecord(fRec_t *r, fRec_t *y);
 
 #endif

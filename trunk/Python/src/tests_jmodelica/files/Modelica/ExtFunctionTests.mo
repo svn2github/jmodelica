@@ -69,13 +69,28 @@ model ExtFunctionRecord
     end R;
     function fRecord
         input R r;
-        output Real y;
-      external "C" annotation(
+        output R y;
+      external "C" fRecord(r,y) annotation(
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
     end fRecord;
-    Real y = fRecord(R(time));
+    R y = fRecord(R(time));
 end ExtFunctionRecord;
+
+model ExtFunctionRecordCeval
+    record R
+        Real x;
+    end R;
+    function fRecord
+        input R r;
+        output R y;
+      external "C" fRecord(r,y) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+    end fRecord;
+    constant R y1 = fRecord(R(3));
+    R y2 = fRecord(R(3));
+end ExtFunctionRecordCeval;
 
 model ExtFunctionTest3
  Real a(start=10);

@@ -690,6 +690,155 @@ $ECE_free$
 
 ")})));
 end Dgelsx;
+
+model Record
+    record R
+        Real a1;
+        Integer a2;
+        Boolean a3;
+        String a4;
+        E a5;
+        R2 r2;
+    end R;
+    record R2
+        Real x;
+    end R2;
+    
+    type E = enumeration(A,B);
+    function f
+        input R a;
+        output R b;
+        external f(a,b);
+    end f;
+    
+    R r = f(R(1,2,true,"s",E.A, R2(3)));
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+           name="ExternalFunction_CEval_Record",
+            description="Test code gen for external C functions evaluation. Record.",
+            template="
+$ECE_external_includes$
+$ECE_record_definitions$
+$ECE_decl$
+---
+$ECE_setup_decl$
+---
+$ECE_setup_init$
+---
+$ECE_setup_free$
+---
+$ECE_calc_decl$
+---
+$ECE_calc_init$
+---
+$ECE_calc$
+---
+$ECE_calc_free$
+---
+$ECE_free$
+",
+            generatedCode="
+    typedef struct R_1_r_ R_1_r;
+    struct R_1_r_ {
+        jmi_ad_var_t a1;
+        jmi_ad_var_t a2;
+        jmi_ad_var_t a3;
+        jmi_string_t a4;
+        jmi_ad_var_t a5;
+        R2_0_r* r2;
+    };
+    JMI_ARRAY_TYPE(R_1_r, R_1_ra)
+
+    typedef struct R_1_r_ext_ R_1_r_ext;
+    struct R_1_r_ext_ {
+        jmi_ad_var_t a1;
+        jmi_int_t a2;
+        jmi_int_t a3;
+        jmi_string_t a4;
+        jmi_int_t a5;
+        R2_0_r_ext r2;
+    };
+
+    typedef struct R2_0_r_ R2_0_r;
+    struct R2_0_r_ {
+        jmi_ad_var_t x;
+    };
+    JMI_ARRAY_TYPE(R2_0_r, R2_0_ra)
+
+    typedef struct R2_0_r_ext_ R2_0_r_ext;
+    struct R2_0_r_ext_ {
+        jmi_ad_var_t x;
+    };
+
+
+
+---
+
+---
+
+---
+
+---
+        JMI_RECORD_STATIC(R_1_r, a_v)
+        JMI_RECORD_STATIC(R2_0_r, tmp_35)
+        JMI_RECORD_STATIC(R_1_r, b_v)
+        JMI_RECORD_STATIC(R2_0_r, tmp_36)
+        JMI_RECORD_STATIC(R_1_r_ext, tmp_37)
+        JMI_RECORD_STATIC(R_1_r_ext, tmp_38)
+
+---
+        JMCEVAL_parse(Real, a_v->a1);
+        JMCEVAL_parse(Integer, a_v->a2);
+        JMCEVAL_parse(Boolean, a_v->a3);
+        JMCEVAL_parse(String, a_v->a4);
+        JMCEVAL_parse(Enum, a_v->a5);
+        JMCEVAL_parse(Real, a_v->r2->x);
+        JMCEVAL_parse(Real, tmp_35->x);
+        a_v->r2 = tmp_35;
+        JMCEVAL_parse(Real, b_v->a1);
+        JMCEVAL_parse(Integer, b_v->a2);
+        JMCEVAL_parse(Boolean, b_v->a3);
+        JMCEVAL_parse(String, b_v->a4);
+        JMCEVAL_parse(Enum, b_v->a5);
+        JMCEVAL_parse(Real, b_v->r2->x);
+        JMCEVAL_parse(Real, tmp_36->x);
+        b_v->r2 = tmp_36;
+
+---
+            tmp_37->a1 = (double)a_v->a1;
+            tmp_37->a2 = (int)a_v->a2;
+            tmp_37->a3 = (int)a_v->a3;
+            JMI_ASG(STR, tmp_37->a4, a_v->a4)
+            tmp_37->a5 = (int)a_v->a5;
+            tmp_37->r2.x = (double)a_v->r2->x;
+            tmp_38->a1 = (double)b_v->a1;
+            tmp_38->a2 = (int)b_v->a2;
+            tmp_38->a3 = (int)b_v->a3;
+            JMI_ASG(STR, tmp_38->a4, b_v->a4)
+            tmp_38->a5 = (int)b_v->a5;
+            tmp_38->r2.x = (double)b_v->r2->x;
+            f(tmp_37, tmp_38);
+            b_v->a1 = tmp_38->a1;
+            b_v->a2 = tmp_38->a2;
+            b_v->a3 = tmp_38->a3;
+            JMI_ASG(STR, tmp_38->a4, b_v->a4)
+            b_v->a5 = tmp_38->a5;
+            b_v->r2->x = tmp_38->r2.x;
+            JMCEVAL_check(\"DONE\");
+            JMCEVAL_print(Real, b_v->a1);
+            JMCEVAL_print(Integer, b_v->a2);
+            JMCEVAL_print(Boolean, b_v->a3);
+            JMCEVAL_print(String, b_v->a4);
+            JMCEVAL_print(Enum, b_v->a5);
+            JMCEVAL_print(Real, b_v->r2->x);
+
+
+---
+
+---
+
+")})));
+end Record;
 end CEval;
 end ExternalFunction;
 

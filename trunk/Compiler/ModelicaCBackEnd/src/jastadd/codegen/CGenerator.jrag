@@ -1455,7 +1455,7 @@ public class CGenerator extends GenericGenerator {
         @Override
         public void generate(CodePrinter p, CodeStream str, String indent, FExternalStmt ext,
                 CodeGenContext cgc, Map<String,String> tempMap) {
-            for (FType rec : ext.usedRecords()) {
+            for (FType rec : ext.usedRecords().values()) {
                 p.print(rec, str, indent);
             }
         }

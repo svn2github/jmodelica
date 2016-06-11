@@ -121,12 +121,13 @@ aspect Serialize {
         public void print(FType type) {
             
         }
+        protected void printScalar(FType type) {
+            
+        }
         protected void printComps(FType type) {
             if (type.isExternalObject()) {
                 printComps((FExternalObjectType) type);
                 printExt((FExternalObjectType) type);
-            } else {
-                super.printComps(type);
             }
         }
         protected void printExt(FExternalObjectType type) {
@@ -206,6 +207,13 @@ aspect Serialize {
                 isArray() ? "Array" : "",
                 isEnum() ? "Enum" : name(),
                 name);
+    }
+    
+    public void FRecordType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
+        name = name + "->";
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().genSerialize_C(str, indent, name + frct.getName(), parse);
+        }
     }
     
     /**
@@ -290,14 +298,22 @@ aspect Serialize {
     /**
      * Declarations of records used in this function
      */
-    syn Collection<FType> FExternalStmt.usedRecords() {
-        Set<FType> res = new LinkedHashSet<FType>();
+    syn Map<String,FType> FExternalStmt.usedRecords() {
+        Map<String,FType> res = new LinkedHashMap<String,FType>();
         for (CommonVariableDecl cvd : varsToSerialize()) {
-            if (cvd.type().isRecord()) {
-                res.add(cvd.type());
-            }
+            cvd.type().usedRecords(res);
         }
         return res;
+    }
+    
+    public void FType.usedRecords(Map<String,FType> res) {}
+    public void FRecordType.usedRecords(Map<String,FType> res) {
+        if (!res.containsKey(name())) {
+            res.put(name(), this);
+        }
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().usedRecords(res);
+        }
     }
     
     /*

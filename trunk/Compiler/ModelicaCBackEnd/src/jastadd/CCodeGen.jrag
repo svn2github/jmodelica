@@ -1026,10 +1026,7 @@ aspect CCodeGen {
 	 */
 	syn boolean FFunctionDecl.generateExpFunction() = hasOutputs() && !isComposite();
 	
-	syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + 
-										       recordIndex() + "_" + C_SUFFIX_RECORD;
-	syn String FRecordDecl.nameArray_C() = name_C() + C_SUFFIX_ARRAY;
-    syn String FRecordDecl.nameExt_C() = name_C() + "_ext";
+    syn String FRecordDecl.name_C()      = getFQName().lastActualTypePartName() + "_" + recordIndex();
 	
     public void FRecordDecl.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         p.print(type(), str, indent);
@@ -1075,7 +1072,8 @@ aspect CCodeGen {
 	// Suffixes that are used with variables in JMI: size, var, arr, rec
 	public static final String ASTNode.C_SUFFIX_DEF      = "def";
 	public static final String ASTNode.C_SUFFIX_EXP      = "exp";
-	public static final String ASTNode.C_SUFFIX_RECORD   = "r";
+	public static final String ASTNode.C_SUFFIX_REC      = "r";
+	public static final String ASTNode.C_SUFFIX_REC_EXT  = "r_ext";
 	public static final String ASTNode.C_SUFFIX_ENUM     = "e";
 	public static final String ASTNode.C_SUFFIX_INDEX    = "i";
 	public static final String ASTNode.C_SUFFIX_VARIABLE = "v";
@@ -1199,18 +1197,21 @@ aspect CCodeGen {
     syn String FType.nameArray_C(boolean external)  = external ? nameArrayExt_C() : nameArray_C();
     
     syn String FType.nameScalar_C()       = "jmi_ad_var_t";
-    eq FRecordType.nameScalar_C()         = getFClass() != null ? myFRecordDecl().name_C() : ASTNode.underScore(getName());
+    eq FRecordType.nameScalar_C()         = (getFClass() != null ? myFRecordDecl().name_C() : 
+        ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC;
     eq FStringType.nameScalar_C()         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C() = "jmi_extobj_t";
     eq FFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";
     
     syn String FType.nameArray_C()        = "jmi_array_t";
-    eq FRecordType.nameArray_C()          = myFRecordDecl().nameArray_C();
+    eq FRecordType.nameArray_C()          = (getFClass() != null ? myFRecordDecl().name_C() :
+        ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC + C_SUFFIX_ARRAY;
     eq FStringType.nameArray_C()          = "jmi_string_array_t";
     eq FExternalObjectType.nameArray_C()  = "jmi_extobj_array_t";
     
     syn String FType.nameScalarExt_C()    = nameScalar_C();
-    eq FRecordType.nameScalarExt_C()      = myFRecordDecl().nameExt_C();
+    eq FRecordType.nameScalarExt_C()      = (getFClass() != null ? myFRecordDecl().name_C() :
+        ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC_EXT;
     eq FIntegerType.nameScalarExt_C()     = "jmi_int_t";
     eq FBooleanType.nameScalarExt_C()     = "jmi_int_t";
     eq FEnumType.nameScalarExt_C()        = "jmi_int_t";
@@ -3342,8 +3343,8 @@ aspect CCodeGen {
 	}
 	
 	public void FIdUseExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
-		if (myCommonVarDecl().isOutput() && !isArray())
-			str.print("&");
+        if (myCommonVarDecl().isOutput() && !isComposite())
+            str.print("&");
         if (useTempVar) {
             str.print(tempName_C());
         } else {

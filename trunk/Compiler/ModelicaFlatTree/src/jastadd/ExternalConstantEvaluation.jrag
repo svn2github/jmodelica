@@ -629,7 +629,7 @@ aspect ExternalProcessCommunication {
          */
         public void put(CValue val, FType type) throws IOException {
 //            ModelicaCompiler.log.debug("ProcessCommunicator WRITE: " + val.toString() + " of type: "+type.toString());
-            val.serialize(out, type);
+            val.serialize(out);
             out.flush();
         }
         
@@ -785,45 +785,50 @@ aspect ExternalProcessCommunication {
     /**
      * Print this constant value to <code>buff</code>
      */
-    public void CValue.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValue.serialize(BufferedWriter buff) throws IOException {
         throw new IOException("Unsupported type to serialize '" + getClass().getSimpleName() + "'");
     }
     
-    public void CValueUnknown.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueUnknown.serialize(BufferedWriter buff) throws IOException {
         throw new IOException("Uninitialized value when expecting initialized");
     }
-    public void CValueArray.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueArray.serialize(BufferedWriter buff) throws IOException {
         for (int s : size().size) {
             buff.write("" + s + "\n");
         }
         for (Index i : indices()) {
-            getCell(i).serialize(buff, type.scalarType());
+            getCell(i).serialize(buff);
         }
     }
-    public void CValueReal.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueRecord.serialize(BufferedWriter buff) throws IOException {
+        for (CValue value : values) {
+            value.serialize(buff);
+        }
+    }
+    public void CValueReal.serialize(BufferedWriter buff) throws IOException {
         buff.write(Double.toString(realValue()));
         buff.write("\n");
     }
-    public void CValueInteger.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueInteger.serialize(BufferedWriter buff) throws IOException {
         buff.write(Integer.toString(intValue()));
         buff.write("\n");
     }
-    public void CValueBoolean.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueBoolean.serialize(BufferedWriter buff) throws IOException {
         buff.write(booleanValue() ? "1\n" : "0\n");
     }
-    public void CValueString.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueString.serialize(BufferedWriter buff) throws IOException {
         String s = stringValue();
         buff.write("" + s.length() + " ");
         buff.write(s);
         buff.write("\n");
     }
-    public void CValueEnum.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueEnum.serialize(BufferedWriter buff) throws IOException {
         buff.write(Integer.toString(intValue()));
         buff.write("\n");
     }
-    public void CValueExternalObject.serialize(BufferedWriter buff, FType type) throws IOException {
+    public void CValueExternalObject.serialize(BufferedWriter buff) throws IOException {
         for (CValue v : values) {
-            v.serialize(buff, type);
+            v.serialize(buff);
         }
     }
     
@@ -844,6 +849,13 @@ aspect ExternalProcessCommunication {
     }
     public CValue FType.deserializeScalar(ProcessCommunicator com) throws IOException {
         throw new IOException("Unsupported type to deserialize '" + getClass().getSimpleName() + "'");
+    }
+    public CValue FRecordType.deserializeScalar(ProcessCommunicator com) throws IOException {
+        CValueRecord res = new CValueRecord(this);
+        for (FRecordComponentType frct : getComponents()) {
+            res.setMember(frct.getName(), frct.getFType().deserialize(com));
+        }
+        return res;
     }
     public CValue FRealType.deserializeScalar(ProcessCommunicator com) throws IOException {
         return new CValueReal(com.deserializeReal());

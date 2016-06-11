@@ -145,7 +145,23 @@ class TestExternalRecord(SimulationTest):
 
     @testattr(stddist = True)
     def test_result(self):
-        self.assert_end_value('y', 0.1)
+        self.assert_end_value('y.x', 0.1)
+
+class TestExternalRecordCeval(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
+            'ExtFunctionTests.ExtFunctionRecordCeval')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_result(self):
+        self.assert_end_value('y1.x', 3)
+        self.assert_end_value('y2.x', 3)
 
 class TestExternalShared2:
     
