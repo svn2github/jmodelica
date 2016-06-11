@@ -136,8 +136,6 @@ CASADI_HOME = $(abs_top_srcdir)/ThirdParty/CasADi/CasADi
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CMAKE_PYTHON_INCLUDE = @CMAKE_PYTHON_INCLUDE@
-CMAKE_PYTHON_LIB = @CMAKE_PYTHON_LIB@
 CP = @CP@
 CPP = @CPP@
 CPPAD_HOME = @CPPAD_HOME@
@@ -198,7 +196,6 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_URL = @PACKAGE_URL@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PYTHON_HOME = @PYTHON_HOME@
 RANLIB = @RANLIB@
 REQUIRE_BEAVER_PATH = @REQUIRE_BEAVER_PATH@
 REQUIRE_COMPILER_JARS = @REQUIRE_COMPILER_JARS@
@@ -309,6 +306,10 @@ MC_COMPILERS_DIR = $(MC_BUILD)/JModelica.org
 MC_LIB = $(DESTDIR)$(prefix)/lib/casadi_interface
 CASADI_BUILD_DIR = $(abs_builddir)/casadi_build
 SWIGCHECK_BUILD_DIR = $(abs_builddir)/swig_check
+
+# Hook for using a specific Python installation
+PYTHON_LIB = 
+PYTHON_INCLUDE = 
 @NUMPY_NO_MSVCR_FALSE@NUMPY_NO_MSVCR_ARG = 
 @NUMPY_NO_MSVCR_TRUE@NUMPY_NO_MSVCR_ARG = --no-msvcr="true"
 
@@ -835,11 +836,13 @@ uninstall-am:
 
 casadi:
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile  "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
+	make -f Makefile "CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB)" "CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)" \
+	    "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
 
 install_casadi: casadi
 	cd $(abs_builddir)/ThirdParty/CasADi; \
-	make -f Makefile install "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
+	make -f Makefile install "CMAKE_PYTHON_LIBRARY=$(PYTHON_LIB)" "CMAKE_PYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)" \
+	    "SWIGCHECK_BUILD_DIR=$(SWIGCHECK_BUILD_DIR)" "CASADI_BUILD_DIR=$(CASADI_BUILD_DIR)" "IPOPT_HOME=$(IPOPT_HOME)"
 	mkdir -p $(DESTDIR)$(prefix)/Python/
 	cp -r $(abs_builddir)/casadi_install/casadi $(DESTDIR)$(prefix)/Python/
 	cp $(abs_builddir)/casadi_build/swig/casadi_core.py $(DESTDIR)$(prefix)/Python/casadi
@@ -896,19 +899,22 @@ $(OC_SRC)/bin/separateProcess.jar:  mc_optimica
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
 modelicacasadi_wrapper: $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi # $(MC_LIB)
+	if [ "$(PYTHON_LIB)" ] && [ "$(PYTHON_INCLUDE)" ]; then \
+	  CMAKE_EXTRA_ARGS="-DPYTHON_LIBRARY=$(PYTHON_LIB) -DPYTHON_INCLUDE_DIR=$(PYTHON_INCLUDE)"; \
+	else \
+	  CMAKE_EXTRA_ARGS=""; \
+	fi; \
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
 	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" \
 	    -DMC_BUILD="$(MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
-	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
+	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" $${CMAKE_EXTRA_ARGS} ;; \
 	*) \
 	cmake $(MC_INTERFACE) \
 	    -DMC_BUILD="$(MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
-	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
+	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" $${CMAKE_EXTRA_ARGS} ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
 

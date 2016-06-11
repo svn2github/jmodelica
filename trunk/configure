@@ -627,9 +627,6 @@ REQUIRE_COMPILER_JARS
 REQUIRE_CPPAD_HOME
 REQUIRE_SUNDIALS_HOME
 REQUIRE_IPOPT_HOME
-CMAKE_PYTHON_INCLUDE
-CMAKE_PYTHON_LIB
-PYTHON_HOME
 HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
@@ -825,8 +822,7 @@ FFLAGS
 CC
 CFLAGS
 CPP
-CXXCPP
-PYTHON_HOME'
+CXXCPP'
 
 
 # Initialize some variables set by options.
@@ -1486,7 +1482,6 @@ Some influential environment variables:
   CFLAGS      C compiler flags
   CPP         C preprocessor
   CXXCPP      C++ preprocessor
-  PYTHON_HOME Python installation to use
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -19494,40 +19489,6 @@ as_fn_error $? "Cannot find Apache Ant - please install in order to build compil
 See \`config.log' for more details" "$LINENO" 5 ; }
 fi
 
-# Detect if Python installation is specified with environment var
-
-if test "${PYTHON_HOME}"; then :
-
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME}" >&5
-$as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME}/libs/libpython27.a"
-          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME}/include"
-
-else
-
-          if test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"; then :
-
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&5
-$as_echo "Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&6; }
-                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
-                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
-
-else
-
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
-$as_echo "Python installation not specified." >&6; }
-                CMAKE_PYTHON_LIB=
-                CMAKE_PYTHON_INCLUDE=
-
-fi
-
-fi
-
-
-
-
-
-PYTHON_HOME=$PYTHON_HOME
 
 # Checks for header files.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
