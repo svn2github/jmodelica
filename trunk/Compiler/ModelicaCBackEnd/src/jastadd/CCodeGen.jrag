@@ -436,6 +436,12 @@ aspect CCodeGen {
         }
     }
     
+    public abstract void FAssignableExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent);
+    
+    public void FDecomposeExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
+        p.print(this, str, indent);
+    }
+    
     public void FIdUseExp.genAssignedRef_C(CodePrinter p, CodeStream str, String indent) {
         p.print(getFIdUse(), str, "");
     }
@@ -1830,7 +1836,7 @@ aspect CCodeGen {
     
     public void FFunctionCallLeft.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp()) {
-            type().printDecl_C(p, str, indent, name_C(), getFExp());
+            type().printDecl_C(p, str, indent, getFExp().tempName_C(), getFExp());
         }
     }
     
@@ -1846,10 +1852,11 @@ aspect CCodeGen {
         }
     }
     
-    syn boolean FFunctionCallLeft.replaceWithTemp() = hasFExp() && getFExp().replaceWithTemp(true);
+    syn boolean FFunctionCallLeft.replaceWithTemp()  = hasFExp() && getFExp().replaceWithTemp(true);
     syn boolean FExp.replaceWithTemp(boolean output) = isComposite() || (output && type().isString());
-    eq FLitExp.replaceWithTemp(boolean output)   = output;
-    eq FIdUseExp.replaceWithTemp(boolean output) = isSlice() || (output && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FLitExp.replaceWithTemp(boolean output)       = output;
+    eq FIdUseExp.replaceWithTemp(boolean output)     = isSlice() || (output && (!inFunction() || alsoInRHS() || type().isString()));
+    eq FDecomposeExp.replaceWithTemp(boolean output) = false;
     
     syn boolean FIdUseExp.alsoInRHS() {
         FAbstractFunctionCall call = myFunctionCall();
@@ -1862,13 +1869,6 @@ aspect CCodeGen {
         return false;
     }
     
-	public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
-        if (replaceWithTemp(false)) {
-			type().printDecl_C(p, str, indent, tempName_C(), this);
-        }
-	}
-
-	
 	public void FExternalStmt.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
 		FExternalLanguage lang = getFExternalLanguage();
 		lang.genVarDecls_C(p, str, indent, this);
@@ -1886,24 +1886,6 @@ aspect CCodeGen {
         }
         if (stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
             stmt.getReturnVar().type().printDeclBase_C(p, str, indent, stmt.getReturnVar().tempName_C(), stmt.getReturnVar(), true);
-        }
-    }
-    
-    public void FType.printDeclBase_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
-        if (isArray()) {
-            if (size().isUnknown()) {
-                printDecl_C(p, str, indent, name, src, external);
-            } else {
-                String type = "STAT" + (isReal() ? "REAL" : "");
-                str.format("%sJMI_ARR(%s, %s, %s, %s, ", indent, type,
-                        nameScalar_C(external), nameArray_C(external), name);
-                size().printNumElements_C(p, str, indent, src);
-                str.print(", ");
-                str.print(ndims());
-                str.println(")");
-            }
-        } else {
-            printScalarDecl_C(str, indent, external, name);
         }
     }
     
@@ -3042,11 +3024,11 @@ aspect CCodeGen {
         // jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
         
         p.printPreSteps(getX(), str, indent);
-        getX().genTempInput_C(p, str, indent);
+        getX().genTempInputPre_C(p, str, indent);
         p.printPreSteps(getInitialPoints(), str, indent);
-        getInitialPoints().genTempInput_C(p, str, indent);
+        getInitialPoints().genTempInputPre_C(p, str, indent);
         p.printPreSteps(getInitialValues(), str, indent);
-        getInitialValues().genTempInput_C(p, str, indent);
+        getInitialValues().genTempInputPre_C(p, str, indent);
         
         str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
         str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
@@ -3153,42 +3135,37 @@ aspect CCodeGen {
         }
     }
     
-    public void FSubscriptedExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+    public void FDecomposeExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         super.genVarDecls_C(p, str, indent);
-        getFExp().type().printDecl_C(p, str, indent, getFExp().tempName_C(), this);
+        getFExp().genTempInputDecl_C(p, str, indent);
     }
     
-    public void FSubscriptedExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
+    public void FDecomposeExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
-        getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), this);
-        genWriteVars_C(p, str, indent, false);
+        getFExp().genTempInputPre_C(p, str, indent);
     }
     
-    public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
+    public void FDecomposeExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempFree_C(p, str, indent);
         if (isAssignedTo()) {
-            genWriteVars_C(p, str, indent, true);
+            getFExp().genTempInputPost_C(p, str, indent);
         }
     }
     
-    public void FSubscriptedExp.genWriteVars_C(CodePrinter p, CodeStream str, String indent, boolean back) {
-        String name = getFExp().tempName_C();
-        String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
-        String pre = "jmi_array_" + type + "_" + getFExp().ndims() + "(" + name + ", ";
-        Array arr = getFExp().getArray();
-        for (Index i : getFExp().indices()) {
-            FExp e = arr.get(i);
-            String cellName = pre + i.toUnclosedString() + ")";
-            if (back) {
-                FStatement.printAssignStmt_C(str, indent, e.prettyPrint_C(""), cellName);
-            } else {
-                FStatement.printAssignStmt_C(str, indent, cellName, e.prettyPrint_C(""));
-            }
-        }
-    }
+    public abstract void FDecomposeExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent);
     
     public void FSubscriptedExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.print(getFArraySubscripts().genFunctionArrayUse_C(p, getFExp().tempName_C(), C_ARRAY_VALUE));
+        str.format("jmi_array_%s_%d(", type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_VALUE, getFExp().ndims());
+        getFExp().genArgument_C(p, str, indent);
+        str.print(", ");
+        getFArraySubscripts().getFSubscripts().prettyPrintWithSep(p, str, "", ", ");
+        str.print(")");
+    }
+    
+    public void FComponentExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        getFExp().genArgument_C(p, str, indent);
+        str.print("->");
+        str.print(getName());
     }
 	
 	public void FExternalStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {		
@@ -3442,8 +3419,9 @@ aspect CCodeGen {
 	
 	public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
 		p.printPreSteps(getArgs(), str, indent);
-		for (FExp arg : getArgs()) 
-			arg.genTempInput_C(p, str, indent);
+        for (FExp arg : getArgs()) {
+            arg.genTempInputPre_C(p, str, indent);
+        }
         if (isStringExp()) {
             str.print(indent);
             str.print(tempName_C());
@@ -3521,7 +3499,22 @@ aspect CCodeGen {
             public String arrayAccessConst() {
                 return ASTNode.C_ARRAY_REFERENCE;
             }
-
+            
+            @Override
+            public CodePrinter printer() {
+                return CodePrinter.this;
+            }
+            
+            @Override
+            public void startComponent(CodeStream str, String indent, FExp exp, String name) {
+                if (exp instanceof FFunctionCall) {
+                    exp.type().printInit_C(printer(), str, indent, tempName(exp), exp);
+                } else {
+                    exp.type().printInitBase_C(printer(), str, indent, name, tempName(exp), exp);
+                }
+                printInitExp(exp, str, indent);
+            }
+            
             @Override
             public void printCell(CodeStream str, String indent, String name, FExp exp) {
                 exp.genTempInputCellAssigns_C(CodePrinter.this, str, indent, name);
@@ -3529,6 +3522,36 @@ aspect CCodeGen {
         }
 
         public abstract void printTempInputAssigns(CodeStream str, String indent, FExp exp);
+        
+        protected final FuncCallDeclPrinter funcCallDeclPrinter = new FuncCallDeclPrinter();
+        
+        public class FuncCallDeclPrinter extends CodeFuncCallInOutArgPrinter {
+            @Override
+            public String arrayAccessConst() {
+                return ASTNode.C_ARRAY_REFERENCE;
+            }
+            
+            @Override
+            public CodePrinter printer() {
+                return CodePrinter.this;
+            }
+            
+            @Override
+            public void startComponent(CodeStream str, String indent, FExp exp, String name) {
+                if (exp instanceof FFunctionCall) {
+                    exp.type().printDecl_C(printer(), str, indent, tempName(exp), exp);
+                } else {
+                    exp.type().printDeclBase_C(CodePrinter.this, str, indent, tempName(exp), exp, false);
+                }
+            }
+            
+            @Override
+            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+                
+            }
+        }
+
+        public abstract void printTempInputDecls(CodeStream str, String indent, FExp exp);
     }
 
     public class CPrettyPrinter {
@@ -3537,28 +3560,90 @@ aspect CCodeGen {
         public void printTempInputAssigns(CodeStream str, String indent, FExp exp) {
             funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
         }
-    }
-
-    public void FExp.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
-        if (replaceWithTemp(false)) {
-            type().print(p.createInitPrinter(str), indent, tempName_C(), this, false);
-            genTempInputAssigns_C(p, str, indent);
+        
+        @Override
+        public void printTempInputDecls(CodeStream str, String indent, FExp exp) {
+            funcCallDeclPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
         }
     }
-
-    public void FExp.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        p.printTempInputAssigns(str, indent, this);
-    }
-
-    public void FFunctionCall.genTempInputAssigns_C(CodePrinter p, CodeStream str, String indent) {
-        if (isComposite()) {
-            prettyPrintCall_C(p, str, indent);
+    
+    public void FType.printDeclBase_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
+        if (isArray()) {
+            if (size().isUnknown()) {
+                printDecl_C(p, str, indent, name, src, external);
+            } else {
+                String type = "STAT" + (isReal() ? "REAL" : "");
+                str.format("%sJMI_ARR(%s, %s, %s, %s, ", indent, type,
+                        nameScalar_C(external), nameArray_C(external), name);
+                size().printNumElements_C(p, str, indent, src);
+                str.print(", ");
+                str.print(ndims());
+                str.println(")");
+            }
         } else {
-            super.genTempInputAssigns_C(p, str, indent);
+            printScalarDecl_C(str, indent, external, name);
         }
     }
-
-    public void FPartialFunctionCall.genTempInput_C(CodePrinter p, CodeStream str, String indent) {
+    
+    public void FType.printInitBase_C(CodePrinter p, CodeStream str, String indent, String wbName, String name, FExp src) {
+        if (isArray()) {
+            if (size().isUnknown()) {
+                printInit_C(p, str, indent, name, src);
+            } else {
+                String type = "STAT" + (isReal() ? "REAL" : "");
+                str.format("%sJMI_ARRAY_INIT_%d(%s, %s, %s, %s, ", indent, ndims(), type,
+                        nameScalar_C(false), nameArray_C(false), name);
+                size().printNumElements_C(p, str, indent, src);
+                str.print(", ");
+                str.print(ndims());
+                str.print(", ");
+                size().printDimensions_C(p, str, indent, src);
+                str.print(")\n");
+            }
+        }
+        if (!wbName.equals(name)) {
+            FStatement.printAssignStmt_C(str, indent, wbName, name);
+        }
+    }
+    
+    public void FExp.printInitExp_C(CodePrinter p, CodeStream str, String indent) {}
+    public void FFunctionCall.printInitExp_C(CodePrinter p, CodeStream str, String indent) {
+        if (isComposite()) {
+            p.print(this, str, indent);
+        }
+    }
+    
+    public void FType.printWriteback_C(CodePrinter p, CodeStream str, String indent, String wbName, String name, FExp src) {
+        if (isString() && size().isUnknown()) {
+            str.format("%sJMI_ASG(%s, ", indent, macroType());
+            ASTNode.printer_C.print(src, str, indent);
+            str.formatln(", %s)", name);
+        }
+    }
+    
+    inh boolean FExp.inFArray();
+    eq BaseNode.getChild().inFArray() = false;
+    eq FArray.getChild().inFArray()   = true;
+    
+    public void FExp.genTempInputDecl_C(CodePrinter p, CodeStream str, String indent) {
+        if (replaceWithTemp(false)) {
+            p.printTempInputDecls(str, indent, this);
+        }
+    }
+    
+    public void FExp.genTempInputPre_C(CodePrinter p, CodeStream str, String indent) {
+        if (replaceWithTemp(false)) {
+            p.printTempInputAssigns(str, indent, this);
+        }
+    }
+    
+    public void FExp.genTempInputPost_C(CodePrinter p, CodeStream str, String indent) {
+        if (replaceWithTemp(false)) {
+            p.printWriteBackAssignment(str, indent, this, null);
+        }
+    }
+    
+    public void FPartialFunctionCall.genTempInputPre_C(CodePrinter p, CodeStream str, String indent) {
         if (myFCallable().isPartialFunction()) {
             p.printTempInputAssigns(str, indent, this);
             str.formatln("%sJMI_DYNAMIC_ADD(%s)", indent, tempName_C());
@@ -4947,21 +5032,14 @@ aspect CCodeGen {
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
     
-    
-    syn String FFunctionCallLeft.name_C() {
-        if (replaceWithTemp()) {
-            return getFExp().tempName_C();
-        } else {
-            return ((FIdUseExp) getFExp()).getFIdUse().name_C();
-        }
-    }
-    
+    syn String FExp.nameOut_C() = tempName_C();
+    eq FIdUseExp.nameOut_C() = replaceWithTemp(true) ? tempName_C() : getFIdUse().name_C();
     
 	public void FFunctionCallLeft.genArgument_C(CodeStream str) {
 		if (hasFExp()) {
 			if (!getFExp().isComposite())
 				str.print("&");
-			str.print(name_C());
+            str.print(getFExp().nameOut_C());
 		} else {
 			str.print("NULL");
 		}
@@ -4978,8 +5056,13 @@ aspect CCodeGen {
             public String arrayAccessConst() {
                 return ASTNode.C_ARRAY_VALUE;
             }
+            
+            @Override
+            public CodePrinter printer() {
+                return CodePrinter.this;
+            }
 
-            public abstract void printUse(CodeStream str, String indent, FIdUseExp use, String name);
+            public abstract void printUse(CodeStream str, String indent, FAssignableExp use, String name);
             public void printNoExp(CodeStream str, String indent) {}
         }
     }
@@ -4987,23 +5070,23 @@ aspect CCodeGen {
     public void FExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
         throw new UnsupportedOperationException("No implementation for FExp.genFuncCallOutArg_C for type '" + getClass().getName() + "'. Printer is " + p.getClass().getName());
     }
-
+    
     @Override
     public void FNoExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
         p.printNoExp(str, indent);
     }
-
+    
     @Override
-    public void FIdUseExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+    public void FAssignableExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
         p.printUse(str, indent, this, name);
     }
-
+    
     public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
-            printer_C.printWriteBackAssignment(str, indent, this, forVariables);
+            printer_C.printWriteBackAssignment(str, indent, getFExp(), forVariables);
         }
     }
-
+    
     public abstract class CodePrinter {
         public class WriteBackResidualPrinter extends FuncCallOutArgPrinter {
             protected final Enumerator enumerator;
@@ -5017,30 +5100,39 @@ aspect CCodeGen {
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
                 use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
             }
         }
 
-        public abstract void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
+        public abstract void printWriteBackResidual(CodeStream str, String indent, FExp exp,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter);
     }
     
     public class CPrettyPrinter {
         @Override
-        public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
+        public void printWriteBackResidual(CodeStream str, String indent, FExp exp,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
             WriteBackResidualPrinter p = new WriteBackResidualPrinter(enumerator, forIndices, indexCounter);
-            p.print(str, indent, left.getFExp().type(), left.name_C(), left.getFExp());
+            p.print(str, indent, exp.type(), exp.nameOut_C(), exp);
         }
     }
 
     public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         if (hasFExp()) 
-            printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
+            printer_C.printWriteBackResidual(str, indent, getFExp(), enumerator, forIndices, indexCounter);
     }
 
-    public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public abstract void FAssignableExp.genWriteBackResidual_C(CodeStream str, String indent, String name,
+            Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter);
+    
+    public void FDecomposeExp.genWriteBackResidual_C(CodeStream str, String indent, String name,
+            Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+        throw new UnsupportedOperationException("genWriteBackResidual_C not implemented for FDecomposeExp");
+    }
+    
+    public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name,
+            Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices == null || forIndices.contains(index)) {
             if (!myFV().isReal()) 
@@ -5057,6 +5149,9 @@ aspect CCodeGen {
             str.print(");\n");
         }
     }
+    
+    syn boolean FAssignableExp.includeInWriteBack(Collection<FVariable> forVariables) = true;
+    eq FIdUseExp.includeInWriteBack(Collection<FVariable> forVariables) = forVariables == null || forVariables.contains(myFV());
 
     public abstract class CodePrinter {
         public class WriteBackAssignmentPrinter extends FuncCallOutArgPrinter {
@@ -5065,9 +5160,14 @@ aspect CCodeGen {
             protected WriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
                 this.forVariables = forVariables;
             }
+            
+            @Override
+            public void startComponent(CodeStream str, String indent, FExp exp, String name) {
+                exp.type().printWriteback_C(CodePrinter.this, str, indent, name, tempName(exp), exp);
+            }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
                 use.genWriteBackAssignment_C(str, indent, name, forVariables);
             }
         }
@@ -5078,8 +5178,8 @@ aspect CCodeGen {
          */
         public class ArrayWriteBackAssignmentPrinter extends WriteBackAssignmentPrinter {
             
-            FIdUseExp firstUse; // First use in component
-            FIdUseExp prevUse;  // Last consecutive use in component;
+            FAssignableExp firstUse; // First use in component
+            FAssignableExp prevUse;  // Last consecutive use in component;
             String firstName;   // Name to read from into firstUse
             int n;              // Number of consecutive elements in component
             
@@ -5088,8 +5188,8 @@ aspect CCodeGen {
             }
             
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
-                if (forVariables != null && !forVariables.contains(use.myFV())) {
+            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
+                if (!use.includeInWriteBack(forVariables)) {
                     /* use not included in writeback */
                     return;
                 }
@@ -5118,7 +5218,7 @@ aspect CCodeGen {
                 endComponent(str, indent);
             };
             
-            public void init(FIdUseExp use, String name) {
+            public void init(FAssignableExp use, String name) {
                 firstUse = use;
                 prevUse = use;
                 firstName = name;
@@ -5139,24 +5239,27 @@ aspect CCodeGen {
             }
         }
         
-        public abstract void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
+        public abstract void printWriteBackAssignment(CodeStream str, String indent, FExp exp,
                 Collection<FVariable> forVariables);
+        
     }
     public class CPrettyPrinter {
         @Override
-        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left, Collection<FVariable> forVariables) {
-            FExp e = left.getFExp();
-            FType t = e.type();
-            WriteBackAssignmentPrinter p = t.isComposite() && !left.inFunction() ? 
+        public void printWriteBackAssignment(CodeStream str, String indent, FExp exp,
+                Collection<FVariable> forVariables) {
+            FType t = exp.type();
+            WriteBackAssignmentPrinter p = t.isComposite() && !exp.inFunction() ? 
                     new ArrayWriteBackAssignmentPrinter(forVariables) :
                     new WriteBackAssignmentPrinter(forVariables);
-            p.print(str, indent, t, left.name_C(), e);
+            p.print(str, indent, t, exp.nameOut_C(), exp);
         }
+        
     }
-
-    public void FIdUseExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        if (forVariables != null && !forVariables.contains(myFV()))
+    
+    public void FAssignableExp.genWriteBackAssignment_C(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+        if (!includeInWriteBack(forVariables)) {
             return; // This variable is not in the set of variables to generate code for.
+        }
         if (type().isString()) {
             str.format("%sJMI_ASG(STR, ", indent);
             genAssignedRef_C(ASTNode.printer_C, str, indent);
@@ -5170,15 +5273,23 @@ aspect CCodeGen {
         str.print(" = (");
         str.print(name);
         str.print(")");
+        genScaling_C(str);
+        str.print(";\n");
+    }
+    
+    public void FAssignableExp.genScaling_C(CodeStream str) {
+        
+    }
+    
+    public void FIdUseExp.genScaling_C(CodeStream str) {
         if (myFV().isReal() && myOptions().getBooleanOption("enable_variable_scaling") && !inFunction()) {
             str.print("/sf(");
             str.print(myFV().valueReference());
             str.print(")");
         }
-        str.print(";\n");
     }
     
-    public void FIdUseExp.genArrayWriteBackAssignment_C(CodeStream str, String indent, String name, int n) {
+    public void FAssignableExp.genArrayWriteBackAssignment_C(CodeStream str, String indent, String name, int n) {
         str.print(indent);
         str.print("memcpy(&");
         genAssignedRef_C(ASTNode.printer_C, str, indent);
@@ -5777,23 +5888,30 @@ aspect CCodeGen {
         public void print(CodeStream str, String indent, FType type, String name, FExp exp) {
             type.genFuncCallInOutArg_C(this, str, indent, name, exp);
         }
-        public abstract void printCell(CodeStream str, String indent, String name, FExp exp);
         public abstract String arrayAccessConst();
+        public abstract CodePrinter printer();
         
-        /**
-         * Notify printer that a component has ended.
-         */
+        public String tempName(FExp exp) {
+            return exp.tempName_C();
+        }
+        
+        public void printInitExp(FExp exp, CodeStream str, String indent) {
+            exp.printInitExp_C(printer(), str, indent);
+        }
+        
+        public abstract void printCell(CodeStream str, String indent, String name, FExp exp);
+        
+        public void startComponent(CodeStream str, String indent, FExp exp, String name) {}
         public void endComponent(CodeStream str, String indent) {}
     }
     
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
+        if (isComposite() && !exp.inFArray()) {
+            p.startComponent(str, indent, exp, name);
+        }
         if (isArray()) {
-            if (size().isUnknown()) {
-                // Works for now!
-                str.format("%sJMI_ASG(%s, ", indent, macroType());
-                ASTNode.printer_C.print(exp, str, indent);
-                str.formatln(", %s)", name);
-            } else {
+            if (!(exp instanceof FFunctionCall)) {
+                // FFunctionCalls handled in startComponent()
                 String type = isRecord() ? C_ARRAY_RECORD : p.arrayAccessConst();
                 String pre = String.format("jmi_array_%s_%d(%s, ", type, ndims(), name);
                 Array arr = exp.getArray();
@@ -5817,7 +5935,7 @@ aspect CCodeGen {
     
     @Override
     public void FRecordType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
-        if (exp.isNoExp()) {
+        if (exp.isNoExp() || exp instanceof FFunctionCall) {
             return;
         }
         for (FRecordComponentType comp : getComponents()) {

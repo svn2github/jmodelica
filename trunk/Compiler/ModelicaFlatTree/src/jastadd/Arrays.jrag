@@ -192,7 +192,8 @@ aspect Arrays {
 	}
 	eq FCatExp.ndims()         = getFExp(0).ndims();
 	eq FReductionExp.ndims()   = getFExp().isIterExp() ? iterExp().ndims() : 0;
-	eq FSubscriptedExp.ndims() = getFArraySubscripts().accessNdims();
+    eq FSubscriptedExp.ndims() = getFExp().ndims() - getFArraySubscripts().getNumFSubscript() + getFArraySubscripts().accessNdims();
+    eq FComponentExp.ndims()   = size().ndims();
 	eq FIterExp.ndims() {
 		int exp = getFExp().ndims();
 		return (exp >= 0) ? exp + localNdims() : -1;
@@ -827,7 +828,15 @@ aspect Arrays {
 	eq FClass.getChild().expandSizeForIterExp(Size s)   = s;
 	eq InstNode.getChild().expandSizeForIterExp(Size s) = s;
 	
-	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
+    eq FDecomposeExp.size() = sizeFromExp().copyAndAppend(sizeFromComp());
+    
+    syn Size FDecomposeExp.sizeFromExp();
+    eq FSubscriptedExp.sizeFromExp() = getFExp().size().contractRight(getFExp().ndims() - getFArraySubscripts().getNumFSubscript());
+    eq FComponentExp.sizeFromExp()   = getFExp().size();
+    
+    syn Size FDecomposeExp.sizeFromComp();
+    eq FSubscriptedExp.sizeFromComp() = getFArraySubscripts().accessSize();
+    eq FComponentExp.sizeFromComp()   = getFExp().type().declared(this).component(getName()).size();
 	
 	eq FTranspose.size() {
 		Size size = getFExp().size();
@@ -1566,29 +1575,43 @@ aspect Arrays {
 	
     eq FSubscriptedExp.getArray() {
         
-        Array old = getFExp().getArray();
         if (!isArray()) {
-            return new ScalarAsArray(new FSubscriptedExp(old.buildFArray(), getFArraySubscripts().fullCopy()));
+            return new ScalarAsArray(this);
         }
         
-        NonConsecutiveIndices expIs = NonConsecutiveIndices.expIndices(getFArraySubscripts());
+        NonConsecutiveIndices expIs = NonConsecutiveIndices.expIndices(getFExp().size(), getFArraySubscripts());
         NonConsecutiveIndices fasIs = NonConsecutiveIndices.fasIndices(getFArraySubscripts());
         Array arr = new Array(indices());
         Iterator<Index> it = arr.indices().iterator();
         
+        Array old = getFExp().getArray();
         for (Index i : expIs) {
-            FExp e;
-            if (i.ndims() == 0) {
-                e = old.buildFArray();
-            } else {
-                e = old.subArrayFExp(i, expIs);
-            }
+            FExp e = old.subArrayFExp(i, expIs);
             for (Index j : fasIs) {
+                FExp e2 = e;
                 FArraySubscripts fas = getFArraySubscripts().specify(j);
-                arr.set(it.next(), new FSubscriptedExp(e.unboundCopy(), fas));
+                if (fas.getNumFSubscript() > 0) {
+                    e2 = new FSubscriptedExp(e, fas);
+                }
+                arr.set(it.next(), e2);
             }
         }
         
+        return arr;
+    }
+    
+    eq FComponentExp.getArray() {
+        if (!isArray()) {
+            return new ScalarAsArray(this);
+        }
+        Array arr = new Array(indices());
+        Array old = getFExp().getArray();
+        for (Index i : old.indices()) {
+            FExp e = dynamicFExp(old.get(i).extractRecordFExp(getName()));
+            for (Index j : e.indices()) {
+                arr.set(i.expand(j), new FSubscriptedExp(e.unboundCopy(), j.createFArraySubscripts()));
+            }
+        }
         return arr;
     }
     
@@ -3658,7 +3681,7 @@ aspect ArrayHelpers {
 	    
         public FExp subArrayFExp(Index i, NonConsecutiveIndices indices) {
             if (i.ndims() >= ndims())
-                return get(i).fullCopy();
+                return get(indices.translate(i)).fullCopy();
             
             boolean[] b = new boolean[ndims()];
             indices = indices.locked(i, b);
@@ -4447,13 +4470,13 @@ aspect ArrayHelpers {
         public NonConsecutiveIndices locked(Index index, boolean[] b) {
             ArrayList<int[]> newInd = new ArrayList<int[]>();
             boolean[] newTrim = new boolean[indices.size()];
-            int l = 0;
+            index = translate(index);
             for (int k = 0; k < indices.size(); k++) {
                 if (trim[k]) {
                     newInd.add(indices.get(k));
                 } else {
                     int[] t = new int[1];
-                    t[0] = index.index()[l++];
+                    t[0] = index.index()[k];
                     newInd.add(t);
                 }
                 b[k] = trim[k];
@@ -4467,15 +4490,21 @@ aspect ArrayHelpers {
          * enabled and replaced using the surrounding size for the corresponding
          * dimension in fas. 
          */
-        public static NonConsecutiveIndices expIndices(FArraySubscripts fas) {
+        public static NonConsecutiveIndices expIndices(Size s, FArraySubscripts fas) {
+            int n2 = s.ndims();
+            int n1 = n2 - fas.getNumFSubscript();
             ArrayList<int[]> newInd = new ArrayList<int[]>();
-            boolean[] newTrim = new boolean[fas.getNumFSubscript()];
-            for (int k = 0; k < newTrim.length; k++) {
-                FSubscript fs = fas.getFSubscript(k);
+            boolean[] newTrim = new boolean[n2];
+            for (int k = 0; k < n1; k++) {
+                newInd.add(ASTNode.range(s.get(k)));
+                newTrim[k] = false;
+            }
+            for (int k = n1; k < n2; k++) {
+                FSubscript fs = fas.getFSubscript(k - n1);
                 if (fs.variability().indexParameterOrLess()) {
                     int[] i = fs.myIndices();
                     newInd.add(i);
-                    newTrim[k] = fs.ndims() == 0;
+                    newTrim[k] = false;
                 } else {
                     newInd.add(ASTNode.range(fs.mySize().get(0)));
                     newTrim[k] = true;
@@ -4511,6 +4540,14 @@ aspect ArrayHelpers {
         int[] res = new int[n];
         for (int i = 0; i < n; i++) {
             res[i] = i + 1;
+        }
+        return res;
+    }
+    
+    public Size Size.copyAndAppend(Size other) {
+        Size res = promote(ndims() + other.ndims());
+        for (int i = 0; i < other.ndims(); i++) {
+            res.set(i+ndims(), other.get(i));
         }
         return res;
     }

@@ -5021,6 +5021,44 @@ end RecordTests.RecordScalarize48;
 ")})));
 end RecordScalarize48;
 
+model RecordScalarize49
+    record R
+        parameter Integer n = 2;
+        Real[n,n+1] x;
+    end R;
+    
+    model M
+        Integer k = integer(time);
+        R r = R(1, {{time,time}});
+        Real[1,2] x = {{r.x[i+k,j+k] for j in 1:2} for i in 1:1};
+    end M;
+    
+    M m;
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize49",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize49
+ structural parameter Integer m.r.n = 1 /* 1 */;
+ Real m.r.x[1,1];
+ Real m.r.x[1,2];
+ Real m.x[1,1];
+ Real m.x[1,2];
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+equation
+ m.r.x[1,1] = time;
+ m.r.x[1,2] = time;
+ m.x[1,1] = ({{m.r.x[1,1], m.r.x[1,2]}})[1 + temp_1,1 + temp_1];
+ m.x[1,2] = ({{m.r.x[1,1], m.r.x[1,2]}})[1 + temp_1,2 + temp_1];
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize49;
+")})));
+end RecordScalarize49;
+
+
 model RecordFunc1
  record A
   Real x;

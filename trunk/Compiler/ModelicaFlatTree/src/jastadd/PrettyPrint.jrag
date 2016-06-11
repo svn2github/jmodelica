@@ -1983,17 +1983,24 @@ aspect FlatPrettyPrint {
 		}
 	}
 	
+    protected void FDecomposeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        boolean par = !(getFExp() instanceof FDecomposeExp);
+        if (par) {
+            str.print("(");
+        }
+        p.print(getFExp(), str, indent);
+        if (par) {
+            str.print(")");
+        }
+    }
+	
 	protected void FSubscriptedExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		str.print("(");
-		p.print(getFExp(), str, indent);
-		str.print(")");
+        super.prettyPrintExp(p, str, indent);
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
     protected void FComponentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-        str.print("(");
-        p.print(getFExp(), str, indent);
-        str.print(")");
+        super.prettyPrintExp(p, str, indent);
         str.print(".");
         str.print(getName());
     }
