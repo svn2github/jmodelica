@@ -1246,12 +1246,12 @@ aspect CADCodeGen {
 
     public class CADPrettyPrinter {
         @Override
-        public void printWriteBackAssignment(CodeStream str, String indent, FExp exp,
+        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
                 Collection<FVariable> forVariables) {
             WriteBackAssignmentPrinter var_p = new WriteBackAssignmentPrinter_var(forVariables);
             WriteBackAssignmentPrinter der_p = new WriteBackAssignmentPrinter_der(forVariables);
-            var_p.print(str, indent, exp.type(), exp.varNameOut_CAD(), exp);
-            der_p.print(str, indent, exp.type(), exp.derNameOut_CAD(), exp);
+            var_p.print(str, indent, left.getFExp().type(), left.varName_CAD(), left.getFExp());
+            der_p.print(str, indent, left.getFExp().type(), left.derName_CAD(), left.getFExp());
         }
 
         public class WriteBackAssignmentPrinter_var extends CodePrinter.WriteBackAssignmentPrinter {
@@ -1261,7 +1261,7 @@ aspect CADCodeGen {
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
                 use.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
             }
         }
@@ -1273,7 +1273,7 @@ aspect CADCodeGen {
             }
     
             @Override
-            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
                 use.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
             }
         }
@@ -1281,24 +1281,22 @@ aspect CADCodeGen {
     
     public void FFunctionCallLeft.genWriteBackAssignment_CAD(CodeStream str, String indent, Collection<FVariable> forVariables){
         if (hasFExp()) {
-            printer_CAD.printWriteBackAssignment(str, indent, getFExp(), forVariables);
+            printer_CAD.printWriteBackAssignment(str, indent, this, forVariables);
         }
     }
 
-    public void FAssignableExp.genWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        if (!includeInWriteBack(forVariables)) {
+    public void FIdUseExp.genWriteBackAssignment_var_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+        if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
-        }
         str.print(indent);
         str.print(varName_CAD());
         str.print(" = ");
         str.print(name + ";\n");
     }
 
-    public void FAssignableExp.genWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
-        if (!includeInWriteBack(forVariables) || !shouldBeDifferentiated()) {
+    public void FIdUseExp.genWriteBackAssignment_der_CAD(CodeStream str, String indent, String name, Collection<FVariable> forVariables) {
+        if (forVariables != null && !forVariables.contains(myFV()) || !shouldBeDifferentiated())
             return; // This variable is not in the set of variables to generate code for.
-        }
         str.print(indent);
         str.print(derName_CAD());
         str.print(" = ");
@@ -1812,64 +1810,16 @@ aspect CADCodeGen {
         
         @Override
         public void printTempInputAssigns(CodeStream str, String indent, FExp exp) {
-            funcCallInArgPrinter_var.print(str, indent, exp.type(), exp.tempName_var_CAD(), exp);
+            funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_var_CAD(), exp);
             funcCallInArgPrinter_der.print(str, indent, exp.type(), exp.tempName_der_CAD(), exp);
-        }
-        
-        protected final FuncCallInArgPrinter funcCallInArgPrinter_var = new FuncCallInArgPrinter_var();
-        
-        public class FuncCallInArgPrinter_var extends FuncCallInArgPrinter {
-            @Override
-            public String tempName(FExp exp) {
-                return exp.tempName_var_CAD();
-            }
-            
-            public void printInitExp(FExp exp, CodeStream str, String indent) {
-                
-            }
-            
         }
         
         protected final FuncCallInArgPrinter funcCallInArgPrinter_der = new FuncCallInArgPrinter_der();
         
         public class FuncCallInArgPrinter_der extends FuncCallInArgPrinter {
             @Override
-            public String tempName(FExp exp) {
-                return exp.tempName_der_CAD();
-            }
-            
-            public void printInitExp(FExp exp, CodeStream str, String indent) {
-                
-            }
-            
-            @Override
             public void printCell(CodeStream str, String indent, String name, FExp exp) {
-                exp.genTempInputCellAssigns_der_CAD(printer(), str, indent, name);
-            }
-        }
-    }
-    
-    public class CADPrettyPrinter {
-        
-        @Override
-        public void printTempInputDecls(CodeStream str, String indent, FExp exp) {
-            funcCallDeclPrinter_var.print(str, indent, exp.type(), exp.tempName_var_CAD(), exp);
-            funcCallDeclPrinter_der.print(str, indent, exp.type(), exp.tempName_der_CAD(), exp);
-        }
-        
-        protected final FuncCallDeclPrinter funcCallDeclPrinter_var = new FuncCallDeclPrinter_var();
-        public class FuncCallDeclPrinter_var extends FuncCallDeclPrinter {
-            @Override
-            public String tempName(FExp exp) {
-                return exp.tempName_var_CAD();
-            }
-        }
-        
-        protected final FuncCallDeclPrinter funcCallDeclPrinter_der = new FuncCallDeclPrinter_der();
-        public class FuncCallDeclPrinter_der extends FuncCallDeclPrinter {
-            @Override
-            public String tempName(FExp exp) {
-                return exp.tempName_der_CAD();
+                exp.genTempInputCellAssigns_der_CAD(CADPrettyPrinter.this, str, indent, name);
             }
         }
     }
@@ -1888,10 +1838,22 @@ aspect CADCodeGen {
      */
     public void FExp.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
-            p.printTempInputAssigns(str, indent, this);
+            type().printInit_C(p, str, indent, tempName_var_CAD(), this);
+            type().printInit_C(p, str, indent, tempName_der_CAD(), this);
+            genTempInputAssigns_CAD(p, str, indent);
         }
     }
-    
+
+    public void FExp.genTempInputAssigns_CAD(CodePrinter p, CodeStream str, String indent) {
+        p.printTempInputAssigns(str, indent, this);
+    }
+
+    public void FFunctionCall.genTempInputAssigns_CAD(CodePrinter p, CodeStream str, String indent) {
+        if (!isComposite()) {
+            super.genTempInputAssigns_CAD(p, str, indent);
+        }
+    }
+
     public void FPartialFunctionCall.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
         if (myFCallable().isPartialFunction()) {
             p.printTempInputAssigns(str, indent, this);
@@ -1906,11 +1868,19 @@ aspect CADCodeGen {
         str.print(";\n");
     }
     
-    syn String FExp.varNameOut_CAD() = tempName_var_CAD();
-    eq FIdUseExp.varNameOut_CAD()    = replaceWithTemp(true) ? tempName_var_CAD() : getFIdUse().varName_CAD();
+    syn String FFunctionCallLeft.varName_CAD() {
+        if (replaceWithTemp()) {
+            return getFExp().tempName_var_CAD();
+        }
+        return ((FIdUseExp) getFExp()).getFIdUse().varName_CAD();
+    }
     
-    syn String FExp.derNameOut_CAD() = tempName_der_CAD();
-    eq FIdUseExp.derNameOut_CAD()    = replaceWithTemp(true) ? tempName_der_CAD() : getFIdUse().derName_CAD();
+    syn String FFunctionCallLeft.derName_CAD() {
+        if (replaceWithTemp()) {
+            return getFExp().tempName_der_CAD();
+        }
+        return ((FIdUseExp) getFExp()).getFIdUse().derName_CAD();
+    }
     
     /**
      * Used when function calls are printed. It is used to  generate outputs for the function call and the  
@@ -1923,7 +1893,7 @@ aspect CADCodeGen {
         if (hasFExp()) {
             if (!getFExp().isComposite())
                 str.print("&");
-            str.print(getFExp().varNameOut_CAD());
+            str.print(varName_CAD());
         } else {
             str.print("NULL");
         }
@@ -1940,7 +1910,7 @@ aspect CADCodeGen {
         if (hasFExp()) {
             if (!getFExp().isComposite())
                 str.print("&");
-            str.print(getFExp().derNameOut_CAD());
+            str.print(derName_CAD());
         } else {
             str.print("NULL");
         }
@@ -1976,12 +1946,12 @@ aspect CADCodeGen {
 
     public class CADPrettyPrinter {
         @Override
-        public void printWriteBackResidual(CodeStream str, String indent, FExp exp,
+        public void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
                 Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
             WriteBackResidualPrinter var_p = new WriteBackResidualPrinter_var(enumerator, forIndices, indexCounter);
             WriteBackResidualPrinter der_p = new WriteBackResidualPrinter_der(enumerator.copy(), forIndices, indexCounter.copy());
-            var_p.print(str, indent, exp.type(), exp.varNameOut_CAD(), exp);
-            der_p.print(str, indent, exp.type(), exp.derNameOut_CAD(), exp);
+            var_p.print(str, indent, left.getFExp().type(), left.varName_CAD(), left.getFExp());
+            der_p.print(str, indent, left.getFExp().type(), left.derName_CAD(), left.getFExp());
         }
 
         public class WriteBackResidualPrinter_var extends CodePrinter.WriteBackResidualPrinter {
@@ -1991,7 +1961,7 @@ aspect CADCodeGen {
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
                 use.genWriteBackResidual_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
             }
         }
@@ -2003,7 +1973,7 @@ aspect CADCodeGen {
             }
     
             @Override
-            public void printUse(CodeStream str, String indent, FAssignableExp use, String name) {
+            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
                 use.genWriteBackResidual_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
             }
         }
@@ -2020,15 +1990,14 @@ aspect CADCodeGen {
     public void FFunctionCallLeft.genWriteBack_CAD(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         if (hasFExp()) {
             if (getFExp().type().shouldBeDifferentiated()) {
-                printer_CAD.printWriteBackResidual(str, indent, getFExp(), enumerator, forIndices, indexCounter);
+                printer_CAD.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
             } else {
-                printer_C.printWriteBackResidual(str, indent, getFExp(), enumerator, forIndices, indexCounter);
+                printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
             }
         }
     }
 
-    public void FAssignableExp.genWriteBackResidual_var_CAD(CodeStream str, String indent, String name,
-            Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public void FIdUseExp.genWriteBackResidual_var_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if (forIndices.size() == 0 || forIndices.contains(index)) {
             // This variable is in the set of variables to generate code for.
@@ -2043,8 +2012,7 @@ aspect CADCodeGen {
         }
     }
 
-    public void FAssignableExp.genWriteBackResidual_der_CAD(CodeStream str, String indent, String name,
-            Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+    public void FIdUseExp.genWriteBackResidual_der_CAD(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         int index = indexCounter.next();
         if ((forIndices.size() == 0 || forIndices.contains(index)) && shouldBeDifferentiated()) {
             str.print(indent);

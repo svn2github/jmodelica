@@ -132,22 +132,14 @@ aspect InstTypeAnalysis {
         return res;
     }
     
-    public FType FType.component(String name) {
+    public FType FType.componentType(String name) {
         return fUnknownType();
     }
     
-    public FType FRecordType.component(String name) {
-        FType res = component(name, getComponents());
-        return res == null ? super.component(name) : res;
+    public FType FRecordType.componentType(String name) {
+        FType res = componentType(name, getComponents());
+        return res == null ? super.componentType(name) : res;
     }
-    
-    syn FType FType.declared(FDecomposeExp context) = this;
-    eq FRecordType.declared(FDecomposeExp context)  = context.declaredType(this);
-    
-    inh FType FDecomposeExp.declaredType(FRecordType frt);
-    eq Root.getChild().declaredType(FRecordType frt)     = fUnknownType();
-    eq FClass.getChild().declaredType(FRecordType frt)   = frt.myFRecordDecl().type();
-    eq InstNode.getChild().declaredType(FRecordType frt) = frt;
     
     eq FIdUseInstAccess.recordType()        = getInstAccess().recordType();
     syn FRecordType InstAccess.recordType() = myInstClassDecl().recordType();

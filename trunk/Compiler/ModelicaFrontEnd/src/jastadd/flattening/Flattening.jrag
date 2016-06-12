@@ -478,16 +478,16 @@ aspect Flattening {
 		super.updateRecordArraySizes(from);
 		FRecordType rfrom = (FRecordType) from;
 		for (FRecordComponentType comp : getComponents())
-            comp.getFType().updateRecordArraySizes(component(comp.getName(), rfrom.getComponents()));
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getComponents()));
 	}
     
     public void FFunctionType.updateRecordArraySizes(FType from) {
         super.updateRecordArraySizes(from);
         FFunctionType rfrom = (FFunctionType) from;
         for (FRecordComponentType comp : getInputs())
-            comp.getFType().updateRecordArraySizes(component(comp.getName(), rfrom.getInputs()));
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getInputs()));
         for (FRecordComponentType comp : getOutputs())
-            comp.getFType().updateRecordArraySizes(component(comp.getName(), rfrom.getOutputs()));
+            comp.getFType().updateRecordArraySizes(componentType(comp.getName(), rfrom.getOutputs()));
     }
 
     public void InstNode.flattenComponentsInFunction(FFunctionDecl ffd, FClass fc, Set<String> added, int level) {
@@ -1400,7 +1400,7 @@ aspect Flattening {
 	eq FIterExp.splitArrayExp(int index) {
 	    Map<String,FExp> repl = new HashMap<String,FExp>();
 	    repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
-        FExp res = dynamicFExp(getFExp().treeCopy()).replaceIndices(repl);
+	    FExp res = getFExp().fullCopy().replaceIndices(repl);
 	    if (getNumForIndex() > 1) {
 	        List<CommonForIndex> indices = new List<CommonForIndex>();
 	        for (int i = 1, n = getNumForIndex(); i < n; i++)
@@ -2075,8 +2075,12 @@ aspect FlatExpressions {
             }
             int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && var.variability().flattenExtractIndices(getInstAccess().indexVariability())) {
-            return use.dynamicFExp(getInstAccess().extractNonParameterIndices()).flatten(prefix);
+        } else if (!inFunction() && getInstAccess().myInstComponentDecl().variability().flattenExtractIndices(getInstAccess().indexVariability())) {
+            FIdUseExp copy = (FIdUseExp) use.dynamicFExp(use.fullCopy());
+            List<FSubscript> sub = new List<FSubscript>();
+            ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, getInstAccess().myInstComponentDecl().variability());
+            FExp res = use.dynamicFExp(new FSubscriptedExp(copy, new FArraySubscripts(sub)));
+            return res.flatten(prefix);
         } else {
             return var.flattenAccess(prefix, use);
         }
@@ -2193,60 +2197,33 @@ aspect FlatExpressions {
      * Move any non-parameter indices to given list and replace with colon.
      * Copy any parameter non-scalar indices to given list.
      */
-    public FExp InstAccess.extractNonParameterIndices() {
-        List<FSubscript> sub = new List<FSubscript>();
-        InstAccess ia = extractNonParameterIndices(sub);
-        return new FSubscriptedExp(new FIdUseExp(new FIdUseInstAccess(ia)), new FArraySubscripts(sub));
-    }
-    
-    public FExp InstDot.extractNonParameterIndices() {
-        List<InstAccess> l = new List<InstAccess>();
-        List<FSubscript> sub = new List<FSubscript>();
-        int i = 0;
-        for (; i < getNumInstAccess(); i++) {
-            InstAccess part = getInstAccess(i);
-            l.add(part.extractNonParameterIndices(sub));
-            if (part.myInstComponentDecl().isRecord()) {
-                break;
-            }
-        }
-        i++;
-        FExp exp = new FIdUseExp(new FIdUseInstAccess(new InstDot(l)));
-        if (sub.getNumChild() > 0) {
-            exp = new FSubscriptedExp(exp, new FArraySubscripts(sub));
-        }
-        for (; i < getNumInstAccess(); i++) {
-            InstAccess part = getInstAccess(i);
-            exp = new FComponentExp(exp, part.name());
-            if (part.myInstComponentDecl().isArray()) {
-                exp = new FSubscriptedExp(exp, part.allFArraySubscripts().get(0).treeCopy());
-            }
-        }
-        return exp;
-    }
-    
-    public InstAccess InstAccess.extractNonParameterIndices(List<FSubscript> sub) {
-        if (myInstComponentDecl().isArray()) {
-            return new InstParseArrayAccess(name(), allFArraySubscripts().get(0).extractNonParameterIndices(sub, myInstComponentDecl().variability()));
-        } else {
-            return new InstParseAccess(name());
-        }
-    }
-    
-    public FArraySubscripts FArraySubscripts.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
-        FArraySubscripts res = new FArraySubscripts();
-        for (FSubscript fs : getFSubscripts()) {
+    public void InstAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {}
+
+    public void InstArrayAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+        FArraySubscripts fas = getFArraySubscripts();
+        for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
+            FSubscript fs = fas.getFSubscript(i);
             if (v.flattenExtractIndices(fs.variability())) {
-                sub.add(fs.treeCopy());
-                res.addFSubscript(new FColonSubscript());
-            } else {
-                if (fs.ndims()==1) {
-                    sub.add(new FColonSubscript());
-                }
-                res.addFSubscript(fs.treeCopy());
+                sub.add(fs);
+                fas.setFSubscript(new FColonSubscript(), i);
+            } else if (fs.ndims() == 1) {
+                sub.add(fs.size().rangeFSubscript(0));
             }
         }
-        return res;
+    }
+
+    public void InstComponentAccess.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+        if (isArray()) {
+            for (int i = 0, n = ndims(); i < n; i++) {
+                sub.add(size().rangeFSubscript(i));
+            }
+        }
+    }
+
+    public void InstDot.extractNonParameterIndices(List<FSubscript> sub, FTypePrefixVariability v) {
+        for (InstAccess ia : getInstAccesss()) {
+            ia.extractNonParameterIndices(sub, v);
+        }
     }
     
     syn boolean FTypePrefixVariability.flattenExtractIndices(FTypePrefixVariability other) = !other.indexParameterOrLess();
@@ -2524,11 +2501,7 @@ aspect FlatExpressions {
 	public FExp FSubscriptedExp.flatten(FQName prefix) {
 		return new FSubscriptedExp(getFExp().flatten(prefix), getFArraySubscripts().flatten(prefix));
 	}
-    
-    public FExp FComponentExp.flatten(FQName prefix) {
-        return new FComponentExp(getFExp().flatten(prefix), getName());
-    }
-    
+
 	public FIdDecl FIdDecl.flatten(FQName prefix) {
 		return (FIdDecl)fullCopy();
 	}

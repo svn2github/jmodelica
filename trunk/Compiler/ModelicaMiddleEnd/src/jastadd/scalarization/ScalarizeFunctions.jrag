@@ -92,7 +92,6 @@ aspect FunctionScalarization {
     eq FEquation.getChild().inUnknownSize()          = false;
     eq FFunctionCall.getChild().inUnknownSize()      = false;
     eq FRecordConstructor.getChild().inUnknownSize() = false;
-    eq FDecomposeExp.getChild().inUnknownSize()      = false;
     eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
     eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
     eq FAbstractVariable.getChild().inUnknownSize()  = false;

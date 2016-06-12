@@ -182,8 +182,7 @@ aspect FlatAPI {
     syn int FAbstractVariable.indexInZ() = -1;
     eq FVariable.indexInZ() = valueReference() & 0x07FFFFFF;
     
-    syn boolean FAssignableExp.isConsecutiveInZ(FAssignableExp use) = false;
-    eq FIdUseExp.isConsecutiveInZ(FAssignableExp use) = (use instanceof FIdUseExp) && myFV().isConsecutiveInZ(((FIdUseExp)use).myFV());
+    syn boolean FIdUseExp.isConsecutiveInZ(FIdUseExp use) = myFV().isConsecutiveInZ(use.myFV());
     
     syn boolean FAbstractVariable.isConsecutiveInZ(FAbstractVariable fv) = false;
     eq FVariable.isConsecutiveInZ(FAbstractVariable fv) = indexInZ() + 1 == fv.indexInZ();
@@ -2434,7 +2433,7 @@ aspect Attributes {
     
     syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name, int n) = null;
     eq FVariable.findHierarchicalAttribute(FQName name, int n) =
-            name.asFQNameFull().findHierarchicalAttribute(getFQName().asFQNameFull(), this, n);
+            name.findHierarchicalAttribute(getFQName(), this, n);
     
     syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var, int n) = null;
     eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var, int n)       =
@@ -2862,13 +2861,12 @@ aspect FVariableUses {
     /**
      * Check if this is the left hand side of an assignment or function call statement.
      */
-    inh boolean FExp.isAssignedTo();
+    inh boolean FAssignableExp.isAssignedTo();
+    inh boolean FFunctionCallLeft.isAssignedTo();
     eq BaseNode.getChild().isAssignedTo()         = false;
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
-    eq FFunctionCallLeft.getFExp().isAssignedTo() = true;
-    eq FDecomposeExp.getFExp().isAssignedTo()     = isAssignedTo();
-    eq FRecordConstructor.getArg().isAssignedTo() = isAssignedTo();
-    eq FArray.getFExp().isAssignedTo()            = isAssignedTo();
+    eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
+    eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
     
     inh boolean FExp.inBindingExp();
     eq Root.getChild().inBindingExp() = false;

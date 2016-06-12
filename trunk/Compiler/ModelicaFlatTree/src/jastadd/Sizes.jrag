@@ -35,7 +35,7 @@ aspect AccessSizes {
     inh Size FArraySubscripts.mySize();
     eq Root.getChild().mySize()                       = Size.SCALAR;
     eq FArraySubscripts.getFSubscript(int i).mySize() = mySize().contract(i);
-    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size().contractLeft(getFArraySubscripts().getNumFSubscript());
+    eq FSubscriptedExp.getFArraySubscripts().mySize() = getFExp().size();
     eq InstNamedAccess.getChild().mySize()            = declarationSize();
     
     inh Size FEndExp.mySize();
