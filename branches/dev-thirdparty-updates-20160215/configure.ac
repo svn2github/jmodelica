@@ -436,8 +436,8 @@ AC_ARG_VAR(PYTHON_HOME, [Python installation to use])
 AS_IF([test "${PYTHON_HOME}"],
       [
           AC_MSG_RESULT([Using Python installation ${PYTHON_HOME}])
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME}/libs/libpython27.a"
-          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME}/include"
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
       ], [
           AS_IF([test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"], 
             [

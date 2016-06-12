@@ -19500,8 +19500,8 @@ if test "${PYTHON_HOME}"; then :
 
           { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME}" >&5
 $as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME}/libs/libpython27.a"
-          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME}/include"
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
 
 else
 
