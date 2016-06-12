@@ -2486,7 +2486,7 @@ fclass RecordTests.RecordConstructor14
 
 public
  record RecordTests.RecordConstructor14.R
-  parameter Real x[:];
+  parameter Real x[1];
   parameter Integer n;
  end RecordTests.RecordConstructor14.R;
 
@@ -2513,8 +2513,8 @@ model RecordConstructor15
 fclass RecordTests.RecordConstructor15
  structural parameter Integer n = 2 /* 2 */;
  structural parameter Integer r.n = 2 /* 2 */;
- parameter Real r.x[1] = 1 /* 1 */;
- parameter Real r.x[2] = 2 /* 2 */;
+ structural parameter Real r.x[1] = 1 /* 1 */;
+ structural parameter Real r.x[2] = 2 /* 2 */;
 end RecordTests.RecordConstructor15;
 ")})));
 end RecordConstructor15;
@@ -2839,7 +2839,7 @@ public
  record RecordTests.RecordConstructor23.B
   parameter Integer n;
   parameter Integer m;
-  parameter Real x[:,n];
+  parameter Real x[2,1];
  end RecordTests.RecordConstructor23.B;
 
 end RecordTests.RecordConstructor23;
@@ -2882,7 +2882,7 @@ public
  record RecordTests.RecordConstructor24.B
   parameter Integer n;
   constant Integer m;
-  parameter Real x[:,n];
+  parameter Real x[2,1];
  end RecordTests.RecordConstructor24.B;
 
 end RecordTests.RecordConstructor24;
@@ -2953,7 +2953,7 @@ fclass RecordTests.RecordConstructor26
 public
  record RecordTests.RecordConstructor26.R2
   parameter Integer n;
-  Real x[n];
+  Real x[1];
  end RecordTests.RecordConstructor26.R2;
 
 end RecordTests.RecordConstructor26;
@@ -3020,8 +3020,8 @@ fclass RecordTests.RecordConstructor28
 
 public
  record RecordTests.RecordConstructor28.R
-  parameter Real a[:];
-  parameter Real b[size(a[:], 1)];
+  parameter Real a[1];
+  parameter Real b[1];
  end RecordTests.RecordConstructor28.R;
 
 end RecordTests.RecordConstructor28;
@@ -3057,8 +3057,8 @@ fclass RecordTests.RecordConstructor29
 
 public
  record RecordTests.RecordConstructor29.R
-  parameter Real a[:];
-  parameter Real b[size(a[:], 1) + 1];
+  parameter Real a[1];
+  parameter Real b[2];
  end RecordTests.RecordConstructor29.R;
 
 end RecordTests.RecordConstructor29;

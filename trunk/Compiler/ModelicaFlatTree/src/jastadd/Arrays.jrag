@@ -1032,10 +1032,8 @@ aspect Arrays {
     syn lazy Size InstComponentDecl.size() = declaredSize();
     eq InstAssignable.size() {
         Size s = super.size();
-        if (s.isUnknown() && hasBindingFExp() && !inRecordDecl() && (!isInput() || !inFunction()) &&
-                !getBindingFExp().isCircular()) {
+        if (s.isUnknown() && hasBindingFExp() && (!isInput() || !inFunction()) && !getBindingFExp().isCircular())
             s = s.createKnown(getBindingFExp());
-        }
         return s;
     }
     
@@ -2462,6 +2460,23 @@ aspect ArrayHelpers {
         }
 		
 		/**
+		 * Create a new flattened FArraySubscripts object describing this size.
+		 */
+		public FArraySubscripts flattenFArraySubscripts(FQName prefix) {
+			FArraySubscripts fas = new FArraySubscripts();
+			for (int i = 0; i < size.length; i++)
+				fas.addFSubscript(flattenFSubscript(i, prefix));
+			return fas;
+		}
+		
+		/**
+		 * Create a new flattened FSubscript for dimension <code>i</code>.
+		 */
+		protected FSubscript flattenFSubscript(int i, FQName prefix) {
+			return size[i] == UNKNOWN ? new FColonSubscript() : new FIntegerSubscript(size[i]);
+		}
+		
+		/**
 		 * Create a new FArraySubscripts object with ranges spanning this size.
 		 */
 		public FArraySubscripts rangeFArraySubscripts() {
@@ -3371,6 +3386,15 @@ aspect ArrayHelpers {
             }
         }
         
+		/**
+		 * Create a new flattened FSubscript for dimension <code>i</code>.
+		 */
+		protected FSubscript flattenFSubscript(int i, FQName prefix) {
+			evaluate(i);
+            return !okExp(i) ? super.flattenFSubscript(i, prefix) : 
+				new FExpSubscript(exps[i].flatten(prefix));
+		}
+
         /**
          * Create a new FSubscript with a range spanning dimension <code>i</code>.
          */

@@ -2321,11 +2321,18 @@ aspect FlatTypes {
     eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
     eq InstRecordConstructor.getInstComponentDecl().inRecord()  = true;
 
-    inh boolean InstNode.inRecordDecl();
-    eq InstNode.getChild().inRecordDecl()       = false;
-    eq InstClassDecl.getChild().inRecordDecl()  = isRecord();
-    eq InstAssignable.getChild().inRecordDecl() = inRecordDecl();
-    eq InstExtends.getChild().inRecordDecl()    = inRecordDecl();
+    inh boolean InstComponentDecl.inRecordDecl();
+    eq InstNode.getChild().inRecordDecl()                     = false;
+    eq InstAssignable.getChild().inRecordDecl()               = inRecordDecl();
+    eq InstRecord.getInstComponentDecl().inRecordDecl()       = false;
+    eq InstRecord.getInstExtends().inRecordDecl()             = false;
+    eq InstRecord.getInstClassDecl().inRecordDecl()           = false;
+    eq InstRecord.getRedeclaredInstClassDecl().inRecordDecl() = false;
+    eq InstRecord.getElementInstModification().inRecordDecl() = false;
+    eq InstForIndex.getInstPrimitive().inRecordDecl()         = false;
+    eq InstClassDecl.getInstComponentDecl().inRecordDecl()    = isRecord();
+    eq FClass.getChild().inRecordDecl()                       = false;
+    eq FRecordDecl.getChild().inRecordDecl()                  = true;
 
     inh boolean InstComponentDecl.inRecordConstructor();
     inh boolean InstExtends.inRecordConstructor();
