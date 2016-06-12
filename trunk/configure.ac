@@ -431,6 +431,31 @@ AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 AS_IF([test "x$ANT" = x],
       [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
 
+# Detect if Python installation is specified with environment var
+AC_ARG_VAR(PYTHON_HOME, [Python installation to use])
+AS_IF([test "${PYTHON_HOME}"],
+      [
+          AC_MSG_RESULT([Using Python installation ${PYTHON_HOME}])
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
+      ], [
+          AS_IF([test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"], 
+            [
+                AC_MSG_RESULT([Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}])
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+            ], [
+                AC_MSG_RESULT([Python installation not specified.])
+                CMAKE_PYTHON_LIB=
+                CMAKE_PYTHON_INCLUDE=
+            ])
+      ])
+AC_SUBST(CMAKE_PYTHON_LIB)
+AC_SUBST(CMAKE_PYTHON_INCLUDE)
+
+
+AC_SUBST(PYTHON_HOME)
+PYTHON_HOME=$PYTHON_HOME
 
 # Checks for header files.
 AC_HEADER_STDC
