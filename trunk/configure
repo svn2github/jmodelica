@@ -19498,10 +19498,11 @@ fi
 
 if test "${PYTHON_HOME}"; then :
 
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME}" >&5
-$as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
-          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
-          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
+          PYTHON_HOME_ABS="`cd ${PYTHON_HOME}; pwd`"
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME_ABS}" >&5
+$as_echo "Using Python installation ${PYTHON_HOME_ABS}" >&6; }
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_HOME_ABS}/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_HOME_ABS}/include"
 
 else
 
@@ -19516,8 +19517,9 @@ else
 
                 { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
 $as_echo "Python installation not specified." >&6; }
-                CMAKE_PYTHON_LIB=
-                CMAKE_PYTHON_INCLUDE=
+                # Empty arguments will make cmake fail, so use dummies instead
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY_DUMMY="
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR_DUMMY="
 
 fi
 
