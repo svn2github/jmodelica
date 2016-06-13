@@ -168,6 +168,13 @@ aspect ComplianceCheck {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "semiLinear");
     }
 
+    public static final SimpleProblemProducer ASTNode.DEPRECATED_DECOUPLE =
+            new SimpleWarningProducer("DEPRECATED_DECOUPLE", ProblemKind.SEMANTIC, "The Subtask.decouple() function-like operator is removed as of Modelica version 3.2r2");
+
+    public void FDecouple.complianceCheck(ErrorCheckType checkType) {
+        DEPRECATED_DECOUPLE.invoke(this);
+    }
+
     public static final SimpleProblemProducer ASTNode.DEPRECATED_CARDINALITY =
             new SimpleWarningProducer("DEPRECATED_CARDINALITY", ProblemKind.SEMANTIC, "The cardinality() function-like operator is deprecated, and will be removed in a future version of Modelica");
 
@@ -179,7 +186,7 @@ aspect ComplianceCheck {
         if (!inAssert() && !inIfTestWithoutConnect()) 
             INCORRECT_USE_OF_CARDINALITY.invoke(this);
     }
-	
+
     public void FDelayExp.complianceCheck(ErrorCheckType checkType) {
         ONLY_FMU_FUNCTION_LIKE_OPERATOR.invoke(this, "delay");
     }
@@ -395,4 +402,30 @@ aspect ComplianceCheck {
             UNSUPPORTED_EXTERNAL_OBJECT_CONSTRUCTORS.invoke(this);
         }
     }
+    
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED =
+        new SimpleErrorProducer("UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED", ProblemKind.COMPLIANCE, "Vectorized function calls of unknown size is not supported");
+        
+    public void InstVectorFunctionCall.complianceCheck(ErrorCheckType checkType) {
+        if (size().isUnknown()) {
+            UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED.invoke(this);
+        }
+    }
+    
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE =
+            new SimpleErrorProducer("UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE", ProblemKind.COMPLIANCE, "Using records as return value from external functions is not supported");
+
+    public void FExternalStmt.complianceCheck(ErrorCheckType checkType) {
+        getFExternalLanguage().complianceCheck(checkType, this);
+    }
+    
+    public void FExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {}
+    public void FCExternalLanguage.complianceCheck(ErrorCheckType checkType, FExternalStmt stmt) {
+        if (stmt.hasReturnVar() && stmt.getReturnVar().type().isRecord()) {
+            UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE.invoke(stmt);
+        }
+    }
+    
+
+    
 }

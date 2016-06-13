@@ -30,7 +30,7 @@ FTimedVariable : FExp ::= Name:FIdUse Arg:FExp;
 InstTimedVariable : FExp ::= Name:InstAccess Arg:FExp;
 
 FTimed : FTypePrefixVariability;
-FOptParameter : FTypePrefixVariability;
+FOptParameter : FParameter;
 
 FStartTimeExp : FExp;
 FFinalTimeExp : FExp;

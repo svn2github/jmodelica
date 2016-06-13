@@ -121,4 +121,33 @@ equation
     end if;
 end TestFeedLoop;
 
-model TestFeedLoopNoPVelEvents = TestFeedLoop(usePVelEvents = false);
+model TestFeedLoopNoPVelEvents
+partial block BaseSpatialDist
+    parameter Real[:] xInit = {0.0, 1.0};
+    parameter Real[:] yInit = {0.0, 0.0};
+    input Real in0, in1, x;
+    output Real out0, out1;
+end BaseSpatialDist;
+
+block SpatialDist
+    extends BaseSpatialDist;
+equation
+    (out0, out1) = spatialDistribution(in0, in1, x, noEvent(der(x) >= 0),
+                                       initialPoints = xInit, initialValues = yInit);
+end SpatialDist;
+block SpatialDistReverse
+    extends BaseSpatialDist;
+equation
+    (out1, out0) = spatialDistribution(in1, in0, -x, not noEvent(der(x) >= 0),
+                                       initialPoints = {1-xInit[k] for k in size(xInit,1):-1:1},
+                                       initialValues = {  yInit[k] for k in size(xInit,1):-1:1});
+end SpatialDistReverse;
+
+    replaceable block SD = SpatialDist constrainedby BaseSpatialDist;
+    SD sd(yInit = {1, 0}, in1(start = -1));
+    Real x(start = 0) = sd.out1;
+equation
+    sd.in0  = -sd.out1;
+    sd.in1  = -sd.out0;
+    sd.x    = 4.5*sin(time);
+end TestFeedLoopNoPVelEvents;

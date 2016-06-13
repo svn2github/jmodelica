@@ -25,6 +25,7 @@
 #define _JMI_LINEAR_SOLVER_H
 
 #include "jmi_block_solver.h"
+#include "jmi.h"
 
 #define JMI_SWITCHES_AND_NON_REALS_CHANGED -1
 #define JMI_SWITCHES_CHANGED               -3
@@ -57,7 +58,6 @@ void jmi_linear_solver_delete(jmi_block_solver_t* block);
 struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
     jmi_real_t* factorization;      /**< \brief Matrix for storing the Jacobian factorization */
-    jmi_real_t* jacobian;         /**< \brief Matrix for storing the Jacobian */
     jmi_real_t* jacobian_temp;         /**< \brief Matrix for storing the Jacobian */
     jmi_real_t* singular_values;  /**< \brief Vector for the singular values of the Jacobian */
     jmi_real_t* singular_vectors; /**< \brief Matrix for the right singular vectors */

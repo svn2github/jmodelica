@@ -634,6 +634,11 @@ aspect PrettyPrint {
 		p.print(getExp(),str,indent);
 	}
 	
+    public void DummyModification.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(" = ");
+        p.print(myFExp(),str,indent);
+    }
+	
 	public void ClassModification.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.print("(");
 		for (int i = 0; i < getNumArgument(); i++) {
@@ -962,60 +967,72 @@ aspect PrettyPrint {
 }
 
 aspect FlatPrettyPrint {
-	
-	public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
-		String nextInd = p.indent(indent);
-		str.print(indent + "fclass " + name() + "\n");
-		for (FVariable fv : getFVariables()) {
-	  		if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
-	  		        !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
-	  			p.print(fv, str, nextInd);
-	  			str.print(";\n");  
-	  		}
-		}
 
-		if (getNumFInitialEquation()>0)
-			str.print(indent + "initial equation \n");
-		getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+    public void FClass.prettyPrint(Printer p, CodeStream str, String indent) {
+        String nextInd = p.indent(indent);
+        str.print(indent + "fclass " + name() + "\n");
+        ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
+        for (FVariable fv : getFVariables()) {
+            if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
+                    !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
+                if (fv.isProtected()) {
+                  protectedVars.add(fv);
+                } else {
+                    p.print(fv, str, nextInd);
+                    str.print(";\n");
+                }
+            }
+        }
+        if (!protectedVars.isEmpty()) {
+            str.print(indent + "protected\n");
+            for (FVariable fv : protectedVars) {
+                p.print(fv, str, nextInd);
+                str.print(";\n");
+            }
+        }
 
-		if (getNumFParameterEquation()>0)
-			str.print(indent + "parameter equation\n");
-		getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
-	
-	    boolean wroteEquation = false;
-    	for (FAbstractEquation e : getFAbstractEquations()) {
-    		if (e instanceof FAlgorithm) {
-    			p.print(e, str, indent);
-    			wroteEquation = false;
-    		} else {
-    			if (!e.isIgnored()) {
-	    			if (!wroteEquation) {
-	    				str.print(indent);
-	    				str.print("equation\n");
-	    				wroteEquation = true;
-	    			}
-	    			p.print(e, str, nextInd);
-		    		str.print(";\n");
-    			}
-    		}
-    	}
-	    
-  		if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
-  				getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
-	  		str.print("\n" + indent + "public\n");
-	    	p.print(getFFunctionDecls(), str, nextInd);
-	    	p.print(getFRecordDecls(), str, nextInd);
-	    	p.print(getFEnumDecls(), str, nextInd);
-	    	p.print(getFDerivedTypes(), str, nextInd);
-  		}
-    	
+        if (getNumFInitialEquation()>0)
+            str.print(indent + "initial equation \n");
+        getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+
+        if (getNumFParameterEquation()>0)
+            str.print(indent + "parameter equation\n");
+        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";\n");
+    
+        boolean wroteEquation = false;
+        for (FAbstractEquation e : getFAbstractEquations()) {
+            if (e instanceof FAlgorithm) {
+                p.print(e, str, indent);
+                wroteEquation = false;
+            } else {
+                if (!e.isIgnored()) {
+                    if (!wroteEquation) {
+                        str.print(indent);
+                        str.print("equation\n");
+                        wroteEquation = true;
+                    }
+                    p.print(e, str, nextInd);
+                    str.print(";\n");
+                }
+            }
+        }
+        
+        if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
+                getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
+            str.print("\n" + indent + "public\n");
+            p.print(getFFunctionDecls(), str, nextInd);
+            p.print(getFRecordDecls(), str, nextInd);
+            p.print(getFEnumDecls(), str, nextInd);
+            p.print(getFDerivedTypes(), str, nextInd);
+        }
+        
         getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
 
-  		str.print(indent);
-  		str.print("end ");
-  		str.print(name());
-  		str.print(";\n");
-	}
+        str.print(indent);
+        str.print("end ");
+        str.print(name());
+        str.print(";\n");
+    }
 
 	syn String FVariable.prettyPrintType() = 
 		getDerivedType().isEmpty() ? type().scalarType().toString() : getDerivedType();
@@ -1163,11 +1180,6 @@ aspect FlatPrettyPrint {
     	str.print(";\n\n");
     }
     
-    public void FEquationType.prettyPrint(Printer p, CodeStream str, String indent) {}
-    public void FInitialEquation.prettyPrint(Printer p, CodeStream str, String indent) {
-    	str.print(indent + "initial ");
-    }
-    
     public void FDerivedType.prettyPrint(Printer p, CodeStream str, String indent) {
     	if (!getBaseType().isEnum()) {
 	    	str.print(indent + "type " + getName() + " = ");
@@ -1203,18 +1215,17 @@ aspect FlatPrettyPrint {
     		str.print(getFTypePrefixInputOutput());
     		str.print(" ");
     	}
-    	if (hasInitArrayStmt) {
-    		str.print(getType().scalarType());
-    		str.print("[");
-    		for (int i = 0; i < ndims(); i++) {
-    			str.print(":");
-    			if (i < ndims()-1)
-    				str.print(",");
-    		}
-    		str.print("]");
-    	} else {
-    		str.print(getType());
-    	}
+        str.print(getType().scalarType());
+        if (isArray()) {
+            str.print("[");
+            for (int i = 0; i < ndims(); i++) {
+                str.print(":");
+                if (i < ndims()-1) {
+                    str.print(",");
+                }
+            }
+            str.print("]");
+        }
     	str.print(" ");
     	str.print(name());
     	getFAttributeList().prettyPrintFAttributeList(str, p);
@@ -1449,9 +1460,15 @@ aspect FlatPrettyPrint {
 	}
 	
 	public void FInitArrayStmt.prettyPrint(Printer p, CodeStream str, String indent) {
-		FFunctionVariable fv = (FFunctionVariable) getFIdUseExp().myFV();
-		str.print("size(" + fv.name() + ") := {");
-		str.print(fv.size().toUnclosedString() + "}");
+        str.print("init ");
+        p.print(getFIdUseExp(), str, indent);
+        str.print(" as ");
+        str.print(type().scalarType());
+        if (type().isArray()) {
+            str.print("[");
+            str.print(type().size().toUnclosedString());
+            str.print("]");
+        }
 	}
 	
 	public void FExternalLanguage.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1557,7 +1574,7 @@ aspect FlatPrettyPrint {
 	
 	protected abstract void FExp.prettyPrintExp(Printer p, CodeStream str, String indent);
 	
-	protected void FUnknownSizeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+	protected void FColonSizeExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print(":");
 	}
 	
@@ -1903,9 +1920,10 @@ aspect FlatPrettyPrint {
 	eq FLinspace.builtInName()           = "linspace";
 	eq FHomotopyExp.builtInName()        = "homotopy";
     eq FCardinality.builtInName()        = "cardinality";
+    eq FDecouple.builtInName()           = "Subtask.decouple";
 	eq FSemiLinearExp.builtInName()      = "semiLinear";
 	eq FInStream.builtInName()           = "inStream";
-	eq FDerInStream.builtInName()        = "derInStream";
+	eq FDerStream.builtInName()         = "derStream";
     eq FExInStream.builtInName()         = "inStreamExpansion";
 	eq FActualStream.builtInName()       = "actualStream";
 	eq FGetInstanceName.builtInName()    = "getInstanceName";
@@ -1972,6 +1990,14 @@ aspect FlatPrettyPrint {
 		p.print(getFArraySubscripts(), str, indent);
 	}
 	
+    protected void FComponentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("(");
+        p.print(getFExp(), str, indent);
+        str.print(")");
+        str.print(".");
+        str.print(getName());
+    }
+	
 	protected void FArgumentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		p.print(copiedFExp(), str, indent);
 	}
@@ -1980,7 +2006,9 @@ aspect FlatPrettyPrint {
     eq FInput.toString()      = "input";
     eq FOutput.toString()     = "output";
     syn String FTypePrefixVariability.toString();
-    eq FParameter.toString()       = "parameter ";
+    eq FFixedParameter.toString()    = "parameter ";
+    eq FInitialParameter.toString() = "initial parameter ";
+    eq FIndexParameter.toString()  = "index parameter";
     eq FEvalParameter.toString()   = "eval parameter ";
     eq FFinalParameter.toString()  = "final parameter ";
     eq FStructParameter.toString() = "structural parameter ";

@@ -617,6 +617,19 @@ ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 LTLIBOBJS
 LIBOBJS
+REQUIRE_OPTIMICA_COMPILER
+REQUIRE_MINGW_HOME
+REQUIRE_JVM_ARGS
+REQUIRE_JPYPE_JVM
+REQUIRE_MODELICAPATH
+REQUIRE_BEAVER_PATH
+REQUIRE_COMPILER_JARS
+REQUIRE_CPPAD_HOME
+REQUIRE_SUNDIALS_HOME
+REQUIRE_IPOPT_HOME
+CMAKE_PYTHON_INCLUDE
+CMAKE_PYTHON_LIB
+PYTHON_HOME
 HAVE_ANT_FALSE
 HAVE_ANT_TRUE
 ANT_OPTS
@@ -630,6 +643,8 @@ COMPILE_WITH_CPPAD_FALSE
 COMPILE_WITH_CPPAD_TRUE
 _JAVA_HOME_
 MINGW_HOME
+NUMPY_NO_MSVCR_FALSE
+NUMPY_NO_MSVCR_TRUE
 COPY_PTHREADS_LIB_FALSE
 COPY_PTHREADS_LIB_TRUE
 WITH_MINGW_FALSE
@@ -810,7 +825,8 @@ FFLAGS
 CC
 CFLAGS
 CPP
-CXXCPP'
+CXXCPP
+PYTHON_HOME'
 
 
 # Initialize some variables set by options.
@@ -1470,6 +1486,7 @@ Some influential environment variables:
   CFLAGS      C compiler flags
   CPP         C preprocessor
   CXXCPP      C++ preprocessor
+  PYTHON_HOME Python installation to use
 
 Use these variables to override the choices made by `configure' or to help
 it to find libraries and programs with nonstandard names/locations.
@@ -19252,6 +19269,14 @@ else
   COPY_PTHREADS_LIB_FALSE=
 fi
 
+ if test "$with_mingw" != no -a "$with_tdm" = yes; then
+  NUMPY_NO_MSVCR_TRUE=
+  NUMPY_NO_MSVCR_FALSE='#'
+else
+  NUMPY_NO_MSVCR_TRUE='#'
+  NUMPY_NO_MSVCR_FALSE=
+fi
+
 
 
 # Set output variables to be exported to the Makefiles
@@ -19469,6 +19494,40 @@ as_fn_error $? "Cannot find Apache Ant - please install in order to build compil
 See \`config.log' for more details" "$LINENO" 5 ; }
 fi
 
+# Detect if Python installation is specified with environment var
+
+if test "${PYTHON_HOME}"; then :
+
+          { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python installation ${PYTHON_HOME}" >&5
+$as_echo "Using Python installation ${PYTHON_HOME}" >&6; }
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
+
+else
+
+          if test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"; then :
+
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&5
+$as_echo "Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}" >&6; }
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+
+else
+
+                { $as_echo "$as_me:${as_lineno-$LINENO}: result: Python installation not specified." >&5
+$as_echo "Python installation not specified." >&6; }
+                CMAKE_PYTHON_LIB=
+                CMAKE_PYTHON_INCLUDE=
+
+fi
+
+fi
+
+
+
+
+
+PYTHON_HOME=$PYTHON_HOME
 
 # Checks for header files.
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for ANSI C header files" >&5
@@ -19772,7 +19831,29 @@ fi
 
 #AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.5.0])
 
-ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests"
+REQUIRE_IPOPT_HOME=True
+REQUIRE_SUNDIALS_HOME=True
+REQUIRE_CPPAD_HOME=True
+REQUIRE_COMPILER_JARS=True
+REQUIRE_BEAVER_PATH=True
+REQUIRE_MODELICAPATH=True
+REQUIRE_JPYPE_JVM=True
+REQUIRE_JVM_ARGS=False
+REQUIRE_MINGW_HOME=True
+REQUIRE_OPTIMICA_COMPILER=True
+
+
+
+
+
+
+
+
+
+
+
+
+ac_config_files="$ac_config_files Makefile ThirdParty/Blas/Makefile ThirdParty/Lapack/Makefile ThirdParty/Sundials/Makefile ThirdParty/Minpack/Makefile ThirdParty/CasADi/Makefile external/FMILibrary/Makefile JMI/src/Makefile JMI/Makefile Python/jm_ipython.sh Python/jm_python.sh Python/src/tests_jmodelica/files/Modelica/Resources/Makefile RuntimeLibrary/Makefile jm_tests Python/src/required_defaults.py"
 
 
 cat >confcache <<\_ACEOF
@@ -19930,6 +20011,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COPY_PTHREADS_LIB_TRUE}" && test -z "${COPY_PTHREADS_LIB_FALSE}"; then
   as_fn_error $? "conditional \"COPY_PTHREADS_LIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${NUMPY_NO_MSVCR_TRUE}" && test -z "${NUMPY_NO_MSVCR_FALSE}"; then
+  as_fn_error $? "conditional \"NUMPY_NO_MSVCR\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${COMPILE_WITH_CPPAD_TRUE}" && test -z "${COMPILE_WITH_CPPAD_FALSE}"; then
@@ -21028,6 +21113,7 @@ do
     "Python/src/tests_jmodelica/files/Modelica/Resources/Makefile") CONFIG_FILES="$CONFIG_FILES Python/src/tests_jmodelica/files/Modelica/Resources/Makefile" ;;
     "RuntimeLibrary/Makefile") CONFIG_FILES="$CONFIG_FILES RuntimeLibrary/Makefile" ;;
     "jm_tests") CONFIG_FILES="$CONFIG_FILES jm_tests" ;;
+    "Python/src/required_defaults.py") CONFIG_FILES="$CONFIG_FILES Python/src/required_defaults.py" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5 ;;
   esac

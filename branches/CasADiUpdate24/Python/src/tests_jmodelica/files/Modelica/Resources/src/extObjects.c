@@ -3,6 +3,16 @@
 #include <stdlib.h>
 #include "ModelicaUtilities.h"
 
+void* cpy(void* src, size_t len) {
+    void* res = malloc(len);
+    memcpy(res, src, len);
+    return res;
+}
+
+char*   cpystr(const char* src)         { return (char*)  cpy((void*)src, strlen(src)*sizeof(char)); }
+double* cpydbl(double* src, size_t len) { return (double*)cpy((void*)src, len*sizeof(double)); }
+int*    cpyint(int* src, size_t len)    { return (int*)   cpy((void*)src, len*sizeof(int)); }
+
 void* constructor_string(const char* str) {
     void* res = malloc(strlen(str) + 1);
     strcpy(res, str);
@@ -32,7 +42,7 @@ typedef struct {
 } Obj1_t;
 void* my_constructor1(double x, int y, int b, const char* s) {
     Obj1_t* res = malloc(sizeof(Obj1_t));
-    res->s = s;
+    res->s = cpystr(s);
     res->x = b ? x + y : -1;
     return res;
 }
@@ -49,10 +59,12 @@ typedef struct {
 } Obj2_t;
 void my_constructor2(double* x, int* y, void** o2, int* b, const char** s) {
     Obj2_t* res = malloc(sizeof(Obj2_t));
-    res->x = x;
-    res->y = y;
-    res->b = b;
-    res->s = s;
+    res->x = cpydbl(x,2);
+    res->y = cpyint(y,2);
+    res->b = cpyint(b,2);
+    res->s = malloc(sizeof(char*)*2);
+    res->s[0] = cpystr(s[0]);
+    res->s[1] = cpystr(s[1]);
     *o2 = res;
 }
 double use2(void* o2) {
@@ -61,20 +73,18 @@ double use2(void* o2) {
 }
 
 typedef struct {
-    Obj1_t* o1;
-    Obj2_t** o2;
+    double x;
 } Obj3_t;
 void my_constructor3(void* o1, void** o2, void** o3) {
     Obj3_t* res = malloc(sizeof(Obj3_t));
-    res->o1 = (Obj1_t*)o1;
-    res->o2 = (Obj2_t**)o2;
+    res->x = use1(o1) + use2(o2[0]) + use2(o2[1]);
     ModelicaFormatMessage("%s", "O3 constructed");
     ModelicaFormatMessage("%s", "Testing\n\r\n some line breaks\n\r\n");
     *o3 = res;
 }
 double use3(void* o3) {
     Obj3_t* o = (Obj3_t*) o3;
-    return use1((void*)o->o1) + use2((void*)o->o2[0]) + use2((void*)o->o2[1]);
+    return o->x;
 }
 
 

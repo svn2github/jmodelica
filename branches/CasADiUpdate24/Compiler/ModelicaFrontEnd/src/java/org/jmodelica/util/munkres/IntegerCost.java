@@ -15,6 +15,13 @@
 */
 package org.jmodelica.util.munkres;
 
+/**
+ * Cost represented by an Integer that is used in Munkres problem. A lower
+ * value results in the variable beeing more prone for selection since the
+ * Munkres algorithm tries to minimize the sum of all matched variables.
+ * 
+ * Use the static method create() for instantiating a matrix of this type
+ */
 public class IntegerCost implements MunkresCost<IntegerCost> {
     
     private int value;
@@ -48,6 +55,11 @@ public class IntegerCost implements MunkresCost<IntegerCost> {
         return new IntegerCost(value);
     }
     
+    /**
+     * Constructs an matrix of Integer costs.
+     * @param values The integer costs
+     * @return A matrix which can be used in a Munkres problem
+     */
     public static IntegerCost[][] create(int[][] values) {
         IntegerCost[][] costs = new IntegerCost[values.length][];
         for (int j = 0; j < values.length; j++) {

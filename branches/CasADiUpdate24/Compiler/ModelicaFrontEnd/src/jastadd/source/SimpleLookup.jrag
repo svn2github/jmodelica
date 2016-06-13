@@ -68,15 +68,26 @@ aspect SimpleClassLookup {
 		}
 		return cd;
 	}
-	
+
+    syn ClassDecl ClassDecl.simpleLookupClassDottedGlobal(String name) {
+        String[] parts = name.split("\\.", 2);
+        ClassDecl base = simpleLookupClassGlobalScope(parts[0]);
+        return (base == null || parts.length == 1) ? base : base.simpleLookupClassDotted(parts[1]);
+    }
+
 	syn ClassDecl Program.simpleLookupClassDotted(String name) {
 		String[] parts = name.split("\\.", 2);
 		ClassDecl base = simpleLookupClassDefaultScope(parts[0]);
 		return (base == null || parts.length == 1) ? base : base.simpleLookupClassDotted(parts[1]);
 	}
-	
-	inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
-	inh ClassDecl ImportClause.simpleLookupClassGlobalScope(String name);
+
+    syn ClassDecl Program.simpleLookupClassDottedGlobal(String name) {
+        return simpleLookupClassDotted(name);
+    }
+
+    inh ClassDecl Access.simpleLookupClassGlobalScope(String name);
+    inh ClassDecl ClassDecl.simpleLookupClassGlobalScope(String name);
+    inh ClassDecl ImportClause.simpleLookupClassGlobalScope(String name);
 	eq Program.getChild().simpleLookupClassGlobalScope(String name) = simpleLookupClassDefaultScope(name);
 	
 	

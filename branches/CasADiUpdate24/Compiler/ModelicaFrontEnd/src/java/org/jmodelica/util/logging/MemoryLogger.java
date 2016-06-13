@@ -36,8 +36,31 @@ public class MemoryLogger extends ModelicaLogger {
     
     private final ArrayList<LoggedUnit> cache = new ArrayList<LoggedUnit>();
     
+    /**
+     * Constructor which takes a parent logger and a log level that should be
+     * when post printing. This constructor will catch all messages and resend
+     * later.
+     * 
+     * @param parent Parent logger for which messages should be logged to
+     * @param postPrintLevel Resend log level
+     */
     public MemoryLogger(ModelicaLogger parent, Level postPrintLevel) {
-        super(parent.getLevel());
+        this(parent, postPrintLevel, Level.DEBUG);
+    }
+    
+    /**
+     * Constructor which takes a parent logger, a log level that should be used
+     * when post printing and a minimum level. Logs below the minimum level
+     * will not be saved and will not be resent afterwards. However they may be
+     * logged directly if the log level of parent (or sub loggers) is lower
+     * than minLevel.
+     * 
+     * @param parent Parent logger for which messages should be logged to
+     * @param postPrintLevel Resend log level
+     * @param minLevel Minimum log level for which messages are saved
+     */
+    public MemoryLogger(ModelicaLogger parent, Level postPrintLevel, Level minLevel) {
+        super(parent.getLevel().compareTo(minLevel) > 0 ? parent.getLevel() : minLevel);
         this.parent = parent;
         this.postPrintLevel = postPrintLevel;
     }

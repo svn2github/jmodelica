@@ -36,8 +36,14 @@ public abstract class CodeGenTestCase extends TestCase {
      */
     protected boolean testTransformed(FClass fc) {
         ByteArrayOutputStream os = new ByteArrayOutputStream();
+        PrintStream ps;
+        if (options.getBooleanOption("debug_duplicate_generated")) {
+            ps = new PrintStream(new CloneOutputStream(os, System.out).setClose(true, false), true);
+        } else {
+            ps = new PrintStream(os);
+        }
         AbstractGenerator generator = createGenerator(fc);
-        generator.generate(createTemplateReader(), new NotNullCodeStream(os));
+        generator.generate(createTemplateReader(), new NotNullCodeStream(ps));
         String test = os.toString();
         String correct = filter(getGeneratedCode());
         if (!removeWhitespace(test).equals(removeWhitespace(correct)))

@@ -104,16 +104,19 @@ class Test_FMI_Jacobians_base:
         jacobian with each other.
         """
         
-        errors = abs(self.jac_analytic(model) - self.jac_fin_diff(model))
+        a_jac = self.jac_analytic(model)
+        f_jac = self.jac_fin_diff(model)
+        
+        errors = abs(a_jac - f_jac)
         
         if errors.max() < tol_check:
             return True
         else:
             print 'Check of Jacobian failed, max error: ', errors.max()
             print '==== Analytical matrix ===='
-            print self.jac_analytic(model)
+            print a_jac
             print '=== Finitie diff matrix ==='
-            print self.jac_fin_diff(model)
+            print f_jac
             return False
             
     def basic_initialize_test(self, cname, fname):

@@ -8,10 +8,6 @@ project(ModelicaCompilerCasADi CXX)
 
 # copied from ModelicaCasadiInterface/CMakeLists.txt
 
-# import environment variables
-set(CASADI_HOME $ENV{CASADI_HOME})
-set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
-
 find_library(CASADI_DLL
   NAMES libcasadi.so libcasadi.dll
   PATHS ${CASADI_BUILD_DIR}/lib
@@ -40,7 +36,7 @@ include_directories(${CASADI_HOME})
 include_directories(${CASADI_HOME}/swig)
 include_directories(${CASADI_BUILD_DIR})
 
-set(CMAKE_SWIG_OUTDIR "$ENV{IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
+set(CMAKE_SWIG_OUTDIR "${IFCASADI_OUTDIR}/src/java-generated/ifcasadi")
 
 find_package(SWIG REQUIRED)
 include(UseSWIG)

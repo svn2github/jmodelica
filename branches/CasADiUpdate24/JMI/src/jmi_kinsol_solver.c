@@ -1349,7 +1349,7 @@ int jmi_kinsol_solver_solve(jmi_block_residual_t * block){
 int jmi_kinsol_solver_evaluate_jacobian(jmi_block_residual_t* block, jmi_real_t* jacobian) {
     int i,j;
     int n_x;
-    int ef;
+    int ef = 0;
     n_x = block->n;
 
     /* TODO: for nested blocks it is necessary to cache jacobians (since dF leads to jac

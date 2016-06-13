@@ -158,7 +158,7 @@ void Variable::setAttribute(AttributeKey key, double val) {
 void Variable::print(ostream& os) const {
     os << (getCausality() == INPUT ? "input " : (getCausality() == OUTPUT ? "output " : "" ));
     os << (getVariability() == CONTINUOUS ? "" : (getVariability() == DISCRETE ? "discrete " : (getVariability() == PARAMETER ? "parameter " : 
-           (getVariability() == CONSTANT ? "constant " : ""))));
+           (getVariability() == CONSTANT ? "constant " : (getVariability() == TIMED ? "constant " : "")))));
     if (declaredType != Ref<VariableType>(NULL)) {
         os << declaredType->getName() << " ";
     } else {

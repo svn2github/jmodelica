@@ -398,6 +398,7 @@ fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, fmi2Integer value[]) {
     fmi2Integer retval;
+    size_t i;
     
     if (c == NULL) {
 		return fmi2Fatal;
@@ -406,6 +407,13 @@ fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
     retval = jmi_get_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
     if (retval != 0) {
         return fmi2Error;
+    }
+    
+    /* Negate the values of the retrieved "negate alias" variables. */
+    for (i = 0; i < nvr; i++) {
+        if (is_negated(vr[i])) {
+            value[i] = -value[i];
+        }
     }
 
     return fmi2OK;
@@ -447,8 +455,7 @@ fmi2Status fmi2_get_string(fmi2Component c, const fmi2ValueReference vr[],
         return fmi2Error;
     }
 
-    /* Strings not yet supported. */
-    return fmi2Warning;
+    return fmi2OK;
 }
 
 fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
@@ -461,12 +468,15 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
 		return fmi2Fatal;
     }
     
-    /* Negate the values before setting the "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
+        /* Negate the values before setting the "negate alias" variables. */
         if (is_negated(vr[i])) {
             fmi2_me->work_real_array[i] = -value[i];
         } else {
             fmi2_me->work_real_array[i] = value[i];
+        }
+        if (fmi2_me->fmu_type == fmi2CoSimulation && !(((fmi2_cs_t *)c)->inputs_updated) && is_real_input(&((fmi2_me_t *)c)->jmi, vr[i])) {
+            ((fmi2_cs_t *)c)->inputs_updated = TRUE;
         }
     }
     
@@ -481,12 +491,23 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, const fmi2Integer value[]) {
     fmi2Integer retval;
+    fmi2_me_t* fmi2_me = (fmi2_me_t*)c;
+    size_t i;
     
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
-    retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, value);
+    /* Negate the values before setting the "negate alias" variables. */
+    for (i = 0; i < nvr; i++) {
+        if (is_negated(vr[i])) {
+            fmi2_me->work_int_array[i] = -value[i];
+        } else {
+            fmi2_me->work_int_array[i] = value[i];
+        }
+    }
+    
+    retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_int_array);
     if (retval != 0) {
         return fmi2Error;
     }
@@ -677,8 +698,8 @@ fmi2Status fmi2_set_time(fmi2Component c, fmi2Real time) {
 		return fmi2Fatal;
     }
 
-    if (((fmi2_me_t*)c)->stopTime < time) {
-        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the <stop_time: %g>.", ((fmi2_me_t*)c)->stopTime);
+    if (((fmi2_me_t*)c)->stopTime*(1+JMI_ALMOST_EPS) < time) {
+        jmi_log_node(((fmi2_me_t *)c)->jmi.log, logError, "Error", "Cannot set a time past the <stop_time: %g>. Asked <time: %g>", ((fmi2_me_t*)c)->stopTime, time);
         return fmi2Error;
     }
 
@@ -867,6 +888,7 @@ fmi2Status fmi2_me_instantiate(fmi2Component c,
     }
     
     fmi2_me->work_real_array    = (fmi2Real*)(fmi2_me_t *)functions->allocateMemory(jmi_get_z_size(&(fmi2_me->jmi)), sizeof(fmi2Real));
+    fmi2_me->work_int_array     = (fmi2Integer*)(fmi2_me_t *)functions->allocateMemory(jmi_get_z_size(&(fmi2_me->jmi)), sizeof(fmi2Integer));
     
     return fmi2OK;
 }
@@ -881,5 +903,6 @@ void fmi2_me_free_instance(fmi2Component c) {
     fmi_free(fmi2_me->jmi.resource_location);
     fmi_free(fmi2_me->event_info);
     fmi_free(fmi2_me->work_real_array);
+    fmi_free(fmi2_me->work_int_array);
     jmi_delete(&fmi2_me->jmi);
 }

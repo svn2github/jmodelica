@@ -53,10 +53,26 @@ aspect Units {
         // <Any>.convertTo(u) == u.convertTo(<Any>) == <Any>
         public abstract Unit convertTo(Unit u);
         
+        // Returns true if the unit u is in the same dimension as this.
+        // If this or u is <Any> then this returns true.
+        public abstract boolean sameDimension(Unit u);
+        
         /*
          * This function is like equals for units but is **not** transitive because of AnyUnit.
+         * v.isCompatibleWith(u) == v.isCompatibleWithNoOffset(u) && v.isCompatibleOnlyOffset(Unit u);
          */
         public abstract boolean isCompatibleWith(Unit u);
+                
+        /*
+         * Same as isCompatibleWith but ignoring differences in offset
+         */
+        public abstract boolean isCompatibleWithoutOffset(Unit u);
+        
+        /*
+         * Compares only the offset of two units.  
+         */
+        public abstract boolean isCompatibleOnlyOffset(Unit u);
+
         
         // // Factory Functions // //
         public static Unit fromDimension(int dim, String name) {
@@ -120,6 +136,11 @@ aspect Units {
         }
         
         @Override
+        public boolean sameDimension(Unit u) {
+            return true;
+        }
+        
+        @Override
         public boolean isAnyUnit() {
             return true;
         }
@@ -146,6 +167,16 @@ aspect Units {
     
         @Override
         public boolean isCompatibleWith(Unit u) {
+            return true;
+        }
+        
+        @Override
+        public boolean isCompatibleOnlyOffset(Unit u) {
+            return true;
+        }
+        
+        @Override
+        public boolean isCompatibleWithoutOffset(Unit u) {
             return true;
         }
         
@@ -357,7 +388,7 @@ aspect Units {
                 double newOffset = offset * newScale - u.offset;
                 int[] newPowers = subArray(powers, u.powers);
                 
-                if(!isZerosArray(newPowers)) {
+                if(!isZeroArray(newPowers)) {
                     return Unit.ANY;
                 }
                 
@@ -367,7 +398,17 @@ aspect Units {
             return Unit.ANY;
         }
         
-        private boolean isZerosArray(int[] a) {
+        @Override
+        public boolean sameDimension(Unit p) {
+            if (p instanceof CompositeUnit) {
+                CompositeUnit u = (CompositeUnit) p;
+                return isZeroArray(subArray(powers, u.powers));
+            }
+            // If p is any unit then return true else false.
+            return p.isAnyUnit();
+        }
+        
+        private boolean isZeroArray(int[] a) {
             for (int i = 0; i < a.length; i++) {
                 if (a[i] != 0) return false;
             }
@@ -381,6 +422,25 @@ aspect Units {
         
         @Override
         public boolean isCompatibleWith(Unit u) {
+            return isCompatibleWithoutOffset(u) && isCompatibleOnlyOffset(u);
+        }
+        
+        @Override
+        public boolean isCompatibleOnlyOffset(Unit u) {
+            if (u == this)
+                return true;
+            if (u instanceof AnyUnit)
+                return true;
+            if (getClass() != u.getClass())
+                return false;
+            CompositeUnit w = (CompositeUnit) u;
+            if (Math.abs(offset - w.offset) > 1e-10)
+                return false;
+            return true;
+        } 
+        
+        @Override
+        public boolean isCompatibleWithoutOffset(Unit u) {
             if (u == this)
                 return true;
             if (u == null)
@@ -394,11 +454,9 @@ aspect Units {
                 return false;
             if (!Arrays.equals(powers, w.powers))
                 return false;
-            if (Math.abs(offset - w.offset) > 1e-10)
-                return false;
             return true;
         }
-    
+        
         @Override
         public int hashCode() {
             final int prime = 31;

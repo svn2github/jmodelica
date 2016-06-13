@@ -100,6 +100,15 @@ package TimeEvents
         end when;
     end Advanced4;
     
+    model Advanced5
+        Real x(start=1.1);
+    equation
+        when (time>=0.5) then
+            reinit(x, 5);
+            end when;
+        der(x) = -0.5*x;
+    end Advanced5;
+    
     model Mixed1
         Real x(start=0.5);
         parameter Real p = 2;
@@ -111,5 +120,19 @@ package TimeEvents
             der(x) = if x < 1 then -0.5 else -1;
         end if;
     end Mixed1;
+    
+    model TestSampling
+        parameter Real sampleInterval=0.1; 
+        Boolean y;
+    equation
+        y = sample(0, sampleInterval);
+    end TestSampling;
+
+    model TestSampling2
+        parameter Real sampleInterval=1e-10; 
+        Boolean y;
+    equation
+        y = sample(0, sampleInterval);
+    end TestSampling2;
 
 end TimeEvents;

@@ -132,6 +132,37 @@ class TestExternalBool:
         for i in falseInd:
             assert(not model.get('res[' + str(i) + ']'))
 
+class TestExternalRecord(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
+            'ExtFunctionTests.ExtFunctionRecord')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_result(self):
+        self.assert_end_value('y.x', 0.1)
+
+class TestExternalRecordCeval(SimulationTest):
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base('ExtFunctionTests.mo', 
+            'ExtFunctionTests.ExtFunctionRecordCeval')
+
+    @testattr(stddist = True)
+    def setUp(self):
+        self.setup_base(start_time=0.0, final_time=0.1, time_step=0.01)
+        self.run()
+
+    @testattr(stddist = True)
+    def test_result(self):
+        self.assert_end_value('y1.x', 3)
+        self.assert_end_value('y2.x', 3)
+
 class TestExternalShared2:
     
     @classmethod
@@ -384,6 +415,7 @@ class TestCBasic:
         res = model.simulate()
         #TODO: enable when model.get_string implemented
         #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
+        #nose.tools.assert_equals(model.get('xScalarLit'), 'dcb')
         #nose.tools.assert_equals(model.get('xArray[2]'), 'dbf')
         #nose.tools.assert_equals(model.get('xArrayUnknown[2]'), 'dbf')
     

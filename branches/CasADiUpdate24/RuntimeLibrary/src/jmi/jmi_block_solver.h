@@ -26,7 +26,13 @@
 #define _JMI_BLOCK_SOLVER_H
 
 #include "jmi_log.h"
-
+#include <time.h>
+#include <sundials/sundials_math.h>
+#include <sundials/sundials_direct.h>
+#include <nvector/nvector_serial.h>
+#include <kinsol/kinsol_direct.h>
+#include <kinsol/kinsol_impl.h>
+#include <sundials/sundials_dense.h>
 
 /** \brief Evaluation modes for the residual function.*/
 /** TODO: convert into enum */
@@ -52,8 +58,11 @@
 #define JMI_BLOCK_EQUATION_NOMINAL_AUTO                         262144
 #define JMI_BLOCK_EVALUATE_JAC                                  524288
 #define JMI_BLOCK_GET_DEPENDENCY_MATRIX                         1048576
+#define JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE                 1 << 21
+#define JMI_BLOCK_DISCRETE_REAL_NOMINAL                         1 << 22
 
 #define JMI_LIMIT_VALUE 1e30
+#define JMI_VAR_NOT_USED(x) ((void)x)
 
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
@@ -219,11 +228,20 @@ typedef int (*jmi_block_solver_check_discrete_variables_change_func_t)(void* pro
  */
 typedef jmi_block_solver_status_t (*jmi_block_solver_update_discrete_variables_func_t)(void* problem_data, int* non_reals_changed_flag);
 
+/**
+ * \brief Function signature for checking if in "restore solver state"-mode.
+ *
+ * @param problem_data (Input) Problem data pointer passed in the jmi_block_solver_new.
+ * @return 1 if in mode otherwise 0.
+ */
+typedef int (*jmi_block_restore_solver_state_mode_t)(void* problem_data);
+
 /* TODO: log_discrete_variables is not really needed. Kept just to make sure there are not changes during refactoring */
 typedef int (*jmi_block_solver_log_discrete_variables)(void* problem_data, jmi_log_node_t node);
 
 typedef struct jmi_block_solver_t jmi_block_solver_t;
 typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
+typedef struct jmi_block_solver_callbacks_t jmi_block_solver_callbacks_t;
 
 /**
  * \brief Allocate the internal structure for the block solver.
@@ -231,12 +249,7 @@ typedef struct jmi_block_solver_options_t jmi_block_solver_options_t;
 int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
                          jmi_callbacks_t* cb,
                          jmi_log_t* log,
-                         jmi_block_solver_residual_func_t F,
-                         jmi_block_solver_dir_der_func_t dF,  /* can be NULL if no directional derivative function is provided */
-                         jmi_block_solver_jacobian_func_t Jacobian, /* can be NULL if, e.g., kin_dF should be used for Jacobian calculation */
-                         jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change,
-                         jmi_block_solver_update_discrete_variables_func_t update_discrete_variables,
-                         jmi_block_solver_log_discrete_variables log_discrete_variables, /* Function for logging the discrete variables, can be NULL and then there is no logging of discrete variables */
+                         jmi_block_solver_callbacks_t solver_callbacks,
                          int n,
                          jmi_block_solver_options_t* options,
                          void* problem_data);
@@ -309,7 +322,8 @@ struct jmi_block_solver_options_t {
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
     int start_from_last_integrator_step; /**< \brief If set, uses the iteration variables from the last integrator step as initial guess. */
     double jacobian_finite_difference_delta; /**< \brief Option for which delta to use in finite differences Jacobians, default sqrt(eps). */
-
+    int block_profiling; /**< \brief Option for enabling profiling of the blocks. */
+    
     /* Options below are not supposed to change between invocations of the solver*/
     jmi_block_solver_kind_t solver; /**< brief Kind of block solver to use */
     jmi_block_solver_jac_variability_t jacobian_variability; /**< brief Jac variability for linear block solver */
@@ -317,14 +331,70 @@ struct jmi_block_solver_options_t {
 
 };
 
+struct jmi_block_solver_callbacks_t {
+    jmi_block_solver_residual_func_t F;                                                         /**< \brief Function for evaluation of the block residual. */
+    jmi_block_solver_dir_der_func_t dF;                                                         /**< \brief Directional derivative, can be NULL. */
+    jmi_block_solver_jacobian_func_t Jacobian;                                                  /**< \brief Function for evaluation of the block residual, can be NULL if, e.g., kin_dF should be used. */
+    jmi_block_solver_check_discrete_variables_change_func_t check_discrete_variables_change;    /**< \brief Function for checking if discrete variables change, used in enhanced event iteration, can be NULL. */
+    jmi_block_solver_update_discrete_variables_func_t update_discrete_variables;                /**< \brief Function for updating discrete variables. */
+    jmi_block_solver_log_discrete_variables log_discrete_variables;                             /**< \brief Function for logging the discrete variables. */
+    jmi_block_restore_solver_state_mode_t restore_solver_state_mode;                            /**< \brief Function for deciding when during the simulation/solver phase the solver state should be saved/restored. */
+};
+
 /** \brief Solve the equations in the associated problem. */
 int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, int handle_discrete_changes);
+
+/** \brief Start the clock for profiling. */
+clock_t jmi_block_solver_start_clock(jmi_block_solver_t * block_solver);
+
+/** \brief Stop the clock for profiling. */
+double jmi_block_solver_elapsed_time(jmi_block_solver_t * block_solver, clock_t start_clock);
 
 /** \brief Notify the block that an integrator step is completed */
 int jmi_block_solver_completed_integrator_step(jmi_block_solver_t * block_solver);
 
+/**
+ * \brief Compares two sets of iteration variables.
+ * 
+ * Compares two sets of iteration variables and returns (1) if their differance 
+ * is small and (0) if not. The difference between the sets of iteration
+ * variables is considered small if
+ *     |x_pre[i] – x_post[i] | < RTOL*|x_pre[i]| + RTOL*x_nom[i],
+ * is true for each iteration variable (i = 1,2,...,n).
+ * 
+ * @param block_solver A jmi_block_solver_t struct
+ * @param x_pre The first set of iteration variables
+ * @param x_post The second set of iteration varilabes
+ */
+int jmi_block_solver_compare_iter_vars(jmi_block_solver_t* block_solver, jmi_real_t* x_pre, jmi_real_t* x_post);
+
+/**
+ * \brief Checks if the "restore to last ingegrator step" behaviour is active.
+ * 
+ * Returns (1) if the option start_from_last_integrator_step and the return
+ * value of the callback restore_solver_state_mode are true otherwise (0).
+ * 
+ * @param block_solver A jmi_block_solver_t struct
+ */
+int jmi_block_solver_use_save_restore_state_behaviour(jmi_block_solver_t* block_solver);
+
 /** \brief Initialize the options with defaults */
 void jmi_block_solver_init_default_options(jmi_block_solver_options_t* op);
+
+/** \brief Retrive a block solver callback struct with defaults */
+jmi_block_solver_callbacks_t jmi_block_solver_default_callbacks(void);
+
+/** \brief Update function scaling based on Jacobian information */
+void jmi_update_f_scale(jmi_block_solver_t *block);
+
+/**< \brief Retrieve residual scales used in solver */
+double* jmi_solver_get_f_scales(jmi_block_solver_t* block);
+
+/**< \brief Setup residual scaling */
+void jmi_setup_f_residual_scaling(jmi_block_solver_t *block);
+
+/** \brief Calculate scaled residual max norm */
+double calculate_scaled_residual_norm(double* residual, double *f_scale, int n);
 
 /** \brief Check and log illegal iv inputs */
 int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);

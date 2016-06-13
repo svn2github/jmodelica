@@ -107,7 +107,8 @@ aspect FlatNames {
     
     inh lazy FQName InstNode.retrieveFQName();
     inh FQName FExp.retrieveFQName();
-    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName();
+    eq InstComponentDecl.getChild().retrieveFQName()                             = getFQName().copyAndAddFas(null);
+    eq InstArrayComponentDecl.getChild().retrieveFQName()                        = getFQName();
     eq InstComponentDecl.getInstModification().retrieveFQName()                  = retrieveFQName();
     eq InstReplacingRecord.getOriginalInstComponent().retrieveFQName()           = retrieveFQName();
     eq InstReplacingComposite.getOriginalInstComponent().retrieveFQName()        = retrieveFQName();
@@ -126,11 +127,11 @@ aspect FlatNames {
     eq InstRoot.getChild().retrieveFQName()                                      = new FQNameEmpty();
     eq SourceRoot.getProgram().retrieveFQName()                                  = new FQNameEmpty();
     eq FClass.getChild().retrieveFQName()                                        = null;
-    
+
     inh FQName InstModification.retrieveFQNameFromModification();
     eq InstClassDecl.getChild().retrieveFQNameFromModification()                 = retrieveFQName();
     eq InstComponentDecl.getChild().retrieveFQNameFromModification()             = retrieveFQName();
-    eq InstRoot.getChild().retrieveFQNameFromModification()                      = new FQNameEmpty();
+    eq Root.getChild().retrieveFQNameFromModification()                          = new FQNameEmpty();
 
     /**
      * Get a string representation of a prefix of this name.
@@ -390,9 +391,13 @@ aspect FlatNames {
     
     syn String FIdUse.scalarName()    = getFQName().scalarName();
     syn String FIdUseExp.scalarName() = getFIdUse().scalarName();
-
+    
+    public static String ASTNode.underScore(String s) {
+        return s.replaceAll("[^0-9a-zA-Z_]", "_");
+    }
+    
     syn String FQName.nameUnderscore()            = "";
-    syn lazy String FQNameString.nameUnderscore() = getName().replaceAll("]", "").replaceAll("[^0-9a-zA-Z_]", "_");
+    syn lazy String FQNameString.nameUnderscore() = ASTNode.underScore(getName().replaceAll("]", ""));
     syn lazy String FQNameFull.nameUnderscore() {
         StringBuilder str = new StringBuilder();
         int i = 0;
@@ -411,9 +416,9 @@ aspect FlatNames {
         }
         return str.toString();
     }
-
-    syn String FQNamePart.nameUnderscore() = getName().replaceAll("[^0-9a-zA-Z_]", "_");
-
+    
+    syn String FQNamePart.nameUnderscore() = ASTNode.underScore(getName());
+    
     syn String FIdUse.nameUnderscore() = getFQName().nameUnderscore();
     syn String FIdUseExp.nameUnderscore() = getFIdUse().nameUnderscore();
     eq FAbstractDerExp.nameUnderscore() {
@@ -556,6 +561,23 @@ aspect FlatNames {
     public FQNameFull FQNameFull.append(String name) {
         addFQNamePart(name);
         return this;
+    }
+    
+    public FQName FQName.append(String name, FArraySubscripts fas) {
+        return asFQNameFull().append(name, fas);
+    }
+    
+    public FQName FQNameFull.append(String name, FArraySubscripts fas) {
+        if (use(fas)) {
+            addFQNamePart(new FQNamePartArray(name, fas));
+        } else {
+            addFQNamePart(new FQNamePart(name));
+        }
+        return this;
+    }
+    
+    public boolean FQName.use(FArraySubscripts fas) {
+        return fas != null && fas.ndims() > 0;
     }
 
     /**
@@ -1075,8 +1097,10 @@ aspect FlatNames {
      * Create an access to this variable, from a scope where it can be accessed unqualified.
      */
     public FIdUseExp InstComponentDecl.createUseExp() {
-        return new FIdUseExp(new FIdUseInstAccess(new InstComponentAccess(name())));
+        return new FIdUseExp(new FIdUseInstAccess(createInstAccess()));
     }
+    
+    syn InstAccess InstComponentDecl.createInstAccess() = new InstComponentAccess(name());
 
     /**
      * Create an access expression with this access.
@@ -1258,10 +1282,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (icd.isInput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (icd.isInput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
@@ -1272,10 +1305,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myNonInputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (!icd.isInput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (!icd.isInput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
@@ -1285,10 +1327,19 @@ aspect FlatFunctionUtils {
       */
      syn lazy ArrayList<InstComponentDecl> InstNode.myOutputs() {
          ArrayList<InstComponentDecl> l = new ArrayList<InstComponentDecl>();
-         Set<String> names = new HashSet<String>();
-         for (InstComponentDecl icd : allInstComponentDecls())
-             if (icd.isOutput() && names.add(icd.name()))
-                 l.add(icd);
+         Map<String,Integer> names = new HashMap<String,Integer>();
+         for (InstComponentDecl icd : allInstComponentDecls()) {
+             if (icd.isOutput()) {
+                 // Make sure inherited ones are added first, 
+                 // but that any that are also present locally replace them.
+                 if (names.containsKey(icd.name())) {
+                     l.set(names.get(icd.name()), icd);
+                 } else {
+                     names.put(icd.name(), l.size());
+                     l.add(icd);
+                 }
+             }
+         }
          return l;
      }
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
@@ -1475,15 +1526,15 @@ aspect FlatFunctionUtils {
     eq FConstructorDecl.requiresDerivative()       = false;
     eq FDestructorDecl.requiresDerivative()        = false;
     
-    syn boolean FFunctionDecl.derivativEqualsZero() = !containsRealInputs() || !containsRealOutputs();
+    syn boolean FFunctionDecl.derivativeEqualsZero() = !containsRealInputs() || !containsRealOutputs();
     
     /**
      * Determines if the compiler is able to differentiate this function declaration
      */
     syn boolean FFunctionDecl.canDifferentiate() {
-        if (derivativeFunction() != null)
+        if (derivativeFunctionUnrestricted() != null)
             return true;
-        if (derivativEqualsZero())
+        if (derivativeEqualsZero())
             return true;
         for (FStatement statement : getFAlgorithm().getFStatements())
             if (!statement.canDifferentiate())
@@ -1904,7 +1955,7 @@ aspect FlatExpressions {
     eq FNoExp.isValidExp(boolean allowUnknownSize)              = false;
     eq FUnsupportedExp.isValidExp(boolean allowUnknownSize)     = false;
     eq FUnsupportedBuiltIn.isValidExp(boolean allowUnknownSize) = false;
-    eq FUnknownSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
+    eq FColonSizeExp.isValidExp(boolean allowUnknownSize)     = allowUnknownSize;
     
     /**
      * Counts the total number of FExp nodes in this ASTNode.

@@ -22,9 +22,10 @@
 
 #include "stdio.h"
 
-#include "jmi.h"
 #include "jmi_util.h"
 #include "jmi_log.h"
+#include "jmi_math.h"
+#include "jmi_types.h"
 
 typedef unsigned int jmi_value_reference;
 
@@ -69,6 +70,8 @@ jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* T
 jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
 
 jmi_value_reference is_negated(jmi_value_reference valueref);
+
+int is_real_input(jmi_t* jmi, jmi_value_reference valueref);
 
 int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location);
 

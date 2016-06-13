@@ -53,10 +53,10 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     jmi_ode_problem_t* ode_problem;
     jmi_cs_input_t* inputs;
     int flag, retval = JMI_ODE_EVENT;
-    int initialize = (int)JMI_FALSE; /* Should an initialization be performed on start of every do_step? */
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
     fmiReal time_event;
     fmiInteger i;
+    jmi_log_node_t top_node, inner_node;
     
     if (c == NULL) {
 		return fmiFatal;
@@ -75,6 +75,9 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     }else{
         time_event = time_final;
     }
+    
+    top_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "DoStep", 
+            "Starting a do step at internal <t:%E> with end <t:%E>", ode_problem->time, time_final);
     
     /* For the active inputs, get the initialize input */
     inputs = ode_problem->inputs;
@@ -98,11 +101,27 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         }
     } else {
         retval = JMI_ODE_EVENT;
-        while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_CS_SMALL*time_final < time_final){
-
-            retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, initialize);
+        while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final){
+            
+            inner_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "InternalSolver", 
+                "Invoking the internal solver at <t:%E> with end <t:%E>.", ode_problem->time, time_event);
+    
+            retval = ode_problem->ode_solver->solve(ode_problem->ode_solver, time_event, fmi1_cs->initialize_solver);
             if (retval<JMI_ODE_OK){
                 jmi_log_comment(ode_problem->log, logError, "Failed to perform a step.");
+                jmi_log_unwind(ode_problem->log, top_node);
+                return fmiError;
+            }
+            /* Solver initialized, set to False. */
+            fmi1_cs->initialize_solver = (int)JMI_FALSE;
+            
+            jmi_log_leave(ode_problem->log, inner_node);
+            
+            /* Set time to the model */
+            flag = fmi1_me_set_time(ode_problem->fmix_me, ode_problem->time);
+            if (flag != fmiOK) {
+                jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the time.");
+                jmi_log_unwind(ode_problem->log, top_node);
                 return fmiError;
             }
             
@@ -110,18 +129,26 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             flag = fmi1_me_set_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
             if (flag != fmiOK) {
                 jmi_log_node(ode_problem->log, logError, "Error", "Failed to set the continuous states.");
+                jmi_log_unwind(ode_problem->log, top_node);
                 return fmiError;
             }
         
             if (retval==JMI_ODE_OK && time_event == time_final) {
-                break;
+                if (fmi1_cs->event_info.upcomingTimeEvent == fmiTrue && fmi1_cs->event_info.nextEventTime == time_event) {
+                } else {
+                    break;
+                }
             }
+            retval = JMI_ODE_EVENT;
             
             flag = fmi1_me_event_update(ode_problem ->fmix_me, fmiFalse, &(fmi1_cs->event_info));
             if (flag != fmiOK){
-                jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
+                jmi_log_node(ode_problem->log, logError, "Error", "Failed to handle the event at <t:%E>.", ode_problem->time);
+                jmi_log_unwind(ode_problem->log, top_node);
                 return fmiError;
             }
+            /* Event handled, initialize again */
+            fmi1_cs->initialize_solver = (int)JMI_TRUE;
             
             flag = fmi1_me_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
             if (flag != fmiOK) {
@@ -130,11 +157,14 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             flag = fmi1_me_get_nominal_continuous_states(ode_problem->fmix_me, ode_problem->nominal, ode_problem->n_real_x);
             if (flag != fmiOK) {
                 jmi_log_node(ode_problem->log, logError, "Error", "Failed to get the nominal states.");
+                jmi_log_unwind(ode_problem->log, top_node);
                 return fmiError;
             }
             
             /* Check if the simulation should be terminated. */
             if (fmi1_cs->event_info.terminateSimulation == fmiTrue) {
+                jmi_log_node(ode_problem->log, logInfo, "Terminate", "Terminating simulation after a signal from the model at <t:%E>.", ode_problem->time);
+                jmi_log_unwind(ode_problem->log, top_node);
                 return fmiDiscard;
             }
             
@@ -148,9 +178,6 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
             }else{
                 time_event = time_final;
             }
-            
-            /* Event handled, initialize again */
-            initialize = (int)JMI_TRUE;
         }
     }
     
@@ -158,6 +185,8 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     for (i = 0; i < ode_problem -> n_real_u; i++) {
         inputs[i].active = fmiFalse;
     }
+    
+    jmi_log_leave(ode_problem->log, top_node);
     
     return fmiOK;
 }
@@ -320,6 +349,7 @@ fmiStatus fmi1_cs_initialize_slave(fmiComponent c, fmiReal tStart,
     fmi1_cs = (fmi1_cs_t*)c;
     ode_problem = fmi1_cs -> ode_problem;
     fmi1_me = (fmi1_me_t*)(ode_problem->fmix_me);
+    fmi1_cs->initialize_solver = (int)JMI_TRUE;
     
     /* jmi_ode_solvers_t solver = JMI_ODE_CVODE; */
                                         

@@ -113,15 +113,6 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         return JMI_ODE_ERROR;
     }
     
-    /*
-    flag = CVode(integrator->cvode_mem, time_final, integrator->y_work, &tret, CV_NORMAL);
-    if(flag<0){
-        jmi_log_node(problem->log, logError, "Error", "Failed to calculate the next step. "
-                     "Returned with <error_flag: %d>", flag);
-        return JMI_ODE_ERROR;
-    }
-    */
-    
     flag = CV_SUCCESS;
     while (flag == CV_SUCCESS) {
         
@@ -133,6 +124,8 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
             return JMI_ODE_ERROR;
         }
         
+        /* Set time */
+        problem->time = tret;
         /* Set states */
         memcpy (problem->states, NV_DATA_S(integrator->y_work), problem->n_real_x*sizeof(jmi_real_t));
         
@@ -163,27 +156,14 @@ int jmi_ode_cvode_solve(jmi_ode_solver_t* solver, realtype time_final, int initi
         }
         
         if (step_event == TRUE) {
-            jmi_log_node(problem->log, logInfo, "STEPEvent", "An event was detected at <t:%g>", tret);
+            jmi_log_node(problem->log, logInfo, "StepEvent", "An event was detected at <t:%g>", tret);
             return JMI_ODE_EVENT;
         }
         
     }
     
-    /*
-    time = problem->time;
-    if (time != tret) {
-        flag = problem->rhs_func(problem, tret, NV_DATA_S(integrator->y_work), problem->states_derivative);
-        if(flag != 0) {
-            jmi_log_node(problem->log, logWarning, "Warning", "Evaluating the derivatives failed (recoverable error). "
-                     "Returned with <warningFlag: %d>", flag);
-            return JMI_ODE_ERROR;
-        }
-        printf("Difference at time %g\n",tret);
-    }
-    */
-    
     if (flag == CV_ROOT_RETURN){
-        jmi_log_node(problem->log, logInfo, "CVODEEvent", "An event was detected at <t:%g>", tret);
+        jmi_log_node(problem->log, logInfo, "StateEvent", "An event was detected at <t:%g>", tret);
         return JMI_ODE_EVENT;
     }
     return JMI_ODE_OK;

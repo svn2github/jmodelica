@@ -410,7 +410,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
         double nom, min, max;
         
         
-        if (!(block->at_event) && block->options->start_from_last_integrator_step) {
+        if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
             flag = block->F(block->problem_data,block->last_accepted_x, NULL, JMI_BLOCK_WRITE_BACK);
             if(flag) {        
                 jmi_log_node(log, logError, "ErrorSettingInitialGuess", "<errorCode: %d> returned from <block: %s> "
@@ -900,7 +900,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
 
 int jmi_brent_completed_integrator_step(jmi_block_solver_t* block) {
     int flag = 0;
-    if (block->options->start_from_last_integrator_step) {
+    if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
         /* Brent specific handling of a completed step */
         flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
         if (flag) {

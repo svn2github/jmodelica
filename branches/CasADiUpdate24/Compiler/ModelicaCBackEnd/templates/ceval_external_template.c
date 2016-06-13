@@ -80,12 +80,10 @@ void JMCEVAL_printString(const char* str) {
 #define JMCEVAL_printEnum(X)    JMCEVAL_printInteger(X)
 #define JMCEVAL_parse(TYPE, X)  X = JMCEVAL_parse##TYPE()
 #define JMCEVAL_print(TYPE, X)  JMCEVAL_print##TYPE(X)
-#define JMCEVAL_free(X)         free(X)
 
 /* Parse/print arrays */
 #define JMCEVAL_parseArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_parse(TYPE, jmi_array_ref_1(ARR,vi)); }
 #define JMCEVAL_printArray(TYPE,ARR) for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_print(TYPE, jmi_array_val_1(ARR,vi)); }
-#define JMCEVAL_freeArray(ARR)       for (vi = 1; vi <= ARR->num_elems; vi++) { JMCEVAL_free(jmi_array_val_1(ARR,vi)); }
 
 /* Used by ModelicaUtilities */
 void jmi_global_log(int warning, const char* name, const char* fmt, const char* value)
@@ -161,16 +159,18 @@ int main(int argc, const char* argv[])
     /* Indices for parsing/printing vars, dimensions */
     size_t vi,di;
     
-    $ECE_decl$
+$ECE_decl$
 
-
-    JMI_DYNAMIC_INIT()
     JMCEVAL_setup(); /* This needs to happen first */
 
     JMCEVAL_check("START");
     if (JMCEVAL_try()) {
+        JMI_DYNAMIC_INIT()
         /* Init phase */
-        $ECE_init$
+$ECE_setup_decl$
+$ECE_setup_init$
+$ECE_setup_free$
+        JMI_DYNAMIC_FREE()
     } else {
         JMCEVAL_failed();
     }
@@ -178,26 +178,27 @@ int main(int argc, const char* argv[])
     JMCEVAL_check("READY");
     while (JMCEVAL_cont("EVAL\n")) {
         JMI_DYNAMIC_INIT()
-        $ECE_calc_init$
+$ECE_calc_decl$
+$ECE_calc_init$
         JMCEVAL_check("CALC");
         if (JMCEVAL_try()) {
             /* Calc phase */
-            $ECE_calc$
+$ECE_calc$
         } else {
             JMCEVAL_failed();
         }
-        $ECE_calc_free$
+$ECE_calc_free$
         JMI_DYNAMIC_FREE()
         JMCEVAL_check("READY");
     }
 
     if (JMCEVAL_try()) {
         /* End phase */
-        $ECE_end$
+$ECE_free$
     } else {
         JMCEVAL_failed();
     }
-    JMI_DYNAMIC_FREE()
+
     JMCEVAL_check("END");
     return 0;
 }

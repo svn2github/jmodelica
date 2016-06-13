@@ -28,6 +28,7 @@
 #include "jmi_log.h"
 #include "jmi_delay_impl.h"
 #include "jmi_dynamic_state.h"
+#include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
 void jmi_z_init(jmi_z_t* z) {
@@ -225,6 +226,8 @@ int jmi_init(jmi_t** jmi,
     jmi_->dynamic_state_sets = (jmi_dynamic_state_set_t*)calloc(n_dynamic_state_sets,sizeof(jmi_dynamic_state_set_t));
     jmi_->updated_states = JMI_FALSE;
     
+    jmi_->chattering = jmi_chattering_create(n_sw);
+    
     /* Work arrays */
     jmi_->real_x_work = (jmi_real_t*)calloc(jmi_->n_real_x,sizeof(jmi_real_t));
     jmi_->real_u_work = (jmi_real_t*)calloc(jmi_->n_real_u,sizeof(jmi_real_t));
@@ -258,6 +261,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->atInitial = JMI_FALSE;
     jmi_->eventPhase = JMI_TIME_EXACT;
     jmi_->nextTimeEvent.defined = 0;
+    jmi_->save_restore_solver_state_mode = 0;
     
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
@@ -273,6 +277,7 @@ int jmi_init(jmi_t** jmi,
     jmi_->is_initialized = 0;
 
     jmi_->nbr_event_iter = 0;
+    jmi_->nbr_consec_time_events = 0;
 
     jmi_->dyn_mem_head.next = NULL;
     jmi_->dyn_mem_head.data = NULL;
@@ -315,6 +320,8 @@ int jmi_delete(jmi_t* jmi){
         jmi_dynamic_state_delete_set(jmi, i);
     }
     free(jmi->dynamic_state_sets);
+    
+    jmi_chattering_delete(jmi->chattering);
 
     free(jmi->output_vrefs);
     free(*(jmi->z));
@@ -548,6 +555,7 @@ int jmi_ode_derivatives(jmi_t* jmi) {
         node = jmi_log_enter_fmt(jmi->log, logInfo, "EquationSolve", 
                                  "Model equations evaluation invoked at <t:%E>", t[0]);
         jmi_log_reals(jmi->log, node, logInfo, "States", jmi_get_real_x(jmi), jmi->n_real_x);
+        jmi_log_reals(jmi->log, node, logInfo, "Inputs", jmi_get_real_u(jmi), jmi->n_real_u);
     }
 
     jmi->block_level = 0; /* to recover from errors */
@@ -632,16 +640,6 @@ int jmi_ode_next_time_event(jmi_t* jmi, jmi_time_event_t* event) {
     }
     jmi_finalize_try(jmi, depth);
     return return_status;
-}
-
-jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
-    jmi_real_t t = jmi_get_t(jmi)[0];
-    if (!jmi->atEvent || SURELY_LT_ZERO(t-offset)) {
-      /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
-        return JMI_FALSE;
-    }
-    /*  printf("jmi_sample2: %f %f %12.12f %12.12f\n",offset,h,fmod((t-offset),h),(t-offset));*/
-    return ALMOST_ZERO(jmi_dremainder((t-offset),h));
 }
 
 int jmi_dae_F(jmi_t* jmi, jmi_real_t* res) {

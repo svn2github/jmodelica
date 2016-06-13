@@ -43,10 +43,6 @@ else(WIN32)
 endif(WIN32)
 
 # import environment variables
-set(CASADI_HOME $ENV{CASADI_HOME})
-set(CASADI_BUILD_DIR $ENV{CASADI_BUILD_DIR})
-set(MC_BUILD $ENV{MC_BUILD})
-set(IPOPT_HOME $ENV{IPOPT_HOME})
 set(BOOST_HOME $ENV{BOOST_HOME})
 
 # locate JCC installation, store in JCC_DIR
@@ -70,7 +66,7 @@ link_directories(${IPOPT_HOME}/lib)
 get_filename_component(ABS_MC_BUILD "${MC_BUILD}" REALPATH)
 
 # Jar file location provided from environment
-set(COMPILERS_DIR "$ENV{IFCASADI_JAR_BASE}")
+set(COMPILERS_DIR "${IFCASADI_JAR_BASE}")
 set(THIRDPARTY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty")
 
 set(MC_JAR "${COMPILERS_DIR}/ModelicaCompilerCasADi/bin/ModelicaCompiler.jar")

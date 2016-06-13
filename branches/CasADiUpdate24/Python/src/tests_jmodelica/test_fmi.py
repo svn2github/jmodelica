@@ -80,6 +80,35 @@ class Test_FMUModelBase:
         cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
 
     @testattr(fmi = True)
+    def test_caching(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        
+        assert len(negated_alias.cache) == 0 #No starting cache
+        
+        vars_1 = negated_alias.get_model_variables()
+        vars_2 = negated_alias.get_model_variables()
+        assert id(vars_1) == id(vars_2)
+        
+        vars_3 = negated_alias.get_model_variables(filter="*")
+        assert id(vars_1) != id(vars_3)
+        
+        vars_4 = negated_alias.get_model_variables(type=0)
+        assert id(vars_3) != id(vars_4)
+        
+        vars_5 = negated_alias.get_model_time_varying_value_references()
+        vars_7 = negated_alias.get_model_time_varying_value_references()
+        assert id(vars_5) != id(vars_1)
+        assert id(vars_5) == id(vars_7)
+        
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        
+        assert len(negated_alias.cache) == 0 #No starting cache
+        
+        vars_6 = negated_alias.get_model_variables()
+        assert id(vars_1) != id(vars_6)
+        
+
+    @testattr(fmi = True)
     def test_initialize_once(self):
         negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
         negated_alias.initialize()
@@ -484,6 +513,14 @@ class Test_FMUModelME1:
         """
         cls.rlc_circuit = compile_fmu("RLC_Circuit",os.path.join(path_to_mofiles,"RLC_Circuit.mo"))
         cls.depPar1 = compile_fmu("DepParTests.DepPar1",os.path.join(path_to_mofiles,"DepParTests.mo"))
+        cls.string1 = compile_fmu("StringModel1",os.path.join(path_to_mofiles,"TestString.mo"))
+    
+    @testattr(fmi = True)
+    def test_get_string(self):
+		model = load_fmu(self.string1)
+		
+		for i in range(100): #Test so that memory issues are detected
+			assert model.get("str")[0] == "hej"
     
     @testattr(fmi = True)
     def test_check_against_unneccesary_derivatives_eval(self):
@@ -634,6 +671,7 @@ class Test_FMUModelME1:
         assert dep.get("b1")
         assert dep.get("b2")
         
+        dep.initialize()
         dep.terminate()
         nose.tools.assert_raises(FMUException, dep.set, "b1", False)
 
@@ -677,6 +715,7 @@ class Test_FMUModelME1:
         dep.set("N1", 4.0)
         assert dep.get("N1")==4
         
+        dep.initialize()
         dep.terminate()
         nose.tools.assert_raises(FMUException, dep.set, "N1", 4.0)
 

@@ -723,18 +723,18 @@ aspect Names {
   eq InstNode.getChild().findLibraryName() = libraryName();
   eq InstRoot.getChild().findLibraryName() = null;
   eq Root.getChild().findLibraryName()     = null;
-  
-  inh String ASTNode.packagePath(String name);
-  eq Root.getChild().packagePath(String name) = null;
-  eq InstNode.getChild().packagePath(String name) {
-      InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(name);
-      return icd.successful() ? icd.target().dirName() : null;
-  }
-  eq FullClassDecl.getChild().packagePath(String name) {
-	  ClassDecl cd = simpleLookupClassDotted(name);
-	  return (cd == null) ? null : cd.dirName();
-  }
-  
+
+    inh String ASTNode.packagePath(String name);
+    eq Root.getChild().packagePath(String name) = null;
+    eq InstNode.getChild().packagePath(String name) {
+        InstLookupResult<InstClassDecl> icd = lookupInstClassQualifiedGlobal(name);
+        return icd.successful() ? icd.target().dirName() : null;
+    }
+    eq FullClassDecl.getChild().packagePath(String name) {
+        ClassDecl cd = simpleLookupClassDottedGlobal(name);
+        return (cd == null) ? null : cd.dirName();
+    }
+
   inh String ASTNode.topPackagePath();
   eq Root.getChild().topPackagePath() = null;
   eq InstClassDecl.getChild().topPackagePath() {
@@ -746,67 +746,92 @@ aspect Names {
 	  return (path == null) ? dirName() : path;
   }
 
-  /**
-   * Converts an URI to a file-system path.
-   * 
-   * Only modelica:// and file:// URIs are supported. 
-   * If the string is a simple path, then it is interpreted as relative to the 
-   * top level package this node is in, or if that path does not exist, relative 
-   * to the parent directory the file this node is in.
-   * 
-   * @param str  the string to interpret as an URI
-   */
-  public String ASTNode.uri2path(String str) {
-      try {
-          URI uri = new URI(str);
-    	  String scheme = uri.getScheme();
-          if (scheme == null) {
-              String pack = topPackagePath();
-              if (pack != null) {
-            	  File f = new File(pack, uri.getPath());
-            	  if (f.exists())
-            		  return f.getAbsolutePath();
-              }
-              File dir = new File(fileName()).getParentFile();
-              return new File(dir, uri.getPath()).getAbsolutePath();
-          } else if (scheme.equals("file")) {
-              return uri.getPath();
-          } else if (scheme.equals("modelica")) {
-              String pack = packagePath(uri.getAuthority());
-              if (pack != null) 
-            	  return new File(pack, uri.getPath()).getAbsolutePath();
-          }
-      } catch (URISyntaxException e) {
-      }
-      return null;
-  }
-  
-  /**
-   * Resolves <code>str</code> to an absolute file path.
-   * Supports file URI, modelica URI, absolute file path and 
-   * relative file path (w.r.t. current working directory)
-   */
-  public String ASTNode.resolve(String str) {
-      try {
-          URI uri = new URI(str);
-          if (uri.getScheme() != null) {
-              if (uri.getScheme().equals("file")) {
-                  return uri.getPath();
-              } else if (uri.getScheme().equals("modelica")) {
-                  String pack = packagePath(uri.getAuthority());
-                  return new File(pack, uri.getPath()).getAbsolutePath();
-              } else {
-                  error(String.format("Unsupported URI scheme '%s'.", uri.getScheme()));
-                  return str;
-              }
-          }
-      } catch (URISyntaxException e) {
-      }
-      
-      File f = new File(str);
-      return f.getAbsolutePath();
-  }
-  
+    /**
+     * Converts an URI to a file-system path.
+     * 
+     * Only modelica:// and file:// URIs are supported. 
+     * If the string is a simple path, then it is interpreted as relative to the 
+     * top level package this node is in, or if that path does not exist, relative 
+     * to the parent directory the file this node is in.
+     * 
+     * @param str  the string to interpret as an URI
+     */
+    public String ASTNode.resolveInPackage(String str) {
+        String path = resolveURI(str, true);
+        if (path != null) {
+            return path;
+        } else {
+            String pack = topPackagePath();
+            if (pack != null) {
+                File f = new File(pack, str);
+                if (f.exists())
+                    return canonicalPath(f);
+                File dir = new File(fileName()).getParentFile();
+                return canonicalPath(new File(dir, str));
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves <code>str</code> to an absolute file path.
+     * Supports file URI, modelica URI, absolute file path and 
+     * relative file path (w.r.t. current working directory)
+     */
+    public String ASTNode.resolve(String str) {
+        String path = resolveURI(str, true);
+        if (path != null) {
+            return path;
+        } else {
+            return canonicalPath(new File(str));
+        }
+    }
+
+    /**
+     * Resolves <code>str</code> to an absolute file path.
+     * 
+     * Supports file URI and modelica URI only.
+     * Returns null for unsupported schemes and malformed URIs.
+     * If error is true, also generate an error for unsupported schemes.
+     */
+    public String ASTNode.resolveURI(String str, boolean error) {
+        try {
+            URI uri = new URI(str);
+            if (uri.getScheme() != null) {
+                if (uri.getScheme().equals("file")) {
+                    return uri.getPath();
+                } else if (uri.getScheme().equals("modelica")) {
+                    String pack = packagePath(uri.getAuthority());
+                    if (pack != null) {
+                        return canonicalPath(new File(pack + uri.getPath()));
+                    }
+                } else if (error) {
+                    error("Unsupported URI scheme '%s'.", uri.getScheme());
+                }
+            }
+        } catch (URISyntaxException e) {
+        }
+        return null;
+    }
+
+    /**
+     * Convert file to a canonical path, if possible.
+     * 
+     * On Windows, backslash is converted to forward slash, to make testing easier.
+     */
+    public static String ASTNode.canonicalPath(File path) {
+        String res;
+        try {
+            res = path.getCanonicalPath();
+        } catch (IOException e) {
+            res = path.getAbsolutePath();
+        }
+        if (File.separatorChar == '\\') {
+            res = res.replace('\\', '/');
+        }
+        return res;
+    }
+
     inh InstClassDecl ASTNode.enclosingInstClassDecl();
     eq SourceRoot.getProgram().enclosingInstClassDecl()      = null;
     eq FlatRoot.getChild().enclosingInstClassDecl()          = null;
@@ -884,7 +909,20 @@ aspect Names {
     eq InstDot.getInstAccess(int i).getNextInstAccess() = 
     		(i >= getNumInstAccessNoTransform() - 1) ? null : getInstAccess(i + 1);
     eq BaseNode.getChild().getNextInstAccess()          = null;
-
+    
+    /**
+     * Iterable of all parts of this access
+     */
+    syn Iterable<InstAccess> InstAccess.allParts() = Arrays.asList(this);
+    eq InstDot.allParts() = getInstAccessList();
+    
+    /**
+     * Find the parent access for this subscript 
+     */
+    inh InstAccess FSubscript.myInstAccess();
+    eq Root.getChild().myInstAccess() = null;
+    eq InstNode.getChild().myInstAccess() = null;
+    eq InstAccess.getChild().myInstAccess() = this;
     
     /**
      * stripFirstAccess removes the first access in a qualified
@@ -995,18 +1033,53 @@ aspect Names {
 }
 
 aspect Slices {
-	
+    
     /**
      * Check if this is a slice operation.
      */
-    syn boolean InstAccess.isSlice() = hasFArraySubscripts() && isArray();
-    eq InstDot.isSlice() {
-    	int last = getNumInstAccess() - 1;
-    	for (int i = 0; i < last; i++)
-    		if (getInstAccess(i).isArray())
-    			return true;
-    	return getInstAccess(last).isSlice();
+    syn boolean FExp.isSlice() = true;
+    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
+    eq FSubscriptedExp.isSlice() = isArray();
+    
+    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
+    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
+    
+    syn boolean InstAccess.isSlice() {
+        java.util.List<FArraySubscripts> l = allFArraySubscripts();
+        int last = l.size() - 1;
+        for (int i = 0; i < last; i++) {
+            if (l.get(i).ndims() > 0) {
+                return true;
+            }
+        }
+        return l.get(last).isSlice();
     }
+    
+    syn boolean FArraySubscripts.isSlice() {
+        for (FSubscript fs : getFSubscripts()) {
+            if (fs.isSlice()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    syn boolean FSubscript.isSlice() = true;
+    eq FColonSubscript.isSlice()     = false;
+    eq FExpSubscript.isSlice()       = getFExp().isSliceFAS(mySize());
+    
+    syn boolean FExp.isSliceFAS(Size size) = true;
+    eq FRangeExp.isSliceFAS(Size size) =
+         !getFExp(0).isLiteral(1) ||
+         (getNumFExp() > 2 && !getFExp(1).isLiteral(1)) ||
+         size.isSliceFAS(getFExp(getNumFExp()-1));
+    
+    public boolean Size.isSliceFAS(FExp exp) {
+        return isUnknown() || !exp.isLiteral(get(0));
+    }
+    
+    syn boolean FExp.isLiteral(int i)  = false;
+    eq FIntegerLitExp.isLiteral(int i) = getValue() == i;
     
     /**
      * Check if this is a slice operation.
@@ -1021,34 +1094,9 @@ aspect Slices {
     				if (fs.ndims() > 0)
     					return true;
     	}
-    	boolean array = false;
-    	boolean exp = false;
 		FQNamePart part = getFQNamePart(n);
-		if (part.hasFArraySubscripts()) {
-			for (FSubscript fs : part.getFArraySubscripts().getFSubscripts()) {
-				if (fs instanceof FExpSubscript) 
-					exp = true;
-				if (fs.ndims() > 0)
-					array = true;
-			}
-		}
-		return array && exp;
+        return part.hasFArraySubscripts() && part.getFArraySubscripts().isSlice();
     }
-    
-    
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FAssignableExp.isSlice();
-    eq FIdUseExp.isSlice() = isArray() && getFIdUse().isSlice();
-    eq FSubscriptedExp.isSlice() = isArray();
-    
-    /**
-     * Check if this is a slice operation.
-     */
-    syn boolean FIdUse.isSlice()  = getFQName().isSlice();
-    eq FIdUseInstAccess.isSlice() = getInstAccess().isSlice();
-    
 }
 
 
@@ -1079,6 +1127,14 @@ aspect Visibility {
     syn boolean ComponentDecl.isProtected()     = getVisibilityType().isProtected();
     syn boolean InstClassDecl.isProtected()     = getClassDecl().isProtected();
     syn boolean InstComponentDecl.isProtected() = getComponentDecl().isProtected();
+
+    inh boolean InstNode.inProtectedComponent();
+    eq InstComponentDecl.getChild().inProtectedComponent()     = isProtected() || inProtectedComponent();
+    eq InstClassDecl.getChild().inProtectedComponent()         = false;
+    eq Root.getChild().inProtectedComponent()                  = false;
+    eq InstRecordConstructor.getChild().inProtectedComponent() = false;
+
+    syn boolean InstAssignable.isPublicVar() = isPublic() && !inProtectedComponent();
 
     syn boolean VisibilityType.isPublic() = false;
     eq PublicVisibilityType.isPublic()    = true;
@@ -1464,11 +1520,24 @@ aspect MultiDeclMethods {
     
     syn InstCallable InstFunctionCall.myInstCallable() = getName().myInstCallable();
     
-    syn InstCallable InstAccess.myInstCallable() = myInstClassDecl();
-    eq InstComponentAccess.myInstCallable() {
-        InstComponentDecl icd = myInstComponentDecl();
-        return icd.isPartialFunction() ? (InstPartialFunction) icd : unknownInstClassDecl();
+    syn InstCallable InstAccess.myInstCallable() = myInstLookupCallable().target(INST_UNKNOWN_CALLABLE, this);
+    
+    syn InstLookupResult<InstCallable> InstAccess.myInstLookupCallable() = myInstLookup().asCallable();
+    
+    public InstLookupResult<InstCallable> InstLookupResult.asCallable() {
+        if (isNotFound()) {
+            return InstLookupResult.<InstCallable>notFound();
+        }
+        InstCallable ic = target().asCallable();
+        if (ic == null) {
+            return InstLookupResult.<InstCallable>notFound();
+        }
+        return create(ic);
     }
+    
+    syn InstCallable InstClassDecl.asCallable()     = this;
+    syn InstCallable InstComponentDecl.asCallable() = null;
+    eq InstPartialFunction.asCallable()             = this;
 }
 
 aspect ShortClassUtil {

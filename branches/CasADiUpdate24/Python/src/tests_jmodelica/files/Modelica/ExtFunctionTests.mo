@@ -63,6 +63,35 @@ equation
     res = copyBoolArray(arg);
 end ExtFunctionBool;
 
+model ExtFunctionRecord
+    record R
+        Real x;
+    end R;
+    function fRecord
+        input R r;
+        output R y;
+      external "C" fRecord(r,y) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+    end fRecord;
+    R y = fRecord(R(time));
+end ExtFunctionRecord;
+
+model ExtFunctionRecordCeval
+    record R
+        Real x;
+    end R;
+    function fRecord
+        input R r;
+        output R y;
+      external "C" fRecord(r,y) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+    end fRecord;
+    constant R y1 = fRecord(R(3));
+    R y2 = fRecord(R(3));
+end ExtFunctionRecordCeval;
+
 model ExtFunctionTest3
  Real a(start=10);
  Real b;
@@ -260,6 +289,14 @@ package CEval
         Include="#include \"externalFunctionsC.h\"");
       end fStringScalar;
       
+      function fStringScalarLit
+        input  String x_in;
+        output String x_out;
+      external "C" annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+      end fStringScalarLit;
+      
       function fStringArray
         input  String[2] x_in;
         output String[size(x_in,1)] x_out;
@@ -277,6 +314,7 @@ package CEval
       end fStringArrayUnknown;
 
       constant String    xScalar        = fStringScalar("abcde");
+      constant String    xScalarLit     = fStringScalarLit("abcde");
       constant String[2] xArray         = fStringArray({"abc","def"});
       constant String[2] xArrayUnknown  = fStringArrayUnknown({"abc","def"});
     end StringTest;
@@ -803,5 +841,15 @@ package CEval
     end UseCrash;
   end Caching;
 end CEval;
+
+model PrintsControlCharacters
+    "This model prints some control characters using ModelicaMessage during compilation"
+    function f
+        input Real i;
+        output Real o;
+        external "C" o = f(i) annotation(Include="double f(double i) {ModelicaMessage(\"\\1\\2\\3\\4\");return i;}");
+    end f;
+    constant Real c = f(2);
+end PrintsControlCharacters;
 
 end ExtFunctionTests;

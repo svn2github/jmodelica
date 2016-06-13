@@ -331,6 +331,7 @@ AS_IF([test "$with_mingw" != no],
       ])
 
 AM_CONDITIONAL([COPY_PTHREADS_LIB],[test "$with_mingw" != no -a "$with_tdm" = no])
+AM_CONDITIONAL([NUMPY_NO_MSVCR],[test "$with_mingw" != no -a "$with_tdm" = yes])
 
 
 # Set output variables to be exported to the Makefiles
@@ -430,6 +431,31 @@ AM_CONDITIONAL([HAVE_ANT],[test "x$ANT" != x])
 AS_IF([test "x$ANT" = x],
       [AC_MSG_FAILURE([Cannot find Apache Ant - please install in order to build compiler front-ends.])])
 
+# Detect if Python installation is specified with environment var
+AC_ARG_VAR(PYTHON_HOME, [Python installation to use])
+AS_IF([test "${PYTHON_HOME}"],
+      [
+          AC_MSG_RESULT([Using Python installation ${PYTHON_HOME}])
+          CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=`cd $PYTHON_HOME; pwd`/libs/libpython27.a"
+          CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=`cd $PYTHON_HOME; pwd`/include"
+      ], [
+          AS_IF([test "${PYTHON_LIB}" && test "${PYTHON_INCLUDE}"], 
+            [
+                AC_MSG_RESULT([Using Python lib ${PYTHON_LIB} and Python include ${PYTHON_INCLUDE}])
+                CMAKE_PYTHON_LIB="-DPYTHON_LIBRARY=${PYTHON_LIB}"
+                CMAKE_PYTHON_INCLUDE="-DPYTHON_INCLUDE_DIR=${PYTHON_INCLUDE}"
+            ], [
+                AC_MSG_RESULT([Python installation not specified.])
+                CMAKE_PYTHON_LIB=
+                CMAKE_PYTHON_INCLUDE=
+            ])
+      ])
+AC_SUBST(CMAKE_PYTHON_LIB)
+AC_SUBST(CMAKE_PYTHON_INCLUDE)
+
+
+AC_SUBST(PYTHON_HOME)
+PYTHON_HOME=$PYTHON_HOME
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -440,6 +466,28 @@ AC_HEADER_STDBOOL
 AC_C_CONST
 
 #AC_CONFIG_SUBDIRS([ThirdParty/Sundials/sundials-2.5.0])
+
+REQUIRE_IPOPT_HOME=True
+REQUIRE_SUNDIALS_HOME=True
+REQUIRE_CPPAD_HOME=True
+REQUIRE_COMPILER_JARS=True
+REQUIRE_BEAVER_PATH=True
+REQUIRE_MODELICAPATH=True
+REQUIRE_JPYPE_JVM=True
+REQUIRE_JVM_ARGS=False
+REQUIRE_MINGW_HOME=True
+REQUIRE_OPTIMICA_COMPILER=True
+
+AC_SUBST(REQUIRE_IPOPT_HOME)
+AC_SUBST(REQUIRE_SUNDIALS_HOME)
+AC_SUBST(REQUIRE_CPPAD_HOME)
+AC_SUBST(REQUIRE_COMPILER_JARS)
+AC_SUBST(REQUIRE_BEAVER_PATH)
+AC_SUBST(REQUIRE_MODELICAPATH)
+AC_SUBST(REQUIRE_JPYPE_JVM)
+AC_SUBST(REQUIRE_JVM_ARGS)
+AC_SUBST(REQUIRE_MINGW_HOME)
+AC_SUBST(REQUIRE_OPTIMICA_COMPILER)
 
 AC_CONFIG_FILES([
  Makefile
@@ -456,6 +504,7 @@ AC_CONFIG_FILES([
  Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
  RuntimeLibrary/Makefile
  jm_tests
+ Python/src/required_defaults.py
 ])
 
 AC_OUTPUT

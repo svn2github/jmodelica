@@ -20,6 +20,7 @@
 #include "jmi_me.h"
 #include "jmi_delay.h"
 #include "jmi_dynamic_state.h"
+#include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
 #define indexmask  0x07FFFFFF
@@ -45,6 +46,15 @@ jmi_value_reference is_negated(jmi_value_reference valueref) {
     jmi_value_reference negated = valueref & negatemask;
     
     return negated;
+}
+
+int is_real_input(jmi_t* jmi, jmi_value_reference valueref) {
+    jmi_value_reference index = get_index_from_value_ref(valueref);
+    if (index >= jmi->offs_real_u && index < jmi->offs_real_w) {
+        return TRUE;
+    } else {
+        return FALSE;
+    }
 }
 
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
@@ -217,6 +227,8 @@ int jmi_initialize(jmi_t* jmi) {
 
     jmi_save_last_successful_values(jmi);
     
+    /* Save restore mode activated after initialization */
+    jmi->save_restore_solver_state_mode = 1;
     jmi->is_initialized = 1;
     
     /* Initialize delay blocks */
@@ -228,6 +240,9 @@ int jmi_initialize(jmi_t* jmi) {
         }
         return -1;
     }
+    
+    /* Initialize chattering struct */
+    jmi_chattering_init(jmi);
     
     retval = jmi_next_time_event(jmi);
     if(retval != 0) {
@@ -468,6 +483,8 @@ int jmi_completed_integrator_step(jmi_t* jmi, jmi_real_t* triggered_event) {
     jmi_save_last_successful_values(jmi);
     /* Block completed step */
     jmi_block_completed_integrator_step(jmi);
+    /* Chattering completed step */
+    jmi_chattering_completed_integrator_step(jmi);
     
     /* Verify the choice of dynamic states */
     retval = jmi_dynamic_state_verify_choice(jmi);
@@ -500,6 +517,15 @@ int jmi_get_nominal_continuous_states(jmi_t* jmi, jmi_real_t x_nominal[], size_t
     return 0;
 }
 
+/* Local helper function */
+static int jmi_exists_grt_than_time_event(jmi_t* jmi) {
+    return jmi->model_terminate == FALSE                            &&
+           jmi->atTimeEvent                                         &&
+           jmi->eventPhase == JMI_TIME_EXACT                        &&
+           jmi->nextTimeEvent.defined                               && 
+           ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+}
+
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                         jmi_event_info_t* event_info) {
                             
@@ -510,6 +536,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi_log_node_t top_node;
     jmi_log_node_t iter_node;
     jmi_log_node_t discrete_node;
+    jmi_log_node_t reinit_node;
 
     /* Used for logging */
     switches = jmi_get_sw(jmi);
@@ -556,6 +583,10 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
         /* We are at an event -> set atEvent to true. */
         jmi->atEvent = JMI_TRUE;
+        
+        /* We don't need to save and restore state during event iteration */
+        jmi->save_restore_solver_state_mode = 0;
+        
         /* We are at an time event -> set atTimeEvent to true. */
         if (jmi->nextTimeEvent.defined) {
             jmi->atTimeEvent = ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
@@ -587,14 +618,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Evaluation of model equations during event iteration failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-        
-        /* This is an implicit accepted step. */
-        retval = jmi_block_completed_integrator_step(jmi);
-        if(retval != 0) {
-            jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
             jmi_log_unwind(jmi->log, top_node);
             return -1;
         }
@@ -638,8 +661,25 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         
         /* Check if a reinit triggered - this would mean that state variables changed. */
         if (jmi->reinit_triggered) {
+            int verify_state_value_changed = 0;
             event_info->iteration_converged = FALSE;
             event_info->state_values_changed = TRUE;
+            
+            reinit_node =jmi_log_enter_fmt(jmi->log, logInfo, "ReInitTriggered", 
+                                "A reinit triggered during the last event iteration.");
+            for (i = 0; i < jmi->n_real_x; i++) {
+                if (jmi_get_real_x(jmi)[i] != jmi_get_z(jmi)[jmi->offs_pre_real_x+i]) {
+                    verify_state_value_changed = 1; /* State has changed */
+                    jmi_log_node(jmi->log, logInfo, "StateUpdated", " <real: #r%d#> <from: %E> <to: %E>", jmi_get_value_ref_from_index(i+jmi->offs_real_x, JMI_REAL), jmi_get_z(jmi)[jmi->offs_pre_real_x+i], jmi_get_real_x(jmi)[i]);
+                }
+            }
+            jmi_log_leave(jmi->log, reinit_node);
+            
+            if (verify_state_value_changed != 1) {
+                jmi_log_node(jmi->log, logError, "ReInitFailure", "No state was changed despite a reinit triggered which indicates an error at <t:%E>.",jmi_get_t(jmi)[0]);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
         }
         
         /* No convergence under the allowed number of iterations. */
@@ -672,13 +712,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
-        /* Evaluate the guards with the event flag set to false in order to
-         * reset guards depending on samplers before copying pre values.
-         * If this is not done, then the corresponding pre values for these guards
-         * will be true, and no event will be triggered at the next sample.
-         */
+        /* Deprecated, does nothing. */
         retval = jmi_ode_guards(jmi);
-
         if (retval != 0) { /* Error check */
             jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
             jmi_log_unwind(jmi->log, top_node);
@@ -720,14 +755,22 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         if (jmi->nextTimeEvent.defined) {
             event_info->next_event_time_defined = TRUE;
             event_info->next_event_time = jmi->nextTimeEvent.time;
-            /*printf("fmi_event_upate: nextTimeEvent: %f\n",nextTimeEvent); */
+            if (event_info->next_event_time < jmi_get_t(jmi)[0]) {  /* Next event time is less than the current, error! */
+                jmi_log_node(jmi->log, logError, "NextTimeEventFailure", "Failed to compute the next time event. "
+                                    "The next time event was computed to <t:%E> while the current time is <t:%E>.",
+                                    event_info->next_event_time,jmi_get_t(jmi)[0]);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
+            jmi_log_node(jmi->log, logInfo, "NextTimeEvent", "A next time event is defined and computed to occur at <t:%E>",event_info->next_event_time);
         } else {
             event_info->next_event_time_defined = FALSE;
         }
         
         /* Save the z values to the z_last vector */
         jmi_save_last_successful_values(jmi);
-        /* Block completed step */
+        /* Block completed step, it should be saved and used when integrating */
+        jmi->save_restore_solver_state_mode = 1;
         retval = jmi_block_completed_integrator_step(jmi);
         if(retval != 0) {
             jmi_log_comment(jmi->log, logError, "Completed block steps during event iteration failed.");
@@ -740,6 +783,27 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         if (jmi->n_sw > 0) {
             jmi_log_reals(jmi->log, top_node, logInfo, "post-switches", switches, jmi->n_sw);
         }
+        
+        /* Check for chattering and log it */
+        jmi_chattering_check(jmi);
+        
+        if (jmi_exists_grt_than_time_event(jmi)) {
+            jmi->nbr_consec_time_events++;
+            
+            if (jmi->nbr_consec_time_events > 2) {
+                jmi_log_node(jmi->log, logError, "NextTimeEventFailure",
+                    "Time event phase failure. Got next time event <t:%E> at "
+                    "current time <t:%E> that should already have been handled.",
+                    jmi->nextTimeEvent.time, jmi_get_t(jmi)[0]);
+                jmi_log_unwind(jmi->log, top_node);
+                return -1;
+            }
+            
+            return jmi_event_iteration(jmi, intermediate_results, event_info);
+        } else {
+            jmi->nbr_consec_time_events = 0;
+        }
+        
         jmi_log_leave(jmi->log, top_node);
 
     } else if (intermediate_results) {
@@ -748,13 +812,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
     /* If everything went well, check if termination of simulation was requested. */
     event_info->terminate_simulation = jmi->model_terminate ? TRUE : FALSE;
-    
-    if (jmi->model_terminate == FALSE && jmi->atTimeEvent && 
-        jmi->eventPhase == JMI_TIME_EXACT && jmi->nextTimeEvent.defined 
-        && ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) &&
-        event_info->iteration_converged == TRUE) {
-        return jmi_event_iteration(jmi, intermediate_results, event_info);
-    }
     
     if (jmi->updated_states == JMI_TRUE) {
         event_info->state_values_changed = TRUE;
@@ -875,11 +932,11 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         case jmi_broyden_jacobian_update_mode:
             bsop->jacobian_update_mode = jmi_broyden_jacobian_update_mode;
             break;
-        case jmi_reuse_jacobian_update_mode:
-            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
+        case jmi_full_jacobian_update_mode:
+            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
             break;
         default:
-            bsop->jacobian_update_mode = jmi_full_jacobian_update_mode;
+            bsop->jacobian_update_mode = jmi_reuse_jacobian_update_mode;
         }
     } 
 
@@ -1008,6 +1065,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_brent_ignore_error");
     if(index)
         bsop->brent_ignore_error_flag = (int)z[index];
+	index = get_option_index("_nle_jacobian_finite_difference_delta");
+	if(index)
+		bsop->jacobian_finite_difference_delta = z[index];
     index = get_option_index("_nle_solver_step_limit_factor");
     if(index)
         bsop->step_limit_factor = z[index];
@@ -1032,6 +1092,9 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_block_jacobian_check_tol");
     if(index)
          bsop->block_jacobian_check_tol = z[index];
+    index = get_option_index("_block_solver_profiling");
+    if(index)
+        bsop->block_profiling  = (int)z[index];
     index = get_option_index("_cs_solver");
     if(index)
         op->cs_solver = (int)z[index];

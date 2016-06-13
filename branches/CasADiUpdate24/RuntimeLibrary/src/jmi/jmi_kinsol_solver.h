@@ -57,9 +57,6 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block_solver);
 int jmi_kinsol_completed_integrator_step(jmi_block_solver_t* block_solver);
 int jmi_kinsol_restore_state(jmi_block_solver_t* block);
 
-/**< \brief Retrieve residual scales used in Kinsol solver */
-double* jmi_kinsol_solver_get_f_scales(jmi_kinsol_solver_t* solver);
-
 /**< \brief Convert Kinsol return flag to readable name */
 const char *jmi_kinsol_flag_to_name(int flag);
 
@@ -86,26 +83,19 @@ struct jmi_kinsol_solver_t {
     N_Vector last_residual;        /**< \brief Last residual vector submitted to linear solver */
 
     N_Vector kin_y_scale;          /**< \brief Work vector for Kinsol scaling of y */
-    N_Vector kin_f_scale;          /**< \brief Work vector for Kinsol scaling of f */
     N_Vector gradient;              /**< \brief Steepest descent direction */
-    realtype* residual_nominal;      /**< \brief Vector for reading in manual scaling factors for f  */
-    realtype* residual_heuristic_nominal; /**< \brief Vector for reading in heuristic scaling factors for f  */
-    realtype kin_scale_update_time; /**< \brief The last time when Kinsol scale was updated */
     realtype kin_jac_update_time; /**< \brief The last time when Jacobian was updated */
     realtype kin_ftol;             /**< \brief Tolerance for F */
     realtype kin_stol;             /**< \brief Tolerance for Step-size */
     realtype kin_reg_tol;          /**< \brief Regularization tolerance */
     
-    DlsMat J;                       /**< \brief The Jacobian matrix  */    
     DlsMat JTJ;                     /**< \brief The Transpose(J).J used if J is singular */
     int J_is_singular_flag;         /**< \brief A flag indicating that J is singular. Regularized JTJ is setup */
     int use_steepest_descent_flag;  /**< \brief A flag indicating that steepest descent and not Newton direction should be used */
     int force_new_J_flag;           /**< \brief A flag indicating that J needs to be recalculated */
-    int using_max_min_scaling_flag; /**< \brief A flag indicating if either the maximum scaling is used of the minimum */
     int updated_jacobian_flag;      /**< \brief A flag indicating if an updated Jacobian is used to solve the system */
     int handling_of_singular_jacobian_flag; /**< \brief A flag for determining how singular systems should be treated */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
-    DlsMat J_scale;                 /**< \brief Jacobian matrix scaled with xnorm for used for fnorm calculation */
     DlsMat J_sing;                  /**< \brief Jacobian matrix/it's right singular vectors */
     DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
     DlsMat J_SVD_VT;                /**< \brief The right singular vectors */

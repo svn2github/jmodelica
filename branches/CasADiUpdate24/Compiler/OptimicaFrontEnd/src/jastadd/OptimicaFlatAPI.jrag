@@ -39,6 +39,13 @@ aspect OptimicaFlatAPI {
 	 * Get the free attribute CValue.
 	 */
 	syn CValue  FVariable.freeAttributeCValue() = attributeCValueBoolean(FAttribute.FREE, false);
+    syn CValue  InstAssignable.freeAttributeCValue() {
+        CValue val = attributeCValueSet(defaultVariableEvaluator(), FAttribute.FREE);
+        if (val != null && !val.isUnknown()) {
+            return val;
+        }
+        return CValueBoolean.FALSE;
+    }
 		
 	/**
 	 * Get the free attribute value.
@@ -46,7 +53,7 @@ aspect OptimicaFlatAPI {
 	 * For an array, this is true if it is true for any cell in the array.
 	 */
 	syn boolean FVariable.freeAttribute()       = freeAttributeCValue().reduceBooleanOr();	
-
+    syn boolean InstAssignable.freeAttribute()  = freeAttributeCValue().reduceBooleanOr();
 	// === initialGuess ===
 	/**
 	 * Check if the initialGuess attribute is set for a variable.
@@ -845,7 +852,7 @@ aspect OptimicaFVariableUses {
 aspect OptimicaLinearVariables {
 	
 	refine FlatAPI eq FVariable.isLinear() {
-		if ((isParameter() || isConstant()) && !(isOptParameter() | isFreeDependentParameter())) {
+		if (variability().fixedParameterOrLess() && !(isOptParameter() | isFreeDependentParameter())) {
 			return true;
 		} 
 		for (FIdUseExp e : uses()) {

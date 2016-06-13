@@ -60,6 +60,7 @@ import org.jmodelica.util.Arguments;
 import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
+import org.jmodelica.util.exceptions.InternalCompilerError;
 import org.jmodelica.util.MemorySpider;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.exceptions.IllegalCompilerArgumentException;
@@ -1080,6 +1081,7 @@ public class ModelicaCompiler {
     
     public SourceRoot doParseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
+        checkSetUp();
         ASTNode.getStepInfo().reset();
         ASTNode.beginStep("parseModel()");
         SourceRoot sr = ParserHandler.parseModel(createUtilInterface(), names);
@@ -1475,11 +1477,15 @@ public class ModelicaCompiler {
             Process proc = Runtime.getRuntime().exec(cmd, e, workDir);
             
             // Eat any output
-            new StreamGobbler(proc.getErrorStream(), logger.warningStream()).start();
-            new StreamGobbler(proc.getInputStream(), logger.verboseStream()).start();
+            Thread err = new StreamGobbler(proc.getErrorStream(), logger.warningStream());
+            Thread out = new StreamGobbler(proc.getInputStream(), logger.verboseStream());
+            err.start();
+            out.start();
             
             // Wait for process to finish and return result
             int code = proc.waitFor();
+            err.join();
+            out.join();
             if (code > 0) {
                 logger.printCache();
             }
@@ -2067,6 +2073,9 @@ public class ModelicaCompiler {
      *@param IErrorHandler The error handler to use when compiling. If null the
      *                     default will be used.
      */
+    public void ModelicaCompiler.setUp() {
+        setUp(null);
+    }
     protected void ModelicaCompiler.setUp(IErrorHandler eh) {
         if (eh == null) {
             eh = new DefaultErrorHandler(options.getBooleanOption("halt_on_warning"));
@@ -2076,6 +2085,12 @@ public class ModelicaCompiler {
         }
         setErrorHandler(eh);
         isSetUp = true;
+    }
+    
+    public void ModelicaCompiler.checkSetUp() {
+        if (!isSetUp) {
+            throw new InternalCompilerError("Compiler setup not performed. Use ModelicaCompiler.setUp()", null);
+        }
     }
     
     /**
@@ -2167,12 +2182,12 @@ public class Templates {
         "Compiler/OptimicaCBackEnd/templates",
         "Compiler/OptimicaFMUXBackEnd/templates",
     };
-    
-    
+
+
     public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
-        case FMUME20a:               
+        case FMUME20a:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
             fmuTemplate = true;
             break;
@@ -2203,9 +2218,8 @@ public class Templates {
             templates = null;
             break;
         }
-
+        
         this.type = type;
-        this.templates = templates;
         
         if (CONTRIBUTORS != null) {
             for (TemplateContributor contributor : CONTRIBUTORS) {
@@ -2213,7 +2227,7 @@ public class Templates {
             }
         }
     }
-    
+
     private String template(int i) {
         return (i < templates.length) ? templates[i] : null;
     }

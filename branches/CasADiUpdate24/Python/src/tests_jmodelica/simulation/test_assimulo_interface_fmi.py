@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
-
 """Tests for the pyfmi.simulation.assimulo module."""
 import logging
 import nose
@@ -85,7 +84,7 @@ class Test_Sensitivities_FMI2:
         compile_fmu("BasicSens2", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True})
         compile_fmu("BasicSens1", file_name, version=2.0, compiler_options={"generate_ode_jacobian": True}, compile_to="BasicSens1Dir.fmu")
         
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_basicsens1(self):
         model = load_fmu("BasicSens1.fmu")
         
@@ -97,7 +96,7 @@ class Test_Sensitivities_FMI2:
         
         assert res.solver.statistics["nsensfcnfcns"] > 0
         
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_basicsens1dir(self):
         model = load_fmu("BasicSens1Dir.fmu")
         
@@ -141,6 +140,8 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
         
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
+        compile_fmu("TimeEvents.TestSampling", file_name)
+        compile_fmu("TimeEvents.TestSampling2", file_name)
     
     @testattr(stddist = True)
     def test_time_event_basic_1(self):
@@ -255,6 +256,20 @@ class Test_Time_Events:
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
         
+    @testattr(stddist = True)
+    def test_time_event_sampling(self):
+        model = load_fmu("TimeEvents_TestSampling.fmu")
+        model.initialize()
+        res = model.simulate(0, 1e4, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e5
+        
+    @testattr(stddist = True)
+    def test_time_event_sampling2(self):
+        model = load_fmu("TimeEvents_TestSampling2.fmu")
+        model.initialize()
+        res = model.simulate(0,1e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+        
 
 class Test_Events:
     @classmethod
@@ -271,6 +286,7 @@ class Test_Events:
         compile_fmu("EventIter.EnhancedEventIteration2", file_name)
         compile_fmu("EventIter.SingularSystem1", file_name)
         compile_fmu("EventIter.InitialPhasing1", file_name)
+        compile_fmu("EventIter.EventIterDiscreteReals", file_name)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -328,6 +344,14 @@ class Test_Events:
         res = model.simulate(final_time=0.1)
         nose.tools.assert_almost_equal(res["b1"][0], 0.0)
         nose.tools.assert_almost_equal(res["b2"][0], 1.0)
+        
+    @testattr(stddist=True)
+    def test_discrete_real_event_iteration(self):
+        model = load_fmu("EventIter_EventIterDiscreteReals.fmu")
+        res = model.simulate(final_time=1.0)
+        nose.tools.assert_almost_equal(res["T1"][0], 0.0)
+        nose.tools.assert_almost_equal(res["start"][0], 1.0)
+        nose.tools.assert_almost_equal(res["T2"][0], 0.0)
 
 class Test_Relations:
     @classmethod
@@ -452,11 +476,13 @@ class Test_NonLinear_Systems:
         compile_fmu("NonLinear.NominalStart3", file_name)
         compile_fmu("NonLinear.NominalStart4", file_name)
         compile_fmu("NonLinear.NominalStart5", file_name)
+        compile_fmu("NonLinear.NominalStart6", file_name)
         compile_fmu("NonLinear.DoubleRoot1", file_name)
         compile_fmu("NonLinear.NonLinear3", file_name)
         compile_fmu("NonLinear.NonLinear4", file_name)
         compile_fmu("NonLinear.ResidualHeuristicScaling1", file_name)
         compile_fmu("NonLinear.NonLinear5", file_name, compiler_options={"generate_ode_jacobian": True})
+        compile_fmu("NonLinear.EventIteration1", file_name)
     
     @testattr(stddist = True)
     def test_Brent_AD(self):
@@ -581,9 +607,19 @@ class Test_NonLinear_Systems:
         model = load_fmu("NonLinear_NominalStart3.fmu")
         model.set("_use_Brent_in_1d", False)
         model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.set('_nle_jacobian_update_mode', 0)
         model.initialize()
         
         nose.tools.assert_almost_equal(model.get("x") ,2.76929235)
+        
+    @testattr(stddist = True)
+    def test_nominals_fallback_7(self):
+        model = load_fmu("NonLinear_NominalStart6.fmu")
+        model.set("_nle_solver_use_nominals_as_fallback", True)
+        model.initialize()
+        
+        nose.tools.assert_almost_equal(model.get("x"), 0.680716920494911)
+        nose.tools.assert_almost_equal(model.get("y"), 0.0)
         
     @testattr(stddist = True)
     def test_residual_scaling_heuristics(self):
@@ -591,8 +627,18 @@ class Test_NonLinear_Systems:
         model.set("_use_Brent_in_1d", False)
         model.initialize()
         nose.tools.assert_almost_equal(model.get('state_a_p'), 17.78200351)
+        
+    @testattr(stddist = True)
+    def test_event_iternation_inf_check_warmup(self):
+        # Test where event inf check cannot only look at the switches but need
+        # to look at the iteration variables too. Generally this is needed for
+        # models with systems that have many solutions and bad start values. In
+        # this model the variable iter_var_1 will go from 300 to ca 874 and then
+        # if it don't get stuck in inf check it will go to 872.98062403
+        model = load_fmu("NonLinear_EventIteration1.fmu")
+        model.initialize()
+        nose.tools.assert_almost_equal(model.get('iter_var_1'), 872.98062403)
     
-
 class Test_Singular_Systems:
     
     @classmethod
@@ -609,6 +655,7 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NonLinear1", file_name)
         compile_fmu("Singular.NonLinear4", file_name)
         compile_fmu("Singular.NonLinear5", file_name)
+        compile_fmu("Singular.NoMinimumNormSolution", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -626,15 +673,6 @@ class Test_Singular_Systems:
         res = model.simulate(final_time=4)
         nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
         nose.tools.assert_almost_equal(res.final('w') ,2.000000000)
-    
-    @testattr(stddist = True)
-    def test_linear_zero_hold(self):
-        model = load_fmu("Singular_Linear2.fmu", log_level=6)
-        model.set("_log_level", 6)
-        
-        model.set("a33", 0.0)
-        model.initialize()
-        assert model.get("z") == 5.0
     
     @testattr(stddist = True)
     def test_linear_inf_1(self):
@@ -737,6 +775,13 @@ class Test_Singular_Systems:
         
         nose.tools.assert_almost_equal(res["z"][0] ,0.000000000)
         nose.tools.assert_almost_equal(res["z"][-1] ,-1.000000000)
+    
+    @testattr(stddist = True)
+    def test_no_valid_minimum_norm_sol(self):
+        model = load_fmu("Singular_NoMinimumNormSolution.fmu", log_level=3)
+        model.set("_log_level", 3)
+        model.set_log_level(3)
+        nose.tools.assert_raises(FMUException, model.initialize)
 
 class Test_FMI_ODE_CS_2:
     @classmethod
@@ -751,6 +796,7 @@ class Test_FMI_ODE_CS_2:
 
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
         _t1_name = compile_fmu("TimeEvents.Basic5", file_name_time_event, version=2.0, target="cs")
+        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, version=2.0, target="cs")
         
     @testattr(stddist = True)
     def test_updated_values_in_result(self):
@@ -761,6 +807,14 @@ class Test_FMI_ODE_CS_2:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        model = load_fmu("TimeEvents_Basic5.fmu")
+        opts = model.simulate_options()
+        opts["initialize"] = False
+
+        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
     
     @testattr(stddist = True)
     def test_time_event_basic_5(self):
@@ -770,6 +824,15 @@ class Test_FMI_ODE_CS_2:
         res = model.simulate(final_time=1,options=opts)
         
         assert res["der(x)"][-1] == -1.0
+        
+    @testattr(stddist = True)
+    def test_time_event_at_do_step_end(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["ncp"] = 100
+        res = model.simulate(final_time=1,options=opts)
+        
+        nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
 
 class Test_FMI_ODE_CS:
     @classmethod
@@ -780,9 +843,38 @@ class Test_FMI_ODE_CS:
         file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
         file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+        file_name_time_event = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
 
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs")
+        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs")
+       
+    @testattr(stddist = True)
+    def test_time_event_at_do_step_end(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["ncp"] = 100
+        res = model.simulate(final_time=1,options=opts)
         
+        nose.tools.assert_almost_equal(res.final("x"), 3.89, 2)
+        
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["initialize"] = False
+
+        nose.tools.assert_raises(FMUException, model.simulate, options=opts)
+        
+    @testattr(stddist = True)
+    def test_no_returned_result(self):
+        model = load_fmu("TimeEvents_Advanced5.fmu")
+        opts = model.simulate_options()
+        opts["return_result"] = False
+        
+        res = model.simulate(options=opts)
+
+        nose.tools.assert_raises(Exception,res._get_result_data)
+            
     @testattr(stddist = True)
     def test_updated_values_in_result(self):
         model = load_fmu("LinearTest_Linear1.fmu")
@@ -792,6 +884,7 @@ class Test_FMI_ODE_CS:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
 
 class Test_FMI_ODE:
     """
@@ -856,6 +949,23 @@ class Test_FMI_ODE:
         res = self._bounce.simulate(options=opts)
         
         nose.tools.assert_raises(Exception,res._get_result_data)
+        
+    @testattr(stddist = True)
+    def test_no_returned_result(self):
+        opts = self._bounce.simulate_options()
+        opts["return_result"] = False
+        opts["initialize"] = False
+        res = self._bounce.simulate(options=opts)
+        
+        nose.tools.assert_raises(Exception,res._get_result_data)
+    
+    @testattr(stddist = True)
+    def test_simulation_without_initialization(self):
+        bounce  = load_fmu('bouncingBall.fmu',path_to_fmus_me1)
+        opts = bounce.simulate_options()
+        opts["initialize"] = False
+        
+        nose.tools.assert_raises(FMUException, bounce.simulate, options=opts)
     
     @testattr(stddist = True)
     def test_reset_internal_variables(self):
@@ -1301,7 +1411,7 @@ class Test_FMI_ODE:
         
         nose.tools.assert_almost_equal(solver.t, 1.856045, places=3)        
 
-    @testattr(stddist = True)
+    @testattr(noncompliantfmi = True)
     def test_assert_raises_sensitivity_parameters(self):
         """
         This tests that an exception is raised if a sensitivity calculation
@@ -1321,7 +1431,7 @@ class Test_FMI_ODE:
         opts = model.simulate_options()
         opts["sensitivities"] = ["J1.w"]
         
-        nose.tools.assert_raises(Exception,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
+        nose.tools.assert_raises(FMUException,model.simulate,0,1,(),'AssimuloFMIAlg',opts)
 
     @testattr(stddist = True)
     def test_event_iteration(self):

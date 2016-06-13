@@ -41,13 +41,13 @@ $(LAPACK_BUILD_DIR64):
 	cmake -G "MSYS Makefiles" -DCMAKE_Fortran_FLAGS="-fPIC -O3 -ffloat-store -m64" -DCMAKE_Fortran_COMPILER="gfortran" -DCMAKE_INSTALL_DIR=$(LAPACK_INSTALL_DIR64) $(abs_top_srcdir)/ThirdParty/Lapack/
 
 all-local: $(LAPACK_BUILD_DIR) $(LAPACK_BUILD_DIR64)
-	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
+	cd $(LAPACK_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 else !JM_WIN64
 
 all-local: $(LAPACK_BUILD_DIR)
-	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+	cd $(LAPACK_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install DESTDIR=
 
 endif !JM_WIN64
 

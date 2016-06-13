@@ -964,7 +964,7 @@ aspect AliasVariables {
         
         // Fixed attribute == true
         score *= 10;
-        if (fixedAttribute())
+        if (isFixed())
             score += 1;
         
         // Start attribute set

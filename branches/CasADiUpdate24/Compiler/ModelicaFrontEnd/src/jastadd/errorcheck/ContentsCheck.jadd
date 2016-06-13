@@ -193,6 +193,7 @@ aspect ContentCheck {
 
     inh boolean InstModification.isForAttributeOnOperatorRecordDeclarationMember();
     eq InstNode.getChild().isForAttributeOnOperatorRecordDeclarationMember()                                 = false;
+    eq InstRecordConstructor.getChild().isForAttributeOnOperatorRecordDeclarationMember()                    = false;
     eq InstCompleteModification.getInstValueModification().isForAttributeOnOperatorRecordDeclarationMember() = // TODO: not needed?
         isForAttributeOnOperatorRecordDeclarationMember();
     eq InstElementModification.getInstModification().isForAttributeOnOperatorRecordDeclarationMember()       =
@@ -204,6 +205,7 @@ aspect ContentCheck {
     eq InstClassDecl.getChild().isForOperatorRecordDeclarationMember()           = isOperatorRecord();
     eq InstExtends.getChild().isForOperatorRecordDeclarationMember()             = myInstClass().isOperatorRecord();
     eq InstNode.getChild().isForOperatorRecordDeclarationMember()                = false;
+    eq Root.getChild().isForOperatorRecordDeclarationMember()                    = false;
 
 	public void InstFunctionCall.contentCheck(ErrorCheckType checkType) {
        if (generated) {
@@ -404,29 +406,37 @@ aspect ContentCheck {
 		"All branches in if equation with non-parameter tests must have the same number of equations";
 	public static final String FIfEquation.UNBALANCED_ERROR_WHEN = 
 		"All branches in if equation with non-parameter tests within when equation must assign the same variables";
-	
-	public void FIfEquation.contentCheck(ErrorCheckType checkType) {
-		super.contentCheck(checkType);
-		if (isTopWhenIfEquation()) {
-			boolean inWhen = inWhen();
-			boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
-			boolean functionCallEqu = hasFunctionCallEquations(); 
+
+    public void FIfEquation.contentCheck(ErrorCheckType checkType) {
+        super.contentCheck(checkType);
+        if (isTopWhenIfEquation()) {
+            boolean inWhen = inWhen();
+            boolean balanced = inWhen ? isBalancedAssignments() : isBalancedEquations();
+            boolean functionCallEqu = hasFunctionCallEquations(); 
             if (hasOnlyFixedParamTests()) {
-				setEliminateOnParamTest(checkType);
-			} else {
-				if (!balanced) {
-					error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
-				}
-			}
-		}
-	}
-	
+                markTestsAsStructuralParameter(checkType);
+            } else {
+                if (!balanced) {
+                    error(inWhen ? UNBALANCED_ERROR_WHEN : UNBALANCED_ERROR);
+                }
+            }
+        }
+    }
+
 	public void FEquation.contentCheck(ErrorCheckType checkType) {
 		super.contentCheck(checkType);
 		if (inWhen() && !isAssignmentEqn())
 			error("Only assignment equations are allowed in when clauses");
 	}
-	
+
+    protected void FIfWhenElseEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {}
+
+    protected void FIfEquation.markTestsAsStructuralParameter(ErrorCheckType checkType) {
+        getTest().markAsStructuralParameter(checkType);
+        if (hasElse())
+            getElse().markTestsAsStructuralParameter(checkType);
+    }
+
 	syn boolean FIfWhenElseEquation.isBalancedEquations() = true; 
 	eq FIfEquation.isBalancedEquations() = hasElse() ? elseIsBalancedEquations() : numScalarEquations() == 0;
 	
@@ -446,7 +456,7 @@ aspect ContentCheck {
 	eq FIfWhenEquation.getElse().isTopWhenIfEquation() = false;
 	
     syn boolean FIfWhenElseEquation.hasOnlyFixedParamTests() = true;
-    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().isFixedParamOrLessExp() 
+    eq FIfWhenEquation.hasOnlyFixedParamTests()              = getTest().variability().fixedParameterOrLess() 
             && (!hasElse() || getElse().hasOnlyFixedParamTests());
 	
 	syn boolean FAbstractEquation.isAssignmentEqn() = false;
@@ -636,6 +646,10 @@ aspect ContentCheck {
         
     }
     
+    public void FRecordType.contentCheckFortranArg(ErrorCheckType checkType, FExternalStmt stmt) {
+        stmt.error("Passing records to external fortran functions is not allowed");
+    }
+    
     public void FStringType.contentCheckFortranArg(ErrorCheckType checkType, FExternalStmt stmt) {
         String funcName = stmt.containingInstClassDecl().qualifiedName();
         boolean islapack = funcName.startsWith("Modelica.Math.Matrices.LAPACK");
@@ -643,7 +657,39 @@ aspect ContentCheck {
             stmt.error("Passing strings to external fortran functions is not allowed");
         }
     }
-
+    
+    public void FCExternalLanguage.contentCheck(ErrorCheckType checkType, FExternalStmt stmt) {
+        for (FExp arg : stmt.getArgs()) {
+            arg.type().contentCheckCArg(checkType, stmt);
+        }
+        if (stmt.hasReturnVar()) {
+            stmt.getReturnVar().type().contentCheckCArg(checkType, stmt);
+        }
+    }
+    
+    public void FType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt) { }
+    public void FRecordType.contentCheckCArg(ErrorCheckType checkType, FExternalStmt stmt) {
+        if (!externalValid()) {
+            stmt.error("Record type used as input or output to external function can only contain scalar record or scalar simple types");
+        }
+    }
+    
+    syn boolean FType.externalValid() = externalValid(false);
+    syn boolean FType.externalValid(boolean rec)      = false;
+    eq FExternalObjectType.externalValid(boolean rec) = !rec || !isArray();
+    eq FPrimitiveType.externalValid(boolean rec)      = !rec || !isArray();
+    eq FRecordType.externalValid(boolean rec) {
+        if (isArray()) {
+            return false;
+        }
+        for (FRecordComponentType frct : getComponents()) {
+            if (!frct.getFType().externalValid(true)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
     /**
      * Get the class this restriction is attached to.
      */
@@ -734,10 +780,11 @@ aspect ForceVariability {
         if (forcedVariability.lessOrEqual(v)) {
             return;
         }
-        if (!variability().combine().parameterVariability() || inFunction() || isForIndex())
+        FTypePrefixVariability currentVariability = variability().combine();
+        if (!currentVariability.parameterVariability() || inFunction() || isForIndex())
             return;
         // TODO: hierarchical check for records?
-        if (indices().numElements() > 0 && isPrimitive() && !fixedAttributeCValue().reduceBooleanOr()) {
+        if (indices().numElements() > 0 && currentVariability.initialParameterVariability()) {
             compliance("Parameters with fixed=false can not be used as structural parameters");
             return;
         }
@@ -753,9 +800,9 @@ aspect ForceVariability {
     }
     
     public void InstRecord.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {
-        super.forceVariability(checkType, v);
-        for (InstComponentDecl icd : getInstComponentDecls())
+        for (InstComponentDecl icd : allInstComponentDecls()) {
             icd.forceVariability(checkType, v);
+        }
     }
     
     public void InstExternalObject.forceVariability(ErrorCheckType checkType, FTypePrefixVariability v) {

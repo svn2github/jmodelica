@@ -157,7 +157,7 @@ def test_RLC():
     """ Test the RLC example. """    
     RLC.run_demo(False)
 
-@testattr(stddist = True)
+@testattr(noncompliantfmi = True)
 def test_robertson_sensitivity_fmu():
     """ Test the sensitivty example Robertson as an FMU. """
     robertson_fmu.run_demo(False)

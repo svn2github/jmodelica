@@ -56,6 +56,8 @@ int jmi_new_ode_solver(jmi_ode_problem_t* problem, jmi_ode_method_t method,
         break;
 
     default:
+        free(problem->ode_solver);
+        problem->ode_solver = NULL;
         return -1;
     }
 

@@ -165,7 +165,7 @@ optimization QuadTank_ParEst (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 +
                      a2(free=true,initialGuess = 0.03e-4,min=0,max=0.1e-4));
 
     // Number of measurement points
-    parameter Integer N_meas = 61;
+    constant Integer N_meas = 61;
     // Vector of measurement times
     parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60;
     // Measurement values for x1 
@@ -235,7 +235,7 @@ optimization QuadTank_ParEst2 (objective=sum((y1_meas[i] - qt.x1(t_meas[i]))^2 +
                      a3(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4),
                      a4(free=true,initialGuess = 0.03e-4,nominal=0.03e-4,min=0,max=0.1e-4));
 
-    parameter Integer N_meas = 61;
+    constant Integer N_meas = 61;
     parameter Real t_meas[N_meas] = 0:60.0/(N_meas-1):60; 
     parameter Real y1_meas[N_meas] = ones(N_meas); 	
     parameter Real y2_meas[N_meas] = ones(N_meas); 

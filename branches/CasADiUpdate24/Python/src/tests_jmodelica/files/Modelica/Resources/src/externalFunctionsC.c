@@ -49,6 +49,16 @@ const char* fStringScalar(const char* in)
 	return c;
 }
 
+const char* fStringScalarLit(const char* in)
+{
+    static char c[4];
+    c[0] = in[2];
+    c[1] = in[1];
+    c[2] = in[0];
+    c[3] = '\0';
+    return c;
+}
+
 void fStringArray(const char** in, size_t in_d1, const char** out, size_t out_d1)
 {
 	size_t i;
@@ -75,4 +85,9 @@ void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1)
 	size_t i;
 	for (i = 0; i < in_d1; i++)
 		out[i] = in[in_d1 - 1 - i];
+}
+
+void fRecord(fRec_t *r, fRec_t *y)
+{
+    y->x = r->x;
 }

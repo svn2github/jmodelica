@@ -37,7 +37,7 @@ import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.collections.ParallelIterable;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.munkres.MunkresProblem;
+import org.jmodelica.util.munkres.DenseMunkresProblem;
 import org.jmodelica.util.munkres.IntegerCost;
 
 
@@ -112,7 +112,7 @@ aspect TransformCanonical {
             transformations = new ArrayList<Transformation>();
             transformations.add(new enableIfEquationElimination());
             transformations.add(new genAlgorithmFunctionsIfSet());
-            transformations.add(new genBindingAssignments());
+            transformations.add(new genInitArrayStatements());
             transformations.add(new scalarize());
             transformations.add(new MakeReinitedVarsStates());
             transformations.add(new enableIfEquationElimination());
@@ -121,7 +121,6 @@ aspect TransformCanonical {
             transformations.add(new transformAlgorithms());
             transformations.add(new enableWhenClauseRewrite());
             transformations.add(new extractSampleExpressions());
-            transformations.add(new genInitArrayStatements());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
@@ -136,7 +135,6 @@ aspect TransformCanonical {
             transformations.add(new genInitialEquations());
             transformations.add(new addStateInitialEquationsIfSet());
             transformations.add(new setFDerivativeVariablesPreBLT());
-            transformations.add(new propagateNonFixedParameters());
             transformations.add(new indexReduction());
             transformations.add(new LateFunctionInliningIfSet());
             transformations.add(new commonSubexpressionEliminationIfSet());
@@ -236,9 +234,10 @@ aspect TransformCanonical {
                         perform();
                     } finally {
                         completedTransformationSteps++;
+                        lastCompletedTransformationStep = name();
                         endStep(name());
                     }
-                    generateStepMof(name());
+                    transformationStepDebug();
                 }
             }
 
@@ -257,17 +256,24 @@ aspect TransformCanonical {
 
     }
 
-	
+    /**
+     * Perform transformation step debug operations that are activated.
+     */
+    public void FClass.transformationStepDebug() {
+        generateStepMof();
+        sanityCheck();
+    }
+
     /**
      * Generate a .mof file with the current flat tree.
      */
-    public void FClass.generateStepMof(String stepName) {
+    public void FClass.generateStepMof() {
         String value = myOptions().getStringOption("debug_transformation_steps");
         if ("full".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
-            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, stepName);
+            String fileName = String.format("%02d_%s.mof", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
-            log.debug("Writing flat tree after step " + stepName + " to " + fileName);
+            log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
@@ -278,9 +284,9 @@ aspect TransformCanonical {
         }
         if ("full".equals(value) || "diag".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
-            String fileName = String.format("%02d_%s.txt", completedTransformationSteps, stepName);
+            String fileName = String.format("%02d_%s.txt", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
-            log.debug("Writing diag after step " + stepName + " to " + fileName);
+            log.debug("Writing diag after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
                 out.print(modelDiagnostics());
@@ -292,9 +298,10 @@ aspect TransformCanonical {
     }
     
     private static final File FClass.TRANSFORMATION_STEP_DIR = new File("transformation_steps");
-    
-	private int FClass.completedTransformationSteps = 0;
-	
+
+    private int FClass.completedTransformationSteps = 0;
+    private String FClass.lastCompletedTransformationStep = "flattening";
+
 	/**
 	 * After scalarization, binding expressions on members of record declarations are no longer needed. 
 	 */
@@ -678,7 +685,7 @@ aspect TransformCanonical {
             }
             
             if (!eq_list.isEmpty())
-                g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName(), new Enumerator(1));
+                g.addEquations(newEquations_, VAR_TYPES_ALL, eq_list.get(0).getName() + "_init_", new Enumerator(1));
         }
         
         log.verbose(g);
@@ -800,341 +807,6 @@ aspect TransformCanonical {
 		}
 		return unbalanced;
 	}
-
-
-    public class FClass {
-    	/**
-    	 * Generate array initialization statements for unknown function arrays.
-    	 */
-        public class genInitArrayStatements extends Transformation {
-            public void perform() {
-                for (FFunctionDecl ffd : getFFunctionDecls()) {
-                    ffd.genInitArrayStatements();
-                    ffd.sortBindingAssignments();
-                }
-            }
-        }
-    }
-	
-	public void FFunctionDecl.genInitArrayStatements() {
-		List<FStatement> stmts = new List<FStatement>();
-		for (FFunctionVariable ffv : getFFunctionVariables())
-            ffv.genInitArrayStatements(stmts, true);
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			stmts.add(stmt);
-		getFAlgorithm().setFStatementList(stmts);
-	}
-
-	protected boolean FFunctionVariable.hasInitArrayStmt = false;
-
-    public ASTNode FFunctionVariable.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        return this;
-    }
-    
-    @Override
-    public ASTNode FFunctionArray.genInitArrayStatements(List<FStatement> stmts, boolean sort) {
-        if (!hasInitArrayStmt && size().isUnknown() && !isInput()) {
-			FInitArrayStmt stmt = new FInitArrayStmt(createUseExp());
-            stmt.shouldBeSorted = sort;
-			stmts.add(stmt);
-			hasInitArrayStmt = true;
-			return stmt;
-		}
-        return this;
-	}
-
-	
-	public void FFunctionDecl.sortBindingAssignments() {
-		Map<String,FStatement> map = new LinkedHashMap<String,FStatement>();
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			stmt.addToSortingMap(map);
-		
-		List<FStatement> stmts = new List<FStatement>();
-		while (!map.isEmpty()) 
-			map.values().iterator().next().addSortedByAssignmentOrder(stmts, map);
-		
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			if (!stmt.shouldBeSorted)
-				stmts.add(stmt);
-		getFAlgorithm().setFStatementList(stmts);
-	}
-	
-	public void FStatement.addToSortingMap(Map<String,FStatement> map) {
-		if (shouldBeSorted) {
-			for (String name : sortingAssignedNames()) {
-				FStatement old = map.get(name);
-				if (old != null && old != this)
-					extraSortingDependencies().add(old);
-				map.put(name, this);
-			}
-		}
-	}
-	
-	
-	private boolean FStatement.isBeingSorted = false;
-	private boolean FStatement.addedDuringSorting = false;
-	
-	public void FStatement.addSortedByAssignmentOrder(
-			List<FStatement> stmts, Map<String,FStatement> map) {
-		if (isBeingSorted) 
-			throw new CircularBindingExpressionException();
-		isBeingSorted = true;
-		
-		for (String depName : sortingDependencies()) {
-			FStatement dep = map.get(depName);
-			if (dep != null && dep != this)
-				dep.addSortedByAssignmentOrder(stmts, map);
-		}
-		for (FStatement dep : extraSortingDependencies()) {
-			if (!dep.addedDuringSorting)
-				dep.addSortedByAssignmentOrder(stmts, map);
-		}
-		
-		stmts.add(this);
-		addedDuringSorting = true;
-		for (String name : sortingAssignedNames())
-			map.remove(name);
-		
-		isBeingSorted = false;
-	}
-	
-	public class CircularBindingExpressionException extends RuntimeException {}
-	
-	private Set<FStatement> FStatement.extraSortingDependencies = null;
-	private Set<FStatement> FStatement.extraSortingDependencies() {
-		if (extraSortingDependencies == null)
-			extraSortingDependencies = new LinkedHashSet<FStatement>();
-		return extraSortingDependencies;
-	}
-    private boolean FStatement.hasExtraSortingDependencies() {
-        return extraSortingDependencies != null;
-    }
-	
-	
-	syn lazy Set<String> FStatement.sortingAssignedNames() = Collections.<String>emptySet();
-    eq FAssignStmt.sortingAssignedNames()      = getLeft().sortingAssignedNames();
-	eq FInitArrayStmt.sortingAssignedNames()   = 
-		Collections.singleton("size(" + getFIdUseExp().name() + ")");
-	eq FForStmt.sortingAssignedNames()         = sortingAssignedNames(getForStmts());
-	eq FWhileStmt.sortingAssignedNames()       = sortingAssignedNames(getWhileStmts());
-	eq FFunctionCallStmt.sortingAssignedNames() {
-		Set<String> res = new LinkedHashSet<String>(getNumLeft());
-		for (FFunctionCallLeft left : getLefts())
-			left.sortingAddNamesUsed(res);
-		return res;
-	}
-	eq FIfStmt.sortingAssignedNames() {
-		Set<String> res = new LinkedHashSet<String>();
-		for (FIfWhenClause iwc : getFIfWhenClauses())
-			res.addAll(iwc.sortingAssignedNames());
-		for (FStatement stmt : getElseStmts())
-			res.addAll(stmt.sortingAssignedNames());
-		return res;
-	}
-	
-	syn Set<String> FIfWhenClause.sortingAssignedNames() = 
-		FStatement.sortingAssignedNames(getFStatements());
-	
-	public static Set<String> FStatement.sortingAssignedNames(List<FStatement> stmts) {
-		Set<String> res = new LinkedHashSet<String>();
-		for (FStatement stmt : stmts)
-			res.addAll(stmt.sortingAssignedNames());
-		return res;
-	}
-	
-    syn Set<String> FAssignableExp.sortingAssignedNames();
-    eq FIdUseExp.sortingAssignedNames() = Collections.singleton(name());
-    eq FSubscriptedExp.sortingAssignedNames() {
-        Set<String> res = new LinkedHashSet<String>();
-        for (FIdUseExp use : findFIdUseExpsInTree()) {
-            res.add(use.name());
-        }
-        return res;
-    }
-    
-	
-	syn lazy Set<String> FStatement.sortingDependencies() = Collections.<String>emptySet();
-	eq FAssignStmt.sortingDependencies()       = 
-		getRight().sortingAddNamesUsed(baseSortingDependencies());
-	eq FInitArrayStmt.sortingDependencies()    = 
-		getFIdUseExp().myFV().size().sortingAddNamesUsed(new LinkedHashSet<String>());
-	eq FFunctionCallStmt.sortingDependencies() = 
-		getCall().sortingAddNamesUsed(baseSortingDependencies());
-	eq FForStmt.sortingDependencies()          = 
-		addCompoundStmtSortingDependencies(baseSortingDependencies(), getIndex(), getForStmts());
-	eq FWhileStmt.sortingDependencies()        = 
-		addCompoundStmtSortingDependencies(baseSortingDependencies(), getTest(), getWhileStmts());
-	eq FIfStmt.sortingDependencies() {
-		Set<String> res = new LinkedHashSet<String>();
-		for (FIfWhenClause iwc : getFIfWhenClauses())
-			res.addAll(iwc.sortingDependencies());
-		for (FStatement stmt : getElseStmts())
-			res.addAll(stmt.sortingDependencies());
-		return res;
-	}
-	
-	syn Set<String> FIfWhenClause.sortingDependencies() = 
-		FStatement.addCompoundStmtSortingDependencies(
-				new LinkedHashSet<String>(), getTest(), getFStatements());
-	
-	protected Set<String> FStatement.baseSortingDependencies() {
-		Set<String> res = new LinkedHashSet<String>();
-		for (String name : sortingAssignedNames()) 
-			res.add("size(" + name + ")");
-		return res;
-	}
-	
-	public static Set<String> FStatement.addCompoundStmtSortingDependencies(
-			Set<String> set, ASTNode head, List<FStatement> body) {
-		head.sortingAddNamesUsed(set);
-		for (FStatement stmt : body)
-			set.addAll(stmt.sortingDependencies());
-		return set;
-	}
-	
-	public Set<String> ASTNode.sortingAddNamesUsed(Set<String> set) {
-		for (ASTNode n : this)
-			n.sortingAddNamesUsed(set);
-		return set;
-	}
-	
-	public Set<String> FIdUse.sortingAddNamesUsed(Set<String> set) {
-		if (!myFV().isUnknown())
-			set.add(name());
-		return super.sortingAddNamesUsed(set);
-	}
-	
-	public Set<String> FSizeExp.sortingAddNamesUsed(Set<String> set) {
-		Set<String> temp = new LinkedHashSet<String>();
-		super.sortingAddNamesUsed(temp);
-		for (String name : temp) {
-			if (!name.startsWith("size("))
-				name = "size(" + name + ")";
-			set.add(name);
-		}
-		return set;
-	}
-	
-	public Set<String> Size.sortingAddNamesUsed(Set<String> set) {
-		return set;
-	}
-	
-	public Set<String> MutableSize.sortingAddNamesUsed(Set<String> set) {
-		for (FExp exp : exps)
-			if (exp != null)
-				exp.sortingAddNamesUsed(set);
-		return set;
-	}
-	
-	
-	
-
-    public class FClass {
-        /**
-         * Convert function variable binding expressions into regular statements.
-         */
-        public class genBindingAssignments extends Transformation {
-            public void perform() {
-                FQName empty = new FQNameEmpty();
-                for (FFunctionDecl ffd : getFFunctionDecls())
-                    ffd.genBindingAssignments();
-                root().flushAllRecursive();
-           }
-        }
-    }
-	
-	public void FFunctionDecl.genBindingAssignments() {
-		// TODO: To support Modelica 3.3, we need to sort the assignments
-		List<FStatement> stmts = new List<FStatement>();
-		for (FFunctionVariable ffv : getFFunctionVariables())
-			ffv.genBindingAssignments(stmts);
-		for (FStatement stmt : getFAlgorithm().getFStatements())
-			stmts.add(stmt);
-		getFAlgorithm().setFStatementList(stmts);
-	}
-	
-	/**
-	 * Flag that controls if this statement should be a part of the set of statements at 
-	 * the beginning of a function that are generated from variable declarations, and 
-	 * should be sorted to ensure assignment before use among them.
-	 */
-	public boolean FStatement.shouldBeSorted = false;
-	
-    public boolean FFunctionVariable.hasBindingAssignment = false;
-	
-    public void FFunctionVariable.genBindingAssignments(List<FStatement> stmts) {
-        if (!isInput()) {
-            if (hasBindingExp()) {
-                FAssignStmt stmt = new FAssignStmt(createUseExp(), getBindingExp());
-                stmt.shouldBeSorted = true;
-                stmts.add(stmt);
-                setBindingExpOpt(new Opt());
-                hasBindingAssignment = true;
-            } else if (hasFAttribute() && isRecord()) {
-                type().genBindingAssignments(stmts, getFQName().asFQNameFull(), getFAttributes());
-            }
-        }
-        
-        if (hasFAttribute()) {
-            setFAttributeList(new List<FAttribute>());
-        }
-    }
-    
-    public void FType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
-        
-    }
-    
-    public void FRecordType.genBindingAssignments(List<FStatement> stmts, FQName prefix, List<FAttribute> attrs) {
-        Map<String,FAttribute> m = new HashMap<String,FAttribute>(attrs.getNumChild());
-        for (FAttribute attr : attrs) {
-            m.put(attr.name(), attr);
-        }
-        for (Index i : indices()) {
-            for (FVariable fv : myFRecordDecl().getFVariables()) {
-                fv.genBindingAssignments(stmts, prefix, m, i);
-            }
-        }
-    }
-    
-    public void FVariable.genBindingAssignments(List<FStatement> stmts, FQName prefix, Map<String, FAttribute> attrs, Index i) {
-        FQName left = prefix.copyAndAddIfFas(i).copyAndAppend(name());
-        FAttribute attr = attrs.get(name());
-        FExp right = selectBindingFExp(attr, i);
-        if (right != null) {
-            FAssignStmt stmt = new FAssignStmt(new FIdUseExp(left), right.fullCopy());
-            stmt.shouldBeSorted = true;
-            stmts.add(stmt);
-        } else if (attr != null) {
-            type().genBindingAssignments(stmts, left, attr.getFAttributes());
-        }
-    }
-    
-    public FExp FVariable.selectBindingFExp(FAttribute attr, Index i) {
-        if (attr != null && attr.hasValue()) {
-            if (i.ndims() > 0 && !attr.hasFEach()) {
-                return attr.getValue().getArray().get(i);
-            } else {
-                return attr.getValue();
-            }
-        }
-        return getBindingExp();
-    }
-	
-	syn boolean FExp.canExtractRecordComponents()      = false;
-	eq FIdUseExp.canExtractRecordComponents()          = true;
-	eq FRecordConstructor.canExtractRecordComponents() = true;
-	eq FArray.canExtractRecordComponents() {
-		for (FExp e : childFExps())
-			if (!e.canExtractRecordComponents())
-				return false;
-		return true;
-	}
-	eq FAbstractCat.canExtractRecordComponents(){
-		for (FExp e : childFExps())
-			if (!e.canExtractRecordComponents())
-				return false;
-		return true;
-	}
 	
 	/**
 	 * Create an FExp that represents a specific component of this record expression.
@@ -1142,9 +814,9 @@ aspect TransformCanonical {
 	 * @param suffix    the suffix to add to a use of the record to access the specific component
 	 */
 	public FExp FExp.extractRecordFExp(String suffix) {
-		throw new UnsupportedOperationException("Can't extract record component of " + getClass().getSimpleName());
+        return new FComponentExp(treeCopy(), suffix);
 	}
-	
+    
     public FExp FIdUseExp.extractRecordFExp(String suffix) {
         return new FIdUseExp(getFIdUse().extractRecordFExp(suffix));
     }
@@ -1159,6 +831,17 @@ aspect TransformCanonical {
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
         return myArgFExp(suffix).fullCopy();
+    }
+    
+    public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
+        InstLookupResult<InstComponentDecl> res = localLookupInstComponent(suffix);
+        if (res.successful()) {
+            int i = res.target().argIndexInRecordConstructor();
+            if (i >= 0 && i < getNumArg()) {
+                return getArg(i).getFExp().fullCopy();
+            }
+        }
+        return super.extractRecordFExp(suffix);
     }
 	
 	public FExp FArray.extractRecordFExp(String suffix) {
@@ -1236,6 +919,7 @@ aspect TransformCanonical {
 			allVars.addAll(inVars);
 			allVars.addAll(outVars);
 			
+            List<FStatement> stmts = new List<FStatement>();
 			for (int i = 0; i < inVars.size(); i++) {
 				FVariable fv = inVars.get(i);
 				FFunctionVariable ffv = fv.createFFunctionInput();
@@ -1258,9 +942,14 @@ aspect TransformCanonical {
 					ffv.setFQName(fqn);
 					
 					// Create and add binding expression for output
-					bothInVars.get(i).setBindingExp(fqn.createFIdUseExp());
+                    stmts.add(new FAssignStmt(bothInVars.get(i).createUseExp(), fqn.createFIdUseExp()));
 				}
 			}
+			
+            for (FStatement stmt : alg.getFStatements()) {
+                stmts.add(stmt);
+            }
+            alg.setFStatementList(stmts);
 			
 			// Create function call equation and replace algorithm
 			List<FExp> args = new List<FExp>();
@@ -1497,6 +1186,10 @@ aspect TransformCanonical {
 		return new FFunctionVariable(new Opt(io), type, new Opt(), getFQName().fullCopy());
 	}
 
+    public static final SimpleProblemProducer ASTNode.DIFFERENTIATED_DISCRETE_VARIALBE =
+            new SimpleErrorProducer("DIFFERENTIATED_DISCRETE_VARIALBE", ProblemKind.SEMANTIC,
+                    "Unable to differentiate the variable %s which is declared or infered to be discrete");
+	
     public class FClass {
         
         public setFDerivativeVariables setFDerivativeVariables = new setFDerivativeVariables();
@@ -1511,13 +1204,20 @@ aspect TransformCanonical {
             
             public void perform() {
                 ArrayList<FVariable> l = new ArrayList<FVariable>();
-                for (FVariable fv : getFVariables())
-                    if (!fv.isDerivativeVariable())
+                for (FVariable fv : getFVariables()) {
+                    if (!fv.isDerivativeVariable()) {
                         l.add(fv);
-                for (FVariable fv : variablesToVisit())
+                    }
+                }
+                for (FVariable fv : variablesToVisit()) {
+                    if (fv.isDiscrete()) {
+                        DIFFERENTIATED_DISCRETE_VARIALBE.invoke(fv, fv.name());
+                    }
                     l.add(fv.createFDerivativeVariable());
+                }
                 setFVariableList(new List<FVariable>(l));
                 root().flushAllRecursive();
+                breakOnErrors();
             }
         }
         
@@ -1678,13 +1378,13 @@ aspect TransformCanonical {
                 for (FVariable fv : variables()) {
                     boolean generate = false;
                     if (!myOptions().getBooleanOption("state_initial_equations") &&
-                            fv.isDifferentiatedVariable() && (fv.fixedAttribute() ||
+                            fv.isDifferentiatedVariable() && (fv.isFixed() ||
                             myOptions().getBooleanOption("state_start_values_fixed")))
                         generate = true;
                     else if (!myOptions().getBooleanOption("state_initial_equations") &&
-                            fv.isAlgebraicContinousRealVariable() && fv.fixedAttribute())
+                            fv.isAlgebraicContinousRealVariable() && fv.isFixed())
                         generate = true;
-                    else if (fv.isDiscrete() && !fv.isString() && fv.fixedAttribute())
+                    else if (fv.isDiscrete() && !fv.isString() && fv.isFixed())
                         generate = true;
                     
                     if (generate) {
@@ -2269,7 +1969,7 @@ aspect TransformCanonical {
         if (nonDefiningUses().size() > 0) {
             FIdUseExp nonDefineUse = nonDefiningUses().iterator().next();
             value = nonDefineUse.inlineUsesFunctionCallLeft();
-            if (value == null) {
+            if (value == null || (defineUse.isParameterExp() && value.myFEquation().isNormalEquation())) {
                 return false;
             }
             value.myFEquation().markForRemoval();
@@ -2857,7 +2557,12 @@ aspect ExtractSampleExpressions {
 }
 
 aspect IfEquations {
-	
+
+    /*
+     *  TODO: We shouldn't need this now that scalarization can do this anyway. 
+     *        Just removing it and making obviously necessary changes causes lots of tests to fail. 
+     */
+
 	/*
 	 * First rewrite those if equations that has constant or stuctural parameter test
 	 * by evaluating the expressions and eliminating unreachable branches.
@@ -2901,20 +2606,7 @@ aspect IfEquations {
 	private boolean FIfEquation.eliminateIfEquation = false;
 	private boolean FIfExp.eliminateIfEquation = false;
 
-	// TODO: not needed, since structural parameters are replaced 
-	protected boolean FIfWhenElseEquation.eliminateOnParamTest = false;
-
-	protected void FIfWhenElseEquation.setEliminateOnParamTest(ErrorCheckType checkType) {}
-
-	protected void FIfEquation.setEliminateOnParamTest(ErrorCheckType checkType) {
-		eliminateOnParamTest = true;
-		getTest().markAsStructuralParameter(checkType);
-		if (hasElse())
-			getElse().setEliminateOnParamTest(checkType);
-	}
-	
-	syn boolean FIfEquation.shouldEliminateIf() = 
-		getTest().isConstantExp() || getTest().isParameterExp() && eliminateOnParamTest;
+	syn boolean FIfEquation.shouldEliminateIf() = getTest().isConstantExp();
 	
 	rewrite FIfEquation {
 		when (eliminateIfEquation) to FIfWhenElseEquation {
@@ -3133,13 +2825,13 @@ aspect IfEquations {
         int[][] weights = new int[nl][nr];
         for (int i = 0; i < nl; i++) {
             for (int j = 0; j < nr; j++) {
-                Set<FVariable> rightVars = right.get(j).variables();
+                Set<String> rightVars = right.get(j).referencedVariablesAsStrings();
                 weights[i][j] = rightVars.size();
-                for (FVariable var : left.get(i).variables()) 
+                for (String var : left.get(i).referencedVariablesAsStrings()) 
                     weights[i][j] += rightVars.contains(var) ? -1 : 1;
             }
         }
-        return new MunkresProblem(IntegerCost.create(weights)).solve();
+        return new DenseMunkresProblem(IntegerCost.create(weights)).solve();
 	}
 	
 	private void FIfEquation.sortOutMatchedEquations(ArrayList<FEquation> eqns, int[][] match, int col, 
@@ -3163,8 +2855,8 @@ aspect IfEquations {
 		if (hasElse())
 		    varsInBoth = intersection(varsInBoth, getElse().assignmentEquationMap().keySet()); 
 		for (FAbstractVariable v : toSortedList(varsInBoth, FAbstractVariable.NAME_COMPARATOR)) {
-			FExp left = assignmentEquationMap().get(v).assignmentExp();
-			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp();
+			FExp left = assignmentEquationMap().get(v).assignmentExp().fullCopy();
+			FExp right = getElse().assignmentEquationMap().get(v).assignmentExp().fullCopy();
 			FIfExp ifExp = new FIfExp(getTest().fullCopy(), left, right);
 			FEquation e = new FEquation(getType().fullCopy(), v.createUseExp(), ifExp);
 			if (isWhen()) {
@@ -3347,7 +3039,7 @@ aspect ParameterSorting {
 		// For each equation
 		for (FAbstractEquation eqn : eqns) {
 			// Retrieve all variables referenced in right hand side
-			Set<FVariable> deps = eqn.referencedFVariablesInRHS();
+            Set<FVariable> deps = eqn.variableDependenciesRHS();
 			// Build the actual adjacency graph.
 			for (FVariable fv : deps) {
 				FAbstractEquation depEqn = fv.parameterEquation();
@@ -3568,7 +3260,7 @@ aspect TransformCanonicalErrorCheck {
         */
        syn int FClass.numDAEInitVariables() = numDAEVariables() +
                numDifferentiatedRealVariables() + numDiscretePreVariables() +
-               numNonFixedParameters() + numDynamicStates() - numDynamicAlgebraicVariables();
+               numInitialParameters() + numDynamicStates() - numDynamicAlgebraicVariables();
 
        public void FClass.checkFClassDimensions() {
                // Check dimensions of DAE
@@ -3679,7 +3371,7 @@ aspect StateInitialEquations {
         
         for (FRealVariable fv : differentiatedRealVariables()) {
             FQName nameToAdd = fv.getFQName().copyAndAddPrefix("_start_");
-            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fNonFixedParameter(), nameToAdd);
+            FRealVariable fvToAdd = new FRealVariable(new FPublicVisibilityType(), fFixedParameter(), nameToAdd);
             if (fv.startAttributeSet())
                 fvToAdd.setBindingExp(fv.startAttributeExp().ceval().buildLiteral());
             else
@@ -4333,7 +4025,9 @@ aspect LoadResource {
             n.collectResourcesToLoad(list);
     }
     public void FLoadResource.collectResourcesToLoad(LinkedHashSet<String> list) {
-        list.add(ceval().stringValue());
+        if (!inFunction()) {
+            list.add(ceval().stringValue());
+        }
     }
     
     syn String FLoadResource.resourceName() {
@@ -4443,6 +4137,11 @@ aspect FunctionAndRecordCleanup {
         super.markUsedFunctionsAndRecords(type);
     }
     
+    public void FExternalObjectVariable.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
+        super.markUsedFunctionsAndRecords(type);
+        getDestructorCall().markUsedFunctionsAndRecords(type);
+    }
+    
     @Override
     public void FFunctionCall.markUsedFunctionsAndRecords(FFunctionDecl.UseType type) {
         myFCallable().markUsedFunctionsAndRecords(type);
@@ -4464,8 +4163,8 @@ aspect FunctionAndRecordCleanup {
                 myOptions().getBooleanOption("generate_ode_jacobian"))) {
                 if (requiresDerivative() && !canDifferentiate()) {
                     error("Unable to determine derivative function for function '" + name() + "'");
-                } else if (derivativeFunction() != null) {
-                    derivativeFunction().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
+                } else if (derivativeFunctionUnrestricted() != null) {
+                    derivativeFunctionUnrestricted().markUsedFunctionsAndRecords(UseType.ANNOTATION_DERIVATIVE);
                 }
             }
             super.markUsedFunctionsAndRecords(functionUsed);
