@@ -416,6 +416,11 @@ aspect ExternalConstantEvaluationCaching {
             
             private ProcessBuilder createProcessBuilder(FExternalStmt ext) {
                 ProcessBuilder pb = new ProcessBuilder(executable);
+                Map<String,String> env = pb.environment();
+                if (env.keySet().contains("Path")) {
+                    env.put("PATH", env.get("Path"));
+                    env.remove("Path");
+                }
                 pb.redirectErrorStream(true);
                 if (ext.libraryDirectory() != null) {
                     // Update environment in case of shared library
@@ -423,23 +428,23 @@ aspect ExternalConstantEvaluationCaching {
                             mc.getCCompiler().getTargetPlatforms());
                     File f = new File(ext.libraryDirectory(), platform);
                     String libLoc = f.isDirectory() ? f.getPath() : ext.libraryDirectory();
-                    appendPath(pb, libLoc, platform);
+                    appendPath(env, libLoc, platform);
                 }
                 return pb;
             }
             
             /**
-             * Append a library location <code>libLoc</code> to the path variable in environment of <code>pb</code>.
+             * Append a library location <code>libLoc</code> to the path variable in environment <code>env</code>.
              */
-            private void appendPath(ProcessBuilder pb, String libLoc, String platform) {
+            private void appendPath(Map<String,String> env, String libLoc, String platform) {
                 String sep = platform.startsWith("win") ? ";" : ":";
                 String var = platform.startsWith("win") ? "PATH" : "LD_LIBRARY_PATH";
-                String res = pb.environment().get(var);
+                String res = env.get(var);
                 if (res == null)
                     res = libLoc;
                 else
                     res = res + sep + libLoc;
-                pb.environment().put(var, res);
+                env.put(var, res);
             }
         }
         
