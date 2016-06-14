@@ -179,6 +179,12 @@ abstract public class OptionRegistry {
              Category.user,
              true, 
              "If enabled, then automatic tearing of equation systems is performed."),
+        ALLOW_NON_SCALAR_NESTED_BLOCKS
+            ("allow_non_scalar_nested_blocks",
+             OptionType.compiler,
+             Category.uncommon,
+             true,
+             "If disabled, an error is given if there are nested blocks which are non-scalar."),
         CONV_FREE_DEP_PAR_TO_ALGS
             ("convert_free_dependent_parameters_to_algebraics", 
              OptionType.compiler, 

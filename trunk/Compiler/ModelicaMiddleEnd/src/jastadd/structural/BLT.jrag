@@ -583,9 +583,9 @@ aspect BLT{
         public void complianceCheck(ErrorCheckType checkType, OptionRegistry options) {
         }
 
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             for (AbstractEquationBlock block : this)
-                block.errorCheck();
+                block.errorCheck(fclass);
         }
 
         public void computeDependencies() {
@@ -1181,7 +1181,7 @@ aspect BLT{
          * method should check the start values of its variable and verify
          * that a start value is set.
          */
-        public abstract void errorCheck();
+        public abstract void errorCheck(FClass fclass);
 
         protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars, Set<FAbstractEquation> activeRealEquations) {
             int numEqns = 0;
@@ -1312,6 +1312,32 @@ aspect BLT{
 
             return false;
         }
+        
+        public static class BlockProblemProducer extends ProblemProducer<ReporterNode> {
+            
+            private final String message;
+            
+            public BlockProblemProducer(String identifier, String message) {
+                super(identifier, ProblemKind.SEMANTIC);
+                this.message = message;
+            }
+            
+            @Override
+            public ProblemSeverity severity() {
+                return ProblemSeverity.ERROR;
+            }
+            
+            public void invoke(ReporterNode src, AbstractEquationBlock block) {
+                invoke(src, ProblemSeverity.ERROR, "%s\nBlock which produced the error:\n%s", message, block);
+            }
+
+            @Override
+            public String description() {
+                return message;
+            }
+
+        }
+        
     }
 
     /**
@@ -1641,16 +1667,25 @@ aspect BLT{
         }
 
         @Override
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             for (SimpleEquationBlock seb : unsolvedBlocks)
                 if (!seb.isReal())
                     seb.equation().error("Non-real equation used as residual:\n" + seb.equation());
+            if (!fclass.myOptions().getBooleanOption("allow_non_scalar_nested_blocks")) {
+                for (AbstractEquationBlock block : new ChainedIterable<AbstractEquationBlock>(solvedBlocks(), unsolvedBlocks())) {
+                    if (block.allEquations().size() > 1) {
+                        ASTNode.NESTED_NON_SCALAR_BLOCK.invoke(fclass, block);
+                    }
+                }
+            }
             if (isLinear())
                 return;
-            for (AbstractEquationBlock seb : solvedBlocks())
-                seb.errorCheck();
-            for (SimpleEquationBlock seb : unsolvedBlocks)
-                seb.errorCheck();
+            for (AbstractEquationBlock seb : solvedBlocks()) {
+                seb.errorCheck(fclass);
+            }
+            for (SimpleEquationBlock seb : unsolvedBlocks()) {
+                seb.errorCheck(fclass);
+            }
         }
 
         @Override
@@ -1680,6 +1715,10 @@ aspect BLT{
 
     }
 
+    public static final AbstractEquationBlock.BlockProblemProducer ASTNode.NESTED_NON_SCALAR_BLOCK =
+            new AbstractEquationBlock.BlockProblemProducer("NESTED_NON_SCALAR_BLOCK", "Nested non scalar blocks are not allowed since option 'allow_non_scalar_nested_blocks' is set to false.");
+    
+    
     /**
      * TornEquationBlock represents an equation block resulting from tearing.
      */
@@ -1852,9 +1891,9 @@ aspect BLT{
         protected abstract String computeLabel(T blt);
 
         @Override
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             for (T blt : subBLTs)
-                blt.errorCheck();
+                blt.errorCheck(fclass);
             
         }
         
@@ -2089,7 +2128,7 @@ aspect BLT{
         }
 
         @Override
-        public void errorCheck() {}
+        public void errorCheck(FClass fclass) {}
 
         protected boolean needLabel(boolean inSubBlock) {
             return needSequenceNumber(inSubBlock);
@@ -2198,7 +2237,7 @@ aspect BLT{
         }
 
         @Override
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             fv.warnStartAttributeNotSet();
         }
 
@@ -2219,7 +2258,7 @@ aspect BLT{
         }
 
         @Override
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             fv.warnStartAttributeNotSet();
         }
 
@@ -2307,7 +2346,7 @@ aspect BLT{
         }
 
         @Override
-        public void errorCheck() {
+        public void errorCheck(FClass fclass) {
             for (FVariable var : activeVars)
                 var.warnStartAttributeNotSet();
         }
