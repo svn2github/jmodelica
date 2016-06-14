@@ -56,10 +56,10 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     
     fmi2_cs_t* fmi2_cs;
     jmi_ode_problem_t* ode_problem;
-    jmi_cs_input_t* inputs;
+    jmi_cs_real_input_t* real_inputs;
     int flag;
 	fmi2Real time_event;
-    fmi2Integer i;
+    size_t i;
 
 	int initialize = FALSE;
 	int retval = JMI_ODE_EVENT;
@@ -83,14 +83,16 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     fmi2_cs = (fmi2_cs_t*)c;
     ode_problem = fmi2_cs -> ode_problem;
     
-    /* For the active inputs, get the initialize input */
-    inputs = ode_problem->inputs;
+    /* For the active real inputs, get the current input value */
+    real_inputs = ode_problem->real_inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        if (inputs[i].active == fmi2True) {
-            inputs[i].tn = ode_problem->time;
-            flag = fmi2_get_real(ode_problem ->fmix_me, &(inputs[i].vr), 1, &(inputs[i].input));
+        if (real_inputs[i].active == fmi2True) {
+            real_inputs[i].tn = ode_problem->time;
+            flag = fmi2_get_real(ode_problem ->fmix_me, &(real_inputs[i].vr),
+                                 1, &(real_inputs[i].value));
             if (flag != fmi2OK) {
-                jmi_log_comment(ode_problem->log, logError, "Failed to get the initial inputs.");
+                jmi_log_comment(ode_problem->log, logError,
+                    "Failed to get the current value of real inputs.");
                 return fmi2Error;
             }
         }
@@ -167,13 +169,10 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
         }
     }
     
-    /* De-activate inputs as they are no longer valid */
+    /* De-activate real inputs as they are no longer valid */
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        inputs[i].active = fmi2False;
+        real_inputs[i].active = fmi2False;
     }
-    
-    /* Set the inputs updated flag to False */
-    fmi2_cs->inputs_updated = FALSE;
     
     return fmi2OK;
 }
@@ -235,7 +234,6 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
     jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
                         jmi->n_relations, jmi->n_real_u, jmi->log);
     fmi2_cs -> ode_problem = ode_problem;
-    fmi2_cs->inputs_updated = TRUE;
     
     return fmi2OK;
 }
@@ -266,7 +264,7 @@ int fmi2_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
 	ode_problem->time = t;
     
     /* Set the inputs */
-    retval = fmi2_cs_set_input(ode_problem, t);
+    retval = fmi2_cs_set_real_inputs(ode_problem, t);
     if (retval != fmi2OK) {
         return -1;
     }
@@ -300,7 +298,7 @@ int fmi2_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
     ode_problem->time = t;
     
     /* Set the inputs */
-    retval = fmi2_cs_set_input(ode_problem, t);
+    retval = fmi2_cs_set_real_inputs(ode_problem, t);
     if (retval != fmi2OK) {
         return -1;
     }
@@ -313,24 +311,26 @@ int fmi2_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
     return 0;
 }
 
-fmi2Status fmi2_cs_set_input(jmi_ode_problem_t* ode_problem, fmi2Real time) {
-    jmi_cs_input_t* inputs;
+fmi2Status fmi2_cs_set_real_inputs(jmi_ode_problem_t* ode_problem, fmi2Real time) {
+    jmi_cs_real_input_t* real_inputs;
     fmi2Status retval;
     fmi2Real value;
     fmi2Integer i,j;
     
-    inputs = ode_problem -> inputs;
+    real_inputs = ode_problem->real_inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        if (inputs[i].active == fmi2False) {
+        if (real_inputs[i].active == fmi2False) {
             continue;
         }
-        value = inputs[i].input;
+        value = real_inputs[i].value;
         for (j = 0; j < JMI_CS_MAX_INPUT_DERIVATIVES; j++) {
-            value += pow((time - inputs[i].tn),j+1.0) * (inputs[i].input_derivatives[j]) / 
-                                    (inputs[i].input_derivatives_factor[j]);
+            value += pow((time - real_inputs[i].tn), j + 1.0) *
+                     real_inputs[i].input_derivatives[j] / 
+                     real_inputs[i].input_derivatives_factor[j];
         }
         
-        retval = fmi2_set_real(ode_problem->fmix_me, &(inputs[i].vr), 1, &value);
+        retval = fmi2_set_real(ode_problem->fmix_me, &(real_inputs[i].vr),
+                               1, &value);
         if (retval != fmi2OK) {
             return fmi2Error;
         }

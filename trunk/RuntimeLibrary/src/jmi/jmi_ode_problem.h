@@ -72,16 +72,16 @@ struct jmi_ode_problem_t {
     root_func_t           root_func;                   /**< \brief A callback function for the root of the ODE problem. */
     complete_step_func_t  complete_step_func;          /**< \brief A callback function for completing the step, checks for step-events. */
     
-    int                   n_real_x;                    /**< \brief Number of differentiated states. */
-    int                   n_real_u;                    /**< \brief Number of inputs. */
-    int                   n_sw;                        /**< \brief Number of switching functions. */
+    size_t                n_real_x;                    /**< \brief Number of differentiated states. */
+    size_t                n_real_u;                    /**< \brief Number of inputs. */
+    size_t                n_sw;                        /**< \brief Number of switching functions. */
     jmi_real_t            time;                        /**< \brief The time, independent variable of the ODE. */
     jmi_real_t*           states;                      /**< \brief The states of the ODE. */
     jmi_real_t*           states_derivative;           /**< \brief The state derivatives of the ODE. */
     jmi_real_t*           nominal;                     /**< \brief The nominals for the states. */
     jmi_real_t*           event_indicators;            /**< \brief The evaluated event indicators at the current time. */
     jmi_real_t*           event_indicators_previous;   /**< \brief The evaluated event indicators at the previous time. */
-    jmi_cs_input_t*       inputs;                      /**< \brief The inputs to the ODE. */
+    jmi_cs_real_input_t*  real_inputs;                 /**< \brief The real inputs to the ODE. */
 };
 
 /**

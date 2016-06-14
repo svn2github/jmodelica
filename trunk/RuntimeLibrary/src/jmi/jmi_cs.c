@@ -24,84 +24,71 @@ int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem,
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]) {
     
-    jmi_cs_input_t* inputs;
-    size_t i,j;
-    jmi_boolean found_input = FALSE;
-
-    if (nvr > (size_t)(ode_problem -> n_real_u)) {
-        jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, too many inputs.");
-        return -1;
-    }
+    jmi_cs_real_input_t* real_inputs;
+    size_t i, j;
+    jmi_boolean found_real_input = FALSE;
     
     for (i = 0; i < nvr; i++) {
         if (order[i] < 1 || order[i] > JMI_CS_MAX_INPUT_DERIVATIVES) {
-            jmi_log_node(ode_problem->log, logError, "SetInputDerivativeFailed", "Failed to set the input derivative, un-supported order: <order:%d>",order[i]);
+            jmi_log_node(ode_problem->log, logError, "SetInputDerivativeFailed",
+                "Failed to set the input derivative, un-supported order: "
+                "<order:%d>", order[i]);
             return -1;
         }
-        found_input = FALSE;
+        found_real_input = FALSE;
         
         /* Check if there exists an active input with the value reference vr[i] */
-        inputs = ode_problem -> inputs;
-        for (j = 0; j < (size_t)ode_problem -> n_real_u; j++) {
-            if (inputs[j].vr == vr[i] && inputs[j].active == TRUE) {
-                inputs[j].input_derivatives[order[i]-1] = value[i];
-                found_input = TRUE;
+        real_inputs = ode_problem -> real_inputs;
+        for (j = 0; j < ode_problem -> n_real_u; j++) {
+            if (real_inputs[j].vr == vr[i] && real_inputs[j].active == TRUE) {
+                real_inputs[j].input_derivatives[order[i]-1] = value[i];
+                found_real_input = TRUE;
                 break;
             }
         }
         
-        /* Found an active input, continue */
-        if (found_input == TRUE) {
+        /* Found an active real input, continue */
+        if (found_real_input == TRUE) {
             continue;
         }
         
-        /* No active input found, active an available */
-        for (j = 0; j < (size_t)ode_problem -> n_real_u; j++) {
-            if (inputs[j].active == FALSE) {
-                jmi_cs_init_input_struct(&(inputs[j]));
-                inputs[j].active = TRUE;
-                inputs[j].input_derivatives[order[i]-1] = value[i];
-                inputs[j].vr = vr[i];
+        /* No active real input found, activate an available */
+        for (j = 0; j < ode_problem -> n_real_u; j++) {
+            if (real_inputs[j].active == FALSE) {
+                jmi_cs_init_real_input_struct(&(real_inputs[j]));
+                real_inputs[j].active = TRUE;
+                real_inputs[j].input_derivatives[order[i]-1] = value[i];
+                real_inputs[j].vr = vr[i];
                 
-                found_input = TRUE;
+                found_real_input = TRUE;
                 break;
             }
         }
         
-        /* No available inputs -> the user has set an input which is not an input */
-        if (found_input == FALSE) {
-            jmi_log_comment(ode_problem->log, logError, "Failed to set the input derivative, inconsistent number of inputs.");
+        /* No available real inputs -> the user has set a variable which is
+         * not a real input */
+        if (found_real_input == FALSE) {
+            jmi_log_comment(ode_problem->log, logError,
+                "Failed to set the input derivative, inconsistent number of "
+                "real inputs.");
             return -1;
         }
-        
-        /*
-        for (j = 0; j < ode_problem->n_real_u; j++) {
-            if (inputs[j].vr == vr[i]) {
-                if (ode_problem-> -> inputs[j].active == FALSE) {
-                    jmi_cs_init_input_struct(&(ode_problem-> -> inputs[j]));
-                    ode_problem-> -> inputs[j].active = TRUE;
-                }
-                ode_problem -> inputs[j].input_derivatives[order[i]-1] = value[i];
-                break;f
-            }
-        }
-        */
     }
     
     return 0;
 }
 
-int jmi_cs_init_input_struct(jmi_cs_input_t* value) {
+int jmi_cs_init_real_input_struct(jmi_cs_real_input_t* real_input) {
     int i = 0;
     jmi_real_t fac[JMI_CS_MAX_INPUT_DERIVATIVES] = {1,2,6};
     
-    value -> active = FALSE;
-    value -> tn     = 0.0;
-    value -> input  = 0.0;
+    real_input->active = FALSE;
+    real_input->tn     = 0.0;
+    real_input->value  = 0.0;
     
     for (i = 0; i < JMI_CS_MAX_INPUT_DERIVATIVES; i++) {
-        value -> input_derivatives[i] = 0.0;
-        value -> input_derivatives_factor[i] = fac[i];
+        real_input->input_derivatives[i] = 0.0;
+        real_input->input_derivatives_factor[i] = fac[i];
     }
     
     return 0;

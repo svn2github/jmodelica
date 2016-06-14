@@ -475,9 +475,6 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
         } else {
             fmi2_me->work_real_array[i] = value[i];
         }
-        if (fmi2_me->fmu_type == fmi2CoSimulation && !(((fmi2_cs_t *)c)->inputs_updated) && is_real_input(&((fmi2_me_t *)c)->jmi, vr[i])) {
-            ((fmi2_cs_t *)c)->inputs_updated = TRUE;
-        }
     }
     
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);

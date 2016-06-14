@@ -51,7 +51,7 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
                          fmiReal communicationStepSize, fmiBoolean newStep) {
     fmi1_cs_t* fmi1_cs;
     jmi_ode_problem_t* ode_problem;
-    jmi_cs_input_t* inputs;
+    jmi_cs_real_input_t* real_inputs;
     int flag, retval = JMI_ODE_EVENT;
     fmiReal time_final = currentCommunicationPoint+communicationStepSize;
     fmiReal time_event;
@@ -79,14 +79,18 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
     top_node = jmi_log_enter_fmt(ode_problem->log, logInfo, "DoStep", 
             "Starting a do step at internal <t:%E> with end <t:%E>", ode_problem->time, time_final);
     
-    /* For the active inputs, get the initialize input */
-    inputs = ode_problem->inputs;
+    /* For the active real inputs, get the current value */
+    real_inputs = ode_problem->real_inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        if (inputs[i].active == fmiTrue) {
-            inputs[i].tn = ode_problem->time;
-            retval = fmi1_me_get_real(ode_problem ->fmix_me, &(inputs[i].vr), 1, &(inputs[i].input));
+        if (real_inputs[i].active == fmiTrue) {
+            real_inputs[i].tn = ode_problem->time;
+            retval = fmi1_me_get_real(ode_problem ->fmix_me,
+                                      &(real_inputs[i].vr),
+                                      1,
+                                      &(real_inputs[i].value));
             if (retval != fmiOK) {
-                jmi_log_comment(ode_problem->log, logError, "Failed to get the initial inputs.");
+                jmi_log_comment(ode_problem->log, logError,
+                    "Failed to get the current value of real inputs.");
                 return fmiError;
             }
         }
@@ -181,9 +185,9 @@ fmiStatus fmi1_cs_do_step(fmiComponent c, fmiReal currentCommunicationPoint,
         }
     }
     
-    /* De-activate inputs as they are no longer valid */
+    /* De-activate real inputs as they are no longer valid */
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        inputs[i].active = fmiFalse;
+        real_inputs[i].active = fmiFalse;
     }
     
     jmi_log_leave(ode_problem->log, top_node);
@@ -544,8 +548,8 @@ int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
     }
 	ode_problem->time = t;
     
-    /* Set the inputs */
-    retval = fmi1_cs_set_input(ode_problem, t);
+    /* Set the real inputs */
+    retval = fmi1_cs_set_real_inputs(ode_problem, t);
     if (retval != fmiOK) {
         return -1;
     }
@@ -566,7 +570,7 @@ int fmi1_cs_rhs_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y,
 int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y, jmi_real_t *root){
     fmiStatus retval;
     
-    retval = fmi1_me_set_continuous_states(ode_problem->fmix_me, (fmiReal*)y, ode_problem->n_real_x);
+    retval = fmi1_me_set_continuous_states(ode_problem->fmix_me, y, ode_problem->n_real_x);
     if (retval != fmiOK) {
         return -1;
     }
@@ -578,13 +582,13 @@ int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
     }
     ode_problem->time = t;
     
-    /* Set the inputs */
-    retval = fmi1_cs_set_input(ode_problem, t);
+    /* Set the real inputs */
+    retval = fmi1_cs_set_real_inputs(ode_problem, t);
     if (retval != fmiOK) {
         return -1;
     }
     
-    retval = fmi1_me_get_event_indicators(ode_problem->fmix_me, (fmiReal*)root , ode_problem->n_sw);
+    retval = fmi1_me_get_event_indicators(ode_problem->fmix_me, root , ode_problem->n_sw);
     if (retval != fmiOK) {
         return -1;
     }
@@ -592,24 +596,26 @@ int fmi1_cs_root_fcn(jmi_ode_problem_t* ode_problem, jmi_real_t t, jmi_real_t *y
     return 0;
 }
 
-fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time) {
-    jmi_cs_input_t* inputs;
+fmiStatus fmi1_cs_set_real_inputs(jmi_ode_problem_t* ode_problem, fmiReal time) {
+    jmi_cs_real_input_t* real_inputs;
     fmiStatus retval;
     fmiReal value;
-    fmiInteger i,j;
+    size_t i,j;
     
-    inputs = ode_problem -> inputs;
+    real_inputs = ode_problem->real_inputs;
     for (i = 0; i < ode_problem -> n_real_u; i++) {
-        if (inputs[i].active == fmiFalse) {
+        if (real_inputs[i].active == fmiFalse) {
             continue;
         }
-        value = inputs[i].input;
+        value = real_inputs[i].value;
         for (j = 0; j < JMI_CS_MAX_INPUT_DERIVATIVES; j++) {
-            value += pow((time - inputs[i].tn),j+1.0) * (inputs[i].input_derivatives[j]) / 
-                                    (inputs[i].input_derivatives_factor[j]);
+            value += pow((time - real_inputs[i].tn), j + 1.0) *
+                     real_inputs[i].input_derivatives[j] /
+                     real_inputs[i].input_derivatives_factor[j];
         }
         
-        retval = fmi1_me_set_real(ode_problem->fmix_me, &(inputs[i].vr), 1, &value);
+        retval = fmi1_me_set_real(ode_problem->fmix_me, &(real_inputs[i].vr),
+                                  1, &value);
         if (retval != fmiOK) {
             return fmiError;
         }
@@ -641,12 +647,3 @@ int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
     return 0;
 }
 
-/*
-fmiStatus fmi_save_state(fmiComponent c, size_t index){
-    return fmiError;
-}
-
-fmiStatus fmi_restore_state(fmiComponent c, size_t index){
-    return fmiError;
-}
-*/
