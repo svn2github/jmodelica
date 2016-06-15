@@ -1068,7 +1068,7 @@ aspect Scalarization {
             try {
                 if (getTest().ceval().booleanValue()) {
                     scalarizeList(getFAbstractEquations(), eqns, vars, indexMap);
-                } else {
+                } else if (hasElse()) {
                     getElse().scalarize(eqns, vars, indexMap);
                 }
                 lockedBranch = true;
