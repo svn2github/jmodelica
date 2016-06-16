@@ -477,6 +477,12 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
         }
     }
     
+    if (fmi2_me->fmu_type == fmi2CoSimulation) {
+        ((fmi2_cs_t *)c)->triggered_external_event =
+            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
+                                               (void*)fmi2_me->work_real_array);
+    }
+    
     retval = jmi_set_real(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_real_array);
     if (retval != 0) {
         return fmi2Error;
@@ -504,6 +510,12 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
         }
     }
     
+    if (fmi2_me->fmu_type == fmi2CoSimulation) {
+        ((fmi2_cs_t *)c)->triggered_external_event =
+            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
+                                               (void*)fmi2_me->work_int_array);
+    }
+    
     retval = jmi_set_integer(&((fmi2_me_t *)c)->jmi, vr, nvr, fmi2_me->work_int_array);
     if (retval != 0) {
         return fmi2Error;
@@ -515,25 +527,31 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
 fmi2Status fmi2_set_boolean(fmi2Component c, const fmi2ValueReference vr[],
                             size_t nvr, const fmi2Boolean value[]) {
     fmi2Integer retval;
+    fmi2_me_t* fmi2_me = (fmi2_me_t *)c;
     size_t i;
-
-	jmi_boolean* jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));;
+    jmi_boolean* jmi_boolean_values;
     
     if (c == NULL) {
 		return fmi2Fatal;
     }
     
+    jmi_boolean_values = (jmi_boolean*)calloc(nvr, sizeof(char));
     for (i = 0; i < nvr; i++) {
         jmi_boolean_values[i] = value[i];
     }
     
-    retval = jmi_set_boolean(&((fmi2_me_t *)c)->jmi, vr, nvr, jmi_boolean_values);
+    if (fmi2_me->fmu_type == fmi2CoSimulation) {
+        ((fmi2_cs_t *)c)->triggered_external_event =
+            jmi_cs_check_discrete_input_change(&fmi2_me->jmi, vr, nvr,
+                                               (void*)jmi_boolean_values);
+    }
+    retval = jmi_set_boolean(&fmi2_me->jmi, vr, nvr, jmi_boolean_values);
+    free(jmi_boolean_values);
+    
     if (retval != 0) {
         return fmi2Error;
     }
 
-	free(jmi_boolean_values);
-    
     return fmi2OK;
 }
 

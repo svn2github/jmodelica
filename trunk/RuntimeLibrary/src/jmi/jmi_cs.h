@@ -17,8 +17,8 @@
     <http://www.ibm.com/developerworks/library/os-cpl.html/> respectively.
 */
 
-#ifndef jmi_cs_h
-#define jmi_cs_h
+#ifndef JMI_CS_H
+#define JMI_CS_H
 
 #include "jmi.h"
 #include "jmi_ode_problem.h"
@@ -35,11 +35,25 @@ struct jmi_cs_real_input_t {
     jmi_real_t input_derivatives_factor[JMI_CS_MAX_INPUT_DERIVATIVES];
 };
 
-
-
 int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]);
         
 int jmi_cs_init_real_input_struct(jmi_cs_real_input_t* real_input);
-#endif
+
+/**
+ * \brief Checks if the user is changing the values of any discrete inputs.
+ * 
+ * @param jmi The jmi_t struct.
+ * @param vr The value references of values the user is setting.
+ * @param nvr The number of value references.
+ * @param value The new values for variables.
+ * @return True if the input would result in changes of discrete inputs sent to
+ * a fmiX_set_XXX function.
+ */
+int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
+                                       const jmi_value_reference    vr[],
+                                       size_t                       nvr,
+                                       const void*                  value);
+
+#endif /* JMI_CS_H */

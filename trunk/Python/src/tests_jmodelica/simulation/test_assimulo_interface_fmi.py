@@ -797,6 +797,20 @@ class Test_FMI_ODE_CS_2:
         _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=2.0, target="cs")
         _t1_name = compile_fmu("TimeEvents.Basic5", file_name_time_event, version=2.0, target="cs")
         _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, version=2.0, target="cs")
+        compile_fmu("Inputs.PlantDiscreteInputs", file_name_in, version=2.0, target="cs")
+        
+    @testattr(stddist = True)
+    def test_changing_discrete_inputs(self):
+        model = load_fmu("Inputs_PlantDiscreteInputs.fmu")
+        opts = model.simulate_options()
+        
+        def step(time):
+            "A step function that goes from 1 to 0 at time=0.28"
+            return time < 0.28
+        
+        input = ('onSwitch', step)
+        res = model.simulate(final_time=0.8, options=opts, input=input)
+        nose.tools.assert_almost_equal(res.final("T"), 11.22494, 2)
         
     @testattr(stddist = True)
     def test_updated_values_in_result(self):

@@ -100,7 +100,9 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
     
     while (retval == JMI_ODE_EVENT && ode_problem->time+JMI_ALMOST_EPS*time_final < time_final) {
 
-        while (fmi2_cs->event_info.newDiscreteStatesNeeded) {
+        while (fmi2_cs->event_info.newDiscreteStatesNeeded ||
+               fmi2_cs->triggered_external_event)
+        {
             flag = fmi2_new_discrete_state(ode_problem->fmix_me, &(fmi2_cs->event_info));
             initialize = TRUE; /* Event detected, need to initialize the ODE problem. */
 
@@ -108,6 +110,8 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
                 jmi_log_comment(ode_problem->log, logError, "Failed to handle the event.");
                 return fmi2Error;
             }
+            
+            fmi2_cs->triggered_external_event = FALSE;
         }
         
         /* We need the values of the continuous states to initialize, no need to check 'valuesOfContinuousStatesChanged'. */
@@ -234,6 +238,7 @@ fmi2Status fmi2_cs_instantiate(fmi2Component c,
     jmi_new_ode_problem(&ode_problem, &jmi->jmi_callbacks, c, jmi->n_real_x,
                         jmi->n_relations, jmi->n_real_u, jmi->log);
     fmi2_cs -> ode_problem = ode_problem;
+    fmi2_cs -> triggered_external_event = FALSE;
     
     return fmi2OK;
 }

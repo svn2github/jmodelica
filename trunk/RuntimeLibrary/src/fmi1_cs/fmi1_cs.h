@@ -50,6 +50,7 @@ struct fmi1_cs_t {
     fmiEventInfo event_info;
     fmiBoolean logging_on;                      /** < \brief The logging on / off attribute. */
     int initialize_solver;               /** < \brief Flag indicating if the solver shall be initialized. */
+    int triggered_external_event;        /** < \brief Flag indicating if the user have sat discrete inputs. */
 };
 
 /**

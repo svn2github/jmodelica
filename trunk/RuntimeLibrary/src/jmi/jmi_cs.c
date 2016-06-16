@@ -20,6 +20,45 @@
 #include "stdio.h"
 #include "jmi_cs.h"
 
+static int is_disc_input_with_diff_value(jmi_t*                     jmi,
+                                         const jmi_value_reference  valueref[],
+                                         const void*                value,
+                                         size_t                     i) {
+    size_t z_index;
+    int is_integer_input, is_boolean_input;
+    
+    z_index = get_index_from_value_ref(valueref[i]);
+    is_integer_input = (z_index >= jmi->offs_integer_u && z_index < jmi->offs_boolean_d);
+    is_boolean_input = (z_index >= jmi->offs_boolean_u && z_index < jmi->offs_sw);
+    /* TODO: Add check for if discrete reals have changed when codegen is fixed:
+     * is_disc_real_input = (index >= jmi->offs_disc_real_u && index < jmi->XXX); */
+    
+    if (is_integer_input) {
+        return ((*jmi->z)[z_index] != ((jmi_int_t*)value)[i]);
+    } else if (is_boolean_input) {
+        return ((*jmi->z)[z_index] != ((jmi_boolean*)value)[i]);
+    /*} else if (is_disc_real_input) {
+        return ((*jmi->z)[z_index] != ((jmi_real_t*)value)[i]); */
+    } else {
+        return 0;
+    }
+}
+
+int jmi_cs_check_discrete_input_change(jmi_t*                       jmi,
+                                       const jmi_value_reference    vr[],
+                                       size_t                       nvr,
+                                       const void*                  value) {
+    size_t i;
+    
+    for (i = 0; i < nvr; i++) {
+        if (is_disc_input_with_diff_value(jmi, vr, value, i)) {
+            return 1; /* Detected change */
+        }
+    }
+    
+    return 0; /* No changed detected */
+}
+
 int jmi_cs_set_real_input_derivatives(jmi_ode_problem_t* ode_problem, 
         const jmi_value_reference vr[], size_t nvr, const int order[],
         const jmi_real_t value[]) {

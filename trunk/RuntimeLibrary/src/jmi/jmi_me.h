@@ -71,8 +71,6 @@ jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TO
 
 jmi_value_reference is_negated(jmi_value_reference valueref);
 
-int is_real_input(jmi_t* jmi, jmi_value_reference valueref);
-
 int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location);
 
 int jmi_me_init_modules(jmi_t* jmi);

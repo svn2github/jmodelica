@@ -48,15 +48,6 @@ jmi_value_reference is_negated(jmi_value_reference valueref) {
     return negated;
 }
 
-int is_real_input(jmi_t* jmi, jmi_value_reference valueref) {
-    jmi_value_reference index = get_index_from_value_ref(valueref);
-    if (index >= jmi->offs_real_u && index < jmi->offs_real_w) {
-        return TRUE;
-    } else {
-        return FALSE;
-    }
-}
-
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
                        
     jmi_t* jmi_ = jmi;
