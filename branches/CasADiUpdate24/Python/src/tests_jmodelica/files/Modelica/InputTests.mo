@@ -37,5 +37,20 @@ package Inputs
     equation
         x = if u > 0.5 then 1 else 0;
     end InputDiscontinuity;
+    
+    model PlantDiscreteInputs
+        output Real T(start=10.0);
+        input Real Tenv(start=0.0);
+        parameter Real V = 9.0;
+        parameter Real R = 1.0;
+        parameter Real k = 0.05;
+        input Boolean onSwitch;
+    equation
+        if onSwitch then
+            der(T) = (Tenv - T) + V^2 / (R + k*T);
+        else
+            der(T) = (Tenv - T);
+        end if;
+    end PlantDiscreteInputs;
 
 end Inputs;

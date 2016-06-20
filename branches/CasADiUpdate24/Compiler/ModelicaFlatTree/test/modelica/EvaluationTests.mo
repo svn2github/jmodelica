@@ -4389,4 +4389,35 @@ end EvaluationTests.Atan2;
 ")})));
 end Atan2;
 
+
+model RangeSubscript1
+    function f
+        input Real[2] x;
+        output Real[2,2] y;
+    algorithm
+        y[1,:] := x[1:2];
+        y[2,:] := {1,2};
+    end f;
+    
+    model A
+        parameter Real b[2];
+    end A;
+    
+    A a[2](b = f(c));
+    final parameter Real c[2] = {1,2};
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RangeSubscript1",
+            description="Constant eval of non-slice array access with subscripts in flat tree",
+            flatModel="
+fclass EvaluationTests.RangeSubscript1
+ final parameter Real a[1].b[1] = 1.0 /* 1.0 */;
+ final parameter Real a[1].b[2] = 2.0 /* 2.0 */;
+ final parameter Real c[1] = 1 /* 1 */;
+ final parameter Real c[2] = 2 /* 2 */;
+end EvaluationTests.RangeSubscript1;
+")})));
+end RangeSubscript1;
+
 end EvaluationTests;

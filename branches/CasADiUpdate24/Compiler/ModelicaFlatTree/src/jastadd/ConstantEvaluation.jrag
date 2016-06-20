@@ -2398,7 +2398,7 @@ aspect ConstantEvaluation {
         FAbstractVariable var = func ? lookupFV(name) : myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
-            if (hasFArraySubscripts() && !name.isScalarized()) {
+            if (hasFArraySubscripts() && !name.isScalarized() && !isArray()) {
                 i = name.getFArraySubscripts().createIndex();
             } else if (var.isFVariable() && name.isScalarized() && !var.asFVariable().isScalarized()) {
                 i = var.asFVariable().getFQName().getFArraySubscripts().createIndex();

@@ -27,7 +27,7 @@ int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, vo
     
     *ode_problem = (jmi_ode_problem_t*)calloc(1,sizeof(jmi_ode_problem_t));
     problem = *ode_problem;
-    problem-> jmi_callbacks = cb;
+    problem -> jmi_callbacks = cb;
     problem -> fmix_me  = fmix_me;     
     problem -> n_real_x = n_real_x;
     problem -> n_sw     = n_sw;
@@ -39,10 +39,10 @@ int jmi_new_ode_problem(jmi_ode_problem_t** ode_problem, jmi_callbacks_t* cb, vo
     problem -> event_indicators_previous = (jmi_real_t*)calloc(n_sw, sizeof(jmi_real_t));
     problem -> log = log;
     
-    problem -> inputs = (jmi_cs_input_t*)calloc(n_real_u, sizeof(jmi_cs_input_t));
-    /* Initialize inputs */
+    problem -> real_inputs = (jmi_cs_real_input_t*)calloc(n_real_u, sizeof(jmi_cs_real_input_t));
+    /* Initialize real inputs */
     for (i = 0; i < n_real_u; i++) {
-        jmi_cs_init_input_struct(&(problem -> inputs[i]));
+        jmi_cs_init_real_input_struct(&(problem -> real_inputs[i]));
     }
     
     return 0;
@@ -68,7 +68,7 @@ void jmi_free_ode_problem(jmi_ode_problem_t* problem){
         free(problem -> nominal);
         free(problem -> event_indicators);
         free(problem -> event_indicators_previous);
-        free(problem -> inputs);
+        free(problem -> real_inputs);
         free(problem);
     }
 }

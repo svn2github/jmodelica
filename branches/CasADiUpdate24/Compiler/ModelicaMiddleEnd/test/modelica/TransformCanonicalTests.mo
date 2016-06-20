@@ -7935,4 +7935,27 @@ end TransformCanonicalTests.ScalarizeIfInLoop3;
 ")})));
 end ScalarizeIfInLoop3;
 
+
+model ScalarizeIfInLoop4
+    Real y[1];
+equation
+    for i in 1:2 loop
+        if size(y, 1) >= i then
+            y[i] = time;
+        end if;
+    end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ScalarizeIfInLoop4",
+            description="Check scalarization of if equation in loop where no branch is active for some indices",
+            flatModel="
+fclass TransformCanonicalTests.ScalarizeIfInLoop4
+ Real y[1];
+equation
+ y[1] = time;
+end TransformCanonicalTests.ScalarizeIfInLoop4;
+")})));
+end ScalarizeIfInLoop4;
+
 end TransformCanonicalTests;

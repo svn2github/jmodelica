@@ -50,6 +50,7 @@ struct fmi1_cs_t {
     fmiEventInfo event_info;
     fmiBoolean logging_on;                      /** < \brief The logging on / off attribute. */
     int initialize_solver;               /** < \brief Flag indicating if the solver shall be initialized. */
+    int triggered_external_event;        /** < \brief Flag indicating if the user have sat discrete inputs. */
 };
 
 /**
@@ -333,21 +334,14 @@ int fmi1_cs_completed_integrator_step(jmi_ode_problem_t* ode_problem, char* step
 fmiStatus fmi1_cs_set_time(fmiComponent c, fmiReal time);
 
 /**
- * \brief Sets the inputs.
+ * \brief Sets the real inputs.
  * 
  * @param ode_problem The ODE problem struct
  * @param time The time for which the input is set.
  * @return Error code.
  */
-fmiStatus fmi1_cs_set_input(jmi_ode_problem_t* ode_problem, fmiReal time);
+fmiStatus fmi1_cs_set_real_inputs(jmi_ode_problem_t* ode_problem, fmiReal time);
 
-/**
- * \brief Initializes the input.
- * 
- * @param value A pointer to one input that should be initialized.
- * @return Error code.
- */
-fmiStatus fmi1_cs_init_input_struct(jmi_cs_input_t* value);
 
 /**
  * \brief Evaluation of the root-function of the ODE.
