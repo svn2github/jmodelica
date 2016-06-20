@@ -1341,7 +1341,12 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             str.append(e);
             str.append(" : ");
             for (V v : e.getVariables()) {
-                str.append(v + (canMatch(e, v) ? "@ " : "# "));
+                str.append(v);
+                str.append(canMatch(e, v) ? '@' : '#');
+                if (v.getMatching() == e || e.getMatching() == v) {
+                    str.append('M');
+                }
+                str.append(' ');
             }
             str.append("// " + e.printEquation() + "\n");
         }
