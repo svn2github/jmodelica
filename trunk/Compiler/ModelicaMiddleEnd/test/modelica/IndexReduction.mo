@@ -1070,7 +1070,7 @@ fclass IndexReduction.IndexReduction52
  Real b;
  Real _der_x;
  Real _der_y;
- Real _der_dy;
+ Real _der_dx;
  Real _der_a;
  Real _der_der_x;
  Real _der_der_y;
@@ -1083,13 +1083,13 @@ fclass IndexReduction.IndexReduction52
  Real _der_der_temp_1;
  Real _der_der_temp_4;
 initial equation 
- dx = 0.0;
+ dy = 0.0;
  b = 0.0;
 equation
  sin(_der_x) = dx;
  cos(_der_y) = dy;
- der(dx) = v * x;
- _der_dy = v * y;
+ _der_dx = v * x;
+ der(dy) = v * y;
  a * b = 1;
  a = temp_1 * temp_4 + 42;
  b = temp_1 * temp_4 + y;
@@ -1100,8 +1100,8 @@ equation
  der(b) = temp_1 * _der_temp_4 + _der_temp_1 * temp_4 + _der_y;
  _der_temp_1 = _der_x;
  _der_temp_4 = 1.0;
- cos(_der_x) * _der_der_x = der(dx);
- - sin(_der_y) * _der_der_y = _der_dy;
+ cos(_der_x) * _der_der_x = _der_dx;
+ - sin(_der_y) * _der_der_y = der(dy);
  a * _der_der_b + _der_a * der(b) + (_der_a * der(b) + _der_der_a * b) = 0;
  _der_der_a = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4);
  _der_der_b = temp_1 * _der_der_temp_4 + _der_temp_1 * _der_temp_4 + (_der_temp_1 * _der_temp_4 + _der_der_temp_1 * temp_4) + _der_der_y;
