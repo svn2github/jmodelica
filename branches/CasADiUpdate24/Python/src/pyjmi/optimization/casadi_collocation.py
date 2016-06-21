@@ -5387,7 +5387,7 @@ class LocalDAECollocator(CasadiCollocator):
         if point == "fcn":
             return nlp_fcn
         elif point == "init":
-            nlp_fcn.setInput(self.xx_init, 'x0')
+            nlp_fcn.setInput(self.xx_init, 'x')
         elif point == "opt":
             nlp_fcn.setInput(self.primal_opt, 'x')
         elif point == "sym":
@@ -5431,7 +5431,7 @@ class LocalDAECollocator(CasadiCollocator):
         if point == "fcn":
             return J_fcn
         elif point == "init":
-            J_fcn.setInput(self.xx_init, 'x0')
+            J_fcn.setInput(self.xx_init, 'x')
         elif point == "opt":
             J_fcn.setInput(self.primal_opt, 'x')
         elif point == "sym":
@@ -5488,16 +5488,16 @@ class LocalDAECollocator(CasadiCollocator):
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
             dual = N.zeros(self.c_e.numel() +
                            self.c_i.numel())
-            H_fcn.setInput(x, 'x')
-            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
+            H_fcn.setInput(x, 'der_x')
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'der_p')
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "opt":
             x = self.primal_opt
             sigma = self._compute_sigma(scaled_residuals=scaled_residuals)
             dual = self.get_opt_constraint_duals(scaled=scaled_residuals)
-            H_fcn.setInput(x, 'x')
-            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
+            H_fcn.setInput(x, 'der_x')
+            H_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'der_p')
             H_fcn.setInput(sigma, 2)
             H_fcn.setInput(dual, 3)
         elif point == "sym":
@@ -5588,7 +5588,7 @@ class LocalDAECollocator(CasadiCollocator):
                 If True, return sigma for the equation scaled NLP.
         """
         grad_fcn = self.solver_object.gradF()
-        grad_fcn.setInput(self.xx_init, 'x0')
+        grad_fcn.setInput(self.xx_init, 'x')
         grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
         grad_fcn.evaluate()
         grad = grad_fcn.getOutput(0).toArray()
