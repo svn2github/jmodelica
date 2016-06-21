@@ -38,7 +38,8 @@ static int is_disc_input_with_diff_value(jmi_t*                     jmi,
     } else if (is_boolean_input) {
         return ((*jmi->z)[z_index] != ((jmi_boolean*)value)[i]);
     /*} else if (is_disc_real_input) {
-        return ((*jmi->z)[z_index] != ((jmi_real_t*)value)[i]); */
+        return (jmi_abs((*jmi->z)[z_index] - ((jmi_real_t*)value)[i]) < 
+                JMI_ALMOST_EPS * jmi_abs((*jmi->z)[z_index]); */
     } else {
         return 0;
     }
