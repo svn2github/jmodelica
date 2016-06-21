@@ -6063,7 +6063,8 @@ class OptimizationSolver(object):
     def set_nominal_traj(self, nom_traj):
         """
         Define the nominal trajectory to use for scaling in the next
-        optimization.
+        optimization. Note that scaling by nominal trajectory has to be
+        set during the initial creation of the optimization object.
         
         Parameters::
         
@@ -6071,6 +6072,10 @@ class OptimizationSolver(object):
                 The result from which variable scaling is computed.
         """
         t0 = time.clock()
+        
+        if self.collocator.nominal_traj is None:
+            raise CasadiCollocatorException("Nominal trajectories must have been initially set.")
+        
         self.collocator.nominal_traj = nom_traj
         try:
             self.collocator.nominal_traj = self.collocator.nominal_traj.result_data
@@ -6115,12 +6120,14 @@ class OptimizationSolver(object):
             self.collocator.solver_object.init()
             self.solver_options_changed = False
 
-        if self.collocator.warm_start or self.nominal_traj_updated:
-            self.nominal_traj_updated = False
+        if self.collocator.warm_start:
             
             if not self.init_traj_set:
                 self.collocator.xx_init = self.collocator.primal_opt
-
+        
+        if self.collocator.warm_start or self.nominal_traj_updated:
+            self.nominal_traj_updated = False
+            
             self.collocator._init_and_set_solver_inputs()
 
         self.init_traj_set = False
