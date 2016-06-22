@@ -212,9 +212,7 @@ aspect Serialize {
     public void FRecordType.genSerialize_C(CodeStream str, String indent, String name, boolean parse) {
         name = name + "->";
         for (FRecordComponentType frct : getComponents()) {
-            if (!frct.getFType().isRecord() || !parse) {
-                frct.getFType().genSerialize_C(str, indent, name + frct.getName(), parse);
-            }
+            frct.getFType().genSerialize_C(str, indent, name + frct.getName(), parse);
         }
     }
     
@@ -300,36 +298,21 @@ aspect Serialize {
     /**
      * Declarations of records used in this function
      */
-    syn Map<String,FType> FExternalStmt.usedTypes() {
+    syn Map<String,FType> FExternalStmt.usedRecords() {
         Map<String,FType> res = new LinkedHashMap<String,FType>();
         for (CommonVariableDecl cvd : varsToSerialize()) {
-            cvd.type().usedTypes(res);
+            cvd.type().usedRecords(res);
         }
         return res;
     }
     
-    public void FType.usedTypes(Map<String,FType> res) {
-        if (res.containsKey(name())) {
-            return;
-        }
-        res.put(name(), this);
-    }
-    public void FRecordType.usedTypes(Map<String,FType> res) {
-        if (res.containsKey(name())) {
-            return;
+    public void FType.usedRecords(Map<String,FType> res) {}
+    public void FRecordType.usedRecords(Map<String,FType> res) {
+        if (!res.containsKey(name())) {
+            res.put(name(), this);
         }
         for (FRecordComponentType frct : getComponents()) {
-            frct.getFType().usedTypes(res);
-        }
-        res.put(name(), this);
-    }
-    public void FExternalObjectType.usedTypes(Map<String,FType> res) {
-        if (res.containsKey(name())) {
-            return;
-        }
-        res.put(name(), this);
-        for (FExp exp : myConstructorStmt().myConstructorArgs()) {
-            exp.type().usedTypes(res);
+            frct.getFType().usedRecords(res);
         }
     }
     
