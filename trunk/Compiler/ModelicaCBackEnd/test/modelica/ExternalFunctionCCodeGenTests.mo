@@ -738,17 +738,6 @@ $ECE_calc_free$
 $ECE_free$
 ",
             generatedCode="
-    typedef struct R2_0_r_ R2_0_r;
-    struct R2_0_r_ {
-        jmi_ad_var_t x;
-    };
-    JMI_ARRAY_TYPE(R2_0_r, R2_0_ra)
-
-    typedef struct R2_0_r_ext_ R2_0_r_ext;
-    struct R2_0_r_ext_ {
-        jmi_ad_var_t x;
-    };
-
     typedef struct R_1_r_ R_1_r;
     struct R_1_r_ {
         jmi_ad_var_t a1;
@@ -768,6 +757,17 @@ $ECE_free$
         jmi_string_t a4;
         jmi_int_t a5;
         R2_0_r_ext r2;
+    };
+
+    typedef struct R2_0_r_ R2_0_r;
+    struct R2_0_r_ {
+        jmi_ad_var_t x;
+    };
+    JMI_ARRAY_TYPE(R2_0_r, R2_0_ra)
+
+    typedef struct R2_0_r_ext_ R2_0_r_ext;
+    struct R2_0_r_ext_ {
+        jmi_ad_var_t x;
     };
 
 
@@ -792,6 +792,7 @@ $ECE_free$
         JMCEVAL_parse(Boolean, a_v->a3);
         JMCEVAL_parse(String, a_v->a4);
         JMCEVAL_parse(Enum, a_v->a5);
+        JMCEVAL_parse(Real, a_v->r2->x);
         JMCEVAL_parse(Real, tmp_35->x);
         a_v->r2 = tmp_35;
         JMCEVAL_parse(Real, b_v->a1);
@@ -799,6 +800,7 @@ $ECE_free$
         JMCEVAL_parse(Boolean, b_v->a3);
         JMCEVAL_parse(String, b_v->a4);
         JMCEVAL_parse(Enum, b_v->a5);
+        JMCEVAL_parse(Real, b_v->r2->x);
         JMCEVAL_parse(Real, tmp_36->x);
         b_v->r2 = tmp_36;
 
@@ -837,119 +839,6 @@ $ECE_free$
 
 ")})));
 end Record;
-
-model RecordExternalObject
-    record R1
-        R2 r2;
-    end R1;
-    record R2
-        Real x;
-    end R2;
-    
-    model EO
-        extends ExternalObject;
-        function constructor
-            input R1 r1;
-            output EO eo;
-            external;
-        end constructor;
-        function destructor
-            input EO eo;
-            external;
-        end destructor;
-    end EO;
-    
-    function f
-        input EO eo;
-        output Real y;
-        external;
-    end f;
-    
-    parameter EO eo = EO(R1(R2(3)));
-    Real y = f(eo);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-           name="ExternalFunction_CEval_RecordExternalObject",
-            description="Test code gen for external C functions evaluation. Record.",
-            template="
-$ECE_external_includes$
-$ECE_record_definitions$
-$ECE_decl$
----
-$ECE_setup_decl$
----
-$ECE_setup_init$
----
-$ECE_setup_free$
----
-$ECE_calc_decl$
----
-$ECE_calc_init$
----
-$ECE_calc$
----
-$ECE_calc_free$
----
-$ECE_free$
-",
-            generatedCode="
-    typedef struct R2_0_r_ R2_0_r;
-    struct R2_0_r_ {
-        jmi_ad_var_t x;
-    };
-    JMI_ARRAY_TYPE(R2_0_r, R2_0_ra)
-
-    typedef struct R2_0_r_ext_ R2_0_r_ext;
-    struct R2_0_r_ext_ {
-        jmi_ad_var_t x;
-    };
-
-    typedef struct R1_1_r_ R1_1_r;
-    struct R1_1_r_ {
-        R2_0_r* r2;
-    };
-    JMI_ARRAY_TYPE(R1_1_r, R1_1_ra)
-
-    typedef struct R1_1_r_ext_ R1_1_r_ext;
-    struct R1_1_r_ext_ {
-        R2_0_r_ext r2;
-    };
-
-
-        JMI_DEF(EXO, eo_v)
-
----
-        JMI_RECORD_STATIC(R1_1_r_ext, tmp_39)
-        JMI_RECORD_STATIC(R1_1_r, tmp_40_arg0)
-        JMI_RECORD_STATIC(R2_0_r, tmp_41)
-
----
-        JMCEVAL_parse(Real, tmp_41->x);
-        tmp_40_arg0->r2 = tmp_41;
-        tmp_39->r2.x = (double)tmp_40_arg0->r2->x;
-        eo_v = constructor(tmp_39);
-
----
-
----
-        JMI_DEF(REA, y_v)
-
----
-        JMCEVAL_parse(Real, y_v);
-
----
-            y_v = f(eo_v);
-            JMCEVAL_check(\"DONE\");
-            JMCEVAL_print(Real, y_v);
-
-
----
-
----
-        destructor(eo_v);
-")})));
-end RecordExternalObject;
 end CEval;
 end ExternalFunction;
 
