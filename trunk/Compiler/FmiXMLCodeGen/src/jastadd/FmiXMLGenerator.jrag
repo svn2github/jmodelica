@@ -419,8 +419,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 		
 		public String[] children() {
             return new String[] {"unitDefinitions", "typeDefinitions", "defaultExperiment",
-            					 "vendorAnnotations", "modelVariables", "modelStructure",
-            					 "implementation"};
+                                 "vendorAnnotations", "modelVariables", "implementation"};
         }
 
         public void generateAttributes(CodeStream genPrinter) {
@@ -796,111 +795,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
             }
         }
     }
-	
-	/*** TODO: Temporary FMI 2.0 Code Gen ***/
-	
-	/**
-	 * Internal class used to generate a ModelStructure tag for the temporary 2.0.
-	 * 
-	 * @see XMLTag
-	 */
-	public class XMLTag_modelStructure extends XMLTag {
-
-		public XMLTag_modelStructure(AbstractGenerator myGenerator, FClass fclass) {
-			super("modelStructure", "ModelStructure", myGenerator, fclass);
-		}
-
-		public void generate(CodeStream genPrinter) {
-
-			if (!fclass.myOptions().getStringOption("fmi_version").equals("2.0alpha")) {
-				return;
-			}
-			StringBuilder tmp;
-			
-			generateTagStart(xml, genPrinter);
-			generateOpenEnd(genPrinter);
-			
-			generateTagStart("Inputs", genPrinter);
-			generateOpenEnd(genPrinter);
-			
-			for (FVariable v : fclass.inputs()) {
-				generateTagStart("Input", genPrinter);
-				generateAttribute("name", v.name(), genPrinter);
-				generateClosedEnd(genPrinter);
-			}
-			generateClosing("Inputs", genPrinter);
-			
-			generateTagStart("Derivatives", genPrinter);
-			generateOpenEnd(genPrinter);
-			
-			for (FDerivativeVariable v : fclass.derivativeVariables()) {
-				generateTagStart("Derivative", genPrinter);
-				generateAttribute("name", v.name(), genPrinter);
-				generateAttribute("state", v.myDifferentiatedVariable().name(), genPrinter);
-				
-				tmp = new StringBuilder();
-				for (FVariable vv : v.dependsOn()) {
-					if (vv.isDifferentiatedVariable()) {
-						tmp.append(vv.differentiatedRealVariableIndex()+1);
-						tmp.append(" ");
-					}
-				}
-				if (v.isDifferentiatedVariable()) {
-					tmp.append(v.differentiatedRealVariableIndex()+1);
-					tmp.append(" ");
-				}
-				generateAttribute("stateDependency", tmp, genPrinter);
-				
-				
-				tmp = new StringBuilder();
-				for (FVariable vv : v.dependsOn()) {
-					if (vv.isInput()) {
-						tmp.append(vv.inputIndex()+1);
-						tmp.append(" ");
-					}
-				}
-				generateAttribute("inputDependency", tmp, genPrinter);
-				
-				generateClosedEnd(genPrinter);
-			}
-			generateClosing("Derivatives", genPrinter);
-			
-			generateTagStart("Outputs", genPrinter);
-			generateOpenEnd(genPrinter);
-			for (FVariable v : fclass.outputs()) {
-				generateTagStart("Output", genPrinter);
-				generateAttribute("name", v.name(), genPrinter);
-				
-				tmp = new StringBuilder();
-				for (FVariable vv : v.dependsOn()) {
-					if (vv.isDifferentiatedVariable()) {
-						tmp.append(vv.differentiatedRealVariableIndex()+1);
-						tmp.append(" ");
-					}
-				}
-				if (v.isDifferentiatedVariable()) {
-					tmp.append(v.differentiatedRealVariableIndex()+1);
-					tmp.append(" ");
-				}
-				generateAttribute("stateDependency", tmp, genPrinter);
-				
-				
-				tmp = new StringBuilder();
-				for (FVariable vv : v.dependsOn()) {
-					if (vv.isInput()) {
-						tmp.append(vv.inputIndex()+1);
-						tmp.append(" ");
-					}
-				}
-				generateAttribute("inputDependency", tmp, genPrinter);
-				
-				generateClosedEnd(genPrinter);
-			}
-			
-			generateClosing("Outputs", genPrinter);
-			generateClosing(xml, genPrinter);
-		}
-	}
 	
 	/*** XML tags for Co-Simulation ***/
 	/**

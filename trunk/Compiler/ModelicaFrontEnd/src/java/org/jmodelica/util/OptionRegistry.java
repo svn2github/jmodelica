@@ -128,7 +128,6 @@ abstract public class OptionRegistry {
     public interface FMIVersion {
         public static final String FMI10  = "1.0";
         public static final String FMI20  = "2.0";
-        public static final String FMI20a = "2.0alpha";
     }
     public interface FunctionIncidenceCalc {
         public static final String NONE  = "none";
@@ -351,7 +350,7 @@ abstract public class OptionRegistry {
              Category.internal,
              FMIVersion.FMI10, 
              "Version of the FMI specification to generate FMU for.", 
-             FMIVersion.FMI10, FMIVersion.FMI20, FMIVersion.FMI20a /* Temporary alpha version for FMI 2.0. TODO: remove */),
+             FMIVersion.FMI10, FMIVersion.FMI20),
         EXPOSE_TEMP_VARS_IN_FMU 
             ("expose_temp_vars_in_fmu", 
              OptionType.compiler, 

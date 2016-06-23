@@ -786,7 +786,7 @@ class Test_ODE_JACOBIANS5(Test_FMI_Jacobians_base):
     def test_ode_simulation_distlib(self):
         cname='BlockOdeJacTest'
 
-        _fn_block = compile_fmu(cname, self.fname, compiler_options={'generate_ode_jacobian':True, 'automatic_tearing':False}, version="2.0alpha")
+        _fn_block = compile_fmu(cname, self.fname, compiler_options={'generate_ode_jacobian':True, 'automatic_tearing':False}, version="2.0")
         pass #THIS NEEDS TO BE FIXED SEE TICKET 3430
         """
         m_block = load_fmu('BlockOdeJacTest.fmu')

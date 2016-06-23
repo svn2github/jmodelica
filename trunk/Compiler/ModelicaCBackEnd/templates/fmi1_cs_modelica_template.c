@@ -137,14 +137,3 @@ DllExport fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s, f
 DllExport fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s, fmiString* value){
     return fmi1_cs_get_string_status(c,s,value);
 }
-
-/* NOTE IN THE FILE FMICSFUNCTIONS.H WHY? */
-/*
-DLLExport fmiStatus fmiSaveState(fmiComponent c, size_t index){
-    return fmi_save_state(c,index);
-}
-
-DLLExport fmiStatus fmiRestoreState(fmiComponent c, size_t index){
-    return fmi_restore_state(c,index);
-}
-*/
