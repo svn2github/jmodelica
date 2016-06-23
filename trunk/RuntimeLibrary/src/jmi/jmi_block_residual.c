@@ -543,7 +543,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         for (i = 0; i < block->n_nr; i++) {
             block->nr_vref[i] =  (jmi_int_t)nr_vref_tmp[i];
             /* Get index for non-reals from their valuereference */
-            block->nr_index[i] = get_index_from_value_ref(block->nr_vref[i]);
+            block->nr_index[i] = jmi_get_index_from_value_ref(block->nr_vref[i]);
             
             type = jmi_get_type_from_value_ref(block->nr_vref[i]);
             if (type == JMI_INTEGER) {
@@ -557,7 +557,7 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
 
         for (i = 0; i < block->n_dr; i++) {
             block->dr_vref[i] = (jmi_int_t)dr_vref_tmp[i];
-            block->dr_index[i] = get_index_from_value_ref(block->dr_vref[i]);
+            block->dr_index[i] = jmi_get_index_from_value_ref(block->dr_vref[i]);
             /* Initialize discrete real nominal vector */
             block->discrete_nominals[i] = 1;
         }
@@ -571,10 +571,10 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
          j = 0;
          for (i = 0; i < block->n_direct_nr; i++) {
              /* Get index for non-reals from their valuereference */
-             block->nr_direct_index[i] = get_index_from_value_ref(nr_vref_tmp[i]);
+             block->nr_direct_index[i] = jmi_get_index_from_value_ref(nr_vref_tmp[i]);
              
-             if (get_type_from_value_ref(nr_vref_tmp[i]) == JMI_BOOLEAN) {
-                 block->bool_direct_index[j] = get_index_from_value_ref(nr_vref_tmp[i]);
+             if (jmi_get_type_from_value_ref(nr_vref_tmp[i]) == JMI_BOOLEAN) {
+                 block->bool_direct_index[j] = jmi_get_index_from_value_ref(nr_vref_tmp[i]);
                  block->n_direct_bool++;
                  j++;
              }

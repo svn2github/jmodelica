@@ -387,7 +387,7 @@ fmi2Status fmi2_get_real(fmi2Component c, const fmi2ValueReference vr[],
     
     /* Negate the values of the retrieved "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (is_negated(vr[i])) {
+        if (jmi_value_ref_is_negated(vr[i])) {
             value[i] = -value[i];
         }
     }
@@ -411,7 +411,7 @@ fmi2Status fmi2_get_integer(fmi2Component c, const fmi2ValueReference vr[],
     
     /* Negate the values of the retrieved "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (is_negated(vr[i])) {
+        if (jmi_value_ref_is_negated(vr[i])) {
             value[i] = -value[i];
         }
     }
@@ -470,7 +470,7 @@ fmi2Status fmi2_set_real(fmi2Component c, const fmi2ValueReference vr[],
     
     for (i = 0; i < nvr; i++) {
         /* Negate the values before setting the "negate alias" variables. */
-        if (is_negated(vr[i])) {
+        if (jmi_value_ref_is_negated(vr[i])) {
             fmi2_me->work_real_array[i] = -value[i];
         } else {
             fmi2_me->work_real_array[i] = value[i];
@@ -503,7 +503,7 @@ fmi2Status fmi2_set_integer(fmi2Component c, const fmi2ValueReference vr[],
     
     /* Negate the values before setting the "negate alias" variables. */
     for (i = 0; i < nvr; i++) {
-        if (is_negated(vr[i])) {
+        if (jmi_value_ref_is_negated(vr[i])) {
             fmi2_me->work_int_array[i] = -value[i];
         } else {
             fmi2_me->work_int_array[i] = value[i];

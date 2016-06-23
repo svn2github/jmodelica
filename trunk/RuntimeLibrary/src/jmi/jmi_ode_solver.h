@@ -46,7 +46,10 @@ typedef int (*jmi_ode_solve_func_t)(jmi_ode_solver_t* block, jmi_real_t time_fin
   */
 typedef void (*jmi_ode_delete_func_t)(jmi_ode_solver_t* block);
 
-
+typedef enum {
+    JMI_ODE_CVODE,
+    JMI_ODE_EULER
+} jmi_ode_method_t;
 
 struct jmi_ode_solver_t {
     jmi_ode_problem_t* ode_problem;                    /**< \brief A pointer to the corresponding jmi_ode_problem_t struct */
