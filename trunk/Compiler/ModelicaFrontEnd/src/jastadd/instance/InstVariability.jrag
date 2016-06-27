@@ -105,6 +105,7 @@ aspect InstVariability {
     inh boolean InstComponentDecl.inEvalAnnotated();
     eq InstClassDecl.getChild().inEvalAnnotated()          = false;
     eq InstComponentDecl.getChild().inEvalAnnotated()      = false;
+    eq InstRecordConstructor.getChild().inEvalAnnotated()  = false;
     eq InstAssignable.getChild().inEvalAnnotated()         = isEvalAnnotated();
     eq InstArrayComponentDecl.getChild().inEvalAnnotated() = inEvalAnnotated();
     

@@ -2314,10 +2314,10 @@ class RedeclareTest19 "Test of merging of modifications in parametrized classes"
 			description="Test of parametrized classes.",
 			flatModel="
 fclass RedeclareTests.RedeclareTest19
- Real g.f.e.a.x = 5 /*(5)*/;
- Real g.f.e.a.y = 4 /*(4)*/;
- Real g.f.e.a.z = 6 /*(6)*/;
- Real g.f.e.a.w = 5 /*(5)*/;
+ Real g.f.e.a.x = 5;
+ Real g.f.e.a.y = 10;
+ Real g.f.e.a.z = 6;
+ Real g.f.e.a.w = 5;
 end RedeclareTests.RedeclareTest19;
 ")})));
 end RedeclareTest19;
@@ -2375,14 +2375,13 @@ class RedeclareTest20 "Test of merging of modifications in parametrized classes"
 			description="Test of parametrized classes.",
 			flatModel="
 fclass RedeclareTests.RedeclareTest20
- Real g.f.e.b.x = 5 /*(5)*/;
- Real g.f.e.b.y = 3 /*(3)*/;
- Real g.f.e.a.x = 5 /*(5)*/;
- Real g.f.e.a.y = 4 /*(4)*/;
- Real g.f.e.a.z = 6 /*(6)*/;
- Real g.f.e.a.w = 5 /*(5)*/;
+ Real g.f.e.b.x = 5;
+ Real g.f.e.b.y = 3;
+ Real g.f.e.a.x = 5;
+ Real g.f.e.a.y = 10;
+ Real g.f.e.a.z = 6;
+ Real g.f.e.a.w = 5;
 end RedeclareTests.RedeclareTest20;
-	
 ")})));
 end RedeclareTest20;
 
@@ -2442,17 +2441,17 @@ class RedeclareTest21 "Test of merging of modifications in parametrized classes"
 			description="Test of parametrized classes.",
 			flatModel="
 fclass RedeclareTests.RedeclareTest21
- parameter Real p0 = 5 /*(5)*/;
- parameter Real g.pG = 6 /*(6)*/;
- parameter Real g.f.pF = 4 /*(4)*/;
- parameter Real g.f.e.pE = 3 /*(3)*/;
- Real g.f.e.b.x = g.f.e.pE /*(3)*/;
- Real g.f.e.b.y = 3 /*(3)*/;
- Real g.f.e.a.x = 5 /*(5)*/;
- Real g.f.e.a.y = g.f.pF /*(4)*/;
- Real g.f.e.a.z = g.pG /*(6)*/;
- Real g.f.e.a.w = p0 /*(5)*/;
-end RedeclareTests.RedeclareTest21;	
+ parameter Real p0 = 5 /* 5 */;
+ parameter Real g.pG = 6 /* 6 */;
+ parameter Real g.f.pF = 4 /* 4 */;
+ parameter Real g.f.e.pE = 3 /* 3 */;
+ Real g.f.e.b.x = g.f.e.pE;
+ Real g.f.e.b.y = 3;
+ Real g.f.e.a.x = 5;
+ Real g.f.e.a.y = 10;
+ Real g.f.e.a.z = g.pG;
+ Real g.f.e.a.w = p0;
+end RedeclareTests.RedeclareTest21;
 ")})));
 end RedeclareTest21;
 
@@ -2613,14 +2612,13 @@ model RedeclareTest23
 			description="Test of parametrized classes.",
 			flatModel="
 fclass RedeclareTests.RedeclareTest23
- Real d1.b.x = 4 /*(4)*/;
- Real d1.b.y = 3 /*(3)*/;
- Real d1.b.z = 10 /*(10)*/;
- Real d2.b.x = 4 /*(4)*/;
- Real d2.b.y = 3 /*(3)*/;
- Real d2.b.z = 10 /*(10)*/;
+ Real d1.b.x = 5;
+ Real d1.b.y = 3;
+ Real d1.b.z = 10;
+ Real d2.b.x = 4;
+ Real d2.b.y = 3;
+ Real d2.b.z = 10;
 end RedeclareTests.RedeclareTest23;
-
 ")})));
 end RedeclareTest23;
 
