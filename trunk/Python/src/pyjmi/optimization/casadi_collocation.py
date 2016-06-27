@@ -6069,7 +6069,7 @@ class OptimizationSolver(object):
             self.collocator.set_solver_option(name, value)
             self.solver_options_changed = True
             
-    def set_nominal_traj(self, nom_traj):
+    def set_nominal_traj(self, nom_traj, nom_traj_mode = None):
         """
         Define the nominal trajectory to use for scaling in the next
         optimization. Note that scaling by nominal trajectory has to be
@@ -6079,6 +6079,9 @@ class OptimizationSolver(object):
         
             nom_traj --
                 The result from which variable scaling is computed.
+            
+            nom_traj_mode --
+                The scaling mode for the nominal trajectories
         """
         t0 = time.clock()
         
@@ -6090,6 +6093,9 @@ class OptimizationSolver(object):
             self.collocator.nominal_traj = self.collocator.nominal_traj.result_data
         except AttributeError:
             pass
+            
+        if nom_traj_mode is not None:
+            self.collocator.nominal_traj_mode = nom_traj_mode
             
         self.collocator._create_trajectory_scaling_factor_structures() #Update the scaling values
         self.collocator._update_variable_scaling() #Update the scaling values in the parameters
