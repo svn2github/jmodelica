@@ -1331,7 +1331,7 @@ aspect IndexReduction {
     syn StateSelect FAbstractVariable.stateSelection() {
         throw new UnsupportedOperationException("Unable to get state select from variable type " + getClass().getSimpleName());
     }
-    eq FVariable.stateSelection() = order() >= 2 ? StateSelect.AVOID : getTopIntegrated().stateSelectAttribute();
+    eq FVariable.stateSelection() = getTopIntegrated().stateSelectAttribute();
     
     public class IndexReductionBiPGraph {
         
@@ -1353,7 +1353,9 @@ aspect IndexReduction {
             }
             
             public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
-                weights[stateSelect.weightPos()] += 1;
+                if (order < 2) {
+                    weights[stateSelect.weightPos()] += 1;
+                }
                 weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
                 weights[ORDER_WEIGHT_POSITION] += -order;
                 weights[LINEARITY_WEIGHT_POSITION] += linearity;
