@@ -1,5 +1,7 @@
 package org.jmodelica.util.problemHandling;
 
+import org.jmodelica.api.problemHandling.Problem;
+
 /**
  * A interface that all problem reporting nodes should fulfill. In reality
  * this is implemented by ASTNode and the interface is needed since ASTnode

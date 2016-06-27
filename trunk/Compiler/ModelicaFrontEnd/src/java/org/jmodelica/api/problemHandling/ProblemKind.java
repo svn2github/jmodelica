@@ -1,4 +1,4 @@
-package org.jmodelica.util.problemHandling;
+package org.jmodelica.api.problemHandling;
 
 public enum ProblemKind { 
     OTHER(2), LEXICAL("Syntax", 1), SYNTACTIC("Syntax", 1), SEMANTIC(2), COMPLIANCE("Compliance", 2);

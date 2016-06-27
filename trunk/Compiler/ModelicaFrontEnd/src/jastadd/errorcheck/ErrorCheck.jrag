@@ -22,9 +22,9 @@ import java.util.Map;
 
 import org.jmodelica.util.collections.ListMap;
 import org.jmodelica.util.collections.LinkedHashListMap;
-import org.jmodelica.util.problemHandling.Problem;
-import org.jmodelica.util.problemHandling.ProblemSeverity;
-import org.jmodelica.util.problemHandling.ProblemKind;
+import org.jmodelica.api.problemHandling.Problem;
+import org.jmodelica.api.problemHandling.ProblemSeverity;
+import org.jmodelica.api.problemHandling.ProblemKind;
 import org.jmodelica.util.problemHandling.ReporterNode;
 import org.jmodelica.util.problemHandling.ProblemOptionsProvider;
 import org.jmodelica.util.ErrorCheckType;

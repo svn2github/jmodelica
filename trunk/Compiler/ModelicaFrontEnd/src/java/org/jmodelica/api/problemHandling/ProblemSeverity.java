@@ -1,3 +1,3 @@
-package org.jmodelica.util.problemHandling;
+package org.jmodelica.api.problemHandling;
 
 public enum ProblemSeverity { ERROR, WARNING }

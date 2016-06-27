@@ -22,9 +22,9 @@
  package $PARSER_PACKAGE$;
  import $AST_PACKAGE$.*;
  import org.jmodelica.util.formattedPrint.FormattingInfo;
- import org.jmodelica.util.problemHandling.Problem;
- import org.jmodelica.util.problemHandling.ProblemSeverity;
- import org.jmodelica.util.problemHandling.ProblemKind;
+ import org.jmodelica.api.problemHandling.Problem;
+ import org.jmodelica.api.problemHandling.ProblemSeverity;
+ import org.jmodelica.api.problemHandling.ProblemKind;
  import beaver.Parser.Events;
  import java.io.*;
  import java.util.Collection;

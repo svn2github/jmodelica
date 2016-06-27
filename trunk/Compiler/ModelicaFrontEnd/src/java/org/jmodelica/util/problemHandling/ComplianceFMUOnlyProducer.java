@@ -1,5 +1,7 @@
 package org.jmodelica.util.problemHandling;
 
+import org.jmodelica.api.problemHandling.ProblemKind;
+
 /**
  * ErrorProducer which only produces errors if we are compiling anything other
  * than a FMU. This class will suffix the message provided to the constructor 
