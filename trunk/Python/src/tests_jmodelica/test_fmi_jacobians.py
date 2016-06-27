@@ -395,6 +395,8 @@ class Test_FMI_Jacobians_Ifcases(Test_FMI_Jacobians_base):
         m.setup_experiment()
         m.initialize()
         self.check_jacobian(m, A=True, B=False, C=False, D=False)
+        m.event_update()
+        m.enter_continuous_time_mode()
         m.simulate(final_time=2, options={'initialize':False})
         self.check_jacobian(m, A=True, B=False, C=False, D=False)
         m.simulate(final_time=4, options={'initialize':False})
@@ -426,6 +428,8 @@ class Test_FMI_Jacobians_Ifcases(Test_FMI_Jacobians_base):
         m.setup_experiment()
         m.initialize()
         self.check_jacobian(m, A=True, B=True, C=True, D=False)
+        m.event_update()
+        m.enter_continuous_time_mode()
         m.simulate(final_time=2, options={'initialize':False})
         self.check_jacobian(m, A=True, B=True, C=True, D=False)
         
@@ -541,6 +545,8 @@ class Test_FMI_Jacobians_Simulation(Test_FMI_Jacobians_base):
         m.setup_experiment()
         m.set_debug_logging(True)
         m.initialize()
+        m.event_update()
+        m.enter_continuous_time_mode()
         m.simulate(final_time=5, options={'initialize':False})
         self.check_jacobian(m, B=False, C=False, D=False)           
 
@@ -671,9 +677,10 @@ class Test_FMI_Jacobians_Miscellaneous(Test_FMI_Jacobians_base):
         t = N.linspace(0.,5.0,100) 
         u_traj = N.transpose(N.vstack((t,t)))
         input_object = ('u', u_traj)
-        #Does not work currently to simulate when initialized prior to simulation
-        #m.simulate(final_time = 10, options={'initialize':False}, input = input_object)
-        #self.check_jacobian(m, A=True, B=True, C=False, D=False)
+        m.event_update()
+        m.enter_continuous_time_mode()
+        m.simulate(final_time = 10, options={'initialize':False}, input = input_object)
+        self.check_jacobian(m, A=True, B=True, C=False, D=False)
     
     #Fails in Linux, needs to be investigated
     #@testattr(stddist = True)
@@ -740,11 +747,12 @@ class Test_ODE_JACOBIANS3(Test_FMI_Jacobians_base):
     def test_ode_simulation_distlib(self): 
         cname='DISTLib.Examples.Simulation'
         _fn_distlib = compile_fmu(cname, self.fname, compiler_options={'generate_ode_jacobian':True}, version="2.0")
-        m_distlib1 = load_fmu('DISTLib_Examples_Simulation.fmu')
-        m_distlib2 = load_fmu('DISTLib_Examples_Simulation.fmu')
+        m_distlib1 = load_fmu(_fn_distlib)
+        m_distlib2 = load_fmu(_fn_distlib)
         
         opts = m_distlib1.simulate_options()
         opts['with_jacobian'] = True
+        
         res = m_distlib1.simulate(final_time=70, options=opts)
         res = m_distlib2.simulate(final_time=70)
         
