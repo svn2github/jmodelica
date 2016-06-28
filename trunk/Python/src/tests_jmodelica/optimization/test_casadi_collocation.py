@@ -1566,10 +1566,12 @@ class TestLocalDAECollocator(object):
         c_e_10 = res_renaming.solver.get_equality_constraint()[self.test_named_vars_c_e_10_id()]
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         
-        comp_str1 = "SX((((der(x1)_1_1_d_sf*der(x1)_1_1)+der(x1)_1_1_e_sf)-((((1-sq(((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))*((der(x2)_1_1_d_sf*der(x2)_1_1)+der(x2)_1_1_e_sf))-((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf))+((u_1_1_d_sf*u_1_1)+u_1_1_e_sf))))" 
+        #comp_str1 = "SX((((der(x1)_1_1_d_sf*der(x1)_1_1)+der(x1)_1_1_e_sf)-((((1-sq(((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))*((der(x2)_1_1_d_sf*der(x2)_1_1)+der(x2)_1_1_e_sf))-((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf))+((u_1_1_d_sf*u_1_1)+u_1_1_e_sf))))" 
+        comp_str1 = "SX((((der(x1)_d_sf*der(x1)_1_1)+der(x1)_e_sf)-((((1-sq(((x2_d_sf*x2_1_1)+x2_e_sf)))*((der(x2)_d_sf*der(x2)_1_1)+der(x2)_e_sf))-((x2_d_sf*x2_1_1)+x2_e_sf))+((u_d_sf*u_1_1)+u_e_sf))))"
         #comp_str1 = "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)-x2_1_1)+u_1_1)))"
         
-        comp_str2 = "SX((((((-3*((x2_1_0_d_sf*x2_1_0)+x2_1_0_e_sf))+(5.53197*((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))+(-7.53197*((x2_1_2_d_sf*x2_1_2)+x2_1_2_e_sf)))+(5*((x2_1_3_d_sf*x2_1_3)+x2_1_3_e_sf)))-(10*((der(x2)_1_3_d_sf*der(x2)_1_3)+der(x2)_1_3_e_sf))))"
+        #comp_str2 = "SX((((((-3*((x2_1_0_d_sf*x2_1_0)+x2_1_0_e_sf))+(5.53197*((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))+(-7.53197*((x2_1_2_d_sf*x2_1_2)+x2_1_2_e_sf)))+(5*((x2_1_3_d_sf*x2_1_3)+x2_1_3_e_sf)))-(10*((der(x2)_1_3_d_sf*der(x2)_1_3)+der(x2)_1_3_e_sf))))"
+        comp_str2 = "SX((((((-3*((x2_d_sf*x2_1_0)+x2_e_sf))+(5.53197*((x2_d_sf*x2_1_1)+x2_e_sf)))+(-7.53197*((x2_d_sf*x2_1_2)+x2_e_sf)))+(5*((x2_d_sf*x2_1_3)+x2_e_sf)))-(10*((der(x2)_d_sf*der(x2)_1_3)+der(x2)_e_sf))))"
         #comp_str2 = "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))"
         
         N.testing.assert_string_equal(

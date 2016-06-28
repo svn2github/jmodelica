@@ -1972,19 +1972,24 @@ class LocalDAECollocator(CasadiCollocator):
                 for vt in ['dx', 'x', 'unelim_u', 'w']:
                     for var in self.mvar_vectors[vt]:
                         name = var.getName()
-                        for i in range(1, self.n_e+1):
-                            for k in self.time_points[i]:
-                                d = casadi.SX.sym("%s_%d_%d_d_sf"%(name,i,k))
-                                e = casadi.SX.sym("%s_%d_%d_e_sf"%(name,i,k))
-                                self.named_pp.append(d)
-                                self.named_pp.append(e)
+                        if self._var_sf_mode[name] != "time-variant":
+                            d = casadi.SX.sym("%s_d_sf"%(name))
+                            e = casadi.SX.sym("%s_e_sf"%(name))
+                            self.named_pp.append(d)
+                            self.named_pp.append(e)
+                        else:
+                            for i in range(1, self.n_e+1):
+                                for k in self.time_points[i]:
+                                    d = casadi.SX.sym("%s_%d_%d_d_sf"%(name,i,k))
+                                    e = casadi.SX.sym("%s_%d_%d_e_sf"%(name,i,k))
+                                    self.named_pp.append(d)
+                                    self.named_pp.append(e)
                 for var in self.mvar_vectors["p_opt"]:
                     name = var.getName()
                     d = casadi.SX.sym("%s_d_sf"%(name))
                     e = casadi.SX.sym("%s_e_sf"%(name))
                     self.named_pp.append(d)
                     self.named_pp.append(e)
-        
 
         # Finalize named_pp
         assert self.n_named_pp == n_pp
@@ -2398,11 +2403,14 @@ class LocalDAECollocator(CasadiCollocator):
         var_sf_map = {}
         var_sf_count = 0
         var_sf_nbr_vars = 0
+        var_sf_mode = {}
+        var_sf = {}
         
         if self.variable_scaling:
             # Loop over all variables
             for vt in ['dx', 'x', 'unelim_u', 'w']:
                 var_sf_map[vt] = {}
+                var_sf["n_variant_%s"%vt] = 0
                 
                 #Setup struct
                 for i in xrange(1, self.n_e + 1):
@@ -2415,31 +2423,42 @@ class LocalDAECollocator(CasadiCollocator):
                     (var_index, _) = self.name_map[name]
                     var_sf_nbr_vars += 1
                     
+                    try:
+                        mode = self.nominal_traj_mode[name]
+                    except KeyError:
+                        mode = self.nominal_traj_mode["_default_mode"]
+                        
+                    var_sf_mode[name] = mode
+                    
+                    if mode != "time-variant":
+                        var_sf_map[vt][name] = (2*var_sf_count, 2*var_sf_count+1)
+                        var_sf_count += 1
+                        continue
+                        
+                    var_sf["n_variant_%s"%vt] += 1
+                    
                     #Setup struct
                     for i in xrange(1, self.n_e + 1):
                         for k in self.time_points[i]:
-                            #d = casadi.MX.sym("%s_%d_%d_d_sf"%(name,i,k))
-                            #e = casadi.MX.sym("%s_%d_%d_e_sf"%(name,i,k))
-                            #var_sf_map[vt][i][k][var_index] = (d, e)
                             var_sf_map[vt][i][k][var_index] = (2*var_sf_count, 2*var_sf_count+1)
                             var_sf_count += 1
             
             # Handle free parameters
             var_sf_map["p_opt"] = {}
+            var_sf["n_variant_p_opt"] = 0
             for var in self.mvar_vectors['p_opt']:
                 name = var.getName()
                 (var_index, _) = self.name_map[name]
-                    
-                #d = casadi.MX.sym("%s_d_sf"%(name))
-                #e = casadi.MX.sym("%s_e_sf"%(name))
-                #var_sf_map[vt][name] = (d, e)
+                
                 var_sf_map['p_opt'][name] = (2*var_sf_count, 2*var_sf_count+1)
                 var_sf_count += 1
                 var_sf_nbr_vars += 1
-            
+        
+        self._var_sf_mode     = var_sf_mode
         self._var_sf_count    = var_sf_count
         self._var_sf_map      = var_sf_map
         self._var_sf_nbr_vars = var_sf_nbr_vars
+        self._var_sf          = var_sf
             
 
     def _create_trajectory_scaling_factor_structures(self):
@@ -2489,6 +2508,13 @@ class LocalDAECollocator(CasadiCollocator):
                         mode = self.nominal_traj_mode[name]
                     except KeyError:
                         mode = self.nominal_traj_mode["_default_mode"]
+                    
+                    if mode == "time-variant" and self._var_sf_mode[name] != "time-variant":
+                        mode = self._var_sf_mode[name]
+                        print("Warning: Could not do time-variant " + 
+                                      "scaling for variable %s " % name +
+                                      "due to that the original scaling was %s. " %mode + 
+                                      "Doing %s scaling instead." %mode)
                     
                     values = {}
                     traj_min = N.inf
@@ -2818,11 +2844,12 @@ class LocalDAECollocator(CasadiCollocator):
             if self.n_var["x"] > 0:
                 x_i_d = self.n_var['x'] * [None]
                 x_i_e = self.n_var['x'] * [None]
+                
                 x_i_sf_d = casadi.MX.sym("x_i_sf_d", self.n_cp + 1, self.n_var["x"])
                 x_i_sf_e = casadi.MX.sym("x_i_sf_e", self.n_cp + 1, self.n_var["x"])
                 dx_i_k_d = self.n_var['dx'] * [None]
                 dx_i_k_e = self.n_var['dx'] * [None]
-                dx_i_k_sf = casadi.MX.sym("dx_i_sf", self.n_var["dx"])
+                dx_i_k_sf_d = casadi.MX.sym("dx_i_sf_d", self.n_var["dx"])
                 dx_i_k_sf_e = casadi.MX.sym("dx_i_sf_e", self.n_var["dx"])
                 var_x_idx = 0
                 var_dx_idx = 0
@@ -2841,7 +2868,7 @@ class LocalDAECollocator(CasadiCollocator):
                     dx_name = var.getMyDerivativeVariable().getName()
                     (ind, _) = self.name_map[dx_name]
                     
-                    dx_i_k_d[ind] = dx_i_k_sf[var_dx_idx]
+                    dx_i_k_d[ind] = dx_i_k_sf_d[var_dx_idx]
                     dx_i_k_e[ind] = dx_i_k_sf_e[var_dx_idx]
                     var_dx_idx += 1
                     
@@ -2953,7 +2980,7 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 var_inputs = x_i + [der_vals_k, h_i] + dx_i_k
                 if self.n_var["x"] > 0:
-                    var_inputs += [x_i_sf_d]+[x_i_sf_e]+[dx_i_k_sf]+[dx_i_k_sf_e]
+                    var_inputs += [x_i_sf_d]+[x_i_sf_e]+[dx_i_k_sf_d]+[dx_i_k_sf_e]
                 
                 coll_eq_fcn = self._FXFunction(var_inputs, [scoll_eq])
 
@@ -3464,9 +3491,8 @@ class LocalDAECollocator(CasadiCollocator):
                     coll_sf[i]['x_e'][-1].append(e)
                 coll_sf[i]['x_d'][-1] = casadi.vertcat(coll_sf[i]['x_d'][-1])
                 coll_sf[i]['x_e'][-1] = casadi.vertcat(coll_sf[i]['x_e'][-1])
-                    
 
-                # Suceeding elements
+                # Succeeding elements
                 for i in xrange(2, self.n_e + 1):
                     k = self.n_cp + self.is_gauss
                     coll_sf[i]['x_d'].append([])
@@ -4097,7 +4123,7 @@ class LocalDAECollocator(CasadiCollocator):
         offset = self.pp_offset["variable_scale"]
         
         (ind, vt) = self.name_map[name]
-        if vt == "p_opt":
+        if vt == "p_opt" or self._var_sf_mode[name] != "time-variant":
             d, e = self._var_sf_map[vt][name]
         else:
             try:
@@ -4141,16 +4167,22 @@ class LocalDAECollocator(CasadiCollocator):
             for vt in ['dx', 'x', 'unelim_u', 'w']:
                 for var in self.mvar_vectors[vt]:
                     name = var.getName()
-                    for i in range(1, self.n_e+1):
-                        for k in self.time_points[i]:
-                            d, e = self._get_affine_scaling(name, i, k)
-                            par_vals[ind]   = d
-                            par_vals[ind+1] = e
-                            ind = ind + 2
+                    if self._var_sf_mode[name] != "time-variant":
+                        d, e = self._get_affine_scaling(name, -1, -1)
+                        par_vals[ind]   = d
+                        par_vals[ind+1] = e
+                        ind = ind + 2
+                    else:
+                        for i in range(1, self.n_e+1):
+                            for k in self.time_points[i]:
+                                d, e = self._get_affine_scaling(name, i, k)
+                                par_vals[ind]   = d
+                                par_vals[ind+1] = e
+                                ind = ind + 2
                             
             for var in self.mvar_vectors["p_opt"]:
                 name = var.getName()
-                d, e = self._get_affine_scaling(name, i, k)
+                d, e = self._get_affine_scaling(name, -1, -1)
                 
                 par_vals[ind]   = d
                 par_vals[ind+1] = e
@@ -4463,7 +4495,6 @@ class LocalDAECollocator(CasadiCollocator):
             for vt in ["dx", "x", "w", "unelim_u"]:
                 traj[vt] = {}
                 for var in mvar_vectors[vt]:
-                    data_matrix = N.empty([n, len(mvar_vectors[vt])])
                     name = var.getName()
                     (var_index, _) = name_map[name]
                     if name == "startTime":
@@ -4496,9 +4527,6 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Set bounds and initial guesses
         for vt in ['dx', 'x', 'w', 'unelim_u']:
-            var_min = N.empty(len(mvar_vectors[vt]))
-            var_max = N.empty(len(mvar_vectors[vt]))
-            var_init = N.empty(len(mvar_vectors[vt]))
             for var in mvar_vectors[vt]:
                 name = var.getName()
                 v_min = op.get_attr(var, "min")
@@ -6099,7 +6127,6 @@ class OptimizationSolver(object):
             
         self.collocator._create_trajectory_scaling_factor_structures() #Update the scaling values
         self.collocator._update_variable_scaling() #Update the scaling values in the parameters
-        self.collocator._compute_bounds_and_init() #Update the lower / upper bounds
         
         self.nominal_traj_updated = True
         
@@ -6123,12 +6150,15 @@ class OptimizationSolver(object):
 
         self.init_traj_set = True
         self.collocator._create_initial_trajectories()        
-        self.collocator._compute_bounds_and_init()
         self.extra_update = time.clock() - t0
         
     def optimize(self):
         """Solve the optimization problem with the current settings, and return the result."""
         t0 = time.clock()
+        
+        if self.init_traj_set or self.nominal_traj_updated:
+            self.collocator._compute_bounds_and_init() #Update the lower / upper bounds and init
+        
         self.collocator._recalculate_model_parameters()
 
         if self.solver_options_changed:
