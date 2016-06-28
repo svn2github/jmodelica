@@ -2920,7 +2920,7 @@ equation
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest1
  structural parameter Boolean on = false /* false */;
- Real x[if false then 2 else 1];
+ Real x[1];
 end ConnectTests.ConditionalNoErrTest1;
 ")})));
 end ConditionalNoErrTest1;
@@ -2943,7 +2943,7 @@ equation
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest2
  structural parameter Boolean on = false /* false */;
- Real x[if false then 2 else 1];
+ Real x[1];
 end ConnectTests.ConditionalNoErrTest2;
 ")})));
 end ConditionalNoErrTest2;
@@ -2970,7 +2970,7 @@ equation
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest3
  structural parameter Boolean on = false /* false */;
- Real x[if false then 2 else 1];
+ Real x[1];
 end ConnectTests.ConditionalNoErrTest3;
 ")})));
 end ConditionalNoErrTest3;
@@ -2997,7 +2997,7 @@ equation
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest4
  structural parameter Boolean on = false /* false */;
- Real x[if false then 2 else 1];
+ Real x[1];
 end ConnectTests.ConditionalNoErrTest4;
 ")})));
 end ConditionalNoErrTest4;
@@ -3020,7 +3020,7 @@ model ConditionalNoErrTest5
 			flatModel="
 fclass ConnectTests.ConditionalNoErrTest5
  structural parameter Boolean on = false /* false */;
- Real x[if false then 2 else 1];
+ Real x[1];
 end ConnectTests.ConditionalNoErrTest5;
 ")})));
 end ConditionalNoErrTest5;
