@@ -386,7 +386,75 @@ class ModelicaTransfer(object):
     #         CONSTRUCTS TRANSFER TESTS          #
     #                                            #
     ##############################################
-
+    
+    @testattr(casadi = True)
+    def test_ConstructElementaryDivision(self):
+        model = self.load_model("AtomicModelElementaryDivision", modelFile)
+        params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
+        expected =""" array([parameter Real p3[1](bindingExpression = (p1[1]/p2[1])) = (p1[1]/p2[1]);,
+       parameter Real p3[2](bindingExpression = (p1[2]/p2[2])) = (p1[2]/p2[2]);,
+       parameter Real p3[3](bindingExpression = (p1[3]/p2[3])) = (p1[3]/p2[3]);,
+       parameter Real p4(bindingExpression = (p1[1]/p2[1])) = (p1[1]/p2[1]);,
+       parameter Real p5[1](bindingExpression = (p1[1]/p2[1])) = (p1[1]/p2[1]);,
+       parameter Real p5[2](bindingExpression = (p1[2]/p2[1])) = (p1[2]/p2[1]);,
+       parameter Real p5[3](bindingExpression = (p1[3]/p2[1])) = (p1[3]/p2[1]);], dtype=object)"""
+        assert strnorm(repr(params)) == strnorm(expected)
+        
+    @testattr(casadi = True)
+    def test_ConstructElementaryMultiplication(self):
+        model = self.load_model("AtomicModelElementaryMultiplication", modelFile)
+        params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
+        expected ="""array([parameter Real p3[1](bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p3[2](bindingExpression = (p1[2]*p2[2])) = (p1[2]*p2[2]);,
+       parameter Real p3[3](bindingExpression = (p1[3]*p2[3])) = (p1[3]*p2[3]);,
+       parameter Real p4(bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p5[1](bindingExpression = (p1[1]*p2[1])) = (p1[1]*p2[1]);,
+       parameter Real p5[2](bindingExpression = (p1[2]*p2[1])) = (p1[2]*p2[1]);,
+       parameter Real p5[3](bindingExpression = (p1[3]*p2[1])) = (p1[3]*p2[1]);], dtype=object)"""
+        assert strnorm(repr(params)) == strnorm(expected)
+        
+    @testattr(casadi = True)
+    def test_ConstructElementaryAddition(self):
+        model = self.load_model("AtomicModelElementaryAddition", modelFile)
+        params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
+        expected ="""array([parameter Real p3[1](bindingExpression = (p1[1]+p2[1])) = (p1[1]+p2[1]);,
+       parameter Real p3[2](bindingExpression = (p1[2]+p2[2])) = (p1[2]+p2[2]);,
+       parameter Real p3[3](bindingExpression = (p1[3]+p2[3])) = (p1[3]+p2[3]);], dtype=object)"""
+        assert strnorm(repr(params)) == strnorm(expected)
+        
+    @testattr(casadi = True)
+    def test_ConstructElementarySubtraction(self):
+        model = self.load_model("AtomicModelElementarySubtraction", modelFile)
+        params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
+        expected ="""array([parameter Real p3[1](bindingExpression = (p1[1]-p2[1])) = (p1[1]-p2[1]);,
+       parameter Real p3[2](bindingExpression = (p1[2]-p2[2])) = (p1[2]-p2[2]);,
+       parameter Real p3[3](bindingExpression = (p1[3]-p2[3])) = (p1[3]-p2[3]);], dtype=object)"""
+        assert strnorm(repr(params)) == strnorm(expected)
+        
+    @testattr(casadi = True)
+    def test_ConstructElementarySubtraction(self):
+        model = self.load_model("AtomicModelElementaryExponentiation", modelFile)
+        params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
+        expected ="""array([ parameter Real p3[1](bindingExpression = pow(p1[1],p2[1])) = pow(p1[1],p2[1]);,
+       parameter Real p3[2](bindingExpression = pow(p1[2],p2[2])) = pow(p1[2],p2[2]);,
+       parameter Real p3[3](bindingExpression = pow(p1[3],p2[3])) = pow(p1[3],p2[3]);,
+       parameter Real p4[1](bindingExpression = pow(p1[1],p2[2])) = pow(p1[1],p2[2]);,
+       parameter Real p4[2](bindingExpression = pow(p1[2],p2[2])) = pow(p1[2],p2[2]);,
+       parameter Real p4[3](bindingExpression = pow(p1[3],p2[2])) = pow(p1[3],p2[2]);,
+       parameter Real p5[1](bindingExpression = pow(p1[1],p2[1])) = pow(p1[1],p2[1]);,
+       parameter Real p5[2](bindingExpression = pow(p1[1],p2[2])) = pow(p1[1],p2[2]);,
+       parameter Real p5[3](bindingExpression = pow(p1[1],p2[3])) = pow(p1[1],p2[3]);,
+       parameter Real p6(bindingExpression = pow(p1[1],p2[1])) = pow(p1[1],p2[1]);,
+       parameter Real p9[1,1](bindingExpression = pow(p7[1,1],p8[1,1])) = pow(p7[1,1],p8[1,1]);,
+       parameter Real p9[1,2](bindingExpression = pow(p7[1,2],p8[1,2])) = pow(p7[1,2],p8[1,2]);,
+       parameter Real p9[2,1](bindingExpression = pow(p7[2,1],p8[2,1])) = pow(p7[2,1],p8[2,1]);,
+       parameter Real p9[2,2](bindingExpression = pow(p7[2,2],p8[2,2])) = pow(p7[2,2],p8[2,2]);,
+       parameter Real p10[1,1](bindingExpression = pow(p7[1,1],p8[1,1])) = pow(p7[1,1],p8[1,1]);,
+       parameter Real p10[1,2](bindingExpression = pow(p7[1,1],p8[1,2])) = pow(p7[1,1],p8[1,2]);,
+       parameter Real p10[2,1](bindingExpression = pow(p7[1,1],p8[2,1])) = pow(p7[1,1],p8[2,1]);,
+       parameter Real p10[2,2](bindingExpression = pow(p7[1,1],p8[2,2])) = pow(p7[1,1],p8[2,2]);], dtype=object)"""
+        assert strnorm(repr(params)) == strnorm(expected) 
+    
     @testattr(casadi = True)
     def test_ConstructElementaryExpression(self):
         dae = self.load_model("AtomicModelElementaryExpressions", modelFile).getDaeResidual()
