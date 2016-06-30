@@ -1969,7 +1969,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.variable_scaling:
             self.n_named_pp += self._var_sf_count*2
             if self.named_vars:
-                for vt in ['dx', 'x', 'unelim_u', 'w']:
+                for vt in ['x', 'dx', 'unelim_u', 'w']:
                     for var in self.mvar_vectors[vt]:
                         name = var.getName()
                         if self._var_sf_mode[name] != "time-variant":
@@ -2404,11 +2404,11 @@ class LocalDAECollocator(CasadiCollocator):
         var_sf_count = 0
         var_sf_nbr_vars = 0
         var_sf_mode = {}
-        var_sf = {}
+        var_sf = {"n_variant": 0}
         
         if self.variable_scaling:
             # Loop over all variables
-            for vt in ['dx', 'x', 'unelim_u', 'w']:
+            for vt in ['x', 'dx', 'unelim_u', 'w']:
                 var_sf_map[vt] = {}
                 var_sf["n_variant_%s"%vt] = 0
                 
@@ -2436,6 +2436,7 @@ class LocalDAECollocator(CasadiCollocator):
                         continue
                         
                     var_sf["n_variant_%s"%vt] += 1
+                    var_sf["n_variant"] += 1
                     
                     #Setup struct
                     for i in xrange(1, self.n_e + 1):
@@ -2500,7 +2501,7 @@ class LocalDAECollocator(CasadiCollocator):
                     variant_sf[i][k] = []
 
             # Evaluate trajectories to generate scaling factors
-            for vt in ['dx', 'x', 'unelim_u', 'w']:
+            for vt in ['x', 'dx', 'unelim_u', 'w']:
                 for var in self.mvar_vectors[vt]:
                     name = var.getName()
                     (var_index, _) = self.name_map[name]
@@ -4146,6 +4147,9 @@ class LocalDAECollocator(CasadiCollocator):
         if self._var_sf_nbr_vars == 0:
             return all_sf
             
+        if self._var_sf["n_variant"] == 0:
+            return [self.pp_split["variable_scale"]]
+            
         for vk in ["x", "dx", "unelim_u", "w", "p_opt"]: #Dont check eliminated u!
             for var in self.mvar_vectors[vk]:
                 name = var.getName()
@@ -4164,7 +4168,7 @@ class LocalDAECollocator(CasadiCollocator):
             par_vals = self._get_par_vals()
             ind = self.pp_offset["variable_scale"]
             
-            for vt in ['dx', 'x', 'unelim_u', 'w']:
+            for vt in ['x', 'dx', 'unelim_u', 'w']:
                 for var in self.mvar_vectors[vt]:
                     name = var.getName()
                     if self._var_sf_mode[name] != "time-variant":
