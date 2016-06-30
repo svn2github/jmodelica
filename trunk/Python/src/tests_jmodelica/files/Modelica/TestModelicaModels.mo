@@ -46,7 +46,7 @@ model AtomicModelElementaryExponentiation
     parameter Real p1[3] = {1,2,3};
     parameter Real p2[3] = {4,5,6};
     parameter Real p3[3] = p1.^p2;
-    parameter Real p4[3] = p1^p2[2];
+    parameter Real p4[3] = p1.^p2[2];
     parameter Real p5[3] = p1[1].^p2;
     parameter Real p6 = p1[1]^p2[1];
     parameter Real p7[2,2] = [1,2;3,4];

@@ -432,7 +432,7 @@ class ModelicaTransfer(object):
         assert strnorm(repr(params)) == strnorm(expected)
         
     @testattr(casadi = True)
-    def test_ConstructElementarySubtraction(self):
+    def test_ConstructElementaryExponentiation(self):
         model = self.load_model("AtomicModelElementaryExponentiation", modelFile)
         params = model.getVariables(model.REAL_PARAMETER_DEPENDENT)
         expected ="""array([ parameter Real p3[1](bindingExpression = pow(p1[1],p2[1])) = pow(p1[1],p2[1]);,
