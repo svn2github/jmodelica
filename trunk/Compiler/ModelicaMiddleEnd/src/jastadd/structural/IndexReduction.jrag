@@ -288,8 +288,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability, type, isMeta);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            return new IndexReductionEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
         @Override
@@ -317,8 +317,8 @@ aspect IndexReduction {
         private Set<FAbstractEquation> nonDiffEqns;
         private Set<IndexReductionVar> remoteVars = null;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-            super(name, eqn, groupNumber, variability, type, isMeta);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
         public int numDifferentiations() {
@@ -851,8 +851,6 @@ aspect IndexReduction {
         // Always add variables from extra equations
         ExtraEquationVariableResolver extraResolver = new ExtraEquationVariableResolver(extraEquations);
         
-        Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
-        
         // Check so that the differentiated equation has the same number of
         // members as the original.
         int numScalarsInDiffed = 0;
@@ -861,6 +859,7 @@ aspect IndexReduction {
         if (baseEqn.getGroupMembers().size() != numScalarsInDiffed)
             throw new IndexReductionException("Number of scalar equations in differentiated equation(" + numScalarsInDiffed + ") does not match the number in original equation(" + baseEqn.getGroupMembers().size() + "). Original equation:\n" + baseEqn.getEquation());
         
+        Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         // Go through differentiated equations that corresponds to the original
         // equations. Add all of these equations to the BiPGraph. We need to
         // remember equations that are differentiated from the "orignal"
@@ -877,7 +876,7 @@ aspect IndexReduction {
                 IndexReductionEq original = eqnIt.next();
                 ASTNode.log.verbose("About to add equation: %s", newEqn);
                 // Add the differentiated equation
-                IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), incMap.type(i), original.getName() + "_d");
+                IndexReductionEq diffedEqn = addEquation(newEqn, i, diffedOriginalEqs, incMap.variability(i), incMap.type(i), original.getName() + "_d");
                 
                 incMap.addEdges(diffedEqn, true);
                 
@@ -897,10 +896,6 @@ aspect IndexReduction {
             ASTNode.log.verbose("Equation added");
         }
         
-        // Link all BiP equations
-        for (IndexReductionEq member : diffedOriginalEqs)
-            for (IndexReductionEq otherMember : diffedOriginalEqs)
-                member.addGroupMember(otherMember);
     }
     
     public Set<FVariable> IndexReductionBiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
@@ -1078,7 +1073,7 @@ aspect IndexReduction {
             diverged from the original one that was presented in the paper.
         */
         
-        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions());
+        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions(), true);
     
         Set<IndexReductionVar> varsToKeep = new HashSet<IndexReductionVar>();
         // Remove all equations and variables that doesn't exist in blocks that
@@ -1400,13 +1395,17 @@ aspect IndexReduction {
             }
             
             
+            private static final int[] printOrder = new int[] {STATE_SELECT_ALWAYS_WEIGHT_POSITION,
+                    STATE_SELECT_PREFER_WEIGHT_POSITION, STATE_SELECT_DEFAULT_WEIGHT_POSITION, STATE_SELECT_AVOID_WEIGHT_POSITION,
+                    STATE_SELECT_NEVER_WEIGHT_POSITION, FIXED_WEIGHT_POSITION, ORDER_WEIGHT_POSITION, LINEARITY_WEIGHT_POSITION};
+            
             public String toString() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(");
                 for (int i = 0; i < weights.length; i++) {
                     if (i > 0)
                         sb.append(", ");
-                    sb.append(weights[i]);
+                    sb.append(weights[printOrder[i]]);
                 }
                 sb.append(")");
                 return sb.toString();
