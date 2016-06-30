@@ -2009,36 +2009,6 @@ _der_b := 1.0
 temp_3 := _der_b
 
 --- Dynamic state block ---
-  --- States: _der_y, x ---
-    --- Solved equation ---
-    dynDer(y) := ds(1, _der_y)
-
-    --- Torn system (Block 1(_der_y, x).1) of 2 iteration variables and 4 solved variables ---
-    Torn variables:
-      c
-      t
-      temp_6
-      _der_t
-
-    Iteration variables:
-      dynDer(x) ()
-      y ()
-
-    Torn equations:
-      c := cos(dynDer(x))
-      t := DynamicStates.Special.NoDerivative1.F(b, c)
-      temp_6 := c
-      _der_t := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
-
-    Residual equations:
-      ds(2, x) * ds(2, y) * t = 0
-        Iteration variables: dynDer(x)
-      ds(2, x) * ds(2, y) * _der_t + (ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * t = 0
-        Iteration variables: y
-
-    --- Solved equation ---
-    _der_x := dynDer(x)
-    -------------------------------
   --- States: _der_y, y ---
     --- Solved equation ---
     dynDer(y) := ds(1, _der_y)
@@ -2048,84 +2018,92 @@ temp_3 := _der_b
       c
       t
       temp_6
-      _der_t
+      dynDer(t)
 
     Iteration variables:
-      dynDer(x) ()
+      _der_x ()
       x ()
 
     Torn equations:
-      c := cos(dynDer(x))
+      c := cos(_der_x)
       t := DynamicStates.Special.NoDerivative1.F(b, c)
       temp_6 := c
-      _der_t := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+      dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
 
     Residual equations:
-      ds(2, x) * ds(2, y) * t = 0
-        Iteration variables: dynDer(x)
-      ds(2, x) * ds(2, y) * _der_t + (ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * t = 0
+      x * ds(2, y) * ds(2, t) = 0
+        Iteration variables: _der_x
+      x * ds(2, y) * dynDer(t) + (x * dynDer(y) + _der_x * ds(2, y)) * ds(2, t) = 0
         Iteration variables: x
 
     --- Solved equation ---
-    _der_x := dynDer(x)
+    _der_t := dynDer(t)
     -------------------------------
-  --- States: _der_x, x ---
-    --- Solved equation ---
-    dynDer(x) := ds(1, _der_x)
-
-    --- Solved equation ---
-    c := cos(dynDer(x))
+  --- States: _der_y, t ---
+    --- Unsolved equation (Block 1(_der_y, t).1) ---
+    ds(2, t) = DynamicStates.Special.NoDerivative1.F(b, c)
+      Computed variables: c
 
     --- Solved equation ---
     temp_6 := c
 
     --- Solved equation ---
-    _der_t := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+    dynDer(t) := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
 
     --- Solved equation ---
-    t := DynamicStates.Special.NoDerivative1.F(b, c)
-
-    --- Unsolved equation (Block 1(_der_x, x).1) ---
-    ds(2, x) * ds(2, y) * t = 0
-      Computed variables: y
-
-    --- Unsolved equation (Block 1(_der_x, x).2) ---
-    ds(2, x) * ds(2, y) * _der_t + (ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * t = 0
-      Computed variables: dynDer(y)
+    _der_t := dynDer(t)
 
     --- Solved equation ---
-    _der_y := dynDer(y)
+    dynDer(y) := ds(1, _der_y)
+
+    --- Unsolved equation (Block 1(_der_y, t).2) ---
+    c = cos(_der_x)
+      Computed variables: _der_x
+
+    --- Unsolved system (Block 1(_der_y, t).3) of 2 variables ---
+    Unknown variables:
+      y ()
+      x ()
+
+    Equations:
+      x * ds(2, y) * dynDer(t) + (x * dynDer(y) + _der_x * ds(2, y)) * ds(2, t) = 0
+        Iteration variables: y
+      x * ds(2, y) * ds(2, t) = 0
+        Iteration variables: x
     -------------------------------
-  --- States: _der_x, y ---
+  --- States: _der_t, y ---
     --- Solved equation ---
-    dynDer(x) := ds(1, _der_x)
+    dynDer(t) := ds(1, _der_t)
+
+    --- Unsolved equation (Block 1(_der_t, y).1) ---
+    dynDer(t) = DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+      Computed variables: temp_6
 
     --- Solved equation ---
-    c := cos(dynDer(x))
-
-    --- Solved equation ---
-    temp_6 := c
-
-    --- Solved equation ---
-    _der_t := DynamicStates.Special.NoDerivative1.F(temp_3 * temp_6, temp_6)
+    c := temp_6
 
     --- Solved equation ---
     t := DynamicStates.Special.NoDerivative1.F(b, c)
 
-    --- Unsolved equation (Block 1(_der_x, y).1) ---
-    ds(2, x) * ds(2, y) * t = 0
+    --- Unsolved equation (Block 1(_der_t, y).2) ---
+    x * ds(2, y) * ds(2, t) = 0
       Computed variables: x
 
-    --- Unsolved equation (Block 1(_der_x, y).2) ---
-    ds(2, x) * ds(2, y) * _der_t + (ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * t = 0
+    --- Unsolved equation (Block 1(_der_t, y).3) ---
+    c = cos(_der_x)
+      Computed variables: _der_x
+
+    --- Unsolved equation (Block 1(_der_t, y).4) ---
+    x * ds(2, y) * dynDer(t) + (x * dynDer(y) + _der_x * ds(2, y)) * ds(2, t) = 0
       Computed variables: dynDer(y)
 
     --- Solved equation ---
     _der_y := dynDer(y)
     -------------------------------
+  --- States: _der_t, t ---
 
 --- Solved equation ---
-vx := dynDer(x)
+vx := _der_x
 
 --- Solved equation ---
 vy := dynDer(y)
@@ -2136,9 +2114,9 @@ _der_der_b := 0.0
 --- Torn system (Block 2) of 1 iteration variables and 6 solved variables ---
 Torn variables:
   _der_vx
-  dynDer(_der_x)
+  _der_der_x
   _der_c
-  _der_der_t
+  dynDer(_der_t)
   _der_vy
   dynDer(_der_y)
 
@@ -2146,15 +2124,15 @@ Iteration variables:
   a ()
 
 Torn equations:
-  _der_vx := a * ds(2, x)
-  dynDer(_der_x) := _der_vx
-  _der_c := - sin(dynDer(x)) * dynDer(_der_x)
-  _der_der_t := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
+  _der_vx := a * x
+  _der_der_x := _der_vx
+  _der_c := - sin(_der_x) * _der_der_x
+  dynDer(_der_t) := DynamicStates.Special.NoDerivative1.F((temp_3 * _der_c + _der_der_b * temp_6) * temp_6, temp_6)
   _der_vy := a * ds(2, y)
   dynDer(_der_y) := _der_vy
 
 Residual equations:
-  ds(2, x) * ds(2, y) * _der_der_t + (ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * _der_t + ((ds(2, x) * dynDer(y) + dynDer(x) * ds(2, y)) * _der_t + (ds(2, x) * dynDer(_der_y) + dynDer(x) * dynDer(y) + (dynDer(x) * dynDer(y) + dynDer(_der_x) * ds(2, y))) * t) = 0
+  x * ds(2, y) * dynDer(_der_t) + (x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + ((x * dynDer(y) + _der_x * ds(2, y)) * dynDer(t) + (x * dynDer(_der_y) + _der_x * dynDer(y) + (_der_x * dynDer(y) + _der_der_x * ds(2, y))) * ds(2, t)) = 0
     Iteration variables: a
 
 --- Solved equation ---
