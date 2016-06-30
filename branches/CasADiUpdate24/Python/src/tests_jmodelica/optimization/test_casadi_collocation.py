@@ -507,14 +507,14 @@ class TestLocalDAECollocator(object):
         
         res_update = solver.optimize()
         
-        cost_update = float(res_update.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        cost_update = float(res_update.solver.solver_object.getOutput('f'))
         
         # Optimize using nominal and initial trajectories
         opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
         opts['nominal_traj_mode'] = {'_default_mode': "affine"}
         res = op.optimize(self.algorithm, opts)
         
-        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        cost = float(res.solver.solver_object.getOutput('f'))
 
         N.testing.assert_equal(cost_update, cost)
 
