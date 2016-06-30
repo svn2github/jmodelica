@@ -6096,8 +6096,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_4[2] : b@M // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
-eq_4[3] : c@M // (d, b, f) = TransformCanonicalTests.IncidenceComputation1.func(a, e, c)
+eq_4[2] : b@M // Already printed, see eq_4[1]
+eq_4[3] : c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation1;
 
@@ -6136,8 +6136,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_4[2] : b@M a@ c@ // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
-eq_4[3] : c@M // (d, b, f) = TransformCanonicalTests.IncidenceComputation2.func(a, e, c, 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation2;
 
@@ -6172,8 +6172,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_4[2] : b@M a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
-eq_4[3] : c@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation3.func({a, e, c}, 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation3;
 
@@ -6214,8 +6214,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_4[2] : b@M a@ c@ // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
-eq_4[3] : c@M // (TransformCanonicalTests.IncidenceComputation4.R(d, b, f)) = TransformCanonicalTests.IncidenceComputation4.func(TransformCanonicalTests.IncidenceComputation4.R(a, e, c), 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation4;
 
@@ -6260,8 +6260,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_4[2] : b@M a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
-eq_4[3] : c@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation5.func({a, e, c}, 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation5;
 
@@ -6294,8 +6294,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_4[2] : b@M a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
-eq_4[3] : a@ c@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation6.func({a, e, c}, 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : a@ c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation6;
 
@@ -6332,8 +6332,8 @@ eq_1 : der(d)@M // der(d) = time
 eq_2 : der(e)@M // der(e) = time
 eq_3 : der(f)@M // der(f) = time
 eq_4[1] : a@M c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_4[2] : b@M a@ c@ // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
-eq_4[3] : a@ c@M // ({d, b, f}) = TransformCanonicalTests.IncidenceComputation7.func({a, e, c}, 0)
+eq_4[2] : b@M a@ c@ // Already printed, see eq_4[1]
+eq_4[3] : a@ c@M // Already printed, see eq_4[1]
 ")})));
 end IncidenceComputation7;
 

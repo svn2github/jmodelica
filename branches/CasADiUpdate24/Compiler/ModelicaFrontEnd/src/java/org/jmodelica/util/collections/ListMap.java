@@ -35,6 +35,14 @@ public interface ListMap<K, V> extends Map<K, List<V>> {
     public List<V> getList(K key);
 
     /**
+     * Get the list mapped to key, or an empty list if there is no list mapped to key.
+     * 
+     * @param create If true and key doesn't exist in the map, then a new
+     *                  list will be created and inserted
+     */
+    public List<V> getList(K key, boolean create);
+    
+    /**
      * Remove the first instance of value from the list mapped to key, if any.
      * 
      * @return  true if any element was removed

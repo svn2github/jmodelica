@@ -799,7 +799,7 @@ aspect DynamicStateSelect{
                     sb.append(combination[j].name() + " ");
                 }
                 ASTNode.log.debug("Generating BLT for: %s", sb);
-                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars, true);
+                BiPGraph graph = new BiPGraph(component.getMembers(), otherVars);
                 for (FVariable var : combination)
                     graph.addVariable(var);
                 for (Eq eqn : graph.getEquations()) {

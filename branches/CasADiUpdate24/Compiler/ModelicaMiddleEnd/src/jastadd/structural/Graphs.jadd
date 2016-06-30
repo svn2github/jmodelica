@@ -49,7 +49,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     public AbstractBiPGraph() {
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars, boolean preserveGroupMembers) {
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> eqs, Collection<V_OTHER> vars) {
         for (E_OTHER oldE : eqs)
             addEquation(oldE.getEquation(), oldE.groupNumber(), oldE.variability(), oldE.type(), oldE.isMeta(), oldE.getName());
         for (V_OTHER oldV : vars)
@@ -61,18 +61,11 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 if (v != null)
                     addInsidence(e, v);
             }
-            if (preserveGroupMembers) {
-                for (E_OTHER oldOtherE : oldE.getGroupMembers()) {
-                    E otherE = getEquation(oldOtherE.getName());
-                    if (otherE != null)
-                        e.addGroupMember(otherE);
-                }
-            }
         }
     }
 
-    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial, boolean preserveGroupMembers) {
-        this(block, collectMatchingVariables(block), preserveGroupMembers);
+    public <E_OTHER extends AbstractEq<E_OTHER, V_OTHER>, V_OTHER extends AbstractVar<E_OTHER, V_OTHER>> AbstractBiPGraph(Collection<E_OTHER> block, boolean isInitial) {
+        this(block, collectMatchingVariables(block));
         initialSystem = isInitial;
         for (E_OTHER e : block) {
             if (!e.isMeta()) {
@@ -137,22 +130,25 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return addEquation(eqn, groupNumber, variability, type, isMeta, name);
     }
 
-    protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, String name) {
-        return addEquation(eqn, groupNumber, variability, type, false, name);
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, String name) {
+        return addEquation(eqn, groupNumber, groupMemberList, variability, type, false, name);
     }
 
     protected E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
+        return addEquation(eqn, groupNumber, equationIndexMap.getList(eqn, true), variability, type, isMeta, name);
+    }
+
+    protected E addEquation(FAbstractEquation eqn, int groupNumber, Collection<E> groupMemberList, FTypePrefixVariability variability, FType type, boolean isMeta, String name) {
         E e = equationMap.get(name);
         if (e != null)
             throw new IllegalArgumentException("Equation with the name '" + name + "' already exists:\n" + e.getEquation() + "\nNew equation:\n" + eqn);
-        e = createEq(name, eqn, groupNumber, variability, type, isMeta);
-        e.addGroupMember(e);
+        e = createEq(name, eqn, groupNumber, groupMemberList, variability, type, isMeta);
         equationMap.put(name,e);
         insertIntoEquationIndexMap(eqn,e);
         return e;
     }
 
-    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta);
+    protected abstract E createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta);
 
     public V addVariable(FVariable var) {
         return addVariable(var.name(), var);
@@ -290,9 +286,12 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                     n_existing_meta++;
                 }
             }
-            if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq)
+            if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq) {
                 throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
-            
+            }
+            if (n_eq > 1000) {
+                throw new org.jmodelica.util.exceptions.InternalCompilerError("Sorry, this equation is too big, it has " + n_eq + " continuous/discrete scalars. Equation in question:\n" + e);
+            }
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
                 Enumerator subEnumerator = enumerator;
@@ -311,11 +310,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                         // need to reverse here to preserve the initial order.
                         E eqn = addEquation(e, i, incMap.variability(i), incMap.type(i), false, prefix, subfix, subEnumerator);
                         groupMembers.add(eqn);
-                    }
-                }
-                for (E ee : groupMembers) {
-                    for (E eee : groupMembers) {
-                        ee.addGroupMember(eee);
                     }
                 }
             }
@@ -1067,7 +1061,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph);
     }
     
-    private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = addSCCContributor(new GroupMemberContributor());
+    private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = new GroupMemberContributor();
     
     /**
      * Contributor that describes the relationship between BiPGrah equations
@@ -1162,26 +1156,34 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
     
     protected abstract C createComponentBlock();
 
-    public Collection<C> tarjan() {
-        return tarjan(null);
+    public Collection<C> tarjan(boolean forceGroupMembersIntoSameBlock) {
+        return tarjan(null, forceGroupMembersIntoSameBlock);
     }
     
 
-    public Collection<C> tarjan(OptionRegistry options) {
-        return tarjan(options, Collections.<SCCContributor>emptyList());
+    public Collection<C> tarjan(OptionRegistry options, boolean forceGroupMembersIntoSameBlock) {
+        return tarjan(options, Collections.<SCCContributor>emptyList(), forceGroupMembersIntoSameBlock);
     }
 
-    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors) {
+    public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors,
+            boolean forceGroupMembersIntoSameBlock) {
         Enumerator indexer = new Enumerator();
         Stack<E> stack = new Stack<E>();
         Collection<C> components = new ArrayList<C>();
         tarjanReset();
+        
+        Collection<SCCContributor> groupMemberContributers;
+        if (forceGroupMembersIntoSameBlock) {
+            groupMemberContributers = Collections.<SCCContributor>singletonList(GROUP_MEMBER_CONTRIBUTOR);
+        } else {
+            groupMemberContributers = Collections.<SCCContributor>emptyList();
+        }
 
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
         Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
         Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
 
-        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), extraContributors)) {
+        for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributers, extraContributors)) {
             if (!contributor.isActive(options))
                 continue;
             contributors.add(contributor);
@@ -1215,7 +1217,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return components;
     }
 
-    public void tarjan(Enumerator indexer, Stack<E> stack, Collection<C> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
+    private void tarjan(Enumerator indexer, Stack<E> stack, Collection<C> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
         int index = indexer.next();
         e.setTarjanNbr(index);
         e.setTarjanLowLink(index);
@@ -1337,6 +1339,7 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             str.append(" ");
         }
         str.append("}\n");
+        Map<FAbstractEquation, E> printedMap = new HashMap<FAbstractEquation, E>();
         for (E e : getEquations()) {
             str.append(e);
             str.append(" : ");
@@ -1348,7 +1351,21 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 }
                 str.append(' ');
             }
-            str.append("// " + e.printEquation() + "\n");
+            String previousPrintLabel = null;
+            if (e.getGroupMembers().size() > 1) {
+                E previous = printedMap.get(e.getEquation());
+                
+                if (previous == null) {
+                    printedMap.put(e.getEquation(), e);
+                } else {
+                    previousPrintLabel = previous.getName();
+                }
+            }
+            if (previousPrintLabel == null) {
+                str.append("// " + e.printEquation() + "\n");
+            } else {
+                str.append("// Already printed, see " + previousPrintLabel + "\n");
+            }
         }
         return str.toString();
     }
@@ -1529,17 +1546,17 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
         super();
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
-        super(block, isInitial, preserveGroupMembers);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> block, boolean isInitial) {
+        super(block, isInitial);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
-        super(eqns, vars, preserveGroupMembers);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> BiPGraph(Collection<E> eqns, Collection<V> vars) {
+        super(eqns, vars);
     }
 
     @Override
-    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return new Eq(name, eqn, groupNumber, variability, type, isMeta);
+    protected Eq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        return new Eq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
     @Override
@@ -1555,8 +1572,8 @@ public class BiPGraph extends AbstractBiPGraph<Eq, Var, SCCBlock<Eq, Var>> {
 
 public class Eq extends AbstractEq<Eq, Var> {
 
-    public Eq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        super(name, eqn, groupNumber, variability, type, isMeta);
+    public Eq(String name, FAbstractEquation eqn, int groupNumber, Collection<Eq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
 }
@@ -1572,12 +1589,12 @@ public class Var extends AbstractVar<Eq, Var> {
 
 public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCCBlock<SolvingEq, SolvingVar>> {
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars, boolean preserveGroupMembers) {
-        super(eqns, vars, preserveGroupMembers);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> eqns, Collection<V> vars) {
+        super(eqns, vars);
     }
 
-    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial, boolean preserveGroupMembers) {
-        super(block, isInitial, preserveGroupMembers);
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> SolvingBiPGraph(Collection<E> block, boolean isInitial) {
+        super(block, isInitial);
     }
 
     @Override
@@ -1611,8 +1628,8 @@ public class SolvingBiPGraph extends AbstractBiPGraph<SolvingEq, SolvingVar, SCC
     }
 
     @Override
-    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        return new SolvingEq(name, eqn, groupNumber, variability, type, isMeta);
+    protected SolvingEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        return new SolvingEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
     @Override
@@ -1641,8 +1658,8 @@ public class SolvingEq extends AbstractEq<SolvingEq, SolvingVar> implements Comp
     private int sameTypeOccurrences = 0;
     private boolean isRes = false;
 
-    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-        super(name, eqn, groupNumber, variability, type, isMeta);
+    public SolvingEq(String name, FAbstractEquation eqn, int groupNumber, Collection<SolvingEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+        super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
     }
 
     public void sameTypeOccurrence(){
@@ -1815,12 +1832,13 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
      * itself. This approach makes handling of equation groups more consistent,
      * e.g., when a function call equation needs to be differentiated.
      */
-    private Set<E> groupMembers = new LinkedHashSet<E>();
+    private final Collection<E> groupMembers;
 
-    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
+    public AbstractEq(String name, FAbstractEquation eqn, int groupNumber, Collection<E> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
         this.name = name;
         this.eqn = eqn;
         this.groupNumber = groupNumber;
+        this.groupMembers = Collections.unmodifiableCollection(groupMembers);
         this.variability = variability;
         this.type = type;
         this.isMeta = isMeta;
@@ -1935,11 +1953,7 @@ public abstract class AbstractEq<E extends AbstractEq<E, V>, V extends AbstractV
         this.depth = d;
     }
 
-    public void addGroupMember(E eqn) {
-        groupMembers.add(eqn);
-    }
-
-    public Set<E> getGroupMembers() {
+    public Collection<E> getGroupMembers() {
         return groupMembers;
     }
 

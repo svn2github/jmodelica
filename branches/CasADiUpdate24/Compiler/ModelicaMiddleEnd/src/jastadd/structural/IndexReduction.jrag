@@ -288,8 +288,8 @@ aspect IndexReduction {
     public class IndexReductionBiPGraph extends AbstractBiPGraph<IndexReductionEq, IndexReductionVar, IndexReductionSCCBlock> {
 
         @Override
-        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-            return new IndexReductionEq(name, eqn, groupNumber, variability, type, isMeta);
+        protected IndexReductionEq createEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            return new IndexReductionEq(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
         @Override
@@ -317,8 +317,8 @@ aspect IndexReduction {
         private Set<FAbstractEquation> nonDiffEqns;
         private Set<IndexReductionVar> remoteVars = null;
 
-        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta) {
-            super(name, eqn, groupNumber, variability, type, isMeta);
+        public IndexReductionEq(String name, FAbstractEquation eqn, int groupNumber, Collection<IndexReductionEq> groupMembers, FTypePrefixVariability variability, FType type, boolean isMeta) {
+            super(name, eqn, groupNumber, groupMembers, variability, type, isMeta);
         }
 
         public int numDifferentiations() {
@@ -851,8 +851,6 @@ aspect IndexReduction {
         // Always add variables from extra equations
         ExtraEquationVariableResolver extraResolver = new ExtraEquationVariableResolver(extraEquations);
         
-        Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
-        
         // Check so that the differentiated equation has the same number of
         // members as the original.
         int numScalarsInDiffed = 0;
@@ -861,6 +859,7 @@ aspect IndexReduction {
         if (baseEqn.getGroupMembers().size() != numScalarsInDiffed)
             throw new IndexReductionException("Number of scalar equations in differentiated equation(" + numScalarsInDiffed + ") does not match the number in original equation(" + baseEqn.getGroupMembers().size() + "). Original equation:\n" + baseEqn.getEquation());
         
+        Collection<IndexReductionEq> diffedOriginalEqs = new ArrayList<IndexReductionEq>();
         // Go through differentiated equations that corresponds to the original
         // equations. Add all of these equations to the BiPGraph. We need to
         // remember equations that are differentiated from the "orignal"
@@ -877,7 +876,7 @@ aspect IndexReduction {
                 IndexReductionEq original = eqnIt.next();
                 ASTNode.log.verbose("About to add equation: %s", newEqn);
                 // Add the differentiated equation
-                IndexReductionEq diffedEqn = addEquation(newEqn, i, incMap.variability(i), incMap.type(i), original.getName() + "_d");
+                IndexReductionEq diffedEqn = addEquation(newEqn, i, diffedOriginalEqs, incMap.variability(i), incMap.type(i), original.getName() + "_d");
                 
                 incMap.addEdges(diffedEqn, true);
                 
@@ -897,10 +896,6 @@ aspect IndexReduction {
             ASTNode.log.verbose("Equation added");
         }
         
-        // Link all BiP equations
-        for (IndexReductionEq member : diffedOriginalEqs)
-            for (IndexReductionEq otherMember : diffedOriginalEqs)
-                member.addGroupMember(otherMember);
     }
     
     public Set<FVariable> IndexReductionBiPGraph.removablePreferDerivatives(Set<FVariable> preferVars) {
@@ -1078,7 +1073,7 @@ aspect IndexReduction {
             diverged from the original one that was presented in the paper.
         */
         
-        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions());
+        Collection<IndexReductionSCCBlock> components = tarjan(fclass.myOptions(), true);
     
         Set<IndexReductionVar> varsToKeep = new HashSet<IndexReductionVar>();
         // Remove all equations and variables that doesn't exist in blocks that
@@ -1399,7 +1394,6 @@ aspect IndexReduction {
                 return copy;
             }
             
-            
             public String toString() {
                 StringBuilder sb = new StringBuilder();
                 sb.append("(");
@@ -1450,27 +1444,9 @@ aspect IndexReduction {
         java.util.List<IndexReductionEq> eqs = new ArrayList<IndexReductionEq>(equationMap.values());
         java.util.List<IndexReductionVar> vars = new ArrayList<IndexReductionVar>(variableMap.values());
         try {
-            result = matchMunkres(weights, cost, false);
-            Set<IndexReductionVar> allVars = new HashSet<IndexReductionVar>(vars);
-            for (int[] entry : result) {
-                IndexReductionVar var = vars.get(entry[1]);
-                if (var.numDifferentiations() == 1 && var.getVariable().stateSelection() == FRealVariable.StateSelect.ALWAYS) {
-                    throw new MunkresException(String.format("Variable %s was selected as dummy derivative but has stateSelect = always", var));
-                }
-                allVars.remove(var);
-            }
-            for (IndexReductionVar var : allVars) {
-                if (var.numDifferentiations() == 1 && var.getVariable().stateSelection() == FRealVariable.StateSelect.NEVER) {
-                    throw new MunkresException(String.format("Variable %s was not selected as dummy derivative but has stateSelect = never", var));
-                }
-            }
+            result = matchMunkres(weights, cost, true);
         } catch (MunkresException e) {
-            try {
-                ASTNode.log.verbose("No munkres matching found, retrying with remote incidences! %s", e.getMessage());
-                result = matchMunkres(weights, cost, true);
-            } catch (MunkresException e2) {
-                throw new IndexReductionException("Munkres algorithm was unable to find a matching; " + e.getMessage());
-            }
+            throw new IndexReductionException("Munkres algorithm was unable to find a matching; " + e.getMessage());
         }
 
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();

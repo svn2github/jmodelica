@@ -108,8 +108,8 @@ aspect BLT{
             if (seb != null && seb.isSolvable())
                 return seb;
             
-            BiPGraph g = new BiPGraph(component.getMembers(), isInitial, false);
-            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options);
+            BiPGraph g = new BiPGraph(component.getMembers(), isInitial);
+            Collection<SCCBlock<Eq, Var>> subBlocks = g.tarjan(options, false);
             
             errorCheckWhenEquations(subBlocks);
             
@@ -188,7 +188,7 @@ aspect BLT{
                 if (seb != null && !mixed) {
                     block = seb;
                 } else {
-                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial, false);
+                    BiPGraph nonRealG = new BiPGraph(nonRealEquations, isInitial);
                     Collection<SimpleEquationBlock> nonRealBlocks = nonRealG.computeNonRealBlocks(producer, options);
                     eqnBlock = new EquationBlock(producer, component.computeBlockDependency(), nonRealBlocks, createSimpleBlocks(groupComponent(realEquations), producer));
                     block = eqnBlock;
@@ -418,7 +418,7 @@ aspect BLT{
     public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy, Collection<SCCContributor> extraContributors) {
         ASTNode.beginStep("computeBLT()");
         try {
-            Collection<C> components = tarjan(options, extraContributors);
+            Collection<C> components = tarjan(options, extraContributors, true);
             return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, components);
         } finally {
             ASTNode.endStep("computeBLT()");
@@ -438,7 +438,7 @@ aspect BLT{
     }
 
     public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
-        Collection<C> components = tarjan(options);
+        Collection<C> components = tarjan(options, false);
         Collection<SimpleEquationBlock> blocks = new ArrayList<SimpleEquationBlock>();
         for (C component : components) {
             SimpleEquationBlock block = EquationBlockFactory.createSimpleEquationBlock(component, producer, true);
@@ -478,7 +478,7 @@ aspect BLT{
         ASTNode.log.debug("Homotopy sub block:");
         ASTNode.log.debug(homotopySubBlock);
         
-        BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true, true);
+        BiPGraph graph = new BiPGraph(mergedComponent.getMembers(), true);
         graph.setAsHomotopySimplified();
         graph.maximumMatching(true);
         BLT simplifiedBLT = graph.computeBLT(options, producer, new BLT(), false);
@@ -3222,7 +3222,7 @@ aspect AutomaticTearing {
             }
             
             private <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> void tear(SCCBlock<E, V> block, TornEquationBlock eb, boolean isInitial) {
-                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial, false);
+                SolvingBiPGraph g = new SolvingBiPGraph(block.getMembers(), isInitial);
                 if (isInitial)
                     g.setAsInitialSystem();
                 
@@ -3283,7 +3283,7 @@ aspect AutomaticTearing {
 
                     // Compute inner BLT and see if tearings can be changed 
                     Set<SolvingVar> SUMV = new LinkedHashSet<SolvingVar>(g.getUnmatchedVariables());
-                    Collection<SCCBlock<SolvingEq, SolvingVar>> innerBlocks = g.tarjan();
+                    Collection<SCCBlock<SolvingEq, SolvingVar>> innerBlocks = g.tarjan(false);
                     java.util.List<SolvingVar> tearings = new ArrayList<SolvingVar>();
 
                     for (SCCBlock<SolvingEq, SolvingVar> bInner : innerBlocks) {
@@ -3300,7 +3300,7 @@ aspect AutomaticTearing {
                             }
                         } else {
                             // Build Inner Graph and add info about iteration variables
-                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial, false);
+                            SolvingBiPGraph gInner = new SolvingBiPGraph(bInner.getMembers(), isInitial);
                             // Build block-graph and look for interchangeable variables in SUMV
                             java.util.List<SolvingEq> eqs = new ArrayList<SolvingEq>();
                             boolean graphHasTear = false;
@@ -3350,17 +3350,17 @@ aspect AutomaticTearing {
 
                             if (graphHasTear) {
                                 if (isChanged) {
-                                    Collection<SCCBlock<SolvingEq, SolvingVar>> newBlocks = gInner.tarjan();
+                                    Collection<SCCBlock<SolvingEq, SolvingVar>> newBlocks = gInner.tarjan(false);
                                     for (SCCBlock<SolvingEq, SolvingVar> bInnerInner : newBlocks) {
                                         tearBlock = EquationBlockFactory.createSimpleEquationBlock(bInnerInner, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                                         if (tearBlock != null && tearBlock.isSolvable()) {
                                             eb.addSolvedBlock(tearBlock);
                                         } else {
-                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial, false), eb);
+                                            tearInner(new SolvingBiPGraph(bInnerInner.getMembers(), isInitial), eb);
                                         }
                                     }
                                 } else {
-                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial, false), eb);
+                                    tearInner(new SolvingBiPGraph(bInner.getMembers(), isInitial), eb);
                                 }
                             } else {
                                 // Reuse the already constructed graph
@@ -3395,13 +3395,13 @@ aspect AutomaticTearing {
                 res.isRes(true);
                 ASTNode.log.verbose("Automatic tearing pair, equation: %s, tearing with variable: %s", res.getEquation(), bestIter.getVariable().displayName());
                 eb.addUnsolvedBlock(EquationBlockFactory.createSimpleEquationBlock(res, bestIter, AUTOMATIC_TEARING_BLOCK_PRODUCER));
-                Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan();
+                Collection<SCCBlock<SolvingEq, SolvingVar>> blt = g.tarjan(false);
                 for (SCCBlock<SolvingEq, SolvingVar> block : blt) {
                     SimpleEquationBlock tearBlock = EquationBlockFactory.createSimpleEquationBlock(block, AUTOMATIC_TEARING_BLOCK_PRODUCER, true);
                     if (tearBlock != null && tearBlock.isSolvable()) {
                         eb.addSolvedBlock(tearBlock);
                     } else {
-                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem(), false), eb);
+                        tearInner(new SolvingBiPGraph(block.getMembers(), g.isInitialSystem()), eb);
                     }
                 }
             }
