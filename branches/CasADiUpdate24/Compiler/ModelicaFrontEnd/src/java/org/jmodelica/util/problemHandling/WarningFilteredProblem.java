@@ -1,5 +1,9 @@
 package org.jmodelica.util.problemHandling;
 
+import org.jmodelica.api.problemHandling.Problem;
+import org.jmodelica.api.problemHandling.ProblemKind;
+import org.jmodelica.api.problemHandling.ProblemSeverity;
+
 public class WarningFilteredProblem extends Problem {
     
     private static final long serialVersionUID = 1L;

@@ -34,7 +34,7 @@ int model_ode_derivatives(jmi_t* jmi) {
     return model_ode_derivatives_base(jmi);
 }
 
-int model_dae_R(jmi_t* jmi, jmi_real_t** res) {
+int model_ode_event_indicators(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_event_indicator_residuals$
     return 0;
 }

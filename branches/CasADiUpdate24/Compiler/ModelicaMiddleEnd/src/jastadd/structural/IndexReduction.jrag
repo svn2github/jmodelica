@@ -1353,7 +1353,9 @@ aspect IndexReduction {
             }
             
             public IndexReductionCost(FAbstractVariable.StateSelect stateSelect, boolean fixed, int order, int linearity) {
-                weights[stateSelect.weightPos()] += 1;
+                if (order < 2) {
+                    weights[stateSelect.weightPos()] += 1;
+                }
                 weights[FIXED_WEIGHT_POSITION] += fixed ? 1 : 0;
                 weights[ORDER_WEIGHT_POSITION] += -order;
                 weights[LINEARITY_WEIGHT_POSITION] += linearity;
@@ -1445,11 +1447,26 @@ aspect IndexReduction {
 
         IndexReductionCost cost[][] = new IndexReductionCost[equationMap.size()][variableMap.size()];
         int[][] result;
+        java.util.List<IndexReductionEq> eqs = new ArrayList<IndexReductionEq>(equationMap.values());
+        java.util.List<IndexReductionVar> vars = new ArrayList<IndexReductionVar>(variableMap.values());
         try {
             result = matchMunkres(weights, cost, false);
+            Set<IndexReductionVar> allVars = new HashSet<IndexReductionVar>(vars);
+            for (int[] entry : result) {
+                IndexReductionVar var = vars.get(entry[1]);
+                if (var.numDifferentiations() == 1 && var.getVariable().stateSelection() == FRealVariable.StateSelect.ALWAYS) {
+                    throw new MunkresException(String.format("Variable %s was selected as dummy derivative but has stateSelect = always", var));
+                }
+                allVars.remove(var);
+            }
+            for (IndexReductionVar var : allVars) {
+                if (var.numDifferentiations() == 1 && var.getVariable().stateSelection() == FRealVariable.StateSelect.NEVER) {
+                    throw new MunkresException(String.format("Variable %s was not selected as dummy derivative but has stateSelect = never", var));
+                }
+            }
         } catch (MunkresException e) {
             try {
-                ASTNode.log.verbose("No munkres matching found, retrying with remote incidences!");
+                ASTNode.log.verbose("No munkres matching found, retrying with remote incidences! %s", e.getMessage());
                 result = matchMunkres(weights, cost, true);
             } catch (MunkresException e2) {
                 throw new IndexReductionException("Munkres algorithm was unable to find a matching; " + e.getMessage());
@@ -1458,8 +1475,6 @@ aspect IndexReduction {
 
         IndexReductionCost opt_cost = IndexReductionCost.zeroCost();
         ASTNode.log.verbose("Munkres result:");
-        java.util.List<IndexReductionEq> eqs = new ArrayList<IndexReductionEq>(equationMap.values());
-        java.util.List<IndexReductionVar> vars = new ArrayList<IndexReductionVar>(variableMap.values());
         for (int i = 0; i < result.length; i++) {
             opt_cost.add(cost[result[i][0]][result[i][1]]);
             IndexReductionEq eqn = eqs.get(result[i][0]);

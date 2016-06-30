@@ -26,8 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jmodelica.util.streams.NullStream;
+import org.jmodelica.api.problemHandling.Problem;
 import org.jmodelica.util.CompiledUnit;
-import org.jmodelica.util.problemHandling.Problem;
 import org.jmodelica.util.exceptions.CompilerException;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.StringLoggingUnit;

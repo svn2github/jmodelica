@@ -23,30 +23,7 @@
 #include "jmi_chattering.h"
 #include "module_include/jmi_get_set.h"
 
-#define indexmask  0x07FFFFFF
-#define negatemask 0x08000000
-#define typemask   0xF0000000
 
-jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref) {
-    /* Translate a ValueReference into variable index in z-vector. */
-    jmi_value_reference index = valueref & indexmask;
-    
-    return index;
-}
-
-jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref) {
-    /* Translate a ValueReference into variable type in z-vector. */
-    jmi_value_reference type = valueref & typemask;
-    
-    return type;
-}
-
-jmi_value_reference is_negated(jmi_value_reference valueref) {
-    /* Checks for a valueReference if it is negated. */
-    jmi_value_reference negated = valueref & negatemask;
-    
-    return negated;
-}
 
 int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location) {
                        
@@ -97,35 +74,6 @@ int jmi_me_init(jmi_callbacks_t* jmi_callbacks, jmi_t* jmi, jmi_string GUID, jmi
 
     /* Write start values to the pre vector*/
     jmi_copy_pre_values(jmi);
-    
-    /* Print some info about Jacobians, if available. */
-    if (jmi_->color_info_A != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_A");
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian A", jmi_->color_info_A->n_nz);
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian A", jmi_->color_info_A->n_groups);
-        jmi_log_leave(jmi_->log, node);
-    }
-
-    if (jmi_->color_info_B != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_B");
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian B", jmi_->color_info_B->n_nz);
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian B", jmi_->color_info_B->n_groups);
-        jmi_log_leave(jmi_->log, node);
-    }
-
-    if (jmi_->color_info_C != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_C");
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian C", jmi_->color_info_C->n_nz);
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian C", jmi_->color_info_C->n_groups);
-        jmi_log_leave(jmi_->log, node);
-    }
-
-    if (jmi_->color_info_D != NULL) {
-        jmi_log_node_t node = jmi_log_enter(jmi_->log, logInfo, "color_info_D");
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_nonzeros: %d> in Jacobian D", jmi_->color_info_D->n_nz);
-        jmi_log_fmt(jmi_->log, node, logInfo, "<num_colors: %d> in Jacobian D", jmi_->color_info_D->n_groups);
-        jmi_log_leave(jmi_->log, node);
-    }
     
     return 0;
 }
@@ -257,7 +205,7 @@ int jmi_cannot_set(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
     jmi_value_reference index;
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
         if (index >= start && index < end) {
             jmi_log_node(jmi->log, logError, "CannotSetVariable",
                          fmt, vr[i]);
@@ -405,12 +353,12 @@ int jmi_get_directional_derivative(jmi_t* jmi,
     }
 
     for (i = 0; i < nKnown; i++) {
-        jmi->dz_active_variables[0][get_index_from_value_ref(vKnown_ref[i])-jmi->offs_real_dx] = dvKnown[i];
+        jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vKnown_ref[i])-jmi->offs_real_dx] = dvKnown[i];
     }
 
-    ef = jmi_generic_func(jmi, jmi->dae->ode_derivatives_dir_der);
+    ef = jmi_ode_derivatives_dir_der(jmi);
     for (i = 0; i < nUnknown; i++) {
-        dvUnknown[i] = jmi->dz_active_variables[0][get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
+        dvUnknown[i] = jmi->dz_active_variables[0][jmi_get_index_from_value_ref(vUnknown_ref[i])-jmi->offs_real_dx];
     }
 
     jmi->dz_active_variables[0] = jmi->dz_active_variables_buf[jmi->dz_active_index];
@@ -703,14 +651,6 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* Reset atEvent flag */
         jmi->atEvent = JMI_FALSE;
 
-        /* Deprecated, does nothing. */
-        retval = jmi_ode_guards(jmi);
-        if (retval != 0) { /* Error check */
-            jmi_log_comment(jmi->log, logError, "Computation of guard expressions failed.");
-            jmi_log_unwind(jmi->log, top_node);
-            return -1;
-        }
-
         /* Final evaluation of the model with event flag set to false. It can
          * for example change values of booleans that should only be true during
          * events due to a sample function.
@@ -856,7 +796,7 @@ int compare_option_names(const void* a, const void* b) {
     return strcmp(*sa, *sb);
 }
 
-static int get_option_index(char* option) {
+static unsigned int get_option_index(char* option) {
     const char** found=(const char**)bsearch(&option, 
                                              fmi_runtime_options_map_names,
                                              fmi_runtime_options_map_length,
@@ -867,7 +807,7 @@ static int get_option_index(char* option) {
     index = (int)(found - &fmi_runtime_options_map_names[0]);
     if(index >= fmi_runtime_options_map_length ) return 0;
     vr = fmi_runtime_options_map_vrefs[index];
-    return get_index_from_value_ref(vr);
+    return jmi_get_index_from_value_ref(vr);
 }
 
 /**

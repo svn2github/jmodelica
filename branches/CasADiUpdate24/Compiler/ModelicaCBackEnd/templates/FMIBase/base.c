@@ -180,51 +180,38 @@ int jmi_new(jmi_t** jmi, jmi_callbacks_t* jmi_callbacks) {
 
     jmi_z_offset_strings(&(*jmi)->z_t.strings.offsets);
 
-    jmi_init(jmi, N_real_ci, N_real_cd,  N_real_pi,    N_real_pi_s,    N_real_pi_f,    N_real_pi_e,    N_real_pd,
-             N_integer_ci, N_integer_cd, N_integer_pi, N_integer_pi_s, N_integer_pi_f, N_integer_pi_e, N_integer_pd,
-             N_boolean_ci, N_boolean_cd, N_boolean_pi, N_boolean_pi_s, N_boolean_pi_f, N_boolean_pi_e, N_boolean_pd,
-             N_real_dx, N_real_x, N_real_u, N_real_w,
-             N_real_d, N_integer_d, N_integer_u, N_boolean_d, N_boolean_u,
-             N_outputs, (int (*))Output_vrefs,
-             N_sw, N_sw_init, N_time_sw,N_state_sw, N_guards, N_guards_init,
-             N_dae_blocks, N_dae_init_blocks,
-             N_initial_relations, (int (*))DAE_initial_relations,
-             N_relations, (int (*))DAE_relations, N_dynamic_state_sets,
-             (jmi_real_t *) DAE_nominals,
-             Scaling_method, N_ext_objs, Homotopy_block, jmi_callbacks);
+    jmi_init(jmi, N_real_ci,      N_real_cd,      N_real_pi,      N_real_pi_s,
+                  N_real_pi_f,    N_real_pi_e,    N_real_pd,      N_integer_ci,
+                  N_integer_cd,   N_integer_pi,   N_integer_pi_s, N_integer_pi_f,
+                  N_integer_pi_e, N_integer_pd,   N_boolean_ci,   N_boolean_cd,
+                  N_boolean_pi,   N_boolean_pi_s, N_boolean_pi_f, N_boolean_pi_e,
+                  N_boolean_pd,   N_real_dx,      N_real_x,       N_real_u, 
+                  N_real_w,       N_real_d,       N_integer_d,    N_integer_u,
+                  N_boolean_d,    N_boolean_u,    N_sw,           N_sw_init,
+                  N_time_sw,      N_state_sw,     N_guards,       N_guards_init,
+                  N_dae_blocks,   N_dae_init_blocks, N_initial_relations,
+                  (int (*))DAE_initial_relations, N_relations,
+                  (int (*))DAE_relations, N_dynamic_state_sets,
+                  (jmi_real_t *) DAE_nominals, Scaling_method, N_ext_objs,
+                  Homotopy_block, jmi_callbacks);
 
 $C_dynamic_state_add_call$
 
     model_add_blocks(jmi);
-    
     model_init_add_blocks(jmi);
 
-    /* Initialize the DAE interface */
-    jmi_dae_init(*jmi, *model_dae_F, N_eq_F, NULL, 0, NULL, NULL,
-                 *model_dae_dir_dF,
-                 CAD_dae_n_nz,(int (*))CAD_dae_nz_rows,(int (*))CAD_dae_nz_cols,
-                 CAD_ODE_A_n_nz, (int (*))CAD_ODE_A_nz_rows, (int(*))CAD_ODE_A_nz_cols,
-                 CAD_ODE_B_n_nz, (int (*))CAD_ODE_B_nz_rows, (int(*))CAD_ODE_B_nz_cols,
-                 CAD_ODE_C_n_nz, (int (*))CAD_ODE_C_nz_rows, (int(*))CAD_ODE_C_nz_cols,
-                 CAD_ODE_D_n_nz, (int (*))CAD_ODE_D_nz_rows, (int(*))CAD_ODE_D_nz_cols,
-                 *model_dae_R, N_eq_R, NULL, 0, NULL, NULL,*model_ode_derivatives,
-                 *model_ode_derivatives_dir_der,
-                 *model_ode_outputs,*model_ode_initialize,*model_ode_guards,
-                 *model_ode_guards_init,*model_ode_next_time_event);
-
-    /* Initialize the Init interface */
-    jmi_init_init(*jmi, *model_init_F0, N_eq_F0, NULL,
-                  0, NULL, NULL,
-                  *model_init_F1, N_eq_F1, NULL,
-                  0, NULL, NULL,
-                  *model_init_Fp, N_eq_Fp, NULL,
-                  0, NULL, NULL,
-                  *model_init_eval_parameters,
-                  *model_init_R0, N_eq_R0, NULL,
-                  0, NULL, NULL);
+    /* Initialize the model equations interface */
+    jmi_model_init(*jmi,
+                   *model_ode_derivatives_dir_der,
+                   *model_ode_derivatives,
+                   *model_ode_event_indicators,
+                   *model_ode_initialize,
+                   *model_init_eval_parameters,
+                   *model_ode_next_time_event);
     
     /* Initialize the delay interface */
-    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay, *model_sample_delay, N_delay_sw);
+    jmi_init_delay_if(*jmi, N_delays, N_spatialdists, *model_init_delay,
+                      *model_sample_delay, N_delay_sw);
 
     return 0;
 }

@@ -557,6 +557,16 @@ class Test_State_Space_Repr:
         
         for i in range(len(M1)):
             nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
+            
+    @testattr(fmi = True)
+    def test_directional_without_initialize(self):
+		model = load_fmu(self.directional1)
+		
+		nose.tools.assert_raises(FMUException, model._get_A)
+		
+		model.force_finite_differences = True
+		
+		nose.tools.assert_raises(FMUException, model._get_A)
     
     @testattr(fmi = True)
     def test_A_matrix1(self):

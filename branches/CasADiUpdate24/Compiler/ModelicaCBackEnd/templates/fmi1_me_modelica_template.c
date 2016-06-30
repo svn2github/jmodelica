@@ -137,17 +137,3 @@ DllExport fmiStatus fmiTerminate(fmiComponent c) {
 DllExport fmiStatus fmiExtractDebugInfo(fmiComponent c) {
     return fmi1_me_extract_debug_info(c);
 }
-
-/* Experimental Jacobian interface */
-DllExport fmiStatus fmiGetJacobian(fmiComponent c, int independents, int dependents, fmiReal jac[], size_t njac) {
-	return fmi1_me_get_jacobian(c, independents, dependents, jac, njac);
-}
-
-DllExport fmiStatus fmiGetDirectionalDerivative(fmiComponent c, const fmiValueReference z_vref[], size_t nzvr, const fmiValueReference v_vref[], size_t nvvr, fmiReal dz[], const fmiReal dv[]) {
-	return fmi1_me_get_directional_derivative(c, z_vref, nzvr, v_vref, nvvr, dz, dv);
-
-}
-
-DllExport fmiStatus fmiGetPartialDerivatives(fmiComponent c, fmiStatus (*setMatrixElement)(void* data, fmiInteger row, fmiInteger col, fmiReal value), void* A, void* B, void* C, void* D) {
-	return fmi1_me_get_partial_derivatives(c, setMatrixElement, A, B, C, D);
-}

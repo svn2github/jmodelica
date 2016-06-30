@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ModelicaUtilities.h"
+#include "extObjects.h"
 
 void* cpy(void* src, size_t len) {
     void* res = malloc(len);
@@ -36,10 +37,6 @@ void destructor_string_create_file(void* o) {
 void destructor(void* o) {
     free(o);
 }
-typedef struct {
-    double x;
-    const char* s;
-} Obj1_t;
 void* my_constructor1(double x, int y, int b, const char* s) {
     Obj1_t* res = malloc(sizeof(Obj1_t));
     res->s = cpystr(s);
@@ -51,12 +48,6 @@ double use1(void* o1) {
     return ((Obj1_t*)o1)->x;
 }
 
-typedef struct {
-    double* x;
-    int* y;
-    int* b;
-    const char** s;
-} Obj2_t;
 void my_constructor2(double* x, int* y, void** o2, int* b, const char** s) {
     Obj2_t* res = malloc(sizeof(Obj2_t));
     res->x = cpydbl(x,2);
@@ -72,9 +63,6 @@ double use2(void* o2) {
     return o->x[0] + o->x[1] + o->y[0] + o->y[1];
 }
 
-typedef struct {
-    double x;
-} Obj3_t;
 void my_constructor3(void* o1, void** o2, void** o3) {
     Obj3_t* res = malloc(sizeof(Obj3_t));
     res->x = use1(o1) + use2(o2[0]) + use2(o2[1]);
@@ -87,10 +75,6 @@ double use3(void* o3) {
     return o->x;
 }
 
-
-typedef struct inc_int {
-    int x;
-} inc_int_t;
 void* inc_int_con(int x) {
     inc_int_t* res;
     ModelicaMessage("Constructor message");
@@ -143,4 +127,16 @@ int error_use(void* o1) {
     return eo->x;
 }
 
+void *eo_constructor_record(R1_t *r1) {
+    double *res = malloc(sizeof(double));
+    *res = r1->r2.x;
+    return (void*)res;
+}
 
+void eo_destructor_record(void *eo) {
+    free(eo);
+}
+
+double eo_use_record(void *eo) {
+    return *((double*)eo);
+}

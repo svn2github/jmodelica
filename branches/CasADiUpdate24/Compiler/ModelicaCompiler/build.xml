@@ -33,7 +33,7 @@
     <property name="jars" value="ModelicaCompiler,util,separateProcess"/>
     <property name="ModelicaCompiler.jar.packages" value="${base_package}"/>
     <property name="ModelicaCompiler.jar.include_resources" value="true"/>
-    <property name="util.jar.packages" value="org.jmodelica.util"/>
+    <property name="util.jar.packages" value="org.jmodelica.util,org.jmodelica.api"/>
     <property name="separateProcess.jar.packages" value="org.jmodelica.util,org.jmodelica.separateProcess"/>
     
     <property name="javadoc.path" value="doc/javadoc"/>

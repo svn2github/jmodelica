@@ -27,8 +27,6 @@
 #include "jmi_math.h"
 #include "jmi_types.h"
 
-typedef unsigned int jmi_value_reference;
-
 typedef struct jmi_event_info_t jmi_event_info_t;
 
 struct jmi_event_info_t {
@@ -64,12 +62,6 @@ extern const int fmi_runtime_options_map_vrefs[];
  * Map between runtime option names and value references for the associated parameters - table length.
  */
 extern const int fmi_runtime_options_map_length;
-
-jmi_value_reference get_index_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
-    
-jmi_value_reference get_type_from_value_ref(jmi_value_reference valueref); /* TODO: should be static later on if possible */
-
-jmi_value_reference is_negated(jmi_value_reference valueref);
 
 int jmi_me_init(jmi_callbacks_t* cb, jmi_t* jmi, jmi_string GUID, jmi_string_t resource_location);
 

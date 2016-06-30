@@ -75,7 +75,7 @@ int jmi_set_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         if(z[index] != value[i]) {
             /* Set value from the value array to z vector. */
@@ -117,7 +117,7 @@ int jmi_set_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         if(z[index] != value[i]) {
 
@@ -156,7 +156,7 @@ int jmi_set_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         if(z[index] != value[i]) {
             /* Set value from the value array to z vector. */
@@ -223,7 +223,7 @@ int jmi_get_real_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         /* Set value from z vector to return value array*/
         value[i] = (jmi_real_t)z[index];
@@ -262,7 +262,7 @@ int jmi_get_integer_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         /* Set value from z vector to return value array*/
         value[i] = (jmi_int_t)z[index];
@@ -299,7 +299,7 @@ int jmi_get_boolean_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
     for (i = 0; i < nvr; i = i + 1) {
         /* Get index in z vector from value reference. */
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
 
         /* Set value from z vector to return value array*/
         value[i] = z[index];
@@ -318,7 +318,7 @@ int jmi_get_string_impl(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr,
 
 
     for (i = 0; i < nvr; i++) {
-        index = get_index_from_value_ref(vr[i]);
+        index = jmi_get_index_from_value_ref(vr[i]);
         value[i] = z[index];
     }
 
@@ -535,7 +535,7 @@ jmi_evaluation_required(jmi_t* jmi, const jmi_value_reference vr[], size_t nvr)
      * then the solver should not be invoked.
      */
     for (i = 0; i < nvr; i++) {
-        if (get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
+        if (jmi_get_index_from_value_ref(vr[i]) >= jmi->offs_real_dx) {
 			return 1;
 		}
 	}

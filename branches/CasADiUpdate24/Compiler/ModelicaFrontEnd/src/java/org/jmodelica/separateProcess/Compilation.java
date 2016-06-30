@@ -25,17 +25,18 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.jmodelica.api.problemHandling.Problem;
+import org.jmodelica.api.problemHandling.ProblemSeverity;
 import org.jmodelica.util.CompiledUnit;
 import org.jmodelica.util.Criteria;
-import org.jmodelica.util.problemHandling.Problem;
-import org.jmodelica.util.problemHandling.ProblemSeverity;
-import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.logging.ObjectStreamLogger;
 import org.jmodelica.util.logging.units.LoggingUnit;
 import org.jmodelica.util.logging.units.ThrowableLoggingUnit;
+import org.jmodelica.util.streams.StreamGobbler;
 
-public final class Compilation {
+public final class Compilation
+{
     
     private final Process process;
     private final LogReceiver receiver;

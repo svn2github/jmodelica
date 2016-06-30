@@ -432,7 +432,93 @@ class TestLocalDAECollocator(object):
                 "VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt")
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, 5e-2, 5e-2)
+    
+    """
+    @testattr(casadi = True)
+    def test_nominal_traj_with_check_point_vdp(self):
+        op = self.vdp_bounds_lagrange_op
+        
+        # References values
+        cost_ref_traj = 3.19495079586595e0
+        u_norm_ref_traj = 2.80997269112246e-1
+        cost_ref = 3.1749908234182826e0
+        u_norm_ref = 2.848606420347583e-1
+        
+        # Get nominal and initial trajectories
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        opts["checkpoint"] = True
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
 
+        init_data = ResultDymolaTextual(res.result_file)
+
+        # Optimize using only initial trajectories
+        opts['n_e'] = 75
+        opts['n_cp'] = 4
+        opts['init_traj'] = init_data
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = init_data
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        col = res.solver
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
+                [0.85693481, 0.12910473])
+
+        # Test disabling scaling
+        opts['variable_scaling'] = False
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+    """
+    
+    @testattr(casadi = True)
+    def test_updated_nominal_traj_vdp(self):
+        """Test optimizing a VDP using nominal and initial trajectories."""
+        op = self.vdp_bounds_lagrange_op
+        
+        # References values
+        cost_ref_traj = 3.19495079586595e0
+        u_norm_ref_traj = 2.80997269112246e-1
+        cost_ref = 3.1749908234182826e0
+        u_norm_ref = 2.848606420347583e-1
+        
+        # Get nominal and initial trajectories
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("vdp_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
+                  "vdp_nom_traj_result.txt")
+        
+        solver = res.get_solver()
+        solver.set_nominal_traj(ResultDymolaTextual("vdp_nom_traj_result.txt"), {'_default_mode': "affine"})
+        
+        res_update = solver.optimize()
+        
+        cost_update = float(res_update.solver.solver_object.output(casadi.NLP_SOLVER_F))
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
+        res = op.optimize(self.algorithm, opts)
+        
+        cost = float(res.solver.solver_object.output(casadi.NLP_SOLVER_F))
+
+        N.testing.assert_equal(cost_update, cost)
+
+    
     @testattr(casadi = True)
     def test_nominal_traj_vdp(self):
         """Test optimizing a VDP using nominal and initial trajectories."""
@@ -474,6 +560,68 @@ class TestLocalDAECollocator(object):
         N.testing.assert_allclose(
                 xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
                 [0.85693481, 0.12910473])
+
+        # #3509
+        #~ # Test with eliminated continuity variables
+        #~ opts['eliminate_cont_var'] = True
+        #~ res = op.optimize(self.algorithm, opts)
+        #~ assert_results(res, cost_ref, u_norm_ref)
+        #~ 
+        #~ # Test with eliminated continuity and derivative variables
+        #~ opts['eliminate_der_var'] = True
+        #~ res = op.optimize(self.algorithm, opts)
+        #~ assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+    @testattr(casadi = True)
+    def test_nominal_traj_vdp_lg(self):
+        """Test optimizing a VDP using nominal and initial trajectories."""
+        op = self.vdp_bounds_lagrange_op
+        
+        # References values
+        #cost_ref_traj = 3.19495079586595e0
+        cost_ref_traj = 3.171799772935013
+        #u_norm_ref_traj = 2.80997269112246e-1
+        u_norm_ref_traj = 2.8094758146374343e-1
+        cost_ref = 3.1749908234182826e0
+        #u_norm_ref = 2.848606420347583e-1
+        u_norm_ref = 2.844516216499257e-1
+        
+        # Get nominal and initial trajectories
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        opts['discr'] = "LG" #TEST LG DISCR
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("vdp_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
+                  "vdp_nom_traj_result.txt")
+        
+        # Optimize using only initial trajectories
+        opts['n_e'] = 75
+        opts['n_cp'] = 4
+        opts['init_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = ResultDymolaTextual("vdp_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': "affine"}
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        col = res.solver
+        xx_init = col.get_xx_init()
+        N.testing.assert_allclose(
+                xx_init[col.var_indices['x'][opts['n_e']][opts['n_cp']]],
+                [0.866368, 0.118284], rtol=1e-5) #[0.85693481, 0.12910473]
 
         # #3509
         #~ # Test with eliminated continuity variables
@@ -533,6 +681,71 @@ class TestLocalDAECollocator(object):
         xx_init = col.get_xx_init()
         N.testing.assert_equal(sum(xx_init == 1.),
                                (n_e * n_cp + 1) * 4 + 2 * n_e)
+
+        # #3509
+        #~ # Test with eliminated continuity variables
+        #~ opts['eliminate_cont_var'] = True
+        #~ res = op.optimize(self.algorithm, opts)
+        #~ assert_results(res, cost_ref, u_norm_ref)
+        #~ 
+        #~ # Test with eliminated continuity and derivative variables
+        #~ opts['eliminate_der_var'] = True
+        #~ res = op.optimize(self.algorithm, opts)
+        #~ assert_results(res, cost_ref, u_norm_ref)
+        
+        # Test disabling scaling
+        opts['variable_scaling'] = False
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+    @testattr(casadi = True)
+    def test_nominal_traj_cstr_lg(self):
+        """Test optimizing a CSTR using nominal and initial trajectories."""
+        op = self.cstr_lagrange_op
+        
+        # References values
+        #cost_ref_traj = 1.8549259545339369e3
+        cost_ref_traj = 1.86034214743738e3
+        #u_norm_ref_traj = 3.0455503580669716e2
+        u_norm_ref_traj = 3.053311192625306e2
+        cost_ref = 1.858428662785409e3
+        cost_ref_nominal = 1.6584308942977912e3
+        #u_norm_ref = 3.0507636243132043e2
+        u_norm_ref = 3.049332451630398e2
+        u_norm_ref_nominal = 3.0106051481333594e2
+        
+        # Get nominal and initial trajectories
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        opts["discr"] = "LG"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("cstr_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("CSTR_CSTR_Opt_Bounds_Lagrange_result.txt",
+                  "cstr_nom_traj_result.txt")
+        
+        # Optimize using only initial trajectories
+        n_e = 75
+        n_cp = 4
+        opts['n_e'] = n_e
+        opts['n_cp'] = n_cp
+        opts['init_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Optimize using nominal and initial trajectories
+        opts['nominal_traj'] = ResultDymolaTextual("cstr_nom_traj_result.txt")
+        opts['nominal_traj_mode'] = {'_default_mode': 'time-variant'}
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_nominal, u_norm_ref_nominal)
+        col = res.solver
+        xx_init = col.get_xx_init()
+        #N.testing.assert_equal(sum(xx_init == 1.),
+        #                       (n_e * n_cp + 1) * 4 + 2 * n_e)
 
         # #3509
         #~ # Test with eliminated continuity variables
@@ -1353,14 +1566,20 @@ class TestLocalDAECollocator(object):
         c_e_10 = res_renaming.solver.get_equality_constraint()[self.test_named_vars_c_e_10_id()]
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         
+        #comp_str1 = "SX((((der(x1)_1_1_d_sf*der(x1)_1_1)+der(x1)_1_1_e_sf)-((((1-sq(((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))*((der(x2)_1_1_d_sf*der(x2)_1_1)+der(x2)_1_1_e_sf))-((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf))+((u_1_1_d_sf*u_1_1)+u_1_1_e_sf))))" 
+        comp_str1 = "SX((((der(x1)_d_sf*der(x1)_1_1)+der(x1)_e_sf)-((((1-sq(((x2_d_sf*x2_1_1)+x2_e_sf)))*((der(x2)_d_sf*der(x2)_1_1)+der(x2)_e_sf))-((x2_d_sf*x2_1_1)+x2_e_sf))+((u_d_sf*u_1_1)+u_e_sf))))"
+        #comp_str1 = "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)-x2_1_1)+u_1_1)))"
+        
+        #comp_str2 = "SX((((((-3*((x2_1_0_d_sf*x2_1_0)+x2_1_0_e_sf))+(5.53197*((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))+(-7.53197*((x2_1_2_d_sf*x2_1_2)+x2_1_2_e_sf)))+(5*((x2_1_3_d_sf*x2_1_3)+x2_1_3_e_sf)))-(10*((der(x2)_1_3_d_sf*der(x2)_1_3)+der(x2)_1_3_e_sf))))"
+        comp_str2 = "SX((((((-3*((x2_d_sf*x2_1_0)+x2_e_sf))+(5.53197*((x2_d_sf*x2_1_1)+x2_e_sf)))+(-7.53197*((x2_d_sf*x2_1_2)+x2_e_sf)))+(5*((x2_d_sf*x2_1_3)+x2_e_sf)))-(10*((der(x2)_d_sf*der(x2)_1_3)+der(x2)_e_sf))))"
+        #comp_str2 = "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))"
+        
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),
-                 "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)" +
-                 "-x2_1_1)+u_1_1)))")
+                 comp_str1)
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_20)),
-            "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+" +
-            "(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))")
+            comp_str2)
 
     def test_named_vars_c_e_10_id(self):
         return 10;
@@ -1849,10 +2068,10 @@ class TestLocalDAECollocator(object):
         # Compute Jacobian condition numbers
         J_init = res.solver.get_J("init")
         J_init_cond = N.linalg.cond(J_init)
-        N.testing.assert_allclose(J_init_cond, 2.93e4, rtol=1e-2)
+        N.testing.assert_allclose(J_init_cond, 3.3368e5, rtol=1e-2) #3.3368e5 , #2.93e4
         J_opt = res.solver.get_J("opt")
         J_opt_cond = N.linalg.cond(J_opt)
-        N.testing.assert_allclose(J_opt_cond, 3.37e6, rtol=1e-2)
+        N.testing.assert_allclose(J_opt_cond, 3.6453652e7, rtol=1e-2) #3.6453652e7 , #3.37e6
 
         # Compute Hessian norms
         H_init = res.solver.get_H("init")
@@ -1865,10 +2084,10 @@ class TestLocalDAECollocator(object):
         # Compute KKT condition numbers
         KKT_init = res.solver.get_KKT("init")
         KKT_init_cond = N.linalg.cond(KKT_init)
-        N.testing.assert_allclose(KKT_init_cond, 2.72e8, rtol=1e-2)
+        N.testing.assert_allclose(KKT_init_cond, 2.637e9, rtol=1e-2) #2.637e9 #2.72e8
         KKT_opt = res.solver.get_KKT("opt")
         KKT_opt_cond = N.linalg.cond(KKT_opt)
-        N.testing.assert_allclose(KKT_opt_cond, 1.18e10, rtol=1e-2)
+        N.testing.assert_allclose(KKT_opt_cond, 9.705e9, rtol=1e-2) #9.705e11 #1.18e10
 
         # Obtain symbolic matrices and matrix functions
         res.solver.get_J("sym")

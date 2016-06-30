@@ -1,5 +1,8 @@
 package org.jmodelica.util.problemHandling;
 
+import org.jmodelica.api.problemHandling.ProblemKind;
+import org.jmodelica.api.problemHandling.ProblemSeverity;
+
 /**
  * Abstract base class for all types of problem messages which only consists of
  * a message and some optional format parameters.

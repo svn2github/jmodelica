@@ -42,8 +42,7 @@ typedef void* jmi_extobj_t; /*< Typedef for the external object
                
 /* Forward declaration of jmi structs */
 typedef struct jmi_t jmi_t;                                         /**< \brief Forward declaration of struct. */
-typedef struct jmi_dae_t jmi_dae_t;                                 /**< \brief Forward declaration of struct. */
-typedef struct jmi_init_t jmi_init_t;                               /**< \brief Forward declaration of struct. */
+typedef struct jmi_model_t jmi_model_t;                             /**< \brief Forward declaration of struct. */
 typedef struct jmi_func_t jmi_func_t;                               /**< \brief Forward declaration of struct. */
 typedef struct jmi_block_residual_t jmi_block_residual_t;           /**< \brief Forward declaration of struct. */
 typedef struct jmi_cs_real_input_t jmi_cs_real_input_t;             /**< \brief Forward declaration of struct. */
@@ -179,11 +178,15 @@ typedef int BOOL;
 #define TRUE  1
 #define FALSE 0
 
-#define JMI_REAL    0x00000000
-#define JMI_INTEGER 0x10000000
-#define JMI_BOOLEAN 0x20000000
+typedef enum {
+    JMI_REAL,
+    JMI_INTEGER,
+    JMI_BOOLEAN,
+    JMI_STRING
+} jmi_type_t;
 
 typedef char jmi_boolean;
 typedef const char* jmi_string;
+typedef unsigned int jmi_value_reference;
 
 #endif

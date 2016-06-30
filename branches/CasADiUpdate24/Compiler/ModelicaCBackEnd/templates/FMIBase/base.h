@@ -27,7 +27,7 @@ extern void dgemm_(char* TRANSA, char* TRANSB, int* M, int* N, int* K, double* A
 
 int model_ode_derivatives(jmi_t* jmi);
 int model_ode_initialize(jmi_t* jmi);
-int model_dae_R(jmi_t* jmi, jmi_real_t** res);
+int model_ode_event_indicators(jmi_t* jmi, jmi_real_t** res);
 int model_init_R0(jmi_t* jmi, jmi_real_t** res);
 void model_add_blocks(jmi_t** jmi);
 void model_init_add_blocks(jmi_t** jmi);

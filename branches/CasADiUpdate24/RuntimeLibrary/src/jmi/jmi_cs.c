@@ -27,7 +27,7 @@ static int is_disc_input_with_diff_value(jmi_t*                     jmi,
     size_t z_index;
     int is_integer_input, is_boolean_input;
     
-    z_index = get_index_from_value_ref(valueref[i]);
+    z_index = jmi_get_index_from_value_ref(valueref[i]);
     is_integer_input = (z_index >= jmi->offs_integer_u && z_index < jmi->offs_boolean_d);
     is_boolean_input = (z_index >= jmi->offs_boolean_u && z_index < jmi->offs_sw);
     /* TODO: Add check for if discrete reals have changed when codegen is fixed:
@@ -38,7 +38,8 @@ static int is_disc_input_with_diff_value(jmi_t*                     jmi,
     } else if (is_boolean_input) {
         return ((*jmi->z)[z_index] != ((jmi_boolean*)value)[i]);
     /*} else if (is_disc_real_input) {
-        return ((*jmi->z)[z_index] != ((jmi_real_t*)value)[i]); */
+        return (jmi_abs((*jmi->z)[z_index] - ((jmi_real_t*)value)[i]) < 
+                JMI_ALMOST_EPS * jmi_abs((*jmi->z)[z_index]); */
     } else {
         return 0;
     }

@@ -1709,7 +1709,7 @@ public class ModelicaCompiler {
     }
     
     public enum TargetType {
-        FMUME10, FMUME20, FMUCS10, FMUCS20, FMUMECS20, JMU, FMUX, FMUME20a, FMUCS20a, CEVAL, NULL
+        FMUME10, FMUME20, FMUCS10, FMUCS20, FMUMECS20, JMU, FMUX, CEVAL, NULL
     }
     
     /**
@@ -1726,8 +1726,6 @@ public class ModelicaCompiler {
         FMUMECS20 (TargetType.FMUMECS20, "fmumecs20", "fmu",  XMLGeneratorHolder.FMI2), 
         JMU       (TargetType.JMU,       "jmu",       "jmu",  XMLGeneratorHolder.JMI),
         FMUX      (TargetType.FMUX,       null,       "fmux", XMLGeneratorHolder.FMIX),
-        FMUME20a  (TargetType.FMUME10,   "fmume10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
-        FMUCS20a  (TargetType.FMUCS10,   "fmucs10",   "fmu",  XMLGeneratorHolder.FMI1), //TODO: Temporary alpha implementation of FMI 2.0, generates extra xml stuff.
         CHECK     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
         PARSE     (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.CHECK, false),
         NOCODEGEN (TargetType.NULL,      null,        null,   XMLGeneratorHolder.NULL, ErrorCheckType.COMPILE, false),
@@ -1786,8 +1784,6 @@ public class ModelicaCompiler {
                     return FMUME10;
                 } else if (version.equals("2.0")) {
                     return FMUME20;
-                } else if (version.equals("2.0alpha")) {
-                    return FMUME20a;
                 } else {
                     throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0."); 
                 }
@@ -1796,10 +1792,8 @@ public class ModelicaCompiler {
                     return FMUCS10;
                 } else if (version.equals("2.0")) {
                     return FMUCS20;
-                } else if (version.equals("2.0alpha")) {
-                    return FMUCS20a;
                 } else {
-                    throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0alpha."); 
+                    throw new IllegalCompilerArgumentException("Unknown version '" + version + "' for target '" + targetType + "'. Use 1.0 or 2.0."); 
                 }
             } else if (targetType.equals("me+cs")) {
                 if (version == null || version.equals("2.0")) {
@@ -1872,7 +1866,6 @@ public class ModelicaCompiler {
             switch (this) {
                 case FMUME10:
                 case FMUME20:
-                case FMUME20a:
                 case CHECK:
                     options.setBooleanOption("generate_ode", true);
                     options.setBooleanOption("generate_dae", false);
@@ -1883,7 +1876,6 @@ public class ModelicaCompiler {
                     break;
                 case FMUCS10:
                 case FMUCS20:
-                case FMUCS20a:
                     options.setBooleanOption("generate_ode", true);
                     options.setBooleanOption("generate_dae", false);
                     options.setBooleanOption("equation_sorting", true);
@@ -1927,10 +1919,6 @@ public class ModelicaCompiler {
             }
             
             switch (this) {
-                case FMUME20a:
-                case FMUCS20a:
-                    options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI20a);
-                    break;
                 case FMUME10:
                 case FMUCS10:
                     options.setStringOption("fmi_version", OptionRegistry.FMIVersion.FMI10);
@@ -2187,19 +2175,14 @@ public class Templates {
     public Templates(ModelicaCompiler.TargetType type, OptionRegistry options) {
         switch (type) {
         case FMUME10:
-        case FMUME20a:
             templates = new String[] { null, "fmi1_me_modelica_template.c" };
             fmuTemplate = true;
             break;
-        case FMUME20:
-            templates = new String[] {null, "fmi2_master_modelica_template.c" };
-            fmuTemplate = true;
-            break;
         case FMUCS10:
-        case FMUCS20a:
             templates = new String[] { null, "fmi1_cs_modelica_template.c" };
             fmuTemplate = true;
             break;
+        case FMUME20:
         case FMUCS20:
         case FMUMECS20:
             templates = new String[] { null, "fmi2_master_modelica_template.c" };

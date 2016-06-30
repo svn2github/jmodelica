@@ -1515,4 +1515,20 @@ Error at line 1493, column 5, in file '...':
 ")})));
 end ExternalRecordArray2;
 
+model NegativeFill
+    Real[2] y = cat(1,{1,2,3,4},fill(0.0, 2 - 4));
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="NegativeFill",
+            description="",
+            checkType=check,
+            errorMessage="
+1 errors found:
+
+Error at line 1519, column 43, in file '...', NEGATIVE_SIZE_FILL:
+  The dimension arguments of the fill() operator may not be negative
+
+")})));
+end NegativeFill;
+
 end CheckTests;
