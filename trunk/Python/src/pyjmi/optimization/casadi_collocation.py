@@ -1891,7 +1891,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self.equation_scaling:
             n_pp_kinds.append(n_c)
             pp_kinds.append('equation_scale')
-        if self.variable_scaling:
+        if self.variable_scaling and self.variable_scaling_allow_update:
             n_pp_kinds.append(self._var_sf_count*2) #Account for (d,e) pair
             pp_kinds.append('variable_scale')
 
@@ -1922,7 +1922,7 @@ class LocalDAECollocator(CasadiCollocator):
             # set all equation scalings to 1 initially
             offset = self.pp_offset['equation_scale']
             par_vals[offset:offset + n_c] = 1
-        if self.variable_scaling:
+        if self.variable_scaling and self.variable_scaling_allow_update:
             offset = self.pp_offset['variable_scale']
             for i in range(self._var_sf_count):
                 pass
@@ -1966,7 +1966,7 @@ class LocalDAECollocator(CasadiCollocator):
                 for j in range(self.n_c_i):
                     self.named_pp.append(casadi.SX.sym('ineq_scale_%d' % j))
                     
-        if self.variable_scaling:
+        if self.variable_scaling and self.variable_scaling_allow_update:
             self.n_named_pp += self._var_sf_count*2
             if self.named_vars:
                 for vt in ['x', 'dx', 'unelim_u', 'w']:
@@ -4121,8 +4121,10 @@ class LocalDAECollocator(CasadiCollocator):
         return cp_f.output().toScalar()
     
     def _get_affine_scaling_symbols(self, name, i, k):
-        offset = self.pp_offset["variable_scale"]
         
+        if not self.variable_scaling_allow_update:
+            return self._get_affine_scaling(name, i, k)
+            
         (ind, vt) = self.name_map[name]
         if vt == "p_opt" or self._var_sf_mode[name] != "time-variant":
             d, e = self._var_sf_map[vt][name]
@@ -4139,6 +4141,9 @@ class LocalDAECollocator(CasadiCollocator):
                         raise KeyError
                 else:
                     raise KeyError
+                    
+        offset = self.pp_offset["variable_scale"]
+        
         return (self.pp[offset+d], self.pp[offset+e])
         
     def _get_affine_scaling_symbols_communication_point(self, i, k):
@@ -4147,7 +4152,7 @@ class LocalDAECollocator(CasadiCollocator):
         if self._var_sf_nbr_vars == 0:
             return all_sf
             
-        if self._var_sf["n_variant"] == 0:
+        if self.variable_scaling_allow_update and self._var_sf["n_variant"] == 0:
             return [self.pp_split["variable_scale"]]
             
         for vk in ["x", "dx", "unelim_u", "w", "p_opt"]: #Dont check eliminated u!
@@ -4164,7 +4169,7 @@ class LocalDAECollocator(CasadiCollocator):
         Update the variable scaling based on the stored values from
         _create_trajectory_scaling_factor_structures
         """
-        if self.variable_scaling:
+        if self.variable_scaling and self.variable_scaling_allow_update:
             par_vals = self._get_par_vals()
             ind = self.pp_offset["variable_scale"]
             
@@ -6119,6 +6124,8 @@ class OptimizationSolver(object):
         
         if not self.collocator.variable_scaling:
             raise CasadiCollocatorException("Variable scaling must have been initially used.")
+        if not self.collocator.variable_scaling_allow_update:
+            raise CasadiCollocatorException("Update of variable scaling must be set to true.")
         
         self.collocator.nominal_traj = nom_traj
         try:

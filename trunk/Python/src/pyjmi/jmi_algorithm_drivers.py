@@ -1671,6 +1671,14 @@ class LocalDAECollocationAlgOptions(OptionBase):
             
             Type: bool
             Default: True
+            
+        variable_scaling_allow_update --
+            Whether or not parameters should be included in the NLP so that
+            the variable scaling can be updated on the returned solver
+            object.
+            
+            Type: bool
+            Default: True
         
         nominal_traj_mode --
             Mode for computing scaling factors for each variable based on
@@ -1854,6 +1862,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'init_dual': None,
                 'variable_scaling': True,
+                'variable_scaling_allow_update': True,
                 'equation_scaling': False,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},
