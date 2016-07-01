@@ -629,9 +629,9 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
  * @param rel The relation expression
  * @return The new switch value
  */
-jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+jmi_real_t jmi_turn_switch(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel);
 
-jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel);
+jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel);
 
 /**
  * \brief Check if file exists.

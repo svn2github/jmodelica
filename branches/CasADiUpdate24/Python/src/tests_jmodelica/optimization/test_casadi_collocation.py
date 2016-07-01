@@ -493,6 +493,7 @@ class TestLocalDAECollocator(object):
         opts = self.optimize_options(op, self.algorithm)
         opts['n_e'] = 40
         opts['n_cp'] = 2
+        opts["variable_scaling_allow_update"] = True
         res = op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref_traj, u_norm_ref_traj)
         try:
@@ -517,6 +518,38 @@ class TestLocalDAECollocator(object):
         cost = float(res.solver.solver_object.getOutput('f'))
 
         N.testing.assert_equal(cost_update, cost)
+        
+    @testattr(casadi = True)
+    def test_no_updated_nominal_traj_vdp(self):
+        """Test optimizing a VDP using nominal and initial trajectories."""
+        op = self.vdp_bounds_lagrange_op
+        
+        # References values
+        cost_ref_traj = 3.19495079586595e0
+        u_norm_ref_traj = 2.80997269112246e-1
+        cost_ref = 3.1749908234182826e0
+        u_norm_ref = 2.848606420347583e-1
+        
+        # Get nominal and initial trajectories
+        opts = self.optimize_options(op, self.algorithm)
+        opts['n_e'] = 40
+        opts['n_cp'] = 2
+        opts["variable_scaling_allow_update"] = False
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref_traj, u_norm_ref_traj)
+        try:
+            os.remove("vdp_nom_traj_result.txt")
+        except OSError:
+            pass
+        os.rename("VDP_pack_VDP_Opt_Bounds_Lagrange_result.txt",
+                  "vdp_nom_traj_result.txt")
+        
+        assert res.get_solver().collocator.pp.shape[0] == 2 #Two parameters
+        
+        solver = res.get_solver()
+        
+        N.testing.assert_raises(CasadiCollocatorException,
+                                solver.set_nominal_traj, res)
 
     
     @testattr(casadi = True)
@@ -1566,8 +1599,13 @@ class TestLocalDAECollocator(object):
         c_e_10 = res_renaming.solver.get_equality_constraint()[self.test_named_vars_c_e_10_id()]
         c_e_20 = res_renaming.solver.get_equality_constraint()[20]
         
-        comp_str1 = "SX(@1=((x2_d_sf*x2_1_1)+x2_e_sf), (((der(x1)_d_sf*der(x1)_1_1)+der(x1)_e_sf)-((((1-sq(@1))*((der(x2)_d_sf*der(x2)_1_1)+der(x2)_e_sf))-@1)+((u_d_sf*u_1_1)+u_e_sf))))"
-        comp_str2 = "SX((((((-3*((x2_d_sf*x2_1_0)+x2_e_sf))+(5.53197*((x2_d_sf*x2_1_1)+x2_e_sf)))+(-7.53197*((x2_d_sf*x2_1_2)+x2_e_sf)))+(5*((x2_d_sf*x2_1_3)+x2_e_sf)))-(10*((der(x2)_d_sf*der(x2)_1_3)+der(x2)_e_sf))))"
+        #comp_str1 = "SX((((der(x1)_1_1_d_sf*der(x1)_1_1)+der(x1)_1_1_e_sf)-((((1-sq(((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))*((der(x2)_1_1_d_sf*der(x2)_1_1)+der(x2)_1_1_e_sf))-((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf))+((u_1_1_d_sf*u_1_1)+u_1_1_e_sf))))" 
+        #comp_str1 = "SX((((der(x1)_d_sf*der(x1)_1_1)+der(x1)_e_sf)-((((1-sq(((x2_d_sf*x2_1_1)+x2_e_sf)))*((der(x2)_d_sf*der(x2)_1_1)+der(x2)_e_sf))-((x2_d_sf*x2_1_1)+x2_e_sf))+((u_d_sf*u_1_1)+u_e_sf))))"
+        comp_str1 = "SX((der(x1)_1_1-((((1-sq(x2_1_1))*der(x2)_1_1)-x2_1_1)+u_1_1)))"
+        
+        #comp_str2 = "SX((((((-3*((x2_1_0_d_sf*x2_1_0)+x2_1_0_e_sf))+(5.53197*((x2_1_1_d_sf*x2_1_1)+x2_1_1_e_sf)))+(-7.53197*((x2_1_2_d_sf*x2_1_2)+x2_1_2_e_sf)))+(5*((x2_1_3_d_sf*x2_1_3)+x2_1_3_e_sf)))-(10*((der(x2)_1_3_d_sf*der(x2)_1_3)+der(x2)_1_3_e_sf))))"
+        #comp_str2 = "SX((((((-3*((x2_d_sf*x2_1_0)+x2_e_sf))+(5.53197*((x2_d_sf*x2_1_1)+x2_e_sf)))+(-7.53197*((x2_d_sf*x2_1_2)+x2_e_sf)))+(5*((x2_d_sf*x2_1_3)+x2_e_sf)))-(10*((der(x2)_d_sf*der(x2)_1_3)+der(x2)_e_sf))))"
+        comp_str2 = "SX((((((-3*x2_1_0)+(5.53197*x2_1_1))+(-7.53197*x2_1_2))+(5*x2_1_3))-(10*der(x2)_1_3)))"
         
         N.testing.assert_string_equal(
             repr(res_renaming.solver.get_named_var_expr(c_e_10)),

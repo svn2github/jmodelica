@@ -256,13 +256,13 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
     return all_discrete_reals_equal;
 }
 
-jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {
+jmi_real_t jmi_turn_switch(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel) {
     /* x >= 0
      * x >  0
      * x <= 0
      * x <  0
      */
-
+    jmi_real_t eps = jmi->events_epsilon;
     if (eps == 0.0) {
         if (sw == 1.0) {
             if ((ev_ind <  0.0 && rel == JMI_REL_GEQ)   ||
@@ -303,12 +303,13 @@ jmi_real_t jmi_turn_switch(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int
     return sw;
 }
 
-jmi_real_t jmi_turn_switch_time(jmi_real_t ev_ind, jmi_real_t sw, jmi_real_t eps, int rel) {
+jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel) {
     /* x >= 0
      * x >  0
      * x <= 0
      * x <  0
      */
+    jmi_real_t eps = JMI_ALMOST_EPS;
     if (sw == 1.0) {
         if ((ev_ind <  -eps && rel == JMI_REL_GEQ)  ||
             (ev_ind <=  eps && rel == JMI_REL_GT)   ||
