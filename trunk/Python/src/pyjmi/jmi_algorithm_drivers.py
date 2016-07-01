@@ -1678,7 +1678,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
             object.
             
             Type: bool
-            Default: True
+            Default: False
         
         nominal_traj_mode --
             Mode for computing scaling factors for each variable based on
@@ -1862,7 +1862,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'init_traj': None,
                 'init_dual': None,
                 'variable_scaling': True,
-                'variable_scaling_allow_update': True,
+                'variable_scaling_allow_update': False,
                 'equation_scaling': False,
                 'nominal_traj': None,
                 'nominal_traj_mode': {"_default_mode": "linear"},

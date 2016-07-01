@@ -4217,7 +4217,17 @@ class LocalDAECollocator(CasadiCollocator):
             return (1.0, 0.0)
             
     def _get_affine_variant_scaling(self, index, i, k):
-        return (self._variant_sf[i][k][index], 0.0)
+        try:
+            d = self._variant_sf[i][k][index]
+        except KeyError:
+            if self.is_gauss:
+                if k==0:
+                    d = self._variant_sf[i][k+1][index] #Same scaling for k==0 and k==1
+                elif k==self.n_cp+1:
+                    d = self._variant_sf[i][k-1][index] #Same scaling for k==n_cp+1 and k==n_cp
+            else:
+                raise KeyError
+        return (d, 0.0)
         
     def _using_variant_variable_scaling(self, name):
         return self._is_variant[name]
