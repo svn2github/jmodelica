@@ -2874,14 +2874,12 @@ aspect CCodeGen {
             } else {
                 str.print(" = jmi_turn_switch(");
             }
+            str.print("jmi");
+            str.print(", ");
             printIndicator(p.ExecStep, str, indent, false);
             str.print(", ");
             printSwitchMacro_C(p, str, indent);
-            if (time) {
-                str.format(", JMI_ALMOST_EPS, ");
-            } else {
-                str.format(", jmi->events_epsilon, ");
-            }
+            str.print(", ");
             boolean phased = isPhased();
             if (phased) {
                 str.print("jmi->eventPhase ? (");
@@ -5451,7 +5449,7 @@ aspect CCodeGen {
         //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
         str.print("  } ");   
         // Case 2: we are at a sample                                   
-        str.print(" else if (ALMOST_ZERO(jmi_dremainder(_t - (");
+        str.print(" else if (ALMOST_ZERO(jmi_dremainder(jmi, _t - (");
         getOffset().prettyPrint_C(str,"");
         str.print("), ");
         getInterval().prettyPrint_C(str,"");
@@ -5480,7 +5478,7 @@ aspect CCodeGen {
         str.print("  } ");
 
         // Case 3: Neither of the above: in between samples
-        str.print(" else if (SURELY_GT_ZERO(jmi_dremainder(_t - (");
+        str.print(" else if (SURELY_GT_ZERO(jmi_dremainder(jmi, _t - (");
         getOffset().prettyPrint_C(str,"");
         str.print("), ");
         getInterval().prettyPrint_C(str,"");

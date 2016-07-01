@@ -1550,7 +1550,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         int n1 = 1;
         int n2 = 1;
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(_x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GEQ);
         }
         Q1[0] = - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1.0), AD_WRAP_LITERAL(-1.0));
         for (i = 0; i < 1; i += 1) {
@@ -1567,7 +1567,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _der_x_3 = x[0];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
-            _sw(0) = jmi_turn_switch(_x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), jmi->events_epsilon, JMI_REL_GEQ);
+            _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GEQ);
         }
         _der_y_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _der_x_3, - _der_x_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {

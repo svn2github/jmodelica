@@ -279,7 +279,7 @@ jmi_real_t jmi_dround(jmi_real_t x) {
         return (x >= 0)? floor(x + 0.5) : floor(x - 0.5);
 }
 
-jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y) {
+jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y) {
         jmi_real_t res = fmod(x,y);
         return ((jmi_abs(res-y)/jmi_max(x,y))<JMI_ALMOST_EPS)? (res-y)/jmi_max(x,y) : res/jmi_max(x,y);
 }
@@ -291,5 +291,5 @@ jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
         return JMI_FALSE;
     }
 	/*jmi_log_node(jmi->log, logWarning, "jmi_sample2", "<offset: %g> <h: %g> <fmod: %g> <time_passed: %g> <remainder: %g>",offset,h,fmod((t-offset),h),(t-offset), jmi_dremainder((t-offset),h));*/
-    return ALMOST_ZERO(jmi_dremainder((t-offset),h));
+    return ALMOST_ZERO(jmi_dremainder(jmi, (t-offset),h));
 }

@@ -168,7 +168,7 @@ jmi_real_t jmi_dround(jmi_real_t x);
  * The remainder function for double numbers. 
  *
  */
-jmi_real_t jmi_dremainder(jmi_real_t x, jmi_real_t y);
+jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y);
 
 /**
  * The sample operator. Returns true if time = offset + i*h, i>=0 during
