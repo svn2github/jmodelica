@@ -79,7 +79,7 @@ import matplotlib.pyplot as plt
     <para>Next, we transfer the model:</para>
 
     <programlisting language="python"># Transfer the optimization problem to casadi
-	op = transfer_optimization_problem("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
+	op = transfer_optimization_problem("VDP_Opt", "VDP_Opt.mop")
 </programlisting>
 
     <para>The function <literal>transfer_optimization_problem</literal>
@@ -186,7 +186,7 @@ plt.show()
         collocation with JMUs (Deprecated in JModelica.org 1.15)</emphasis>.
         This algorithm is implemented in C, uses CppAD for computing function
         derivatives and IPOPT for solving the resulting nonlinear program
-        (NLP). </para>
+        (NLP).</para>
       </listitem>
     </itemizedlist>
 
@@ -194,7 +194,7 @@ plt.show()
     problem presented above is used. First, the model is transferred into
     Python</para>
 
-    <programlisting language="python">op = transfer_optimization_problem("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
+    <programlisting language="python">op = transfer_optimization_problem("VDP_Opt", "VDP_Opt.mop")
 </programlisting>
 
     <para>All operations that can be performed on the model are available as
@@ -271,7 +271,7 @@ plt.show()
     case the default optimization algorithm, with default options, is
     invoked:</para>
 
-    <programlisting>res = vdp.optimize()
+    <programlisting>res = op.optimize()
 </programlisting>
 
     <para>In the remainder of this chapter the available algorithms are
@@ -301,14 +301,14 @@ plt.show()
     <para>The option object is essentially a Python dictionary and options are
     set simply by using standard dictionary syntax:</para>
 
-    <programlisting language="python">opts = vdp.optimize_options()
+    <programlisting language="python">opts = op.optimize_options()
 opts['n_e'] = 5
 </programlisting>
 
     <para>The optimization algorithm may then be invoked again with the new
     options:</para>
 
-    <programlisting language="python">res = vdp.optimize(options=opts)
+    <programlisting language="python">res = op.optimize(options=opts)
 </programlisting>
 
     <para>Available options for each algorithm are documented in their
@@ -695,6 +695,17 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>variable_scaling_allow_update</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>Determines if variable scaling can be updated on the
+              solver object in the next optimizations. This results in that
+              parameters are included in the NLP that determines the
+              scaling.</entry>
+            </row>
+
+            <row>
               <entry><literal>equation_scaling</literal></entry>
 
               <entry>False</entry>
@@ -834,7 +845,7 @@ opts? # View the help text</programlisting>
       options, the maximum number of iterations in IPOPT can be set using the
       following syntax:</para>
 
-      <programlisting>opts = model.optimize_options()
+      <programlisting>opts = op.optimize_options()
 opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
 
       <para>JModelica.org's CasADi based framework does not support simulation
@@ -936,6 +947,24 @@ Returns::
 
         <para>where <literal>init_traj</literal> has the same format as used
         with the <literal>init_traj</literal> option.</para>
+
+        <para>Scaling can be updated by providing new nominal
+        trajectories</para>
+
+        <programlisting>solver.set_nominal_traj(nominal_traj, nominal_traj_mode)
+</programlisting>
+
+        <para>where <literal>nominal_traj</literal> is on the same format as
+        the option for nominal trajectories and
+        <literal>nominal_traj_mode</literal> is on the same format as the
+        option for determining the scaling mode
+        (<literal>nominal_traj_mode</literal>). Note that this requires that
+        the option <literal>variable_scaling_allow_updat</literal>e was
+        originally set to True in either
+        <literal>prepare_optimization</literal> or in the initial call to the
+        optimize routine. There is further a limitation that time-variant
+        scaling cannot be set on a variable if it were not originally set to
+        be time-variant.</para>
 
         <para>External data can be updated with</para>
 
@@ -1996,7 +2025,7 @@ plt.show()
             </m:munder>
 
             <m:msub>
-              <m:mi> t</m:mi>
+              <m:mi>t</m:mi>
 
               <m:mi>f</m:mi>
             </m:msub>
@@ -2364,7 +2393,7 @@ plt.show()
 
                     <m:mi>(t) -</m:mi>
 
-                    <m:mi> 2</m:mi>
+                    <m:mi>2</m:mi>
 
                     <m:msub>
                       <m:mi>u</m:mi>
@@ -2596,7 +2625,7 @@ plt.show()
               <m:mi>1 -</m:mi>
 
               <m:msub>
-                <m:mi> t</m:mi>
+                <m:mi>t</m:mi>
 
                 <m:mi>delay</m:mi>
               </m:msub>
