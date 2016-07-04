@@ -5714,8 +5714,8 @@ x := sin(time)
 
 --- Unsolved function call equation (Block 2) ---
 (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
-  Computed variables: r2.r.x
-                      r2.x
+  Computed variables: r2.x
+                      r2.r.x
                       r2.r.y
 
 --- Unsolved function call equation (Block 3) ---

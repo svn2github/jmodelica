@@ -520,8 +520,8 @@ Torn variables:
 
 Iteration variables:
   f ()
-  a ()
   b ()
+  a ()
 
 Torn equations:
   (c, d) = TearingTests.RecordTearingTest5.F(a, b)
@@ -535,9 +535,9 @@ Residual equations:
   (e, f) = TearingTests.RecordTearingTest5.F(c, d)
     Iteration variables: f
   (a, b) = TearingTests.RecordTearingTest5.F(e, f)
-    Iteration variables: a
-  (a, b) = TearingTests.RecordTearingTest5.F(e, f)
     Iteration variables: b
+  (a, b) = TearingTests.RecordTearingTest5.F(e, f)
+    Iteration variables: a
 -------------------------------
 ")})));
 end RecordTearingTest5;

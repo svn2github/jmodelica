@@ -16719,8 +16719,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DEF(REA, tmp_6)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 5;
-        x[1] = 0;
-        x[2] = 1;
+        x[1] = 1;
+        x[2] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
         x[0] = 2;
         x[1] = 3;
@@ -16731,13 +16731,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         (*res)[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _f_5;
-        x[1] = _a_0;
-        x[2] = _b_1;
+        x[1] = _b_1;
+        x[2] = _a_0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _f_5 = x[0];
-            _a_0 = x[1];
-            _b_1 = x[2];
+            _b_1 = x[1];
+            _a_0 = x[2];
         }
         func_CCodeGenTests_RecordTearingTest1_F_def0(_a_0, _b_1, &tmp_5, &tmp_6);
         _c_2 = (tmp_5);
@@ -16747,8 +16747,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = tmp_2 - (_f_5);
             func_CCodeGenTests_RecordTearingTest1_F_def0(_e_4, _f_5, &tmp_3, &tmp_4);
-            (*res)[1] = tmp_3 - (_a_0);
-            (*res)[2] = tmp_4 - (_b_1);
+            (*res)[1] = tmp_4 - (_b_1);
+            (*res)[2] = tmp_3 - (_a_0);
         }
     }
     return ef;
