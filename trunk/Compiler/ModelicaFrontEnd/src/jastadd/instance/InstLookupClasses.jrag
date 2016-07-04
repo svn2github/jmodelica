@@ -72,7 +72,7 @@ aspect InstLookupClasses {
 
     // The lexical scope of modifiers in short classes is the "outer" scope, although
     // the short class declaration is modeled as containing an extends clause
-    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)         = lookupInstClass(name);
+    eq InstExtendsShortClass.getInstClassModification().lookupInstClass(String name)         = getLookupNode().lookupInstClass(name);
     eq InstExtendsShortClass.getClassName().lookupInstClass(String name)                     = lookupInstClassInChain(name);
     eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)            = lookupInstClassInChain(name);
     eq InstShortClassDecl.getChild().lookupInstClass(String name)                            = lookupInstClass(name);

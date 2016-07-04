@@ -642,6 +642,7 @@ aspect InstanceErrorCheck {
     eq InstClassDecl.getChild().inInstComponent()     = false;
     eq InstRoot.getChild().inInstComponent()          = false;
     eq FlatRoot.getChild().inInstComponent()          = false;
+    eq InstRecordConstructor.getChild().inInstComponent() = false;
     
     
     public void FExp.collectErrors(ErrorCheckType checkType) {

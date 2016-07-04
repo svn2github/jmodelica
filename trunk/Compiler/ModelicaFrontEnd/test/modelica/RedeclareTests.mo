@@ -7287,5 +7287,55 @@ end RedeclareTests.RedeclareInRecord7;
 ")})));
 end RedeclareInRecord7;
 
+model RedeclareInRecord8
+    record G0
+        Real x = 1;
+    end G0;
+    
+    model A
+        replaceable record G = G0;
+        B b(redeclare replaceable record G = G);
+    end A;
+    
+    model B
+        replaceable record G = G0;
+        G g;
+    end B;
+
+    model C
+        A a(redeclare record G = G0(x=f(time)));
+        function f
+            input Real x;
+            output Real y = x;
+            algorithm
+        end f;
+    end C;
+    
+    C c;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord8",
+            description="Redeclare record with function call in binding expression",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord8
+ RedeclareTests.RedeclareInRecord8.c.a.b.G c.a.b.g(x = RedeclareTests.RedeclareInRecord8.c.f(time));
+
+public
+ function RedeclareTests.RedeclareInRecord8.c.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end RedeclareTests.RedeclareInRecord8.c.f;
+
+ record RedeclareTests.RedeclareInRecord8.c.a.b.G
+  Real x;
+ end RedeclareTests.RedeclareInRecord8.c.a.b.G;
+
+end RedeclareTests.RedeclareInRecord8;
+")})));
+end RedeclareInRecord8;
+
 
 end RedeclareTests;
