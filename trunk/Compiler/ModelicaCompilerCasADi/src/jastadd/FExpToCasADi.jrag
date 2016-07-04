@@ -188,6 +188,10 @@ aspect FExpToCasADi {
         return expressions;
     }
     
+    MXVector FIfStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
+        throw new UnsupportedOperationException("If-Statements are unsupported (try to rewrite into if-expressions): " + toString());
+    }
+    
     /**
      * @param A MX that is searched for
      * @param A MXVector that is searched in
