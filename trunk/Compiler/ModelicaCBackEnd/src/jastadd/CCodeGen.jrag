@@ -1197,15 +1197,13 @@ aspect CCodeGen {
     syn String FType.nameArray_C(boolean external)  = external ? nameArrayExt_C() : nameArray_C();
     
     syn String FType.nameScalar_C()       = "jmi_ad_var_t";
-    eq FRecordType.nameScalar_C()         = (getFClass() != null ? myFRecordDecl().name_C() : 
-        ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC;
+    eq FRecordType.nameScalar_C()         = myFRecordDecl().name_C() + "_" + C_SUFFIX_REC;
     eq FStringType.nameScalar_C()         = "jmi_string_t";
     eq FExternalObjectType.nameScalar_C() = "jmi_extobj_t";
     eq FFunctionType.nameScalar_C() = myFFunctionDecl().funcNameUnderscore(C_SUFFIX_FP) + "*";
     
     syn String FType.nameArray_C()        = "jmi_array_t";
-    eq FRecordType.nameArray_C()          = (getFClass() != null ? myFRecordDecl().name_C() :
-        ASTNode.underScore(getName())) + "_" + C_SUFFIX_REC + C_SUFFIX_ARRAY;
+    eq FRecordType.nameArray_C()          = nameScalar_C() + C_SUFFIX_ARRAY;
     eq FStringType.nameArray_C()          = "jmi_string_array_t";
     eq FExternalObjectType.nameArray_C()  = "jmi_extobj_array_t";
     
@@ -4937,11 +4935,11 @@ aspect CCodeGen {
     }
     
     syn FFunctionCallStmt FExternalObjectVariable.getDestructorCall() {
-        FIdUse name = new FIdUse(type().name() + ".destructor");
-        Size[] sizes = new Size[0];
+        String strName = type().name() + ".destructor";
+        FIdUse name = new FIdUse(strName);
         List<FExp> args = new List<FExp>();
         args.add(createUseExp());
-        FFunctionCall call = new FFunctionCall(name, args, sizes);
+        FFunctionCall call = new FFunctionCall(name, args, FFunctionType.create(strName, new ArrayList<FVariable>(), myFClass()));
         return new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
     }
     

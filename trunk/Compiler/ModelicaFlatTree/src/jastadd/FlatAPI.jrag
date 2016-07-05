@@ -1564,6 +1564,7 @@ aspect FlatAPI {
     
     inh FClass FAbstractVariable.myFClass();
     inh FClass FExp.myFClass();
+    inh FClass FType.myFClass();
     inh FClass FIdUse.myFClass();
     inh FClass FQName.myFClass();
     inh FClass FFunctionDecl.myFClass();

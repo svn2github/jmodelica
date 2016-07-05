@@ -28,6 +28,7 @@ aspect InstLookupClasses {
     inh InstLookupResult<InstClassDecl> InstNode.lookupInstClass(String name);
     inh InstLookupResult<InstClassDecl> InstModification.lookupInstClass(String name);
     inh InstLookupResult<InstClassDecl> InstConstraining.lookupInstClass(String name);
+    inh InstLookupResult<InstClassDecl> FType.lookupInstClass(String name);
 
     syn InstLookupResult<InstClassDecl> InstNode.lookupInstClassRedirect(String name)         = genericLookupInstClass(name);
     syn InstLookupResult<InstClassDecl> InstModification.lookupInstClassRedirect(String name) = lookupInstClass(name);

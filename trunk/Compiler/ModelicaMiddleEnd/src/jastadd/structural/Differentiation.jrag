@@ -567,7 +567,7 @@ aspect Derivatives {
                 args.add(e.diff(name));
             i++;
         }
-        FFunctionCall der_f = new FFunctionCall(new FIdUse(myDiffDecl.name()), args, getSizes());
+        FFunctionCall der_f = new FFunctionCall(new FIdUse(myDiffDecl.name()), args, getFType().treeCopy());
         der_f.order = order + 1;
         return dynamicFExp(der_f);
     }

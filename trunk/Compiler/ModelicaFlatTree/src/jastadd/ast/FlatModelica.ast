@@ -52,7 +52,6 @@ FClass : BaseNode ::= FQName
 FFunctionDecl : BaseNode ::= FQName 
                              FFunctionVariable* 
                              FAlgorithm 
-                             /DummyExp:FExp/
                              FAttribute*;
 
 /**
@@ -1282,7 +1281,7 @@ abstract CommonFunctionCall : FAbstractFunctionCall;
 /**
  * Generic function call expression in flat tree.
  */
-FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* <Sizes:Size[]>;
+FFunctionCall : CommonFunctionCall ::= Name:FIdUse Arg:FExp* FType;
  
 /**
  * Partial function call expression in flat tree.
@@ -1297,7 +1296,7 @@ FVectorFunctionCall : FFunctionCall ::= <VectorSize:Size> <Vectorized:boolean[]>
 /**
  * Generic function call expression in instance trees.
  */
-InstFunctionCall : CommonFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument*;
+InstFunctionCall : CommonFunctionCall ::= Name:InstAccess Arg:InstFunctionArgument* /FType/;
 
 /**
  * Partial function call expression in instance trees.

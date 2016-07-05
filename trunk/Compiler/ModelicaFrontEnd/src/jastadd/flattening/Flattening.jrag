@@ -829,7 +829,7 @@ aspect Flattening {
         for (FRecordComponentType frct : getOutputs()) {
             outputs.add(frct.flatten(prefix, ia, keepSizeExpressions));
         }
-        FType res = new FFunctionType(getSize(), ia.myInstClass().actualInstClass().qualifiedName(), inputs, outputs, getFClass());
+        FType res = new FFunctionType(getSize(), getName(), inputs, outputs, getFClass());
         res.setSize(getSize().flatten(prefix, res, keepSizeExpressions));
         return res;
     }
@@ -2787,7 +2787,7 @@ aspect FlatExpressions {
 		List args = new List();
 		for (FExp e : getArgs()) 
 			args.add(e.flatten(prefix));
-		return new FFunctionCall(getName().flatten(new FQNameEmpty()), args, getSizes());		
+        return new FFunctionCall(getName().flatten(new FQNameEmpty()), args, getFType().flatten(new FQNameEmpty(), null, true));
 	}
 
 	public FFunctionCall InstFunctionCall.flatten(FQName prefix) {
@@ -2796,35 +2796,26 @@ aspect FlatExpressions {
 			args.add(e.flatten(prefix));
         InstCallable target = myInstCallable().actualInstCallable();
 		FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
-		Size[] sizes = new Size[myCallOutputs().size()];
-		FFunctionCall res = createFFunctionCall(name, args, sizes);
-        if (isFunctionCallClause()) {
-            for (int i = 0; i < myLefts().size(); i++) {
-                sizes[i] = myLefts().get(i).hasFExp() ? sizeOfOutput(i).flatten(prefix, res, true) : null;
-            }
-        } else {
-            sizes[0] = size().flatten(prefix, res, true);
-        }
-		return res;	
+        return createFFunctionCall(name, args, getFType().flatten(new FQNameEmpty(), null, true));
 	}
 
-	public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
-		return new FFunctionCall(name, args, sizes);
+    public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
+		return new FFunctionCall(name, args, type);
 	}
     
-    public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+    public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
         List<FIdUse> argNames = new List<FIdUse>();
         for (String s : namedArgs())
             argNames.add(new FIdUse(s));
-        return new FPartialFunctionCall(name, args, sizes, argNames);
+        return new FPartialFunctionCall(name, args, type, argNames);
     }
 
-	public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, Size[] sizes) {
+    public FFunctionCall InstVectorFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
 		boolean[] vectorFlags = new boolean[getNumArg()];
 		int i = 0;
 		for (InstFunctionArgument e : getArgs())
 			vectorFlags[i++] = e.isVectorized();
-		return new FVectorFunctionCall(name, args, sizes, size(), vectorFlags);
+        return new FVectorFunctionCall(name, args, type, size(), vectorFlags);
 	}
 
     public FFunctionCall InstClassDecl.flattenOverloadedFunctionCall(FQName prefix, FExp... args) {
@@ -2854,9 +2845,7 @@ aspect FlatExpressions {
             }
         }
         List<FExp> argList = new List<FExp>(args);
-        Size[] sizes = new Size[myOutputs().size()];
-        sizes[0] = myOutputs().get(0).size();
-        return new FFunctionCall(name, argList, sizes);
+        return new FFunctionCall(name, argList, functionType().flatten(prefix, null, true));
     }
 
 	public FExp InstFunctionArgument.flatten(FQName prefix) {

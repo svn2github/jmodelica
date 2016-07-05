@@ -6447,6 +6447,50 @@ end RecordTests.RecordWithColonArray3;
 ")})));
 end RecordWithColonArray3;
 
+model RecordWithColonArray4
+    record R
+        Real x[:];
+    end R;
+    
+    function f
+        input Integer n;
+        output R r = R(1:n);
+    algorithm
+    end f;
+    
+    parameter Integer n = 3;
+    R r = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordWithColonArray4",
+            description="Variable with : size in record",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordWithColonArray4
+ structural parameter Integer n = 3 /* 3 */;
+ Real r.x[1];
+ Real r.x[2];
+ Real r.x[3];
+equation
+ (RecordTests.RecordWithColonArray4.R({r.x[1], r.x[2], r.x[3]})) = RecordTests.RecordWithColonArray4.f(3);
+
+public
+ function RecordTests.RecordWithColonArray4.f
+  input Integer n;
+  output RecordTests.RecordWithColonArray4.R r;
+ algorithm
+  return;
+ end RecordTests.RecordWithColonArray4.f;
+
+ record RecordTests.RecordWithColonArray4.R
+  Real x[:];
+ end RecordTests.RecordWithColonArray4.R;
+
+end RecordTests.RecordWithColonArray4;
+")})));
+end RecordWithColonArray4;
+
 model RecordDer1
 	record A
 		Real x;

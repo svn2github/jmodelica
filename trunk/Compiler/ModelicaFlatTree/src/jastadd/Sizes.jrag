@@ -247,9 +247,7 @@ aspect AccessSizes {
 aspect FunctionCallSizes {
     
     syn Size FAbstractFunctionCall.sizeOfOutput(int i) = (i == 0) ? size() : Size.SCALAR;
-    eq InstVectorFunctionCall.sizeOfOutput(int i) = (i == 0) ? vectorizedSize() : super.sizeOfOutput(i);
-    eq FFunctionCall.sizeOfOutput(int i) = getSizes()[i];
-    eq InstFunctionCall.sizeOfOutput(int i) = myCallOutputs().get(i).size().createSizeFExp(this);
+    eq CommonFunctionCall.sizeOfOutput(int i)          = typeOfOutput(i).size();
     
     /**
      * Get array sizes of function argument.
@@ -260,6 +258,22 @@ aspect FunctionCallSizes {
 
     eq FArgumentExp.size() = copiedFExp().size();
     
+    public FType FType.createSizeFExp(InstFunctionCall call) {
+        FType res = treeCopy();
+        res.replaceSizeFExp(call);
+        return res;
+    }
+    
+    public void ASTNode.replaceSizeFExp(InstFunctionCall call) {
+        for (ASTNode n : this) {
+            n.replaceSizeFExp(call);
+        }
+    }
+    
+    public void FType.replaceSizeFExp(InstFunctionCall call) {
+        setSize(getSize().createSizeFExp(call));
+        super.replaceSizeFExp(call);
+    }
     
     public Size Size.createSizeFExp(InstFunctionCall call) {
         
@@ -307,6 +321,9 @@ aspect FunctionCallSizes {
     public void InstFunctionArgument.sizeOfOutput(Map<InstComponentDecl, InstFunctionArgument> varMap, InstComponentDecl icd) {
         getFExp().size();      // Cash sizes to prevent false circularity in nested function calls
         varMap.put(icd, this);
+    }
+    public void InstMissingArgument.sizeOfOutput(Map<InstComponentDecl, InstFunctionArgument> varMap, InstComponentDecl icd) {
+        
     }
     
     protected boolean FSizeExp.circ = false;

@@ -1455,4 +1455,13 @@ aspect InheritedFactoryMethods {
 	eq FMinExp.createCompareNode(FExp x, FExp y) = new FLtExp(x, y);
 	eq FMaxExp.createCompareNode(FExp x, FExp y) = new FGtExp(x, y);
 	
+    public static FFunctionType FFunctionType.create(String name, Iterable<FVariable> fvs, FClass fclass) {
+        List<FRecordComponentType> in = new List<FRecordComponentType>();
+        List<FRecordComponentType> out = new List<FRecordComponentType>();
+        for (FVariable fv : fvs) {
+            out.add(new FRecordComponentType(fv.name(), fv.type().treeCopy()));
+        }
+        return new FFunctionType(Size.SCALAR, name, in, out, fclass);
+    }
+    
 }
