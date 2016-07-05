@@ -536,5 +536,14 @@ aspect ExpressionSimplification {
         FEnumLitExp o = (FEnumLitExp) other;
         return getValue() == o.getValue(); 
     }
+    
+    eq FBinExp.equalsSymbolic(FExp other) {
+        if (getClass().equals(other.getClass())) {
+            FBinExp o = (FBinExp) other;
+            return getRightNoTransform().equalsSymbolic(o.getRightNoTransform())
+                    && getLeftNoTransform().equalsSymbolic(o.getLeftNoTransform());
+        }
+        return false;
+    }
 
  }

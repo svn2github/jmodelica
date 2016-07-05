@@ -15141,8 +15141,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real y[1];
  Real y[2];
 equation
- y[1] = noEvent(if x[1] >= 0 then x[1] * s[1] else x[1] * s[1]);
- y[2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
+ y[1] = noEvent(x[1] * s[1]);
+ y[2] = noEvent(x[2] * s[2]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -15179,8 +15179,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear8
  Real y[2,2];
 equation
  y[1,1] = noEvent(if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
- y[1,2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
- y[2,1] = noEvent(if x2 >= 0 then x2 * s[1] else x2 * s[1]);
+ y[1,2] = noEvent(x[2] * s[2]);
+ y[2,1] = noEvent(x2 * s[1]);
  y[2,2] = noEvent(if x2 >= 0 then x2 * s[2] else x2 * s[1]);
  s[1] = 1;
  s[2] = 2;
