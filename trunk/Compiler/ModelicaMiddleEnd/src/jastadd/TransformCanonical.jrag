@@ -707,20 +707,13 @@ aspect TransformCanonical {
                 FAbstractEquation fe = prePropagationEquations.remove(fv);
                 if (fe == null && fv.isPreVariable())
                     fe = prePropagationEquations.remove(fv.myNonPreVariable());
-                if (fe != null) {
-                    Eq eqn = g.addEquation(fe, 1, fe.variability(), fe.type());
-                    g.addEdge(eqn, g.getVariable(fv.name()));
-                    g.addEdge(eqn, g.getVariable(fv.myPreVariable().name()));
-                } else {
+                if (fe == null) {
                     FIdUseExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createUseExp();
                     FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                     fe = new FEquation(lhs, rhs);
                     addFInitialEquation(fe);
-                    
-                    Eq eqn = g.addEquation(fe, 0, fe.variability(), fe.type());
-                    Var v = g.getVariable(lhs.name());
-                    g.addEdge(eqn,v);
                 }
+                g.addEquations(Collections.singletonList(fe), VAR_TYPES_ALL);
             }
             root().flushAllRecursive();
             

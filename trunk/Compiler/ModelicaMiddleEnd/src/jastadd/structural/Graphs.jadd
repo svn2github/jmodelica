@@ -123,11 +123,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return equationIndexMap.getList(eqn);
     }
 
-    public E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type) {
-        return addEquation(eqn, groupNumber, variability, type, false, DEFAULT_EQ_PREFIX, DEFAULT_EQ_SUBFIX, enumerator);
-        
-    }
-    
     private E addEquation(FAbstractEquation eqn, int groupNumber, FTypePrefixVariability variability, FType type, boolean isMeta, String prefix, String subfix, Enumerator enumerator) {
         String name;
         do {
