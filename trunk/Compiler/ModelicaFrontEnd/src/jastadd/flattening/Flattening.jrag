@@ -1442,15 +1442,17 @@ aspect Flattening {
 	syn InstAccess InstAccess.splitArrayAccess(int index) = this;
 	
 	eq InstDot.splitArrayAccess(int index) {
-		InstDot res = fullCopy();
-		for (int i = 0, n = getNumInstAccess(); i < n; i++) {
-			InstAccess ia = getInstAccess(i);
-			if (ia.isArray()) {
-				res.setInstAccess(ia.splitArrayAccess(index), i);
-				i = n;
-			}
-		}
-		return res;
+        List<InstAccess> l = new List<InstAccess>();
+        boolean split = false;
+        for (InstAccess ia : getInstAccesss()) {
+            if (!split && ia.isArray()) {
+                l.add(ia.splitArrayAccess(index));
+                split = true;
+            } else {
+                l.add(ia.treeCopy());
+            }
+        }
+        return new InstDot(l);
 	}
 	
 	eq InstScalarAccess.splitArrayAccess(int index) {
