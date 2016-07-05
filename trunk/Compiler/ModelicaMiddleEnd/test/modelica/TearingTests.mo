@@ -571,11 +571,9 @@ Torn equations:
   algorithm
     x := x + y + z;
     y := y - x + z;
+
     Assigned variables: y
-  algorithm
-    x := x + y + z;
-    y := y - x + z;
-    Assigned variables: x
+                        x
 
 Residual equations:
   z = x + y

@@ -295,9 +295,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
             if (n_existing != 0 && (n_existing - n_existing_meta) != n_eq) {
                 throw new IllegalArgumentException("Equation already exist in BiPGraph but with different number of scalars, previously " + n_existing + ", now " + n_eq + ", equation:\n" + e);
             }
-            if (n_eq > 1000) {
-                throw new org.jmodelica.util.exceptions.InternalCompilerError("Sorry, this equation is too big, it has " + n_eq + " continuous/discrete scalars. Equation in question:\n" + e);
-            }
             if (n_existing == 0) {
                 groupMembers = new ArrayList<E>();
                 Enumerator subEnumerator = enumerator;

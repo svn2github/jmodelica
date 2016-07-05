@@ -1337,6 +1337,28 @@ aspect BLT{
             }
 
         }
+
+        /**
+         * Tries to merge the provided block with this one if they are of the
+         * same type. True is returned if the merge was successful, false
+         * otherwise.
+         */
+        public final boolean merge(AbstractEquationBlock block) {
+            if (getClass().equals(block.getClass()) && do_merge(block)) {
+                return true;
+            }
+            return false;
+        }
+        
+        /**
+         * Internal method for merging, subclasses should override and try to
+         * merge. Return true on successful merge. No type check is needed, it
+         * has already been checked.
+         */
+        protected boolean do_merge(AbstractEquationBlock block) {
+            return false;
+        }
+
         
     }
 
@@ -1346,8 +1368,8 @@ aspect BLT{
      */
     public class EquationBlock extends AbstractEquationBlock {
 
-        private Collection<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
-        private Collection<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
+        private java.util.List<SimpleEquationBlock> unsolvedBlocks = new ArrayList<SimpleEquationBlock>();
+        private java.util.List<AbstractEquationBlock> solvedBlocks = new ArrayList<AbstractEquationBlock>();
         private Collection<SimpleEquationBlock> localRealBlocks_cache = null;
         private Collection<SimpleEquationBlock> localSolvedBlocks_cache = null;
         private Collection<SimpleEquationBlock> localDiscreteRealBlocks_cache = null;
@@ -1362,7 +1384,13 @@ aspect BLT{
         
         public EquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<? extends AbstractEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
             super(producer, blockDependency);
-            this.solvedBlocks.addAll(solvedBlocks);
+            AbstractEquationBlock lastSolved = null;
+            for (AbstractEquationBlock block : solvedBlocks) {
+                if (lastSolved == null || !lastSolved.merge(block)) {
+                    this.solvedBlocks.add(block);
+                    lastSolved = block;
+                }
+            }
             this.unsolvedBlocks.addAll(unsolvedBlocks);
         }
         
@@ -1380,7 +1408,9 @@ aspect BLT{
          * @param block Block to add to the list of solved blocks
          */
         public void addSolvedBlock(AbstractEquationBlock block) {
-            solvedBlocks.add(block);
+            if (solvedBlocks.size() == 0 || !solvedBlocks.get(solvedBlocks.size() - 1).merge(block)) {
+                solvedBlocks.add(block);
+            }
             resetCache();
         }
 
@@ -2390,6 +2420,20 @@ aspect BLT{
         @Override
         public Collection<FAbstractEquation> localDifferentiatedEquations() {
             return new ArrayList<FAbstractEquation>();
+        }
+
+        @Override
+        protected boolean do_merge(AbstractEquationBlock block) {
+            AlgorithmBlock other = (AlgorithmBlock) block;
+            if (equation() == other.equation() &&
+                    isReal() == other.isReal() &&
+                    isDiscreteReal() == other.isDiscreteReal()) {
+                activeVars.addAll(other.activeVars);
+                assignedIndices.addAll(other.assignedIndices);
+                return true;
+            } else {
+                return false;
+            }
         }
     }
 
