@@ -125,9 +125,9 @@ aspect InstTypeAnalysis {
         List<FRecordComponentType> inputTypes = new List();
         List<FRecordComponentType> outputTypes = new List();
         for (InstComponentDecl icd : myInputs())
-            inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
+            inputTypes.add(new FRecordComponentType(icd.name(), icd.type()));
         for (InstComponentDecl icd : myOutputs())
-            outputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
+            outputTypes.add(new FRecordComponentType(icd.name(), icd.type()));
         return new FFunctionType(Size.SCALAR, actualInstClass().qualifiedName(), inputTypes, outputTypes, null);
     }
     
