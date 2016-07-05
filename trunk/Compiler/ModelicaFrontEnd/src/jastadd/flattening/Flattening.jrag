@@ -957,6 +957,27 @@ aspect Flattening {
             flattenMyType(fc);
         }
     }
+    
+    public FArraySubscripts Size.flattenFArraySubscripts() {
+        List<FSubscript> l = new List<FSubscript>();
+        for (int i = 0; i < ndims(); i++) {
+            l.add(flattenFSubscript(i));
+        }
+        return new FArraySubscripts(l);
+    }
+    
+    public FSubscript Size.flattenFSubscript(int i) {
+        int s = get(i);
+        return s == Size.UNKNOWN ? new FColonSubscript() : new FIntegerSubscript(s);
+    }
+    
+    public FSubscript MutableSize.flattenFSubscript(int i) {
+        if (exps[i] == null || exps[i] instanceof FColonSizeExp ||
+                exps[i].variability().knownParameterOrLess()) {
+            return super.flattenFSubscript(i);
+        }
+        return new FExpSubscript(exps[i].flatten(new FQNameEmpty()));
+    }
 
     public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
         if (useInFlattening()) {

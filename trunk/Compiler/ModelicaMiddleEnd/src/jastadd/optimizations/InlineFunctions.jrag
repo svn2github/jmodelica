@@ -338,7 +338,7 @@ aspect FunctionInlining {
         protected FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
             String n = nextTempVarName();
             FQName name = type.isArray() ? 
-                    new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
+                    new FQNameFull(n, type.size().createFArraySubscripts()) : 
                     new FQNameString(n);
             FVariable var = addVar(name, variability, type);
             setTypeOf(oldName, type);

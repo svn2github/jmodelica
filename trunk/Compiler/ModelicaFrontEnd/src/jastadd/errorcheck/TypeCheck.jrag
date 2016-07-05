@@ -141,15 +141,15 @@ aspect FlatTypeCheck {
 
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
         FExp bexp = myBindingInstExp();
-        boolean func = inFunction();
+        boolean unknownAllowed = inFunction() || inRecordDecl();
         Size componentSize = size();
-        if (!componentSize.isComplete() && !func && !inRecordDecl() && !checkType.allowIncompleteSizes()) 
+        if (!componentSize.isComplete() && !unknownAllowed && !checkType.allowIncompleteSizes()) 
             CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
             InstValueModification ivm = myInstValueMod();
             FType expectedBT = bindingType();
             FType actualBT = bexp.type();
-            if (!expectedBT.typeCompatible(actualBT, func) && !expectedBT.isUnknown()) {
+            if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
                 if (needsEach != null) {
                     ASSUMING_EACH.invoke(needsEach, needsEach);
