@@ -280,6 +280,7 @@ int jmi_init(jmi_t** jmi,
     jmi_init_runtime_options(jmi_, &jmi_->options);
 
     jmi_->events_epsilon = jmi_->options.events_default_tol;
+    jmi_->time_events_epsilon = jmi_->options.time_events_default_tol;
     jmi_->recomputeVariables = 1;
 
     jmi_->log = jmi_log_init(jmi_callbacks);

@@ -317,6 +317,7 @@ struct jmi_block_solver_options_t {
     int brent_ignore_error_flag;   /**< \brief Flag if the solver should ignore errors in Brent solve. */
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
     double events_epsilon;         /**< \brief The event epsilon used for event indicators and switches. */
+    double time_events_epsilon;    /**< \brief The time event epsilon used for time event indicators and switches. */
     int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */

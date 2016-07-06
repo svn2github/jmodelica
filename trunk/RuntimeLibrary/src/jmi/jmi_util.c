@@ -186,13 +186,14 @@ jmi_real_t* jmi_get_sw_init(jmi_t* jmi) {
 void jmi_init_runtime_options(jmi_t *jmi, jmi_options_t* op) {
     jmi_block_solver_init_default_options(&op->block_solver_options);
 
-    op->nle_solver_default_tol = 1e-10;   /**< \brief Default tolerance for the equation block solver */
-    op->nle_solver_tol_factor = 0.0001;   /**< \brief Tolerance safety factor for the non-linear equation block solver. */
-    op->events_default_tol = 1e-10;       /**< \brief Default tolerance for the event iterations. */        
-    op->events_tol_factor = 0.0001;       /**< \brief Tolerance safety factor for the event iterations. */
-    op->cs_solver = JMI_ODE_CVODE;        /**< \brief Option for changing the internal CS solver. */
-    op->cs_rel_tol = 1e-6;                /**< \brief Default tolerance for the adaptive solvers in the CS case. */
-    op->cs_step_size = 1e-3;              /**< \brief Default step-size for the non-adaptive solvers in the CS case. */   
+    op->nle_solver_default_tol = 1e-10;           /**< \brief Default tolerance for the equation block solver */
+    op->nle_solver_tol_factor = 0.0001;           /**< \brief Tolerance safety factor for the non-linear equation block solver. */
+    op->events_default_tol = 1e-10;               /**< \brief Default tolerance for the event iterations. */        
+    op->time_events_default_tol = JMI_ALMOST_EPS; /** <\brief Default tolerance for the time event iterations. */
+    op->events_tol_factor = 0.0001;               /**< \brief Tolerance safety factor for the event iterations. */
+    op->cs_solver = JMI_ODE_CVODE;                /**< \brief Option for changing the internal CS solver. */
+    op->cs_rel_tol = 1e-6;                        /**< \brief Default tolerance for the adaptive solvers in the CS case. */
+    op->cs_step_size = 1e-3;                      /**< \brief Default step-size for the non-adaptive solvers in the CS case. */   
     op->cs_experimental_mode = 0;
 
     op->log_options = &jmi->jmi_callbacks.log_options;
@@ -309,7 +310,7 @@ jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, in
      * x <= 0
      * x <  0
      */
-    jmi_real_t eps = JMI_ALMOST_EPS;
+    jmi_real_t eps = jmi->time_events_epsilon;
     if (sw == 1.0) {
         if ((ev_ind <  -eps && rel == JMI_REL_GEQ)  ||
             (ev_ind <=  eps && rel == JMI_REL_GT)   ||

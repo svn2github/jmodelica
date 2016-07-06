@@ -42,6 +42,7 @@
 #include "jmi_linear_solver.h"
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
+#include "jmi_math.h"
 
 #define Ith(v,i)    NV_Ith_S(v,i)
 
@@ -706,6 +707,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->max_iter = 100;
     bsop->max_iter_no_jacobian = 10;
     bsop->events_epsilon = 1e-10;
+    bsop->time_events_epsilon = JMI_ALMOST_EPS;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 

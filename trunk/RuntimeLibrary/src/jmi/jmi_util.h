@@ -160,6 +160,7 @@ typedef struct jmi_options_t {
     double nle_solver_tol_factor;           /**< \brief Tolerance safety factor for the non-linear equation block solver. */
 
     double events_default_tol;              /**< \brief Default tolerance for the event iterations. */        
+    double time_events_default_tol;         /**< \brief Defult tolerance for the time event iterations. */
     double events_tol_factor;               /**< \brief Tolerance safety factor for the event iterations. */
 
     int cs_solver;                          /**< \brief Option for changing the internal CS solver */
@@ -623,6 +624,7 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
  * occurs if ev_ind is <= 0.0. If on the other hand the relation is >=
  * , then the switch occurs if ev_ind < -eps.
  * 
+ * @param jmi The jmi struct
  * @param ev_ind The indicator value.
  * @param sw The switch value
  * @param eps The epsilon used for "moving" the zero.
