@@ -179,7 +179,11 @@ aspect FExpToCasADi {
      */
     MXVector FAssignStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
         MXVector lhsVec = new MXVector();
-        lhsVec.add(getLeft().toMX());
+        MX left = getLeft().toMX();
+        if (left == null) {
+            throw new UnsupportedOperationException("The variable on the LHS does not exists: " + toString());
+        }
+        lhsVec.add(left);
         MXVector rhsVec = getRight().toMXVector();
         
         MX updatedRhsExpression = ifcasadi.substitute(rhsVec, allVars, expressions).get(0);
