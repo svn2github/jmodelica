@@ -4177,7 +4177,7 @@ aspect ConstantEvaluation {
         for (FRecordComponentType comp : comps)
             if (comp.getName().equals(name))
                 return comp.getFType();
-        return fUnknownType();
+        return null;
     }
     
     

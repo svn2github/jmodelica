@@ -828,7 +828,6 @@ aspect Arrays {
 	eq InstNode.getChild().expandSizeForIterExp(Size s) = s;
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
-    eq FComponentExp.size()   = type().size();
 	
 	eq FTranspose.size() {
 		Size size = getFExp().size();
@@ -1724,14 +1723,17 @@ aspect Arrays {
 
     eq FVectorFunctionCall.getArray() {
         Array arr = new Array(indices());
+        Size[] sizes = (Size[]) getSizes().clone();
+        sizes[0] = Size.SCALAR;
         boolean[] vec = getVectorized();
+        
         int j;
         for (Index i : arr.indices()) {
             List<FExp> args = new List<FExp>();
             j = 0;
             for (FExp arg : getArgs()) 
                 args.add(vec[j++] ? arg.getArray().subArrayFExp(i) : arg);
-            arr.set(i, new FFunctionCall(getName().fullCopy(), args, getFType().scalarType()));
+            arr.set(i, new FFunctionCall(getName().fullCopy(), args, sizes));
         }
         return arr;
     }

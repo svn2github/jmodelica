@@ -951,8 +951,7 @@ aspect TransformCanonical {
 			Size[] sizes = new Size[outVars.size()];
 			for (int i = 0; i < outVars.size(); i++)
 				sizes[i] = outVars.get(i).size();
-            FType type = FFunctionType.create(funcName.name(), outVars, this);
-            FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, type);
+			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, sizes);
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
 				lefts.add(fv.getFQName().createFFunctionCallLeft());
@@ -2128,13 +2127,15 @@ aspect TransformCanonical {
 		for (ASTNode n : this)
 			n.activateEquivalentRecordUseRewrite();
 	}
-    
-    public void FRecordType.activateEquivalentRecordUseRewrite() {
-        super.activateEquivalentRecordUseRewrite();
-        rewriteEquivalentRecord = true;
-        is$Final = false;
-    }
-    
+	
+	public void FFunctionVariable.activateEquivalentRecordUseRewrite() {
+		super.activateEquivalentRecordUseRewrite();
+		if (type().isRecord()) {
+			rewriteEquivalentRecord = true;
+			is$Final = false;
+		}
+	}
+	
 	public void FRecordVariable.activateEquivalentRecordUseRewrite() {
 		super.activateEquivalentRecordUseRewrite();
 		rewriteEquivalentRecord = true;
@@ -2147,13 +2148,17 @@ aspect TransformCanonical {
 		is$Final = false;
 	}
 	
-    private boolean FRecordType.rewriteEquivalentRecord        = false;
+	private boolean FFunctionVariable.rewriteEquivalentRecord  = false;
 	private boolean FRecordVariable.rewriteEquivalentRecord    = false;
 	private boolean FRecordConstructor.rewriteEquivalentRecord = false;
 	
-    rewrite FRecordType {
-        when (rewriteEquivalentRecord) to FType {
-            return myFClass().createEquivalentRecordType(this);
+	rewrite FFunctionVariable {
+		when (rewriteEquivalentRecord)
+		to FFunctionVariable {
+			rewriteEquivalentRecord = false;
+			setType(myFClass().createEquivalentRecordType(getType()));
+			flushAll();
+			return this;
 		}
 	}
 	
