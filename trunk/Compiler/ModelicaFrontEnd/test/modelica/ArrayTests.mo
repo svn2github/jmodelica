@@ -8295,8 +8295,8 @@ fclass ArrayTests.Other.ArraySizeInComp1
  constant Real r1.x[1] = 1;
  constant Real r1.x[2] = 2;
  structural parameter Integer r1.n = 2 /* 2 */;
- constant Real x[1] = 0.0;
- constant Real x[2] = 0.0;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
 end ArrayTests.Other.ArraySizeInComp1;
 ")})));
 end ArraySizeInComp1;
@@ -8330,8 +8330,8 @@ fclass ArrayTests.Other.ArraySizeInComp2
  constant Real r2.x[2] = 2;
  constant Real r2.x[3] = 3;
  structural parameter Integer r2.n = 3 /* 3 */;
- constant Real x[1] = 0.0;
- constant Real x[2] = 0.0;
+ constant Real x[1] = 1.0;
+ constant Real x[2] = 2.0;
  constant Real x[3] = 0.0;
 end ArrayTests.Other.ArraySizeInComp2;
 ")})));

@@ -438,15 +438,7 @@ aspect Arrays {
 	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
-			FQName name = getFQName();
-			FAbstractVariable record = lookupOutermostFV(name);
-			if (!record.isUnknown()) {
-				FAttribute attr = record.findHierarchicalAttribute(name);
-				if (attr != null)
-					attr = attr.findAttribute(FAttribute.SIZE);
-				if (attr != null && attr.hasValue())
-					s = new MutableSize(attr.getValue());
-			}
+            s = getFQName().calcMySize(getFQName().numParts());
 		}
 		return s.createExpandedFArraySubscripts();
 	}

@@ -247,16 +247,12 @@ aspect FunctionScalarization {
     }
     
     public void FFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
-        boolean func = inFunction();
-        if (vars != null)
-            addTemporaryVars(clauses, vars, indexMap, !func);
-        getArgs().createArrayTemporaries(clauses, vars, indexMap);
-        FExp temp = tempExp();
-        if (!func) {
-            temp = type().createRecordConstructor(indexMap, temp);
+        if (vars != null) {
+            addTemporaryVars(clauses, vars, indexMap, !inFunction());
         }
-        createFunctionCallClause(clauses, indexMap, temp);
+        getArgs().createArrayTemporaries(clauses, vars, indexMap);
         useTempVar = true;
+        createFunctionCallClause(clauses, indexMap, scalarize(indexMap));
     }
     
     public void FVectorFunctionCall.knownArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap) {
