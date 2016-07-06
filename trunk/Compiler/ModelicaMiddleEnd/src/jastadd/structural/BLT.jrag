@@ -877,6 +877,13 @@ aspect BLT{
         public abstract Collection<FAbstractEquation> realEquations();
 
         /**
+         * Returns all real blocks in this block.
+         * 
+         * @return Collection<SimpleEquationBlock> all real blocks
+         */
+        public abstract Collection<SimpleEquationBlock> localRealBlocks();
+
+        /**
          * Returns all local equations in this block that are of type real
          * 
          * Local equations are equations that are computed directly in this
@@ -1117,7 +1124,7 @@ aspect BLT{
         public boolean computeJacobian(Set<FAbstractEquation> activeRealEquations) {
             if (!canComputeJacobian())
                 return false;
-            jacobian = computeJacobian(localRealEquations(), localRealVariables(), activeRealEquations);
+            jacobian = computeJacobian(localRealBlocks(), activeRealEquations);
             variability = computeVariability(jacobian);
             return true;
         }
@@ -1183,28 +1190,30 @@ aspect BLT{
          */
         public abstract void errorCheck(FClass fclass);
 
-        protected final static FExp[][] computeJacobian(Collection<FAbstractEquation> eqns, Collection<FVariable> vars, Set<FAbstractEquation> activeRealEquations) {
-            int numEqns = 0;
-            for (FAbstractEquation eqn : eqns) {
-                if (!eqn.isMetaEquation()) {
-                    numEqns++;
+        protected final static FExp[][] computeJacobian(Collection<SimpleEquationBlock> blocks, Set<FAbstractEquation> activeRealEquations) {
+            
+            Collection<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+            Collection<FVariable> vars = new ArrayList<FVariable>();
+            
+            for (SimpleEquationBlock block : blocks) {
+                Collection<FVariable> blockVars = block.localRealVariables();
+                if (blockVars.size() == 0 || block.isMeta()) {
+                    continue;
                 }
-            }
-            int numVars = vars.size();
-            if (numEqns != numVars) {
-                ASTNode.log.debug("Oh boy, something went wrong when constructing this block!");
-                ASTNode.log.debug("Variables of intereset:");
-                for (FVariable var : vars) {
-                    ASTNode.log.debug(var);
-                }
-                ASTNode.log.debug("Equations of intereset:");
-                for (FAbstractEquation eqn : eqns) {
-                    ASTNode.log.debug(eqn);
-                }
+                vars.addAll(blockVars);
                 
-                throw new IllegalArgumentException("Incorrect arguments to AbstractEquationBlock.computeJacobian(). The number of equations is " + numEqns + " and number of variables is " + numVars + "!");
+                Collection<FAbstractEquation> blockEqns = block.localRealEquations();
+                // There should be exactly one equation in this list
+                if (blockEqns.size() != 1) {
+                    throw new IllegalArgumentException("Incorrect arguments to AbstractEquationBlock.computeJacobian(). There are " + blockVars.size() + " local real variables but " + blockEqns.size() + " local real equations in sub-block:" + block);
+                }
+                // Let's add it n number of times, one for each variable
+                for (int i = 0; i < blockVars.size(); i++) {
+                    eqns.addAll(blockEqns);
+                }
             }
-            FExp[][] jacobian = new FExp[numEqns][numVars];
+            
+            FExp[][] jacobian = new FExp[eqns.size()][vars.size()];
             int row = 0;
             int col = 0;
             Map<FVariable, Integer> columnMap = new HashMap<FVariable, Integer>();
@@ -1212,9 +1221,6 @@ aspect BLT{
                 columnMap.put(fv, col++);
             
             for (FAbstractEquation fe : eqns) {
-                if (fe.isMetaEquation()) {
-                    continue;
-                }
                 if (!activeRealEquations.contains(fe)) {
                     jacobian[row][row] = new FRealLitExp(1);
                     jacobian[row][row].parent = fe; // TODO: This is ugly, yes!
@@ -1442,11 +1448,7 @@ aspect BLT{
             return solvedBlocks;
         }
 
-        /**
-         * Returns all real blocks in this block.
-         * 
-         * @return Collection<SimpleEquationBlock> all real blocks
-         */
+        @Override
         public Collection<SimpleEquationBlock> localRealBlocks() {
             if (localRealBlocks_cache == null) {
                 localRealBlocks_cache = new ArrayList<SimpleEquationBlock>();
@@ -1844,6 +1846,11 @@ aspect BLT{
         }
 
         @Override
+        public Collection<SimpleEquationBlock> localRealBlocks() {
+            return Collections.emptyList();
+        }
+
+        @Override
         public Collection<FVariable> realVariables() {
             Set<FVariable> res = new LinkedHashSet<FVariable>();
             for (T blt : subBLTs)
@@ -2050,6 +2057,15 @@ aspect BLT{
         @Override
         public Collection<FAbstractEquation> realEquations() {
             return localRealEquations();
+        }
+
+        @Override
+        public Collection<SimpleEquationBlock> localRealBlocks() {
+            if (isReal()) {
+                return Collections.singletonList(this);
+            } else {
+                return Collections.emptyList();
+            }
         }
 
         @Override

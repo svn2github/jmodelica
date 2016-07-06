@@ -7665,6 +7665,67 @@ pre(b) := false
 ")})));
 end LinearBlockTest2;
 
+model LinearBlockTest3
+    Real a,b,c,d,e;
+equation
+    a = time + d * 2;
+    e = a * 2 - d;
+    d = c * 2 + a;
+algorithm
+    when e > 0 then
+        b := pre(d) + 1;
+        c := b / 2;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearBlockTest3",
+            description="Test generation of linear blocks with non-scalar algorithm block in the solved part",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 4 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  a
+  e
+  b
+  c
+
+Iteration variables:
+  d
+
+Solved discrete variables:
+  temp_1
+
+Torn equations:
+  a := time + d * 2
+  e := a * 2 + (- d)
+  algorithm
+    if temp_1 and not pre(temp_1) then
+      b := pre(d) + 1;
+      c := b / 2;
+    end if;
+
+    Assigned variables: b
+                        c
+
+Continuous residual equations:
+  d = c * 2 + a
+    Iteration variables: d
+
+Discrete equations:
+  temp_1 := e > 0
+
+Jacobian:
+  |1.0, 0.0, 0.0, 0.0, -2|
+  |0.0, 1.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 1.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, 1.0, 0.0|
+  |-1.0, 0.0, 0.0, -2, 1.0|
+-------------------------------
+")})));
+end LinearBlockTest3;
+
 
 model Sample1
     Real x;
