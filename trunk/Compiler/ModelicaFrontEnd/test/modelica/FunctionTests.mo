@@ -7343,7 +7343,7 @@ public
   init y as Real[2];
   init temp_1 as Real[2];
   (temp_1) := FunctionTests.ArrayOutputScalarization8.f1();
-  for i in temp_1 loop
+  for i in {temp_1[1], temp_1[2]} loop
    y[1] := i;
    (y) := FunctionTests.ArrayOutputScalarization8.f1();
   end for;

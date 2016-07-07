@@ -438,15 +438,8 @@ aspect Scalarization {
         }
         
         public ScalarizingVariableInstance(FVariable fv) {
-            this(fv.getFQName(), fv.getFAttributes(), scalarize(fv.getBindingExp()), fv.ndims(), fv.variability(), 
+            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.ndims(), fv.variability(), 
                     fv.getFTypePrefixInputOutputOpt(), Index.NULL);
-        }
-        
-        private static FExp scalarize(FExp exp) {
-            if (exp != null) {
-                exp = exp.dynamicFExp(exp.scalarize(Collections.<String, FExp>emptyMap()));
-            }
-            return exp;
         }
         
         private static Map<String, FAttribute> mapped(List<FAttribute> as) {
@@ -476,7 +469,8 @@ aspect Scalarization {
             Index ti = index.expand(i);
             if (bExp != null) {
                 Index ni = ti.subIndex(ti.ndims() - bExpDims);
-                nbexp = bExp.getArray().get(ni);
+                nbexp = bExp.extractArrayCell(Collections.<String,FExp>emptyMap(), ni);
+                nbexp = bExp.dynamicFExp(nbexp);
             }
             return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), 
                     mattrs, nbexp, -1, variability, inputOutput, ti);
@@ -502,11 +496,11 @@ aspect Scalarization {
                 if (nbexp != null) {
                     nbexpdims = nbexp.ndims();
                     nbexp.createArrayTemporaries(scalarizer, nv);
-                    nbexp = scalarize(nbexp);
                 }
             } else {
                 nbexpdims = comp.ndims();
-                nbexp = bExp.dynamicFExp(bExp.extractRecordFExp(cName));
+                nbexp = bExp.scalarRecordFExp(Collections.<String, FExp>emptyMap(), cName);
+                bExp.dynamicFExp(nbexp);
             }
             
             return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbexpdims, nv, inputOutput, index);
@@ -922,8 +916,7 @@ aspect Scalarization {
       if (indexNames != null) {
           fqn = fqn.copyAndAddFas(createIndexNameFas());
       }
-      fqn = fqn.asFQNameFull().copyAndAppend(suffix);
-      fqn.scalarized = false;
+      fqn = fqn.copyAndAppend(suffix);
       FExp res = createNode(new FIdUse(fqn));
       res = dynamicFExp(res).scalarize(indexMap);
       return res;
@@ -1311,11 +1304,8 @@ aspect Scalarization {
 	public FExp FRecordType.createRecordConstructorCell(Map<String,FExp> indexMap, FExp exp) {
 		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
-            FExp next = exp.scalarRecordFExp(indexMap, comp.getName());
-            if (exp.type().isUnknown()) {
-                next = comp.getFType().createRecordConstructor(indexMap, exp.dynamicFExp(next));
-            }
-            rc.addArg(next);
+			FExp next = exp.dynamicFExp(exp.scalarRecordFExp(indexMap, comp.getName()));
+			rc.addArg(comp.getFType().createRecordConstructor(indexMap, next));
 		}
 		return rc;
 	}
@@ -1462,7 +1452,7 @@ aspect Scalarization {
     
     syn boolean FExp.scalarizeExpanded()       = isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
-    eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
+    eq FFunctionCall.scalarizeExpanded()       = (useTempVar || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
     eq FRecordConstructor.scalarizeExpanded()  = useTempVar && super.scalarizeExpanded();
     
@@ -1844,7 +1834,7 @@ aspect Scalarization {
 	}
 	
 	public void ConnectionSetEntry.scalarize() {
-        if (fqName.ndims() == 0) {
+		if (fqName.accessNdims() == 0) {
 			// Can't use FQName.scalarize(), since it relies on rewrites
 			fqName = new FQNameString(fqName.scalarName());
 		} else {
