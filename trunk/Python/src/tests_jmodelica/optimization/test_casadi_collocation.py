@@ -1440,7 +1440,37 @@ class TestLocalDAECollocator(object):
         opts['nominal_traj'] = res_radau
         res = unscaled_op.optimize(self.algorithm, opts)
         assert_results(res, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+    @testattr(casadi = True)
+    def test_reorder(self):
+        """Test reordered NLP."""
+        op = self.cstr_lagrange_op
         
+        # References values
+        cost_ref = 1.858428662785409e3
+        u_norm_ref = 305.5673000177923
+        
+        # Default order
+        opts = self.optimize_options(op, self.algorithm)
+        opts['write_scaled_result'] = True
+        opts['order'] = "default"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Reverse order
+        opts['order'] = "reverse"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Random order #1
+        N.random.seed(1)
+        opts['order'] = "random"
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
+        
+        # Random order #2
+        res = op.optimize(self.algorithm, opts)
+        assert_results(res, cost_ref, u_norm_ref)
 
     @testattr(casadi = True)
     def test_cstr_minimum_time(self):

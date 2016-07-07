@@ -535,13 +535,16 @@ class CasadiCollocator(object):
         objective = float(self.solver_object.output(casadi.NLP_SOLVER_F))
         total_exec_time = stats['t_mainloop']
         
-        # 'Maximum_CPU_Time_Exceeded' fails to fill in stats['return_status'].
-        # Hopefully this is the only case
+        # 'Maximum_CPU_Time_Exceeded' and 'Feasible_Point_for_Square_Problem_Found' fail
+                # to fill in stats['return_status'].
         if (self.solver_object.hasSetOption('max_cpu_time') and
             total_exec_time >= self.solver_object.getOption('max_cpu_time')):
             return_status = 'Maximum_CPU_Time_Exceeded'
         else:
-            return_status = stats['return_status']
+            try:
+                return_status = stats['return_status']
+            except KeyError:
+                return_status = 'Feasible_Point_for_Square_Problem_Found'
         return (return_status, nbr_iter, objective, total_exec_time)
 
     def _update_equation_scaling(self):
@@ -608,6 +611,8 @@ class CasadiCollocator(object):
         # Get the result
         primal_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_X))
         self.primal_opt = primal_opt.reshape(-1)
+        if self.order != "default":
+            self.primal_opt = self.primal_opt[self.var_ordering]
         dual_g_opt = N.array(self.solver_object.output(casadi.NLP_SOLVER_LAM_G))
         # The stored dual variables are unscaled, so that we can change
         # the scaling without invalidating them
@@ -4669,10 +4674,34 @@ class LocalDAECollocator(CasadiCollocator):
         # Concatenate constraints
         constraints = casadi.vertcat([self.c_e, self.c_i])
 
+        # Reorder variables and constraints
+        if self.order != "default":
+            if self.order == "reverse":
+                self.eq_ordering = eq_ordering = range(constraints.numel()-1, -1, -1)
+                self.var_ordering = var_ordering = range(self.n_xx-1, -1, -1)
+            elif self.order == "random":
+                self.eq_ordering = eq_ordering = range(constraints.numel())
+                self.var_ordering = var_ordering = range(self.n_xx)
+                N.random.shuffle(eq_ordering)
+                N.random.shuffle(var_ordering)
+            else:
+                raise ValueError('Invalid order %s' % self.order)
+            self.inv_var_ordering = [var_ordering.index(i) for i in range(len(var_ordering))]
+            constraints = constraints[eq_ordering]
+            (constraints, self.cost) = casadi.substitute([constraints, self.cost], [self.xx], [self.xx[var_ordering]])
+            if self.equation_scaling:
+                self.pp_split = self.pp_split[eq_ordering]
+            self.gllb = self.gllb[eq_ordering]
+            self.glub = self.glub[eq_ordering]
+            self.xx_lb = self.xx_lb[self.inv_var_ordering]
+            self.xx_ub = self.xx_ub[self.inv_var_ordering]
+            self.xx_init = self.xx_init[self.inv_var_ordering]
+
         if self.equation_scaling:
             constraints = self.pp_split['equation_scale'] * constraints
 
         # Create solver object
+        self.constraints = constraints
         nlp = casadi.MXFunction(casadi.nlpIn(x=self.xx, p=self.pp),
                                 casadi.nlpOut(f=self.cost, g=constraints))
         if self.solver == "IPOPT":
