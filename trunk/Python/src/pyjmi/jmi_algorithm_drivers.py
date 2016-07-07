@@ -1613,6 +1613,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: String
             Default: 'IPOPT'
 
+        verbosity --
+            Sets verbosity of algorithm output. 0 prints nothing, 3 prints everything.
+
+            Type: int
+            Default: 3
+
     Collocation algorithm experimental/debug options::
 
         free_element_lengths_data --
@@ -1893,6 +1899,7 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
+                'verbosity': 3,
                 'explicit_hessian': False,
                 'order': "default",
                 'IPOPT_options': {'dual_inf_tol': 1e100,

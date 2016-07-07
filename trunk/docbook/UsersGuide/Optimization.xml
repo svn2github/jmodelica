@@ -594,6 +594,15 @@ opts? # View the help text</programlisting>
             </row>
 
             <row>
+              <entry><literal>verbosity</literal></entry>
+
+              <entry>3</entry>
+
+              <entry>Sets verbosity of algorithm output. 0 prints nothing, 3
+              prints everything.</entry>
+            </row>
+
+            <row>
               <entry><literal>IPOPT_options</literal></entry>
 
               <entry>IPOPT defaults</entry>

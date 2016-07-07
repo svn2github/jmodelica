@@ -2296,10 +2296,11 @@ class LocalDAECollocator(CasadiCollocator):
                             data = self.init_traj.get_variable_data(t_name)
                         except VariableNotFoundError:
                             if (var_init_guess in [0., 1.]):
-                                print("Warning: Could not find initial " +
-                                      "guess for %s in initial " % t_name +
-                                      "trajectories. Using end-point of " +
-                                      "provided time horizon instead.")
+                                if self.options['verbosity'] >= 2:
+                                    print("Warning: Could not find initial " +
+                                          "guess for %s in initial " % t_name +
+                                          "trajectories. Using end-point of " +
+                                          "provided time horizon instead.")
                                 if t_name == "startTime":
                                     t_init[t_name] = intraj_gvd("time").t[0]
                                 elif t_name == "finalTime":
@@ -2308,10 +2309,11 @@ class LocalDAECollocator(CasadiCollocator):
                                     raise CasadiCollocatorException(
                                         "BUG: Please contact the developers.")
                             else:
-                                print("Warning: Could not find initial " +
-                                      "guess for %s in initial " % t_name +
-                                      "trajectories. Using initialGuess " +
-                                      "attribute value instead.")
+                                if self.options['verbosity'] >= 2:
+                                    print("Warning: Could not find initial " +
+                                          "guess for %s in initial " % t_name +
+                                          "trajectories. Using initialGuess " +
+                                          "attribute value instead.")
                                 t_init[t_name] = var_init_guess
                         else:
                             t_init[t_name] = data.x[0]
@@ -2329,10 +2331,11 @@ class LocalDAECollocator(CasadiCollocator):
                                 data = self.nominal_traj.get_variable_data(
                                     t_name)
                             except VariableNotFoundError:
-                                print("Warning: Could not find nominal " +
-                                      "value for %s in nominal t" % t_name +
-                                      "rajectories. Using end-point of " +
-                                      "provided time horizon instead.")
+                                if self.options['verbosity'] >= 2:
+                                    print("Warning: Could not find nominal " +
+                                          "value for %s in nominal t" % t_name +
+                                          "rajectories. Using end-point of " +
+                                          "provided time horizon instead.")
                                 if t_name == "startTime":
                                     t_nom[t_name] = nomtraj_gvd("time").t[0]
                                 elif t_name == "finalTime":
@@ -2382,9 +2385,10 @@ class LocalDAECollocator(CasadiCollocator):
                     except VariableNotFoundError:
                         # It is possibly to treat missing variable trajectories
                         # more efficiently, especially in the case of MX
-                        print("Warning: Could not find nominal trajectory " +
-                              "for variable " + name + ". Using nominal " +
-                              "attribute value instead.")
+                        if self.options['verbosity'] >= 2:
+                            print("Warning: Could not find nominal trajectory " +
+                                  "for variable " + name + ". Using nominal " +
+                                  "attribute value instead.")
                         self.nominal_traj_mode[name] = "attribute"
                         abscissae = N.array([0])
                         nom_val = self.op.get_attr(var, "nominal")
@@ -2395,9 +2399,10 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = N.asarray(data.x)
                         nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
                         if len(nonfinite_ind) > 0:
-                            print("Warning: Nominal trajectory for variable " + name +
-                                  " contains nonfinite values. Using nominal attribute " +
-                                  "value for these instead.")
+                            if self.options['verbosity'] >= 1:
+                                print("Warning: Nominal trajectory for variable " + name +
+                                      " contains nonfinite values. Using nominal attribute " +
+                                      "value for these instead.")
                             ordinates[nonfinite_ind] = self.op.get_attr(var, "nominal")
                         ordinates = ordinates.reshape([-1, 1])
                     nom_traj[vt][var_index] = \
@@ -2517,10 +2522,11 @@ class LocalDAECollocator(CasadiCollocator):
                     
                     if mode == "time-variant" and self._var_sf_mode[name] != "time-variant":
                         mode = self._var_sf_mode[name]
-                        print("Warning: Could not do time-variant " + 
-                                      "scaling for variable %s " % name +
-                                      "due to that the original scaling was %s. " %mode + 
-                                      "Doing %s scaling instead." %mode)
+                        if self.options['verbosity'] >= 3:
+                            print("Warning: Could not do time-variant " + 
+                                          "scaling for variable %s " % name +
+                                          "due to that the original scaling was %s. " %mode + 
+                                          "Doing %s scaling instead." %mode)
                     
                     values = {}
                     traj_min = N.inf
@@ -2555,10 +2561,11 @@ class LocalDAECollocator(CasadiCollocator):
                             if (self.nominal_traj_mode["_default_mode"] == 
                                 "time-variant"):
                                 variant = False
-                                print("Warning: Could not do time-variant " + 
-                                      "scaling for variable %s. " % name +
-                                      "Doing time-invariant affine scaling " +
-                                      "instead.")
+                                if self.options['verbosity'] >= 3:
+                                    print("Warning: Could not do time-variant " + 
+                                          "scaling for variable %s. " % name +
+                                          "Doing time-invariant affine scaling " +
+                                          "instead.")
                             else:
                                 raise CasadiCollocatorException(
                                     "Could not do time-variant scaling for " +
@@ -2588,9 +2595,10 @@ class LocalDAECollocator(CasadiCollocator):
                             d = max([abs(traj_max), abs(traj_min)])
                             if d == 0.0:
                                 d = N.abs(self.op.get_attr(var, "nominal"))
-                                print("Warning: Nominal trajectory for " +
-                                      "variable %s is identically " % name + 
-                                      "zero. Using nominal attribute instead.")
+                                if self.options['verbosity'] >= 3:
+                                    print("Warning: Nominal trajectory for " +
+                                          "variable %s is identically " % name + 
+                                          "zero. Using nominal attribute instead.")
                                 if d == 0.0:
                                     raise CasadiCollocatorException(
                                         "Nominal value for " +
@@ -2600,19 +2608,21 @@ class LocalDAECollocator(CasadiCollocator):
                             if N.allclose(traj_max, traj_min):
                                 if (self.nominal_traj_mode["_default_mode"] in 
                                     ["affine", "time-variant"]):
-                                    print("Warning: Could not do affine " +
-                                          "scaling for variable %s. " % name + 
-                                          "Doing linear scaling instead.")
+                                    if self.options['verbosity'] >= 3:
+                                        print("Warning: Could not do affine " +
+                                              "scaling for variable %s. " % name + 
+                                              "Doing linear scaling instead.")
                                 else:
                                     raise CasadiCollocatorException(
                                         "Could not do affine scaling " +
                                         "for variable %s." % name)
                                 d = max([abs(traj_max), abs(traj_min)])
                                 if d == 0.:
-                                    print("Warning: Nominal trajectory for " +
-                                          "variable %s is " % name + 
-                                          "identically zero. Using nominal " +
-                                          "attribute instead.")
+                                    if self.options['verbosity'] >= 3:
+                                        print("Warning: Nominal trajectory for " +
+                                              "variable %s is " % name + 
+                                              "identically zero. Using nominal " +
+                                              "attribute instead.")
                                     d = N.abs(self.op.get_attr(var, "nominal"))
                                     if d == 0.:
                                         raise CasadiCollocatorException(
@@ -2673,13 +2683,15 @@ class LocalDAECollocator(CasadiCollocator):
                             data = self.nominal_traj.get_variable_data(name)
                             d = N.abs(data.x[0])
                             if N.allclose(d, 0.):
-                                print("Warning: Nominal value for %s is " % name +
-                                      "too small. Setting scaling factor to 1.")
+                                if self.options['verbosity'] >= 2:
+                                    print("Warning: Nominal value for %s is " % name +
+                                          "too small. Setting scaling factor to 1.")
                                 d = 1.
                         except VariableNotFoundError:
-                            print("Warning: Could not find nominal trajectory " +
-                                  "for variable " + name + ". Using nominal " +
-                                  "attribute value instead.")
+                            if self.options['verbosity'] >= 2:
+                                print("Warning: Could not find nominal trajectory " +
+                                      "for variable " + name + ". Using nominal " +
+                                      "attribute value instead.")
                             nom_val = self.op.get_attr(var, "nominal")
                             d = N.abs(nom_val)
                             if d == 0.:
@@ -4427,10 +4439,11 @@ class LocalDAECollocator(CasadiCollocator):
                     try:
                         data = self.init_traj.get_variable_data(name)
                     except VariableNotFoundError:
-                        print("Warning: Could not find initial " +
-                              "trajectory for variable " + name +
-                              ". Using initialGuess attribute value " +
-                              "instead.")
+                        if self.options['verbosity'] >= 2:
+                            print("Warning: Could not find initial " +
+                                  "trajectory for variable " + name +
+                                  ". Using initialGuess attribute value " +
+                                  "instead.")
                         ordinates = N.array([[
                             self.op.get_attr(var, "initialGuess")]])
                         abscissae = N.array([0])
@@ -4439,9 +4452,10 @@ class LocalDAECollocator(CasadiCollocator):
                         ordinates = N.asarray(data.x)
                         nonfinite_ind = N.nonzero(N.isfinite(ordinates) == 0.)[0]
                         if len(nonfinite_ind) > 0:
-                            print("Warning: Initial trajectory for variable " + name +
-                                  " contains nonfinite values. Using initialGuess attribute " +
-                                  "value for these instead.")
+                            if self.options['verbosity'] >= 1:
+                                print("Warning: Initial trajectory for variable " + name +
+                                      " contains nonfinite values. Using initialGuess attribute " +
+                                      "value for these instead.")
                             ordinates[nonfinite_ind] = self.op.get_attr(var, "initialGuess")
                         ordinates = ordinates.reshape([-1, 1])
                     traj[var] = TrajectoryLinearInterpolation(
@@ -4531,10 +4545,11 @@ class LocalDAECollocator(CasadiCollocator):
                         try:
                             data = self.init_traj.get_variable_data(name)
                         except VariableNotFoundError:
-                            print("Warning: Could not find initial " +
-                                  "trajectory for variable " + name +
-                                  ". Using initialGuess attribute value " +
-                                  "instead.")
+                            if self.options['verbosity'] >= 2:
+                                print("Warning: Could not find initial " +
+                                      "trajectory for variable " + name +
+                                      ". Using initialGuess attribute value " +
+                                      "instead.")
                             ordinates = N.array([[
                                 op.get_attr(var, "initialGuess")]])
                             abscissae = N.array([0])
@@ -5851,7 +5866,8 @@ def _to_external_function(fcn, name, use_existing=False):
     else:
         ext = '.so'
     if not use_existing:
-        print 'Generating code for', name
+        if self.options['verbosity'] >= 1:
+            print 'Generating code for', name
         fcn.generateCode(name + '.c')
         _add_help_fcns(name + '.c')
         bitness_flag = '-m32' if struct.calcsize('P') == 4 else '-m64'
@@ -6009,7 +6025,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
             self.solver_statistics = solver.get_solver_statistics()
             self.opt_input = solver.get_opt_input()
 
-        if times is not None:
+        if times is not None and self.options['verbosity'] >= 1:
             # Print times
             print("\nInitialization time: %.2f seconds" % times['init'])
             
@@ -6020,7 +6036,7 @@ class LocalDAECollocationAlgResult(JMResultBase):
                   times['post_processing'])
 
         # Print condition numbers
-        if options is not None and self.options['print_condition_numbers']:
+        if options is not None and self.options['print_condition_numbers'] and self.options['verbosity'] >= 1:
             J_init_cond = N.linalg.cond(solver.get_J("init"), scaled_residuals=self.op.equation_scaling)
             J_opt_cond = N.linalg.cond(solver.get_J("opt"), scaled_residuals=self.op.equation_scaling)
             KKT_init_cond = N.linalg.cond(solver.get_KKT("init"), scaled_residuals=self.op.equation_scaling)

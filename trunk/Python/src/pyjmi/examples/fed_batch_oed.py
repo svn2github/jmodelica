@@ -65,6 +65,7 @@ def run_demo(with_plots=True):
     opts['blocking_factors'] = 10 * [3] # Piecewise constant inputs
     opts['n_e'] = 30 # Number of collocation elements
     opts['IPOPT_options']['linear_solver'] = "ma27"
+    opts['verbosity'] = 1
 
     # Solve
     opt_res = op.optimize(options=opts)
