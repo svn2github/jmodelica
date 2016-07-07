@@ -1725,6 +1725,7 @@ abstract public class OptionRegistry {
         public StringOption(String key, OptionType type, Category cat, String description, String value, String[] vals) {
             super(key, description, type, cat);
             this.value = value;
+            this.defaultValue = value;
             if (vals == null) {
                 this.vals = null;
             } else {
