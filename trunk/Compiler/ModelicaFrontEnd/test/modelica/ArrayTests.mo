@@ -8471,4 +8471,126 @@ end ArrayTests.SpatialDistribution1;
 ")})));
 end SpatialDistribution1;
 
+model Delay1
+    Real[2] y1;
+    Real[2] y2;
+    Real[2] x;
+  equation
+    y1 = delay(x,{1,2},2);
+    y2 = delay(x,{1,2});
+    x = {time,time};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Delay1",
+            description="Test scalarizing of vectorized delay",
+            flatModel="
+fclass ArrayTests.Delay1
+ Real y1[1];
+ Real y1[2];
+ Real y2[1];
+ Real y2[2];
+ Real x[1];
+ Real x[2];
+equation
+ y1[1] = delay(x[1], 1, 2);
+ y1[2] = delay(x[2], 2, 2);
+ y2[1] = delay(x[1], 1);
+ y2[2] = delay(x[2], 2);
+ x[1] = time;
+ x[2] = time;
+end ArrayTests.Delay1;
+")})));
+end Delay1;
+
+model IfExprTemp1
+    function f
+        input Real x;
+        output Real[:] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real y = if sum(f(time))>0 then sum(f(time)) else sum(f(time+1));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExprTemp1",
+            description="",
+            flatModel="
+fclass ArrayTests.IfExprTemp1
+ Real y;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_3[1];
+ Real temp_3[2];
+ Real temp_7;
+ Real temp_10;
+equation
+ temp_1[2] = temp_1[1] + 1;
+ temp_2[1] = if temp_1[1] + temp_1[2] > 0 then temp_7 else pre(temp_2[1]);
+ temp_2[2] = if temp_1[1] + temp_1[2] > 0 then temp_7 + 1 else pre(temp_2[2]);
+ temp_3[1] = if temp_1[1] + temp_1[2] > 0 then pre(temp_3[1]) else temp_10;
+ temp_3[2] = if temp_1[1] + temp_1[2] > 0 then pre(temp_3[2]) else temp_10 + 1;
+ y = if temp_1[1] + temp_1[2] > 0 then temp_2[1] + temp_2[2] else temp_3[1] + temp_3[2];
+ temp_1[1] = time;
+ temp_7 = time;
+ temp_10 = time + 1;
+end ArrayTests.IfExprTemp1;
+")})));
+end IfExprTemp1;
+
+model IfExprTemp2
+    function f
+        input Real x;
+        output Real[:] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real y;
+algorithm
+    y := if sum(f(time))>0 then sum(f(time)) else sum(f(time+1));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExprTemp2",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.IfExprTemp2
+ Real y;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_3[1];
+ Real temp_3[2];
+algorithm
+ ({temp_1[1], temp_1[2]}) := ArrayTests.IfExprTemp2.f(time);
+ _eventIndicator_1 := temp_1[1] + temp_1[2];
+ if temp_1[1] + temp_1[2] > 0 then
+  ({temp_2[1], temp_2[2]}) := ArrayTests.IfExprTemp2.f(time);
+ else
+  ({temp_3[1], temp_3[2]}) := ArrayTests.IfExprTemp2.f(time + 1);
+ end if;
+ _eventIndicator_2 := temp_1[1] + temp_1[2];
+ y := if temp_1[1] + temp_1[2] > 0 then temp_2[1] + temp_2[2] else temp_3[1] + temp_3[2];
+
+public
+ function ArrayTests.IfExprTemp2.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end ArrayTests.IfExprTemp2.f;
+
+end ArrayTests.IfExprTemp2;
+")})));
+end IfExprTemp2;
+
 end ArrayTests;

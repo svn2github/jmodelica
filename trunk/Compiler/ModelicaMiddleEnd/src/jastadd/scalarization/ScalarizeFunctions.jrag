@@ -183,6 +183,40 @@ aspect FunctionScalarization {
         }
     }
     
+    public void FIfExp.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+        getIfExp().createArrayTemporaries(clauses, vars, indexMap, names);
+        List<FAbstractVariable> thenVars = new List<FAbstractVariable>();
+        List thenClauses = new List();
+        getThenExp().createArrayTemporaries(thenClauses, thenVars, indexMap, names);
+        List<FAbstractVariable> elseVars = new List<FAbstractVariable>();
+        List elseClauses = new List();
+        getElseExp().createArrayTemporaries(elseClauses, elseVars, indexMap, names);
+        if (thenClauses.getNumChild() > 0 || elseClauses.getNumChild() > 0) {
+            FExp ifexp = getIfExp().scalarize(indexMap);
+            if (inFAlgorithm()) {
+                List<FIfWhenClause> cl = new List<FIfWhenClause>();
+                cl.add(new FIfClause(ifexp, thenClauses));
+                clauses.add(new FIfStmt(cl, elseClauses));
+            } else {
+                for (FAbstractVariable fv : elseVars) {
+                    thenClauses.add(new FEquation(fv.createUseExp(), fv.createUseExp().createFPreExp()));
+                }
+                List l = new List();
+                for (FAbstractVariable fv : thenVars) {
+                    l.add(new FEquation(fv.createUseExp(), fv.createUseExp().createFPreExp()));
+                }
+                l.addAll(elseClauses);
+                FElseEquation elseClause = new FElseEquation(new FNormalEquation(), l);
+                clauses.add(new FIfEquation(new FNormalEquation(), thenClauses, ifexp, new Opt<FIfWhenElseEquation>(elseClause)));
+            }
+            vars.addAll(thenVars);
+            vars.addAll(elseVars);
+        }
+        if (extractTemp()) {
+            super.createArrayTemporaries(clauses, vars, indexMap, names);
+        }
+    }
+    
     public void FFunctionCall.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // No names available as a function call arg.
         boolean b = !extractTemp();
