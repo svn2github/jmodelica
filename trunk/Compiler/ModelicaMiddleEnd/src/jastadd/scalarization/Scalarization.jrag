@@ -1758,15 +1758,15 @@ aspect Scalarization {
         for (FExp arg : getArgs()) {
             args.add(arg.scalarize(indexMap));
         }
-        return createScalarized(getName().fullCopy(), args, getSizes());
+        return createScalarized(getName().fullCopy(), args, getFType().scalarType());
 	}
     
-    protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
-        return new FFunctionCall(name, args, sizes); 
+    protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
+        return new FFunctionCall(name, args, type); 
     }
     
-    protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, Size[] sizes) {
-        return new FPartialFunctionCall(name, args, sizes, getArgNames().fullCopy()); 
+    protected FFunctionCall FPartialFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
+        return new FPartialFunctionCall(name, args, type, getArgNames().fullCopy()); 
     }
     
 	public FAssert FAssert.scalarizeExp(Map<String,FExp> indexMap) {

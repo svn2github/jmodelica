@@ -6597,6 +6597,106 @@ end RecordTests.RecordWithColonArray3;
 ")})));
 end RecordWithColonArray3;
 
+model RecordWithColonArray4
+    record R
+        Real x[:];
+    end R;
+    
+    function f
+        input Integer n;
+        output R r = R(1:n);
+    algorithm
+    end f;
+    
+    parameter Integer n = 3;
+    R r = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordWithColonArray4",
+            description="Variable with : size in record",
+            variability_propagation=false,
+            flatModel="
+fclass RecordTests.RecordWithColonArray4
+ structural parameter Integer n = 3 /* 3 */;
+ Real r.x[1];
+ Real r.x[2];
+ Real r.x[3];
+equation
+ (RecordTests.RecordWithColonArray4.R({r.x[1], r.x[2], r.x[3]})) = RecordTests.RecordWithColonArray4.f(3);
+
+public
+ function RecordTests.RecordWithColonArray4.f
+  input Integer n;
+  output RecordTests.RecordWithColonArray4.R r;
+ algorithm
+  return;
+ end RecordTests.RecordWithColonArray4.f;
+
+ record RecordTests.RecordWithColonArray4.R
+  Real x[:];
+ end RecordTests.RecordWithColonArray4.R;
+
+end RecordTests.RecordWithColonArray4;
+")})));
+end RecordWithColonArray4;
+
+model RecordWithColonArray5
+    record R
+        Real x[:];
+    end R;
+    
+    record R2
+        R r;
+    end R2;
+    
+    function f
+        input Integer n;
+        output R r = R(1:n);
+    algorithm
+    end f;
+    
+    parameter Integer n = 3;
+    R2[2] r2 = {R2(f(n)),R2(f(n))};
+    
+    model M
+        R2 r2; 
+    end M;
+    
+    M[2] m(r2=r2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordWithColonArray5",
+            description="Variable with : size in record",
+            flatModel="
+fclass RecordTests.RecordWithColonArray5
+ structural parameter Integer n = 3 /* 3 */;
+ RecordTests.RecordWithColonArray5.R2 r2[2](r(x(size() = {{3}, {3}}))) = {RecordTests.RecordWithColonArray5.R2(RecordTests.RecordWithColonArray5.f(3)), RecordTests.RecordWithColonArray5.R2(RecordTests.RecordWithColonArray5.f(3))};
+ RecordTests.RecordWithColonArray5.R2 m[1].r2(r(x(size() = {3}))) = r2[1];
+ RecordTests.RecordWithColonArray5.R2 m[2].r2(r(x(size() = {3}))) = r2[2];
+
+public
+ function RecordTests.RecordWithColonArray5.f
+  input Integer n;
+  output RecordTests.RecordWithColonArray5.R r;
+ algorithm
+  r := RecordTests.RecordWithColonArray5.R(1:n);
+  return;
+ end RecordTests.RecordWithColonArray5.f;
+
+ record RecordTests.RecordWithColonArray5.R
+  Real x[:];
+ end RecordTests.RecordWithColonArray5.R;
+
+ record RecordTests.RecordWithColonArray5.R2
+  RecordTests.RecordWithColonArray5.R r;
+ end RecordTests.RecordWithColonArray5.R2;
+
+end RecordTests.RecordWithColonArray5;
+")})));
+end RecordWithColonArray5;
+
 model RecordDer1
 	record A
 		Real x;
