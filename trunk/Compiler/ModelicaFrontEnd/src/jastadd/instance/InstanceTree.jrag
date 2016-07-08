@@ -447,7 +447,7 @@ aspect Environments {
     }
     
     syn lazy Environment InstRecordConstructor.getMergedEnvironment() = 
-        new Environment().mergeOuterClone(getInstModifications());
+        myInstClassDecl().getMergedEnvironment().mergeOuterClone(getInstModifications());
 
     syn Environment InstNode.filteredEnvironment() = nameScope() ? myEnvironment(name()) : myEnvironment();
 
@@ -494,7 +494,9 @@ aspect Environments {
      * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
      * InstNode is simply duplicated. This is typically the case for extends clauses.
      */
-    eq InstNode.getChild().myEnvironment() = getMergedEnvironment().clone();
+    eq InstNode.getChild().myEnvironment()                          = getMergedEnvironment().clone();
+    eq InstRecordConstructor.getInstComponentDecl().myEnvironment() = getMergedEnvironment().clone();
+    eq InstRecordConstructor.getInstExtends().myEnvironment()       = getMergedEnvironment().clone();
 
     /** 
      * When a string argument representing a component name is given as argument to myEnvironment,
@@ -1033,8 +1035,8 @@ aspect InstanceTreeConstruction {
 
     syn InstModification InstFunctionArgument.newInstModification() = 
             new InstComponentModification(getModification(), false, false,
-                getBoundInput().createInstAccess(),
-                new Opt<InstModification>(getModification().newInstModification()));
+                    boundInput.createInstAccess(),
+                    new Opt<InstModification>(getModification().newInstModification()));
 
     syn InstValueModification DummyModification.newInstModification() = new InstValueModification(this);
 

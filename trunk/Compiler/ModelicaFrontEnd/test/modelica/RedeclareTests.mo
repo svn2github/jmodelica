@@ -4615,6 +4615,66 @@ In component g:
 end RedeclareTest75;
 
 
+model RedeclareTest76
+    record R2
+        Real w;
+    end R2;
+    
+    record R1
+        R2 x = R2(time);
+    end R1;
+    
+    record R
+        extends R1;
+    end R;
+    
+    model A
+        R1 r;
+        replaceable D x;
+    end A;
+    
+    model B
+        extends A(r = R());
+        redeclare E x;
+    end B;
+    
+    model D
+        Real y = time+2;
+    end D;
+    
+    model E
+        extends D(y=time+3);
+    end E;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest76",
+            description="Check that environment is correctly calculated for extends in record constructors (see #5044)",
+            flatModel="
+fclass RedeclareTests.RedeclareTest76
+ RedeclareTests.RedeclareTest76.R1 b.r = RedeclareTests.RedeclareTest76.R(RedeclareTests.RedeclareTest76.R2(time));
+ Real b.x.y = time + 3;
+
+public
+ record RedeclareTests.RedeclareTest76.R2
+  Real w;
+ end RedeclareTests.RedeclareTest76.R2;
+
+ record RedeclareTests.RedeclareTest76.R1
+  RedeclareTests.RedeclareTest76.R2 x;
+ end RedeclareTests.RedeclareTest76.R1;
+
+ record RedeclareTests.RedeclareTest76.R
+  RedeclareTests.RedeclareTest76.R2 x;
+ end RedeclareTests.RedeclareTest76.R;
+
+end RedeclareTests.RedeclareTest76;
+")})));
+end RedeclareTest76;
+
+
 model RedeclareElement1
   model A
     replaceable model B

@@ -1843,8 +1843,8 @@ aspect FlatFunctionUtils {
                  this.prefix = prefix;
              }
              
-             public String name(NameIndexCache nic, GeneratedVarType gvt) {
-                 return prefix + nic.nextIndex(gvt);
+             public String name(NameIndexCache nic) {
+                 return prefix + nic.nextIndex(this);
              }
          }
      }
@@ -1852,7 +1852,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt) {
          String name;
          do {
-             name = gvt.name(nic, gvt);
+             name = gvt.name(nic);
          } while (lookup(name) != null);
          return name;
      }
@@ -1860,7 +1860,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt, FlatVariableMap other) {
          String name;
          do {
-             name = gvt.name(nic, gvt);
+             name = gvt.name(nic);
          } while (lookup(name) != null || other.lookup(name) != null);
          return name;
      }
