@@ -407,8 +407,8 @@ aspect Scalarization {
         // Binding expression
         private FExp bExp;
         
-        // Number of dimensions in binding expression
-        private int bExpDims;
+        // Number of name parts relevant for binding expression
+        private int nBindingNameParts;
         
         // (Mapped) attributes of this variable
         private Map<String, FAttribute> mattrs; 
@@ -424,7 +424,7 @@ aspect Scalarization {
         private ScalarizingVariableInstance(FQName n, Map<String, FAttribute> mattrs, FExp be,
                 int bd, FTypePrefixVariability variability, Opt<FTypePrefixInputOutput> inputOutput, Index i)  {
             bExp = be;
-            bExpDims = bd;
+            nBindingNameParts = bd;
             name = n;
             index = i;
             this.mattrs = mattrs;
@@ -438,7 +438,7 @@ aspect Scalarization {
         }
         
         public ScalarizingVariableInstance(FVariable fv) {
-            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.ndims(), fv.variability(), 
+            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.getFQName().asFQNameFull().numParts(), fv.variability(), 
                     fv.getFTypePrefixInputOutputOpt(), Index.NULL);
         }
         
@@ -465,15 +465,14 @@ aspect Scalarization {
         }
         
         public ScalarizingVariableInstance create(Scalarizer scalarizer, Index i) {
-            FExp nbexp = null;
+            FExp nbexp = bExp;
             Index ti = index.expand(i);
-            if (bExp != null) {
-                Index ni = ti.subIndex(ti.ndims() - bExpDims);
-                nbexp = bExp.extractArrayCell(Collections.<String,FExp>emptyMap(), ni);
-                nbexp = bExp.dynamicFExp(nbexp);
+            if (nbexp != null && nbexp.isArray()) {
+                Index ni = ti.subIndex(ti.ndims() - nbexp.ndims());
+                nbexp = nbexp.getArray().get(ni);
             }
             return new ScalarizingVariableInstance(name.asFQNameFull().copyAndAddFas(i.createFArraySubscripts()), 
-                    mattrs, nbexp, -1, variability, inputOutput, ti);
+                    mattrs, nbexp, nBindingNameParts, variability, inputOutput, ti);
         }
         
         public ScalarizingVariableInstance create(Scalarizer scalarizer, FVariable comp) {
@@ -487,33 +486,30 @@ aspect Scalarization {
                 attrs = a.getFAttributes();
             }
             
-            FExp nbexp = null;
-            int nbexpdims = -1;
-            if (bExp == null) {
+            FExp nbexp = bExp;
+            int nbp = nBindingNameParts;
+            if (nbexp == null) {
                 if (a != null) {
                     nbexp = a.getValue();
                 }
                 if (nbexp != null) {
-                    nbexpdims = nbexp.ndims();
                     nbexp.createArrayTemporaries(scalarizer, nv);
+                    nbp = name.asFQNameFull().numParts() + 1;
                 }
-            } else {
-                nbexpdims = comp.ndims();
-                nbexp = bExp.scalarRecordFExp(Collections.<String, FExp>emptyMap(), cName);
-                bExp.dynamicFExp(nbexp);
             }
             
-            return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbexpdims, nv, inputOutput, index);
+            return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbp, nv, inputOutput, index);
         }
         
         public void createScalarized(Scalarizer scalarizer, FVariable comp) {
             FVariable fv = comp.copyForName(name);
             Map<String,FExp> im = Collections.<String,FExp>emptyMap();
             if (bExp != null) {
+                FExp e = bExp.scalarRecordFExp(im, name.copyPart(nBindingNameParts, name.numParts()-1));
                 if (comp.keepBExp(variability, bExp)) {
-                    fv.setBindingExp(bExp);
+                    fv.setBindingExp(e);
                 } else {
-                    scalarizer.add(variability, new FEquation(new FIdUseExp(name.scalarize(im)), bExp.scalarize(im)));
+                    scalarizer.add(variability, new FEquation(new FIdUseExp(name.scalarize(im)), e));
                     fv.setBindingExpOpt(new Opt());
                 }
             } else {
@@ -916,7 +912,8 @@ aspect Scalarization {
       if (indexNames != null) {
           fqn = fqn.copyAndAddFas(createIndexNameFas());
       }
-      fqn = fqn.copyAndAppend(suffix);
+      fqn = fqn.asFQNameFull().copyAndAppend(suffix);
+      fqn.scalarized = false;
       FExp res = createNode(new FIdUse(fqn));
       res = dynamicFExp(res).scalarize(indexMap);
       return res;
@@ -1304,8 +1301,12 @@ aspect Scalarization {
 	public FExp FRecordType.createRecordConstructorCell(Map<String,FExp> indexMap, FExp exp) {
 		FRecordConstructor rc = new FRecordConstructor(new FIdUse(getName()), new List());
 		for (FRecordComponentType comp : getComponents()) {
-			FExp next = exp.dynamicFExp(exp.scalarRecordFExp(indexMap, comp.getName()));
-			rc.addArg(comp.getFType().createRecordConstructor(indexMap, next));
+            FExp next = exp.scalarRecordFExp(indexMap, comp.getName());
+            if (exp.type().isUnknown()) {
+                // Work around for expanding FIdTempExp which doesnt know its type
+                next = comp.getFType().createRecordConstructor(indexMap, exp.dynamicFExp(next));
+            }
+            rc.addArg(next);
 		}
 		return rc;
 	}
@@ -1452,7 +1453,7 @@ aspect Scalarization {
     
     syn boolean FExp.scalarizeExpanded()       = isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
-    eq FFunctionCall.scalarizeExpanded()       = (useTempVar || isVectorized()) && super.scalarizeExpanded();
+    eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();
     eq FRecordConstructor.scalarizeExpanded()  = useTempVar && super.scalarizeExpanded();
     
