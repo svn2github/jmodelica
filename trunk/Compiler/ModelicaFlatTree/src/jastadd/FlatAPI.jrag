@@ -3714,7 +3714,7 @@ aspect FlatDiagnostics {
 
 aspect FlatAlgorithmAPI {
     
-    syn boolean FExp.inFAlgorithm() = myFAlgorithm() != null;
+    syn boolean FIdUseExp.inFAlgorithm() = myFAlgorithm() != null;
     
     syn FAlgorithm FIdUseExp.myFAlgorithm() = getFIdUse().myFAlgorithm();
     inh lazy FAlgorithm FIdUse.myFAlgorithm();
