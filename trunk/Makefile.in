@@ -301,6 +301,8 @@ MC_INTERFACE = $(abs_top_srcdir)/ModelicaCasADiInterface
 MC_SRC = $(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi
 OC_SRC = $(JAVA_CASADI_BASE_DIR)/OptimicaCompilerCasADi
 MC_SRC_SWIG = $(abs_top_srcdir)/Compiler/ModelicaCompilerCasADi/src/swig
+MC_CASADI_BUILD = $(abs_builddir)/ModelicaCompilerCasADi
+OC_CASADI_BUILD = $(abs_builddir)/OptimicaCompilerCasADi
 
 # The modelica casadi interface is built into a build folder
 MC_BUILD = $(abs_builddir)/ModelicaCasADiInterfaceBuild
@@ -324,6 +326,9 @@ COMPILER_DIR = $(abs_top_srcdir)/Compiler
 JAVA_MC_ANT_FILE = $(COMPILER_DIR)/ModelicaCompiler/build.xml
 JAVA_OC_ANT_FILE = $(COMPILER_DIR)/OptimicaCompiler/build.xml
 JAVA_CASADI_BASE_DIR = $(COMPILER_DIR)
+JAVA_CASADI_BUILD_DIR = $(abs_builddir)
+JAVA_MC_CASADI_ANT_FILE = $(COMPILER_DIR)/ModelicaCompilerCasADi/build.xml
+JAVA_OC_CASADI_ANT_FILE = $(COMPILER_DIR)/OptimicaCompilerCasADi/build.xml
 JAVA_EXEC_CP = $(JAVA_BUILD_DIR)/bin/ModelicaCompiler.jar:$(JAVA_BUILD_DIR)/bin/util.jar:$(abs_top_srcdir)/ThirdParty/Beaver/beaver-0.9.6.1/lib/beaver-rt.jar
 
 # Paths for doc
@@ -855,19 +860,19 @@ ifcasadi: casadi
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
 	cmake $(MC_SRC_SWIG) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" \
-	    -DIFCASADI_OUTDIR="$(MC_SRC)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
+	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
 	*) \
 	cmake $(MC_SRC_SWIG) \
-	    -DIFCASADI_OUTDIR="$(MC_SRC)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
+	    -DIFCASADI_OUTDIR="$(MC_CASADI_BUILD)" -DCASADI_HOME="$(CASADI_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)";; \
 	esac 
 	cd $(MC_BUILD)/ifcasadi;  make
 
-$(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi
+$(MC_LIB): $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi
 	rm -rf $(MC_LIB)
 	mkdir -p $(MC_LIB)
-	cp $(MC_SRC)/bin/ModelicaCompiler.jar $(MC_LIB)
-	cp $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_LIB)
-	cp $(MC_SRC)/bin/util.jar $(MC_LIB)
+	cp $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(MC_LIB)
+	cp $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_LIB)
+	cp $(MC_CASADI_BUILD)/bin/util.jar $(MC_LIB)
 	case $(build) in \
 	*-cygwin*) \
 	cp $(MC_BUILD)/ifcasadi/ifcasadi.dll $(MC_LIB) ;; \
@@ -878,36 +883,36 @@ $(MC_LIB): $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar
 	esac 
 
 mc_modelica: ifcasadi
-	cd $(MC_SRC); $(ANT_OPTS) $(ANT) "-Dcompiler=$(COMPILER_DIR)"
+	cd $(MC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_MC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 
 mc_optimica: ifcasadi
-	mkdir -p $(OC_SRC)/src/java-generated
-	cp -pr $(MC_SRC)/src/java-generated/ifcasadi $(OC_SRC)/src/java-generated
-	cd $(OC_SRC); $(ANT_OPTS) $(ANT) "-Dcompiler=$(COMPILER_DIR)"
+	mkdir -p $(OC_CASADI_BUILD)/src/java-generated
+	cp -pr $(MC_CASADI_BUILD)/src/java-generated/ifcasadi $(OC_CASADI_BUILD)/src/java-generated
+	cd $(OC_CASADI_BUILD); $(ANT_OPTS) $(ANT) -f "$(JAVA_OC_CASADI_ANT_FILE)" "-Dcompiler=$(COMPILER_DIR)"
 
-$(MC_SRC)/bin/ModelicaCompiler.jar: mc_modelica
-$(MC_SRC)/bin/util.jar:             mc_modelica
-$(MC_SRC)/bin/separateProcess.jar:  mc_modelica
+$(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar: mc_modelica
+$(MC_CASADI_BUILD)/bin/util.jar:             mc_modelica
+$(MC_CASADI_BUILD)/bin/separateProcess.jar:  mc_modelica
 
-$(OC_SRC)/bin/OptimicaCompiler.jar: mc_optimica
-$(OC_SRC)/bin/util.jar:             mc_optimica
-$(OC_SRC)/bin/separateProcess.jar:  mc_optimica
+$(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar: mc_optimica
+$(OC_CASADI_BUILD)/bin/util.jar:             mc_optimica
+$(OC_CASADI_BUILD)/bin/separateProcess.jar:  mc_optimica
 
 $(MC_BUILD)/modelicacasadi_wrapper/swig/modelicacasadi_wrapper.py: modelicacasadi_wrapper
 
-modelicacasadi_wrapper: $(MC_SRC)/bin/ModelicaCompiler.jar $(OC_SRC)/bin/OptimicaCompiler.jar $(MC_SRC)/bin/util.jar ifcasadi # $(MC_LIB)
+modelicacasadi_wrapper: $(MC_CASADI_BUILD)/bin/ModelicaCompiler.jar $(OC_CASADI_BUILD)/bin/OptimicaCompiler.jar $(MC_CASADI_BUILD)/bin/util.jar ifcasadi # $(MC_LIB)
 	mkdir -p $(MC_BUILD)/modelicacasadi_wrapper; \
 	cd $(MC_BUILD)/modelicacasadi_wrapper; \
 	case $(build) in \
 	*-cygwin*|*-mingw*) \
 	cmake $(MC_INTERFACE) -G "MSYS Makefiles" -DCMAKE_CXX_COMPILER_ARG1="-m32" -DCMAKE_CXX_FLAGS="-m32" \
 	    -DMC_BUILD="$(MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
+	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BUILD_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
 	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
 	*) \
 	cmake $(MC_INTERFACE) \
 	    -DMC_BUILD="$(MC_BUILD)" -DIPOPT_HOME="$(IPOPT_HOME)" -DCASADI_BUILD_DIR="$(CASADI_BUILD_DIR)" \
-	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BASE_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
+	    -DIFCASADI_JAR_BASE="$(JAVA_CASADI_BUILD_DIR)" -DCASADI_HOME="$(CASADI_HOME)" \
 	    "$(CMAKE_PYTHON_LIB)" "$(CMAKE_PYTHON_INCLUDE)" ;; \
 	esac 
 	cd $(MC_BUILD)/modelicacasadi_wrapper;  make modelicacasadi_wrapper
@@ -1162,10 +1167,10 @@ clean-casadi-interface:
 	rm -rf $(MC_BUILD)
 #	rm -rf $(DESTDIR)$(prefix)/Python/casadi
 #	rm -rf $(DESTDIR)$(prefix)/Python/modelicacasadi_transfer
-@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BASE_DIR)/ModelicaCompilerCasADi; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_SRC)/src/cpp-generated $(MC_SRC)/src/java-generated/ifcasadi 
-@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BASE_DIR)/OptimicaCompilerCasADi; \
-@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_SRC)/src/cpp-generated $(OC_SRC)/src/java-generated/ifcasadi 
+@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/ModelicaCompilerCasADi; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(MC_CASADI_BUILD)/src/cpp-generated $(MC_CASADI_BUILD)/src/java-generated/ifcasadi 
+@HAVE_ANT_TRUE@	cd $(JAVA_CASADI_BUILD_DIR)/OptimicaCompilerCasADi; \
+@HAVE_ANT_TRUE@	$(ANT_OPTS) $(ANT) clean ; rm -rf $(OC_CASADI_BUILD)/src/cpp-generated $(OC_CASADI_BUILD)/src/java-generated/ifcasadi 
 
 clean-python-packages:
 @WITH_SUNDIALS_TRUE@	if [ -d $(assimulo_build_dir)/Assimulo ]; then \
