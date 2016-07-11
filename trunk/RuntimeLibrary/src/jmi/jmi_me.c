@@ -106,8 +106,11 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
+    jmi->time_events_epsilon = jmi->options.time_events_default_tol;
+
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
     jmi->options.block_solver_options.events_epsilon = jmi->events_epsilon;
+    jmi->options.block_solver_options.time_events_epsilon = jmi->time_events_epsilon;
 }
 
 int jmi_initialize(jmi_t* jmi) {
