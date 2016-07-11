@@ -2433,6 +2433,82 @@ Error at line 2398, column 71, in file 'Compiler/ModelicaFrontEnd/test/modelica/
 ")})));
 end Functional7;
 
+model Functional8
+    partial function partFunc
+        input Real[:] x1;
+        output Real y;
+    end partFunc;
+    
+    partial function middleFunc
+        extends partFunc;
+        input Real x2;
+    end middleFunc;
+    
+    function fullFunc
+        extends middleFunc;
+        input Real x3;
+      algorithm
+        y := x1 + x2 + x3;
+    end fullFunc;
+    
+    function useMiddleFunc
+        input middleFunc mf;
+        input Real b;
+        input Real c;
+        output Real y = usePartFunc(function mf(x1={1},x2="string",x3=3,x4=4), c);
+        algorithm
+    end useMiddleFunc;
+    
+    function usePartFunc
+        input partFunc pf;
+        input Real c;
+        output Real y;
+      algorithm
+        y := pf(c);
+    end usePartFunc;
+
+    Real y = useMiddleFunc(function fullFunc(x3=time), time, time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="Functional8",
+            description="Type calculation with array sizes",
+            errorMessage="
+8 errors found:
+
+Error at line 2451, column 14, in file '...', TYPE_MISMATCH_IN_EXPRESSION:
+  Type error in expression: x1 + x2
+    type of 'x1' is Real[size(x1, 1)]
+    type of 'x2' is Real
+
+Compliance error at line 2454, column 26, in file '...', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+  Functional input arguments with record/array inputs/outputs is currently not supported
+
+Error at line 2458, column 49, in file '...':
+  Creating functional input argument mf(): no input matching named argument x1 found
+
+Error at line 2458, column 56, in file '...':
+  Creating functional input argument mf(): types of named argument x2 and input x2 are not compatible
+    type of '\"string\"' is String
+    expected type is Real
+
+Error at line 2458, column 68, in file '...':
+  Creating functional input argument mf(): no input matching named argument x3 found
+
+Error at line 2458, column 73, in file '...':
+  Creating functional input argument mf(): no input matching named argument x4 found
+
+Compliance error at line 2462, column 24, in file '...', UNSUPPORTED_FUNCTIONAL_INPUT_COMPOSITE:
+  Functional input arguments with record/array inputs/outputs is currently not supported
+
+Error at line 2467, column 17, in file '...':
+  Calling function pf(): types of positional argument 1 and input x1 are not compatible
+    type of 'c' is Real
+    expected type is Real[:]
+
+")})));
+end Functional8;
+
 
 model Delay1
     Real x1 = sin(time);
