@@ -5866,8 +5866,7 @@ def _to_external_function(fcn, name, use_existing=False):
     else:
         ext = '.so'
     if not use_existing:
-        if self.options['verbosity'] >= 1:
-            print 'Generating code for', name
+        print 'Generating code for', name
         fcn.generateCode(name + '.c')
         _add_help_fcns(name + '.c')
         bitness_flag = '-m32' if struct.calcsize('P') == 4 else '-m64'
