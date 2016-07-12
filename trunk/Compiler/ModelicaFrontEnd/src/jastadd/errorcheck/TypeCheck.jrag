@@ -115,6 +115,9 @@ aspect FlatTypeCheck {
     public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE =
             new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE", ProblemKind.SEMANTIC,
                     "Can not infer array size of the variable %s");
+    public static final SimpleProblemProducer ASTNode.CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT =
+            new SimpleErrorProducer("CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT", ProblemKind.COMPLIANCE,
+                    "Can not infer array size of the function output %s");
     public static final SimpleProblemProducer ASTNode.BINDING_EXPRESSION_TYPE_MISMATCH =
             new SimpleErrorProducer("BINDING_EXPRESSION_TYPE_MISMATCH", ProblemKind.SEMANTIC,
                     "The binding expression of the variable %s does not match the declared type of the variable");
@@ -141,10 +144,19 @@ aspect FlatTypeCheck {
 
     public void InstAssignable.typeCheck(ErrorCheckType checkType) {
         FExp bexp = myBindingInstExp();
-        boolean unknownAllowed = inFunction() || inRecordDecl();
+        boolean function = inFunction();
+        boolean record = inRecordDecl();
+        boolean output = isOutput();
+        boolean incompleteAllowed = (function && !output) || record;
+        boolean unknownAllowed = function || record;
         Size componentSize = size();
-        if (!componentSize.isComplete() && !unknownAllowed && !checkType.allowIncompleteSizes()) 
-            CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
+        if (!componentSize.isComplete() && !incompleteAllowed && !checkType.allowIncompleteSizes()) {
+            if (function && output) {
+                CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT.invoke(surroundingInstClass(), qualifiedName());
+            } else {
+                CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE.invoke(this, name());
+            }
+        }
         if (bexp != null && !inRecordWithBindingExp() && !bexp.type().isUnknown()) {
             InstValueModification ivm = myInstValueMod();
             FType expectedBT = bindingType();

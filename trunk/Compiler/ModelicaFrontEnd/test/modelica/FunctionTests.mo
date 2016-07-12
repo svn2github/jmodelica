@@ -10917,6 +10917,29 @@ end FunctionTests.UnknownArray51;
 ")})));
 end UnknownArray51;
 
+model UnknownArray52
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        output R r;
+    algorithm
+        r := R(1:2);
+    end f;
+    R r = f();
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArray52",
+            description="Cannot resolve size of function output",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 10925, column 5, in file '...', CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT:
+  Can not infer array size of the function output r.x
+")})));
+end UnknownArray52;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f
