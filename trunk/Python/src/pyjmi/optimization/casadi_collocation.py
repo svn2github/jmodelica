@@ -2636,6 +2636,9 @@ class LocalDAECollocator(CasadiCollocator):
                                 e = traj_min
                         name_idx_sf_map[name] = n_invariant_var
                         n_invariant_var += 1
+                        if self._normalize_min_time and vt == "dx":
+                            d *= (tf_nom - t0_nom)
+                            e *= (tf_nom - t0_nom)
                         invariant_d.append(d)
                         invariant_e.append(e)
 
@@ -4580,12 +4583,14 @@ class LocalDAECollocator(CasadiCollocator):
                         
                         #Scale bounds and init
                         v_init = self._eval_initial(var, i, k)
-                        xx_lb[self.var_indices[vt][i][k][var_idx]] = \
-                            (v_min - e) / d
-                        xx_ub[self.var_indices[vt][i][k][var_idx]] = \
-                            (v_max - e) / d
-                        xx_init[self.var_indices[vt][i][k][var_idx]] = \
-                            (v_init - e) / d
+                        if self._normalize_min_time and vt == "dx":
+                            if N.isfinite([v_min, v_max]).any():
+                                return NotImplementedError('State derivative bounds are not supported for problems ' +
+                                                           'with free time horizons.')
+                            v_init *= (tf - t0)
+                        xx_lb[self.var_indices[vt][i][k][var_idx]] = (v_min - e) / d
+                        xx_ub[self.var_indices[vt][i][k][var_idx]] = (v_max - e) / d
+                        xx_init[self.var_indices[vt][i][k][var_idx]] = (v_init - e) / d
 
         # Set bounds and initial guesses for continuity variables
         if not self.eliminate_cont_var:
