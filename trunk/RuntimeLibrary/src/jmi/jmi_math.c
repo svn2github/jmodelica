@@ -299,3 +299,26 @@ jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
     else
         return FALSE;
 }
+
+
+int jmi_vector_mul(jmi_real_t* x, jmi_real_t* y, jmi_int_t n) {
+    int i;
+    
+    for (i = 0; i < n; i++) {
+        x[i] = x[i]*y[i];
+    }
+    
+    return 0;
+}
+
+int jmi_matrix_diagonal_mul(jmi_real_t* A, jmi_real_t* D, jmi_int_t n) {
+    int i, j;
+    
+    for (i = 0; i < n; i++) {
+        for (j = 0; j < n; j++) {
+            A[j*n + i] *= D[j];
+        }
+    }
+    return 0;
+}
+
