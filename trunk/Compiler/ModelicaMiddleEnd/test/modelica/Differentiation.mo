@@ -1386,7 +1386,7 @@ end Differentiation.Expressions.ActualStream;
             flatModel="
 fclass Differentiation.Expressions.Iter
  Real x[3] = {1, 2, 3} * time;
- Real y[3] = {der(x[i]) for i in 3:-1:1};
+  Real y[3] = {der(x[3]), der(x[2]), der(x[1])};
 end Differentiation.Expressions.Iter;
 ")})));
         end Iter;
