@@ -1172,4 +1172,60 @@ Residual equations:
 ")})));
 end NoEventNonlinear2; 
 
+model DivisionSmallConstant
+Real x[3];
+Real y[3];
+constant Real small = 2.7755575615628914E-17;
+equation
+
+1 = - y[1] + (-small * x[3] + small * x[2]);
+1 = - y[2] + (-small * x[1] - 0.5226138631915538 * x[3]);    
+1 = - y[3] + (0.5226138631915538 * x[2] + small * x[1]);
+
+y[1] + y[2] + y[3]  = 0;
+- y[1] - y[2]  - y[3]  = 0;
+- x[1]  - x[2]  - x[3]  = 0;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="DivisionSmallConstant",
+            description="",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn linear system (Block 1) of 3 iteration variables and 3 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  x[2]
+  y[1]
+  y[2]
+
+Iteration variables:
+  x[1]
+  y[3]
+  x[3]
+
+Torn equations:
+  x[2] := (-1 + (- y[3]) + 2.7755575615628914E-17 * x[1]) / -0.5226138631915538
+  y[1] := -1 + -2.7755575615628914E-17 * x[3] + 2.7755575615628914E-17 * x[2]
+  y[2] := - y[1] + (- y[3])
+
+Residual equations:
+  - x[1] - x[2] - x[3] = 0
+    Iteration variables: x[1]
+  - y[1] - y[2] - y[3] = 0
+    Iteration variables: y[3]
+  1 = - y[2] + (-2.7755575615628914E-17 * x[1] - 0.5226138631915538 * x[3])
+    Iteration variables: x[3]
+
+Jacobian:
+  |-0.5226138631915538, 0.0, 0.0, -2.7755575615628914E-17, 1.0, 0.0|
+  |-2.7755575615628914E-17, 1.0, 0.0, 0.0, 0.0, 2.7755575615628914E-17|
+  |0.0, 1.0, 1.0, 0.0, 1.0, 0.0|
+  |-1.0, 0.0, 0.0, -1.0, 0.0, -1.0|
+  |0.0, -1.0, -1.0, 0.0, -1.0, 0.0|
+  |0.0, 0.0, 1.0, 2.7755575615628914E-17, 0.0, 0.5226138631915538|
+-------------------------------
+")})));
+end DivisionSmallConstant;
+
 end TearingTests;

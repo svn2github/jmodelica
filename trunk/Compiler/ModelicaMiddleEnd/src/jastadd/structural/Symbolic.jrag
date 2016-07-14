@@ -173,6 +173,9 @@ aspect EquationSolve {
                     activeFactors.add(((FNegExp)ee).getFExp());
                     negatedFactor = true;
                 } else if (ee.nbrUses(var.name())==0) {
+                    if (ee.variability().constantVariability() && Math.abs(ee.ceval().realValue())*ee.dynamicFExp(var.nominal()).ceval().realValue() < 1e-12) {
+                        return new FNoExp();
+                    }
                     inactiveFactors.add(ee);
                 } else {
                     // This equation cannot be solved
