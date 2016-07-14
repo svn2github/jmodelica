@@ -193,25 +193,10 @@ aspect Variability {
             with add root FAbstractEquation;
     FTimeExp contributes this to FAbstractEquation.timeExps() for myFEquation();
     
-    syn boolean FAbstractEquation.isConstant() = false;
-    syn boolean FAbstractEquation.isParameter() = false;
-    syn boolean FAbstractEquation.isDiscrete() = false;
-    syn boolean FAbstractEquation.isContinuous() = false;
-
-    eq FEquation.isConstant() = variability().constantVariability();
-    eq FEquation.isParameter() = variability().parameterVariability();
-    eq FEquation.isDiscrete() = variability().discreteVariability();
-    eq FEquation.isContinuous() = variability().continuousVariability();
-
-    eq FFunctionCallEquation.isConstant() = variability().constantVariability();
-    eq FFunctionCallEquation.isParameter() = variability().parameterVariability();
-    eq FFunctionCallEquation.isDiscrete() = variability().discreteVariability();
-    eq FFunctionCallEquation.isContinuous() = variability().continuousVariability();
-
-    eq FAlgorithm.isConstant() = variability().constantVariability();
-    eq FAlgorithm.isParameter() = variability().parameterVariability();
-    eq FAlgorithm.isDiscrete() = variability().discreteVariability();
-    eq FAlgorithm.isContinuous() = variability().continuousVariability();
+    syn boolean FAbstractEquation.isConstant()   = variability().constantVariability();
+    syn boolean FAbstractEquation.isParameter()  = variability().parameterVariability();
+    syn boolean FAbstractEquation.isDiscrete()   = variability().discreteVariability();
+    syn boolean FAbstractEquation.isContinuous() = variability().continuousVariability();
 
     syn boolean FAbstractVariable.isConstant()   = false;
     syn boolean FAbstractVariable.isParameter()  = false;
