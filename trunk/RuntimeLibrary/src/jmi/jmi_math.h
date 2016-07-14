@@ -177,16 +177,4 @@ jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y);
  */
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h);
 
-/**
- * Performs a vector vector multiplication (x*y).
- * The result is stored in x.
- */
-int jmi_vector_mul(jmi_real_t* x, jmi_real_t* y, jmi_int_t n);
-/**
- * Performs a matrix times a diagonal matrix multiplication (A*D).
- * The result is stored in A.
- */
-int jmi_matrix_diagonal_mul(jmi_real_t* A, jmi_real_t* D, jmi_int_t n);
-
-
 #endif /* _JMI_MATH_H */

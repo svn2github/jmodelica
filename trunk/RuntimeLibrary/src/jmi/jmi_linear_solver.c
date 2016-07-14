@@ -215,40 +215,6 @@ static int jmi_linear_find_active_set(jmi_block_solver_t * block ) {
     return n_x+solver->n_extra_rows;
 }
 
-static int jmi_linear_solver_employ_variable_scaling(jmi_block_solver_t *block, jmi_real_t* J) {
-    if(block->options->iteration_variable_scaling_mode) {
-        /* Scale Jacobian based on nominal values.*/
-        jmi_matrix_diagonal_mul(J, block->nominal, block->n);
-        
-        /*
-        int i, j, n_x = block->n;
-        
-        
-        for (i = 0; i < n_x; i++){
-            for (j = 0; j < n_x; j++) {
-                J[j*block->n + i] *= block->nominal[j];
-            }
-        }
-        */
-    }
-    return 0;
-}
-
-static int jmi_linear_solver_rescale_variables(jmi_block_solver_t *block, jmi_real_t* x) {
-    if(block->options->iteration_variable_scaling_mode) {
-        /* Rescale variables based on nominal values.*/
-        jmi_vector_mul(x, block->nominal,  block->n);
-        
-        /*int i, n_x = block->n;
-        
-        for (i = 0; i < n_x; i++){
-            x[i] = block->nominal[i]*x[i];
-        }
-        */
-    }
-    return 0;
-}
-
 
 int jmi_linear_solver_solve(jmi_block_solver_t * block){
     int n_x = block->n;
@@ -272,14 +238,13 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* If needed, reevaluate jacobian. */
     if (solver->cached_jacobian != 1) {
         int j = 0;
+
+        /*printf("** Computing factorization in jmi_linear_solver_solve for block %s\n",block->label);*/
           /*
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
         info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN);
-        
-        jmi_linear_solver_employ_variable_scaling(block, block->J->data);
-        
         memcpy(solver->factorization, block->J->data, n_x*n_x*sizeof(jmi_real_t));
         if(info) {
             if(block->init) {
@@ -446,9 +411,6 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         jmi_log_node(block->log, logError, "Error", "Internal error when solving <block: %d> with <error_code: %s>", block->label, info);
         return -1;
     }
-    
-    jmi_linear_solver_rescale_variables(block, solver->rhs);
-    
     if((solver->equed == 'C') || (solver->equed == 'B')) {
         if (solver->singular_jacobian == 1) {
             for (i=0;i<n_x;i++) {

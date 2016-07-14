@@ -41,10 +41,10 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
     jmi->dae_block_residuals[index] = b;
 #ifdef JMI_PROFILE_RUNTIME
-    if (b != 0) {
-        b->parent_index = parent_index;
-        b->is_init_block = 0;
-    }
+	if (b != 0) {
+		b->parent_index = parent_index;
+		b->is_init_block = 0;
+	}
 #endif
     return flag;
 }
@@ -54,10 +54,10 @@ int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi
     int flag;
     flag = jmi_new_block_residual(&b,jmi, solver, F, dF, n, n_sr, n_dr, n_nr, n_dinr, n_nrt, n_sw, n_disw, jacobian_variability, index, label);
 #ifdef JMI_PROFILE_RUNTIME
-    if (b != 0) {
-        b->parent_index = parent_index;
-        b->is_init_block = 1;
-    }
+	if (b != 0) {
+		b->parent_index = parent_index;
+		b->is_init_block = 1;
+	}
 #endif
     jmi->dae_init_block_residuals[index] = b;
     return flag;
@@ -112,42 +112,42 @@ int jmi_block_check_discrete_variables_change(void* b, double* x) {
     block->F(jmi, block->work_ivs, NULL, JMI_BLOCK_INITIALIZE);
 
     /* Get the current switches, non-reals and discrete_reals*/
-    jmi_block_get_sw_nr_dr(block, block->work_switches, block->work_non_reals, block->work_discrete_reals);
+	jmi_block_get_sw_nr_dr(block, block->work_switches, block->work_non_reals, block->work_discrete_reals);
 
     /* Evaluate and get the current switches and non-reals */
     block->F(jmi, x, NULL, JMI_BLOCK_WRITE_BACK);
     block->F(jmi, x, block->res, JMI_BLOCK_EVALUATE | JMI_BLOCK_EVALUATE_NON_REALS);
     switches  = &block->sw_old[block->event_iter*block->n_sw];
     non_reals = &block->nr_old[block->event_iter*block->n_nr];
-    discrete_reals = &block->dr_old[block->event_iter*block->n_dr];
+	discrete_reals = &block->dr_old[block->event_iter*block->n_dr];
     jmi_block_get_sw_nr_dr(block, switches, non_reals, discrete_reals);
 
     /* Write back the current values of the iteration variables. */
     block->F(jmi, block->work_ivs, NULL, JMI_BLOCK_WRITE_BACK);
     /* Reset the values of the switches and non-reals in the block. */
-    jmi_block_set_sw_nr_dr(block, block->work_switches, block->work_non_reals, block->work_discrete_reals);
+	jmi_block_set_sw_nr_dr(block, block->work_switches, block->work_non_reals, block->work_discrete_reals);
     
     /* Compare current switches and non-reals with their previous values */
     switches_equal  = jmi_compare_switches(switches, block->work_switches, block->n_sw);
     non_reals_equal = jmi_compare_switches(non_reals, block->work_non_reals, block->n_nr);
-    discrete_reals_equal = jmi_compare_discrete_reals(discrete_reals, block->work_discrete_reals, block->discrete_nominals, block->n_dr);
+	discrete_reals_equal = jmi_compare_discrete_reals(discrete_reals, block->work_discrete_reals, block->discrete_nominals, block->n_dr);
     
-    if (switches_equal && non_reals_equal && discrete_reals_equal) { 
+	if (switches_equal && non_reals_equal && discrete_reals_equal) { 
         ret = JMI_EQUAL;
-    } else if (!switches_equal && !non_reals_equal && !discrete_reals_equal) { 
-        ret = JMI_SWITCHES_AND_DISCRETE_REALS_AND_NON_REALS_CHANGED;
+	} else if (!switches_equal && !non_reals_equal && !discrete_reals_equal) { 
+		ret = JMI_SWITCHES_AND_DISCRETE_REALS_AND_NON_REALS_CHANGED;
     } else if (!switches_equal && !non_reals_equal) {
-        ret = JMI_SWITCHES_AND_NON_REALS_CHANGED;
-    } else if (!switches_equal && !discrete_reals_equal) {
-        ret = JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED;
-    } else if(!switches_equal) { 
+		ret = JMI_SWITCHES_AND_NON_REALS_CHANGED;
+	} else if (!switches_equal && !discrete_reals_equal) {
+		ret = JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED;
+	} else if(!switches_equal) { 
         ret = JMI_SWITCHES_CHANGED; 
     } else if (!non_reals_equal && !discrete_reals_equal) { 
         ret = JMI_DISCRETE_REALS_AND_NON_REALS_CHANGED;
     } else if (!non_reals_equal) {
-        ret = JMI_NON_REALS_CHANGED;
-    } else { 
-        ret = JMI_DISCRETE_REALS_CHANGED; 
+		ret = JMI_NON_REALS_CHANGED;
+	} else { 
+		ret = JMI_DISCRETE_REALS_CHANGED; 
     }
     
     return ret;
@@ -159,7 +159,7 @@ int jmi_block_log_discrete_variables(void* b, jmi_log_node_t node) {
 
     jmi_real_t* switches  = &block->sw_old[(block->event_iter)*block->n_sw];
     jmi_real_t* non_reals = &block->nr_old[(block->event_iter)*block->n_nr];
-    jmi_real_t* discrete_reals = &block->dr_old[(block->event_iter)*block->n_dr];
+	jmi_real_t* discrete_reals = &block->dr_old[(block->event_iter)*block->n_dr];
 
     /* Get the current values of switches and non-reals */
     jmi_block_get_sw_nr_dr(block, switches, non_reals, discrete_reals);
@@ -405,8 +405,8 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->n_direct_bool = 0; /* Calculated in initialization */
     b->index = index;
 #ifdef JMI_PROFILE_RUNTIME
-    b->parent_index = -1;
-    b->is_init_block = -1;
+	b->parent_index = -1;
+	b->is_init_block = -1;
 #endif
     b->label = (jmi_string_t) calloc(strlen(label) + 1, sizeof(char));
     strcpy(b->label, label);
@@ -414,7 +414,7 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->sw_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_sw, sizeof(jmi_real_t));
     b->nr_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_nr, sizeof(jmi_real_t));
     b->x_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n, sizeof(jmi_real_t));
-    b->dr_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_dr, sizeof(jmi_real_t));
+	b->dr_old = (jmi_real_t*)calloc( (nbr_allocated_iterations +2)*b->n_dr, sizeof(jmi_real_t));
     b->sw_index = (jmi_int_t*)calloc(b->n_sw, sizeof(jmi_int_t));
     b->sw_direct_index = (jmi_int_t*)calloc(b->n_direct_sw, sizeof(jmi_int_t));
     b->sr_vref = (jmi_int_t*)calloc(b->n_sr, sizeof(jmi_int_t));
@@ -423,14 +423,14 @@ int jmi_new_block_residual(jmi_block_residual_t** block, jmi_t* jmi, jmi_block_s
     b->nr_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->bool_direct_index = (jmi_int_t*)calloc(b->n_direct_nr, sizeof(jmi_int_t));
     b->nr_vref  = (jmi_int_t*)calloc(b->n_nr, sizeof(jmi_int_t));
-    b->dr_index = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
-    b->dr_pre_index = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
-    b->dr_vref  = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
+	b->dr_index = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
+	b->dr_pre_index = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
+	b->dr_vref  = (jmi_int_t*)calloc(b->n_dr, sizeof(jmi_int_t));
     
     /* Work vectors */
     b->work_ivs       = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     b->work_non_reals = (jmi_real_t*)calloc(n_nr,sizeof(jmi_real_t));
-    b->work_discrete_reals = (jmi_real_t*)calloc(n_dr,sizeof(jmi_real_t));
+	b->work_discrete_reals = (jmi_real_t*)calloc(n_dr,sizeof(jmi_real_t));
     b->work_switches  = (jmi_real_t*)calloc(n_sw,sizeof(jmi_real_t));
 
     b->dx = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -515,14 +515,14 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         jmi_real_t* sr_index_tmp = (jmi_real_t*)calloc(block->n_sr, sizeof(jmi_real_t));
 
 #ifdef JMI_PROFILE_RUNTIME
-        if (block->parent_index != -1) {
-            if (block->is_init_block) {
-                block->block_solver->parent_block = jmi->dae_init_block_residuals[block->parent_index]->block_solver;
-            } else {
-                block->block_solver->parent_block = jmi->dae_block_residuals[block->parent_index]->block_solver;
-            }
-        } 
-        block->block_solver->is_init_block = block->is_init_block;
+		if (block->parent_index != -1) {
+			if (block->is_init_block) {
+				block->block_solver->parent_block = jmi->dae_init_block_residuals[block->parent_index]->block_solver;
+			} else {
+				block->block_solver->parent_block = jmi->dae_block_residuals[block->parent_index]->block_solver;
+			}
+		} 
+		block->block_solver->is_init_block = block->is_init_block;
 #endif
         block->F(jmi, vref_tmp, NULL, JMI_BLOCK_VALUE_REFERENCE);
         for (i = 0; i < block->n; i++) {
@@ -534,9 +534,9 @@ int jmi_solve_block_residual(jmi_block_residual_t * block) {
         }
         
         block->F(jmi, nr_vref_tmp, NULL, JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE);
-        block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX);
-        block->F(jmi, dr_vref_tmp, NULL, JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE);
-            
+		block->F(jmi, sw_index_tmp, NULL, JMI_BLOCK_ACTIVE_SWITCH_INDEX);
+		block->F(jmi, dr_vref_tmp, NULL, JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE);
+			
         for (i = 0; i < block->n_sw; i++) {
             block->sw_index[i] = (jmi_int_t)sw_index_tmp[i];
         }
@@ -688,7 +688,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->sw_old);
     free(b->nr_old);
     free(b->x_old);
-    free(b->dr_old);
+	free(b->dr_old);
     free(b->sw_index);
     free(b->sw_direct_index);
     free(b->bool_direct_index);
@@ -696,16 +696,16 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->nr_pre_index);
     free(b->nr_direct_index);
     free(b->nr_vref);
-    free(b->dr_index);
-    free(b->dr_pre_index);
-    free(b->dr_vref);
+	free(b->dr_index);
+	free(b->dr_pre_index);
+	free(b->dr_vref);
     free(b->sr_vref);
     free(b->jac);
     free(b->ipiv);
     free(b->min);
     free(b->max);
     free(b->nominal);
-    free(b->discrete_nominals);
+	free(b->discrete_nominals);
     free(b->message_buffer);
     free(b->initial);
     free(b->value_references);
@@ -715,7 +715,7 @@ int jmi_delete_block_residual(jmi_block_residual_t* b){
     free(b->work_ivs);
     free(b->work_non_reals);
     free(b->work_switches);
-    free(b->work_discrete_reals);
+	free(b->work_discrete_reals);
 
     /*Deallocate struct */
     free(b);
