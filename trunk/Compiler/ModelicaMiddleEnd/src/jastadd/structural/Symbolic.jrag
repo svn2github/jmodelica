@@ -501,6 +501,22 @@ aspect ExpressionSimplification {
     rewrite FIfExp {
         when (getThenExpNoTransform().equalsSymbolic(getElseExpNoTransform())) to FExp getThenExp();
     }
+    
+    syn boolean FExp.needsNoEvent() = true;
+    eq FVarRefExp.needsNoEvent()    = false;
+    eq FLitExp.needsNoEvent()       = false;
+
+    rewrite FNoEventExp {
+        when (!getFExpNoTransform().needsNoEvent()) to FExp getFExpNoTransform();
+    }
+    
+    syn boolean FExp.needsSmooth() = true;
+    eq FVarRefExp.needsSmooth()    = false;
+    eq FLitExp.needsSmooth()       = false;
+
+    rewrite FSmoothExp {
+        when (!getFExpNoTransform().needsSmooth()) to FExp getFExpNoTransform();
+    }
 
 
     syn boolean FExp.equalsSymbolic(FExp other) {

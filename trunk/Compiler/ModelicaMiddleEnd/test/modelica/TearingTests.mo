@@ -1162,7 +1162,7 @@ Iteration variables:
   x ()
 
 Torn equations:
-  z := noEvent(x) * noEvent(x)
+  z := x * x
   y := z / 2
 
 Residual equations:

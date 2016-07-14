@@ -15274,10 +15274,8 @@ model NoEventArray1
             description="noEvent() for Real array",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventArray1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real y[1] = 1.0;
- constant Real y[2] = 2.0;
+ constant Real y[1] = 1;
+ constant Real y[2] = 2;
 end FunctionTests.FunctionLike.EventRel.NoEventArray1;
 ")})));
 end NoEventArray1;
@@ -15297,8 +15295,8 @@ fclass FunctionTests.FunctionLike.EventRel.NoEventArray2
  parameter Boolean y[1];
  parameter Boolean y[2];
 parameter equation
- y[1] = noEvent(x[1]);
- y[2] = noEvent(x[2]);
+ y[1] = x[1];
+ y[2] = x[2];
 end FunctionTests.FunctionLike.EventRel.NoEventArray2;
 ")})));
 end NoEventArray2;
@@ -15318,10 +15316,8 @@ model NoEventRecord1
             description="",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventRecord1
- constant Real x.a = 1;
- constant Real x.b = 2;
- constant Real y.a = 1.0;
- constant Real y.b = 2.0;
+ constant Real y.a = 1;
+ constant Real y.b = 2;
 end FunctionTests.FunctionLike.EventRel.NoEventRecord1;
 ")})));
 end NoEventRecord1;
@@ -15348,6 +15344,27 @@ equation
 end FunctionTests.FunctionLike.EventRel.Smooth;
 ")})));
 end Smooth;
+
+model Smooth1
+    Real x,y;
+equation
+    der(x) = -1;
+    x = smooth(0, y);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_EventRel_Smooth1",
+            description="",
+            flatModel="
+fclass FunctionTests.FunctionLike.EventRel.Smooth1
+ Real x;
+initial equation 
+ x = 0.0;
+equation
+ der(x) = -1;
+end FunctionTests.FunctionLike.EventRel.Smooth1;
+")})));
+end Smooth1;
 
 model Smooth2
     Real a,b,c, d;
