@@ -1794,197 +1794,7 @@ aspect InstNodeInterface {
 
 
 aspect FlatExpressions {
-
-    public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
-        FAbstractEquation eqn = flattenEqn(prefix, fc);
-        if (eqn != null) {
-            getType().addEquationTo(fc, eqn);
-//            eqn.annotation("src").setValue(new FStringLitExp(fileName() + ":" + beginLine()));;
-        }
-    }
-	
-	abstract public void FEquationType.addEquationTo(FClass fc, FAbstractEquation f);
-	
-	public void FNormalEquation.addEquationTo(FClass fc, FAbstractEquation f) {
-		fc.addFAbstractEquationNoTransform(f);
-	}
-	
-	public void FInitialEquation.addEquationTo(FClass fc, FAbstractEquation f) {
-		fc.addFInitialEquationNoTransform(f);
-	}
-
-	public FAbstractEquation FAbstractEquation.flattenEqn(FQName prefix, FClass fc) {
-		return (FAbstractEquation) fullCopy();
-	}
-	
-    public void FAbstractEquation.flattenAttrs(FAbstractEquation eqn, FQName prefix) {
-        List<FAttribute> flatAttrs = new List<FAttribute>();
-        for (FAttribute attr : getFAttributes())
-            flatAttrs.add(attr.flatten(prefix));
-        eqn.setFAttributeList(flatAttrs);
-    }
-
-
-	public FEquation FEquation.flattenEqn(FQName prefix, FClass fc) {
-		FEquation flattened = new FEquation(getLeft().flatten(prefix), getRight().flatten(prefix));
-		flattenAttrs(flattened, prefix);
-		return flattened;
-	}
-
-	public FForClauseE InstForClauseE.flattenEqn(FQName prefix, FClass fc) {
-		List forIndex = new List();
-		List eqns = new List();
-		for (InstForIndex ifi : getInstForIndexs()) 
-			forIndex.add(ifi.flatten(prefix));
-		for (FAbstractEquation ae : getFAbstractEquations()) {
-			FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
-			if (feqn != null)
-				eqns.add(feqn);
-		}
-		if (eqns.getNumChild() == 0)
-			return null;
-		return new FForClauseE(forIndex, eqns);
-	}
-
-    public FIfWhenElseEquation FIfWhenElseEquation.flattenEqn(FQName prefix, FClass fc) {
-        FIfWhenElseEquation res = createEmptyNode();
-        res.setType((FEquationType) getType().fullCopy());
-        for (FAbstractEquation ae : getFAbstractEquations()) {
-            FAbstractEquation feqn = ae.flattenEqn(prefix, fc);
-            if (feqn != null)
-                res.addFAbstractEquation(feqn);
-        }
-        flattenIfWhenTo(res, prefix, fc);
-        return res.isEmpty() ? null : res;
-    }
-
-    public void FIfWhenElseEquation.flattenIfWhenTo(FIfWhenElseEquation res, FQName prefix, FClass fc) {}
-
-    public void FIfWhenEquation.flattenIfWhenTo(FIfWhenElseEquation res, FQName prefix, FClass fc) {
-        FIfWhenEquation ifWhen = (FIfWhenEquation) res;
-        if (hasElse()) {
-            FIfWhenElseEquation elseRes = getElse().flattenEqn(prefix, fc);
-            if (elseRes != null)
-                ifWhen.setElse(elseRes);
-        }
-        ifWhen.setTest(getTest().flatten(prefix));
-    }
-
-    syn boolean FIfWhenElseEquation.isEmpty() = getNumFAbstractEquation() == 0;
-    eq FIfWhenEquation.isEmpty()              = super.isEmpty() && (!hasElse() || getElse().isEmpty());
-
-	public FAbstractEquation FConnectClause.flattenEqn(FQName prefix, FClass fc) {
-		return null;
-	}
-	
-	public FFunctionCallEquation FFunctionCallEquation.flattenEqn(FQName prefix, FClass fc) {
-		if (ignoreInFlattening())
-			return null;
-		FExp call = getCall().flatten(prefix);
-		if (!(call instanceof FAbstractFunctionCall))
-		    return null;
-		List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-		for (FFunctionCallLeft l : getLefts()) 
-			lefts.add(l.flatten(prefix));
-		FFunctionCallEquation flattened =  new FFunctionCallEquation(lefts, (FAbstractFunctionCall) call);
-		flattenAttrs(flattened, prefix);
-		return flattened;
-	}
-	
-	public FFunctionCallLeft FFunctionCallLeft.flatten(FQName prefix) {
-		return new FFunctionCallLeft(hasFExp() ? new Opt(getFExp().flatten(prefix)) : new Opt());
-	}
-
-	public FAlgorithm FAlgorithm.flattenEqn(FQName prefix, FClass fc) {
-		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-        return new FAlgorithm(l);
-    }
     
-    public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
-        return FStatement.flattenFStatementList(new List<FStatement>(), prefix, l);
-    }
-	
-    public static List<FStatement> FStatement.flattenFStatementList(List<FStatement> l2, FQName prefix, List<FStatement> l) {
-		for (FStatement s : l) 
-			l2.add(s.flatten(prefix));
-		return l2;
-	}
-	
-	public abstract FStatement FStatement.flatten(FQName prefix);
-    
-    public FStatement FAssignStmt.flatten(FQName prefix) {
-        return new FAssignStmt((FAssignableExp)getLeft().flatten(prefix), getRight().flatten(prefix));
-    }
-    
-	public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
-        throw new UnsupportedOperationException();
-	}
-	
-	public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {
-		List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
-		for (FFunctionCallLeft a : getLefts())
-			l.add(a.flatten(prefix));
-		return new FFunctionCallStmt(l, (FAbstractFunctionCall) getCall().flatten(prefix));
-	}
-	
-	public FIfWhenStmt FIfWhenStmt.flatten(FQName prefix) {
-		List l = new List();
-		for (FIfWhenClause c : getFIfWhenClauses()) 
-			l.add(c.flatten(prefix));
-		return flattenFIfWhenStmt(prefix, l);
-	}
-	
-	protected abstract FIfWhenStmt FIfWhenStmt.flattenFIfWhenStmt(FQName prefix, List l);
-	
-	protected FIfStmt FIfStmt.flattenFIfWhenStmt(FQName prefix, List icl) {
-		List esl = FStatement.flattenFStatementList(prefix, getElseStmts());
-		return new FIfStmt(icl, esl);
-	}
-	
-	protected FWhenStmt FWhenStmt.flattenFIfWhenStmt(FQName prefix, List l) {
-		return new FWhenStmt(l);
-	}
-	
-	public FIfWhenClause FIfWhenClause.flatten(FQName prefix) {
-		FExp t = getTest().flatten(prefix);
-		List l = FStatement.flattenFStatementList(prefix, getFStatements());
-		return flattenFIfWhenClause(t, l);
-	}
-	
-	protected abstract FIfWhenClause FIfWhenClause.flattenFIfWhenClause(FExp t, List l);
-	
-	protected FIfClause FIfClause.flattenFIfWhenClause(FExp t, List l) {
-		return new FIfClause(t, l);
-	}
-	
-	protected FWhenClause FWhenClause.flattenFIfWhenClause(FExp t, List l) {
-		return new FWhenClause(t, l);
-	}
-	
-	public FForStmt FForStmt.flatten(FQName prefix) {
-		return (FForStmt)(this.fullCopy());
-	}
-		
-	public FForStmt InstForStmt.flatten(FQName prefix) {
-		List sl = FStatement.flattenFStatementList(prefix, getForStmts());
-		int i = getNumInstForIndex() - 1;
-		FForStmt res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
-		for (i--; i >= 0; i--) {
-			sl = new List().add(res);
-			res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
-		}
-		return res;		
-	}
-
-	
-	public FWhileStmt FWhileStmt.flatten(FQName prefix) {
-		List l = FStatement.flattenFStatementList(prefix, getWhileStmts());
-		return new FWhileStmt(getTest().flatten(prefix), l);
-	}
-	
-	public FBreakStmt FBreakStmt.flatten(FQName prefix)   { return new FBreakStmt(); }
-	public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
-	
     public FAttribute FAttribute.flatten(FQName prefix) {
         FAttribute flat = createEmptyNode();
         flat.setType(getType().fullCopy());
@@ -2025,29 +1835,14 @@ aspect FlatExpressions {
     eq Root.getChild().expandSize()             = true;
     eq InstNode.getChild().expandSize()         = true;
     eq FIdUse.getChild().expandSize()           = true;
-    eq InstDot.getInstAccess(int i).expandSize() = expandSize(i);
-    
-    syn boolean InstAccess.expandSize(int i) = hasFArraySubscripts() ? getFArraySubscripts().expandSize() : true;
-    eq InstDot.expandSize(int i) {
+    eq InstDot.getInstAccess(int i).expandSize() {
         for (int j = 0; j < i; j++) {
-            if (!getInstAccess(j).expandSize(0)) {
+            if (!getInstAccess(j).indexVariability().indexParameterOrLess()) {
                 return false;
             }
         }
         return true;
     }
-    
-    syn boolean FArraySubscripts.expandSize() {
-        for (FSubscript fs : getFSubscripts()) {
-            if (!fs.expandSize_()) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    syn boolean FSubscript.expandSize_() = variability().indexParameterOrLess();
-    eq FExpSubscript.expandSize_() = super.expandSize_() && getFExp().canCeval();
     
     public FSubscript Size.flattenSubscript(int i) {
         return new FExpSubscript(new FRangeExp(new FIntegerLitExp(1),new FIntegerLitExp(get(i))));
@@ -2112,7 +1907,7 @@ aspect FlatExpressions {
             }
             int d = use.findDepthOfNestledFunctionCalls();
             return new FArgumentExp(i, d);
-        } else if (!inFunction() && getInstAccess().myInstComponentDecl().variability().flattenExtractIndices(getInstAccess().indexVariability())) {
+        } else if (!inFunction() && !getInstAccess().indexVariability().indexParameterOrLess()) {
             FIdUseExp copy = (FIdUseExp) use.dynamicFExp(use.fullCopy());
             List<FSubscript> sub = new List<FSubscript>();
             ((FIdUseInstAccess)copy.getFIdUse()).getInstAccess().extractNonParameterIndices(sub, getInstAccess().myInstComponentDecl().variability());
@@ -2240,7 +2035,7 @@ aspect FlatExpressions {
         FArraySubscripts fas = getFArraySubscripts();
         for (int i = 0, n = fas.getNumFSubscript(); i < n; i++) {
             FSubscript fs = fas.getFSubscript(i);
-            if (v.flattenExtractIndices(fs.variability())) {
+            if (!fs.variability().indexParameterOrLess()) {
                 sub.add(fs);
                 fas.setFSubscript(new FColonSubscript(), i);
             } else if (fs.ndims() == 1) {
@@ -2263,10 +2058,6 @@ aspect FlatExpressions {
         }
     }
     
-    syn boolean FTypePrefixVariability.flattenExtractIndices(FTypePrefixVariability other) = !other.indexParameterOrLess();
-    eq FConstant.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
-    eq FKnownParameter.flattenExtractIndices(FTypePrefixVariability other) = !other.knownParameterOrLess();
-
     /**
      * Check if this access is in the binding expression of an input to a function 
      * or component in a record class, and refers to an input in the same function 

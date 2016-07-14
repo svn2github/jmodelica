@@ -1,0 +1,105 @@
+/*
+    Copyright (C) 2016 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect FlatStatements {
+    
+    public static List<FStatement> FStatement.flattenFStatementList(FQName prefix, List<FStatement> l) {
+        return FStatement.flattenFStatementList(new List<FStatement>(), prefix, l);
+    }
+    
+    public static List<FStatement> FStatement.flattenFStatementList(List<FStatement> l2, FQName prefix, List<FStatement> l) {
+        for (FStatement s : l) 
+            l2.add(s.flatten(prefix));
+        return l2;
+    }
+    
+    public abstract FStatement FStatement.flatten(FQName prefix);
+    
+    public FStatement FAssignStmt.flatten(FQName prefix) {
+        return new FAssignStmt((FAssignableExp)getLeft().flatten(prefix), getRight().flatten(prefix));
+    }
+    
+    public FInitArrayStmt FInitArrayStmt.flatten(FQName prefix){
+        throw new UnsupportedOperationException();
+    }
+    
+    public FFunctionCallStmt FFunctionCallStmt.flatten(FQName prefix) {
+        List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
+        for (FFunctionCallLeft a : getLefts())
+            l.add(a.flatten(prefix));
+        return new FFunctionCallStmt(l, (FAbstractFunctionCall) getCall().flatten(prefix));
+    }
+    
+    public FIfWhenStmt FIfWhenStmt.flatten(FQName prefix) {
+        List l = new List();
+        for (FIfWhenClause c : getFIfWhenClauses()) 
+            l.add(c.flatten(prefix));
+        return flattenFIfWhenStmt(prefix, l);
+    }
+    
+    protected abstract FIfWhenStmt FIfWhenStmt.flattenFIfWhenStmt(FQName prefix, List l);
+    
+    protected FIfStmt FIfStmt.flattenFIfWhenStmt(FQName prefix, List icl) {
+        List esl = FStatement.flattenFStatementList(prefix, getElseStmts());
+        return new FIfStmt(icl, esl);
+    }
+    
+    protected FWhenStmt FWhenStmt.flattenFIfWhenStmt(FQName prefix, List l) {
+        return new FWhenStmt(l);
+    }
+    
+    public FIfWhenClause FIfWhenClause.flatten(FQName prefix) {
+        FExp t = getTest().flatten(prefix);
+        List l = FStatement.flattenFStatementList(prefix, getFStatements());
+        return flattenFIfWhenClause(t, l);
+    }
+    
+    protected abstract FIfWhenClause FIfWhenClause.flattenFIfWhenClause(FExp t, List l);
+    
+    protected FIfClause FIfClause.flattenFIfWhenClause(FExp t, List l) {
+        return new FIfClause(t, l);
+    }
+    
+    protected FWhenClause FWhenClause.flattenFIfWhenClause(FExp t, List l) {
+        return new FWhenClause(t, l);
+    }
+    
+    public FForStmt FForStmt.flatten(FQName prefix) {
+        return (FForStmt)(this.fullCopy());
+    }
+        
+    public FForStmt InstForStmt.flatten(FQName prefix) {
+        List sl = FStatement.flattenFStatementList(prefix, getForStmts());
+        int i = getNumInstForIndex() - 1;
+        FForStmt res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+        for (i--; i >= 0; i--) {
+            sl = new List().add(res);
+            res = new FForStmt(getInstForIndex(i).flatten(prefix), sl);
+        }
+        return res;
+    }
+    
+    
+    public FWhileStmt FWhileStmt.flatten(FQName prefix) {
+        List l = FStatement.flattenFStatementList(prefix, getWhileStmts());
+        return new FWhileStmt(getTest().flatten(prefix), l);
+    }
+    
+    public FBreakStmt FBreakStmt.flatten(FQName prefix)   { return new FBreakStmt(); }
+    public FReturnStmt FReturnStmt.flatten(FQName prefix) { return new FReturnStmt(); }
+    
+}
+
