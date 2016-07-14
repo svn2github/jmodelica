@@ -1203,8 +1203,8 @@ fclass ArrayTests.General.ArrayTest45
  Real b.x[2];
  parameter Integer b.j = 1 /* 1 */;
 equation
- b.x[1] = ({1.0, 3.0})[b.j] + time;
- b.x[2] = ({2.0, 4.0})[b.j] + 2 * time;
+ b.x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,1] + time;
+ b.x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,2] + 2 * time;
 end ArrayTests.General.ArrayTest45;
 ")})));
 end ArrayTest45;
@@ -1259,8 +1259,9 @@ fclass ArrayTests.General.ArrayTest47
  ArrayTests.General.ArrayTest47.B b(n = 2,r(size() = {2}));
  ArrayTests.General.ArrayTest47.R_input c.r[2];
 equation
- b.r[1].x = 1;
- b.r[2].x = 1;
+ for i in 1:2 loop
+  b.r[i].x = 1;
+ end for;
  b.r[1].x = c.r[1].x;
  b.r[2].x = c.r[2].x;
 
@@ -6408,9 +6409,9 @@ model ForEquation1
 fclass ArrayTests.For.ForEquation1
  Real y.x[3];
 equation
- y.x[1] = 1;
- y.x[2] = 2 * 2;
- y.x[3] = 3 * 3;
+ for i in 1:3 loop
+  y.x[i] = i * i;
+ end for;
 end ArrayTests.For.ForEquation1;
 ")})));
 end ForEquation1;
@@ -6594,16 +6595,13 @@ fclass ArrayTests.For.ForStructural1
  structural parameter Boolean p[2] = {true, false} /* { true, false } */;
  Real x[2];
 equation
- if true then
-  x[1] = time;
- else
-  x[1] = 1;
- end if;
- if false then
-  x[2] = time;
- else
-  x[2] = 1;
- end if;
+ for i in 1:2 loop
+  if ({true, false})[i] then
+   x[i] = time;
+  else
+   x[i] = 1;
+  end if;
+ end for;
 end ArrayTests.For.ForStructural1;
 ")})));
 end ForStructural1;
