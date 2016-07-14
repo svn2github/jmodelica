@@ -217,7 +217,7 @@ public class CompilerInstance {
         if (log.size() > 0)
             args.add("-log=w|os|stderr," + join(",", log));
         else
-            args.add("-log=w,w|os|stderr");
+            args.add("-log=w|os|stderr");
         if (compilerOptions.size() > 0)
             args.add("-opt=" + join(",", ":", compilerOptions));
         if (platform != null)
