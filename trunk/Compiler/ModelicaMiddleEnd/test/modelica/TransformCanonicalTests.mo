@@ -3096,9 +3096,9 @@ fclass TransformCanonicalTests.WhenEqu15
  Real z[3];
 equation
  der(z[1:3]) = z[1:3] .* {0.1, 0.2, 0.3};
- when {z[1] > 2, z[2] > 2, z[3] > 2} then
+ when {z[i] > 2 for i in 1:3} then
   x[1:3] = 1:3;
- elsewhen {z[1] < 0, z[2] < 0, z[3] < 0} then
+ elsewhen {z[i] < 0 for i in 1:3} then
   x[1:3] = 4:6;
  elsewhen sum(z[1:3]) > 4.5 then
   x[1:3] = 7:9;

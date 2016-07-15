@@ -2025,29 +2025,14 @@ aspect FlatExpressions {
     eq Root.getChild().expandSize()             = true;
     eq InstNode.getChild().expandSize()         = true;
     eq FIdUse.getChild().expandSize()           = true;
-    eq InstDot.getInstAccess(int i).expandSize() = expandSize(i);
-    
-    syn boolean InstAccess.expandSize(int i) = hasFArraySubscripts() ? getFArraySubscripts().expandSize() : true;
-    eq InstDot.expandSize(int i) {
+    eq InstDot.getInstAccess(int i).expandSize() {
         for (int j = 0; j < i; j++) {
-            if (!getInstAccess(j).expandSize(0)) {
+            if (!getInstAccess(j).indexVariability().knownParameterOrLess()) {
                 return false;
             }
         }
         return true;
     }
-    
-    syn boolean FArraySubscripts.expandSize() {
-        for (FSubscript fs : getFSubscripts()) {
-            if (!fs.expandSize_()) {
-                return false;
-            }
-        }
-        return true;
-    }
-    
-    syn boolean FSubscript.expandSize_() = variability().indexParameterOrLess();
-    eq FExpSubscript.expandSize_() = super.expandSize_() && getFExp().canCeval();
     
     public FSubscript Size.flattenSubscript(int i) {
         return new FExpSubscript(new FRangeExp(new FIntegerLitExp(1),new FIntegerLitExp(get(i))));
@@ -2169,7 +2154,7 @@ aspect FlatExpressions {
         // have binding expressions, however, array subscripts may need to be 
         // flattened during error checks, when using qualifiedName()
         InstAccess ia = iae.asInstAccess();
-        if (variability().indexParameterOrLess()) {
+        if (variability().knownParameterOrLess()) {
             try {
                 if (!size().isEmpty() && iae.canInlineConstant()) {
                     // Check if we have non-constant array subscripts
@@ -2517,50 +2502,13 @@ aspect FlatExpressions {
 	   return new FIdUse(getInstAccess().flatten(prefix));
 	}
 
-    public FExp FArray.flatten(FQName prefix) {
-        if (isIterArray() && !size().isUnknown()) {
-            return ((FIterExp)getFExp(0)).flattenArray(prefix);
-        }
-        List l = new List();
-        for (FExp exp : getFExps()) {
-            l.add(exp.flatten(prefix));
-        }
-        return createNode(l);
-    }
-    
-    public FArray FIterExp.flattenArray(FQName prefix) {
-        Iterable<CommonForIndex> forIndices = getForIndexs();
-        Indices ind = Indices.create(forIndices);
-        FArray res = flattenArray(prefix, forIndices, ind, ind.iterator(), ind.size(), 0);
-        for (CommonForIndex fi : forIndices) {
-            fi.clearEvaluationValue();
-        }
-        return res;
-    }
-    
-    public FArray FIterExp.flattenArray(FQName prefix, Iterable<CommonForIndex> forIndices, Indices ind, Iterator<Index> indIt, Size s, int dim) {
-        List<FExp> l = new List<FExp>();
-        if (dim == s.ndims() - 1) {
-            for (int i = 0; i < s.get(dim); i++) {
-                ind.translate(indIt.next()).setValues(forIndices);
-                getFExp().flushAllRecursive();
-                l.add(getFExp().flatten(prefix));
-            }
-        } else {
-            for (int i = 0; i < s.get(dim); i++) {
-                l.add(flattenArray(prefix, forIndices, ind, indIt, s, dim+1));
-            }
-        }
-        return new FArray(l);
-    }
-    
-    public void Index.setValues(Iterable<CommonForIndex> forIndices) {
-        int i = 0;
-        for (CommonForIndex fi : forIndices) {
-            fi.setEvaluationValue(new CValueInteger(index[i++]));
-        }
-    }
-    
+	public FExp FArray.flatten(FQName prefix) {
+	   List l = new List();
+	   for (FExp exp : getFExps())
+	   	 l.add(exp.flatten(prefix));
+	   return createNode(l);
+	}
+	
 	public FReductionExp FReductionExp.flatten(FQName prefix) {
 		return (FReductionExp) createNode(getFExp().flatten(prefix));
 	}

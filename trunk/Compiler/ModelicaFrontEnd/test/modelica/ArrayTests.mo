@@ -6075,16 +6075,15 @@ public
  function ArrayTests.Constructors.Iterators.ArrayIterTest9.f2
   input Real[:] x;
   output ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] y;
-  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_1;
-  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_2;
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] temp_1;
  algorithm
   init y as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
-  (temp_1) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
-  (temp_2) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
-  y[1].a := temp_1.a;
-  y[1].b := temp_1.b;
-  y[2].a := temp_2.a;
-  y[2].b := temp_2.b;
+  (temp_1[1]) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
+  (temp_1[2]) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
+  y[1].a := temp_1[1].a;
+  y[1].b := temp_1[1].b;
+  y[2].a := temp_1[2].a;
+  y[2].b := temp_1[2].b;
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTest9.f2;
 
@@ -6276,68 +6275,6 @@ equation
 end ArrayTests.Constructors.Iterators.ArrayIterTest15;
 ")})));
 end ArrayIterTest15;
-
-model ArrayIterTest16
-    model A
-        parameter Integer n;
-        Real[n] x = 1:n;
-    end A;
-    model M
-        parameter Integer n;
-        A[n] a(n={3-i for i in 1:n});
-    end M;
-    
-    M[2] m(n={1,2});
-    
-    Real[:] y1 = {m[i].a[end].x[end] for i in 1:2};
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Constructors_Iterators_ArrayIterTest16",
-            description="Varying size in iteration expression",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest16
- structural parameter Integer m[1].n = 1 /* 1 */;
- structural parameter Integer m[1].a[1].n = 2 /* 2 */;
- Real m[1].a[1].x[2] = 1:2;
- structural parameter Integer m[2].n = 2 /* 2 */;
- structural parameter Integer m[2].a[1].n = 2 /* 2 */;
- Real m[2].a[1].x[2] = 1:2;
- structural parameter Integer m[2].a[2].n = 1 /* 1 */;
- Real m[2].a[2].x[1] = 1:1;
- Real y1[2] = {m[1].a[1].x[2], m[2].a[2].x[1]};
-end ArrayTests.Constructors.Iterators.ArrayIterTest16;
-")})));
-end ArrayIterTest16;
-
-model ArrayIterTest17
-    function f
-        input Integer i;
-        output Integer[:] y = 1:2;
-        algorithm
-    end f;
-    Real[:,:] y3 = {f(i) for i in 1:2};
-    
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="Constructors_Iterators_ArrayIterTest17",
-            description="",
-            flatModel="
-fclass ArrayTests.Constructors.Iterators.ArrayIterTest17
- Real y3[2,2] = {ArrayTests.Constructors.Iterators.ArrayIterTest17.f(1), ArrayTests.Constructors.Iterators.ArrayIterTest17.f(2)};
-
-public
- function ArrayTests.Constructors.Iterators.ArrayIterTest17.f
-  input Integer i;
-  output Integer[:] y;
- algorithm
-  init y as Integer[2];
-  y := 1:2;
-  return;
- end ArrayTests.Constructors.Iterators.ArrayIterTest17.f;
-
-end ArrayTests.Constructors.Iterators.ArrayIterTest17;
-")})));
-end ArrayIterTest17;
 
 model ArrayIterTestUnknown1
     function f
