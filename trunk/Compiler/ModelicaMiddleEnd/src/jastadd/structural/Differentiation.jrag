@@ -84,6 +84,14 @@ aspect Derivatives {
         throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
     }
     
+    public static List<FAbstractEquation> FAbstractEquation.diffList(String name, List<FAbstractEquation> equations) {
+        List<FAbstractEquation> res = new List<FAbstractEquation>();
+        for (FAbstractEquation equation : equations) {
+            res.addAll(equation.diff(name));
+        }
+        return res;
+    }
+    
     eq FEquation.diff(String name) {
         try {
             return Arrays.asList(dynamicFAbstractEquation(new FEquation(getLeft().diff(name), getRight().diff(name))));
@@ -114,6 +122,24 @@ aspect Derivatives {
             throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
         }
     }
+    
+    eq FIfEquation.diff(String name) {
+        if (isWhen()) {
+            throw new EquationDifferentiationException(this, "Cannot differentate the equation:\n   " + prettyPrint(""));
+        }
+        try {
+            Opt<FIfWhenElseEquation> elseOpt = hasElse() ?
+                new Opt<FIfWhenElseEquation>((FElseEquation)getElse().diff(name).iterator().next()):
+                new Opt<FIfWhenElseEquation>();
+            return Arrays.asList(dynamicFAbstractEquation(
+                    new FIfEquation(getType().treeCopy(), FAbstractEquation.diffList(name, getFAbstractEquations()), getTest().treeCopy(), elseOpt)));
+        } catch (ExpressionDifferentiationException e) {
+            throw new EquationDifferentiationException(this, e.toQuotedString() + " in equation:\n   " + this);
+        }
+    }
+    
+    eq FElseEquation.diff(String name) = Arrays.asList(dynamicFAbstractEquation(
+            new FElseEquation(getType().treeCopy(), FAbstractEquation.diffList(name, getFAbstractEquations()))));
 
     public static final String FExp.TIME = "time";
     
