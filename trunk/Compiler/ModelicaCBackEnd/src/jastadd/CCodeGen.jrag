@@ -5263,7 +5263,7 @@ aspect CCodeGen {
             p.printPreSteps(getX(), str, indent);
             p.printPreSteps(getPositiveVelocity(), str, indent);
             int index = mySpatialDistIndex();
-            str.format("%sjmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
+            str.format("%sef = jmi_spatialdist_event_indicator(jmi, %d, ", indent, index);
             p.print(getX(), str, indent);
             str.print(", ");
             p.print(getPositiveVelocity(), str, indent);

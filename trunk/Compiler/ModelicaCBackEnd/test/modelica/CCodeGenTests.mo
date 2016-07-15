@@ -22619,8 +22619,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
-    jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
-    jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
+    ef = jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
+    ef = jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
 
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
