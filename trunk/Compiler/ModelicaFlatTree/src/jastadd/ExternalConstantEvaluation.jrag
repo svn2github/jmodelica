@@ -373,7 +373,7 @@ aspect ExternalConstantEvaluationCaching {
                 com.startTimer(timeout);
                 com.accept("START");
                 for (CommonVariableDecl eo : ext.externalObjectsToSerialize()) {
-                    com.put(values.get(eo), eo.type());
+                    com.put(values.containsKey(eo) ? values.get(eo) : eo.ceval(), eo.type());
                 }
                 com.accept("READY");
                 com.cancelTimer();
@@ -383,8 +383,9 @@ aspect ExternalConstantEvaluationCaching {
                     ProcessCommunicator com) throws IOException {
                 com.startTimer(timeout);
                 com.check("EVAL");
+                
                 for (CommonVariableDecl arg : ext.functionArgsToSerialize()) {
-                    com.put(values.get(arg), arg.type());
+                    com.put(values.containsKey(arg) ? values.get(arg) : arg.ceval(), arg.type());
                 }
                 com.accept("CALC");
                 com.accept("DONE");

@@ -349,7 +349,14 @@ package CEval
         Library="externalFunctionsC",
         Include="#include \"externalFunctionsC.h\"");
       end fStringArrayUnknown;
+      
+      function fStrlen
+        input String s;
+        output Integer n;
+      external "C" n = strlen(s);
+      end fStrlen;
 
+      constant Integer   len            = fStrlen("abcde");
       constant String    xScalar        = fStringScalar("abcde");
       constant String    xScalarLit     = fStringScalarLit("abcde");
       constant String[2] xArray         = fStringArray({"abc","def"});

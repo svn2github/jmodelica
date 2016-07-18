@@ -2618,7 +2618,6 @@ public abstract class CCompilerDelegator {
     
     public static Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
         Set<String> newPaths = new LinkedHashSet<String>();
-
         for (String path : paths) {
             String platformed = path + "/" + platform;
             String compilered = platformed + "/" + compilerType + versionNumber;
@@ -3038,7 +3037,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
             int i = mArgs.length;
             for (String arg : vArgs)
                 cmd[i++] = arg;
-                //TODO Reorder ext libs
+                
             ASTNode.log.debug("C-code compilation command:");
             ASTNode.log.debug(printStringArrayObject(cmd));
 
