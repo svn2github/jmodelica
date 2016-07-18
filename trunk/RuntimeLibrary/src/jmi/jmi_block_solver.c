@@ -976,13 +976,21 @@ double* jmi_solver_get_f_scales(jmi_block_solver_t* block) {
     return N_VGetArrayPointer(block->f_scale);
 }
 
-double calculate_scaled_residual_norm(double* residual, double *f_scale, int n) {
-    double scaledRes, norm = 0;
-    int i;
-    for(i=0; i<n; i++) {
-        scaledRes = residual[i]*f_scale[i];
-        norm = norm>= RAbs(scaledRes)?norm:RAbs(scaledRes);
+int jmi_scaled_vector_norm(jmi_real_t *x, jmi_real_t *scale, jmi_int_t n, jmi_int_t NORM, jmi_real_t* out) {
+    int ef = 0;
+    
+    if (NORM == JMI_NORM_MAX) {
+        int i;
+        jmi_real_t tmp;
+        *out = 0.0;
+        for (i = 0; i < n; i++) {
+            tmp = JMI_ABS(x[i]*scale[i]);
+            *out = *out >= tmp ? *out : tmp;
+        }
+    } else {
+        ef = -1;
     }
-    return norm;
+    
+    return ef;
 }
 
