@@ -309,6 +309,7 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
+    eq FSubscriptedExp.toMX() = select().toMX();
     syn lazy MX FClass.timeMX() = ifcasadi.msym("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return A MX with the first output, and perhaps only output, for this function call */

@@ -1199,3 +1199,16 @@ equation
     der(a2) = -2.7*a2-0.3;
     (b1, b2) = f(a1,a2);
 end simpleModelWithFunctions;
+
+model ParameterIndexing1
+
+Real x[N];
+
+final parameter Integer index = max(1, max_index);
+      parameter Integer max_index = 1;
+      parameter Integer N(min=1)=2;
+equation
+
+x[index] = 0;
+x[index+1] = 2;
+end ParameterIndexing1;
