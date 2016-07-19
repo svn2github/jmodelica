@@ -117,8 +117,11 @@ aspect Sanity {
     }
     
     public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc) {
-        if (!getFIdUse().myFV().isParameter()) {
+        FAbstractVariable fv = getFIdUse().myFV();
+        if (!fv.isParameter()) {
             fc.sanityProblem(this, "Non-parameter set in parameter equation: %s", this);
+        } else if (fv.variability().initialParameterVariability()) {
+            fc.sanityProblem(this, "Initial parameter set in parameter equation: %s", this);
         }
     }
 
