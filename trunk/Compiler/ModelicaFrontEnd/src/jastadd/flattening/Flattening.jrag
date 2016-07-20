@@ -2187,14 +2187,28 @@ aspect FlatExpressions {
     syn boolean InstAssignable.flattenAsFunctionConstant() =
             !isInput() && !isOutput() && variability().knownParameterOrLess();
 
-    syn boolean FIdUseExp.canInlineConstant() = !inExternalArg() && !inFunctionCallLeft();
+    /**
+     *  Determines whether or not a constant can be in-lined
+     *  for the given context.
+     */
+    eq BaseNode.getChild().canInlineConstant()              = true;
+    eq FArraySubscripts.getFSubscript().canInlineConstant() = true;
+    eq FExternalStmt.getArg().canInlineConstant()           = false;
+    eq FFunctionCallLeft.getFExp().canInlineConstant()      = false;
+    eq InstExternalCall.getArg().canInlineConstant()        = false;
     
-    inh boolean FIdUseExp.inExternalArg();
-    inh boolean FSizeExp.inExternalArg();
-    eq BaseNode.getChild().inExternalArg()       = false;
-    eq InstExternalCall.getArg().inExternalArg() = true;
-    eq FExternalStmt.getArg().inExternalArg()    = true;
-    eq FSizeExp.getFExp().inExternalArg()        = inExternalArg();
+    inh boolean FArray.canInlineConstant();
+    inh boolean FIdUseExp.canInlineConstant();
+    inh boolean FRecordConstructor.canInlineConstant();
+    inh boolean FSizeExp.canInlineConstant();
+    inh boolean InstFunctionArgument.canInlineConstant();
+    inh boolean InstRecordConstructor.canInlineConstant();
+    
+    eq FArray.getChild().canInlineConstant()                = canInlineConstant();
+    eq FRecordConstructor.getChild().canInlineConstant()    = canInlineConstant();
+    eq FSizeExp.getFExp().canInlineConstant()               = canInlineConstant();
+    eq InstFunctionArgument.getChild().canInlineConstant()  = canInlineConstant();
+    eq InstRecordConstructor.getArg().canInlineConstant()   = canInlineConstant();
 
     /**
      * Flatten an access to this constant in a function.
