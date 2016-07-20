@@ -2616,12 +2616,16 @@ public abstract class CCompilerDelegator {
     
     protected abstract String compilerVersionNumber();
     
-    public static Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
+    public Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
         Set<String> newPaths = new LinkedHashSet<String>();
         for (String path : paths) {
             String platformed = path + "/" + platform;
-            String compilered = platformed + "/" + compilerType + versionNumber;
-            newPaths.add(compilered);
+            
+            if (versionNumber != null) {
+                String compilered = platformed + "/" + compilerType + versionNumber;
+                newPaths.add(compilered);
+            }
+            
             newPaths.add(platformed);
         }
         return newPaths;
@@ -2968,30 +2972,26 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         StringOperation libOp = new ChainedOperations(
                 new PlatformDirOperation(platform),
                 new QuoteOperation("-L"));
-
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
-
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
 
     @Override
     public String compilerVersionNumber() {
-        return versionNumber();
-    }
-
-    public static String versionNumber() {
         String[] cmd = new String[] {
                 "gcc", "--version"
         };
 
         OutputStream os = new ByteArrayOutputStream();
         if (ModelicaCompiler.loggedProcess(cmd, getEnv(), new File("."), os) > 0) {
-            throw new CcodeCompilationException("Evaluation of GCC version number failed.");
+            return null;
         }
         
         String output = os.toString();
-        String versionNumber = output.split("\n")[0].split(" ")[2].replaceAll("\\.", "");
-        return versionNumber.substring(0, versionNumber.length() - 1);
+        String[] firstLine = output.split("\n")[0].split(" ");
+        String prefix = firstLine[1].contains("tdm") ? "tdm" : "";
+        String versionNumber = firstLine[2].replaceAll("\\.", "");
+        return prefix + versionNumber.substring(0, versionNumber.length() - 1);
     }
     
     /**
