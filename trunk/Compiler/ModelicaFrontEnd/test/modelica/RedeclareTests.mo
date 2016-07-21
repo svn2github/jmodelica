@@ -5010,7 +5010,7 @@ model RedeclareElement9
 fclass RedeclareTests.RedeclareElement9
  constant Integer c.n = 3;
  Real c.b.y = 2;
- Real c.b.x[3] = {i ^ 2 for i in 1:3};
+ Real c.b.x[3] = {1 ^ 2, 2 ^ 2, 3 ^ 2};
 end RedeclareTests.RedeclareElement9;
 ")})));
 end RedeclareElement9;
