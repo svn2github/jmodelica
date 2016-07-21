@@ -7343,7 +7343,7 @@ public
   init y as Real[2];
   init temp_1 as Real[2];
   (temp_1) := FunctionTests.ArrayOutputScalarization8.f1();
-  for i in {temp_1[1], temp_1[2]} loop
+  for i in temp_1 loop
    y[1] := i;
    (y) := FunctionTests.ArrayOutputScalarization8.f1();
   end for;
@@ -10916,6 +10916,29 @@ fclass FunctionTests.UnknownArray51
 end FunctionTests.UnknownArray51;
 ")})));
 end UnknownArray51;
+
+model UnknownArray52
+    record R
+        Real[:] x;
+    end R;
+    
+    function f
+        output R r;
+    algorithm
+        r := R(1:2);
+    end f;
+    R r = f();
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArray52",
+            description="Cannot resolve size of function output",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 10925, column 5, in file '...', CANNOT_INFER_ARRAY_SIZE_OF_FUNCTION_OUTPUT:
+  Can not infer array size of the function output r.x
+")})));
+end UnknownArray52;
 
 // TODO: need more complex cases
 model IncompleteFunc1
@@ -15141,8 +15164,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real y[1];
  Real y[2];
 equation
- y[1] = noEvent(if x[1] >= 0 then x[1] * s[1] else x[1] * s[1]);
- y[2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
+ y[1] = noEvent(x[1] * s[1]);
+ y[2] = noEvent(x[2] * s[2]);
  s[1] = 1;
  s[2] = 2;
  x[1] = time;
@@ -15179,8 +15202,8 @@ fclass FunctionTests.FunctionLike.Special.SemiLinear8
  Real y[2,2];
 equation
  y[1,1] = noEvent(if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
- y[1,2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[2]);
- y[2,1] = noEvent(if x2 >= 0 then x2 * s[1] else x2 * s[1]);
+ y[1,2] = noEvent(x[2] * s[2]);
+ y[2,1] = noEvent(x2 * s[1]);
  y[2,2] = noEvent(if x2 >= 0 then x2 * s[2] else x2 * s[1]);
  s[1] = 1;
  s[2] = 2;
@@ -15251,10 +15274,8 @@ model NoEventArray1
             description="noEvent() for Real array",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventArray1
- constant Real x[1] = 1;
- constant Real x[2] = 2;
- constant Real y[1] = 1.0;
- constant Real y[2] = 2.0;
+ constant Real y[1] = 1;
+ constant Real y[2] = 2;
 end FunctionTests.FunctionLike.EventRel.NoEventArray1;
 ")})));
 end NoEventArray1;
@@ -15274,8 +15295,8 @@ fclass FunctionTests.FunctionLike.EventRel.NoEventArray2
  parameter Boolean y[1];
  parameter Boolean y[2];
 parameter equation
- y[1] = noEvent(x[1]);
- y[2] = noEvent(x[2]);
+ y[1] = x[1];
+ y[2] = x[2];
 end FunctionTests.FunctionLike.EventRel.NoEventArray2;
 ")})));
 end NoEventArray2;
@@ -15295,10 +15316,8 @@ model NoEventRecord1
             description="",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.NoEventRecord1
- constant Real x.a = 1;
- constant Real x.b = 2;
- constant Real y.a = 1.0;
- constant Real y.b = 2.0;
+ constant Real y.a = 1;
+ constant Real y.b = 2;
 end FunctionTests.FunctionLike.EventRel.NoEventRecord1;
 ")})));
 end NoEventRecord1;
@@ -15325,6 +15344,27 @@ equation
 end FunctionTests.FunctionLike.EventRel.Smooth;
 ")})));
 end Smooth;
+
+model Smooth1
+    Real x,y;
+equation
+    der(x) = -1;
+    x = smooth(0, y);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="FunctionLike_EventRel_Smooth1",
+            description="",
+            flatModel="
+fclass FunctionTests.FunctionLike.EventRel.Smooth1
+ Real x;
+initial equation 
+ x = 0.0;
+equation
+ der(x) = -1;
+end FunctionTests.FunctionLike.EventRel.Smooth1;
+")})));
+end Smooth1;
 
 model Smooth2
     Real a,b,c, d;

@@ -438,15 +438,7 @@ aspect Arrays {
 	syn FArraySubscripts FIdUse.getExpandedSubscripts() {
 		Size s = myFV().size();
 		if (s.isUnknown() && myFV().inRecord()) {
-			FQName name = getFQName();
-			FAbstractVariable record = lookupOutermostFV(name);
-			if (!record.isUnknown()) {
-				FAttribute attr = record.findHierarchicalAttribute(name);
-				if (attr != null)
-					attr = attr.findAttribute(FAttribute.SIZE);
-				if (attr != null && attr.hasValue())
-					s = new MutableSize(attr.getValue());
-			}
+            s = getFQName().calcMySize(getFQName().numParts());
 		}
 		return s.createExpandedFArraySubscripts();
 	}
@@ -828,6 +820,7 @@ aspect Arrays {
 	eq InstNode.getChild().expandSizeForIterExp(Size s) = s;
 	
 	eq FSubscriptedExp.size() = getFArraySubscripts().accessSize();
+    eq FComponentExp.size()   = type().size();
 	
 	eq FTranspose.size() {
 		Size size = getFExp().size();
@@ -1032,8 +1025,12 @@ aspect Arrays {
     syn lazy Size InstComponentDecl.size() = declaredSize();
     eq InstAssignable.size() {
         Size s = super.size();
-        if (s.isUnknown() && hasBindingFExp() && (!isInput() || !inFunction()) && !getBindingFExp().isCircular())
+        if (s.isUnknown() && hasBindingFExp() && 
+                (!inRecordDecl() || !isModifiable()) && 
+                (!isInput() || !inFunction()) &&
+                !getBindingFExp().isCircular()) {
             s = s.createKnown(getBindingFExp());
+        }
         return s;
     }
     
@@ -1719,17 +1716,14 @@ aspect Arrays {
 
     eq FVectorFunctionCall.getArray() {
         Array arr = new Array(indices());
-        Size[] sizes = (Size[]) getSizes().clone();
-        sizes[0] = Size.SCALAR;
         boolean[] vec = getVectorized();
-        
         int j;
         for (Index i : arr.indices()) {
             List<FExp> args = new List<FExp>();
             j = 0;
             for (FExp arg : getArgs()) 
                 args.add(vec[j++] ? arg.getArray().subArrayFExp(i) : arg);
-            arr.set(i, new FFunctionCall(getName().fullCopy(), args, sizes));
+            arr.set(i, new FFunctionCall(getName().fullCopy(), args, getFType().scalarType()));
         }
         return arr;
     }
@@ -2458,23 +2452,6 @@ aspect ArrayHelpers {
         public boolean isZero() {
             return !isUnknown() && numElements() == 0;
         }
-		
-		/**
-		 * Create a new flattened FArraySubscripts object describing this size.
-		 */
-		public FArraySubscripts flattenFArraySubscripts(FQName prefix) {
-			FArraySubscripts fas = new FArraySubscripts();
-			for (int i = 0; i < size.length; i++)
-				fas.addFSubscript(flattenFSubscript(i, prefix));
-			return fas;
-		}
-		
-		/**
-		 * Create a new flattened FSubscript for dimension <code>i</code>.
-		 */
-		protected FSubscript flattenFSubscript(int i, FQName prefix) {
-			return size[i] == UNKNOWN ? new FColonSubscript() : new FIntegerSubscript(size[i]);
-		}
 		
 		/**
 		 * Create a new FArraySubscripts object with ranges spanning this size.
@@ -3386,15 +3363,6 @@ aspect ArrayHelpers {
             }
         }
         
-		/**
-		 * Create a new flattened FSubscript for dimension <code>i</code>.
-		 */
-		protected FSubscript flattenFSubscript(int i, FQName prefix) {
-			evaluate(i);
-            return !okExp(i) ? super.flattenFSubscript(i, prefix) : 
-				new FExpSubscript(exps[i].flatten(prefix));
-		}
-
         /**
          * Create a new FSubscript with a range spanning dimension <code>i</code>.
          */

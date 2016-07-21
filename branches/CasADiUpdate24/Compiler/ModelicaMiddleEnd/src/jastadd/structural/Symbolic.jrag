@@ -173,6 +173,9 @@ aspect EquationSolve {
                     activeFactors.add(((FNegExp)ee).getFExp());
                     negatedFactor = true;
                 } else if (ee.nbrUses(var.name())==0) {
+                    if (ee.variability().constantVariability() && Math.abs(ee.ceval().realValue())*ee.dynamicFExp(var.nominal()).ceval().realValue() < 1e-10) {
+                        return new FNoExp();
+                    }
                     inactiveFactors.add(ee);
                 } else {
                     // This equation cannot be solved
@@ -501,6 +504,22 @@ aspect ExpressionSimplification {
     rewrite FIfExp {
         when (getThenExpNoTransform().equalsSymbolic(getElseExpNoTransform())) to FExp getThenExp();
     }
+    
+    syn boolean FExp.needsNoEvent() = true;
+    eq FVarRefExp.needsNoEvent()    = false;
+    eq FLitExp.needsNoEvent()       = false;
+
+    rewrite FNoEventExp {
+        when (!getFExpNoTransform().needsNoEvent()) to FExp getFExpNoTransform();
+    }
+    
+    syn boolean FExp.needsSmooth() = true;
+    eq FVarRefExp.needsSmooth()    = false;
+    eq FLitExp.needsSmooth()       = false;
+
+    rewrite FSmoothExp {
+        when (!getFExpNoTransform().needsSmooth()) to FExp getFExpNoTransform();
+    }
 
 
     syn boolean FExp.equalsSymbolic(FExp other) {
@@ -535,6 +554,15 @@ aspect ExpressionSimplification {
             return false;
         FEnumLitExp o = (FEnumLitExp) other;
         return getValue() == o.getValue(); 
+    }
+    
+    eq FBinExp.equalsSymbolic(FExp other) {
+        if (getClass().equals(other.getClass())) {
+            FBinExp o = (FBinExp) other;
+            return getRightNoTransform().equalsSymbolic(o.getRightNoTransform())
+                    && getLeftNoTransform().equalsSymbolic(o.getLeftNoTransform());
+        }
+        return false;
     }
 
  }

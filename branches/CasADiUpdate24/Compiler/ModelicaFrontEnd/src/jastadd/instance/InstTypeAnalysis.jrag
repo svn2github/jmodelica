@@ -112,19 +112,32 @@ aspect InstTypeAnalysis {
         return type;
     }
 
-    eq InstPartialFunction.type() = myInstClass().functionType().sizedType(size());
+    eq InstPartialFunction.type() = functionType().sizedType(size());
     
-    syn FFunctionType InstClassDecl.functionType() {
+    public interface InstCallable{
+        public FType functionType();
+    }
+    
+    syn FFunctionType InstClassDecl.functionType()       = getFunctionType();
+    syn FFunctionType InstPartialFunction.functionType() = myInstClass().functionType();
+    
+    syn FFunctionType InstClassDecl.getFunctionType() {
         List<FRecordComponentType> inputTypes = new List();
         List<FRecordComponentType> outputTypes = new List();
         for (InstComponentDecl icd : myInputs())
-            inputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
+            inputTypes.add(new FRecordComponentType(icd.name(), icd.type().treeCopy()));
         for (InstComponentDecl icd : myOutputs())
-            outputTypes.add(new FRecordComponentType(icd.qualifiedName(), icd.type()));
-        return new FFunctionType(Size.SCALAR, qualifiedName(), inputTypes, outputTypes, null);
+            outputTypes.add(new FRecordComponentType(icd.name(), icd.type().treeCopy()));
+        return new FFunctionType(Size.SCALAR, actualInstClass().qualifiedName(), inputTypes, outputTypes, null);
     }
-
-    eq InstRecordConstructor.type() = getRecord().recordType();
+    
+    eq InstRecordConstructor.type() {
+        FRecordType res = myInstClassDecl().createEmptyFRecordType(Size.SCALAR);
+        for (InstComponentDecl icd : allInstComponentDecls()) {
+            res.addComponent(new FRecordComponentType(icd.name(), icd.type().treeCopy()));
+        }
+        return res;
+    }
     
     public FType FType.componentType(String name) {
         return fUnknownType();
@@ -143,17 +156,22 @@ aspect InstTypeAnalysis {
     syn lazy FType InstComponentDecl.type() = fUnknownType();
 
     eq InstFunctionCall.type() = hasOutputs() ? typeOfOutput(0) : fUnknownType();
-    eq InstPartialFunctionCall.type() = functionType();
     
-    syn FFunctionType InstPartialFunctionCall.functionType() {
-         FFunctionType type = myInstCallable().actualInstClassDecl().functionType();
-         Set<String> s = new HashSet(namedArgs());
-         List<FRecordComponentType> n = new List<FRecordComponentType>();
-         for (FRecordComponentType frc : type.getInputs())
-             if (!s.contains(frc.getName()))
-                 n.add(frc);
-         type.setInputList(n);
-         return type;
+    syn FFunctionType InstFunctionCall.declType() = myInstCallable().actualInstClassDecl().functionType();
+    
+    syn lazy FType InstFunctionCall.getFType() = declType().removeInputs().createSizeFExp(this);
+    eq InstVectorFunctionCall.getFType()       = declType().removeInputs().createSizeFExp(this).sizedType(vectorizedSize());
+    eq InstPartialFunctionCall.getFType() {
+        FFunctionType type = declType();
+        Set<String> s = new HashSet(namedArgs());
+        List<FRecordComponentType> n = new List<FRecordComponentType>();
+        for (FRecordComponentType frc : type.getInputs()) {
+            if (!s.contains(frc.getName())) {
+                n.add(frc);
+            }
+        }
+        type.setInputList(n);
+        return type;
     }
     
     syn ArrayList<String> InstPartialFunctionCall.namedArgs() {
@@ -161,6 +179,15 @@ aspect InstTypeAnalysis {
         for (InstComponentDecl icd : myInputsToBind(myInstCallable()))
             res.add(icd.name());
         return res;
+    }
+    
+    /**
+     * Remove input types
+     * @return this
+     */
+    public FFunctionType FFunctionType.removeInputs() {
+        setInputList(new List<FRecordComponentType>());
+        return this;
     }
     
     syn boolean InstNode.isReal()            = false;
@@ -208,8 +235,8 @@ aspect InstBindingType {
      * The size that a value FExp of this modification should have.
      */
     syn Size InstModification.expectedSize() = expectedSizeFromParent();
-    eq InstNamedModification.expectedSize()  = getName().size().expand(getEach() ? Size.SCALAR : super.expectedSize());
-    eq InstElementRedeclare.expectedSize()   = getName().size();
+    eq InstNamedModification.expectedSize()  = getName().myInstComponentDecl().size().expand(getEach() ? Size.SCALAR : super.expectedSize());
+    eq InstElementRedeclare.expectedSize()   = getName().myInstComponentDecl().size();
 
     /**
      * The size that a value expression of the parent this modification should have.

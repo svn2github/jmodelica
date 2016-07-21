@@ -4615,6 +4615,66 @@ In component g:
 end RedeclareTest75;
 
 
+model RedeclareTest76
+    record R2
+        Real w;
+    end R2;
+    
+    record R1
+        R2 x = R2(time);
+    end R1;
+    
+    record R
+        extends R1;
+    end R;
+    
+    model A
+        R1 r;
+        replaceable D x;
+    end A;
+    
+    model B
+        extends A(r = R());
+        redeclare E x;
+    end B;
+    
+    model D
+        Real y = time+2;
+    end D;
+    
+    model E
+        extends D(y=time+3);
+    end E;
+    
+    B b;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest76",
+            description="Check that environment is correctly calculated for extends in record constructors (see #5044)",
+            flatModel="
+fclass RedeclareTests.RedeclareTest76
+ RedeclareTests.RedeclareTest76.R1 b.r = RedeclareTests.RedeclareTest76.R(RedeclareTests.RedeclareTest76.R2(time));
+ Real b.x.y = time + 3;
+
+public
+ record RedeclareTests.RedeclareTest76.R2
+  Real w;
+ end RedeclareTests.RedeclareTest76.R2;
+
+ record RedeclareTests.RedeclareTest76.R1
+  RedeclareTests.RedeclareTest76.R2 x;
+ end RedeclareTests.RedeclareTest76.R1;
+
+ record RedeclareTests.RedeclareTest76.R
+  RedeclareTests.RedeclareTest76.R2 x;
+ end RedeclareTests.RedeclareTest76.R;
+
+end RedeclareTests.RedeclareTest76;
+")})));
+end RedeclareTest76;
+
+
 model RedeclareElement1
   model A
     replaceable model B
@@ -7286,6 +7346,56 @@ public
 end RedeclareTests.RedeclareInRecord7;
 ")})));
 end RedeclareInRecord7;
+
+model RedeclareInRecord8
+    record G0
+        Real x = 1;
+    end G0;
+    
+    model A
+        replaceable record G = G0;
+        B b(redeclare replaceable record G = G);
+    end A;
+    
+    model B
+        replaceable record G = G0;
+        G g;
+    end B;
+
+    model C
+        A a(redeclare record G = G0(x=f(time)));
+        function f
+            input Real x;
+            output Real y = x;
+            algorithm
+        end f;
+    end C;
+    
+    C c;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareInRecord8",
+            description="Redeclare record with function call in binding expression",
+            flatModel="
+fclass RedeclareTests.RedeclareInRecord8
+ RedeclareTests.RedeclareInRecord8.c.a.b.G c.a.b.g(x = RedeclareTests.RedeclareInRecord8.c.f(time));
+
+public
+ function RedeclareTests.RedeclareInRecord8.c.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x;
+  return;
+ end RedeclareTests.RedeclareInRecord8.c.f;
+
+ record RedeclareTests.RedeclareInRecord8.c.a.b.G
+  Real x;
+ end RedeclareTests.RedeclareInRecord8.c.a.b.G;
+
+end RedeclareTests.RedeclareInRecord8;
+")})));
+end RedeclareInRecord8;
 
 
 end RedeclareTests;

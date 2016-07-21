@@ -177,13 +177,21 @@ aspect FExpToCasADi {
      */
     MXVector FAssignStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
         MXVector lhsVec = new MXVector();
-        lhsVec.add(getLeft().toMX());
+        MX left = getLeft().toMX();
+        if (left == null) {
+            throw new UnsupportedOperationException("The variable on the LHS does not exists: " + toString());
+        }
+        lhsVec.add(left);
         MXVector rhsVec = getRight().toMXVector();
         
         MX updatedRhsExpression = ifcasadi.subst(rhsVec, allVars, expressions).get(0);
         int indexInAllCurrVars = findIndexOfMXInMXVector(lhsVec.get(0), allVars);
         expressions.set(indexInAllCurrVars, updatedRhsExpression);
         return expressions;
+    }
+    
+    MXVector FIfStmt.updateExpressionsAccordingToStatement(MXVector expressions, MXVector allVars) {
+        throw new UnsupportedOperationException("If-Statements are unsupported (try to rewrite into if-expressions): " + toString());
     }
     
     /**
@@ -299,6 +307,7 @@ aspect FExpToCasADi {
     eq FOrExp.toMX() = getLeft().toMX().logic_or(getRight().toMX());
     
     // Other expressions
+    eq FSubscriptedExp.toMX() = select().toMX();
     syn lazy MX FClass.timeMX() = ifcasadi.msym("time");
     eq FTimeExp.toMX() = myFClass().timeMX();
     /** @return A MX with the first output, and perhaps only output, for this function call */

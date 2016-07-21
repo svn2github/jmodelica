@@ -430,7 +430,7 @@ struct jmi_t {
 
     jmi_real_t atEvent;                  /**< \brief A boolean variable indicating if the model equations are evaluated at an event.*/
     jmi_real_t atInitial;                /**< \brief A boolean variable indicating if the model equations are evaluated at the initial time */
-    jmi_real_t atTimeEvent;              /**< \brief A boolean variable indicating if the model equations are evaluated at an time event time */
+    jmi_real_t atTimeEvent;              /**< \brief A boolean variable indicating if the model equations are evaluated at a time event time */
     int eventPhase;                      /**< \brief Zero if in first phase of event iteration, non zero if in second phase */
     int save_restore_solver_state_mode;  /**< \brief A boolean variable indicating if in a mode where solver state should be saved and restored */
     
@@ -445,6 +445,7 @@ struct jmi_t {
 
     jmi_options_t options;               /**< \brief Runtime options */
     jmi_real_t events_epsilon;           /**< \brief Value used to adjust the event indicator functions */
+    jmi_real_t time_events_epsilon;      /**< \brief Value used to adjust the time event indicator functions */
     jmi_real_t tmp_events_epsilon;       /**< \brief Temporary holder for the event epsilon during initialization */
     jmi_real_t newton_tolerance;         /**< \brief Tolerance that is used in the newton iteration */
     jmi_int_t recomputeVariables;        /**< \brief Dirty flag indicating when equations should be resolved. */

@@ -99,7 +99,7 @@ aspect FlatNames {
     
     syn FQName InstComponentDecl.appendMyName(FQName prefix) = 
         (isAssignable() && isArrayDecl()) ? 
-                prefix.copyAndAppend(name(), size().flattenFArraySubscripts(prefix)) :
+                prefix.copyAndAppend(name(), size().flattenFArraySubscripts()) :
                 prefix.copyAndAppend(name());
     eq InstArrayComponentDecl.appendMyName(FQName prefix)    = 
         (getIndex() > 0) ? prefix.copyAndAddSubscript(new FIntegerSubscript(getIndex())) : prefix;
@@ -1360,7 +1360,9 @@ aspect FlatFunctionUtils {
      /**
       * May this component be altered by a modification?
       */
-     syn boolean InstComponentDecl.isModifiable() = !(isConstant()&& hasBindingExp()) && !(isParameter() && getComponentDecl().hasFinal());
+     syn boolean InstComponentDecl.isModifiable() = 
+             !(definedVariability().constantVariability() && hasBindingExp()) &&
+             !(definedVariability().parameterVariability() && getComponentDecl().hasFinal());
      
      /**
       * Returns a list of all FFunctionVariables declared as "input".
@@ -1841,8 +1843,8 @@ aspect FlatFunctionUtils {
                  this.prefix = prefix;
              }
              
-             public String name(NameIndexCache nic, GeneratedVarType gvt) {
-                 return prefix + nic.nextIndex(gvt);
+             public String name(NameIndexCache nic) {
+                 return prefix + nic.nextIndex(this);
              }
          }
      }
@@ -1850,7 +1852,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt) {
          String name;
          do {
-             name = gvt.name(nic, gvt);
+             name = gvt.name(nic);
          } while (lookup(name) != null);
          return name;
      }
@@ -1858,7 +1860,7 @@ aspect FlatFunctionUtils {
      public String FlatVariableMap.nextGeneratedVarName(NameIndexCache nic, GeneratedVarType gvt, FlatVariableMap other) {
          String name;
          do {
-             name = gvt.name(nic, gvt);
+             name = gvt.name(nic);
          } while (lookup(name) != null || other.lookup(name) != null);
          return name;
      }

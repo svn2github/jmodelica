@@ -64,6 +64,8 @@
 #define JMI_LIMIT_VALUE 1e30
 #define JMI_VAR_NOT_USED(x) ((void)x)
 
+#define JMI_NORM_MAX 0
+
 /** \brief Jacobian variability for the linear solver */
 typedef enum jmi_block_solver_jac_variability_t {
     JMI_CONSTANT_VARIABILITY=0,
@@ -317,6 +319,7 @@ struct jmi_block_solver_options_t {
     int brent_ignore_error_flag;   /**< \brief Flag if the solver should ignore errors in Brent solve. */
     int experimental_mode;         /**< \brief  Activate experimental features of equation block solvers. Combination of jmi_block_solver_experimental_mode_t flags. */
     double events_epsilon;         /**< \brief The event epsilon used for event indicators and switches. */
+    double time_events_epsilon;    /**< \brief The time event epsilon used for time event indicators and switches. */
     int use_newton_for_brent;      /**< \brief If a few Newton steps are to be performed in order to get a better guess for Brent. */
     double active_bounds_threshold; /**< \brief Threshold for when we are at active bounds. */
     int use_nominals_as_fallback_in_init; /**< \brief If set, uses the nominals as initial guess in case everything else failed during initialization */
@@ -393,8 +396,8 @@ double* jmi_solver_get_f_scales(jmi_block_solver_t* block);
 /**< \brief Setup residual scaling */
 void jmi_setup_f_residual_scaling(jmi_block_solver_t *block);
 
-/** \brief Calculate scaled residual max norm */
-double calculate_scaled_residual_norm(double* residual, double *f_scale, int n);
+/** \brief Computes the scaled vector norm */
+int jmi_scaled_vector_norm(jmi_real_t *x, jmi_real_t *scale, jmi_int_t n, jmi_int_t NORM, jmi_real_t* out);
 
 /** \brief Check and log illegal iv inputs */
 int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);

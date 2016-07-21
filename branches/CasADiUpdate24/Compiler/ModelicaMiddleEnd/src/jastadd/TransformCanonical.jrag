@@ -707,20 +707,13 @@ aspect TransformCanonical {
                 FAbstractEquation fe = prePropagationEquations.remove(fv);
                 if (fe == null && fv.isPreVariable())
                     fe = prePropagationEquations.remove(fv.myNonPreVariable());
-                if (fe != null) {
-                    Eq eqn = g.addEquation(fe, 1, fe.variability(), fe.type());
-                    g.addEdge(eqn, g.getVariable(fv.name()));
-                    g.addEdge(eqn, g.getVariable(fv.myPreVariable().name()));
-                } else {
+                if (fe == null) {
                     FIdUseExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createUseExp();
                     FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                     fe = new FEquation(lhs, rhs);
                     addFInitialEquation(fe);
-                    
-                    Eq eqn = g.addEquation(fe, 0, fe.variability(), fe.type());
-                    Var v = g.getVariable(lhs.name());
-                    g.addEdge(eqn,v);
                 }
+                g.addEquations(Collections.singletonList(fe), VAR_TYPES_ALL);
             }
             root().flushAllRecursive();
             
@@ -958,7 +951,8 @@ aspect TransformCanonical {
 			Size[] sizes = new Size[outVars.size()];
 			for (int i = 0; i < outVars.size(); i++)
 				sizes[i] = outVars.get(i).size();
-			FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, sizes);
+            FType type = FFunctionType.create(funcName.name(), outVars, this);
+            FFunctionCall call = new FFunctionCall(funcName.createFIdUse(), args, type);
 			List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
 			for (FVariable fv : outVars)
 				lefts.add(fv.getFQName().createFFunctionCallLeft());
@@ -2134,15 +2128,13 @@ aspect TransformCanonical {
 		for (ASTNode n : this)
 			n.activateEquivalentRecordUseRewrite();
 	}
-	
-	public void FFunctionVariable.activateEquivalentRecordUseRewrite() {
-		super.activateEquivalentRecordUseRewrite();
-		if (type().isRecord()) {
-			rewriteEquivalentRecord = true;
-			is$Final = false;
-		}
-	}
-	
+    
+    public void FRecordType.activateEquivalentRecordUseRewrite() {
+        super.activateEquivalentRecordUseRewrite();
+        rewriteEquivalentRecord = true;
+        is$Final = false;
+    }
+    
 	public void FRecordVariable.activateEquivalentRecordUseRewrite() {
 		super.activateEquivalentRecordUseRewrite();
 		rewriteEquivalentRecord = true;
@@ -2155,17 +2147,13 @@ aspect TransformCanonical {
 		is$Final = false;
 	}
 	
-	private boolean FFunctionVariable.rewriteEquivalentRecord  = false;
+    private boolean FRecordType.rewriteEquivalentRecord        = false;
 	private boolean FRecordVariable.rewriteEquivalentRecord    = false;
 	private boolean FRecordConstructor.rewriteEquivalentRecord = false;
 	
-	rewrite FFunctionVariable {
-		when (rewriteEquivalentRecord)
-		to FFunctionVariable {
-			rewriteEquivalentRecord = false;
-			setType(myFClass().createEquivalentRecordType(getType()));
-			flushAll();
-			return this;
+    rewrite FRecordType {
+        when (rewriteEquivalentRecord) to FType {
+            return myFClass().createEquivalentRecordType(this);
 		}
 	}
 	

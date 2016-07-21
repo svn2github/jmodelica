@@ -175,6 +175,7 @@ def run_demo(with_plots=True):
     opt_opts['init_traj'] = init_res
     opt_opts['nominal_traj'] = init_res
     opt_opts['IPOPT_options']['tol'] = 1e-10
+    opt_opts['verbosity'] = 1
     
     # Solve the optimal control problem
     res = op.optimize(options=opt_opts)

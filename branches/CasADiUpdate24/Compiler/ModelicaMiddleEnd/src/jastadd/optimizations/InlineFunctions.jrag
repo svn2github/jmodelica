@@ -338,7 +338,7 @@ aspect FunctionInlining {
         protected FVariable addVar(String oldName, FTypePrefixVariability variability, FType type) {
             String n = nextTempVarName();
             FQName name = type.isArray() ? 
-                    new FQNameFull(n, type.size().flattenFArraySubscripts(new FQNameEmpty())) : 
+                    new FQNameFull(n, type.size().createFArraySubscripts()) : 
                     new FQNameString(n);
             FVariable var = addVar(name, variability, type);
             setTypeOf(oldName, type);
@@ -1268,7 +1268,9 @@ aspect FunctionInlining {
         }
         
         for (FFunctionVariable var : myNonInputs()) {
-            fi.setTypeOf(var.name(), var.getType().copyAndReplaceReferences(fi, getDummyExp()));
+            FType t = var.getType().copyAndReplaceReferences(fi);
+            t.setParent(var);
+            fi.setTypeOf(var.name(), t);
             var.functionInliner = fi;
         }
         
@@ -1285,9 +1287,7 @@ aspect FunctionInlining {
     public void FFunctionVariable.inline(AbstractFunctionInliner fi, List<FExp> args) {
         throw new UnsupportedOperationException();
     }
-
-    syn lazy FExp FFunctionDecl.getDummyExp() = new FNoExp();
-
+    
     /**
      * Inline this statement.
      * 
@@ -1328,7 +1328,9 @@ aspect FunctionInlining {
 
     public void FInitArrayStmt.inline(AbstractFunctionInliner fi) {
         FAbstractVariable fv = getFIdUseExp().myFV();
-        fi.setTypeOf(fv.name(), type().copyAndReplaceReferences(fi, getFIdUseExp()));
+        FType t = type().copyAndReplaceReferences(fi);
+        t.setParent(getFIdUseExp());
+        fi.setTypeOf(fv.name(), t);
         fv.flushCache();
     }
 
@@ -1641,18 +1643,6 @@ aspect FunctionInlining {
         fas.addFSubscriptNoTransform(treeCopyNoTransform());
     }
 
-
-    public FExp FFunctionCall.replaceReferences(AbstractFunctionInliner fi) {
-        super.replaceReferences(fi);
-        Size[] old = getSizes();
-        Size[] sizes = new Size[old.length];
-        for (int i = 0; i < old.length; i++)
-            if (old[i] != null)
-                sizes[i] = old[i].replaceReferences(fi, this);
-        setSizes(sizes);
-        return this;
-    }
-
     public class Array {
 
         public FExp buildWithReplacedReferences(AbstractFunctionInliner fi, FExp context) {
@@ -1696,42 +1686,46 @@ aspect FunctionInlining {
      * Make a copy of this type with all variable references replaced according to the 
      * function inliner.
      */
-    public FType FType.copyAndReplaceReferences(AbstractFunctionInliner fi, FExp context) {
+    public FType FType.copyAndReplaceReferences(AbstractFunctionInliner fi) {
         FType res = fullCopy();
-        res.replaceReferences(fi, context);
-        return res;
+        return res.replaceReferences(fi);
     }
     
-    public void FType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        setSize(getSize().replaceReferences(fi, context));
-    }
-    
-    public void FRecordType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        super.replaceReferences(fi, context);
-        for (FRecordComponentType frct : getComponents()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-    }
-    
-    public void FFunctionType.replaceReferences(AbstractFunctionInliner fi, FExp context) {
-        super.replaceReferences(fi, context);
-        for (FRecordComponentType frct : getInputs()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-        for (FRecordComponentType frct : getOutputs()) {
-            frct.getFType().replaceReferences(fi, context);
-        }
-    }
-    
-    public Size Size.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+    public FType FType.replaceReferences(AbstractFunctionInliner fi) {
+        setSize(getSize().replaceReferences(fi, this));
         return this;
     }
     
-    public MutableSize MutableSize.replaceReferences(AbstractFunctionInliner fi, FExp context) {
+    public FType FRecordType.replaceReferences(AbstractFunctionInliner fi) {
+        super.replaceReferences(fi);
+        for (FRecordComponentType frct : getComponents()) {
+            frct.getFType().replaceReferences(fi);
+        }
+        return this;
+    }
+    
+    public FType FFunctionType.replaceReferences(AbstractFunctionInliner fi) {
+        super.replaceReferences(fi);
+        for (FRecordComponentType frct : getInputs()) {
+            frct.getFType().replaceReferences(fi);
+        }
+        for (FRecordComponentType frct : getOutputs()) {
+            frct.getFType().replaceReferences(fi);
+        }
+        return this;
+    }
+    
+    public Size Size.replaceReferences(AbstractFunctionInliner fi, ASTNode context) {
+        return this;
+    }
+    
+    public MutableSize MutableSize.replaceReferences(AbstractFunctionInliner fi, ASTNode context) {
         MutableSize res = clone();
         for (int i = 0; i < exps.length; i++)
-            if (res.exps[i] != null)
-                res.exps[i] = context.dynamicFExp(exps[i].fullCopy()).replaceReferences(fi);
+            if (res.exps[i] != null) {
+                res.exps[i] = exps[i].dynamicFExp(exps[i].fullCopy()).replaceReferences(fi);
+                res.exps[i].setParent(context);
+            }
         return res;
     }
 

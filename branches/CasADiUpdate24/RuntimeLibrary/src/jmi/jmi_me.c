@@ -106,8 +106,11 @@ void jmi_setup_experiment(jmi_t* jmi, jmi_boolean tolerance_defined,
         jmi->events_epsilon = jmi->options.events_tol_factor*relative_tolerance; /* Used in the event detection */
         jmi->newton_tolerance = jmi->options.nle_solver_tol_factor*relative_tolerance; /* Used in the Newton iteration */
     }
+    jmi->time_events_epsilon = jmi->options.time_events_default_tol;
+
     jmi->options.block_solver_options.res_tol = jmi->newton_tolerance;
     jmi->options.block_solver_options.events_epsilon = jmi->events_epsilon;
+    jmi->options.block_solver_options.time_events_epsilon = jmi->time_events_epsilon;
 }
 
 int jmi_initialize(jmi_t* jmi) {
@@ -462,7 +465,7 @@ static int jmi_exists_grt_than_time_event(jmi_t* jmi) {
            jmi->atTimeEvent                                         &&
            jmi->eventPhase == JMI_TIME_EXACT                        &&
            jmi->nextTimeEvent.defined                               && 
-           ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+           jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time)< jmi->time_events_epsilon;
 }
 
 int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
@@ -483,7 +486,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
     jmi->model_terminate = 0;  /* Reset terminate flag. */
     max_iterations = 30;       /* Maximum number of event iterations */
 
-    /* Performed at the fist event iteration: */
+    /* Performed at the first event iteration: */
     if (jmi->nbr_event_iter == 0) {
 
         /* Reset eventInfo */
@@ -526,10 +529,16 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* We don't need to save and restore state during event iteration */
         jmi->save_restore_solver_state_mode = 0;
         
-        /* We are at an time event -> set atTimeEvent to true. */
+        /* We are at a time event -> set atTimeEvent to true. */
         if (jmi->nextTimeEvent.defined) {
-            jmi->atTimeEvent = ALMOST_ZERO(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time);
+            jmi->atTimeEvent = jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) < jmi->time_events_epsilon;
             jmi->eventPhase = jmi->nextTimeEvent.phase;
+            if(!jmi->atTimeEvent && jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time > 0) { /* We passed the next time event, return error */
+                jmi_log_node(jmi->log, logError, "NextTimeEventPassed",
+                    "Current time <t: %E> is after next time event <next_time_event: %E>. Consider to change option <time_events_default_tol: %E>.",
+                    jmi_get_t(jmi)[0], jmi->nextTimeEvent.time, jmi->time_events_epsilon);
+                return -1;
+            }
         }else{
             jmi->atTimeEvent = JMI_FALSE;
             jmi->eventPhase = JMI_TIME_GREATER;
@@ -575,7 +584,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
             if (z[i - jmi->offs_real_d + jmi->offs_pre_real_d] != z[i]) {
                 event_info->iteration_converged = FALSE;
                 
-                /* Extra logging of the discrete variables that has been changed) */
+                /* Extra logging of the discrete variables that have been changed) */
                 if (jmi->jmi_callbacks.log_options.log_level >= 5){
                     if (i < jmi->offs_boolean_d) {
                         jmi_log_node(jmi->log, logInfo, "Info", " <integer: #i%d#> <from: %d> <to: %d>", jmi_get_value_ref_from_index(i, JMI_INTEGER), (jmi_int_t)z[i - jmi->offs_real_d + jmi->offs_pre_real_d], (jmi_int_t)z[i]);
@@ -1013,7 +1022,10 @@ void jmi_update_runtime_options(jmi_t* jmi) {
         op->nle_solver_tol_factor = z[index]; 
     index = get_option_index("_events_default_tol");
     if(index)
-        op->events_default_tol = z[index]; 
+        op->events_default_tol = z[index];
+    index = get_option_index("_time_events_default_tol");
+    if(index)
+        op->time_events_default_tol = z[index];
     index = get_option_index("_events_tol_factor");
     if(index)
         op->events_tol_factor = z[index];

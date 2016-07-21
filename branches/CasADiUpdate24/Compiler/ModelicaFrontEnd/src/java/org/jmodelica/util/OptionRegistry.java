@@ -825,6 +825,13 @@ abstract public class OptionRegistry {
               1e-10,
               "Default tolerance for the event iterations.",
               1e-14, 1e-2),
+        TIME_EVENTS_DEFAULT_TOL
+            ("time_events_default_tol",
+              OptionType.runtime, 
+             Category.uncommon,
+              2.2204460492503131E-014,
+              "Default tolerance for the time event iterations.",
+              0, 1.0),
         EVENTS_TOL_FACTOR
             ("events_tol_factor",
              OptionType.runtime, 
@@ -1718,6 +1725,7 @@ abstract public class OptionRegistry {
         public StringOption(String key, OptionType type, Category cat, String description, String value, String[] vals) {
             super(key, description, type, cat);
             this.value = value;
+            this.defaultValue = value;
             if (vals == null) {
                 this.vals = null;
             } else {

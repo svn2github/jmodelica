@@ -281,15 +281,21 @@ jmi_real_t jmi_dround(jmi_real_t x) {
 
 jmi_real_t jmi_dremainder(jmi_t* jmi, jmi_real_t x, jmi_real_t y) {
         jmi_real_t res = fmod(x,y);
-        return ((jmi_abs(res-y)/jmi_max(x,y))<JMI_ALMOST_EPS)? (res-y)/jmi_max(x,y) : res/jmi_max(x,y);
+        jmi_real_t scaling = jmi_max(1.0, jmi_max(x,y));
+        return ((jmi_abs(res-y)/scaling)<jmi->time_events_epsilon)? (res-y)/scaling : res/scaling;
 }
 
 jmi_ad_var_t jmi_sample(jmi_t* jmi, jmi_real_t offset, jmi_real_t h) {
     jmi_real_t t = jmi_get_t(jmi)[0];
+    jmi_real_t remainder;
     if (!jmi->atEvent || SURELY_LT_ZERO(t-offset) || jmi->atInitial) {
       /*printf("jmi_sample1: %f %f %12.12f %12.12f\n",offset,fmod((t-offset),h),(t-offset));*/
         return JMI_FALSE;
     }
+    remainder = jmi_dremainder(jmi, (t-offset),h);
 	/*jmi_log_node(jmi->log, logWarning, "jmi_sample2", "<offset: %g> <h: %g> <fmod: %g> <time_passed: %g> <remainder: %g>",offset,h,fmod((t-offset),h),(t-offset), jmi_dremainder((t-offset),h));*/
-    return ALMOST_ZERO(jmi_dremainder(jmi, (t-offset),h));
+    if (jmi_abs(remainder) < jmi->time_events_epsilon)
+        return TRUE;
+    else
+        return FALSE;
 }

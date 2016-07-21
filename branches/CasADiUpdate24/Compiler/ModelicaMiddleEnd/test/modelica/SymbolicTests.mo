@@ -107,6 +107,23 @@ end SymbolicTests.EquivalentIfBranch5;
 ")})));
 end EquivalentIfBranch5;
 
+model EquivalentIfBranch6
+    Real x = if time > 1 then y - z else y - z;
+    Real y = time;
+    Real z = sin(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="EquivalentIfBranch6",
+            description="Symbolic simplification of equivalent if branches",
+            flatModel="
+fclass SymbolicTests.EquivalentIfBranch6
+ Real x = y - z;
+ Real y = time;
+ Real z = sin(time);
+end SymbolicTests.EquivalentIfBranch6;
+")})));
+end EquivalentIfBranch6;
 
 model SimplifyNegations1
     Real x, y(start = 1), z(start = 0);

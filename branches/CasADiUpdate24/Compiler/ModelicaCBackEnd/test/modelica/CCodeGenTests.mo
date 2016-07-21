@@ -12008,11 +12008,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     int ef = 0;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_DEF(REA, tmp_3)
-    JMI_DEF(REA, tmp_4)
-    JMI_DEF(REA, tmp_5)
-    JMI_DEF(REA, tmp_6)
-    JMI_DEF(REA, tmp_7)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 2;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -12028,10 +12023,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _y_2 = x[0];
         }
-        tmp_4 = _x_1_0;
-        tmp_5 = _temp_1_1_3;
-        tmp_6 = _temp_1_2_4;
-        tmp_7 = _x_2_1;
         _x_1_0 = _y_2;
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
@@ -12041,22 +12032,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         memcpy(&_temp_1_1_3, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
         _x_1_0 = _temp_1_1_3;
         _x_2_1 = _temp_1_2_4;
-        tmp_3 = _x_1_0;
-        _x_1_0 = tmp_4;
-        tmp_4 = tmp_3;
-        tmp_3 = _temp_1_1_3;
-        _temp_1_1_3 = tmp_5;
-        tmp_5 = tmp_3;
-        tmp_3 = _temp_1_2_4;
-        _temp_1_2_4 = tmp_6;
-        tmp_6 = tmp_3;
-        tmp_3 = _x_2_1;
-        _x_2_1 = tmp_7;
-        tmp_7 = tmp_3;
-        _temp_1_1_3 = (tmp_5);
-        _temp_1_2_4 = (tmp_6);
-        _x_2_1 = (tmp_7);
-        _x_1_0 = (tmp_4);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _x_1_0 + 1 - (_y_2);
         }
@@ -12763,9 +12738,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-	JMI_DEF(REA, tmp_1)
-	JMI_DEF(REA, tmp_2)
-	JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -12779,18 +12751,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
-        tmp_2 = _y_1;
-        tmp_3 = _z_2;
         _y_1 = _x_0 * 2 + 2;
         _z_2 = _y_1 + _x_0;
-        tmp_1 = _y_1;
-        _y_1 = tmp_2;
-        tmp_2 = tmp_1;
-        tmp_1 = _z_2;
-        _z_2 = tmp_3;
-        tmp_3 = tmp_1;
-        _z_2 = (tmp_3);
-        _y_1 = (tmp_2);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
         }
@@ -12803,9 +12765,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     /***** Init block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_DEF(REA, tmp_1)
-    JMI_DEF(REA, tmp_2)
-    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -12819,18 +12778,8 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
-        tmp_2 = _y_1;
-        tmp_3 = _z_2;
         _y_1 = _x_0 * 2 + 2;
         _z_2 = _y_1 + _x_0;
-        tmp_1 = _y_1;
-        _y_1 = tmp_2;
-        tmp_2 = tmp_1;
-        tmp_1 = _z_2;
-        _z_2 = tmp_3;
-        tmp_3 = tmp_1;
-        _z_2 = (tmp_3);
-        _y_1 = (tmp_2);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = 3 - (_y_1 + _x_0 + _z_2);
         }
@@ -13888,9 +13837,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_DEF(REA, tmp_1)
-    JMI_DEF(REA, tmp_2)
-    JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
         x[0] = 3;
         x[1] = 4;
@@ -13950,8 +13896,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             }
             _temp_1_3 = _sw(0);
         }
-        tmp_2 = _a_1;
-        tmp_3 = _b_2;
         _a_1 = pre_a_1;
         _b_2 = pre_b_2;
         if (LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3))) {
@@ -13961,19 +13905,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         } else if (LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_temp_3_5, LOG_EXP_NOT(pre_temp_3_5)), LOG_EXP_AND(_temp_4_6, LOG_EXP_NOT(pre_temp_4_6))), LOG_EXP_AND(_temp_5_7, LOG_EXP_NOT(pre_temp_5_7))), LOG_EXP_AND(_temp_6_8, LOG_EXP_NOT(pre_temp_6_8)))) {
             _b_2 = _b_2 + 1;
         }
-        tmp_1 = _a_1;
-        _a_1 = tmp_2;
-        tmp_2 = tmp_1;
-        tmp_1 = _b_2;
-        _b_2 = tmp_3;
-        tmp_3 = tmp_1;
-        _a_1 = (tmp_2);
-        _b_2 = (tmp_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
         }
     }
     return ef;
 }
+
 
 ")})));
 end Algorithm16;
@@ -14036,7 +13973,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DEF(REA, tmp_1)
     JMI_DEF(REA, tmp_2)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
-    JMI_DEF(REA, tmp_4)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 2;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -14050,22 +13986,12 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _c_2 = x[0];
         }
-        tmp_1 = _a_0;
-        tmp_2 = _b_1;
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
         jmi_array_ref_1(tmp_3, 1) = - _c_2;
         jmi_array_ref_1(tmp_3, 2) = _time;
         func_CCodeGenTests_Algorithm18_F_def0(tmp_3, &tmp_1, &tmp_2);
         _a_0 = (tmp_1);
         _b_1 = (tmp_2);
-        tmp_4 = _a_0;
-        _a_0 = tmp_1;
-        tmp_1 = tmp_4;
-        tmp_4 = _b_1;
-        _b_1 = tmp_2;
-        tmp_2 = tmp_4;
-        _b_1 = (tmp_2);
-        _a_0 = (tmp_1);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _a_0 * _b_1 - (_c_2);
         }
@@ -16719,8 +16645,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DEF(REA, tmp_6)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 5;
-        x[1] = 0;
-        x[2] = 1;
+        x[1] = 1;
+        x[2] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
         x[0] = 2;
         x[1] = 3;
@@ -16731,13 +16657,13 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         (*res)[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _f_5;
-        x[1] = _a_0;
-        x[2] = _b_1;
+        x[1] = _b_1;
+        x[2] = _a_0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _f_5 = x[0];
-            _a_0 = x[1];
-            _b_1 = x[2];
+            _b_1 = x[1];
+            _a_0 = x[2];
         }
         func_CCodeGenTests_RecordTearingTest1_F_def0(_a_0, _b_1, &tmp_5, &tmp_6);
         _c_2 = (tmp_5);
@@ -16747,8 +16673,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = tmp_2 - (_f_5);
             func_CCodeGenTests_RecordTearingTest1_F_def0(_e_4, _f_5, &tmp_3, &tmp_4);
-            (*res)[1] = tmp_3 - (_a_0);
-            (*res)[2] = tmp_4 - (_b_1);
+            (*res)[1] = tmp_4 - (_b_1);
+            (*res)[2] = tmp_3 - (_a_0);
         }
     }
     return ef;
@@ -17727,6 +17653,7 @@ const char *fmi_runtime_options_map_names[] = {
     \"_rescale_each_step\",
     \"_residual_equation_scaling\",
     \"_runtime_log_to_file\",
+    \"_time_events_default_tol\",
     \"_use_Brent_in_1d\",
     \"_use_jacobian_equilibration\",
     \"_use_newton_for_brent\",
@@ -17734,13 +17661,13 @@ const char *fmi_runtime_options_map_names[] = {
 };
 
 const int fmi_runtime_options_map_vrefs[] = {
-    536870937, 0, 268435469, 536870938, 268435470, 1, 268435471, 2, 536870939, 3,
-    4, 268435472, 268435473, 268435474, 536870940, 268435475, 5, 268435476, 536870941, 6,
-    268435477, 268435478, 268435479, 7, 8, 9, 10, 11, 12, 536870942,
-    536870943, 536870944, 536870945, 268435480, 536870946, 536870947, 536870948, 536870949, 0
+    536870938, 0, 268435470, 536870939, 268435471, 1, 268435472, 2, 536870940, 3,
+    4, 268435473, 268435474, 268435475, 536870941, 268435476, 5, 268435477, 536870942, 6,
+    268435478, 268435479, 268435480, 7, 8, 9, 10, 11, 12, 536870943,
+    536870944, 536870945, 536870946, 268435481, 536870947, 13, 536870948, 536870949, 536870950, 0
 };
 
-const int fmi_runtime_options_map_length = 38;
+const int fmi_runtime_options_map_length = 39;
 #define __block_jacobian_check_tol_2 ((*(jmi->z))[jmi->offs_real_pi+0])
 #define __cs_rel_tol_6 ((*(jmi->z))[jmi->offs_real_pi+1])
 #define __cs_step_size_8 ((*(jmi->z))[jmi->offs_real_pi+2])
@@ -17754,6 +17681,7 @@ const int fmi_runtime_options_map_length = 38;
 #define __nle_solver_regularization_tolerance_27 ((*(jmi->z))[jmi->offs_real_pi+10])
 #define __nle_solver_step_limit_factor_28 ((*(jmi->z))[jmi->offs_real_pi+11])
 #define __nle_solver_tol_factor_29 ((*(jmi->z))[jmi->offs_real_pi+12])
+#define __time_events_default_tol_36 ((*(jmi->z))[jmi->offs_real_pi+13])
 #define __block_solver_experimental_mode_3 ((*(jmi->z))[jmi->offs_integer_pi+0])
 #define __cs_experimental_mode_5 ((*(jmi->z))[jmi->offs_integer_pi+1])
 #define __cs_solver_7 ((*(jmi->z))[jmi->offs_integer_pi+2])
@@ -17776,9 +17704,9 @@ const int fmi_runtime_options_map_length = 38;
 #define __rescale_after_singular_jac_32 ((*(jmi->z))[jmi->offs_boolean_pi+7])
 #define __rescale_each_step_33 ((*(jmi->z))[jmi->offs_boolean_pi+8])
 #define __runtime_log_to_file_35 ((*(jmi->z))[jmi->offs_boolean_pi+9])
-#define __use_Brent_in_1d_36 ((*(jmi->z))[jmi->offs_boolean_pi+10])
-#define __use_jacobian_equilibration_37 ((*(jmi->z))[jmi->offs_boolean_pi+11])
-#define __use_newton_for_brent_38 ((*(jmi->z))[jmi->offs_boolean_pi+12])
+#define __use_Brent_in_1d_37 ((*(jmi->z))[jmi->offs_boolean_pi+10])
+#define __use_jacobian_equilibration_38 ((*(jmi->z))[jmi->offs_boolean_pi+11])
+#define __use_newton_for_brent_39 ((*(jmi->z))[jmi->offs_boolean_pi+12])
 #define _x_0 ((*(jmi->z))[jmi->offs_real_w+0])
 #define _time ((*(jmi->z))[jmi->offs_t])
 #define __homotopy_lambda ((*(jmi->z))[jmi->offs_homotopy_lambda])
@@ -17821,9 +17749,10 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     __rescale_each_step_33 = (JMI_FALSE);
     __residual_equation_scaling_34 = (1);
     __runtime_log_to_file_35 = (JMI_FALSE);
-    __use_Brent_in_1d_36 = (JMI_TRUE);
-    __use_jacobian_equilibration_37 = (JMI_FALSE);
-    __use_newton_for_brent_38 = (JMI_TRUE);
+    __time_events_default_tol_36 = (2.220446049250313E-14);
+    __use_Brent_in_1d_37 = (JMI_TRUE);
+    __use_jacobian_equilibration_38 = (JMI_FALSE);
+    __use_newton_for_brent_39 = (JMI_TRUE);
     return ef;
 }
 
@@ -22671,7 +22600,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     _x1_0 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(3), AD_WRAP_LITERAL(4));
     _x2_1 = COND_EXP_EQ(JMI_TRUE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
     _x3_2 = COND_EXP_EQ(JMI_FALSE, JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(3));
-    _x4_3 = (0.0);
+    _x4_3 = 0.0;
     return ef;
 }
 
@@ -22690,8 +22619,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
-    jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
-    jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
+    ef = jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
+    ef = jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
 
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;

@@ -3295,6 +3295,155 @@ end IndexReduction.FunctionCallEquation7;
 ")})));
 end FunctionCallEquation7;
 
+model IfEquation1
+function f
+    input Real t;
+    output Integer x = integer(t);
+    output Real y = t;
+algorithm
+    annotation(Inline=false);
+end f;
+    Integer a;
+    Real b;
+    Real x,y;
+equation
+    if time > 1 then
+        (a,b) = f(x);
+    else
+        a = 0;
+        b = 0;
+    end if;
+    der(x) = der(y);
+    y = time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEquation1",
+            description="index reduction in model with if equation",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass IndexReduction.IfEquation1
+ discrete Integer a;
+ Real b;
+ Real x;
+ Real y;
+ Real _der_y;
+initial equation 
+ x = 0.0;
+ pre(a) = 0;
+equation
+ if time > 1 then
+  (a, b) = IndexReduction.IfEquation1.f(x);
+ else
+  a = 0;
+  b = 0;
+ end if;
+ der(x) = _der_y;
+ y = time;
+ _der_y = 1.0;
+
+public
+ function IndexReduction.IfEquation1.f
+  input Real t;
+  output Integer x;
+  output Real y;
+ algorithm
+  x := integer(t);
+  y := t;
+  return;
+ annotation(Inline = false);
+ end IndexReduction.IfEquation1.f;
+
+end IndexReduction.IfEquation1;
+")})));
+end IfEquation1;
+
+model IfEquation2
+function f
+    input Real t;
+    output Real x = t;
+    output Real y = t;
+algorithm
+    annotation(Inline=false, smoothOrder=3);
+end f;
+    Real a,b;
+    Real x,y;
+equation
+    if time > 1 then
+        (a,b) = f(time);
+    else
+        a = 0;
+        b = 0;
+    end if;
+    der(x) = der(a);
+    der(y) = der(b);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEquation2",
+            description="index reduction in model with if equation",
+            inline_functions="none",
+            variability_propagation=false,
+            flatModel="
+fclass IndexReduction.IfEquation2
+ Real a;
+ Real b;
+ Real x;
+ Real y;
+ Real _der_a;
+ Real _der_b;
+initial equation 
+ x = 0.0;
+ y = 0.0;
+equation
+ if time > 1 then
+  (a, b) = IndexReduction.IfEquation2.f(time);
+ else
+  a = 0;
+  b = 0;
+ end if;
+ der(x) = _der_a;
+ der(y) = _der_b;
+ if time > 1 then
+  (_der_a, _der_b) = IndexReduction.IfEquation2._der_f(time, 1.0);
+ else
+  _der_a = 0;
+  _der_b = 0;
+ end if;
+
+public
+ function IndexReduction.IfEquation2.f
+  input Real t;
+  output Real x;
+  output Real y;
+ algorithm
+  x := t;
+  y := t;
+  return;
+ annotation(Inline = false,smoothOrder = 3,derivative(order = 1) = IndexReduction.IfEquation2._der_f);
+ end IndexReduction.IfEquation2.f;
+
+ function IndexReduction.IfEquation2._der_f
+  input Real t;
+  input Real _der_t;
+  output Real _der_x;
+  output Real _der_y;
+  Real x;
+  Real y;
+ algorithm
+  _der_x := _der_t;
+  x := t;
+  _der_y := _der_t;
+  y := t;
+  return;
+ annotation(smoothOrder = 2);
+ end IndexReduction.IfEquation2._der_f;
+
+end IndexReduction.IfEquation2;
+")})));
+end IfEquation2;
+
 model Algorithm1
     Integer a;
     Real b;

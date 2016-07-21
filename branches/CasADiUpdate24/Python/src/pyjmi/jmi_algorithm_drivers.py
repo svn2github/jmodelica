@@ -1436,6 +1436,11 @@ class LocalDAECollocationAlg(AlgorithmBase):
         if self.checkpoint and self.blocking_factors is not None:
             raise NotImplementedError("Checkpoint does not work with " +
                                       "blocking factors.")
+
+        # Check validity of order
+        if self.order != "default" and not self.write_scaled_result:
+            raise NotImplementedError("Reordering is only supported with enabled write_scaled_result.")
+        
         # Solver options
         if self.solver == "IPOPT":
             self.solver_options = self.IPOPT_options
@@ -1607,6 +1612,12 @@ class LocalDAECollocationAlgOptions(OptionBase):
 
             Type: String
             Default: 'IPOPT'
+
+        verbosity --
+            Sets verbosity of algorithm output. 0 prints nothing, 3 prints everything.
+
+            Type: int
+            Default: 3
 
     Collocation algorithm experimental/debug options::
 
@@ -1838,6 +1849,14 @@ class LocalDAECollocationAlgOptions(OptionBase):
             Type: bool
             Default: False
 
+        order --
+            Order of variables and equations. Requires write_scaled_result!
+
+            Possible values: "default", "reverse", and "random"
+
+            Type: str
+            Default: "default"
+
     Options are set by using the syntax for dictionaries::
 
         >>> opts = my_model.optimize_options()
@@ -1880,7 +1899,9 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'checkpoint': False,
                 'delayed_feedback': None,
                 'solver': 'IPOPT',
+                'verbosity': 3,
                 'explicit_hessian': False,
+                'order': "default",
                 'IPOPT_options': {'dual_inf_tol': 1e100,
                                   'constr_viol_tol': 1e100,
                                   'compl_inf_tol': 1e100,

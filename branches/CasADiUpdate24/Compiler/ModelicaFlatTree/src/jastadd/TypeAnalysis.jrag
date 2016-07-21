@@ -44,23 +44,7 @@ aspect FlatTypeAnalysis {
             type.addFEnumLiteralType(new FEnumLiteralType(Size.SCALAR, el));
         return type;
     }
-
-    // Re-evaluate record types for function variables
-    private boolean FFunctionVariable.typeRewritten = false;
-    rewrite FFunctionVariable { 
-        when (!typeRewritten) to FFunctionVariable {
-            if (getType().isRecord()) {
-                FRecordType type = (FRecordType) getType();
-                type.setFClass(myFClass());
-            } else if (getType().isFunction()) {
-                FFunctionType type = (FFunctionType) getType();
-                type.setFClass(myFClass());
-            }
-            typeRewritten = true;
-            return this;
-        }
-    }
-
+    
     syn FType FRecordVariable.getType() = myFRecordDecl().type().sizedType(size());
 
     syn FType FEnumVariable.getType() = myFEnumDecl().type().sizedType(size());
@@ -593,11 +577,29 @@ aspect FlatTypeAnalysis {
     eq FFunctionCallEquation.getLeft(int i).type() = getCall().typeOfOutput(i);
     eq FFunctionCallStmt.getLeft(int i).type()     = getCall().typeOfOutput(i);
 
-	syn FType FAbstractFunctionCall.typeOfOutput(int i) = (i == 0) ? type() : fUnknownType();
-    syn lazy FType InstFunctionCall.typeOfOutput(int i) = myCallOutputs().get(i).type().sizedType(sizeOfOutput(i));
-    syn lazy FType FFunctionCall.typeOfOutput(int i)    = myCallOutputs().get(i).type().sizedType(sizeOfOutput(i));
-    eq FSpatialDistExp.typeOfOutput(int i) = i == 1 ? type() : super.typeOfOutput(i);
-
+	syn FType FAbstractFunctionCall.typeOfOutput(int i) = typeOutput(i) ? type() : fUnknownType();
+    eq FFunctionCall.typeOfOutput(int i)                = getFType().component(i);
+    eq FPartialFunctionCall.typeOfOutput(int i)         = getFType();
+    eq InstFunctionCall.typeOfOutput(int i)             = getFType().component(i);
+    eq InstPartialFunctionCall.typeOfOutput(int i)      = getFType();
+    
+    syn boolean FAbstractFunctionCall.typeOutput(int i) = i == 0;
+    eq FSpatialDistExp.typeOutput(int i)                = i == 1 || super.typeOutput(i);
+    
+    syn FType FType.component(int i)  = fUnknownType();
+    eq FFunctionType.component(int i) = nullUnknown(getOutput(i)).vectorized(getSize());
+    
+    syn FType FType.nullUnknown(FRecordComponentType t) = t == null ? fUnknownType() : t.getFType();
+    
+    syn FType FType.vectorized(Size s) {
+        if (s == Size.SCALAR) {
+            return this;
+        }
+        MutableSize s2 = s.mutableClone();
+        s2.append(getSize());
+        return sizedType(s2);
+    }
+    
     eq FFunctionCall.type()    = hasOutputs() ? typeOfOutput(0) : fUnknownType();
     eq FMathematicalFunctionCall.type() = fRealType(size());
     eq FPartialFunctionCall.type() {

@@ -26,9 +26,16 @@ aspect Environment {
      * TODO: Is it a good idea to inherit? Should env be a component?
      */
     public class Environment extends ArrayList<InstModification> {
-    
+        
         public Environment() {
-        	super();
+        }
+        
+        public Environment(Iterable<InstModification>... sets) {
+            for (Iterable<InstModification> set : sets) {
+                for (InstModification mod : set) {
+                    addAll(mod.expand());
+                }
+            }
         }
 
         /**
@@ -266,25 +273,67 @@ aspect InstModifications{
 
 aspect Environments {
 
-    syn lazy java.util.List<InstModification> InstNode.localInstModifications() = Collections.<InstModification>emptyList();
+    syn lazy Collection<InstModification> InstNode.localInstModifications() {
+        Collection<InstModification> nc = localInstModificationsNoClass();
+        Collection<InstModification> c = localInstModificationsClass();
+        if (nc.isEmpty()) {
+            return c;
+        } else if (c.isEmpty()) {
+            return nc;
+        } else {
+            ArrayList<InstModification> l = new ArrayList<InstModification>();
+            l.addAll(nc);
+            l.addAll(c);
+            return l;
+        }
+    }
+    /**
+     * All local modifications except those from any target class.
+     * 
+     * Used for extends within components.
+     */
+    syn Collection<InstModification> InstNode.localInstModificationsNoClass() = Collections.<InstModification>emptyList();
+    /**
+     * Local modifications only from any target class.
+     * 
+     * Used for extends within components.
+     */
+    syn Collection<InstModification> InstNode.localInstModificationsClass()   = Collections.<InstModification>emptyList();
 
-    eq InstComponentDecl.localInstModifications() {
+    eq InstComponentDecl.localInstModificationsNoClass() {
         ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstModification() && !isGeneratedInner())
+        if (hasInstModification() && !isGeneratedInner()) {
             l.add(getInstModification());
+        }
         l.addAll(instModificationsFromConstrainingType());
-        l.addAll(myInstClass().classInstModifications());
+        if (myInstClass().isRedeclared()) {
+            l.addAll(myInstClass().instModificationsFromConstrainingType());
+        }
         return l;
     }
 
-    eq InstClassDecl.localInstModifications() {
+    eq InstComponentDecl.localInstModificationsClass() = myInstClass().classInstModifications();
+
+    eq InstExtends.localInstModificationsNoClass() {
         ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstClassModification())
+        if (hasInstClassModification()) {
             l.add(getInstClassModification());
-        l.addAll(instModificationsFromConstrainingType());
-        l.addAll(targetClassInstModifications());
+        }
         return l;
     }
+
+    eq InstExtends.localInstModificationsClass() = myInstClass().classInstModifications();
+
+    eq InstClassDecl.localInstModificationsNoClass() {
+        ArrayList<InstModification> l = new ArrayList<InstModification>();
+        if (hasInstClassModification()) {
+            l.add(getInstClassModification());
+        }
+        l.addAll(instModificationsFromConstrainingType());
+        return l;
+    }
+
+    eq InstClassDecl.localInstModificationsClass() = targetClassInstModifications();
 
     syn java.util.List<InstModification> InstClassDecl.targetClassInstModifications() = Collections.<InstModification>emptyList();
     eq InstShortClassDecl.targetClassInstModifications()       = 
@@ -379,18 +428,8 @@ aspect Environments {
     syn boolean ClassDecl.hasClassModification() = false;
     eq ShortClassDecl.hasClassModification()     = getExtendsClauseShortClass().hasClassModification();
 
-    eq InstExtends.localInstModifications() {
-        ArrayList<InstModification> l = new ArrayList<InstModification>();
-        if (hasInstClassModification())
-            l.add(getInstClassModification());
-        l.addAll(myInstClass().classInstModifications());
-        return l;
-    }
+    syn lazy ArrayList<InstModification> InstClassDecl.classInstModifications() = getMergedEnvironment().clone();
 
- 	syn lazy ArrayList<InstModification> InstClassDecl.classInstModifications() = getMergedEnvironment().clone();
-
- 
- 
     /* getMergedEnvironment gives the environment applicable
        to the children of the InstNode. It consists of the outer modifications
        in the environment (with the name of the InstNode itself, if any,
@@ -398,8 +437,17 @@ aspect Environments {
     */
     syn lazy Environment InstNode.getMergedEnvironment() = 
         filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModifications());
+    eq InstExtendsShortClass.getMergedEnvironment() {
+        if (inInstComponent()) {
+            return myEnvironmentNoClass().mergeInnerClone(
+                    getElementInstModifications(), localInstModifications(), myEnvironmentClass());
+        } else {
+            return super.getMergedEnvironment();
+        }
+    }
+    
     syn lazy Environment InstRecordConstructor.getMergedEnvironment() = 
-        new Environment().mergeOuterClone(getInstModifications());
+        myInstClassDecl().getMergedEnvironment().mergeOuterClone(getInstModifications());
 
     syn Environment InstNode.filteredEnvironment() = nameScope() ? myEnvironment(name()) : myEnvironment();
 
@@ -417,6 +465,20 @@ aspect Environments {
         return env;
     }
 
+    inh Environment InstExtends.myEnvironmentNoClass();
+    inh Environment InstExtends.myEnvironmentClass();
+    eq Root.getChild().myEnvironmentNoClass()              = null;
+    eq Root.getChild().myEnvironmentClass()                = null;
+    eq InstNode.getChild().myEnvironmentNoClass()          = getMergedEnvironment().clone();
+    eq InstNode.getChild().myEnvironmentClass()            = new Environment();
+    eq InstExtends.getChild().myEnvironmentNoClass()       = 
+        myEnvironmentNoClass().mergeInnerClone(getElementInstModifications(), localInstModificationsNoClass());
+    eq InstExtends.getChild().myEnvironmentClass()         = 
+        myEnvironmentClass().mergeInnerClone(localInstModificationsClass());
+    eq InstComponentDecl.getChild().myEnvironmentNoClass() = 
+        filteredEnvironment().mergeInnerClone(getElementInstModifications(), localInstModificationsNoClass());
+    eq InstComponentDecl.getChild().myEnvironmentClass()   = new Environment(localInstModificationsClass());
+
 
     /**
      * myEnvironment represents the environment of the InstNode itself. It is defined
@@ -432,7 +494,9 @@ aspect Environments {
      * When no arguments are supplied to myEnvironment, the MergedEnvironment of the ancestor
      * InstNode is simply duplicated. This is typically the case for extends clauses.
      */
-    eq InstNode.getChild().myEnvironment() = getMergedEnvironment().clone();
+    eq InstNode.getChild().myEnvironment()                          = getMergedEnvironment().clone();
+    eq InstRecordConstructor.getInstComponentDecl().myEnvironment() = getMergedEnvironment().clone();
+    eq InstRecordConstructor.getInstExtends().myEnvironment()       = getMergedEnvironment().clone();
 
     /** 
      * When a string argument representing a component name is given as argument to myEnvironment,
@@ -971,8 +1035,8 @@ aspect InstanceTreeConstruction {
 
     syn InstModification InstFunctionArgument.newInstModification() = 
             new InstComponentModification(getModification(), false, false,
-                getBoundInput().createInstAccess(),
-                new Opt<InstModification>(getModification().newInstModification()));
+                    boundInput.createInstAccess(),
+                    new Opt<InstModification>(getModification().newInstModification()));
 
     syn InstValueModification DummyModification.newInstModification() = new InstValueModification(this);
 

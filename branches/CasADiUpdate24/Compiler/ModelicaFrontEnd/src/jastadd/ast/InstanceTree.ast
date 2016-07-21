@@ -40,7 +40,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
                                [Dummy2:InstGeneratedInner]     // Dummy node to prevent InstGeneratedInner from being classified as root
                                [Dummy3:InstConstraining];      // Dummy node to prevent InstConstraining from being classified as root
 
-abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/;
+abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/ /FunctionType:FType/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstrainingClass] InstRestriction;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;

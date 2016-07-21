@@ -568,7 +568,13 @@ class ModelicaTransfer(object):
             {NULL, NULL, @2} = atomicModelFunctionCallStatementIgnoredOuts.f(@0, @1)
             output[0] = @2"""
         check_strnorm(model.getModelFunction("atomicModelFunctionCallStatementIgnoredOuts.f2"), expected)
-
+    
+    @testattr(casadi = True)
+    def test_ParameterIndexing(self):
+        model = self.load_model("ParameterIndexing1", modelFile)
+        expected = "[x[1] = 0 x[2] = 2]"
+        assert strnorm(model.getDaeEquations()) == strnorm(expected)
+    
     @testattr(casadi = True)
     def test_OmittedArrayRecordOuts(self):
         model = self.load_model("atomicModelFunctionCallStatementIgnoredArrayRecordOuts", modelFile, compiler_options={"inline_functions":"none"})

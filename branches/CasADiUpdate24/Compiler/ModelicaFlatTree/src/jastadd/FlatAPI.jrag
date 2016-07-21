@@ -1143,7 +1143,7 @@ aspect FlatAPI {
     syn int FAbstractEquation.numScalarEquations() = 1;
     eq FEquation.numScalarEquations()           = getLeft().type().numScalarElements();
     eq FConnectClause.numScalarEquations()      = getConnector1().type().numScalarElements();
-    eq FAlgorithm.numScalarEquations() {
+    syn lazy int FAlgorithm.numScalarEquations() {
         Set<FVariable> assignedVars = new HashSet<FVariable>();
         for (FIdUseExp use : FIdUseExpsInLHS()) {
             if (!use.myFV().isUnknown() && !assignedVars.contains(use.myFV())) {
@@ -1564,6 +1564,7 @@ aspect FlatAPI {
     
     inh FClass FAbstractVariable.myFClass();
     inh FClass FExp.myFClass();
+    inh FClass FType.myFClass();
     inh FClass FIdUse.myFClass();
     inh FClass FQName.myFClass();
     inh FClass FFunctionDecl.myFClass();
@@ -2178,6 +2179,8 @@ aspect ReferencedVariables {
     
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInRHS() = lookupFVariablesInSet(FIdUseExpsInRHS());
     syn Set<FVariable> FAbstractEquation.referencedFVariablesInLHS() = lookupFVariablesInSet(FIdUseExpsInLHS());
+    // Lazy is needed for FAlgorithms since the can have large number of scalars
+    syn lazy Set<FVariable> FAlgorithm.referencedFVariablesInLHS() = super.referencedFVariablesInLHS();
     syn Set<FVariable> FExp.referencedFVariablesInFExp()             = lookupFVariablesInSet(findFIdUseExpsInTree());
     syn Set<FVariable> FVariable.referencedFVariablesInBindingExp()  = lookupFVariablesInSet(getBindingExp().findFIdUseExpsInTree());
     syn lazy Set<FVariable> FAbstractEquation.referencedFVariables() = lookupFVariablesInSet(referencedFIdUseExps());
@@ -2321,18 +2324,11 @@ aspect FlatTypes {
     eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
     eq InstRecordConstructor.getInstComponentDecl().inRecord()  = true;
 
-    inh boolean InstComponentDecl.inRecordDecl();
-    eq InstNode.getChild().inRecordDecl()                     = false;
-    eq InstAssignable.getChild().inRecordDecl()               = inRecordDecl();
-    eq InstRecord.getInstComponentDecl().inRecordDecl()       = false;
-    eq InstRecord.getInstExtends().inRecordDecl()             = false;
-    eq InstRecord.getInstClassDecl().inRecordDecl()           = false;
-    eq InstRecord.getRedeclaredInstClassDecl().inRecordDecl() = false;
-    eq InstRecord.getElementInstModification().inRecordDecl() = false;
-    eq InstForIndex.getInstPrimitive().inRecordDecl()         = false;
-    eq InstClassDecl.getInstComponentDecl().inRecordDecl()    = isRecord();
-    eq FClass.getChild().inRecordDecl()                       = false;
-    eq FRecordDecl.getChild().inRecordDecl()                  = true;
+    inh boolean InstNode.inRecordDecl();
+    eq InstNode.getChild().inRecordDecl()       = false;
+    eq InstClassDecl.getChild().inRecordDecl()  = isRecord();
+    eq InstAssignable.getChild().inRecordDecl() = inRecordDecl();
+    eq InstExtends.getChild().inRecordDecl()    = inRecordDecl();
 
     inh boolean InstComponentDecl.inRecordConstructor();
     inh boolean InstExtends.inRecordConstructor();
@@ -2424,7 +2420,7 @@ aspect Attributes {
     syn FExp    FVariable.attributeExp(String name)    = attributeExp(findAttribute(name));
     syn String  FVariable.attributeString(String name) = attributeCValueString(name).stringValue();
     
-    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQName name, int n, String attrName) {
+    syn FExp FRecordVariable.findHierarchicalAttributeValue(FQNameFull name, int n, String attrName) {
         FAttribute attr = findHierarchicalAttribute(name, n);
         if (attr != null) {
             attr = attr.findAttribute(attrName);
@@ -2435,17 +2431,15 @@ aspect Attributes {
         return null;
     }
     
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name) =
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQNameFull name) =
             findHierarchicalAttribute(name, name.numParts());
     
-    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQName name, int n) = null;
-    eq FVariable.findHierarchicalAttribute(FQName name, int n) =
-            name.findHierarchicalAttribute(getFQName(), this, n);
+    syn FAttribute FAbstractVariable.findHierarchicalAttribute(FQNameFull name, int n) = null;
+    eq FVariable.findHierarchicalAttribute(FQNameFull name, int n) =
+            name.findHierarchicalAttribute(getFQName().asFQNameFull(), this, n);
     
-    syn FAttribute FQName.findHierarchicalAttribute(FQName prefix, FVariable var, int n) = null;
-    eq FQNameString.findHierarchicalAttribute(FQName prefix, FVariable var, int n)       =
-            var.findAttribute(getName());
-    eq FQNameFull.findHierarchicalAttribute(FQName prefix, FVariable var, int n) {
+    syn FAttribute FQName.findHierarchicalAttribute(FQNameFull prefix, FVariable var, int n) = asFQNameFull().findHierarchicalAttribute(prefix, var, n);
+    eq FQNameFull.findHierarchicalAttribute(FQNameFull prefix, FVariable var, int n) {
         int i = prefix.numMatchingParts(this);
         if (i >= n)
             return null;

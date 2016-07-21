@@ -42,6 +42,7 @@
 #include "jmi_linear_solver.h"
 #include "jmi_minpack_solver.h"
 #include "jmi_block_solver_impl.h"
+#include "jmi_math.h"
 
 #define Ith(v,i)    NV_Ith_S(v,i)
 
@@ -80,18 +81,18 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
 
     block_solver->f_scale = N_VNew_Serial(n);
     block_solver->scale_update_time = -1.0;
-	if(n>0) {
-		block_solver->J = NewDenseMat(n ,n);
+    if(n>0) {
+        block_solver->J = NewDenseMat(n ,n);
         SetToZero(block_solver->J);
-		block_solver->J_scale = NewDenseMat(n ,n);
-	}
+        block_solver->J_scale = NewDenseMat(n ,n);
+    }
 
     block_solver->res = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->dres = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->jac  = (jmi_real_t*)calloc(n*n,sizeof(jmi_real_t));
     block_solver->ipiv = (int*)calloc(2*n+1,sizeof(int));
     block_solver->init = 1;
-      
+    
     block_solver->min = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->max = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
     block_solver->nominal = (jmi_real_t*)calloc(n,sizeof(jmi_real_t));
@@ -193,11 +194,11 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
     block_solver->nb_fevals = 0;
     block_solver->time_spent  = 0;             /**< \brief Total time spent in non-linear solver */
 #ifdef JMI_PROFILE_RUNTIME 
-	block_solver->parent_block = 0;
-	block_solver->time_df = 0;
-	block_solver->time_f = 0;
-	block_solver->time_in_brent = 0;
-	block_solver->is_init_block = -1;
+    block_solver->parent_block = 0;
+    block_solver->time_df = 0;
+    block_solver->time_f = 0;
+    block_solver->time_in_brent = 0;
+    block_solver->is_init_block = -1;
 #endif
     block_solver->message_buffer = 0 ; /**< \brief Message buffer used for debugging purposes */
     return 0;
@@ -222,10 +223,10 @@ void jmi_delete_block_solver(jmi_block_solver_t** block_solver_ptr) {
     free(block_solver->dx);
 
     N_VDestroy_Serial(block_solver->f_scale);
-	if(block_solver->n > 0) {
-		DestroyMat(block_solver->J);
-		DestroyMat(block_solver->J_scale);
-	}
+    if(block_solver->n > 0) {
+        DestroyMat(block_solver->J);
+        DestroyMat(block_solver->J_scale);
+    }
 
     free(block_solver->res);
     free(block_solver->dres);
@@ -706,6 +707,7 @@ void jmi_block_solver_init_default_options(jmi_block_solver_options_t* bsop) {
     bsop->max_iter = 100;
     bsop->max_iter_no_jacobian = 10;
     bsop->events_epsilon = 1e-10;
+    bsop->time_events_epsilon = JMI_ALMOST_EPS;
     bsop->step_limit_factor = 10; /** < \brief Step limiting factor */
     bsop->regularization_tolerance = -1;
     bsop->use_newton_for_brent = 0; 
@@ -974,13 +976,21 @@ double* jmi_solver_get_f_scales(jmi_block_solver_t* block) {
     return N_VGetArrayPointer(block->f_scale);
 }
 
-double calculate_scaled_residual_norm(double* residual, double *f_scale, int n) {
-    double scaledRes, norm = 0;
-    int i;
-    for(i=0; i<n; i++) {
-        scaledRes = residual[i]*f_scale[i];
-        norm = norm>= RAbs(scaledRes)?norm:RAbs(scaledRes);
+int jmi_scaled_vector_norm(jmi_real_t *x, jmi_real_t *scale, jmi_int_t n, jmi_int_t NORM, jmi_real_t* out) {
+    int ef = 0;
+    
+    if (NORM == JMI_NORM_MAX) {
+        int i;
+        jmi_real_t tmp;
+        *out = 0.0;
+        for (i = 0; i < n; i++) {
+            tmp = JMI_ABS(x[i]*scale[i]);
+            *out = *out >= tmp ? *out : tmp;
+        }
+    } else {
+        ef = -1;
     }
-    return norm;
+    
+    return ef;
 }
 

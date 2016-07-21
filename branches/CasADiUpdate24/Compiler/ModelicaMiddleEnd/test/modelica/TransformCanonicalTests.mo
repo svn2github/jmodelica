@@ -5714,8 +5714,8 @@ x := sin(time)
 
 --- Unsolved function call equation (Block 2) ---
 (TransformCanonicalTests.BlockTest2.R2(r2.x, TransformCanonicalTests.BlockTest2.R(r2.r.x, r2.r.y))) = TransformCanonicalTests.BlockTest2.f3(x + r2.x)
-  Computed variables: r2.r.x
-                      r2.x
+  Computed variables: r2.x
+                      r2.r.x
                       r2.r.y
 
 --- Unsolved function call equation (Block 3) ---
@@ -7071,48 +7071,90 @@ Error at line 6561, column 18, in file 'Compiler/ModelicaMiddleEnd/src/test/Tran
 end GetInstanceName2;
 
 
-model FixedFalseParam1
-    Real x;
-    parameter Real p(fixed=false);
-initial equation
-    2*x = p;
-    x = 3;
-equation
-    der(x) = -x;
-
+package InitialParameters
+    model Test1
+        Real x;
+        parameter Real p(fixed=false);
+    initial equation
+        2*x = p;
+        x = 3;
+    equation
+        der(x) = -x;
+    
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="FixedFalseParam1",
-            description="Test of parameters with fixed = false.",
+            name="InitialParameters_Test1",
+            description="Test of initial parameters.",
             flatModel="
-fclass TransformCanonicalTests.FixedFalseParam1
+fclass TransformCanonicalTests.InitialParameters.Test1
  Real x;
  initial parameter Real p(fixed = false);
-initial equation
+initial equation 
  2 * x = p;
  x = 3;
 equation
  der(x) = - x;
-end TransformCanonicalTests.FixedFalseParam1;
+end TransformCanonicalTests.InitialParameters.Test1;
 ")})));
-end FixedFalseParam1;
+    end Test1;
 
-model FixedFalseParam2
-	parameter Real a1(fixed = false);
-	parameter Real a2(fixed = false);
-	parameter Real b = 2;
-	parameter Real c = 3;
-	Real d = time * 42;
-initial equation
-	c = b * a1 - a2 * d;
-	a1 = a2 * 3.14;
+    model Test2
+        Real x(start=p);
+        parameter Real p(fixed=false) = time + x;
+        Real y = p * time;
+    equation
+        der(x) = sin(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="InitialParameters_Test2",
+            description="Test incidence computation for state startvalues with initial parameters",
+            methodName="printDAEInitBLT",
+            methodResult="
+--- Solved equation ---
+der(x) := sin(time)
+
+--- Torn linear system (Block 1) of 1 iteration variables and 1 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  p
+
+Iteration variables:
+  x
+
+Torn equations:
+  p := time + x
+
+Residual equations:
+  x = p
+    Iteration variables: x
+
+Jacobian:
+  |1.0, -1.0|
+  |-1.0, 1.0|
+
+--- Solved equation ---
+y := p * time
+-------------------------------
+")})));
+    end Test2;
+
+    model Differentiation1
+       parameter Real a1(fixed = false);
+        parameter Real a2(fixed = false);
+        parameter Real b = 2;
+        parameter Real c = 3;
+        Real d = time * 42;
+    initial equation
+        c = b * a1 - a2 * d;
+        a1 = a2 * 3.14;
 
     annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="FixedFalseParam2",
-			description="Test differentiation of parameters with fixed = false",
-			methodName="printDAEInitBLT",
-			methodResult="
+        FClassMethodTestCase(
+            name="InitialParameters_Differentiation1",
+            description="Test differentiation of initial parameters",
+            methodName="printDAEInitBLT",
+            methodResult="
 --- Solved equation ---
 d := time * 42
 
@@ -7136,8 +7178,9 @@ Jacobian:
   |d, - b|
 -------------------------------
 ")})));
-end FixedFalseParam2;
+    end Differentiation1;
 
+end InitialParameters;
 model AssertEval1
 	Real x = time;
 equation
@@ -7621,6 +7664,67 @@ pre(b) := false
 -------------------------------
 ")})));
 end LinearBlockTest2;
+
+model LinearBlockTest3
+    Real a,b,c,d,e;
+equation
+    a = time + d * 2;
+    e = a * 2 - d;
+    d = c * 2 + a;
+algorithm
+    when e > 0 then
+        b := pre(d) + 1;
+        c := b / 2;
+    end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="LinearBlockTest3",
+            description="Test generation of linear blocks with non-scalar algorithm block in the solved part",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 4 solved variables ---
+Coefficient variability: constant
+Torn variables:
+  a
+  e
+  b
+  c
+
+Iteration variables:
+  d
+
+Solved discrete variables:
+  temp_1
+
+Torn equations:
+  a := time + d * 2
+  e := a * 2 + (- d)
+  algorithm
+    if temp_1 and not pre(temp_1) then
+      b := pre(d) + 1;
+      c := b / 2;
+    end if;
+
+    Assigned variables: b
+                        c
+
+Continuous residual equations:
+  d = c * 2 + a
+    Iteration variables: d
+
+Discrete equations:
+  temp_1 := e > 0
+
+Jacobian:
+  |1.0, 0.0, 0.0, 0.0, -2|
+  |0.0, 1.0, 0.0, 0.0, 0.0|
+  |0.0, 0.0, 1.0, 0.0, 0.0|
+  |0.0, 0.0, 0.0, 1.0, 0.0|
+  |-1.0, 0.0, 0.0, -2, 1.0|
+-------------------------------
+")})));
+end LinearBlockTest3;
 
 
 model Sample1

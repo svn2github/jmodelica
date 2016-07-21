@@ -438,13 +438,14 @@ class TestCBasic:
         nose.tools.assert_equals(res.final('xScalar'), False)
         nose.tools.assert_equals(res.final('xArray[2]'), True)
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), False)
-    
+
     @testattr(stddist = True)
     def test_ExtFuncString(self):
         cpath = "ExtFunctionTests.CEval.C.StringTest"
         fmu_name = compile_fmu(cpath, self.fpath)
         model = load_fmu(fmu_name)
         res = model.simulate()
+        nose.tools.assert_equals(model.get('len'), 5)
         #TODO: enable when model.get_string implemented
         #nose.tools.assert_equals(model.get('xScalar'), 'dcb')
         #nose.tools.assert_equals(model.get('xScalarLit'), 'dcb')
@@ -474,7 +475,7 @@ class TestCBasic:
         model = load_fmu(fmu_name)
         resConst = model.simulate()
         nose.tools.assert_almost_equal(resConst.final('a1'), 10*3.14)
-        
+
 class TestFortranBasic:
     '''
     Test basic external fortran functions.
