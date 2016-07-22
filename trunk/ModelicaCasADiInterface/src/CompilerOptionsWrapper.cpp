@@ -83,47 +83,6 @@ bool CompilerOptionsWrapper::getBooleanOption(std::string opt) {
     return roption;
 }
 
-void CompilerOptionsWrapper::addStringOption(std::string opt, std::string val) {
-    try 
-    {
-    optr.addStringOption(StringFromUTF(opt.c_str()), StringFromUTF(val.c_str()));
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }    
-}
-void CompilerOptionsWrapper::addBooleanOption(std::string opt, bool val) {
-    try 
-    {
-    optr.addBooleanOption(StringFromUTF(opt.c_str()), val);
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }
-}
-void CompilerOptionsWrapper::addIntegerOption(std::string opt, int val) {
-    try 
-    {
-    optr.addIntegerOption(StringFromUTF(opt.c_str()), val);
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }
-}
-void CompilerOptionsWrapper::addRealOption(std::string opt, double val) {
-    try 
-    {
-    optr.addRealOption(StringFromUTF(opt.c_str()), val);
-    }
-    catch (JavaError e) 
-    {
-        rethrowJavaException(e);
-    }
-}
-
 void CompilerOptionsWrapper::printCompilerOptions(std::ostream& out){
     try 
     {
