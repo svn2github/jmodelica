@@ -3911,11 +3911,15 @@ class LocalDAECollocator(CasadiCollocator):
             if self.op.get_attr(t0_var, "free"):
                 (ind, _) = self.name_map["startTime"]
                 t0 = self.var_map['p_opt']['all'][ind]
+                (d, e) = self._get_affine_scaling('startTime', -1, -1)
+                t0 = d*t0 + e
             else:
                 t0 = self.op.get_attr(t0_var, "_value")
             if self.op.get_attr(tf_var, "free"):
                 (ind, _) = self.name_map["finalTime"]
                 tf = self.var_map['p_opt']['all'][ind]
+                (d, e) = self._get_affine_scaling('finalTime', -1, -1)
+                tf = d*tf + e
             else:
                 tf = self.op.get_attr(tf_var, "_value")
 
