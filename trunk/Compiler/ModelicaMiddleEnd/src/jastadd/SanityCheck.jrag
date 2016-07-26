@@ -102,27 +102,31 @@ aspect Sanity {
     public void FAbstractEquation.sanityCheckParameterEquations(FClass fc) {}
 
     public void FEquation.sanityCheckParameterEquations(FClass fc) {
-        getLeft().sanityCheckParameterEquationLeft(fc);
+        getLeft().sanityCheckParameterEquationLeft(fc, this);
     }
     
     public void FFunctionCallEquation.sanityCheckParameterEquations(FClass fc) {
         for (FFunctionCallLeft left : getLefts())
             if (left.hasFExp())
-                left.getFExp().sanityCheckParameterEquationLeft(fc);
+                left.getFExp().sanityCheckParameterEquationLeft(fc, this);
     }
     
-    public void FExp.sanityCheckParameterEquationLeft(FClass fc) {
+    public void FExp.sanityCheckParameterEquationLeft(FClass fc, FAbstractEquation eqn) {
         for (FExp e : childFExps())
-            e.sanityCheckParameterEquationLeft(fc);
+            e.sanityCheckParameterEquationLeft(fc, eqn);
     }
     
-    public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc) {
+    public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc, FAbstractEquation eqn) {
         FAbstractVariable fv = getFIdUse().myFV();
         if (!fv.isParameter()) {
             fc.sanityProblem(this, "Non-parameter set in parameter equation: %s", this);
         } else if (fv.variability().initialParameterVariability()) {
             fc.sanityProblem(this, "Initial parameter set in parameter equation: %s", this);
         }
+    }
+    
+    public void FLitExp.sanityCheckParameterEquationLeft(FClass fc, FAbstractEquation eqn) {
+        fc.sanityProblem(this, "Literal in left-hand side of parameter equation: %s", eqn);
     }
 
 }

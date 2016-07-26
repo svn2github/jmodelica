@@ -578,10 +578,11 @@ aspect VariabilityPropagation {
                 boolean neg = av.isNegated() ^ thisAlias.isNegated();
                 if (fv != this) {
                     fv.setFTypePrefixVariability(variability);
-                    if (variability.knownParameterOrLess())
+                    if (variability.knownParameterOrLess()) {
                         fv.setBindingExp(bindingExp.negated(neg));
-                    if (unAlias && variability.parameterVariability() && !fv.isTemporary())
+                    } else if (unAlias && variability.parameterVariability() && !fv.isTemporary()) {
                         propagator.addEquation(variability, new FEquation(fv.createUseExp(), createUseExp().negated(neg)));
+                    }
                 }
             }
             if (unAlias) {

@@ -2330,4 +2330,35 @@ end VariabilityPropagationTests.AlgorithmFolding1;
 end AlgorithmFolding1;
 
 
+model KnownParameter1
+    function f
+        input Real x;
+        output Real[1,1] y;
+    algorithm
+        y[1,1] := x + 1;
+    end f;
+    
+    model C
+        Real x = y;
+        Real y(start = 1) = a[1];
+        parameter Real a[1] = {1};
+    end C;
+    
+    C c[1](a = f(b));
+    final parameter Real b = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="KnownParameter1",
+            description="Test variability propagation for known parameter expressions",
+            flatModel="
+fclass VariabilityPropagationTests.KnownParameter1
+ final parameter Real c[1].y(start = 1) = 2.0 /* 2.0 */;
+ final parameter Real b = 1 /* 1 */;
+end VariabilityPropagationTests.KnownParameter1;
+")})));
+end KnownParameter1;
+
+
+
 end VariabilityPropagationTests;
