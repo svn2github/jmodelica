@@ -12183,6 +12183,116 @@ end FunctionTests.InputAsArraySize15;
 end InputAsArraySize15;
 
 
+model InputAsArraySize16
+    function f
+        input Integer a;
+        output Real[2,a] y = {1:a,3:a+2};
+        algorithm
+    end f;
+    function w
+        input Integer b;
+        R[2] r(n=b,x=f(b));
+        output Real[2] y = r.y;
+        algorithm
+    end w;
+    record R
+        parameter Integer n = 1;
+        Real[n] x;
+        Real y = x[1];
+    end R;
+    parameter Integer m = 2;
+    Real[2] r = w(m);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize16",
+            description="Parametrized size in FSubscriptedExp over array of records",
+            flatModel="
+fclass FunctionTests.InputAsArraySize16
+ parameter Integer m = 2 /* 2 */;
+ Real r[2] = FunctionTests.InputAsArraySize16.w(m);
+
+public
+ function FunctionTests.InputAsArraySize16.w
+  input Integer b;
+  FunctionTests.InputAsArraySize16.R[:] r;
+  output Real[:] y;
+ algorithm
+  init r as FunctionTests.InputAsArraySize16.R[2];
+  r[1].n := b;
+  r[1].x := (FunctionTests.InputAsArraySize16.f(b))[1,:];
+  r[1].y := x[1];
+  r[2].n := b;
+  r[2].x := (FunctionTests.InputAsArraySize16.f(b))[2,:];
+  r[2].y := x[1];
+  init y as Real[2];
+  y := r[1:2].y;
+  return;
+ end FunctionTests.InputAsArraySize16.w;
+
+ function FunctionTests.InputAsArraySize16.f
+  input Integer a;
+  output Real[:,:] y;
+ algorithm
+  init y as Real[2, a];
+  y := {1:a, 3:a + 2};
+  return;
+ end FunctionTests.InputAsArraySize16.f;
+
+ record FunctionTests.InputAsArraySize16.R
+  parameter Integer n;
+  Real x[n];
+  Real y;
+ end FunctionTests.InputAsArraySize16.R;
+
+end FunctionTests.InputAsArraySize16;
+")})));
+end InputAsArraySize16;
+
+
+model InputAsArraySize17
+    function f
+        input Integer a;
+        output Real[2,a] y = {1:a,3:a+2};
+        algorithm
+    end f;
+    model M
+        parameter Integer n = 1;
+        Real[n] x;
+        Real y = x[1];
+    end R;
+    parameter Integer k = 2;
+    M[2] m(n=k,x=f(k));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="InputAsArraySize17",
+            description="Parametrized size in FSubscriptedExp over array of records",
+            flatModel="
+fclass FunctionTests.InputAsArraySize17
+ structural parameter Integer k = 2 /* 2 */;
+ structural parameter Integer m[1].n = 2 /* 2 */;
+ Real m[1].x[2] = (FunctionTests.InputAsArraySize17.f(2))[1,1:2];
+ Real m[1].y = m[1].x[1];
+ structural parameter Integer m[2].n = 2 /* 2 */;
+ Real m[2].x[2] = (FunctionTests.InputAsArraySize17.f(2))[2,1:2];
+ Real m[2].y = m[2].x[1];
+
+public
+ function FunctionTests.InputAsArraySize17.f
+  input Integer a;
+  output Real[:,:] y;
+ algorithm
+  init y as Real[2, a];
+  y := {1:a, 3:a + 2};
+  return;
+ end FunctionTests.InputAsArraySize17.f;
+
+end FunctionTests.InputAsArraySize17;
+")})));
+end InputAsArraySize17;
+
+
 
 model VectorizedCall1
     function f
