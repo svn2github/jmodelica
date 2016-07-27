@@ -2998,7 +2998,7 @@ model ConditionalComponentTest4
 			description="Test flattening of conditional components.",
 			flatModel="
 fclass NameTests.ConditionalComponentTest4
- parameter Boolean b = true /* true */;
+ structural parameter Boolean b = true /* true */;
  parameter Real x = 1 /* 1 */;
 
 end NameTests.ConditionalComponentTest4;
@@ -3148,8 +3148,8 @@ model ConditionalComponentTest10
 			description="Test flattening of conditional components",
 			flatModel="
 fclass NameTests.ConditionalComponentTest10
- parameter Boolean b = true /* true */;
- parameter Boolean m.b = b;
+ structural parameter Boolean b = true /* true */;
+ structural parameter Boolean m.b = true /* true */;
  NameTests.ConditionalComponentTest10.RealInput m.u1;
  NameTests.ConditionalComponentTest10.RealOutput m.y;
  NameTests.ConditionalComponentTest10.RealOutput source1.y = source1.p;
@@ -3207,8 +3207,8 @@ model ConditionalComponentTest11
 			description="Test flattening of conditional components",
 			flatModel="
 fclass NameTests.ConditionalComponentTest11
- parameter Boolean b = false /* false */;
- parameter Boolean m.b = b;
+ structural parameter Boolean b = false /* false */;
+ structural parameter Boolean m.b = false /* false */;
  NameTests.ConditionalComponentTest11.RealInput m.u2;
  NameTests.ConditionalComponentTest11.RealOutput m.y;
  NameTests.ConditionalComponentTest11.RealOutput source2.y = source2.p;
@@ -3250,7 +3250,7 @@ model ConditionalComponentTest12
 			flatModel="
 fclass NameTests.ConditionalComponentTest12
  Real y = 1;
- parameter Boolean a.flag = true /* true */;
+ structural parameter Boolean a.flag = true /* true */;
  Real a.b1.x = y;
  Real a.z1 = y;
 end NameTests.ConditionalComponentTest12;

@@ -277,7 +277,7 @@ model ConditionalError6
             checkType=check,
             flatModel="
 fclass CheckTests.ConditionalError6
- parameter Boolean p = false /* false */;
+ structural parameter Boolean p = false /* false */;
 equation
  x = time;
 end CheckTests.ConditionalError6;

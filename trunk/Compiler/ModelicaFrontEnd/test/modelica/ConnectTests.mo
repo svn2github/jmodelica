@@ -3128,10 +3128,10 @@ equation
             description="Check that active conditional components in connnectors are handled properly",
             flatModel="
 fclass ConnectTests.ConditionalCompInConnector2
- parameter Boolean c1.b = true /* true */;
+ structural parameter Boolean c1.b = true /* true */;
  Real c1.x;
  Real c1.y;
- parameter Boolean c2.b = true /* true */;
+ structural parameter Boolean c2.b = true /* true */;
  Real c2.x;
  Real c2.y;
 equation

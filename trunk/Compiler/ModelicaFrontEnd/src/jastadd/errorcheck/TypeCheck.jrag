@@ -188,8 +188,11 @@ aspect FlatTypeCheck {
                     NON_SCALAR_CONDITIONAL_GUARD.invoke(this);
                 if (!cond.type().isBoolean()) 
                     NON_BOOLEAN_CONDITIONAL_GUARD.invoke(this);
-                if (!cond.variability().parameterOrLess()) 
+                if (!cond.variability().parameterOrLess()) {
                     NON_FIXED_CONDITIONAL_GUARD.invoke(this);
+                } else {
+                    cond.markAsStructuralParameter(checkType);
+                }
             }
         }
         
