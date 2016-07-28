@@ -25,9 +25,19 @@ aspect AccessSizes {
      */
     syn Size FSubscript.size();
     eq FExpSubscript.size()     = getFExp().size();
-    eq FColonSubscript.size()   = accessContextSize();
+    eq FColonSubscript.size()   = inSubscriptedExp() ? mySize() : accessContextSize();
     eq FIntegerSubscript.size() = Size.SCALAR;
-    
+
+    inh boolean FSubscript.inSubscriptedExp();
+    eq FSubscriptedExp.getFArraySubscripts().inSubscriptedExp()        = true;
+    eq InstArrayAccess.getFArraySubscripts().inSubscriptedExp()        = false;
+    eq InstScalarAccess.getExpandedSubscripts().inSubscriptedExp()     = false;
+    eq InstShortClassDecl.getFArraySubscripts().inSubscriptedExp()     = false;
+    eq InstComponentDecl.getFArraySubscripts().inSubscriptedExp()      = false;
+    eq InstComponentDecl.getLocalFArraySubscripts().inSubscriptedExp() = false;
+    eq FQNamePartArray.getFArraySubscripts().inSubscriptedExp()        = false;
+    eq FIdUse.getExpandedSubscripts().inSubscriptedExp()               = false;
+
     /**
      * Get the size this subscript(s) would have if all subscripts were colons.
      */
@@ -119,7 +129,7 @@ aspect AccessSizes {
         return exps[0].copyReplaceAccess(new FExp.SizeContextReplacer(fs));
     }
     
-    public class FExp {
+    class FExp {
         public static class SizeContextReplacer implements ContextReplacer {
             private FSubscript fs;
             public SizeContextReplacer(FSubscript fs) {
@@ -134,61 +144,26 @@ aspect AccessSizes {
                 return exp.copyReplaceAccessExp(this);
             }
             
-            public FExp buildAccessContextSizeExp(InstAccess ia) {
-                 return fs.findAccessContext().buildAccessContextSizeExp(this, ia);
-            }
-            
-            public int subscriptIndex() {
-                return fs.subscriptIndex();
-            }
-        }
-
-        public abstract static class AccessContext {
-            public abstract FExp buildAccessContextSizeExp(FExp.SizeContextReplacer crp, InstAccess ia);
-        }
-    }
-
-    public class InstAccess {
-        public class AccessContext extends FExp.AccessContext {
-            @Override
-            public FExp buildAccessContextSizeExp(FExp.SizeContextReplacer crp, InstAccess ia) {
-                List<InstAccess> res = accessContextInst();
-                for (InstAccess part : ia.allParts()) {
-                    res.addChild(part.copyReplaceAccess(crp));
-                }
-                return new FIdUseExp(new FIdUseInstAccess(new InstDot(res)));
+            public List<InstAccess> buildContext() {
+                 return fs.myInstAccess().accessContextInst();
             }
         }
     }
-
-    public class FSubscriptedExp {
-        public class AccessContext extends FExp.AccessContext {
-            @Override
-            public FExp buildAccessContextSizeExp(FExp.SizeContextReplacer crp, InstAccess ia) {
-                return getFExp().size().createFExp(crp.subscriptIndex());
-            }
-        }
-    }
-
-    inh FExp.AccessContext FSubscript.findAccessContext();
-    eq Root.getChild().findAccessContext()            = null;
-    eq InstNode.getChild().findAccessContext()        = null;
-    eq InstAccess.getChild().findAccessContext()      = new AccessContext();
-    eq FSubscriptedExp.getChild().findAccessContext() = new AccessContext();
-
-    inh int FSubscript.subscriptIndex();
-    eq FArraySubscripts.getFSubscript(int i).subscriptIndex() = i;
-
+    
     public FExp FIdUse.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
         return new FIdUseExp(treeCopy());
     }
     
     public FExp FIdUseInstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return getInstAccess().buildAccessContextSizeExp(crp);
+        return new FIdUseExp(new FIdUseInstAccess(getInstAccess().buildAccessContextSizeExp(crp)));
     }
     
-    public FExp InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
-        return crp.buildAccessContextSizeExp(this);
+    public InstAccess InstAccess.buildAccessContextSizeExp(FExp.SizeContextReplacer crp) {
+        List<InstAccess> res = crp.buildContext();
+        for (InstAccess part : allParts()) {
+            res.addChild(part.copyReplaceAccess(crp));
+        }
+        return new InstDot(res);
     }
     
     inh FIdUseExp FSubscript.buildAccessContextSizeExp();
