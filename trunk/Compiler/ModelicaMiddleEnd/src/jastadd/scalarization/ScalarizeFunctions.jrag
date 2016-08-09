@@ -179,71 +179,9 @@ aspect FunctionScalarization {
                 knownArrayTemporaries(clauses, vars, indexMap);
             }
         } else {
-            createArrayTemporariesInChildren(clauses, vars, indexMap, names);
+            super.createArrayTemporaries(clauses, vars, indexMap, names);
         }
     }
-    
-    public void FExp.createArrayTemporariesInChildren(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        for (ASTNode n : this) {
-            n.createArrayTemporaries(clauses, vars, indexMap, names);
-        }
-    }
-    
-    public void FIfExp.createArrayTemporariesInChildren(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        if (inFAlgorithm()) {
-            List thenClauses = new List();
-            List elseClauses = new List();
-            getIfExp().createArrayTemporaries(clauses, vars, indexMap, names);
-            getThenExp().createArrayTemporaries(thenClauses, vars, indexMap, names);
-            getElseExp().createArrayTemporaries(elseClauses, vars, indexMap, names);
-            if (thenClauses.getNumChild() > 0 || elseClauses.getNumChild() > 0) {
-                List<FIfWhenClause> cl = new List<FIfWhenClause>();
-                cl.add(new FIfClause(getIfExp().scalarize(indexMap), thenClauses));
-                clauses.add(new FIfStmt(cl, elseClauses));
-            }
-        } else {
-            createArrayTemporariesIfBranch(null, clauses, vars, indexMap, names);
-        }
-    }
-    
-    public void FExp.createArrayTemporariesIfBranch(FExp ifExp, List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        List thenClauses = new List();
-        List elseClauses = new List();
-        List<FAbstractVariable> thenVars = new List<FAbstractVariable>();
-        createArrayTemporaries(thenClauses, thenVars, indexMap, names);
-        if (thenClauses.getNumChild() > 0) {
-            if (inFAlgorithm()) {
-                List<FIfWhenClause> cl = new List<FIfWhenClause>();
-                cl.add(new FIfClause(ifExp, thenClauses));
-                clauses.add(new FIfStmt(cl, elseClauses));
-            } else {
-                for (FAbstractVariable fv : thenVars) {
-                    elseClauses.add(new FEquation(fv.createUseExp(), fv.type().zeroLiteral()));
-                }
-                FElseEquation elseClause = new FElseEquation(new FNormalEquation(), elseClauses);
-                clauses.add(new FIfEquation(new FNormalEquation(), thenClauses, ifExp, new Opt<FIfWhenElseEquation>(elseClause)));
-            }
-            vars.addAll(thenVars);
-        }
-    }
-    
-    public void FIfExp.createArrayTemporariesIfBranch(FExp guard, List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
-        if (guard == null) {
-            getIfExp().createArrayTemporaries(clauses, vars, indexMap, names);
-        } else {
-            getIfExp().createArrayTemporariesIfBranch(guard.treeCopy(), clauses, vars, indexMap, names);
-        }
-        FExp ifExp = dynamicFExp(getIfExp().scalarize(indexMap));
-        FExp thenGuard = ifExp.treeCopy();
-        FExp elseGuard = new FNotExp(ifExp.treeCopy());
-        if (guard != null) {
-            thenGuard = new FAndExp(guard.treeCopy(), thenGuard);
-            elseGuard = new FAndExp(guard.treeCopy(), elseGuard);
-        }
-        getThenExp().createArrayTemporariesIfBranch(thenGuard, clauses, vars, indexMap, names);
-        getElseExp().createArrayTemporariesIfBranch(elseGuard, clauses, vars, indexMap, names);
-    }
-    
     
     public void FFunctionCall.createArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         // No names available as a function call arg.

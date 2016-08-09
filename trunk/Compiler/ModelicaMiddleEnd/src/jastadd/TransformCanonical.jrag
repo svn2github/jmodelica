@@ -2632,10 +2632,6 @@ aspect IfEquations {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
 	
-    rewrite FElseEquation in FClass.getFParameterEquation() {
-        when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
-    }
-	
 	rewrite FElseEquation in FClass.getFAbstractEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
