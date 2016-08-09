@@ -2007,7 +2007,37 @@ equation
 end FunctionInlining.ForStatementInline8;
 ")})));
     end ForStatementInline8;
-	
+    
+    model ForStatementInline9
+function f
+    input Real[:] x;
+    output Real[size(x,1)] y;
+algorithm
+    if size(x,1) > 1 then
+    else
+        for i in 1:size(x,1) loop
+            y[i] := x[i];
+        end for;
+    end if;
+end f;
+
+Real[:] y = f({time,time+1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForStatementInline9",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.ForStatementInline9
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = 0.0;
+ y[2] = 0.0;
+end FunctionInlining.ForStatementInline9;
+")})));
+    end ForStatementInline9;
     
     
     model MultipleOutputsInline1

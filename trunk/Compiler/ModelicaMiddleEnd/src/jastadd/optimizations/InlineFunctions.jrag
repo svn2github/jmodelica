@@ -269,6 +269,10 @@ aspect FunctionInlining {
         
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent, FType type,
                 FTypePrefixVariability variability) {
+            if (type.isNoType()) {
+                replMap.put(oldName, value);
+                return;
+            }
             FVariable var = addVar(oldName, variability, type);
             if (variability.constantVariability()) {
                 try {
