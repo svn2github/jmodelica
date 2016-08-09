@@ -4637,6 +4637,12 @@ aspect CCodeGen {
     public void FIfWhenElseEquation.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
         genIfStart_C(p, str, indent);
+        if (forVariables == null) {
+            for (FAbstractEquation equation : getFAbstractEquations()) {
+                equation.genAssignment_C(p, str, p.indent(indent));
+            }
+            return;
+        }
         Iterator<FVariable> fvIt = forVariables.iterator();
         Iterator<Integer> fiIt = forIndices.iterator();
         Map<Integer, FVariable> fiToFvMap = new HashMap<Integer, FVariable>();

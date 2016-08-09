@@ -29,6 +29,13 @@ aspect VariabilityPropagation {
         }
         taggedByVProp = false;
     }
+    public void FIfWhenElseEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
+        if (!isTempAssign() || !getFAbstractEquation(0).taggedByVProp) {
+            l.add(this);
+        }
+        taggedByVProp = false;
+    }
+    
     public void FFunctionCallEquation.cleanEquations(ArrayList<FAbstractEquation> l) {
         super.cleanEquations(l);
         if (taggedForCleanup) {
@@ -99,7 +106,7 @@ aspect VariabilityPropagation {
     inh boolean FAbstractEquation.canPropagateContext();
     eq Root.getChild().canPropagateContext() = false;
     eq FClass.getFAbstractEquation().canPropagateContext() = true;
-    eq FIfWhenElseEquation.getChild().canPropagateContext() = false;
+    eq FIfWhenElseEquation.getChild().canPropagateContext() = isTempAssign() && canPropagateContext();
     
     /**
      * If any arg is constant return constant. Otherwise returns combined variability.
@@ -201,7 +208,19 @@ aspect VariabilityPropagation {
             
         }
     }
-	
+    
+    public void FAbstractEquation.addEquationsToWorkList(Set<FAbstractEquation> wl) {
+        wl.add(this);
+    }
+    
+    public void FIfWhenElseEquation.addEquationsToWorkList(Set<FAbstractEquation> wl) {
+        if (isTempAssign()) {
+            for (FAbstractEquation equation: getFAbstractEquations()) {
+                equation.addEquationsToWorkList(wl);
+            }
+        }
+    }
+    
 	/**
 	 * Runs variability propagation.
 	 */
@@ -214,7 +233,7 @@ aspect VariabilityPropagation {
 
 		// Build worklist
 		for (FAbstractEquation equation: equations) {
-            worklist.add(equation);
+            equation.addEquationsToWorkList(worklist);
 		}
 
 		// Work

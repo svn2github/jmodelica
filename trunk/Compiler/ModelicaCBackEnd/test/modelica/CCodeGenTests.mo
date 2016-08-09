@@ -9229,6 +9229,53 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end IfEqu8;
 
+model IfEqu9
+function f
+    input Real[:] x;
+    output Real[:] y = x;
+    algorithm
+    annotation(Inline=false);
+end f;
+    
+    parameter Real[:] x = f({1});
+    parameter Real[:] y = if x[1] > 0 then f(x) else {0};
+    
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="IfEqu9",
+            description="Code generation for if equation in parameter equations",
+            variability_propagation=false,
+            inline_functions="none",
+            template="
+$C_DAE_initial_dependent_parameter_assignments$
+",
+            generatedCode="
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 1, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1, 1)
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
+    jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
+    func_CCodeGenTests_IfEqu9_f_def0(tmp_2, tmp_1);
+    _x_1_0 = (jmi_array_val_1(tmp_1, 1));
+    if (COND_EXP_GT(_x_1_0, 0, JMI_TRUE, JMI_FALSE)) {
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1, 1)
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 1, 1, 1)
+        jmi_array_ref_1(tmp_4, 1) = _x_1_0;
+        func_CCodeGenTests_IfEqu9_f_def0(tmp_4, tmp_3);
+        _temp_2_1_1 = (jmi_array_val_1(tmp_3, 1));
+    } else {
+        _temp_2_1_1 = (0.0);
+    }
+    _y_1_2 = (COND_EXP_EQ(COND_EXP_GT(_x_1_0, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, _temp_2_1_1, AD_WRAP_LITERAL(0)));
+    return ef;
+}
+")})));
+end IfEqu9;
 
 
 model ReinitCTest1

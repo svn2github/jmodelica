@@ -2632,6 +2632,10 @@ aspect IfEquations {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
 	
+    rewrite FElseEquation in FClass.getFParameterEquation() {
+        when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+    }
+	
 	rewrite FElseEquation in FClass.getFAbstractEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
@@ -2892,18 +2896,25 @@ aspect IfEquations {
 		    if (keepRight.getNumChild() > 0) 
 		        elseOpt.addChild(new FElseEquation(getType().fullCopy(), keepRight));
 		    e = new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt);
-		    if (isWhen())
-		    	e.setWhen();
+            copyFlagsTo(e);
 		    l.add(e);
 		} else if (keepRight.getNumChild() > 0) {
             e = new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt());
-		    if (isWhen())
-		    	e.setWhen();
+            copyFlagsTo(e);
             l.add(e);
 		}
 		
 		return l;
 	}
+	
+    public void FIfEquation.copyFlagsTo(FIfEquation e) {
+        if (isTempAssign()) {
+            e.setIsTempAssign();
+        }
+        if (isWhen()) {
+            e.setWhen();
+        }
+    }
 	
 	syn boolean FAbstractEquation.allowGlobalOnIfRewrite() = false;
 	eq FFunctionCallEquation.allowGlobalOnIfRewrite()      = getNumLeft() > 0;

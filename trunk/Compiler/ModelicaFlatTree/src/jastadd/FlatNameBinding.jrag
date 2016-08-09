@@ -466,7 +466,11 @@ aspect ParameterEquations {
 	}
 	
 	public void FAbstractEquation.addToParameterEquationsMap(
-			Map<FAbstractVariable,FAbstractEquation> map) {}
+            Map<FAbstractVariable,FAbstractEquation> map) {
+        for (FVariable fv : referencedFVariablesInLHS()) {
+            fv.addToParameterEquationsMap(map, this);
+        }
+    }
 	
 	public void FEquation.addToParameterEquationsMap(
 			Map<FAbstractVariable,FAbstractEquation> map) {
@@ -479,13 +483,6 @@ aspect ParameterEquations {
 			if (left.hasFExp())
 				left.getFExp().addToParameterEquationsMap(map, this);
 	}
-    
-    public void FAlgorithm.addToParameterEquationsMap(
-            Map<FAbstractVariable,FAbstractEquation> map) {
-        for (FVariable fv : referencedFVariablesInLHS()) {
-            fv.addToParameterEquationsMap(map, this);
-        }
-    }
     
 	public void FExp.addToParameterEquationsMap(
 			Map<FAbstractVariable,FAbstractEquation> map, FAbstractEquation equ) {
