@@ -353,7 +353,28 @@ end XMLCodeGenTest2;
 		</ScalarVariable>
 ")})));
 	end EnumerationTest4;
-	
+
+    model EnumerationTest5
+        type T = enumeration(LT "<", GT ">") "Type for < and >";
+        parameter T t = T.LT;
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        XMLCodeGenTestCase(
+            name="EnumerationTest5",
+            description="Test that attributes in the TypeDefinitions section is escaped correctly.",
+            template="$XML_typeDefinitions$",
+            generatedCode="
+<TypeDefinitions>
+    <Type name=\"XMLCodeGenTests.EnumerationTest5.T\" description=\"Type for &lt; and &gt;\">
+        <EnumerationType min=\"1\" max=\"2\">
+            <Item name=\"LT\" description=\"&lt;\" />
+            <Item name=\"GT\" description=\"&gt;\" />
+        </EnumerationType>
+    </Type>
+</TypeDefinitions>
+")})));
+    end EnumerationTest5;
 	//model EnumerationTest5
 		//type DigitalCurrentChoices = enumeration(zero, one);
 		//type DigitalCurrent = DigitalCurrentChoices(quantity="Current",start = DigitalCurrentChoices.one, fixed = true);

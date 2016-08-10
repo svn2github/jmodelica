@@ -15,45 +15,32 @@
 */
 package org.jmodelica.util;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 public class XMLUtil {
 
     private XMLUtil() {}
 
-    private static Pattern escapePattern = Pattern.compile("[\"&'<>\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]");
-
     public static String escape(String message) {
         if (message == null)
             return message;
-        Matcher matcher = escapePattern.matcher(message);
-        StringBuffer sb = new StringBuffer();
-        while (matcher.find()) {
-            String replacement;
-            String group = matcher.group();
-            if (group.length() != 1) {
-                throw new IllegalArgumentException("Expecting a match group of length 1, got " + group.length() + "!");
-            }
-            char c = group.charAt(0);
+        StringBuffer sb = new StringBuffer(message.length());
+        for (int i = 0; i < message.length(); i++) {
+            char c = message.charAt(i);
             if (c == '"') {
-                replacement = "&quot;";
+                sb.append("&quot;");
             } else if (c == '&') {
-                replacement = "&amp;";
+                sb.append("&amp;");
             } else if (c ==  '\'') {
-                replacement = "&apos;";
+                sb.append("&apos;");
             } else if (c == '<') {
-                replacement = "&lt;";
+                sb.append("&lt;");
             } else if (c == '>') {
-                replacement = "&gt;";
+                sb.append("&gt;");
             } else if ((c >= 0x0 && c <= 0x8) || (c >= 0xB && c <= 0xC) || (c >= 0xE && c <= 0x1F)) {
-                replacement = ""; // These characters aren't allowed by the XML specification
+                // These characters aren't allowed by the XML specification
             } else {
-                throw new IllegalArgumentException("Unsupported treated characther number " + Character.getNumericValue(c) + "!");
+                sb.append(c);
             }
-            matcher.appendReplacement(sb, replacement);
         }
-        matcher.appendTail(sb);
         return sb.toString();
     }
 

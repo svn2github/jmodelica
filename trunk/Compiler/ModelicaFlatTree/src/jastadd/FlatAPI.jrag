@@ -1897,6 +1897,9 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isFVariable() = false;
     eq FVariable.isFVariable()                  = true;
 
+    syn boolean FAbstractVariable.isFRealVariable() = false;
+    eq FVariable.isFRealVariable()                  = true;
+    
     syn boolean FAbstractVariable.isFFunctionVariable() = false;
     eq FFunctionVariable.isFFunctionVariable()          = true;
 
@@ -1916,6 +1919,11 @@ aspect FlatAPI {
     }
     eq FVariable.asFVariable() = this;
 
+    syn FRealVariable FAbstractVariable.asFRealVariable() {
+        throw new UnsupportedOperationException("asFRealVariable() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FRealVariable.asFRealVariable() = this;
+    
     syn FDerivativeVariable FAbstractVariable.asDerivativeVariable() {
         throw new UnsupportedOperationException("isDerivativeVariable() is not supported for class type " + getClass().getSimpleName());
     }

@@ -51,55 +51,57 @@ public class OptimicaXMLGenerator extends XMLGenerator {
 
 	}
 	
-	@Override
-	protected void addRealAttributes(CodeStream genPrinter, FRealVariable realvariable) {
-		super.addRealAttributes(genPrinter, realvariable);
-		Boolean generateFMI = realvariable.myOptions().getBooleanOption("generate_fmi_me_xml");
-		if(!generateFMI) {
-			genPrinter.print("free=\""+realvariable.isFreeParameter()+"\" ");
-			double ig_val = 0;
-			// If initialGuess attribute is not specified, use start attribute
-			if (realvariable.initialGuessAttributeSet()) {
-				ig_val = realvariable.initialGuessAttribute();			
-			} else {
-				ig_val = realvariable.startAttribute();			
-			}
-			genPrinter.print("initialGuess=\""+ig_val+"\" ");
-		}
-	}
-	
-	@Override
-	protected void addIntegerAttributes(CodeStream genPrinter, FIntegerVariable integervariable) {
-		super.addIntegerAttributes(genPrinter, integervariable);
-		Boolean generateFMI = integervariable.myOptions().getBooleanOption("generate_fmi_me_xml");
-		if(!generateFMI) {
-			genPrinter.print("free=\""+integervariable.isFreeParameter()+"\" ");
-			int ig_val = 0;
-			// If initialGuess attribute is not specified, use start attribute
-			if (integervariable.initialGuessAttributeSet()) {
-				ig_val = integervariable.initialGuessAttribute();			
-			} else {
-				ig_val = integervariable.startAttribute();			
-			}
-			genPrinter.print("initialGuess=\""+ig_val+"\" ");
-		}
-	}
-	
-	@Override
-	protected void addBooleanAttributes(CodeStream genPrinter, FBooleanVariable booleanvariable) {
-		super.addBooleanAttributes(genPrinter, booleanvariable);
-		Boolean generateFMI = booleanvariable.myOptions().getBooleanOption("generate_fmi_me_xml");
-		if(!generateFMI) {
-			genPrinter.print("free=\""+booleanvariable.isFreeParameter()+"\" ");
-			boolean ig_val = false;
-			// If initialGuess attribute is not specified, use start attribute
-			if (booleanvariable.initialGuessAttributeSet()) {
-				ig_val = booleanvariable.initialGuessAttribute();			
-			} else {
-				ig_val = booleanvariable.startAttribute();			
-			}
-			genPrinter.print("initialGuess=\""+ig_val+"\" ");
-		}
+    /** 
+     * This method and the other addRealAttributes, addIntegerAttributes has
+     * rather bad smell. I know, but the return type of startAttribute() and
+     * initialGuessAttribute() has different types... :(
+     */
+    @Override
+    public void addRealAttributes(CodeStream str, FRealVariable var) {
+        super.addRealAttributes(str, var);
+        if(!var.myOptions().getBooleanOption("generate_fmi_me_xml")) {
+            generateAttribute("free", var.isFreeParameter(), str);
+            double ig_val = 0;
+            // If initialGuess attribute is not specified, use start attribute
+            if (var.initialGuessAttributeSet()) {
+                ig_val = var.initialGuessAttribute();
+            } else {
+                ig_val = var.startAttribute();
+            }
+            generateAttribute("initialGuess", ig_val, str);
+        }
+    }
+
+    @Override
+    public void addIntegerAttributes(CodeStream str, FIntegerVariable var) {
+        super.addIntegerAttributes(str, var);
+        if(!var.myOptions().getBooleanOption("generate_fmi_me_xml")) {
+            generateAttribute("free", var.isFreeParameter(), str);
+            int ig_val = 0;
+            // If initialGuess attribute is not specified, use start attribute
+            if (var.initialGuessAttributeSet()) {
+                ig_val = var.initialGuessAttribute();
+            } else {
+                ig_val = var.startAttribute();
+            }
+            generateAttribute("initialGuess", ig_val, str);
+        }
+    }
+
+    @Override
+    public void addBooleanAttributes(CodeStream str, FBooleanVariable var) {
+        super.addBooleanAttributes(str, var);
+        if(!var.myOptions().getBooleanOption("generate_fmi_me_xml")) {
+            generateAttribute("free", var.isFreeParameter(), str);
+            boolean ig_val = false;
+            // If initialGuess attribute is not specified, use start attribute
+            if (var.initialGuessAttributeSet()) {
+                ig_val = var.initialGuessAttribute();
+            } else {
+                ig_val = var.startAttribute();
+            }
+            generateAttribute("initialGuess", ig_val, str);
+        }
 	}
 	
 	@Override

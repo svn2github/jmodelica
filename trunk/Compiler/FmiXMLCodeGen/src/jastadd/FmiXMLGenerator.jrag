@@ -183,8 +183,8 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 		
 		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name",  name,                       genPrinter);
-            generateAttribute("value", replaceIllegalChars(value), genPrinter);
+			generateAttribute("name",  name,  genPrinter);
+            generateAttribute("value", value, genPrinter);
 		}
 	}
     
@@ -269,7 +269,7 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
      * @param FVariable A variable class.
      */
     protected String getXMLStartAttribute(FVariable var) {
-        return replaceIllegalChars(var.type().convert(getStartExp(var).ceval()).xmlValue());
+        return var.type().convert(getStartExp(var).ceval()).xmlValue();
     }
     
     /**
@@ -638,7 +638,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("name",           variable.name(),           genPrinter);
 				generateAttribute("valueReference", variable.valueReference(), genPrinter);
                 if (variable.hasFStringComment())
-                    generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
+                    generateAttribute("description", variable.getFStringComment().getComment(), genPrinter);
                 
                 generateAttribute("variability", getVariability(variable), genPrinter);
                 
@@ -667,11 +667,11 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				FRealVariable realvariable = (FRealVariable)variable;
 
                 if(realvariable.quantityAttributeSet())
-                    generateAttribute("quantity", realvariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", realvariable.quantity_XML(), genPrinter);
                 if(realvariable.unitAttributeSet()) {
-                    generateAttribute("unit", realvariable.unitXML(Fmi1XMLGenerator.this), genPrinter);
+                    generateAttribute("unit", realvariable.unit_XML(), genPrinter);
                     if(realvariable.displayUnitAttributeSet()) {
-                        generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi1XMLGenerator.this), genPrinter);
+                        generateAttribute("displayUnit", realvariable.displayUnit_XML(), genPrinter);
                     }
                 }
                 generateAttribute("relativeQuantity", false, genPrinter);
@@ -700,7 +700,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
                 if(integervariable.quantityAttributeSet())
-                    generateAttribute("quantity", integervariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", integervariable.quantity_XML(), genPrinter);
                 if(integervariable.minAttributeSet())
                     generateAttribute("min", integervariable.minAttribute(), genPrinter);
                 if(integervariable.maxAttributeSet())
@@ -756,7 +756,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
 
                 if(enumvariable.quantityAttributeSet())
-                    generateAttribute("quantity", enumvariable.quantityXML(Fmi1XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", enumvariable.quantity_XML(), genPrinter);
                 if(enumvariable.minAttributeSet())
                     generateAttribute("min", enumvariable.minAttribute(), genPrinter);
                 if(enumvariable.maxAttributeSet())
@@ -1331,7 +1331,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("name",           variable.name(), genPrinter);
 				generateAttribute("valueReference", valueReference,  genPrinter);
                 if (variable.hasFStringComment())
-                    generateAttribute("description", replaceIllegalChars(variable.getFStringComment().getComment()), genPrinter);
+                    generateAttribute("description", variable.getFStringComment().getComment(), genPrinter);
 				
 				//Find the attribute for initial, is generated later.
                 InitialType initialType = getInitialType(variable);
@@ -1370,11 +1370,11 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				realvariable = (FRealVariable)variable;
 
                 if (realvariable.quantityAttributeSet())
-                    generateAttribute("quantity", realvariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", realvariable.quantity_XML(), genPrinter);
                 if (realvariable.unitAttributeSet()) {
-                    generateAttribute("unit", realvariable.unitXML(Fmi2XMLGenerator.this), genPrinter);
+                    generateAttribute("unit", realvariable.unit_XML(), genPrinter);
                     if (realvariable.displayUnitAttributeSet()) {
-                        generateAttribute("displayUnit", realvariable.displayUnitXML(Fmi2XMLGenerator.this), genPrinter);
+                        generateAttribute("displayUnit", realvariable.displayUnit_XML(), genPrinter);
                     }
                 }
                 generateAttribute("relativeQuantity", false, genPrinter);
@@ -1419,7 +1419,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				FIntegerVariable integervariable = (FIntegerVariable)variable;
 				
                 if(integervariable.quantityAttributeSet())
-                    generateAttribute("quantity", integervariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", integervariable.quantity_XML(), genPrinter);
                 if(integervariable.minAttributeSet())
                     generateAttribute("min", integervariable.minAttribute(), genPrinter);
                 if(integervariable.maxAttributeSet())
@@ -1477,7 +1477,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
 				generateAttribute("declaredType", enumvariable.myFEnumDecl().name(), genPrinter);
 
                 if(enumvariable.quantityAttributeSet())
-                    generateAttribute("quantity", enumvariable.quantityXML(Fmi2XMLGenerator.this), genPrinter);
+                    generateAttribute("quantity", enumvariable.quantity_XML(), genPrinter);
                 if(enumvariable.minAttributeSet())
                     generateAttribute("min", enumvariable.minAttribute(), genPrinter);
                 if(enumvariable.maxAttributeSet())
