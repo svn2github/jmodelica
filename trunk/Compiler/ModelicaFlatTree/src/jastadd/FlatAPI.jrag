@@ -1898,7 +1898,7 @@ aspect FlatAPI {
     eq FVariable.isFVariable()                  = true;
 
     syn boolean FAbstractVariable.isFRealVariable() = false;
-    eq FVariable.isFRealVariable()                  = true;
+    eq FRealVariable.isFRealVariable()              = true;
     
     syn boolean FAbstractVariable.isFFunctionVariable() = false;
     eq FFunctionVariable.isFFunctionVariable()          = true;
