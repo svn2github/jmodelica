@@ -3429,6 +3429,11 @@ aspect ConstantEvaluation {
 	  super.prepareForFunctionEval();
 	  flushUnknownSizes();
   }
+  
+    public void InstAccess.prepareForFunctionEval() {
+        super.prepareForFunctionEval();
+        flushCache();
+    }
 
     public void FExp.flushUnknownSizes() {
         // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated

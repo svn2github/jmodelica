@@ -4420,4 +4420,33 @@ end EvaluationTests.RangeSubscript1;
 ")})));
 end RangeSubscript1;
 
+model ConstantInFunction1
+    record R
+        Real x;
+    end R;
+    
+    constant R[:] r = {R(1),R(2)};
+    
+    function f
+        input Integer i;
+        output Real y = r[i].x;
+    algorithm
+        y := y + r[i].x;
+    end f;
+    
+    constant Real y = f(1) + f(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantInFunction1",
+            description="Constant eval of composite array package constant in function",
+            flatModel="
+fclass EvaluationTests.ConstantInFunction1
+ constant Real r[1].x = 1;
+ constant Real r[2].x = 2;
+ constant Real y = 6.0;
+end EvaluationTests.ConstantInFunction1;
+")})));
+end ConstantInFunction1;
+
 end EvaluationTests;
