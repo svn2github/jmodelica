@@ -8672,4 +8672,55 @@ end ArrayTests.IfExprTemp2;
 ")})));
 end IfExprTemp2;
 
+model IfExprTemp3
+      function f
+        input Real x;
+        output Real[2] y = {x,x+1};
+        algorithm
+      end f;
+      
+      Real x;
+      Real y;
+  equation
+      der(x) = time;
+      y = if der(x) > x then 1 else if der(x) > x then 1 else sum(f(x));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExprTemp3",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.IfExprTemp3
+ Real x;
+ Real y;
+ Real temp_1[1];
+ Real temp_1[2];
+initial equation 
+ x = 0.0;
+equation
+ der(x) = time;
+ if not der(x) > x and not der(x) > x then
+  ({temp_1[1], temp_1[2]}) = ArrayTests.IfExprTemp3.f(x);
+ else
+  temp_1[1] = 0.0;
+  temp_1[2] = 0.0;
+ end if;
+ y = if der(x) > x then 1 elseif der(x) > x then 1 else temp_1[1] + temp_1[2];
+
+public
+ function ArrayTests.IfExprTemp3.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end ArrayTests.IfExprTemp3.f;
+
+end ArrayTests.IfExprTemp3;
+")})));
+end IfExprTemp3;
+
 end ArrayTests;

@@ -237,14 +237,14 @@ aspect FunctionScalarization {
         if (guard == null) {
             getIfExp().createArrayTemporaries(clauses, vars, indexMap, names);
         } else {
-            getIfExp().createArrayTemporariesIfBranch(guard.treeCopy(), clauses, vars, indexMap, names);
+            getIfExp().createArrayTemporariesIfBranch(guard.treeCopyNoTransform(), clauses, vars, indexMap, names);
         }
-        FExp ifExp = dynamicFExp(getIfExp().scalarize(indexMap));
-        FExp thenGuard = ifExp.treeCopy();
-        FExp elseGuard = new FNotExp(ifExp.treeCopy());
+        FExp ifExp = getIfExp().scalarize(indexMap);
+        FExp thenGuard = ifExp.treeCopyNoTransform();
+        FExp elseGuard = new FNotExp(ifExp.treeCopyNoTransform());
         if (guard != null) {
-            thenGuard = new FAndExp(guard.treeCopy(), thenGuard);
-            elseGuard = new FAndExp(guard.treeCopy(), elseGuard);
+            thenGuard = new FAndExp(guard.treeCopyNoTransform(), thenGuard);
+            elseGuard = new FAndExp(guard.treeCopyNoTransform(), elseGuard);
         }
         getThenExp().createArrayTemporariesIfBranch(thenGuard, clauses, vars, indexMap, names);
         getElseExp().createArrayTemporariesIfBranch(elseGuard, clauses, vars, indexMap, names);
