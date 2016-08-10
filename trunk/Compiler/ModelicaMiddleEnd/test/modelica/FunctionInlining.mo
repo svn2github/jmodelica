@@ -3971,12 +3971,11 @@ initial equation
             flatModel="
 fclass FunctionInlining.InitialSystemInlining2
  initial parameter Real x(fixed = false);
- Real temp_2;
- Real temp_3;
- Real temp_5;
+ initial parameter Real temp_2;
+ initial parameter Real temp_3;
+ initial parameter Real temp_5;
 initial equation 
  x = sin(temp_2) * cos(temp_3) + cos(temp_2) * sin(temp_3);
-equation
  temp_2 = temp_5 - 3.14;
  temp_3 = temp_5 + 3.14;
  temp_5 = time + 1;
@@ -4444,6 +4443,63 @@ public
 end FunctionInlining.ChainedCallInlining11;
 ")})));
 end ChainedCallInlining11;
+
+model ChainedCallInlining12
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function F1
+        input Real i1;
+        input R i2;
+        output Real o1;
+    algorithm
+        o1 := i2.a;
+    end F1;
+    
+    function F2
+        input Real i1;
+        input Real i2;
+        output R o1;
+    algorithm
+        o1.a := i1;
+        o1.b := i2;
+    annotation(Inline=false);
+    end F2;
+    
+    parameter Real a(fixed=false) = F1(time, F2(time, 42));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining12",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining12
+ initial parameter Real a(fixed = false);
+initial equation 
+ (FunctionInlining.ChainedCallInlining12.R(a, )) = FunctionInlining.ChainedCallInlining12.F2(time, 42);
+
+public
+ function FunctionInlining.ChainedCallInlining12.F2
+  input Real i1;
+  input Real i2;
+  output FunctionInlining.ChainedCallInlining12.R o1;
+ algorithm
+  o1.a := i1;
+  o1.b := i2;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ChainedCallInlining12.F2;
+
+ record FunctionInlining.ChainedCallInlining12.R
+  Real a;
+  Real b;
+ end FunctionInlining.ChainedCallInlining12.R;
+
+end FunctionInlining.ChainedCallInlining12;
+")})));
+end ChainedCallInlining12;
 
 
 model InputAsIndex1

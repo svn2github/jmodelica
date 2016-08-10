@@ -156,7 +156,8 @@ aspect FunctionInlining {
         private FlatVariableMap lookupMap;
         private Map<String,FType> typeMap;
         private Queue<FAbstractEquation> outerMostWorklist = null;
-
+        public FTypePrefixVariability contextVariability = ASTNode.fContinuous();
+        
         /**
          * Inline all function calls that we can from a specific list of equations.
          */
@@ -194,6 +195,14 @@ aspect FunctionInlining {
             } else {
                 newEquationList.add(eqn);
             }
+        }
+        
+        public void setContextVariability(FTypePrefixVariability v) {
+            contextVariability = v;
+        }
+        
+        public FTypePrefixVariability contextVariability(FExp e) {
+            return contextVariability.combineDown(e.variability());
         }
 
         /**
@@ -264,7 +273,7 @@ aspect FunctionInlining {
          * @param noEvent  if true, make sure no events are generated for the equation
          */
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent) {
-            addVarAndEqn(oldName, value, noEvent, value.type(), value.variability());
+            addVarAndEqn(oldName, value, noEvent, value.type(), contextVariability(value));
         }
         
         public void addVarAndEqn(String oldName, FExp value, boolean noEvent, FType type,
@@ -298,7 +307,7 @@ aspect FunctionInlining {
          */
         public void addVarsAndFCEqn(List<FFunctionCallLeft> lefts, FAbstractFunctionCall call) {
             int nLefts = lefts.getNumChild();
-            FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : call.variability().fullCopy();
+            FTypePrefixVariability variability = (nLefts == 0) ? ASTNode.fContinuous() : contextVariability(call).fullCopy();
             FExp[] exps = null;
             if (variability.constantVariability()) {
                 try {
@@ -435,16 +444,19 @@ aspect FunctionInlining {
             List<FAbstractEquation> oldInitialEqns = initialEqns;
             initialEqns = new List<FAbstractEquation>();
             fc.setFInitialEquationList(initialEqns);
+            setContextVariability(ASTNode.fInitialParameter());
             inlineFCList(oldInitialEqns, initialEqns);
             
             List<FAbstractEquation> oldNormalEqns = normalEqns;
             normalEqns = new List<FAbstractEquation>();
             fc.setFAbstractEquationList(normalEqns);
+            setContextVariability(ASTNode.fContinuous());
             inlineFCList(oldNormalEqns, normalEqns);
             
             List<FAbstractEquation> oldParamEqns = paramEqns;
             paramEqns = new List<FAbstractEquation>();
             fc.setFParameterEquationList(paramEqns);
+            setContextVariability(ASTNode.fParameter());
             inlineFCList(oldParamEqns, paramEqns);
         }
         
@@ -476,7 +488,7 @@ aspect FunctionInlining {
     
     public void FFunctionCall.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
         if (isComposite()) {
-            FTypePrefixVariability v = variability();
+            FTypePrefixVariability v = fi.contextVariability(this);
             if (v.constantVariability()) {
                 try {
                     dynamicFExp(ceval().buildLiteral()).addInliningVarsAndEqns(fi, oldName, noEvent);
@@ -502,7 +514,7 @@ aspect FunctionInlining {
                 String tempName = temp + suffix;
                 String oldName = old + suffix;
                 FExp e = src.dynamicFExp(new FIdUseExp(tempName));
-                FTypePrefixVariability v = src.variability();
+                FTypePrefixVariability v = fi.contextVariability(src);
                 fi.addVarAndEqn(oldName, e, noEvent, type, v);
                 fi.addVar(new FQNameString(tempName), v, type);
                 return e.fullCopy();
