@@ -2550,8 +2550,8 @@ model RecordConstructor15
 fclass RecordTests.RecordConstructor15
  structural parameter Integer n = 2 /* 2 */;
  structural parameter Integer r.n = 2 /* 2 */;
- parameter Real r.x[1] = 1 /* 1 */;
- parameter Real r.x[2] = 2 /* 2 */;
+ structural parameter Real r.x[1] = 1 /* 1 */;
+ structural parameter Real r.x[2] = 2 /* 2 */;
 end RecordTests.RecordConstructor15;
 ")})));
 end RecordConstructor15;

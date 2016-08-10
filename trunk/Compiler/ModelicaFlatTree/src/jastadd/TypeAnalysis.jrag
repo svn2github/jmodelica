@@ -827,7 +827,7 @@ aspect FTypeCompatibility {
             comps1.add(t);
         for (FRecordComponentType t : rec.getComponents())
             comps2.add(t);
-        return typeMatches(comps1, comps2, compatible, allowUnknown);
+        return typeMatches(comps1, comps2, compatible, true);
     }
     eq FExternalObjectType.typeMatches(FType type, boolean compatible, boolean allowUnknown) {
         if (!dimensionCompatible(type, allowUnknown) || !type.isExternalObject())
