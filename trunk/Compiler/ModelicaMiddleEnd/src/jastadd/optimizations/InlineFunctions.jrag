@@ -469,21 +469,21 @@ aspect FunctionInlining {
             inline(oldEquationList, newEquationList);
         }
     }
-
-    public void FExp.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        fi.addVarAndEqn(oldName, this, noEvent);
-    }
     
-    public void FArray.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        Array arr = getArray();
-        for (Index i : indices())
-            arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
-    }
-
-    public void FRecordConstructor.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
-        oldName += ".";
-        for (FRecordComponentType part : ((FRecordType) type()).getComponents())
-            myArgFExp(part.getName()).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
+    public void FExp.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {
+        if (isArray()) {
+            Array arr = getArray();
+            for (Index i : indices()) {
+                arr.get(i).addInliningVarsAndEqns(fi, oldName + i, noEvent);
+            }
+        } else if (type().isRecord()) {
+            oldName += ".";
+            for (FRecordComponentType part : ((FRecordType) type()).getComponents()) {
+                dynamicFExp(extractRecordFExp(part.getName())).addInliningVarsAndEqns(fi, oldName + part.getName(), noEvent);
+            }
+        } else {
+            fi.addVarAndEqn(oldName, this, noEvent);
+        }
     }
     
     public void FFunctionCall.addInliningVarsAndEqns(AbstractFunctionInliner fi, String oldName, boolean noEvent) {

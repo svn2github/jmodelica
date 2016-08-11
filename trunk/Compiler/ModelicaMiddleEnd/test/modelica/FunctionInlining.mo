@@ -1132,6 +1132,32 @@ end FunctionInlining.RecordInline12;
 ")})));
 end RecordInline12;
 
+model RecordInline13
+    function f
+        input R r;
+        output Real y = sum(r.x);
+        algorithm
+    end f;
+    record R
+        Real[:] x = {1};
+    end R;
+    R r;
+    Real x = f(if time > 1 then r else R({2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline13",
+            description="Check inlining of composite if expression",
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.RecordInline13
+ constant Real r.x[1] = 1;
+ Real x;
+equation
+ x = if time > 1 then 1.0 else 2;
+end FunctionInlining.RecordInline13;
+")})));
+end RecordInline13;
 
 model Test2
   Modelica.Blocks.Sources.Ramp ramp(
