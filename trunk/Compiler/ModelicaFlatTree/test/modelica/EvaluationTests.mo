@@ -4420,6 +4420,56 @@ end EvaluationTests.RangeSubscript1;
 ")})));
 end RangeSubscript1;
 
+model RangeSubscript2
+    function f
+        input Real[:] x;
+        output Integer[size(x,1)] i;
+        output Real[size(x,1)] y;
+    algorithm
+        i := 1:size(x,1);
+        y := x[i];
+    end f;
+    
+    constant Real[:] y1 = f({1,2});
+    Real[:] y2 = f({1,2,3});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RangeSubscript2",
+            description="Test proper flush for sizes after evaluation",
+            variability_propagation=false,
+            inline_functions="none",
+            flatModel="
+fclass EvaluationTests.RangeSubscript2
+ constant Real y1[1] = 1;
+ constant Real y1[2] = 2;
+ Real y2[1];
+ Real y2[2];
+ Real y2[3];
+equation
+ ({y2[1], y2[2], y2[3]}) = EvaluationTests.RangeSubscript2.f({1, 2, 3});
+
+public
+ function EvaluationTests.RangeSubscript2.f
+  input Real[:] x;
+  output Integer[:] i;
+  output Real[:] y;
+ algorithm
+  init i as Integer[size(x, 1)];
+  init y as Real[size(x, 1)];
+  for i1 in 1:size(x, 1) loop
+   i[i1] := i1;
+  end for;
+  for i1 in 1:size(x, 1) loop
+   y[i1] := x[i[i1]];
+  end for;
+  return;
+ end EvaluationTests.RangeSubscript2.f;
+
+end EvaluationTests.RangeSubscript2;
+")})));
+end RangeSubscript2;
+
 model ConstantInFunction1
     record R
         Real x;
