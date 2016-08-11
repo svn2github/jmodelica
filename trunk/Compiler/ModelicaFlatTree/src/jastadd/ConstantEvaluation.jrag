@@ -3432,7 +3432,9 @@ aspect ConstantEvaluation {
   
     public void InstAccess.prepareForFunctionEval() {
         super.prepareForFunctionEval();
-        flushCache();
+        if (myInstComponentDecl().isConstant()) {
+            flushCache();
+        }
     }
 
     public void FExp.flushUnknownSizes() {
