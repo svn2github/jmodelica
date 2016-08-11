@@ -256,6 +256,12 @@ abstract public class OptionRegistry {
              Category.user,
              false, 
              "If enabled, then only the initial equation system will be generated."),
+        TEARING_DIVISION_TOLERANCE
+            ("tearing_division_tolerance",
+             OptionType.compiler,
+             Category.user,
+             1e-10,
+             "The minimum allowed size for a divisior constant when performing tearing."),
         DIVIDE_BY_VARS_IN_TEARING 
             ("divide_by_vars_in_tearing", 
              OptionType.compiler, 
