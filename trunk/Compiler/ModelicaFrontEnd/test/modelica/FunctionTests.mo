@@ -4230,9 +4230,9 @@ public
  algorithm
   x := x_0;
   x := 0;
-  for i in 1:3 loop
-   x := x + i;
-  end for;
+  x := x + 1;
+  x := x + 2;
+  x := x + 3;
   return;
  end FunctionTests.AlgorithmTransformation14.algorithm_1;
 
@@ -12293,49 +12293,6 @@ end FunctionTests.InputAsArraySize17;
 end InputAsArraySize17;
 
 
-model InputAsArraySize18
-    function f
-        input Integer a;
-        output Real[2,a] y = {1:a,3:a+2};
-        algorithm
-    end f;
-    model M
-        parameter Integer n = 1;
-        Real[n+1] x;
-        Real y = x[1];
-    end R;
-    parameter Integer k = 2;
-    M[2] m(n=k-1,x=f(k));
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="InputAsArraySize18",
-            description="Parametrized size in FSubscriptedExp over array of records",
-            flatModel="
-fclass FunctionTests.InputAsArraySize18
- structural parameter Integer k = 2 /* 2 */;
- structural parameter Integer m[1].n = 1 /* 1 */;
- Real m[1].x[2] = (FunctionTests.InputAsArraySize18.f(2))[1,1:2];
- Real m[1].y = m[1].x[1];
- structural parameter Integer m[2].n = 1 /* 1 */;
- Real m[2].x[2] = (FunctionTests.InputAsArraySize18.f(2))[2,1:2];
- Real m[2].y = m[2].x[1];
-
-public
- function FunctionTests.InputAsArraySize18.f
-  input Integer a;
-  output Real[:,:] y;
- algorithm
-  init y as Real[2, a];
-  y := {1:a, 3:a + 2};
-  return;
- end FunctionTests.InputAsArraySize18.f;
-
-end FunctionTests.InputAsArraySize18;
-")})));
-end InputAsArraySize18;
-
-
 
 model VectorizedCall1
     function f
@@ -16404,66 +16361,5 @@ public
 end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
-
-model IfExprTemp1
-function f
-    input Real x;
-    output Real y;
-algorithm
-    y := if sum(f2(x)) > 0 then sum(f2(x)) else sum(f2(x+1));
-end f;
-
-function f2
-    input Real x;
-    output Real[:] y = {x,x+1};
-algorithm
-end f2;
-
-Real y = f(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IfExprTemp1",
-            description="",
-            flatModel="
-fclass FunctionTests.IfExprTemp1
- Real y;
-equation
- y = FunctionTests.IfExprTemp1.f(time);
-
-public
- function FunctionTests.IfExprTemp1.f
-  input Real x;
-  output Real y;
-  Real[:] temp_1;
-  Real[:] temp_2;
-  Real[:] temp_3;
- algorithm
-  init temp_1 as Real[2];
-  (temp_1) := FunctionTests.IfExprTemp1.f2(x);
-  if temp_1[1] + temp_1[2] > 0 then
-   init temp_2 as Real[2];
-   (temp_2) := FunctionTests.IfExprTemp1.f2(x);
-  else
-   init temp_3 as Real[2];
-   (temp_3) := FunctionTests.IfExprTemp1.f2(x + 1);
-  end if;
-  y := if temp_1[1] + temp_1[2] > 0 then temp_2[1] + temp_2[2] else temp_3[1] + temp_3[2];
-  return;
- end FunctionTests.IfExprTemp1.f;
-
- function FunctionTests.IfExprTemp1.f2
-  input Real x;
-  output Real[:] y;
- algorithm
-  init y as Real[2];
-  y[1] := x;
-  y[2] := x + 1;
-  return;
- end FunctionTests.IfExprTemp1.f2;
-
-end FunctionTests.IfExprTemp1;
-")})));
-end IfExprTemp1;
 
 end FunctionTests;

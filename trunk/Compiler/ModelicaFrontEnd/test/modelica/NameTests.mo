@@ -2819,9 +2819,15 @@ equation
 fclass NameTests.ForTest1
  Real x[3,3];
 equation 
- for i in 1:3, j in 1:3 loop
-  x[i,j] = i + j;
- end for;
+ x[1,1] = 1 + 1;
+ x[1,2] = 1 + 2;
+ x[1,3] = 1 + 3;
+ x[2,1] = 2 + 1;
+ x[2,2] = 2 + 2;
+ x[2,3] = 2 + 3;
+ x[3,1] = 3 + 1;
+ x[3,2] = 3 + 2;
+ x[3,3] = 3 + 3;
 
 end NameTests.ForTest1;
 ")})));
