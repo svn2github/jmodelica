@@ -3432,9 +3432,7 @@ aspect ConstantEvaluation {
   
     public void InstAccess.prepareForFunctionEval() {
         super.prepareForFunctionEval();
-        if (myInstComponentDecl().isConstant()) {
-            flushCache();
-        }
+        flushCache();
     }
 
     public void FExp.flushUnknownSizes() {
@@ -3592,6 +3590,7 @@ aspect ConstantEvaluation {
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
+            fab.prepareForFunctionEval();
             currentEvaluationValues = oldVal;
         }
     }
