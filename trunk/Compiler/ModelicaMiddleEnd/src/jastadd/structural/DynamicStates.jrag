@@ -313,16 +313,11 @@ aspect DynamicStateSelect{
             Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
             if (coefficients == null)
                 continue;
-            if (!dynamicSetCandidate(eqn, coefficients)) {
-                continue;
-            }
             if (!dynamicSetCandidate(eqn, eqn.getMatching(), coefficients))
                 continue;
             lightReset();
             ASTNode.log.debug("  SAP1");
-            if (eqn.getMatching().getVariable().isTemporary()) {
-                ASTNode.log.debug("    Not allowed, var is a temporary, choosing temps as states is bad!");
-            } else if (sap1.augmentingPath(eqn)) {
+            if (sap1.augmentingPath(eqn)) {
                 continue;
             }
             DSSet set = dsLookup.get(eqn);
@@ -527,20 +522,6 @@ aspect DynamicStateSelect{
         return res;
     }
     
-    public boolean IndexReductionBiPGraph.dynamicSetCandidate(IndexReductionEq eqn, 
-            Map<IndexReductionVar, Coefficient> coefficients) {
-        // Don't visit equation with less that two potential variables and ignore temporaries!
-        int count = 0;
-        for (IndexReductionVar var : eqn.getVariables()) {
-            if (!dynamicSetCandidate(eqn, var, coefficients)) {
-                continue;
-            }
-            if (!var.getVariable().isTemporary()) {
-                count++;
-            }
-        }
-        return count >= 2;
-    }
     public boolean IndexReductionBiPGraph.dynamicSetCandidate(IndexReductionEq eqn, IndexReductionVar var,
             Map<IndexReductionVar, Coefficient> coefficients) {
         return var.dynamicSetCandidate(coefficients.get(var), computeIncidenceStateSelect(eqn, var));
