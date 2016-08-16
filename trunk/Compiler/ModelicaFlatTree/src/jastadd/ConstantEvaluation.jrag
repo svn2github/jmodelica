@@ -3430,9 +3430,14 @@ aspect ConstantEvaluation {
 	  flushUnknownSizes();
   }
   
-    public void InstAccess.prepareForFunctionEval() {
+    public void InstComponentAccess.prepareForFunctionEval() {
         super.prepareForFunctionEval();
-        flushCache();
+        myInstLookup_reset();
+    }
+    
+    public void InstComponentArrayAccess.prepareForFunctionEval() {
+        super.prepareForFunctionEval();
+        myInstLookup_reset();
     }
 
     public void FExp.flushUnknownSizes() {
@@ -3552,6 +3557,14 @@ aspect ConstantEvaluation {
     public void InstSimpleShortClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
        actualInstClass().evaluate(evaluator, values);
     }
+    
+    public void InstBaseClassDecl.prepareForFunctionEval(FAlgorithm fab) {
+        for (InstComponentDecl var : allInstComponentDecls())
+            var.clearLocalCachedEvaluationValue();
+        for (InstComponentDecl var : allInstComponentDecls())
+            var.prepareForFunctionEval();
+        fab.prepareForFunctionEval();
+    }
 
     public void InstBaseClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
         // We assume that this class is a function
@@ -3568,11 +3581,7 @@ aspect ConstantEvaluation {
         
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
-        for (InstComponentDecl var : allInstComponentDecls())
-            var.clearLocalCachedEvaluationValue();
-        fab.prepareForFunctionEval();
-        for (InstComponentDecl var : myNonInputs())
-            var.prepareForFunctionEval();
+        prepareForFunctionEval(fab);
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
@@ -3585,12 +3594,10 @@ aspect ConstantEvaluation {
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(qualifiedName(), myOutputs(), e);
         } finally {
-            for (InstComponentDecl var : allInstComponentDecls())
-                var.clearLocalCachedEvaluationValue();
+            prepareForFunctionEval(fab);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
-            fab.prepareForFunctionEval();
             currentEvaluationValues = oldVal;
         }
     }
