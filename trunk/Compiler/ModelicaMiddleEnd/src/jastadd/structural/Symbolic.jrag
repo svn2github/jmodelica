@@ -125,7 +125,7 @@ aspect EquationSolve {
         FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
         FExp activeTerm = computeActiveSolution(activeTerms, var,
                 duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") ||
-                inactiveTerm.isLiteralZero(), myOptions().getRealOption("tearing_division_tolerance"));
+                inactiveTerm.isLiteralZero(), duringTearing ? myOptions().getRealOption("tearing_division_tolerance") : 0);
         
         if (activeTerm.isNoExp()) {
             return new FNoExp();

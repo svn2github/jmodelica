@@ -2442,5 +2442,23 @@ end VariabilityPropagationTests.IfEquationTemp2;
 ")})));
 end IfEquationTemp2;
 
+model SmallConstant1
+    Real x;
+equation
+    1e-17*x=1e-16;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SmallConstant1",
+            description="",
+            inline_functions="none",
+            tearing_division_tolerance=1e-15,
+            flatModel="
+fclass VariabilityPropagationTests.SmallConstant1
+ constant Real x = 9.999999999999998;
+end VariabilityPropagationTests.SmallConstant1;
+")})));
+end SmallConstant1;
+
 
 end VariabilityPropagationTests;
