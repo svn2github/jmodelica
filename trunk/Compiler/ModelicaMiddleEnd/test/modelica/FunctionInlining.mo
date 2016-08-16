@@ -4009,6 +4009,59 @@ end FunctionInlining.InitialSystemInlining2;
 ")})));
 end InitialSystemInlining2;
 
+model InitialSystemInlining3
+    function f2
+        input Real x;
+        output Real y[2];
+    algorithm
+        y := {sin(x), cos(x)};
+        annotation(Inline=false);
+    end f2;
+    
+    function f1
+        input Real x;
+        output Real y[2];
+    algorithm
+        y := f2(x);
+    end f1;
+    
+    parameter Real p2 = 2;
+    parameter Real[2] p1(fixed=false);
+initial equation
+    p1 = f1(p2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemInlining3",
+            description="Test inlining in the initial system. Test that ensures that equations and variables which define p1 end up in correct equations list (and with correct variability)",
+            flatModel="
+fclass FunctionInlining.InitialSystemInlining3
+ parameter Real p2 = 2 /* 2 */;
+ initial parameter Real p1[1](fixed = false);
+ initial parameter Real p1[2](fixed = false);
+ parameter Real temp_3;
+ parameter Real temp_4;
+initial equation 
+ p1[1] = temp_3;
+ p1[2] = temp_4;
+parameter equation
+ ({temp_3, temp_4}) = FunctionInlining.InitialSystemInlining3.f2(p2);
+
+public
+ function FunctionInlining.InitialSystemInlining3.f2
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := sin(x);
+  y[2] := cos(x);
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.InitialSystemInlining3.f2;
+
+end FunctionInlining.InitialSystemInlining3;
+")})));
+end InitialSystemInlining3;
+
 model ChainedCallInlining1
     record R
         Real x;

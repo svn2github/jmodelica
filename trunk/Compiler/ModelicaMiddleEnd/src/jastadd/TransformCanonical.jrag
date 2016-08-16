@@ -1961,9 +1961,10 @@ aspect TransformCanonical {
         FIdUseExp defineUse = definingUses().iterator().next();
         FExp value;
         if (nonDefiningUses().size() > 0) {
+            List<FAbstractEquation> defineEqnList = defineUse.myFEquation().myFAbstractEquationList();
             FIdUseExp nonDefineUse = nonDefiningUses().iterator().next();
             value = nonDefineUse.inlineUsesFunctionCallLeft();
-            if (value == null || (defineUse.isParameterExp() && value.myFEquation().isNormalEquation())) {
+            if (value == null || defineEqnList == null || defineEqnList != value.myFEquation().myFAbstractEquationList()) {
                 return false;
             }
             value.myFEquation().markForRemoval();
