@@ -1713,12 +1713,12 @@ initial equation
 equation
  y = time * 2;
  z = x + _der_y;
+ temp_1 = time > 0.25;
 algorithm
  if temp_1 and not pre(temp_1) then
   x := y / 2;
  end if;
 equation
- temp_1 = time > 0.25;
  _der_y = 2;
 end IndexReduction.AlgorithmVariability3;
 ")})));

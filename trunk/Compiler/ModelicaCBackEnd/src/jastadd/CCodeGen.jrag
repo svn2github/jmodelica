@@ -1992,6 +1992,9 @@ aspect CCodeGen {
 	
 	   
     public void FIfEquation.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        if (isWhen() && p.inInitialSystem() && !getTest().isInitialGuard()) {
+            return;
+        }
         genIfStart_C(p, str, indent);
         for (FAbstractEquation equation : getFAbstractEquations())
             p.print(equation, str, p.indent(indent));
@@ -2250,7 +2253,7 @@ aspect CCodeGen {
 
     @Override
     public void FIfWhenEquation.genReinitTempDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (!p.inInitialSystem() || getTest().isInitialGuard()) {
+        if (!isWhen() || !p.inInitialSystem() || getTest().isInitialGuard()) {
             super.genReinitTempDecls_C(p, str, indent);
         }
         if (hasElse()) {
@@ -4501,9 +4504,9 @@ aspect CCodeGen {
     }
 
     public void MetaEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent, boolean inInitial) {
-        ASTNode.printer_C.printPreSteps(equation(), str, indent);
-        ASTNode.printer_C.print(equation(), str, indent);
-        ASTNode.printer_C.printPostSteps(equation(), str, indent);
+        p.printPreSteps(equation(), str, indent);
+        p.print(equation(), str, indent);
+        p.printPostSteps(equation(), str, indent);
     }
     
     public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }

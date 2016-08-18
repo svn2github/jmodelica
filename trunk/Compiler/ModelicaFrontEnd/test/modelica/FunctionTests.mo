@@ -3121,17 +3121,17 @@ initial equation
 equation
  y2 = sin(y1);
  x = time;
+ temp_1 = x > 2;
 algorithm
  if temp_1 and not pre(temp_1) then
   y1 := sin(x);
  end if;
+equation
+ temp_2 = x > 2;
 algorithm
  if temp_2 and not pre(temp_2) then
   y3 := 2 * x + y1 + y2;
  end if;
-equation
- temp_1 = x > 2;
- temp_2 = x > 2;
 end FunctionTests.AlgorithmFlatten9;
 ")})));
 end AlgorithmFlatten9;
@@ -3160,15 +3160,15 @@ initial equation
  pre(y2) = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
+equation
+ temp_1 = time > 1;
+ temp_2 = time > 2;
 algorithm
  if temp_1 and not pre(temp_1) then
   y1 := 1;
  elseif temp_2 and not pre(temp_2) then
   y2 := 2;
  end if;
-equation
- temp_1 = time > 1;
- temp_2 = time > 2;
 end FunctionTests.AlgorithmFlatten10;
 ")})));
 end AlgorithmFlatten10;

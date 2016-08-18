@@ -8805,6 +8805,53 @@ int model_ode_initialize_base(jmi_t* jmi) {
 ")})));
 end WhenTest13;
 
+model WhenTest14
+    Real x;
+    Real y;
+equation
+    der(x) = 1;
+    if time < 1 then
+        y = x + 1;
+    else
+        y = x - 1;
+        when time > 2 then
+            reinit(x, 0);
+        end when;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="WhenTest14",
+            description="Ensure that no temporaries for non-initial when inside if clause isn't generated'",
+            template="
+$C_reinit_temp_decls_initial$
+$C_ode_initialization$
+",
+            generatedCode="
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    _der_x_4 = 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (2), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+    }
+    _temp_1_2 = _sw(0);
+    _x_0 = 0.0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+    }
+    _y_1 = COND_EXP_EQ(_sw(1), JMI_TRUE, _x_0 + AD_WRAP_LITERAL(1), _x_0 - AD_WRAP_LITERAL(1));
+    pre_temp_1_2 = JMI_FALSE;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (1), _sw(1), JMI_REL_LT);
+    }
+    if (LOG_EXP_NOT(_sw(1))) {
+    }
+    return ef;
+}
+
+")})));
+end WhenTest14;
+
 
 
 function dummyFunc
