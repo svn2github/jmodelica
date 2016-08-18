@@ -57,9 +57,9 @@ typedef struct jmi_modules_t jmi_modules_t;                         /**< \brief 
 typedef struct jmi_module_t jmi_module_t;                           /**< \brief Forward declaration of struct. */
 typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief Forward declaration of struct. */
 
+#define JMI_MAX(X,Y) ((X) > (Y) ? (X) : (Y))
 #define JMI_MIN(X,Y) ((X) < (Y) ? (X) : (Y))
-#define JMI_ABS(X)   ((X) < (0) ? (-1*X) : (X))
-
+#define JMI_ABS(X)   ((X) < (0) ? (-1*(X)) : (X))
 
 #define JMI_DEF(TYPE, NAME) \
     JMI_DEF_##TYPE(NAME)
