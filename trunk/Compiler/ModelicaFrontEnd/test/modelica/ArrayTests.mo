@@ -6368,8 +6368,8 @@ public
  algorithm
   init x as Real[max(a / 2, 0)];
   init temp_1 as Real[max(a / 2, 0)];
-  for i2 in 1:max(a / 2, 0) loop
-   temp_1[i2] := i2 ^ 2;
+  for i1 in 1:max(a / 2, 0) loop
+   temp_1[i1] := i1 ^ 2;
   end for;
   for i1 in 1:max(a / 2, 0) loop
    x[i1] := temp_1[i1];

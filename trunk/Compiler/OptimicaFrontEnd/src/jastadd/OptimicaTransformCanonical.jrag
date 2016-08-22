@@ -152,17 +152,17 @@ aspect OptimicaTransformCanonical {
 	// Don't add initial equations for optimization problems
 	public void FOptClass.addInitialEquations() {}
 	
-    protected void FOptClass.scalarizeVars(Scalarizer scalarizer) {
-        super.scalarizeVars(scalarizer);
-        scalarizeConstraints(scalarizer.getVars());
+    protected void FOptClass.scalarizeVars(List<FVariable> vars) {
+        super.scalarizeVars(vars);
+        scalarizeConstraints(vars);
 		scalarizeClassAttributes();
 	}
 	
 	protected void FOptClass.scalarizeConstraints(List<FVariable> vars) {
-		List<FAbstractEquation> eqns = getFAbstractEquations();
+	    Scalarizer.Equation s = new Scalarizer.Equation(vars, getFAbstractEquationListNoTransform(), ASTNode.fContinuous());
 		List<FConstraint> constr = new List<FConstraint>();
 		for (FConstraint c : getFConstraints()) 
-			c.scalarize(constr, eqns, vars, Collections.<String,FExp>emptyMap());
+            c.scalarize(s, constr);
 		setFConstraintList(constr);
 	}
 	
@@ -176,12 +176,10 @@ aspect OptimicaTransformCanonical {
 	/**
 	 * Scalarize constraint and put all scalarized equations in list eqns.
 	 */
-	public void FConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {}
+    public void FConstraint.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {}
 	
-	public void FRelationConstraint.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns, 
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap);
+    public void FRelationConstraint.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {
+        createArrayTemporaries(s);
 		//log.debug("FEquation.scalarize() " + ndims());
 		if (ndims()==0) {
 			/**
@@ -189,7 +187,7 @@ aspect OptimicaTransformCanonical {
 			 * the constraint is "scalarized" into a simple constraint where
 			 * e.g. built in functions are replaced by elementary operations.
 			 */
-			constr.add(createNode(getLeft().scalarize(indexMap), getRight().scalarize(indexMap)));
+            constr.add(createNode(getLeft().scalarize(s), getRight().scalarize(s)));
 		} else if (ndims() > 0) {
 			/**
 			 * If the expression is an array expression, then the FExp.getArray()
@@ -197,22 +195,19 @@ aspect OptimicaTransformCanonical {
 			 */
 			// Iterate over array elements and create scalarized equation for each
 			for (Index i : indices()) {
-				constr.add(createNode(getLeft().getArray().get(i).scalarize(indexMap), 
-						getRight().getArray().get(i).scalarize(indexMap)));
+                constr.add(createNode(getLeft().getArray().get(i).scalarize(s), 
+                        getRight().getArray().get(i).scalarize(s)));
 			}
 		}
 	}
 	
-	public void FForClauseC.scalarize(List<FConstraint> constr, List<FAbstractEquation> eqns,
-			List<FVariable> vars, Map<String,FExp> indexMap) {
-		createArrayTemporaries(eqns, vars, indexMap);
-		Map<String,FExp> myIndexMap = new HashMap<String,FExp>();
-		myIndexMap.putAll(indexMap);
+    public void FForClauseC.scalarize(Scalarizer.Equation s, List<FConstraint> constr) {
+        createArrayTemporaries(s);
 		Indices indices = indices();
 		for (Index i : indices) {
-			indices.fillIndexMap(myIndexMap, i, getFForIndexs());
+            indices.fillIndexMap(s.map(), i, getFForIndexs());
 			for (FConstraint c : getFConstraints()) 
-				c.scalarize(constr, eqns, vars, myIndexMap);
+                c.scalarize(s, constr);
 		}
         for (CommonForIndex fi : getFForIndexs())
             fi.clearEvaluationValue();

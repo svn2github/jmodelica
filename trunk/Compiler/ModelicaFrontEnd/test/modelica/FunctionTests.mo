@@ -5258,14 +5258,14 @@ public
  algorithm
   init y as Real[2, size(x1, 1), size(x1, 2)];
   init temp_1 as Real[2, size(x1, 1), size(x1, 2)];
-  for i5 in 1:size(x1, 1) loop
-   for i6 in 1:size(x1, 2) loop
-    temp_1[1,i5,i6] := x1[i5,i6];
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:size(x1, 2) loop
+    temp_1[1,i1,i2] := x1[i1,i2];
    end for;
   end for;
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_1[2,i5,i6] := x2[i5,i6];
+  for i1 in 1:size(x2, 1) loop
+   for i2 in 1:size(x2, 2) loop
+    temp_1[2,i1,i2] := x2[i1,i2];
    end for;
   end for;
   for i1 in 1:2 loop
@@ -5327,36 +5327,36 @@ public
   init temp_1 as Real[2, size(x1, 1) + 1 + 1];
   init temp_2 as Real[1, size(x1, 1) + 1 + 1];
   init temp_3 as Real[1, size(x1, 1)];
-  for i8 in 1:size(x1, 1) loop
-   temp_3[1,i8] := x1[i8];
+  for i5 in 1:size(x1, 1) loop
+   temp_3[1,i5] := x1[i5];
   end for;
-  for i5 in 1:1 loop
-   for i6 in 1:size(x1, 1) loop
-    temp_2[i5,i6] := temp_3[i5,i6];
+  for i3 in 1:1 loop
+   for i4 in 1:size(x1, 1) loop
+    temp_2[i3,i4] := temp_3[i3,i4];
    end for;
   end for;
   temp_2[1,1 + size(x1, 1)] := 1;
   temp_2[1,1 + (size(x1, 1) + 1)] := 2;
-  for i3 in 1:1 loop
-   for i4 in 1:size(x1, 1) + 1 + 1 loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+  for i1 in 1:1 loop
+   for i2 in 1:size(x1, 1) + 1 + 1 loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   init temp_4 as Real[1, 1 + size(x1, 1) + 1];
   temp_4[1,1] := 3;
   init temp_5 as Real[1, size(x1, 1)];
-  for i8 in 1:size(x1, 1) loop
-   temp_5[1,i8] := x1[i8];
+  for i5 in 1:size(x1, 1) loop
+   temp_5[1,i5] := x1[i5];
   end for;
-  for i5 in 1:1 loop
-   for i6 in 1:size(x1, 1) loop
-    temp_4[i5,i6 + 1] := temp_5[i5,i6];
+  for i3 in 1:1 loop
+   for i4 in 1:size(x1, 1) loop
+    temp_4[i3,i4 + 1] := temp_5[i3,i4];
    end for;
   end for;
   temp_4[1,1 + (1 + size(x1, 1))] := 4;
-  for i3 in 1:1 loop
-   for i4 in 1:1 + size(x1, 1) + 1 loop
-    temp_1[i3 + 1,i4] := temp_4[i3,i4];
+  for i1 in 1:1 loop
+   for i2 in 1:1 + size(x1, 1) + 1 loop
+    temp_1[i1 + 1,i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:2 loop
@@ -5460,42 +5460,42 @@ public
   assert(size(x2, 1) == size(x1, 1), \"Mismatching size in dimension 1 of expression x2[:,:], x1[:] in function FunctionTests.ArrayExpInFunc21.f\");
   init temp_1 as Real[size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)];
   init temp_2 as Real[size(x1, 1), 1 + size(x2, 2)];
-  for i5 in 1:size(x1, 1) loop
-   temp_2[i5,1] := x1[i5];
+  for i3 in 1:size(x1, 1) loop
+   temp_2[i3,1] := x1[i3];
   end for;
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_2[i5,i6 + 1] := x2[i5,i6];
+  for i3 in 1:size(x2, 1) loop
+   for i4 in 1:size(x2, 2) loop
+    temp_2[i3,i4 + 1] := x2[i3,i4];
    end for;
   end for;
-  for i3 in 1:size(x1, 1) loop
-   for i4 in 1:1 + size(x2, 2) loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:1 + size(x2, 2) loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   init temp_3 as Real[size(x2, 1), size(x2, 2) + 1];
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_3[i5,i6] := x2[i5,i6];
+  for i3 in 1:size(x2, 1) loop
+   for i4 in 1:size(x2, 2) loop
+    temp_3[i3,i4] := x2[i3,i4];
    end for;
   end for;
-  for i5 in 1:size(x1, 1) loop
-   temp_3[i5,1 + size(x2, 2)] := x1[i5];
+  for i3 in 1:size(x1, 1) loop
+   temp_3[i3,1 + size(x2, 2)] := x1[i3];
   end for;
-  for i3 in 1:size(x2, 1) loop
-   for i4 in 1:size(x2, 2) + 1 loop
-    temp_1[i3 + size(x1, 1),i4] := temp_3[i3,i4];
+  for i1 in 1:size(x2, 1) loop
+   for i2 in 1:size(x2, 2) + 1 loop
+    temp_1[i1 + size(x1, 1),i2] := temp_3[i1,i2];
    end for;
   end for;
   init temp_4 as Real[size(x3, 1), size(x3, 2)];
-  for i5 in 1:size(x3, 1) loop
-   for i6 in 1:size(x3, 2) loop
-    temp_4[i5,i6] := x3[i5,i6];
-   end for;
-  end for;
   for i3 in 1:size(x3, 1) loop
    for i4 in 1:size(x3, 2) loop
-    temp_1[i3 + (size(x1, 1) + size(x2, 1)),i4] := temp_4[i3,i4];
+    temp_4[i3,i4] := x3[i3,i4];
+   end for;
+  end for;
+  for i1 in 1:size(x3, 1) loop
+   for i2 in 1:size(x3, 2) loop
+    temp_1[i1 + (size(x1, 1) + size(x2, 1)),i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:size(x1, 1) + size(x2, 1) + size(x3, 1) loop
@@ -5553,14 +5553,14 @@ public
   init y as Real[size(a, 1), size(a, 1)];
   init temp_1 as Real[size(a, 1), size(a, 1)];
   init temp_2 as Real[size(a, 1), size(a, 1)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(a, 1) loop
-    temp_2[i5,i6] := x[a[i5],a[i6]];
-   end for;
-  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+    temp_2[i3,i4] := x[a[i3],a[i4]];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -5570,14 +5570,14 @@ public
   end for;
   init temp_3 as Real[size(a, 1), size(b, 1)];
   init temp_4 as Real[size(a, 1), size(b, 1)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(b, 1) loop
-    temp_4[i5,i6] := x[a[i5],b[i6]];
-   end for;
-  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(b, 1) loop
-    temp_3[i3,i4] := temp_4[i3,i4];
+    temp_4[i3,i4] := x[a[i3],b[i4]];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 1) loop
+    temp_3[i1,i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:size(b, 1) loop
@@ -5731,19 +5731,19 @@ public
  algorithm
   init o as Real[size(c, 1), size(c, 2)];
   init temp_2 as Integer[size(a, 1), size(b, 2)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(b, 2) loop
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(b, 2) loop
     temp_3 := 0;
-    for i7 in 1:size(b, 1) loop
-     temp_3 := temp_3 + a[i5,i7] * b[i7,i6];
+    for i5 in 1:size(b, 1) loop
+     temp_3 := temp_3 + a[i3,i5] * b[i5,i4];
     end for;
-    temp_2[i5,i6] := temp_3;
+    temp_2[i3,i4] := temp_3;
    end for;
   end for;
   temp_1 := 0;
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1 := temp_1 + temp_2[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1 := temp_1 + temp_2[i1,i2];
    end for;
   end for;
   for i1 in 1:size(c, 1) loop
@@ -5791,13 +5791,13 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(b, 1) loop
-     temp_2 := temp_2 + a[i3,i5] * b[i5,i4];
+    for i3 in 1:size(b, 1) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(b, 2) loop
@@ -5846,21 +5846,21 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := 0.0;
-    for i5 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := 0.0;
+    for i3 in 1:size(b, 2) loop
      init temp_2 as Real[size(a, 1), size(b, 2)];
-     for i6 in 1:size(a, 1) loop
-      for i7 in 1:size(b, 2) loop
+     for i4 in 1:size(a, 1) loop
+      for i5 in 1:size(b, 2) loop
        temp_3 := 0.0;
-       for i8 in 1:size(b, 1) loop
-        temp_3 := temp_3 + a[i6,i8] * b[i8,i7];
+       for i6 in 1:size(b, 1) loop
+        temp_3 := temp_3 + a[i4,i6] * b[i6,i5];
        end for;
-       temp_2[i6,i7] := temp_3;
+       temp_2[i4,i5] := temp_3;
       end for;
      end for;
-     temp_1[i3,i4] := temp_1[i3,i4] + temp_2[i4,i5] * i3;
+     temp_1[i1,i2] := temp_1[i1,i2] + temp_2[i2,i3] * i1;
     end for;
    end for;
   end for;
@@ -5910,21 +5910,21 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(b, 2), size(a, 1)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1[i3,i4] := 0.0;
-    for i5 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1[i1,i2] := 0.0;
+    for i3 in 1:size(a, 1) loop
      init temp_2 as Real[size(a, 1), size(b, 2)];
-     for i6 in 1:size(a, 1) loop
-      for i7 in 1:size(b, 2) loop
+     for i4 in 1:size(a, 1) loop
+      for i5 in 1:size(b, 2) loop
        temp_3 := 0.0;
-       for i8 in 1:size(b, 1) loop
-        temp_3 := temp_3 + a[i6,i8] * b[i8,i7];
+       for i6 in 1:size(b, 1) loop
+        temp_3 := temp_3 + a[i4,i6] * b[i6,i5];
        end for;
-       temp_2[i6,i7] := temp_3;
+       temp_2[i4,i5] := temp_3;
       end for;
      end for;
-     temp_1[i3,i4] := temp_1[i3,i4] + temp_2[i5,i4] * i3;
+     temp_1[i1,i2] := temp_1[i1,i2] + temp_2[i3,i2] * i1;
     end for;
    end for;
   end for;
@@ -5973,14 +5973,14 @@ public
   init o as Real[size(a, 1) + size(b, 1), size(b, 2)];
   assert(size(a, 2) == size(b, 2), \"Mismatching size in dimension 2 of expression cat(1, a[:,:], b[:,:]) in function FunctionTests.ArrayExpInFunc29.f\");
   init temp_1 as Real[size(a, 1) + size(b, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    temp_1[i3,i4] := a[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[i1,i2] := a[i1,i2];
    end for;
   end for;
-  for i3 in 1:size(b, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1[i3 + size(a, 1),i4] := b[i3,i4];
+  for i1 in 1:size(b, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1[i1 + size(a, 1),i2] := b[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) + size(b, 1) loop
@@ -6041,32 +6041,32 @@ public
   assert(size(b, 1) == size(c, 1), \"Mismatching size in dimension 1 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
   assert(size(b, 2) == size(c, 2), \"Mismatching size in dimension 2 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
   init temp_1 as Real[size(a, 1), size(a, 2) + size(b, 2), size(a, 3)];
-  for i4 in 1:size(a, 1) loop
-   for i5 in 1:size(a, 2) loop
-    for i6 in 1:size(a, 3) loop
-     temp_1[i4,i5,i6] := a[i4,i5,i6];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[i1,i2,i3] := a[i1,i2,i3];
     end for;
    end for;
   end for;
   init temp_2 as Real[size(b, 1), size(b, 2), size(b, 3) + size(c, 3)];
-  for i7 in 1:size(b, 1) loop
-   for i8 in 1:size(b, 2) loop
-    for i9 in 1:size(b, 3) loop
-     temp_2[i7,i8,i9] := b[i7,i8,i9];
-    end for;
-   end for;
-  end for;
-  for i7 in 1:size(c, 1) loop
-   for i8 in 1:size(c, 2) loop
-    for i9 in 1:size(c, 3) loop
-     temp_2[i7,i8,i9 + size(b, 3)] := c[i7,i8,i9];
-    end for;
-   end for;
-  end for;
   for i4 in 1:size(b, 1) loop
    for i5 in 1:size(b, 2) loop
-    for i6 in 1:size(b, 3) + size(c, 3) loop
-     temp_1[i4,i5 + size(a, 2),i6] := temp_2[i4,i5,i6];
+    for i6 in 1:size(b, 3) loop
+     temp_2[i4,i5,i6] := b[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i4 in 1:size(c, 1) loop
+   for i5 in 1:size(c, 2) loop
+    for i6 in 1:size(c, 3) loop
+     temp_2[i4,i5,i6 + size(b, 3)] := c[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i1 in 1:size(b, 1) loop
+   for i2 in 1:size(b, 2) loop
+    for i3 in 1:size(b, 3) + size(c, 3) loop
+     temp_1[i1,i2 + size(a, 2),i3] := temp_2[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6354,9 +6354,9 @@ public
  algorithm
   init o as Real[n, n];
   init temp_1 as Integer[n, n];
-  for i3 in 1:n loop
-   for i4 in 1:n loop
-    temp_1[i3,i4] := if i3 == i4 then 1 else 0;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    temp_1[i1,i2] := if i1 == i2 then 1 else 0;
    end for;
   end for;
   for i1 in 1:n loop
@@ -6449,8 +6449,8 @@ public
  algorithm
   init b as Real[size(a, 1)];
   init temp_1 as Real[size(a, 1)];
-  for i2 in 1:size(a, 1) loop
-   temp_1[i2 - 1 + 1] := a[i2];
+  for i1 in 1:size(a, 1) loop
+   temp_1[i1 - 1 + 1] := a[i1];
   end for;
   for i1 in 1:size(a, 1) loop
    b[i1] := temp_1[i1];
@@ -6493,10 +6493,10 @@ public
   init b as Real[size(a, 1) * size(a, 2) * size(a, 3)];
   assert(size(a, 1) * size(a, 2) * size(a, 3) <= size(a, 1) + size(a, 2) + size(a, 3) - 3 + 1, \"Mismatching size in expression vector(a[:,:,:]) in function FunctionTests.ArrayExpInFunc37.f\");
   init temp_1 as Real[size(a, 1) * size(a, 2) * size(a, 3)];
-  for i2 in 1:size(a, 1) loop
-   for i3 in 1:size(a, 2) loop
-    for i4 in 1:size(a, 3) loop
-     temp_1[((i2 - 1) * size(a, 2) + (i3 - 1)) * size(a, 3) + (i4 - 1) + 1] := a[i2,i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[((i1 - 1) * size(a, 2) + (i2 - 1)) * size(a, 3) + (i3 - 1) + 1] := a[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6540,8 +6540,8 @@ public
  algorithm
   init b as Real[size(a, 1), 1];
   init temp_1 as Real[size(a, 1), 1];
-  for i3 in 1:size(a, 1) loop
-   temp_1[i3,1] := a[i3];
+  for i1 in 1:size(a, 1) loop
+   temp_1[i1,1] := a[i1];
   end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:1 loop
@@ -6585,9 +6585,9 @@ public
  algorithm
   init b as Real[size(a, 1), size(a, 2)];
   init temp_1 as Real[size(a, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    temp_1[i3,i4] := a[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[i1,i2] := a[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -6633,10 +6633,10 @@ public
   init b as Real[size(a, 1), size(a, 2)];
   assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression matrix(a[:,:,:]) in function FunctionTests.ArrayExpInFunc40.f\");
   init temp_1 as Real[size(a, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    for i5 in 1:size(a, 3) loop
-     temp_1[i3,i4] := a[i3,i4,i5];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[i1,i2] := a[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6834,9 +6834,9 @@ public
  algorithm
   init b as Real[size(a, 1), size(a, 1)];
   init temp_1 as Real[size(a, 1), size(a, 1)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := if i3 == i4 then a[i3] else 0;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := if i1 == i2 then a[i1] else 0;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -6887,8 +6887,8 @@ public
  algorithm
   init temp_2 as Real[max(n, 0)];
   init temp_3 as Integer[max(n, 0)];
-  for i1 in 1:max(n, 0) loop
-   temp_3[i1] := i1;
+  for i2 in 1:max(n, 0) loop
+   temp_3[i2] := i2;
   end for;
   (temp_2) := FunctionTests.ArrayExpInFunc45.f1(temp_3);
   temp_1 := 0.0;
@@ -8155,8 +8155,8 @@ fclass FunctionTests.ArrayOutputScalarization24
  Real y;
  Real z[1];
  Real z[2];
- initial parameter Real temp_1[1](fixed = false);
- initial parameter Real temp_1[2](fixed = false);
+ initial parameter Real temp_1[1];
+ initial parameter Real temp_1[2];
 initial equation 
  y = x / 2;
  ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization24.f(y);
@@ -8913,13 +8913,13 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(b, 1) loop
-     temp_2 := temp_2 + a[i3,i5] * b[i5,i4];
+    for i3 in 1:size(b, 1) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -9075,22 +9075,22 @@ public
   init o as Real[size(a, 1), size(c, 2)];
   init temp_1 as Real[size(a, 1), size(c, 2)];
   init temp_3 as Real[size(a, 1), size(b, 2)];
-  for i6 in 1:size(a, 1) loop
-   for i7 in 1:size(b, 2) loop
+  for i4 in 1:size(a, 1) loop
+   for i5 in 1:size(b, 2) loop
     temp_4 := 0.0;
-    for i8 in 1:size(b, 1) loop
-     temp_4 := temp_4 + a[i6,i8] * b[i8,i7];
+    for i6 in 1:size(b, 1) loop
+     temp_4 := temp_4 + a[i4,i6] * b[i6,i5];
     end for;
-    temp_3[i6,i7] := temp_4;
+    temp_3[i4,i5] := temp_4;
    end for;
   end for;
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(c, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(c, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(c, 1) loop
-     temp_2 := temp_2 + temp_3[i3,i5] * c[i5,i4];
+    for i3 in 1:size(c, 1) loop
+     temp_2 := temp_2 + temp_3[i1,i3] * c[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -9390,13 +9390,13 @@ public
   temp_3[1,2] := 2;
   temp_3[2,1] := 3;
   temp_3[2,2] := 4;
-  for i3 in 1:size(x, 1) loop
-   for i4 in 1:2 loop
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:2 loop
     temp_2 := 0.0;
-    for i5 in 1:2 loop
-     temp_2 := temp_2 + x[i3,i5] * temp_3[i5,i4];
+    for i3 in 1:2 loop
+     temp_2 := temp_2 + x[i1,i3] * temp_3[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(x, 1) loop
@@ -9652,7 +9652,7 @@ public
   end for;
   temp_1 := temp_2;
   temp_4 := 0.0;
-  for i2 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
    temp_4 := temp_4;
   end for;
   temp_3 := temp_4;
@@ -9935,14 +9935,14 @@ public
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   init temp_1 as Real[3, size(d, 1)];
-  for i4 in 1:size(d, 1) loop
-   temp_1[1,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[1,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[2,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[2,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[3,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[3,i1] := d[i1];
   end for;
   for i1 in 1:3 loop
    for i2 in 1:size(d, 1) loop
@@ -10169,14 +10169,14 @@ public
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   init temp_1 as Real[3, size(d, 1)];
-  for i4 in 1:size(d, 1) loop
-   temp_1[1,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[1,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[2,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[2,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[3,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[3,i1] := d[i1];
   end for;
   for i1 in 1:3 loop
    for i2 in 1:size(d, 1) loop
@@ -10195,28 +10195,28 @@ public
   temp_7[2,2] := 4;
   temp_7[3,1] := 5;
   temp_7[3,2] := 6;
-  for i7 in 1:n loop
-   for i8 in 1:2 loop
-    temp_6 := 0.0;
-    for i9 in 1:3 loop
-     temp_6 := temp_6 + 3 * e[i7,i9] * 3 * temp_7[i9,i8];
-    end for;
-    temp_5[i7,i8] := temp_6;
-   end for;
-  end for;
-  for i6 in 1:n loop
-   init temp_8 as Real[2];
-   for i10 in 1:2 loop
-    temp_8[i10] := temp_5[i6,i10];
-   end for;
-   temp_4[i6] := FunctionTests.UnknownArray38.f(n, temp_8);
-  end for;
   for i5 in 1:n loop
-   temp_3[i5,1] := temp_4[i5];
+   for i6 in 1:2 loop
+    temp_6 := 0.0;
+    for i7 in 1:3 loop
+     temp_6 := temp_6 + 3 * e[i5,i7] * 3 * temp_7[i7,i6];
+    end for;
+    temp_5[i5,i6] := temp_6;
+   end for;
+  end for;
+  for i4 in 1:n loop
+   init temp_8 as Real[2];
+   for i5 in 1:2 loop
+    temp_8[i5] := temp_5[i4,i5];
+   end for;
+   temp_4[i4] := FunctionTests.UnknownArray38.f(n, temp_8);
   end for;
   for i3 in 1:n loop
-   for i4 in 1:1 loop
-    temp_2[i3,i4] := temp_3[i3,i4];
+   temp_3[i3,1] := temp_4[i3];
+  end for;
+  for i1 in 1:n loop
+   for i2 in 1:1 loop
+    temp_2[i1,i2] := temp_3[i1,i2];
    end for;
   end for;
   for i1 in 1:n loop
@@ -10268,8 +10268,8 @@ public
   init o as FunctionTests.UnknownArray39.R[m, m];
   for i in 1:m loop
    init temp_1 as FunctionTests.UnknownArray39.R[max(m, 0)];
-   for i2 in 1:max(m, 0) loop
-    temp_1[i2].x := i * i2;
+   for i1 in 1:max(m, 0) loop
+    temp_1[i1].x := i * i1;
    end for;
    for i1 in 1:max(m, 0) loop
     o[i,i1].x := temp_1[i1].x;
@@ -10387,10 +10387,10 @@ public
   init o as FunctionTests.UnknownArray41.R[m, m];
   for i in 1:m loop
    init temp_1 as FunctionTests.UnknownArray41.R[max(m, 0)];
-   for i2 in 1:max(m, 0) loop
-    temp_1[i2].x := i * i2;
-    temp_1[i2].y[1] := i;
-    temp_1[i2].y[2] := i2;
+   for i1 in 1:max(m, 0) loop
+    temp_1[i1].x := i * i1;
+    temp_1[i1].y[1] := i;
+    temp_1[i1].y[2] := i1;
    end for;
    for i1 in 1:max(m, 0) loop
     o[i,i1].x := temp_1[i1].x;
@@ -10458,13 +10458,13 @@ public
  algorithm
   init o as FunctionTests.UnknownArray42.R1[m];
   init temp_1 as FunctionTests.UnknownArray42.R1[max(m, 0)];
-  for i2 in 1:max(m, 0) loop
-   (temp_2) := FunctionTests.UnknownArray42.f2(i2);
-   (temp_3) := FunctionTests.UnknownArray42.f2(i2);
-   temp_1[i2].y[1].p1[1] := temp_2.p1[1];
-   temp_1[i2].y[1].p2 := temp_2.p2;
-   temp_1[i2].z.p1[1] := temp_3.p1[1];
-   temp_1[i2].z.p2 := temp_3.p2;
+  for i1 in 1:max(m, 0) loop
+   (temp_2) := FunctionTests.UnknownArray42.f2(i1);
+   (temp_3) := FunctionTests.UnknownArray42.f2(i1);
+   temp_1[i1].y[1].p1[1] := temp_2.p1[1];
+   temp_1[i1].y[1].p2 := temp_2.p2;
+   temp_1[i1].z.p1[1] := temp_3.p1[1];
+   temp_1[i1].z.p2 := temp_3.p2;
   end for;
   for i1 in 1:max(m, 0) loop
    o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
@@ -13618,9 +13618,9 @@ public
   assert(2 * size(a, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownSize.Hidden.Vector1.f\");
   assert(2 * size(a, 2) <= 2 + size(a, 2) - 2 + 1, \"Mismatching size in expression vector(a[1:2,:]) in function FunctionTests.UnknownSize.Hidden.Vector1.f\");
   init temp_1 as Real[2 * size(a, 2)];
-  for i2 in 1:2 loop
-   for i3 in 1:size(a, 2) loop
-    temp_1[(i2 - 1) * size(a, 2) + (i3 - 1) + 1] := a[i2,i3];
+  for i1 in 1:2 loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[(i1 - 1) * size(a, 2) + (i2 - 1) + 1] := a[i1,i2];
    end for;
   end for;
   for i1 in 1:2 * size(a, 2) loop
@@ -13928,13 +13928,13 @@ public
    end for;
   end for;
   init temp_3 as Real[2, 2];
-  for i4 in 1:2 loop
-   for i5 in 1:2 loop
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
     temp_4 := 0.0;
-    for i6 in 1:size(b, 2) loop
-     temp_4 := temp_4 + a[i4,i6] * b[i5,i6];
+    for i3 in 1:size(b, 2) loop
+     temp_4 := temp_4 + a[i1,i3] * b[i2,i3];
     end for;
-    temp_3[i4,i5] := temp_4;
+    temp_3[i1,i2] := temp_4;
    end for;
   end for;
   c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,2] + ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,2]));

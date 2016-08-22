@@ -33,6 +33,31 @@ aspect FlatStatements {
         return res;
     }
     
+    public static List<FStatement> FStatement.breakBlock(List<FStatement> stmts, FExp breakCond) {
+        FIfStmt ifStmt = new FIfStmt();
+        FIfClause clause = new FIfClause();
+        clause.setTest(breakCond.fullCopy());
+        ifStmt.addFIfWhenClause(clause);
+        stmts.add(ifStmt);
+        return clause.getFStatements();
+    }
+    
+    syn boolean ASTNode.containsBreakStmt() {
+        for (ASTNode n : this)
+            if (n.containsBreakStmt())
+                return true;
+        return false;
+    }
+    eq FForStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FWhileStmt.containsBreakStmt() {
+        return false;
+    }
+    eq FBreakStmt.containsBreakStmt() {
+        return true;
+    }
+    
     public abstract boolean FStatement.flatten(List<FStatement> sl, FClass fc, FQName prefix);
     
     public boolean FAssignStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {

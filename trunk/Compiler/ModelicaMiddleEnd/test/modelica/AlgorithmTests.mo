@@ -354,8 +354,8 @@ public
   t := size(x, 1);
   init temp_1 as AlgorithmTests.TempAssign2.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
-  for i2 in 1:max(t, 0) loop
-   temp_2[i2] := t + 1 - i2;
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1] := t + 1 - i1;
   end for;
   for i1 in 1:max(t, 0) loop
    temp_1[i1].a := y[temp_2[i1]].a;
@@ -458,8 +458,8 @@ public
   t := size(x, 1);
   init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
-  for i2 in 1:max(t, 0) loop
-   temp_2[i2] := t + 1 - i2;
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1] := t + 1 - i1;
   end for;
   for i1 in 1:max(t, 0) loop
    temp_1[i1].a[1] := y[temp_2[i1]].a[1];

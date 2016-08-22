@@ -1479,13 +1479,14 @@ public
   Real temp_2;
  algorithm
   init b as Real[size(a, 2), size(a, 1)];
-  init temp_1 as Real[size(a, 1), size(a, 1)];  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
+  init temp_1 as Real[size(a, 1), size(a, 1)];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
     temp_2 := 0.0;
-    for i5 in 1:size(a, 2) loop
-     temp_2 := temp_2 + a[i3,i5] * (a[i4,i5] + a[i4,i5]);
+    for i3 in 1:size(a, 2) loop
+     temp_2 := temp_2 + a[i1,i3] * (a[i2,i3] + a[i2,i3]);
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -2270,8 +2271,8 @@ public
  algorithm
   init y as Real[size(x, 1)];
   init temp_1 as Real[size(x, 1)];
-  for i2 in 1:size(x, 1) loop
-   temp_1[i2] := x[i2];
+  for i1 in 1:size(x, 1) loop
+   temp_1[i1] := x[i1];
   end for;
   for i1 in 1:size(x, 1) loop
    y[i1] := temp_1[i1];
