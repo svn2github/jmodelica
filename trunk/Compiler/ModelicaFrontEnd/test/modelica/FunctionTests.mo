@@ -10134,7 +10134,6 @@ model UnknownArray38
 		c := [f(n,3 * e * 3 * {{1,2},{3,4},{5,6}})];
         b := 1;
     end f;
-
     Real x = f(3, {1,2,3});
 	
     annotation(__JModelica(UnitTesting(tests={
@@ -10163,6 +10162,7 @@ public
   Real[:,:] temp_5;
   Real temp_6;
   Integer[:,:] temp_7;
+  Real[:] temp_8;
  algorithm
   init e as Real[n, 3];
   init c as Real[1, 1];
@@ -10195,16 +10195,22 @@ public
   temp_7[2,2] := 4;
   temp_7[3,1] := 5;
   temp_7[3,2] := 6;
-  for i1 in 1:n loop
-   for i2 in 1:2 loop
+  for i7 in 1:n loop
+   for i8 in 1:2 loop
     temp_6 := 0.0;
-    for i3 in 1:3 loop
-     temp_6 := temp_6 + 3 * e[i1,i3] * 3 * temp_7[i3,i2];
+    for i9 in 1:3 loop
+     temp_6 := temp_6 + 3 * e[i7,i9] * 3 * temp_7[i9,i8];
     end for;
-    temp_5[i1,i2] := temp_6;
+    temp_5[i7,i8] := temp_6;
    end for;
   end for;
-  (temp_4) := FunctionTests.UnknownArray38.f(n, temp_5);
+  for i6 in 1:n loop
+   init temp_8 as Real[2];
+   for i10 in 1:2 loop
+    temp_8[i10] := temp_5[i6,i10];
+   end for;
+   temp_4[i6] := FunctionTests.UnknownArray38.f(n, temp_8);
+  end for;
   for i5 in 1:n loop
    temp_3[i5,1] := temp_4[i5];
   end for;
@@ -12864,33 +12870,6 @@ public
 end FunctionTests.VectorizedCall8;
 ")})));
 end VectorizedCall8;
-
-model VectorizedCall9
-function fv
-    input Real x;
-    output Real y;
-    algorithm
-end fv;
-function f
-    input Real[:] x;
-    output Real[:] y= fv(x);
-algorithm
-    annotation(Inline=false);
-end f;
-
-Real[:] y = f({time});
-    annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="VectorizedCall9",
-            description="",
-            errorMessage="
-1 errors found:
-
-Compliance error at line 12661, column 23, in file '...', UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED:
-  Vectorized function calls of unknown size is not supported
-")})));
-end VectorizedCall9;
-
 
 model Lapack_dgeqpf
   Real A[2,2] = {{1,2},{3,4}};

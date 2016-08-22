@@ -60,23 +60,29 @@ aspect FunctionScalarization {
     /**
      * Should this expression be extracted into its own statement?
      */
-    syn boolean FExp.extractTemp() = isComposite() && size().isUnknown() && isFunctionCallIO();
-    eq FIdUseExp.extractTemp()     = super.extractTemp() && isSlice();
-    eq FMulExp.extractTemp()       = !isElementWise() && extractAsUnknown();
-    eq FReductionExp.extractTemp() = getFExp().size().isUnknown();
-    eq FMinMaxExp.extractTemp()    = getX().size().isUnknown();
-    eq FFunctionCall.extractTemp() = !isFunctionCallArg() && isComposite() && !isFunctionCallClause();
-    eq FArray.extractTemp()        = size().isUnknown() || inUnknownSize();
-    eq FAbstractCat.extractTemp()  = size().isUnknown() || inUnknownSize();
-    eq FAbstractDiagonal.extractTemp() = size().isUnknown() || inUnknownSize();
-    eq FVectorExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
-    eq FMatrixExp.extractTemp()    = getFExp().size().isUnknown() || inUnknownSize();
-    eq FIdTempExp.extractTemp()    = false;
+    syn boolean FExp.extractTemp()          = isComposite() && size().isUnknown() && isFunctionCallIO();
+    eq FIdUseExp.extractTemp()              = super.extractTemp() && isSlice();
+    eq FMulExp.extractTemp()                = !isElementWise() && extractAsUnknown();
+    eq FReductionExp.extractTemp()          = getFExp().size().isUnknown();
+    eq FMinMaxExp.extractTemp()             = getX().size().isUnknown();
+    eq FFunctionCall.extractTemp()          = (isFVectorFunctionCallArg() || !isFunctionCallArg()) &&
+            isComposite() && !isFunctionCallClause();
+    eq FVectorFunctionCall.extractTemp()    = true;
+    eq FArray.extractTemp()                 = size().isUnknown() || inUnknownSize();
+    eq FAbstractCat.extractTemp()           = size().isUnknown() || inUnknownSize();
+    eq FAbstractDiagonal.extractTemp()      = size().isUnknown() || inUnknownSize();
+    eq FVectorExp.extractTemp()             = getFExp().size().isUnknown() || inUnknownSize();
+    eq FMatrixExp.extractTemp()             = getFExp().size().isUnknown() || inUnknownSize();
+    eq FIdTempExp.extractTemp()             = false;
     
     inh boolean FExp.isFunctionCallIO();
     eq BaseNode.getChild().isFunctionCallIO()         = false;
     eq FFunctionCall.getArg().isFunctionCallIO()      = true;
     eq FFunctionCallLeft.getFExp().isFunctionCallIO() = true;
+    
+    inh boolean FExp.isFVectorFunctionCallArg();
+    eq BaseNode.getChild().isFVectorFunctionCallArg() = false;
+    eq FVectorFunctionCall.getArg().isFVectorFunctionCallArg() = true;
     
     syn boolean FExp.extractAsUnknown() = size().isUnknown();
     eq FReductionExp.extractAsUnknown() = getFExp().size().isUnknown();
@@ -93,7 +99,8 @@ aspect FunctionScalarization {
     eq FFunctionCall.getChild().inUnknownSize()      = false;
     eq FRecordConstructor.getChild().inUnknownSize() = false;
     eq FAssignStmt.getChild().inUnknownSize()        = getLeft().size().isUnknown() || getRight().size().isUnknown();
-    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) || inUnknownSize();
+    eq FExp.getChild().inUnknownSize()               = size().isUnknown() || (extractTemp() && extractAsUnknown()) ||
+            inUnknownSize();
     eq FAbstractVariable.getChild().inUnknownSize()  = false;
     
     syn boolean FAssignStmt.extractTemp() {
@@ -374,6 +381,57 @@ aspect FunctionScalarization {
         createFunctionCallClause(clauses, indexMap, tempUseExp());
     }
     
+    public void FVectorFunctionCall.unknownFunctionArrayTemporaries(List clauses, List vars,
+            Map<String,FExp> indexMap, ForNames names) {
+        List<FExp> newArgs = new List<FExp>();
+        List<FStatement> result = new List<FStatement>();
+        List<FStatement> outer = clauses;
+
+        names.addLayer(ndims());
+        names.fillLayer(this);
+
+        List<FStatement> firstLoop = names.createForLoops(result, this, 1);
+        FIdUseExp funcLeft = tempExp(names.createFArraySubscripts(1));
+
+        for (int i = 0; i < getNumArg(); ++i) {
+            FExp arg = getArg(i);
+            int dimDiff = arg.ndims() - ndims();
+
+            arg.createArrayTemporaries(outer, vars, indexMap, names);
+
+            if (getVectorized()[i]) {
+                arg.addArrayUsesToIndexMap(indexMap, names);
+
+                if (dimDiff > 0) {
+                    names.addLayer(dimDiff + 1);
+                    names.promote(0);
+                    names.fillLayer(arg);
+                    FIdUseExp tempExp = new FIdUseExp(new FIdUse(arg.calcTempVarName()));
+
+                    FType tempType = arg.type().arrayType(arg.size().contract(1));
+                    arg.addTempVar(firstLoop, vars, indexMap, tempType, false, tempExp.name());
+
+                    newArgs.add(dimDiff > 1 ? names.createUseWithSubscripts(tempExp.name(), 0, dimDiff - 1) : tempExp);
+
+                    FAssignableExp left = names.createUseWithSubscripts(tempExp.name(), 1, dimDiff + 1);
+                    FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
+                    (clauses = names.createForLoops(firstLoop, arg, 1, dimDiff + 1)).add(new FAssignStmt(left, right));
+                    names.removeLayer();
+                } else {
+                    newArgs.add(names.createUseWithSubscripts(arg.tempVarName(), 0, 1));
+                }
+            } else {
+                arg.addArrayUsesToIndexMap(indexMap, new ForNames());
+                newArgs.add(arg.scalarize(indexMap));
+            }
+        }
+        names.removeLayer();
+
+        FFunctionCall funcRight = new FFunctionCall(getName().fullCopy(), newArgs, getFType().scalarType());
+        firstLoop.add(new FAssignStmt(funcLeft, funcRight));
+        outer.addAll(result);
+    }
+    
     public void FArray.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
         names.addLayer(ndims());
         names.fillLayer(this);
@@ -414,7 +472,8 @@ aspect FunctionScalarization {
         names.removeLayer();
     }
     
-    public void FMulExp.unknownFunctionArrayTemporaries(List clauses, List vars, Map<String,FExp> indexMap, ForNames names) {
+    public void FMulExp.unknownFunctionArrayTemporaries(List clauses, List vars,
+            Map<String,FExp> indexMap, ForNames names) {
         HashMap<String,FExp> myIndexMap;
         FIdUseExp sum = new FIdUseExp(calcTempVarName());
         if (vars != null)
@@ -633,18 +692,15 @@ aspect FunctionScalarization {
     }
     public boolean FIterExp.editNamesIter(Map<String,FExp> indexMap, ForNames names) {
         int i = 0;
-        for (; i < getNumForIndex(); i++)
+        for (; i < getNumForIndex(); i++) {
             indexMap.put(getForIndex(i).name(), new FIdUseExp(names.get(i)));
+        }
         names.addLayer(getFExp().ndims());
-        for (; i < getFExp().ndims() + getNumForIndex(); i++)
+        for (; i < getFExp().ndims() + getNumForIndex(); i++) {
             names.promote(i);
+        }
         return true;
     }
-    
-    
-    
-    
-    
     
     /**
      * Wrapper for {@link ASTNode#addArrayUsesToIndexMap(Map indexMap, FExp[] names)}.
@@ -964,14 +1020,14 @@ aspect FunctionScalarizationHelpers {
         }
         
         /**
-         * Creates a new FArraySubscripts with uses of the <code>d</code> 
-         * first names in the top layer as subscripts. When out of names, adds 1s.
+         * Creates a new FArraySubscripts with uses of the <code>d1</code> to <code>d2</code> names
+         * in the top layer as subscripts. When out of names, adds 1s.
          */
-        public FArraySubscripts createFArraySubscripts(int d) {
-            if (d == 0)
+        public FArraySubscripts createFArraySubscripts(int d1, int d2) {
+            if (d1 < 0)
                 throw new UnsupportedOperationException();
             FArraySubscripts fas = new FArraySubscripts();
-            for (int i = 0; i < d; i++) {
+            for (int i = d1; i < d2; ++i) {
                 if (i < topLayer().length)
                     fas.addFSubscript(new FIdTempExp(new FIdUse(topLayer()[i])));
                 else
@@ -980,21 +1036,41 @@ aspect FunctionScalarizationHelpers {
             return fas;
         }
         
+        /**
+         * Creates a new FArraySubscripts with uses of the <code>d</code> 
+         * first names in the top layer as subscripts. When out of names, adds 1s.
+         */
+        public FArraySubscripts createFArraySubscripts(int d) {
+            return createFArraySubscripts(0, d);
+        }
         
         /**
          * Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
+         * 
+         * @param name  the name of the expression to have subscripts.
+         * @param d1    the first subscript integer to use.
+         * @param d2    the first subscript integer not to use after d1.
+         * @return  the expression using subscripts in top layer [d1, d2).
          */
-        public FArraySubscripts createFArraySubscripts() {
-            return createFArraySubscripts(topLayer().length);
-        }
-        
-        public FIdUseExp createUseWithSubscripts(String name) {
+        public FIdUseExp createUseWithSubscripts(String name, int d1, int d2) {
             FQName fqn;
             if (hasNames())
-                fqn = new FQNameFull(name, createFArraySubscripts());
+                fqn = new FQNameFull(name, createFArraySubscripts(d1, d2));
             else
                 fqn = new FQNameFull(name);
             return new FIdTempExp(new FIdUse(fqn));
+        }
+        
+        public FIdUseExp createUseWithSubscripts(String name, int d) {
+            return createUseWithSubscripts(name, d, topLayer().length);
+        }
+        
+        public FIdUseExp createUseWithSubscripts(String name) {
+            return createUseWithSubscripts(name, 0);
+        }
+        
+        public FArraySubscripts createFArraySubscripts() {
+            return createFArraySubscripts(topLayer().length);
         }
         
         public FExp[] createFExpArray() {
