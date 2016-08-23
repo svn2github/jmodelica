@@ -334,41 +334,43 @@ aspect FunctionScalarization {
 
         for (int i = 0; i < getNumArg(); ++i) {
             FExp arg = getArg(i);
-            int dimDiff = arg.ndims() - ndims();
 
             arg.createArrayTemporaries(s.block(outer));
 
             if (getVectorized()[i]) {
                 arg.addArrayUsesToIndexMap(s);
+                int dimDiff = arg.ndims() - ndims();
 
                 if (dimDiff > 0) {
                     names.addLayer(dimDiff + 1);
                     names.promote(0);
                     names.fillLayer(arg);
-                    FIdUseExp tempExp = new FIdUseExp(new FIdUse(arg.calcTempVarName()));
+                    
+                    String tempName = arg.calcTempVarName();
+                    FIdUseExp tempExp = new FIdUseExp(new FIdUse(tempName));
 
                     FType tempType = arg.type().arrayType(arg.size().contract(1));
-                    s.block(firstLoop).addTempVar(tempType, tempExp.name());
+                    s.block(firstLoop).addTempVar(tempType, tempName);
 
-                    newArgs.add(dimDiff > 1 ? names.createUseWithSubscripts(tempExp.name(), 0, dimDiff - 1) : tempExp);
+                    newArgs.add(names.createUseWithSubscripts(tempName, 0, dimDiff - 1));
 
-                    FAssignableExp left = names.createUseWithSubscripts(tempExp.name(), 1, dimDiff + 1);
+                    FAssignableExp left = names.createUseWithSubscripts(tempName, 1, dimDiff + 1);
                     FExp right = arg.tempExp(names.createFArraySubscripts(0, dimDiff + 1));
                     names.createForLoops(firstLoop, arg, 1, dimDiff + 1).add(new FAssignStmt(left, right));
                     names.removeLayer();
                 } else {
-                    newArgs.add(names.createUseWithSubscripts(arg.tempVarName(), 0, 1));
+                    newArgs.add(arg.scalarize(s));
                 }
             } else {
-                arg.addArrayUsesToIndexMap(s);
                 newArgs.add(arg.scalarize(s));
             }
         }
-        names.removeLayer();
 
         FFunctionCall funcRight = new FFunctionCall(getName().fullCopy(), newArgs, getFType().scalarType());
         firstLoop.add(new FAssignStmt(funcLeft, funcRight));
+
         outer.addAll(result);
+        names.removeLayer();
     }
     
     public void FArray.unknownFunctionArrayTemporaries(Scalarizer s) {
@@ -994,6 +996,13 @@ aspect FunctionScalarizationHelpers {
         }
         
         /**
+         * Creates a new FArraySubscripts with uses of all the names in the top layer.
+         */
+        public FArraySubscripts createFArraySubscripts() {
+            return createFArraySubscripts(topLayer().length);
+        }
+        
+        /**
          * Creates a new FArraySubscripts with uses of the names in the top layer as subscripts.
          * 
          * @param name  the name of the expression to have subscripts.
@@ -1003,23 +1012,25 @@ aspect FunctionScalarizationHelpers {
          */
         public FIdUseExp createUseWithSubscripts(String name, int d1, int d2) {
             FQName fqn;
-            if (hasNames())
+            if (hasNames() && (d2 - d1) > 0)
                 fqn = new FQNameFull(name, createFArraySubscripts(d1, d2));
             else
                 fqn = new FQNameFull(name);
             return new FIdTempExp(new FIdUse(fqn));
         }
         
+        /**
+         * Creates a new FIdUseExp with the first </code>d</code> names in the top layer.
+         */
         public FIdUseExp createUseWithSubscripts(String name, int d) {
-            return createUseWithSubscripts(name, d, topLayer().length);
+            return createUseWithSubscripts(name, 0, d < topLayer().length ? d : topLayer().length);
         }
         
+        /**
+         * Creates a new FIdUseExp with all of the names in the top layer.
+         */
         public FIdUseExp createUseWithSubscripts(String name) {
-            return createUseWithSubscripts(name, 0);
-        }
-        
-        public FArraySubscripts createFArraySubscripts() {
-            return createFArraySubscripts(topLayer().length);
+            return createUseWithSubscripts(name, topLayer().length);
         }
         
         public FExp[] createFExpArray() {
