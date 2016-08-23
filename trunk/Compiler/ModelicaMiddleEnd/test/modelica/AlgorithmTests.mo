@@ -183,6 +183,26 @@ end AlgorithmTests.For.Break3;
 ")})));
 end Break3;
 
+model Empty1
+    Real x;
+algorithm
+    x := 1;
+    for i in 2:1 loop
+        x := x + i;
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_Empty1",
+            description="Empty for statement",
+            flatModel="
+fclass AlgorithmTests.For.Empty1
+ Real x;
+algorithm
+ x := 1;
+end AlgorithmTests.For.Empty1;
+")})));
+end Empty1;
+
 end For;
 
 model TempAssign1

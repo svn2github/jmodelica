@@ -132,35 +132,7 @@ aspect FlatStatements {
     }
     
     public boolean InstForStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
-        ArrayList<CommonForIndex> lt = new ArrayList<CommonForIndex>();
-        for (InstForIndex ifi : getInstForIndexs()) {
-            lt.add(ifi);
-        }
-        FVariable tempVar = null;
-        Iterable<CommonForIndex> forIndices = lt;
-        Indices ind = Indices.create(forIndices);
-        
-        if (!ind.size().isZero() && !inFunction()) {
-            boolean hasBreak = getForStmts().containsBreakStmt();
-            
-            if (hasBreak) {
-                tempVar = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(),
-                        new FQNameFull(myTempVarName()));
-                fc.addFVariableNoTransform(tempVar);
-                new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()).flatten(sl, fc, prefix);
-            }
-            
-            List<FStatement> inner = sl;
-            for (Index i : ind) {
-                if (hasBreak) {
-                    inner = FStatement.breakBlock(sl, tempVar.createUseExp());
-                }
-                ind.translate(i).setValues(forIndices);
-                getForStmts().flushAllRecursive();
-                FStatement.flattenFStatementList(getForStmts(), inner, fc, prefix);
-            }
-            
-        } else {
+        if (inFunction()) {
             List fsl = new List();
             FStatement.flattenFStatementList(getForStmts(), fsl, fc, prefix);
             int i = getNumInstForIndex() - 1;
@@ -170,12 +142,36 @@ aspect FlatStatements {
                 res = new FForStmt(getInstForIndex(i).flatten(prefix), fsl);
             }
             sl.add(res);
+        } else {
+            ArrayList<CommonForIndex> forIndices = new ArrayList<CommonForIndex>();
+            for (InstForIndex ifi : getInstForIndexs()) {
+                forIndices.add(ifi);
+            }
+            Indices ind = Indices.create(forIndices);
+            if (!ind.size().isZero()) {
+                FVariable tempVar = null;
+                boolean hasBreak = getForStmts().containsBreakStmt();
+                if (hasBreak) {
+                    tempVar = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(),
+                            new FQNameFull(myTempVarName()));
+                    fc.addFVariableNoTransform(tempVar);
+                    new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()).flatten(sl, fc, prefix);
+                }
+                
+                List<FStatement> inner = sl;
+                for (Index i : ind) {
+                    if (hasBreak) {
+                        inner = FStatement.breakBlock(sl, tempVar.createUseExp());
+                    }
+                    ind.translate(i).setValues(forIndices);
+                    getForStmts().flushAllRecursive();
+                    FStatement.flattenFStatementList(getForStmts(), inner, fc, prefix);
+                }
+                for (InstForIndex ifi : getInstForIndexs()) {
+                    ifi.clearEvaluationValue();
+                }
+            }
         }
-
-        for (InstForIndex ifi : getInstForIndexs()) {
-            ifi.clearEvaluationValue();
-        }
-        
         return false;
     }
     
