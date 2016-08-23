@@ -153,7 +153,7 @@ aspect FlatStatements {
                 boolean hasBreak = getForStmts().containsBreakStmt();
                 if (hasBreak) {
                     tempVar = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(),
-                            new FQNameFull(myTempVarName()));
+                            prefix.copyAndAppend(new FQNameFull(myTempVarName())));
                     fc.addFVariableNoTransform(tempVar);
                     new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()).flatten(sl, fc, prefix);
                 }
@@ -185,7 +185,7 @@ aspect FlatStatements {
     eq InstClassDecl.getChild().myTempVarName() {
         String sqn = "";
         while (componentExists(sqn = nextTempVarName())) {}
-        return sqn;
+        return name() + "." + sqn;
     }
     
     inh FIdUseExp FStatement.breakCondExp();
