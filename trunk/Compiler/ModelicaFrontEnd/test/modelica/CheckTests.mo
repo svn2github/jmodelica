@@ -1515,13 +1515,14 @@ Error at line 1493, column 5, in file '...':
 ")})));
 end ExternalRecordArray2;
 
-model NegativeFill
+model NegativeFill1
     Real[2] y = cat(1,{1,2,3,4},fill(0.0, 2 - 4));
+    
+    
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
-            name="NegativeFill",
+            name="NegativeFill1",
             description="",
-            checkType=check,
             errorMessage="
 1 errors found:
 
@@ -1529,6 +1530,33 @@ Error at line 1519, column 43, in file '...', NEGATIVE_SIZE_FILL:
   The dimension arguments of the fill() operator may not be negative
 
 ")})));
-end NegativeFill;
+end NegativeFill1;
+
+model NegativeFill2
+    parameter Integer n = 2;
+    Real[n] y;
+equation
+    if n > 1 then
+        y = cat(1,{time,time},fill(0.0, n - 2));
+    elseif n == 1 then
+        y = {time};
+    end if;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="NegativeFill2",
+            description="",
+            flatModel="
+fclass CheckTests.NegativeFill2
+ structural parameter Integer n = 2 /* 2 */;
+ Real y[2];
+equation
+ if 2 > 1 then
+  y[1:2] = cat(1, {time, time}, fill(0.0, 2 - 2));
+ elseif 2 == 1 then
+  y[1:2] = {time};
+ end if;
+end CheckTests.NegativeFill2;
+")})));
+end NegativeFill2;
 
 end CheckTests;
