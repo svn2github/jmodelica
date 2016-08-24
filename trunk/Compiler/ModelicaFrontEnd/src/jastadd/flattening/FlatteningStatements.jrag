@@ -26,7 +26,7 @@ aspect FlatStatements {
         boolean res = false;
         for (FStatement stmt : fromList) {
             if (hasBroken) {
-                toList = FStatement.breakBlock(toList, stmt.breakCondExp());
+                toList = FStatement.breakBlock(toList, new FIdUseExp(stmt.breakCondName()));
             }
             res = (hasBroken = stmt.flatten(toList, fc, prefix)) || res;
         }
@@ -153,7 +153,7 @@ aspect FlatStatements {
                 boolean hasBreak = getForStmts().containsBreakStmt();
                 if (hasBreak) {
                     tempVar = new FBooleanVariable(new FTemporaryVisibilityType(), fDiscrete(),
-                            prefix.copyAndAppend(new FQNameFull(myTempVarName())));
+                            prefix.copyAndAppend(myTempVarName()));
                     fc.addFVariableNoTransform(tempVar);
                     new FAssignStmt(tempVar.createUseExp(), new FBooleanLitExpTrue()).flatten(sl, fc, prefix);
                 }
@@ -188,9 +188,9 @@ aspect FlatStatements {
         return name() + "." + sqn;
     }
     
-    inh FIdUseExp FStatement.breakCondExp();
-    eq InstForStmt.getChild().breakCondExp() = new FIdUseExp(myTempVarName());
-    eq Root.getChild().breakCondExp() = null;
+    inh String FStatement.breakCondName();
+    eq InstForStmt.getChild().breakCondName() = myTempVarName();
+    eq Root.getChild().breakCondName() = null;
     
     public boolean InstClassDecl.componentExists(String name) {
         for (InstComponentDecl decl : allInstComponentDecls()) {
@@ -203,7 +203,8 @@ aspect FlatStatements {
     
     public boolean FBreakStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix){
         if (!inFunction() && enclosingLoop() instanceof InstForStmt) {
-            new FAssignStmt(breakCondExp(), new FBooleanLitExpFalse()).flatten(sl, fc, prefix);
+            new FAssignStmt(prefix.copyAndAppend(breakCondName()).createFIdUseExp(),
+                    new FBooleanLitExpFalse()).flatten(sl, fc, prefix);
             return true;
         }
         sl.add(new FBreakStmt());

@@ -271,13 +271,13 @@ algorithm
  if m1.BreakNames2.temp_1 then
   m1.b := m1.a + 1;
   if m1.b < 0.0 then
-   BreakNames2.temp_1 := false;
+   m1.BreakNames2.temp_1 := false;
   end if;
  end if;
  if m1.BreakNames2.temp_1 then
   m1.b := m1.a + 2;
   if m1.b < 0.0 then
-   BreakNames2.temp_1 := false;
+   m1.BreakNames2.temp_1 := false;
   end if;
  end if;
 algorithm
@@ -286,13 +286,13 @@ algorithm
  if m2.BreakNames2.temp_2 then
   m2.b := m2.b + m2.a + 1;
   if m2.b > 10.0 then
-   BreakNames2.temp_2 := false;
+   m2.BreakNames2.temp_2 := false;
   end if;
  end if;
  if m2.BreakNames2.temp_2 then
   m2.b := m2.b + m2.a + 2;
   if m2.b > 10.0 then
-   BreakNames2.temp_2 := false;
+   m2.BreakNames2.temp_2 := false;
   end if;
  end if;
 end AlgorithmTests.For.BreakNames2;
