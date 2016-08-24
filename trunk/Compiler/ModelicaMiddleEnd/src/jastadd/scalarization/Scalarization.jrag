@@ -606,7 +606,9 @@ aspect Scalarization {
         }
         
         public ScalarizingVariableInstance(FVariable fv) {
-            this(fv.getFQName(), fv.getFAttributes(), fv.getBindingExp(), fv.getFQName().asFQNameFull().numParts(), fv.variability(), 
+            this(fv.getFQName(), fv.getFAttributes(),
+                    fv.hasBindingExp() ? fv.getBindingExp().dynamicFExp(fv.getBindingExp().scalarize(Collections.<String,FExp>emptyMap())) : null,
+                    fv.getFQName().asFQNameFull().numParts(), fv.variability(), 
                     fv.getFTypePrefixInputOutputOpt(), Index.NULL);
         }
         
@@ -661,8 +663,11 @@ aspect Scalarization {
                     nbexp = a.getValue();
                 }
                 if (nbexp != null) {
+                    nbexp = nbexp.dynamicFExp(nbexp.scalarize(Collections.<String,FExp>emptyMap()));
                     nbp = name.asFQNameFull().numParts() + 1;
                 }
+            } else {
+                nbexp = ((FRecordConstructor)nbexp).myArgFExp(comp.name());
             }
             
             return new ScalarizingVariableInstance(name.copyAndAppend(cName), attrs, nbexp, nbp, nv, inputOutput, index);
@@ -673,11 +678,10 @@ aspect Scalarization {
             FVariable fv = comp.copyForName(name);
             Map<String,FExp> im = Collections.<String,FExp>emptyMap();
             if (bExp != null) {
-                FExp e = bExp.scalarRecordFExp(im, name.copyPart(nBindingNameParts, name.numParts()-1));
                 if (comp.keepBExp(variability, bExp)) {
-                    fv.setBindingExp(e);
+                    fv.setBindingExp(bExp);
                 } else {
-                    se.add(new FIdUseExp(name.scalarize(im)), e);
+                    se.add(new FIdUseExp(name.scalarize(im)), bExp);
                     fv.setBindingExpOpt(new Opt());
                 }
             } else {
