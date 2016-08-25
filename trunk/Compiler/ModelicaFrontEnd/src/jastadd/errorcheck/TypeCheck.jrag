@@ -46,6 +46,9 @@ aspect FlatTypeCheck {
     public static final SimpleProblemProducer ASTNode.REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS =
             new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
                     "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
+    public static final SimpleProblemProducer ASTNode.PREV_REDECLARE_NOT_REPLACEABLE =
+            new SimpleErrorProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
+                    "In the declaration '%s', %s can't be redeclared since it has already been redeclared without 'replaceable'");
 
     public void InstComposite.typeCheck(ErrorCheckType checkType) {
         super.typeCheck(checkType);
@@ -84,7 +87,8 @@ aspect FlatTypeCheck {
             CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS.invoke(superType.getComponentDecl(), declaredType.getComponentDecl());
 
         // The environment should be traversed backwards in order to perform correct
-        // subtype tests in redeclaration chains.       
+        // subtype tests in redeclaration chains.
+        InstComponentDecl prevDeclaredSubType = null;
         for (int i = myEnvironment().size() - 1; i >= 0; i--) {
             InstModification im = myEnvironment().get(i);
             InstComponentRedeclare redeclare = im.matchInstComponentRedeclare(name());
@@ -108,6 +112,16 @@ aspect FlatTypeCheck {
                 // instead of the constraining type of the orignal declaration.
                 if (declaredSubType.hasInstConstrainingComponent()) 
                     superType = constrainingSubType;
+                
+                // If the previous redeclare is declared without "replaceable", then it is illegal 
+                // to redeclare further.
+                if (prevDeclaredSubType != null && !prevDeclaredSubType.isReplaceable() && 
+                        prevDeclaredSubType.getComponentDecl() != declaredSubType.getComponentDecl()) {
+                    PREV_REDECLARE_NOT_REPLACEABLE.invoke(declaredSubType, 
+                            declaredSubType.getComponentDecl(), declaredSubType.name());
+                }
+                
+                prevDeclaredSubType = declaredSubType;
             }
         }
     }
