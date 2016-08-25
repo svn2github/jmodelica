@@ -2354,15 +2354,22 @@ aspect FlatTypes {
     eq Root.getChild().inRecordConstructor()                              = false;
 
     syn int FRecordDecl.indexOf(String name) {
-        return myIndexMap().get(name);
+        for (int i = 0; i < getNumFVariable(); i++)
+            if (getFVariable(i).name().equals(name))
+                return i;
+        return -1;
     }
     
-    syn lazy Map<String,Integer> FRecordDecl.myIndexMap() {
-        Map<String,Integer> res = new HashMap<String,Integer>();
+    syn int FRecordDecl.indexOfArg(String name) {
+        int k = 0;
         for (int i = 0; i < getNumFVariable(); i++) {
-            res.put(getFVariable(i).name(), i);
+            if (getFVariable(i).modifiableInRecord) {
+                if (getFVariable(i).name().equals(name))
+                    return k;
+                k++;
+            }
         }
-        return res;
+        return -1;
     }
     
     syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
