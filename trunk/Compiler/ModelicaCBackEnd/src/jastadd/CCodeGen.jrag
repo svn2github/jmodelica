@@ -388,8 +388,6 @@ aspect CCodeGen {
         FAbstractVariable fv = myFV();
         if (fv.isUnknown()) {
             fv = myNonPreFV();
-            if (!fv.isContinuous())
-                throw new UnsupportedOperationException();
         }
         str.print(fv.preName_C());
     }
