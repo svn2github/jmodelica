@@ -2658,6 +2658,10 @@ public abstract class CCompilerDelegator {
             this.externalIncludeDirectories = externalIncludeDirectories;
         }
         
+        public OptionRegistry getOptions() {
+            return options;
+        }
+        
         public String getFileName() {
             return fileName;
         }
