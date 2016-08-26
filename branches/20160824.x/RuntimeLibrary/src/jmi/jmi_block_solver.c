@@ -545,9 +545,19 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
 
             /* Write back the current iteration variables, needed for checking discrete variables. */
             block_solver->F(block_solver->problem_data, x, NULL, JMI_BLOCK_WRITE_BACK);
+            
+            /* Check for convergence in first try before computing a reduced step */ 
+            if (block_solver->check_discrete_variables_change(block_solver->problem_data, x_new) == JMI_EQUAL) { 
+                /* Set the correct solution */ 
+                block_solver->F(block_solver->problem_data, x_new, NULL, JMI_BLOCK_WRITE_BACK); 
+                /* block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);  Not needed, nothing changed */
+                jmi_log_node(log, logInfo, "Found consistent solution on first try in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>", 
+                        block_solver->label, iter, cur_time); 
+                converged = 1; 
+            }
 
             iter = 0;
-            while (1 && ef==0){
+            while (ef == 0 && converged == 1){
 
                 jmi_log_node_t iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", 
                     "Enhanced block iteration <iter:%I> at <t:%g>",
