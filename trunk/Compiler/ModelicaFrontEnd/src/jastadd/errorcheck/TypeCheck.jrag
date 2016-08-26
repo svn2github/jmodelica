@@ -51,7 +51,7 @@ aspect FlatTypeCheck {
             new SimpleErrorProducer("REPLACING_CLASS_NOT_SUBTYPE_OF_CONSTRAINING_CLASS", ProblemKind.SEMANTIC,
                     "In the declaration '%s', the replacing class is not a subtype of the constraining class from the declaration '%s'");
     public static final SimpleProblemProducer ASTNode.PREV_REDECLARE_NOT_REPLACEABLE =
-            new SimpleErrorProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
+            new SimpleWarningProducer("PREV_REDECLARE_NOT_REPLACEABLE", ProblemKind.SEMANTIC,
                     "In the declaration '%s', %s can't be redeclared since it has already been redeclared without 'replaceable'");
 
     public void InstComposite.typeCheck(ErrorCheckType checkType) {

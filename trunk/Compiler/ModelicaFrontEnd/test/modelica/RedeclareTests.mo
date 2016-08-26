@@ -7425,13 +7425,13 @@ model FinalRedeclare1
     F f;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="FinalRedeclare1",
             description="Check that final redeclares are enforced for modification component redeclares",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 7422, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
+Warning at line 7422, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
 In component f:
   In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
 ")})));
@@ -7467,13 +7467,13 @@ model FinalRedeclare2
     F f;
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="FinalRedeclare2",
             description="Check that final redeclares are enforced for element component redeclares",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 7464, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+Warning at line 7464, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
   In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
 ")})));
 end FinalRedeclare2;
