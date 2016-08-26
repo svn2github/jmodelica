@@ -196,7 +196,7 @@ model RedeclareTestOx5 "Redeclare deeper into instance hierarchy and redeclarati
    end D;
  
    model E
-     D d(redeclare B a);
+     D d(redeclare replaceable B a);
    end E;
  
    E e(d(redeclare C a));
@@ -7397,5 +7397,116 @@ end RedeclareTests.RedeclareInRecord8;
 ")})));
 end RedeclareInRecord8;
 
+
+model FinalRedeclare1
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable A a;
+    end D;
+    
+    model E
+        extends D(redeclare B a);
+    end E;
+    
+    model F
+        extends E(redeclare C a);
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="FinalRedeclare1",
+            description="Check that final redeclares are enforced for modification component redeclares",
+            errorMessage="
+1 warnings found:
+
+Warning at line 7422, column 19, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE,
+In component f:
+  In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare1;
+
+
+model FinalRedeclare2
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable A a;
+    end D;
+    
+    model E
+        extends D;
+        redeclare B a;
+    end E;
+    
+    model F
+        extends E;
+        redeclare C a;
+    end F;
+    
+    F f;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="FinalRedeclare2",
+            description="Check that final redeclares are enforced for element component redeclares",
+            errorMessage="
+1 warnings found:
+
+Warning at line 7464, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/RedeclareTests.mo', PREV_REDECLARE_NOT_REPLACEABLE:
+  In the declaration 'redeclare C a', a can't be redeclared since it has already been redeclared without 'replaceable'
+")})));
+end FinalRedeclare2;
+
+
+// TODO: Does not generate an error - seem like redeclared classes aren't error checked at all.
+//       Add this test once #5088 is fixed.
+model FinalRedeclare3
+    model A
+    end A;
+    
+    model B
+        parameter Real b = 1;
+    end B;
+    
+    model C
+        parameter Real c = 2;
+    end C;
+    
+    model D
+        replaceable model G = A;
+        G g;
+    end D;
+    
+    model E
+        extends D(redeclare model G = B);
+    end E;
+    
+    model F
+        extends E(redeclare model G = C);
+    end F;
+    
+    F f;
+end FinalRedeclare3;
 
 end RedeclareTests;

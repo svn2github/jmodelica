@@ -757,13 +757,14 @@ aspect Environments {
     eq InstRoot.getChild().lookupReplacingClass(String name) = null;
     eq Root.getChild().lookupReplacingClass(String name)     = null;
 
-	inh InstNode InstModification.myInstNode();
-	inh InstNode InstNode.myInstNode();
-	inh InstNode FAbstractEquation.myInstNode();
-	eq InstNode.getChild().myInstNode() = this;
-	eq Root.getChild().myInstNode() {
-		throw new UnsupportedOperationException();
-	}
+    inh InstNode InstModification.myInstNode();
+    inh InstNode InstNode.myInstNode();
+    inh InstNode FAbstractEquation.myInstNode();
+    eq InstNode.getChild().myInstNode()                   = this;
+    eq InstNode.getElementInstModification().myInstNode() = myInstNode();
+    eq Root.getChild().myInstNode() {
+        throw new UnsupportedOperationException();
+    }
 
     //The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = getLookupNode();
