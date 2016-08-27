@@ -557,7 +557,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
             }
 
             iter = 0;
-            while (ef == 0 && converged == 1){
+            while (ef == 0 && converged == 0){
 
                 jmi_log_node_t iter_node = jmi_log_enter_fmt(log, logInfo, "BlockIteration", 
                     "Enhanced block iteration <iter:%I> at <t:%g>",
