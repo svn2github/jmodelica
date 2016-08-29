@@ -3579,7 +3579,7 @@ aspect CCodeGen {
 	}
 	
     public FExp FRecordConstructor.extractRecordComponentExp(String name) {
-        return myArgFExp(name);
+        return component(name);
     }
     
     public void AbstractEquationBlock.genEvalModeValueReferences_C(CodePrinter p, CodeStream str, String indent, 

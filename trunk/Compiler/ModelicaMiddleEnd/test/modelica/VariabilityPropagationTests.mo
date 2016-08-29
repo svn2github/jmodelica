@@ -2353,7 +2353,7 @@ model KnownParameter1
             description="Test variability propagation for known parameter expressions",
             flatModel="
 fclass VariabilityPropagationTests.KnownParameter1
- final parameter Real c[1].y(start = 1) = 2.0 /* 2.0 */;
+ final parameter Real c[1].a[1](start = 1) = 2.0 /* 2.0 */;
  final parameter Real b = 1 /* 1 */;
 end VariabilityPropagationTests.KnownParameter1;
 ")})));
