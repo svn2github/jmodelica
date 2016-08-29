@@ -26,8 +26,8 @@ from pyjmi import get_files_path, transfer_optimization_problem
 
 def run_demo(with_plots=True, use_ma57=False):
     """
-    This example is based on a binary distillation column. The model has 125
-    states, 1000 algebraic variables and 2 control variables. The task is to
+    This example is based on a binary distillation column. The model has 42
+    states, 1083 algebraic variables and 2 control variables. The task is to
     get back to the desired steady-state after a short reflux breakdown.
     
     The example consists of the following steps:
