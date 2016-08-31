@@ -117,6 +117,19 @@ equation
     w = ( if y <= 1.5 then 0 else 1);
 end EnhancedEventIteration2;
 
+model EnhancedEventIteration3
+    Real x(start = 4);
+    parameter Real magnitude = 1e-6;
+equation
+    if x > 2 then
+       x = 0.5*magnitude;
+    elseif x <= 0.5*magnitude then
+       x^2 = 1.0*magnitude^2;
+    else
+       x = -0.4*magnitude;
+    end if;
+end EnhancedEventIteration3;
+
 model SingularSystem1
   Real sa(start=0);
   Boolean backward(start=false),forward(start=false),locked;
