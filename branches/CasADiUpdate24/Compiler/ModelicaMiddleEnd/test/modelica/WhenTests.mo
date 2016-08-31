@@ -433,14 +433,57 @@ initial equation
 equation
  temp_1 = time > 0.5;
  x = if temp_1 and not pre(temp_1) then p + 3.0 else pre(x);
+ temp_2 = time > 0.25;
 algorithm
  if temp_2 and not pre(temp_2) then
   y := p + 3.0;
  end if;
-equation
- temp_2 = time > 0.25;
 end WhenTests.ParameterPre1;
 ")})));
 end ParameterPre1;
+
+model InsideIfEquation1
+    Real x;
+    Real y;
+equation
+    der(x) = 1;
+    if time < 1 then
+        y = x + 1;
+    else
+        y = x - 1;
+        when time > 2 then
+            reinit(x, 0);
+        end when;
+    end if;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InsideIfEquation1",
+            description="Test rewrite of when equation inside if equation",
+            flatModel="
+fclass WhenTests.InsideIfEquation1
+ Real x(stateSelect = StateSelect.always);
+ Real y;
+ discrete Boolean temp_1;
+initial equation 
+ x = 0.0;
+ pre(temp_1) = false;
+equation
+ der(x) = 1;
+ temp_1 = time > 2;
+ y = if time < 1 then x + 1 else x - 1;
+ if not time < 1 then
+  if temp_1 and not pre(temp_1) then
+   reinit(x, 0);
+  end if;
+ end if;
+
+public
+ type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
+
+end WhenTests.InsideIfEquation1;
+")})));
+end InsideIfEquation1;
+
 
 end WhenTests;

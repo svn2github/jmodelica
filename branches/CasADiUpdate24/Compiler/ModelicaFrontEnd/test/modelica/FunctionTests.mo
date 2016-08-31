@@ -3121,17 +3121,17 @@ initial equation
 equation
  y2 = sin(y1);
  x = time;
+ temp_1 = x > 2;
 algorithm
  if temp_1 and not pre(temp_1) then
   y1 := sin(x);
  end if;
+equation
+ temp_2 = x > 2;
 algorithm
  if temp_2 and not pre(temp_2) then
   y3 := 2 * x + y1 + y2;
  end if;
-equation
- temp_1 = x > 2;
- temp_2 = x > 2;
 end FunctionTests.AlgorithmFlatten9;
 ")})));
 end AlgorithmFlatten9;
@@ -3160,15 +3160,15 @@ initial equation
  pre(y2) = 0.0;
  pre(temp_1) = false;
  pre(temp_2) = false;
+equation
+ temp_1 = time > 1;
+ temp_2 = time > 2;
 algorithm
  if temp_1 and not pre(temp_1) then
   y1 := 1;
  elseif temp_2 and not pre(temp_2) then
   y2 := 2;
  end if;
-equation
- temp_1 = time > 1;
- temp_2 = time > 2;
 end FunctionTests.AlgorithmFlatten10;
 ")})));
 end AlgorithmFlatten10;
@@ -4230,9 +4230,9 @@ public
  algorithm
   x := x_0;
   x := 0;
-  for i in 1:3 loop
-   x := x + i;
-  end for;
+  x := x + 1;
+  x := x + 2;
+  x := x + 3;
   return;
  end FunctionTests.AlgorithmTransformation14.algorithm_1;
 
@@ -5258,14 +5258,14 @@ public
  algorithm
   init y as Real[2, size(x1, 1), size(x1, 2)];
   init temp_1 as Real[2, size(x1, 1), size(x1, 2)];
-  for i5 in 1:size(x1, 1) loop
-   for i6 in 1:size(x1, 2) loop
-    temp_1[1,i5,i6] := x1[i5,i6];
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:size(x1, 2) loop
+    temp_1[1,i1,i2] := x1[i1,i2];
    end for;
   end for;
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_1[2,i5,i6] := x2[i5,i6];
+  for i1 in 1:size(x2, 1) loop
+   for i2 in 1:size(x2, 2) loop
+    temp_1[2,i1,i2] := x2[i1,i2];
    end for;
   end for;
   for i1 in 1:2 loop
@@ -5327,36 +5327,36 @@ public
   init temp_1 as Real[2, size(x1, 1) + 1 + 1];
   init temp_2 as Real[1, size(x1, 1) + 1 + 1];
   init temp_3 as Real[1, size(x1, 1)];
-  for i8 in 1:size(x1, 1) loop
-   temp_3[1,i8] := x1[i8];
+  for i5 in 1:size(x1, 1) loop
+   temp_3[1,i5] := x1[i5];
   end for;
-  for i5 in 1:1 loop
-   for i6 in 1:size(x1, 1) loop
-    temp_2[i5,i6] := temp_3[i5,i6];
+  for i3 in 1:1 loop
+   for i4 in 1:size(x1, 1) loop
+    temp_2[i3,i4] := temp_3[i3,i4];
    end for;
   end for;
   temp_2[1,1 + size(x1, 1)] := 1;
   temp_2[1,1 + (size(x1, 1) + 1)] := 2;
-  for i3 in 1:1 loop
-   for i4 in 1:size(x1, 1) + 1 + 1 loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+  for i1 in 1:1 loop
+   for i2 in 1:size(x1, 1) + 1 + 1 loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   init temp_4 as Real[1, 1 + size(x1, 1) + 1];
   temp_4[1,1] := 3;
   init temp_5 as Real[1, size(x1, 1)];
-  for i8 in 1:size(x1, 1) loop
-   temp_5[1,i8] := x1[i8];
+  for i5 in 1:size(x1, 1) loop
+   temp_5[1,i5] := x1[i5];
   end for;
-  for i5 in 1:1 loop
-   for i6 in 1:size(x1, 1) loop
-    temp_4[i5,i6 + 1] := temp_5[i5,i6];
+  for i3 in 1:1 loop
+   for i4 in 1:size(x1, 1) loop
+    temp_4[i3,i4 + 1] := temp_5[i3,i4];
    end for;
   end for;
   temp_4[1,1 + (1 + size(x1, 1))] := 4;
-  for i3 in 1:1 loop
-   for i4 in 1:1 + size(x1, 1) + 1 loop
-    temp_1[i3 + 1,i4] := temp_4[i3,i4];
+  for i1 in 1:1 loop
+   for i2 in 1:1 + size(x1, 1) + 1 loop
+    temp_1[i1 + 1,i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:2 loop
@@ -5460,42 +5460,42 @@ public
   assert(size(x2, 1) == size(x1, 1), \"Mismatching size in dimension 1 of expression x2[:,:], x1[:] in function FunctionTests.ArrayExpInFunc21.f\");
   init temp_1 as Real[size(x1, 1) + size(x2, 1) + size(x3, 1), 1 + size(x2, 2)];
   init temp_2 as Real[size(x1, 1), 1 + size(x2, 2)];
-  for i5 in 1:size(x1, 1) loop
-   temp_2[i5,1] := x1[i5];
+  for i3 in 1:size(x1, 1) loop
+   temp_2[i3,1] := x1[i3];
   end for;
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_2[i5,i6 + 1] := x2[i5,i6];
+  for i3 in 1:size(x2, 1) loop
+   for i4 in 1:size(x2, 2) loop
+    temp_2[i3,i4 + 1] := x2[i3,i4];
    end for;
   end for;
-  for i3 in 1:size(x1, 1) loop
-   for i4 in 1:1 + size(x2, 2) loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+  for i1 in 1:size(x1, 1) loop
+   for i2 in 1:1 + size(x2, 2) loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   init temp_3 as Real[size(x2, 1), size(x2, 2) + 1];
-  for i5 in 1:size(x2, 1) loop
-   for i6 in 1:size(x2, 2) loop
-    temp_3[i5,i6] := x2[i5,i6];
+  for i3 in 1:size(x2, 1) loop
+   for i4 in 1:size(x2, 2) loop
+    temp_3[i3,i4] := x2[i3,i4];
    end for;
   end for;
-  for i5 in 1:size(x1, 1) loop
-   temp_3[i5,1 + size(x2, 2)] := x1[i5];
+  for i3 in 1:size(x1, 1) loop
+   temp_3[i3,1 + size(x2, 2)] := x1[i3];
   end for;
-  for i3 in 1:size(x2, 1) loop
-   for i4 in 1:size(x2, 2) + 1 loop
-    temp_1[i3 + size(x1, 1),i4] := temp_3[i3,i4];
+  for i1 in 1:size(x2, 1) loop
+   for i2 in 1:size(x2, 2) + 1 loop
+    temp_1[i1 + size(x1, 1),i2] := temp_3[i1,i2];
    end for;
   end for;
   init temp_4 as Real[size(x3, 1), size(x3, 2)];
-  for i5 in 1:size(x3, 1) loop
-   for i6 in 1:size(x3, 2) loop
-    temp_4[i5,i6] := x3[i5,i6];
-   end for;
-  end for;
   for i3 in 1:size(x3, 1) loop
    for i4 in 1:size(x3, 2) loop
-    temp_1[i3 + (size(x1, 1) + size(x2, 1)),i4] := temp_4[i3,i4];
+    temp_4[i3,i4] := x3[i3,i4];
+   end for;
+  end for;
+  for i1 in 1:size(x3, 1) loop
+   for i2 in 1:size(x3, 2) loop
+    temp_1[i1 + (size(x1, 1) + size(x2, 1)),i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:size(x1, 1) + size(x2, 1) + size(x3, 1) loop
@@ -5553,14 +5553,14 @@ public
   init y as Real[size(a, 1), size(a, 1)];
   init temp_1 as Real[size(a, 1), size(a, 1)];
   init temp_2 as Real[size(a, 1), size(a, 1)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(a, 1) loop
-    temp_2[i5,i6] := x[a[i5],a[i6]];
-   end for;
-  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := temp_2[i3,i4];
+    temp_2[i3,i4] := x[a[i3],a[i4]];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := temp_2[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -5570,14 +5570,14 @@ public
   end for;
   init temp_3 as Real[size(a, 1), size(b, 1)];
   init temp_4 as Real[size(a, 1), size(b, 1)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(b, 1) loop
-    temp_4[i5,i6] := x[a[i5],b[i6]];
-   end for;
-  end for;
   for i3 in 1:size(a, 1) loop
    for i4 in 1:size(b, 1) loop
-    temp_3[i3,i4] := temp_4[i3,i4];
+    temp_4[i3,i4] := x[a[i3],b[i4]];
+   end for;
+  end for;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 1) loop
+    temp_3[i1,i2] := temp_4[i1,i2];
    end for;
   end for;
   for i1 in 1:size(b, 1) loop
@@ -5731,19 +5731,19 @@ public
  algorithm
   init o as Real[size(c, 1), size(c, 2)];
   init temp_2 as Integer[size(a, 1), size(b, 2)];
-  for i5 in 1:size(a, 1) loop
-   for i6 in 1:size(b, 2) loop
+  for i3 in 1:size(a, 1) loop
+   for i4 in 1:size(b, 2) loop
     temp_3 := 0;
-    for i7 in 1:size(b, 1) loop
-     temp_3 := temp_3 + a[i5,i7] * b[i7,i6];
+    for i5 in 1:size(b, 1) loop
+     temp_3 := temp_3 + a[i3,i5] * b[i5,i4];
     end for;
-    temp_2[i5,i6] := temp_3;
+    temp_2[i3,i4] := temp_3;
    end for;
   end for;
   temp_1 := 0;
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1 := temp_1 + temp_2[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1 := temp_1 + temp_2[i1,i2];
    end for;
   end for;
   for i1 in 1:size(c, 1) loop
@@ -5791,13 +5791,13 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(b, 1) loop
-     temp_2 := temp_2 + a[i3,i5] * b[i5,i4];
+    for i3 in 1:size(b, 1) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(b, 2) loop
@@ -5846,21 +5846,21 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := 0.0;
-    for i5 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := 0.0;
+    for i3 in 1:size(b, 2) loop
      init temp_2 as Real[size(a, 1), size(b, 2)];
-     for i6 in 1:size(a, 1) loop
-      for i7 in 1:size(b, 2) loop
+     for i4 in 1:size(a, 1) loop
+      for i5 in 1:size(b, 2) loop
        temp_3 := 0.0;
-       for i8 in 1:size(b, 1) loop
-        temp_3 := temp_3 + a[i6,i8] * b[i8,i7];
+       for i6 in 1:size(b, 1) loop
+        temp_3 := temp_3 + a[i4,i6] * b[i6,i5];
        end for;
-       temp_2[i6,i7] := temp_3;
+       temp_2[i4,i5] := temp_3;
       end for;
      end for;
-     temp_1[i3,i4] := temp_1[i3,i4] + temp_2[i4,i5] * i3;
+     temp_1[i1,i2] := temp_1[i1,i2] + temp_2[i2,i3] * i1;
     end for;
    end for;
   end for;
@@ -5910,21 +5910,21 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(b, 2), size(a, 1)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1[i3,i4] := 0.0;
-    for i5 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1[i1,i2] := 0.0;
+    for i3 in 1:size(a, 1) loop
      init temp_2 as Real[size(a, 1), size(b, 2)];
-     for i6 in 1:size(a, 1) loop
-      for i7 in 1:size(b, 2) loop
+     for i4 in 1:size(a, 1) loop
+      for i5 in 1:size(b, 2) loop
        temp_3 := 0.0;
-       for i8 in 1:size(b, 1) loop
-        temp_3 := temp_3 + a[i6,i8] * b[i8,i7];
+       for i6 in 1:size(b, 1) loop
+        temp_3 := temp_3 + a[i4,i6] * b[i6,i5];
        end for;
-       temp_2[i6,i7] := temp_3;
+       temp_2[i4,i5] := temp_3;
       end for;
      end for;
-     temp_1[i3,i4] := temp_1[i3,i4] + temp_2[i5,i4] * i3;
+     temp_1[i1,i2] := temp_1[i1,i2] + temp_2[i3,i2] * i1;
     end for;
    end for;
   end for;
@@ -5973,14 +5973,14 @@ public
   init o as Real[size(a, 1) + size(b, 1), size(b, 2)];
   assert(size(a, 2) == size(b, 2), \"Mismatching size in dimension 2 of expression cat(1, a[:,:], b[:,:]) in function FunctionTests.ArrayExpInFunc29.f\");
   init temp_1 as Real[size(a, 1) + size(b, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    temp_1[i3,i4] := a[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[i1,i2] := a[i1,i2];
    end for;
   end for;
-  for i3 in 1:size(b, 1) loop
-   for i4 in 1:size(b, 2) loop
-    temp_1[i3 + size(a, 1),i4] := b[i3,i4];
+  for i1 in 1:size(b, 1) loop
+   for i2 in 1:size(b, 2) loop
+    temp_1[i1 + size(a, 1),i2] := b[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) + size(b, 1) loop
@@ -6041,32 +6041,32 @@ public
   assert(size(b, 1) == size(c, 1), \"Mismatching size in dimension 1 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
   assert(size(b, 2) == size(c, 2), \"Mismatching size in dimension 2 of expression cat(3, b[:,:,:], c[:,:,:]) in function FunctionTests.ArrayExpInFunc30.f\");
   init temp_1 as Real[size(a, 1), size(a, 2) + size(b, 2), size(a, 3)];
-  for i4 in 1:size(a, 1) loop
-   for i5 in 1:size(a, 2) loop
-    for i6 in 1:size(a, 3) loop
-     temp_1[i4,i5,i6] := a[i4,i5,i6];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[i1,i2,i3] := a[i1,i2,i3];
     end for;
    end for;
   end for;
   init temp_2 as Real[size(b, 1), size(b, 2), size(b, 3) + size(c, 3)];
-  for i7 in 1:size(b, 1) loop
-   for i8 in 1:size(b, 2) loop
-    for i9 in 1:size(b, 3) loop
-     temp_2[i7,i8,i9] := b[i7,i8,i9];
-    end for;
-   end for;
-  end for;
-  for i7 in 1:size(c, 1) loop
-   for i8 in 1:size(c, 2) loop
-    for i9 in 1:size(c, 3) loop
-     temp_2[i7,i8,i9 + size(b, 3)] := c[i7,i8,i9];
-    end for;
-   end for;
-  end for;
   for i4 in 1:size(b, 1) loop
    for i5 in 1:size(b, 2) loop
-    for i6 in 1:size(b, 3) + size(c, 3) loop
-     temp_1[i4,i5 + size(a, 2),i6] := temp_2[i4,i5,i6];
+    for i6 in 1:size(b, 3) loop
+     temp_2[i4,i5,i6] := b[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i4 in 1:size(c, 1) loop
+   for i5 in 1:size(c, 2) loop
+    for i6 in 1:size(c, 3) loop
+     temp_2[i4,i5,i6 + size(b, 3)] := c[i4,i5,i6];
+    end for;
+   end for;
+  end for;
+  for i1 in 1:size(b, 1) loop
+   for i2 in 1:size(b, 2) loop
+    for i3 in 1:size(b, 3) + size(c, 3) loop
+     temp_1[i1,i2 + size(a, 2),i3] := temp_2[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6354,9 +6354,9 @@ public
  algorithm
   init o as Real[n, n];
   init temp_1 as Integer[n, n];
-  for i3 in 1:n loop
-   for i4 in 1:n loop
-    temp_1[i3,i4] := if i3 == i4 then 1 else 0;
+  for i1 in 1:n loop
+   for i2 in 1:n loop
+    temp_1[i1,i2] := if i1 == i2 then 1 else 0;
    end for;
   end for;
   for i1 in 1:n loop
@@ -6449,8 +6449,8 @@ public
  algorithm
   init b as Real[size(a, 1)];
   init temp_1 as Real[size(a, 1)];
-  for i2 in 1:size(a, 1) loop
-   temp_1[i2 - 1 + 1] := a[i2];
+  for i1 in 1:size(a, 1) loop
+   temp_1[i1 - 1 + 1] := a[i1];
   end for;
   for i1 in 1:size(a, 1) loop
    b[i1] := temp_1[i1];
@@ -6493,10 +6493,10 @@ public
   init b as Real[size(a, 1) * size(a, 2) * size(a, 3)];
   assert(size(a, 1) * size(a, 2) * size(a, 3) <= size(a, 1) + size(a, 2) + size(a, 3) - 3 + 1, \"Mismatching size in expression vector(a[:,:,:]) in function FunctionTests.ArrayExpInFunc37.f\");
   init temp_1 as Real[size(a, 1) * size(a, 2) * size(a, 3)];
-  for i2 in 1:size(a, 1) loop
-   for i3 in 1:size(a, 2) loop
-    for i4 in 1:size(a, 3) loop
-     temp_1[((i2 - 1) * size(a, 2) + (i3 - 1)) * size(a, 3) + (i4 - 1) + 1] := a[i2,i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[((i1 - 1) * size(a, 2) + (i2 - 1)) * size(a, 3) + (i3 - 1) + 1] := a[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6540,8 +6540,8 @@ public
  algorithm
   init b as Real[size(a, 1), 1];
   init temp_1 as Real[size(a, 1), 1];
-  for i3 in 1:size(a, 1) loop
-   temp_1[i3,1] := a[i3];
+  for i1 in 1:size(a, 1) loop
+   temp_1[i1,1] := a[i1];
   end for;
   for i1 in 1:size(a, 1) loop
    for i2 in 1:1 loop
@@ -6585,9 +6585,9 @@ public
  algorithm
   init b as Real[size(a, 1), size(a, 2)];
   init temp_1 as Real[size(a, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    temp_1[i3,i4] := a[i3,i4];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[i1,i2] := a[i1,i2];
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -6633,10 +6633,10 @@ public
   init b as Real[size(a, 1), size(a, 2)];
   assert(size(a, 3) == 1, \"Mismatching size in dimension 3 of expression matrix(a[:,:,:]) in function FunctionTests.ArrayExpInFunc40.f\");
   init temp_1 as Real[size(a, 1), size(a, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 2) loop
-    for i5 in 1:size(a, 3) loop
-     temp_1[i3,i4] := a[i3,i4,i5];
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 2) loop
+    for i3 in 1:size(a, 3) loop
+     temp_1[i1,i2] := a[i1,i2,i3];
     end for;
    end for;
   end for;
@@ -6834,9 +6834,9 @@ public
  algorithm
   init b as Real[size(a, 1), size(a, 1)];
   init temp_1 as Real[size(a, 1), size(a, 1)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(a, 1) loop
-    temp_1[i3,i4] := if i3 == i4 then a[i3] else 0;
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(a, 1) loop
+    temp_1[i1,i2] := if i1 == i2 then a[i1] else 0;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -6887,8 +6887,8 @@ public
  algorithm
   init temp_2 as Real[max(n, 0)];
   init temp_3 as Integer[max(n, 0)];
-  for i1 in 1:max(n, 0) loop
-   temp_3[i1] := i1;
+  for i2 in 1:max(n, 0) loop
+   temp_3[i2] := i2;
   end for;
   (temp_2) := FunctionTests.ArrayExpInFunc45.f1(temp_3);
   temp_1 := 0.0;
@@ -8155,8 +8155,8 @@ fclass FunctionTests.ArrayOutputScalarization24
  Real y;
  Real z[1];
  Real z[2];
- initial parameter Real temp_1[1](fixed = false);
- initial parameter Real temp_1[2](fixed = false);
+ initial parameter Real temp_1[1];
+ initial parameter Real temp_1[2];
 initial equation 
  y = x / 2;
  ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization24.f(y);
@@ -8913,13 +8913,13 @@ public
  algorithm
   init o as Real[size(a, 1), size(b, 2)];
   init temp_1 as Real[size(a, 1), size(b, 2)];
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(b, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(b, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(b, 1) loop
-     temp_2 := temp_2 + a[i3,i5] * b[i5,i4];
+    for i3 in 1:size(b, 1) loop
+     temp_2 := temp_2 + a[i1,i3] * b[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -9075,22 +9075,22 @@ public
   init o as Real[size(a, 1), size(c, 2)];
   init temp_1 as Real[size(a, 1), size(c, 2)];
   init temp_3 as Real[size(a, 1), size(b, 2)];
-  for i6 in 1:size(a, 1) loop
-   for i7 in 1:size(b, 2) loop
+  for i4 in 1:size(a, 1) loop
+   for i5 in 1:size(b, 2) loop
     temp_4 := 0.0;
-    for i8 in 1:size(b, 1) loop
-     temp_4 := temp_4 + a[i6,i8] * b[i8,i7];
+    for i6 in 1:size(b, 1) loop
+     temp_4 := temp_4 + a[i4,i6] * b[i6,i5];
     end for;
-    temp_3[i6,i7] := temp_4;
+    temp_3[i4,i5] := temp_4;
    end for;
   end for;
-  for i3 in 1:size(a, 1) loop
-   for i4 in 1:size(c, 2) loop
+  for i1 in 1:size(a, 1) loop
+   for i2 in 1:size(c, 2) loop
     temp_2 := 0.0;
-    for i5 in 1:size(c, 1) loop
-     temp_2 := temp_2 + temp_3[i3,i5] * c[i5,i4];
+    for i3 in 1:size(c, 1) loop
+     temp_2 := temp_2 + temp_3[i1,i3] * c[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(a, 1) loop
@@ -9390,13 +9390,13 @@ public
   temp_3[1,2] := 2;
   temp_3[2,1] := 3;
   temp_3[2,2] := 4;
-  for i3 in 1:size(x, 1) loop
-   for i4 in 1:2 loop
+  for i1 in 1:size(x, 1) loop
+   for i2 in 1:2 loop
     temp_2 := 0.0;
-    for i5 in 1:2 loop
-     temp_2 := temp_2 + x[i3,i5] * temp_3[i5,i4];
+    for i3 in 1:2 loop
+     temp_2 := temp_2 + x[i1,i3] * temp_3[i3,i2];
     end for;
-    temp_1[i3,i4] := temp_2;
+    temp_1[i1,i2] := temp_2;
    end for;
   end for;
   for i1 in 1:size(x, 1) loop
@@ -9652,7 +9652,7 @@ public
   end for;
   temp_1 := temp_2;
   temp_4 := 0.0;
-  for i2 in 1:size(a, 1) loop
+  for i1 in 1:size(a, 1) loop
    temp_4 := temp_4;
   end for;
   temp_3 := temp_4;
@@ -9935,14 +9935,14 @@ public
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray35.f\");
   init temp_1 as Real[3, size(d, 1)];
-  for i4 in 1:size(d, 1) loop
-   temp_1[1,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[1,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[2,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[2,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[3,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[3,i1] := d[i1];
   end for;
   for i1 in 1:3 loop
    for i2 in 1:size(d, 1) loop
@@ -10134,7 +10134,6 @@ model UnknownArray38
 		c := [f(n,3 * e * 3 * {{1,2},{3,4},{5,6}})];
         b := 1;
     end f;
-
     Real x = f(3, {1,2,3});
 	
     annotation(__JModelica(UnitTesting(tests={
@@ -10163,20 +10162,21 @@ public
   Real[:,:] temp_5;
   Real temp_6;
   Integer[:,:] temp_7;
+  Real[:] temp_8;
  algorithm
   init e as Real[n, 3];
   init c as Real[1, 1];
   assert(size(d, 1) == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   assert(n == 3, \"Mismatching sizes in FunctionTests.UnknownArray38.f\");
   init temp_1 as Real[3, size(d, 1)];
-  for i4 in 1:size(d, 1) loop
-   temp_1[1,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[1,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[2,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[2,i1] := d[i1];
   end for;
-  for i4 in 1:size(d, 1) loop
-   temp_1[3,i4] := d[i4];
+  for i1 in 1:size(d, 1) loop
+   temp_1[3,i1] := d[i1];
   end for;
   for i1 in 1:3 loop
    for i2 in 1:size(d, 1) loop
@@ -10195,22 +10195,28 @@ public
   temp_7[2,2] := 4;
   temp_7[3,1] := 5;
   temp_7[3,2] := 6;
-  for i1 in 1:n loop
-   for i2 in 1:2 loop
+  for i5 in 1:n loop
+   for i6 in 1:2 loop
     temp_6 := 0.0;
-    for i3 in 1:3 loop
-     temp_6 := temp_6 + 3 * e[i1,i3] * 3 * temp_7[i3,i2];
+    for i7 in 1:3 loop
+     temp_6 := temp_6 + 3 * e[i5,i7] * 3 * temp_7[i7,i6];
     end for;
-    temp_5[i1,i2] := temp_6;
+    temp_5[i5,i6] := temp_6;
    end for;
   end for;
-  (temp_4) := FunctionTests.UnknownArray38.f(n, temp_5);
-  for i5 in 1:n loop
-   temp_3[i5,1] := temp_4[i5];
+  for i4 in 1:n loop
+   init temp_8 as Real[2];
+   for i5 in 1:2 loop
+    temp_8[i5] := temp_5[i4,i5];
+   end for;
+   temp_4[i4] := FunctionTests.UnknownArray38.f(n, temp_8);
   end for;
   for i3 in 1:n loop
-   for i4 in 1:1 loop
-    temp_2[i3,i4] := temp_3[i3,i4];
+   temp_3[i3,1] := temp_4[i3];
+  end for;
+  for i1 in 1:n loop
+   for i2 in 1:1 loop
+    temp_2[i1,i2] := temp_3[i1,i2];
    end for;
   end for;
   for i1 in 1:n loop
@@ -10262,8 +10268,8 @@ public
   init o as FunctionTests.UnknownArray39.R[m, m];
   for i in 1:m loop
    init temp_1 as FunctionTests.UnknownArray39.R[max(m, 0)];
-   for i2 in 1:max(m, 0) loop
-    temp_1[i2].x := i * i2;
+   for i1 in 1:max(m, 0) loop
+    temp_1[i1].x := i * i1;
    end for;
    for i1 in 1:max(m, 0) loop
     o[i,i1].x := temp_1[i1].x;
@@ -10381,10 +10387,10 @@ public
   init o as FunctionTests.UnknownArray41.R[m, m];
   for i in 1:m loop
    init temp_1 as FunctionTests.UnknownArray41.R[max(m, 0)];
-   for i2 in 1:max(m, 0) loop
-    temp_1[i2].x := i * i2;
-    temp_1[i2].y[1] := i;
-    temp_1[i2].y[2] := i2;
+   for i1 in 1:max(m, 0) loop
+    temp_1[i1].x := i * i1;
+    temp_1[i1].y[1] := i;
+    temp_1[i1].y[2] := i1;
    end for;
    for i1 in 1:max(m, 0) loop
     o[i,i1].x := temp_1[i1].x;
@@ -10452,13 +10458,13 @@ public
  algorithm
   init o as FunctionTests.UnknownArray42.R1[m];
   init temp_1 as FunctionTests.UnknownArray42.R1[max(m, 0)];
-  for i2 in 1:max(m, 0) loop
-   (temp_2) := FunctionTests.UnknownArray42.f2(i2);
-   (temp_3) := FunctionTests.UnknownArray42.f2(i2);
-   temp_1[i2].y[1].p1[1] := temp_2.p1[1];
-   temp_1[i2].y[1].p2 := temp_2.p2;
-   temp_1[i2].z.p1[1] := temp_3.p1[1];
-   temp_1[i2].z.p2 := temp_3.p2;
+  for i1 in 1:max(m, 0) loop
+   (temp_2) := FunctionTests.UnknownArray42.f2(i1);
+   (temp_3) := FunctionTests.UnknownArray42.f2(i1);
+   temp_1[i1].y[1].p1[1] := temp_2.p1[1];
+   temp_1[i1].y[1].p2 := temp_2.p2;
+   temp_1[i1].z.p1[1] := temp_3.p1[1];
+   temp_1[i1].z.p2 := temp_3.p2;
   end for;
   for i1 in 1:max(m, 0) loop
    o[i1].y[1].p1[1] := temp_1[i1].y[1].p1[1];
@@ -12183,604 +12189,114 @@ end FunctionTests.InputAsArraySize15;
 end InputAsArraySize15;
 
 
-
-model VectorizedCall1
+model InputAsArraySize16
     function f
-        input Real x;
-        output Real y;
-    algorithm
-        y := 2 * x;
+        input Integer a;
+        output Real[2,a] y = {1:a,3:a+2};
+        algorithm
     end f;
-    
-    Real z[2] = f({1,2});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall1",
-            description="Vectorization: basic test",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
-fclass FunctionTests.VectorizedCall1
- Real z[1];
- Real z[2];
-equation
- z[1] = FunctionTests.VectorizedCall1.f(1);
- z[2] = FunctionTests.VectorizedCall1.f(2);
-
-public
- function FunctionTests.VectorizedCall1.f
-  input Real x;
-  output Real y;
- algorithm
-  y := 2 * x;
-  return;
- end FunctionTests.VectorizedCall1.f;
-
-end FunctionTests.VectorizedCall1;
-")})));
-end VectorizedCall1;
-
-
-model VectorizedCall2
-    function f
-        input Real x1;
-		input Real x2;
-		input Real x3 = 2;
-        output Real y;
-    algorithm
-        y := 2 * x1 + x2 + x3;
-    end f;
-    
-    Real z[2,2] = f({{1,2},{3,4}}, 5);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall2",
-            description="Vectorization: one of two args vectorized",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
-fclass FunctionTests.VectorizedCall2
- Real z[1,1];
- Real z[1,2];
- Real z[2,1];
- Real z[2,2];
-equation
- z[1,1] = FunctionTests.VectorizedCall2.f(1, 5, 2);
- z[1,2] = FunctionTests.VectorizedCall2.f(2, 5, 2);
- z[2,1] = FunctionTests.VectorizedCall2.f(3, 5, 2);
- z[2,2] = FunctionTests.VectorizedCall2.f(4, 5, 2);
-
-public
- function FunctionTests.VectorizedCall2.f
-  input Real x1;
-  input Real x2;
-  input Real x3;
-  output Real y;
- algorithm
-  y := 2 * x1 + x2 + x3;
-  return;
- end FunctionTests.VectorizedCall2.f;
-
-end FunctionTests.VectorizedCall2;
-")})));
-end VectorizedCall2;
-
-
-model VectorizedCall3
-    function f
-        input Real[:,:] x1;
-        input Real[:,:] x2;
-        output Real y;
-    algorithm
-        y := sum(x1 * x2);
-    end f;
-    
-    constant Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
-    constant Real w[3,3] = [1,2,3;4,5,6;7,8,9];
-    Real z[2,2] = f({{w, 2*w},{3*w, 4*w}}, {{v, 2*v},{3*v, 4*v}});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall3",
-            description="Vectorization: vectorised array arg, constant",
-            variability_propagation=false,
-            flatModel="
-fclass FunctionTests.VectorizedCall3
- constant Real v[1,1] = -1;
- constant Real v[1,2] = -2;
- constant Real v[1,3] = -3;
- constant Real v[2,1] = -4;
- constant Real v[2,2] = -5;
- constant Real v[2,3] = -6;
- constant Real v[3,1] = -7;
- constant Real v[3,2] = -8;
- constant Real v[3,3] = -9;
- constant Real w[1,1] = 1;
- constant Real w[1,2] = 2;
- constant Real w[1,3] = 3;
- constant Real w[2,1] = 4;
- constant Real w[2,2] = 5;
- constant Real w[2,3] = 6;
- constant Real w[3,1] = 7;
- constant Real w[3,2] = 8;
- constant Real w[3,3] = 9;
- Real z[1,1];
- Real z[1,2];
- Real z[2,1];
- Real z[2,2];
-equation
- z[1,1] = FunctionTests.VectorizedCall3.f({{1.0, 2.0, 3.0}, {4.0, 5.0, 6.0}, {7.0, 8.0, 9.0}}, {{-1.0, -2.0, -3.0}, {-4.0, -5.0, -6.0}, {-7.0, -8.0, -9.0}});
- z[1,2] = FunctionTests.VectorizedCall3.f({{2, 2 * 2.0, 2 * 3.0}, {2 * 4.0, 2 * 5.0, 2 * 6.0}, {2 * 7.0, 2 * 8.0, 2 * 9.0}}, {{-2, 2 * -2.0, 2 * -3.0}, {2 * -4.0, 2 * -5.0, 2 * -6.0}, {2 * -7.0, 2 * -8.0, 2 * -9.0}});
- z[2,1] = FunctionTests.VectorizedCall3.f({{3, 3 * 2.0, 3 * 3.0}, {3 * 4.0, 3 * 5.0, 3 * 6.0}, {3 * 7.0, 3 * 8.0, 3 * 9.0}}, {{-3, 3 * -2.0, 3 * -3.0}, {3 * -4.0, 3 * -5.0, 3 * -6.0}, {3 * -7.0, 3 * -8.0, 3 * -9.0}});
- z[2,2] = FunctionTests.VectorizedCall3.f({{4, 4 * 2.0, 4 * 3.0}, {4 * 4.0, 4 * 5.0, 4 * 6.0}, {4 * 7.0, 4 * 8.0, 4 * 9.0}}, {{-4, 4 * -2.0, 4 * -3.0}, {4 * -4.0, 4 * -5.0, 4 * -6.0}, {4 * -7.0, 4 * -8.0, 4 * -9.0}});
-
-public
- function FunctionTests.VectorizedCall3.f
-  input Real[:,:] x1;
-  input Real[:,:] x2;
-  output Real y;
-  Real temp_1;
-  Real[:,:] temp_2;
-  Real temp_3;
- algorithm
-  init temp_2 as Real[size(x1, 1), size(x2, 2)];
-  for i3 in 1:size(x1, 1) loop
-   for i4 in 1:size(x2, 2) loop
-    temp_3 := 0.0;
-    for i5 in 1:size(x2, 1) loop
-     temp_3 := temp_3 + x1[i3,i5] * x2[i5,i4];
-    end for;
-    temp_2[i3,i4] := temp_3;
-   end for;
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(x1, 1) loop
-   for i2 in 1:size(x2, 2) loop
-    temp_1 := temp_1 + temp_2[i1,i2];
-   end for;
-  end for;
-  y := temp_1;
-  return;
- end FunctionTests.VectorizedCall3.f;
-
-end FunctionTests.VectorizedCall3;
-")})));
-end VectorizedCall3;
-
-
-model VectorizedCall4
-    function f
-        input Real[:,:] x1;
-        input Real[:,:] x2;
-        output Real y;
-    algorithm
-        y := sum(x1 * x2);
-    end f;
-    
-    Real v[3,3] = -1 * [1,2,3;4,5,6;7,8,9];
-    Real w[3,3] = [1,2,3;4,5,6;7,8,9];
-    Real v2[2,2,3,3] = {{v, 2*v},{3*v, 4*v}};
-    Real w2[2,2,3,3] = {{w, 2*w},{3*w, 4*w}};
-    Real z[2,2] = f(w2, v2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall4",
-            description="Vectorization: vectorised array arg, continous",
-            variability_propagation=false,
-            flatModel="
-fclass FunctionTests.VectorizedCall4
- Real v2[1,1,1,1];
- Real v2[1,1,1,2];
- Real v2[1,1,1,3];
- Real v2[1,1,2,1];
- Real v2[1,1,2,2];
- Real v2[1,1,2,3];
- Real v2[1,1,3,1];
- Real v2[1,1,3,2];
- Real v2[1,1,3,3];
- Real v2[1,2,1,1];
- Real v2[1,2,1,2];
- Real v2[1,2,1,3];
- Real v2[1,2,2,1];
- Real v2[1,2,2,2];
- Real v2[1,2,2,3];
- Real v2[1,2,3,1];
- Real v2[1,2,3,2];
- Real v2[1,2,3,3];
- Real v2[2,1,1,1];
- Real v2[2,1,1,2];
- Real v2[2,1,1,3];
- Real v2[2,1,2,1];
- Real v2[2,1,2,2];
- Real v2[2,1,2,3];
- Real v2[2,1,3,1];
- Real v2[2,1,3,2];
- Real v2[2,1,3,3];
- Real v2[2,2,1,1];
- Real v2[2,2,1,2];
- Real v2[2,2,1,3];
- Real v2[2,2,2,1];
- Real v2[2,2,2,2];
- Real v2[2,2,2,3];
- Real v2[2,2,3,1];
- Real v2[2,2,3,2];
- Real v2[2,2,3,3];
- Real w2[1,1,1,1];
- Real w2[1,1,1,2];
- Real w2[1,1,1,3];
- Real w2[1,1,2,1];
- Real w2[1,1,2,2];
- Real w2[1,1,2,3];
- Real w2[1,1,3,1];
- Real w2[1,1,3,2];
- Real w2[1,1,3,3];
- Real w2[1,2,1,1];
- Real w2[1,2,1,2];
- Real w2[1,2,1,3];
- Real w2[1,2,2,1];
- Real w2[1,2,2,2];
- Real w2[1,2,2,3];
- Real w2[1,2,3,1];
- Real w2[1,2,3,2];
- Real w2[1,2,3,3];
- Real w2[2,1,1,1];
- Real w2[2,1,1,2];
- Real w2[2,1,1,3];
- Real w2[2,1,2,1];
- Real w2[2,1,2,2];
- Real w2[2,1,2,3];
- Real w2[2,1,3,1];
- Real w2[2,1,3,2];
- Real w2[2,1,3,3];
- Real w2[2,2,1,1];
- Real w2[2,2,1,2];
- Real w2[2,2,1,3];
- Real w2[2,2,2,1];
- Real w2[2,2,2,2];
- Real w2[2,2,2,3];
- Real w2[2,2,3,1];
- Real w2[2,2,3,2];
- Real w2[2,2,3,3];
- Real z[1,1];
- Real z[1,2];
- Real z[2,1];
- Real z[2,2];
-equation
- v2[1,1,1,1] = -1;
- v2[1,1,1,2] = -2;
- v2[1,1,1,3] = -3;
- v2[1,1,2,1] = -4;
- v2[1,1,2,2] = -5;
- v2[1,1,2,3] = -6;
- v2[1,1,3,1] = -7;
- v2[1,1,3,2] = -8;
- v2[1,1,3,3] = -9;
- w2[1,1,1,1] = 1;
- w2[1,1,1,2] = 2;
- w2[1,1,1,3] = 3;
- w2[1,1,2,1] = 4;
- w2[1,1,2,2] = 5;
- w2[1,1,2,3] = 6;
- w2[1,1,3,1] = 7;
- w2[1,1,3,2] = 8;
- w2[1,1,3,3] = 9;
- v2[1,2,1,1] = 2 * v2[1,1,1,1];
- v2[1,2,1,2] = 2 * v2[1,1,1,2];
- v2[1,2,1,3] = 2 * v2[1,1,1,3];
- v2[1,2,2,1] = 2 * v2[1,1,2,1];
- v2[1,2,2,2] = 2 * v2[1,1,2,2];
- v2[1,2,2,3] = 2 * v2[1,1,2,3];
- v2[1,2,3,1] = 2 * v2[1,1,3,1];
- v2[1,2,3,2] = 2 * v2[1,1,3,2];
- v2[1,2,3,3] = 2 * v2[1,1,3,3];
- v2[2,1,1,1] = 3 * v2[1,1,1,1];
- v2[2,1,1,2] = 3 * v2[1,1,1,2];
- v2[2,1,1,3] = 3 * v2[1,1,1,3];
- v2[2,1,2,1] = 3 * v2[1,1,2,1];
- v2[2,1,2,2] = 3 * v2[1,1,2,2];
- v2[2,1,2,3] = 3 * v2[1,1,2,3];
- v2[2,1,3,1] = 3 * v2[1,1,3,1];
- v2[2,1,3,2] = 3 * v2[1,1,3,2];
- v2[2,1,3,3] = 3 * v2[1,1,3,3];
- v2[2,2,1,1] = 4 * v2[1,1,1,1];
- v2[2,2,1,2] = 4 * v2[1,1,1,2];
- v2[2,2,1,3] = 4 * v2[1,1,1,3];
- v2[2,2,2,1] = 4 * v2[1,1,2,1];
- v2[2,2,2,2] = 4 * v2[1,1,2,2];
- v2[2,2,2,3] = 4 * v2[1,1,2,3];
- v2[2,2,3,1] = 4 * v2[1,1,3,1];
- v2[2,2,3,2] = 4 * v2[1,1,3,2];
- v2[2,2,3,3] = 4 * v2[1,1,3,3];
- w2[1,2,1,1] = 2 * w2[1,1,1,1];
- w2[1,2,1,2] = 2 * w2[1,1,1,2];
- w2[1,2,1,3] = 2 * w2[1,1,1,3];
- w2[1,2,2,1] = 2 * w2[1,1,2,1];
- w2[1,2,2,2] = 2 * w2[1,1,2,2];
- w2[1,2,2,3] = 2 * w2[1,1,2,3];
- w2[1,2,3,1] = 2 * w2[1,1,3,1];
- w2[1,2,3,2] = 2 * w2[1,1,3,2];
- w2[1,2,3,3] = 2 * w2[1,1,3,3];
- w2[2,1,1,1] = 3 * w2[1,1,1,1];
- w2[2,1,1,2] = 3 * w2[1,1,1,2];
- w2[2,1,1,3] = 3 * w2[1,1,1,3];
- w2[2,1,2,1] = 3 * w2[1,1,2,1];
- w2[2,1,2,2] = 3 * w2[1,1,2,2];
- w2[2,1,2,3] = 3 * w2[1,1,2,3];
- w2[2,1,3,1] = 3 * w2[1,1,3,1];
- w2[2,1,3,2] = 3 * w2[1,1,3,2];
- w2[2,1,3,3] = 3 * w2[1,1,3,3];
- w2[2,2,1,1] = 4 * w2[1,1,1,1];
- w2[2,2,1,2] = 4 * w2[1,1,1,2];
- w2[2,2,1,3] = 4 * w2[1,1,1,3];
- w2[2,2,2,1] = 4 * w2[1,1,2,1];
- w2[2,2,2,2] = 4 * w2[1,1,2,2];
- w2[2,2,2,3] = 4 * w2[1,1,2,3];
- w2[2,2,3,1] = 4 * w2[1,1,3,1];
- w2[2,2,3,2] = 4 * w2[1,1,3,2];
- w2[2,2,3,3] = 4 * w2[1,1,3,3];
- z[1,1] = FunctionTests.VectorizedCall4.f({{w2[1,1,1,1], w2[1,1,1,2], w2[1,1,1,3]}, {w2[1,1,2,1], w2[1,1,2,2], w2[1,1,2,3]}, {w2[1,1,3,1], w2[1,1,3,2], w2[1,1,3,3]}}, {{v2[1,1,1,1], v2[1,1,1,2], v2[1,1,1,3]}, {v2[1,1,2,1], v2[1,1,2,2], v2[1,1,2,3]}, {v2[1,1,3,1], v2[1,1,3,2], v2[1,1,3,3]}});
- z[1,2] = FunctionTests.VectorizedCall4.f({{w2[1,2,1,1], w2[1,2,1,2], w2[1,2,1,3]}, {w2[1,2,2,1], w2[1,2,2,2], w2[1,2,2,3]}, {w2[1,2,3,1], w2[1,2,3,2], w2[1,2,3,3]}}, {{v2[1,2,1,1], v2[1,2,1,2], v2[1,2,1,3]}, {v2[1,2,2,1], v2[1,2,2,2], v2[1,2,2,3]}, {v2[1,2,3,1], v2[1,2,3,2], v2[1,2,3,3]}});
- z[2,1] = FunctionTests.VectorizedCall4.f({{w2[2,1,1,1], w2[2,1,1,2], w2[2,1,1,3]}, {w2[2,1,2,1], w2[2,1,2,2], w2[2,1,2,3]}, {w2[2,1,3,1], w2[2,1,3,2], w2[2,1,3,3]}}, {{v2[2,1,1,1], v2[2,1,1,2], v2[2,1,1,3]}, {v2[2,1,2,1], v2[2,1,2,2], v2[2,1,2,3]}, {v2[2,1,3,1], v2[2,1,3,2], v2[2,1,3,3]}});
- z[2,2] = FunctionTests.VectorizedCall4.f({{w2[2,2,1,1], w2[2,2,1,2], w2[2,2,1,3]}, {w2[2,2,2,1], w2[2,2,2,2], w2[2,2,2,3]}, {w2[2,2,3,1], w2[2,2,3,2], w2[2,2,3,3]}}, {{v2[2,2,1,1], v2[2,2,1,2], v2[2,2,1,3]}, {v2[2,2,2,1], v2[2,2,2,2], v2[2,2,2,3]}, {v2[2,2,3,1], v2[2,2,3,2], v2[2,2,3,3]}});
-
-public
- function FunctionTests.VectorizedCall4.f
-  input Real[:,:] x1;
-  input Real[:,:] x2;
-  output Real y;
-  Real temp_1;
-  Real[:,:] temp_2;
-  Real temp_3;
- algorithm
-  init temp_2 as Real[size(x1, 1), size(x2, 2)];
-  for i3 in 1:size(x1, 1) loop
-   for i4 in 1:size(x2, 2) loop
-    temp_3 := 0.0;
-    for i5 in 1:size(x2, 1) loop
-     temp_3 := temp_3 + x1[i3,i5] * x2[i5,i4];
-    end for;
-    temp_2[i3,i4] := temp_3;
-   end for;
-  end for;
-  temp_1 := 0.0;
-  for i1 in 1:size(x1, 1) loop
-   for i2 in 1:size(x2, 2) loop
-    temp_1 := temp_1 + temp_2[i1,i2];
-   end for;
-  end for;
-  y := temp_1;
-  return;
- end FunctionTests.VectorizedCall4.f;
-
-end FunctionTests.VectorizedCall4;
-")})));
-end VectorizedCall4;
-
-
-model VectorizedCall5
-	record R
-		Real a;
-		Real b;
-	end R;
-	
-    function f
-        input R x;
-        output Real y;
-    algorithm
-        y := 2 * x.a + x.b;
-    end f;
-    
-	R[2] w = {R(1,2), R(3,4)};
-    Real z[2] = f(w);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall5",
-            description="Vectorization: vectorised record arg",
-            variability_propagation=false,
-            inline_functions="none",
-            flatModel="
-fclass FunctionTests.VectorizedCall5
- Real w[1].a;
- Real w[1].b;
- Real w[2].a;
- Real w[2].b;
- Real z[1];
- Real z[2];
-equation
- w[1].a = 1;
- w[1].b = 2;
- w[2].a = 3;
- w[2].b = 4;
- z[1] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[1].a, w[1].b));
- z[2] = FunctionTests.VectorizedCall5.f(FunctionTests.VectorizedCall5.R(w[2].a, w[2].b));
-
-public
- function FunctionTests.VectorizedCall5.f
-  input FunctionTests.VectorizedCall5.R x;
-  output Real y;
- algorithm
-  y := 2 * x.a + x.b;
-  return;
- end FunctionTests.VectorizedCall5.f;
-
- record FunctionTests.VectorizedCall5.R
-  Real a;
-  Real b;
- end FunctionTests.VectorizedCall5.R;
-
-end FunctionTests.VectorizedCall5;
-")})));
-end VectorizedCall5;
-
-
-model VectorizedCall6
+    function w
+        input Integer b;
+        R[2] r(n=b,x=f(b));
+        output Real[2] y = r.y;
+        algorithm
+    end w;
     record R
-        Real a;
-        Real b;
+        parameter Integer n = 1;
+        Real[n] x;
+        Real y = x[1];
     end R;
-    
-    function f
-        input Real x;
-        output R y;
-    algorithm
-        y := R(x, 2*x);
-    end f;
-    
-    Real w[2] = {1, 2};
-    R z[2] = f(w);
+    parameter Integer m = 2;
+    Real[2] r = w(m);
 
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall6",
-            description="Vectorization: record return value",
-            variability_propagation=false,
-            inline_functions="none",
+        FlatteningTestCase(
+            name="InputAsArraySize16",
+            description="Parametrized size in FSubscriptedExp over array of records",
             flatModel="
-fclass FunctionTests.VectorizedCall6
- Real w[1];
- Real w[2];
- Real z[1].a;
- Real z[1].b;
- Real z[2].a;
- Real z[2].b;
-equation
- w[1] = 1;
- w[2] = 2;
- (FunctionTests.VectorizedCall6.R(z[1].a, z[1].b)) = FunctionTests.VectorizedCall6.f(w[1]);
- (FunctionTests.VectorizedCall6.R(z[2].a, z[2].b)) = FunctionTests.VectorizedCall6.f(w[2]);
+fclass FunctionTests.InputAsArraySize16
+ parameter Integer m = 2 /* 2 */;
+ Real r[2] = FunctionTests.InputAsArraySize16.w(m);
 
 public
- function FunctionTests.VectorizedCall6.f
-  input Real x;
-  output FunctionTests.VectorizedCall6.R y;
- algorithm
-  y.a := x;
-  y.b := 2 * x;
-  return;
- end FunctionTests.VectorizedCall6.f;
-
- record FunctionTests.VectorizedCall6.R
-  Real a;
-  Real b;
- end FunctionTests.VectorizedCall6.R;
-
-end FunctionTests.VectorizedCall6;
-")})));
-end VectorizedCall6;
-
-
-model VectorizedCall7
-    function f
-        input Real a;
-        input Real b[2];
-        output Real c;
-    algorithm
-        c := sum(a * b);
-    end f;
-    
-    Real d[3] = {1, 2, 3} * time;
-    Real e[3] = f(d, {4, 5});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall7",
-            description="",
-            flatModel="
-fclass FunctionTests.VectorizedCall7
- Real d[1];
- Real d[2];
- Real d[3];
- Real e[1];
- Real e[2];
- Real e[3];
-equation
- d[1] = time;
- d[2] = 2 * time;
- d[3] = 3 * time;
- e[1] = d[1] * 4 + d[1] * 5;
- e[2] = d[2] * 4 + d[2] * 5;
- e[3] = d[3] * 4 + d[3] * 5;
-end FunctionTests.VectorizedCall7;
-")})));
-end VectorizedCall7;
-
-model VectorizedCall8
-function fv
-    input Real x;
-    output Real y;
-    algorithm
-end fv;
-function f
-    input Real[1] x;
-    output Real[1] y= fv(x);
-algorithm
-    annotation(Inline=false);
-end f;
-
-Real[:] y = f({time});
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="VectorizedCall8",
-            description="",
-            flatModel="
-fclass FunctionTests.VectorizedCall8
- Real y[1];
-equation
- ({y[1]}) = FunctionTests.VectorizedCall8.f({time});
-
-public
- function FunctionTests.VectorizedCall8.f
-  input Real[:] x;
+ function FunctionTests.InputAsArraySize16.w
+  input Integer b;
+  FunctionTests.InputAsArraySize16.R[:] r;
   output Real[:] y;
  algorithm
-  init y as Real[1];
-  y[1] := FunctionTests.VectorizedCall8.fv(x[1]);
+  init r as FunctionTests.InputAsArraySize16.R[2];
+  r[1].n := b;
+  r[1].x := (FunctionTests.InputAsArraySize16.f(b))[1,:];
+  r[1].y := x[1];
+  r[2].n := b;
+  r[2].x := (FunctionTests.InputAsArraySize16.f(b))[2,:];
+  r[2].y := x[1];
+  init y as Real[2];
+  y := r[1:2].y;
   return;
- annotation(Inline = false);
- end FunctionTests.VectorizedCall8.f;
+ end FunctionTests.InputAsArraySize16.w;
 
- function FunctionTests.VectorizedCall8.fv
-  input Real x;
-  output Real y;
+ function FunctionTests.InputAsArraySize16.f
+  input Integer a;
+  output Real[:,:] y;
  algorithm
+  init y as Real[2, a];
+  y := {1:a, 3:a + 2};
   return;
- end FunctionTests.VectorizedCall8.fv;
+ end FunctionTests.InputAsArraySize16.f;
 
-end FunctionTests.VectorizedCall8;
+ record FunctionTests.InputAsArraySize16.R
+  parameter Integer n;
+  Real x[n];
+  Real y;
+ end FunctionTests.InputAsArraySize16.R;
+
+end FunctionTests.InputAsArraySize16;
 ")})));
-end VectorizedCall8;
+end InputAsArraySize16;
 
-model VectorizedCall9
-function fv
-    input Real x;
-    output Real y;
-    algorithm
-end fv;
-function f
-    input Real[:] x;
-    output Real[:] y= fv(x);
-algorithm
-    annotation(Inline=false);
-end f;
 
-Real[:] y = f({time});
+model InputAsArraySize17
+    function f
+        input Integer a;
+        output Real[2,a] y = {1:a,3:a+2};
+        algorithm
+    end f;
+    model M
+        parameter Integer n = 1;
+        Real[n] x;
+        Real y = x[1];
+    end R;
+    parameter Integer k = 2;
+    M[2] m(n=k,x=f(k));
+
     annotation(__JModelica(UnitTesting(tests={
-        ComplianceErrorTestCase(
-            name="VectorizedCall9",
-            description="",
-            errorMessage="
-1 errors found:
+        FlatteningTestCase(
+            name="InputAsArraySize17",
+            description="Parametrized size in FSubscriptedExp over array of records",
+            flatModel="
+fclass FunctionTests.InputAsArraySize17
+ structural parameter Integer k = 2 /* 2 */;
+ structural parameter Integer m[1].n = 2 /* 2 */;
+ Real m[1].x[2] = (FunctionTests.InputAsArraySize17.f(2))[1,1:2];
+ Real m[1].y = m[1].x[1];
+ structural parameter Integer m[2].n = 2 /* 2 */;
+ Real m[2].x[2] = (FunctionTests.InputAsArraySize17.f(2))[2,1:2];
+ Real m[2].y = m[2].x[1];
 
-Compliance error at line 12661, column 23, in file '...', UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED:
-  Vectorized function calls of unknown size is not supported
+public
+ function FunctionTests.InputAsArraySize17.f
+  input Integer a;
+  output Real[:,:] y;
+ algorithm
+  init y as Real[2, a];
+  y := {1:a, 3:a + 2};
+  return;
+ end FunctionTests.InputAsArraySize17.f;
+
+end FunctionTests.InputAsArraySize17;
 ")})));
-end VectorizedCall9;
-
+end InputAsArraySize17;
 
 model Lapack_dgeqpf
   Real A[2,2] = {{1,2},{3,4}};
@@ -13529,9 +13045,9 @@ public
   assert(2 * size(a, 2) == 2, \"Mismatching sizes in FunctionTests.UnknownSize.Hidden.Vector1.f\");
   assert(2 * size(a, 2) <= 2 + size(a, 2) - 2 + 1, \"Mismatching size in expression vector(a[1:2,:]) in function FunctionTests.UnknownSize.Hidden.Vector1.f\");
   init temp_1 as Real[2 * size(a, 2)];
-  for i2 in 1:2 loop
-   for i3 in 1:size(a, 2) loop
-    temp_1[(i2 - 1) * size(a, 2) + (i3 - 1) + 1] := a[i2,i3];
+  for i1 in 1:2 loop
+   for i2 in 1:size(a, 2) loop
+    temp_1[(i1 - 1) * size(a, 2) + (i2 - 1) + 1] := a[i1,i2];
    end for;
   end for;
   for i1 in 1:2 * size(a, 2) loop
@@ -13839,13 +13355,13 @@ public
    end for;
   end for;
   init temp_3 as Real[2, 2];
-  for i4 in 1:2 loop
-   for i5 in 1:2 loop
+  for i1 in 1:2 loop
+   for i2 in 1:2 loop
     temp_4 := 0.0;
-    for i6 in 1:size(b, 2) loop
-     temp_4 := temp_4 + a[i4,i6] * b[i5,i6];
+    for i3 in 1:size(b, 2) loop
+     temp_4 := temp_4 + a[i1,i3] * b[i2,i3];
     end for;
-    temp_3[i4,i5] := temp_4;
+    temp_3[i1,i2] := temp_4;
    end for;
   end for;
   c[1,1] := 2 * ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[1,2] + ((2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,1] + (2 * temp_1[1,1] + 2 * temp_1[1,2] + (2 * temp_1[2,1] + 2 * temp_1[2,2])) * temp_3[2,2]));
@@ -14041,44 +13557,6 @@ end FunctionTests.FunctionLike.NumericConversion.Abs1;
 end Abs1;
 
 model Abs2
-    constant Real[2,2] c = {{-1, 2}, {3, -4}};
-    constant Real[2,2] d = abs(c);
-    Real[2,2] x = c;
-    Real[2,2] y = d;
-    Real[2,2] z = abs(x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_NumericConversion_Abs2",
-            description="Test of vectorized abs()",
-            eliminate_alias_variables=false,
-            flatModel="
-fclass FunctionTests.FunctionLike.NumericConversion.Abs2
- constant Real c[1,1] = -1;
- constant Real c[1,2] = 2;
- constant Real c[2,1] = 3;
- constant Real c[2,2] = -4;
- constant Real d[1,1] = 1.0;
- constant Real d[1,2] = 2.0;
- constant Real d[2,1] = 3.0;
- constant Real d[2,2] = 4.0;
- constant Real x[1,1] = -1.0;
- constant Real x[1,2] = 2.0;
- constant Real x[2,1] = 3.0;
- constant Real x[2,2] = -4.0;
- constant Real y[1,1] = 1.0;
- constant Real y[1,2] = 2.0;
- constant Real y[2,1] = 3.0;
- constant Real y[2,2] = 4.0;
- constant Real z[1,1] = 1.0;
- constant Real z[1,2] = 2.0;
- constant Real z[2,1] = 3.0;
- constant Real z[2,2] = 4.0;
-end FunctionTests.FunctionLike.NumericConversion.Abs2;
-")})));
-end Abs2;
-
-model Abs3
     constant Real x = abs(-35);
     constant Real y = abs(0);
 	constant Real z = abs(42);
@@ -14097,7 +13575,7 @@ z
 0.0
 42.0
 ")})));
-end Abs3;
+end Abs2;
 
 model Sign1
     Real x = sign(1);
@@ -14124,44 +13602,6 @@ end FunctionTests.FunctionLike.NumericConversion.Sign1;
 end Sign1;
 
 model Sign2
-    constant Real[2,2] c = {{-1, 2}, {3, -4}};
-    constant Real[2,2] d = sign(c);
-    Real[2,2] x = c;
-    Real[2,2] y = d;
-    Real[2,2] z = sign(x);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_NumericConversion_Sign2",
-            description="Test of vectorized sign()",
-            eliminate_alias_variables=false,
-            flatModel="
-fclass FunctionTests.FunctionLike.NumericConversion.Sign2
- constant Real c[1,1] = -1;
- constant Real c[1,2] = 2;
- constant Real c[2,1] = 3;
- constant Real c[2,2] = -4;
- constant Real d[1,1] = -1;
- constant Real d[1,2] = 1;
- constant Real d[2,1] = 1;
- constant Real d[2,2] = -1;
- constant Real x[1,1] = -1.0;
- constant Real x[1,2] = 2.0;
- constant Real x[2,1] = 3.0;
- constant Real x[2,2] = -4.0;
- constant Real y[1,1] = -1.0;
- constant Real y[1,2] = 1.0;
- constant Real y[2,1] = 1.0;
- constant Real y[2,2] = -1.0;
- constant Real z[1,1] = -1;
- constant Real z[1,2] = 1;
- constant Real z[2,1] = 1;
- constant Real z[2,2] = -1;
-end FunctionTests.FunctionLike.NumericConversion.Sign2;
-")})));
-end Sign2;
-
-model Sign3
     constant Real x = sign(-35);
     constant Real y = sign(0);
 	constant Real z = sign(42);
@@ -14180,7 +13620,7 @@ z
 0.0
 1.0
 ")})));
-end Sign3;
+end Sign2;
 
 model Sqrt1
     Real x = sqrt(1);
@@ -15144,97 +14584,6 @@ y = semiLinear(x, s[2], sc)
 end SemiLinear6;
 
 model SemiLinear7
-    Real s[2] = {1,2};
-    Real x[2] = {time,time};
-    Real y[2];
-equation
-    y = semiLinear(x,s,s);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_Special_SemiLinear7",
-            description="Test of the semiLinear() operator. Vectorization.",
-            variability_propagation=false,
-            flatModel="
-fclass FunctionTests.FunctionLike.Special.SemiLinear7
- Real s[1];
- Real s[2];
- Real x[1];
- Real x[2];
- Real y[1];
- Real y[2];
-equation
- y[1] = noEvent(x[1] * s[1]);
- y[2] = noEvent(x[2] * s[2]);
- s[1] = 1;
- s[2] = 2;
- x[1] = time;
- x[2] = time;
-end FunctionTests.FunctionLike.Special.SemiLinear7;
-")})));
-end SemiLinear7;
-
-model SemiLinear8
-    Real s[2] = {1,2};
-    Real x[2] = {time,time};
-    Real x2 = time;
-    Real y[2,2];
-equation
-    y[1,:] = semiLinear(x,s[2],s);
-    y[2,:] = semiLinear(x2,s,s[1]);
-equation
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_Special_SemiLinear8",
-            description="Test of the semiLinear() operator. Vectorization.",
-            variability_propagation=false,
-            flatModel="
-fclass FunctionTests.FunctionLike.Special.SemiLinear8
- Real s[1];
- Real s[2];
- Real x[1];
- Real x[2];
- Real x2;
- Real y[1,1];
- Real y[1,2];
- Real y[2,1];
- Real y[2,2];
-equation
- y[1,1] = noEvent(if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
- y[1,2] = noEvent(x[2] * s[2]);
- y[2,1] = noEvent(x2 * s[1]);
- y[2,2] = noEvent(if x2 >= 0 then x2 * s[2] else x2 * s[1]);
- s[1] = 1;
- s[2] = 2;
- x[1] = time;
- x[2] = time;
- x2 = time;
-end FunctionTests.FunctionLike.Special.SemiLinear8;
-")})));
-end SemiLinear8;
-
-model SemiLinear9
-    Real s[1] = {1};
-    Real x[2] = {time,time};
-    Real y[2];
-equation
-    y = semiLinear(x,s,s);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="FunctionLike_Special_SemiLinear9",
-            description="Test of the semiLinear() operator. Vectorization.",
-            variability_propagation=false,
-            errorMessage="
-1 errors found:
-
-Error at line 14489, column 9, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo':
-  Mismatching sizes in semiLinear. All non-scalar arguments need matching sizes
-")})));
-end SemiLinear9;
-
-model SemiLinear10
     Real x = time;
     Real y;
     Real z = 2 * time;
@@ -15243,10 +14592,10 @@ equation
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="FunctionLike_Special_SemiLinear10",
+            name="FunctionLike_Special_SemiLinear7",
             description="Check that semiLinear() with event-generating argument does not expand with smooth(0, ...)",
             flatModel="
-fclass FunctionTests.FunctionLike.Special.SemiLinear10
+fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real x;
  Real y;
  Real z;
@@ -15254,13 +14603,11 @@ equation
  y = if (if time > 1 then 1 else -1) >= 0 then (if time > 1 then 1 else -1) * x else (if time > 1 then 1 else -1) * z;
  x = time;
  z = 2 * time;
-end FunctionTests.FunctionLike.Special.SemiLinear10;
+end FunctionTests.FunctionLike.Special.SemiLinear7;
 ")})));
-end SemiLinear10;
+end SemiLinear7;
 
 end Special;
-
-
 
 package EventRel
 

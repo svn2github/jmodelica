@@ -16,6 +16,7 @@ import java.io.PrintStream;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+import org.jmodelica.util.XMLUtil;
 
 /**
  * A generator class containing basic functionality for generating XML files.
@@ -24,7 +25,6 @@ import java.io.PrintStream;
  */
 public abstract class GenericXMLGenerator extends GenericGenerator {
 
-    private HashMap<Character,String> illegalCharsSub;
     private String indentStep;
     private int indentation;
     
@@ -48,22 +48,6 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     protected String indentStep() { return "\t"; }
     
     /**
-     * Replace characters that are illegal in XML values with their HTML escape sequences.
-     */
-    protected String replaceIllegalChars(String s) {
-        StringBuilder buf = new StringBuilder();
-        int l = s.length();
-        for (int i = 0; i < l; i++) {
-            char ch = s.charAt(i);
-            if (illegalCharsSub.containsKey(ch))
-                buf.append(illegalCharsSub.get(ch));
-            else
-                buf.append(ch);
-        }
-        return buf.toString();
-    }
-    
-    /**
      * Constructor.
      * 
      * @param expPrinter Printer object used to generate code for expressions.
@@ -72,12 +56,6 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      */
     public GenericXMLGenerator(Printer expPrinter, char escapeCharacter, FClass fclass) {
         super(expPrinter,escapeCharacter, fclass);
-        
-        illegalCharsSub = new HashMap<Character,String>();
-        illegalCharsSub.put('&',"&amp;");
-        illegalCharsSub.put('<',"&lt;");
-        illegalCharsSub.put('>',"&gt;");
-        illegalCharsSub.put('"', "&quot;");
         
         indentStep = indentStep();
         indentation = 0;
@@ -175,6 +153,25 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
     }
     
     /**
+     * Generates an open XML start tag. This is the same as first calling
+     * generateTagStart() followed by generateOpenEnd().
+     */
+    protected void generateOpenTag(String name, CodeStream printer) {
+        generateTagStart(name, printer);
+        generateOpenEnd(printer);
+    }
+    
+    /**
+     * Generates an one line tag with text contents inside.
+     */
+    protected void generateOneLineTag(String name, Object contents, CodeStream printer) {
+        generateTagStart(name, printer);
+        printer.print(">");
+        printer.print(XMLUtil.escape(contents.toString()));
+        printer.format("</%s>\n", name);
+    }
+    
+    /**
      * Generate the end of an XML closed tag.
      * 
      * Closed tags can not contain other tags, and ends with "/>".
@@ -205,7 +202,7 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
      * @param printer  the print stream to use
      */
     protected void generateAttribute(String name, Object value, CodeStream printer) {
-        printer.format(" %s=\"%s\"", name, value);
+        printer.format(" %s=\"%s\"", name, XMLUtil.escape(value.toString()));
     }
     
     

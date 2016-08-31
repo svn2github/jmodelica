@@ -1172,60 +1172,51 @@ Residual equations:
 ")})));
 end NoEventNonlinear2; 
 
-model DivisionSmallConstant
-Real x[3];
-Real y[3];
-constant Real small = 2.7755575615628914E-17;
-equation
-
-1 = - y[1] + (-small * x[3] + small * x[2]);
-1 = - y[2] + (-small * x[1] - 0.5226138631915538 * x[3]);    
-1 = - y[3] + (0.5226138631915538 * x[2] + small * x[1]);
-
-y[1] + y[2] + y[3]  = 0;
-- y[1] - y[2]  - y[3]  = 0;
-- x[1]  - x[2]  - x[3]  = 0;
-
+    model DivisionSmallConstant
+        constant Real small_1 = 2E-11;
+        constant Real small_2 = 1E-11;
+        Real x;
+        Real y(start=0.5);
+    equation
+        x*y=1;
+        x*small_1 + y*small_2 = 0;
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
             name="DivisionSmallConstant",
-            description="",
+            description="Ensure that division of small numbers isn't done during tearing'",
             methodName="printDAEBLT",
             methodResult="
---- Torn linear system (Block 1) of 3 iteration variables and 3 solved variables ---
-Coefficient variability: constant
+--- Unsolved system (Block 1) of 2 variables ---
+Unknown variables:
+  y (start=0.5)
+  x ()
+
+Equations:
+  x * 2.0E-11 + y * 1.0E-11 = 0
+    Iteration variables: y
+  x * y = 1
+    Iteration variables: x
+-------------------------------
+"), FClassMethodTestCase(
+            name="DivisionSmallConstant_tighterLimit",
+            description="Ensure that division of almost to small numbers is possible divider greater than tolerance (1e-11 > 1e-12)",
+            methodName="printDAEBLT",
+            tearing_division_tolerance=1e-12,
+            methodResult="
+--- Torn system (Block 1) of 1 iteration variables and 1 solved variables ---
 Torn variables:
-  x[2]
-  y[1]
-  y[2]
+  y
 
 Iteration variables:
-  x[1]
-  y[3]
-  x[3]
+  x ()
 
 Torn equations:
-  x[2] := (-1 + (- y[3]) + 2.7755575615628914E-17 * x[1]) / -0.5226138631915538
-  y[1] := -1 + -2.7755575615628914E-17 * x[3] + 2.7755575615628914E-17 * x[2]
-  y[2] := - y[1] + (- y[3])
+  y := (- x * 2.0E-11) / 1.0E-11
 
 Residual equations:
-  - x[1] - x[2] - x[3] = 0
-    Iteration variables: x[1]
-  - y[1] - y[2] - y[3] = 0
-    Iteration variables: y[3]
-  1 = - y[2] + (-2.7755575615628914E-17 * x[1] - 0.5226138631915538 * x[3])
-    Iteration variables: x[3]
-
-Jacobian:
-  |-0.5226138631915538, 0.0, 0.0, -2.7755575615628914E-17, 1.0, 0.0|
-  |-2.7755575615628914E-17, 1.0, 0.0, 0.0, 0.0, 2.7755575615628914E-17|
-  |0.0, 1.0, 1.0, 0.0, 1.0, 0.0|
-  |-1.0, 0.0, 0.0, -1.0, 0.0, -1.0|
-  |0.0, -1.0, -1.0, 0.0, -1.0, 0.0|
-  |0.0, 0.0, 1.0, 2.7755575615628914E-17, 0.0, 0.5226138631915538|
+  x * y = 1
+    Iteration variables: x
 -------------------------------
 ")})));
-end DivisionSmallConstant;
-
+    end DivisionSmallConstant;
 end TearingTests;

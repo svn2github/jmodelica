@@ -1671,6 +1671,13 @@ aspect FlatAPI {
     eq InstNode.getChild().isNormalEquation()           = true;
     eq Root.getChild().isNormalEquation()               = false;
     
+    inh List<FAbstractEquation> FAbstractEquation.myFAbstractEquationList();
+    eq FClass.getFAbstractEquation().myFAbstractEquationList() = getFAbstractEquations();
+    eq FClass.getFInitialEquation().myFAbstractEquationList() = getFInitialEquations();
+    eq FClass.getFParameterEquation().myFAbstractEquationList() = getFParameterEquations();
+    eq FClass.getChild().myFAbstractEquationList() = null;
+    eq Root.getChild().myFAbstractEquationList() = null;
+    
     coll ArrayList<FExp> FAbstractEquation.replacedAtInitialExps()
         [new ArrayList<FExp>()] with add root FAbstractEquation;
     FDelayExp contributes this
@@ -1897,6 +1904,9 @@ aspect FlatAPI {
     syn boolean FAbstractVariable.isFVariable() = false;
     eq FVariable.isFVariable()                  = true;
 
+    syn boolean FAbstractVariable.isFRealVariable() = false;
+    eq FRealVariable.isFRealVariable()              = true;
+    
     syn boolean FAbstractVariable.isFFunctionVariable() = false;
     eq FFunctionVariable.isFFunctionVariable()          = true;
 
@@ -1916,6 +1926,11 @@ aspect FlatAPI {
     }
     eq FVariable.asFVariable() = this;
 
+    syn FRealVariable FAbstractVariable.asFRealVariable() {
+        throw new UnsupportedOperationException("asFRealVariable() is not supported for class type " + getClass().getSimpleName());
+    }
+    eq FRealVariable.asFRealVariable() = this;
+    
     syn FDerivativeVariable FAbstractVariable.asDerivativeVariable() {
         throw new UnsupportedOperationException("isDerivativeVariable() is not supported for class type " + getClass().getSimpleName());
     }
@@ -2359,10 +2374,6 @@ aspect FlatTypes {
     
     syn FExp FRecordDecl.extractArg(FRecordConstructor frc, String name) {
         return frc.getArg(indexOf(name));
-    }
-    
-    syn FExp FRecordConstructor.myArgFExp(String name) {
-        return getRecord().myFRecordDecl().extractArg(this, name);
     }
     
     inh FRecordDecl FExp.containingRecordDecl();
@@ -3712,7 +3723,7 @@ aspect FlatDiagnostics {
 
 aspect FlatAlgorithmAPI {
     
-    syn boolean FIdUseExp.inFAlgorithm() = myFAlgorithm() != null;
+    syn boolean FExp.inFAlgorithm() = myFAlgorithm() != null;
     
     syn FAlgorithm FIdUseExp.myFAlgorithm() = getFIdUse().myFAlgorithm();
     inh lazy FAlgorithm FIdUse.myFAlgorithm();

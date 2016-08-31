@@ -1132,6 +1132,32 @@ end FunctionInlining.RecordInline12;
 ")})));
 end RecordInline12;
 
+model RecordInline13
+    function f
+        input R r;
+        output Real y = sum(r.x);
+        algorithm
+    end f;
+    record R
+        Real[:] x = {1};
+    end R;
+    R r;
+    Real x = f(if time > 1 then r else R({2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordInline13",
+            description="Check inlining of composite if expression",
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.RecordInline13
+ constant Real r.x[1] = 1;
+ Real x;
+equation
+ x = if time > 1 then 1.0 else 2;
+end FunctionInlining.RecordInline13;
+")})));
+end RecordInline13;
 
 model Test2
   Modelica.Blocks.Sources.Ramp ramp(
@@ -2007,7 +2033,37 @@ equation
 end FunctionInlining.ForStatementInline8;
 ")})));
     end ForStatementInline8;
-	
+    
+    model ForStatementInline9
+function f
+    input Real[:] x;
+    output Real[size(x,1)] y;
+algorithm
+    if size(x,1) > 1 then
+    else
+        for i in 1:size(x,1) loop
+            y[i] := x[i];
+        end for;
+    end if;
+end f;
+
+Real[:] y = f({time,time+1});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForStatementInline9",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            flatModel="
+fclass FunctionInlining.ForStatementInline9
+ Real y[1];
+ Real y[2];
+equation
+ y[1] = 0.0;
+ y[2] = 0.0;
+end FunctionInlining.ForStatementInline9;
+")})));
+    end ForStatementInline9;
     
     
     model MultipleOutputsInline1
@@ -3941,18 +3997,70 @@ initial equation
             flatModel="
 fclass FunctionInlining.InitialSystemInlining2
  initial parameter Real x(fixed = false);
- Real temp_2;
- Real temp_3;
- Real temp_5;
+ initial parameter Real temp_2;
+ initial parameter Real temp_3;
+ initial parameter Real temp_5;
 initial equation 
  x = sin(temp_2) * cos(temp_3) + cos(temp_2) * sin(temp_3);
-equation
  temp_2 = temp_5 - 3.14;
  temp_3 = temp_5 + 3.14;
  temp_5 = time + 1;
 end FunctionInlining.InitialSystemInlining2;
 ")})));
 end InitialSystemInlining2;
+
+model InitialSystemInlining3
+    function f2
+        input Real x;
+        output Real y[2];
+    algorithm
+        y := {sin(x), cos(x)};
+        annotation(Inline=false);
+    end f2;
+    
+    function f1
+        input Real x;
+        output Real y[2];
+    algorithm
+        y := f2(x);
+    end f1;
+    
+    parameter Real p2 = 2;
+    parameter Real[2] p1(fixed=false);
+initial equation
+    p1 = f1(p2);
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialSystemInlining3",
+            description="Test inlining in the initial system. Test that ensures that equations and variables which define p1 end up in correct equations list (and with correct variability)",
+            flatModel="
+fclass FunctionInlining.InitialSystemInlining3
+ parameter Real p2 = 2 /* 2 */;
+ initial parameter Real p1[1](fixed = false);
+ initial parameter Real p1[2](fixed = false);
+ parameter Real temp_3;
+ parameter Real temp_4;
+initial equation 
+ p1[1] = temp_3;
+ p1[2] = temp_4;
+parameter equation
+ ({temp_3, temp_4}) = FunctionInlining.InitialSystemInlining3.f2(p2);
+
+public
+ function FunctionInlining.InitialSystemInlining3.f2
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := sin(x);
+  y[2] := cos(x);
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.InitialSystemInlining3.f2;
+
+end FunctionInlining.InitialSystemInlining3;
+")})));
+end InitialSystemInlining3;
 
 model ChainedCallInlining1
     record R
@@ -4414,6 +4522,63 @@ public
 end FunctionInlining.ChainedCallInlining11;
 ")})));
 end ChainedCallInlining11;
+
+model ChainedCallInlining12
+    record R
+        Real a;
+        Real b;
+    end R;
+    
+    function F1
+        input Real i1;
+        input R i2;
+        output Real o1;
+    algorithm
+        o1 := i2.a;
+    end F1;
+    
+    function F2
+        input Real i1;
+        input Real i2;
+        output R o1;
+    algorithm
+        o1.a := i1;
+        o1.b := i2;
+    annotation(Inline=false);
+    end F2;
+    
+    parameter Real a(fixed=false) = F1(time, F2(time, 42));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining12",
+            description="Test inlining chained function calls",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining12
+ initial parameter Real a(fixed = false);
+initial equation 
+ (FunctionInlining.ChainedCallInlining12.R(a, )) = FunctionInlining.ChainedCallInlining12.F2(time, 42);
+
+public
+ function FunctionInlining.ChainedCallInlining12.F2
+  input Real i1;
+  input Real i2;
+  output FunctionInlining.ChainedCallInlining12.R o1;
+ algorithm
+  o1.a := i1;
+  o1.b := i2;
+  return;
+ annotation(Inline = false);
+ end FunctionInlining.ChainedCallInlining12.F2;
+
+ record FunctionInlining.ChainedCallInlining12.R
+  Real a;
+  Real b;
+ end FunctionInlining.ChainedCallInlining12.R;
+
+end FunctionInlining.ChainedCallInlining12;
+")})));
+end ChainedCallInlining12;
 
 
 model InputAsIndex1

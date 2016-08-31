@@ -880,7 +880,7 @@ public class ModelicaCompiler {
             deleteOutDir();
             ASTNode.endStep("packUnit()");
         } finally {
-            log.debug("Time useage and memory usage change during compilation steps:");
+            log.debug("Time usage and memory usage change during compilation steps:");
             ASTNode.getStepInfo().logReport();
             if (options.getBooleanOption("debug_csv_step_info"))
                 ASTNode.getStepInfo().writeCSVFile(new File(FClass.removeModifiersFromClassName(className) + ".csv"));
@@ -2656,6 +2656,10 @@ public abstract class CCompilerDelegator {
             this.externalLibraries = externalLibraries;
             this.externalLibraryDirectories = externalLibraryDirectories;
             this.externalIncludeDirectories = externalIncludeDirectories;
+        }
+        
+        public OptionRegistry getOptions() {
+            return options;
         }
         
         public String getFileName() {

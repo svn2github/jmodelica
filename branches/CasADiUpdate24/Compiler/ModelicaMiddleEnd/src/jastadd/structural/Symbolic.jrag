@@ -123,7 +123,9 @@ aspect EquationSolve {
 		
         // Compute new expressions for the inactive and active terms
         FExp inactiveTerm = computeInactiveSolution(inactiveTerms);
-        FExp activeTerm = computeActiveSolution(activeTerms, var, duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") || inactiveTerm.isLiteralZero());
+        FExp activeTerm = computeActiveSolution(activeTerms, var,
+                duringTearing && !myOptions().getBooleanOption("divide_by_vars_in_tearing") ||
+                inactiveTerm.isLiteralZero(), duringTearing ? myOptions().getRealOption("tearing_division_tolerance") : 0);
         
         if (activeTerm.isNoExp()) {
             return new FNoExp();
@@ -150,7 +152,8 @@ aspect EquationSolve {
         return FExp.createBalancedBinaryTree(new FAddExp(), expsCopies);
     }
     
-    private static FExp FEquation.computeActiveSolution(Collection<FExp> exps, FVariable var, boolean dontAllowDivisionByVariable) {
+    private static FExp FEquation.computeActiveSolution(Collection<FExp> exps, FVariable var,
+            boolean dontAllowDivisionByVariable, double tol) {
         java.util.List<FExp> parts = new ArrayList<FExp>();
         FTypePrefixVariability mulCoeffVar = fConstant(); // Keep track of variability
         // Compute new expressions for the active terms
@@ -173,7 +176,9 @@ aspect EquationSolve {
                     activeFactors.add(((FNegExp)ee).getFExp());
                     negatedFactor = true;
                 } else if (ee.nbrUses(var.name())==0) {
-                    if (ee.variability().constantVariability() && Math.abs(ee.ceval().realValue())*ee.dynamicFExp(var.nominal()).ceval().realValue() < 1e-10) {
+                    if (ee.variability().constantVariability() &&
+                            Math.abs(ee.ceval().realValue()) *
+                            ee.dynamicFExp(var.nominal()).ceval().realValue() < tol) {
                         return new FNoExp();
                     }
                     inactiveFactors.add(ee);

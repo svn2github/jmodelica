@@ -131,13 +131,7 @@ aspect InstTypeAnalysis {
         return new FFunctionType(Size.SCALAR, actualInstClass().qualifiedName(), inputTypes, outputTypes, null);
     }
     
-    eq InstRecordConstructor.type() {
-        FRecordType res = myInstClassDecl().createEmptyFRecordType(Size.SCALAR);
-        for (InstComponentDecl icd : allInstComponentDecls()) {
-            res.addComponent(new FRecordComponentType(icd.name(), icd.type().treeCopy()));
-        }
-        return res;
-    }
+    eq InstRecordConstructor.type() = getRecord().recordType();
     
     public FType FType.componentType(String name) {
         return fUnknownType();

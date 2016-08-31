@@ -403,15 +403,6 @@ aspect ComplianceCheck {
         }
     }
     
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED =
-        new SimpleErrorProducer("UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED", ProblemKind.COMPLIANCE, "Vectorized function calls of unknown size is not supported");
-        
-    public void InstVectorFunctionCall.complianceCheck(ErrorCheckType checkType) {
-        if (size().isUnknown()) {
-            UNSUPPORTED_UNKNOWN_SIZE_VECTORIZED.invoke(this);
-        }
-    }
-    
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE =
             new SimpleErrorProducer("UNSUPPORTED_EXTERNAL_FUNCTION_RECORD_RETURN_VALUE", ProblemKind.COMPLIANCE, "Using records as return value from external functions is not supported");
 

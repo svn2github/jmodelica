@@ -392,7 +392,7 @@ int jmi_get_event_indicators_impl(jmi_t* jmi, jmi_real_t eventIndicators[], size
 
     retval = jmi_dae_R_perturbed(jmi,eventIndicators);
     if(retval != 0) {
-        jmi_log_node(jmi->log, logError, "EventInticatorsEvaluationFailed", "Error evaluating event indicators.");
+        jmi_log_node(jmi->log, logError, "EventIndicatorsEvaluationFailed", "Error evaluating event indicators.");
         if (jmi->jmi_callbacks.log_options.log_level >= 5){
             jmi_log_leave(jmi->log, node);
         }

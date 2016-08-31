@@ -119,7 +119,7 @@ aspect TransformCanonical {
             transformations.add(new enableStreamsRewrite());
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
-            transformations.add(new enableWhenClauseRewrite());
+            transformations.add(new convertWhenToIf());
             transformations.add(new extractSampleExpressions());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
@@ -823,7 +823,7 @@ aspect TransformCanonical {
     }
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-        return myArgFExp(suffix).fullCopy();
+        return component(suffix).fullCopy();
     }
     
     public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
@@ -1961,9 +1961,10 @@ aspect TransformCanonical {
         FIdUseExp defineUse = definingUses().iterator().next();
         FExp value;
         if (nonDefiningUses().size() > 0) {
+            List<FAbstractEquation> defineEqnList = defineUse.myFEquation().myFAbstractEquationList();
             FIdUseExp nonDefineUse = nonDefiningUses().iterator().next();
             value = nonDefineUse.inlineUsesFunctionCallLeft();
-            if (value == null || (defineUse.isParameterExp() && value.myFEquation().isNormalEquation())) {
+            if (value == null || defineEqnList == null || defineEqnList != value.myFEquation().myFAbstractEquationList()) {
                 return false;
             }
             value.myFEquation().markForRemoval();
@@ -2293,200 +2294,6 @@ aspect TransformCanonical {
 	
 }
 
-aspect WhenClauses{
-	
-	public class FClass {
-		/**
-		 * Rewrites when clauses to if clauses.
-		 */
-		public class enableWhenClauseRewrite extends Transformation {
-			public void perform() {
-				createGuardTemporaries();
-				enableWhenClauseRewrite();
-				flushAllRecursive();
-			}
-			
-			public void createGuardTemporaries() {
-				for (FExp e : guardExpInEquations()) {
-					if (e.shouldExtractGuard()) {
-						addFVariable(e.type().createFVariable(new FPublicVisibilityType(), 
-								new FQNameFull(e.tempVarName()), e.variability().combine(fDiscrete())));
-						
-						if (e.inAlgorithm() && !e.dependsOn(e.myFAlgorithm().referencedFVariablesInLHS())) {
-							addFAbstractEquation(new FEquation(e.tempUseExp(), e.fullCopy()));
-						}
-					}
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Should this guard expression be extracted into a temp variable?
-	 */
-	syn boolean FExp.shouldExtractGuard() = true;
-	eq FInitialExp.shouldExtractGuard() = false;
-	eq FIdUseExp.shouldExtractGuard() = false;
-	eq FPreExp.shouldExtractGuard() = true;
-	eq FDerExp.shouldExtractGuard() = true;
-	eq FDummyDerExp.shouldExtractGuard() = true;
-	
-	/**
-	 * Flag for whether or not this if clause/expression 
-	 * originates from a when clause.
-	 */
-	private boolean FAbstractEquation.isWhen = false;
-	private boolean FStatement.isWhen        = false;
-	private boolean FIfExp.isWhen            = false;
-	
-	syn boolean FAbstractEquation.isWhen() = isWhen;
-	eq FWhenEquation.isWhen()              = true;
-	syn boolean FStatement.isWhen()        = isWhen;
-	eq FWhenStmt.isWhen()                  = true;
-	syn boolean FIfExp.isWhen()            = isWhen;
-	public void FAbstractEquation.setWhen() { isWhen = true; }
-	public void FStatement.setWhen()        { isWhen = true; }
-	public void FIfExp.setWhen()            { isWhen = true; }
-	
-	
-	
-	/**
-	 * Rewrite mechanisms
-	 */
-	boolean FWhenEquation.rewriteWhenClause = false;
-	boolean FWhenStmt.rewriteWhenClause     = false;
-	boolean FRelExp.rewriteWhenClause       = false;
-	boolean FEventGenExp.rewriteWhenClause  = false;
-
-	public void ASTNode.enableWhenClauseRewrite() {
-		for (ASTNode n : this)
-			n.enableWhenClauseRewrite();
-	}
-	
-	public void FWhenEquation.enableWhenClauseRewrite() {
-		super.enableWhenClauseRewrite();
-		rewriteWhenClause = true;
-		is$Final = false;
-	}
-	
-	public void FWhenStmt.enableWhenClauseRewrite() {
-		rewriteWhenClause = true;
-		is$Final = false;
-	}
-	
-	/**
-	 * Rewrites this when clause to an equivalent if clause
-	 */
-	rewrite FWhenEquation in FClass.getFAbstractEquation() {
-		when (rewriteWhenClause) to List {
-			ArrayList<FAbstractEquation> eqs = new ArrayList<FAbstractEquation>();
-			convertGuard(eqs, true);
-			eqs.add(asIfClause());
-			return new List<FAbstractEquation>(eqs);
-		}
-	}
-	rewrite FWhenEquation {
-		when (rewriteWhenClause) to FIfEquation {
-			return asIfClause();
-		}
-	}
-	
-	/**
-	 * Rewrites this when clause to an equivalent if clause
-	 */
-	rewrite FWhenStmt in FAlgorithm.getFStatement() {
-		when (rewriteWhenClause) to List {
-			return asIfClause();
-		}
-	}
-	
-	/**
-	 * Converts this when clause to an equivalent if clause
-	 */
-	public FIfEquation FWhenEquation.asIfClause() {
-		
-		FIfEquation e = new FIfEquation();
-		
-		if (hasElse()) {
-			e.setElse(getElse());
-		} else {
-			ArrayList<FAbstractEquation> l = new ArrayList<FAbstractEquation>();
-			for (FVariable fv : referencedFVariablesInLHS()) {
-				l.add(new FEquation(fv.createUseExp(), fv.createFPreExp()));
-			}
-			e.setElse(new FElseEquation(getType(), new List<FAbstractEquation>(l)));
-		}
-		e.setType(getType());
-		e.setTest(getTest());
-		e.setFAbstractEquationList(getFAbstractEquations());
-		e.setWhen();
-		
-		return e;
-	}
-	
-	/**
-	 * Converts this when clause to an equivalent if clause
-	 */
-	public List<FStatement> FWhenStmt.asIfClause() {
-		ArrayList<FStatement> stmts = new ArrayList<FStatement>();
-		ArrayList<FIfWhenClause> clauses = new ArrayList<FIfWhenClause>();
-		
-		for (FIfWhenClause clause : getFIfWhenClauses()) {	
-			FIfClause c = new FIfClause();
-			c.setTest(clause.getTest().transformGuard(stmts, false));
-			c.setFStatementList(clause.getFStatements().fullCopy());
-			clauses.add(c);
-		}
-		
-		FIfStmt e = new FIfStmt();
-		e.setWhen();
-		myFEquation().setWhen();
-		e.setFIfWhenClauseList(new List<FIfWhenClause>(clauses));
-		
-		stmts.add(e);
-		
-		return new List<FStatement>(stmts);
-	}
-	
-	public void FIfWhenElseEquation.convertGuard(ArrayList l, boolean equation) {}
-	public void FIfWhenEquation.convertGuard(ArrayList l, boolean equation) {
-		setTest(getTest().transformGuard(l,equation));
-		if (hasElse())
-			getElse().convertGuard(l,equation);
-	}
-	
-	/**
-	 * Converts this guard expression from a when clause to a guard expression
-	 * to be used in an if clause.
-	 */
-    public FExp FExp.transformGuard(ArrayList l, boolean equation) {
-        Iterator<FExp> it = guards().iterator();
-        FExp res = it.next().asGuard(l, equation);
-        while (it.hasNext())
-            res = new FOrExp(res,it.next().asGuard(l, equation));
-        return res;
-    }
-	public FExp FExp.asGuard(ArrayList l, boolean equation) {
-		if (equation)
-			l.add(new FEquation(tempUseExp(), fullCopy()));
-		else if(dependsOn(myFAlgorithm().referencedFVariablesInLHS()))
-			l.add(new FAssignStmt(tempUseExp(), fullCopy()));
-		return new FAndExp(tempUseExp(), new FNotExp(tempPreExp()));
-	}
-	
-	public FExp FInitialExp.asGuard(ArrayList l, boolean equation) {
-		return fullCopy();
-	}
-	
-	public FExp FIdUseExp.asGuard(ArrayList l, boolean equation) {
-		if (!shouldExtractGuard())
-			return new FAndExp(fullCopy(), new FNotExp(new FPreExp(getFIdUse().fullCopy())));
-		else
-			return super.asGuard(l, equation);
-	}
-}
-
-
 aspect ExtractSampleExpressions {
     public class FClass {
         /**
@@ -2631,6 +2438,10 @@ aspect IfEquations {
 	rewrite FElseEquation in FClass.getFInitialEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
 	}	
+	
+    rewrite FElseEquation in FClass.getFParameterEquation() {
+        when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
+    }
 	
 	rewrite FElseEquation in FClass.getFAbstractEquation() {
 		when (getNumFAbstractEquation() > 0) to List getFAbstractEquations();
@@ -2892,18 +2703,25 @@ aspect IfEquations {
 		    if (keepRight.getNumChild() > 0) 
 		        elseOpt.addChild(new FElseEquation(getType().fullCopy(), keepRight));
 		    e = new FIfEquation(getType().fullCopy(), keepLeft, getTest(), elseOpt);
-		    if (isWhen())
-		    	e.setWhen();
+            copyFlagsTo(e);
 		    l.add(e);
 		} else if (keepRight.getNumChild() > 0) {
             e = new FIfEquation(getType().fullCopy(), keepRight, new FNotExp(getTest()), new Opt());
-		    if (isWhen())
-		    	e.setWhen();
+            copyFlagsTo(e);
             l.add(e);
 		}
 		
 		return l;
 	}
+	
+    public void FIfEquation.copyFlagsTo(FIfEquation e) {
+        if (isTempAssign()) {
+            e.setIsTempAssign();
+        }
+        if (isWhen()) {
+            e.setWhen();
+        }
+    }
 	
 	syn boolean FAbstractEquation.allowGlobalOnIfRewrite() = false;
 	eq FFunctionCallEquation.allowGlobalOnIfRewrite()      = getNumLeft() > 0;

@@ -317,8 +317,9 @@ aspect DynamicStateSelect{
                 continue;
             lightReset();
             ASTNode.log.debug("  SAP1");
-            if (sap1.augmentingPath(eqn))
+            if (sap1.augmentingPath(eqn)) {
                 continue;
+            }
             DSSet set = dsLookup.get(eqn);
             if (set == null)
                 set = new DSSet();
@@ -481,14 +482,18 @@ aspect DynamicStateSelect{
         Collections.sort(res, new Comparator<IndexReductionVar>() {
             @Override
             public int compare(IndexReductionVar a, IndexReductionVar b) {
+                // Get unmatched first
                 int diff = (a.getMatching() == null ? 1 : 0) - (b.getMatching() == null ? 1 : 0);
                 if (diff != 0) {
                     return -diff;
                 }
+                // Get other variables after the one matched to the equation
                 diff = (a.getMatching() == IndexReductionEq.this ? 1 : 0) - (b.getMatching() == IndexReductionEq.this ? 1 : 0);
                 if (diff != 0) {
                     return -diff;
                 }
+                // Get non-temporary variables first. Then temporary variables
+                // that are not assigned in its "temporary equation"
                 IndexReductionEq aEq = tempAssignmentMap.get(a);
                 IndexReductionEq bEq = tempAssignmentMap.get(b);
                 diff = (aEq != null ? (aEq.getMatching() != a ? 2 : 1) : 0) - (bEq != null ? (bEq.getMatching() != b ? 2 : 1) : 0);
@@ -642,6 +647,12 @@ aspect DynamicStateSelect{
                 }
                 return var.dynamicSetCandidate(computeIncidenceStateSelect(eqn, var));
             }
+            @Override
+            protected void match(IndexReductionEq eqn, IndexReductionVar var) {
+                IndexReductionVar previous = eqn.getMatching();
+                super.match(eqn, var);
+                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
+            }
         }
 
         public class SAP2 extends AugmentingPathAlgorithm<Collection<IndexReductionEq>> {
@@ -685,8 +696,9 @@ aspect DynamicStateSelect{
     
             @Override
             protected void match(IndexReductionEq eqn, IndexReductionVar var) {
+                IndexReductionVar previous = eqn.getMatching();
                 super.match(eqn, var);
-                ASTNode.log.debug("      Rematch %s to %s", eqn, var);
+                ASTNode.log.debug("      Rematch %s to %s (previous %s)", eqn, var, previous);
                 Map<IndexReductionVar, Coefficient> coefficients = coefficientsMatrix.get(eqn);
                 if (coefficients == null)
                     return;

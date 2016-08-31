@@ -960,7 +960,6 @@ der(_ds.2.s1) := dsDer(2, 1)
 -------------------------------
 ")})));
         end TwoDSSetSameBlock;
-
     end Basic;
     
     package Leafs

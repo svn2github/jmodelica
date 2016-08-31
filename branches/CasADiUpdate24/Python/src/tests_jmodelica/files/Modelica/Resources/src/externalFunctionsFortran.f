@@ -14,6 +14,17 @@
               y(i) = x(xs + 1 - i)
 10        continue
       END
+      
+      SUBROUTINE FREALMATRIX(xs1, xs2, x, y)
+          INTEGER xs1,xs2
+          DOUBLE PRECISION x(xs1, xs2)
+          DOUBLE PRECISION y(xs1, xs2)
+          do 10 i = 1, xs1
+              do 11 j = 1, xs2
+                  y(i,j) = x(xs1 + 1 - i, xs2 + 1 - j)
+11            continue
+10        continue
+      END
 
       INTEGER FUNCTION FINTEGERSCALAR(x)
           INTEGER x

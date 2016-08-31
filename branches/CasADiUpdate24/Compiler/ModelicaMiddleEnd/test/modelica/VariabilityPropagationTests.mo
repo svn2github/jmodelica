@@ -2330,4 +2330,135 @@ end VariabilityPropagationTests.AlgorithmFolding1;
 end AlgorithmFolding1;
 
 
+model KnownParameter1
+    function f
+        input Real x;
+        output Real[1,1] y;
+    algorithm
+        y[1,1] := x + 1;
+    end f;
+    
+    model C
+        Real x = y;
+        Real y(start = 1) = a[1];
+        parameter Real a[1] = {1};
+    end C;
+    
+    C c[1](a = f(b));
+    final parameter Real b = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="KnownParameter1",
+            description="Test variability propagation for known parameter expressions",
+            flatModel="
+fclass VariabilityPropagationTests.KnownParameter1
+ final parameter Real c[1].a[1](start = 1) = 2.0 /* 2.0 */;
+ final parameter Real b = 1 /* 1 */;
+end VariabilityPropagationTests.KnownParameter1;
+")})));
+end KnownParameter1;
+
+
+model IfEquationTemp1
+    function f
+        input Real x;
+        output Real[2] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real[:] y = if sum(f(time))>0 then f(1) else f(2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEquationTemp1",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.IfEquationTemp1
+ Real y[1];
+ Real y[2];
+ Real temp_1[1];
+ Real temp_1[2];
+equation
+ ({temp_1[1], temp_1[2]}) = VariabilityPropagationTests.IfEquationTemp1.f(time);
+ y[1] = if temp_1[1] + temp_1[2] > 0 then 1.0 else 2.0;
+ y[2] = if temp_1[1] + temp_1[2] > 0 then 2.0 else 3.0;
+
+public
+ function VariabilityPropagationTests.IfEquationTemp1.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end VariabilityPropagationTests.IfEquationTemp1.f;
+
+end VariabilityPropagationTests.IfEquationTemp1;
+")})));
+end IfEquationTemp1;
+
+model IfEquationTemp2
+    function f
+        input Real x;
+        output Real[2] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real[:] y = if sum(f(time))>0 then f(c) else f(c+1);
+    Real c = 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEquationTemp2",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass VariabilityPropagationTests.IfEquationTemp2
+ Real y[1];
+ Real y[2];
+ constant Real c = 1;
+ Real temp_1[1];
+ Real temp_1[2];
+equation
+ ({temp_1[1], temp_1[2]}) = VariabilityPropagationTests.IfEquationTemp2.f(time);
+ y[1] = if temp_1[1] + temp_1[2] > 0 then 1.0 else 2.0;
+ y[2] = if temp_1[1] + temp_1[2] > 0 then 2.0 else 3.0;
+
+public
+ function VariabilityPropagationTests.IfEquationTemp2.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end VariabilityPropagationTests.IfEquationTemp2.f;
+
+end VariabilityPropagationTests.IfEquationTemp2;
+")})));
+end IfEquationTemp2;
+
+model SmallConstant1
+    Real x;
+equation
+    1e-17*x=1e-16;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SmallConstant1",
+            description="",
+            inline_functions="none",
+            tearing_division_tolerance=1e-15,
+            flatModel="
+fclass VariabilityPropagationTests.SmallConstant1
+ constant Real x = 9.999999999999998;
+end VariabilityPropagationTests.SmallConstant1;
+")})));
+end SmallConstant1;
+
+
 end VariabilityPropagationTests;

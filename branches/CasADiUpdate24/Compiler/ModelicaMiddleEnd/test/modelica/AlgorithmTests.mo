@@ -35,23 +35,23 @@ model Break1
             flatModel="
 fclass AlgorithmTests.For.Break1
  Real x;
- discrete Boolean temp_1;
+ discrete Boolean Break1.temp_1;
 initial equation 
- pre(temp_1) = false;
+ pre(Break1.temp_1) = false;
 algorithm
  x := 1;
- temp_1 := true;
- if temp_1 then
+ Break1.temp_1 := true;
+ if Break1.temp_1 then
   x := x + 1;
-  temp_1 := false;
-  if temp_1 then
+  Break1.temp_1 := false;
+  if Break1.temp_1 then
    x := x + 1;
   end if;
  end if;
- if temp_1 then
+ if Break1.temp_1 then
   x := x + 1;
-  temp_1 := false;
-  if temp_1 then
+  Break1.temp_1 := false;
+  if Break1.temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -80,31 +80,31 @@ model Break2
             flatModel="
 fclass AlgorithmTests.For.Break2
  Real x;
- discrete Boolean temp_1;
+ discrete Boolean Break2.temp_1;
 initial equation 
- pre(temp_1) = false;
+ pre(Break2.temp_1) = false;
 algorithm
  x := 1;
- temp_1 := true;
- if temp_1 then
+ Break2.temp_1 := true;
+ if Break2.temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   temp_1 := false;
+   Break2.temp_1 := false;
   else
    x := x + 1;
   end if;
-  if temp_1 then
+  if Break2.temp_1 then
    x := x + 1;
   end if;
  end if;
- if temp_1 then
+ if Break2.temp_1 then
   x := x + 1;
   if noEvent(x > 2) then
-   temp_1 := false;
+   Break2.temp_1 := false;
   else
    x := x + 1;
   end if;
-  if temp_1 then
+  if Break2.temp_1 then
    x := x + 2;
   end if;
  end if;
@@ -139,49 +139,229 @@ model Break3
             flatModel="
 fclass AlgorithmTests.For.Break3
  Real x;
- discrete Boolean temp_1;
- discrete Boolean temp_2;
+ discrete Boolean Break3.temp_1;
+ discrete Boolean Break3.temp_2;
 initial equation 
- pre(temp_1) = false;
- pre(temp_2) = false;
+ pre(Break3.temp_1) = false;
+ pre(Break3.temp_2) = false;
 algorithm
  x := 1;
- temp_1 := true;
- if temp_1 then
-  temp_2 := true;
-  if temp_2 then
+ Break3.temp_1 := true;
+ if Break3.temp_1 then
+  Break3.temp_2 := true;
+  if Break3.temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     temp_2 := false;
+     Break3.temp_2 := false;
     end if;
-    if temp_2 then
+    if Break3.temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  if temp_2 then
+  if Break3.temp_2 then
    if noEvent(x > 1) then
     x := 2;
    elseif noEvent(x > 2) then
     x := 3;
    else
     if noEvent(x > 3) then
-     temp_2 := false;
+     Break3.temp_2 := false;
     end if;
-    if temp_2 then
+    if Break3.temp_2 then
      x := 4;
     end if;
    end if;
   end if;
-  temp_1 := false;
+  Break3.temp_1 := false;
  end if;
 end AlgorithmTests.For.Break3;
 ")})));
 end Break3;
+
+model BreakNames1
+    Real a;
+    algorithm
+        a := 0.0;
+        for i in 1:2 loop
+            a := a + i;
+            if a > 0.0 then
+                break;
+            end if;
+        end for;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="BreakNames1",
+            description="Correct naming of temporary variables resulting from flattening of break statements.",
+            variability_propagation=false,
+            flatModel="
+fclass AlgorithmTests.For.BreakNames1
+ discrete Boolean BreakNames1.temp_1;
+ Real a;
+algorithm
+ a := 0.0;
+ BreakNames1.temp_1 := true;
+ if BreakNames1.temp_1 then
+  a := a + 1;
+  if a > 0.0 then
+   BreakNames1.temp_1 := false;
+  end if;
+ end if;
+ if BreakNames1.temp_1 then
+  a := a + 2;
+  if a > 0.0 then
+   BreakNames1.temp_1 := false;
+  end if;
+ end if;
+end AlgorithmTests.For.BreakNames1;
+")})));
+end BreakNames1;
+
+model BreakNames2
+    model M1
+        input Real a;
+        output Real b;
+    algorithm
+        a := 0.0;
+        for i in 1:2 loop
+            b := a + i;
+            if b < 0.0 then
+                break;
+            end if;
+        end for;
+    end M1;
+    
+    model M2
+        input Real a;
+        output Real b;
+    algorithm
+        a := 0.0;
+        for i in 1:2 loop
+            b := b + a + i;
+            if b > 10.0 then
+                break;
+            end if;
+        end for;
+    end M2;
+    
+    M1 m1;
+    M2 m2;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="BreakNames2",
+            description="Correct naming of temporary variables resulting from flattening of break statements (class conflict).",
+            variability_propagation=false,
+            flatModel="
+fclass AlgorithmTests.For.BreakNames2
+ discrete Boolean m1.BreakNames2.temp_1;
+ Real m1.a;
+ Real m1.b;
+ discrete Boolean m2.BreakNames2.temp_2;
+ Real m2.a;
+ Real m2.b;
+algorithm
+ m1.a := 0.0;
+ m1.BreakNames2.temp_1 := true;
+ if m1.BreakNames2.temp_1 then
+  m1.b := m1.a + 1;
+  if m1.b < 0.0 then
+   m1.BreakNames2.temp_1 := false;
+  end if;
+ end if;
+ if m1.BreakNames2.temp_1 then
+  m1.b := m1.a + 2;
+  if m1.b < 0.0 then
+   m1.BreakNames2.temp_1 := false;
+  end if;
+ end if;
+algorithm
+ m2.a := 0.0;
+ m2.BreakNames2.temp_2 := true;
+ if m2.BreakNames2.temp_2 then
+  m2.b := m2.b + m2.a + 1;
+  if m2.b > 10.0 then
+   m2.BreakNames2.temp_2 := false;
+  end if;
+ end if;
+ if m2.BreakNames2.temp_2 then
+  m2.b := m2.b + m2.a + 2;
+  if m2.b > 10.0 then
+   m2.BreakNames2.temp_2 := false;
+  end if;
+ end if;
+end AlgorithmTests.For.BreakNames2;
+")})));
+end BreakNames2;
+
+model BreakNames3
+    Real[2] temp_1 = {1, 2};
+    Real temp_2;
+    Real temp_4;
+    algorithm
+        for i in 1:2 loop
+            temp_2 := temp_2 + temp_1[3 - i];
+            temp_4 := temp_4 + temp_1[i];
+            if temp_2 > temp_4 then
+                break;
+            end if;
+        end for;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="BreakNames3",
+            description="Correct naming of temporary variables resulting from flattening of break statements (variable conflict).",
+            variability_propagation=false,
+            flatModel="
+fclass AlgorithmTests.For.BreakNames3
+ discrete Boolean BreakNames3.temp_3;
+ Real temp_1[2] = {1, 2};
+ Real temp_2;
+ Real temp_4;
+algorithm
+ BreakNames3.temp_3 := true;
+ if BreakNames3.temp_3 then
+  temp_2 := temp_2 + temp_1[3 - 1];
+  temp_4 := temp_4 + temp_1[1];
+  if temp_2 > temp_4 then
+   BreakNames3.temp_3 := false;
+  end if;
+ end if;
+ if BreakNames3.temp_3 then
+  temp_2 := temp_2 + temp_1[3 - 2];
+  temp_4 := temp_4 + temp_1[2];
+  if temp_2 > temp_4 then
+   BreakNames3.temp_3 := false;
+  end if;
+ end if;
+end AlgorithmTests.For.BreakNames3;
+")})));
+end BreakNames3;
+
+model Empty1
+    Real x;
+algorithm
+    x := 1;
+    for i in 2:1 loop
+        x := x + i;
+    end for;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="For_Empty1",
+            description="Empty for statement",
+            flatModel="
+fclass AlgorithmTests.For.Empty1
+ Real x;
+algorithm
+ x := 1;
+end AlgorithmTests.For.Empty1;
+")})));
+end Empty1;
 
 end For;
 
@@ -354,8 +534,8 @@ public
   t := size(x, 1);
   init temp_1 as AlgorithmTests.TempAssign2.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
-  for i2 in 1:max(t, 0) loop
-   temp_2[i2] := t + 1 - i2;
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1] := t + 1 - i1;
   end for;
   for i1 in 1:max(t, 0) loop
    temp_1[i1].a := y[temp_2[i1]].a;
@@ -458,8 +638,8 @@ public
   t := size(x, 1);
   init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
-  for i2 in 1:max(t, 0) loop
-   temp_2[i2] := t + 1 - i2;
+  for i1 in 1:max(t, 0) loop
+   temp_2[i1] := t + 1 - i1;
   end for;
   for i1 in 1:max(t, 0) loop
    temp_1[i1].a[1] := y[temp_2[i1]].a[1];

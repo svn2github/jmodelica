@@ -589,7 +589,8 @@ static int record(jmi_t *jmi, jmi_delaybuffer_t *buffer, jmi_real_t t, jmi_real_
             if (buffer->size > 1) {
                 /* Filter out the event, or the current sample? */
 
-                if (buf[end_pos].y == y) return 0; /* Filter out this event since it has the same y. NB: only valid for linear interpolation. */
+                /* Filter out this event since it has the same y. NB: only valid for linear interpolation. */
+                if (JMI_ABS(buf[end_pos].y - y) < JMI_MAX(1.0, JMI_ABS(y))*jmi->events_epsilon) return 0;
 
                 /* If there is already an event at the end, discard it. */
                 if (at_right && event_left_of(buffer, end_index)) {

@@ -498,6 +498,18 @@ class TestFortranBasic:
         nose.tools.assert_equals(res.final('xArrayUnknown[2]'), 6)
         
     @testattr(stddist = True)
+    def testCEvalMatrixReal(self):
+        '''
+        Constant evaluation of basic external fortran function with Reals.
+        '''
+        cpath = "ExtFunctionTests.CEval.Fortran.RealTestMatrix"
+        fmu_name = compile_fmu(cpath, self.fpath)
+        model = load_fmu(fmu_name)
+        res = model.simulate()
+        nose.tools.assert_equals(res.final('y1[1,1]'), 1)
+        nose.tools.assert_equals(res.final('y2[1,1]'), 9)
+        
+    @testattr(stddist = True)
     def testCEvalInteger(self):
         '''
         Constant evaluation of basic external fortran function with Integers.

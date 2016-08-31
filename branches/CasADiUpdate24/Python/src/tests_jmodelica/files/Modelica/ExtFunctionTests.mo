@@ -437,6 +437,18 @@ package CEval
       constant Real[2] xArrayUnknown  = frealarrayunknown({6,7});
     end RealTest;
     
+    model RealTestMatrix
+      function frealmatrix
+        input  Real[:,:] x_in;
+        output Real[size(x_in,1), size(x_in,2)] x_out;
+      external "FORTRAN 77" frealmatrix(size(x_in,1), size(x_in,2), x_in, x_out) annotation(
+        Library="externalFunctionsFortran");
+      end frealmatrix;
+      
+      constant Real[1,1] y1  = frealmatrix({{1}});
+      constant Real[2,2] y2  = frealmatrix({{6,7},{8,9}});
+    end RealTestMatrix;
+    
     model IntegerTest
       function fintegerscalar
         input  Integer x_in;

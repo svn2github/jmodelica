@@ -26,8 +26,8 @@ from pyjmi import get_files_path, transfer_optimization_problem
 
 def run_demo(with_plots=True, use_ma57=False):
     """
-    This example is based on a binary distillation column. The model has 125
-    states, 1000 algebraic variables and 2 control variables. The task is to
+    This example is based on a binary distillation column. The model has 42
+    states, 1083 algebraic variables and 2 control variables. The task is to
     get back to the desired steady-state after a short reflux breakdown.
     
     The example consists of the following steps:
@@ -202,9 +202,6 @@ def run_demo(with_plots=True, use_ma57=False):
     break_model.set('Vdot_L1_ref', L_vol_ref)
     for i in xrange(1, 43):
         break_model.set('xA_init[%d]' % i, ss_res.final('xA[%d]' % i))
-        break_model.set('Temp_init[%d]' % i, ss_res.final('Temp[%d]' % i))
-        if i < 42:
-            break_model.set('V_init[%d]' % i, ss_res.final('V[%d]' % i))
 
     # Define input function for broken reflux
     def input_function(time):
@@ -237,11 +234,6 @@ def run_demo(with_plots=True, use_ma57=False):
     for i in xrange(1, 43):
         ref_model.set('xA_init[' + `i` + ']',
                       break_res.final('xA[' + `i` + ']'))
-        ref_model.set('Temp_init[' + `i` + ']',
-                      break_res.final('Temp[' + `i` + ']'))
-        if i < 42:
-            ref_model.set('V_init[' + `i` + ']',
-                          break_res.final('V[' + `i` + ']'))
 
     # Simulate
     ref_res = ref_model.simulate(final_time=5000.,
@@ -270,9 +262,6 @@ def run_demo(with_plots=True, use_ma57=False):
     op.set('Vdot_L1_ref', L_vol_ref)
     for i in xrange(1, 43):
         op.set('xA_init[' + `i` + ']', break_res.final('xA[' + `i` + ']'))
-        op.set('Temp_init[' + `i` + ']', break_res.final('Temp[' + `i` + ']'))
-        if i < 42:
-            op.set('V_init[' + `i` + ']', break_res.final('V[' + `i` + ']'))
 
     # Set optimization options and solve
     opts = op.optimize_options()
@@ -302,7 +291,7 @@ def run_demo(with_plots=True, use_ma57=False):
         pass
     else:
         cost = float(opt_res.solver.solver_object.output('f'))
-        N.testing.assert_allclose(cost, 4.9995927e-02, rtol=1e-2)
+        N.testing.assert_allclose(cost, 4.611038777467e-02, rtol=1e-2)
 
     ### 5. Verify optimization discretization by simulation
     verif_model = load_fmu(model_fmu)
@@ -313,11 +302,6 @@ def run_demo(with_plots=True, use_ma57=False):
     for i in xrange(1, 43):
         verif_model.set('xA_init[' + `i` + ']',
                         break_res.final('xA[' + `i` + ']'))
-        verif_model.set('Temp_init[' + `i` + ']',
-                        break_res.final('Temp[' + `i` + ']'))
-        if i < 42:
-            verif_model.set('V_init[' + `i` + ']',
-                            break_res.final('V[' + `i` + ']'))
 
     # Simulate with optimal input
     verif_res = verif_model.simulate(final_time=5000.,

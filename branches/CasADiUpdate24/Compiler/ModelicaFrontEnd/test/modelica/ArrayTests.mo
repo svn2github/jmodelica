@@ -1203,8 +1203,8 @@ fclass ArrayTests.General.ArrayTest45
  Real b.x[2];
  parameter Integer b.j = 1 /* 1 */;
 equation
- b.x[1] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,1] + time;
- b.x[2] = ({{1.0, 2.0}, {3.0, 4.0}})[b.j,2] + 2 * time;
+ b.x[1] = ({1.0, 3.0})[b.j] + time;
+ b.x[2] = ({2.0, 4.0})[b.j] + 2 * time;
 end ArrayTests.General.ArrayTest45;
 ")})));
 end ArrayTest45;
@@ -1259,9 +1259,8 @@ fclass ArrayTests.General.ArrayTest47
  ArrayTests.General.ArrayTest47.B b(n = 2,r(size() = {2}));
  ArrayTests.General.ArrayTest47.R_input c.r[2];
 equation
- for i in 1:2 loop
-  b.r[i].x = 1;
- end for;
+ b.r[1].x = 1;
+ b.r[2].x = 1;
  b.r[1].x = c.r[1].x;
  b.r[2].x = c.r[2].x;
 
@@ -6075,15 +6074,16 @@ public
  function ArrayTests.Constructors.Iterators.ArrayIterTest9.f2
   input Real[:] x;
   output ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] y;
-  ArrayTests.Constructors.Iterators.ArrayIterTest9.R[:] temp_1;
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_1; 
+  ArrayTests.Constructors.Iterators.ArrayIterTest9.R temp_2;
  algorithm
   init y as ArrayTests.Constructors.Iterators.ArrayIterTest9.R[2];
-  (temp_1[1]) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]);
-  (temp_1[2]) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]);
-  y[1].a := temp_1[1].a;
-  y[1].b := temp_1[1].b;
-  y[2].a := temp_1[2].a;
-  y[2].b := temp_1[2].b;
+  (temp_1) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[1]); 
+  (temp_2) := ArrayTests.Constructors.Iterators.ArrayIterTest9.f1(x[2]); 
+  y[1].a := temp_1.a; 
+  y[1].b := temp_1.b; 
+  y[2].a := temp_2.a; 
+  y[2].b := temp_2.b; 
   return;
  end ArrayTests.Constructors.Iterators.ArrayIterTest9.f2;
 
@@ -6276,6 +6276,68 @@ end ArrayTests.Constructors.Iterators.ArrayIterTest15;
 ")})));
 end ArrayIterTest15;
 
+model ArrayIterTest16 
+        model A 
+            parameter Integer n; 
+            Real[n] x = 1:n; 
+        end A; 
+        model M 
+            parameter Integer n; 
+            A[n] a(n={3-i for i in 1:n}); 
+        end M; 
+         
+        M[2] m(n={1,2}); 
+         
+        Real[:] y1 = {m[i].a[end].x[end] for i in 1:2}; 
+        annotation(__JModelica(UnitTesting(tests={ 
+            FlatteningTestCase( 
+                name="Constructors_Iterators_ArrayIterTest16", 
+                description="Varying size in iteration expression", 
+                flatModel=" 
+    fclass ArrayTests.Constructors.Iterators.ArrayIterTest16 
+     structural parameter Integer m[1].n = 1 /* 1 */; 
+     structural parameter Integer m[1].a[1].n = 2 /* 2 */; 
+     Real m[1].a[1].x[2] = 1:2; 
+     structural parameter Integer m[2].n = 2 /* 2 */; 
+     structural parameter Integer m[2].a[1].n = 2 /* 2 */; 
+     Real m[2].a[1].x[2] = 1:2; 
+     structural parameter Integer m[2].a[2].n = 1 /* 1 */; 
+     Real m[2].a[2].x[1] = 1:1; 
+     Real y1[2] = {m[1].a[1].x[2], m[2].a[2].x[1]}; 
+    end ArrayTests.Constructors.Iterators.ArrayIterTest16; 
+    ")}))); 
+    end ArrayIterTest16; 
+     
+    model ArrayIterTest17 
+        function f 
+            input Integer i; 
+            output Integer[:] y = 1:2; 
+            algorithm 
+        end f; 
+        Real[:,:] y3 = {f(i) for i in 1:2}; 
+         
+        annotation(__JModelica(UnitTesting(tests={ 
+            FlatteningTestCase( 
+                name="Constructors_Iterators_ArrayIterTest17", 
+                description="", 
+                flatModel=" 
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest17 
+ Real y3[2,2] = {ArrayTests.Constructors.Iterators.ArrayIterTest17.f(1), ArrayTests.Constructors.Iterators.ArrayIterTest17.f(2)}; 
+
+public
+ function ArrayTests.Constructors.Iterators.ArrayIterTest17.f 
+  input Integer i; 
+  output Integer[:] y; 
+ algorithm 
+  init y as Integer[2]; 
+  y := 1:2; 
+  return; 
+ end ArrayTests.Constructors.Iterators.ArrayIterTest17.f; 
+
+end ArrayTests.Constructors.Iterators.ArrayIterTest17; 
+")}))); 
+end ArrayIterTest17;
+    
 model ArrayIterTestUnknown1
     function f
 		input Integer a;
@@ -6306,8 +6368,8 @@ public
  algorithm
   init x as Real[max(a / 2, 0)];
   init temp_1 as Real[max(a / 2, 0)];
-  for i2 in 1:max(a / 2, 0) loop
-   temp_1[i2] := i2 ^ 2;
+  for i1 in 1:max(a / 2, 0) loop
+   temp_1[i1] := i1 ^ 2;
   end for;
   for i1 in 1:max(a / 2, 0) loop
    x[i1] := temp_1[i1];
@@ -6346,9 +6408,9 @@ model ForEquation1
 fclass ArrayTests.For.ForEquation1
  Real y.x[3];
 equation
- for i in 1:3 loop
-  y.x[i] = i * i;
- end for;
+ y.x[1] = 1;
+ y.x[2] = 2 * 2;
+ y.x[3] = 3 * 3;
 end ArrayTests.For.ForEquation1;
 ")})));
 end ForEquation1;
@@ -6532,13 +6594,16 @@ fclass ArrayTests.For.ForStructural1
  structural parameter Boolean p[2] = {true, false} /* { true, false } */;
  Real x[2];
 equation
- for i in 1:2 loop
-  if ({true, false})[i] then
-   x[i] = time;
-  else
-   x[i] = 1;
-  end if;
- end for;
+ if true then
+  x[1] = time;
+ else
+  x[1] = 1;
+ end if;
+ if false then
+  x[2] = time;
+ else
+  x[2] = 1;
+ end if;
 end ArrayTests.For.ForStructural1;
 ")})));
 end ForStructural1;
@@ -8415,60 +8480,162 @@ end ScalarizingPre;
 end Other;
 
 
-model Delay1
-    Real[2] y1;
-    Real[2] y2;
-    Real[2] x;
-  equation
-    y1 = delay(x,{1,2},2);
-    y2 = delay(x,{1,2});
-    x = {time,time};
+model IfExprTemp1
+    function f
+        input Real x;
+        output Real[:] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real y = if sum(f(time))>0 then sum(f(time)) else sum(f(time+1));
+    
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="Delay1",
-            description="Test scalarizing of vectorized delay",
+            name="IfExprTemp1",
+            description="",
+            inline_functions="none",
             flatModel="
-fclass ArrayTests.Delay1
- Real y1[1];
- Real y1[2];
- Real y2[1];
- Real y2[2];
- Real x[1];
- Real x[2];
+fclass ArrayTests.IfExprTemp1
+ Real y;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_3[1];
+ Real temp_3[2];
 equation
- y1[1] = delay(x[1], 1, 2);
- y1[2] = delay(x[2], 2, 2);
- y2[1] = delay(x[1], 1);
- y2[2] = delay(x[2], 2);
- x[1] = time;
- x[2] = time;
-end ArrayTests.Delay1;
-")})));
-end Delay1;
+ ({temp_1[1], temp_1[2]}) = ArrayTests.IfExprTemp1.f(time);
+ if temp_1[1] + temp_1[2] > 0 then
+  ({temp_2[1], temp_2[2]}) = ArrayTests.IfExprTemp1.f(time);
+ else
+  temp_2[1] = 0.0;
+  temp_2[2] = 0.0;
+ end if;
+ if not temp_1[1] + temp_1[2] > 0 then
+  ({temp_3[1], temp_3[2]}) = ArrayTests.IfExprTemp1.f(time + 1);
+ else
+  temp_3[1] = 0.0;
+  temp_3[2] = 0.0;
+ end if;
+ y = if temp_1[1] + temp_1[2] > 0 then temp_2[1] + temp_2[2] else temp_3[1] + temp_3[2];
 
-model SpatialDistribution1
-    Real[2] y;
-    Real[2] x;
-  equation
-    y = spatialDistribution(x,{1,2},1,true,{{0,0.5,1.0}, {0,0.6,1.0}}, {1,2,3});
-    x = {time,time};
+public
+ function ArrayTests.IfExprTemp1.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end ArrayTests.IfExprTemp1.f;
+
+end ArrayTests.IfExprTemp1;
+")})));
+end IfExprTemp1;
+
+model IfExprTemp2
+    function f
+        input Real x;
+        output Real[:] y = {x,x+1};
+    algorithm
+    end f;
+    
+    Real y;
+algorithm
+    y := if sum(f(time))>0 then sum(f(time)) else sum(f(time+1));
+    
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
-            name="SpatialDistribution1",
-            description="Test scalarizing of vectorized delay",
+            name="IfExprTemp2",
+            description="",
+            inline_functions="none",
             flatModel="
-fclass ArrayTests.SpatialDistribution1
- Real y[1];
- Real y[2];
- Real x[1];
- Real x[2];
-equation
- y[1] = spatialDistribution(x[1], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
- y[2] = spatialDistribution(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
- x[1] = time;
- x[2] = time;
-end ArrayTests.SpatialDistribution1;
+fclass ArrayTests.IfExprTemp2
+ Real y;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
+ Real temp_1[1];
+ Real temp_1[2];
+ Real temp_2[1];
+ Real temp_2[2];
+ Real temp_3[1];
+ Real temp_3[2];
+algorithm
+ ({temp_1[1], temp_1[2]}) := ArrayTests.IfExprTemp2.f(time);
+ _eventIndicator_1 := temp_1[1] + temp_1[2];
+ if temp_1[1] + temp_1[2] > 0 then
+  ({temp_2[1], temp_2[2]}) := ArrayTests.IfExprTemp2.f(time);
+ else
+  ({temp_3[1], temp_3[2]}) := ArrayTests.IfExprTemp2.f(time + 1);
+ end if;
+ _eventIndicator_2 := temp_1[1] + temp_1[2];
+ y := if temp_1[1] + temp_1[2] > 0 then temp_2[1] + temp_2[2] else temp_3[1] + temp_3[2];
+
+public
+ function ArrayTests.IfExprTemp2.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end ArrayTests.IfExprTemp2.f;
+
+end ArrayTests.IfExprTemp2;
 ")})));
-end SpatialDistribution1;
+end IfExprTemp2;
+
+model IfExprTemp3
+      function f
+        input Real x;
+        output Real[2] y = {x,x+1};
+        algorithm
+      end f;
+      
+      Real x;
+      Real y;
+  equation
+      der(x) = time;
+      y = if der(x) > x then 1 else if der(x) > x then 1 else sum(f(x));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfExprTemp3",
+            description="",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.IfExprTemp3
+ Real x;
+ Real y;
+ Real temp_1[1];
+ Real temp_1[2];
+initial equation 
+ x = 0.0;
+equation
+ der(x) = time;
+ if not der(x) > x and not der(x) > x then
+  ({temp_1[1], temp_1[2]}) = ArrayTests.IfExprTemp3.f(x);
+ else
+  temp_1[1] = 0.0;
+  temp_1[2] = 0.0;
+ end if;
+ y = if der(x) > x then 1 elseif der(x) > x then 1 else temp_1[1] + temp_1[2];
+
+public
+ function ArrayTests.IfExprTemp3.f
+  input Real x;
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y[1] := x;
+  y[2] := x + 1;
+  return;
+ end ArrayTests.IfExprTemp3.f;
+
+end ArrayTests.IfExprTemp3;
+")})));
+end IfExprTemp3;
 
 end ArrayTests;

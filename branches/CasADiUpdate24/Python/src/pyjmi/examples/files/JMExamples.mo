@@ -1981,8 +1981,8 @@ Simulation time: 7200s
       Real xA[42](start=xA_init, each fixed=true)
         "Liquid Mole Fraction of Component A";
     // Algebraic Equations (AEs)
-      SI.MolarFlowRate V[41](start=V_init, each fixed=true) "Vapor Molar Flux";
-      SI.Temp_K Temp[42](start=Temp_init, each fixed=true, each max=0.999*c1_A)
+      SI.MolarFlowRate V[41] "Vapor Molar Flux";
+      SI.Temp_K Temp[42](each max=0.999*c1_A)
         "Temperature (K)";
     // other variables
       SI.Pressure Press[42](each start=1.4e5);
@@ -2109,14 +2109,14 @@ Simulation time: 7200s
       end for;
     //Set up Algebraic Equations, der(V[i])=0
       for i in 2:41 loop
-          der(V[i-1]) = (1/2.1221253477356540 * (hV[i+1] * V[i] + hL[i-1] * L[i-1] - hV[i] * V[i-1] -
+          0 = (1/2.1221253477356540 * (hV[i+1] * V[i] + hL[i-1] * L[i-1] - hV[i] * V[i-1] -
             hL[i] * L[i] + hL_Feed * F[i]) - h_dot[i]) "Trays";
       end for;
-      der(V[41])= 1/113* (hL[41]*L[41] - hL[42]*Bott - hV[42]*V[41] + Q_elec - Q_loss) - h_dot[42]
+      0 = 1/113* (hL[41]*L[41] - hL[42]*Bott - hV[42]*V[41] + Q_elec - Q_loss) - h_dot[42]
         "Reboiler";
     // Algebraic equations to determine the temperature at each stage; der(Temp[i])=0
     for i in 1:42 loop
-       der(Temp[i]) = (Press[i] - Psat_A[i] * xA[i] - Psat_B[i] * (1 - xA[i])) / Press[i];
+       0 = (Press[i] - Psat_A[i] * xA[i] - Psat_B[i] * (1 - xA[i])) / Press[i];
     end for;
     dh_dTemp[1]=0;
     dh_dxA[1]=0;

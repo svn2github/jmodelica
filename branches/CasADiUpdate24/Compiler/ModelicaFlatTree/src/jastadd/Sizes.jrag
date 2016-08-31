@@ -25,9 +25,19 @@ aspect AccessSizes {
      */
     syn Size FSubscript.size();
     eq FExpSubscript.size()     = getFExp().size();
-    eq FColonSubscript.size()   = accessContextSize();
+    eq FColonSubscript.size()   = inSubscriptedExp() ? mySize() : accessContextSize();
     eq FIntegerSubscript.size() = Size.SCALAR;
-    
+
+    inh boolean FSubscript.inSubscriptedExp();
+    eq FSubscriptedExp.getFArraySubscripts().inSubscriptedExp()        = true;
+    eq InstArrayAccess.getFArraySubscripts().inSubscriptedExp()        = false;
+    eq InstScalarAccess.getExpandedSubscripts().inSubscriptedExp()     = false;
+    eq InstShortClassDecl.getFArraySubscripts().inSubscriptedExp()     = false;
+    eq InstComponentDecl.getFArraySubscripts().inSubscriptedExp()      = false;
+    eq InstComponentDecl.getLocalFArraySubscripts().inSubscriptedExp() = false;
+    eq FQNamePartArray.getFArraySubscripts().inSubscriptedExp()        = false;
+    eq FIdUse.getExpandedSubscripts().inSubscriptedExp()               = false;
+
     /**
      * Get the size this subscript(s) would have if all subscripts were colons.
      */
@@ -385,10 +395,6 @@ aspect FunctionCallSizes {
             }
         }
         return exp;
-    }
-    
-    public FExp FExp.component(String name) {
-        return extractRecordFExp(name);
     }
     
     public FExp FExp.cell(FExp.FunctionSizeContextReplacer crp, FArraySubscripts fas) {

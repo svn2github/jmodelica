@@ -1329,15 +1329,17 @@ aspect InstanceErrorCheck {
     
     public void FFillExp.collectErrors(ErrorCheckType checkType) {
         super.collectErrors(checkType);
-        for (FExp exp : getFExps()) {
-            if (exp.variability().knownParameterOrLess()) {
-                try {
-                    int d = exp.ceval().intValue();
-                    if (d < 0) {
-                        NEGATIVE_SIZE_FILL.invoke(exp);
+        if (!lockBranch(checkType)) {
+            for (FExp exp : getFExps()) {
+                if (exp.variability().knownParameterOrLess()) {
+                    try {
+                        int d = exp.ceval().intValue();
+                        if (d < 0) {
+                            NEGATIVE_SIZE_FILL.invoke(exp);
+                        }
+                    } catch (ConstantEvaluationException e) {
+                        
                     }
-                } catch (ConstantEvaluationException e) {
-                    
                 }
             }
         }
