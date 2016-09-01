@@ -726,7 +726,7 @@ aspect Arrays {
     }
 
     public FExp FEndExp.makeRangeSizeExp() {
-        return type().wrapRangeSizeExp(mySize().createFExp(0));
+        return type().wrapRangeSizeExp(mySize().createFExpForced(0));
     }
 
  	/**
