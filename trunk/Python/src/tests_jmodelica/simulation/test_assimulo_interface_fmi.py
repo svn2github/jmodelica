@@ -288,6 +288,15 @@ class Test_Events:
         compile_fmu("EventIter.SingularSystem1", file_name)
         compile_fmu("EventIter.InitialPhasing1", file_name)
         compile_fmu("EventIter.EventIterDiscreteReals", file_name)
+        compile_fmu("EventIter.EventAfterTimeEvent", file_name)
+    
+    @testattr(stddist = True)
+    def test_reinit_after_two_time_events(self):
+        model = load_fmu("EventIter_EventAfterTimeEvent.fmu")
+        
+        res = model.simulate()
+        
+        nose.tools.assert_almost_equal(res.final("s"), -1.0)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
