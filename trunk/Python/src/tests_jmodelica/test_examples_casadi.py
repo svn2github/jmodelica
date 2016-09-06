@@ -24,7 +24,7 @@ from tests_jmodelica import testattr
 try:
     from pyjmi.examples import (cart_pendulum, ccpp, ccpp_elimination, vdp_casadi, vdp_minimum_time_casadi,
                                 cstr_casadi, qt_par_est_casadi, vehicle_turn, fed_batch_oed,
-                                distillation4_opt, cstr_mpc_casadi, ccpp_elimination)
+                                distillation4_opt, cstr_mpc_casadi, ccpp_elimination, double_pendulum, fourbar1)
 except (NameError, ImportError):
     pass
 
@@ -70,12 +70,12 @@ def test_vehicle_turn():
 
 @testattr(ma27 = True)
 def test_distillation4_opt():
-    """Run the large istillation optimization example."""
+    """Run the large distillation optimization example."""
     distillation4_opt.run_demo(False)
 
 @testattr(ma57 = True)
 def test_distillation4_opt():
-    """Run the large istillation optimization example."""
+    """Run the large distillation optimization example."""
     distillation4_opt.run_demo(False, use_ma57=True)
 
 @testattr(casadi = True)
@@ -92,3 +92,13 @@ def test_ccpp_variable_elimination():
 def test_fed_batch_oed():
     """Run the Fed Batch Reactor OED example."""
     fed_batch_oed.run_demo(False)
+
+@testattr(ma27 = True)
+def test_double_pendulum():
+    """Run the double pendulum optimizaiton example."""
+    double_pendulum.run_demo(False)
+
+@testattr(ma57 = True)
+def test_fourbar1():
+    """Run the fourbar1 optimization example."""
+    double_pendulum.run_demo(False)
