@@ -38,7 +38,8 @@ def run_demo(with_plots=True):
     This example needs the linear solver MA57 to work.
     """
     # Load trajectories that are optimal subject to a smaller torque constraint and use as initial guess
-    init_res = LocalDAECollocationAlgResult(result_data=ResultDymolaTextual('fourbar1_init.txt'))
+    init_path = os.path.join(get_files_path(), "fourbar1_init.txt")
+    init_res = LocalDAECollocationAlgResult(result_data=ResultDymolaTextual(init_path))
     
     # Set up optimization
     file_paths = (os.path.join(get_files_path(), "Fourbar1.mo"),
@@ -76,19 +77,19 @@ def run_demo(with_plots=True):
     if with_plots:
         plt.close(1)
         plt.figure(1)
-        plt.subplot(2, 1, 1)
+        plt.subplot(3, 1, 1)
         plt.plot(time, s)
         plt.ylabel('$s$')
         plt.xlabel('$t$')
         plt.grid()
         
-        plt.subplot(2, 1, 2)
+        plt.subplot(3, 1, 2)
         plt.plot(time, s)
         plt.ylabel('$\phi$')
         plt.xlabel('$t$')
         plt.grid()
         
-        plt.subplot(2, 1, 3)
+        plt.subplot(3, 1, 3)
         plt.plot(time, u)
         plt.ylabel('$u$')
         plt.xlabel('$t$')

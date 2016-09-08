@@ -101,4 +101,4 @@ def test_double_pendulum():
 @testattr(ma57 = True)
 def test_fourbar1():
     """Run the fourbar1 optimization example."""
-    double_pendulum.run_demo(False)
+    fourbar1.run_demo(False)
