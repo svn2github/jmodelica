@@ -24,9 +24,14 @@ from tests_jmodelica import testattr
 try:
     from pyjmi.examples import (cart_pendulum, ccpp, ccpp_elimination, vdp_casadi, vdp_minimum_time_casadi,
                                 cstr_casadi, qt_par_est_casadi, vehicle_turn, fed_batch_oed,
-                                distillation4_opt, cstr_mpc_casadi, ccpp_elimination, double_pendulum, fourbar1)
+                                distillation4_opt, cstr_mpc_casadi, ccpp_elimination, double_pendulum, fourbar1, greybox_identification)
 except (NameError, ImportError):
     pass
+
+@testattr(casadi = True)
+def test_greybox_identification_example():
+    """ Test the greybox example."""
+    greybox_identification.run_demo()
 
 @testattr(casadi = True)
 def test_cart_pendulum():
