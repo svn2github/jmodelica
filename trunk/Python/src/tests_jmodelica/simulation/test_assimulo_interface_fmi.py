@@ -281,6 +281,30 @@ class Test_Time_Events:
         nose.tools.assert_almost_equal(model.get("s"), 2.8)
         assert res.solver.statistics["ntimeevents"] == 2        
 
+class Test_DynamicStates:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'RevoluteConstraint.mo')
+
+        compile_fmu("StrippedRevoluteConstraint", file_name)
+        
+    @testattr(stddist = True)
+    def test_no_switch_of_states(self):
+        model = load_fmu("StrippedRevoluteConstraint.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        #No step events triggered
+        assert res.solver.statistics["nstepevents"] == 0 
+        
+        var = res["freeMotionScalarInit.angle_2"]
+        
+        nose.tools.assert_almost_equal(abs(max(var)), 0.00, 2)
+        nose.tools.assert_almost_equal(abs(min(var)), 2.54, 2)
+
 class Test_Events:
     @classmethod
     def setUpClass(cls):
