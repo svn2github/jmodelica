@@ -51,7 +51,7 @@ def run_demo(with_plots=True):
     opts['IPOPT_options']['ma57_pivtol'] = 1e-3
     opts['IPOPT_options']['ma57_automatic_scaling'] = "yes"
     opts['IPOPT_options']['mu_strategy'] = "adaptive"
-    opts['n_e'] = 60
+    opts['n_e'] = 20
     opts['init_traj'] = init_res
     opts['nominal_traj'] = init_res
 
