@@ -3276,9 +3276,7 @@ algorithm
 fclass FunctionTests.AlgorithmTypeIf5
  Real x;
 algorithm
- if true then
   x := 1.0;
- end if;
 end FunctionTests.AlgorithmTypeIf5;
 ")})));
 end AlgorithmTypeIf5;
@@ -7268,27 +7266,29 @@ end ArrayOutputScalarization6;
 
 model ArrayOutputScalarization7
  function f1
+  input Real i;
   output Real x[2] = {1, 2};
  algorithm
  end f1;
  
  function f2
+  input Real i;
   output Real x;
   protected Real y[2];
  algorithm
-  if sum(f1()) < 4 then
+  if sum(f1(i)) < 4 then
    x := 1;
-   y := {1,2} + f1();
-  elseif sum(f1()) < 5 then
+   y := {1,2} + f1(i);
+  elseif sum(f1(i)) < 5 then
    y := {3,4};
   else
    x := 1;
-   y := f1();
+   y := f1(i);
   end if;
   x := y[1];
  end f2;
  
- Real x = f2();
+ Real x = f2(1);
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -7299,10 +7299,11 @@ model ArrayOutputScalarization7
 fclass FunctionTests.ArrayOutputScalarization7
  Real x;
 equation
- x = FunctionTests.ArrayOutputScalarization7.f2();
+ x = FunctionTests.ArrayOutputScalarization7.f2(1);
 
 public
  function FunctionTests.ArrayOutputScalarization7.f2
+  input Real i;
   output Real x;
   Real[:] y;
   Real[:] temp_1;
@@ -7311,13 +7312,13 @@ public
  algorithm
   init y as Real[2];
   init temp_1 as Real[2];
-  (temp_1) := FunctionTests.ArrayOutputScalarization7.f1();
+  (temp_1) := FunctionTests.ArrayOutputScalarization7.f1(i);
   init temp_2 as Real[2];
-  (temp_2) := FunctionTests.ArrayOutputScalarization7.f1();
+  (temp_2) := FunctionTests.ArrayOutputScalarization7.f1(i);
   if temp_1[1] + temp_1[2] < 4 then
    x := 1;
    init temp_3 as Real[2];
-   (temp_3) := FunctionTests.ArrayOutputScalarization7.f1();
+   (temp_3) := FunctionTests.ArrayOutputScalarization7.f1(i);
    y[1] := 1 + temp_3[1];
    y[2] := 2 + temp_3[2];
   elseif temp_2[1] + temp_2[2] < 5 then
@@ -7325,13 +7326,14 @@ public
    y[2] := 4;
   else
    x := 1;
-   (y) := FunctionTests.ArrayOutputScalarization7.f1();
+   (y) := FunctionTests.ArrayOutputScalarization7.f1(i);
   end if;
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization7.f2;
 
  function FunctionTests.ArrayOutputScalarization7.f1
+  input Real i;
   output Real[:] x;
  algorithm
   init x as Real[2];

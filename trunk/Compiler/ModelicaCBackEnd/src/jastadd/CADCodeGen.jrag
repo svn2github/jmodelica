@@ -54,12 +54,17 @@ aspect CADCodeGen {
         public void print(ASTNode node, CodeStream str, String indent) {
             node.prettyPrint_CAD(this, str, indent); 
         }
-
+        
         @Override
         public void printVarDecls(ASTNode node, CodeStream str, String indent) {
             node.genVarDecls_CAD(this, str, indent);
         }
-
+        
+        @Override
+        public void printDecl(ASTNode node, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
+            node.printDecl_C(this, str, indent, visited, forVariables, solved);
+        }
+        
         @Override
         public void printPreSteps(ASTNode node, CodeStream str, String indent) {
             node.genTempVars_CAD(this, str, indent);
