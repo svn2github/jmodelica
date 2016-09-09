@@ -142,6 +142,7 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
         compile_fmu("TimeEvents.TestSampling", file_name)
         compile_fmu("TimeEvents.TestSampling2", file_name)
+        compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name)
     
     @testattr(stddist = True)
     def test_time_event_basic_1(self):
@@ -270,6 +271,15 @@ class Test_Time_Events:
         res = model.simulate(0,1e-6, options={"initialize":False});
         assert res.solver.statistics["ntimeevents"] == 1e4
         
+    @testattr(stddist = True)
+    def test_time_event_state_event_after_time_event(self):
+        model = load_fmu("TimeEvents_StateEventAfterTimeEvent.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["CVode_options"]["rtol"] = 1e-4
+        res = model.simulate(0,1, options=opts);
+        nose.tools.assert_almost_equal(model.get("s"), 2.8)
+        assert res.solver.statistics["ntimeevents"] == 2        
 
 class Test_DynamicStates:
     @classmethod
