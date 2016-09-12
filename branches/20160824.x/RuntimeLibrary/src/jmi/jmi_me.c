@@ -732,6 +732,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         jmi_chattering_check(jmi);
         
         if (jmi_exists_grt_than_time_event(jmi)) {
+            int ret;
+            jmi_boolean state_values_changed = event_info->state_values_changed;
             jmi->nbr_consec_time_events++;
             
             if (jmi->nbr_consec_time_events > 2) {
@@ -743,7 +745,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 return -1;
             }
             
-            return jmi_event_iteration(jmi, intermediate_results, event_info);
+            ret = jmi_event_iteration(jmi, intermediate_results, event_info);
+            
+            /* If there was a previous state value changed, restore the flag */
+            if (state_values_changed == TRUE) {
+                event_info->state_values_changed = state_values_changed;
+            } 
+            
+            return ret;
         } else {
             jmi->nbr_consec_time_events = 0;
         }

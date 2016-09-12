@@ -173,5 +173,20 @@ equation
   T2 = sqrt(T1^2) + w + m^2;
 end EventIterDiscreteReals;
 
+model EventAfterTimeEvent
+    Boolean b;
+    Real s(start=0);
+equation
+    b = time > 0.5;
+    when time >= 0.5 then
+        if b then
+            reinit(s,0);
+        else
+            reinit(s,-1);
+        end if;
+    end when;
+    der(s)=0;
+end EventAfterTimeEvent;
+
 end EventIter;
 
