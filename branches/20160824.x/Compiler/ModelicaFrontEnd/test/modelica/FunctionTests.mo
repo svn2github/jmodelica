@@ -8396,6 +8396,76 @@ end FunctionTests.ArrayOutputScalarization27;
 ")})));
 end ArrayOutputScalarization27;
 
+model ArrayOutputScalarization28
+    function F
+        input Integer[:] x;
+        output Real[sum(x)] y;
+    algorithm
+        for i in 1:sum(x) loop
+            y[i] := i + sum(x);
+        end for;
+    end F;
+    
+    model B
+        parameter Real p1 = 0;
+    end B;
+    
+    parameter Integer p2[:] = {2};
+    
+    parameter Real a = 0.1;
+    
+    B b[2](p1 = a * F(p2));
+
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayOutputScalarization28",
+            description="Scalarization of function type with mutable record size",
+            flatModel="
+fclass FunctionTests.ArrayOutputScalarization28
+ structural parameter Integer p2[1] = 2 /* 2 */;
+ parameter Real a = 0.1 /* 0.1 */;
+ parameter Real temp_1[1];
+ parameter Real temp_2[2];
+ parameter Real b[1].p1;
+ parameter Real b[2].p1;
+parameter equation
+ ({temp_1[1], }) = FunctionTests.ArrayOutputScalarization28.F({2});
+ ({, temp_2[2]}) = FunctionTests.ArrayOutputScalarization28.F({2});
+ b[1].p1 = a * temp_1[1];
+ b[2].p1 = a * temp_2[2];
+
+public
+ function FunctionTests.ArrayOutputScalarization28.F
+  input Integer[:] x;
+  output Real[:] y;
+  Integer temp_1;
+  Integer temp_2;
+  Integer temp_3;
+ algorithm
+  temp_1 := 0;
+  for i1 in 1:size(x, 1) loop
+   temp_1 := temp_1 + x[i1];
+  end for;
+  init y as Real[temp_1];
+  temp_2 := 0;
+  for i1 in 1:size(x, 1) loop
+   temp_2 := temp_2 + x[i1];
+  end for;
+  for i in 1:temp_2 loop
+   temp_3 := 0;
+   for i1 in 1:size(x, 1) loop
+    temp_3 := temp_3 + x[i1];
+   end for;
+   y[i] := i + temp_3;
+  end for;
+  return;
+ end FunctionTests.ArrayOutputScalarization28.F;
+
+end FunctionTests.ArrayOutputScalarization28;
+")})));
+end ArrayOutputScalarization28;
+
 
 /* ======================= Unknown array sizes ======================*/
 
