@@ -707,6 +707,8 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NonLinear4", file_name)
         compile_fmu("Singular.NonLinear5", file_name)
         compile_fmu("Singular.NoMinimumNormSolution", file_name)
+        compile_fmu("Singular.ZeroColumnJacobian", file_name)
+        compile_fmu("Singular.ZeroColumnJacobian2", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -833,6 +835,18 @@ class Test_Singular_Systems:
         model.set("_log_level", 3)
         model.set_log_level(3)
         nose.tools.assert_raises(FMUException, model.initialize)
+    
+    @testattr(stddist = True)
+    def test_zero_column_jacobian(self):
+        model = load_fmu("Singular_ZeroColumnJacobian.fmu");
+        res = model.simulate();
+        nose.tools.assert_almost_equal(res["x"][0], -1)
+        
+    @testattr(stddist = True)
+    def test_zero_column_jacobian2(self):
+        model = load_fmu("Singular_ZeroColumnJacobian2.fmu");
+        res = model.simulate();
+        nose.tools.assert_almost_equal(res["x"][0], -1)
 
 class Test_FMI_ODE_CS_2:
     @classmethod
