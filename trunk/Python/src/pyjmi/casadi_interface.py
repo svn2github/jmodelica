@@ -527,7 +527,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
             timed_sens.append(N.array(timed_sens_i))
         return timed_sens
 
-    def setup_oed(self, outputs, parameters, sigma, time_points, design="A"):
+    def setup_oed(self, outputs, parameters, sigma, time_points, design="A", inverse=False):
         """
         Transforms an Optimization Problem into an Optimal Experimental Design problem.
 
@@ -557,6 +557,12 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                 Design criterion.
 
                 Possible values: "A"
+
+            inverse --
+                If True, the scalar metric of the inverse of the Fisher matrix is minimized. Otherwise, the metric of
+                the Fisher matrix is maximized.
+
+                Type: bool
         """
         # Augment sensitivities and add timed variables
         self.augment_sensitivities(parameters)
@@ -567,13 +573,18 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         for j in xrange(len(outputs)):
             Q.append(casadi.vertcat([casadi.horzcat([s.getVar() for s in timed_sens[i][j]])
                                      for i in xrange(len(time_points))]))
-        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in xrange(len(outputs)) for j in xrange(len(outputs))])
+        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in xrange(len(outputs))
+                      for j in xrange(len(outputs))])
 
         # Define the objective
-        b = casadi.MX.sym("b", Fisher.shape[1], 1)
-        Fisher_inv = casadi.jacobian(casadi.solve(Fisher, b), b)
+        if inverse:
+            b = casadi.MX.sym("b", Fisher.shape[1], 1)
+            Fisher_inv = casadi.jacobian(casadi.solve(Fisher, b), b)
         if design == "A":
-            obj = casadi.trace(Fisher_inv)
+            if inverse:
+                obj = casadi.trace(Fisher_inv)
+            else:
+                obj = -casadi.trace(Fisher)
         else:
             raise ValueError("Currently only A-optimal design is supported.")
         old_obj = self.getObjective()
