@@ -134,5 +134,15 @@ package TimeEvents
     equation
         y = sample(0, sampleInterval);
     end TestSampling2;
+    
+    model StateEventAfterTimeEvent
+        Real s;
+        Boolean b;
+        Boolean c;
+    equation
+        b = time > 0.1-1e-14;
+        c = time >= 0.5;
+        der(s) = if s < 0.1 then 1 else 3;
+    end StateEventAfterTimeEvent;
 
 end TimeEvents;
