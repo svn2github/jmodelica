@@ -730,6 +730,14 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         return unmatched;
     }
 
+    /**
+     * Comparator that is used during matching of variables to equations. We 
+     * need to use a comparator during this since we wan't to prioritize
+     * matching of certain variables. For example, when matching the initial
+     * system, there is usually more variables than equations. In that case it
+     * is better to leave a variable with start value unmatched since we then
+     * can use the start value as an extra initial condition (equation).
+     */
     private static class VarMatchingComparator implements Comparator<AbstractVar<?,?>> {
         private Set<FAbstractVariable> hasExtraStartConditions;
         private VarMatchingComparator(Set<FAbstractVariable> hasExtraStartConditions) {
@@ -737,23 +745,40 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
                 hasExtraStartConditions = Collections.emptySet();
             this.hasExtraStartConditions = hasExtraStartConditions;
         }
+        
+        /**
+         * Variable o1 will be prefered over o2 by returning a negative number.
+         * This means that o1 will be matched (if possible) before o2, which
+         * means that we wan't to return a positive number for the variables
+         * that we wan't to be unmatched (and used as initial conditions).
+         */
         @Override
         public int compare(AbstractVar<?,?> o1, AbstractVar<?,?> o2) {
             FVariable v1 = o1.getVariable();
             FVariable v2 = o2.getVariable();
+            
+            // Variables that has an extra start condition (equation already in
+            // the system) should be matched last
             boolean b1 = (v1.isPreVariable() && hasExtraStartConditions.contains(v1.myNonPreVariable())) || hasExtraStartConditions.contains(v1);
             boolean b2 = (v2.isPreVariable() && hasExtraStartConditions.contains(v2.myNonPreVariable())) || hasExtraStartConditions.contains(v2);
             int diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
+            
+            // Discrete pre() and continuous variables with start value should
+            // be matched last
             b1 = (v1.isDiscrete() && v1.isPreVariable() || v1.isContinuous()) && v1.startAttributeSet();
             b2 = (v2.isDiscrete() && v2.isPreVariable() || v2.isContinuous()) && v2.startAttributeSet();
             diff = (b1 ? 1 : 0) - (b2 ? 1 : 0);
             if (diff != 0)
                 return diff;
+            
+            // pre() variables should be matched last (why?)
             diff = (v1.isPreVariable() ? 1 : 0) - (v2.isPreVariable() ? 1 : 0);
             if (diff != 0)
                 return diff;
+            
+            // Make the sorting deterministic by comparing the names
             return o1.getName().compareTo(o2.getName());
         }
     }
@@ -2156,29 +2181,43 @@ public Set<V> AbstractBiPGraph.lookupVars(Iterable<FIdUseExp> set) {
     return res;
 }
 
-    public AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+    AbstractBiPGraph<E, V, C>.IncidenceMap
+    FAbstractEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes) {
         return createIncidenceMap(g, variableTypes, g.defaultVariableResolver());
     }
     
-    public AbstractBiPGraph.IncidenceMap FAbstractEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+    AbstractBiPGraph<E, V, C>.IncidenceMap
+    FAbstractEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
+            AbstractBiPGraph.VariableResolver<E, V> resolver) {
         return g.new IncidenceMap(this, resolver);
     }
 
     @Override
-    public AbstractBiPGraph.IncidenceMap FAlgorithm.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+    AbstractBiPGraph<E, V ,C>.IncidenceMap
+    FAlgorithm.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
+            AbstractBiPGraph.VariableResolver<E, V> resolver) {
         return g.new ManyIncidenceMap(this, resolver, variableTypes);
     }
 
     @Override
-    public AbstractBiPGraph.IncidenceMap FIfEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>>
+    AbstractBiPGraph<E, V, C>.IncidenceMap
+    FIfEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
+            AbstractBiPGraph.VariableResolver<E, V> resolver) {
         return g.new ManyIncidenceMap(this, resolver, variableTypes);
     }
 
     @Override
-    public AbstractBiPGraph.IncidenceMap FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph g, EnumSet<AbstractBiPGraph.VarType> variableTypes, AbstractBiPGraph.VariableResolver resolver) {
+    public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> 
+    AbstractBiPGraph<E, V, C>.IncidenceMap
+    FFunctionCallEquation.createIncidenceMap(AbstractBiPGraph<E, V, C> g, EnumSet<AbstractBiPGraph.VarType> variableTypes,
+            AbstractBiPGraph.VariableResolver<E, V> resolver) {
         if (myOptions().getStringOption("function_incidence_computation").equals("all")) {
             try {
-                AbstractBiPGraph.SplitIncidenceMap splitIncidenceMap = g.new SplitIncidenceMap(this, resolver, variableTypes);
+                AbstractBiPGraph<E, V, C>.SplitIncidenceMap splitIncidenceMap = g.new SplitIncidenceMap(this, resolver, variableTypes);
                 splitIncidenceMap.lhs(); // trigger cache calculations
                 return splitIncidenceMap;
             } catch (ConstantEvaluationException e) {
