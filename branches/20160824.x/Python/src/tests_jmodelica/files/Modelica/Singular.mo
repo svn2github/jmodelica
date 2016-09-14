@@ -226,5 +226,30 @@ package Singular "Some tests for singular systems"
         a31*x+a32*y+a33*z = b[3];
         der(v) = time;
     end NoMinimumNormSolution;
+    
+    model ZeroColumnJacobian
+        Real x(start=0, nominal=1e-1);
+        Real y;
+        Real z;
+        Real w(start=1);
 
+    function f
+        input Real a;
+        input Real b;
+        output Real c;
+        Real d;
+    algorithm
+        d := b;
+        c:= a+d;
+    end f;    
+    equation
+        z=1e-8*x;
+        w^2=y;
+        0=2*y-f(z,w)-1;
+        z-2*y+3-f(x^2,-z)=0;
+    end ZeroColumnJacobian;
+
+    model ZeroColumnJacobian2
+        extends ZeroColumnJacobian(x(nominal=1e-2));
+    end ZeroColumnJacobian2;
 end Singular;

@@ -47,6 +47,13 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
 /* KINSOL callback for setting up linear solver (jacobian update and decomposition) */
 static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
 
+/*Kinsol function wrapper
+    @param yy - Input - function argument
+    @param ff - Output - residuals
+    @param problem_data - solver object propagated as opaque data
+*/
+int kin_f(N_Vector yy, N_Vector ff, void *problem_data);
+
 /* Only call directly after jmi_update_f_scale */
 static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_block_solver_t *block);
 
@@ -126,6 +133,81 @@ static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
         }
     }
     return(sum);
+}
+
+int jmi_kinsol_is_zero_column(realtype* col, int n) {
+    int i;
+    for(i=0; i<n; i++) {
+        if(col[i] != 0) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+int jmi_kinsol_zero_column_jacobian_handling(jmi_block_solver_t * block) {
+    int j, ret, isZeroColumn;
+    int updatedJacobian = FALSE;
+    jmi_kinsol_solver_t* solver = block->solver;
+    struct KINMemRec* kin_mem = solver->kin_mem;
+    realtype inc, inc_inv, ujsaved, ujscale, sign, delta;
+    realtype *tmp2_data, *u_data, *uscale_data;
+    realtype *col;
+    N_Vector jthCol;
+    /* Obtain pointers to the data for u and uscale */
+    u_data   = N_VGetArrayPointer(solver->kin_y);
+    uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+    
+    for(j=0; j<block->n; j++) {
+        col = DENSE_COL(block->J, j);
+        delta = block->options->jacobian_finite_difference_delta*10;
+        isZeroColumn = jmi_kinsol_is_zero_column(col, block->n);
+        if(!isZeroColumn) continue;
+        while(isZeroColumn && delta < block->options->jacobian_finite_difference_delta*1000 && delta < 1) { /* Zero column, try finite differences with greater delta */
+            ujsaved = u_data[j];
+            ujscale = ONE/uscale_data[j];
+            sign = (ujsaved >= 0) ? 1 : -1;
+            inc = MAX(ABS(ujsaved), ujscale)*sign*delta;
+            u_data[j] += inc;
+            /* make sure we're inside bounds*/
+            if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
+                inc = -inc;
+                u_data[j] = ujsaved + inc;
+            }
+
+            ret = kin_f(solver->kin_y, solver->work_vector, block);
+            if(ret > 0) {
+                /* try to recover by stepping in the opposite direction */
+                inc = -inc;
+                u_data[j] = ujsaved + inc;
+
+                ret = kin_f(solver->kin_y, solver->work_vector, block);
+            }
+            if (ret != 0) {
+                u_data[j] = ujsaved;
+                break; 
+            }
+
+            u_data[j] = ujsaved;
+            inc_inv = ONE/inc;
+            tmp2_data = N_VGetArrayPointer(solver->work_vector2);
+            jthCol = solver->work_vector2;
+            N_VSetArrayPointer(DENSE_COL(block->J, j), jthCol);
+            N_VLinearSum(inc_inv, solver->work_vector, -inc_inv, kin_mem->kin_fval, jthCol);
+            N_VSetArrayPointer(tmp2_data, solver->work_vector2);
+            delta *=10;
+            isZeroColumn = jmi_kinsol_is_zero_column(col, block->n);
+        }
+
+        if(!isZeroColumn) {
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "ZeroColumnJacobianUpdate", 
+                "The column for <iter: #r%d#> was zero but is now recalculated with <delta: %E>", block->value_references[j], delta/10);
+            jmi_log_reals(block->log, node, logInfo, "column", DENSE_COL(block->J, j), block->n);
+            jmi_log_leave(block->log, node);
+            updatedJacobian = TRUE;
+        }
+    }
+    return updatedJacobian;
 }
 
 
@@ -1937,6 +2019,12 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
     }
     
     info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+    if(info != 0) {
+        if(jmi_kinsol_zero_column_jacobian_handling(block)) {
+            DenseCopy(block->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
+            info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+        }
+    }
     
     if(info != 0 ) {
         if (N > 1) {
