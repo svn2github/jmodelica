@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     op = transfer_optimization_problem('FedBatchReactor_OED', file_path)
 
     # Transform the optimization problem into an OED problem
-    op.setup_oed(outputs, parameters, sigma, time_points, "A")
+    op.setup_oed(outputs, parameters, sigma, time_points, "T")
 
     # Set solver options
     opts = op.optimize_options()

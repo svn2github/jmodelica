@@ -527,7 +527,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
             timed_sens.append(N.array(timed_sens_i))
         return timed_sens
 
-    def setup_oed(self, outputs, parameters, sigma, time_points, design="A", inverse=False):
+    def setup_oed(self, outputs, parameters, sigma, time_points, design="A"):
         """
         Transforms an Optimization Problem into an Optimal Experimental Design problem.
 
@@ -556,13 +556,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
             design --
                 Design criterion.
 
-                Possible values: "A"
-
-            inverse --
-                If True, the scalar metric of the inverse of the Fisher matrix is minimized. Otherwise, the metric of
-                the Fisher matrix is maximized.
-
-                Type: bool
+                Possible values: "A", "T"
         """
         # Augment sensitivities and add timed variables
         self.augment_sensitivities(parameters)
@@ -577,16 +571,17 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
                       for j in xrange(len(outputs))])
 
         # Define the objective
-        if inverse:
+        if design == "A":
             b = casadi.MX.sym("b", Fisher.shape[1], 1)
             Fisher_inv = casadi.jacobian(casadi.solve(Fisher, b), b)
-        if design == "A":
-            if inverse:
-                obj = casadi.trace(Fisher_inv)
-            else:
-                obj = -casadi.trace(Fisher)
+            obj = casadi.trace(Fisher_inv)
+        elif design == "T":
+            obj = -casadi.trace(Fisher)
+        elif design == "D":
+            obj = -casadi.det(Fisher)
+            raise NotImplementedError("D-optimal design is not supported.")
         else:
-            raise ValueError("Currently only A-optimal design is supported.")
+            raise ValueError("Invalid design %s." % design)
         old_obj = self.getObjective()
         self.setObjective(old_obj + obj)
          
