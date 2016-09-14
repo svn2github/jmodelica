@@ -336,8 +336,6 @@ aspect CCodeGen {
             str.print(" = ");
             myFCallable().prettyPrintCall_C(p, str, indent, this);
             str.println(";");
-            if (!fv.isContinuous())
-                throw new UnsupportedOperationException();
         }
     }
 

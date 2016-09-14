@@ -22821,6 +22821,36 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end SpatialDist2;
 
+model DiscreteInput
+        input Boolean b;
+    equation
+        when b then
+            assert(false, "msg");
+        end when;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="DiscreteInput",
+            description="Code generated from a discrete input.",
+            equation_sorting=true,
+            generate_ode=true,
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (LOG_EXP_AND(_b_0, LOG_EXP_NOT(pre_b_0))) {
+        if (JMI_FALSE == JMI_FALSE) {
+            jmi_assert_failed(\"msg\", JMI_ASSERT_ERROR);
+        }
+    }
+    return ef;
+}
+
+")})));
+end DiscreteInput;
+
     package DynamicStates
         
         model ThreeDSOneEq
