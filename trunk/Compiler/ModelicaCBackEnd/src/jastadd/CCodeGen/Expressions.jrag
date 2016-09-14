@@ -1450,33 +1450,14 @@ aspect CCodeGenExpressions {
     public void FSubscriptedExp.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempVars_C(p, str, indent);
         getFExp().type().printInit_C(p, str, indent, getFExp().tempName_C(), this);
-        genWriteVars_C(p, str, indent, false);
+        p.printTempInputAssigns(str, indent, getFExp());
     }
 
     @Override
     public void FSubscriptedExp.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
         super.genTempFree_C(p, str, indent);
         if (isAssignedTo()) {
-            genWriteVars_C(p, str, indent, true);
-        }
-    }
-
-    /**
-     * Helper, writes pre and post assignment statements
-     */
-    public void FSubscriptedExp.genWriteVars_C(CodePrinter p, CodeStream str, String indent, boolean back) {
-        String name = getFExp().tempName_C();
-        String type = type().isRecord() ? C_ARRAY_RECORD : C_ARRAY_REFERENCE;
-        String pre = "jmi_array_" + type + "_" + getFExp().ndims() + "(" + name + ", ";
-        Array arr = getFExp().getArray();
-        for (Index i : getFExp().indices()) {
-            FExp e = arr.get(i);
-            String cellName = pre + i.toUnclosedString() + ")";
-            if (back) {
-                FStatement.printAssignStmt_C(str, indent, e.prettyPrint_C(""), cellName);
-            } else {
-                FStatement.printAssignStmt_C(str, indent, cellName, e.prettyPrint_C(""));
-            }
+            p.printWriteBackAssignment(str, indent, this, null);
         }
     }
 

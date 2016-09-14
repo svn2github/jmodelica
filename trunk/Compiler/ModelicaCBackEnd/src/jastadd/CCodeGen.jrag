@@ -4003,18 +4003,40 @@ aspect CCodeGen {
             }
         }
         
-        public abstract void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
+        public abstract void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node,
                 Collection<FVariable> forVariables);
     }
+    
+    /**
+     * Helper interface for ASTNodes which handles writebacks to multiple
+     * variables even after scalarization.
+     */
+    public interface FCompositeWriteBackNode {
+        public FExp getFExp();
+        public String writeBackName_C();
+    }
+    
+    FFunctionCallLeft implements FCompositeWriteBackNode;
+    FSubscriptedExp implements FCompositeWriteBackNode;
+    
+    @Override
+    public String FFunctionCallLeft.writeBackName_C() {
+        return name_C();
+    }
+    @Override
+    public String FSubscriptedExp.writeBackName_C() {
+        return getFExp().tempName_C();
+    }
+    
     public class CPrettyPrinter {
         @Override
-        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left, Collection<FVariable> forVariables) {
-            FExp e = left.getFExp();
+        public void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node, Collection<FVariable> forVariables) {
+            FExp e = node.getFExp();
             FType t = e.type();
-            WriteBackAssignmentPrinter p = t.isComposite() && !left.inFunction() ? 
+            WriteBackAssignmentPrinter p = t.isComposite() && !e.inFunction() ? 
                     new ArrayWriteBackAssignmentPrinter(forVariables) :
                     new WriteBackAssignmentPrinter(forVariables);
-            p.print(str, indent, t, left.name_C(), e);
+            p.print(str, indent, t, node.writeBackName_C(), e);
         }
     }
 

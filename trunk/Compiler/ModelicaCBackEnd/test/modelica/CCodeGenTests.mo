@@ -18249,9 +18249,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_1, 2) = _y_2_1;
     jmi_array_ref_1(tmp_1, 3) = _y_3_2;
     jmi_array_val_1(tmp_1, _i_4) = _x_3;
-    _y_1_0 = jmi_array_ref_1(tmp_1, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_1, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_1, 3);
+    memcpy(&_y_1_0, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
@@ -18311,13 +18309,68 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     jmi_array_ref_1(tmp_4, 2) = _x_2_4;
     jmi_array_ref_1(tmp_4, 3) = _x_3_5;
     jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
-    _y_1_0 = jmi_array_ref_1(tmp_2, 1);
-    _y_2_1 = jmi_array_ref_1(tmp_2, 2);
-    _y_3_2 = jmi_array_ref_1(tmp_2, 3);
+    memcpy(&_y_1_0, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     return ef;
 }
 ")})));
 end VariableArrayIndex6;
+
+model VariableArrayIndex7
+    Real m[4,4];
+    Integer i;
+    Integer j;
+equation
+    when sample(0, 0.01) then
+        if pre(i) == size(m, 1) then
+            i = 1;
+            j = mod(pre(j) + 1, size(m, 2));
+        else
+            i = pre(i) + 1;
+            j = pre(j);
+        end if;
+    end when;
+algorithm
+    m[i,j] := time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="VariableArrayIndex7",
+            description="Test of variable array index with multiple dimentions",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 16, 2)
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, jmi_divide_equation(jmi, (pre_j_17 + AD_WRAP_LITERAL(1)),AD_WRAP_LITERAL(4),\"(pre(j) + 1) / 4\") - (pre_temp_1_18), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, jmi_divide_equation(jmi, (pre_j_17 + AD_WRAP_LITERAL(1)),AD_WRAP_LITERAL(4),\"(pre(j) + 1) / 4\") - (pre_temp_1_18 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 16, 2, 4, 4)
+    jmi_array_ref_2(tmp_1, 1,1) = _m_1_1_0;
+    jmi_array_ref_2(tmp_1, 1,2) = _m_1_2_1;
+    jmi_array_ref_2(tmp_1, 1,3) = _m_1_3_2;
+    jmi_array_ref_2(tmp_1, 1,4) = _m_1_4_3;
+    jmi_array_ref_2(tmp_1, 2,1) = _m_2_1_4;
+    jmi_array_ref_2(tmp_1, 2,2) = _m_2_2_5;
+    jmi_array_ref_2(tmp_1, 2,3) = _m_2_3_6;
+    jmi_array_ref_2(tmp_1, 2,4) = _m_2_4_7;
+    jmi_array_ref_2(tmp_1, 3,1) = _m_3_1_8;
+    jmi_array_ref_2(tmp_1, 3,2) = _m_3_2_9;
+    jmi_array_ref_2(tmp_1, 3,3) = _m_3_3_10;
+    jmi_array_ref_2(tmp_1, 3,4) = _m_3_4_11;
+    jmi_array_ref_2(tmp_1, 4,1) = _m_4_1_12;
+    jmi_array_ref_2(tmp_1, 4,2) = _m_4_2_13;
+    jmi_array_ref_2(tmp_1, 4,3) = _m_4_3_14;
+    jmi_array_ref_2(tmp_1, 4,4) = _m_4_4_15;
+    jmi_array_val_2(tmp_1, _i_16, _j_17) = _time;
+    memcpy(&_m_1_1_0, &jmi_array_val_2(tmp_1, 1,1), 16 * sizeof(jmi_real_t));
+    return ef;
+}
+")})));
+end VariableArrayIndex7;
 
 model TestRelationalOp1
 Real v1(start=-1);

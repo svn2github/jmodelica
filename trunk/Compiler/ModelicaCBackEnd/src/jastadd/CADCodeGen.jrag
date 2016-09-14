@@ -1262,12 +1262,12 @@ aspect CADCodeGen {
 
     public class CADPrettyPrinter {
         @Override
-        public void printWriteBackAssignment(CodeStream str, String indent, FFunctionCallLeft left,
+        public void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node,
                 Collection<FVariable> forVariables) {
             WriteBackAssignmentPrinter var_p = new WriteBackAssignmentPrinter_var(forVariables);
             WriteBackAssignmentPrinter der_p = new WriteBackAssignmentPrinter_der(forVariables);
-            var_p.print(str, indent, left.getFExp().type(), left.varName_CAD(), left.getFExp());
-            der_p.print(str, indent, left.getFExp().type(), left.derName_CAD(), left.getFExp());
+            var_p.print(str, indent, node.getFExp().type(), node.varWriteBackName_CAD(), node.getFExp());
+            der_p.print(str, indent, node.getFExp().type(), node.derWriteBackName_CAD(), node.getFExp());
         }
 
         public class WriteBackAssignmentPrinter_var extends CodePrinter.WriteBackAssignmentPrinter {
@@ -1295,6 +1295,28 @@ aspect CADCodeGen {
         }
     }
     
+    public interface FCompositeWriteBackNode {
+        public String varWriteBackName_CAD();
+        public String derWriteBackName_CAD();
+    }
+
+    @Override
+    public String FFunctionCallLeft.varWriteBackName_CAD() {
+        return varName_CAD();
+    }
+    @Override
+    public String FFunctionCallLeft.derWriteBackName_CAD() {
+        return derName_CAD();
+    }
+    @Override
+    public String FSubscriptedExp.varWriteBackName_CAD() {
+        throw new UnsupportedOperationException("varWriteBackName_CAD() is not supported for " + getClass().getSimpleName());
+    }
+    @Override
+    public String FSubscriptedExp.derWriteBackName_CAD() {
+        throw new UnsupportedOperationException("derWriteBackName_CAD() is not supported for " + getClass().getSimpleName());
+    }
+
     public void FFunctionCallLeft.genWriteBackAssignment_CAD(CodeStream str, String indent, Collection<FVariable> forVariables){
         if (hasFExp()) {
             printer_CAD.printWriteBackAssignment(str, indent, this, forVariables);
