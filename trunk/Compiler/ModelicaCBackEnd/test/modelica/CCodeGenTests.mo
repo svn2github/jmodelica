@@ -7698,7 +7698,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="WhenTest2",
-            description="Test that samplers are not duplicated in the function tha computes the next time event.",
+            description="Test that samplers are not duplicated in the function that computes the next time event.",
             equation_sorting=true,
             generate_ode=true,
             variability_propagation=false,
@@ -13922,9 +13922,9 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
     (*res)[0] = _x_0 - (0.7);
-    (*res)[1] = _x_0 - (0.7);
+    (*res)[1] = _x_0 - (0.8);
     (*res)[2] = _x_0 - (0.8);
-    (*res)[3] = _x_0 - (0.8);
+    (*res)[3] = _x_0 - (0.7);
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -19087,7 +19087,7 @@ $C_ode_derivatives$
             generatedCode="
     jmi_time_event_t nextEvent = {0};
     jmi_real_t nSamp;
-    if (SURELY_LT_ZERO(COND_EXP_EQ(_sw(2), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_sw(2), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))))) {
+    if (SURELY_LT_ZERO(COND_EXP_EQ(_sw(1), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_sw(1), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))))) {
         jmi_min_time_event(&nextEvent, 1, 1, 3);
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(_b1_2, JMI_TRUE, _time - (2), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_b1_2, JMI_TRUE, _time - (2), AD_WRAP_LITERAL(1))))) {
@@ -19105,19 +19105,19 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch_time(jmi, _time - (3), _sw(0), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch_time(jmi, _time - (1), _sw(2), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (1), _sw(1), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
-    _b3_0 = LOG_EXP_AND(_sw(0), _sw(2));
+    _b3_0 = LOG_EXP_AND(_sw(0), _sw(1));
     pre_b3_0 = _b3_0;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(2) = jmi_turn_switch_time(jmi, _time - (1), _sw(2), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (1), _sw(1), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
-    _b1_2 = _sw(2);
+    _b1_2 = _sw(1);
     pre_b1_2 = _b1_2;
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch_time(jmi, _time - (2), _sw(1), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
+        _sw(2) = jmi_turn_switch_time(jmi, _time - (2), _sw(2), jmi->eventPhase ? (JMI_REL_GEQ) : (JMI_REL_GT));
     }
-    _b2_1 = LOG_EXP_AND(_sw(1), _b1_2);
+    _b2_1 = LOG_EXP_AND(_sw(2), _b1_2);
     pre_b2_1 = _b2_1;
     return ef;
 }
@@ -20278,7 +20278,7 @@ model ActiveSwitches1
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="ActiveSwitches1",
-            description="Test code gen for active switch indexes in block.",
+            description="Test code gen for active switch indices in block.",
             template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -20375,7 +20375,7 @@ initial equation
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="ActiveSwitches2",
-            description="Test code gen for active switch indexes in block.",
+            description="Test code gen for active switch indices in block.",
             template="
 $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
@@ -20802,6 +20802,261 @@ static const int N_sw_init = 0;
 ")})));
 end ActiveSwitches5;
 
+model ActiveSwitches6
+    parameter Real d = 1;
+    Real x(start=0);
+equation
+    x = if time < d then time else delay(x, d);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ActiveSwitches6",
+            description="Test switch indices in code generation when using both delay exp. and rel. exp.",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            template="
+$C_ode_guards$
+$C_ode_derivatives$ 
+$C_ode_initialization$
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_DAE_event_indicator_residuals$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (_d_0), _sw(0), JMI_REL_LT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
+    return ef;
+}
+ 
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (_d_0), _sw(0), JMI_REL_LT);
+    }
+    ef |= jmi_solve_block_residual(jmi->dae_init_block_residuals[0]);
+    return ef;
+}
+
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_START_SET) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (_d_0), _sw(0), JMI_REL_LT);
+            }
+            (*res)[0] = COND_EXP_EQ(_sw(0), JMI_TRUE, _time, jmi_delay_evaluate(jmi, 0, _x_1, _d_0)) - (_x_1);
+        }
+    }
+    return ef;
+}
+
+
+static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Init block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    if (evaluation_mode == JMI_BLOCK_START) {
+    } else if (evaluation_mode == JMI_BLOCK_START_SET) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        memset(residual, 0, 1 * sizeof(jmi_real_t));
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (_d_0), _sw(0), JMI_REL_LT);
+        }
+        residual[0] = AD_WRAP_LITERAL(1.0) - COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(0.0), AD_WRAP_LITERAL(1.0));
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(0) = jmi_turn_switch_time(jmi, _time - (_d_0), _sw(0), JMI_REL_LT);
+            }
+            (*res)[0] = COND_EXP_EQ(_sw(0), JMI_TRUE, _time, _x_1) - (_x_1);
+        }
+    }
+    return ef;
+}
+")})));
+end ActiveSwitches6;
+
+model ActiveSwitches7
+    public
+        Real x(start=0.5);
+        parameter Real p = 2;
+        Boolean b = time < 1.5;
+    equation
+        if time < p or b then
+            der(x) = if x < 1 then 1 else 0.5;
+        else
+            der(x) = if x < 1 then -0.5 else -1;
+        end if;
+        
+            annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ActiveSwitches7",
+            description="Test switch indices in code generation when using two if-statements.",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            template="
+$C_ode_guards$
+$C_ode_derivatives$ 
+$C_ode_initialization$
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_DAE_event_indicator_residuals$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch_time(jmi, _time - (1.5), _sw(3), JMI_REL_LT);
+    }
+    _b_2 = _sw(3);
+    pre_b_2 = _b_2;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch_time(jmi, _time - (_p_1), _sw(2), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+    }
+    _der_x_4 = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0.5)), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(-0.5), AD_WRAP_LITERAL(-1)));
+    return ef;
+}
+ 
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch_time(jmi, _time - (1.5), _sw(3), JMI_REL_LT);
+    }
+    _b_2 = _sw(3);
+    _x_0 = 0.5;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch_time(jmi, _time - (_p_1), _sw(2), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+    }
+    _der_x_4 = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0.5)), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(-0.5), AD_WRAP_LITERAL(-1)));
+    pre_b_2 = JMI_FALSE;
+    return ef;
+}
+
+
+
+    (*res)[0] = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1));
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(_sw(2), _b_2)), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1));
+")})));
+end ActiveSwitches7;
+
+model ActiveSwitches8
+    public
+        Real x(start=0.5);
+        parameter Real p = 2;
+        Boolean b = time < 1.5;
+    equation
+        if time < p or b then
+            der(x) = if x < 1 then 1 else 0.5;
+        else
+            der(x) = if x < 1 then -0.5 else -1;
+        end if;
+        
+            annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ActiveSwitches7",
+            description="Test switch indices in code generation when using two if-statements.",
+            generate_ode=true,
+            equation_sorting=true,
+            variability_propagation=false,
+            template="
+$C_ode_guards$
+$C_ode_derivatives$ 
+$C_ode_initialization$
+$C_dae_blocks_residual_functions$
+$C_dae_init_blocks_residual_functions$
+$C_DAE_event_indicator_residuals$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch_time(jmi, _time - (1.5), _sw(3), JMI_REL_LT);
+    }
+    _b_2 = _sw(3);
+    pre_b_2 = _b_2;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch_time(jmi, _time - (_p_1), _sw(2), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+    }
+    _der_x_4 = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0.5)), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(-0.5), AD_WRAP_LITERAL(-1)));
+    return ef;
+}
+ 
+int model_ode_initialize_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch_time(jmi, _time - (1.5), _sw(3), JMI_REL_LT);
+    }
+    _b_2 = _sw(3);
+    _x_0 = 0.5;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch_time(jmi, _time - (_p_1), _sw(2), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+    }
+    _der_x_4 = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0.5)), COND_EXP_EQ(_sw(1), JMI_TRUE, AD_WRAP_LITERAL(-0.5), AD_WRAP_LITERAL(-1)));
+    pre_b_2 = JMI_FALSE;
+    return ef;
+}
+
+
+
+    (*res)[0] = COND_EXP_EQ(LOG_EXP_OR(_sw(2), _b_2), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1));
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(_sw(2), _b_2)), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1));
+")})));
+end ActiveSwitches8;
+
 model DirectlyActiveSwitches1
     Boolean b1, b2;
     Real x, a, y;
@@ -21102,7 +21357,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="TruncDivString1",
-            description="Test code gen for active switch indexes in block.",
+            description="Test code gen for active switch indices in block.",
             template="$C_ode_derivatives$",
             generatedCode="
 int model_ode_derivatives_base(jmi_t* jmi) {
