@@ -3472,14 +3472,15 @@ end CArrayInput5;
 
 model CArrayInput6
  function f1
+  input Integer i;
   output Real out = 1.0;
  algorithm
-  if f2(1:2) < 4 then
-   out := f2(5:6);
+  if f2(i+1:2) < 4 then
+   out := f2(i+5:6);
   elseif f2(3:4) > 5 then
-   out := f2(7:8);
+   out := f2(i+7:8);
   else
-   out := f2(9:10);
+   out := f2(i+9:10);
   end if;
  end f1;
  
@@ -3489,7 +3490,7 @@ model CArrayInput6
  algorithm
  end f2;
  
- Real x = f1();
+ Real x = f1(0);
 
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
@@ -3502,50 +3503,61 @@ $C_function_headers$
 $C_functions$
 ",
             generatedCode="
-void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t* out_o);
-jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp0();
+void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t i_v, jmi_ad_var_t* out_o);
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp0(jmi_ad_var_t i_v);
 void func_CCodeGenTests_CArrayInput6_f2_def1(jmi_array_t* inp_a, jmi_ad_var_t* out_o);
 jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp1(jmi_array_t* inp_a);
 
-void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t* out_o) {
+void func_CCodeGenTests_CArrayInput6_f1_def0(jmi_ad_var_t i_v, jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, out_v)
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
-    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, temp_2_a, -1, 1)
+    JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, temp_3_a, -1, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i1_1i;
+    jmi_ad_var_t i1_1ie;
+    jmi_ad_var_t i1_2i;
+    jmi_ad_var_t i1_2ie;
     out_v = 1.0;
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-    jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
-    jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
-    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
-    jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(3);
-    jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(4);
-    if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp1(tmp_1), 4, JMI_TRUE, JMI_FALSE)) {
-        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
-        jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(5);
-        jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(6);
-        out_v = func_CCodeGenTests_CArrayInput6_f2_exp1(tmp_2);
-    } else if (COND_EXP_GT(func_CCodeGenTests_CArrayInput6_f2_exp1(tmp_3), 5, JMI_TRUE, JMI_FALSE)) {
-        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1, 2)
-        jmi_array_ref_1(tmp_4, 1) = AD_WRAP_LITERAL(7);
-        jmi_array_ref_1(tmp_4, 2) = AD_WRAP_LITERAL(8);
-        out_v = func_CCodeGenTests_CArrayInput6_f2_exp1(tmp_4);
+    if (COND_EXP_EQ(jmi_max(floor(AD_WRAP_LITERAL(2) - (i_v + AD_WRAP_LITERAL(1))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+        jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.CArrayInput6.f1\", JMI_ASSERT_ERROR);
+    }
+    JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_max(floor(AD_WRAP_LITERAL(2) - (i_v + AD_WRAP_LITERAL(1))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), 1, jmi_max(floor(AD_WRAP_LITERAL(2) - (i_v + AD_WRAP_LITERAL(1))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)))
+    i1_0ie = jmi_max(floor(AD_WRAP_LITERAL(2) - (i_v + AD_WRAP_LITERAL(1))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(temp_1_a, i1_0i) = i_v + 1 + (i1_0i - 1);
+    }
+    if (COND_EXP_LT(func_CCodeGenTests_CArrayInput6_f2_exp1(temp_1_a), 4, JMI_TRUE, JMI_FALSE)) {
+        if (COND_EXP_EQ(jmi_max(floor(AD_WRAP_LITERAL(6) - (i_v + AD_WRAP_LITERAL(5))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+            jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.CArrayInput6.f1\", JMI_ASSERT_ERROR);
+        }
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, temp_2_a, jmi_max(floor(AD_WRAP_LITERAL(6) - (i_v + AD_WRAP_LITERAL(5))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), 1, jmi_max(floor(AD_WRAP_LITERAL(6) - (i_v + AD_WRAP_LITERAL(5))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)))
+        i1_1ie = jmi_max(floor(AD_WRAP_LITERAL(6) - (i_v + AD_WRAP_LITERAL(5))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)) + 1 / 2.0;
+        for (i1_1i = 1; i1_1i < i1_1ie; i1_1i += 1) {
+            jmi_array_ref_1(temp_2_a, i1_1i) = i_v + 5 + (i1_1i - 1);
+        }
+        out_v = func_CCodeGenTests_CArrayInput6_f2_exp1(temp_2_a);
     } else {
-        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_5, 2, 1, 2)
-        jmi_array_ref_1(tmp_5, 1) = AD_WRAP_LITERAL(9);
-        jmi_array_ref_1(tmp_5, 2) = AD_WRAP_LITERAL(10);
-        out_v = func_CCodeGenTests_CArrayInput6_f2_exp1(tmp_5);
+        if (COND_EXP_EQ(jmi_max(floor(AD_WRAP_LITERAL(8) - (i_v + AD_WRAP_LITERAL(7))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+            jmi_assert_failed(\"Mismatching sizes in CCodeGenTests.CArrayInput6.f1\", JMI_ASSERT_ERROR);
+        }
+        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, temp_3_a, jmi_max(floor(AD_WRAP_LITERAL(8) - (i_v + AD_WRAP_LITERAL(7))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)), 1, jmi_max(floor(AD_WRAP_LITERAL(8) - (i_v + AD_WRAP_LITERAL(7))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)))
+        i1_2ie = jmi_max(floor(AD_WRAP_LITERAL(8) - (i_v + AD_WRAP_LITERAL(7))) + AD_WRAP_LITERAL(1), AD_WRAP_LITERAL(0)) + 1 / 2.0;
+        for (i1_2i = 1; i1_2i < i1_2ie; i1_2i += 1) {
+            jmi_array_ref_1(temp_3_a, i1_2i) = i_v + 7 + (i1_2i - 1);
+        }
+        out_v = func_CCodeGenTests_CArrayInput6_f2_exp1(temp_3_a);
     }
     JMI_RET(GEN, out_o, out_v)
     JMI_DYNAMIC_FREE()
     return;
 }
 
-jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp0() {
+jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f1_exp0(jmi_ad_var_t i_v) {
     JMI_DEF(REA, out_v)
-    func_CCodeGenTests_CArrayInput6_f1_def0(&out_v);
+    func_CCodeGenTests_CArrayInput6_f1_def0(i_v, &out_v);
     return out_v;
 }
 
@@ -3563,7 +3575,6 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput6_f2_exp1(jmi_array_t* inp_a) {
     func_CCodeGenTests_CArrayInput6_f2_def1(inp_a, &out_v);
     return out_v;
 }
-
 ")})));
 end CArrayInput6;
 
@@ -8647,25 +8658,25 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _temp_1_4 = _sw(0);
         }
         if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
-            func_CCodeGenTests_WhenEqu10_f_def0(_x_0, _y_1, &tmp_3, &tmp_4);
-            _b_3 = (tmp_4);
+            func_CCodeGenTests_WhenEqu10_f_def0(_x_0, _y_1, &tmp_1, &tmp_2);
+            _b_3 = (tmp_2);
         } else {
             _b_3 = pre_b_3;
         }
         if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
-            _a_2 = (tmp_3);
+            _a_2 = (tmp_1);
         } else {
             _a_2 = pre_a_2;
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_5, LOG_EXP_NOT(pre_temp_2_5)))) {
-                func_CCodeGenTests_WhenEqu10_f_def0(_a_2, _b_3, &tmp_1, &tmp_2);
-                (*res)[0] = tmp_2 - (_y_1);
+                func_CCodeGenTests_WhenEqu10_f_def0(_a_2, _b_3, &tmp_3, &tmp_4);
+                (*res)[0] = tmp_4 - (_y_1);
             } else {
                 (*res)[0] = pre_y_1 - (_y_1);
             }
             if (LOG_EXP_OR(_atInitial, LOG_EXP_AND(_temp_2_5, LOG_EXP_NOT(pre_temp_2_5)))) {
-                (*res)[1] = tmp_1 - (_x_0);
+                (*res)[1] = tmp_3 - (_x_0);
             } else {
                 (*res)[1] = pre_x_0 - (_x_0);
             }
@@ -9020,29 +9031,29 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _a_2 = x[1];
         }
         if (_sw(0)) {
-            func_CCodeGenTests_dummyFunc_def0(_a_2, &tmp_5, &tmp_6);
-            _y_1 = (tmp_6);
+            func_CCodeGenTests_dummyFunc_def0(_a_2, &tmp_1, &tmp_2);
+            _y_1 = (tmp_2);
         } else {
-            func_CCodeGenTests_dummyFunc_def0(_b_3, &tmp_7, &tmp_8);
-            _y_1 = (tmp_8);
+            func_CCodeGenTests_dummyFunc_def0(_b_3, &tmp_3, &tmp_4);
+            _y_1 = (tmp_4);
         }
         if (_sw(0)) {
-            _x_0 = (tmp_5);
+            _x_0 = (tmp_1);
         } else {
-            _x_0 = (tmp_7);
+            _x_0 = (tmp_3);
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             if (_sw(0)) {
-                func_CCodeGenTests_dummyFunc_def0(_x_0, &tmp_1, &tmp_2);
-                (*res)[0] = tmp_2 - (_b_3);
+                func_CCodeGenTests_dummyFunc_def0(_x_0, &tmp_5, &tmp_6);
+                (*res)[0] = tmp_6 - (_b_3);
             } else {
-                func_CCodeGenTests_dummyFunc_def0(_y_1, &tmp_3, &tmp_4);
-                (*res)[0] = tmp_4 - (_b_3);
+                func_CCodeGenTests_dummyFunc_def0(_y_1, &tmp_7, &tmp_8);
+                (*res)[0] = tmp_8 - (_b_3);
             }
             if (_sw(0)) {
-                (*res)[1] = tmp_1 - (_a_2);
+                (*res)[1] = tmp_5 - (_a_2);
             } else {
-                (*res)[1] = tmp_3 - (_a_2);
+                (*res)[1] = tmp_7 - (_a_2);
             }
         }
     }
@@ -11756,7 +11767,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_1)
     JMI_DEF(INT, tmp_2)
     JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
@@ -11819,7 +11830,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
-    JMI_DEF(INT, tmp_1)
+    JMI_DEF(REA, tmp_1)
     JMI_DEF(INT, tmp_2)
     JMI_DEF(REA, tmp_3)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
@@ -13472,8 +13483,6 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DEF(REA, tmp_2)
     JMI_DEF(REA, tmp_3)
     JMI_DEF(REA, tmp_4)
-    JMI_DEF(REA, tmp_5)
-    JMI_DEF(REA, tmp_6)
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -13488,31 +13497,21 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
             _x_0 = x[0];
         }
-        tmp_5 = _y_1;
-        tmp_6 = _z1_2;
+        tmp_2 = _y_1;
         _y_1 = _x_0;
         _z1_2 = _x_0;
-        tmp_4 = _y_1;
-        _y_1 = tmp_5;
-        tmp_5 = tmp_4;
-        tmp_4 = _z1_2;
-        _z1_2 = tmp_6;
-        tmp_6 = tmp_4;
-        _z1_2 = (tmp_6);
-        tmp_2 = _y_1;
-        tmp_3 = _z2_3;
-        _y_1 = _z1_2;
-        _z2_3 = _x_0;
         tmp_1 = _y_1;
         _y_1 = tmp_2;
         tmp_2 = tmp_1;
-        tmp_1 = _z2_3;
-        _z2_3 = tmp_3;
-        tmp_3 = tmp_1;
-        _z2_3 = (tmp_3);
-        _y_1 = (tmp_5);
+        tmp_4 = _y_1;
+        _y_1 = _z1_2;
+        _z2_3 = _x_0;
+        tmp_3 = _y_1;
+        _y_1 = tmp_4;
+        tmp_4 = tmp_3;
+        _y_1 = (tmp_2);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = tmp_2 - (_y_1);
+            (*res)[0] = tmp_4 - (_y_1);
         }
     }
     return ef;
@@ -14095,6 +14094,76 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 ")})));
 end Algorithm18;
+
+model Algorithm19
+    Integer t;
+    Real x;
+    Real y[5];
+  algorithm
+    y := fill(x,5);
+    t := 1;
+  equation
+    x = sum(y) + 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="BlockTest14",
+            description="Mixed algorithm in block",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(REA, tmp_2)
+    JMI_DEF(INT, tmp_3)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 2;
+        x[1] = 3;
+        x[2] = 4;
+        x[3] = 5;
+        x[4] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435464;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435464;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_1;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_1 = x[0];
+        }
+        tmp_2 = _y_1_2;
+        tmp_3 = _t_0;
+        _y_1_2 = _x_1;
+        _y_2_3 = _x_1;
+        _y_3_4 = _x_1;
+        _y_4_5 = _x_1;
+        _y_5_6 = _x_1;
+        _t_0 = 1;
+        tmp_1 = _y_1_2;
+        _y_1_2 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = _t_0;
+        _t_0 = tmp_3;
+        tmp_3 = tmp_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _t_0 = (tmp_3);
+        }
+        _y_1_2 = (tmp_2);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _y_1_2 + _y_2_3 + _y_3_4 + (_y_4_5 + _y_5_6) + 1 - (_x_1);
+        }
+    }
+    return ef;
+}
+")})));
+end Algorithm19;
 
 model OutputTest1
 
@@ -16759,16 +16828,16 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _b_1 = x[1];
             _a_0 = x[2];
         }
-        func_CCodeGenTests_RecordTearingTest1_F_def0(_a_0, _b_1, &tmp_5, &tmp_6);
-        _c_2 = (tmp_5);
-        _d_3 = (tmp_6);
-        func_CCodeGenTests_RecordTearingTest1_F_def0(_c_2, _d_3, &tmp_1, &tmp_2);
-        _e_4 = (tmp_1);
+        func_CCodeGenTests_RecordTearingTest1_F_def0(_a_0, _b_1, &tmp_1, &tmp_2);
+        _c_2 = (tmp_1);
+        _d_3 = (tmp_2);
+        func_CCodeGenTests_RecordTearingTest1_F_def0(_c_2, _d_3, &tmp_3, &tmp_4);
+        _e_4 = (tmp_3);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = tmp_2 - (_f_5);
-            func_CCodeGenTests_RecordTearingTest1_F_def0(_e_4, _f_5, &tmp_3, &tmp_4);
-            (*res)[1] = tmp_4 - (_b_1);
-            (*res)[2] = tmp_3 - (_a_0);
+            (*res)[0] = tmp_4 - (_f_5);
+            func_CCodeGenTests_RecordTearingTest1_F_def0(_e_4, _f_5, &tmp_5, &tmp_6);
+            (*res)[1] = tmp_6 - (_b_1);
+            (*res)[2] = tmp_5 - (_a_0);
         }
     }
     return ef;

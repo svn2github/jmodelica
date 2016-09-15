@@ -77,28 +77,50 @@ aspect FlatStatements {
         return false;
     }
     
-    public boolean FIfWhenStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+    public boolean FWhenStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
         boolean res = false;
         boolean hasBroken = false;
-        List l = new List();
+        List cl = new List();
         for (FIfWhenClause c : getFIfWhenClauses()) {
-            hasBroken = c.flatten(l, fc, prefix) || hasBroken;
+            hasBroken = c.flatten(cl, fc, prefix) || hasBroken;
         }
-        sl.add(flattenFIfWhenStmt(fc, prefix, l));
+        sl.add(new FWhenStmt(cl));
         return hasBroken;
     }
     
-    protected abstract FIfWhenStmt FIfWhenStmt.flattenFIfWhenStmt(FClass fc,
-        FQName prefix, List l);
-    
-    protected FIfWhenStmt FIfStmt.flattenFIfWhenStmt(FClass fc, FQName prefix, List icl) {
+    public boolean FIfStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+        boolean res = false;
+        boolean hasBroken = false;
+        List cl = new List();
+        boolean first = true;
+        for (FIfWhenClause c : getFIfWhenClauses()) {
+            if (c.getTest().variability().indexParameterOrLess()) {
+                try {
+                    CValue val = c.getTest().ceval();
+                    if (!val.booleanValue()) {
+                        continue;
+                    } else if (first) {
+                        return FStatement.flattenFStatementList(c.getFStatements(), sl, fc, prefix) || hasBroken;
+                    } else {
+                        List l = new List();
+                        hasBroken = FStatement.flattenFStatementList(c.getFStatements(), l, fc, prefix) || hasBroken;
+                        sl.add(new FIfStmt(cl, l));
+                        return hasBroken;
+                    }
+                } catch (ConstantEvaluationException e) {
+                    
+                }
+            }
+            first = false;
+            hasBroken = c.flatten(cl, fc, prefix) || hasBroken;
+        }
+        if (first) {
+            return FStatement.flattenFStatementList(getElseStmts(), sl, fc, prefix) || hasBroken;
+        }
         List l = new List();
-        FStatement.flattenFStatementList(getElseStmts(), l, fc, prefix);
-        return new FIfStmt(icl, l);
-    }
-    
-    protected FIfWhenStmt FWhenStmt.flattenFIfWhenStmt(FClass fc, FQName prefix, List l) {
-        return new FWhenStmt(l);
+        hasBroken = FStatement.flattenFStatementList(getElseStmts(), l, fc, prefix) || hasBroken;
+        sl.add(new FIfStmt(cl, l));
+        return hasBroken;
     }
     
     public boolean FIfWhenClause.flatten(List cl, FClass fc, FQName prefix) {

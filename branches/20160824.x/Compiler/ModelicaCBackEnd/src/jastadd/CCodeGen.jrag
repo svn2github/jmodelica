@@ -111,6 +111,8 @@ aspect CCodeGen {
         public abstract void print(ASTNode node, CodeStream str, String indent);
 
         public abstract void printVarDecls(ASTNode node, CodeStream str, String indent);
+        
+        public abstract void printDecl(ASTNode node, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved);
 
         public abstract void printPreSteps(ASTNode node, CodeStream str, String indent);
         
@@ -247,7 +249,12 @@ aspect CCodeGen {
         public void printVarDecls(ASTNode node, CodeStream str, String indent) {
             node.genVarDecls_C(this, str, indent);
         }
-
+        
+        @Override
+        public void printDecl(ASTNode node, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
+            node.printDecl_C(this, str, indent, visited, forVariables, solved);
+        }
+        
         @Override
         public void printPreSteps(ASTNode node, CodeStream str, String indent) {
             node.genTempVars_C(this, str, indent);
@@ -1599,20 +1606,25 @@ aspect CCodeGen {
             if (node != attributeList)
                 node.genVarDecls_C(p, str, indent);
     }
-
+    
+    public void ASTNode.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
+        throw new UnsupportedOperationException("FAbstractEquation.printDecl_C(CodePrinter p, CodeStream str, String indent, Collection<FVariable> forVariables, boolean solved) not implemented for class '" + getClass().getSimpleName() +"'");
+    }
+    
     @Override
-    public void FAlgorithm.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        super.genVarDecls_C(p, str, indent);
-        if (!inFunction() && !isParameterEquation()) {
-            boolean first = true;
-            String switchTemp = this.tempName_C();
-            for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
-                if (first) {
-                    first = false;
-                    use.type().printDecl_C(printer_C, str, indent, switchTemp, null);
+    public void FAlgorithm.printDecl_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited, Collection<FVariable> forVariables, boolean solved) {
+        boolean first = visited == null || visited.add(this);
+        if (first) {
+            p.printVarDecls(this, str, indent);
+            if (!solved || (forVariables != null && forVariables.size() != uniqueFIdUseExpsInLHS().size())) {
+                fRealScalarType().printDecl_C(printer_C, str, indent, this.tempName_C(), null);
+                for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
+                    if (!solved || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
+                        if (!use.inFunctionCallLeftTop()) {
+                            use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
+                        }
+                    }
                 }
-                if (!use.inFunctionCallLeftTop()) 
-                    use.type().printDecl_C(printer_C, str, indent, use.tempName_C(), use);
             }
         }
     }
@@ -2907,22 +2919,17 @@ aspect CCodeGen {
     }
 
     @Override
-    protected void SolvedAlgorithmBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
-        if (visited == null || visited.add(equation())) {
-            if (activeVars.size() != equation().uniqueFIdUseExpsInLHS().size())
-                p.printVarDecls(equation(), str, indent);
-            else
-                p.printVarDecls(equation().getFStatements(), str, indent);
-        }
+    protected void AlgorithmBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
+        p.printDecl(equation(), str, indent, visited, activeVars, isSolvable());
     }
-
+    
     @Override
     protected void EquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
         if (visited == null)
             visited = new HashSet<ASTNode>();
-        for (SimpleEquationBlock seb : unsolvedBlocks())
-            seb.genVarDecls_C(p, str, indent, visited);
         for (SimpleEquationBlock seb : localSolvedBlocks())
+            seb.genVarDecls_C(p, str, indent, visited);
+        for (SimpleEquationBlock seb : unsolvedBlocks())
             seb.genVarDecls_C(p, str, indent, visited);
     }
 
@@ -3458,23 +3465,26 @@ aspect CCodeGen {
     @Override
     public void FAlgorithm.genBlock_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
+        boolean firstVisit = visited == null || !visited.contains(this);
         boolean sideEffect = forVariables == null || forVariables.size() == uniqueFIdUseExpsInLHS().size();
         genBlockEval_C(p, str, indent, visited, forVariables, forIndices);
-        if (!sideEffect)
+        if (!sideEffect && (!firstVisit || !forVariables.iterator().next().isReal())) {
             for (FIdUseExp use : uniqueFIdUseExpsInLHS())
                 use.genWriteBackAssignment_C(str, indent, use.tempName_C(), forVariables);
+        }
     }
 
     @Override
     public void FAlgorithm.genBlockEval_C(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited,
             Collection<FVariable> forVariables, Collection<Integer> forIndices) {
-        boolean firstVisit = visited == null ? true : visited.add(this);
+        boolean firstVisit = visited == null || visited.add(this);
         boolean sideEffect = forVariables == null || forVariables.size() == uniqueFIdUseExpsInLHS().size();
         if (firstVisit) {
-            if (sideEffect)
+            if (sideEffect) {
                 p.print(this, str, indent);
-            else
-                prettyPrintNoSideEffect_C(str, indent);
+            } else {
+                prettyPrintNoSideEffect_C(str, indent, forVariables);
+            }
         }
     }
 
@@ -3622,15 +3632,15 @@ aspect CCodeGen {
 
     @Override
     public void FAlgorithm.genResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices) {
-        if (!visited.contains(this)) {
-            visited.add(this);
+        if (visited == null || visited.add(this)) {
             p.printPreSteps(this, str, indent);
-            prettyPrintNoSideEffect_C(str, indent);
+            prettyPrintNoSideEffect_C(str, indent, null);
             p.printPostSteps(this, str, indent);
         }
         Enumerator indexCounter = new Enumerator();
-        for (FIdUseExp use : uniqueFIdUseExpsInLHS())
+        for (FIdUseExp use : uniqueFIdUseExpsInLHS()) {
             use.genWriteBackResidual_C(str, indent, use.tempName_C(), enumerator, forIndices, indexCounter);
+        }
     }
 
     /**
@@ -3638,16 +3648,21 @@ aspect CCodeGen {
      * Prints the algorithm, statements which restore LHS variables,
      * and statements which put the new values in temporaries.
      */
-    public void FAlgorithm.prettyPrintNoSideEffect_C(CodeStream str, String indent) {
+    public void FAlgorithm.prettyPrintNoSideEffect_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
         String switchTemp = this.tempName_C();
         Collection<FIdUseExp> lhs = uniqueFIdUseExpsInLHS();
-        for (FIdUseExp use : lhs)
-            FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
+        for (FIdUseExp use : lhs) {
+            if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
+                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), use.myFV().name_C());
+            }
+        }
         prettyPrint_C(str, indent);
         for (FIdUseExp use : lhs) {
-            FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
-            FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
-            FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
+            if (forVariables == null || !forVariables.contains(use.myFV()) || !use.myFV().isReal()) {
+                FStatement.printAssignStmt_C(str, indent, switchTemp, use.myFV().name_C());
+                FStatement.printAssignStmt_C(str, indent, use.myFV().name_C(), use.tempName_C());
+                FStatement.printAssignStmt_C(str, indent, use.tempName_C(), switchTemp);
+            }
         }
     }
 
