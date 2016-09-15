@@ -397,10 +397,6 @@ aspect FunctionCallSizes {
         return exp;
     }
     
-    public FExp FExp.component(String name) {
-        return extractRecordFExp(name);
-    }
-    
     public FExp FExp.cell(FExp.FunctionSizeContextReplacer crp, FArraySubscripts fas) {
         if (fas != null) {
             if (fas.variability().knownParameterOrLess()) {

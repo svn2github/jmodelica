@@ -4412,8 +4412,6 @@ model RangeSubscript1
             description="Constant eval of non-slice array access with subscripts in flat tree",
             flatModel="
 fclass EvaluationTests.RangeSubscript1
- final parameter Real a[1].b[1] = 1.0 /* 1.0 */;
- final parameter Real a[1].b[2] = 2.0 /* 2.0 */;
  final parameter Real c[1] = 1 /* 1 */;
  final parameter Real c[2] = 2 /* 2 */;
 end EvaluationTests.RangeSubscript1;

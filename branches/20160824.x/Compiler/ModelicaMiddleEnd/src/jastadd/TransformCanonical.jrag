@@ -823,7 +823,7 @@ aspect TransformCanonical {
     }
 	
     public FExp FRecordConstructor.extractRecordFExp(String suffix) {
-        return myArgFExp(suffix).fullCopy();
+        return component(suffix).fullCopy();
     }
     
     public FExp InstRecordConstructor.extractRecordFExp(String suffix) {

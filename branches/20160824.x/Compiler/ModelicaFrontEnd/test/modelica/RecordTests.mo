@@ -4986,7 +4986,7 @@ fclass RecordTests.RecordScalarize47
 equation
  r1.x = time;
  r2.x = 2 * time;
- x = RecordTests.RecordScalarize47.f(RecordTests.RecordScalarize47.R(if p then r1.x else r2.x));
+ x = RecordTests.RecordScalarize47.f(if p then RecordTests.RecordScalarize47.R(r1.x) else RecordTests.RecordScalarize47.R(r2.x));
 
 public
  function RecordTests.RecordScalarize47.f
@@ -5203,6 +5203,81 @@ end RecordTests.RecordScalarize51;
 ")})));
 end RecordScalarize51;
 
+model RecordScalarize52
+    record R
+        Real[1] x;
+    end R;
+    
+    function f
+        output R r = R(2:2);
+        algorithm
+    end f;
+    
+    R r = if time > 1 then R(1:1) else f();
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize52",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize52
+ Real r.x[1];
+ Real temp_1.x[1];
+equation
+ temp_1.x[1] = if not time > 1 then 2 else 0.0;
+ r.x[1] = if time > 1 then 1 else temp_1.x[1];
+end RecordTests.RecordScalarize52;
+")})));
+end RecordScalarize52;
+
+model RecordScalarize53
+    record R
+        Real x;
+    end R;
+    R x[2] = {R(1),R(2)};
+    R y = x[integer(time)];
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize53",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize53
+ constant Real x[1].x = 1;
+ constant Real x[2].x = 2;
+ Real y.x;
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+equation
+ y.x = ({1.0, 2.0})[temp_1];
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize53;
+")})));
+end RecordScalarize53;
+
+model RecordScalarize54
+    record R
+        Real[1] x;
+    end R;
+    R x[2] = {R(1:1),R(2:2)};
+    R y = x[integer(time)];
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize54",
+            description="",
+            flatModel="
+fclass RecordTests.RecordScalarize54
+ constant Real x[1].x[1] = 1;
+ constant Real x[2].x[1] = 2;
+ Real y.x[1];
+ discrete Integer temp_1;
+initial equation 
+ pre(temp_1) = 0;
+equation
+ y.x[1] = ({1.0, 2.0})[temp_1];
+ temp_1 = if time < pre(temp_1) or time >= pre(temp_1) + 1 or initial() then integer(time) else pre(temp_1);
+end RecordTests.RecordScalarize54;
+")})));
+end RecordScalarize54;
 
 model RecordFunc1
  record A
