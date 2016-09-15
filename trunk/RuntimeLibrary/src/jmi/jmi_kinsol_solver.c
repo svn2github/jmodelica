@@ -41,6 +41,10 @@
 
 #define JMI_LIMIT_VALUE 1e30
 
+#define JMI_DELTA_INCREASE_MAGNITUDE 10.0
+#define JMI_MAX_DELTA_INCREASE_MAGNITUDE 100.0
+#define JMI_MAX_DELTA 0.1
+
 /* KINSOL callback for linear system solve */
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 
@@ -135,6 +139,45 @@ static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
     return(sum);
 }
 
+int jmi_kinsol_one_sided_differences_for_one_column(jmi_block_solver_t * block, realtype delta, int column_index, N_Vector jthCol) {
+    int ret;
+    jmi_kinsol_solver_t* solver = block->solver;
+    struct KINMemRec* kin_mem = solver->kin_mem;
+    realtype inc, inc_inv, ujsaved, ujscale, sign;
+    realtype *u_data, *uscale_data;
+    /* Obtain pointers to the data for u and uscale */
+    u_data   = N_VGetArrayPointer(solver->kin_y);
+    uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+    ujsaved = u_data[column_index];
+    ujscale = ONE/uscale_data[column_index];
+    sign = (ujsaved >= 0) ? 1 : -1;
+    inc = MAX(ABS(ujsaved), ujscale)*sign*delta;
+    u_data[column_index] += inc;
+    /* make sure we're inside bounds*/
+    if((u_data[column_index] > block->max[column_index]) || (u_data[column_index] < block->min[column_index])) {
+        inc = -inc;
+        u_data[column_index] = ujsaved + inc;
+    }
+
+    ret = kin_f(solver->kin_y, solver->work_vector, block);
+    if(ret > 0) {
+        /* try to recover by stepping in the opposite direction */
+        inc = -inc;
+        u_data[column_index] = ujsaved + inc;
+
+        ret = kin_f(solver->kin_y, solver->work_vector, block);
+    }
+    if (ret != 0) {
+        u_data[column_index] = ujsaved;
+        return ret; 
+    }
+    inc_inv = ONE/inc; 
+    N_VLinearSum(inc_inv, solver->work_vector, -inc_inv, kin_mem->kin_fval, jthCol);
+
+    u_data[column_index] = ujsaved;
+    return ret;
+}
+
 int jmi_kinsol_is_zero_column(realtype* col, int n) {
     int i;
     for(i=0; i<n; i++) {
@@ -146,68 +189,41 @@ int jmi_kinsol_is_zero_column(realtype* col, int n) {
 }
 
 int jmi_kinsol_zero_column_jacobian_handling(jmi_block_solver_t * block) {
-    int j, ret, isZeroColumn;
-    int updatedJacobian = FALSE;
+    int j, ret, is_zero_column;
+    int updated_jacobian = FALSE;
     jmi_kinsol_solver_t* solver = block->solver;
     struct KINMemRec* kin_mem = solver->kin_mem;
-    realtype inc, inc_inv, ujsaved, ujscale, sign, delta;
-    realtype *tmp2_data, *u_data, *uscale_data;
+    realtype delta;
+    realtype *tmp2_data;
     realtype *col;
     N_Vector jthCol;
-    /* Obtain pointers to the data for u and uscale */
-    u_data   = N_VGetArrayPointer(solver->kin_y);
-    uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
     
     for(j=0; j<block->n; j++) {
         col = DENSE_COL(block->J, j);
-        delta = block->options->jacobian_finite_difference_delta*10;
-        isZeroColumn = jmi_kinsol_is_zero_column(col, block->n);
-        if(!isZeroColumn) continue;
-        while(isZeroColumn && delta < block->options->jacobian_finite_difference_delta*1000 && delta < 1) { /* Zero column, try finite differences with greater delta */
-            ujsaved = u_data[j];
-            ujscale = ONE/uscale_data[j];
-            sign = (ujsaved >= 0) ? 1 : -1;
-            inc = MAX(ABS(ujsaved), ujscale)*sign*delta;
-            u_data[j] += inc;
-            /* make sure we're inside bounds*/
-            if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
-                inc = -inc;
-                u_data[j] = ujsaved + inc;
-            }
-
-            ret = kin_f(solver->kin_y, solver->work_vector, block);
-            if(ret > 0) {
-                /* try to recover by stepping in the opposite direction */
-                inc = -inc;
-                u_data[j] = ujsaved + inc;
-
-                ret = kin_f(solver->kin_y, solver->work_vector, block);
-            }
-            if (ret != 0) {
-                u_data[j] = ujsaved;
-                break; 
-            }
-
-            u_data[j] = ujsaved;
-            inc_inv = ONE/inc;
+        delta = block->options->jacobian_finite_difference_delta*JMI_DELTA_INCREASE_MAGNITUDE;
+        is_zero_column = jmi_kinsol_is_zero_column(col, block->n);
+        if(!is_zero_column) continue;
+        /* Zero column, try finite differences with greater delta */
+        while(is_zero_column && delta < block->options->jacobian_finite_difference_delta*JMI_MAX_DELTA_INCREASE_MAGNITUDE*2 && delta < JMI_MAX_DELTA*10) { 
             tmp2_data = N_VGetArrayPointer(solver->work_vector2);
             jthCol = solver->work_vector2;
             N_VSetArrayPointer(DENSE_COL(block->J, j), jthCol);
-            N_VLinearSum(inc_inv, solver->work_vector, -inc_inv, kin_mem->kin_fval, jthCol);
+            ret = jmi_kinsol_one_sided_differences_for_one_column(block, delta, j, jthCol);
             N_VSetArrayPointer(tmp2_data, solver->work_vector2);
-            delta *=10;
-            isZeroColumn = jmi_kinsol_is_zero_column(col, block->n);
+            if(ret != 0) break;
+            delta *=JMI_DELTA_INCREASE_MAGNITUDE;
+            is_zero_column = jmi_kinsol_is_zero_column(col, block->n);
         }
 
-        if(!isZeroColumn) {
+        if(!is_zero_column) {
             jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "ZeroColumnJacobianUpdate", 
-                "The column for <iter: #r%d#> was zero but is now recalculated with <delta: %E>", block->value_references[j], delta/10);
+                "The column for <iter: #r%d#> was zero but is now recalculated with one-sided differences with <delta: %E>", block->value_references[j], delta/JMI_DELTA_INCREASE_MAGNITUDE);
             jmi_log_reals(block->log, node, logInfo, "column", DENSE_COL(block->J, j), block->n);
             jmi_log_leave(block->log, node);
-            updatedJacobian = TRUE;
+            updated_jacobian = TRUE;
         }
     }
-    return updatedJacobian;
+    return updated_jacobian;
 }
 
 
@@ -541,30 +557,12 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 }
                 if(sqrt_relfunc > 0) 
                     inc *= sqrt_relfunc;
-                u_data[j] += inc;
-                /* make sure we're inside bounds*/
-                if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
-                    inc = -inc;
-                    u_data[j] = ujsaved + inc;
-                }
-                ret = kin_f(u, ftemp, block);
-                if(ret > 0) {
-                    /* try to recover by stepping in the opposite direction */
-                    inc = -inc;
-                    u_data[j] = ujsaved + inc;
-
-                    ret = kin_f(u, ftemp, block);
-                }
-                if (ret != 0) break; 
-
-                u_data[j] = ujsaved;
-
-                inc_inv = ONE/inc;
                 /* Generate the jth col of Jac(u) */
                 N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
-                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
+                ret = jmi_kinsol_one_sided_differences_for_one_column(block, sqrt_relfunc, j, jthCol);
                 /* Restore original array pointer in tmp2 */
                 N_VSetArrayPointer(tmp2_data, tmp2);
+                if (ret != 0) break; 
             }
 
             /* Evaluate the residual with the original u vector to avoid that the initial guess 
