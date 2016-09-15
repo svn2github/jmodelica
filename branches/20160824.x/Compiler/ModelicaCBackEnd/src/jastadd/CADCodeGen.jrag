@@ -1310,11 +1310,11 @@ aspect CADCodeGen {
     }
     @Override
     public String FSubscriptedExp.varWriteBackName_CAD() {
-        throw new UnsupportedOperationException("varWriteBackName_CAD() is not supported for " + getClass().getSimpleName());
+        return getFExp().tempName_var_CAD();
     }
     @Override
     public String FSubscriptedExp.derWriteBackName_CAD() {
-        throw new UnsupportedOperationException("derWriteBackName_CAD() is not supported for " + getClass().getSimpleName());
+        return getFExp().tempName_der_CAD();
     }
 
     public void FFunctionCallLeft.genWriteBackAssignment_CAD(CodeStream str, String indent, Collection<FVariable> forVariables){
@@ -1684,20 +1684,30 @@ aspect CADCodeGen {
     
     @Override
     public void FSubscriptedExp.genVarDecls_CAD(CodePrinter p, CodeStream str, String indent) {
-        genVarDecls_C(p, str, indent);
+        getFExp().printDecls_CAD(p, str, indent, getFExp().tempName_var_CAD(), getFExp().tempName_der_CAD());
     }
     
     @Override
     public void FSubscriptedExp.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
-        genTempVars_C(p, str, indent);
+        getFExp().type().printInit_C(p, str, indent, getFExp().tempName_var_CAD(), this);
+        getFExp().type().printInit_C(p, str, indent, getFExp().tempName_der_CAD(), this);
+        p.printTempInputAssigns(str, indent, getFExp());
     }
     
     @Override
-    public void FSubscriptedExp.genTempFree_CAD(CodePrinter p, CodeStream str, String indent) {
-        genTempFree_C(p, str, indent);
+    public void FSubscriptedExp.genVarExp_CAD(CodePrinter p, CodeStream str, String indent) {
+        str.print(getFArraySubscripts().genFunctionArrayUse_C(p, getFExp().tempName_var_CAD(), C_ARRAY_VALUE));
     }
     
+    @Override
+    public void FSubscriptedExp.genDerExp_CAD(CodePrinter p, CodeStream str, String indent) {
+        str.print(getFArraySubscripts().genFunctionArrayUse_C(p, getFExp().tempName_der_CAD(), C_ARRAY_VALUE));
+    }
+
+    @Override
     syn boolean FSubscriptedExp.inlineVar_CAD() = true;
+    @Override
+    syn boolean FSubscriptedExp.inlineDer_CAD() = true;
 
     /**
      * Generates temporary input variables for arrays and records.
