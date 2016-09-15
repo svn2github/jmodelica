@@ -192,7 +192,6 @@ int jmi_kinsol_zero_column_jacobian_handling(jmi_block_solver_t * block) {
     int j, ret, is_zero_column;
     int updated_jacobian = FALSE;
     jmi_kinsol_solver_t* solver = block->solver;
-    struct KINMemRec* kin_mem = solver->kin_mem;
     realtype delta;
     realtype *tmp2_data;
     realtype *col;
