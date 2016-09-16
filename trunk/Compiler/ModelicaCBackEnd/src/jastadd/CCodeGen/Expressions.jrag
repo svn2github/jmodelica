@@ -1211,7 +1211,11 @@ aspect CCodeGenExpressions {
      * Helper, prints the appropiate jmi switch macro
      */
     private void FRelExp.printSwitchMacro_C(CodePrinter p, CodeStream str, String indent) {
-        str.format(switchString() + "(" + mySwitchIndex() + ")");
+        if (originalFExp().generatesEventInDAE()) {
+            str.format("_sw(%d)", mySwitchIndex());
+        } else {
+            str.format("_sw_init(%d)", relExpInInitialEquationsIndex());
+        }
     }
 
     /**
@@ -1255,7 +1259,7 @@ aspect CCodeGenExpressions {
         p.printPreSteps(getFExp(), str, indent);
         p.printPreSteps(maxDelayExp, str, indent);
         
-        str.format("%sjmi_delay_init(jmi, %d, ", indent, mySwitchIndex());
+        str.format("%sjmi_delay_init(jmi, %d, ", indent, myDelayIndex());
         str.print(!isTimeEventGenerating() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean fixed
         str.print(", "); 
         str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
@@ -1282,7 +1286,7 @@ aspect CCodeGenExpressions {
      */
     public void FDelayExp.genSample_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(getFExp(), str, indent);
-        str.format("%sjmi_delay_record_sample(jmi, %d, ", indent, mySwitchIndex());
+        str.format("%sjmi_delay_record_sample(jmi, %d, ", indent, myDelayIndex());
         p.print(getFExp(), str, indent);
         str.println(");");
         p.printPostSteps(getFExp(), str, indent);
@@ -1290,7 +1294,7 @@ aspect CCodeGenExpressions {
 
     @Override
     public void FDelayExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        str.format("jmi_delay_evaluate(jmi, %d, ", mySwitchIndex());
+        str.format("jmi_delay_evaluate(jmi, %d, ", myDelayIndex());
         p.print(getFExp(), str, indent);
         str.print(", ");
         p.print(getDelay(), str, indent);
@@ -1324,7 +1328,7 @@ aspect CCodeGenExpressions {
         p.printPreSteps(getInitialValues(), str, indent);
         getInitialValues().genTempInput_C(p, str, indent);
         
-        str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySwitchIndex());
+        str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
         str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
         str.print(", "); 
         p.print(getX(), str, indent); // jmi_real_t x0,
@@ -1361,7 +1365,7 @@ aspect CCodeGenExpressions {
         p.printPreSteps(getX(), str, indent);
         p.printPreSteps(getPositiveVelocity(), str, indent);
             
-        str.format("%sjmi_spatialdist_record_sample(jmi, %d, ", indent, mySwitchIndex());
+        str.format("%sjmi_spatialdist_record_sample(jmi, %d, ", indent, mySpatialDistIndex());
         p.print(getIn0(), str, indent);
         str.print(", ");
         p.print(getIn1(), str, indent);
@@ -1403,7 +1407,7 @@ aspect CCodeGenExpressions {
         if (!exp) {
             str.print(indent);
         }
-        str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySwitchIndex());
+        str.format("jmi_spatialdist_evaluate(jmi, %d, ", mySpatialDistIndex());
         if (exp) {
             str.print("NULL, NULL");
         } else {
