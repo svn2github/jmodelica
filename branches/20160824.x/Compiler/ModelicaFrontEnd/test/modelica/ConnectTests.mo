@@ -1299,6 +1299,41 @@ end ConnectTests.ConnectTest29;
 end ConnectTest29;
 
 
+model ConnectTest30
+    connector C
+        Real a;
+    end C;
+    
+    model A
+        parameter Integer n = 2;
+        C c[n];
+    end A;
+    
+    A a1(c(a={1,2}));
+    A a2;
+equation
+    connect(a1.c, a2.c[1:end]);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConnectTest30",
+            description="Size of range exp using end in connect, where size is discribed by parameter in other scope",
+            flatModel="
+fclass ConnectTests.ConnectTest30
+ structural parameter Integer a1.n = 2 /* 2 */;
+ Real a1.c[1].a = 1;
+ Real a1.c[2].a = 2;
+ structural parameter Integer a2.n = 2 /* 2 */;
+ Real a2.c[1].a;
+ Real a2.c[2].a;
+equation
+ a1.c[1].a = a2.c[1].a;
+ a1.c[2].a = a2.c[2].a;
+end ConnectTests.ConnectTest30;
+")})));
+end ConnectTest30;
+
+
 
 model ConnectOuterTest1
     connector C = Real;

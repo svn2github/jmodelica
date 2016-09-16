@@ -6913,6 +6913,47 @@ end FunctionTests.ArrayExpInFunc45;
 ")})));
 end ArrayExpInFunc45;
 
+
+model ArrayExpInFunc46
+    function f
+        input Real x[:];
+        output Real y[size(x,1)-1];
+    algorithm
+        for i in 1:2 loop
+            y := x[2:end];
+        end for;
+	end f;
+    
+    parameter Real[:] x1 = f({1,2,3,4,5}) annotation(Evaluate=true);
+    parameter Real[:] x2 = f({6,7,8}) annotation(Evaluate=true);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayExpInFunc46",
+            description="Check that we don't crash due to cached size for range expression in for loop in function",
+            flatModel="
+fclass FunctionTests.ArrayExpInFunc46
+ eval parameter Real x1[4] = {2, 3, 4, 5} /* { 2, 3, 4, 5 } */;
+ eval parameter Real x2[2] = {7, 8} /* { 7, 8 } */;
+
+public
+ function FunctionTests.ArrayExpInFunc46.f
+  input Real[:] x;
+  output Real[:] y;
+ algorithm
+  init y as Real[size(x, 1) - 1];
+  for i in 1:2 loop
+   y[:] := x[2:size(x, 1)];
+  end for;
+  return;
+ end FunctionTests.ArrayExpInFunc46.f;
+
+end FunctionTests.ArrayExpInFunc46;
+")})));
+end ArrayExpInFunc46;
+
+
+
 model ArrayOutputScalarization1
  function f
   output Real x[2] = {1,2};

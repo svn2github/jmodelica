@@ -4646,17 +4646,19 @@ aspect ArrayConstantEvaluation {
 }
 
 aspect LiteralExpressions {
-	
-	syn boolean FExp.hasOnlyLiterals() {
-		for (FExp e : childFExps())
-			if (!e.hasOnlyLiterals())
-				return false;
-		return true;
-	}
-	
-	eq FIdUseExp.hasOnlyLiterals()      = false;
-	eq FFunctionCall.hasOnlyLiterals()  = false;
-	
+
+    syn boolean FExp.hasOnlyLiterals() {
+        for (FExp e : childFExps())
+            if (!e.hasOnlyLiterals())
+                return false;
+        return true;
+    }
+
+    eq FIdUseExp.hasOnlyLiterals()      = false;
+    eq FFunctionCall.hasOnlyLiterals()  = false;
+    eq FTimeExp.hasOnlyLiterals()       = false;
+    eq FEndExp.hasOnlyLiterals()        = !inFunction();
+
 }
 
 aspect CircularExpressions {
