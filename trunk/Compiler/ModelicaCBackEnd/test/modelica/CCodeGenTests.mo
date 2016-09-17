@@ -19123,6 +19123,141 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 ")})));
 end TestRelationalOp13;
+model TestRelationalOp14
+    function f
+        input Real[1] X;
+        output Real r;
+    algorithm
+        r := X[1];
+    end f;
+    Real a;
+    Real b;
+equation
+    a = f({if b > 0.0 then b else -b});
+    b = cos(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp14",
+            description="Test inline bug which caused exception during code gen (related to switch index)",
+            template="
+$C_ode_time_events$
+$C_ode_derivatives$
+",
+            generatedCode="
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    *event = nextEvent;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    _b_1 = cos(_time);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
+    }
+    _a_0 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    return ef;
+}
+
+")})));
+end TestRelationalOp14;
+model TestRelationalOp15
+    Real a = if sin(time) > 0 and cos(time) > 0 then 1 else time;
+    Real b = if sin(time) > 0 and cos(time) > 0 then time else 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp15",
+            description="Ensure that guards are generated correctly",
+            template="
+$C_ode_time_events$
+$C_ode_derivatives$
+$C_DAE_event_indicator_residuals$
+",
+            generatedCode="
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    *event = nextEvent;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+    }
+    _a_0 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, AD_WRAP_LITERAL(1), _time);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
+    }
+    _b_1 = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(2)), JMI_TRUE, _time, AD_WRAP_LITERAL(1));
+    return ef;
+}
+
+    (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+
+")})));
+end TestRelationalOp15;
+model TestRelationalOp16
+    Real a = if sin(time) > 0 and cos(time) > 0 and cos(time+0.5) > 0 then 1 else time;
+    Real b = if sin(time) > 0 and cos(time) > 0 and cos(time+0.5) > 0 then time else 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp16",
+            description="Ensure that guards are generated correctly",
+            template="
+$C_ode_time_events$
+$C_ode_derivatives$
+$C_DAE_event_indicator_residuals$
+",
+            generatedCode="
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    *event = nextEvent;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(1), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(2) = jmi_turn_switch(jmi, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), _sw(2), JMI_REL_GT);
+    }
+    _a_0 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(1)), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1), _time);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, sin(_time) - (AD_WRAP_LITERAL(0)), _sw(0), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(3) = jmi_turn_switch(jmi, cos(_time) - (AD_WRAP_LITERAL(0)), _sw(3), JMI_REL_GT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(4) = jmi_turn_switch(jmi, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), _sw(4), JMI_REL_GT);
+    }
+    _b_1 = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(_sw(0), _sw(3)), _sw(4)), JMI_TRUE, _time, AD_WRAP_LITERAL(1));
+    return ef;
+}
+
+    (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
+    (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+
+")})));
+end TestRelationalOp16;
 
 model StringOperations1
 	type E = enumeration(a, bb, ccc);

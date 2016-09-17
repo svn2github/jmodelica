@@ -295,6 +295,7 @@ aspect FunctionInlining {
             }
             if (noEvent)
                 value = value.preventEvents();
+            value.resetOriginalReferences();
             FEquation eqn = new FEquation(var.createUseExp(), value);
             addEquation(eqn, variability);
         }
