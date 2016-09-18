@@ -3767,7 +3767,7 @@ aspect EliminateEqualSwitches{
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (!exp.hasBrancher()) {
+                        if (!exp.hasBrancher() && !(exp.inFArray() && exp.inFunctionCall())) {
                             original = exp;
                             break;
                         }
@@ -3782,6 +3782,16 @@ aspect EliminateEqualSwitches{
             }
         }
     }
+    
+    /**
+     * Check if this expression is in an FArray expression. Either directly or
+     * a thorugh a sequence of other expressions.
+     */
+    inh boolean FExp.inFArray();
+    eq FExp.getChild().inFArray()    = inFArray();
+    eq FArray.getChild().inFArray()   = true;
+    eq BaseNode.getChild().inFArray() = false;
+
     
     public void FExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
         
