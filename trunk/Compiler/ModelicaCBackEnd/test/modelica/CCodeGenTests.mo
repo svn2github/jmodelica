@@ -19042,10 +19042,11 @@ $C_ode_derivatives$
             generatedCode="
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     (*res)[0] = _x_0 - (AD_WRAP_LITERAL(4));
+    (*res)[1] = _x_0 - (AD_WRAP_LITERAL(4));
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     jmi_array_ref_1(tmp_1, 1) = _sw(0);
-    jmi_array_ref_1(tmp_1, 2) = _sw(0);
-    (*res)[1] = COND_EXP_EQ(func_CCodeGenTests_TestRelationalOp12_f_exp0(tmp_1), JMI_TRUE, _x_0 - (5), AD_WRAP_LITERAL(1));
+    jmi_array_ref_1(tmp_1, 2) = _sw(1);
+    (*res)[2] = COND_EXP_EQ(func_CCodeGenTests_TestRelationalOp12_f_exp0(tmp_1), JMI_TRUE, _x_0 - (5), AD_WRAP_LITERAL(1));
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
@@ -19055,15 +19056,15 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(4)), _sw(0), JMI_REL_GT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(4)), _sw(0), JMI_REL_GT);
+        _sw(1) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(4)), _sw(1), JMI_REL_GT);
     }
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     jmi_array_ref_1(tmp_2, 1) = _sw(0);
-    jmi_array_ref_1(tmp_2, 2) = _sw(0);
+    jmi_array_ref_1(tmp_2, 2) = _sw(1);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, _x_0 - (5), _sw(1), JMI_REL_GT);
+        _sw(2) = jmi_turn_switch(jmi, _x_0 - (5), _sw(2), JMI_REL_GT);
     }
-    _b_1 = LOG_EXP_AND(func_CCodeGenTests_TestRelationalOp12_f_exp0(tmp_2), _sw(1));
+    _b_1 = LOG_EXP_AND(func_CCodeGenTests_TestRelationalOp12_f_exp0(tmp_2), _sw(2));
     pre_b_1 = _b_1;
     return ef;
 }
@@ -19162,6 +19163,47 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
 ")})));
 end TestRelationalOp14;
+model TestRelationalOp14B
+    function f
+        input Real[1] X;
+        output Real r;
+    algorithm
+        r := X[1];
+    annotation(LateInline=true);
+    end f;
+    Real a = f({if b > 0.0 then b else -b});
+    Real b = cos(time);
+    Real c = if b > 0.0 then b else -b;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestRelationalOp14B",
+            description="Test inline bug which caused exception during code gen (related to switch index)",
+            template="
+$C_ode_time_events$
+$C_ode_derivatives$
+",
+            generatedCode="
+    jmi_time_event_t nextEvent = {0};
+    jmi_real_t nSamp;
+    *event = nextEvent;
+
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    _b_1 = cos(_time);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(1), JMI_REL_GT);
+    }
+    _a_0 = COND_EXP_EQ(_sw(1), JMI_TRUE, _b_1, - _b_1);
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (AD_WRAP_LITERAL(0.0)), _sw(0), JMI_REL_GT);
+    }
+    _c_2 = COND_EXP_EQ(_sw(0), JMI_TRUE, _b_1, - _b_1);
+    return ef;
+}
+")})));
+end TestRelationalOp14B;
 model TestRelationalOp15
     Real a = if sin(time) > 0 and cos(time) > 0 then 1 else time;
     Real b = if sin(time) > 0 and cos(time) > 0 then time else 1;
