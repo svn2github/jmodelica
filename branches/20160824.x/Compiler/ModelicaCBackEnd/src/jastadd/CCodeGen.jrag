@@ -2342,17 +2342,28 @@ aspect CCodeGen {
     eq FExternalStmt.getChild().myCodeGenContext() = getCodeGenContext();
 
     public abstract class CodePrinter {
-        protected final FuncCallInArgPrinter funcCallInArgPrinter = new FuncCallInArgPrinter();
+        protected final FuncCallInArgPrinter funcCallInArgPrinter = new FuncCallInArgPrinter(false);
+        protected final FuncCallInArgPrinter memCpyFuncCallInArgPrinter = new FuncCallInArgPrinter(true);
         
         public class FuncCallInArgPrinter extends CodeFuncCallInOutArgPrinter {
+            
+            protected FuncCallInArgPrinter(boolean useMemcpy) {
+                super(useMemcpy);
+            }
+            
             @Override
             public String arrayAccessConst() {
                 return ASTNode.C_ARRAY_REFERENCE;
             }
 
             @Override
-            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+            public void printCellExp(CodeStream str, String indent, String name, FExp exp) {
                 exp.genTempInputCellAssigns_C(CodePrinter.this, str, indent, name);
+            }
+
+            @Override
+            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+                firstUse.genTempInputCellAssignsMemcpy_C(str, indent, firstName, n);
             }
         }
 
@@ -2363,7 +2374,11 @@ aspect CCodeGen {
         
         @Override
         public void printTempInputAssigns(CodeStream str, String indent, FExp exp) {
-            funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
+            if (exp.inFunction()) {
+                funcCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
+            } else {
+                memCpyFuncCallInArgPrinter.print(str, indent, exp.type(), exp.tempName_C(), exp);
+            }
         }
     }
 
@@ -2400,6 +2415,18 @@ aspect CCodeGen {
 		p.print(this, str, indent);
 		str.print(";\n");
 	}
+	
+    public void FIdUseExp.genTempInputCellAssignsMemcpy_C(CodeStream str, String indent, String name, int n) {
+        str.print(indent);
+        str.print("memcpy(&");
+        str.print(name);
+        str.print(", &");
+        genAssignedRef_C(ASTNode.printer_C, str, indent);
+        str.print(", ");
+        str.print(n);
+        str.print(" * sizeof(jmi_real_t));\n");
+    }
+
 	
 	// TODO: maybe this should be moved to front-end
 	public FExp FExp.extractRecordComponentExp(String name) {
@@ -3833,34 +3860,48 @@ aspect CCodeGen {
 	
     public class CodePrinter {
         public abstract class FuncCallOutArgPrinter extends CodeFuncCallInOutArgPrinter {
-            @Override
-            public void printCell(CodeStream str, String indent, String name, FExp exp) {
-                exp.genFuncCallOutArg_C(this, str, indent, name);
+            
+            protected FuncCallOutArgPrinter(boolean useMemcpy) {
+                super(useMemcpy);
             }
+            
+//            @Override
+//            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+//                exp.genFuncCallOutArg_C(this, str, indent, name);
+//            }
 
             @Override
             public String arrayAccessConst() {
                 return ASTNode.C_ARRAY_VALUE;
             }
 
-            public abstract void printUse(CodeStream str, String indent, FIdUseExp use, String name);
-            public void printNoExp(CodeStream str, String indent) {}
+            @Override
+            public void printCellExp(CodeStream str, String indent, String name, FExp exp) {
+                throw new UnsupportedOperationException("No implementation for FuncCallOutArgPrinter.printCellExp for type '" + exp.getClass().getSimpleName() + "'. Printer is " + getClass().getSimpleName());
+            }
+
+            @Override
+            public abstract void printCellUse(CodeStream str, String indent, String name, FIdUseExp exp);
+//            public abstract void printUse(CodeStream str, String indent, FIdUseExp use, String name);
+//            public void printNoExp(CodeStream str, String indent) {
+//                endComponent(str, indent);
+//            }
         }
     }
 
-    public void FExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-        throw new UnsupportedOperationException("No implementation for FExp.genFuncCallOutArg_C for type '" + getClass().getName() + "'. Printer is " + p.getClass().getName());
-    }
-
-    @Override
-    public void FNoExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-        p.printNoExp(str, indent);
-    }
-
-    @Override
-    public void FIdUseExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-        p.printUse(str, indent, this, name);
-    }
+//    public void FExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+//        throw new UnsupportedOperationException("No implementation for FExp.genFuncCallOutArg_C for type '" + getClass().getName() + "'. Printer is " + p.getClass().getName());
+//    }
+//
+//    @Override
+//    public void FNoExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+//        p.printNoExp(str, indent);
+//    }
+//
+//    @Override
+//    public void FIdUseExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
+//        p.printUse(str, indent, this, name);
+//    }
 
     public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
@@ -3875,15 +3916,17 @@ aspect CCodeGen {
             protected final Enumerator indexCounter;
     
             protected WriteBackResidualPrinter(Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
+                super(false);
                 this.enumerator = enumerator;
                 this.forIndices = forIndices;
                 this.indexCounter = indexCounter;
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackResidual_C(str, indent, name, enumerator, forIndices, indexCounter);
             }
+            
         }
 
         public abstract void printWriteBackResidual(CodeStream str, String indent, FFunctionCallLeft left,
@@ -3926,82 +3969,93 @@ aspect CCodeGen {
         public class WriteBackAssignmentPrinter extends FuncCallOutArgPrinter {
             protected Collection<FVariable> forVariables;
 
-            protected WriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
+            protected WriteBackAssignmentPrinter(boolean useMemcpy, Collection<FVariable> forVariables) {
+                super(useMemcpy);
                 this.forVariables = forVariables;
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackAssignment_C(str, indent, name, forVariables);
             }
-        }
+
+            @Override
+            public boolean shouldPrint(FIdUseExp use) {
+                return forVariables == null || forVariables.contains(use.myFV());
+            }
+
+            @Override
+            protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+                firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
+            }
+       }
         
-        /**
-         * For array components which are consecutive in z vector this printer generates
-         * memcpy writebacks instead of scalar assignments.
-         */
-        public class ArrayWriteBackAssignmentPrinter extends WriteBackAssignmentPrinter {
+//        /**
+//         * For array components which are consecutive in z vector this printer generates
+//         * memcpy writebacks instead of scalar assignments.
+//         */
+//        public class ArrayWriteBackAssignmentPrinter extends WriteBackAssignmentPrinter {
             
-            FIdUseExp firstUse; // First use in component
-            FIdUseExp prevUse;  // Last consecutive use in component;
-            String firstName;   // Name to read from into firstUse
-            int n;              // Number of consecutive elements in component
-            
-            public ArrayWriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
-                super(forVariables);
-            }
-            
-            @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
-                if (forVariables != null && !forVariables.contains(use.myFV())) {
-                    /* use not included in writeback */
-                    return;
-                }
-                
-                if (firstUse == null) {
-                    /* use is the first element in this component */
-                    init(use, name);
-                    return;
-                }
-                
-                if (!prevUse.isConsecutiveInZ(use)) {
-                    /* use is not directly after prevUse in z-vector
-                     * Write n items we have so far (firstUse to prevUse)
-                     * and reinit with use as first element */
-                    endComponent(str, indent);
-                    init(use, name);
-                    return;
-                }
-                
-                prevUse = use;
-                n++;
-            }
-            
-            @Override
-            public void printNoExp(CodeStream str, String indent) {
-                endComponent(str, indent);
-            }
-            
-            public void init(FIdUseExp use, String name) {
-                firstUse = use;
-                prevUse = use;
-                firstName = name;
-                n = 1;
-            }
-            
-            @Override
-            public void endComponent(CodeStream str, String indent) {
-                if (n == 1) {
-                    super.printUse(str, indent, firstUse, firstName);
-                } else if (n > 1) {
-                    firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
-                }
-                firstUse = null;
-                prevUse = null;
-                firstName = null;
-                n = 0;
-            }
-        }
+//            FIdUseExp firstUse; // First use in component
+//            FIdUseExp prevUse;  // Last consecutive use in component;
+//            String firstName;   // Name to read from into firstUse
+//            int n;              // Number of consecutive elements in component
+//            
+//            public ArrayWriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
+//                super(true, forVariables);
+//            }
+//            
+//            @Override
+//            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+//                if (forVariables != null && !forVariables.contains(use.myFV())) {
+//                    /* use not included in writeback */
+//                    return;
+//                }
+//                
+//                if (firstUse == null) {
+//                    /* use is the first element in this component */
+//                    init(use, name);
+//                    return;
+//                }
+//                
+//                if (!prevUse.isConsecutiveInZ(use)) {
+//                    /* use is not directly after prevUse in z-vector
+//                     * Write n items we have so far (firstUse to prevUse)
+//                     * and reinit with use as first element */
+//                    endComponent(str, indent);
+//                    init(use, name);
+//                    return;
+//                }
+//                
+//                prevUse = use;
+//                n++;
+//            }
+//            
+////            @Override
+////            public void printNoExp(CodeStream str, String indent) {
+////                endComponent(str, indent);
+////            }
+//            
+//            public void init(FIdUseExp use, String name) {
+//                firstUse = use;
+//                prevUse = use;
+//                firstName = name;
+//                n = 1;
+//            }
+//            
+//            @Override
+//            public void endComponent(CodeStream str, String indent) {
+//                if (n == 1) {
+//                    super.printUse(str, indent, firstUse, firstName);
+//                } else if (n > 1) {
+//                    firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
+//                }
+//                firstUse = null;
+//                prevUse = null;
+//                firstName = null;
+//                n = 0;
+//            }
+//        }
         
         public abstract void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node,
                 Collection<FVariable> forVariables);
@@ -4033,9 +4087,7 @@ aspect CCodeGen {
         public void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node, Collection<FVariable> forVariables) {
             FExp e = node.getFExp();
             FType t = e.type();
-            WriteBackAssignmentPrinter p = t.isComposite() && !e.inFunction() ? 
-                    new ArrayWriteBackAssignmentPrinter(forVariables) :
-                    new WriteBackAssignmentPrinter(forVariables);
+            WriteBackAssignmentPrinter p = new WriteBackAssignmentPrinter(t.isComposite() && !e.inFunction(), forVariables);
             p.print(str, indent, t, node.writeBackName_C(), e);
         }
     }
@@ -4675,16 +4727,88 @@ aspect CCodeGen {
      * duplicated code and bugs.
      */
     public abstract class CodeFuncCallInOutArgPrinter {
-        public void print(CodeStream str, String indent, FType type, String name, FExp exp) {
+        private final boolean useMemcpy;
+        FIdUseExp firstUse; // First use in component
+        FIdUseExp prevUse;  // Last consecutive use in component;
+        String firstName;   // Name to read from into firstUse
+        int n;              // Number of consecutive elements in component
+        
+        
+        protected CodeFuncCallInOutArgPrinter(boolean useMemcpy) {
+            this.useMemcpy = useMemcpy;
+        }
+        
+        public final void print(CodeStream str, String indent, FType type, String name, FExp exp) {
             type.genFuncCallInOutArg_C(this, str, indent, name, exp);
         }
-        public abstract void printCell(CodeStream str, String indent, String name, FExp exp);
+        
+        public abstract void printCellExp(CodeStream str, String indent, String name, FExp exp);
+        public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
+            printCellExp(str, indent, name, use);
+        }
+        protected void printCellMemcpyUse(CodeStream str, String indent, String firstName, FIdUseExp firstUse, int n) {
+            throw new UnsupportedOperationException("printCellMemcpyUse() is not implemented for the subtype " + getClass().getSimpleName() + ". This is required if useMemcpy=true");
+        }
+        public boolean shouldPrint(FIdUseExp use) {
+            return true;
+        }
+        
         public abstract String arrayAccessConst();
         
         /**
          * Notify printer that a component has ended.
          */
-        public void endComponent(CodeStream str, String indent) {}
+        public final void endComponent(CodeStream str, String indent) {
+            if (n == 1) {
+                printCellUse(str, indent, firstName, firstUse);
+            } else if (n > 1) {
+                printCellMemcpyUse(str, indent, firstName, firstUse, n);
+            }
+            firstUse = null;
+            prevUse = null;
+            firstName = null;
+            n = 0;
+        }
+        
+        public final void printUse(CodeStream str, String indent, String name, FIdUseExp use) {
+            if (!useMemcpy) {
+                printCellUse(str, indent, name, use);
+                return;
+            }
+            if (!shouldPrint(use)) {
+                return;
+            }
+            if (firstUse == null) {
+                /* use is the first element in this component */
+                init(use, name);
+                return;
+            }
+            
+            if (!prevUse.isConsecutiveInZ(use)) {
+                /* use is not directly after prevUse in z-vector
+                 * Write n items we have so far (firstUse to prevUse)
+                 * and reinit with use as first element */
+                endComponent(str, indent);
+                init(use, name);
+                return;
+            }
+            
+            prevUse = use;
+            n++;
+        }
+        
+//        @Override
+//        public void printNoExp(CodeStream str, String indent) {
+//            endComponent(str, indent);
+//        }
+        
+        private void init(FIdUseExp use, String name) {
+            firstUse = use;
+            prevUse = use;
+            firstName = name;
+            n = 1;
+        }
+        
     }
     
     public void FType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
@@ -4710,10 +4834,12 @@ aspect CCodeGen {
     }
 
     @Override
-    public void FNoType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {}
+    public void FNoType.genFuncCallInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
+        p.endComponent(str, indent);
+    }
 
     public void FType.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name, FExp exp) {
-        p.printCell(str, indent, name, exp);
+        exp.genFuncCallCellInOutArg_C(p, str, indent, name);
     }
     
     @Override
@@ -4726,5 +4852,20 @@ aspect CCodeGen {
             FExp compExp = exp.extractRecordComponentExp(comp.getName());
             comp.getFType().genFuncCallInOutArg_C(p, str, indent, compName, compExp);
         }
+    }
+    
+    public void FExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
+        p.endComponent(str, indent);
+        p.printCellExp(str, indent, name, this);
+    }
+
+    @Override
+    public void FNoExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
+        p.endComponent(str, indent);
+    }
+
+    @Override
+    public void FIdUseExp.genFuncCallCellInOutArg_C(CodeFuncCallInOutArgPrinter p, CodeStream str, String indent, String name) {
+        p.printUse(str, indent, name, this);
     }
 }

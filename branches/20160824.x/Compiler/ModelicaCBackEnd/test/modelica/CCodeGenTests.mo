@@ -446,8 +446,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-    jmi_array_ref_1(tmp_1, 1) = _c_1_0;
-    jmi_array_ref_1(tmp_1, 2) = _c_2_1;
+    memcpy(&jmi_array_ref_1(tmp_1, 1), &_c_1_0, 2 * sizeof(jmi_real_t));
     _x_2 = COND_EXP_EQ(_atInitial, JMI_TRUE, func_CCodeGenTests_CCodeGenTest14_f_exp0(tmp_1), pre_x_2);
     pre_x_2 = _x_2;
     return ef;
@@ -631,9 +630,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     _x_3 = pre_x_3;
     if (COND_EXP_LT(_index_4, 4, JMI_TRUE, JMI_FALSE)) {
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-        jmi_array_ref_1(tmp_1, 1) = _table_1_0;
-        jmi_array_ref_1(tmp_1, 2) = _table_2_1;
-        jmi_array_ref_1(tmp_1, 3) = _table_3_2;
+        memcpy(&jmi_array_ref_1(tmp_1, 1), &_table_1_0, 3 * sizeof(jmi_real_t));
         _x_3 = jmi_array_val_1(tmp_1, _index_4);
     } else {
         _x_3 = JMI_TRUE;
@@ -2372,8 +2369,7 @@ void func_CCodeGenTests_CFunctionTest12_f_def0(jmi_array_t* x_a, jmi_array_t* y_
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
-    jmi_array_ref_1(tmp_2, 1) = (_z_1_0*sf(0));
-    jmi_array_ref_1(tmp_2, 2) = (_z_2_1*sf(1));
+    memcpy(&jmi_array_ref_1(tmp_2, 1), &_z_1_0, 2 * sizeof(jmi_real_t));
     func_CCodeGenTests_CFunctionTest12_f_def0(tmp_2, tmp_1);
     (*res)[0] = jmi_array_val_1(tmp_1, 1) - ((_w_1_2*sf(2)));
     (*res)[1] = jmi_array_val_1(tmp_1, 2) - ((_w_2_3*sf(3)));
@@ -2452,8 +2448,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 2, 1, 2)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
-    jmi_array_ref_1(tmp_3, 1) = _x_1_0;
-    jmi_array_ref_1(tmp_3, 2) = _x_2_1;
+    memcpy(&jmi_array_ref_1(tmp_3, 1), &_x_1_0, 2 * sizeof(jmi_real_t));
     func_CCodeGenTests_CFunctionTest13_F_def0(tmp_3, _u_4, tmp_1, tmp_2);
     memcpy(&_z_1_2, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
     memcpy(&_y_1_5, &jmi_array_val_1(tmp_2, 1), 2 * sizeof(jmi_real_t));
@@ -2595,8 +2590,7 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1, 2)
-    jmi_array_ref_1(tmp_3, 1) = _p1_1_0;
-    jmi_array_ref_1(tmp_3, 2) = _p1_2_1;
+    memcpy(&jmi_array_ref_1(tmp_3, 1), &_p1_1_0, 2 * sizeof(jmi_real_t));
     _p2_2 = (func_CCodeGenTests_CFunctionTest15_f_exp0(tmp_3));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 2, 1, 2)
     jmi_array_ref_1(tmp_4, 1) = _p1_1_0 + _p2_2;
@@ -2956,6 +2950,62 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 }
 ")})));
 end CFunctionTest22;
+model CFunctionTest23
+    function F
+        input Real i[6];
+        output Real o[6];
+    algorithm
+        o := i;
+    annotation(Inline=false);
+    end F;
+    Real a;
+    Real c;
+    Real d;
+    
+    Real e = time;
+    Real b[3];
+    Real f[3] = {sin(time - 0.5), sin(time), sin(time + 0.5)};
+    Real g = cos(time);
+    Real h = -cos(time);
+equation
+    {a, b[1],b[2],c,b[3],d} = F({e, f[1], f[2], g, f[3], h});
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="CFunctionTest23",
+            description="memcpy for parts of array (both of input and output)",
+            template="
+$C_ode_derivatives$
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 6, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 6, 1)
+    _e_3 = _time;
+    _f_1_7 = sin(_time - 0.5);
+    _f_2_8 = sin(_time);
+    _g_10 = cos(_time);
+    _f_3_9 = sin(_time + 0.5);
+    _h_11 = - cos(_time);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 6, 1, 6)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 6, 1, 6)
+    jmi_array_ref_1(tmp_2, 1) = _e_3;
+    memcpy(&jmi_array_ref_1(tmp_2, 2), &_f_1_7, 2 * sizeof(jmi_real_t));
+    jmi_array_ref_1(tmp_2, 4) = _g_10;
+    jmi_array_ref_1(tmp_2, 5) = _f_3_9;
+    jmi_array_ref_1(tmp_2, 6) = _h_11;
+    func_CCodeGenTests_CFunctionTest23_F_def0(tmp_2, tmp_1);
+    _a_0 = (jmi_array_val_1(tmp_1, 1));
+    memcpy(&_b_1_4, &jmi_array_val_1(tmp_1, 2), 2 * sizeof(jmi_real_t));
+    _c_1 = (jmi_array_val_1(tmp_1, 4));
+    _b_3_6 = (jmi_array_val_1(tmp_1, 5));
+    _d_2 = (jmi_array_val_1(tmp_1, 6));
+    return ef;
+}
+
+")})));
+end CFunctionTest23;
 
 model CForLoop1
  function f
@@ -16751,8 +16801,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_2 = x[0];
         }
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
-        jmi_array_ref_1(tmp_1, 1) = _map_1_0;
-        jmi_array_ref_1(tmp_1, 2) = _map_2_1;
+        memcpy(&jmi_array_ref_1(tmp_1, 1), &_map_1_0, 2 * sizeof(jmi_real_t));
         _y_3 = func_CCodeGenTests_MapTearingTest1_F_exp0(_x_2, tmp_1);
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             (*res)[0] = _y_3 + 1 - (_x_2);
@@ -18052,9 +18101,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-            jmi_array_ref_1(tmp_1, 1) = _x_1_0;
-            jmi_array_ref_1(tmp_1, 2) = _x_2_1;
-            jmi_array_ref_1(tmp_1, 3) = _x_3_2;
+            memcpy(&jmi_array_ref_1(tmp_1, 1), &_x_1_0, 3 * sizeof(jmi_real_t));
             (*res)[0] = jmi_array_val_1(tmp_1, _i_4) - (_y_3);
         }
     }
@@ -18116,14 +18163,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-            jmi_array_ref_1(tmp_1, 1) = _x_1_0;
-            jmi_array_ref_1(tmp_1, 2) = _x_2_1;
-            jmi_array_ref_1(tmp_1, 3) = _x_3_2;
+            memcpy(&jmi_array_ref_1(tmp_1, 1), &_x_1_0, 3 * sizeof(jmi_real_t));
             tmp_3 = _y_3;
             JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-            jmi_array_ref_1(tmp_1, 1) = _x_1_0;
-            jmi_array_ref_1(tmp_1, 2) = _x_2_1;
-            jmi_array_ref_1(tmp_1, 3) = _x_3_2;
+            memcpy(&jmi_array_ref_1(tmp_1, 1), &_x_1_0, 3 * sizeof(jmi_real_t));
             _y_3 = jmi_array_val_1(tmp_1, _i_4);
             tmp_2 = _y_3;
             _y_3 = tmp_3;
@@ -18176,9 +18219,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
         memset(residual, 0, 1 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
-        jmi_array_ref_1(tmp_3, 1) = _x_1_1;
-        jmi_array_ref_1(tmp_3, 2) = _x_2_2;
-        jmi_array_ref_1(tmp_3, 3) = _x_3_3;
+        memcpy(&jmi_array_ref_1(tmp_3, 1), &_x_1_1, 3 * sizeof(jmi_real_t));
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
         jmi_array_ref_1(tmp_4, 1) = 0;
         jmi_array_ref_1(tmp_4, 2) = 0;
@@ -18202,13 +18243,9 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
             JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-            jmi_array_ref_1(tmp_1, 1) = _x_1_1;
-            jmi_array_ref_1(tmp_1, 2) = _x_2_2;
-            jmi_array_ref_1(tmp_1, 3) = _x_3_3;
+            memcpy(&jmi_array_ref_1(tmp_1, 1), &_x_1_1, 3 * sizeof(jmi_real_t));
             JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
-            jmi_array_ref_1(tmp_2, 1) = _x_1_1;
-            jmi_array_ref_1(tmp_2, 2) = _x_2_2;
-            jmi_array_ref_1(tmp_2, 3) = _x_3_3;
+            memcpy(&jmi_array_ref_1(tmp_2, 1), &_x_1_1, 3 * sizeof(jmi_real_t));
             (*res)[0] = jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_5)) - (_y_4);
         }
     }
@@ -18245,9 +18282,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     pre_i_4 = _i_4;
     _x_3 = _time;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    jmi_array_ref_1(tmp_1, 1) = _y_1_0;
-    jmi_array_ref_1(tmp_1, 2) = _y_2_1;
-    jmi_array_ref_1(tmp_1, 3) = _y_3_2;
+    memcpy(&jmi_array_ref_1(tmp_1, 1), &_y_1_0, 3 * sizeof(jmi_real_t));
     jmi_array_val_1(tmp_1, _i_4) = _x_3;
     memcpy(&_y_1_0, &jmi_array_val_1(tmp_1, 1), 3 * sizeof(jmi_real_t));
     return ef;
@@ -18293,21 +18328,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     _x_2_4 = _time;
     _x_3_5 = _time;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    jmi_array_ref_1(tmp_1, 1) = _is_1_7;
-    jmi_array_ref_1(tmp_1, 2) = _is_2_8;
-    jmi_array_ref_1(tmp_1, 3) = _is_3_9;
+    memcpy(&jmi_array_ref_1(tmp_1, 1), &_is_1_7, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
-    jmi_array_ref_1(tmp_2, 1) = _y_1_0;
-    jmi_array_ref_1(tmp_2, 2) = _y_2_1;
-    jmi_array_ref_1(tmp_2, 3) = _y_3_2;
+    memcpy(&jmi_array_ref_1(tmp_2, 1), &_y_1_0, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
-    jmi_array_ref_1(tmp_3, 1) = _is_1_7;
-    jmi_array_ref_1(tmp_3, 2) = _is_2_8;
-    jmi_array_ref_1(tmp_3, 3) = _is_3_9;
+    memcpy(&jmi_array_ref_1(tmp_3, 1), &_is_1_7, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
-    jmi_array_ref_1(tmp_4, 1) = _x_1_3;
-    jmi_array_ref_1(tmp_4, 2) = _x_2_4;
-    jmi_array_ref_1(tmp_4, 3) = _x_3_5;
+    memcpy(&jmi_array_ref_1(tmp_4, 1), &_x_1_3, 3 * sizeof(jmi_real_t));
     jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
     memcpy(&_y_1_0, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     return ef;
@@ -18349,22 +18376,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     }
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[0]);
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 16, 2, 4, 4)
-    jmi_array_ref_2(tmp_1, 1,1) = _m_1_1_0;
-    jmi_array_ref_2(tmp_1, 1,2) = _m_1_2_1;
-    jmi_array_ref_2(tmp_1, 1,3) = _m_1_3_2;
-    jmi_array_ref_2(tmp_1, 1,4) = _m_1_4_3;
-    jmi_array_ref_2(tmp_1, 2,1) = _m_2_1_4;
-    jmi_array_ref_2(tmp_1, 2,2) = _m_2_2_5;
-    jmi_array_ref_2(tmp_1, 2,3) = _m_2_3_6;
-    jmi_array_ref_2(tmp_1, 2,4) = _m_2_4_7;
-    jmi_array_ref_2(tmp_1, 3,1) = _m_3_1_8;
-    jmi_array_ref_2(tmp_1, 3,2) = _m_3_2_9;
-    jmi_array_ref_2(tmp_1, 3,3) = _m_3_3_10;
-    jmi_array_ref_2(tmp_1, 3,4) = _m_3_4_11;
-    jmi_array_ref_2(tmp_1, 4,1) = _m_4_1_12;
-    jmi_array_ref_2(tmp_1, 4,2) = _m_4_2_13;
-    jmi_array_ref_2(tmp_1, 4,3) = _m_4_3_14;
-    jmi_array_ref_2(tmp_1, 4,4) = _m_4_4_15;
+    memcpy(&jmi_array_ref_2(tmp_1, 1,1), &_m_1_1_0, 16 * sizeof(jmi_real_t));
     jmi_array_val_2(tmp_1, _i_16, _j_17) = _time;
     memcpy(&_m_1_1_0, &jmi_array_val_2(tmp_1, 1,1), 16 * sizeof(jmi_real_t));
     return ef;
