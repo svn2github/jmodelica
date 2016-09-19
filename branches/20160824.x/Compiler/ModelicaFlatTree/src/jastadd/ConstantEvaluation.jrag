@@ -3246,7 +3246,7 @@ aspect ConstantEvaluation {
         public void setLocalCachedEvaluationValue(CValue val);
         public CValue getLocalCachedEvaluationValue();
         public void clearLocalCachedEvaluationValue();
-        public void prepareForFunctionEval();
+        public void resetAfterCeval();
         public CValue evaluationValue(VariableEvaluator evaluator);
         public CValue ceval();
         public CValue ceval(VariableEvaluator evaluator);
@@ -3288,7 +3288,6 @@ aspect ConstantEvaluation {
 	  Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
 	  int i = 0;
 	  for (CommonVariableDecl var : myCallInputs()) {
-		  var.prepareForFunctionEval();
 		  FExp arg = argument(i++);
             if (arg != null) {
                 values.put(var, arg.ceval(evaluator));
@@ -3403,64 +3402,59 @@ aspect ConstantEvaluation {
         evaluationValue.evaluatePartialFunction(this, values);
     syn CValue FFunctionVariable.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
         evaluationValue.evaluatePartialFunction(this, values);
-  
-  /**
-   * Prepare a function fro being function evaluation.
-   * 
-   * This entails: 
-   * <ul>
-   * <li>Make sure all size() attributes are calculated.</li>
-   * <li>Clear cached getArray() values for expressions with unknown size.</li>
-   * </ul>
-   */
-  public void ASTNode.prepareForFunctionEval() {
-	  for (ASTNode n : this)
-		  n.prepareForFunctionEval();
-  }
-  
-  public void InstAssignable.prepareForFunctionEval() {
-	  super.prepareForFunctionEval();
-	  if (hasBindingFExp())
-		  myBindingInstExp().prepareForFunctionEval();
-	  size();
-  }
-  
-  public void FExp.prepareForFunctionEval() {
-	  super.prepareForFunctionEval();
-	  flushUnknownSizes();
-  }
-  
-    public void InstComponentAccess.prepareForFunctionEval() {
-        super.prepareForFunctionEval();
-        myInstLookup_reset();
+    
+    public void InstBaseClassDecl.resetAfterCeval(ASTNode n) {
+        for (InstComponentDecl var : allInstComponentDecls())
+            var.resetAfterCeval();
+        n.resetAfterCeval();
     }
     
-    public void InstComponentArrayAccess.prepareForFunctionEval() {
-        super.prepareForFunctionEval();
-        myInstLookup_reset();
+    public void FFunctionDecl.resetAfterCeval(ASTNode n) {
+        for (FFunctionVariable var : getFFunctionVariables())
+            var.resetAfterCeval();
+        n.resetAfterCeval();
     }
-
-    public void FExp.flushUnknownSizes() {
-        // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated
-        if (size().flushUnknownSizes()) {
-            flushCache();
-            size().isUnknown();
+    
+    public void ASTNode.resetAfterCeval() {
+        for (ASTNode n : this) {
+            n.resetAfterCeval();
         }
     }
     
-    public boolean Size.flushUnknownSizes() {
-        return false;
+    public void FFunctionVariable.resetAfterCeval() {
+        super.resetAfterCeval();
+        clearLocalCachedEvaluationValue();
+        size().resetAfterCeval();
     }
     
-    public boolean MutableSize.flushUnknownSizes() {
-        for (FExp e : exps)
-            if (e != null)
-                return true;
-        return false;
+    public void InstAssignable.resetAfterCeval() {
+        super.resetAfterCeval();
+        clearLocalCachedEvaluationValue();
+        if (hasBindingFExp()) {
+            myBindingInstExp().resetAfterCeval();
+        }
+        size().resetAfterCeval();
     }
-
-    public void FFunctionCall.flushUnknownSizes() {}
-
+    
+    public void Size.resetAfterCeval() {
+        
+    }
+    
+    public void MutableSize.resetAfterCeval() {
+        for (int i = 0; i < exps.length; i++) {
+            if (exps[i] != null) {
+                exps[i].resetAfterCeval();
+                evaluated[i] = false;
+                size[i] = Size.UNKNOWN;
+            }
+        }
+    }
+    
+    
+    public void FExp.resetAfterCeval() {
+        flushAllRecursive();
+    }
+    
     // TODO: reduce code duplication
 
     /**
@@ -3475,9 +3469,6 @@ aspect ConstantEvaluation {
         currentEvaluationValues = values;
         for (FFunctionVariable var : getFFunctionVariables())
             var.clearLocalCachedEvaluationValue();
-        fab.prepareForFunctionEval();
-        for (FFunctionVariable var : myNonInputs())
-            var.prepareForFunctionEval();
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
@@ -3495,8 +3486,7 @@ aspect ConstantEvaluation {
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(name(), myOutputs(), e);
         } finally {
-            for (FFunctionVariable var : getFFunctionVariables())
-                var.clearLocalCachedEvaluationValue();
+            resetAfterCeval(fab);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
@@ -3517,8 +3507,6 @@ aspect ConstantEvaluation {
      */
     public CValue InstClassDecl.evaluateFirst(VariableEvaluator evaluator, Iterable<FExp> args) {
         Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
-        for (CommonVariableDecl var : myInputs()) 
-            var.prepareForFunctionEval();
         int i = 0;
         for (FExp arg : args) {
             if (i < myInputs().size()) {
@@ -3558,14 +3546,6 @@ aspect ConstantEvaluation {
        actualInstClass().evaluate(evaluator, values);
     }
     
-    public void InstBaseClassDecl.prepareForFunctionEval(FAlgorithm fab) {
-        for (InstComponentDecl var : allInstComponentDecls())
-            var.clearLocalCachedEvaluationValue();
-        for (InstComponentDecl var : allInstComponentDecls())
-            var.prepareForFunctionEval();
-        fab.prepareForFunctionEval();
-    }
-
     public void InstBaseClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
         // We assume that this class is a function
         
@@ -3581,7 +3561,6 @@ aspect ConstantEvaluation {
         
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
-        prepareForFunctionEval(fab);
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
@@ -3594,7 +3573,7 @@ aspect ConstantEvaluation {
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(qualifiedName(), myOutputs(), e);
         } finally {
-            prepareForFunctionEval(fab);
+            resetAfterCeval(fab);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
@@ -4293,8 +4272,8 @@ aspect ConstantEvaluation {
         int res = EVAL_CONT;
         for (Index i : ivals.indices()) {
             getIndex().setEvaluationValue(defaultVariableEvaluator(), ivals.getCell(i));
-            getForStmts().prepareForFunctionEval();
             res = getForStmts().evaluateList(evaluator);
+            getForStmts().resetAfterCeval();
             if (res != EVAL_CONT) {
                 break;
             }
@@ -4321,9 +4300,9 @@ aspect ConstantEvaluation {
 	  CValueArray ivals = getFExp().ceval(evaluator).array();
 	  for (Index j : ivals.indices()) {
 		  var.setEvaluationValue(evaluator, ivals.getCell(j));
-		  stmts.prepareForFunctionEval();
 		  int res = last ? stmts.evaluateList(evaluator) : 
 				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
+            stmts.resetAfterCeval();
 		  if (res != FStatement.EVAL_CONT) {
 			  var.setEvaluationValue(evaluator, oldVal);
 			  return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
