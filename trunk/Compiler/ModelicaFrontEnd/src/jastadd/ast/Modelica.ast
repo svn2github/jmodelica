@@ -99,7 +99,7 @@ PN_FullClassDecl : BaseClassDecl ::= [StringComment]
                                      Composition 
                                      [Annotation]
                                      EndDecl;
-	                      
+
 FullClassDecl : BaseClassDecl ::= [StringComment]  
                                   Equation:AbstractEquation* 
                                   Algorithm*
@@ -113,12 +113,11 @@ FullClassDecl : BaseClassDecl ::= [StringComment]
                                   EndDecl;
 
 LibClassDecl : FullClassDecl ::= LibNode*;
-LibNode : SourceBaseNode ::= <FileName:String>
-                             <Name:String> 
-                             <Structured:boolean> 
-                             <Version:String> 
-                             <Reason:LibNode.LoadReason> 
-                             /StoredDefinition/;
+LibNode : ClassDecl ::= <FileName:String>
+                        <Structured:boolean> 
+                        <Version:String> 
+                        <Reason:LibNode.LoadReason> 
+                        /StoredDefinition/;
 
 PN_ShortClassDecl : BaseClassDecl ::= [TypePrefixFlow] 
                                       [TypePrefixVariability]

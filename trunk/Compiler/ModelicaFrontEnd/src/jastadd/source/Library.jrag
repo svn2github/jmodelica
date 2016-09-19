@@ -15,7 +15,7 @@
 */
 
 
-import java.io.*;
+import java.io.File;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.ArrayList;
@@ -23,6 +23,9 @@ import java.util.Arrays;
 import java.util.Collections;
 
 import org.jmodelica.util.OptionRegistry;
+import org.jmodelica.util.problemHandling.ProblemProducer;
+import org.jmodelica.api.problemHandling.ProblemKind;
+import org.jmodelica.api.problemHandling.ProblemSeverity;
 
 aspect Library {
 
@@ -58,33 +61,42 @@ aspect Library {
                 b. Return the resulting FullClassDecl
         */
         
-        String fileName = getFileName();
+        String fileName = fileName();
         String dirName = null;
         File baseDir = null;
+        String name = name();
         boolean isStructured = getStructured();
+        // TODO: Error if more than one class in file
         if (isStructured) {
             dirName = getFileName();
             baseDir = new File(dirName);
-            fileName = myPackageFile().getPath();
         }
         try {
             log.info("Reading file: " + fileName);
             SourceRoot sr = ParserHandler.parseFile(root().getUtilInterface(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
-            if (entity == null) {
-                if (isStructured) {
-                    warning("Empty structured entity, package is omitted", sr);
+            ClassDecl cd = null;
+            if (entity != null) {
+                for (Element e : entity.getElements()) {
+                    if (cd == null && name.equals(e.name())) {
+                        cd = (ClassDecl) e;
+                    }
                 }
-                return new StoredDefinition();
+            }
+            if (entity == null || entity.getNumElement() != 1 || cd == null) {
+                LIBRARY_FILE_CONTENTS.invoke(this, entity);
+                if (cd == null) {
+                    return createErrorStoredDefinition();
+                }
             }
             entity.setFileName(fileName);
             if (isStructured) {
-                FullClassDecl fcd = (FullClassDecl)entity.getElement(0);
+                FullClassDecl fcd = (FullClassDecl) cd;
                 LibClassDecl lcd = new LibClassDecl(fcd);
                 
                 LibraryList ll = new LibraryList();
                 ll.addLibraryDirectory(dirName, getReason());
-                lcd.setLibNodeList(ll.createLibNodeList());
+                ll.createLibNodes(lcd);
                 
                 File orderFile = new File(baseDir, PACKAGE_ORDER_FILE);
                 if (orderFile.isFile()) {
@@ -111,6 +123,78 @@ aspect Library {
             log.debug(e);
             return createErrorStoredDefinition();
         } 
+    }
+
+    public static final LibraryContentErrorProducer ASTNode.LIBRARY_FILE_CONTENTS = 
+            new LibraryContentErrorProducer();
+    
+    public class ASTNode {
+        public static class LibraryContentErrorProducer extends ProblemProducer<LibNode> {
+            private static final String BASE_MSG = 
+                    "Class '%s' must be alone at top level of library file, but the file %s.";
+            
+            public LibraryContentErrorProducer() {
+                super("LIBRARY_FILE_CONTENTS", ProblemKind.SEMANTIC);
+            }
+            
+            public void invoke(LibNode src, StoredDefinition sd) {
+                String name = src.name();
+                invoke(src, severity(), BASE_MSG, name, detailMsg(sd, name));
+            }
+    
+            private String detailMsg(StoredDefinition sd, String name) {
+                if (sd == null) {
+                   return "was empty";
+                } else {
+                    int correct = 0;
+                    ArrayList<String> wrong = new ArrayList<String>();
+                    for (Element e : sd.getElements()) {
+                        String n = e.name();
+                        if (n.equals(name)) {
+                            correct++;
+                        } else {
+                            wrong.add(n);
+                        }
+                    }
+                    
+                    StringBuilder buf = new StringBuilder();
+                    if (correct == 1 && !wrong.isEmpty()) {
+                        buf.append("also ");
+                    }
+                    buf.append("contains");
+                    if (correct > 1) {
+                        buf.append(' ');
+                        buf.append(correct);
+                        buf.append(" classes of that name");
+                        if (!wrong.isEmpty()) {
+                            buf.append(", and also");
+                        }
+                    }
+                    for (int i = 0, n = wrong.size(); i < n; i++) {
+                        if (i > 0) {
+                            buf.append((i < n - 1) ? "," : " and");
+                        }
+                        buf.append(" '");
+                        buf.append(wrong.get(i));
+                        buf.append("'");
+                    }
+                    if (correct == 0) {
+                        buf.append(" instead");
+                    }
+                    return buf.toString();
+                }
+            }
+    
+            @Override
+            public String description() {
+                return "Library file contains wrong class(es).";
+            }
+    
+            @Override
+            public ProblemSeverity severity() {
+                return ProblemSeverity.ERROR;
+            }
+        }
     }
 
     /**
@@ -159,19 +243,15 @@ aspect Library {
         }
 
     private StoredDefinition LibNode.createErrorStoredDefinition() {
-        StoredDefinition sd = new StoredDefinition(new Opt(), new List());
-        sd.addElement(createErrorClass());
-        return sd;
+        return new StoredDefinition(new Opt(), new List(createErrorClass()));
     }
 
     private BadClassDecl LibNode.createErrorClass() {
-        BadClassDecl bcd = new BadClassDecl();
-        bcd.setName(new IdDecl("_ErrorClassDecl_in_lib"));
-        return bcd;
+        return new BadClassDecl(name());
     }
 
     public LibNode.LibNode(File file, String name, boolean structured, LoadReason reason) {
-        this(file.getPath(), name, structured, "", reason);
+        this(new IdDecl(name), file.getPath(), structured, "", reason);
     }
 
     public LibClassDecl.LibClassDecl(FullClassDecl fcd) {
@@ -248,6 +328,11 @@ aspect Library {
             for (LibraryDef def : availableLibraries())
                 res.add(def.createLibNode());
             return res;
+        }
+        
+        public void createLibNodes(FullClassDecl parent) {
+            for (LibraryDef def : availableLibraries())
+                parent.addClassDecl(def.createLibNode());
         }
         
         /**
