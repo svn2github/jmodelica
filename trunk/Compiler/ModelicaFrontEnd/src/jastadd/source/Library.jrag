@@ -236,11 +236,11 @@ aspect Library {
     syn ClassDecl LibNode.classDecl() = 
         (getStoredDefinition().getNumElement() > 0) ? (ClassDecl) getStoredDefinition().getElement(0) : createErrorClass();
 
-        private java.util.List<String> LibClassDecl.order = Collections.emptyList();
-        
-        public void LibClassDecl.setOrder(java.util.List<String> order) {
-            this.order = order;
-        }
+    private java.util.List<String> LibClassDecl.order = Collections.emptyList();
+    
+    public void LibClassDecl.setOrder(java.util.List<String> order) {
+        this.order = order;
+    }
 
     private StoredDefinition LibNode.createErrorStoredDefinition() {
         return new StoredDefinition(new Opt(), new List(createErrorClass()));

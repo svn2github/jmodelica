@@ -2380,29 +2380,21 @@ aspect SourceAST_API {
 
     syn Iterable<AbstractEquation> ClassDecl.equations() = Collections.<AbstractEquation>emptyList();
     eq FullClassDecl.equations()                         = getEquations();
-    eq LibNode.equations() {
-        throw new UnsupportedOperationException();
-    }
+    eq LibNode.equations()                               = myClass().equations();
 
     syn Iterable<Algorithm> ClassDecl.algorithms() = Collections.<Algorithm>emptyList();
     eq FullClassDecl.algorithms()                  = getAlgorithms();
-    eq LibNode.algorithms() {
-        throw new UnsupportedOperationException();
-    }
+    eq LibNode.algorithms()                        = myClass().algorithms();
     
     syn Iterable<ExtendsClause> ClassDecl.superClasses() = Collections.<ExtendsClause>emptyList();
     eq FullClassDecl.superClasses()                      = getSupers();
     eq ShortClassDecl.superClasses()                     = 
         Collections.<ExtendsClause>singletonList(getExtendsClauseShortClass());
-    eq LibNode.superClasses() {
-        throw new UnsupportedOperationException();
-    }
+    eq LibNode.superClasses()                            = myClass().superClasses();
     
     syn Iterable<ComponentDecl> ClassDecl.components() = Collections.<ComponentDecl>emptyList();
     eq FullClassDecl.components()                      = getComponentDecls();
-    eq LibNode.components() {
-        throw new UnsupportedOperationException();
-    }
+    eq LibNode.components()                            = myClass().components();
     
     syn Iterable<Modification> ClassDecl.elementModifications() = Collections.<Modification>emptyList();
     eq FullClassDecl.elementModifications()                         = getElementModifications();
@@ -2423,37 +2415,30 @@ aspect SourceAST_API {
         }
     }
 
-	syn Iterable<ClassDecl> ClassDecl.classes() = Collections.<ClassDecl>emptyList();
-	eq FullClassDecl.classes()                  = filterErrorNodes(getClassDecls());
-	syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
-		// Imposes ordering specified in LibClassDecl.order
-		Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
-		for (ClassDecl cd : super.classes())
-			map.put(cd.name(), cd);
-		for (LibNode ln : getLibNodes()) {
-		    map.put(ln.name(), ln);
-//		    for (Element e : ln.getStoredDefinition().getElements()) {
-//		    	ClassDecl cd = (ClassDecl) e;
-//                if (!cd.isError())
-//                    map.put(cd.name(), cd);
-//			}
-		}
-		
-		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
-		for (String name : order) {
-			ClassDecl cd = map.get(name);
-			if (cd != null) {
-				l.add(cd);
-				map.remove(name);
-			}
-		}
-		for (ClassDecl cd : map.values())
-			l.add(cd);
+    syn Iterable<ClassDecl> ClassDecl.classes() = Collections.<ClassDecl>emptyList();
+    eq FullClassDecl.classes()                  = filterErrorNodes(getClassDecls());
+    eq LibNode.classes()                        = myClass().classes();
+    syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
+        // Imposes ordering specified in LibClassDecl.order
+        Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
+        for (ClassDecl cd : super.classes())
+            map.put(cd.name(), cd);
+        for (LibNode ln : getLibNodes()) {
+            map.put(ln.name(), ln);
+        }
+        
+        ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+        for (String name : order) {
+            ClassDecl cd = map.get(name);
+            if (cd != null) {
+                l.add(cd);
+                map.remove(name);
+            }
+        }
+        for (ClassDecl cd : map.values())
+            l.add(cd);
 
-		return l;
-	}
-    eq LibNode.classes() {
-        throw new UnsupportedOperationException();
+        return l;
     }
     syn Iterable<ClassDecl> Program.classes() {
     	ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
