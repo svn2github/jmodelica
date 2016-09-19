@@ -20262,6 +20262,57 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end TestStringWithUnicode1;
 
+model TestStringWithUnicode2
+	parameter String s = "°C";
+    Real x = time + 1;
+equation
+	assert(x < 5, "°C");
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="TestStringWithUnicode2",
+            description="C string literal with unicode followed by a C, checks bug where the hex escape also included the C",
+            template="
+$C_set_start_values$
+$C_ode_derivatives$",
+            generatedCode="
+int jmi_set_start_values_0_0(jmi_t* jmi) {
+    int ef = 0;
+    _s_pi_s_0 = (\"\\xc2\\xb0\"\"C\");
+    return ef;
+}
+
+int jmi_set_start_values_1_0(jmi_t* jmi) {
+    int ef = 0;
+    _x_1 = (0.0);
+    return ef;
+}
+
+int jmi_set_start_values_base(jmi_t* jmi) {
+    int ef = 0;
+    ef |= jmi_set_start_values_0_0(jmi);
+    model_init_eval_parameters(jmi);
+    ef |= jmi_set_start_values_1_0(jmi);
+    return ef;
+}
+
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    _x_1 = _time + 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(5)), _sw(0), JMI_REL_LT);
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _x_1 - (AD_WRAP_LITERAL(5)), _sw(0), JMI_REL_LT);
+    }
+    if (_sw(0) == JMI_FALSE) {
+        jmi_assert_failed(\"\\xc2\\xb0\"\"C\", JMI_ASSERT_ERROR);
+    }
+    return ef;
+}
+")})));
+end TestStringWithUnicode2;
+
 
 model CFixedFalseParam1
     Real x, y;
