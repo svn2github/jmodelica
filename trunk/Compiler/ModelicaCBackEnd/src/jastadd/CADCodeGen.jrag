@@ -1273,11 +1273,11 @@ aspect CADCodeGen {
         public class WriteBackAssignmentPrinter_var extends CodePrinter.WriteBackAssignmentPrinter {
             
             protected WriteBackAssignmentPrinter_var(Collection<FVariable> forVariables) {
-                super(forVariables);
+                super(false, forVariables);
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackAssignment_var_CAD(str, indent, name, forVariables);
             }
         }
@@ -1285,11 +1285,11 @@ aspect CADCodeGen {
         public class WriteBackAssignmentPrinter_der extends CodePrinter.WriteBackAssignmentPrinter {
 
             protected WriteBackAssignmentPrinter_der(Collection<FVariable> forVariables) {
-                super(forVariables);
+                super(false, forVariables);
             }
     
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackAssignment_der_CAD(str, indent, name, forVariables);
             }
         }
@@ -1873,8 +1873,13 @@ aspect CADCodeGen {
         protected final FuncCallInArgPrinter funcCallInArgPrinter_der = new FuncCallInArgPrinter_der();
         
         public class FuncCallInArgPrinter_der extends FuncCallInArgPrinter {
+            
+            public FuncCallInArgPrinter_der() {
+                super(false);
+            }
+            
             @Override
-            public void printCell(CodeStream str, String indent, String name, FExp exp) {
+            public void printCellExp(CodeStream str, String indent, String name, FExp exp) {
                 exp.genTempInputCellAssigns_der_CAD(CADPrettyPrinter.this, str, indent, name);
             }
         }
@@ -2019,7 +2024,7 @@ aspect CADCodeGen {
             }
 
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackResidual_var_CAD(str, indent, name, enumerator, forIndices, indexCounter);
             }
         }
@@ -2031,7 +2036,7 @@ aspect CADCodeGen {
             }
     
             @Override
-            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
+            public void printCellUse(CodeStream str, String indent, String name, FIdUseExp use) {
                 use.genWriteBackResidual_der_CAD(str, indent, name, enumerator, forIndices, indexCounter);
             }
         }
