@@ -64,15 +64,6 @@ def transfer_model(class_name, file_name=[],
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be file or library paths.
     
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
-    
         
     Parameters::
     
@@ -122,15 +113,6 @@ def transfer_optimization_problem(class_name, file_name=[],
     * class_name and file_name is passed:
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be file or library paths.
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
     
         
     Parameters::

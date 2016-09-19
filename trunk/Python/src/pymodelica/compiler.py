@@ -55,15 +55,6 @@ def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version=
           ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is 
           found in file_name list.
     
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
-    
     The compiler target is 'me' by default which means that the shared 
     file contains the FMI for Model Exchange API. Setting this parameter to 
     'cs' will generate an FMU containing the FMI for Co-Simulation API.
@@ -165,15 +156,6 @@ def compile_fmux(class_name, file_name=[], compiler='auto', compiler_options={},
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be to files or libraries
     
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
-    
     
     Parameters::
     
@@ -250,15 +232,6 @@ def compile_jmu(class_name, file_name=[], compiler='auto', compiler_options={},
           compiler will be selected based on model file ending, i.e. 
           ModelicaCompiler if .mo file and OptimicaCompiler if a .mop file is 
           found in file_name list.
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
     
     Parameters::
     
