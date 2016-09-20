@@ -538,10 +538,7 @@ aspect FileNames {
     	return fName; 
     }
     public String LibNode.fileName() {
-        return getStructured() ? myPackageFile().getPath() : getFileName();
-    }
-    public String InstLibNode.fileName() {
-        return actualInstClass().fileName();
+        return getFileName();
     }
     
     syn String ASTNode.dirName() = 
@@ -621,11 +618,14 @@ aspect Names {
 	  return buf.substring(0, buf.length() - 1);
   }
   eq InstGlobalAccess.qualifiedName()         = "." + getInstAccess().qualifiedName();
-
-    syn String Element.name() = null;
-    eq ClassDecl.name()       = getNameNoTransform().getID();
-    eq ComponentDecl.name()   = getNameNoTransform().getID();
-
+  
+  syn String ClassDecl.name();
+  eq BaseClassDecl.name()    = getNameNoTransform().getID();
+  eq BuiltInClassDecl.name() = getNameNoTransform().getID();
+  //eq LibNode.name() = getName();
+  
+  syn String ComponentDecl.name() = getNameNoTransform().getID();
+  
   syn String FunctionCall.name() = getNameNoTransform().name();
   
   syn String InstImport.name();
@@ -645,20 +645,21 @@ aspect Names {
   public T List.lastChildNoTransform() {
 	  return getChildNoTransform(getNumChildNoTransform() - 1);
   }
-
-    syn String ClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
-    inh String ClassDecl.classNamePrefix();
-    inh String ComponentDecl.classNamePrefix();
-    eq FullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
-    eq BuiltInClassDecl.qualifiedName() = getName().getID();
-
-    // For proxy
-    public String SourceRoot.computeClassNamePrefix() {
-        return "";
-    }
-
-    eq SourceRoot.getProgram().classNamePrefix() = computeClassNamePrefix();
-    eq Root.getChild().classNamePrefix() = "";
+  
+  syn String ClassDecl.qualifiedName();
+  eq BaseClassDecl.qualifiedName() = combineName(classNamePrefix(), name());
+  inh String BaseClassDecl.classNamePrefix();
+  inh String ComponentDecl.classNamePrefix();
+  eq FullClassDecl.getChild().classNamePrefix() = combineName(classNamePrefix(), name());
+  eq BuiltInClassDecl.qualifiedName() = getName().getID();
+  
+  // For proxy
+  public String SourceRoot.computeClassNamePrefix() {
+      return "";
+  }
+  
+  eq SourceRoot.getProgram().classNamePrefix() = computeClassNamePrefix();
+  eq Root.getChild().classNamePrefix() = "";
 
     /**
      * Compose a dotted name of two components.
@@ -673,22 +674,23 @@ aspect Names {
         return first + "." + second;
     }
 
-    syn String InstClassDecl.primitiveName() = name();
-    eq InstLibNode.primitiveName()           = resolveLib().name();
-
-    eq InstFullClassDecl.primitiveName() {
-        if (extendsPrimitive())
-            return getInstExtends(0).myInstClass().finalClass().primitiveName();
-        else 
-            return name();
-    }
-
-    syn String InstForIndex.name() = getInstPrimitiveNoTransform().name();
-    syn String FForIndex.name()    = getFVariableNoTransform().name();
-
-    syn String InstAccess.enclosingName() = "";
-    eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
-    eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
+  syn String InstClassDecl.primitiveName();
+  eq InstBaseClassDecl.primitiveName() = name();
+  eq InstBuiltInClassDecl.primitiveName() = name();
+  
+  eq InstFullClassDecl.primitiveName() {
+      if (extendsPrimitive())
+          return getInstExtends(0).myInstClass().finalClass().primitiveName();
+      else 
+          return name();
+  }
+  
+  syn String InstForIndex.name() = getInstPrimitiveNoTransform().name();
+  syn String FForIndex.name()    = getFVariableNoTransform().name();
+ 
+  syn String InstAccess.enclosingName() = "";
+  eq InstDot.enclosingName()           = name().substring(0, name().lastIndexOf('.'));
+  eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
     eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
     eq InstAssignable.getBindingFExp().calcInstanceName()         = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
@@ -1534,7 +1536,6 @@ aspect MultiDeclMethods {
     }
     
     syn InstCallable InstClassDecl.asCallable()     = this;
-    eq InstLibNode.asCallable()                     = resolveLib();
     syn InstCallable InstComponentDecl.asCallable() = null;
     eq InstPartialFunction.asCallable()             = this;
 }
@@ -1544,7 +1545,6 @@ aspect ShortClassUtil {
     syn InstClassDecl InstClassDecl.finalClass() = this;
     eq InstShortClassDecl.finalClass()           = myTargetInstClassDecl().finalClass();
     eq InstSimpleShortClassDecl.finalClass()     = actualInstClass().finalClass();
-    eq InstLibNode.finalClass()                  = actualInstClass().finalClass();
 
 
     syn boolean ClassDecl.isInput() = false;
@@ -1562,7 +1562,6 @@ aspect ShortClassUtil {
     eq InstShortClassDecl.isInput()                = 
         getClassDecl().isInput() || myTargetInstClassDecl().isInput();
     eq InstSimpleShortClassDecl.isInput()          = actualInstClass().isInput();
-    eq InstLibNode.isInput()                       = actualInstClass().isInput();
     eq InstReplacingShortClassDecl.isInput()       = 
         (super.isInput() || super.isOutput()) ? super.isInput() : getOriginalInstClass().isInput();
     eq InstReplacingSimpleShortClassDecl.isInput() = 
@@ -1572,7 +1571,6 @@ aspect ShortClassUtil {
     eq InstShortClassDecl.isOutput()                =
         getClassDecl().isOutput() || myTargetInstClassDecl().isOutput();
     eq InstSimpleShortClassDecl.isOutput()          = actualInstClass().isOutput();
-    eq InstLibNode.isOutput()                       = actualInstClass().isOutput();
     eq InstReplacingShortClassDecl.isOutput()       = 
         (super.isInput() || super.isOutput()) ? super.isOutput() : getOriginalInstClass().isOutput();
     eq InstReplacingSimpleShortClassDecl.isOutput() = 

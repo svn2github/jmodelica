@@ -15,7 +15,7 @@
 */
 
 BadDefinition: StoredDefinition;
-BadClassDecl: ClassDecl;
+BadClassDecl: BaseClassDecl;
 BadElement: Element;
 BadArgument: Argument;
 BadStatement: Statement; 

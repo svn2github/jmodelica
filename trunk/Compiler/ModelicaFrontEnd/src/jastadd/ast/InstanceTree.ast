@@ -42,7 +42,6 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/ /FunctionType:FType/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstrainingClass] InstRestriction;
-InstLibNode              : InstClassDecl ::= /ActualInstClass:InstClassDecl/;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;
 abstract InstAbstractShortClassDecl : InstBaseClassDecl;
@@ -52,7 +51,7 @@ InstPrimitiveClassDecl   : InstFullClassDecl;
 InstEnumClassDecl        : InstPrimitiveClassDecl;
 InstBuiltInClassDecl     : InstClassDecl;
 UnknownInstClassDecl     : InstFullClassDecl;
-BadInstClassDecl         : InstClassDecl;
+BadInstClassDecl         : InstFullClassDecl;
 
 InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
                                      <OriginalClassDecl:ClassDecl> 

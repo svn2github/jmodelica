@@ -76,14 +76,14 @@ aspect InstTypeAnalysis {
                 return myInstClass().recordType().sizedType(size());
             root = root.getInstComponentDecl(0);
         }
-        FRecordType type = myInstClass().actualInstClass().createEmptyFRecordType(size());
+        FRecordType type = myInstClass().createEmptyFRecordType(size());
         for (InstComponentDecl icd : root.allInstComponentDecls()) 
             type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
     }
 
     syn lazy FRecordType InstClassDecl.recordType() {
-        FRecordType type = actualInstClass().createEmptyFRecordType(Size.SCALAR);
+        FRecordType type = createEmptyFRecordType(Size.SCALAR);
         for (InstComponentDecl icd : allInstComponentDecls()) 
             type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
@@ -619,8 +619,7 @@ aspect InstClassRestriction {
         }
         return false;
     }
-    eq InstSimpleShortClassDecl.isExternalObject() = actualInstClass().isExternalObject();
-    eq InstLibNode.isExternalObject()              = actualInstClass().isExternalObject();
+    eq InstSimpleShortClassDecl.isExternalObject() = false;
 
     /**
      * Check if this class has a restriction.
