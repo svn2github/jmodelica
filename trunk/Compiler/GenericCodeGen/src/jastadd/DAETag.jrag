@@ -150,7 +150,7 @@ public abstract class DAETag extends AbstractTag {
         }
         
         public void add(T element) {
-            int n = numScalarElements(element);
+            int n = numScalarElements(element) + numScalarTemporaries(element);
             if (elements.size() == 0 || splitCount + n > itemLimit) {
                 elements.add(new ArrayList<T>());
                 splitCount = 0;
@@ -221,6 +221,7 @@ public abstract class DAETag extends AbstractTag {
         }
         
         public int numScalarElements(T element) { return 1; }
+        public int numScalarTemporaries(T element) { return 1; }
         public abstract void genDecl(T element);
         public void genPre(T element) {}
         public abstract void gen(T element);

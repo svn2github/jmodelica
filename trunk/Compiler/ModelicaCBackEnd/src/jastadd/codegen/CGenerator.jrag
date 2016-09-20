@@ -323,6 +323,10 @@ public class CGenerator extends GenericGenerator {
                     return element.numScalarEquations();
                 }
                 @Override
+                public int numScalarTemporaries(FAbstractEquation element) {
+                    return element.numScalarTemporaries();
+                }
+                @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
                 }
@@ -783,6 +787,10 @@ public class CGenerator extends GenericGenerator {
                     return element.allLocalVariables().size();
                 }
                 @Override
+                public int numScalarTemporaries(AbstractEquationBlock element) {
+                    return element.numScalarTemporaries();
+                }
+                @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls_C(p, str, indent);
                 }
@@ -841,6 +849,10 @@ public class CGenerator extends GenericGenerator {
                 @Override
                 public int numScalarElements(AbstractEquationBlock element) {
                     return element.allLocalVariables().size();
+                }
+                @Override
+                public int numScalarTemporaries(AbstractEquationBlock element) {
+                    return element.numScalarTemporaries();
                 }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
