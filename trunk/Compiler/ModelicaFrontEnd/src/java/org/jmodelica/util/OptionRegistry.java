@@ -340,7 +340,7 @@ abstract public class OptionRegistry {
              Category.internal,
              "", 
              "The value of this option is appended to the MODELICAPATH " +
-             "when searching for libraries. Decrepated."),
+             "when searching for libraries. Deprecated."),
         START_FIX
             ("state_start_values_fixed", 
              OptionType.compiler, 

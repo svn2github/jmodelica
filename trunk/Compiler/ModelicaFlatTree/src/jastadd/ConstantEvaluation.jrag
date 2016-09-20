@@ -3545,7 +3545,11 @@ aspect ConstantEvaluation {
     public void InstSimpleShortClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
        actualInstClass().evaluate(evaluator, values);
     }
-    
+
+    public void InstLibNode.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+       actualInstClass().evaluate(evaluator, values);
+    }
+
     public void InstBaseClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
         // We assume that this class is a function
         

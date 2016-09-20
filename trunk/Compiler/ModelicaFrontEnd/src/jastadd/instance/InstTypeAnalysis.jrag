@@ -76,14 +76,14 @@ aspect InstTypeAnalysis {
                 return myInstClass().recordType().sizedType(size());
             root = root.getInstComponentDecl(0);
         }
-        FRecordType type = myInstClass().createEmptyFRecordType(size());
+        FRecordType type = myInstClass().actualInstClass().createEmptyFRecordType(size());
         for (InstComponentDecl icd : root.allInstComponentDecls()) 
             type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
     }
 
     syn lazy FRecordType InstClassDecl.recordType() {
-        FRecordType type = createEmptyFRecordType(Size.SCALAR);
+        FRecordType type = actualInstClass().createEmptyFRecordType(Size.SCALAR);
         for (InstComponentDecl icd : allInstComponentDecls()) 
             type.addComponent(new FRecordComponentType(icd.name(), (FType) icd.type().fullCopy()));
         return type;
@@ -368,18 +368,21 @@ aspect ClassRestriction {
      */
     syn boolean ClassDecl.isPartial() = false;
     eq BaseClassDecl.isPartial()      = hasPartial();
+    eq LibNode.isPartial()            = myClass().isPartial();
 
     /**
      * Is this class encapsulated?
      */
     syn boolean ClassDecl.isEncapsulated() = false;
     eq BaseClassDecl.isEncapsulated()      = hasEncapsulated();
+    eq LibNode.isEncapsulated()            = myClass().isEncapsulated();
 
     /**
      * Is this class a model?
      */
     syn boolean ClassDecl.isModel() = false;
     eq BaseClassDecl.isModel()      = getRestriction().isModel();
+    eq LibNode.isModel()            = myClass().isModel();
 
     /**
      * Is this restriction "model"?
@@ -392,6 +395,7 @@ aspect ClassRestriction {
      */
     syn boolean ClassDecl.isBlock() = false;
     eq BaseClassDecl.isBlock()      = getRestriction().isBlock();
+    eq LibNode.isBlock()            = myClass().isBlock();
 
     /**
      * Is this restriction "block"?
@@ -404,6 +408,7 @@ aspect ClassRestriction {
      */
     syn boolean ClassDecl.isClass() = false;
     eq BaseClassDecl.isClass()      = getRestriction().isClass();
+    eq LibNode.isClass()            = myClass().isClass();
 
     /**
      * Is this restriction "class"?
@@ -417,6 +422,7 @@ aspect ClassRestriction {
     syn boolean ClassDecl.isPackage() = false;
     eq BaseClassDecl.isPackage()      = getRestriction().isPackage();
     eq UnknownClassDecl.isPackage()   = false;
+    eq LibNode.isPackage()            = myClass().isPackage();
 
     /**
      * Is this restriction "package"?
@@ -619,7 +625,8 @@ aspect InstClassRestriction {
         }
         return false;
     }
-    eq InstSimpleShortClassDecl.isExternalObject() = false;
+    eq InstSimpleShortClassDecl.isExternalObject() = actualInstClass().isExternalObject();
+    eq InstLibNode.isExternalObject()              = actualInstClass().isExternalObject();
 
     /**
      * Check if this class has a restriction.
