@@ -75,30 +75,16 @@ aspect Library {
             log.info("Reading file: " + fileName);
             SourceRoot sr = ParserHandler.parseFile(root().getUtilInterface(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
-            ClassDecl match = null;
-            ClassDecl wrongCase = null;
-            if (entity != null) {
-                for (Element e : entity.getElements()) {
-                    if (name.equals(e.name())) {
-                        match = (ClassDecl) e;
-                    } else if (equalsLowerCase(name, e.name())) {
-                        wrongCase = (ClassDecl) e;
-                    }
-                }
-            }
-            if (entity == null || entity.getNumElement() != 1 || match == null) {
+            ClassDecl cd = extractClassDecl(entity, name);
+            if (shouldProduceProblem(entity, name)) {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
-                if (match == null) {
-                    if (wrongCase != null) {
-                        match = wrongCase;
-                    } else {
-                        return createErrorStoredDefinition();
-                    }
-                }
+            }
+            if (cd == null) {
+                return createErrorStoredDefinition();
             }
             entity.setFileName(fileName);
             if (isStructured) {
-                FullClassDecl fcd = (FullClassDecl) match;
+                FullClassDecl fcd = (FullClassDecl) cd;
                 LibClassDecl lcd = new LibClassDecl(fcd);
                 
                 LibraryList ll = new LibraryList();
@@ -132,9 +118,35 @@ aspect Library {
         } 
     }
 
+    private ClassDecl LibNode.extractClassDecl(StoredDefinition entity, String name) {
+        if (entity == null) {
+            return null;
+        } else {
+            ClassDecl match = null;
+            ClassDecl wrongCase = null;
+            for (Element e : entity.getElements()) {
+                if (name.equals(e.name())) {
+                    if (match == null) {
+                        match = (ClassDecl) e;
+                    }
+                } else if (equalsLowerCase(name, e.name())) {
+                    if (wrongCase == null) {
+                        wrongCase = (ClassDecl) e;
+                    }
+                }
+            }
+            return (match == null) ? wrongCase : match;
+        }
+    }
+
+    private boolean LibNode.shouldProduceProblem(StoredDefinition entity, String name) {
+        return entity == null || entity.getNumElement() != 1 || 
+                !entity.getElement(0).name().equals(name);
+    }
+
     public static final LibraryContentErrorProducer ASTNode.LIBRARY_FILE_CONTENTS = 
             new LibraryContentErrorProducer();
-    
+
     public class ASTNode {
         public static class LibraryContentErrorProducer extends ProblemProducer<LibNode> {
             private static final String BASE_MSG = 
