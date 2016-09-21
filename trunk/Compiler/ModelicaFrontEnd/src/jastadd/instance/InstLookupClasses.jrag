@@ -539,8 +539,13 @@ aspect InstLookupClasses {
         return icd;
     }
 
-    eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 
-    eq InstBaseClassDecl.matches(String str)    = name().equals(str);
+    eq InstClassDecl.matches(String str) = name().equals(str);
+    eq InstLibNode.matches(String str) {
+        if (equalsLowerCase(name(), str)) {
+            resolveLib();
+        }
+        return name().matches(str);
+    }
 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
     eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
@@ -639,9 +644,6 @@ aspect SimpleInstClassLookup {
     syn lazy InstClassDecl InstProgramRoot.simpleLookupInstClassDecl(String name) = 
         simpleLookupInstClassDeclRecursive(name);
 
-    // For findMatching()
-    eq InstClassDecl.matches(String str) = name().equals(str);
-    
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);

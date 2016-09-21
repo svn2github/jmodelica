@@ -75,23 +75,30 @@ aspect Library {
             log.info("Reading file: " + fileName);
             SourceRoot sr = ParserHandler.parseFile(root().getUtilInterface(), fileName);
             StoredDefinition entity = sr.getProgram().getUnstructuredEntity(0);
-            ClassDecl cd = null;
+            ClassDecl match = null;
+            ClassDecl wrongCase = null;
             if (entity != null) {
                 for (Element e : entity.getElements()) {
-                    if (cd == null && name.equals(e.name())) {
-                        cd = (ClassDecl) e;
+                    if (name.equals(e.name())) {
+                        match = (ClassDecl) e;
+                    } else if (equalsLowerCase(name, e.name())) {
+                        wrongCase = (ClassDecl) e;
                     }
                 }
             }
-            if (entity == null || entity.getNumElement() != 1 || cd == null) {
+            if (entity == null || entity.getNumElement() != 1 || match == null) {
                 LIBRARY_FILE_CONTENTS.invoke(this, entity);
-                if (cd == null) {
-                    return createErrorStoredDefinition();
+                if (match == null) {
+                    if (wrongCase != null) {
+                        match = wrongCase;
+                    } else {
+                        return createErrorStoredDefinition();
+                    }
                 }
             }
             entity.setFileName(fileName);
             if (isStructured) {
-                FullClassDecl fcd = (FullClassDecl) cd;
+                FullClassDecl fcd = (FullClassDecl) match;
                 LibClassDecl lcd = new LibClassDecl(fcd);
                 
                 LibraryList ll = new LibraryList();
@@ -132,16 +139,16 @@ aspect Library {
         public static class LibraryContentErrorProducer extends ProblemProducer<LibNode> {
             private static final String BASE_MSG = 
                     "Class '%s' must be alone at top level of library file, but the file %s.";
-            
+
             public LibraryContentErrorProducer() {
                 super("LIBRARY_FILE_CONTENTS", ProblemKind.SEMANTIC);
             }
-            
+
             public void invoke(LibNode src, StoredDefinition sd) {
                 String name = src.name();
-                invoke(src, severity(), BASE_MSG, name, detailMsg(sd, name));
+                invoke(src, severity(sd, name), BASE_MSG, name, detailMsg(sd, name));
             }
-    
+
             private String detailMsg(StoredDefinition sd, String name) {
                 if (sd == null) {
                    return "was empty";
@@ -184,15 +191,22 @@ aspect Library {
                     return buf.toString();
                 }
             }
-    
+
+            public ProblemSeverity severity(StoredDefinition sd, String name) {
+                // If the class simply has the wrong case, give a warning instead
+                boolean warn = sd != null && sd.getNumElement() == 1 && 
+                        ASTNode.equalsLowerCase(sd.getElement(0).name(), name);
+                return warn ? ProblemSeverity.WARNING : ProblemSeverity.ERROR;
+            }
+
             @Override
             public String description() {
                 return "Library file contains wrong class(es).";
             }
-    
+
             @Override
             public ProblemSeverity severity() {
-                return ProblemSeverity.ERROR;
+                return null;
             }
         }
     }

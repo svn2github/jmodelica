@@ -73,7 +73,7 @@ model LibraryTest4
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="LibraryTest4",
-            description="",
+            description="Several classes in library file",
             modelicaLibraries="WrongContent",
             errorMessage="
 1 errors found:
@@ -90,7 +90,7 @@ model LibraryTest5
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="LibraryTest5",
-            description="",
+            description="Several classes in library file",
             modelicaLibraries="WrongContent",
             errorMessage="
 1 errors found:
@@ -107,7 +107,7 @@ model LibraryTest6
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="LibraryTest6",
-            description="",
+            description="Several classes in library file",
             modelicaLibraries="WrongContent",
             errorMessage="
 1 errors found:
@@ -124,7 +124,7 @@ model LibraryTest7
     annotation(__JModelica(UnitTesting(tests={
         ErrorTestCase(
             name="LibraryTest7",
-            description="",
+            description="Several classes in library file",
             modelicaLibraries="WrongContent",
             errorMessage="
 1 errors found:
@@ -133,5 +133,42 @@ Error at line 1, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JMode
   Class 'D1' must be alone at top level of library file, but the file contains 2 classes of that name.
 ")})));
 end LibraryTest7;
+
+
+model LibraryTest8
+    extends WrongContent.Ee;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="LibraryTest8",
+            description="File name and class differ only in case",
+            modelicaLibraries="WrongContent",
+            errorMessage="
+1 warnings found:
+
+Warning at line 16, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\EE.mo', LIBRARY_FILE_CONTENTS:
+  Class 'EE' must be alone at top level of library file, but the file contains 'Ee' instead.
+")})));
+end LibraryTest8;
+
+
+model LibraryTest9
+    extends WrongContent.EE;
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="LibraryTest9",
+            description="File name and class differ only in case",
+            modelicaLibraries="WrongContent",
+            errorMessage="
+1 errors and 1 warnings found:
+
+Error at line 156, column 26, in file 'Compiler/ModelicaCompiler/test/modelica/LibraryTests.mo':
+  Cannot find class declaration for EE
+
+Warning at line 16, column 1, in file 'C:\\Users\\jesper.mattsson\\workspace\\JModelica\\Compiler\\ModelicaCompiler\\test\\modelica\\WrongContent\\EE.mo', LIBRARY_FILE_CONTENTS:
+  Class 'EE' must be alone at top level of library file, but the file contains 'Ee' instead.
+")})));
+end LibraryTest9;
 
 end LibraryTests;

@@ -234,13 +234,18 @@ aspect SimpleClassLookup {
 				return (ClassDecl) ln;
 		return null;
 	}
-	
-	
-	eq IdDecl.matches(String str)                = getID().equals(str);
-	eq LibNode.matches(String str)               = getName().matches(str);
-	eq BaseClassDecl.matches(String str)         = getName().matches(str);
-	eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
-	eq ImportClauseQualified.matches(String str) = 
-		getPackageName().getLastAccess().matches(str);
+
+
+    eq IdDecl.matches(String str)                = getID().equals(str);
+    eq BaseClassDecl.matches(String str)         = getName().matches(str);
+    eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
+    eq ImportClauseQualified.matches(String str) = 
+        getPackageName().getLastAccess().matches(str);
+    eq LibNode.matches(String str) {
+        if (equalsLowerCase(name(), str)) {
+            myClass();
+        }
+        return getName().matches(str);
+    }
 
 }
