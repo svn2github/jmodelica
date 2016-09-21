@@ -696,13 +696,8 @@ abstract public class TestAnnotationizerHelper {
         }
 
         private NotNullCodeStream createCodeStream(OutputStream os) {
-            PrintStream ps;
-            if (or.getBooleanOption("debug_duplicate_generated")) {
-                ps = new PrintStream(new CloneOutputStream(os, System.out).setClose(true, false), true);
-            } else {
-                ps = new PrintStream(os);
-            }
-            return new NotNullCodeStream(ps);
+            PrintStream ps = CodeStream.createPrintStream(os, or.getBooleanOption("debug_duplicate_generated"));
+            return new UnitTestCodeStream(ps);
         }
 
 		/**

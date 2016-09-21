@@ -119,7 +119,8 @@ public abstract class DAETag extends AbstractTag {
 
     public abstract static class CodeSplitter<T> {
         
-        private int itemLimit = 1000;
+        private int itemLimit;
+        private int chunkLimit;
         private int splitCount = 0;
         private String funcName;
         protected CodeStream str;
@@ -129,18 +130,25 @@ public abstract class DAETag extends AbstractTag {
         
         private ArrayList<ArrayList<T>> elements = new ArrayList<ArrayList<T>>();
         
-        public CodeSplitter(CodePrinter p, CodeStream str, String indent, boolean allowDirect, String funcName) {
-            this(p, str, indent, allowDirect, funcName, new ArrayList<T>());
+        public CodeSplitter(CodePrinter p, CodeStream str, String indent,
+                boolean allowDirect, String funcName, OptionRegistry or) {
+            this(p, str, indent, allowDirect, funcName, or, new ArrayList<T>());
         }
         
         public CodeSplitter(CodePrinter p, CodeStream str, String indent,
-                boolean allowDirect, String funcName, ArrayList<T> elements) {
+                boolean allowDirect, String funcName, OptionRegistry or, ArrayList<T> elements) {
             this.funcName = funcName;
             this.str = str;
             this.p = p;
             this.indent = indent;
             this.allowDirect = allowDirect;
+            this.itemLimit  = cap(or.getIntegerOption("cc_split_element_limit"));
+            this.chunkLimit = cap(or.getIntegerOption("cc_split_function_limit"));
             add(elements);
+        }
+        
+        private int cap(int x) {
+            return x < 1 ? Integer.MAX_VALUE : x;
         }
         
         public void add(Collection<T> coll) {
@@ -175,8 +183,21 @@ public abstract class DAETag extends AbstractTag {
             str.print(indent + "return ef;\n");
         }
         
-        public void genFuncs() {
+        public void genFuncHeads() {
             for (int split = 0; split < numSplits(); split++) {
+                str.print("int ");
+                str.print(funcName);
+                str.print(split);
+                str.print("(jmi_t* jmi);\n");
+            }
+            str.print("\n");
+        }
+        
+        public void genFuncImpls() {
+            for (int split = 0; split < numSplits(); split++) {
+                if (split > 0 && split % chunkLimit == 0) {
+                    str.splitFile();
+                }
                 str.print("int ");
                 str.print(funcName);
                 str.print(split);
@@ -189,7 +210,7 @@ public abstract class DAETag extends AbstractTag {
             }
         }
         
-        public void genCalls() {
+        public void genFuncCalls() {
             int n = numSplits();
             if (n == 0) {
                 if (elements.size() > 0) {
@@ -221,7 +242,7 @@ public abstract class DAETag extends AbstractTag {
         }
         
         public int numScalarElements(T element) { return 1; }
-        public int numScalarTemporaries(T element) { return 1; }
+        public int numScalarTemporaries(T element) { return 0; }
         public abstract void genDecl(T element);
         public void genPre(T element) {}
         public abstract void gen(T element);

@@ -937,6 +937,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);

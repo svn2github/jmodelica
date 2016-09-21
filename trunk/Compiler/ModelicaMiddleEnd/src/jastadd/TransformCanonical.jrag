@@ -278,7 +278,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
                 out.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
@@ -291,7 +291,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 out.print(modelDiagnostics());
                 out.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
