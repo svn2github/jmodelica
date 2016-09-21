@@ -193,6 +193,12 @@ aspect InstLookupClasses {
     eq InstLibNode.resolveLib()                  = getActualInstClass();
 
     /**
+     * Get loaded version of library class.
+     */
+    syn ClassDecl ClassDecl.resolveLib() = this;
+    eq LibNode.resolveLib()              = myClass();
+
+    /**
      * Lookup the class being redeclared & extended in the last step of a chain 
      * of "redeclare class extends" declarations, where it is known that the last 
      * redeclaring class is below this node.
