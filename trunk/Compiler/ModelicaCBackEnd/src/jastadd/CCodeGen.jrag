@@ -3864,11 +3864,6 @@ aspect CCodeGen {
             protected FuncCallOutArgPrinter(boolean useMemcpy) {
                 super(useMemcpy);
             }
-            
-//            @Override
-//            public void printCell(CodeStream str, String indent, String name, FExp exp) {
-//                exp.genFuncCallOutArg_C(this, str, indent, name);
-//            }
 
             @Override
             public String arrayAccessConst() {
@@ -3882,26 +3877,8 @@ aspect CCodeGen {
 
             @Override
             public abstract void printCellUse(CodeStream str, String indent, String name, FIdUseExp exp);
-//            public abstract void printUse(CodeStream str, String indent, FIdUseExp use, String name);
-//            public void printNoExp(CodeStream str, String indent) {
-//                endComponent(str, indent);
-//            }
         }
     }
-
-//    public void FExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-//        throw new UnsupportedOperationException("No implementation for FExp.genFuncCallOutArg_C for type '" + getClass().getName() + "'. Printer is " + p.getClass().getName());
-//    }
-//
-//    @Override
-//    public void FNoExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-//        p.printNoExp(str, indent);
-//    }
-//
-//    @Override
-//    public void FIdUseExp.genFuncCallOutArg_C(CPrettyPrinter.FuncCallOutArgPrinter p, CodeStream str, String indent, String name) {
-//        p.printUse(str, indent, this, name);
-//    }
 
     public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
@@ -3989,74 +3966,7 @@ aspect CCodeGen {
                 firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
             }
        }
-        
-//        /**
-//         * For array components which are consecutive in z vector this printer generates
-//         * memcpy writebacks instead of scalar assignments.
-//         */
-//        public class ArrayWriteBackAssignmentPrinter extends WriteBackAssignmentPrinter {
-            
-//            FIdUseExp firstUse; // First use in component
-//            FIdUseExp prevUse;  // Last consecutive use in component;
-//            String firstName;   // Name to read from into firstUse
-//            int n;              // Number of consecutive elements in component
-//            
-//            public ArrayWriteBackAssignmentPrinter(Collection<FVariable> forVariables) {
-//                super(true, forVariables);
-//            }
-//            
-//            @Override
-//            public void printUse(CodeStream str, String indent, FIdUseExp use, String name) {
-//                if (forVariables != null && !forVariables.contains(use.myFV())) {
-//                    /* use not included in writeback */
-//                    return;
-//                }
-//                
-//                if (firstUse == null) {
-//                    /* use is the first element in this component */
-//                    init(use, name);
-//                    return;
-//                }
-//                
-//                if (!prevUse.isConsecutiveInZ(use)) {
-//                    /* use is not directly after prevUse in z-vector
-//                     * Write n items we have so far (firstUse to prevUse)
-//                     * and reinit with use as first element */
-//                    endComponent(str, indent);
-//                    init(use, name);
-//                    return;
-//                }
-//                
-//                prevUse = use;
-//                n++;
-//            }
-//            
-////            @Override
-////            public void printNoExp(CodeStream str, String indent) {
-////                endComponent(str, indent);
-////            }
-//            
-//            public void init(FIdUseExp use, String name) {
-//                firstUse = use;
-//                prevUse = use;
-//                firstName = name;
-//                n = 1;
-//            }
-//            
-//            @Override
-//            public void endComponent(CodeStream str, String indent) {
-//                if (n == 1) {
-//                    super.printUse(str, indent, firstUse, firstName);
-//                } else if (n > 1) {
-//                    firstUse.genArrayWriteBackAssignment_C(str, indent, firstName, n);
-//                }
-//                firstUse = null;
-//                prevUse = null;
-//                firstName = null;
-//                n = 0;
-//            }
-//        }
-        
+
         public abstract void printWriteBackAssignment(CodeStream str, String indent, FCompositeWriteBackNode node,
                 Collection<FVariable> forVariables);
     }
@@ -4204,8 +4114,6 @@ aspect CCodeGen {
 
     @Override
     public void FSpatialDistExp.genEventResidual_C(CodePrinter p, CodeStream str, String indent, Enumerator enumerator) {
-//        int jmi_spatialdist_event_indicator(jmi_t *jmi, int index, jmi_real_t x, 
-//              jmi_boolean positiveVelocity, jmi_real_t *event_indicator);
         if (p.inInitialSystem()) {
             str.formatln("%s(*res)[%d] = JMI_DELAY_INITIAL_EVENT_RES;", indent, enumerator.next());
         } else {
@@ -4796,12 +4704,7 @@ aspect CCodeGen {
             prevUse = use;
             n++;
         }
-        
-//        @Override
-//        public void printNoExp(CodeStream str, String indent) {
-//            endComponent(str, indent);
-//        }
-        
+
         private void init(FIdUseExp use, String name) {
             firstUse = use;
             prevUse = use;
