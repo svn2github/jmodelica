@@ -435,7 +435,6 @@
                                 source="${java_version}" 
                                 target="${java_version}" 
                                 debug="false" 
-                                verbose="true" 
                                 destdir="${class_output}" 
                                 includeantruntime="false"
                                 excludes="${test_helper_java_patterns}" >
