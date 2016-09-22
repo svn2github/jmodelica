@@ -2611,8 +2611,6 @@ public abstract class CCompilerDelegator {
         moduleLibNames = names;
     }
     
-    protected abstract String compilerVersionNumber();
-    
     public Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
         Set<String> newPaths = new LinkedHashSet<String>();
         for (String path : paths) {
@@ -2976,8 +2974,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
-
-    @Override
+    
     public String compilerVersionNumber() {
         String[] cmd = new String[] {
                 "gcc", "--version"
