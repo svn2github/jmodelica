@@ -57,7 +57,6 @@ import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.jmodelica.util.Arguments;
-import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
 import org.jmodelica.util.exceptions.InternalCompilerError;
@@ -71,7 +70,8 @@ import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.streams.CloneOutputStream;
+import org.jmodelica.util.streams.*;
+
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -670,7 +670,7 @@ public class ModelicaCompiler {
      * The dump will be saved in a file named <code>"node_count.txt"</code>.
      */
     protected void dumpNodeCountFile() 
-            throws FileNotFoundException {
+            throws IOException {
         if (dumpMemoryUse) {
             String file = "node_count.txt";
             log.debug("Dumping node counts to '" + file + "'...");
@@ -1376,11 +1376,8 @@ public class ModelicaCompiler {
             hookCheckAbort();
             hookCodeGeneratorCreated(gen);
             File outFile = new File(dir, name);
-            OutputStream output = new FileOutputStream(outFile);
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
-            if (debugGen)
-                output = new CloneOutputStream(output, System.out).setClose(true, false);
-            gen.generate(tmpl, output, debugGen, header);
+            gen.generate(tmpl, new SplitFilesCodeStream(outFile, debugGen, header), header);
             log.debug("Generated file '" + outFile + "'.");
         }
     }

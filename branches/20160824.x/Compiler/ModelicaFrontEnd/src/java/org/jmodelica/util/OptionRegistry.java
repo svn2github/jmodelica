@@ -708,6 +708,20 @@ abstract public class OptionRegistry {
             CCompilerFlags.O1,
             "Optimization level for c-code compilation",
             CCompilerFlags.O1, CCompilerFlags.O2),
+        CC_SPLIT_ELEMENT_LIMIT
+            ("cc_split_element_limit",
+            OptionType.compiler,
+            Category.uncommon,
+            1000,
+            "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
+            + " This option controls how many scalar elements can be evaluated by a function. Value < 1 indicates no split."),
+        CC_SPLIT_FUNCTION_LIMIT
+            ("cc_split_function_limit",
+            OptionType.compiler,
+            Category.uncommon,
+            20,
+            "When generating code for large systems, the code is split into multiple functions and files for performance reasons."
+            + " This option controls how many functions can be generated in a file. Value < 1 indicates no split."),
         DYNAMIC_STATES
             ("dynamic_states",
              OptionType.compiler,

@@ -181,27 +181,11 @@ public abstract class AbstractGenerator {
      * @throws FileNotFoundException An exception is thrown if the template
      * file is not found.
      */
-    public void generate(String templateFile, String outputFile) {
+    public void generate(String templateFile, CodeStream outStream, String header) {
         try {
-            generate(templateFile, new FileOutputStream(outputFile), false, "");
-        } catch (IOException e) { // TODO: introduce specific exception type
-            throw new RuntimeException("File I/O problem during code generation", e);
-        }
-    }
-
-    /**
-     * See generate(String templateFile, String outputFile).
-     * 
-     * @param templateFile  a file containing the code generation template
-     * @param outputFile    the stream to write output to
-     * @param autoFlush     automatically flush output steam on each newline
-     */
-    public void generate(String templateFile, OutputStream output, boolean autoFlush, String header) {
-        try {
-            CodeStream outStream = new NotNullCodeStream(new PrintStream(output, autoFlush, "UTF-8"));
             outStream.print(header);
             if (templateFile == null) {
-                generate(null, outStream, null);
+                generate(null, outStream);
             } else {
                 File tFile = new File(templateFile);
                 Reader template = openTemplate(tFile);

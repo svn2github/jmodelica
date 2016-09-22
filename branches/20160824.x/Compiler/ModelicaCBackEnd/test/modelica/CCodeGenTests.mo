@@ -1101,6 +1101,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -1271,6 +1275,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -1343,6 +1349,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     _s_pi_pd_6 = (\"s2\");
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -2576,6 +2584,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _der_w_7 = (0.0);
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -14389,6 +14401,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -14441,6 +14457,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     pre_temp_1_6 = (0);
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -17499,6 +17519,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -17644,6 +17668,8 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     _r_eos_2_2 = (func_CCodeGenTests_ExtObject_constructor_exp1());
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -17973,6 +17999,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _x_0 = (0.0);
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
@@ -20288,6 +20318,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -20399,6 +20433,10 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     return ef;
 }
 
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
+
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
     ef |= jmi_set_start_values_0_0(jmi);
@@ -20450,6 +20488,8 @@ int jmi_set_start_values_1_0(jmi_t* jmi) {
     _x1_0 = (func_CCodeGenTests_CFixedFalseParam3_f_exp0(tmp_1));
     return ef;
 }
+
+int jmi_set_start_values_1_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;

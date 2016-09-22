@@ -16,11 +16,13 @@
 package org.jmodelica.util.streams;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
 public class CodeStream {
+    
     private PrintStream out;
     
     public CodeStream(PrintStream ps) {
@@ -28,19 +30,38 @@ public class CodeStream {
     }
     
     public CodeStream(OutputStream os) {
-        this.out = new PrintStream(os);
+        this(new PrintStream(os));
     }
     
-    public CodeStream(File file) throws FileNotFoundException {
-        this.out = new PrintStream(file);
+    public CodeStream(String file) throws IOException {
+        this(new File(file));
     }
     
-    public CodeStream(String file) throws FileNotFoundException {
-        this.out = new PrintStream(file);
+    public CodeStream(File file) throws IOException {
+        this(createPrintStream(file, false));
     }
     
-    public CodeStream(CodeStream str) {
-        this(str.out);
+    public static PrintStream createPrintStream(File file, boolean cloneToSysOut) {
+        try {
+            return createPrintStream(new FileOutputStream(file), cloneToSysOut ? System.out : null);
+        } catch (IOException e) {
+            throw new RuntimeException("File I/O problem during code generation", e);
+        }
+    }
+    
+    public static PrintStream createPrintStream(OutputStream os, boolean cloneToSysOut) {
+        return createPrintStream(os, cloneToSysOut ? System.out : null);
+    }
+    
+    public static PrintStream createPrintStream(OutputStream os, PrintStream clone) {
+        if (clone != null) {
+            os = new CloneOutputStream(os, clone).setClose(true, false);
+        }
+        try {
+            return new PrintStream(os, clone != null, "UTF-8");
+        } catch (IOException e) {
+            throw new RuntimeException("File I/O problem during code generation", e);
+        }
     }
     
     public void close() {
@@ -48,12 +69,14 @@ public class CodeStream {
         out = null;
     }
     
-    public void println() {
-        print("\n");
-    }
-    
     public void print(String s) {
         out.print(s);
+    }
+    
+    public void splitFile() {}
+    
+    public void println() {
+        print("\n");
     }
     
     public void print(Object o) {
