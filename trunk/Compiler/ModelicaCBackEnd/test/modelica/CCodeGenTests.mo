@@ -14227,6 +14227,74 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end Algorithm19;
 
+model Algorithm20
+    function f
+        input Real x;
+        output Integer[2] i;
+    algorithm
+        i[1] := integer(x);
+        i := (1:2) * i[1];
+    end f;
+    
+    Integer i[2];
+    Real x, y;
+equation
+    y * x = sum(i);
+    x = time + y;
+algorithm
+    i := f(x) .- 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm20",
+            description="",
+            template="$C_dae_blocks_residual_functions$",
+            generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435461;
+        x[1] = 268435460;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 268435460;
+        x[1] = 268435461;
+    } else if (evaluation_mode == JMI_BLOCK_NON_REAL_TEMP_VALUE_REFERENCE) {
+        x[0] = 268435462;
+        x[1] = 268435463;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _y_3;
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _y_3 = x[0];
+        }
+        _x_2 = _time + _y_3;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1, 2)
+            func_CCodeGenTests_Algorithm20_f_def0(_x_2, tmp_1);
+            memcpy(&_temp_1_1_6, &jmi_array_val_1(tmp_1, 1), 2 * sizeof(jmi_real_t));
+            _i_1_0 = _temp_1_1_6 - 1;
+            _i_2_1 = _temp_1_2_7 - 1;
+        }
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _i_1_0 + _i_2_1 - (_y_3 * _x_2);
+        }
+    }
+    return ef;
+}
+
+")})));
+end Algorithm20;
+
+
 model OutputTest1
 
   output Real x_1(start=0.951858508368);
