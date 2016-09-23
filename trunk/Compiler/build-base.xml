@@ -43,7 +43,7 @@
 
     <property name="jastadd_dir" value="${base.dir}/../ThirdParty/JastAdd" />
     <property name="junit_dir" value="${base.dir}/../ThirdParty/Junit" />
-    <property name="junit_jar" value="${junit_dir}/junit-4.5.jar" />
+    <property name="junit_jar" value="${junit_dir}/junit-4.10.jar" />
     <property name="jflex_dir" value="${base.dir}/../ThirdParty/JFlex/jflex-1.4.3" />
     <property name="beaver_dir" value="${base.dir}/../ThirdParty/Beaver/beaver-0.9.6.1" />
     <property name="beaver_jar" value="${beaver_dir}/lib/beaver.jar"/>
