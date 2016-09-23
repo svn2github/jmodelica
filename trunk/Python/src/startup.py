@@ -122,7 +122,7 @@ for _e in _expected_env:
             _paths = _value.split(_separator)
             for p in _paths:
                 if not os.path.exists(p):
-                    logging.warning('%s: Path "%s" does not exist. %s' % (_e[0], p, msg))
+                    logging.warning('%s: Path "%s" does not exist. %s' % (_e[0], p, _msg))
         elif not os.path.exists(environ[_e[0]]):
             logging.warning('%s="%s": Path does not exist. %s' % (_e[0], environ[_e[0]], _msg))
 
