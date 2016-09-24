@@ -22,3 +22,4 @@ rm Modelica/Math/Random.mo
 rm Modelica/Math/Special.mo
 patch -i removeSubLibs.patch -p0
 patch -i tightenTolRoomCOControls.patch -p0
+patch -i updateStartInverseParameterization.patch -p0

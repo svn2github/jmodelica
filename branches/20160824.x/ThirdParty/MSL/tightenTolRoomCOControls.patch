@@ -1,7 +1,7 @@
-Index: Fluid/Examples/TraceSubstances.mo
+Index: Modelica/Fluid/Examples/TraceSubstances.mo
 ===================================================================
---- Fluid/Examples/TraceSubstances.mo	(revision 9254)
-+++ Fluid/Examples/TraceSubstances.mo	(working copy)
+--- Modelica/Fluid/Examples/TraceSubstances.mo	(revision 9254)
++++ Modelica/Fluid/Examples/TraceSubstances.mo	(working copy)
 @@ -230,7 +230,7 @@
          points={{-10,0},{-10,-30},{-18,-30}},
          color={0,127,255}));
