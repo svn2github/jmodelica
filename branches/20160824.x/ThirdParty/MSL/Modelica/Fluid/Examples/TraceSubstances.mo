@@ -230,7 +230,7 @@ of magnitude.
         points={{-10,0},{-10,-30},{-18,-30}},
         color={0,127,255}));
     annotation (
-      experiment(StopTime=86400, Tolerance=1e-006),
+      experiment(StopTime=86400, Tolerance=1e-007),
       __Dymola_Commands(file(ensureSimulated=true)="modelica://Modelica/Resources/Scripts/Dymola/Fluid/RoomCO2WithControls/plotStatesWithControl.mos"
           "plot states and controls"),
       Documentation(info="<html>

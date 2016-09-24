@@ -21,3 +21,4 @@ rm Modelica/Math/Distributions.mo
 rm Modelica/Math/Random.mo
 rm Modelica/Math/Special.mo
 patch -i removeSubLibs.patch -p0
+patch -i tightenTolRoomCOControls.patch -p0
