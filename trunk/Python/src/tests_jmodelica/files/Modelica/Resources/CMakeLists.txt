@@ -56,10 +56,10 @@ else(CMAKE_HOST_WIN32)
     message(SEND_ERROR "Target platform is not supported by the tests")
 set(JM_PLATFORM not_supported)
 endif()
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-    set(JM_PLATFORM "${JM_PLATFORM}32")
-else()
+if(" ${CMAKE_C_FLAGS} " MATCHES " -m64 ")
     set(JM_PLATFORM "${JM_PLATFORM}64")
+else()
+    set(JM_PLATFORM "${JM_PLATFORM}32")
 endif()
 
 
