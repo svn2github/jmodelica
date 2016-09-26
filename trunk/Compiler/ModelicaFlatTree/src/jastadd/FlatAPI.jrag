@@ -2395,6 +2395,7 @@ aspect FlatTypes {
     eq InstRecordConstructor.getInstComponentDecl().inRecord()  = true;
 
     inh boolean InstNode.inRecordDecl();
+    eq Root.getChild().inRecordDecl()           = false;
     eq InstNode.getChild().inRecordDecl()       = false;
     eq InstClassDecl.getChild().inRecordDecl()  = isRecord();
     eq InstAssignable.getChild().inRecordDecl() = inRecordDecl();

@@ -607,7 +607,9 @@ aspect ExternalProcessCommunication {
         private Process process;
         private Timer timer;
         private TimerTask task;
-        String buffLine = null;
+        private String buffLine = null;
+        private boolean timeOutHappened = false;
+        private int timeOut = 0;
         
         public ProcessCommunicator(Process proc) {
             process = proc;
@@ -620,8 +622,13 @@ aspect ExternalProcessCommunication {
             String line = buffLine;
             if (line == null)
                 line = in.readLine();
-            if (line == null)
-                throw new IOException("Process halted unexpectedly");
+            if (line == null) {
+                if (timeOutHappened) {
+                    throw new IOException(String.format("Evaluation timed out, time limit set to %d ms by option %s", timeOut, "external_constant_evaluation"));
+                } else {
+                    throw new IOException("Process halted unexpectedly");
+                }
+            }
             buffLine = null;
             return line;
         }
@@ -762,6 +769,7 @@ aspect ExternalProcessCommunication {
         }
         
         public void startTimer(int timeout) {
+            this.timeOut = timeout;
             if (timeout >= 0) {
                 if (task != null) {
                     //XXX: Throw exception instead?
@@ -771,6 +779,7 @@ aspect ExternalProcessCommunication {
                 task = new TimerTask() {
                     @Override
                     public void run() {
+                        timeOutHappened = true;
                         process.destroy();
                         cancel();
                     }
