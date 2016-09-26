@@ -764,10 +764,10 @@ der(_ds.2.s1) := dsDer(2, 1)
         equation
             der(a1) + der(a4) + der(a5) + der(a8) + der(a9) = 0;
             der(a2) + der(a3) + der(a7) + der(a6) = 0;
-            a1 * a2 = a5 + a7 + a9;
-            a1 * a2 = a6 + a8 + a9;
-            a3 * a4 = a5 + a7 + a9;
-            a3 * a4 = a6 + a8 + a9;
+            a1 * a2 - 1 = a5 + a7 + a9 + 1;
+            a1 * a2 + 1 = a6 + a8 + a9 + 3;
+            a3 * a4 - 1 = a5 + a7 + a9 + 2;
+            a3 * a4 + 1 = a6 + a8 + a9 + 4;
             a7 = time;
             a5 + a7 = 1;
             a6 - a8 = time;
@@ -798,15 +798,15 @@ Coefficient variability: continuous-time
       a3
 
     Torn equations:
-      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a9 := ds(1, a1) * ds(1, a2) - 1 - a5 - (a7 + 1)
       a8 := a6 - time
 
     Residual equations:
-      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+      ds(2, a3) * ds(2, a4) + 1 = a6 + a8 + a9 + 4
         Iteration variables: a6
-      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+      ds(2, a3) * ds(2, a4) - 1 = a5 + a7 + a9 + 2
         Iteration variables: a2
-      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+      ds(1, a1) * ds(1, a2) + 1 = a6 + a8 + a9 + 3
         Iteration variables: a3
 
     Jacobian:
@@ -829,15 +829,15 @@ Coefficient variability: continuous-time
       a4
 
     Torn equations:
-      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a9 := ds(1, a1) * ds(1, a2) - 1 - a5 - (a7 + 1)
       a8 := a6 - time
 
     Residual equations:
-      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+      ds(2, a3) * ds(2, a4) + 1 = a6 + a8 + a9 + 4
         Iteration variables: a6
-      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+      ds(2, a3) * ds(2, a4) - 1 = a5 + a7 + a9 + 2
         Iteration variables: a2
-      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+      ds(1, a1) * ds(1, a2) + 1 = a6 + a8 + a9 + 3
         Iteration variables: a4
 
     Jacobian:
@@ -860,15 +860,15 @@ Coefficient variability: continuous-time
       a3
 
     Torn equations:
-      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a9 := ds(1, a1) * ds(1, a2) - 1 - a5 - (a7 + 1)
       a8 := a6 - time
 
     Residual equations:
-      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+      ds(2, a3) * ds(2, a4) + 1 = a6 + a8 + a9 + 4
         Iteration variables: a6
-      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+      ds(2, a3) * ds(2, a4) - 1 = a5 + a7 + a9 + 2
         Iteration variables: a1
-      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+      ds(1, a1) * ds(1, a2) + 1 = a6 + a8 + a9 + 3
         Iteration variables: a3
 
     Jacobian:
@@ -891,15 +891,15 @@ Coefficient variability: continuous-time
       a4
 
     Torn equations:
-      a9 := ds(1, a1) * ds(1, a2) - a5 - a7
+      a9 := ds(1, a1) * ds(1, a2) - 1 - a5 - (a7 + 1)
       a8 := a6 - time
 
     Residual equations:
-      ds(2, a3) * ds(2, a4) = a6 + a8 + a9
+      ds(2, a3) * ds(2, a4) + 1 = a6 + a8 + a9 + 4
         Iteration variables: a6
-      ds(2, a3) * ds(2, a4) = a5 + a7 + a9
+      ds(2, a3) * ds(2, a4) - 1 = a5 + a7 + a9 + 2
         Iteration variables: a1
-      ds(1, a1) * ds(1, a2) = a6 + a8 + a9
+      ds(1, a1) * ds(1, a2) + 1 = a6 + a8 + a9 + 3
         Iteration variables: a4
 
     Jacobian:
