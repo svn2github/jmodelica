@@ -1171,7 +1171,7 @@ aspect CCodeGen {
         public void reset(String name, FExp src, boolean dynamic, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
-            levels.push(new Level(name, indent, dynamic));
+            levels.push(new Level(name, indent, dynamic || external));
             this.external = external;
         }
         
@@ -1714,7 +1714,7 @@ aspect CCodeGen {
     
     public void FType.printDeclBase_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean external) {
         if (isArray()) {
-            if (size().isUnknown()) {
+            if (size().isUnknown() || external) {
                 printDecl_C(p, str, indent, name, src, external);
             } else {
                 String type = "STAT" + (isReal() ? "REAL" : "");
