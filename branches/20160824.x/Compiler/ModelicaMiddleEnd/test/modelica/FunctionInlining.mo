@@ -4727,4 +4727,60 @@ end FunctionInlining.InputAsIndex4;
 ")})));
 end InputAsIndex4;
 
+
+model SizeParam1
+    function f
+      input Integer m;
+      output Real y[m];
+      constant Real pi = 3.1415;
+    algorithm
+      if mod(m, 2) == 0 then
+        if m == 2 then
+          y[1] := 0;
+          y[2] := pi/2;
+        else
+          y[1:integer(m/2)] := f(integer(m/2));
+          y[integer(m/2) + 1:m] := f(integer(m/2)) - fill(pi/m, integer(m/2));
+        end if;
+      else
+        y := {(k - 1)*2*pi/m for k in 1:m};
+      end if;
+    end f;
+
+    function g
+        input Real x[:];
+        output Real y[2];
+    protected 
+        parameter Integer m=size(x, 1);
+        parameter Real phi[m] = f(m);
+        parameter Real z[2, m] = 2 / m * {cos(phi), sin(phi)};
+    algorithm 
+        y := z * x;
+        annotation (Inline=true);
+    end g;
+
+    Real x[3] = (1:3) * time;
+    Real y[2] = g(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SizeParam1",
+            description="Check that function inliner handles sizes that depend on local variables correctly",
+            flatModel="
+fclass FunctionInlining.SizeParam1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = time;
+ x[2] = 2 * time;
+ x[3] = 3 * time;
+ y[1] = 0.6666666666666666 * x[1] + -0.33329767031411434 * x[2] + -0.33340465555621845 * x[3];
+ y[2] = 0.5773708577748173 * x[2] + -0.5773090854108254 * x[3];
+end FunctionInlining.SizeParam1;
+")})));
+end SizeParam1;
+
 end FunctionInlining;

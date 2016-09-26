@@ -1259,10 +1259,23 @@ aspect FunctionInlining {
      */
     private boolean FFunctionDecl.duringInlining = false;
 
+    private AbstractFunctionInliner FFunctionVariable.functionInliner = null;
+
     /**
-     * Keep reference to function inliner during inlining for size lookup.
+     * Keep reference to function inliner during inlining for type lookup.
      */
-    public AbstractFunctionInliner FFunctionVariable.functionInliner = null;
+    public void FAbstractVariable.cacheFunctionInliner(AbstractFunctionInliner fi) {}
+    public void FFunctionVariable.cacheFunctionInliner(AbstractFunctionInliner fi) {
+        functionInliner = fi;
+    }
+
+    /**
+     * Clear reference to function inliner.
+     */
+    public void FAbstractVariable.clearFunctionInliner() {}
+    public void FFunctionVariable.clearFunctionInliner() {
+        functionInliner = null;
+    }
 
     /**
      * Inline a call to this function.
@@ -1281,21 +1294,14 @@ aspect FunctionInlining {
             FExp arg = args.getChild(i++);
             fi.setTypeOf(var.name(), arg.type());
             arg.addInliningVarsAndEqns(fi, var.name(), false);
-            var.functionInliner = fi;
-        }
-        
-        for (FFunctionVariable var : myNonInputs()) {
-            FType t = var.getType().copyAndReplaceReferences(fi);
-            t.setParent(var);
-            fi.setTypeOf(var.name(), t);
-            var.functionInliner = fi;
+            var.cacheFunctionInliner(fi);
         }
         
         for (FStatement stmt : getFAlgorithm().getFStatements()) 
             stmt.inline(fi);
         
         for (FFunctionVariable var : getFFunctionVariables())
-            var.functionInliner = null;
+            var.clearFunctionInliner();
         
         tempLookupMap = null;
         duringInlining = false;
@@ -1348,6 +1354,7 @@ aspect FunctionInlining {
         FType t = type().copyAndReplaceReferences(fi);
         t.setParent(getFIdUseExp());
         fi.setTypeOf(fv.name(), t);
+        fv.cacheFunctionInliner(fi);
         fv.flushCache();
     }
 
