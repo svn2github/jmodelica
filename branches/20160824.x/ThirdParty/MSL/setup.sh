@@ -23,3 +23,4 @@ rm Modelica/Math/Special.mo
 patch -i removeSubLibs.patch -p0
 patch -i tightenTolRoomCOControls.patch -p0
 patch -i updateStartInverseParameterization.patch -p0
+patch -i decreasesHeightTanksWithOverflow -p0
