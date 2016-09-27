@@ -940,7 +940,7 @@ public class ModelicaCompiler {
         time.end();
         log.info("Total time: " + time);
     }
-        
+
     private void parseFiles(File[] files, boolean all) {
         for (File file : files) {
             if (file.isDirectory()) {
@@ -1078,7 +1078,32 @@ public class ModelicaCompiler {
             tryTearDown(doTearDown);
         }
     }
-    
+
+    /**
+     * Parses a string and returns a reference to the root of the source tree. 
+     * Options related to the compilation are also loaded here and added to the 
+     * source tree representation.
+     * 
+     * @param code
+     *            Modelica code to parse.
+     * @param name
+     *            The filename (or other description) to use when reporting errors.
+     *
+     * @return The root of the source tree.
+     * 
+     * @throws beaver.Parser.Exception
+     *             If there was an Beaver parsing exception.
+     * @throws CompilerException
+     *             If errors have been found during the parsing.
+     * @throws IOException
+     *             If there was an error reading the model file. (Beaver exception.)
+     */
+    public SourceRoot parseString(String code, String name) 
+      throws IOException, beaver.Parser.Exception, CompilerException {
+        checkSetUp();
+        return ParserHandler.parseString(createUtilInterface(), code, name);
+    }
+
     public SourceRoot doParseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
