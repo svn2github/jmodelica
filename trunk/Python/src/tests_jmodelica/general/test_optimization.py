@@ -261,7 +261,7 @@ class TestFunction1(OptimizationTest):
         OptimizationTest.setup_class_base(
             'FunctionAR_opt.mop', 'FunctionAR.UnknownArray1')
 
-    @testattr(ipopt = True)
+    @testattr(disabled = True)
     def setUp(self):
         n_e = 50
         hs = N.ones(n_e)*1./n_e
@@ -275,7 +275,7 @@ class TestFunction1(OptimizationTest):
         self.run()
         self.load_expected_data('UnknownArray.txt')
 
-    @testattr(ipopt = True)
+    @testattr(disabled = True)
     def test_trajectories(self):
         vars = ['x[%d]' % i for i in range(1, 4)]
         self.assert_all_trajectories(vars, same_span=True)
