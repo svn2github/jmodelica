@@ -37,14 +37,21 @@ def run_demo(with_plots=True):
 
     This example needs the linear solver MA57 to work.
     """
-    # Load trajectories that are optimal subject to a smaller torque constraint and use as initial guess
-    init_path = os.path.join(get_files_path(), "fourbar1_init.txt")
-    init_res = LocalDAECollocationAlgResult(result_data=ResultDymolaTextual(init_path))
-    
-    # Set up optimization
+    # Compile simulation model
     file_paths = (os.path.join(get_files_path(), "Fourbar1.mo"),
                   os.path.join(get_files_path(), "Fourbar1.mop"))
-    comp_opts = {'inline_functions': 'all', 'dynamic_states': False}
+    comp_opts = {'inline_functions': 'all', 'dynamic_states': False, 'expose_temp_vars_in_fmu': True}
+    model = load_fmu(compile_fmu('Fourbar1.Fourbar1Sim', file_paths, compiler_options=comp_opts))
+    
+    # Load trajectories that are optimal subject to a smaller torque constraint and use to generate initial guess
+    init_path = os.path.join(get_files_path(), "fourbar1_init.txt")
+    init_res = LocalDAECollocationAlgResult(result_data=ResultDymolaTextual(init_path))
+    t = init_res['time']
+    u = init_res['u']
+    u_traj = ('u', N.transpose(N.vstack((t, u))))
+    sim_res = model.simulate(final_time=1.0, input=u_traj)
+    
+    # Set up optimization
     op = transfer_optimization_problem('Opt', file_paths, compiler_options=comp_opts)
     opts = op.optimize_options()
     opts['IPOPT_options']['linear_solver'] = "ma57"
@@ -52,8 +59,8 @@ def run_demo(with_plots=True):
     opts['IPOPT_options']['ma57_automatic_scaling'] = "yes"
     opts['IPOPT_options']['mu_strategy'] = "adaptive"
     opts['n_e'] = 20
-    opts['init_traj'] = init_res
-    opts['nominal_traj'] = init_res
+    opts['init_traj'] = sim_res
+    opts['nominal_traj'] = sim_res
 
     # Solve optimization problem
     res = op.optimize(options=opts)
