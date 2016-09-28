@@ -78,6 +78,7 @@ aspect InstLookupClasses {
     eq InstReplacingExtendsShortClass.getClassName().lookupInstClass(String name)            = lookupInstClassInChain(name);
     eq InstShortClassDecl.getChild().lookupInstClass(String name)                            = lookupInstClass(name);
     eq InstSimpleShortClassDecl.getChild().lookupInstClass(String name)                      = lookupInstClass(name);
+    eq InstLibNode.getChild().lookupInstClass(String name)                                   = lookupInstClass(name);
     eq InstReplacingShortClassDecl.getChild().lookupInstClass(String name)                   = getInstClassRedeclare().lookupInstClass(name);
     eq InstReplacingSimpleShortClassDecl.getChild().lookupInstClass(String name)             = getInstClassRedeclare().lookupInstClass(name);
     eq InstReplacingShortClassDecl.getOriginalInstClass().lookupInstClass(String name)       = lookupInstClass(name);
@@ -165,8 +166,9 @@ aspect InstLookupClasses {
         myInstClass().lookupRedeclareExtendsInstClassFromComponent(name);
 
     syn InstLookupResult<InstClassDecl> InstClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupLastRedeclareExtendsInstClass(name);
-    eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)   = lookupRedeclareExtendsInstClass(name);
-    eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)  = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingFullClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)        = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name)       = lookupRedeclareExtendsInstClass(name);
+    eq InstReplacingSimpleShortClassDecl.lookupRedeclareExtendsInstClassFromComponent(String name) = lookupRedeclareExtendsInstClass(name);
 
     /**
      * Look up the class being redeclared & extended in the last step of a chain 
@@ -182,6 +184,19 @@ aspect InstLookupClasses {
     syn InstClassDecl InstClassDecl.actualInstClass() = this;
     eq InstSimpleShortClassDecl.actualInstClass()     = 
         isRecursive() ? unknownInstClassDecl() : myTargetInstClassDecl().actualInstClass();
+    eq InstLibNode.actualInstClass()                  = resolveLib().actualInstClass();
+
+    /**
+     * Get loaded version of library class.
+     */
+    syn InstClassDecl InstClassDecl.resolveLib() = this;
+    eq InstLibNode.resolveLib()                  = getActualInstClass();
+
+    /**
+     * Get loaded version of library class.
+     */
+    syn ClassDecl ClassDecl.resolveLib() = this;
+    eq LibNode.resolveLib()              = myClass();
 
     /**
      * Lookup the class being redeclared & extended in the last step of a chain 
@@ -192,7 +207,7 @@ aspect InstLookupClasses {
         // TODO: find better way of detecting if there is only one "redeclare class extends" in chain
         InstLookupResult<InstClassDecl> first = lookupCurRedeclareExtendsInstClass(name);
         if (first.successful()) {
-            InstLookupResult<InstClassDecl> second = first.target().lookupRedeclareExtendsInstClass(name);
+            InstLookupResult<InstClassDecl> second = first.target().resolveLib().lookupRedeclareExtendsInstClass(name);
             if (second.successful())
                 return second;
         }
@@ -231,8 +246,8 @@ aspect InstLookupClasses {
         Program prog = ((SourceRoot) root()).getProgram();
         HashMap<String,LibNode> map = new HashMap<String,LibNode>(prog.getNumLibNode() * 4 / 3 + 1);
         for (LibNode ln : prog.getLibNodes()) {
-            if (!map.containsKey(ln.getName())) {
-                map.put(ln.getName(), ln);
+            if (!map.containsKey(ln.name())) {
+                map.put(ln.name(), ln);
             }
         }
         return map;
@@ -241,10 +256,10 @@ aspect InstLookupClasses {
     syn lazy InstLookupResult<InstClassDecl> InstProgramRoot.lookupLibrary(String name) {
         LibNode ln = libraryMap().get(name);
         if (ln != null) {
-            InstClassDecl icd = createInstClassDecl(ln.classDecl());
-            if (icd instanceof InstFullClassDecl) {
+            InstClassDecl icd = createInstClassDecl(ln);
+            if (icd instanceof InstFullClassDecl || icd instanceof InstLibNode) {
                 // Add to instance tree
-                addInstLibClassDecl((InstFullClassDecl) icd);
+                addInstLibClassDecl(icd);
                 // Make sure is$Final is true;
                 getInstLibClassDecl(getNumInstLibClassDecl() - 1);
                 return InstLookupResult.found(icd);
@@ -331,7 +346,7 @@ aspect InstLookupClasses {
         }
         if (!res.successful())
             return null;
-        InstClassDecl icd = res.target();
+        InstClassDecl icd = res.target().resolveLib();
         if (!icd.hasInstConstrainingClass() || !icd.isReplaceable())
             return icd;
         return (InstClassDecl) icd.getInstConstrainingClass().getInstNode();
@@ -364,6 +379,7 @@ aspect InstLookupClasses {
         return lookupInstClassInSurrounding(name);
     }
     eq InstSimpleShortClassDecl.genericLookupInstClass(String name) = actualInstClass().genericLookupInstClass(name);
+    eq InstLibNode.genericLookupInstClass(String name)              = actualInstClass().genericLookupInstClass(name);
 
     syn InstLookupResult<InstClassDecl> InstNode.superLookupInstClass(String name) {
         InstLookupResult<InstClassDecl> res = superLookupInstClassLocal(name);
@@ -389,6 +405,7 @@ aspect InstLookupClasses {
         return InstLookupResult.notFound();
     }
     eq InstSimpleShortClassDecl.superLookupInstClassLocal(String name) = actualInstClass().superLookupInstClassLocal(name);
+    eq InstLibNode.superLookupInstClassLocal(String name)              = actualInstClass().superLookupInstClassLocal(name);
 
     syn InstLookupResult<InstClassDecl> InstComponentDecl.genericLookupInstClass(String name) {
         InstLookupResult<InstClassDecl> res = memberInstClass(name);
@@ -451,7 +468,6 @@ aspect InstLookupClasses {
 
 
     syn InstLookupResult<InstClassDecl> InstNode.memberInstClass(String name) = InstLookupResult.notFound();
-
     eq InstFullClassDecl.memberInstClass(String name) {
         for (InstClassDecl icd : getInstClassDecls()) 
             if (icd.matches(name)) 
@@ -468,6 +484,7 @@ aspect InstLookupClasses {
 
     eq InstShortClassDecl.memberInstClass(String name)       = getInstExtends(0).memberInstClass(name);
     eq InstSimpleShortClassDecl.memberInstClass(String name) = actualInstClass().memberInstClass(name);
+    eq InstLibNode.memberInstClass(String name)              = actualInstClass().memberInstClass(name);
 
     eq InstExtends.memberInstClass(String name) {
         for (InstClassDecl icd : getInstClassDecls()) 
@@ -528,13 +545,18 @@ aspect InstLookupClasses {
         return icd;
     }
 
-    eq InstBuiltInClassDecl.matches(String str) = name().equals(str); 
-    eq InstBaseClassDecl.matches(String str)    = name().equals(str);
+    eq InstClassDecl.matches(String str) = name().equals(str);
+    eq InstLibNode.matches(String str) {
+        if (equalsLowerCase(name(), str)) {
+            resolveLib();
+        }
+        return name().matches(str);
+    }
 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
     eq InstDot.myInstClassDecl()          = getLastInstAccess().myInstClassDecl();
     eq InstGlobalAccess.myInstClassDecl() = getInstAccess().myInstClassDecl();
-    syn InstClassDecl InstClassAccess.myInstClassDecl() = myInstLookup().target(INST_UNKNOWN_CLASS, this);
+    syn InstClassDecl InstClassAccess.myInstClassDecl() = myInstLookup().target(INST_UNKNOWN_CLASS, this).resolveLib();
     
     syn lazy InstLookupResult<InstClassDecl> InstClassAccess.myInstLookup() {
         // If we return back during same lookup, return unknown to avoid infinite loop
@@ -628,14 +650,11 @@ aspect SimpleInstClassLookup {
     syn lazy InstClassDecl InstProgramRoot.simpleLookupInstClassDecl(String name) = 
         simpleLookupInstClassDeclRecursive(name);
 
-    // For findMatching()
-    eq InstClassDecl.matches(String str) = name().equals(str);
-    
     public InstClassDecl InstNode.simpleLookupInstClassDeclRecursive(String name) {
         String[] parts = name.split("\\.", 2);
         InstClassDecl icd = findMatching(getInstClassDecls(), parts[0]);
         if (icd != null)
-            return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
+            return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
         else
             return unknownInstClassDecl();
     }
@@ -649,7 +668,7 @@ aspect SimpleInstClassLookup {
                 icd = result.target();
         }
         if (icd != null)
-            return icd = (parts.length == 1) ? icd : icd.simpleLookupInstClassDeclRecursive(parts[1]);
+            return icd = (parts.length == 1) ? icd : icd.actualInstClass().simpleLookupInstClassDeclRecursive(parts[1]);
         else
             return unknownInstClassDecl();
     }
@@ -687,7 +706,7 @@ aspect SimpleInstClassLookup {
             res = icd.lookupInstClassQualifiedPart(part, first, global);
             if (!res.successful())
                 return res;
-            icd = res.target();
+            icd = res.target().resolveLib();
             first = false;
         }
         return res;

@@ -754,7 +754,7 @@ aspect InstanceErrorCheck {
                 return;
             }
         }
-        InstClassDecl icd = lr.target();
+        InstClassDecl icd = lr.target().actualInstClass();
         if (!icd.isFunction()) {
             derivative.ast().error("The class " + name + " is not a function");
             return;
@@ -797,6 +797,13 @@ aspect InstanceErrorCheck {
         if (!errorChecked) {
             errorChecked = true;
             getTarget().collectErrors(checkType);
+            actualInstClass().collectErrors(checkType);
+        }
+    }
+
+    public void InstLibNode.collectErrors(ErrorCheckType checkType) {
+        if (!errorChecked) {
+            errorChecked = true;
             actualInstClass().collectErrors(checkType);
         }
     }
@@ -1180,7 +1187,8 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numInstExternal();
 		return n;
 	}
-	eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
+    eq InstSimpleShortClassDecl.numInstExternal() = actualInstClass().numInstExternal();
+    eq InstLibNode.numInstExternal()              = actualInstClass().numInstExternal();
 	
 	syn int InstClassDecl.numFAlgorithm() {
 		int n = 0;
@@ -1191,7 +1199,8 @@ aspect InstanceErrorCheck {
 			n += ie.myInstClass().numFAlgorithm();
 		return n;
 	}
-	eq InstSimpleShortClassDecl.numFAlgorithm() = actualInstClass().numFAlgorithm();
+    eq InstSimpleShortClassDecl.numFAlgorithm() = actualInstClass().numFAlgorithm();
+    eq InstLibNode.numFAlgorithm()              = actualInstClass().numFAlgorithm();
 	
 	public void InstExternalObject.collectErrors(ErrorCheckType checkType) {
 	    if (!errorChecked) {
@@ -1443,16 +1452,25 @@ aspect InstanceErrorCheck {
 			calcIsRecursive(new HashSet<InstNode>());
 		return recursiveCache == RECURSIVE_YES;
 	}
-	
-	/**
-	 * Check if extends tree is recursive.
-	 */
-	public boolean InstSimpleShortClassDecl.isRecursive() {
-		if (recursiveCache == RECURSIVE_UNKNOWN)
-			calcIsRecursive(new HashSet<InstNode>());
-		return recursiveCache == RECURSIVE_YES;
-	}
-	
+
+    /**
+     * Check if extends tree is recursive.
+     */
+    public boolean InstSimpleShortClassDecl.isRecursive() {
+        if (recursiveCache == RECURSIVE_UNKNOWN)
+            calcIsRecursive(new HashSet<InstNode>());
+        return recursiveCache == RECURSIVE_YES;
+    }
+
+    /**
+     * Check if extends tree is recursive.
+     */
+    public boolean InstLibNode.isRecursive() {
+        if (recursiveCache == RECURSIVE_UNKNOWN)
+            calcIsRecursive(new HashSet<InstNode>());
+        return recursiveCache == RECURSIVE_YES;
+    }
+
 	/**
 	 * Examine extends tree to find recursive extends nodes.
 	 */
@@ -1476,14 +1494,24 @@ aspect InstanceErrorCheck {
         visited.add(this);
         if (recursiveCache == RECURSIVE_NO) 
             myTargetInstClassDecl().calcIsRecursive(visited);
+        // Can't use actualInstClass() here, since it uses isRecursive()
     }
 
-	private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
-	private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
-	protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
-	protected static final byte InstNode.RECURSIVE_YES     = 1;
-	protected static final byte InstNode.RECURSIVE_NO      = 2;
-	
+    public void InstLibNode.calcIsRecursive(HashSet<InstNode> visited) {
+        recursiveCache = visited.contains(this) ? RECURSIVE_YES : RECURSIVE_NO;
+        visited.add(this);
+        if (recursiveCache == RECURSIVE_NO) 
+            resolveLib().calcIsRecursive(visited);
+        // Can't use actualInstClass() here, since it uses isRecursive()
+    }
+
+    private byte InstExtends.recursiveCache              = RECURSIVE_UNKNOWN;
+    private byte InstSimpleShortClassDecl.recursiveCache = RECURSIVE_UNKNOWN;
+    private byte InstLibNode.recursiveCache              = RECURSIVE_UNKNOWN;
+    protected static final byte InstNode.RECURSIVE_UNKNOWN = 0;
+    protected static final byte InstNode.RECURSIVE_YES     = 1;
+    protected static final byte InstNode.RECURSIVE_NO      = 2;
+
 	/**
 	 * Check if <code>icd</code> is an ancestor of this node or any ancestor is an 
 	 *        instance of <code>icd</code>.

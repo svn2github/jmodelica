@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2009 Modelon AB
+    Copyright (C) 2015 Modelon AB
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -13,9 +13,14 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
+model C2
+    
+end C2;
 
-BadDefinition: StoredDefinition;
-BadClassDecl: ClassDecl;
-BadElement: Element;
-BadArgument: Argument;
-BadStatement: Statement; 
+model C3
+    
+end C3;
+
+model C4
+    
+end C4;
