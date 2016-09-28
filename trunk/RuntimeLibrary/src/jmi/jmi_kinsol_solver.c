@@ -743,6 +743,38 @@ static void jmi_kinsol_small_step_nonconv_info_message(jmi_block_solver_t * bloc
     jmi_log_leave(block->log, node);
 }
 
+/* Local helper that will log the condition number of the Jacobian */
+static void jmi_kinsol_log_jacobian_cond_nbr(jmi_block_solver_t *block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int info, N = block->n;
+    realtype tol = solver->kin_stol;
+
+    dgetrf_(&N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
+    if(info > 0) {
+        jmi_log_node(block->log, logWarning, "SingularJacobian",
+            "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
+    }
+    else {
+        char norm = 'I';
+        double Jnorm = 1.0, Jcond = 1.0;
+        dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
+
+        if(tol * Jcond < UNIT_ROUNDOFF) {
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
+                "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+            if (block->callbacks->log_options.log_level >= 4) {
+                jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
+            }
+            jmi_log_leave(block->log, node);
+
+        }
+        else {
+            jmi_log_node(block->log, logInfo, "JacobianCondition",
+                "<JacobianInverseConditionEstimate:%E>", Jcond);
+        }
+    }
+}
+
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category = logWarning;
@@ -778,9 +810,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_log_leave(block->log, node);
 
         if(block->options->check_jac_cond_flag) {
-            char norm = 'I';
-            double Jnorm = 1.0, Jcond = 1.0;
-            int i, info, N = block->n;
+            int i, N = block->n;
             realtype tol = solver->kin_stol;
             realtype *scale_ptr = N_VGetArrayPointer(block->f_scale);
             if(block->options->residual_equation_scaling_mode != 0) {
@@ -799,28 +829,8 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
             } else {
                 DenseCopy(block->J, block->J_scale);
             }
-            dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-            if(info > 0) {
-                jmi_log_node(block->log, logWarning, "SingularJacobian",
-                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-            }
-            else {
-                dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-                if(tol * Jcond < UNIT_ROUNDOFF) {
-                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                    if (block->callbacks->log_options.log_level >= 4) {
-                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                    }
-                    jmi_log_leave(block->log, node);
-
-                }
-                else {
-                    jmi_log_node(block->log, logInfo, "JacobianCondition",
-                        "<JacobianInverseConditionEstimate:%E>", Jcond);
-                }
-            }
+            
+            jmi_kinsol_log_jacobian_cond_nbr(block);
         }
     }
 
@@ -1657,7 +1667,6 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
     int i, N = block->n;
     jmi_block_solver_options_t* bsop = block->options;
     int use_scaling_flag = bsop->residual_equation_scaling_mode;
-    realtype tol = solver->kin_stol;
     realtype* scale_ptr = N_VGetArrayPointer(block->f_scale);
 
     if (block->using_max_min_scaling_flag && !solver->J_is_singular_flag) {
@@ -1680,9 +1689,7 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
     and scale function tolerance with it. */
     if((N > 1) && bsop->check_jac_cond_flag){
         realtype* scaled_col_ptr;
-        char norm = 'I';
-        double Jnorm = 1.0, Jcond = 1.0;
-        int info;
+
         if(use_scaling_flag) {
             for(i = 0; i < N; i++){
                 int j;
@@ -1695,28 +1702,7 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
             DenseCopy(block->J, block->J_scale);
         }
 
-        dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-        if(info > 0) {
-            jmi_log_node(block->log, logWarning, "SingularJacobian",
-                "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-        }
-        else {
-            dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-            if(tol * Jcond < UNIT_ROUNDOFF) {
-                jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                    "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                if (block->callbacks->log_options.log_level >= 4) {
-                    jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                }
-                jmi_log_leave(block->log, node);
-
-            }
-            else {
-                jmi_log_node(block->log, logInfo, "JacobianCondition",
-                    "<JacobianInverseConditionEstimate:%E>", Jcond);
-            }
-        }
+        jmi_kinsol_log_jacobian_cond_nbr(block);
     }
 }
 
@@ -2744,7 +2730,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         }
 
         if(block->options->check_jac_cond_flag) {
-            int i, info, N = block->n;
+            int i, N = block->n;
             realtype* scale_ptr = N_VGetArrayPointer(block->f_scale);
             realtype tol = solver->kin_stol;
             if(block->options->residual_equation_scaling_mode !=0) {
@@ -2764,30 +2750,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
                 DenseCopy(block->J, block->J_scale);
             }
 
-            dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-            if(info > 0) {
-                jmi_log_node(block->log, logWarning, "SingularJacobian",
-                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-            }
-            else {
-                char norm = 'I';
-                double Jnorm = 1.0, Jcond = 1.0;
-                dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-                if(tol * Jcond < UNIT_ROUNDOFF) {
-                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                    if (block->callbacks->log_options.log_level >= 4) {
-                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                    }
-                    jmi_log_leave(block->log, node);
-
-                }
-                else {
-                    jmi_log_node(block->log, logInfo, "JacobianCondition",
-                        "<JacobianInverseConditionEstimate:%E>", Jcond);
-                }
-            }
+            jmi_kinsol_log_jacobian_cond_nbr(block);
         }
     }
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);
