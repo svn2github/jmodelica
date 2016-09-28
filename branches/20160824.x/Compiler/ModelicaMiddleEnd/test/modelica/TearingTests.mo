@@ -45,7 +45,7 @@ equation
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-u0 := sin(time)
+uL := sin(time)
 
 --- Torn linear system (Block 1) of 2 iteration variables and 3 solved variables ---
 Coefficient variability: parameter
@@ -61,7 +61,7 @@ Iteration variables:
 Torn equations:
   i1 := i2 + i3
   u1 := R1 * i1
-  u2 := u0 - u1
+  u2 := uL - u1
 
 Residual equations:
   u2 = R3 * i3
@@ -75,9 +75,6 @@ Jacobian:
   |0.0, -1.0, -1.0, 0.0, 0.0|
   |0.0, 0.0, 1.0, 0.0, (- R3)|
   |0.0, 0.0, 1.0, (- R2), 0.0|
-
---- Solved equation ---
-uL := u1 + u2
 
 --- Solved equation ---
 der(iL) := (- uL) / (- L)
