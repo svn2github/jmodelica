@@ -20,12 +20,12 @@
 import os
 import numpy as N
 from tests_jmodelica import testattr, get_files_path
-from pyjmi.optimization.greybox import GreyBox, Identification
 from collections import OrderedDict
 
 try:
     from pyjmi import transfer_optimization_problem
     from pyjmi.optimization.casadi_collocation import ExternalData
+    from pyjmi.optimization.greybox import GreyBox, Identification
 except (NameError, ImportError):
     pass
 
