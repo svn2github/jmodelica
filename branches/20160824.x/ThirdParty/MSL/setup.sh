@@ -12,15 +12,18 @@ rm -r .svn
 rm -r ModelicaTest
 rm -r ModelicaReference
 rm ObsoleteModelica3.mo
+rm ModelicaTestOverdetermined.mo
+
 
 #Remove unwanted parts
 rm Modelica/Blocks/Noise.mo
 rm Modelica/Electrical/PowerConverters.mo
 rm -r Modelica/Magnetic/QuasiStatic
 rm Modelica/Math/Distributions.mo
+rm Modelica/Math/FastFourierTransform.mo
 rm Modelica/Math/Random.mo
 rm Modelica/Math/Special.mo
 patch -i removeSubLibs.patch -p0
 patch -i tightenTolRoomCOControls.patch -p0
 patch -i updateStartInverseParameterization.patch -p0
-patch -i decreasesHeightTanksWithOverflow -p0
+patch -i decreasesHeightTanksWithOverflow.patch -p0
