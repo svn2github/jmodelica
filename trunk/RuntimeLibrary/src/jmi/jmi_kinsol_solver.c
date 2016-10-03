@@ -1002,7 +1002,21 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
                 }
-
+                if (solver->last_fnorm < kin_mem->kin_fnorm && nniters > 0) { /* This is not ment to happen */
+                    jmi_log_node_t warning_node_top;
+                    jmi_log_node_t warning_node;
+                    realtype* last_f = N_VGetArrayPointer(solver->last_residual);
+                    warning_node_top = jmi_log_enter_fmt(log, logWarning, "ResidualIncreaseAfterLineSearch", "The residual L2 norm has increased, from <norm_old: %E> to <norm_new: %E>",
+                        solver->last_fnorm, kin_mem->kin_fnorm);
+                    warning_node = jmi_log_enter_index_vector_(log, warning_node_top, logWarning,"increased_residuals", 'R');
+                    for (i=0; i<block->n; i++) { /* Go through the residuals and log which ones increased */
+                        if (RAbs(last_f[i]) < RAbs(f[i])) {
+                            jmi_log_int_(log, i);
+                        }
+                    }
+                    jmi_log_leave(log, warning_node);
+                    jmi_log_leave(log, warning_node_top);
+                }
                 solver->last_fnorm = kin_mem->kin_fnorm;
                 solver->last_max_residual= max_residual;
                 solver->last_max_residual_index = max_index;
