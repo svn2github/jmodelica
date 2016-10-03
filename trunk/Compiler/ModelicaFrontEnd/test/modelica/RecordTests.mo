@@ -3262,6 +3262,35 @@ end RecordTests.RecordConstructor34;
 ")})));
 end RecordConstructor34;
 
+model RecordConstructor35
+    record R1
+        parameter Real x1;
+        parameter Real x2;
+    end R1;
+    
+    record R2
+        extends R1(x2=2);
+    end R2;
+    
+    record R3
+        parameter R2[:] r2 = {R2(x1=-1)};
+    end R3;
+    
+    R3 r3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor35",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordConstructor35
+ parameter Real r3.r2[1].x1 = -1 /* -1 */;
+ parameter Real r3.r2[1].x2 = 2 /* 2 */;
+end RecordTests.RecordConstructor35;
+")})));
+end RecordConstructor35;
+
 model RecordScalarize1
  record A
   Real a;

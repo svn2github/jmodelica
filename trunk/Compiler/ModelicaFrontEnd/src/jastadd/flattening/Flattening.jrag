@@ -1611,8 +1611,8 @@ aspect Flattening {
         InstValueModification ivm = parentInstValueMod();
         return (ivm != null) ? ivm.arrayInstModification(getIndex()) : null;
     }
-    eq InstRecordConstructor.getInstComponentDecl().parentInstValueMod() = null;
-
+    eq InstRecordConstructor.getChild().parentInstValueMod() = null;
+    
     syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
     
     syn InstValueModification InstAssignable.myInstValueModTop() {
