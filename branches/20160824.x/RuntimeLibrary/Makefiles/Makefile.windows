@@ -149,10 +149,10 @@ FMU_TYPES =
 EXT_OPTION = 
 
 # C++ Compiler options
-CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -DJMI_AD=${JMI_AD} ${FMU_TYPES}
+CXXFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -DJMI_AD=${JMI_AD} ${FMU_TYPES}
 
 # C Compiler options
-CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -g -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -msse2 -mfpmath=sse
+CFLAGS = $(PLATFORM_FLAG) $(EXT_OPTION) -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -msse2 -mfpmath=sse
 
 SHARED_LDFLAGS = $(PLATFORM_FLAG) -shared
 
