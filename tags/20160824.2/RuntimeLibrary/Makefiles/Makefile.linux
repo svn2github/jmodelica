@@ -119,11 +119,11 @@ JMI_AD=JMI_AD_CPPAD
 FMU_TYPES =
 
 # C++ Compiler options
-CXXFLAGS = -g
+CXXFLAGS = 
 CXXFLAGS += -DJMI_AD=${JMI_AD} -fPIC
 
 # C Compiler options
-CFLAGS = -g
+CFLAGS = 
 CFLAGS += -std=c89 -pedantic -DJMI_AD=$(JMI_AD) ${FMU_TYPES} -fPIC -msse2 -mfpmath=sse
 
 SHARED_LDFLAGS = -shared -Wl,-rpath,'$$ORIGIN',--no-undefined -pthread
