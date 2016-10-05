@@ -503,7 +503,7 @@ AC_CONFIG_FILES([
  JMI/Makefile
  Python/jm_ipython.sh
  Python/jm_python.sh
- Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
+ Python/Makefile
  RuntimeLibrary/Makefile
  jm_tests
  Python/src/required_defaults.py
