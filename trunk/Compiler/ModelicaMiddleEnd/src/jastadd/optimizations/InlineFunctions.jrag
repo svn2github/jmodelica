@@ -1305,6 +1305,7 @@ aspect FunctionInlining {
         
         tempLookupMap = null;
         duringInlining = false;
+        flushAllRecursive();
     }
     
     public void FFunctionVariable.inline(AbstractFunctionInliner fi, List<FExp> args) {

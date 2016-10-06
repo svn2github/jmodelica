@@ -4580,6 +4580,41 @@ end FunctionInlining.ChainedCallInlining12;
 ")})));
 end ChainedCallInlining12;
 
+model ChainedCallInlining13
+    record R
+        Real[2] x;
+    end R;
+    
+    function f1
+        input Real[:] x;
+        output R r = if size(x,1) >= 2 then R(x[1:2]) else R(cat(1,x,{1}));
+    algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R r;
+        output Real y = sum(r.x);
+        algorithm
+        annotation(Inline=true);
+    end f2;
+    
+    parameter R r = f1({1,2});
+    parameter Real y = f2(f1({1}));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining13",
+            description="Test bug in #5165",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining13
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+ parameter Real y = 2 /* 2 */;
+end FunctionInlining.ChainedCallInlining13;
+")})));
+end ChainedCallInlining13;
+
 
 model InputAsIndex1
     function f
