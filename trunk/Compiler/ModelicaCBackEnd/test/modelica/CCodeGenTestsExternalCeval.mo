@@ -15,10 +15,8 @@
 */
 
 
-package ExternalFunctionCCodeGenTests
+package CCodeGenTestsExternalCeval
 
-package ExternalFunction
-package CEval
 model Scalar
     type E = enumeration(A,B);
     function f
@@ -950,7 +948,5 @@ $ECE_free$
         destructor(eo_v);
 ")})));
 end RecordExternalObject;
-end CEval;
-end ExternalFunction;
 
-end ExternalFunctionCCodeGenTests;
+end CCodeGenTestsExternalCeval;
