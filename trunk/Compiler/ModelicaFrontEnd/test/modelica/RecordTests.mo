@@ -7541,6 +7541,49 @@ end RecordTests.RecordEval7;
 ")})));
 end RecordEval7;
 
+model RecordEval8
+    record R2
+        function f1
+            Real t = 0;
+            output Real x = t;
+            algorithm
+        end f1;
+        function f2
+            extends f1;
+        end f2;
+        constant Real x = f2();
+    end R2;
+    
+    record R3
+        extends R2;
+    end R3;
+    
+    R3 r3;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordEval8",
+            description="Test bug in #5153",
+            flatModel="
+fclass RecordTests.RecordEval8
+ constant RecordTests.RecordEval8.R3 r3 = RecordTests.RecordEval8.R3(0);
+
+public
+ function RecordTests.RecordEval8.r3.f2
+  Real t;
+  output Real x;
+ algorithm
+  t := 0;
+  x := t;
+  return;
+ end RecordTests.RecordEval8.r3.f2;
+
+ record RecordTests.RecordEval8.R3
+  constant Real x;
+ end RecordTests.RecordEval8.R3;
+
+end RecordTests.RecordEval8;
+")})));
+end RecordEval8;
 
 model RecordModification1
   record R
