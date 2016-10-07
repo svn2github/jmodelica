@@ -35,7 +35,7 @@ from pymodelica.common import xmlparser
 from pymodelica.common.core import get_unit_name, list_to_string
 
 
-def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='2.0', 
+def compile_fmu(class_name, file_name=[], compiler='auto', target='me', version='1.0', 
                 platform='auto', compiler_options={}, compile_to='.', 
                 compiler_log_level='warning', separate_process=True, jvm_args=''):
     """ 
