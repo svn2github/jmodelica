@@ -5427,14 +5427,14 @@ equation
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }
-    (*res)[2] = _sw(0) - (_temp_1_4);
+    (*res)[2] = _sw(0) - (_temp_1_6);
     if (LOG_EXP_OR(v_0, v_1)) {
-      func_CADCodeGenTests_WhenEqu8_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
-      (*res)[3] = tmp_var_0 - (_x_0);
-      (*res)[4] = tmp_var_1 - (_y_1);
+        func_CADCodeGenTests_WhenEqu8_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+        (*res)[3] = tmp_var_0 - (_x_0);
+        (*res)[4] = tmp_var_1 - (_y_1);
     } else {
-      (*res)[3] = pre_x_0 - (_x_0);
-      (*res)[4] = pre_y_1 - (_y_1);
+        (*res)[3] = pre_x_0 - (_x_0);
+        (*res)[4] = pre_y_1 - (_y_1);
     }
 ")})));
 end WhenEqu8;
@@ -5498,14 +5498,14 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     } else {
         return -1;
     }
-    _temp_1_4 = _sw(0);
-    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+    _temp_1_6 = _sw(0);
+    if (LOG_EXP_AND(_temp_1_6, v_0)) {
       func_CADCodeGenTests_WhenEqu9_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
       _y_1 = tmp_var_1;
     } else {
       _y_1 = pre_y_1;
     }
-    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+    if (LOG_EXP_AND(_temp_1_6, v_0)) {
       _x_0 = tmp_var_0;
     } else {
       _x_0 = pre_x_0;
@@ -5592,30 +5592,30 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     } else {
         return -1;
     }
-    _temp_2_5 = _sw(0);
-    _temp_1_4 = _sw(0);
-    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+    _temp_2_9 = _sw(0);
+    _temp_1_8 = _sw(0);
+    if (LOG_EXP_AND(_temp_1_8, v_0)) {
       func_CADCodeGenTests_WhenEqu10_f_der_AD0(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
       _b_3 = tmp_var_1;
     } else {
       _b_3 = pre_b_3;
     }
-    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+    if (LOG_EXP_AND(_temp_1_8, v_0)) {
       _a_2 = tmp_var_0;
     } else {
       _a_2 = pre_a_2;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         if (LOG_EXP_OR(v_1, v_2)) {
-          func_CADCodeGenTests_WhenEqu10_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
-          (*res)[0] = tmp_var_3 - (_y_1);
+            func_CADCodeGenTests_WhenEqu10_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+            (*res)[0] = tmp_var_3 - (_y_1);
         } else {
-          (*res)[0] = pre_y_1 - (_y_1);
+            (*res)[0] = pre_y_1 - (_y_1);
         }
         if (LOG_EXP_OR(v_1, v_2)) {
-          (*res)[1] = tmp_var_2 - (_x_0);
+            (*res)[1] = tmp_var_2 - (_x_0);
         } else {
-          (*res)[1] = pre_x_0 - (_x_0);
+            (*res)[1] = pre_x_0 - (_x_0);
         }
         (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = 0;
         (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
@@ -5649,8 +5649,8 @@ equation
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (2), _sw(0), JMI_REL_GEQ);
     }
-    (*res)[0] = _sw(0) - (_temp_1_2);
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_2, LOG_EXP_NOT(pre_temp_1_2)), JMI_TRUE, pre_x_0, pre_z_1) - (_z_1);
+    (*res)[0] = _sw(0) - (_temp_1_3);
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_AND(_temp_1_3, LOG_EXP_NOT(pre_temp_1_3)), JMI_TRUE, pre_x_0, pre_z_1) - (_z_1);
     (*res)[2] = _time - (_x_0);
     (*dF)[2] = (*dz)[jmi->offs_t] - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
 ")})));
