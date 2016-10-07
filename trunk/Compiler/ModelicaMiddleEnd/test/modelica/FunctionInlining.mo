@@ -757,18 +757,18 @@ fclass FunctionInlining.RecordInline4
  Real y[3];
  Real y[4];
  Real x;
- discrete Integer temp_1;
+ discrete Integer temp_5;
 initial equation 
- pre(temp_1) = 0;
+ pre(temp_5) = 0;
 equation
  y[1] = 1;
  y[2] = 2;
  y[3] = 3;
  y[4] = 4;
- x = temp_1 + (y[1] + y[2] + y[3]);
- temp_1 = if y[4] < pre(temp_1) or y[4] >= pre(temp_1) + 1 or initial() then integer(y[4]) else pre(temp_1);
+ x = temp_5 + (y[1] + y[2] + y[3]);
+ temp_5 = if y[4] < pre(temp_5) or y[4] >= pre(temp_5) + 1 or initial() then integer(y[4]) else pre(temp_5);
 end FunctionInlining.RecordInline4;
-			
+
 ")})));
     end RecordInline4;
     
@@ -889,9 +889,9 @@ fclass FunctionInlining.RecordInline7
  Real x.a[2];
  Real x.a[3];
  discrete Integer x.b;
- discrete Integer temp_2;
+ discrete Integer temp_6;
 initial equation 
- pre(temp_2) = 0;
+ pre(temp_6) = 0;
  pre(x.b) = 0;
 equation
  y[1] = 1;
@@ -901,10 +901,10 @@ equation
  x.a[1] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[1] + y[1]) - y[1];
  x.a[2] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[2] + y[2]) - y[2];
  x.a[3] = (y[1] * y[1] + y[2] * y[2] + y[3] * y[3]) * (y[3] + y[3]) - y[3];
- temp_2 = if y[4] < pre(temp_2) or y[4] >= pre(temp_2) + 1 or initial() then integer(y[4]) else pre(temp_2);
- x.b = 3 + (temp_2 - temp_2);
+ temp_6 = if y[4] < pre(temp_6) or y[4] >= pre(temp_6) + 1 or initial() then integer(y[4]) else pre(temp_6);
+ x.b = 3 + (temp_6 - temp_6);
 end FunctionInlining.RecordInline7;
-			
+
 ")})));
     end RecordInline7;
     

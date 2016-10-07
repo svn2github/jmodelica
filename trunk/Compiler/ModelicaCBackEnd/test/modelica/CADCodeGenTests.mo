@@ -599,13 +599,14 @@ package FSubscriptedExp
         Real[:] y = {sin(time), cos(time)};
         Real x = y[i] + 1;
     
-        annotation(__JModelica(UnitTesting(tests={
-            CADCodeGenTestCase(
-                name="FSubscriptedExp_Use1",
-                description="Test CAD code gen for FSubscriptedExp where it is used in the right hand side of an equation",
-                generate_ode_jacobian=true,
-                template="$CAD_ode_derivatives$",
-                generatedCode="
+    annotation(__JModelica(UnitTesting(tests={
+        CADCodeGenTestCase(
+            name="FSubscriptedExp_Use1",
+            description="Test CAD code gen for FSubscriptedExp where it is used in the right hand side of an equation",
+            generate_ode_jacobian=true,
+            template="$CAD_ode_derivatives$",
+            generatedCode="
+
 /******** Declarations *******/
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
@@ -644,9 +645,9 @@ jmi_real_t** dz = jmi->dz;
         v_5 = floor(_time);
         v_0 = v_5;
     } else {
-        v_0 = pre_temp_3_6;
+        v_0 = pre_temp_3_7;
     }
-    _temp_3_6 = v_0;
+    _temp_3_7 = v_0;
     v_8 = _sw(2);
     v_9 = _sw(3);
     v_7 = LOG_EXP_OR(v_8, v_9);
@@ -655,24 +656,24 @@ jmi_real_t** dz = jmi->dz;
         v_11 = floor(_time);
         v_6 = v_11;
     } else {
-        v_6 = pre_temp_1_4;
+        v_6 = pre_temp_1_5;
     }
-    _temp_1_4 = v_6;
+    _temp_1_5 = v_6;
     v_14 = _sw(0);
     v_15 = _sw(1);
     v_13 = LOG_EXP_OR(v_14, v_15);
     v_16 = _atInitial;
     if (LOG_EXP_OR(v_13, v_16)) {
-        v_18 = jmi_divide_equation(jmi, _temp_1_4,AD_WRAP_LITERAL(2),\"temp_1 / 2\");
+        v_18 = jmi_divide_equation(jmi, _temp_1_5,AD_WRAP_LITERAL(2),\"temp_1 / 2\");
         v_17 = floor(v_18);
         v_12 = v_17;
     } else {
-        v_12 = pre_temp_2_5;
+        v_12 = pre_temp_2_6;
     }
-    _temp_2_5 = v_12;
-    v_20 = _temp_2_5 * 2;
+    _temp_2_6 = v_12;
+    v_20 = _temp_2_6 * 2;
     v_19 = (- v_20);
-    _i_0 = _temp_3_6 + v_19;
+    _i_0 = _temp_3_7 + v_19;
     _y_1_1 = sin(_time);
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi->offs_t] * cos(_time);
     _y_2_2 = cos(_time);
@@ -810,15 +811,15 @@ equation
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
     jmi_ad_var_t v_5;
-    (*res)[0] = _temp_1_1 - (_der_x_3);
+    (*res)[0] = _temp_1_2 - (_der_x_1);
     (*dF)[0] = AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx]);
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_1), _sw(0), JMI_REL_LT);
+        _sw(0) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_2), _sw(0), JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_1 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
+        _sw(1) = jmi_turn_switch(jmi, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")) - (pre_temp_1_2 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
     }
-    (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")), pre_temp_1_1) - (_temp_1_1);
+    (*res)[1] = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, ((long)jmi_divide_equation(jmi, _x_0,AD_WRAP_LITERAL(3.14),\"div(x, 3.14)\")), pre_temp_1_2) - (_temp_1_2);
 ")})));
 end divFuncTest1;
 

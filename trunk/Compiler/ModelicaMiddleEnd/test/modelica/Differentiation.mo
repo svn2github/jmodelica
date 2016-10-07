@@ -884,8 +884,8 @@ end Differentiation.Expressions.DotPow;
 fclass Differentiation.Expressions.DivFunc
  Real x1;
  Real x2;
- discrete Real temp_1;
  Real _der_x1;
+ discrete Real temp_1;
 initial equation 
  pre(temp_1) = 0.0;
  x2 = 0.0;
@@ -1107,8 +1107,8 @@ end Differentiation.Expressions.Rem;
 fclass Differentiation.Expressions.Ceil
  Real x;
  Real y;
- discrete Real temp_1;
  Real _der_x;
+ discrete Real temp_1;
 initial equation 
  pre(temp_1) = 0.0;
  y = 0.0;
@@ -1136,8 +1136,8 @@ end Differentiation.Expressions.Ceil;
 fclass Differentiation.Expressions.Floor
  Real x;
  Real y;
- discrete Real temp_1;
  Real _der_x;
+ discrete Real temp_1;
 initial equation 
  pre(temp_1) = 0.0;
  y = 0.0;

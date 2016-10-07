@@ -1958,9 +1958,9 @@ fclass TypeTests.AlgorithmType1
  discrete Boolean b;
  discrete Integer i;
  discrete Real r;
- discrete Integer temp_1;
  Real _eventIndicator_1;
  Real _eventIndicator_2;
+ discrete Integer temp_1;
 initial equation 
  pre(temp_1) = 0;
  pre(b) = false;

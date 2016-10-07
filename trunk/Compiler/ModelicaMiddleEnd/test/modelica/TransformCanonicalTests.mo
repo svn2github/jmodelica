@@ -2824,8 +2824,8 @@ algorithm
 fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer i(start = 0,fixed = true);
  discrete Real t;
- discrete Integer temp_1;
  Real _eventIndicator_1;
+ discrete Integer temp_1;
  discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
@@ -6833,10 +6833,10 @@ algorithm
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
- discrete Real temp_1;
- discrete Integer temp_2;
  Real _eventIndicator_1;
  Real _eventIndicator_2;
+ discrete Real temp_1;
+ discrete Integer temp_2;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;

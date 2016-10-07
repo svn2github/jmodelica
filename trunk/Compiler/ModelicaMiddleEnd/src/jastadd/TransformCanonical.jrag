@@ -3244,14 +3244,13 @@ aspect EventGeneratingExps {
                 
                 // Equations
                 for (FEventGenExp exp: eventExps) {
-                	FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(), 
-							new FQNameFull(exp.tempVarName()), exp.variability());
-					addFVariable(fv);
-					addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
-                	if (exp.inAlgorithm()) {
-                		algs.add((FAlgorithm) exp.myFEquation());
-                		continue;
-                	}
+                    FVariable fv = exp.type().createTempFVariable(new FQNameFull(exp.tempVarName()), exp.variability());
+                    addFVariable(fv);
+                    addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
+                    if (exp.inAlgorithm()) {
+                        algs.add((FAlgorithm) exp.myFEquation());
+                        continue;
+                    }
                     exp.replaceMe(exp.tempUseExp());
                     addFEquation(new FEquation(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
                 }
