@@ -16581,6 +16581,7 @@ jmi_string_t func_CCodeGenTests_StringOperations8_f1_exp1(jmi_string_t s_v) {
 
 void func_Modelica_Utilities_Streams_print_def2(jmi_string_t string_v, jmi_string_t fileName_v) {
     JMI_DYNAMIC_INIT()
+    extern void ModelicaInternal_print_(char*, char*);
     ModelicaInternal_print(string_v, fileName_v);
     JMI_DYNAMIC_FREE()
     return;

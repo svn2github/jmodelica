@@ -2238,11 +2238,8 @@ aspect CCodeGen {
     public void FSizeExp.genExternalCFuncArgs(CodePrinter p, CodeStream str, String indent) {
         str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
     }
-
-	public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
-
-    @Override
-	public void FFortran77ExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
+    
+    public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
 		str.print(indent);
 		str.print("extern ");
 		if (stmt.hasReturnVar()) {
