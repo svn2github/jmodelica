@@ -120,6 +120,7 @@ aspect TransformCanonical {
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new convertWhenToIf());
+            transformations.add(new extractSampleExpressions());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
@@ -1919,7 +1920,7 @@ aspect TransformCanonical {
         isTemporary() && 
         nonDefiningUses().size() <= 1 && 
         definingUses().size() <= 1 && 
-        !isPreVariable() && (!isDiscrete() || myPreVariable().uses().size() == 0) &&  
+        !isPreVariable() && myPreVariable().isUnknown() && 
         (definingUses().isEmpty() || !definingUses().iterator().next().myFEquation().generatesEvents()) && 
         !isDifferentiatedVariable() && !isDerivativeVariable();
 
@@ -2293,6 +2294,63 @@ aspect TransformCanonical {
             && getLeft().asFIdUseExp().myFV() == getRight().asFIdUseExp().myFV()
             && !getLeft().asFIdUseExp().myFV().isUnknown();
 	
+}
+
+aspect ExtractSampleExpressions {
+    public class FClass {
+        /**
+         * Rewrites when clauses to if clauses.
+         */
+        public class extractSampleExpressions extends Transformation {
+            public void perform() {
+                extractSampleExpressions();
+                flushAllRecursiveClearFinal();
+            }
+        }
+    }
+
+    public void FClass.extractSampleExpressions() {
+        Collection<FEquation> newEqns = new ArrayList<FEquation>();
+        Collection<FVariable> newVars = new ArrayList<FVariable>();
+        extractSampleExpressions(newEqns, newVars);
+        for (FEquation eqn : newEqns)
+            addFAbstractEquation(eqn);
+        for (FVariable var : newVars)
+            addFVariable(var);
+    }
+
+    public void ASTNode.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        for (ASTNode n : this)
+            n.extractSampleExpressions(newEqns, newVars);
+    }
+
+    public void FSampleExp.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        if (!originalFExp().shouldExtract())
+            return;
+        if (originalFExp() == this) {
+            newEqns.add(new FEquation(tempUseExp(), fullCopy()));
+            newVars.add(type().createFVariable(new FPublicVisibilityType(), new FQNameFull(tempVarName()), variability().combine(fDiscrete())));
+        }
+        rewriteToTemp = true;
+    }
+
+    private boolean FSampleExp.rewriteToTemp = false;
+
+    rewrite FSampleExp {
+        when (rewriteToTemp) to FExp {
+            return originalFExp().tempUseExp();
+        }
+    }
+
+    inh boolean FSampleExp.shouldExtract();
+    eq FAbstractEquation.getChild().shouldExtract() = false;
+    eq BaseNode.getChild().shouldExtract()          = true;
+
+    syn boolean FAbstractEquation.isSampleEquation() = false;
+    eq FEquation.isSampleEquation()                  = getRight().isFSampleExp();
+
+    syn boolean FExp.isFSampleExp() = false;
+    eq FSampleExp.isFSampleExp()    = true;
 }
 
 aspect IfEquations {
@@ -3244,13 +3302,14 @@ aspect EventGeneratingExps {
                 
                 // Equations
                 for (FEventGenExp exp: eventExps) {
-                    FVariable fv = exp.type().createTempFVariable(new FQNameFull(exp.tempVarName()), exp.variability());
-                    addFVariable(fv);
-                    addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
-                    if (exp.inAlgorithm()) {
-                        algs.add((FAlgorithm) exp.myFEquation());
-                        continue;
-                    }
+                	FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(), 
+							new FQNameFull(exp.tempVarName()), exp.variability());
+					addFVariable(fv);
+					addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
+                	if (exp.inAlgorithm()) {
+                		algs.add((FAlgorithm) exp.myFEquation());
+                		continue;
+                	}
                     exp.replaceMe(exp.tempUseExp());
                     addFEquation(new FEquation(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
                 }

@@ -1693,8 +1693,8 @@ fclass IndexReduction.AlgorithmVariability3
  Real y;
  discrete Real x;
  Real z;
- Real _der_y;
  discrete Boolean temp_1;
+ Real _der_y;
 initial equation 
  pre(x) = 0.0;
  pre(temp_1) = false;

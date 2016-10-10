@@ -2752,6 +2752,9 @@ aspect CCodeGen {
     }
 
     syn boolean FAbstractEquation.shouldProduceNonRealGuard_C(Collection<FVariable> fvs) {
+        if (isSampleEquation()) {
+            return false;
+        }
         for (FVariable fv : fvs) {
             if (!fv.isTemporary()) {
                 return true;

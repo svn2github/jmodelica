@@ -2824,8 +2824,8 @@ algorithm
 fclass TransformCanonicalTests.InitialEqTest20
  discrete Integer i(start = 0,fixed = true);
  discrete Real t;
- Real _eventIndicator_1;
  discrete Integer temp_1;
+ Real _eventIndicator_1;
  discrete Boolean temp_2;
 initial equation 
  pre(temp_1) = 0;
@@ -6833,10 +6833,10 @@ algorithm
 			flatModel="
 fclass TransformCanonicalTests.EventGeneratingExps.InAlgorithm
  Real x;
- Real _eventIndicator_1;
- Real _eventIndicator_2;
  discrete Real temp_1;
  discrete Integer temp_2;
+ Real _eventIndicator_1;
+ Real _eventIndicator_2;
 initial equation 
  pre(temp_1) = 0.0;
  pre(temp_2) = 0;
@@ -7767,12 +7767,15 @@ equation
 fclass TransformCanonicalTests.Sample2
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
  pre(x) = 0.0;
  pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
- temp_1 = sample(0, 1) and time < 20;
+ temp_1 = temp_2 and time < 20;
  x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
+ temp_2 = sample(0, 1);
 end TransformCanonicalTests.Sample2;
 ")})));
 end Sample2;

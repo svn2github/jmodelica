@@ -968,6 +968,11 @@ end DirectDependencyTest1;
             <isLinear>true</isLinear>
             <VariableCategory>algebraic</VariableCategory>
         </ScalarVariable>
+        <ScalarVariable name=\"temp_1\" valueReference=\"268435460\" variability=\"discrete\" causality=\"internal\" alias=\"noAlias\">
+            <Integer />
+            <isLinear>true</isLinear>
+            <VariableCategory>algebraic</VariableCategory>
+        </ScalarVariable>
         <ScalarVariable name=\"x\" valueReference=\"0\" variability=\"continuous\" causality=\"input\" alias=\"noAlias\">
             <Real relativeQuantity=\"false\" start=\"0.0\" fixed=\"false\" />
             <isLinear>true</isLinear>

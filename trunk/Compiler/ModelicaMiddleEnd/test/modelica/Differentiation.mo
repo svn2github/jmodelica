@@ -884,8 +884,8 @@ end Differentiation.Expressions.DotPow;
 fclass Differentiation.Expressions.DivFunc
  Real x1;
  Real x2;
- Real _der_x1;
  discrete Real temp_1;
+ Real _der_x1;
 initial equation 
  pre(temp_1) = 0.0;
  x2 = 0.0;
@@ -1107,8 +1107,8 @@ end Differentiation.Expressions.Rem;
 fclass Differentiation.Expressions.Ceil
  Real x;
  Real y;
- Real _der_x;
  discrete Real temp_1;
+ Real _der_x;
 initial equation 
  pre(temp_1) = 0.0;
  y = 0.0;
@@ -1136,8 +1136,8 @@ end Differentiation.Expressions.Ceil;
 fclass Differentiation.Expressions.Floor
  Real x;
  Real y;
- Real _der_x;
  discrete Real temp_1;
+ Real _der_x;
 initial equation 
  pre(temp_1) = 0.0;
  y = 0.0;
@@ -1580,6 +1580,7 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
  Real vx \"Velocity in x coordinate\";
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
+ discrete Boolean temp_1;
  Real _der_vx;
  Real _der_vy;
  Real _der_x;
@@ -1592,7 +1593,6 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete1
  Real dynDer(y);
  Real dynDer(_der_x);
  Real dynDer(_der_y);
- discrete Boolean temp_1;
 initial equation 
  _ds.1.s1 = 0.0;
  _ds.2.s1 = 0.0;
@@ -1651,6 +1651,7 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
  Real vx \"Velocity in x coordinate\";
  Real vy \"Velocity in y coordinate\";
  Real lambda \"Lagrange multiplier\";
+ discrete Boolean temp_1;
  Real _der_vx;
  Real _der_vy;
  Real _der_x;
@@ -1663,7 +1664,6 @@ fclass Differentiation.DiscreteTime.AutoDiffOfDiscrete2
  Real dynDer(y);
  Real dynDer(_der_x);
  Real dynDer(_der_y);
- discrete Boolean temp_1;
 initial equation 
  _ds.1.s1 = 0.0;
  _ds.2.s1 = 0.0;
