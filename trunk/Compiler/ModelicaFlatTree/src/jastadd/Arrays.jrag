@@ -1741,7 +1741,7 @@ aspect Arrays {
         }
         Array arr = new Array(indices());
         for (Index i : arr.indices()) {
-            arr.set(i, new FDelayExp(getFExp().getArray().get(i), getDelay().getArray().get(i), 
+            arr.set(i, createNode(getFExp().getArray().get(i), getDelay().getArray().get(i), 
                     hasMax() ? new Opt(getMax().getArray().get(i)) : new Opt()));
         }
         return arr;

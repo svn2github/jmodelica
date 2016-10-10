@@ -168,7 +168,13 @@ aspect Flattening {
         getConnector1().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
         getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
     }
-
+    
+    public void FBuiltInFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
+        for (int i = argsOffset(); i < getNumChild(); i++) {
+            getChild(i).flattenUsedFuncsAndEnums(fc);
+        }
+    }
+    
     public void InstNode.flattenOverloadedOperatorsForFlow(FClass fc) {
         for (InstComponentDecl icd : getInstComponentDecls())
             icd.flattenOverloadedOperatorsForFlow(fc);
@@ -2512,9 +2518,9 @@ aspect FlatExpressions {
     
     public FExp FLoadResource.flatten(FQName prefix)   {
         try {
-            return new FLoadResource(new FStringLitExp(ceval().stringValue()));
+            return createNode(new FStringLitExp(ceval().stringValue()));
         } catch (ConstantEvaluationException e) {
-            return new FLoadResource(getFExp().flatten(prefix));
+            return createNode(getFExp().flatten(prefix));
         }
     }
     
@@ -2547,22 +2553,22 @@ aspect FlatExpressions {
         return this; // Assume literal;
     }
     
-    public FExp                 FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
-    public FBuiltInFunctionCall FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
-    public FAtan2Exp            FAtan2Exp.flatten(FQName prefix)                 { return new FAtan2Exp(getFExp().flatten(prefix), getY().flatten(prefix)); }
-    public FExp                 FHomotopyExp.flatten(FQName prefix)              {
+    public FExp FNoArgBuiltIn.flatten(FQName prefix)             { return createEmptyNode(); }
+    public FExp FMathematicalFunctionCall.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
+    public FExp FAtan2Exp.flatten(FQName prefix)                 { return createNode(getFExp().flatten(prefix), getY().flatten(prefix)); }
+    public FExp FHomotopyExp.flatten(FQName prefix)              {
         if (myOptions().getStringOption("homotopy_type") == OptionRegistry.Homotopy.ACTUAL) {
             return getActual().flatten(prefix);
         }
         if (myOptions().getStringOption("homotopy_type") == OptionRegistry.Homotopy.SIMPLIFIED) {
             return getSimplified().flatten(prefix);
         }
-        return new FHomotopyExp(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
+        return createNode(getActual().flatten(prefix), getSimplified().flatten(prefix)); 
     }
-    public FSemiLinearExp FSemiLinearExp.flatten(FQName prefix)   { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
-    public FDelayExp      FDelayExp.flatten(FQName prefix)        { return new FDelayExp(getFExp().flatten(prefix), getDelay().flatten(prefix), hasMax() ? new Opt(getMax().flatten(prefix)) : new Opt()); }
-    public FExp           FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(calcInstanceName()); }
-    public FSpatialDistExp FSpatialDistExp.flatten(FQName prefix)     {
+    public FExp FSemiLinearExp.flatten(FQName prefix)   { return new FSemiLinearExp(getX().flatten(prefix), getPosSlope().flatten(prefix), getNegSlope().flatten(prefix)); }
+    public FExp FDelayExp.flatten(FQName prefix)        { return createNode(getFExp().flatten(prefix), getDelay().flatten(prefix), hasMax() ? new Opt(getMax().flatten(prefix)) : new Opt()); }
+    public FExp FGetInstanceName.flatten(FQName prefix) { return new FStringLitExp(calcInstanceName()); }
+    public FExp FSpatialDistExp.flatten(FQName prefix)     {
         return new FSpatialDistExp(
             getIn0().flatten(prefix), getIn1().flatten(prefix), 
             getX().flatten(prefix), getPositiveVelocity().flatten(prefix),
@@ -2586,13 +2592,11 @@ aspect FlatExpressions {
     
     public FAssert FAssert.flatten(FQName prefix) {
         Opt level = hasLevel() ? new Opt(getLevel().flatten(prefix)) : new Opt();
-        return new FAssert(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
+        return createNode(getTest().flatten(prefix), getMsg().flatten(prefix), level); 
     }
-
-    public FCardinality FCardinality.flatten(FQName prefix) { 
-        return new FCardinality(getFExp().flatten(prefix));
-    }
-
+    
+    public FExp FCardinality.flatten(FQName prefix) { return createNode(getFExp().flatten(prefix)); }
+    
     public FExp FDecouple.flatten(FQName prefix) { 
         return getFExp().flatten(prefix);
     }

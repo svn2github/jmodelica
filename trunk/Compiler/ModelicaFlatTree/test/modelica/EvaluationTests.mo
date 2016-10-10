@@ -1532,6 +1532,25 @@ end EvaluationTests.FunctionEval43;
 ")})));
 end FunctionEval43;
 
+model FunctionEval44
+    constant Real[:] x = {sum(j for j in i:3) for i in 1:3};
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval44",
+            description="Constant evaluation of iter exp containing function call",
+            variables="
+x[1]
+x[2]
+x[3]
+",
+            values="
+6.0
+5.0
+3.0
+")})));
+end FunctionEval44;
+
 
 model VectorFuncEval1
     function f
