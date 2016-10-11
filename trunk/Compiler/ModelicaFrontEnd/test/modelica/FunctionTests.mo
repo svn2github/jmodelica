@@ -12627,6 +12627,8 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
 
+ type AssertionLevel = enumeration(error, warning);
+
 end FunctionTests.Lapack_QR;
 ")})));
 end Lapack_QR;

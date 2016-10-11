@@ -169,12 +169,6 @@ aspect Flattening {
         getConnector2().getInstAccess().myInstComponentDecl().flattenOverloadedOperatorsForFlow(fc);
     }
     
-    public void FBuiltInFunctionCall.flattenUsedFuncsAndEnums(FClass fc) {
-        for (int i = argsOffset(); i < getNumChild(); i++) {
-            getChild(i).flattenUsedFuncsAndEnums(fc);
-        }
-    }
-    
     public void InstNode.flattenOverloadedOperatorsForFlow(FClass fc) {
         for (InstComponentDecl icd : getInstComponentDecls())
             icd.flattenOverloadedOperatorsForFlow(fc);

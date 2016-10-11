@@ -2785,6 +2785,10 @@ initial equation
  algorithm
   assert(p, \"p should not be false\");
 ;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.InitialEqTest18;
 ")})));
 end InitialEqTest18;
@@ -2803,6 +2807,10 @@ fclass TransformCanonicalTests.InitialEqTest19
  parameter Boolean p = true /* true */;
 initial equation 
  assert(p, \"p should not be false\");
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.InitialEqTest19;
 ")})));
 end InitialEqTest19;
@@ -7195,6 +7203,10 @@ fclass TransformCanonicalTests.AssertEval1
  Real x;
 equation
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.AssertEval1;
 ")})));
 end AssertEval1;
@@ -7242,6 +7254,10 @@ initial equation
 equation
  temp_1 = time > 1;
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.AssertEval3;
 ")})));
 end AssertEval3;
@@ -7280,6 +7296,9 @@ equation
   end if;
  end if;
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
 end TransformCanonicalTests.AssertEval4;
 ")})));
 end AssertEval4;

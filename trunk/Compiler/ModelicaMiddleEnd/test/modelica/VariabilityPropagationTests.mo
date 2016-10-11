@@ -232,6 +232,8 @@ algorithm
 
  type VariabilityPropagationTests.ConstantFolding3.E = enumeration(small, medium, large, xlarge);
 
+ type AssertionLevel = enumeration(error, warning);
+
 end VariabilityPropagationTests.ConstantFolding3;
 ")})));
 end ConstantFolding3;
@@ -784,6 +786,8 @@ no or infinitely many solutions (A is singular).\");
   external \"FORTRAN 77\" dgesv(size(A, 1), 1, Awork, lda, ipiv, x, ldb, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dgesv_vec;
+
+ type AssertionLevel = enumeration(error, warning);
 
 end VariabilityPropagationTests.FunctionCallEquation4;
 ")})));
@@ -2223,6 +2227,8 @@ public
   return;
  end VariabilityPropagationTests.EvalFail1.f;
 
+ type AssertionLevel = enumeration(error, warning);
+
 end VariabilityPropagationTests.EvalFail1;
 ")})));
 end EvalFail1;
@@ -2254,6 +2260,8 @@ public
   assert(false, \"nope\");
   return;
  end VariabilityPropagationTests.EvalFail2.f;
+
+ type AssertionLevel = enumeration(error, warning);
 
 end VariabilityPropagationTests.EvalFail2;
 ")})));
