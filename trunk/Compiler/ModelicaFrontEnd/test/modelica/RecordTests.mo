@@ -3291,6 +3291,32 @@ end RecordTests.RecordConstructor35;
 ")})));
 end RecordConstructor35;
 
+model RecordConstructor36
+    record R1
+        Real x;
+    end R1;
+    
+    model M
+        R1 r1;
+    end M;
+    
+    M[2] m(r1={R1(i+time) for i in 1:2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor36",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor36
+ Real m[1].r1.x;
+ Real m[2].r1.x;
+equation
+ m[1].r1.x = 1 + time;
+ m[2].r1.x = 2 + time;
+end RecordTests.RecordConstructor36;
+")})));
+end RecordConstructor36;
+
 model RecordScalarize1
  record A
   Real a;

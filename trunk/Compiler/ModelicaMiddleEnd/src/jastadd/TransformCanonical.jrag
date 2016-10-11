@@ -845,7 +845,11 @@ aspect TransformCanonical {
 			res.addFExp(e.extractRecordFExp(suffix));
 		return res;
 	}
-	
+    
+    public FExp FIterExp.extractRecordFExp(String suffix) {
+        return new FIterExp(getFExp().extractRecordFExp(suffix), getForIndexList().treeCopy());
+    }
+    
 	public FExp FAbstractCat.extractRecordFExp(String suffix) {
 		FInfArgsFunctionCall res = createEmptyNode();
 		for (FExp e : getFExps())
