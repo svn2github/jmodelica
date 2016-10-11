@@ -8336,6 +8336,81 @@ end ArrayTests.Other.ArraySizeInIf3;
 ")})));
 end ArraySizeInIf3;
 
+model ArraySizeInIf4
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if size(x,1) > 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+            
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf4",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+1 errors found:
+
+Error at line 8346, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf4;
+
+model ArraySizeInIf5
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if size(x,1) < 0 then
+        y := x[1];
+    elseif size(x,1) > 0 then
+        y := x[1];
+    elseif size(x,1) > 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf5",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+1 errors found:
+
+Error at line 8373, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf5;
+
+model ArraySizeInIf6
+    Real[0] x = 1:0;
+    Real y;
+algorithm
+    if sum(x) > 0 then
+        y := x[1];
+    elseif size(x,1) < 0 then
+        y := x[1];
+    else
+        y := x[1];
+    end if;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="Other_ArraySizeInIf6",
+            description="Test that array size errors lock if branches if possible",
+            errorMessage="
+2 errors found:
+
+Error at line 8406, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+
+Error at line 8410, column 16, in file '...':
+  Array index out of bounds: 1, index expression: 1
+")})));
+end ArraySizeInIf6;
+
 model ArraySizeInComp1
     record R
         Real[:] x = 1:n;
