@@ -1314,13 +1314,8 @@ aspect Scalarization {
 	 * variable or member with the given name.
 	 */
 	public FExp FType.createRecordConstructorArray(Map<String,FExp> indexMap, FExp exp, Iterator<Index> it, int dim) {
-        Size s = size();
-        if (s.isEmpty()) {
-            List<FExp> dims = new List<FExp>();
-            for (int i = 0, n = s.ndims(); i < n ; i++) {
-                dims.add(s.createFExp(i));
-            }
-            return new FFillExp(dims, zeroLiteral());
+        if (isEmpty()) {
+            return createEmptyExp();
         }
 		FArray arr = new FArray();
 		boolean last = dim == ndims() - 1;
@@ -1334,6 +1329,16 @@ aspect Scalarization {
 		}
 		return arr;
 	}
+	
+    syn boolean FType.isEmpty() = size().isEmpty();
+    syn FExp FType.createEmptyExp() {
+        Size s = size();
+        List<FExp> dims = new List<FExp>();
+        for (int i = 0, n = s.ndims(); i < n ; i++) {
+            dims.add(s.createFExp(i));
+        }
+        return new FFillExp(dims, zeroLiteral());
+    }
 	
 	/**
 	 * Create a record constructor with the arguments taken from a record 

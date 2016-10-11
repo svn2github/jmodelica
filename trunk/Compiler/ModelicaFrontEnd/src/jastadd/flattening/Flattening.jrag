@@ -2002,7 +2002,11 @@ aspect FlatExpressions {
         InstAccess ia = iae.asInstAccess();
         if (variability().indexParameterOrLess()) {
             try {
-                if (!size().isEmpty() && iae.canInlineConstant()) {
+                FType t = iae.type();
+                if (t.isEmpty()) {
+                    return t.createEmptyExp();
+                }
+                if (iae.canInlineConstant()) {
                     // Check if we have non-constant array subscripts
                     if (ia.hasUnknownIndices()) {
                         // If this is a package constant, then the variable will not be available in the flattened model 

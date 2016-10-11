@@ -5763,6 +5763,22 @@ end ArrayTests.Constructors.EmptyArray.EmptyArray6;
 ")})));
 end EmptyArray6;
 
+model EmptyArray7
+    constant Real x[:] = {1};
+    Real[:] y = x[1:0];
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Constructors_EmptyArray_EmptyArray7",
+            description="Empty arrays, composite array",
+            flatModel="
+fclass ArrayTests.Constructors.EmptyArray.EmptyArray7
+ constant Real x[1] = {1};
+ Real y[0] = fill(0.0, 0);
+end ArrayTests.Constructors.EmptyArray.EmptyArray7;
+")})));
+end EmptyArray7;
+
 end EmptyArray;
 
 
