@@ -137,7 +137,7 @@ aspect Scalarization {
             }
             
             public void add(FExp left, FExp right) {
-                add(new FEquation(left, right));
+                add(left.setLocationOf(new FEquation(left, right)));
             }
             
             public void createScalarizedFunctionCallClause(FExp left, FFunctionCall right) {
@@ -435,7 +435,7 @@ aspect Scalarization {
             if (keepBExp(variability(), getBindingExp())) {
                 fv.setBindingExp(bexp);
             } else {
-                s.add(new FIdUseExp(name), bexp);
+                s.add(this.setLocationOf(new FIdUseExp(name)), bexp);
             }
 		}
 		
@@ -446,6 +446,8 @@ aspect Scalarization {
 		fv.setDerivedType(getDerivedType());
 		fv.addArrayAttributesFromType(i, myFDerivedType());
 
+		fv.setLocation(this);
+		
         s.add(fv);
         return fv;
 	}
@@ -969,7 +971,7 @@ aspect Scalarization {
         if (left.inferType().isRecord()) {
             left.inferType().scalarRecordClauses(s, new FQNameEmpty(), left, right);
         } else {
-            s.add(new FEquation(attrs, left.scalarize(s), right.scalarize(s)));
+            s.add(this.setLocationOf(new FEquation(attrs, left.scalarize(s), right.scalarize(s))));
         }
 	}
 	
@@ -1066,6 +1068,7 @@ aspect Scalarization {
       fqn.scalarized = false;
       FExp res = createNode(new FIdUse(fqn));
       res = dynamicFExp(res).scalarize(indexMap);
+      res.setLocation(this);
       return res;
     }
     
@@ -1585,11 +1588,12 @@ aspect Scalarization {
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (indexMap.containsKey(name())) {
-            return indexMap.get(name()).fullCopy();
+            return this.setLocationOf(indexMap.get(name()).fullCopy());
         }
-        if (indexNames != null)
+        if (indexNames != null){
             return createUseFas(name());
-        return new FIdUseExp(getFIdUse().scalarize(indexMap));
+    	}
+        return this.setLocationOf(new FIdUseExp(getFIdUse().scalarize(indexMap)));
     }
     
     public FExp FIfExp.scalarizeExp(Map<String,FExp> indexMap) {

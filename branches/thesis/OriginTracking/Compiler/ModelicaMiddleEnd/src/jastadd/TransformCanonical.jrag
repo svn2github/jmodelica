@@ -278,7 +278,7 @@ aspect TransformCanonical {
             log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
-                prettyPrint(out, "");
+                sourcePrettyPrint(out, "");
                 out.close();
             } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);

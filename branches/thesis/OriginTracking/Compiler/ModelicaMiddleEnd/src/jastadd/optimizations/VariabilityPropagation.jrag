@@ -326,7 +326,7 @@ aspect VariabilityPropagation {
 		}
 		
         if (!solutionVariability.knownParameterOrLess()) {
-            propagator.addEquation(solutionVariability, new FEquation(fVariable.createUseExp(), solution));
+            propagator.addEquation(solutionVariability, this.setLocationOf(new FEquation(fVariable.setLocationOf(fVariable.createUseExp()), solution)));
         }
         
         this.taggedByVProp = true;
@@ -564,7 +564,7 @@ aspect VariabilityPropagation {
                         topFactorExp.taggedByVProp = true;
                     }
                 }
-                
+            	
                 propagator.addWorkEq(equation);
                 if (equation.inInitialEquationSection() && equation.variables().size() == 0
                         && equation.initialParameters().size() == 0) {

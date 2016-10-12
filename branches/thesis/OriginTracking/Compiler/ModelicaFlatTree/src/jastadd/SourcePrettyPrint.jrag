@@ -1,0 +1,104 @@
+	//fabstractequaton
+	//fabstractvariable
+	//fexp
+
+aspect SourcePrettyPrint {
+
+	public class SourcePrettyPrinter extends PrettyPrinter {
+			public SourcePrettyPrinter() {
+				super();
+			}
+			
+	 		public void print(ASTNode node, CodeStream str, String indent) { 
+	 			node.sourcePrettyPrint(this, str, indent); 
+	 		
+	 		}
+	}
+	public void ASTNode.sourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		//System.out.println("ASTNode");
+		prettyPrint(p, str, indent);
+	}
+	public void ASTNode.sourcePrettyPrint(CodeStream str, String indent) {
+		sourcePrettyPrint(new SourcePrettyPrinter(), str, indent);
+		
+	}
+	
+
+
+
+	public void BaseNode.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		if(this.fName == null)
+		//	log.debug("BaseNode----Source file: " + this.fName);
+		
+		//log.debug("Base----Source position: " + this.start + " " + this.end);
+		//log.debug("Base----Source file: " + this.fName);
+		prettyPrint(p, str, indent);
+	}
+	/*
+	public void FVariable.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		//if(this.fName != null)
+			//str.print("%Var location: " + this.fName);
+		
+		log.debug("FVar----Source position: " + this.start + " " + this.end);
+		log.debug("FVar----Source file: " + this.fName);
+		prettyPrint(p, str, indent);
+	}
+	
+	public void FSinExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		//str.print("Source file: " + this.start + " " + this.end);
+		log.debug("SinExp----Source position: " + this.start + " " + this.end);
+		log.debug("SinExp----Source file: " + this.fName);	
+		prettyPrint(p, str, indent);
+	}
+	
+	public void FExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		log.debug("Exp----Source position: " + this.start + " " + this.end);
+		log.debug("Exp----Source file: " + this.fName);
+		
+		prettyPrint(p, str, indent);
+		
+	}
+	public void FAbstractVariable.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		log.debug("AbstractVariable----Source position: " + this.start + " " + this.end);
+		log.debug("AbstractVariable----Source file: " + this.fName);
+		prettyPrint(p, str, indent);
+	}
+	
+	public void FEquation.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		log.debug("FEquation----Source position: " + this.start + " " + this.end);
+		log.debug("FEquation----Source file: " + this.fName);
+
+		prettyPrint(p, str, indent);
+		
+	}
+
+	*/
+/*	public void FIdUseExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		//if(this.fName==null){
+		log.debug("FIdUseExp----Source position: " + this.start + " " + this.end);
+		log.debug("FIdUseExp----Source file: " + this.fName);
+		str.print(" [p: " + this.start + " " + this.end + "] ");
+	//	}
+
+		prettyPrint(p, str, indent);
+		
+		//str.println("FIdUseExp----Source file: " + this.fName);
+		
+	}*/
+	
+	/*public void FTimeExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		log.debug("FTimeExp----Source position: " + this.start + " " + this.end);
+		log.debug("FTimeExp----Source file: " + this.fName);
+
+		prettyPrint(p, str, indent);
+	}*/
+	
+/*	public void FRecordConstructor.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+		log.debug("FRecordConstructor----Source position: " + this.start + " " + this.end);
+		log.debug("FRecordConstructor----Source file: " + this.fName);
+
+		prettyPrint(p, str, indent);
+	}*/
+
+	
+}

@@ -42,6 +42,7 @@ aspect FlatEquations {
     public void FEquation.flattenEqn(List<FAbstractEquation> l, FQName prefix, FClass fc) {
         FEquation flattened = new FEquation(getLeft().flatten(prefix), getRight().flatten(prefix));
         flattenAttrs(flattened, prefix);
+        flattened.setLocation(this);
         l.add(flattened);
     }
     

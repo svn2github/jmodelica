@@ -351,6 +351,11 @@ aspect NodeMethods {
         	fName = ((BaseNode) fNameNode).fName;
     }
     
+    protected <T extends ASTNode> T ASTNode.setLocationOf(T node) {
+        node.setLocationNoTree(this);
+        return node;
+    }
+    
     public int ASTNode.beginLine()   { return getLine(getStart()); }
     public int ASTNode.beginColumn() { return getColumn(getStart()); }
     public int ASTNode.endLine()     { return getLine(getEnd()); }

@@ -739,7 +739,7 @@ aspect Flattening {
     
     public void InstAssignable.addBindingAssignments(List<FStatement> l) {
         if (hasBindingFExp()) {
-            FStatement stmt = new FAssignStmt(new FIdUseExp(expandedFQNameCalc()), getBindingFExp().flatten(new FQNameEmpty()));
+            FStatement stmt = new FAssignStmt(this.setLocationOf(new FIdUseExp(expandedFQNameCalc())), getBindingFExp().flatten(new FQNameEmpty()));
             stmt.shouldBeSorted = true;
             l.add(stmt);
         } else {
@@ -1329,6 +1329,7 @@ aspect Flattening {
             fv.setFStringComment(new FStringComment(getComponentDecl().getComment().getStringComment().getComment()));
 
         fv.setFQName(name);
+        fv.setLocation(this);
 
         contribute(fv);
 
@@ -1924,7 +1925,7 @@ aspect FlatExpressions {
     }
     
     public FExp FIdUseExp.flatten(FQName prefix) {
-        return getFIdUse().flatten(prefix, this);
+        return this.setLocationOf(getFIdUse().flatten(prefix, this));
     }
     
     public FExp FIdUse.flatten(FQName prefix, FIdUseExp use) {
@@ -2663,7 +2664,8 @@ aspect FlatExpressions {
         return res;
     }
     
-    public FTimeExp FTimeExp.flatten(FQName prefix) { return new FTimeExp(); }
+    public FTimeExp FTimeExp.flatten(FQName prefix) { return this.setLocationOf(new FTimeExp()); }
+    
     public FExp FEndExp.flatten(FQName prefix)  {
         if (expandSize()) {
             return mySize().flattenFExp(0);
@@ -2912,7 +2914,7 @@ aspect InstantiatedExpressions {
     
     public  FFunctionCallLeft FunctionCallLeft.instantiate() {
         Opt id = hasAccess() ? 
-                new Opt(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess()))) : 
+                new Opt(this.setLocationOf(new FIdUseExp(new FIdUseInstAccess(getAccess().newInstAccess())))) : 
                 new Opt();
         return new FFunctionCallLeft(id);
     }
@@ -2976,6 +2978,7 @@ aspect InstantiatedExpressions {
     
     protected FAssignStmt AssignStmt.instantiateStatement() {
         FIdUseExp left = new FIdUseExp(new FIdUseInstAccess(getLeft().newInstAccess()));
+        left.setLocation(this);
         return new FAssignStmt(left, getRight().instantiate());
     }
     
