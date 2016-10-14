@@ -5306,7 +5306,7 @@ jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_der_exp3(jmi_extobj_t eo_v, j
 
 void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
-    extern void close_myEO_(void*);
+    extern void close_myEO(void*);
     close_myEO(eo_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -5315,7 +5315,7 @@ void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_destructor_def0(jmi_ext
 void func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_def1(jmi_ad_var_t i_v, jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(EXO, eo_v)
-    extern void* init_myEO_(double*);
+    extern void* init_myEO(double);
     eo_v = init_myEO(i_v);
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -5331,7 +5331,7 @@ jmi_extobj_t func_CADCodeGenTests_TestExtObject1_ExtObjectwInput_constructor_exp
 void func_CADCodeGenTests_TestExtObject1_f_def2(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, r_v)
-    extern double useMyEO_(void*, double*);
+    extern double useMyEO(void*, double);
     r_v = useMyEO(eo_v, x_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -5347,7 +5347,7 @@ jmi_ad_var_t func_CADCodeGenTests_TestExtObject1_f_exp2(jmi_extobj_t eo_v, jmi_a
 void func_CADCodeGenTests_TestExtObject1_f_der_def3(jmi_extobj_t eo_v, jmi_ad_var_t x_v, jmi_ad_var_t x_der_v, jmi_ad_var_t* r_der_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, r_der_v)
-    extern double useMyEO_der_(void*, double*, double*);
+    extern double useMyEO_der(void*, double, double);
     r_der_v = useMyEO_der(eo_v, x_v, x_der_v);
     JMI_RET(GEN, r_der_o, r_der_v)
     JMI_DYNAMIC_FREE()

@@ -85,7 +85,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal1_f_exp0(jmi_ad_var_t a_v)
 void func_CCodeGenTestsExternal_SimpleExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern double f_(double*);
+    extern double f(double);
     b_v = f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -130,7 +130,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal2_f_exp0(jmi_ad_var_t a_v,
 void func_CCodeGenTestsExternal_SimpleExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
-    extern double f_(double*, double*);
+    extern double f(double, double);
     c_v = f(a_v, b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -173,7 +173,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal3_f_exp0(jmi_ad_var_t a_v)
 void func_CCodeGenTestsExternal_SimpleExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern double my_f_(double*);
+    extern double my_f(double);
     b_v = my_f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -216,7 +216,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal4_f_exp0(jmi_ad_var_t a_v)
 void func_CCodeGenTestsExternal_SimpleExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern void my_f_(double*, double*);
+    extern void my_f(double, double*);
     my_f(a_v, &b_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -255,7 +255,7 @@ void func_CCodeGenTestsExternal_SimpleExternal5_f_def0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTestsExternal_SimpleExternal5_f_def0(jmi_ad_var_t a_v) {
     JMI_DYNAMIC_INIT()
-    extern void f_(double*);
+    extern void f(double);
     f(a_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -287,7 +287,7 @@ void func_CCodeGenTestsExternal_SimpleExternal6_f_def0(jmi_ad_var_t a_v);
 
 void func_CCodeGenTestsExternal_SimpleExternal6_f_def0(jmi_ad_var_t a_v) {
     JMI_DYNAMIC_INIT()
-    extern void my_f_(double*);
+    extern void my_f(double);
     my_f(a_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -325,7 +325,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal7_f_exp0(jmi_ad_var_t a_v,
 void func_CCodeGenTestsExternal_SimpleExternal7_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
-    extern void my_f_(double*, double*, double*);
+    extern void my_f(double, double*, double);
     my_f(a_v, &c_v, b_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -373,7 +373,7 @@ void func_CCodeGenTestsExternal_SimpleExternal8_f_def0(jmi_ad_var_t a_v, jmi_ad_
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
     JMI_DEF(REA, d_v)
-    extern void my_f_(double*, double*, double*, double*);
+    extern void my_f(double, double*, double, double*);
     my_f(a_v, &c_v, b_v, &d_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -422,7 +422,7 @@ void func_CCodeGenTestsExternal_SimpleExternal9_f_def0(jmi_ad_var_t a_v, jmi_ad_
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
     JMI_DEF(REA, d_v)
-    extern double my_f_(double*, double*, double*);
+    extern double my_f(double, double, double*);
     d_v = my_f(a_v, b_v, &c_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -474,7 +474,7 @@ void func_CCodeGenTestsExternal_SimpleExternal10_f_def0(jmi_ad_var_t a_v, jmi_ad
     JMI_DEF(REA, c_v)
     JMI_DEF(REA, d_v)
     JMI_DEF(REA, e_v)
-    extern double my_f_(double*, double*, double*, double*);
+    extern double my_f(double, double*, double, double*);
     d_v = my_f(a_v, &c_v, b_v, &e_v);
     JMI_RET(GEN, c_o, c_v)
     JMI_RET(GEN, d_o, d_v)
@@ -548,7 +548,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal11_fw_exp0(jmi_ad_var_t x_
 void func_CCodeGenTestsExternal_SimpleExternal11_strlen_def1(jmi_string_t s_v, jmi_ad_var_t* n_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(INT, n_v)
-    extern int strlen_(char*);
+    extern int strlen(char*);
     n_v = strlen(s_v);
     JMI_RET(GEN, n_o, n_v)
     JMI_DYNAMIC_FREE()
@@ -564,7 +564,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_SimpleExternal11_strlen_exp1(jmi_string_
 void func_CCodeGenTestsExternal_SimpleExternal11_f_def2(jmi_string_t* s_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(STR, s_v)
-    extern char* f_();
+    extern char* f();
     JMI_INI(STR, s_v)
     s_v = f();
     JMI_RET(STR, s_o, s_v)
@@ -609,7 +609,7 @@ void func_CCodeGenTestsExternal_IntegerExternal1_f_def0(jmi_ad_var_t a_v, jmi_ad
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     JMI_DEF(INT_EXT, tmp_1)
-    extern double f_(int*);
+    extern double f(int);
     tmp_1 = (int)a_v;
     b_v = f(tmp_1);
     JMI_RET(GEN, b_o, b_v)
@@ -653,7 +653,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_IntegerExternal2_f_exp0(jmi_ad_var_t a_v
 void func_CCodeGenTestsExternal_IntegerExternal2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(INT, b_v)
-    extern int f_(double*);
+    extern int f(double);
     b_v = f(a_v);
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -697,7 +697,7 @@ void func_CCodeGenTestsExternal_IntegerExternal3_f_def0(jmi_ad_var_t a_v, jmi_ad
     JMI_DYNAMIC_INIT()
     JMI_DEF(INT, b_v)
     JMI_DEF(INT_EXT, tmp_1)
-    extern void my_f_(double*, int*);
+    extern void my_f(double, int*);
     tmp_1 = (int)b_v;
     my_f(a_v, &tmp_1);
     b_v = tmp_1;
@@ -750,7 +750,7 @@ void func_CCodeGenTestsExternal_IntegerExternal4_f_def0(jmi_ad_var_t a_v, jmi_ad
     JMI_DEF(INT_EXT, tmp_1)
     JMI_DEF(INT_EXT, tmp_2)
     JMI_DEF(INT_EXT, tmp_3)
-    extern int my_f_(int*, int*, int*);
+    extern int my_f(int, int, int*);
     tmp_1 = (int)a_v;
     tmp_2 = (int)b_v;
     tmp_3 = (int)c_v;
@@ -816,7 +816,7 @@ void func_CCodeGenTestsExternal_RecordExternal1_f_def0(R_0_r* r_v, R_0_r* y_v) {
     JMI_RECORD_STATIC(R_0_r, y_vn)
     JMI_RECORD_STATIC(R_0_r_ext, tmp_1)
     JMI_RECORD_STATIC(R_0_r_ext, tmp_2)
-    extern R_0_r* f_(R_0_r**);
+    extern R_0_r* f(R_0_r*);
     if (y_v == NULL) {
         y_v = y_vn;
     }
@@ -890,7 +890,7 @@ void func_CCodeGenTestsExternal_RecordExternal2_f_def0(R2_1_r* r_v, R2_1_r* y_v)
     JMI_RECORD_STATIC(R1_0_r, tmp_1)
     JMI_RECORD_STATIC(R2_1_r_ext, tmp_2)
     JMI_RECORD_STATIC(R2_1_r_ext, tmp_3)
-    extern R2_1_r* f_(R2_1_r**);
+    extern R2_1_r* f(R2_1_r*);
     if (y_v == NULL) {
         y_vn->r1 = tmp_1;
         y_v = y_vn;
@@ -965,7 +965,7 @@ void func_CCodeGenTestsExternal_RecordExternal3_f_def0(R2_1_r* r_v, jmi_ad_var_t
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_v)
     JMI_RECORD_STATIC(R2_1_r_ext, tmp_1)
-    extern double f_(R2_1_r**);
+    extern double f(R2_1_r*);
     tmp_1->r1.x = (double)r_v->r1->x;
     JMI_ASG(STR, tmp_1->r1.s, r_v->r1->s)
     y_v = f(tmp_1);
@@ -1013,7 +1013,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalLiteral1_f_exp0(jmi_ad_var_t a_v
 void func_CCodeGenTestsExternal_ExternalLiteral1_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
-    extern void my_f_(double*, double*, int*);
+    extern void my_f(double, double, int);
     my_f(a_v, b_v, 10);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -1058,7 +1058,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalLiteral2_f_exp0(jmi_ad_var_t a_v
 void func_CCodeGenTestsExternal_ExternalLiteral2_f_def0(jmi_ad_var_t a_v, jmi_ad_var_t b_v, jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
-    extern void my_f_(double*, int*, double*, int*);
+    extern void my_f(double, int, double, int);
     my_f(a_v, 20, b_v, 10);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -1099,7 +1099,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalLiteral3_f_exp0();
 void func_CCodeGenTestsExternal_ExternalLiteral3_f_def0(jmi_ad_var_t* c_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, c_v)
-    extern void my_f_(int*, int*, int*);
+    extern void my_f(int, int, int);
     my_f(10, 20, 30);
     JMI_RET(GEN, c_o, c_v)
     JMI_DYNAMIC_FREE()
@@ -1153,7 +1153,7 @@ void func_CCodeGenTestsExternal_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
     JMI_DEF(REA, y_v)
-    extern double f_(double*, double*, double*);
+    extern double f(double, double, double*);
     c_v = 3;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     jmi_array_ref_1(d_a, 1) = 3;
@@ -1174,7 +1174,7 @@ void func_CCodeGenTestsExternal_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
     JMI_DEF(REA, y_v)
-    extern double f2_(double*, double*, double*, int*);
+    extern double f2(double, double, double*, int);
     c_v = 3;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
     jmi_array_ref_1(d_a, 1) = 3;
@@ -1221,7 +1221,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalArray1_f_exp0(jmi_array_t* a_a);
 void func_CCodeGenTestsExternal_ExternalArray1_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern double f_(double*, int*);
+    extern double f(double*, int);
     b_v = f(a_a->var, jmi_array_size(a_a, 0));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -1264,7 +1264,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalArray2_f_exp0(jmi_array_t* a_a);
 void func_CCodeGenTestsExternal_ExternalArray2_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern double f_(double*, int*, int*);
+    extern double f(double*, int, int);
     b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -1308,7 +1308,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_ExternalArray3_f_exp0(jmi_array_t* a_a);
 void func_CCodeGenTestsExternal_ExternalArray3_f_def0(jmi_array_t* a_a, jmi_ad_var_t* b_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
-    extern double f_(double*, int*, int*);
+    extern double f(double*, int, int);
     b_v = f(a_a->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
     JMI_RET(GEN, b_o, b_v)
     JMI_DYNAMIC_FREE()
@@ -1352,7 +1352,7 @@ void func_CCodeGenTestsExternal_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_arra
 void func_CCodeGenTestsExternal_ExternalArray4_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, b_an, 2, 1)
-    extern void f_(double*, int*, double*, int*);
+    extern void f(double*, int, double*, int);
     if (b_a == NULL) {
         JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
@@ -1392,7 +1392,7 @@ void func_CCodeGenTestsExternal_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_arra
 void func_CCodeGenTestsExternal_ExternalArray5_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, b_an, 4, 2)
-    extern void f_(double*, int*, int*, double*, int*, int*);
+    extern void f(double*, int, int, double*, int, int);
     if (b_a == NULL) {
         JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
@@ -1432,7 +1432,7 @@ void func_CCodeGenTestsExternal_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_arra
 void func_CCodeGenTestsExternal_ExternalArray6_f_def0(jmi_array_t* a_a, jmi_array_t* b_a) {
     JMI_DYNAMIC_INIT()
     JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, b_an, -1, 2)
-    extern void f_(double*, int*, int*, double*, int*, int*);
+    extern void f(double*, int, int, double*, int, int);
     if (b_a == NULL) {
         JMI_ARRAY_INIT_2(DYNAREAL, jmi_ad_var_t, jmi_array_t, b_an, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
         b_a = b_an;
@@ -1473,7 +1473,7 @@ void func_CCodeGenTestsExternal_IntegerExternalArray1_f_def0(jmi_array_t* a_a, j
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
-    extern double f_(int*, int*);
+    extern double f(int*, int);
     JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0), 1, jmi_array_size(a_a, 0))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0));
@@ -1519,7 +1519,7 @@ void func_CCodeGenTestsExternal_IntegerExternalArray2_f_def0(jmi_array_t* a_a, j
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, b_v)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
-    extern double f_(int*, int*, int*);
+    extern double f(int*, int, int);
     JMI_ARRAY_INIT_2(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, jmi_array_size(a_a, 0) * jmi_array_size(a_a, 1), 2, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1))
     jmi_copy_matrix_to_int(a_a, a_a->var, tmp_1->var);
     b_v = f(tmp_1->var, jmi_array_size(a_a, 0), jmi_array_size(a_a, 1));
@@ -1564,7 +1564,7 @@ void func_CCodeGenTestsExternal_IntegerExternalArray3_f_def0(jmi_ad_var_t a_v, j
     JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, b_an, 2, 1)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 1)
-    extern void f_(double*, int*, int*);
+    extern void f(double, int*, int);
     if (b_a == NULL) {
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, b_an, 2, 1, 2)
         b_a = b_an;
@@ -1609,7 +1609,7 @@ void func_CCodeGenTestsExternal_IntegerExternalArray4_f_def0(jmi_array_t* a_a, j
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, b_an, 4, 2)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_1, -1, 2)
     JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_2, -1, 2)
-    extern void f_(int*, int*, int*, int*, int*, int*);
+    extern void f(int*, int, int, int*, int, int);
     if (b_a == NULL) {
         JMI_ARRAY_INIT_2(STAT, jmi_ad_var_t, jmi_array_t, b_an, 4, 2, 2, 2)
         b_a = b_an;
@@ -2882,7 +2882,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_useMyEO_exp2(jmi_extobj_t eo_v);
 
 void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
-    extern void close_myEO_(void*);
+    extern void close_myEO(void*);
     close_myEO(eo_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -2891,7 +2891,7 @@ void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 void func_CCodeGenTestsExternal_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(EXO, eo_v)
-    extern void* init_myEO_();
+    extern void* init_myEO();
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -2907,7 +2907,7 @@ jmi_extobj_t func_CCodeGenTestsExternal_ExtObject_constructor_exp1() {
 void func_CCodeGenTestsExternal_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, r_v)
-    extern double useMyEO_(void*);
+    extern double useMyEO(void*);
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -2963,7 +2963,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_useMyEO_exp2(jmi_extobj_t eo_v);
 
 void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
-    extern void close_myEO_(void*);
+    extern void close_myEO(void*);
     close_myEO(eo_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -2972,7 +2972,7 @@ void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 void func_CCodeGenTestsExternal_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(EXO, eo_v)
-    extern void* init_myEO_();
+    extern void* init_myEO();
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -2988,7 +2988,7 @@ jmi_extobj_t func_CCodeGenTestsExternal_ExtObject_constructor_exp1() {
 void func_CCodeGenTestsExternal_useMyEO_def2(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, r_v)
-    extern double useMyEO_(void*);
+    extern double useMyEO(void*);
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()
@@ -3327,7 +3327,7 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 
 void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
     JMI_DYNAMIC_INIT()
-    extern void close_myEO_(void*);
+    extern void close_myEO(void*);
     close_myEO(eo_v);
     JMI_DYNAMIC_FREE()
     return;
@@ -3336,7 +3336,7 @@ void func_CCodeGenTestsExternal_ExtObject_destructor_def0(jmi_extobj_t eo_v) {
 void func_CCodeGenTestsExternal_ExtObject_constructor_def1(jmi_extobj_t* eo_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(EXO, eo_v)
-    extern void* init_myEO_();
+    extern void* init_myEO();
     eo_v = init_myEO();
     JMI_RET(GEN, eo_o, eo_v)
     JMI_DYNAMIC_FREE()
@@ -3367,7 +3367,7 @@ jmi_ad_var_t func_CCodeGenTestsExternal_TestExtObjectArray1_get_y_exp2(jmi_extob
 void func_CCodeGenTestsExternal_useMyEO_def3(jmi_extobj_t eo_v, jmi_ad_var_t* r_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, r_v)
-    extern double useMyEO_(void*);
+    extern double useMyEO(void*);
     r_v = useMyEO(eo_v);
     JMI_RET(GEN, r_o, r_v)
     JMI_DYNAMIC_FREE()

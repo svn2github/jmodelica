@@ -2201,7 +2201,34 @@ aspect CCodeGen {
 		}
 		str.print(");\n");		
 	}
-
+    
+    public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
+        boolean fortran = this instanceof FFortran77ExternalLanguage;
+        str.print(indent);
+        str.print("extern ");
+        if (stmt.hasReturnVar()) {
+            str.print(stmt.getReturnVar().type().argType_C(false));
+        } else {
+            str.print("void");
+        }
+        str.print(" ");
+        str.print(stmt.getName());
+        if (fortran) {
+            str.print("_");
+        }
+        str.print("(");
+        String prefix = "";
+        for (FExp arg : stmt.getArgs()) {
+            str.print(prefix);
+            str.print(arg.argType_C(arg.isExternalArgumentRef(fortran)));
+            prefix = ", ";
+        }
+        str.print(");\n");
+    }
+    
+    syn boolean FExp.isExternalArgumentRef(boolean fortran) = fortran || isArray();
+    eq FIdUseExp.isExternalArgumentRef(boolean fortran)     = super.isExternalArgumentRef(fortran) || myCommonVarDecl().isOutput();
+    
 	public void FExp.genExternalFortranFuncArgs(CodePrinter p, CodeStream str, String indent) {
         if (!isArray() && !type().isString()) {
 			str.print("&");
@@ -2239,27 +2266,6 @@ aspect CCodeGen {
         str.print(myCodeGenContext().alias(prettyPrint_C(indent)));
     }
     
-    public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
-		str.print(indent);
-		str.print("extern ");
-		if (stmt.hasReturnVar()) {
-            str.print(stmt.getReturnVar().type().argType_C(false));
-		} else {
-            str.print("void");
-		}
-        str.print(" ");
-
-		str.print(stmt.getName()+"_(");
-		
-		String prefix = "";
-		for (FExp arg : stmt.getArgs()) {
-			str.print(prefix);
-            str.print(arg.argType_C(true));
-			prefix = ", ";
-		}
-		str.print(");\n");
-	}
-
     @Override
     public void FAbstractEquation.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
         ASTNode attributeList = getFAttributeList();
