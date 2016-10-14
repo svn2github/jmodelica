@@ -1,0 +1,312 @@
+/*
+    Copyright (C) 2009 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+aspect ConstantEvaluationFunction {
+    public interface CommonCallable {
+        public void evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values);
+        public CValue evaluatePartial(Map<CommonVariableDecl, CValue> values);
+    }
+    
+    syn CValue InstClassDecl.evaluatePartial(Map<CommonVariableDecl, CValue> values) = 
+        CValuePartialFunction.create(this, values);
+    syn CValue FFunctionDecl.evaluatePartial(Map<CommonVariableDecl, CValue> values) = 
+        CValuePartialFunction.create(this, values);
+    syn CValue InstPartialFunction.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
+        evaluationValue.evaluatePartialFunction(this, values);
+    syn CValue FFunctionVariable.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
+        evaluationValue.evaluatePartialFunction(this, values);
+    
+    public static Map<CommonVariableDecl, CValue> FFunctionDecl.resetAfterCeval(CommonCallable cc, ASTNode n, Map<CommonVariableDecl, CValue> values) {
+        Map<CommonVariableDecl, CValue> oldVal = cc.getCurrentEvaluationValues();
+        cc.setCurrentEvaluationValues(values);
+        for (CommonVariableDecl cvd : cc.myInputs()) {
+            cvd.resetAfterCeval();
+        }
+        for (CommonVariableDecl cvd : cc.myNonInputs()) {
+            cvd.resetAfterCeval();
+        }
+        n.resetAfterCeval();
+        if (values != null) {
+            for (CommonVariableDecl cvd : values.keySet()) {
+                cvd.setLocalCachedEvaluationValue(values.get(cvd));
+            }
+        }
+        return oldVal;
+    }
+    
+    public void ASTNode.resetAfterCeval() {
+        for (ASTNode n : this) {
+            n.resetAfterCeval();
+        }
+    }
+    
+    public void FFunctionVariable.resetAfterCeval() {
+        super.resetAfterCeval();
+        clearLocalCachedEvaluationValue();
+        size().resetAfterCeval();
+    }
+    
+    public void InstAssignable.resetAfterCeval() {
+        super.resetAfterCeval();
+        clearLocalCachedEvaluationValue();
+        if (hasBindingFExp()) {
+            myBindingInstExp().resetAfterCeval();
+        }
+        size().resetAfterCeval();
+    }
+    
+    public void Size.resetAfterCeval() {
+        
+    }
+    
+    public void MutableSize.resetAfterCeval() {
+        for (int i = 0; i < exps.length; i++) {
+            if (exps[i] != null) {
+                exps[i].resetAfterCeval();
+                evaluated[i] = false;
+                size[i] = Size.UNKNOWN;
+            }
+        }
+    }
+    
+    
+    public void FExp.resetAfterCeval() {
+        flushAllRecursive();
+    }
+    
+    // TODO: reduce code duplication
+
+    /**
+     * Perform constant evaluation of functions.
+     * 
+     * @param values  constant values for the variables. 
+     *                Should be filled with the values of the inputs.
+     */
+    public void FFunctionDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        FFunctionDecl.evaluate(evaluator, values, this, getFAlgorithm());
+    }
+    
+    public static void FFunctionDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values, CommonCallable cc, FAlgorithm fab) {
+        AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
+        Map<CommonVariableDecl, CValue> oldVal = FFunctionDecl.resetAfterCeval(cc, fab, values);
+        try {
+            for (CommonVariableDecl cvd : cc.myInputs()) {
+                // Only here because operator record functions does not evaluate default values of inputs
+                cvd.readEvaluationValue(values);
+            }
+            for (CommonVariableDecl cvd : cc.myNonInputs()) {
+                // Only here because scalar primitives does not have init statements.
+                cvd.readEvaluationValue(values);
+            }
+            if (oldVal == null || algoEvaluator.recursive(cc)) {
+                fab.getFStatements().evaluateList(algoEvaluator);
+            }
+        } catch (ConstantEvaluationException e) {
+            algoEvaluator.failed(cc, e);
+        } finally {
+            FFunctionDecl.resetAfterCeval(cc, fab, oldVal);
+        }
+    }
+    
+    public void FFunctionVariable.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        evaluationValue.evaluateFunction(evaluator, myFCallable(), values);
+    }
+    
+    interface CommonCallable {
+        public Map<CommonVariableDecl, CValue> getCurrentEvaluationValues();
+        public void setCurrentEvaluationValues(Map<CommonVariableDecl, CValue> values);
+    }
+    
+    private Map<CommonVariableDecl, CValue> FFunctionDecl.currentEvaluationValues = null;
+    public Map<CommonVariableDecl, CValue> FFunctionDecl.getCurrentEvaluationValues() { return currentEvaluationValues; }
+    public void FFunctionDecl.setCurrentEvaluationValues(Map<CommonVariableDecl, CValue> values) { currentEvaluationValues = values; }
+    
+    private Map<CommonVariableDecl, CValue> InstBaseClassDecl.currentEvaluationValues = null;
+    public Map<CommonVariableDecl, CValue> InstBaseClassDecl.getCurrentEvaluationValues() { return currentEvaluationValues; }
+    public void InstBaseClassDecl.setCurrentEvaluationValues(Map<CommonVariableDecl, CValue> values) { currentEvaluationValues = values; }
+    
+    public Map<CommonVariableDecl, CValue> InstNode.getCurrentEvaluationValues() { return null; }
+    public void InstNode.setCurrentEvaluationValues(Map<CommonVariableDecl, CValue> values) {}
+    
+    public Map<CommonVariableDecl, CValue> FFunctionVariable.getCurrentEvaluationValues() { return null; }
+    public void FFunctionVariable.setCurrentEvaluationValues(Map<CommonVariableDecl, CValue> values) {}
+    
+    /**
+     * Constant-evaluate function with given set of arguments and return value for first output.
+     * 
+     * @param args  arguments of the function call
+     */
+    public CValue InstClassDecl.evaluateFirst(VariableEvaluator evaluator, Iterable<FExp> args) {
+        Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
+        int i = 0;
+        for (FExp arg : args) {
+            if (i < myInputs().size()) {
+                CommonVariableDecl cvd = myInputs().get(i);
+                if (cvd.type().typeCompatible(arg.type(), true)) {
+                    values.put(cvd, arg.ceval(evaluator));
+                } else {
+                    InstClassDecl constructor = cvd.type().matchOverloadedConstructor(arg.type());
+                    ArrayList<FExp> l = new ArrayList<FExp>();
+                    l.add(arg);
+                    CValue v = constructor.evaluateFirst(evaluator, l);
+                    values.put(cvd, v);
+                }
+            } else {
+                throw new ConstantEvaluationException();
+            }
+            i++;
+        }
+        
+        evaluate(evaluator, values);
+        
+        CValue res = myOutputs().isEmpty() ? null : values.get(myOutputs().get(0));
+        return (res == null) ? CValue.UNKNOWN : res;
+    }
+
+    /**
+     * Perform constant evaluation of functions.
+     * 
+     * @param values  constant values for the variables. 
+     *                Should be filled with the values of the inputs.
+     */
+    public void InstClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        values.clear(); // Make sure evaluation returns CValue.UNKNOWN
+    }
+
+    public void InstSimpleShortClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+       actualInstClass().evaluate(evaluator, values);
+    }
+
+    public void InstLibNode.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+       actualInstClass().evaluate(evaluator, values);
+    }
+
+    public void InstBaseClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        // We assume that this class is a function
+        
+        FAlgorithm fab = findFunctionAlgorithm();
+        if (fab == null) {
+            InstExternal ie = findFunctionExternal();
+            if (ie == null) {
+                values.clear();
+                return;
+            }
+            fab = ie.getFAlgorithm();
+        }
+        
+        FFunctionDecl.evaluate(evaluator, values, this, fab);
+    }
+    
+    public void InstPartialFunction.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
+        evaluationValue.evaluateFunction(evaluator, myInstClass(), values);
+    }
+    
+    
+    
+    /**
+     * Read current function evaluation value from map.
+     * 
+     * If this variable isn't in the map, set to value of binding expression.
+     */
+    public void FAbstractVariable.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        CValue val = map.get(this);
+        if (val == null) {
+            val = cevalFunctionBindingExp(ASTNode.defaultVariableEvaluator());
+        }
+        if (!isInput()) {
+            val = val.cached();
+        }
+        map.put(this, val);
+        setLocalCachedEvaluationValue(val);
+    }
+
+    /**
+     * Read current function evaluation value from map.
+     * 
+     * If this variable isn't in the map, set to value of binding expression.
+     */
+    public void InstComponentDecl.readEvaluationValue(Map<CommonVariableDecl, CValue> map) {
+        CValue val = map.get(this);
+        if (val == null) {
+            val = cevalFunctionBindingExp(ASTNode.defaultVariableEvaluator());
+        }
+        if (!isInput()) {
+            val = val.cached();
+        }
+        map.put(this, val);
+        setLocalCachedEvaluationValue(val);
+    }
+    
+    
+    protected CValue FAbstractVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return CValue.UNKNOWN;
+    }
+
+    protected CValue FFunctionVariable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        if (hasBindingExp()) {
+            return getBindingExp().ceval(evaluator);
+        } else if (isArray()) {
+            return CValue.UNKNOWN;
+        } else {
+            return type().zeroCValue();
+        }
+    }
+
+    protected CValue InstComponentDecl.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return CValue.UNKNOWN;
+    }
+
+    protected CValue InstAssignable.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        return hasBindingFExp() ? myBindingInstExp().ceval(evaluator) : type().zeroCValue();
+    }
+
+    protected CValue InstRecord.cevalFunctionBindingExp(VariableEvaluator evaluator) {
+        if (hasBindingFExp())
+            return myBindingInstExp().ceval(evaluator);
+        FRecordType type = (FRecordType) type().scalarType();
+        if (isArray()) {
+            CValueArray res = new CValueArray(size());
+            int ndims = ndims();
+            for (InstComponentDecl ch : allInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(evaluator, type, res, ndims);
+            return res;
+        } else {
+            return cevalBindingExpForRecord(evaluator, type);
+        }
+    }
+
+    protected void InstComponentDecl.cevalBindingExpForRecordArray(VariableEvaluator evaluator, FRecordType type, CValueArray arr, int ndims) {
+        throw new UnsupportedOperationException("Only valid for InstArrayComponentDecls.");
+    }
+
+    protected void InstArrayComponentDecl.cevalBindingExpForRecordArray(VariableEvaluator evaluator, FRecordType type, CValueArray arr, int ndims) {
+        ndims--;
+        if (ndims > 0) {
+            for (InstComponentDecl ch : allInstComponentDecls())
+                ch.cevalBindingExpForRecordArray(evaluator, type, arr, ndims);
+        } else {
+            arr.addCell(cevalBindingExpForRecord(evaluator, type));
+        }
+    }
+
+    protected CValue InstComponentDecl.cevalBindingExpForRecord(VariableEvaluator evaluator, FRecordType type) {
+        CValueRecord res = new CValueRecord(type);
+        evaluationValue = res;
+        for (InstComponentDecl ch : allInstComponentDecls())
+            res.setMember(ch.name(), ch.cevalFunctionBindingExp(evaluator));
+        return res;
+    }
+}
