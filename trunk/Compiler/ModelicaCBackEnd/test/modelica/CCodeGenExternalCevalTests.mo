@@ -15,7 +15,7 @@
 */
 
 
-package CCodeGenTestsExternalCeval
+package CCodeGenExternalCevalTests
 
 model Scalar
     type E = enumeration(A,B);
@@ -965,4 +965,4 @@ $ECE_free$
 ")})));
 end RecordExternalObject;
 
-end CCodeGenTestsExternalCeval;
+end CCodeGenExternalCevalTests;
