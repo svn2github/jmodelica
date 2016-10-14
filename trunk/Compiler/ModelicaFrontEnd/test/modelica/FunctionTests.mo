@@ -2126,6 +2126,38 @@ end FunctionTests.RecursionTest2;
 ")})));
 end RecursionTest2;
 
+model RecursionTest3
+ function f
+  input Real x[:];
+  output Real y[size(x,1)];
+  Integer n = size(x,1);
+ algorithm
+  if n == 1 then
+    y[1] := x[1];
+  elseif n > 1 then
+    y[1:integer(n/2)] := f(x[1:integer(n/2)]);
+    y[integer(1+n/2):n] := f(x[integer(1+n/2):n])-fill(0.0,integer(1+n/2)+1);
+  end if;
+ end f;
+ 
+  constant Real[:] y1 = f({1,2,3,4,5});
+  Real[:] y2 = f({1,2,3,4,5});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecursionTest3",
+            description="Type calculation of recursive function call during constant evaluation",
+            flatModel="
+fclass FunctionTests.RecursionTest3
+ constant Real y1[1] = 1;
+ constant Real y1[2] = 2;
+ constant Real y1[3] = 3;
+ constant Real y1[4] = 4;
+ constant Real y1[5] = 5;
+end FunctionTests.RecursionTest3;
+")})));
+end RecursionTest3;
+
 /* ====================== Function call type checks ====================== */
 
 model FunctionType0
