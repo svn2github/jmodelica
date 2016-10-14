@@ -57,26 +57,46 @@ aspect FunctionScalarization {
     /**
      * Should this expression be extracted into its own statement?
      */
-    syn boolean FExp.extractTemp()          = isComposite() && size().isUnknown() && isFunctionCallIO();
+    syn boolean FExp.extractTemp()          = 
+        (size().isUnknown() && isComposite() && isFunctionCallIO()) || extractForIndexTemp();
     eq FIdUseExp.extractTemp()              = super.extractTemp() && isSlice();
-    eq FMulExp.extractTemp()                = !isElementWise() && extractAsUnknown();
-    eq FReductionExp.extractTemp()          = getFExp().size().isUnknown();
-    eq FMinMaxExp.extractTemp()             = getX().size().isUnknown();
+    eq FMulExp.extractTemp()                = !isElementWise() && extractAsUnknown() || isForIndexExp();
+    eq FReductionExp.extractTemp()          = getFExp().size().isUnknown() || isForIndexExp();
+    eq FMinMaxExp.extractTemp()             = getX().size().isUnknown() || isForIndexExp();
     eq FFunctionCall.extractTemp()          = (isFVectorFunctionCallArg() || !isFunctionCallArg()) &&
-            isComposite() && !isFunctionCallClause();
+            isComposite() && !isFunctionCallClause() || isForIndexExp();
     eq FVectorFunctionCall.extractTemp()    = true;
-    eq FArray.extractTemp()                 = size().isUnknown() || inUnknownSize();
-    eq FAbstractCat.extractTemp()           = size().isUnknown() || inUnknownSize();
-    eq FAbstractDiagonal.extractTemp()      = size().isUnknown() || inUnknownSize();
-    eq FVectorExp.extractTemp()             = getFExp().size().isUnknown() || inUnknownSize();
-    eq FMatrixExp.extractTemp()             = getFExp().size().isUnknown() || inUnknownSize();
+    eq FArray.extractTemp()                 = extractTempArrayCon(this);
+    eq FAbstractCat.extractTemp()           = extractTempArrayCon(this);
+    eq FAbstractDiagonal.extractTemp()      = extractTempArrayCon(this);
+    eq FVectorExp.extractTemp()             = extractTempArrayCon(getFExp());
+    eq FMatrixExp.extractTemp()             = extractTempArrayCon(getFExp());
     eq FIdTempExp.extractTemp()             = false;
-    
+
+    syn boolean FExp.extractForIndexTemp() = isForIndexExp();
+    eq FRangeExp.extractForIndexTemp()     = false;
+
+    syn boolean FExp.extractTempArrayCon(FExp e) = e.size().isUnknown() || inUnknownSize() || isForIndexExp();
+
     inh boolean FExp.isFunctionCallIO();
     eq BaseNode.getChild().isFunctionCallIO()         = false;
     eq FFunctionCall.getArg().isFunctionCallIO()      = true;
     eq FFunctionCallLeft.getFExp().isFunctionCallIO() = true;
-    
+
+    inh boolean FExp.isForIndexExp();
+    eq BaseNode.getChild().isForIndexExp() = false;
+    eq FForIndex.getFExp().isForIndexExp() = !duringExtractedTempScalarization;
+
+    inh ASTNode FExp.myExtractedTempOwner();
+    inh ASTNode CommonForIndex.myExtractedTempOwner();
+    eq Root.getChild().myExtractedTempOwner()                 = null;
+    eq FFunctionCallEquation.getLeft().myExtractedTempOwner() = getCall();
+    eq FFunctionCallStmt.getLeft().myExtractedTempOwner()     = getCall();
+    eq FFunctionCall.getArg(int i).myExtractedTempOwner()     = 
+        getArg(i).extractTemp() ? this : myExtractedTempOwner();
+    eq FForIndex.getFExp().myExtractedTempOwner()             = 
+        getFExp().extractTemp() ? this : myExtractedTempOwner();
+
     inh boolean FExp.isFVectorFunctionCallArg();
     eq BaseNode.getChild().isFVectorFunctionCallArg() = false;
     eq FVectorFunctionCall.getArg().isFVectorFunctionCallArg() = true;
@@ -294,28 +314,49 @@ aspect FunctionScalarization {
      * @param s Scalarization visitor
      */
     public void FExp.unknownFunctionArrayTemporaries(Scalarizer s) {
-        /* Assumes exp is function call arg or left */
         boolean writeBack = inFunctionCallLeft();
         if (!writeBack || s.getWriteBack()) {
-            FAbstractFunctionCall fc = myFunctionCall();
+            ASTNode owner = myExtractedTempOwner();
             FIdUseExp left = tempExp();
-            FExp right;
-            setParent(null); // Force dynamicFExp
+            FExp right = owner.enterExtractedTempScalarization(this);
             if (writeBack) {
+                FIdUseExp temp = (FIdUseExp) right;
                 right = left;
-                left  = (FIdUseExp) fc.dynamicFExp(this);
-            } else {
-                right = fc.dynamicFExp(this);
+                left  = temp;
             }
             
             useTempVar = false;
             type().scalarizeAssignment((Scalarizer.Algorithm)s, left, right);
             useTempVar = true;
+            owner.exitExtractedTempScalarization(this);
             left.indexNames = null;
             right.indexNames = null;
         }
     }
-    
+
+    public FExp ASTNode.enterExtractedTempScalarization(FExp e) {
+        return e;
+    }
+
+    public void ASTNode.exitExtractedTempScalarization(FExp e) {
+    }
+
+    public FExp FAbstractFunctionCall.enterExtractedTempScalarization(FExp e) {
+        e.setParent(null); // Force dynamicFExp
+        return dynamicFExp(e);
+    }
+
+    public FExp FForIndex.enterExtractedTempScalarization(FExp e) {
+        duringExtractedTempScalarization = true;
+        return e;
+    }
+
+    public void FForIndex.exitExtractedTempScalarization(FExp e) {
+        duringExtractedTempScalarization = false;
+    }
+
+    private boolean FForIndex.duringExtractedTempScalarization = false;
+
     public void FFunctionCall.unknownFunctionArrayTemporaries(Scalarizer s) {
         s.createScalarizedFunctionCallClause(this, this);
     }

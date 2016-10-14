@@ -1744,28 +1744,28 @@ end FunctionInlining.IfStatementInline6;
         Real v = 3;
         Real z = f(v);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ForStatementInline1",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForStatementInline1",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
- Real temp_1;
- Real temp_5;
- Real temp_7;
- Real temp_9;
+ Real temp_2;
+ Real temp_10;
+ Real temp_12;
+ Real temp_14;
 equation
  v = 3;
- z = 1 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
- temp_1 = v;
- temp_5 = 1 + (temp_1 - 1) / 3;
- temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
- temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
+ z = 1 + temp_10 * temp_10 + temp_12 * temp_12 + temp_14 * temp_14;
+ temp_2 = v;
+ temp_10 = 1 + (temp_2 - 1) / 3;
+ temp_12 = 1 + 2 * ((temp_2 - 1) / 3);
+ temp_14 = 1 + 3 * ((temp_2 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;

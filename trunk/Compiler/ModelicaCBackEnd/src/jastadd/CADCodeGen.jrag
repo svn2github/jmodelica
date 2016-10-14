@@ -1804,12 +1804,7 @@ aspect CADCodeGen {
         super.genVarDecls_CAD(p, str, indent);
         String name = getFVariable().name_C();
         str.format("%sjmi_ad_var_t %s;\n", indent, name);
-        if (needsForArray()) {
-            str.format("%sint %si;\n", indent, name);
-            str.format("%sjmi_ad_var_t %sa[%d];\n", indent, name, getFExp().size().numElements());
-        } else {
-            str.format("%sjmi_ad_var_t %se;\n", indent, name);
-        }
+        getFExp().genForIndexExtraVarDecls_C(p, str, indent, name);
     }
 
     /**
@@ -2122,12 +2117,12 @@ aspect CADCodeGen {
     @Override
 	public void FForStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
 		getIndex().genTempVars_CAD(p, str, indent);
-		getIndex().printForArrayInit_C(p, str, indent);
+		getIndex().printForIndexInit_C(p, str, indent);
 		str.print(indent);
 		str.print("for (");
 		p.print(getIndex(), str, indent);
 		str.print(") {\n");
-		getIndex().printForArrayNext_C(p, str, p.indent(indent));
+		getIndex().printForIndexNext_C(p, str, p.indent(indent));
 		p.print(getForStmts(), str, p.indent(indent));
 		str.print(indent);
 		str.print("}\n");

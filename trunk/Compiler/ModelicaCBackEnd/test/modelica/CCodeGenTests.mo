@@ -3090,16 +3090,17 @@ void func_CCodeGenTests_CForLoop2_f_def0(jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, o_v)
     JMI_DEF(REA, x_v)
+    JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, temp_1_a, 3, 1)
     jmi_ad_var_t i_0i;
     int i_0ii;
-    jmi_ad_var_t i_0ia[3];
     o_v = 1.0;
     x_v = 0;
-    i_0ia[0] = 2;
-    i_0ia[1] = 3;
-    i_0ia[2] = 5;
-    for (i_0ii = 0; i_0ii < 3; i_0ii++) {
-        i_0i = i_0ia[i_0ii];
+    JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, temp_1_a, 3, 1, 3)
+    jmi_array_ref_1(temp_1_a, 1) = 2;
+    jmi_array_ref_1(temp_1_a, 2) = 3;
+    jmi_array_ref_1(temp_1_a, 3) = 5;
+    for (i_0ii = 0; i_0ii < jmi_array_size(temp_1_a, 0); i_0ii++) {
+        i_0i = jmi_array_val_1(temp_1_a, i_0ii);
         x_v = x_v + i_0i;
     }
     JMI_RET(GEN, o_o, o_v)
@@ -3757,25 +3758,26 @@ jmi_ad_var_t func_CCodeGenTests_CArrayInput8_f2_exp1(jmi_array_t* inp_a);
 void func_CCodeGenTests_CArrayInput8_f1_def0(jmi_ad_var_t* out_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, out_v)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
     jmi_ad_var_t i_0i;
     int i_0ii;
-    jmi_ad_var_t i_0ia[2];
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
     out_v = 1.0;
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, 2, 1, 2)
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
+    jmi_array_ref_1(temp_1_a, 1) = func_CCodeGenTests_CArrayInput8_f2_exp1(tmp_1);
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
     jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(4);
     jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(5);
     jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(6);
-    i_0ia[0] = func_CCodeGenTests_CArrayInput8_f2_exp1(tmp_1);
-    i_0ia[1] = func_CCodeGenTests_CArrayInput8_f2_exp1(tmp_2);
-    for (i_0ii = 0; i_0ii < 2; i_0ii++) {
-        i_0i = i_0ia[i_0ii];
+    jmi_array_ref_1(temp_1_a, 2) = func_CCodeGenTests_CArrayInput8_f2_exp1(tmp_2);
+    for (i_0ii = 0; i_0ii < jmi_array_size(temp_1_a, 0); i_0ii++) {
+        i_0i = jmi_array_val_1(temp_1_a, i_0ii);
         JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
         jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(7);
         jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(8);
@@ -20408,5 +20410,149 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
         end TwoDSSetSameBlock;
     end DynamicStates;
+
+
+model ForOfUnknownSize1
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ForOfUnknownSize1",
+            description="C code gen for for loop over unknown size array: array variable",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_ForOfUnknownSize1_f_def0(jmi_array_t* y_a, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, x_v)
+    jmi_ad_var_t v_0i;
+    int v_0ii;
+    x_v = 0;
+    for (v_0ii = 0; v_0ii < jmi_array_size(y_a, 0); v_0ii++) {
+        v_0i = jmi_array_val_1(y_a, v_0ii);
+        x_v = x_v + v_0i;
+    }
+    JMI_RET(GEN, x_o, x_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ForOfUnknownSize1_f_exp0(jmi_array_t* y_a) {
+    JMI_DEF(REA, x_v)
+    func_CCodeGenTests_ForOfUnknownSize1_f_def0(y_a, &x_v);
+    return x_v;
+}
+
+")})));
+end ForOfUnknownSize1;
+
+
+model ForOfUnknownSize2
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in 1:n loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ForOfUnknownSize2",
+            description="C code gen for for loop over unknown size array: range exp",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_ForOfUnknownSize2_f_def0(jmi_ad_var_t n_v, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, x_v)
+    jmi_ad_var_t i_0i;
+    jmi_ad_var_t i_0ie;
+    x_v = 0;
+    i_0ie = n_v + 1 / 2.0;
+    for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
+        x_v = x_v + i_0i;
+    }
+    JMI_RET(GEN, x_o, x_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ForOfUnknownSize2_f_exp0(jmi_ad_var_t n_v) {
+    JMI_DEF(REA, x_v)
+    func_CCodeGenTests_ForOfUnknownSize2_f_def0(n_v, &x_v);
+    return x_v;
+}
+
+")})));
+end ForOfUnknownSize2;
+
+
+model ForOfUnknownSize3
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in (1:n).^2 loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="ForOfUnknownSize3",
+            description="C code gen for for loop over unknown size array: general array exp",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenTests_ForOfUnknownSize3_f_def0(jmi_ad_var_t n_v, jmi_ad_var_t* x_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, x_v)
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, -1, 1)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    jmi_ad_var_t i_1i;
+    int i_1ii;
+    x_v = 0;
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, temp_1_a, jmi_max(n_v, AD_WRAP_LITERAL(0)), 1, jmi_max(n_v, AD_WRAP_LITERAL(0)))
+    i1_0ie = jmi_max(n_v, AD_WRAP_LITERAL(0)) + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        jmi_array_ref_1(temp_1_a, i1_0i) = (1.0 * (i1_0i) * (i1_0i));
+    }
+    for (i_1ii = 0; i_1ii < jmi_array_size(temp_1_a, 0); i_1ii++) {
+        i_1i = jmi_array_val_1(temp_1_a, i_1ii);
+        x_v = x_v + i_1i;
+    }
+    JMI_RET(GEN, x_o, x_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenTests_ForOfUnknownSize3_f_exp0(jmi_ad_var_t n_v) {
+    JMI_DEF(REA, x_v)
+    func_CCodeGenTests_ForOfUnknownSize3_f_def0(n_v, &x_v);
+    return x_v;
+}
+
+")})));
+end ForOfUnknownSize3;
 
 end CCodeGenTests;

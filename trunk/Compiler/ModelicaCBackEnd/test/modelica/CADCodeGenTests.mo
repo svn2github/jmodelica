@@ -3068,7 +3068,7 @@ equation
     annotation(__JModelica(UnitTesting(tests={
         CADCodeGenTestCase(
             name="CADForStmtTest1",
-            description="",
+            description="CAD for function with for loop",
             variability_propagation=false,
             generate_ode_jacobian=true,
             template="
@@ -3082,9 +3082,10 @@ void func_CADCodeGenTests_CADForStmtTest1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, y_var_v)
     JMI_DEF(REA, y_der_v)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_var_a, 3, 1)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_der_a, 3, 1)
     jmi_ad_var_t i_0i;
     int i_0ii;
-    jmi_ad_var_t i_0ia[3];
     jmi_ad_var_t v_0;
     jmi_ad_var_t d_0;
     jmi_ad_var_t j_1i;
@@ -3092,11 +3093,16 @@ void func_CADCodeGenTests_CADForStmtTest1_f_der_AD0(jmi_ad_var_t x_var_v, jmi_ad
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
     jmi_ad_var_t v_2;
-    i_0ia[0] = 1;
-    i_0ia[1] = 2 + x_var_v;
-    i_0ia[2] = 4;
-    for (i_0ii = 0; i_0ii < 3; i_0ii++) {
-        i_0i = i_0ia[i_0ii];
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_var_a, 3, 1, 3)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, temp_1_der_a, 3, 1, 3)
+    jmi_array_ref_1(temp_1_var_a, 1) = 1;
+    jmi_array_ref_1(temp_1_der_a, 1) = AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(temp_1_var_a, 2) = 2 + x_var_v;
+    jmi_array_ref_1(temp_1_der_a, 2) = AD_WRAP_LITERAL(0) + x_der_v;
+    jmi_array_ref_1(temp_1_var_a, 3) = 4;
+    jmi_array_ref_1(temp_1_der_a, 3) = AD_WRAP_LITERAL(0);
+    for (i_0ii = 0; i_0ii < jmi_array_size(temp_1_a, 0); i_0ii++) {
+        i_0i = jmi_array_val_1(temp_1_a, i_0ii);
         v_0 = x_var_v + 1;
         d_0 = x_der_v + AD_WRAP_LITERAL(0);
         j_1ie = v_0 + 1 / 2.0;

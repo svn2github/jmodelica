@@ -1503,7 +1503,8 @@ aspect Scalarization {
         return scalarize(s.map());
     }
     
-    syn boolean FExp.scalarizeExpanded()       = isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize());
+    syn boolean FExp.scalarizeExpanded()       = 
+        isComposite() && indexNames == null && !(size().isUnknown() || inUnknownSize()) && !(useTempVar && isForIndexExp());
     eq FIdUseExp.scalarizeExpanded()           = !inFunction() && super.scalarizeExpanded();
     eq FFunctionCall.scalarizeExpanded()       = ((useTempVar && !inFunction()) || isVectorized()) && super.scalarizeExpanded();
     eq FArray.scalarizeExpanded()              = useTempVar && super.scalarizeExpanded();

@@ -239,9 +239,6 @@ aspect ComplianceCheck {
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
 
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX =
-            new SimpleErrorProducer("UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX", ProblemKind.COMPLIANCE, "Unknown size array as a for index is not supported in functions");
-
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION =
             new SimpleErrorProducer("UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION", ProblemKind.COMPLIANCE, "For index without in expression isn't supported");
 
@@ -250,9 +247,6 @@ aspect ComplianceCheck {
     
     public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {
-            UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX.invoke(this);
-        }
         if (!hasFExp()) {
             UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
         }
