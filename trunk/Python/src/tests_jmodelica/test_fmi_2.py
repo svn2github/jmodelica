@@ -133,7 +133,35 @@ class Test_FMUModelCS2:
         cls.coupled_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.bouncing_name = compile_fmu("BouncingBall",os.path.join(path_to_mofiles,"BouncingBall.mo"), target="cs", version="2.0", compiler_options={'eliminate_alias_constants':False})
         cls.jacobian_name = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="cs", version="2.0", compiler_options={'generate_ode_jacobian':True})
+        cls.terminate = compile_fmu("Terminate",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
+        cls.assert_fail = compile_fmu("AssertFail",os.path.join(path_to_mofiles,"Terminate.mo"),target="cs", version="2.0")
     
+        
+    @testattr(fmi = True)
+    def test_assert_fail(self):
+        model = load_fmu(Test_FMUModelCS2.assert_fail)
+        
+        nose.tools.assert_raises(Exception, model.simulate)
+    
+    @testattr(fmi = True)
+    def test_terminate(self):
+        model = load_fmu(Test_FMUModelCS2.terminate)
+        
+        model.initialize()
+        status = model.do_step(0,1)
+        
+        assert status == fmi.FMI_DISCARD
+        assert abs(model.get_real_status(fmi.FMI2_LAST_SUCCESSFUL_TIME) - 0.5) < 1e-3
+        
+    @testattr(fmi = True)
+    def test_terminate_2(self):
+        model = load_fmu(Test_FMUModelCS2.terminate)
+        
+        res = model.simulate()
+        
+        assert res.status == fmi.FMI_DISCARD
+        assert abs(res["time"][-1] - 0.5) < 1e-3
+
     @testattr(fmi = True)
     def test_log_file_name(self):
         path, file_name = os.path.split(self.coupled_name)
