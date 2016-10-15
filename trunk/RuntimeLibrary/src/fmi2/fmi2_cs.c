@@ -114,6 +114,12 @@ fmi2Status fmi2_do_step(fmi2Component c, fmi2Real currentCommunicationPoint,
             fmi2_cs->triggered_external_event = FALSE;
         }
         
+        /* Check if the simulation should be terminated. */
+        if (fmi2_cs->event_info.terminateSimulation) {
+            jmi_log_node(ode_problem->log, logInfo, "Terminate", "Terminating simulation after a signal from the model at <t:%E>.", ode_problem->time);
+            return fmi2Discard;
+        }
+        
         /* We need the values of the continuous states to initialize, no need to check 'valuesOfContinuousStatesChanged'. */
         if (initialize) {
             flag = fmi2_get_continuous_states(ode_problem->fmix_me, ode_problem->states, ode_problem->n_real_x);
@@ -192,6 +198,13 @@ fmi2Status fmi2_get_status(fmi2Component c, const fmi2StatusKind s,
 
 fmi2Status fmi2_get_real_status(fmi2Component c, const fmi2StatusKind s,
                                 fmi2Real* value) {
+    fmi2_cs_t* fmi2_cs = (fmi2_cs_t*)c;
+    jmi_ode_problem_t* ode_problem = fmi2_cs -> ode_problem;
+    
+    if (s == fmi2LastSuccessfulTime) {
+        *value = ode_problem->time;
+        return fmi2OK;
+    }
     return fmi2Discard;
 }
 
