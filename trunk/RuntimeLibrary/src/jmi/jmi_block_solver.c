@@ -522,7 +522,8 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
         }
         
         /* ENHANCED FIXED POINT ITERATION */
-        if (converged==0 && (ef==0 || ef==jmi_block_solver_status_event_non_converge || ef==jmi_block_solver_status_inf_event_loop) && block_solver->check_discrete_variables_change){
+        if (converged==0 && (ef==0 || ef==jmi_block_solver_status_event_non_converge || ef==jmi_block_solver_status_inf_event_loop) 
+            && block_solver->check_discrete_variables_change && block_solver->n > 0){
             int non_reals_changed_flag;
             int non_reals_not_changed_flag;
             jmi_log_node_t ebi_node = jmi_log_enter_fmt(log, logInfo, "EnhancedBlockIterations",
