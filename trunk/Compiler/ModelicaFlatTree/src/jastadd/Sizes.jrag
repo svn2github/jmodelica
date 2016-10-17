@@ -286,12 +286,8 @@ aspect FunctionCallSizes {
     }
     
     public Size Size.createSizeFExp(InstFunctionCall call) {
-        return this;
-    }
-    
-    public Size MutableSize.createSizeFExp(InstFunctionCall call) {
         
-        if (call.isCircular())
+        if (!isUnknown() || call.isCircular())
             return this;
         
         HashMap<InstComponentDecl, InstFunctionArgument> varMap = new HashMap<InstComponentDecl, InstFunctionArgument>();
@@ -569,27 +565,17 @@ aspect SizesUtil {
      * @param varMap  a map of variables to replace and expressions to replace them with
      */
     public FExp Size.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
-        checkDimension(d);
-        if (isUnknown(d)) {
+        if (d < 0 || d >= ndims()) {
             throw new ConstantEvaluationException();
         }
-        return new FIntegerLitExp(get(d));
+        return createFExp(d);
     }
     
     public FExp MutableSize.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
-        checkDimension(d);
-        FExp exp = exps[d];
-        if (exp == null || exp.variability().knownParameterOrLess()) {
-            return super.copyReplaceAccess(d, crp);
-        } else {
-            return exps[d].copyReplaceAccess(crp);
-        }
-    }
-    
-    public void Size.checkDimension(int d) {
-        if (d < 0 || d >= ndims() || isCircular(d)) {
-            throw new ConstantEvaluationException();
-        }
+        evaluate(d);
+        return (okExp(d, true)) ?
+                exps[d].copyReplaceAccess(crp) :
+                super.copyReplaceAccess(d, crp);
     }
     
 }
