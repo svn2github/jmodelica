@@ -551,7 +551,7 @@ int jmi_block_solver_solve(jmi_block_solver_t * block_solver, double cur_time, i
                 /* Set the correct solution */ 
                 block_solver->F(block_solver->problem_data, x_new, NULL, JMI_BLOCK_WRITE_BACK); 
                 /* block_solver->update_discrete_variables(block_solver->problem_data, &non_reals_changed_flag);  Not needed, nothing changed */
-                jmi_log_node(log, logInfo, "Found consistent solution on first try in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>", 
+                jmi_log_node(log, logInfo, "FirstEnhancedSolutionConsistent","Found consistent solution on first try in enhanced fixed point iteration in <block:%s, iter:%I> at <t:%E>", 
                         block_solver->label, iter, cur_time); 
                 converged = 1; 
             }
