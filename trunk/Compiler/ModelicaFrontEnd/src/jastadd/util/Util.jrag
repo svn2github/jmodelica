@@ -157,12 +157,17 @@ aspect Parsers {
     public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName) 
             throws CompilerException, beaver.Parser.Exception, IOException {
         try {
-            return parseModelicaString(uif, str, fileName);
+            return parseStringNoCatch(uif, str, fileName);
         } catch (ParserException e) {
             CompilerException ce = new CompilerException();
             ce.addProblem(e.getProblem());
             throw ce;
         }
+    }
+
+    public static SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName) 
+            throws CompilerException, beaver.Parser.Exception, IOException {
+        return parseModelicaString(uif, str, fileName);
     }
 
     public static Exp ParserHandler.parseExpString(String str)
