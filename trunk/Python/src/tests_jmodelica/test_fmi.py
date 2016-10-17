@@ -76,8 +76,14 @@ class Test_FMUModelBase:
         """
         Sets up the test class.
         """
-        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"))
-        cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'))
+        cls.negAliasFmu = compile_fmu("NegatedAlias",os.path.join(path_to_mofiles,"NegatedAlias.mo"), version=1.0)
+        cls.enumFMU = compile_fmu('Parameter.Enum', os.path.join(path_to_mofiles,'ParameterTests.mo'), version=1.0)
+
+    @testattr(fmi = True)
+    def test_version(self):
+        negated_alias  = load_fmu(Test_FMUModelBase.negAliasFmu)
+        
+        assert negated_alias.get_version() == "1.0"
 
     @testattr(fmi = True)
     def test_caching(self):
