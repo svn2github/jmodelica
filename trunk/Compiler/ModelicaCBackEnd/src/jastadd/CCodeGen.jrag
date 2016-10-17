@@ -2605,7 +2605,13 @@ aspect CCodeGen {
         }
         return false;
     }
-
+    
+    syn boolean FAbstractEquation.isSampleEquation() = false;
+    eq FEquation.isSampleEquation()                  = getRight().isFSampleExp();
+    
+    syn boolean FExp.isFSampleExp() = false;
+    eq FSampleExp.isFSampleExp()    = true;
+    
     @Override
     public void MetaEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
             String indent, boolean inInitial, Set<FAbstractEquation> visited) {
