@@ -58,7 +58,7 @@ class Test_FMUModelBase2:
     def test_version(self):
         negated_alias  = load_fmu(Test_FMUModelBase2.negAliasFmu)
         
-        assert negated_alias.get_version() == "1.0"
+        assert negated_alias.get_version() == "2.0"
 
     @testattr(fmi = True)
     def test_caching(self):
