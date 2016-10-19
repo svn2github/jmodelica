@@ -273,12 +273,17 @@ aspect TransformCanonical {
         String value = myOptions().getStringOption("debug_transformation_steps");
         if ("full".equals(value)) {
             TRANSFORMATION_STEP_DIR.mkdir();
+            TRANSFORMATION_STEP_HTML_DIR.mkdir();
             String fileName = String.format("%02d_%s.mof", completedTransformationSteps, lastCompletedTransformationStep);
+            String htmlFileName = String.format("%02d_%s.html", completedTransformationSteps, lastCompletedTransformationStep);
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
+            File htmlFile = new File(TRANSFORMATION_STEP_HTML_DIR, htmlFileName);
             log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
+                CodeStream htmlOut = new CodeStream(htmlFile);
                 sourcePrettyPrint(out, "");
+                htmlSourcePrettyPrint(htmlOut, "");
                 out.close();
             } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
@@ -300,6 +305,7 @@ aspect TransformCanonical {
     }
     
     private static final File FClass.TRANSFORMATION_STEP_DIR = new File("transformation_steps");
+    private static final File FClass.TRANSFORMATION_STEP_HTML_DIR = new File("transformation_steps_html");
 
     private int FClass.completedTransformationSteps = 0;
     private String FClass.lastCompletedTransformationStep = "flattening";

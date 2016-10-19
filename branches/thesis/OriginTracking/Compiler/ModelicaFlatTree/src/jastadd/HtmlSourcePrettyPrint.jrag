@@ -1,0 +1,185 @@
+	//fabstractequaton
+	//fabstractvariable
+	//fexp
+
+aspect HtmlSourcePrettyPrint {
+
+	public class HtmlSourcePrettyPrinter extends PrettyPrinter {
+		
+			private int htmlLineDepth;
+		
+			public HtmlSourcePrettyPrinter() {
+				super();
+				htmlLineDepth = 0;
+			}
+			
+	 		public void print(ASTNode node, CodeStream str, String indent) { 
+	 			node.htmlSourcePrettyPrint(this, str, indent); 
+	 		
+	 		}
+	 		
+	 		public int incLineDepth(){ return htmlLineDepth++; }
+	 		
+	 		public int decLineDepth(){ return htmlLineDepth--; }
+	}
+	public void ASTNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		prettyPrint(p, str, indent);
+	}
+	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
+		str.println("<html>\n<head>\n<title>Derp</title>\n");
+		str.println(htmlStyle());
+		str.println("</head><body>");
+		htmlSourcePrettyPrint(new HtmlSourcePrettyPrinter(), str, indent);
+		str.println("</body>\n</html>");
+		
+	}
+	
+	public String ASTNode.htmlStyle(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("<style>\nspan {\n");
+		sb.append("\tline-height: 20px;\n");
+		sb.append("\tbackground: linear-gradient(0deg, black 1px, white 1px, transparent 1px);\n");
+		sb.append("\tbackground-position: 0 100%;\n}\n");
+		for(Integer i = 1; i < 6; i++){
+			sb.append(".s" + i + " {\n");
+			sb.append("\tline-height: " + (i * 4 + 20) + "px;\n");
+			sb.append("\tpadding-bottom: " + (i * 4) + "px;\n}\n");
+		}
+		sb.append("</style>\n");
+		return sb.toString();
+		
+	}
+	
+	
+	/**
+	 * Copied from FClass.prettyPrint and modified
+	 */
+	public void FClass.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+        String nextInd = p.indent(indent);
+        str.print(indent + "<b>fclass " + name() + "</b><br>\n");
+        ArrayList<FVariable> protectedVars = new ArrayList<FVariable>();
+        for (FVariable fv : getFVariables()) {
+            if (!fv.isDerivativeVariable() && !fv.isPreVariable() &&
+                    !fv.getFVisibilityType().isRuntimeOptionVisibility()) {
+                if (fv.isProtected()) {
+                  protectedVars.add(fv);
+                } else {
+                    p.print(fv, str, nextInd);
+                    str.print(";<br>\n");
+                }
+            }
+        }
+        if (!protectedVars.isEmpty()) {
+            str.print(indent + "<b>protected</b><br>\n");
+            for (FVariable fv : protectedVars) {
+                p.print(fv, str, nextInd);
+                str.print(";<br>\n");
+            }
+        }
+
+        if (getNumFInitialEquation()>0)
+            str.print(indent + "<b>initial equation</b><br>\n");
+        getFInitialEquations().prettyPrintWithFix(p, str, nextInd, "", ";<br>\n");
+
+        if (getNumFParameterEquation()>0)
+            str.print(indent + "<b>parameter equation</b><br>\n");
+        getFParameterEquations().prettyPrintWithFix(p, str, nextInd, "", ";<br>\n");
+    
+        boolean wroteEquation = false;
+        for (FAbstractEquation e : getFAbstractEquations()) {
+            if (e instanceof FAlgorithm) {
+                p.print(e, str, indent);
+                wroteEquation = false;
+            } else {
+                if (!e.isIgnored()) {
+                    if (!wroteEquation) {
+                        str.print(indent);
+                        str.print("<b>equation</b><br>\n");
+                        wroteEquation = true;
+                    }
+                    p.print(e, str, nextInd);
+                    str.print(";<br>\n");
+                }
+            }
+        }
+        
+        if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
+                getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
+            str.print("\n" + indent + "<b>public</b>\n");
+            p.print(getFFunctionDecls(), str, nextInd);
+            p.print(getFRecordDecls(), str, nextInd);
+            p.print(getFEnumDecls(), str, nextInd);
+            p.print(getFDerivedTypes(), str, nextInd);
+        }
+        
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
+
+        str.print(indent);
+        str.print("<b>end ");
+        str.print(name());
+        str.print(";</b>\n");
+    }
+	
+	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		String s = this.getClass().toString();
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
+			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
+			prettyPrint(p, str, indent);
+			hp.decLineDepth()--;
+			str.print("</span>");
+		}else{
+			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
+			prettyPrint(p, str, indent);
+		}
+	}
+	
+	/*public void FEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
+			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			super.htmlSourcePrettyPrint(p, str, indent);
+			hp.htmlLineDepth--;
+			str.print("</span>");
+		}else{
+			super.htmlSourcePrettyPrint(p, str, indent);
+		}
+	}*/
+	
+	/*public void FExp.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
+			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			super.htmlSourcePrettyPrint(p, str, indent);
+			hp.htmlLineDepth--;
+			str.print("</span>");
+		}else{
+			super.htmlSourcePrettyPrint(p, str, indent);
+		}
+	}
+	
+	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
+			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			super.htmlSourcePrettyPrint(p, str, indent);
+			hp.htmlLineDepth--;
+			str.print("</span>");
+		}else{
+			super.htmlSourcePrettyPrint(p, str, indent);
+		}
+	}
+	
+	public void FAbstractVariable.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
+			str.print("<span class=\"s" + hp.htmlLineDepth++ + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			super.htmlSourcePrettyPrint(p, str, indent);
+			hp.htmlLineDepth--;
+			str.print("</span>");
+		}else{
+			super.htmlSourcePrettyPrint(p, str, indent);
+		}
+	}*/
+}

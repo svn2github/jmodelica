@@ -34,7 +34,7 @@ aspect SourcePrettyPrint {
 		//log.debug("Base----Source file: " + this.fName);
 		prettyPrint(p, str, indent);
 	}
-	/*
+	
 	public void FVariable.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		//if(this.fName != null)
 			//str.print("%Var location: " + this.fName);
@@ -54,6 +54,7 @@ aspect SourcePrettyPrint {
 	public void FExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		log.debug("Exp----Source position: " + this.start + " " + this.end);
 		log.debug("Exp----Source file: " + this.fName);
+		//log.debug(this.getClass().getName());
 		
 		prettyPrint(p, str, indent);
 		
@@ -72,8 +73,8 @@ aspect SourcePrettyPrint {
 		
 	}
 
-	*/
-/*	public void FIdUseExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+	
+	public void FIdUseExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		//if(this.fName==null){
 		log.debug("FIdUseExp----Source position: " + this.start + " " + this.end);
 		log.debug("FIdUseExp----Source file: " + this.fName);
@@ -84,16 +85,16 @@ aspect SourcePrettyPrint {
 		
 		//str.println("FIdUseExp----Source file: " + this.fName);
 		
-	}*/
+	}
 	
-	/*public void FTimeExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+	public void FTimeExp.sourcePrettyPrint(Printer p, CodeStream str, String indent){
 		log.debug("FTimeExp----Source position: " + this.start + " " + this.end);
 		log.debug("FTimeExp----Source file: " + this.fName);
 
 		prettyPrint(p, str, indent);
-	}*/
+	}
 	
-/*	public void FRecordConstructor.sourcePrettyPrint(Printer p, CodeStream str, String indent){
+	/*public void FRecordConstructor.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// onödig? behövs till annat?
 		log.debug("FRecordConstructor----Source position: " + this.start + " " + this.end);
 		log.debug("FRecordConstructor----Source file: " + this.fName);
 

@@ -1591,7 +1591,7 @@ aspect Scalarization {
             return this.setLocationOf(indexMap.get(name()).fullCopy());
         }
         if (indexNames != null){
-            return createUseFas(name());
+            return this.setLocationOf(createUseFas(name()));
     	}
         return this.setLocationOf(new FIdUseExp(getFIdUse().scalarize(indexMap)));
     }
