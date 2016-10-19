@@ -269,6 +269,9 @@ SUNDIALS_HOME=$sundials
 AC_SUBST(MINPACK_HOME)
 MINPACK_HOME="$CURR_DIR/minpack_install"
 
+AC_SUBST(CSPARSE_HOME)
+CSPARSE_HOME="$CURR_DIR/csparse_install"
+
 AC_ARG_WITH([superlu],
   [AS_HELP_STRING([--with-superlu],
     [SuperLU installation directory @<:@default=check@:>@])],
@@ -497,6 +500,7 @@ AC_CONFIG_FILES([
  ThirdParty/Lapack/Makefile
  ThirdParty/Sundials/Makefile
  ThirdParty/Minpack/Makefile
+ ThirdParty/CSparse/Makefile
  ThirdParty/CasADi/Makefile
  external/FMILibrary/Makefile
  JMI/src/Makefile
