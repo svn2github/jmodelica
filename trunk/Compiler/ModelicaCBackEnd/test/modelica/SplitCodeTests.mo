@@ -35,15 +35,19 @@ $C_ode_initialization$
             generatedCode="
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _p_1_0 = (1);
     _p_2_1 = (2);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = (0.0);
     _x_2_3 = (0.0);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -53,31 +57,39 @@ int jmi_set_start_values_1_0(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
     ef |= jmi_set_start_values_1_0(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = _p_1_0 + _time;
     _x_2_3 = _p_2_1 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = _p_1_0 + _time;
     _x_2_3 = _p_2_1 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -102,25 +114,33 @@ $C_ode_initialization$
             generatedCode="
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _p_1_0 = (1);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int jmi_set_start_values_0_1(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _p_2_1 = (2);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int jmi_set_start_values_1_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = (0.0);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int jmi_set_start_values_1_1(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_2_3 = (0.0);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -132,29 +152,37 @@ int jmi_set_start_values_1_1(jmi_t* jmi);
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= jmi_set_start_values_0_0(jmi);
     ef |= jmi_set_start_values_0_1(jmi);
     model_init_eval_parameters(jmi);
     ef |= jmi_set_start_values_1_0(jmi);
     ef |= jmi_set_start_values_1_1(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = _p_1_0 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_2_3 = _p_2_1 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -163,20 +191,26 @@ int model_ode_derivatives_1(jmi_t* jmi);
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= model_ode_derivatives_0(jmi);
     ef |= model_ode_derivatives_1(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_initialize_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_2 = _p_1_0 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_initialize_1(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_2_3 = _p_2_1 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -185,8 +219,10 @@ int model_ode_initialize_1(jmi_t* jmi);
 
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= model_ode_initialize_0(jmi);
     ef |= model_ode_initialize_1(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -201,21 +237,23 @@ model SplitCodeTest3
             description="Test split options",
             cc_split_element_limit=2,
             cc_split_function_limit=2,
-            template="
-$C_ode_derivatives$
-",
+            template="$C_ode_derivatives$",
             generatedCode="
 int model_ode_derivatives_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1_0 = 1 + _time;
     _x_2_1 = 2 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_derivatives_1(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_3_2 = 3 + _time;
     _x_4_3 = 4 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -223,15 +261,19 @@ int model_ode_derivatives_1(jmi_t* jmi) {
 
 int model_ode_derivatives_2(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_5_4 = 5 + _time;
     _x_6_5 = 6 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_derivatives_3(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_7_6 = 7 + _time;
     _x_8_7 = 8 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -239,14 +281,18 @@ int model_ode_derivatives_3(jmi_t* jmi) {
 
 int model_ode_derivatives_4(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_9_8 = 9 + _time;
     _x_10_9 = 10 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
 int model_ode_derivatives_5(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_11_10 = 11 + _time;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
@@ -259,12 +305,14 @@ int model_ode_derivatives_5(jmi_t* jmi);
 
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= model_ode_derivatives_0(jmi);
     ef |= model_ode_derivatives_1(jmi);
     ef |= model_ode_derivatives_2(jmi);
     ef |= model_ode_derivatives_3(jmi);
     ef |= model_ode_derivatives_4(jmi);
     ef |= model_ode_derivatives_5(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));

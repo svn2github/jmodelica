@@ -946,8 +946,7 @@ aspect CADCodeGen {
         
         str.print(indent);
         str.println("jmi_real_t** res = &residual;");
-        str.print(indent);
-        str.println("int ef = 0;");
+        ASTNode.genFunctionStart(str, indent);
         str.print(indent);
         str.println("jmi_real_t** dF = &dRes;");
         str.print(indent);
@@ -1027,7 +1026,7 @@ aspect CADCodeGen {
         str.print(indent);
         str.println("}");
         str.print(indent);
-        str.println("return ef;");
+        ASTNode.genFunctionEnd(str, indent);
         str.print(outerIndent);
         str.println("}");
         str.println();

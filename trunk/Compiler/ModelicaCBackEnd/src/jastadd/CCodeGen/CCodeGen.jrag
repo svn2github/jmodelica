@@ -698,8 +698,7 @@ aspect CCodeGen {
 		// Print definition
 		prettyPrintHead_C(p, str, indent, "void", C_SUFFIX_DEF, true);
 		str.print(" {\n");
-		// TODO: Check if there are any dynamic declarations first
-		str.print(next + "JMI_DYNAMIC_INIT()\n");
+        ASTNode.genDynMemInit(str, next);
 		genVarDecls_C(p, str, p.indent(indent));
         for (FFunctionVariable ffv : myNonInputs()) {
             if (!ffv.isArray()) {
@@ -1073,7 +1072,29 @@ aspect CCodeGen {
     eq FStringType.macroTypeDeclScalar()         = "STR";
     eq FExternalObjectType.macroTypeDeclScalar() = "EXO";
     
-	
+    public static void ASTNode.genFunctionStart(CodeStream str, String indent) {
+        str.print(indent);
+        str.print("int ef = 0;\n");
+        ASTNode.genDynMemInit(str, indent);
+    }
+    
+    public static void ASTNode.genFunctionEnd(CodeStream str, String indent) {
+        ASTNode.genDynMemFree(str, indent);
+        str.print(indent);
+        str.print("return ef;\n");
+    }
+    
+    public static void ASTNode.genDynMemInit(CodeStream str, String indent) {
+        str.print(indent);
+        str.print("JMI_DYNAMIC_INIT()\n");
+    }
+    
+    public static void ASTNode.genDynMemFree(CodeStream str, String indent) {
+        str.print(indent);
+        str.print("JMI_DYNAMIC_FREE()\n");
+    }
+    
+    
 	public void FFunctionVariable.printReturnArgument_C(CodeStream str) {
 		str.print(typeReturn_C());
 		str.print(" ");
@@ -1820,8 +1841,7 @@ aspect CCodeGen {
     @Override
 	public void FReturnStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
 		returnDefinition().printReturnWrite_C(str, indent);
-		// TODO: Check if there are any dynamic declarations first
-		str.print(indent + "JMI_DYNAMIC_FREE()\n");
+        ASTNode.genDynMemFree(str, indent);
 		str.print(indent + "return;\n");
 	}
 	
@@ -2364,7 +2384,7 @@ aspect CCodeGen {
                 outerIndent, (inInitial? "init_": ""), getSequenceNumber());
         str.format("%s/***** %s: %s *****/\n", indent, inInitial ? "Init block" : "Block", getLabel());
         str.print(indent + "jmi_real_t** res = &residual;\n");
-        str.print(indent + "int ef = 0;\n");
+        ASTNode.genFunctionStart(str, indent);
         genVarDecls_C(p, str, indent, null);
         
         str.print(indent);
@@ -2452,7 +2472,7 @@ aspect CCodeGen {
         genBlockResidualFunction_residualEqns_C(p, str, p.indent(nextIndent), new Enumerator(), visitedList, solverArrayMap);
         str.print(nextIndent + "}\n");
         str.print(indent + "}\n");
-        str.print(indent + "return ef;\n");
+        ASTNode.genFunctionEnd(str, indent);
         str.print(outerIndent + "}\n\n");
     }
 
