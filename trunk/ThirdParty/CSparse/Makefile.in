@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = RuntimeLibrary
+subdir = ThirdParty/CSparse
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -209,10 +209,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-RUNTIMELIBRARY_BUILD_DIR = $(abs_builddir)/build
-RUNTIMELIBRARY_BUILD_DIR64 = $(abs_builddir)/build64
-RUNTIMELIBRARY_SRC_DIR = $(abs_top_srcdir)/RuntimeLibrary
-RUNTIMELIBRARY_COMMON_ARGS = "-DCMAKE_INSTALL_DIR:PATH=$(prefix)" "$(RUNTIMELIBRARY_SRC_DIR)" "-DSUNDIALS_HOME=$(SUNDIALS_HOME)" "-DTOP_SRC=$(abs_top_srcdir)" "-DEXTRA_RUNTIME_MODULES=$(EXTRA_RUNTIME_MODULES)"
+CSPARSE_DIR = $(abs_builddir)/csparse_build
+CSPARSE_DIR64 = $(abs_builddir)/csparse_build64
 all: all-am
 
 .SUFFIXES:
@@ -225,9 +223,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign RuntimeLibrary/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/CSparse/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign RuntimeLibrary/Makefile
+	  $(AUTOMAKE) --foreign ThirdParty/CSparse/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -292,7 +290,6 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-@JM_WIN64_FALSE@all-local:
 all-am: Makefile all-local
 installdirs:
 install: install-am
@@ -320,7 +317,6 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
-@JM_WIN64_TRUE@install-exec-local:
 clean: clean-am
 
 clean-am: clean-generic clean-libtool clean-local mostlyclean-am
@@ -402,43 +398,58 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	uninstall uninstall-am
 
-
 # This is to ensure that the install target of the Sundials
 # make system is run whenever make all is run. This is needed
 # in order to trigger a complete install, local in the build
 # directory, early in the build process.
 
-$(RUNTIMELIBRARY_BUILD_DIR):
-	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR) && \
-	cd $(RUNTIMELIBRARY_BUILD_DIR) && \
-	case $(build) in \
-	*-cygwin*|*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
-	*-apple*) \
-	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
-	*) \
-	cmake $(RUNTIMELIBRARY_COMMON_ARGS) ;; \
-	esac
+$(CSPARSE_DIR):
+	mkdir -p $(CSPARSE_DIR)
+	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR)/
+	mkdir -p $(abs_builddir)/../../csparse_install/lib
+	mkdir -p $(abs_builddir)/../../csparse_install/include
 
-@JM_WIN64_TRUE@$(RUNTIMELIBRARY_BUILD_DIR64):
-@JM_WIN64_TRUE@	mkdir -p $(RUNTIMELIBRARY_BUILD_DIR64)
-@JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR64) && \
-@JM_WIN64_TRUE@	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m64" $(RUNTIMELIBRARY_COMMON_ARGS)
+@JM_WIN64_TRUE@$(CSPARSE_DIR64):
+@JM_WIN64_TRUE@	mkdir -p $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR64)/	
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/lib
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/include
 
-@JM_WIN64_TRUE@all-local: $(RUNTIMELIBRARY_BUILD_DIR) $(RUNTIMELIBRARY_BUILD_DIR64)
-@JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
-@JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR64) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+@JM_WIN64_TRUE@all-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	case $(build) in \
+@JM_WIN64_TRUE@	*-cygwin*|*-mingw*) \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m64 install DESTDIR= ;; \
+@JM_WIN64_TRUE@	*) \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR= ;; \
+@JM_WIN64_TRUE@	esac
 
-@JM_WIN64_FALSE@install-exec-local: $(RUNTIMELIBRARY_BUILD_DIR)
-@JM_WIN64_FALSE@	cd $(RUNTIMELIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+@JM_WIN64_TRUE@install-exec-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install64/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Include/* $(abs_builddir)/../../csparse_install64/include/
+
+@JM_WIN64_FALSE@all-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	case $(build) in \
+@JM_WIN64_FALSE@	*-cygwin*|*-mingw*) \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 install DESTDIR= ;; \
+@JM_WIN64_FALSE@	*) \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR= ;; \
+@JM_WIN64_FALSE@	esac
+
+@JM_WIN64_FALSE@install-exec-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
 
 check-local:
-	cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
-@JM_WIN64_TRUE@	cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
+	cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
-	-cd $(RUNTIMELIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-@JM_WIN64_TRUE@	-cd $(RUNTIMELIBRARY_BUILD_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
