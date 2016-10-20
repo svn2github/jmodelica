@@ -22,17 +22,15 @@
 #include "jmi_linear_solver.h"
 #include "jmi_block_solver_impl.h"
 #include "jmi_log.h"
+#include <stdint.h>
 
 #define SMALL 1e-15
 #define THRESHOLD 1e-15
 
 int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver= (jmi_linear_solver_t*)calloc(1,sizeof(jmi_linear_solver_t));
-/*    jmi_t* jmi = block->jmi;
-    int i = 0;
-    int j = 0; */
+
     int n_x = block->n;
-    int info = 0;
     int i;
     
     if (!solver) return -1;
@@ -65,9 +63,12 @@ int jmi_linear_solver_new(jmi_linear_solver_t** solver_ptr, jmi_block_solver_t* 
     for (i=0; i<n_x; i++) {
         solver->zero_vector[i] = 0.0;
     }
+    
+    solver->Jsp = NULL;
 
     *solver_ptr = solver;
-    return info==0? 0: -1;
+    
+    return 0;
 }
 
 static int jmi_linear_find_dependent_set(jmi_block_solver_t * block) {
@@ -280,7 +281,19 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
              TODO: this code should be merged with the code used in kinsol interface module.
              A regularization strategy for simple cases singular jac should be introduced.
           */
-        info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN);
+        if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) { 
+            if(block->init) {  
+                info = jmi_linear_solver_sparse_setup(block);  
+                if (info) { 
+                    jmi_log_node(block->log, logError, "JacobianSparseSetup", "Failed to setup the sparse Jacobian for <block: %s>",  
+                            block->label); 
+                    return -1; 
+                } 
+            } 
+            info = jmi_linear_solver_sparse_compute_jacobian(block); 
+        } else  { 
+            info = block->F(block->problem_data,NULL,block->J->data,JMI_BLOCK_EVALUATE_JACOBIAN); 
+        } 
         
         jmi_linear_solver_employ_variable_scaling(block, block->J->data);
         
@@ -296,6 +309,7 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             }
             return -1;
         }
+
         if((n_x>1)  && block->options->use_jacobian_equilibration_flag) {
             double rowcnd, colcnd, amax;
             dgeequ_(&n_x, &n_x, solver->factorization, &n_x, solver->rScale, solver->cScale, 
@@ -516,8 +530,220 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     return info==0? 0: -1;
 }
 
+int jmi_linear_solver_cs_to_dense(const cs *A, double *x) {
+    int col, p;
+    double val;
+    for (col = 0 ; col < A->n ; col++) {
+        for (p = A->p [col] ; p < A->p[col+1] ; p++) {
+            val =  A->x[p];
+            x[A->n*col+A->i[p]] = val;
+        }
+    }
+    return 0;
+}
+
+int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+    int k = 0;
+    csi col, i;
+    int info = 0;
+    
+    if (Jsp->L != NULL) {
+        info |= block->F(block->problem_data,NULL,Jsp->L->x,  JMI_BLOCK_EVALUATE_JACOBIAN_L);
+        info |= block->F(block->problem_data,NULL,Jsp->A12->x,JMI_BLOCK_EVALUATE_JACOBIAN_A12);
+        info |= block->F(block->problem_data,NULL,Jsp->A21->x,JMI_BLOCK_EVALUATE_JACOBIAN_A21);
+    }
+    info |= block->F(block->problem_data,NULL,Jsp->A22->x,JMI_BLOCK_EVALUATE_JACOBIAN_A22);
+    if (info) { return info; }
+    
+    /* A22 - A21L^(-1)A12 */
+    /* M1 = L^(-1)A12 */
+    /* M2 = A21L^(-1)A12 */
+    /* M3 = A22 - A21L^(-1)A12 */
+    
+    /* Compute L^(-1) A12 */
+    if (Jsp->L != NULL ) {
+        for (col = 0; col < Jsp->A12->n; col++) {
+            info = cs_spsolve_inplace(Jsp->L, Jsp->A12, col, Jsp->xi[col], Jsp->top[col], Jsp->work_x);
+            if (info) { 
+                jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to compute the sparse inplace triangular solve as part of the Jacobian (L^-1*A12) in <block: %s>.", block->label);
+                return info; 
+            }
+            
+            for (i = 0; i < Jsp->L->m-Jsp->top[col]; i++) {
+                Jsp->M1->x[k] = Jsp->work_x[Jsp->xi[col][i]];
+                k = k + 1;
+            }
+        }
+        
+        /* Compute A21L^(-1)A12 */
+        info = cs_multiply_inplace (Jsp->A21, Jsp->M1, Jsp->M2, Jsp->work_w, Jsp->work_x);
+        if (info) { 
+            jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to compute the sparse inplace multiplication as part of the Jacobian (A21*L^-1*A12) in <block: %s>.", block->label);
+            return info; }
+            
+        /* Compute A22 - A21L^(-1)A12 */
+        info = cs_add_inplace( Jsp->A22, Jsp->M2, Jsp->M3, 1.0, -1.0, Jsp->work_w, Jsp->work_x);
+        if (info) { 
+            jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to compute the sparse inplace addition as part of the Jacobian (A22-A21*L^-1*A12) in <block: %s>.", block->label);
+            return info; 
+        }
+        
+        /* Convert back to dense */
+        jmi_linear_solver_cs_to_dense(Jsp->M3, block->J->data);
+    } else {
+        /* Convert back to dense */
+        jmi_linear_solver_cs_to_dense(Jsp->A22, block->J->data);
+    }
+    
+    return 0;
+}
+
+static int compare( const void* a, const void* b)
+{
+     csi int_a = * ( (csi*) a );
+     csi int_b = * ( (csi*) b );
+
+     if ( int_a == int_b ) return 0;
+     else if ( int_a < int_b ) return -1;
+     else return 1;
+}
+
+int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp;
+    csi top, col, i, nzmax = 0;
+    csi *xi;
+    csi max_xi = 0;
+    int ret;
+    
+    solver->Jsp = (jmi_linear_solver_sparse_t*)calloc(1, sizeof(jmi_linear_solver_sparse_t));
+    solver->Jsp->L = NULL; solver->Jsp->A12 = NULL; solver->Jsp->A21 = NULL; solver->Jsp->A22 = NULL;
+    solver->Jsp->M1 = NULL; solver->Jsp->M2 = NULL; solver->Jsp->M3 = NULL; solver->Jsp->xi = NULL;
+    solver->Jsp->work_x = NULL; solver->Jsp->work_w = NULL;
+    Jsp = solver->Jsp;
+    
+    ret = jmi_linear_solver_init_sparse_matrices(block);
+    if (ret) { return ret; }
+    
+    /* Check if torn */
+    if (Jsp->L != NULL) {
+        max_xi = Jsp->L->n > Jsp->A22->n ? Jsp->L->n : Jsp->A22->n;
+        
+        Jsp->xi  = (csi**)calloc(Jsp->A12->n, sizeof(csi*));
+        Jsp->top = (csi*)calloc(Jsp->A12->n, sizeof(csi));
+        Jsp->work_x = (double*)calloc(max_xi, sizeof(double));
+        Jsp->work_w = (csi*)calloc(max_xi, sizeof(csi));
+    
+    
+        /* Compute the sparsity structure of L^(-1) A12 */
+        xi = calloc(2*max_xi, sizeof(csi));
+        for (col = 0; col < Jsp->A12->n; col++) {
+            top = cs_reach (Jsp->L, Jsp->A12, col, xi, NULL) ;        /* xi[top..n-1]=Reach(B(:,k)) */
+            
+            Jsp->xi[col] = calloc(Jsp->L->m-top, sizeof(csi));
+            
+            for (i = 0; i < Jsp->L->m-top; i++) { Jsp->xi[col][i] = xi[top+i]; }
+            
+            qsort(  Jsp->xi[col], Jsp->L->m-top, sizeof(csi), compare );
+            
+            Jsp->top[col] = top;
+            nzmax += Jsp->L->m-top;
+        }
+        free(xi);
+    
+        Jsp->M1 = cs_spalloc(Jsp->L->m, Jsp->A12->n, nzmax, 1, 0);
+        top = 0;
+        for (col = 0; col < Jsp->A12->n; col++) {
+            Jsp->M1->p[col] = top;
+            for (i = 0; i < Jsp->L->m-Jsp->top[col]; i++) {
+                Jsp->M1->i[top] = Jsp->xi[col][i];
+                Jsp->M1->x[top] = 1.0;
+                top = top + 1;
+            }
+        }
+        Jsp->M1->p[Jsp->A12->n] = top;
+        
+        /* A22 - A21L^(-1)A12 */
+        /* M1 = L^(-1)A12 */
+        /* M2 = A21L^(-1)A12 */
+        /* M3 = A22 - A21L^(-1)A12 */
+        
+        /* Compute the sparsity structures of M2 and M3 */
+        
+        for (i = 0; i < Jsp->A21->nzmax; i++) { Jsp->A21->x[i] = 1.0; }
+        for (i = 0; i < Jsp->A22->nzmax; i++) { Jsp->A22->x[i] = 1.0; }
+        
+        Jsp->M2 = cs_multiply(Jsp->A21, Jsp->M1);
+        if (Jsp->M2 == NULL) {
+            jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to compute the sparsity structure of the Jacobian (A21*L^-1*A12) in <block: %d>.", block->label);
+            return -1;
+        }
+        
+        Jsp->M3 = cs_add(Jsp->A22, Jsp->M2, 1.0, -1.0);
+        if (Jsp->M3 == NULL) {
+            jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to compute the sparsity structure of the Jacobian (A22-A21*L^-1*A12) in <block: %d>.", block->label);
+            return -1;
+        }
+        
+    } else if (Jsp->A22 == NULL) {
+         jmi_log_node(block->log, logError, "JacobianSparsity", "Failed to retrieve the sparsity structure of the Jacobian in <block: %d>.", block->label);
+        return -1;
+    }
+
+    return 0;
+}
+
+void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+    csi col;
+    
+    if (Jsp != NULL) {
+        if (Jsp->xi != NULL) {
+            for (col = 0; col < Jsp->A12->n; col++) {
+                free(Jsp->xi[col]);
+            }
+            free(Jsp->xi);
+        }
+        if (Jsp->top != NULL) { free(Jsp->top); }
+        if (Jsp->work_x != NULL) { free(Jsp->work_x); }
+        if (Jsp->work_w != NULL) { free(Jsp->work_w); }
+        
+        if (Jsp->L != NULL) { cs_spfree(Jsp->L); }
+        if (Jsp->A12 != NULL) { cs_spfree(Jsp->A12); }
+        if (Jsp->A21 != NULL) { cs_spfree(Jsp->A21); }
+        if (Jsp->A22 != NULL) { cs_spfree(Jsp->A22); }
+        if (Jsp->M1 != NULL) { cs_spfree(Jsp->M1); }
+        if (Jsp->M2 != NULL) { cs_spfree(Jsp->M2); }
+        if (Jsp->M3 != NULL) { cs_spfree(Jsp->M3); }
+        
+        free(Jsp);
+    }
+}
+
+int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
+    jmi_linear_solver_t* solver = block->solver;
+    jmi_linear_solver_sparse_t* Jsp = solver->Jsp;
+    int info = 0;
+    
+    /* Should be changed! */
+    Jsp->L   = (cs*)(intptr_t)block->F(block->problem_data,NULL, (jmi_real_t*)(Jsp->L),  JMI_BLOCK_EVALUATE_JACOBIAN_INIT_L);
+    Jsp->A12 = (cs*)(intptr_t)block->F(block->problem_data,NULL, (jmi_real_t*)(Jsp->A12),JMI_BLOCK_EVALUATE_JACOBIAN_INIT_A12);
+    Jsp->A21 = (cs*)(intptr_t)block->F(block->problem_data,NULL, (jmi_real_t*)(Jsp->A21),JMI_BLOCK_EVALUATE_JACOBIAN_INIT_A21);
+    Jsp->A22 = (cs*)(intptr_t)block->F(block->problem_data,NULL, (jmi_real_t*)(Jsp->A22),JMI_BLOCK_EVALUATE_JACOBIAN_INIT_A22);
+    
+    return info;
+}
+
 void jmi_linear_solver_delete(jmi_block_solver_t* block) {
     jmi_linear_solver_t* solver = block->solver;
+    
+    if (block->options->linear_sparse_jacobian_threshold != -1 &&  block->options->linear_sparse_jacobian_threshold <= block->n_sr) {
+        jmi_linear_solver_sparse_delete(block);
+    }
+    
     free(solver->ipiv);
     free(solver->factorization);
     free(solver->singular_values);
