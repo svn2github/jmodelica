@@ -134,20 +134,23 @@ RUNTIMELIBRARY_INC_DIR = ${JMODELICA_HOME}/include/RuntimeLibrary
 STANDARD_HEADER_INC_DIR = ${JMODELICA_HOME}/ThirdParty/FMI/2.0
 CPPAD_INC_DIR = $(CPPAD_HOME)
 SUNDIALS_INC_DIR = $(SUNDIALS_HOME)/include
+CSPARSE_INC_DIR = ${JMODELICA_HOME}/ThirdParty/CSparse/include
 
 # Directories with libraries
 JMI_LIB_DIR = ${JMODELICA_HOME}/lib
 RUNTIMELIBRARY_LIB_DIR = ${JMODELICA_HOME}/lib/RuntimeLibrary
 SUNDIALS_LIB_DIR = $(SUNDIALS_HOME)/lib
 MINPACK_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/Minpack/lib
+CSPARSE_LIB_DIR = ${JMODELICA_HOME}/ThirdParty/CSparse/lib
 
 # Libraries necessary to link with jmi
 # Reused parts
 LIBS_FMU_STD = -ljmi "-L$(JMI_LIB_DIR)" $(EXT_LIB_DIRS) $(EXTERNAL_LIBS) -lModelicaExternalC -lzlib -ljmi
 LIB_SUNDIALS = -L$(SUNDIALS_LIB_DIR) -l:libsundials_kinsol.a -l:libsundials_nvecserial.a
 LIB_MINPACK  = -L$(MINPACK_LIB_DIR) -l:libcminpack.a
+LIB_CSPARSE  = -L$(CSPARSE_LIB_DIR) -l:libcsparse.a
 LIB_STD      = -lstdc++ -lm
-LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_STD)
+LIB_COMMON   = $(LIB_SUNDIALS) $(LIB_MINPACK) $(LIB_CSPARSE) $(LIB_STD)
 LIB_JMIAD    = -L$(JMI_LIB_DIR) -ljmi_cppad
 LIB_EXTRA_AD = -L$(JMI_LIB_DIR) -ljmi_algorithm_cppad -ljmi_solver_cppad
 ifdef IPOPT_HOME
@@ -163,8 +166,8 @@ LIBS_IPOPT   = -L$(JMI_LIB_DIR) -lfmi $(LIB_JMIAD)   $(LIB_EXTRA_AD) $(LIB_IPOPT
 LIBS_CEVAL   = $(LIBS_FMU_STD)
 
 # Include paths for compilation
-INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR)
-INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) -I$(STANDARD_HEADER_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR)
+INCL_CPPAD = -I$(JMI_INC_DIR) -I$(CPPAD_INC_DIR) -I$(SUNDIALS_INC_DIR) -I$(CSPARSE_INC_DIR)
+INCL_NOCPPAD = -I$(RUNTIMELIBRARY_INC_DIR) -I$(STANDARD_HEADER_INC_DIR) $(EXT_INC_DIRS) -I$(SUNDIALS_INC_DIR) -I$(CSPARSE_INC_DIR)
 
 # set variable to correct makefile (for recursive call in fmume/fmucs)
 MAKEFILE = $(lastword $(MAKEFILE_LIST))
