@@ -15,7 +15,7 @@
 */
 
 
-package CCodeGenTestsExternalCeval
+package CCodeGenExternalCevalTests
 
 model Scalar
     type E = enumeration(A,B);
@@ -95,7 +95,6 @@ $ECE_free$
         JMI_DEF(INT_EXT, tmp_4)
         JMI_DEF(BOO_EXT, tmp_5)
         JMI_DEF(ENU_EXT, tmp_6)
-        extern void f_(double*, int*, int*, char*, int*, double*, int*, int*, char*, int*);
 
 ---
         JMCEVAL_parse(Real, a1_v);
@@ -211,7 +210,6 @@ $ECE_free$
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_11, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_12, -1, 1)
-        extern void f_(double*, int*, int*, int*, int*, int*, char*, int*, int*, int*, double*, int*, int*, int*, int*, int*, char*, int*, int*, int*);
 
 ---
         JMCEVAL_parseArrayDims(1);
@@ -379,7 +377,6 @@ $ECE_free$
 ---
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
-        extern void my_constructor2_(double*, int*, void*, int*, char*);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, -1, 1)
         JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, 2, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg2, -1, 1)
@@ -408,7 +405,6 @@ $ECE_free$
 
 ---
         JMI_DEF(REA, x_v)
-        extern double use2_(void*);
 
 ---
         JMCEVAL_parse(Real, x_v);
@@ -463,11 +459,9 @@ $ECE_free$
         JMI_DEF(EXO, o3_v)
 
 ---
-        extern void my_constructor3_(void*, void*, void*);
         JMI_DEF(EXO, tmp_16_arg0)
         JMI_DEF(INT_EXT, tmp_17)
         JMI_DEF(BOO_EXT, tmp_18)
-        extern void* my_constructor1_(double*, int*, int*, char*);
         JMI_DEF(REA, tmp_19_arg0)
         JMI_DEF(INT, tmp_19_arg1)
         JMI_DEF(BOO, tmp_19_arg2)
@@ -477,7 +471,6 @@ $ECE_free$
         JMI_DEF(REA, tmp_20_max)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, -1, 1)
-        extern void my_constructor2_(double*, int*, void*, int*, char*);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_23_arg0, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg1, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg2, -1, 1)
@@ -523,7 +516,6 @@ $ECE_free$
 
 ---
         JMI_DEF(REA, x_v)
-        extern double use3_(void*);
 
 ---
         JMCEVAL_parse(Real, x_v);
@@ -796,7 +788,6 @@ $ECE_free$
         JMI_RECORD_STATIC(R2_0_r, tmp_36)
         JMI_RECORD_STATIC(R_1_r_ext, tmp_37)
         JMI_RECORD_STATIC(R_1_r_ext, tmp_38)
-        extern void f_(R_1_r**, R_1_r**);
 
 ---
         JMCEVAL_parse(Real, a_v->a1);
@@ -933,7 +924,6 @@ $ECE_free$
 
 ---
         JMI_RECORD_STATIC(R1_1_r_ext, tmp_39)
-        extern void* constructor_(R1_1_r**);
         JMI_RECORD_STATIC(R1_1_r, tmp_40_arg0)
         JMI_RECORD_STATIC(R2_0_r, tmp_41)
 
@@ -947,7 +937,6 @@ $ECE_free$
 
 ---
         JMI_DEF(REA, y_v)
-        extern double f_(void*);
 
 ---
         JMCEVAL_parse(Real, y_v);
@@ -965,4 +954,4 @@ $ECE_free$
 ")})));
 end RecordExternalObject;
 
-end CCodeGenTestsExternalCeval;
+end CCodeGenExternalCevalTests;
