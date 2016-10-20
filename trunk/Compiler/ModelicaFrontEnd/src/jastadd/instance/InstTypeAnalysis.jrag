@@ -361,6 +361,23 @@ aspect InstBindingType {
 }
 
 
+aspect NodeTypes {
+
+    /**
+     * Is this element a short class decl?
+     */
+    syn boolean Element.isShortClassDecl() = false;
+    eq ShortClassDecl.isShortClassDecl()   = true;
+
+    /**
+     * Is this element a full class decl?
+     */
+    syn boolean Element.isFullClassDecl() = false;
+    eq FullClassDecl.isFullClassDecl()    = true;
+
+}
+
+
 aspect ClassRestriction {
 
     /**
