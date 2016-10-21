@@ -393,10 +393,10 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * Returns true if the constant value is NaN, infinity or unknown.
+         * Returns false if the constant value is NaN, infinity or unknown.
          */
         public boolean isValid() {
-            return false;
+            return true;
         }
 
         /**
@@ -678,11 +678,6 @@ aspect ConstantEvaluation {
             return value < 0;
         }
 
-        @Override
-        public boolean isValid() {
-            return true;
-        }
-
     }
     
 	/**
@@ -854,11 +849,6 @@ aspect ConstantEvaluation {
         public boolean isBoolean() {
             return true;
         }
-        
-        @Override
-        public boolean isValid() {
-            return true;
-        }
 
       }
       
@@ -906,11 +896,6 @@ aspect ConstantEvaluation {
         public boolean isString() {
             return true;
         }
-        
-        @Override
-        public boolean isValid() {
-            return true;
-        }
 
       }
     
@@ -926,21 +911,25 @@ aspect ConstantEvaluation {
          * 
          * @return The string. 
          */
-    	public String toString() { 
-      		return "(unknown value)"; 
-      	}
-      	
-      	public boolean isUnknown() {
-      		return true;
-      	}
-	    
-	    /**
-	     * Get a string describing this CValue for use in 
-	     *        ConstantEvaluationExceptions.
-	     */
-	    public String errorDesc() {
-	    	return getClass().getSimpleName();
-	    }
+        public String toString() { 
+            return "(unknown value)"; 
+        }
+
+        public boolean isUnknown() {
+            return true;
+        }
+
+        public boolean isValid() {
+            return false;
+        }
+
+        /**
+         * Get a string describing this CValue for use in 
+         *        ConstantEvaluationExceptions.
+         */
+        public String errorDesc() {
+            return getClass().getSimpleName();
+        }
 
     }
     
@@ -1542,11 +1531,6 @@ aspect ConstantEvaluation {
             return res;
         }
 
-        @Override
-        public boolean isValid() {
-            return true;
-        }
-
     }
 
 
@@ -1637,11 +1621,6 @@ aspect ConstantEvaluation {
             return new CValuePartialFunction(func, resValues);
         }
 
-        @Override
-        public boolean isValid() {
-            return true;
-        }
-
     }
 
     /**
@@ -1683,20 +1662,29 @@ aspect ConstantEvaluation {
             value = this.type.getFEnumLiteralType(index - 1).getName();
         }
 
+        @Override
         public int intValue() {
             return index;
         }
 
+        @Override
         public double realValue() {
             return index;
         }
 
+        @Override
         public String stringValue() {
             return value;
         }
 
+        @Override
         public String toString() {
             return type.getName() + "." + value;
+        }
+
+        @Override
+        public boolean isEnum() {
+            return true;
         }
 
         /**
@@ -1716,11 +1704,6 @@ aspect ConstantEvaluation {
             if (!max.isUnknown() && max.intValue() < index)
                 return max;
             return this;
-        }
-
-        @Override
-        public boolean isValid() {
-            return true;
         }
 
     }
