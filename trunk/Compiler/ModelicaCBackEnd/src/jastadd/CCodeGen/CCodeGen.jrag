@@ -1046,7 +1046,7 @@ aspect CCodeGen {
     
     syn String FType.argType_C(boolean ref)        = argTypeBase_C() + (ref ? "*" : "");
     eq FExternalObjectType.argType_C(boolean ref)  = argTypeBase_C();
-    eq FStringType.argType_C(boolean ref)          = "const " + argTypeBase_C();
+    eq FStringType.argType_C(boolean ref)          = argTypeBase_C();
     
     syn String FType.argTypeBase_C()        = type_C();
     eq FPrimitiveType.argTypeBase_C()       = "double";

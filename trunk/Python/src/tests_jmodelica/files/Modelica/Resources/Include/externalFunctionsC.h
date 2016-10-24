@@ -13,7 +13,6 @@ void fIntegerArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fEnumArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fBooleanArray(int* in, size_t in_d1, int* out, size_t out_d1);
 void fStringArray(const char** in, size_t in_d1, const char** out, size_t out_d1);
-int fStrlen(const char *str);
 
 typedef struct fRec {
     double x;
