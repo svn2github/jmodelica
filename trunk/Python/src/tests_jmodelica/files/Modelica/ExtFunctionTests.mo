@@ -364,7 +364,9 @@ package CEval
       function fStrlen
         input String s;
         output Integer n;
-      external "C" n = strlen(s);
+      external "C" n = fStrlen(s) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
       end fStrlen;
 
       constant Integer   len            = fStrlen("abcde");
