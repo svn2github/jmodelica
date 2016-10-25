@@ -89,6 +89,10 @@ aspect CCodeGenExternal {
     }
     
     public void FExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {
+        if (stmt.isIncluded()) {
+            return;
+        }
+        
         boolean fortran = this instanceof FFortran77ExternalLanguage;
         str.print(indent);
         str.print("extern ");
@@ -111,8 +115,6 @@ aspect CCodeGenExternal {
         }
         str.print(");\n");
     }
-    
-    public void FCExternalLanguage.genFuncDecl(CodePrinter p, CodeStream str, String indent, FExternalStmt stmt) {}
     
     syn boolean FExp.isExternalArgumentRef(boolean fortran) = fortran || isArray();
     eq FIdUseExp.isExternalArgumentRef(boolean fortran)     = super.isExternalArgumentRef(fortran) || myCommonVarDecl().isOutput();

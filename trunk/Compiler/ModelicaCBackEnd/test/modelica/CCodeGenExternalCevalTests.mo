@@ -69,9 +69,6 @@ $ECE_calc_free$
 $ECE_free$
 ",
             generatedCode="
-
-
-
 ---
 
 ---
@@ -95,6 +92,7 @@ $ECE_free$
         JMI_DEF(INT_EXT, tmp_4)
         JMI_DEF(BOO_EXT, tmp_5)
         JMI_DEF(ENU_EXT, tmp_6)
+        extern void f(double, int, int, const char*, int, double*, int*, int*, const char*, int*);
 
 ---
         JMCEVAL_parse(Real, a1_v);
@@ -130,6 +128,7 @@ $ECE_free$
 ---
 
 ---
+
 ")})));
 end Scalar;
 
@@ -184,9 +183,6 @@ $ECE_calc_free$
 $ECE_free$
 ",
             generatedCode="
-
-
-
 ---
 
 ---
@@ -210,6 +206,7 @@ $ECE_free$
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_10, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_11, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_12, -1, 1)
+        extern void f(double*, size_t, int*, size_t, int*, size_t, const char**, size_t, int*, size_t, double*, size_t, int*, size_t, int*, size_t, const char**, size_t, int*, size_t);
 
 ---
         JMCEVAL_parseArrayDims(1);
@@ -271,6 +268,7 @@ $ECE_free$
 ---
 
 ---
+
 ")})));
 end Array;
 
@@ -377,6 +375,7 @@ $ECE_free$
 ---
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
+        extern void my_constructor2(double*, int*, void**, int*, const char**);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, -1, 1)
         JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, 2, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg2, -1, 1)
@@ -419,6 +418,7 @@ $ECE_free$
 
 ---
         destructor(o2_v);
+
 ")})));
 end ExtObj1;
 
@@ -459,9 +459,11 @@ $ECE_free$
         JMI_DEF(EXO, o3_v)
 
 ---
+        extern void my_constructor3(void*, void**, void**);
         JMI_DEF(EXO, tmp_16_arg0)
         JMI_DEF(INT_EXT, tmp_17)
         JMI_DEF(BOO_EXT, tmp_18)
+        extern void* my_constructor1(double, int, int, const char*);
         JMI_DEF(REA, tmp_19_arg0)
         JMI_DEF(INT, tmp_19_arg1)
         JMI_DEF(BOO, tmp_19_arg2)
@@ -471,6 +473,7 @@ $ECE_free$
         JMI_DEF(REA, tmp_20_max)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, -1, 1)
+        extern void my_constructor2(double*, int*, void**, int*, const char**);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_23_arg0, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg1, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg2, -1, 1)
@@ -530,6 +533,7 @@ $ECE_free$
 
 ---
         destructor(o3_v);
+
 ")})));
 end ExtObj2;
 
@@ -788,6 +792,7 @@ $ECE_free$
         JMI_RECORD_STATIC(R2_0_r, tmp_36)
         JMI_RECORD_STATIC(R_1_r_ext, tmp_37)
         JMI_RECORD_STATIC(R_1_r_ext, tmp_38)
+        extern void f(R_1_r*, R_1_r**);
 
 ---
         JMCEVAL_parse(Real, a_v->a1);
@@ -924,6 +929,7 @@ $ECE_free$
 
 ---
         JMI_RECORD_STATIC(R1_1_r_ext, tmp_39)
+        extern void* constructor(R1_1_r*);
         JMI_RECORD_STATIC(R1_1_r, tmp_40_arg0)
         JMI_RECORD_STATIC(R2_0_r, tmp_41)
 
@@ -937,6 +943,7 @@ $ECE_free$
 
 ---
         JMI_DEF(REA, y_v)
+        extern double f(void*);
 
 ---
         JMCEVAL_parse(Real, y_v);
@@ -951,6 +958,7 @@ $ECE_free$
 
 ---
         destructor(eo_v);
+
 ")})));
 end RecordExternalObject;
 

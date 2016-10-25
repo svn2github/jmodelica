@@ -3912,7 +3912,9 @@ aspect FlatExternalFunctionAPI {
     syn String FExternalStmt.include()            = include;
     syn String FExternalStmt.libraryDirectory()   = libraryDir;
     syn String FExternalStmt.includeDirectory()   = includeDir;
-
+    syn boolean FExternalStmt.isIncluded() = !(include() == null || include().equals(""));
+    syn boolean FExternalStmt.isInLibrary() = !(libraryDirectory() == null || libraryDirectory().equals(""));
+    
     private String[] FExternalStmt.library;
     private String FExternalStmt.include;
     private String FExternalStmt.libraryDir;

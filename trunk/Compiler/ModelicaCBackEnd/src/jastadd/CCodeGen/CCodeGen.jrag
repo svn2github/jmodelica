@@ -1043,10 +1043,10 @@ aspect CCodeGen {
     
     /* Corresponding external c representation */
     syn String FExp.argType_C(boolean ref) = type().argType_C(ref);
+    eq FSizeExp.argType_C(boolean ref)     = ref ? type().argType_C(ref) : "size_t";
     
     syn String FType.argType_C(boolean ref)        = argTypeBase_C() + (ref ? "*" : "");
-    eq FExternalObjectType.argType_C(boolean ref)  = argTypeBase_C();
-    eq FStringType.argType_C(boolean ref)          = argTypeBase_C();
+    eq FStringType.argType_C(boolean ref)          = "const " + super.argType_C(isArray());
     
     syn String FType.argTypeBase_C()        = type_C();
     eq FPrimitiveType.argTypeBase_C()       = "double";
