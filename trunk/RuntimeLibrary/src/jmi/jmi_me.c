@@ -1033,9 +1033,14 @@ void jmi_update_runtime_options(jmi_t* jmi) {
     index = get_option_index("_nle_solver_tol_factor");
     if(index)
         op->nle_solver_tol_factor = z[index]; 
+        
+    index = get_option_index("_le_sparse_jacobian_threshold");
+    if(index)
+        bsop->linear_sparse_jacobian_threshold = (int)z[index];
+        
     index = get_option_index("_events_default_tol");
     if(index)
-        op->events_default_tol = z[index];
+        op->events_default_tol = z[index]; 
     index = get_option_index("_time_events_default_tol");
     if(index)
         op->time_events_default_tol = z[index];
