@@ -136,8 +136,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(CodeStream genPrinter) {
 			if (shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_CAD;
 				for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
-					block.genBlockResidualFunction_CAD(false, "", genPrinter); 
+					block.genBlockResidualFunction_CAD(p, genPrinter, ""); 
 				}
 			}
 		}
@@ -154,8 +155,9 @@ public class CADGenerator extends CGenerator {
 
 		public void generate(CodeStream genPrinter) {
 			if ( shouldGenerateBlockJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_CAD.initialSystemPrinter();
 				for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
-					block.genBlockResidualFunction_CAD(true, "", genPrinter); 
+					block.genBlockResidualFunction_CAD(p, genPrinter, ""); 
 				}
 				
 			}
@@ -220,14 +222,15 @@ public class CADGenerator extends CGenerator {
             return !fclass.onlyInitBLT() && super.isActive();
         }
 
-		public void generate(CodeStream genPrinter) {
-			if (shouldGenerateODEJacobians(fclass)) {
-				genPrinter.print("\n/******** Declarations *******/\n");
-				fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
-				genPrinter.print("\njmi_real_t** dz = jmi->dz;\n");
-				fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(genPrinter);
-			}
-		}
+        public void generate(CodeStream genPrinter) {
+            if (shouldGenerateODEJacobians(fclass)) {
+                CodePrinter p = ASTNode.printer_CAD;
+                genPrinter.formatln("%s/******** Declarations *******/", INDENT);
+                fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
+                genPrinter.formatln("%sjmi_real_t** dz = jmi->dz;", INDENT);
+                fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(p, genPrinter, INDENT);
+            }
+        }
 	}
 
 	/**

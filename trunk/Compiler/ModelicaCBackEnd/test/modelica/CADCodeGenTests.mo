@@ -631,8 +631,7 @@ package FSubscriptedExp
     jmi_ad_var_t v_20;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_0, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1)
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
     /*********** Real outputs **********/
     /*** Integer and boolean outputs ***/
@@ -648,6 +647,7 @@ jmi_real_t** dz = jmi->dz;
         v_0 = pre_temp_3_6;
     }
     _temp_3_6 = v_0;
+    pre_temp_3_6 = _temp_3_6;
     v_8 = _sw(2);
     v_9 = _sw(3);
     v_7 = LOG_EXP_OR(v_8, v_9);
@@ -659,6 +659,7 @@ jmi_real_t** dz = jmi->dz;
         v_6 = pre_temp_1_4;
     }
     _temp_1_4 = v_6;
+    pre_temp_1_4 = _temp_1_4;
     v_14 = _sw(0);
     v_15 = _sw(1);
     v_13 = LOG_EXP_OR(v_14, v_15);
@@ -671,9 +672,11 @@ jmi_real_t** dz = jmi->dz;
         v_12 = pre_temp_2_5;
     }
     _temp_2_5 = v_12;
+    pre_temp_2_5 = _temp_2_5;
     v_20 = _temp_2_5 * 2;
     v_19 = (- v_20);
     _i_0 = _temp_3_6 + v_19;
+    pre_i_0 = _i_0;
     _y_1_1 = sin(_time);
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi->offs_t] * cos(_time);
     _y_2_2 = cos(_time);
@@ -2603,8 +2606,11 @@ jmi_real_t** dz = jmi->dz;
     /*** Integer and boolean outputs ***/
     /********* Other variables *********/
     _x_1_0 = 1;
+    pre_x_1_0 = _x_1_0;
     _x_2_1 = 2;
+    pre_x_2_1 = _x_2_1;
     _x_3_2 = 3;
+    pre_x_3_2 = _x_3_2;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_var_0, 3, 1, 3)
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_der_0, 3, 1, 3)
     jmi_array_ref_1(tmp_var_0, 1) = _x_1_0;
@@ -2615,6 +2621,7 @@ jmi_real_t** dz = jmi->dz;
     jmi_array_ref_1(tmp_der_0, 3) = AD_WRAP_LITERAL(0);
     func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD0(tmp_var_0, tmp_der_0, &v_0);
     _i_3 = v_0;
+    pre_i_3 = _i_3;
 
 void func_CADCodeGenTests_FunctionDiscreteOutputTest3_F_der_AD0(jmi_array_t* x_var_a, jmi_array_t* x_der_a, jmi_ad_var_t* i_o);
 
@@ -3225,17 +3232,16 @@ $CAD_dae_blocks_residual_functions$
     jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t d_3;
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     v_1 = _x_0 + AD_WRAP_LITERAL(1);
     d_1 = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
     v_0 = jmi_log_equation(jmi, v_1,\"log(x + 1)\");
     d_0 = d_1 / v_1;
     _der_a_4 = v_0 * _a_2;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = d_0 * _a_2 + v_0 * (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx];
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
     v_3 = _y_1 + AD_WRAP_LITERAL(2);
     d_3 = (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] + AD_WRAP_LITERAL(0);
     v_2 = jmi_log_equation(jmi, v_3,\"log(y + 2)\");
@@ -3348,10 +3354,9 @@ $CAD_dae_blocks_residual_functions$
     jmi_ad_var_t d_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t d_1;
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     _der_y_3 = _x_0 * _a_2;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] * _a_2 + _x_0 * (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx];
     v_1 = _x_0 * _y_1;
@@ -3486,10 +3491,9 @@ $CAD_dae_blocks_residual_functions$
     jmi_ad_var_t d_16;
     jmi_ad_var_t v_17;
     jmi_ad_var_t d_17;
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     v_2 = _x1_0 * _x2_1;
     d_2 = (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] * _x2_1 + _x1_0 * (*dz)[jmi_get_index_from_value_ref(9)-jmi->offs_real_dx];
     v_1 = v_2 + AD_WRAP_LITERAL(1);
@@ -3896,10 +3900,9 @@ $CAD_dae_blocks_residual_functions$
     jmi_ad_var_t d_27;
     jmi_ad_var_t v_28;
     jmi_ad_var_t d_28;
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     v_3 = 1.58 * _w_ode_1_1_1;
     d_3 = AD_WRAP_LITERAL(0) * _w_ode_1_1_1 + 1.58 * (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx];
     v_4 = sin(_w_ode_1_1_1);
@@ -4254,8 +4257,7 @@ equation
     JMI_DEF(REA, tmp_der_2)
     JMI_DEF(REA, tmp_var_3)
     JMI_DEF(REA, tmp_der_3)
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
     v_0 = AD_WRAP_LITERAL(2) + AD_WRAP_LITERAL(1);
     _der_x1_8 = sin(v_0);
@@ -4584,10 +4586,9 @@ $CAD_functions$
     JMI_RECORD_STATIC(Complex_0_r, tmp_der_1)
     JMI_RECORD_STATIC(Complex_0_r, tmp_var_2)
     JMI_RECORD_STATIC(Complex_0_r, tmp_der_2)
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     _der_x_6 = _x_4 * _y_5;
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] * _y_5 + _x_4 * (*dz)[jmi_get_index_from_value_ref(6)-jmi->offs_real_dx];
     /*********** Real outputs **********/
@@ -4855,8 +4856,7 @@ $CAD_functions$
     jmi_ad_var_t d_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t d_3;
-
-jmi_real_t** dz = jmi->dz;
+    jmi_real_t** dz = jmi->dz;
     /*********** ODE section ***********/
     _X_1_1_4 = 0;
     (*dz)[jmi_get_index_from_value_ref(8)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
@@ -4866,7 +4866,7 @@ jmi_real_t** dz = jmi->dz;
     (*dz)[jmi_get_index_from_value_ref(10)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
     _X_2_2_7 = 0;
     (*dz)[jmi_get_index_from_value_ref(11)-jmi->offs_real_dx] = AD_WRAP_LITERAL(0);
-    jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
     v_0 = _dx_1_1_8 * _A_1_1_0;
     d_0 = (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] * _A_1_1_0 + _dx_1_1_8 * (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx];
     v_1 = _dx_1_2_9 * _A_2_1_2;

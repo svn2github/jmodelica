@@ -559,7 +559,7 @@ public class CGenerator extends GenericGenerator {
 
 		public void generate(CodeStream genPrinter) {
 			for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-				block.genBlockResidualFunction_C(ASTNode.blockPrinter_C, genPrinter, "", false);
+				block.genBlockResidualFunction_C(ASTNode.blockPrinter_C, genPrinter, "");
 		}
 	}
 
@@ -627,7 +627,7 @@ public class CGenerator extends GenericGenerator {
 		public void generate(CodeStream genPrinter) {
             CodePrinter printer = ASTNode.blockPrinter_C.initialSystemPrinter();
 			for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-				block.genBlockResidualFunction_C(printer, genPrinter, "", true); 
+				block.genBlockResidualFunction_C(printer, genPrinter, ""); 
 		}
 	}
 
@@ -802,7 +802,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock_C(p, str, indent, false);
+                    element.genBlock_C(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
@@ -868,7 +868,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock_C(p, str, indent, true);
+                    element.genBlock_C(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
