@@ -1306,11 +1306,11 @@ aspect CCodeGenExpressions {
      */
     public void FSpatialDistExp.genInitVarDecls_C(CodePrinter p, CodeStream str, String indent) {
         p.printVarDecls(getX(), str, indent);
-        getX().genTempInputDecl_C(p, str, indent);
+        getX().genTempArg(p.DeclStep, str, indent);
         p.printVarDecls(getInitialPoints(), str, indent);
-        getInitialPoints().genTempInputDecl_C(p, str, indent);
+        getInitialPoints().genTempArg(p.DeclStep, str, indent);
         p.printVarDecls(getInitialValues(), str, indent);
-        getInitialValues().genTempInputDecl_C(p, str, indent);
+        getInitialValues().genTempArg(p.DeclStep, str, indent);
     }
 
     /**
@@ -1322,20 +1322,20 @@ aspect CCodeGenExpressions {
         // jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
         
         p.printPreSteps(getX(), str, indent);
-        getX().genTempInput_C(p, str, indent);
+        getX().genTempArg(p.PreStep, str, indent);
         p.printPreSteps(getInitialPoints(), str, indent);
-        getInitialPoints().genTempInput_C(p, str, indent);
+        getInitialPoints().genTempArg(p.PreStep, str, indent);
         p.printPreSteps(getInitialValues(), str, indent);
-        getInitialValues().genTempInput_C(p, str, indent);
+        getInitialValues().genTempArg(p.PreStep, str, indent);
         
         str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
         str.print(generatesEventInDAE() ? "JMI_FALSE" : "JMI_TRUE"); // jmi_boolean no_event
         str.print(", "); 
         p.print(getX(), str, indent); // jmi_real_t x0,
         str.print(", "); 
-        getInitialPoints().genArgument_C(p, str, indent); // jmi_real_t *x_init
+        getInitialPoints().genTempArg(p.ExecStep, str, indent); // jmi_real_t *x_init
         str.print(", ");
-        getInitialValues().genArgument_C(p, str, indent); // jmi_real_t *y_init
+        getInitialValues().genTempArg(p.ExecStep, str, indent); // jmi_real_t *y_init
         str.println(");");
         
         p.printPostSteps(getX(), str, indent);
