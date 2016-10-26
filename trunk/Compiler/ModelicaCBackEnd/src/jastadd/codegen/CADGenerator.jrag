@@ -226,7 +226,7 @@ public class CADGenerator extends CGenerator {
             if (shouldGenerateODEJacobians(fclass)) {
                 CodePrinter p = ASTNode.printer_CAD;
                 genPrinter.formatln("%s/******** Declarations *******/", INDENT);
-                fclass.getDAEStructuredBLT().genSolvedVarDecls_CAD(genPrinter, INDENT);
+                fclass.getDAEStructuredBLT().genVarDecls(p, genPrinter, INDENT);
                 genPrinter.formatln("%sjmi_real_t** dz = jmi->dz;", INDENT);
                 fclass.getDAEStructuredBLT().genOdeDerivativeBlocks_CAD(p, genPrinter, INDENT);
             }

@@ -6110,5 +6110,71 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
 
 ")})));
 end StringZeroValue1;
+    
+    package PrePropagation
+        
+        model Simple1
+            Boolean b1 = time > 0 and time < 2;
+            Integer i1(start = 0);
+        equation
+            when b1 then
+                i1 = 1;
+            end when;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            CADCodeGenTestCase(
+                name="PrePropagation_Simple1",
+                description="Test CAD gen for pre propagation, ensure that ad steps are produced for switch expressions. Code gen isn't 100% correct, but at least lets try that it is compilable c-code'",
+                generate_ode_jacobian=true,
+                template="
+$CAD_ode_derivatives$
+$CAD_dae_blocks_residual_functions$
+", /* Yes this result is incorrect, v_0 and v_1 isn't used anywhere, but this test is to ensure that the temporary declarations are produced! */
+                    generatedCode="
+    /******** Declarations *******/
+    jmi_ad_var_t v_0;
+    jmi_ad_var_t v_1;
+    jmi_real_t** dz = jmi->dz;
+    /*********** ODE section ***********/
+    /*********** Real outputs **********/
+    /*** Integer and boolean outputs ***/
+    /********* Other variables *********/
+    v_0 = _sw(0);
+    v_1 = _sw(1);
+    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
+
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_ad_var_t v_2;
+    jmi_ad_var_t v_3;
+    jmi_ad_var_t v_4;
+    jmi_ad_var_t v_5;
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    jmi_real_t** dF = &dRes;
+    jmi_real_t** dz;
+    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        return 0;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
+        dz = jmi->dz_active_variables;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
+        dz = jmi->dz;
+    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
+        dz = jmi->dz;
+    } else {
+        return -1;
+    }
+    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+    }
+        JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+")})));
+        end Simple1;
+        
+    end PrePropagation;
 
 end CADCodeGenTests;

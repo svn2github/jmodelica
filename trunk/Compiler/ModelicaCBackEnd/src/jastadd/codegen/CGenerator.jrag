@@ -794,7 +794,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
-                    element.genVarDecls_C(p, str, indent);
+                    element.genVarDecls(p, str, indent);
                 }
                 @Override
                 public void genPre(AbstractEquationBlock element) {
@@ -802,7 +802,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock_C(p, str, indent);
+                    element.genBlock(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
@@ -860,7 +860,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
-                    element.genVarDecls_C(p, str, indent);
+                    element.genVarDecls(p, str, indent);
                 }
                 @Override
                 public void genPre(AbstractEquationBlock element) {
@@ -868,7 +868,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock_C(p, str, indent);
+                    element.genBlock(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {

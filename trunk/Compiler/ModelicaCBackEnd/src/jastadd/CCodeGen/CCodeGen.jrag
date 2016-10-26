@@ -2220,7 +2220,7 @@ aspect CCodeGen {
         str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", getLabel());
         str.print(indent + "jmi_real_t** res = &residual;\n");
         ASTNode.genFunctionStart(str, indent);
-        genVarDecls_C(p, str, indent, null);
+        genVarDecls(p, str, indent, null);
         
         str.print(indent);
         
@@ -2468,7 +2468,7 @@ aspect CCodeGen {
     @Override
     public void MetaEquationBlock.genBlockResidualFunction_solvedEqn_C(CodePrinter p, CodeStream str,
             String indent, Set<FAbstractEquation> visited) {
-        genBlock_C(p, str, indent);
+        genBlock(p, str, indent);
     }
 
     public C_blockResidualAttributePrinter CodePrinter.C_blockResidualAttributePrinter = new C_blockResidualAttributePrinter();
@@ -2647,52 +2647,6 @@ aspect CCodeGen {
 	}
 	
 	
-    protected void AbstractEquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
-        for (ASTNode n : blockResidualNodes_C())
-            if (visited == null || visited.add(n))
-                p.printVarDecls(n, str, indent);
-    }
-
-    @Override
-    protected void AlgorithmBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
-        p.printDecl(equation(), str, indent, visited, activeVars, isSolvable());
-    }
-    
-    @Override
-    protected void EquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent, Set<ASTNode> visited) {
-        if (visited == null)
-            visited = new HashSet<ASTNode>();
-        for (SimpleEquationBlock seb : localSolvedBlocks())
-            seb.genVarDecls_C(p, str, indent, visited);
-        for (SimpleEquationBlock seb : unsolvedBlocks())
-            seb.genVarDecls_C(p, str, indent, visited);
-    }
-
-	public Set<ASTNode> AbstractEquationBlock.blockResidualNodes_C() {
-		Set<ASTNode> res = new LinkedHashSet<ASTNode>();
-		res.addAll(allLocalEquations());
-		return res;
-	}
-
-    @Override
-    public Set<ASTNode> EquationBlock.blockResidualNodes_C() {
-        Set<ASTNode> res = super.blockResidualNodes_C();
-        res.addAll(localNonRealEquations());
-        return res;
-    }
-
-    @Override
-    public Set<ASTNode> SolvedScalarEquationBlock.blockResidualNodes_C() {
-        return Collections.<ASTNode>singleton(solution());
-    }
-
-    @Override
-    public Set<ASTNode> TornEquationBlock.blockResidualNodes_C() {
-        Set<ASTNode> res = super.blockResidualNodes_C();
-        res.addAll(localSolvedEquations());
-        return res;
-    }
-
     public void AbstractEquationBlock.genBlockResidualFunction_jacobianDecls_C(CodePrinter p, CodeStream str, String indent) {
         if (jacobian != null)
             for (FExp[] col : jacobian)
@@ -3033,124 +2987,6 @@ aspect CCodeGen {
         }
     }
 
-
-    public void AbstractEquationBlock.genBlockResidualCall_C(CodePrinter p, CodeStream str, String indent) {
-        String var = p.inInitialSystem() ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.formatln("%sef |= jmi_solve_block_residual(jmi->%s[%d]);", indent, var, getSequenceNumber());
-    }
-
-    /**
-     * Generate code for blocks of equations 
-     */
-    public void AbstractEquationBlock.genBlockBase_C(CodePrinter p, CodeStream str, String indent) {
-        for (FRelExp relExp : inactiveSwitches_C())
-            p.printPreSteps(relExp, str, indent);
-        for (FRelExp relExp : inactiveInitialSwitches_C())
-            p.printPreSteps(relExp, str, indent);
-        p.genBlockResidualCall(this, str, indent);
-        for (FRelExp relExp : inactiveSwitches_C())
-            p.printPostSteps(relExp, str, indent);
-        for (FRelExp relExp : inactiveInitialSwitches_C())
-            p.printPostSteps(relExp, str, indent);
-    }
-
-    /**
-     * Generate code for blocks of equations 
-     */
-    public abstract void AbstractEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent);
-
-    @Override
-    public void EquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        genBlockBase_C(p, str, indent);
-    }
-
-    @Override
-    public void SimpleEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        if (getSequenceNumber() >= 0) {
-            genBlockBase_C(p, str, indent);
-        } else if (genBlockEnabled()) {
-            p.genBlock(equation(), str, indent, new HashSet<FAbstractEquation>(), allLocalVariables(), assignedIndices());
-            for (FVariable var : allLocalVariables()) {
-                if (!p.inInitialSystem() && var.isDiscrete() && !var.isPreVariable()) {
-                    str.formatln("%s%s = %s;", indent, var.myPreVariable().name_C(), var.name_C());
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException("Unable to produce solving code for block of type " + getClass().getSimpleName());
-        }
-    }
-
-    @Override
-    public void MetaEquationBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(equation(), str, indent);
-        p.print(equation(), str, indent);
-        p.printPostSteps(equation(), str, indent);
-    }
-    
-    public boolean SimpleEquationBlock.genBlockEnabled()             { return false; }
-    @Override
-    public boolean SolvedScalarEquationBlock.genBlockEnabled()       { return true; }
-    @Override
-    public boolean SolvedAlgorithmBlock.genBlockEnabled()            { return true; }
-    @Override
-    public boolean SolvedFunctionCallEquationBlock.genBlockEnabled() { return true; }
-    @Override
-    public boolean SolvedIfEquationBlock.genBlockEnabled()           { return true; }
-
-    @Override
-    public void DynamicStateBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        String innerIndent = p.indent(indent);
-        for (DynamicStateSet set : sets) {
-            str.formatln("%sif (jmi->atInitial || jmi->atEvent) {", indent);
-            str.formatln("%sjmi_dynamic_state_update_states(jmi, %d);", innerIndent, set.id_C());
-            str.formatln("%s}", indent);
-        }
-        boolean first = true;
-        for (DynamicStateBLT blt : subBLTs()) {
-            if (first)
-                str.format("%sif (", indent);
-            else
-                str.format("%s} else if (", indent);
-            first = false;
-            blt.genSubBLTTest_C(p, str);
-            str.println(") {");
-            blt.genVarDecls_C(p, str, innerIndent);
-            blt.genOdeDerivativeBlocks(p, str, innerIndent);
-        }
-        str.formatln("%s}", indent);
-    }
-    
-    public void DynamicStateBLT.genSubBLTTest_C(CodePrinter p, CodeStream str) {
-        DynamicStateSet previousSet = null;
-        for (FVariable var : states()) {
-            DynamicStateSet set = var.dynamicStateSet();
-            if (set != previousSet) {
-                if (previousSet != null)
-                    str.print(") && ");
-                previousSet = set;
-                str.format("jmi_dynamic_state_check_is_state(jmi, %d", set.id_C());
-            }
-            str.format(", %d", var.valueReference());
-        }
-        str.print(")");
-    }
- 
-    @Override
-    public void HomotopyBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        str.formatln("%s/* Start of section for simplified version of homotopy*/", indent);
-        CodePrinter simplifiedPrinter = p.homotopySimplifiedPrinter();
-        for (AbstractEquationBlock block : subBLTs()[SIMPLIFIED_BLT_POS]) {
-            block.genBlock_C(simplifiedPrinter, str, indent); 
-        }
-        str.formatln("%s/* End of section for simplified version of homotopy*/", indent);
-        homotopySubBlock.genBlock_C(p, str, indent);
-    }
-
-    @Override
-    public void HomotopySubBlock.genBlock_C(CodePrinter p, CodeStream str, String indent) {
-        String var = p.inInitialSystem() ? "dae_init_block_residuals" : "dae_block_residuals";
-        str.format("%sef |= jmi_solve_block_with_homotopy_residual(jmi->%s[%d]);\n", indent, var, getSequenceNumber());
-    }
 
     /**
      * Generate block code for equations
@@ -3975,7 +3811,7 @@ aspect CCodeGen {
 
 	public void BLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
 		for (AbstractEquationBlock block : this) {
-			block.genBlock_C(p, str, indent); 
+			block.genBlock(p, str, indent); 
 		}
 	}
 
@@ -3983,27 +3819,11 @@ aspect CCodeGen {
 		return this;
 	}
 
-	public void BLT.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+	public void BLT.genVarDecls(CodePrinter p, CodeStream str, String indent) {
 		for (AbstractEquationBlock eb : getAllBlocks()) {
-            eb.genVarDecls_C(p, str, indent);
+            eb.genVarDecls(p, str, indent);
 		}
 	}
-
-    public void AbstractEquationBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        if (isSolvable()) {
-            genVarDecls_C(p, str, indent, null);
-        } else {
-            for (FRelExp relExp : inactiveSwitches_C())
-                p.printVarDecls(relExp, str, indent);
-            for (FRelExp relExp : inactiveInitialSwitches_C())
-                p.printVarDecls(relExp, str, indent);
-        }
-    }
-
-    @Override
-    public void HomotopyBlock.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        subBLTs()[SIMPLIFIED_BLT_POS].genVarDecls_C(p, str, indent);
-    }
 
     @Override
 	public void StructuredBLT.genOdeDerivativeBlocks(CodePrinter p, CodeStream str, String indent) {
@@ -4014,19 +3834,19 @@ aspect CCodeGen {
 		str.formatln("%s/************* ODE section *********/", indent);
 		// Loop over all derivatives
 		for (AbstractEquationBlock eb : getOdeBlocks()) {
-			eb.genBlock_C(p, str, indent);
+			eb.genBlock(p, str, indent);
 		}
 		str.formatln("%s/************ Real outputs *********/", indent);
 		for (AbstractEquationBlock eb : getRealOutputBlocks()) {
-			eb.genBlock_C(p, str, indent);
+			eb.genBlock(p, str, indent);
 		}
 		str.formatln("%s/****Integer and boolean outputs ***/", indent);
 		for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
-			eb.genBlock_C(p, str, indent);
+			eb.genBlock(p, str, indent);
 		}
 		str.formatln("%s/**** Other variables ***/", indent);
 		for (AbstractEquationBlock eb : getOtherBlocks()) {
-			eb.genBlock_C(p, str, indent);
+			eb.genBlock(p, str, indent);
 		}
         str.formatln("%s/********* Write back reinits *******/", indent);
         for (AbstractEquationBlock eb : getAllBlocks()) {
