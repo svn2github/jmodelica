@@ -2276,16 +2276,16 @@ void func_CADCodeGenTests_CADFunction11_F1_der_AD0(jmi_array_t* X_var_a, jmi_arr
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_1, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_1, 2, 1)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_1, 2, 1, 2)
-    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_1, 2, 1, 2)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_0, 2, 1, 2)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1, 2)
-    jmi_array_ref_1(tmp_var_0, 1) = 1.1;
-    jmi_array_ref_1(tmp_var_0, 2) = 1.2;
-    jmi_array_ref_1(tmp_der_0, 1) = AD_WRAP_LITERAL(0);
-    jmi_array_ref_1(tmp_der_0, 2) = AD_WRAP_LITERAL(0);
-    func_CADCodeGenTests_CADFunction11_F2_der_AD2(X_var_a, tmp_var_0, X_der_a, tmp_der_0, tmp_var_1, tmp_der_1);
-    func_CADCodeGenTests_CADFunction11_F3_der_AD1(tmp_var_1, tmp_der_1, &v_0, &d_0);
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_1, 2, 1, 2)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_1, 2, 1, 2)
+    jmi_array_ref_1(tmp_var_1, 1) = 1.1;
+    jmi_array_ref_1(tmp_var_1, 2) = 1.2;
+    jmi_array_ref_1(tmp_der_1, 1) = AD_WRAP_LITERAL(0);
+    jmi_array_ref_1(tmp_der_1, 2) = AD_WRAP_LITERAL(0);
+    func_CADCodeGenTests_CADFunction11_F2_der_AD2(X_var_a, tmp_var_1, X_der_a, tmp_der_1, tmp_var_0, tmp_der_0);
+    func_CADCodeGenTests_CADFunction11_F3_der_AD1(tmp_var_0, tmp_der_0, &v_0, &d_0);
     lambda_var_v = v_0;
     lambda_der_v = d_0;
     if (lambda_var_o != NULL) *lambda_var_o = lambda_var_v;

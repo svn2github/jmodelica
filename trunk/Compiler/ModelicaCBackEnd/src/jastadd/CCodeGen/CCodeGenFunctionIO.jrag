@@ -14,77 +14,22 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-aspect StepPrinters {
-    public abstract class CodePrinter extends Printer {
-        public abstract class StepPrinter {
-            public abstract void print(ASTNode n, CodeStream str, String indent);
-            public void printArg(FExp n, CodeStream str, String indent) {
-                
-            }
-            public void print(CodeStream str, String s) {
-                
-            }
-        }
-        
-        public StepPrinter DeclStep  = new DeclCodePrinter();
-        public StepPrinter PreStep   = new PreCodePrinter();
-        public StepPrinter ExecStep  = new ExecuteCodePrinter();
-        public StepPrinter PostStep  = new PostCodePrinter();
-        
-        private class DeclCodePrinter extends StepPrinter {
-            @Override
-            public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printVarDecls(n, str, indent);
-            }
-            @Override
-            public void printArg(FExp n, CodeStream str, String indent) {
-                n.genTempInputDecl_C(CodePrinter.this, str, indent);
-            }
-        }
-        
-        private class PreCodePrinter extends StepPrinter {
-            @Override
-            public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printPreSteps(n, str, indent);
-            }
-            @Override
-            public void printArg(FExp n, CodeStream str, String indent) {
-                n.genTempInputAssigns_C(CodePrinter.this, str, indent);
-            }
-        }
-        
-        private class ExecuteCodePrinter extends StepPrinter {
-            @Override
-            public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.print(n, str, indent);
-            }
-            @Override
-            public void printArg(FExp n, CodeStream str, String indent) {
-                n.genArgument_C(CodePrinter.this, str, indent);
-            }
-            
-            @Override
-            public void print(CodeStream str, String s) {
-                str.print(s);
-            }
-        }
-        
-        private class PostCodePrinter extends StepPrinter {
-            @Override
-            public void print(ASTNode n, CodeStream str, String indent) {
-                CodePrinter.this.printPostSteps(n, str, indent);
-            }
-        }
-    }
-}
-
-
 aspect CCodeGenFunctionIO {
     
-    public void FExp.genTempArg(CodePrinter.StepPrinter p, CodeStream str, String indent) {
-        p.printArg(this, str, indent);
+    public class CPrettyPrinter {
+        @Override
+        public void printIODecl(FExp n, CodeStream str, String indent) {
+            n.genTempInputDecl_C(this, str, indent);
+        }
+        @Override
+        public void printIOPre(FExp n, CodeStream str, String indent) {
+            n.genTempInputAssigns_C(this, str, indent);
+        }
+        @Override
+        public void printIOExec(FExp n, CodeStream str, String indent) {
+            n.genArgument_C(this, str, indent);
+        }
     }
-    
     
     
     syn boolean FFunctionCallLeft.replaceWithTemp()         = hasFExp() && getFExp().replaceWithTemp(true);
