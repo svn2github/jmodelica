@@ -484,9 +484,9 @@ aspect Arrays {
 	eq FVariable.ndims()         = isScalarized()? 0 : getFQName().ndims();
 	eq FFunctionArray.ndims()    = getType().ndims();
 	eq FFunctionVariable.ndims() = 0;
-	
-	syn int CommonForIndex.ndims() = hasFExp() ? getFExp().ndims() : 1;
-	
+
+    syn int CommonForIndex.ndims() = 1;
+
 	/**
 	 * Get array dimensions.
 	 * 
@@ -544,21 +544,18 @@ aspect Arrays {
 	}
 
 	syn Size FAbstractEquation.totalSize() = size().expand(parentTotalSize());
-	
-	inh Size FAbstractEquation.parentTotalSize();
-	eq InstForClauseE.getChild().parentTotalSize() {
-		Size s = parentTotalSize();
-		for (InstForIndex i : getInstForIndexs()) {
-			if (i.hasFExp())
-				s = i.getFExp().size().expand(s);
-			else
-				s = new Size(0).expand(s);
-		}
-		return s;
-	}
-	eq InstRoot.getChild().parentTotalSize() = Size.SCALAR;
-	eq FlatRoot.getChild().parentTotalSize() = Size.SCALAR;
-	
+
+    inh Size FAbstractEquation.parentTotalSize();
+    eq InstForClauseE.getChild().parentTotalSize() {
+        Size s = parentTotalSize();
+        for (InstForIndex i : getInstForIndexs()) {
+            s = i.size().expand(s);
+        }
+        return s;
+    }
+    eq InstRoot.getChild().parentTotalSize() = Size.SCALAR;
+    eq FlatRoot.getChild().parentTotalSize() = Size.SCALAR;
+
 	syn FArraySubscripts FAbstractEquation.expandedSubscripts() {
 		FArraySubscripts fas = parentExpandedSubscripts();
 		Size size = size();
@@ -567,21 +564,26 @@ aspect Arrays {
 		}
 		return fas;
 	}
-	
-	inh FArraySubscripts FAbstractEquation.parentExpandedSubscripts();
-	eq InstForClauseE.getChild().parentExpandedSubscripts() {
-		FArraySubscripts fas = parentExpandedSubscripts();
-		for (InstForIndex i : getInstForIndexs()) {
-			if (i.hasFExp())
-				fas.addFSubscript(new FExpSubscript(i.getFExp().flatten(myInstNode().getFQName())));
-			else
-				fas.addFSubscript(new FColonSubscript());
-		}
-		return fas;
-	}
-	eq InstRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
-	eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
-	
+
+    inh FArraySubscripts FAbstractEquation.parentExpandedSubscripts();
+    eq InstForClauseE.getChild().parentExpandedSubscripts() {
+        FArraySubscripts fas = parentExpandedSubscripts();
+        for (InstForIndex i : getInstForIndexs()) {
+            fas.addFSubscript(i.createFSubscript(myInstNode().getFQName()));
+        }
+        return fas;
+    }
+    eq InstRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
+    eq FlatRoot.getChild().parentExpandedSubscripts() = new FArraySubscripts();
+
+    public FSubscript InstForIndex.createFSubscript(FQName prefix) {
+        return new FExpSubscript(getFExp().flatten(prefix));
+    }
+    @Override
+    public FSubscript InstForIndexNoExp.createFSubscript(FQName prefix) {
+        return hasFExp() ? super.createFSubscript(prefix) : new FColonSubscript();
+    }
+
 	/**
 	 * Get the array sizes. 
 	 */
@@ -787,18 +789,26 @@ aspect Arrays {
 		s.append(getFExp().size());
 		return s;
 	}
-	
-	/**
-	 * The size of the iteration indices of this iteration expression.
-	 */
-	syn lazy Size FIterExp.localSize() {
-		MutableSize s = new MutableSize(localNdims());
-		for (CommonForIndex fi : getForIndexList())
-			if (fi.hasFExp() && fi.getFExp().ndims() == 1)
-				s.append(fi.getFExp().size());
-		return s;
-	}
-	
+
+    /**
+     * The size of the iteration indices of this iteration expression.
+     */
+    syn lazy Size FIterExp.localSize() {
+        MutableSize s = new MutableSize(localNdims());
+        for (CommonForIndex fi : getForIndexList()) {
+            if (fi.expIsVector()) {
+                s.append(fi.size());
+            }
+        }
+        return s;
+    }
+
+    /**
+     * Check if the expression of this index is a vector (and thus usable).
+     */
+    syn boolean CommonForIndex.expIsVector() = getFExp().ndims() == 1;
+    eq InstForIndexNoExp.expIsVector()       = true;
+
 	/**
 	 * Check if this expression is inside an iteration expression.
 	 */
@@ -1060,13 +1070,13 @@ aspect Arrays {
 	syn lazy Size FAbstractVariable.size() = Size.SCALAR;
 	eq FVariable.size()      = isScalarized()? Size.SCALAR: getFQName().size();
 	eq FFunctionArray.size() = type().size();
-		
-	/**
-	 * Get the array sizes of the loop index expression. 
-	 */	
-	syn Size CommonForIndex.size() = hasFExp() ? getFExp().size() : Size.SCALAR;
-	// TODO: support automatic extrapolation of the loop expression
-	
+
+    /**
+     * Get the array size of the loop index expression. 
+     */ 
+    syn Size CommonForIndex.size() = getFExp().size();
+    eq InstForIndexNoExp.size()    = hasFExp() ? getFExp().size() : new Size(-1);
+
 	/**
 	 * Get the array sizes. 
 	 */
@@ -1112,10 +1122,9 @@ aspect Arrays {
 	 * @return True if array dimension > 0 else false
 	 */
 	syn boolean InstNode.isArray() = ndims()>0;
-	
-	public abstract int[]  CommonForIndex.myIndices();
-	public abstract String CommonForIndex.name();
-	
+
+    public abstract String CommonForIndex.name();
+
 	/**
 	 * Expand for all values of for indices given in <code>indices</code>.
 	 * 
@@ -2306,31 +2315,15 @@ aspect Arrays {
 		}
 		return new int[0];
 	}
-	
-	/**
-	 * Get the set of all values this for index spans.
-	 * 
-	 * @return an int array containing the values spanned
-	 */
-	syn int[] FForIndex.myIndices() {
-		if (hasFExp())
-			return getFExp().myIndices();
-		else
-			return new int[0]; // TODO: return 1..n, where n is given by use.
-	}
-	
-	/**
-	 * Get the set of all values this for index spans.
-	 * 
-	 * @return an int array containing the values spanned
-	 */
-	syn int[] InstForIndex.myIndices() {
-		if (hasFExp())
-			return getFExp().myIndices();
-		else
-			return new int[0]; // TODO: return 1..n, where n is given by use.
-	}
-	
+
+    /**
+     * Get the set of all values this for index spans.
+     * 
+     * @return an int array containing the values spanned
+     */
+    syn int[] CommonForIndex.myIndices() = getFExp().myIndices();
+    eq InstForIndexNoExp.myIndices()     = hasFExp() ? getFExp().myIndices() : new int[0];
+
 	/**
 	 * Try to infer type of an expression from its surrounding Array.
 	 * 

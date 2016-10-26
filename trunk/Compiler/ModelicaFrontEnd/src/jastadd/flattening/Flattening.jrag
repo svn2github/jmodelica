@@ -2267,7 +2267,8 @@ aspect FlatExpressions {
     eq FFunctionCallLeft.getFExp().flattenFASContext()     = !inFunction() || getFExp().isSlice();
     eq FSizeExp.getFExp().flattenFASContext()              = !getFExp().isCircular() && (!inFunction() || getFExp().isSlice());
     eq FUnknownSizeExp.getFExp().flattenFASContext()       = false;
-    eq InstForIndex.getFExp().flattenFASContext()          = !inFunction() || getFExp().isSlice();
+    eq InstForIndexWithExp.getFExp().flattenFASContext()   = !inFunction() || getFExp().isSlice();
+    eq InstForIndexNoExp.getFExp().flattenFASContext()     = !inFunction() || hasFExp() && getFExp().isSlice();
     eq FAssignStmt.getLeft().flattenFASContext()           = !scalarizedAsFFunctionCallStmt();
     eq FExternalStmt.getArg(int i).flattenFASContext()     = getArg(i).isSlice();
     eq FExternalStmt.getReturnVar().flattenFASContext()    = getReturnVar().isSlice();
@@ -2802,14 +2803,15 @@ aspect FlatExpressions {
     public FExp InstDefaultArgument.flatten(FQName prefix) {
         return getFExp().flatten(getFExp().retrieveFQName());
     }
-    
+
     public abstract FForIndex CommonForIndex.flatten(FQName prefix);
-    
+
+    @Override
     public FForIndex InstForIndex.flatten(FQName prefix) {
-        return new FForIndex(hasFExp()? new Opt(getFExp().flatten(prefix)): new Opt(),
-                getInstPrimitive().createFVariable());
+        return new FForIndex(getInstPrimitive().createFVariable(), getFExp().flatten(prefix));
     }
-    
+
+    @Override
     public FForIndex FForIndex.flatten(FQName prefix) {
         return (FForIndex) fullCopy();
     }
@@ -3274,8 +3276,13 @@ aspect InstantiatedExpressions {
   
     public InstForIndex ForIndex.instantiate() {
         InstPrimitive ip = new InstCreateForIndexPrimitive(getForIndexDecl());
-        Opt o = hasExp()? new Opt(getExp().instantiate()): new Opt();
-        return copyLocationTo(new InstForIndex(o, ip));
+        InstForIndex res;
+        if (hasExp()) {
+            res = new InstForIndexWithExp(ip, getExp().instantiate());
+        } else {
+            res = new InstForIndexNoExp(ip);
+        }
+        return copyLocationTo(res);
     }
     
     public InstForClauseE ForClauseE.instantiate() {

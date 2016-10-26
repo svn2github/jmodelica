@@ -1283,26 +1283,33 @@ aspect InstanceErrorCheck {
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         throw new UnsupportedOperationException();
     }
-    
+
+    @Override
     public void InstForIndex.collectErrorsForAllIndices(
+        List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+        InstComponentDecl var = getInstPrimitive();
+        CValue oldVal = var.evaluationValue;
+        boolean last = i == indices.getNumChild() - 1;
+        CommonForIndex next = last ? null : indices.getChild(i + 1);
+        CValueArray ivals = getFExp().ceval().array();
+        for (Index j : ivals.indices()) {
+            var.setLocalCachedEvaluationValue(ivals.getCell(j));
+            if (last) {
+                child.resetCollectErrors();
+                child.collectErrors(checkType);
+                child.flushAllRecursive();
+            } else {
+                next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
+            }
+        }
+        var.setLocalCachedEvaluationValue(oldVal);
+    }
+
+    @Override
+    public void InstForIndexNoExp.collectErrorsForAllIndices(
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         if (hasFExp()) {
-            InstComponentDecl var = getInstPrimitive();
-            CValue oldVal = var.evaluationValue;
-            boolean last = i == indices.getNumChild() - 1;
-            CommonForIndex next = last ? null : indices.getChild(i + 1);
-            CValueArray ivals = getFExp().ceval().array();
-            for (Index j : ivals.indices()) {
-                var.setLocalCachedEvaluationValue(ivals.getCell(j));
-                if (last) {
-                    child.resetCollectErrors();
-                    child.collectErrors(checkType);
-                    child.flushAllRecursive();
-                } else {
-                    next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
-                }
-            }
-            var.setLocalCachedEvaluationValue(oldVal);
+            super.collectErrorsForAllIndices(indices, i, child, checkType);
         }
     }
 

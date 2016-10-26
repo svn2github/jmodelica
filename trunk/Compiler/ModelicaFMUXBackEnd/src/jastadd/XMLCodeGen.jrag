@@ -396,11 +396,9 @@ aspect XMLCodeGen {
         qVarName.prettyPrint_XML(str,p.indent(indent+"\t"));
         str.println(indent + "\t</" + namespace + ":" + varTag + ">"); 
         
-        if (this.hasFExp()){
-        	str.println(indent + "\t<" + namespace + ":" + expTag + ">");
-        	this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
-        	str.println(indent + "\t</" + namespace + ":" + expTag + ">");
-        }     	
+        str.println(indent + "\t<" + namespace + ":" + expTag + ">");
+        this.getFExp().prettyPrint_XML(str,p.indent(indent+"\t"));
+        str.println(indent + "\t</" + namespace + ":" + expTag + ">");
         str.println(indent + "</" + namespace + ":" + tag + ">"); 
      
     }

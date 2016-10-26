@@ -1843,12 +1843,11 @@ aspect Scalarization {
                 getX().scalarize(indexMap), getPositiveVelocity().scalarize(indexMap),
                 getInitialPoints().scalarize(indexMap), getInitialValues().scalarize(indexMap));
     }
-	
-	public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
-		return new FForIndex(hasFExp() ? new Opt(getFExp().scalarizeIndexExp(indexMap)) : new Opt(), 
-				(FVariable) getFVariable().fullCopy());
-	}
-	
+
+    public FForIndex FForIndex.scalarize(Map<String,FExp> indexMap) {
+        return new FForIndex(getFVariable().fullCopy(), getFExp().scalarizeIndexExp(indexMap));
+    }
+
 	/**
 	 * Scalarize the expression of an FForIndex. 
 	 */

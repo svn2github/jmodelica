@@ -244,15 +244,17 @@ aspect ComplianceCheck {
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_FOR_INDEX =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_FOR_INDEX", ProblemKind.COMPLIANCE, "For index with higher than parameter variability is not supported in equations and algorithms");
-    
-    public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
+
+    public void InstForIndexWithExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (!hasFExp()) {
-            UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
-        }
-        if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
+        if (!getFExp().variability().parameterOrLess() && !inFunction()) {
             UNSUPPORTED_NON_FIXED_FOR_INDEX.invoke(this);
         }
+    }
+
+    public void InstForIndexNoExp.complianceCheck(ErrorCheckType checkType) {
+        super.complianceCheck(checkType);
+        UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
     }
 
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {

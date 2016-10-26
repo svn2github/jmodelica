@@ -1976,7 +1976,9 @@ aspect FlatExpressions {
     eq FExp.numFExp() {
         return super.numFExp() + 1;
     }
-    
+
+    public abstract FExp CommonForIndex.getFExp();
+
 }
 
 

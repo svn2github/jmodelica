@@ -734,15 +734,23 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
-  
-  
-  
-  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
-	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
-		  error("The expression of for index " + name() + " must be a vector expression: " + 
-				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
-  }
-  
+
+
+
+    public void InstForIndexWithExp.typeCheck(ErrorCheckType checkType) {
+        if (!getFExp().type().isUnknown() && getFExp().ndims() != 1)
+            error("The expression of for index " + name() + " must be a vector expression: " + 
+                    getFExp() + " has " + getFExp().ndims() + " dimension(s)");
+    }
+
+    public void InstForIndexNoExp.typeCheck(ErrorCheckType checkType) {
+        hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
+    }
+
+    syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
+        return new Opt();
+    }
+
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());

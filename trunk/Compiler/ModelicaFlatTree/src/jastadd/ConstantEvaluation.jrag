@@ -4269,84 +4269,94 @@ aspect ConstantEvaluation {
         return (res == EVAL_BREAK) ? EVAL_CONT : res;
     }
 
-  @Override
-  public int InstForStmt.evaluate(AlgorithmEvaluator evaluator) {
-	  return getInstForIndex(0).evaluateInFunc(evaluator, getInstForIndexList(), 0, getForStmts());
-  }
-  
-  /**
-   * Evaluate statement list over this for index during function evaluation.
-   * 
-   * @param values  constant values for the variables. 
-   */
-  public int InstForIndex.evaluateInFunc(AlgorithmEvaluator evaluator, 
-		  List<InstForIndex> indices, int i, List<FStatement> stmts) {
-	  InstComponentDecl var = getInstPrimitive();
-	  CValue oldVal = var.evaluationValue(evaluator);
-	  boolean last = i == indices.getNumChild() - 1;
-	  CValueArray ivals = getFExp().ceval(evaluator).array();
-	  for (Index j : ivals.indices()) {
-		  var.setEvaluationValue(evaluator, ivals.getCell(j));
-		  int res = last ? stmts.evaluateList(evaluator) : 
-				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
-            stmts.resetAfterCeval();
-		  if (res != FStatement.EVAL_CONT) {
-			  var.setEvaluationValue(evaluator, oldVal);
-			  return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
-		  }
-	  }
-	  var.setEvaluationValue(evaluator, oldVal);
-	  return FStatement.EVAL_CONT;
-  }
+    @Override
+    public int InstForStmt.evaluate(AlgorithmEvaluator evaluator) {
+        return getInstForIndex(0).evaluateInFunc(evaluator, getInstForIndexList(), 0, getForStmts());
+    }
+    
+    /**
+     * Evaluate statement list over this for index during function evaluation.
+     * 
+     * @param values  constant values for the variables. 
+     */
+    public int InstForIndex.evaluateInFunc(AlgorithmEvaluator evaluator, 
+            List<InstForIndex> indices, int i, List<FStatement> stmts) {
+        InstComponentDecl var = getInstPrimitive();
+        CValue oldVal = var.evaluationValue(evaluator);
+        boolean last = i == indices.getNumChild() - 1;
+        CValueArray ivals = getFExp().ceval(evaluator).array();
+        for (Index j : ivals.indices()) {
+            var.setEvaluationValue(evaluator, ivals.getCell(j));
+            int res = last ? stmts.evaluateList(evaluator) : 
+                    indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
+              stmts.resetAfterCeval();
+            if (res != FStatement.EVAL_CONT) {
+                var.setEvaluationValue(evaluator, oldVal);
+                return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
+            }
+        }
+        var.setEvaluationValue(evaluator, oldVal);
+        return FStatement.EVAL_CONT;
+    }
 
-  @Override
-  public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
-	  int res = EVAL_CONT;
-	  while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
-		  res = getWhileStmts().evaluateList(evaluator);
-	  return (res == EVAL_BREAK) ? EVAL_CONT : res;
-  }
+    @Override
+    public int InstForIndexNoExp.evaluateInFunc(AlgorithmEvaluator evaluator, 
+            List<InstForIndex> indices, int i, List<FStatement> stmts) {
+        if (hasFExp()) {
+            return super.evaluateInFunc(evaluator, indices, i, stmts);
+        } else {
+            throw new ConstantEvaluationException();
+        }
+    }
 
-  
-  /**
-   * Addition of constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.add(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FRealType.add(CValue v1, CValue v2) = 
-	  new CValueReal(v1.realValue() + v2.realValue());
-  eq FIntegerType.add(CValue v1, CValue v2) = 
-	  new CValueInteger(v1.intValue() + v2.intValue());
-  eq FStringType.add(CValue v1, CValue v2) = 
-	  new CValueString(v1.stringValue() + v2.stringValue());
+    @Override
+    public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
+        int res = EVAL_CONT;
+        while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
+            res = getWhileStmts().evaluateList(evaluator);
+        return (res == EVAL_BREAK) ? EVAL_CONT : res;
+    }
 
-  /**
-   * Subtraction of constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.sub(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
-  eq FRealType.sub(CValue v1, CValue v2) = 
-	  new CValueReal(v1.realValue() - v2.realValue());
-  eq FIntegerType.sub(CValue v1, CValue v2) = 
-	  new CValueInteger(v1.intValue() - v2.intValue());
+    
+    /**
+     * Addition of constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.add(CValue v1, CValue v2) = 
+        CValue.UNKNOWN;
+    eq FRealType.add(CValue v1, CValue v2) = 
+        new CValueReal(v1.realValue() + v2.realValue());
+    eq FIntegerType.add(CValue v1, CValue v2) = 
+        new CValueInteger(v1.intValue() + v2.intValue());
+    eq FStringType.add(CValue v1, CValue v2) = 
+        new CValueString(v1.stringValue() + v2.stringValue());
 
-  /**
-   * Multiplication of constant values.
-   * 
-   * @param v1 Constant value of left operand.
-   * @param v2 Constant value of right operand.
-   * @return Resulting constant value.
-   */
-  syn CValue FType.mul(CValue v1, CValue v2) = 
-	  CValue.UNKNOWN;
+    /**
+     * Subtraction of constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.sub(CValue v1, CValue v2) = 
+        CValue.UNKNOWN;
+    eq FRealType.sub(CValue v1, CValue v2) = 
+        new CValueReal(v1.realValue() - v2.realValue());
+    eq FIntegerType.sub(CValue v1, CValue v2) = 
+        new CValueInteger(v1.intValue() - v2.intValue());
+
+    /**
+     * Multiplication of constant values.
+     * 
+     * @param v1 Constant value of left operand.
+     * @param v2 Constant value of right operand.
+     * @return Resulting constant value.
+     */
+    syn CValue FType.mul(CValue v1, CValue v2) = 
+        CValue.UNKNOWN;
     eq FRealType.mul(CValue v1, CValue v2) {
         return new CValueReal(v1.realValue()*v2.realValue());
     }
@@ -4660,7 +4670,7 @@ aspect CircularExpressions {
     syn boolean FIdUse.isCircular(int dim)  = myFV().isCircular();
     eq FIdUseInstAccess.isCircular(int dim) = getInstAccess().myInstComponentDecl().isCircular(dim);
 
-	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
+	syn lazy boolean FForIndex.isCircular() circular [true] = getFExp().isCircular(); // TODO: test without when it works
 
 	eq FSizeExp.isCircularCalc() { 
 		Size s = getFExp().size();
@@ -4711,15 +4721,18 @@ aspect CircularExpressions {
 		}
 	}
 
-	eq FIterExp.isCircularCalc() {
-		if (getFExp().isCircular()) 
-			return true;
-		for (CommonForIndex i : getForIndexList()) 
-			if (i.hasFExp() && i.getFExp().isCircular()) 
-				return true;
-		return false;
-	}
-	
+    eq FIterExp.isCircularCalc() {
+        if (getFExp().isCircular()) 
+            return true;
+        for (CommonForIndex i : getForIndexList()) 
+            if (i.isCircular()) 
+                return true;
+        return false;
+    }
+
+    syn boolean CommonForIndex.isCircular() = getFExp().isCircular();
+    eq InstForIndexNoExp.isCircular()       = hasFExp() && getFExp().isCircular();
+
 	eq InstFunctionCall.isCircularCalc() {
 		for (InstFunctionArgument a : getArgs())
 			if (a.isCircular())
