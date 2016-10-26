@@ -237,4 +237,30 @@ aspect CCodeGenBlocks {
         return res;
     }
 
+    /**
+     * Generates residual equation for all unsolved equations in this block.
+     */
+    public abstract void AbstractEquationBlock.genResidual(CodePrinter p, CodeStream str, String indent,
+            Enumerator enumerator, Set<FAbstractEquation> visited);
+
+    @Override
+    public void EquationBlock.genResidual(CodePrinter p, CodeStream str, String indent,
+            Enumerator enumerator, Set<FAbstractEquation> visited) {
+        for (SimpleEquationBlock block : unsolvedBlocks())
+            block.genResidual(p, str, indent, enumerator, visited);
+    }
+    
+    @Override
+    public void AbstractSubBLTBlock.genResidual(CodePrinter p, CodeStream str, String indent,
+            Enumerator enumerator, Set<FAbstractEquation> visited) {
+        throw new UnsupportedOperationException("Can not produce residual statements for AbstractSubBLTBlock! This kind of block should not end up in the residual of another block, something has gone horribly wrong here!");
+    }
+    
+    @Override
+    public void SimpleEquationBlock.genResidual(CodePrinter p, CodeStream str, String indent,
+            Enumerator enumerator, Set<FAbstractEquation> visited) {
+        p.genResidual(equation(), str, indent, enumerator, visited,
+                assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
+    }
+
 }

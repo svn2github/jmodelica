@@ -100,7 +100,12 @@ aspect CADCodeGen {
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices) {
             node.genBlock_CAD(this, str, indent, visited, forVariables, forIndices);
         }
-        
+
+        @Override
+        public void genResidual(FAbstractEquation node, CodeStream str, String indent, Enumerator enumerator,
+                Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+            node.genResidual_CAD(enumerator, indent, str, visited, forIndices);
+        }
     }
 	
 	static CADPrettyPrinter ASTNode.printer_CAD = new CADPrettyPrinter();
@@ -1026,7 +1031,7 @@ aspect CADCodeGen {
         str.println("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {");
         
         // AD-code for residual equations
-        genBlockResidualFunctionEqns_CAD(new Enumerator(), innerIndent, str, visitedList);
+        genResidual(p, str, innerIndent, new Enumerator(), visitedList);
         
         // Reset all variables. global dz is updated elsewhere and dz_active should
         // always be reset so as not to cause incorrect seeds
@@ -1094,38 +1099,6 @@ aspect CADCodeGen {
     @Override
     public void NumericallySolvedScalarEquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
         p.genBlockResidualCall(this, str, indent);
-    }
-
-    /**
-     * Code for generating residual function for unsolved equation blocks
-     * 
-     * @param enumerator  Enumerator that specifies numers for the residual equations
-     * @param indent      indentation that should be used
-     * @param str         output stream
-     * @param visited     a set that contains all visited equations. Might be null!
-     */
-    public abstract void AbstractEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited);
-
-    @Override
-    public void EquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        for (SimpleEquationBlock block : unsolvedBlocks())
-            block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
-    }
-
-    @Override
-    public void TornEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        for (SimpleEquationBlock block : unsolvedBlocks())
-            block.genBlockResidualFunctionEqns_CAD(enumerator, indent, str, visited);
-    }
-
-    @Override
-    public void AbstractSubBLTBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunctionEqns_CAD() is not implemented!");
-    }
-
-    @Override
-    public void SimpleEquationBlock.genBlockResidualFunctionEqns_CAD(Enumerator enumerator, String indent, CodeStream str, Set<FAbstractEquation> visited) {
-        equation().genResidual_CAD(enumerator, indent, str, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
     /**

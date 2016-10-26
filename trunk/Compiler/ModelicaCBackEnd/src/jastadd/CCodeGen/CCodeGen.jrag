@@ -31,7 +31,6 @@ import org.jmodelica.util.streams.CStringCodeStream;
 
 aspect CCodeGen {
 
-    
     public class CPrettyPrinter extends CodePrinter {
 
         public CPrettyPrinter() {
@@ -102,6 +101,12 @@ aspect CCodeGen {
         public void genBlock(FAbstractEquation node, CodeStream str, String indent,
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices) {
             node.genBlock_C(this, str, indent, visited, forVariables, forIndices);
+        }
+
+        @Override
+        public void genResidual(FAbstractEquation node, CodeStream str, String indent, Enumerator enumerator,
+                Set<FAbstractEquation> visited, Set<Integer> forIndices) {
+            node.genResidual_C(this, str, indent, enumerator, visited, forIndices);
         }
     }
 	
@@ -2133,7 +2138,7 @@ aspect CCodeGen {
         genBlockResidualFunction_solvedEqns_C(p, str, nextIndent, visitedList);
         str.print(nextIndent + "if (evaluation_mode & JMI_BLOCK_EVALUATE) {\n");
         // Write the residual expressions
-        genBlockResidualFunction_residualEqns_C(p, str, p.indent(nextIndent), new Enumerator(), visitedList, solverArrayMap);
+        genResidual(p, str, p.indent(nextIndent), new Enumerator(), visitedList);
         str.print(nextIndent + "}\n");
         str.print(indent + "}\n");
         ASTNode.genFunctionEnd(str, indent);
@@ -2180,39 +2185,6 @@ aspect CCodeGen {
         } else {
             str.format("%sx[%d] = jmi->offs_sw_init + %d;\n", nextIndent, enumerator.next(), relExpInInitialEquationsIndex());
         }
-    }
-
-    /**
-     * Generates residual equation for all unsolved equations in this block.
-     */
-    public abstract void AbstractEquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap);
-
-    @Override
-    public void EquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        for (SimpleEquationBlock block : unsolvedBlocks())
-            block.genBlockResidualFunction_residualEqn_C(p, str, indent, enumerator, visited, solverArrayMap);
-    }
-    
-    @Override
-    public void AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        throw new UnsupportedOperationException("AbstractSubBLTBlock.genBlockResidualFunction_residualEqns_C() is not implemented!");
-    }
-    
-    @Override
-    public void SimpleEquationBlock.genBlockResidualFunction_residualEqns_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        genBlockResidualFunction_residualEqn_C(p, str, indent, enumerator, visited, solverArrayMap);
-    }
-
-    /**
-     * Generates residual equation for this simple block.
-     */
-    public void SimpleEquationBlock.genBlockResidualFunction_residualEqn_C(CodePrinter p, CodeStream str, String indent,
-            Enumerator enumerator, Set<FAbstractEquation> visited, Map<FVariable,String> solverArrayMap) {
-        equation().genResidual_C(p, str, indent, enumerator, visited, assignedIndices() == null ? null : new LinkedHashSet<Integer>(assignedIndices()));
     }
 
     /**

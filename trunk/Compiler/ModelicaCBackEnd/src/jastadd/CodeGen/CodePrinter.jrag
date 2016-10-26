@@ -163,7 +163,7 @@ aspect CodePrinter {
         public abstract void genBlockResidualCall(AbstractEquationBlock node, CodeStream str, String indent);
 
         /**
-         * Produce statements that solves the equation in question.
+         * Produce c-statements that solves the equation in question.
          * 
          * @param node Equation which is going to be printed
          * @param str Output stream
@@ -177,7 +177,21 @@ aspect CodePrinter {
         public abstract void genBlock(FAbstractEquation node, CodeStream str, String indent,
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices);
 
-        
+        /**
+         * Produce c-statements that forms an residual for the equation in
+         * question.
+         * 
+         * @param node Equation which is going to be printed
+         * @param str Output stream
+         * @param indent Indentation
+         * @param enumerator An enumerator which enumerates the residual vector.
+         * @param visited Set of visited equations
+         * @param forIndices The integer indices that we are producing
+         *      statements for
+         */
+        public abstract void genResidual(FAbstractEquation node, CodeStream str, String indent,
+                Enumerator enumerator, Set<FAbstractEquation> visited, Set<Integer> forIndices);
+
         @Override
         public String op(FBinExp e) { return e.op_C(); }
 
