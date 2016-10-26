@@ -25,9 +25,7 @@ if(NOT TOP_SRC)
     message(STATUS "TOP_SRC was not defined, using ${TOP_SRC}")
 endif()
 set(MSLCSOURCES ${TOP_SRC}/ThirdParty/MSL/Modelica/Resources/C-Sources)
-set(CSPARSECSOURCES ${TOP_SRC}/ThirdParty/CSparse/csparse)
 message(STATUS MSLCSOURCES=${MSLCSOURCES})
-message(STATUS CSPARSECSOURCES=${CSPARSECSOURCES})
 
 set(JMISources   
     jmi.h
@@ -127,63 +125,6 @@ set(ZLIB_SOURCES
     ${MSLCSOURCES}/zlib/zutil.c
 )
 
-set(CSPARSE_SOURCES
-    ${CSPARSECSOURCES}/Include/cs.h
-    
-    ${CSPARSECSOURCES}/Source/cs_add.c        
-    ${CSPARSECSOURCES}/Source/cs_amd.c        
-    ${CSPARSECSOURCES}/Source/cs_chol.c       
-    ${CSPARSECSOURCES}/Source/cs_cholsol.c    
-    ${CSPARSECSOURCES}/Source/cs_compress.c   
-    ${CSPARSECSOURCES}/Source/cs_counts.c     
-    ${CSPARSECSOURCES}/Source/cs_cumsum.c     
-    ${CSPARSECSOURCES}/Source/cs_dfs.c        
-    ${CSPARSECSOURCES}/Source/cs_dmperm.c     
-    ${CSPARSECSOURCES}/Source/cs_droptol.c    
-    ${CSPARSECSOURCES}/Source/cs_dropzeros.c  
-    ${CSPARSECSOURCES}/Source/cs_dupl.c       
-    ${CSPARSECSOURCES}/Source/cs_entry.c      
-    ${CSPARSECSOURCES}/Source/cs_ereach.c     
-    ${CSPARSECSOURCES}/Source/cs_etree.c      
-    ${CSPARSECSOURCES}/Source/cs_fkeep.c      
-    ${CSPARSECSOURCES}/Source/cs_gaxpy.c                 
-    ${CSPARSECSOURCES}/Source/cs_happly.c     
-    ${CSPARSECSOURCES}/Source/cs_house.c
-    ${CSPARSECSOURCES}/Source/cs_inplace.c      
-    ${CSPARSECSOURCES}/Source/cs_ipvec.c     
-    ${CSPARSECSOURCES}/Source/cs_leaf.c       
-    ${CSPARSECSOURCES}/Source/cs_load.c       
-    ${CSPARSECSOURCES}/Source/cs_lsolve.c     
-    ${CSPARSECSOURCES}/Source/cs_ltsolve.c    
-    ${CSPARSECSOURCES}/Source/cs_lu.c         
-    ${CSPARSECSOURCES}/Source/cs_lusol.c      
-    ${CSPARSECSOURCES}/Source/cs_malloc.c    
-    ${CSPARSECSOURCES}/Source/cs_maxtrans.c  
-    ${CSPARSECSOURCES}/Source/cs_multiply.c  
-    ${CSPARSECSOURCES}/Source/cs_norm.c       
-    ${CSPARSECSOURCES}/Source/cs_permute.c    
-    ${CSPARSECSOURCES}/Source/cs_pinv.c      
-    ${CSPARSECSOURCES}/Source/cs_post.c      
-    ${CSPARSECSOURCES}/Source/cs_print.c     
-    ${CSPARSECSOURCES}/Source/cs_pvec.c      
-    ${CSPARSECSOURCES}/Source/cs_qr.c         
-    ${CSPARSECSOURCES}/Source/cs_qrsol.c      
-    ${CSPARSECSOURCES}/Source/cs_randperm.c   
-    ${CSPARSECSOURCES}/Source/cs_reach.c     
-    ${CSPARSECSOURCES}/Source/cs_scatter.c    
-    ${CSPARSECSOURCES}/Source/cs_scc.c        
-    ${CSPARSECSOURCES}/Source/cs_schol.c      
-    ${CSPARSECSOURCES}/Source/cs_spsolve.c    
-    ${CSPARSECSOURCES}/Source/cs_sqr.c        
-    ${CSPARSECSOURCES}/Source/cs_symperm.c    
-    ${CSPARSECSOURCES}/Source/cs_tdfs.c       
-    ${CSPARSECSOURCES}/Source/cs_transpose.c  
-    ${CSPARSECSOURCES}/Source/cs_updown.c     
-    ${CSPARSECSOURCES}/Source/cs_usolve.c     
-    ${CSPARSECSOURCES}/Source/cs_util.c       
-    ${CSPARSECSOURCES}/Source/cs_utsolve.c    
-)
-
 include_directories(module_include)
 
 #Build jmi library
@@ -198,12 +139,11 @@ endif()
 if(WIN32)
     #Flag that is needed for compiling lib togheter with MINPACK, no dll is created.
     add_definitions(-DCMINPACK_NO_DLL)
-    
 endif()
 
 if(JMI_SUNDIALS AND JMI_LAPACK AND JMI_MINPACK)
     add_executable(jmi_block_solver_test jmi_block_solver_test.c)
-    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK} ${JMI_CSPARSE})
+    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK})
 endif()
 
 #Build ModelicaExternalC library
@@ -239,14 +179,8 @@ if(NOT MSVC)
     set_target_properties(ModelicaStandardTables PROPERTIES COMPILE_FLAGS "-Wall -g")
 endif()
 
-include_directories(${CSPARSECSOURCES}/Include)
-add_library(csparse STATIC ${CSPARSE_SOURCES})
-if(NOT MSVC)
-    set_target_properties(csparse PROPERTIES COMPILE_FLAGS "-Wall -g")
-endif()
-
 #Install the libraries
-install(TARGETS jmi ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib csparse
+install(TARGETS jmi ModelicaExternalC ModelicaStandardTables ModelicaIO ModelicaMatIO zlib
     DESTINATION "${RTLIB_LIB_DIR}")
 
 #Install header files
@@ -255,10 +189,6 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/"
     FILES_MATCHING PATTERN "*.h")
     
 install(DIRECTORY "${MSLCSOURCES}/"
-    DESTINATION "${RTLIB_INCLUDE_DIR}"
-    FILES_MATCHING PATTERN "*.h")
-    
-install(DIRECTORY "${CSPARSECSOURCES}/Include/"
     DESTINATION "${RTLIB_INCLUDE_DIR}"
     FILES_MATCHING PATTERN "*.h")
 
