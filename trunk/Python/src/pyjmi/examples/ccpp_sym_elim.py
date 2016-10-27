@@ -44,13 +44,14 @@ def run_demo(with_plots=True):
     class_name = "CombinedCycleStartup.Startup6"
     file_paths = (os.path.join(get_files_path(), "CombinedCycle.mo"),
                   os.path.join(get_files_path(), "CombinedCycleStartup.mop"))
-    op = transfer_optimization_problem("CombinedCycleStartup.Startup6", file_paths)
+    compiler_options = {'equation_sorting': True, 'automatic_tearing': True}
+    op = transfer_optimization_problem("CombinedCycleStartup.Startup6", file_paths, compiler_options)
 
     # Set elimination options
     elim_opts = EliminationOptions()
     elim_opts['uneliminable'] = ['plant.sigma']
-    elim_opts['tear_vars'] = ['plant.turbineShaft.T__3']
-    elim_opts['tear_res'] = [123]
+    if with_plots:
+        elim_opts['draw_blt'] = True
 
     # Eliminate algebraic variables
     op = BLTOptimizationProblem(op, elim_opts)

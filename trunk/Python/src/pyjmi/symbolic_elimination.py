@@ -43,18 +43,24 @@ class EliminationOptions(dict):
             Default: False
 
         tearing --
-            Whether to tear algebraic loops. Choice of variables and residuals is done with options tear_vars and
-            tear_res_indices.
+            How to tear algebraic loops. Possible values: ['automatic', 'disabled', 'manual']
 
-            Default: False
+            automatic: Choice of tearing variables and residuals is done automatically.
+
+            disabled: Tearing is not used.
+
+            manual: Tearing variables and residuals are selected manually with options tear_vars and tear_res_indices.
+
+            Type: str
+            Default: 'automatic'
 
         tear_vars --
-            List of names of manually selected tearing variables. Only applicable if tearing is True.
+            List of names of selected tearing variables. Only applicable if tearing is 'manual'.
 
             Default: []
 
         tear_res_indices --
-            List of global equation indices of manually selected tearing residuals.
+            List of global equation indices of selected tearing residuals. Only applicable if tearing is 'manual'.
 
             Default: []
 
@@ -122,7 +128,7 @@ class EliminationOptions(dict):
         self['draw_blt_strings'] = False
         self['solve_blocks'] = False
         self['solve_torn_linear_blocks'] = False
-        self['tearing'] = False
+        self['tearing'] = 'automatic'
         self['tear_vars'] = []
         self['tear_res'] = []
         self['inline'] = True
@@ -153,11 +159,12 @@ def scale_axis(figure=plt, xfac=0.08, yfac=0.08):
 
 class Equation(object):
 
-    def __init__(self, string, global_index, local_index, expression=None):
+    def __init__(self, string, global_index, local_index, tearing, expression=None):
         self.string = string
         self.global_index = global_index
         self.local_index = local_index
         self.expression = expression
+        self.tearing = tearing
         self.global_blt_index = None
         self.local_blt_index = None
         self.dig_vertex = None
@@ -183,13 +190,14 @@ class NonBool(object):
 
 class Variable(object):
 
-    def __init__(self, name, global_index, local_index, is_der, mvar=None, mx_var=None):
+    def __init__(self, name, global_index, local_index, is_der, tearing, mvar=None, mx_var=None):
         self.name = name
         self.global_index = global_index
         self.local_index = local_index
         self.is_der = is_der
         self.mvar = mvar
         self.mx_var = mx_var
+        self.tearing = tearing
         self.global_blt_index = None
         self.local_blt_index = None
         self.dig_vertex = None
@@ -235,11 +243,9 @@ def find_deps(expr, mx_vars, deps=None):
 
 class Component(object):
 
-    def __init__(self, vertices, causalization_options, tear_vars, tear_res, edges):
+    def __init__(self, vertices, causalization_options, edges):
         # Define data structures
         self.options = causalization_options
-        self.tear_vars = tear_vars
-        self.tear_res = tear_res
         self.vertices = vertices
         self.n = len(vertices) # Block size
         self.variables = variables = []
@@ -279,12 +285,12 @@ class Component(object):
             self.block_causal_vars = []
             self.block_causal_equations = []
             for var in self.variables:
-                if var.name in self.tear_vars:
+                if var.tearing:
                     self.block_tear_vars.append(var)
                 else:
                     self.block_causal_vars.append(var)
             for eq in self.equations:
-                if eq.global_index in self.tear_res:
+                if eq.tearing:
                     self.block_tear_res.append(eq)
                 else:
                     self.block_causal_equations.append(eq)
@@ -454,7 +460,7 @@ class Component(object):
 
         # Create new bipartite graph for block
         causal_edges = create_edges(causal_equations, causal_variables)
-        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, [], [], CausalizationOptions())
+        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, CausalizationOptions())
 
         # Compute components and verify scalarity
         causal_graph.maximum_match()
@@ -547,7 +553,7 @@ class Component(object):
 
         # Create new bipartite graph for block
         causal_edges = create_edges(causal_equations, causal_variables)
-        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, [], [], EliminationOptions())
+        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, EliminationOptions())
 
         # Compute components and verify scalarity
         try:
@@ -576,11 +582,9 @@ class Component(object):
 
 class BipartiteGraph(object):
 
-    def __init__(self, equations, variables, edges, tear_vars, tear_res, causalization_options):
+    def __init__(self, equations, variables, edges, causalization_options):
         self.equations = equations
         self.variables = variables
-        self.tear_vars = tear_vars
-        self.tear_res = tear_res
         self.options = causalization_options
         self.n = len(equations)
         if self.n != len(variables):
@@ -856,8 +860,8 @@ class BipartiteGraph(object):
         L[i_star] = [vari for vari in L[i_star] if vari in unmatched_varis]
 
         # Add source and sink
-        source = Equation('source', -1, -1, False)
-        sink = Variable('sink', -1, -1, False)
+        source = Equation('source', -1, -1, False, False)
+        sink = Variable('sink', -1, -1, False, False)
 
         # Draw layers
         if options['plots']:
@@ -994,7 +998,7 @@ class BipartiteGraph(object):
             vertices = []
             while self.stack and self.stack[-1].number >= v.number:
                 vertices.append(self.stack.pop())
-            self.components.append(Component(vertices, self.options, self.tear_vars, self.tear_res, self.edges))
+            self.components.append(Component(vertices, self.options, self.edges))
 
 def create_edges(equations, variables):
         """
@@ -1032,8 +1036,17 @@ class BLTModel(object):
         Creates a BLTModel from a Model.
         """
         self.options = elimination_options
-        self.tear_vars = list(self.options['tear_vars'])
-        self.tear_res = list(self.options['tear_res'])
+
+        # Identify tearing variables
+        if self.options['tearing'] == 'automatic':
+            self.tear_vars = [var.getName() for var in model.getVariables(model.REAL_ALGEBRAIC)
+                              if not var.isAlias() and var.isTearing()]
+        elif self.options['tearing'] == 'manual':
+            self.tear_vars = list(self.options['tear_vars'])
+        elif self.options['tearing'] == 'disabled':
+            self.tear_vars = []
+        else:
+            raise ValueError("Unknown tearing option %s." % self.tearing)
         
         # Check that uneliminables exist and replace with aliases
         for (i, name) in enumerate(self.options['uneliminable']):
@@ -1119,6 +1132,7 @@ class BLTModel(object):
         # Get optimization and model expressions
         named_initial = model.getInitialResidual()
         named_dae = model.getDaeResidual()
+        named_dae_equations = model.getDaeEquations()
 
         # Eliminate parameters
         [named_initial, named_dae] = casadi.substitute([named_initial, named_dae], par_vars, par_vals)
@@ -1130,26 +1144,29 @@ class BLTModel(object):
 
         # Create variables
         i = 0
-        #~ mvar_map = {}
-        #~ self._mx_var_map = mx_var_map = {}
         for vk in ["dx", "w"]:
             for (mvar, mx_var) in itertools.izip(mvar_vectors[vk], mx_var_struct[vk]):
-                variables.append(Variable(mvar.getName(), i, i, vk=="dx", mvar, mx_var))
-                #~ mvar_map[mvar] = variables[-1]
-                #~ mx_var_map[mx_var] = variables[-1]
+                tearing = mvar.getName() in self.tear_vars
+                variables.append(Variable(mvar.getName(), i, i, vk=="dx", tearing, mvar, mx_var))
                 i += 1
 
         # Create equations
         i = 0
-        for named_eq in named_dae:
-            equations.append(Equation(named_eq.__str__()[4:-2], i, i, named_eq))
+        for (named_res, named_eq) in itertools.izip(named_dae, named_dae_equations):
+            if self.options['tearing'] == "manual":
+                tearing = i in self.options['tear_res']
+            elif self.options['tearing'] == "automatic":
+                tearing = named_eq.isTearing()
+            else:
+                tearing = False
+            equations.append(Equation(named_eq.__str__()[4:-2], i, i, tearing, named_res))
             i += 1
 
         # Create edges
         self._edges = create_edges(equations, variables)
 
         # Create graph
-        self._graph = BipartiteGraph(equations, variables, self._edges, self.tear_vars, self.tear_res, self.options)
+        self._graph = BipartiteGraph(equations, variables, self._edges, self.options)
         if self.options['plots']:
             self._graph.draw(11)
 
@@ -1165,7 +1182,7 @@ class BLTModel(object):
         for var_name in self.options['uneliminable']:
             dependencies[var_name] = [var_name]
 
-        for var in self.options['tear_vars']:
+        for var in self.tear_vars:
             self._dependencies[var] = [var]
 
     def _compute_blt(self):
@@ -1208,20 +1225,6 @@ class BLTModel(object):
             sx_u = [casadi.SX.sym(name) for name in [var.__repr__()[3:-1] for var in u]]
             self._sx_known_vars = sx_known_vars = sx_time + sx_x + sx_u
             self._sx_solved_vars = sx_solved_vars = []
-
-        #~ for comp in self._graph.components:
-            #~ if 'temp_3087' in [var.name for var in comp.variables]:
-            #~ if 'i3' in [var.name for var in comp.variables]:
-                #~ A = np.zeros([comp.n, comp.n])
-                #~ n0 = comp.equations[0].global_blt_index
-                #~ for edge in self._graph.edges:
-                    #~ i = edge.eq.global_blt_index - n0
-                    #~ j = edge.var.global_blt_index - n0
-                    #~ if (0 <= i < comp.n and 0 <= j < comp.n):
-                        #~ A[i, j] = 2 - edge.linear
-        #~ from tearing import tear
-        #~ tear(A)
-        #~ dh()
 
         # Create expression
         residuals = []
@@ -1540,7 +1543,7 @@ class BLTModel(object):
 
         # Draw BLT
         if options['plots'] or options['draw_blt']:
-            self._graph.draw_blt(strings=options['blt_strings'])
+            self._graph.draw_blt(strings=options['draw_blt_strings'])
 
     def _sparsity_preserving(self, co):
         """
