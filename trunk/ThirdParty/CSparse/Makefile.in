@@ -398,7 +398,7 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	uninstall uninstall-am
 
-# This is to ensure that the install target of the Sundials
+# This is to ensure that the install target of the CSparse
 # make system is run whenever make all is run. This is needed
 # in order to trigger a complete install, local in the build
 # directory, early in the build process.
@@ -418,29 +418,32 @@ $(CSPARSE_DIR):
 @JM_WIN64_TRUE@all-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
 @JM_WIN64_TRUE@	case $(build) in \
 @JM_WIN64_TRUE@	*-cygwin*|*-mingw*) \
-@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 install DESTDIR= ; \
-@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m64 install DESTDIR= ;; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m64 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
 @JM_WIN64_TRUE@	*) \
-@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR= ; \
-@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) install DESTDIR= ;; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
 @JM_WIN64_TRUE@	esac
 
 @JM_WIN64_TRUE@install-exec-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
 @JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install/lib/libcsparse$(SHAREDEXT)
 @JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
 @JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install64/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install64/lib/libcsparse$(SHAREDEXT)
 @JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Include/* $(abs_builddir)/../../csparse_install64/include/
 
 @JM_WIN64_FALSE@all-local: $(CSPARSE_DIR)
 @JM_WIN64_FALSE@	case $(build) in \
 @JM_WIN64_FALSE@	*-cygwin*|*-mingw*) \
-@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 install DESTDIR= ;; \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS)  install DESTDIR= ;; \
 @JM_WIN64_FALSE@	*) \
-@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) install DESTDIR= ;; \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
 @JM_WIN64_FALSE@	esac
 
 @JM_WIN64_FALSE@install-exec-local: $(CSPARSE_DIR)
 @JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install/lib/libcsparse$(SHAREDEXT)
 @JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
 
 check-local:
