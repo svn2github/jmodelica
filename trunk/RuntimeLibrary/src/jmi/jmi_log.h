@@ -64,7 +64,7 @@ struct jmi_log_node_t {
     int inner_id;
 };
 
-/** \brief Allocate and intialize a log, with output to `jmi` */
+/** \brief Allocate and initialize a log, with output to `jmi` */
 jmi_log_t *jmi_log_init(jmi_callbacks_t* jmi_callbacks);
 
 /** \brief Deallocate the log */
@@ -102,8 +102,8 @@ void jmi_log_node( jmi_log_t *log, jmi_log_category_t c, const char *type, const
  *      * *name* is an identifier and
  *      * *format* is one of the printf format characters
  *          `diu` for `int`,
- *          `I` for `int`; mark it as an iv index (to be converted from 0- to 1-based by recepient if needed)
- *          `R` for `int`; mark it as a residual index (to be converted from 0- to 1-based by recepient if needed)
+ *          `I` for `int`; mark it as an iv index (to be converted from 0- to 1-based by recipient if needed)
+ *          `R` for `int`; mark it as a residual index (to be converted from 0- to 1-based by recipient if needed)
  *          `eEfFgG` for `jmi_real_t`, or
  *          `s` for `char *`.
  *        No format specifiers beyond the single character are supported;

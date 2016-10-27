@@ -18,7 +18,7 @@
 */
 
 /** \file jmi_callbacks.h
- *  \brief jmi_callbacks stuct is utilized to propagate base line callbacks and info in different modules.
+ *  \brief jmi_callbacks struct is utilized to propagate base line callbacks and info in different modules.
  */
 
 #ifndef _JMI_CALLBACKS_H
@@ -65,7 +65,7 @@ typedef struct jmi_log_options_t {
 struct jmi_callbacks_t {
     jmi_log_options_t log_options;               /** < \brief Options controlling logging */
 
-    jmi_callback_emit_log_ft        emit_log;           /** < \brief Logger function */
+    jmi_callback_emit_log_ft        emit_log;                        /** < \brief Logger function */
     jmi_callback_is_log_category_emitted_ft is_log_category_emitted; /** < \brief Check if specified category is logged */
 
     jmi_callback_allocate_memory_ft allocate_memory;  /** < \brief Allocate memory function. */
@@ -76,7 +76,4 @@ struct jmi_callbacks_t {
     void*                        model_data;       /**< \brief Opaque application model pointer for propagating additional information */
 };
 
-/** TODO: consider a method for initializing the struct
-void jmi_callbacks_init(jmi_callbacks_t *jmi, jmi_options_t* op);
-*/
 #endif
