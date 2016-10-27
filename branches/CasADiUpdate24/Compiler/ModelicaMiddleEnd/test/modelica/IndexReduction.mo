@@ -308,37 +308,25 @@ fclass IndexReduction.IndexReduction3_Electrical
  parameter Real C = 0.05 /* 0.05 */;
  Real iL(start = 1);
  Real uC(start = 1);
- Real u0;
  Real u1;
  Real uL;
  Real i0;
  Real i1;
  Real i2;
  Real iC;
- Real _der_iL;
  Real _der_uC;
- Real _der_u0;
- Real _der_u1;
- Real _der_uL;
- Real _der_i1;
 initial equation 
- i2 = 0.0;
+ iL = 1;
 equation
- u0 = 220 * sin(time * omega);
+ uC = 220 * sin(time * omega);
  u1 = R[1] * i1;
  uL = R[2] * i2;
- uL = L * _der_iL;
+ uL = L * der(iL);
  iC = C * _der_uC;
- u0 = u1 + uL;
  uC = u1 + uL;
  i0 = i1 + iC;
  i1 = i2 + iL;
- _der_u0 = 220 * (cos(time * omega) * omega);
- _der_u1 = R[1] * _der_i1;
- _der_uL = R[2] * der(i2);
- _der_u0 = _der_u1 + _der_uL;
- _der_uC = _der_u1 + _der_uL;
- _der_i1 = der(i2) + _der_iL;
+ _der_uC = 220 * (cos(time * omega) * omega);
 end IndexReduction.IndexReduction3_Electrical;
 ")})));
   end IndexReduction3_Electrical;
@@ -505,22 +493,22 @@ fclass IndexReduction.IndexReduction27_DerFunc
  Real x2[2](stateSelect = StateSelect.prefer);
  Real _der_x1[1];
  Real _der_x1[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real _der_temp_6;
+ Real _der_temp_7;
 initial equation 
  x2[1] = 0.0;
  x2[2] = 0.0;
 equation
  _der_x1[1] + der(x2[1]) = 2;
  _der_x1[2] + der(x2[2]) = 3;
- ({temp_4, temp_5}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- ({_der_temp_4, _der_temp_5}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
- - _der_x1[1] = _der_temp_4;
- - _der_x1[2] = _der_temp_5;
+ ({temp_6, temp_7}) = IndexReduction.IndexReduction27_DerFunc.f({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1[1] = temp_6;
+ - x1[2] = temp_7;
+ ({_der_temp_6, _der_temp_7}) = IndexReduction.IndexReduction27_DerFunc.f_der({x2[1], x2[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2[1]), der(x2[2])}, {{0.0, 0.0}, {0.0, 0.0}});
+ - _der_x1[1] = _der_temp_6;
+ - _der_x1[2] = _der_temp_7;
 
 public
  function IndexReduction.IndexReduction27_DerFunc.f
@@ -603,22 +591,22 @@ fclass IndexReduction.IndexReduction28_Record
  Real x2.a[2](stateSelect = StateSelect.default);
  Real x1._der_a[2];
  Real x2._der_a[2];
- Real temp_4;
- Real temp_5;
- Real _der_temp_4;
- Real _der_temp_5;
+ Real temp_6;
+ Real temp_7;
+ Real _der_temp_6;
+ Real _der_temp_7;
 initial equation 
  x1.a[1] = 0.0;
  x2.a[1] = 0.0;
 equation
  der(x1.a[1]) + der(x2.a[1]) = 2;
  x1._der_a[2] + x2._der_a[2] = 3;
- (IndexReduction.IndexReduction28_Record.R({temp_4, temp_5})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
- - x1.a[1] = temp_4;
- - x1.a[2] = temp_5;
- (IndexReduction.IndexReduction28_Record.R({_der_temp_4, _der_temp_5})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
- - der(x1.a[1]) = _der_temp_4;
- - x1._der_a[2] = _der_temp_5;
+ (IndexReduction.IndexReduction28_Record.R({temp_6, temp_7})) = IndexReduction.IndexReduction28_Record.f({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}});
+ - x1.a[1] = temp_6;
+ - x1.a[2] = temp_7;
+ (IndexReduction.IndexReduction28_Record.R({_der_temp_6, _der_temp_7})) = IndexReduction.IndexReduction28_Record.f_der({x2.a[1], x2.a[2]}, {{A[1,1], A[1,2]}, {A[2,1], A[2,2]}}, {der(x2.a[1]), x2._der_a[2]}, {{0.0, 0.0}, {0.0, 0.0}});
+ - der(x1.a[1]) = _der_temp_6;
+ - x1._der_a[2] = _der_temp_7;
 
 public
  function IndexReduction.IndexReduction28_Record.f
@@ -1447,30 +1435,30 @@ fclass IndexReduction.TemporaryVarStates1
  Real _der_x2[1];
  Real _der_x1[2];
  Real _der_x2[2];
- Real temp_4;
- Real temp_5;
  Real temp_6;
  Real temp_7;
- Real temp_20;
- Real temp_21;
+ Real temp_8;
+ Real temp_9;
+ Real temp_22;
+ Real temp_23;
 initial equation 
- temp_4 = 0.0;
- temp_5 = 0.0;
+ temp_6 = 0.0;
+ temp_7 = 0.0;
 equation
  _der_x1[1] + _der_x2[1] = 2;
  _der_x1[2] + _der_x2[2] = 3;
- temp_4 = A[1,1] * temp_6 + A[1,2] * temp_7;
- temp_5 = A[2,1] * temp_6 + A[2,2] * temp_7;
- - x1[1] = temp_4;
- - x1[2] = temp_5;
- der(temp_4) = A[1,1] * temp_20 + A[1,2] * temp_21;
- der(temp_5) = A[2,1] * temp_20 + A[2,2] * temp_21;
- - _der_x1[1] = der(temp_4);
- - _der_x1[2] = der(temp_5);
- temp_6 = x2[1];
- temp_7 = x2[2];
- temp_20 = _der_x2[1];
- temp_21 = _der_x2[2];
+ temp_6 = A[1,1] * temp_8 + A[1,2] * temp_9;
+ temp_7 = A[2,1] * temp_8 + A[2,2] * temp_9;
+ - x1[1] = temp_6;
+ - x1[2] = temp_7;
+ der(temp_6) = A[1,1] * temp_22 + A[1,2] * temp_23;
+ der(temp_7) = A[2,1] * temp_22 + A[2,2] * temp_23;
+ - _der_x1[1] = der(temp_6);
+ - _der_x1[2] = der(temp_7);
+ temp_8 = x2[1];
+ temp_9 = x2[2];
+ temp_22 = _der_x2[1];
+ temp_23 = _der_x2[2];
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");

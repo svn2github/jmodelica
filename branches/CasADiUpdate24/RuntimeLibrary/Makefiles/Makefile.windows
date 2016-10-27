@@ -213,7 +213,7 @@ endif
 
 ceval_: $(OBJS)
 	if not exist "$(BINARY_BASE_DIR)" mkdir "$(BINARY_BASE_DIR)"
-	$(CXX) $(CXXFLAGS) -o "$(EXECUTABLE)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_CEVAL)
+	"$(CXX)" $(CXXFLAGS) -o "$(EXECUTABLE)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_CEVAL)
 	$(RM) $(OBJS)
 
 fmume10:
@@ -225,7 +225,7 @@ endif
 
 fmume10_: $(OBJS)
 	if not exist "$(BINARY_MKDIR)" mkdir "$(BINARY_MKDIR)"
-	$(CXX) $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUME10)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUME10)
 	$(RM) $(OBJS)
 
 fmucs10:
@@ -237,7 +237,7 @@ endif
 
 fmucs10_: $(OBJS)
 	mkdir "$(BINARY_MKDIR)"
-	$(CXX) $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUCS10)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMUCS10)
 	$(RM) $(OBJS)
 
 fmume20:
@@ -249,7 +249,7 @@ endif
 
 fmume20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
 	$(RM) $(OBJS)
 
 fmucs20:
@@ -261,7 +261,7 @@ endif
 
 fmucs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
 	$(RM) $(OBJS)
 
 fmumecs20:
@@ -273,7 +273,7 @@ endif
 
 fmumecs20_: $(OBJS)
 	mkdir $(BINARY_MKDIR)
-	$(CXX) $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) "-L${RUNTIMELIBRARY_LIB_DIR}" $(LIBS_FMU20)
 	$(RM) $(OBJS)
 
 jmu: $(OBJS)
@@ -284,7 +284,7 @@ ifeq "$(wildcard .jmi_objs )" ""
 endif
 	mkdir $(BINARY_MKDIR)
 	cd .jmi_objs && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_algorithm_cppad.a"  && $(AR) -x "$(JMODELICA_HOME)/lib/libjmi_solver_cppad.a"  
-	$(CXX) $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o "-L$(JMI_LIB_DIR)" $(LIBS_JMU)
+	"$(CXX)" $(SHARED_LDFLAGS) $(CXXLINKFLAGS) $(CXXFLAGS) -o "$(SHARED)" $(OBJS) ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_init_opt.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll.o ./.jmi_objs/libjmi_algorithm_cppad_la-jmi_opt_coll_radau.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_init_opt_TNLP.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_ipopt.o ./.jmi_objs/libjmi_solver_cppad_la-jmi_opt_coll_TNLP.o "-L$(JMI_LIB_DIR)" $(LIBS_JMU)
 	$(RM) .jmi_objs\*.o
 	rmdir .jmi_objs
 	$(RM) $(OBJS)
@@ -296,16 +296,16 @@ all: $(SHARED)
 # Compile
 %.o: sources/%.cpp
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
-	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
+	"$(CXX)" $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
 else
-	$(CXX) $(CXXFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
+	"$(CXX)" $(CXXFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
 endif
 
 %.o: sources/%.c
 ifeq ($(JMI_AD),JMI_AD_CPPAD)
-	$(CXX) $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
+	"$(CXX)" $(CXXFLAGS) $(INCL_CPPAD) -c -o "$@" $<
 else
-	$(CC) $(CFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
+	"$(CC)" $(CFLAGS) $(INCL_NOCPPAD) -c -o "$@" $<
 endif
 
 # Create a rule which uses the first item in arg as src name and

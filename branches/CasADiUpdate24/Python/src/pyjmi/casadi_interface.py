@@ -67,15 +67,6 @@ def transfer_model(class_name, file_name=[],
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be file or library paths.
     
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
-    
         
     Parameters::
     
@@ -125,15 +116,6 @@ def transfer_optimization_problem(class_name, file_name=[],
     * class_name and file_name is passed:
         - file_name can be a single path as a string or a list of paths 
           (strings). The paths can be file or library paths.
-    
-    Library directories can be added to MODELICAPATH by listing them in a 
-    special compiler option 'extra_lib_dirs', for example:
-    
-        compiler_options = 
-            {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-        
-    Other options for the compiler should also be listed in the compiler_options 
-    dict.
     
         
     Parameters::
@@ -559,7 +541,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
             design --
                 Design criterion.
 
-                Possible values: "A"
+                Possible values: "A", "T"
         """
         # Augment sensitivities and add timed variables
         self.augment_sensitivities(parameters)
@@ -570,15 +552,21 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         for j in xrange(len(outputs)):
             Q.append(casadi.vertcat([casadi.horzcat([s.getVar() for s in timed_sens[i][j]])
                                      for i in xrange(len(time_points))]))
-        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in xrange(len(outputs)) for j in xrange(len(outputs))])
+        Fisher = sum([sigma[i, j] * casadi.mul(Q[i].T, Q[j]) for i in xrange(len(outputs))
+                      for j in xrange(len(outputs))])
 
         # Define the objective
-        b = casadi.MX.sym("b", Fisher.shape[1], 1)
-        Fisher_inv = casadi.jacobian(casadi.solve(Fisher, b), b)
         if design == "A":
+            b = casadi.MX.sym("b", Fisher.shape[1], 1)
+            Fisher_inv = casadi.jacobian(casadi.solve(Fisher, b), b)
             obj = casadi.trace(Fisher_inv)
+        elif design == "T":
+            obj = -casadi.trace(Fisher)
+        elif design == "D":
+            obj = -casadi.det(Fisher)
+            raise NotImplementedError("D-optimal design is not supported.")
         else:
-            raise ValueError("Currently only A-optimal design is supported.")
+            raise ValueError("Invalid design %s." % design)
         old_obj = self.getObjective()
         self.setObjective(old_obj + obj)
          

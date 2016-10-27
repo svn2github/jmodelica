@@ -316,8 +316,16 @@ public class CGenerator extends GenericGenerator {
             String indent = "";
             String next = p.indent(indent);
             
-            CodeSplitter<FAbstractEquation> cs1 = new CodeSplitter<FAbstractEquation>(p, str, next, 
-                    true, "model_init_eval_parameters_", fclass.getFParameterEquations().toArrayList()) {
+            CodeSplitter<FAbstractEquation> cs = new CodeSplitter<FAbstractEquation>(p, str, next, 
+                    true, "model_init_eval_parameters_", fclass.myOptions(), fclass.getFParameterEquations().toArrayList()) {
+                @Override
+                public int numScalarElements(FAbstractEquation element) {
+                    return element.numScalarEquations();
+                }
+                @Override
+                public int numScalarTemporaries(FAbstractEquation element) {
+                    return element.numScalarTemporaries();
+                }
                 @Override
                 public void genDecl(FAbstractEquation element) {
                     p.printVarDecls(element, str, indent);
@@ -328,12 +336,14 @@ public class CGenerator extends GenericGenerator {
                 }
             };
             
-            cs1.genFuncs();
+            cs.genFuncImpls();
+            
+            cs.genFuncHeads();
             
             str.print("int model_init_eval_parameters_base(jmi_t* jmi) {\n");
-            cs1.printStatusDecl();
-            cs1.genCalls();
-            cs1.printStatusReturn();
+            cs.printStatusDecl();
+            cs.genFuncCalls();
+            cs.printStatusReturn();
             str.print("}\n");
 		}
 	
@@ -773,7 +783,15 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
-                    "model_ode_derivatives_") {
+                    "model_ode_derivatives_", fclass.myOptions()) {
+                @Override
+                public int numScalarElements(AbstractEquationBlock element) {
+                    return element.allLocalVariables().size();
+                }
+                @Override
+                public int numScalarTemporaries(AbstractEquationBlock element) {
+                    return element.numScalarTemporaries();
+                }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls_C(p, str, indent);
@@ -796,14 +814,16 @@ public class CGenerator extends GenericGenerator {
                 cs.add(fclass.getDAEStructuredBLT().getAllBlocks());
             }
             
-            cs.genFuncs();
+            cs.genFuncImpls();
+            
+            cs.genFuncHeads();
             
             str.print("int model_ode_derivatives_base(jmi_t* jmi) {\n");
             cs.printStatusDecl();
             if (fclass.onlyInitBLT()) {
                 str.print(next + "ef = model_ode_initialize(jmi);\n");
             } else {
-                cs.genCalls();
+                cs.genFuncCalls();
             }
             cs.printStatusReturn();
             str.print("}\n");
@@ -829,7 +849,15 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<AbstractEquationBlock> cs = new CodeSplitter<AbstractEquationBlock>(p, str, next, true,
-                    "model_ode_initialize_") {
+                    "model_ode_initialize_", fclass.myOptions()) {
+                @Override
+                public int numScalarElements(AbstractEquationBlock element) {
+                    return element.allLocalVariables().size();
+                }
+                @Override
+                public int numScalarTemporaries(AbstractEquationBlock element) {
+                    return element.numScalarTemporaries();
+                }
                 @Override
                 public void genDecl(AbstractEquationBlock element) {
                     element.genVarDecls_C(p, str, indent);
@@ -852,11 +880,13 @@ public class CGenerator extends GenericGenerator {
                 cs.add(fclass.getDAEInitBLT());
             }
             
-            cs.genFuncs();
+            cs.genFuncImpls();
+            
+            cs.genFuncHeads();
             
             str.print("int model_ode_initialize_base(jmi_t* jmi) {\n");
             cs.printStatusDecl();
-            cs.genCalls();
+            cs.genFuncCalls();
             cs.printStatusReturn();
             str.print("}\n");
         }
@@ -1209,7 +1239,7 @@ public class CGenerator extends GenericGenerator {
             String next = p.indent(indent);
             
             CodeSplitter<FVariable> cs1 = new CodeSplitter<FVariable>(p, str, next, false,
-                    "jmi_set_start_values_0_") {
+                    "jmi_set_start_values_0_", fclass.myOptions()) {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);
@@ -1223,10 +1253,10 @@ public class CGenerator extends GenericGenerator {
             cs1.add(fclass.independentConstants());
             cs1.add(fclass.dependentConstants());
             cs1.add(fclass.independentParameters());
-            cs1.genFuncs();
+            cs1.genFuncImpls();
             
             CodeSplitter<FVariable> cs2 = new CodeSplitter<FVariable>(p, str, next, false,
-                    "jmi_set_start_values_1_") {
+                    "jmi_set_start_values_1_", fclass.myOptions()) {
                 @Override
                 public void genDecl(FVariable element) {
                     p.printVarDecls(element, str, indent);
@@ -1243,14 +1273,17 @@ public class CGenerator extends GenericGenerator {
             }
             cs2.add(fclass.variables());
             cs2.add(fclass.discretePreVariables());
-            cs2.genFuncs();
+            cs2.genFuncImpls();
+            
+            cs1.genFuncHeads();
+            cs2.genFuncHeads();
             
             str.print("int jmi_set_start_values_base(jmi_t* jmi) {\n");
             cs1.printStatusDecl();
-            cs1.genCalls();
+            cs1.genFuncCalls();
             str.print(next);
             str.print("model_init_eval_parameters(jmi);\n");
-            cs2.genCalls();
+            cs2.genFuncCalls();
             cs1.printStatusReturn();
             str.print("}\n");
         }

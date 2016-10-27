@@ -128,6 +128,8 @@ aspect TransformCanonical {
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new variabilityPropagationIfSet());
             transformations.add(new aliasEliminationIfSet());
+            transformations.add(new eliminateLinearEquations());
+            transformations.add(new aliasEliminationIfSet());
             transformations.add(new enableExpandedInStreamRewrite());
             transformations.add(new evaluateAsserts());
             transformations.add(new enableSemiLinearRewrite());
@@ -278,7 +280,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
                 out.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
@@ -291,7 +293,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 out.print(modelDiagnostics());
                 out.close();
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
@@ -3767,7 +3769,7 @@ aspect EliminateEqualSwitches{
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (!exp.hasBrancher()) {
+                        if (!exp.hasBrancher() && !(exp.inFArray() && exp.inFunctionCall())) {
                             original = exp;
                             break;
                         }
@@ -3782,6 +3784,16 @@ aspect EliminateEqualSwitches{
             }
         }
     }
+    
+    /**
+     * Check if this expression is in an FArray expression. Either directly or
+     * a thorugh a sequence of other expressions.
+     */
+    inh boolean FExp.inFArray();
+    eq FExp.getChild().inFArray()    = inFArray();
+    eq FArray.getChild().inFArray()   = true;
+    eq BaseNode.getChild().inFArray() = false;
+
     
     public void FExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
         

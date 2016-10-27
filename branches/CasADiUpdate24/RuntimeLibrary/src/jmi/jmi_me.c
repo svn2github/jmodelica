@@ -532,7 +532,11 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         /* We are at a time event -> set atTimeEvent to true. */
         if (jmi->nextTimeEvent.defined) {
             jmi->atTimeEvent = jmi_abs(jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time) < jmi->time_events_epsilon;
-            jmi->eventPhase = jmi->nextTimeEvent.phase;
+            if(jmi->atTimeEvent) {
+                jmi->eventPhase = jmi->nextTimeEvent.phase;
+            } else {
+                jmi->eventPhase = JMI_TIME_GREATER;
+            }
             if(!jmi->atTimeEvent && jmi_get_t(jmi)[0]-jmi->nextTimeEvent.time > 0) { /* We passed the next time event, return error */
                 jmi_log_node(jmi->log, logError, "NextTimeEventPassed",
                     "Current time <t: %E> is after next time event <next_time_event: %E>. Consider to change option <time_events_default_tol: %E>.",
@@ -728,6 +732,8 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
         jmi_chattering_check(jmi);
         
         if (jmi_exists_grt_than_time_event(jmi)) {
+            int ret;
+            jmi_boolean state_values_changed = event_info->state_values_changed;
             jmi->nbr_consec_time_events++;
             
             if (jmi->nbr_consec_time_events > 2) {
@@ -739,7 +745,14 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
                 return -1;
             }
             
-            return jmi_event_iteration(jmi, intermediate_results, event_info);
+            ret = jmi_event_iteration(jmi, intermediate_results, event_info);
+            
+            /* If there was a previous state value changed, restore the flag */
+            if (state_values_changed == TRUE) {
+                event_info->state_values_changed = state_values_changed;
+            } 
+            
+            return ret;
         } else {
             jmi->nbr_consec_time_events = 0;
         }

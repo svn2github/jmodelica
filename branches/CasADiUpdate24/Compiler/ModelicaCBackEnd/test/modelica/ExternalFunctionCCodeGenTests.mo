@@ -373,7 +373,7 @@ $ECE_free$
         JMI_DEF(EXO, o2_v)
 
 ---
-        JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_13, 2, 1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, -1, 1)
         JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, 2, 1)
@@ -393,7 +393,7 @@ $ECE_free$
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_15_arg3, d[0], 1, d[0])
         JMCEVAL_parseArray(String, tmp_15_arg3);
-        JMI_ARRAY_INIT_1(STAT, jmi_int_t, jmi_int_array_t, tmp_13, 2, 1, 2)
+        JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, jmi_array_size(tmp_15_arg1, 0), 1, jmi_array_size(tmp_15_arg1, 0))
         jmi_copy_matrix_to_int(tmp_15_arg1, tmp_15_arg1->var, tmp_13->var);
         JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, jmi_array_size(tmp_15_arg2, 0), 1, jmi_array_size(tmp_15_arg2, 0))
         jmi_copy_matrix_to_int(tmp_15_arg2, tmp_15_arg2->var, tmp_14->var);
@@ -468,7 +468,7 @@ $ECE_free$
         JMI_ARR(DYNA, jmi_extobj_t, jmi_extobj_array_t, tmp_16_arg1, -1, 1)
         JMI_DEF(REA, tmp_20)
         JMI_DEF(REA, tmp_20_max)
-        JMI_ARR(STAT, jmi_int_t, jmi_int_array_t, tmp_21, 2, 1)
+        JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, -1, 1)
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_23_arg0, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg1, -1, 1)
@@ -499,7 +499,7 @@ $ECE_free$
             JMCEVAL_parseArrayDims(1);
             JMI_ARRAY_INIT_1(DYNA, jmi_string_t, jmi_string_array_t, tmp_23_arg3, d[0], 1, d[0])
             JMCEVAL_parseArray(String, tmp_23_arg3);
-            JMI_ARRAY_INIT_1(STAT, jmi_int_t, jmi_int_array_t, tmp_21, 2, 1, 2)
+            JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, jmi_array_size(tmp_23_arg1, 0), 1, jmi_array_size(tmp_23_arg1, 0))
             jmi_copy_matrix_to_int(tmp_23_arg1, tmp_23_arg1->var, tmp_21->var);
             JMI_ARRAY_INIT_1(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, jmi_array_size(tmp_23_arg2, 0), 1, jmi_array_size(tmp_23_arg2, 0))
             jmi_copy_matrix_to_int(tmp_23_arg2, tmp_23_arg2->var, tmp_22->var);

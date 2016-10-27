@@ -56,7 +56,7 @@ def run_demo(with_plots=True):
     op = transfer_optimization_problem('FedBatchReactor_OED', file_path)
 
     # Transform the optimization problem into an OED problem
-    op.setup_oed(outputs, parameters, sigma, time_points, "A")
+    op.setup_oed(outputs, parameters, sigma, time_points, "T")
 
     # Set solver options
     opts = op.optimize_options()
@@ -96,7 +96,7 @@ def run_demo(with_plots=True):
         pass
     else:
         cost = float(opt_res.solver.solver_object.getOutput('f'))
-        N.testing.assert_allclose(cost, 3.657565715e-3, rtol=1e-3)
+        N.testing.assert_allclose(cost, -1.311920e+07, rtol=1e-3)
 
     # Plot solution
     if with_plots:

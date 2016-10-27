@@ -269,9 +269,9 @@ class Test_Compiler:
     @testattr(stddist = True)
     def test_setget_string_option(self):
         """ Test string option setter and getter. """
-        option = 'extra_lib_dirs'
+        option = 'inline_functions'
         default_value = Test_Compiler.mc.get_string_option(option)
-        setvalue = 'option 1'
+        setvalue = 'none'
         # change value of option
         Test_Compiler.mc.set_string_option(option, setvalue)
         nose.tools.assert_equal(Test_Compiler.mc.get_string_option(option), setvalue)

@@ -41,11 +41,22 @@
 
 #define JMI_LIMIT_VALUE 1e30
 
+#define JMI_DELTA_INCREASE_MAGNITUDE 10.0
+#define JMI_MAX_DELTA_INCREASE_MAGNITUDE 100.0
+#define JMI_MAX_DELTA 0.1
+
 /* KINSOL callback for linear system solve */
 static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, realtype *res_norm);
 
 /* KINSOL callback for setting up linear solver (jacobian update and decomposition) */
 static int jmi_kin_lsetup(struct KINMemRec * kin_mem);
+
+/*Kinsol function wrapper
+    @param yy - Input - function argument
+    @param ff - Output - residuals
+    @param problem_data - solver object propagated as opaque data
+*/
+int kin_f(N_Vector yy, N_Vector ff, void *problem_data);
 
 /* Only call directly after jmi_update_f_scale */
 static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_block_solver_t *block);
@@ -126,6 +137,92 @@ static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
         }
     }
     return(sum);
+}
+
+int jmi_kinsol_one_sided_differences_for_one_column(jmi_block_solver_t * block, realtype delta, int column_index, N_Vector jthCol) {
+    int ret;
+    jmi_kinsol_solver_t* solver = block->solver;
+    struct KINMemRec* kin_mem = solver->kin_mem;
+    realtype inc, inc_inv, ujsaved, ujscale, sign;
+    realtype *u_data, *uscale_data;
+    /* Obtain pointers to the data for u and uscale */
+    u_data   = N_VGetArrayPointer(solver->kin_y);
+    uscale_data = N_VGetArrayPointer(solver->kin_y_scale);
+    ujsaved = u_data[column_index];
+    ujscale = ONE/uscale_data[column_index];
+    sign = (ujsaved >= 0) ? 1 : -1;
+    inc = MAX(ABS(ujsaved), ujscale)*sign*delta;
+    u_data[column_index] += inc;
+    /* make sure we're inside bounds*/
+    if((u_data[column_index] > block->max[column_index]) || (u_data[column_index] < block->min[column_index])) {
+        inc = -inc;
+        u_data[column_index] = ujsaved + inc;
+    }
+
+    ret = kin_f(solver->kin_y, solver->work_vector, block);
+    if(ret > 0) {
+        /* try to recover by stepping in the opposite direction */
+        inc = -inc;
+        u_data[column_index] = ujsaved + inc;
+
+        ret = kin_f(solver->kin_y, solver->work_vector, block);
+    }
+    if (ret != 0) {
+        u_data[column_index] = ujsaved;
+        return ret; 
+    }
+    inc_inv = ONE/inc; 
+    N_VLinearSum(inc_inv, solver->work_vector, -inc_inv, kin_mem->kin_fval, jthCol);
+
+    u_data[column_index] = ujsaved;
+    return ret;
+}
+
+int jmi_kinsol_is_zero_column(realtype* col, int n) {
+    int i;
+    for(i=0; i<n; i++) {
+        if(col[i] != 0) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+int jmi_kinsol_zero_column_jacobian_handling(jmi_block_solver_t * block) {
+    int j, ret, is_zero_column;
+    int updated_jacobian = FALSE;
+    jmi_kinsol_solver_t* solver = block->solver;
+    realtype delta;
+    realtype *tmp2_data;
+    realtype *col;
+    N_Vector jthCol;
+    
+    for(j=0; j<block->n; j++) {
+        col = DENSE_COL(block->J, j);
+        delta = block->options->jacobian_finite_difference_delta*JMI_DELTA_INCREASE_MAGNITUDE;
+        is_zero_column = jmi_kinsol_is_zero_column(col, block->n);
+        if(!is_zero_column) continue;
+        /* Zero column, try finite differences with greater delta */
+        while(is_zero_column && delta < block->options->jacobian_finite_difference_delta*JMI_MAX_DELTA_INCREASE_MAGNITUDE*2 && delta < JMI_MAX_DELTA*10) { 
+            tmp2_data = N_VGetArrayPointer(solver->work_vector2);
+            jthCol = solver->work_vector2;
+            N_VSetArrayPointer(DENSE_COL(block->J, j), jthCol);
+            ret = jmi_kinsol_one_sided_differences_for_one_column(block, delta, j, jthCol);
+            N_VSetArrayPointer(tmp2_data, solver->work_vector2);
+            if(ret != 0) break;
+            delta *=JMI_DELTA_INCREASE_MAGNITUDE;
+            is_zero_column = jmi_kinsol_is_zero_column(col, block->n);
+        }
+
+        if(!is_zero_column) {
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "ZeroColumnJacobianUpdate", 
+                "The column for <iter: #r%d#> was zero but is now recalculated with one-sided differences with <delta: %E>", block->value_references[j], delta/JMI_DELTA_INCREASE_MAGNITUDE);
+            jmi_log_reals(block->log, node, logInfo, "column", DENSE_COL(block->J, j), block->n);
+            jmi_log_leave(block->log, node);
+            updated_jacobian = TRUE;
+        }
+    }
+    return updated_jacobian;
 }
 
 
@@ -459,30 +556,12 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                 }
                 if(sqrt_relfunc > 0) 
                     inc *= sqrt_relfunc;
-                u_data[j] += inc;
-                /* make sure we're inside bounds*/
-                if((u_data[j] > block->max[j]) || (u_data[j] < block->min[j])) {
-                    inc = -inc;
-                    u_data[j] = ujsaved + inc;
-                }
-                ret = kin_f(u, ftemp, block);
-                if(ret > 0) {
-                    /* try to recover by stepping in the opposite direction */
-                    inc = -inc;
-                    u_data[j] = ujsaved + inc;
-
-                    ret = kin_f(u, ftemp, block);
-                }
-                if (ret != 0) break; 
-
-                u_data[j] = ujsaved;
-
-                inc_inv = ONE/inc;
                 /* Generate the jth col of Jac(u) */
                 N_VSetArrayPointer(DENSE_COL(J, j), jthCol);
-                N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
+                ret = jmi_kinsol_one_sided_differences_for_one_column(block, sqrt_relfunc, j, jthCol);
                 /* Restore original array pointer in tmp2 */
                 N_VSetArrayPointer(tmp2_data, tmp2);
+                if (ret != 0) break; 
             }
 
             /* Evaluate the residual with the original u vector to avoid that the initial guess 
@@ -664,6 +743,38 @@ static void jmi_kinsol_small_step_nonconv_info_message(jmi_block_solver_t * bloc
     jmi_log_leave(block->log, node);
 }
 
+/* Local helper that will log the condition number of the Jacobian */
+static void jmi_kinsol_log_jacobian_cond_nbr(jmi_block_solver_t *block) {
+    jmi_kinsol_solver_t* solver = block->solver;
+    int info, N = block->n;
+    realtype tol = solver->kin_stol;
+
+    dgetrf_(&N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
+    if(info > 0) {
+        jmi_log_node(block->log, logWarning, "SingularJacobian",
+            "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
+    }
+    else {
+        char norm = 'I';
+        double Jnorm = 1.0, Jcond = 1.0;
+        dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
+
+        if(tol * Jcond < UNIT_ROUNDOFF) {
+            jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
+                "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
+            if (block->callbacks->log_options.log_level >= 4) {
+                jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
+            }
+            jmi_log_leave(block->log, node);
+
+        }
+        else {
+            jmi_log_node(block->log, logInfo, "JacobianCondition",
+                "<JacobianInverseConditionEstimate:%E>", Jcond);
+        }
+    }
+}
+
 /* Logging callback for KINSOL used to report on errors during solution */
 void kin_err(int err_code, const char *module, const char *function, char *msg, void *eh_data){
     jmi_log_category_t category = logWarning;
@@ -699,9 +810,7 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
         jmi_log_leave(block->log, node);
 
         if(block->options->check_jac_cond_flag) {
-            char norm = 'I';
-            double Jnorm = 1.0, Jcond = 1.0;
-            int i, info, N = block->n;
+            int i, N = block->n;
             realtype tol = solver->kin_stol;
             realtype *scale_ptr = N_VGetArrayPointer(block->f_scale);
             if(block->options->residual_equation_scaling_mode != 0) {
@@ -720,28 +829,8 @@ void kin_err(int err_code, const char *module, const char *function, char *msg, 
             } else {
                 DenseCopy(block->J, block->J_scale);
             }
-            dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-            if(info > 0) {
-                jmi_log_node(block->log, logWarning, "SingularJacobian",
-                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-            }
-            else {
-                dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-                if(tol * Jcond < UNIT_ROUNDOFF) {
-                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                    if (block->callbacks->log_options.log_level >= 4) {
-                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                    }
-                    jmi_log_leave(block->log, node);
-
-                }
-                else {
-                    jmi_log_node(block->log, logInfo, "JacobianCondition",
-                        "<JacobianInverseConditionEstimate:%E>", Jcond);
-                }
-            }
+            
+            jmi_kinsol_log_jacobian_cond_nbr(block);
         }
     }
 
@@ -913,7 +1002,21 @@ void kin_info(const char *module, const char *function, char *msg, void *eh_data
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_value:%E>", max_residual);
                     jmi_log_fmt(log, topnode, logInfo, "<max_scaled_residual_index:%I>", max_index);
                 }
-
+                if (solver->last_fnorm < kin_mem->kin_fnorm && nniters > 0) { /* This is not ment to happen */
+                    jmi_log_node_t warning_node_top;
+                    jmi_log_node_t warning_node;
+                    realtype* last_f = N_VGetArrayPointer(solver->last_residual);
+                    warning_node_top = jmi_log_enter_fmt(log, logWarning, "ResidualIncreaseAfterLineSearch", "The residual L2 norm has increased, from <norm_old: %E> to <norm_new: %E>",
+                        solver->last_fnorm, kin_mem->kin_fnorm);
+                    warning_node = jmi_log_enter_index_vector_(log, warning_node_top, logWarning,"increased_residuals", 'R');
+                    for (i=0; i<block->n; i++) { /* Go through the residuals and log which ones increased */
+                        if (RAbs(last_f[i]) < RAbs(f[i])) {
+                            jmi_log_int_(log, i);
+                        }
+                    }
+                    jmi_log_leave(log, warning_node);
+                    jmi_log_leave(log, warning_node_top);
+                }
                 solver->last_fnorm = kin_mem->kin_fnorm;
                 solver->last_max_residual= max_residual;
                 solver->last_max_residual_index = max_index;
@@ -1578,7 +1681,6 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
     int i, N = block->n;
     jmi_block_solver_options_t* bsop = block->options;
     int use_scaling_flag = bsop->residual_equation_scaling_mode;
-    realtype tol = solver->kin_stol;
     realtype* scale_ptr = N_VGetArrayPointer(block->f_scale);
 
     if (block->using_max_min_scaling_flag && !solver->J_is_singular_flag) {
@@ -1601,9 +1703,7 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
     and scale function tolerance with it. */
     if((N > 1) && bsop->check_jac_cond_flag){
         realtype* scaled_col_ptr;
-        char norm = 'I';
-        double Jnorm = 1.0, Jcond = 1.0;
-        int info;
+
         if(use_scaling_flag) {
             for(i = 0; i < N; i++){
                 int j;
@@ -1616,28 +1716,7 @@ static void jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(jmi_bloc
             DenseCopy(block->J, block->J_scale);
         }
 
-        dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-        if(info > 0) {
-            jmi_log_node(block->log, logWarning, "SingularJacobian",
-                "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-        }
-        else {
-            dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-            if(tol * Jcond < UNIT_ROUNDOFF) {
-                jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                    "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                if (block->callbacks->log_options.log_level >= 4) {
-                    jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                }
-                jmi_log_leave(block->log, node);
-
-            }
-            else {
-                jmi_log_node(block->log, logInfo, "JacobianCondition",
-                    "<JacobianInverseConditionEstimate:%E>", Jcond);
-            }
-        }
+        jmi_kinsol_log_jacobian_cond_nbr(block);
     }
 }
 
@@ -1937,6 +2016,12 @@ static int jmi_kin_factorize_jacobian(jmi_block_solver_t *block ) {
     }
     
     info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+    if(info != 0) {
+        if(jmi_kinsol_zero_column_jacobian_handling(block)) {
+            DenseCopy(block->J, solver->J_LU); /* make a copy of the Jacobian that will be used for LU factorization */
+            info = jmi_LU_factorization(block, solver->J_LU,block->options->experimental_mode & jmi_block_solver_experimental_LU_through_sundials ? 1:0);
+        }
+    }
     
     if(info != 0 ) {
         if (N > 1) {
@@ -2659,7 +2744,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
         }
 
         if(block->options->check_jac_cond_flag) {
-            int i, info, N = block->n;
+            int i, N = block->n;
             realtype* scale_ptr = N_VGetArrayPointer(block->f_scale);
             realtype tol = solver->kin_stol;
             if(block->options->residual_equation_scaling_mode !=0) {
@@ -2679,30 +2764,7 @@ static int jmi_kinsol_invoke_kinsol(jmi_block_solver_t *block, int strategy) {
                 DenseCopy(block->J, block->J_scale);
             }
 
-            dgetrf_(  &N, &N, block->J_scale->data, &N, solver->lapack_iwork, &info);
-            if(info > 0) {
-                jmi_log_node(block->log, logWarning, "SingularJacobian",
-                    "Singular Jacobian detected when checking condition number in <block:%s>. Solver may fail to converge.", block->label);
-            }
-            else {
-                char norm = 'I';
-                double Jnorm = 1.0, Jcond = 1.0;
-                dgecon_(&norm, &N, block->J_scale->data, &N, &Jnorm, &Jcond, solver->lapack_work, solver->lapack_iwork,&info);       
-
-                if(tol * Jcond < UNIT_ROUNDOFF) {
-                    jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "IllConditionedJacobian",
-                        "<JacobianInverseConditionEstimate:%E> Solver may fail to converge in <block: %s>.", Jcond, block->label);
-                    if (block->callbacks->log_options.log_level >= 4) {
-                        jmi_log_reals(block->log, node, logWarning, "ivs", N_VGetArrayPointer(solver->kin_y), block->n);
-                    }
-                    jmi_log_leave(block->log, node);
-
-                }
-                else {
-                    jmi_log_node(block->log, logInfo, "JacobianCondition",
-                        "<JacobianInverseConditionEstimate:%E>", Jcond);
-                }
-            }
+            jmi_kinsol_log_jacobian_cond_nbr(block);
         }
     }
     jmi_kinsol_solver_print_solve_end(block, &topnode, flag);

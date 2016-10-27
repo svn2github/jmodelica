@@ -59,6 +59,7 @@ aspect AnnotationAPI {
     eq FullClassDecl.annotation()            = getAnnotationOpt().annotation();
     eq InstClassDecl.annotation()            = getClassDecl().annotation();
     eq ShortClassDecl.annotation()           = getExtendsClauseShortClass().annotation();
+    eq LibNode.annotation()                  = myClass().annotation();
     eq ExtendsClauseShortClass.annotation()  = getComment().annotation();
     eq InstShortClassDecl.annotation()       = getClassDecl().annotation();
     eq InstSimpleShortClassDecl.annotation() = getClassDecl().annotation();

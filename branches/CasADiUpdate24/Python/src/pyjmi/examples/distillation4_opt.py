@@ -290,7 +290,7 @@ def run_demo(with_plots=True, use_ma57=False):
     except:
         pass
     else:
-        cost = float(opt_res.solver.solver_object.output('f'))
+        cost = float(opt_res.solver.solver_object.getOutput('f'))
         N.testing.assert_allclose(cost, 4.611038777467e-02, rtol=1e-2)
 
     ### 5. Verify optimization discretization by simulation

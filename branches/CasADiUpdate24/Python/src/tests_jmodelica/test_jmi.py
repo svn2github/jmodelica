@@ -1478,10 +1478,9 @@ class Test_JMU_methods:
         """ Test compiling with compiler options."""
         libdir = os.path.join(get_files_path(), 'MODELICAPATH_test', 'LibLoc1',
             'LibA')
-        co = {"index_reduction":True, "equation_sorting":True,
-            "extra_lib_dirs":[libdir]}
+        co = {"index_reduction":True, "equation_sorting":True}
         compile_jmu('RLC_Circuit',
-            os.path.join(get_files_path(), 'Modelica','RLC_Circuit.mo'),
+            [os.path.join(get_files_path(), 'Modelica','RLC_Circuit.mo'), libdir],
             compiler_options = co)
         
     @testattr(ipopt = True)

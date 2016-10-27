@@ -140,12 +140,18 @@ static int jmi_linear_check_active_variable(jmi_block_solver_t * block, int set,
     
     x[index] = val+eps+THRESHOLD;
     flag = block->check_discrete_variables_change(block->problem_data, x);
-    if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED) { active = 1; }
+    if (flag == JMI_SWITCHES_CHANGED || 
+        flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || 
+        flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED ||
+        flag == JMI_SWITCHES_AND_DISCRETE_REALS_AND_NON_REALS_CHANGED) { active = 1; }
     
     if (!active) {
         x[index] = val-eps-THRESHOLD;
         flag = block->check_discrete_variables_change(block->problem_data, x);
-        if (flag == JMI_SWITCHES_CHANGED || flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED) { active = 1; }
+        if (flag == JMI_SWITCHES_CHANGED || 
+            flag == JMI_SWITCHES_AND_NON_REALS_CHANGED || 
+            flag == JMI_SWITCHES_AND_DISCRETE_REALS_CHANGED || 
+            flag == JMI_SWITCHES_AND_DISCRETE_REALS_AND_NON_REALS_CHANGED) { active = 1; }
     }
     
     x[index] = val;
@@ -333,14 +339,12 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         if(info) {
             jmi_log_node(block->log, logWarning, "SingularJacobian", "Singular Jacobian detected for <block: %s> at <t: %f>", 
                          block->label, block->cur_time);
-            /* return -1; */
+                         
             solver->singular_jacobian = 1;
             
-            if (!block->at_event){
-                jmi_linear_find_dependent_set(block);
-            } else {
-                solver->update_active_set = 1;
-            }
+            jmi_linear_find_dependent_set(block);
+            solver->update_active_set = 1;
+            
         }else{
             solver->singular_jacobian = 0;
         }
@@ -410,9 +414,8 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         int n_rows = n_x;
         rcond = -1.0;
         
-        if (!block->at_event){
-            n_rows = jmi_linear_find_active_set(block);
-        }
+        /* Find the active set */
+        n_rows = jmi_linear_find_active_set(block);
         
         if (n_rows > n_x) {
             dgelss_(&n_rows, &n_x, &i, solver->jacobian_temp, &n_rows, solver->rhs, &n_rows ,solver->singular_values, &rcond, &rank, solver->rwork, &iwork, &info);

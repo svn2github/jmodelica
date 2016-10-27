@@ -142,6 +142,7 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
         compile_fmu("TimeEvents.TestSampling", file_name)
         compile_fmu("TimeEvents.TestSampling2", file_name)
+        compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name)
     
     @testattr(stddist = True)
     def test_time_event_basic_1(self):
@@ -270,6 +271,39 @@ class Test_Time_Events:
         res = model.simulate(0,1e-6, options={"initialize":False});
         assert res.solver.statistics["ntimeevents"] == 1e4
         
+    @testattr(stddist = True)
+    def test_time_event_state_event_after_time_event(self):
+        model = load_fmu("TimeEvents_StateEventAfterTimeEvent.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["CVode_options"]["rtol"] = 1e-4
+        res = model.simulate(0,1, options=opts);
+        nose.tools.assert_almost_equal(model.get("s"), 2.8)
+        assert res.solver.statistics["ntimeevents"] == 2        
+
+class Test_DynamicStates:
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'RevoluteConstraint.mo')
+
+        compile_fmu("StrippedRevoluteConstraint", file_name)
+        
+    @testattr(stddist = True)
+    def test_no_switch_of_states(self):
+        model = load_fmu("StrippedRevoluteConstraint.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        #No step events triggered
+        assert res.solver.statistics["nstepevents"] == 0 
+        
+        var = res["freeMotionScalarInit.angle_2"]
+        
+        nose.tools.assert_almost_equal(abs(max(var)), 0.00, 2)
+        nose.tools.assert_almost_equal(abs(min(var)), 2.54, 2)
 
 class Test_Events:
     @classmethod
@@ -284,9 +318,19 @@ class Test_Events:
         compile_fmu("EventIter.EventInfiniteIteration3", file_name)
         compile_fmu("EventIter.EnhancedEventIteration1", file_name)
         compile_fmu("EventIter.EnhancedEventIteration2", file_name)
+        compile_fmu("EventIter.EnhancedEventIteration3", file_name)
         compile_fmu("EventIter.SingularSystem1", file_name)
         compile_fmu("EventIter.InitialPhasing1", file_name)
         compile_fmu("EventIter.EventIterDiscreteReals", file_name)
+        compile_fmu("EventIter.EventAfterTimeEvent", file_name)
+    
+    @testattr(stddist = True)
+    def test_reinit_after_two_time_events(self):
+        model = load_fmu("EventIter_EventAfterTimeEvent.fmu")
+        
+        res = model.simulate()
+        
+        nose.tools.assert_almost_equal(res.final("s"), -1.0)
     
     @testattr(stddist = True)
     def test_event_infinite_iteration_1(self):
@@ -337,6 +381,13 @@ class Test_Events:
         nose.tools.assert_almost_equal(res["y"][-1],1.58385,4)
         nose.tools.assert_almost_equal(res["z"][-1], 0.0)
         nose.tools.assert_almost_equal(res["w"][-1], 1.0)
+        
+    @testattr(stddist = True)
+    def test_enhanced_event_iteration_3(self):
+        model = load_fmu("EventIter_EnhancedEventIteration3.fmu")
+        model.initialize(relativeTolerance=1e-1)
+        
+        nose.tools.assert_almost_equal(model.get("x"), -1e-6)
     
     @testattr(stddist = True)
     def test_initial_phasing_1(self):
@@ -656,6 +707,8 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NonLinear4", file_name)
         compile_fmu("Singular.NonLinear5", file_name)
         compile_fmu("Singular.NoMinimumNormSolution", file_name)
+        compile_fmu("Singular.ZeroColumnJacobian", file_name)
+        compile_fmu("Singular.ZeroColumnJacobian2", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -782,6 +835,18 @@ class Test_Singular_Systems:
         model.set("_log_level", 3)
         model.set_log_level(3)
         nose.tools.assert_raises(FMUException, model.initialize)
+    
+    @testattr(stddist = True)
+    def test_zero_column_jacobian(self):
+        model = load_fmu("Singular_ZeroColumnJacobian.fmu");
+        res = model.simulate();
+        nose.tools.assert_almost_equal(res["x"][0], -1)
+        
+    @testattr(stddist = True)
+    def test_zero_column_jacobian2(self):
+        model = load_fmu("Singular_ZeroColumnJacobian2.fmu");
+        res = model.simulate();
+        nose.tools.assert_almost_equal(res["x"][0], -1)
 
 class Test_FMI_ODE_CS_2:
     @classmethod

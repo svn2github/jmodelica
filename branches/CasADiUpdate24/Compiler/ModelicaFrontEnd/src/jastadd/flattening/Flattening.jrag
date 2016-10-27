@@ -115,6 +115,10 @@ aspect Flattening {
         fc.setFQName(new FQNameString(qualifiedName()));
     }
 
+    public void InstLibNode.flattenInstClassDecl(FClass fc) {
+        actualInstClass().flattenInstClassDecl(fc);
+    }
+
     /**
      * Delegate for adding extra flattening code to top-level model.
      */
@@ -152,6 +156,10 @@ aspect Flattening {
     }
 
     public void InstSimpleShortClassDecl.flattenUsedFuncsAndEnums(FClass fc) {
+        actualInstClass().flattenUsedFuncsAndEnums(fc);
+    }
+
+    public void InstLibNode.flattenUsedFuncsAndEnums(FClass fc) {
         actualInstClass().flattenUsedFuncsAndEnums(fc);
     }
 
@@ -280,6 +288,10 @@ aspect Flattening {
         actualInstClass().flattenFunction(fc);
     }
     
+    public void InstLibNode.flattenFunction(FClass fc) {
+        actualInstClass().flattenFunction(fc);
+    }
+    
     public void InstRestriction.flattenFunction(FClass fc, InstBaseClassDecl icd) {}
     
     public void InstFunction.flattenFunction(FClass fc, InstBaseClassDecl icd) {
@@ -390,7 +402,12 @@ aspect Flattening {
 
     @Override
     protected AnnotationNode InstSimpleShortClassDecl.findAnnotationRoot(boolean lookInExternal, boolean lookInExtends, String ... subPaths) {
-        return myTargetInstClassDecl().findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
+        return actualInstClass().findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
+    }
+
+    @Override
+    protected AnnotationNode InstLibNode.findAnnotationRoot(boolean lookInExternal, boolean lookInExtends, String ... subPaths) {
+        return actualInstClass().findAnnotationRoot(lookInExternal, lookInExtends, subPaths);
     }
 
     protected AnnotationNode InstClassDecl.findDerivativeAnnotationRoot() {
@@ -536,6 +553,7 @@ aspect Flattening {
     eq InstFullClassDecl.findFunctionExternal()        = 
         hasInstExternal() ? getInstExternal() : super.findFunctionExternal();
     eq InstSimpleShortClassDecl.findFunctionExternal() = actualInstClass().findFunctionExternal();
+    eq InstLibNode.findFunctionExternal()              = actualInstClass().findFunctionExternal();
     
     // Flatten record if not already done
     public void InstClassDecl.flattenRecord(FClass fc) {}
@@ -583,6 +601,10 @@ aspect Flattening {
     }
 
     public void InstSimpleShortClassDecl.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
+        actualInstClass().flattenComponentsInRecord(frd, fc, names, level);
+    }
+
+    public void InstLibNode.flattenComponentsInRecord(FRecordDecl frd, FClass fc, Set<String> names, int level) {
         actualInstClass().flattenComponentsInRecord(frd, fc, names, level);
     }
 
@@ -1113,6 +1135,10 @@ aspect Flattening {
         actualInstClass().flattenEnum(fc);
     }
     
+    public void InstLibNode.flattenEnum(FClass fc) {
+        actualInstClass().flattenEnum(fc);
+    }
+    
     public abstract FVariable InstAssignable.createEmptyFVariable();
     
     public FVariable InstPrimitive.createEmptyFVariable() {
@@ -1266,6 +1292,10 @@ aspect Flattening {
     }
     
     public void InstSimpleShortClassDecl.addFDerivedType(FClass fc) {
+        actualInstClass().addFDerivedType(fc);
+    }
+    
+    public void InstLibNode.addFDerivedType(FClass fc) {
         actualInstClass().addFDerivedType(fc);
     }
 
@@ -1581,8 +1611,8 @@ aspect Flattening {
         InstValueModification ivm = parentInstValueMod();
         return (ivm != null) ? ivm.arrayInstModification(getIndex()) : null;
     }
-    eq InstRecordConstructor.getInstComponentDecl().parentInstValueMod() = null;
-
+    eq InstRecordConstructor.getChild().parentInstValueMod() = null;
+    
     syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
     
     syn InstValueModification InstAssignable.myInstValueModTop() {
@@ -1750,6 +1780,7 @@ aspect Flattening {
     eq InstExtends.extraNodesToSetModLevelFor()                 = listExtraNodesToSetModLevelFor(true, myInstClass());
     eq InstClassDecl.extraNodesToSetModLevelFor()               = listExtraNodesToSetModLevelFor(true);
     eq InstSimpleShortClassDecl.extraNodesToSetModLevelFor()    = listExtraNodesToSetModLevelFor(false, actualInstClass());
+    eq InstLibNode.extraNodesToSetModLevelFor()                 = listExtraNodesToSetModLevelFor(false, actualInstClass());
     eq InstReplacingComposite.extraNodesToSetModLevelFor()      = 
         listExtraNodesToSetModLevelFor(true, getInstComponentRedeclare().getInstComponentDecl(), myInstClass());
     eq InstReplacingRecord.extraNodesToSetModLevelFor()         = 

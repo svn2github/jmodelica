@@ -57,7 +57,6 @@ import org.jmodelica.util.logging.Level;
 import org.jmodelica.util.OptionRegistry;
 import org.jmodelica.util.OptionRegistry.UnknownOptionException;
 import org.jmodelica.util.Arguments;
-import org.jmodelica.util.streams.StreamGobbler;
 import org.jmodelica.util.SymbolValueFixer;
 import org.jmodelica.util.exceptions.ModelicaException;
 import org.jmodelica.util.exceptions.InternalCompilerError;
@@ -71,7 +70,8 @@ import org.jmodelica.util.problemHandling.ProblemProducer;
 import org.jmodelica.util.PassAndForget;
 import org.jmodelica.util.logging.IllegalLogStringException;
 import org.jmodelica.util.ErrorCheckType;
-import org.jmodelica.util.streams.CloneOutputStream;
+import org.jmodelica.util.streams.*;
+
 import org.xml.sax.SAXException;
 
 aspect ModelicaCompilerMain {
@@ -670,7 +670,7 @@ public class ModelicaCompiler {
      * The dump will be saved in a file named <code>"node_count.txt"</code>.
      */
     protected void dumpNodeCountFile() 
-            throws FileNotFoundException {
+            throws IOException {
         if (dumpMemoryUse) {
             String file = "node_count.txt";
             log.debug("Dumping node counts to '" + file + "'...");
@@ -940,7 +940,7 @@ public class ModelicaCompiler {
         time.end();
         log.info("Total time: " + time);
     }
-        
+
     private void parseFiles(File[] files, boolean all) {
         for (File file : files) {
             if (file.isDirectory()) {
@@ -1078,7 +1078,32 @@ public class ModelicaCompiler {
             tryTearDown(doTearDown);
         }
     }
-    
+
+    /**
+     * Parses a string and returns a reference to the root of the source tree. 
+     * Options related to the compilation are also loaded here and added to the 
+     * source tree representation.
+     * 
+     * @param code
+     *            Modelica code to parse.
+     * @param name
+     *            The filename (or other description) to use when reporting errors.
+     *
+     * @return The root of the source tree.
+     * 
+     * @throws beaver.Parser.Exception
+     *             If there was an Beaver parsing exception.
+     * @throws CompilerException
+     *             If errors have been found during the parsing.
+     * @throws IOException
+     *             If there was an error reading the model file. (Beaver exception.)
+     */
+    public SourceRoot parseString(String code, String name) 
+      throws IOException, beaver.Parser.Exception, CompilerException {
+        checkSetUp();
+        return ParserHandler.parseString(createUtilInterface(), code, name);
+    }
+
     public SourceRoot doParseModel(String names[]) 
       throws FileNotFoundException, IOException, beaver.Parser.Exception, CompilerException {
         checkSetUp();
@@ -1376,11 +1401,8 @@ public class ModelicaCompiler {
             hookCheckAbort();
             hookCodeGeneratorCreated(gen);
             File outFile = new File(dir, name);
-            OutputStream output = new FileOutputStream(outFile);
             boolean debugGen = options.getBooleanOption("debug_duplicate_generated");
-            if (debugGen)
-                output = new CloneOutputStream(output, System.out).setClose(true, false);
-            gen.generate(tmpl, output, debugGen, header);
+            gen.generate(tmpl, new SplitFilesCodeStream(outFile, debugGen, header), header);
             log.debug("Generated file '" + outFile + "'.");
         }
     }
@@ -2614,8 +2636,6 @@ public abstract class CCompilerDelegator {
         moduleLibNames = names;
     }
     
-    protected abstract String compilerVersionNumber();
-    
     public Set<String> expandLibraries(Set<String> paths, String compilerType, String versionNumber, String platform) {
         Set<String> newPaths = new LinkedHashSet<String>();
         for (String path : paths) {
@@ -2979,8 +2999,7 @@ public class GccCompilerDelegator extends CCompilerDelegator {
         Set<String> expandedLibDirs = expandLibraries(ext_lib_dirs, "gcc", compilerVersionNumber(), platform);
         vars.put("EXT_LIB_DIRS", varFromList(expandedLibDirs, libOp));
     }
-
-    @Override
+    
     public String compilerVersionNumber() {
         String[] cmd = new String[] {
                 "gcc", "--version"
