@@ -96,7 +96,7 @@ aspect CADCodeGen {
         }
 
         @Override
-        public void genBlock(FAbstractEquation node, CodeStream str, String indent,
+        public void genSolved(FAbstractEquation node, CodeStream str, String indent,
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices) {
             node.genBlock_CAD(this, str, indent, visited, forVariables, forIndices);
         }
@@ -946,7 +946,7 @@ aspect CADCodeGen {
      * @param str          Output stream
      */
     public void AbstractEquationBlock.genBlockResidualFunction_CAD(CodePrinter p, CodeStream str, String outerIndent) {
-        if (!hasResidualFunction_C())
+        if (!hasResidualFunction())
             return;
         for (AbstractEquationBlock subBlock : genBlockResidualFunction_subBlocks_C())
             subBlock.genBlockResidualFunction_CAD(p, str, outerIndent);
@@ -1031,7 +1031,7 @@ aspect CADCodeGen {
         str.println("if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {");
         
         // AD-code for residual equations
-        genResidual(p, str, innerIndent, new Enumerator(), visitedList);
+        genResidualPart(p, str, innerIndent, new Enumerator(), visitedList);
         
         // Reset all variables. global dz is updated elsewhere and dz_active should
         // always be reset so as not to cause incorrect seeds
@@ -1078,7 +1078,7 @@ aspect CADCodeGen {
     @Override
     public void SimpleEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
         if (genBlockEnabled())
-            equation().genBlock_CAD(p, str, indent, visited, allLocalVariables(), assignedIndices());
+            p.genSolved(equation(), str, indent, visited, allLocalVariables(), assignedIndices());
     }
 
     /**
@@ -1296,7 +1296,7 @@ aspect CADCodeGen {
      */
     public void BLT.genOdeDerivativeBlocks_CAD(CodePrinter p, CodeStream str, String indent) {
         for (AbstractEquationBlock block : this) {
-            block.genBlock(p, str, indent);
+            block.genSolvedInBLT(p, str, indent);
         }
     }
 
@@ -1315,19 +1315,19 @@ aspect CADCodeGen {
         str.formatln("%s/*********** ODE section ***********/", indent);
         // Loop over all derivatives
         for (AbstractEquationBlock eb : getOdeBlocks()) {
-            eb.genBlock(p, str, indent);
+            eb.genSolvedInBLT(p, str, indent);
         }
         str.formatln("%s/*********** Real outputs **********/", indent);
         for (AbstractEquationBlock eb : getRealOutputBlocks()) {
-            eb.genBlock(p, str, indent);
+            eb.genSolvedInBLT(p, str, indent);
         }
         str.formatln("%s/*** Integer and boolean outputs ***/", indent);
         for (AbstractEquationBlock eb : getIntegerBooleanOutputBlocks()) {
-            eb.genBlock(p, str, indent);
+            eb.genSolvedInBLT(p, str, indent);
         }
         str.formatln("%s/********* Other variables *********/", indent);
         for (AbstractEquationBlock eb : getOtherBlocks()) {
-            eb.genBlock(p, str, indent);
+            eb.genSolvedInBLT(p, str, indent);
         }
     }
 

@@ -174,7 +174,7 @@ aspect CodePrinter {
          * @param forIndices The integer indices that we are producing
          *      statements for
          */
-        public abstract void genBlock(FAbstractEquation node, CodeStream str, String indent,
+        public abstract void genSolved(FAbstractEquation node, CodeStream str, String indent,
                 Set<FAbstractEquation> visited, Collection<FVariable> forVariables, Collection<Integer> forIndices);
 
         /**

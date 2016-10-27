@@ -802,7 +802,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock(p, str, indent);
+                    element.genSolvedInBLT(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
@@ -868,7 +868,7 @@ public class CGenerator extends GenericGenerator {
                 }
                 @Override
                 public void gen(AbstractEquationBlock element) {
-                    element.genBlock(p, str, indent);
+                    element.genSolvedInBLT(p, str, indent);
                 }
                 @Override
                 public void genPost(AbstractEquationBlock element) {
