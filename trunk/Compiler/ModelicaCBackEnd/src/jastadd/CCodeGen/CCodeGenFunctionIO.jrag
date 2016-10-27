@@ -271,7 +271,7 @@ aspect CodeFuncCallInOutArgPrinters {
         }
     }
     
-    public class CodePrinter {
+    public abstract class CodePrinter {
         public abstract class FuncCallOutArgPrinter extends CodeFuncCallInOutArgPrinter {
             
             protected FuncCallOutArgPrinter(boolean useMemcpy) {

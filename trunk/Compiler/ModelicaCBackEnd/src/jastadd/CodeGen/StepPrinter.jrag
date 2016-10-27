@@ -80,7 +80,7 @@ aspect StepPrinter {
         }
     }
     
-    public class CodePrinter {
+    public abstract class CodePrinter {
         public abstract void printIODecl(FExp n, CodeStream str, String indent);
         public abstract void printIOPre(FExp n, CodeStream str, String indent);
         public abstract void printIOExec(FExp n, CodeStream str, String indent);
