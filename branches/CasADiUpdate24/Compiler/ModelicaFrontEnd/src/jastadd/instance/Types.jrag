@@ -124,7 +124,6 @@ aspect Types {
 
     syn InstNode InstClassDecl.findConstrainingInstType()           = this;
     eq InstSimpleShortClassDecl.findConstrainingInstType()          = myTargetInstClassDecl().constrainingInstType();
-    eq InstLibNode.findConstrainingInstType()                       = resolveLib().constrainingInstType();
     eq InstReplacingFullClassDecl.findConstrainingInstType()        = getOriginalInstClass().constrainingInstType();
     eq InstReplacingShortClassDecl.findConstrainingInstType()       = getOriginalInstClass().constrainingInstType();
     eq InstReplacingSimpleShortClassDecl.findConstrainingInstType() = getOriginalInstClass().constrainingInstType();

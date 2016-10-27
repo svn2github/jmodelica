@@ -15,7 +15,6 @@
 */
 package org.jmodelica.util.streams;
 
-import java.io.PrintStream;
 import java.nio.charset.Charset;
 
 public class CStringCodeStream extends CodeStream {
@@ -25,7 +24,6 @@ public class CStringCodeStream extends CodeStream {
     private String beginString = "(truncated) ";
     private String endString = "...";
     private StringBuilder buffer;
-    private CodeStream str;
 
     public static final Charset UTF8 = Charset.forName("UTF-8");
 
@@ -35,10 +33,9 @@ public class CStringCodeStream extends CodeStream {
     }
     
     public CStringCodeStream(CodeStream str, int lim) {
-        super((PrintStream)null);
+        super(str);
         this.limit = lim - endString.length() - beginString.length();
         buffer = new StringBuilder();
-        this.str = str;
     }
     
     public void print(String s) {
@@ -52,10 +49,10 @@ public class CStringCodeStream extends CodeStream {
     public void close() {
         boolean trunc = buffer.length() >= limit;
         if (trunc)
-            str.print(beginString);
-        str.print(buffer.toString());
+            super.print(beginString);
+        super.print(buffer.toString());
         if (trunc)
-            str.print(endString);
+            super.print(endString);
     }
 
     private void encode(byte[] str, int n) {

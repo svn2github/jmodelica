@@ -782,8 +782,7 @@ aspect Environments {
 		else
 			return getInstExtends(0).totalMergedEnvironment();
 	}
-    eq InstSimpleShortClassDecl.totalMergedEnvironment() = actualInstClass().getMergedEnvironment();
-    eq InstLibNode.totalMergedEnvironment()              = actualInstClass().getMergedEnvironment();
+	eq InstSimpleShortClassDecl.totalMergedEnvironment() = actualInstClass().getMergedEnvironment();
 
 }
 
@@ -825,7 +824,7 @@ aspect InstanceTreeConstruction {
             String targetName = className.substring(0, p);
             InstLookupResult<InstClassDecl> icd = lookupInstClassQualified(targetName);
             if (icd.successful()) {
-                Restriction restriction = ((BaseClassDecl) icd.target().actualInstClass().getClassDecl()).getRestriction();
+                Restriction restriction = ((BaseClassDecl) icd.target().getClassDecl()).getRestriction();
                 ClassDecl cl = sourceRoot().getProgram().anonymousClass(className, restriction, targetName);
                 if (cl != null) {
                     addInstAnonymousClass(createInstClassDecl(cl));
@@ -989,7 +988,6 @@ aspect InstanceTreeConstruction {
     eq InstClassDecl.instLookupNodeForShortClassExtends()               = null;
     eq InstShortClassDecl.instLookupNodeForShortClassExtends()          = this;
     eq InstReplacingShortClassDecl.instLookupNodeForShortClassExtends() = getInstClassRedeclare().instLookupNodeForShortClassExtends();
-    eq InstLibNode.instLookupNodeForShortClassExtends()                 = resolveLib().instLookupNodeForShortClassExtends();
 
     syn InstNode InstClassRedeclare.instLookupNodeForShortClassExtends() = myInstNode();
 
@@ -1169,10 +1167,6 @@ aspect InstanceTreeConstruction {
         return actualInstClass().createInstReplacingExtends(ec, lookup);
     }
 
-    public InstExtends InstLibNode.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
-        return actualInstClass().createInstReplacingExtends(ec, lookup);
-    }
-
     public InstExtends InstNode.createInstReplacingExtends(ExtendsClause ec, InstNode lookup) {
         return ec.newInstExtends(lookup);
     }
@@ -1191,13 +1185,21 @@ aspect InstanceTreeConstruction {
 	syn boolean ExtendsClause.needsReplacingExtends()  = false;
 	eq ExtendsClauseShortClass.needsReplacingExtends() = true;
 	
-
-    public InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd) {
-        return newInstComponentDecl(cd, cd.getClassName());
-    }
-
-
-    public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
+		// Dispatch w.r.t. class type
+	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd);
+	public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());		
+	}
+	
+	
+	public InstComponentDecl InstPrimitiveClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());
+	}
+	public InstComponentDecl InstBuiltInClassDecl.newInstComponentDecl(ComponentDecl cd) {
+		return newInstComponentDecl(cd,cd.getClassName());
+	}
+		
+	public abstract InstComponentDecl InstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className);
 
     public InstComponentDecl InstBaseClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
         InstComponentDecl icd = emptyInstComponentDecl(cd, className.newInstAccess());
@@ -1212,18 +1214,10 @@ aspect InstanceTreeConstruction {
         return icd;
     }
 
-    public InstComponentDecl InstSimpleShortClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-        return actualInstClass().newInstComponentDecl(cd, className);
-    }
-
-    public InstComponentDecl InstLibNode.newInstComponentDecl(ComponentDecl cd, Access className) {
-        return actualInstClass().newInstComponentDecl(cd, className);
-    }
-
-    public InstComponentDecl BadInstClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
-        throw new UnsupportedOperationException();
-    }
-
+	public InstComponentDecl InstSimpleShortClassDecl.newInstComponentDecl(ComponentDecl cd, Access className) {
+		return actualInstClass().newInstComponentDecl(cd, className);
+	}
+	
 	public InstComponentDecl InstBaseClassDecl.emptyInstComponentDecl(ComponentDecl cd, InstAccess name) {
 		if (isRecord()) 
 			return new InstRecord(name, new Opt(), cd, new Opt(), new Opt(), new Opt());
@@ -1305,20 +1299,8 @@ aspect InstanceTreeConstruction {
         }
     }
 
-    public InstComponentDecl InstLibNode.newInstReplacingComponent(
-            ComponentDecl replacingDecl, ComponentDecl originalDecl, 
-            InstComponentRedeclare icr, InstComponentRedeclare cicr) {
-        return resolveLib().newInstReplacingComponent(replacingDecl, originalDecl, icr, cicr);
-    }
-
     // This cannot be done.
     public InstComponentDecl InstBuiltInClassDecl.newInstReplacingComponent(
-            ComponentDecl replacingDecl, ComponentDecl originalDecl, 
-            InstComponentRedeclare icr, InstComponentRedeclare cicr) {
-        throw new UnsupportedOperationException();
-    }
-
-    public InstComponentDecl BadInstClassDecl.newInstReplacingComponent(
             ComponentDecl replacingDecl, ComponentDecl originalDecl, 
             InstComponentRedeclare icr, InstComponentRedeclare cicr) {
         throw new UnsupportedOperationException();
@@ -1364,11 +1346,7 @@ aspect InstanceTreeConstruction {
     }
 
     public InstBuiltInClassDecl BuiltInClassDecl.newInstClassDecl() {
-        return new InstBuiltInClassDecl(this);
-    }
-
-    public InstLibNode LibNode.newInstClassDecl() {
-        return new InstLibNode(this);
+    	return new InstBuiltInClassDecl(this);
     }
 
     public InstEnumClassDecl EnumClassDecl.newInstClassDecl() {
@@ -1378,7 +1356,8 @@ aspect InstanceTreeConstruction {
     }
 
     public BadInstClassDecl BadClassDecl.newInstClassDecl() {
-        return new BadInstClassDecl(this);
+        BadInstClassDecl ecd = new BadInstClassDecl(this, new Opt<InstConstrainingClass>(), new InstMClass(), new Opt<InstExternal>());
+        return ecd;
     }
 
     public InstClassDecl ClassDecl.newInstReplacingClass(
@@ -1460,8 +1439,6 @@ aspect InstanceTreeConstruction {
      */
     syn InstRestriction InstClassDecl.inheritedRestriction(boolean checkMine) = null;
     eq InstSimpleShortClassDecl.inheritedRestriction(boolean checkMine)       = 
-        actualInstClass().inheritedRestriction(true);
-    eq InstLibNode.inheritedRestriction(boolean checkMine)                    = 
         actualInstClass().inheritedRestriction(true);
     eq InstBaseClassDecl.inheritedRestriction(boolean checkMine) {
         if (checkMine)
@@ -1648,54 +1625,30 @@ aspect InstanceTreeConstruction {
 		hasTypePrefixFlow() || hasTypePrefixVariability() || hasTypePrefixInputOutput();
 
     syn lazy InstAccess InstSimpleShortClassDecl.getTarget() = 
-        getBaseClassDecl().superClasses().iterator().next().getSuper().newInstAccess();
+            getBaseClassDecl().superClasses().iterator().next().getSuper().newInstAccess();
 
     syn InstClassDecl InstSimpleShortClassDecl.myTargetInstClassDecl() = getTarget().myInstClassDecl();
     syn InstClassDecl InstShortClassDecl.myTargetInstClassDecl()       = getInstExtends(0).myInstClass();
 
-    syn lazy InstClassDecl InstLibNode.getActualInstClass() {
-        LibNode ln = (LibNode) getClassDecl();
-        ClassDecl cl = ln.myClass();
-        if (ln.nameCaseChanged()) {
-            flushCache();
-        }
-        return createInstClassDecl(cl);
-    }
-
-    public List<InstComponentDecl> InstSimpleShortClassDecl.getInstComponentDeclList() {
-        throw new UnsupportedOperationException();
-    }
-    public List<InstComponentDecl> InstLibNode.getInstComponentDeclList() {
-        throw new UnsupportedOperationException();
-    }
+	public List<InstComponentDecl> InstSimpleShortClassDecl.getInstComponentDeclList() {
+		throw new UnsupportedOperationException();
+	}
 	
-    public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
-        throw new UnsupportedOperationException();
-    }
-    public List<InstClassDecl> InstLibNode.getInstClassDeclList() {
-        throw new UnsupportedOperationException();
-    }
+	public List<InstClassDecl> InstSimpleShortClassDecl.getInstClassDeclList() {
+		throw new UnsupportedOperationException();
+	}
 	
-    public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
-        throw new UnsupportedOperationException();
-    }
-    public List<InstExtends> InstLibNode.getInstExtendsList() {
-        throw new UnsupportedOperationException();
-    }
+	public List<InstExtends> InstSimpleShortClassDecl.getInstExtendsList() {
+		throw new UnsupportedOperationException();
+	}
 	
-    public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
-        throw new UnsupportedOperationException();
-    }
-    public List<InstImport> InstLibNode.getInstImportList() {
-        throw new UnsupportedOperationException();
-    }
+	public List<InstImport> InstSimpleShortClassDecl.getInstImportList() {
+		throw new UnsupportedOperationException();
+	}
 	
-    public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
-        throw new UnsupportedOperationException();
-    }
-    public List<InstClassDecl> InstLibNode.getRedeclaredInstClassDeclList() {
-        throw new UnsupportedOperationException();
-    }
+	public List<InstClassDecl> InstSimpleShortClassDecl.getRedeclaredInstClassDeclList() {
+		throw new UnsupportedOperationException();
+	}
 
 }
 
@@ -1878,10 +1831,11 @@ aspect InstanceAST_API {
 	eq InstArrayComponentDecl.nameScope() = false;
     eq InstBaseClassDecl.nameScope() = true;
 
-    syn String InstNode.name()  = "";
+    syn String InstNode.name() = "";
     eq InstComponentDecl.name() = getComponentDecl().name();
-    eq InstClassDecl.name()     = getClassDecl().name();
-    eq InstExtends.name()       = getClassName().name();
+    eq InstBaseClassDecl.name() = getBaseClassDecl().name();
+    eq InstBuiltInClassDecl.name() = getBuiltInClassDecl().name();
+    eq InstExtends.name() = getClassName().name();
     syn String InstGeneratedInner.name() = getCopiedOuter().name();
 
     syn BaseClassDecl InstBaseClassDecl.getBaseClassDecl() = (BaseClassDecl)getClassDecl();
@@ -1894,8 +1848,6 @@ aspect InstanceAST_API {
     eq InstComponentDecl.qualifiedName()    = getFQName().name();
     eq InstExtends.qualifiedName()          = myInstClass().qualifiedName();
     eq InstBaseClassDecl.qualifiedName()    = getInstRestriction().qualifiedClassName();
-    eq InstLibNode.qualifiedName()          = resolveLib().qualifiedName();
-    eq BadInstClassDecl.qualifiedName()     = buildQualifiedName();
     eq InstBuiltInClassDecl.qualifiedName() = name();
     eq InstProgramRoot.qualifiedName()      = "";
 
@@ -1910,7 +1862,6 @@ aspect InstanceAST_API {
     inh String InstNode.instClassNamePrefix(boolean sup);
     eq InstExtends.getChild().instClassNamePrefix(boolean sup)       = sup ? qualifiedName() : instClassNamePrefix(sup);
     eq InstBaseClassDecl.getChild().instClassNamePrefix(boolean sup) = qualifiedName();
-    eq InstLibNode.getChild().instClassNamePrefix(boolean sup)       = instClassNamePrefix(sup);
     eq InstComponentDecl.getChild().instClassNamePrefix(boolean sup) = buildQualifiedName();
     eq Root.getChild().instClassNamePrefix(boolean sup)              = "";
     eq InstRoot.getChild().instClassNamePrefix(boolean sup)          = "";
@@ -1925,7 +1876,7 @@ aspect InstanceAST_API {
         (getNumInstExtends() > 0) ? getInstExtends(0).baseClassName() : qualifiedName();
     eq InstComponentDecl.baseClassName()                 = myInstClass().baseClassName();
     eq InstSimpleShortClassDecl.baseClassName()          = actualInstClass().baseClassName();
-    eq InstLibNode.baseClassName()                       = actualInstClass().baseClassName();
+    eq InstReplacingSimpleShortClassDecl.baseClassName() = actualInstClass().baseClassName();
 
 
 	syn Iterable<AbstractEquation> InstNode.equations() = Collections.<AbstractEquation>emptyList();
@@ -1951,66 +1902,60 @@ aspect InstanceAST_API {
             return super.fAlgorithms();
         }
     }
-
-    syn Iterable<ComponentDecl> InstNode.components() = Collections.<ComponentDecl>emptyList();
-    eq InstComponentDecl.components()                 = myInstClass().components();
-    eq InstArrayComponentDecl.components()            = instComponentDecl().components();
-    eq InstExtends.components()                       = 
-        extendsPrimitive() ? Collections.<ComponentDecl>emptyList() : myInstClass().components();
-    eq InstBaseClassDecl.components()                 = getBaseClassDecl().components();
-    eq InstLibNode.components()                       = resolveLib().components();
-
-    syn Iterable<ExtendsClause> InstNode.superClasses() = Collections.<ExtendsClause>emptyList();
-    eq InstComponentDecl.superClasses()                 = myInstClass().superClasses();
-    eq InstArrayComponentDecl.superClasses()            = instComponentDecl().superClasses();
-    eq InstExtends.superClasses()                       = myInstClass().superClasses();
+    
+	syn Iterable<ComponentDecl> InstNode.components() = Collections.<ComponentDecl>emptyList();
+	eq InstComponentDecl.components()                 = myInstClass().components();
+	eq InstArrayComponentDecl.components()            = instComponentDecl().components();
+	eq InstExtends.components()                       = 
+	    extendsPrimitive() ? Collections.<ComponentDecl>emptyList() : myInstClass().components();
+	eq InstBaseClassDecl.components()                 = getBaseClassDecl().components();
+	
+	syn Iterable<ExtendsClause> InstNode.superClasses() = Collections.<ExtendsClause>emptyList();
+	eq InstComponentDecl.superClasses()                 = myInstClass().superClasses();
+	eq InstArrayComponentDecl.superClasses()            = instComponentDecl().superClasses();
+	eq InstExtends.superClasses()                       = myInstClass().superClasses();
     eq InstBaseClassDecl.superClasses()                 = getBaseClassDecl().superClasses();
-    eq InstLibNode.superClasses()                       = resolveLib().superClasses();
 
-    syn Iterable<ClassDecl> InstNode.classes() = Collections.<ClassDecl>emptyList();
-    eq InstProgramRoot.classes()               = getProgram().classes();
-    eq InstComponentDecl.classes()             = myInstClass().classes();
-    eq InstArrayComponentDecl.classes()        = instComponentDecl().classes();
-    eq InstBaseClassDecl.classes()             = getBaseClassDecl().classes();
-    eq InstExtends.classes()                   = myInstClass().classes();
-    eq InstLibNode.classes()                   = resolveLib().classes();
+	syn Iterable<ClassDecl> InstNode.classes() = Collections.<ClassDecl>emptyList();
+	eq InstProgramRoot.classes()               = getProgram().classes();
+	eq InstComponentDecl.classes()             = myInstClass().classes();
+	eq InstArrayComponentDecl.classes()        = instComponentDecl().classes();
+	eq InstBaseClassDecl.classes()             = getBaseClassDecl().classes();
+	eq InstExtends.classes()                   = myInstClass().classes();
 
-    syn Iterable<ImportClause> InstNode.imports() = Collections.<ImportClause>emptyList();
-    eq InstComponentDecl.imports()                = myInstClass().imports();
-    eq InstBaseClassDecl.imports()                = getBaseClassDecl().imports();
-    eq InstExtends.imports()                      = myInstClass().imports();
-    eq InstLibNode.imports()                      = resolveLib().imports();
-
-    syn Iterable<Modification> InstNode.elementModifications() = Collections.<Modification>emptyList();
+	syn Iterable<ImportClause> InstNode.imports() = Collections.<ImportClause>emptyList();
+	eq InstComponentDecl.imports()                = myInstClass().imports();
+	eq InstBaseClassDecl.imports()                = getBaseClassDecl().imports();
+	eq InstExtends.imports()                      = myInstClass().imports();
+	
+	syn Iterable<Modification> InstNode.elementModifications() = Collections.<Modification>emptyList();
     eq InstComponentDecl.elementModifications()                = myInstClass().elementModifications();
     eq InstExtends.elementModifications()                      = myInstClass().elementModifications();
-    eq InstBaseClassDecl.elementModifications()                = getClassDecl().elementModifications();
-    eq InstLibNode.elementModifications()                      = ((LibNode) getClassDecl()).myClass().elementModifications();
+    eq InstBaseClassDecl.elementModifications()                = getBaseClassDecl().elementModifications();
+	
+	inh InstEnumClassDecl InstEnumLiteral.myInstEnumClassDecl();
+	eq InstEnumClassDecl.getInstComponentDecl().myInstEnumClassDecl() = this;
+	eq InstNode.getChild().myInstEnumClassDecl()                      = null;
+	eq FlatRoot.getChild().myInstEnumClassDecl()                      = null;
+	
+	inh int InstEnumLiteral.myIndex();
+	eq InstEnumClassDecl.getInstComponentDecl(int i).myIndex() = 
+		enumLiterals().indexOf(getInstComponentDecl(i)) + 1;
+	eq InstNode.getChild().myIndex()                           = 0;
+	eq FlatRoot.getChild().myIndex()                           = 0;
 
-    inh InstEnumClassDecl InstEnumLiteral.myInstEnumClassDecl();
-    eq InstEnumClassDecl.getInstComponentDecl().myInstEnumClassDecl() = this;
-    eq InstNode.getChild().myInstEnumClassDecl()                      = null;
-    eq FlatRoot.getChild().myInstEnumClassDecl()                      = null;
-
-    inh int InstEnumLiteral.myIndex();
-    eq InstEnumClassDecl.getInstComponentDecl(int i).myIndex() = 
-        enumLiterals().indexOf(getInstComponentDecl(i)) + 1;
-    eq InstNode.getChild().myIndex()                           = 0;
-    eq FlatRoot.getChild().myIndex()                           = 0;
-
-    syn ArrayList<InstEnumLiteral> InstClassDecl.enumLiterals() =
-        extendsEnum() ? getInstExtends(0).myInstClass().enumLiterals() : new ArrayList<InstEnumLiteral>();
-    eq InstSimpleShortClassDecl.enumLiterals()                  = actualInstClass().enumLiterals();
-    eq InstLibNode.enumLiterals()                               = actualInstClass().enumLiterals();
-    syn lazy ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
-        ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
-        for (InstComponentDecl icd : getInstComponentDecls()) {
-            if (icd.isEnumLiteral()) {
-                l.add((InstEnumLiteral)icd);
-            }
-        }
-        return l;
-    }
+	syn ArrayList<InstEnumLiteral> InstClassDecl.enumLiterals() =
+		extendsEnum() ? getInstExtends(0).myInstClass().enumLiterals() : new ArrayList<InstEnumLiteral>();
+	eq InstSimpleShortClassDecl.enumLiterals()                  = actualInstClass().enumLiterals();
+	syn lazy ArrayList<InstEnumLiteral> InstEnumClassDecl.enumLiterals() {
+		ArrayList<InstEnumLiteral> l = new ArrayList<InstEnumLiteral>();
+		for (InstComponentDecl icd : getInstComponentDecls()) {
+			if (icd.isEnumLiteral()) {
+				l.add((InstEnumLiteral)icd);
+			}
+		}
+		return l;
+	}
 
 
     // Overridden in BaseClassDecl by generated API for optional child
@@ -2075,7 +2020,6 @@ aspect InstanceAST_API {
     eq InstShortClassDecl.extendsPrimitive()       = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
     eq InstFullClassDecl.extendsPrimitive()        = getNumInstExtends() == 1 && getInstExtends(0).extendsPrimitive();
     eq InstSimpleShortClassDecl.extendsPrimitive() = actualInstClass().isOrExtendsPrimitive();
-    eq InstLibNode.extendsPrimitive()              = actualInstClass().extendsPrimitive();
     eq InstExtends.extendsPrimitive() {
         InstClassDecl icd = myInstClass();
         return !isRecursive() && icd.isOrExtendsPrimitive();
@@ -2128,7 +2072,6 @@ aspect InstanceAST_API {
     syn boolean InstNode.extendsEnum()        = false;
     eq InstClassDecl.extendsEnum()            = getNumInstExtends() == 1 && getInstExtends(0).extendsEnum();
     eq InstSimpleShortClassDecl.extendsEnum() = actualInstClass().extendsEnum();
-    eq InstLibNode.extendsEnum()              = actualInstClass().extendsEnum();
     eq InstEnumClassDecl.extendsEnum()        = true;
     eq InstExtends.extendsEnum()              = !isRecursive() && myInstClass().extendsEnum();
 
@@ -2383,49 +2326,21 @@ aspect InstanceAST_API {
 
 aspect SourceAST_API {
 
-    public static boolean ASTNode.equalsLowerCase(String name1, String name2) {
-        return name1.toLowerCase().equals(name2.toLowerCase());
-    }
+	syn Iterable<AbstractEquation> ClassDecl.equations() = Collections.<AbstractEquation>emptyList();
+	eq FullClassDecl.equations()                         = getEquations();
 
-    private static final byte LibNode.UPDATED_NAME_CASE_NOT_DONE  = 0;
-    private static final byte LibNode.UPDATED_NAME_CASE_CHANGE    = 1;
-    private static final byte LibNode.UPDATED_NAME_CASE_NO_CHANGE = 2;
-    private byte LibNode.updatedNameCase = UPDATED_NAME_CASE_NOT_DONE;
-
-    syn ClassDecl LibNode.myClass() {
-        ClassDecl cl = (ClassDecl) getStoredDefinition().getElement(0);
-        if (updatedNameCase == UPDATED_NAME_CASE_NOT_DONE) {
-            if (!cl.name().equals(name()) && equalsLowerCase(cl.name(), name())) {
-                setName(cl.getName().treeCopy());
-                updatedNameCase = UPDATED_NAME_CASE_CHANGE;
-            } else {
-                updatedNameCase = UPDATED_NAME_CASE_NO_CHANGE;
-            }
-        }
-        return cl;
-    }
-
-    syn boolean LibNode.nameCaseChanged() = updatedNameCase == UPDATED_NAME_CASE_CHANGE;
-
-    syn Iterable<AbstractEquation> ClassDecl.equations() = Collections.<AbstractEquation>emptyList();
-    eq FullClassDecl.equations()                         = getEquations();
-    eq LibNode.equations()                               = myClass().equations();
-
-    syn Iterable<Algorithm> ClassDecl.algorithms() = Collections.<Algorithm>emptyList();
-    eq FullClassDecl.algorithms()                  = getAlgorithms();
-    eq LibNode.algorithms()                        = myClass().algorithms();
+	syn Iterable<Algorithm> ClassDecl.algorithms() = Collections.<Algorithm>emptyList();
+	eq FullClassDecl.algorithms()                  = getAlgorithms();
+	
+	syn Iterable<ExtendsClause> ClassDecl.superClasses() = Collections.<ExtendsClause>emptyList();
+	eq FullClassDecl.superClasses()                      = getSupers();
+	eq ShortClassDecl.superClasses()                     = 
+	    Collections.<ExtendsClause>singletonList(getExtendsClauseShortClass());
+	
+	syn Iterable<ComponentDecl> ClassDecl.components() = Collections.<ComponentDecl>emptyList();
+	eq FullClassDecl.components()                      = getComponentDecls();
     
-    syn Iterable<ExtendsClause> ClassDecl.superClasses() = Collections.<ExtendsClause>emptyList();
-    eq FullClassDecl.superClasses()                      = getSupers();
-    eq ShortClassDecl.superClasses()                     = 
-        Collections.<ExtendsClause>singletonList(getExtendsClauseShortClass());
-    eq LibNode.superClasses()                            = myClass().superClasses();
-    
-    syn Iterable<ComponentDecl> ClassDecl.components() = Collections.<ComponentDecl>emptyList();
-    eq FullClassDecl.components()                      = getComponentDecls();
-    eq LibNode.components()                            = myClass().components();
-    
-    syn Iterable<Modification> ClassDecl.elementModifications() = Collections.<Modification>emptyList();
+    syn Iterable<Modification> BaseClassDecl.elementModifications() = Collections.<Modification>emptyList();
     eq FullClassDecl.elementModifications()                         = getElementModifications();
 
     public class ASTNode {
@@ -2444,31 +2359,34 @@ aspect SourceAST_API {
         }
     }
 
-    syn Iterable<ClassDecl> ClassDecl.classes() = Collections.<ClassDecl>emptyList();
-    eq FullClassDecl.classes()                  = filterErrorNodes(getClassDecls());
-    eq LibNode.classes()                        = myClass().classes();
-    syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
-        // Imposes ordering specified in LibClassDecl.order
-        Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
-        for (ClassDecl cd : super.classes())
-            map.put(cd.name(), cd);
-        for (LibNode ln : getLibNodes()) {
-            map.put(ln.name(), ln);
-        }
-        
-        ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
-        for (String name : order) {
-            ClassDecl cd = map.get(name);
-            if (cd != null) {
-                l.add(cd);
-                map.remove(name);
-            }
-        }
-        for (ClassDecl cd : map.values())
-            l.add(cd);
+	syn Iterable<ClassDecl> ClassDecl.classes() = Collections.<ClassDecl>emptyList();
+	eq FullClassDecl.classes()                  = filterErrorNodes(getClassDecls());
+	syn lazy Iterable<ClassDecl> LibClassDecl.classes() {
+		// Imposes ordering specified in LibClassDecl.order
+		Map<String,ClassDecl> map = new LinkedHashMap<String,ClassDecl>();
+		for (ClassDecl cd : super.classes())
+			map.put(cd.name(), cd);
+		for (LibNode ln : getLibNodes()) {
+		    for (Element e : ln.getStoredDefinition().getElements()) {
+		    	ClassDecl cd = (ClassDecl) e;
+                if (!cd.isError())
+                    map.put(cd.name(), cd);
+			}
+		}
+		
+		ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
+		for (String name : order) {
+			ClassDecl cd = map.get(name);
+			if (cd != null) {
+				l.add(cd);
+				map.remove(name);
+			}
+		}
+		for (ClassDecl cd : map.values())
+			l.add(cd);
 
-        return l;
-    }
+		return l;
+	}
     syn Iterable<ClassDecl> Program.classes() {
     	ArrayList<ClassDecl> l = new ArrayList<ClassDecl>();
         for (StoredDefinition sd : getUnstructuredEntitys()) 
@@ -2561,7 +2479,6 @@ aspect InstArrays {
 	
     syn java.util.List<FSubscript> InstNode.myFSubscripts() = Collections.emptyList();
     eq InstSimpleShortClassDecl.myFSubscripts()             = actualInstClass().myFSubscripts();
-    eq InstLibNode.myFSubscripts()                          = actualInstClass().myFSubscripts();
     eq InstFullClassDecl.myFSubscripts()                    = 
         (getNumInstExtends() == 1) ? getInstExtends(0).myFSubscripts() : super.myFSubscripts();
     eq InstExtends.myFSubscripts()                          = 

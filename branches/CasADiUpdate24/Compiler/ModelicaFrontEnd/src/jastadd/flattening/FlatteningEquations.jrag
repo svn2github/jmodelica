@@ -17,6 +17,9 @@
 aspect FlatEquations {
     public void FAbstractEquation.flatten(FQName prefix, FClass fc) {
         flattenEqn(getType().equationList(fc), prefix, fc);
+//        if (eqn != null) {
+//            eqn.annotation("src").setValue(new FStringLitExp(fileName() + ":" + beginLine()));;
+//        }
     }
     
     abstract public List<FAbstractEquation> FEquationType.equationList(FClass fc);

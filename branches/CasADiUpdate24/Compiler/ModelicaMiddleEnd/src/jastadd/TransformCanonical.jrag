@@ -120,14 +120,13 @@ aspect TransformCanonical {
             transformations.add(new extractEventGeneratingExps());
             transformations.add(new transformAlgorithms());
             transformations.add(new convertWhenToIf());
+            transformations.add(new extractSampleExpressions());
             transformations.add(new FunctionInliningIfSet());
             transformations.add(new setFDerivativeVariables());
             transformations.add(new addFPreVariables());
             transformations.add(new enableIfEquationRewrite());
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new variabilityPropagationIfSet());
-            transformations.add(new aliasEliminationIfSet());
-            transformations.add(new eliminateLinearEquations());
             transformations.add(new aliasEliminationIfSet());
             transformations.add(new enableExpandedInStreamRewrite());
             transformations.add(new evaluateAsserts());
@@ -279,7 +278,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 prettyPrint(out, "");
                 out.close();
-            } catch (IOException e) {
+            } catch (FileNotFoundException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
@@ -292,7 +291,7 @@ aspect TransformCanonical {
                 CodeStream out = new CodeStream(file);
                 out.print(modelDiagnostics());
                 out.close();
-            } catch (IOException e) {
+            } catch (FileNotFoundException e) {
                 log.warning("Failed to write step info to file " + file);
             }
         }
@@ -844,11 +843,7 @@ aspect TransformCanonical {
 			res.addFExp(e.extractRecordFExp(suffix));
 		return res;
 	}
-    
-    public FExp FIterExp.extractRecordFExp(String suffix) {
-        return new FIterExp(getFExp().extractRecordFExp(suffix), getForIndexList().treeCopy());
-    }
-    
+	
 	public FExp FAbstractCat.extractRecordFExp(String suffix) {
 		FInfArgsFunctionCall res = createEmptyNode();
 		for (FExp e : getFExps())
@@ -2299,6 +2294,63 @@ aspect TransformCanonical {
 	
 }
 
+aspect ExtractSampleExpressions {
+    public class FClass {
+        /**
+         * Rewrites when clauses to if clauses.
+         */
+        public class extractSampleExpressions extends Transformation {
+            public void perform() {
+                extractSampleExpressions();
+                flushAllRecursiveClearFinal();
+            }
+        }
+    }
+
+    public void FClass.extractSampleExpressions() {
+        Collection<FEquation> newEqns = new ArrayList<FEquation>();
+        Collection<FVariable> newVars = new ArrayList<FVariable>();
+        extractSampleExpressions(newEqns, newVars);
+        for (FEquation eqn : newEqns)
+            addFAbstractEquation(eqn);
+        for (FVariable var : newVars)
+            addFVariable(var);
+    }
+
+    public void ASTNode.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        for (ASTNode n : this)
+            n.extractSampleExpressions(newEqns, newVars);
+    }
+
+    public void FSampleExp.extractSampleExpressions(Collection<FEquation> newEqns, Collection<FVariable> newVars) {
+        if (!originalFExp().shouldExtract())
+            return;
+        if (originalFExp() == this) {
+            newEqns.add(new FEquation(tempUseExp(), fullCopy()));
+            newVars.add(type().createFVariable(new FPublicVisibilityType(), new FQNameFull(tempVarName()), variability().combine(fDiscrete())));
+        }
+        rewriteToTemp = true;
+    }
+
+    private boolean FSampleExp.rewriteToTemp = false;
+
+    rewrite FSampleExp {
+        when (rewriteToTemp) to FExp {
+            return originalFExp().tempUseExp();
+        }
+    }
+
+    inh boolean FSampleExp.shouldExtract();
+    eq FAbstractEquation.getChild().shouldExtract() = false;
+    eq BaseNode.getChild().shouldExtract()          = true;
+
+    syn boolean FAbstractEquation.isSampleEquation() = false;
+    eq FEquation.isSampleEquation()                  = getRight().isFSampleExp();
+
+    syn boolean FExp.isFSampleExp() = false;
+    eq FSampleExp.isFSampleExp()    = true;
+}
+
 aspect IfEquations {
 
     /*
@@ -3715,7 +3767,7 @@ aspect EliminateEqualSwitches{
                     log.verbose("Eliminated %d equal switches: %s", entry.getValue().size() - 1, entry.getKey());
                     FRelExp original = null;
                     for (FRelExp exp : entry.getValue()) {
-                        if (!exp.hasBrancher() && !(exp.inFArray() && exp.inFunctionCall())) {
+                        if (!exp.hasBrancher()) {
                             original = exp;
                             break;
                         }
@@ -3730,16 +3782,6 @@ aspect EliminateEqualSwitches{
             }
         }
     }
-    
-    /**
-     * Check if this expression is in an FArray expression. Either directly or
-     * a thorugh a sequence of other expressions.
-     */
-    inh boolean FExp.inFArray();
-    eq FExp.getChild().inFArray()    = inFArray();
-    eq FArray.getChild().inFArray()   = true;
-    eq BaseNode.getChild().inFArray() = false;
-
     
     public void FExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
         

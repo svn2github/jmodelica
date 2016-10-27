@@ -565,6 +565,50 @@ package UnknownArraySizes
 /* Tests compliance errors for array exps 
    of unknown size in functions. #2155 #698 */
 
+model Error1
+	
+record R
+	Real[2] x;
+end R;
+  function f
+    input Real x[2,:];
+	input R[:] recsIn; 
+	Boolean b[size(x,2)];
+    Real c[2,size(x,2)*2];
+	Real known[2,4];
+    output Real y[size(x,2),2];
+	output R[size(recsIn,1)] recsOut;
+  algorithm
+    c := cat(2,x,x); // Concat unknown size.
+	recsOut := recsIn;
+	recsOut[1] := R(x[1,:]);
+	
+	for i in x[2,:] loop // In exp is unknown size array.
+		b[i] := x[i] > 4;
+	end for;
+	for i in 1:size(x,2) loop // Shouldn't trigger, range exp allowed
+		b[i] := x[i] > 4;
+	end for;
+	
+/*	when b then // Array guard, unknown size.
+		x := x;
+	end when;*/
+  end f;
+  
+  Real x[4,2] = f({{1,2,3,4},{5,6,7,8}}, {R({1,1})});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ComplianceErrorTestCase(
+            name="UnknownArraySizes_Error1",
+            description="Test that compliance errors are given.",
+            errorMessage="
+1 errors found:
+
+Compliance error at line 577, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX:
+  Unknown size array as a for index is not supported in functions
+")})));
+end Error1;
+
 model Error2
   function f
     input Real x[:,:];
@@ -643,20 +687,13 @@ algorithm
             name="UnknownArrayIndex",
             description="Test errors for unknown array for indices in algorithms and equations.",
             errorMessage="
-4 errors found:
+2 errors found:
 
-Compliance error at line 677, column 6, in file '...', UNSUPPORTED_NON_FIXED_FOR_INDEX:
+Compliance error at line 668, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_FOR_INDEX:
   For index with higher than parameter variability is not supported in equations and algorithms
 
-Compliance error at line 677, column 8, in file '...', NON_PARAMETER_SIZE_IN_EXPRESSION:
-  Non-parameter expression sizes not supported, 'max(integer(time), 0)', dimension 0 in '1:integer(time)'
-
-Compliance error at line 681, column 6, in file '...', UNSUPPORTED_NON_FIXED_FOR_INDEX:
+Compliance error at line 672, column 6, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_NON_FIXED_FOR_INDEX:
   For index with higher than parameter variability is not supported in equations and algorithms
-
-Compliance error at line 681, column 8, in file '...', NON_PARAMETER_SIZE_IN_EXPRESSION:
-  Non-parameter expression sizes not supported, 'max(integer(time), 0)', dimension 0 in '1:integer(time)'
-
 ")})));
 end UnknownArrayIndex;
 
@@ -813,20 +850,5 @@ Warning at line 838, column 17, in file 'Compiler/ModelicaFrontEnd/test/modelica
   The Subtask.decouple() function-like operator is removed as of Modelica version 3.2r2
 ")})));
 end DeprecatedDecoupleTest1;
-
-model NonParameterSize1
-    Real x = sum(1:integer(time));
-    annotation(__JModelica(UnitTesting(tests={
-        WarningTestCase(
-            name="NonParameterSize1",
-            description="",
-            errorMessage="
-1 errors found:
-
-Compliance error at line 862, column 18, in file '...', NON_PARAMETER_SIZE_IN_EXPRESSION:
-  Non-parameter expression sizes not supported, 'max(integer(time), 0)', dimension 0 in '1:integer(time)'
-
-")})));
-end NonParameterSize1;
 
 end ComplianceTests;

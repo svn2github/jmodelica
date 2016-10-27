@@ -412,32 +412,24 @@ aspect FlatTypeCheck {
                     return;
             typeError(checkType);
         } else if (!inFunction()) {
-            size().markAsStructuralParameter(checkType, this);
+            size().markAsStructuralParameter(checkType);
         }
     }
-    
+
     protected static boolean FExp.isUnknownFExp(ASTNode n) {
         return n instanceof FExp && ((FExp) n).type().isUnknown();
     }
-    
-    public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
-    
-    public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
-        for (int i = 0; i < ndims(); i++) {
-            FExp exp = exps[i];
+
+    public void Size.markAsStructuralParameter(ErrorCheckType checkType) {}
+
+    public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType) {
+        for (FExp exp : exps) {
             if (exp != null) {
                 exp.markAsStructuralParameter(checkType);
-                if (!exp.variability().parameterOrLess()) {
-                    ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
-                }
             }
         }
     }
-    
-    public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
-            new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
-                    "Non-parameter expression sizes not supported, '%s', dimension %d in '%s'");
-    
+
     public class FExp {
         public static class ExpTypeErrorProducer extends AbstractErrorProducerUnlessDisabled<ReporterNode> {
             private final String message;
@@ -734,23 +726,15 @@ aspect FlatTypeCheck {
   eq FIdUseInstAccess.isAccessToStream() = getInstAccess().isAccessToStream();
   
   syn boolean InstAccess.isAccessToStream() = myInstComponentDecl().isStream();
-
-
-
-    public void InstForIndexWithExp.typeCheck(ErrorCheckType checkType) {
-        if (!getFExp().type().isUnknown() && getFExp().ndims() != 1)
-            error("The expression of for index " + name() + " must be a vector expression: " + 
-                    getFExp() + " has " + getFExp().ndims() + " dimension(s)");
-    }
-
-    public void InstForIndexNoExp.typeCheck(ErrorCheckType checkType) {
-        hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
-    }
-
-    syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
-        return new Opt();
-    }
-
+  
+  
+  
+  public void InstForIndex.typeCheck(ErrorCheckType checkType) {
+	  if (hasFExp() && !getFExp().type().isUnknown() && getFExp().ndims() != 1)
+		  error("The expression of for index " + name() + " must be a vector expression: " + 
+				  getFExp() + " has " + getFExp().ndims() + " dimension(s)");
+  }
+  
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {
 	  if (ndims() > 0) { 
 		  error("Array size must be scalar expression: " + getFExp());
@@ -972,7 +956,7 @@ aspect FlatTypeCheck {
         if (checkTypeAsExpression()) {
             super.typeCheck(checkType);
         } else if (!inFunction()) {
-            size().markAsStructuralParameter(checkType, this);
+            size().markAsStructuralParameter(checkType);
         }
         int n = builtInNumOutput();
         if (myLefts().size() > n)
@@ -1124,10 +1108,10 @@ aspect FlatTypeCheck {
         if (!inFunction()) {
             if (isFunctionCallClause()) {
                 for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
-                    sizeOfOutput(i).markAsStructuralParameter(checkType, this);
+                    sizeOfOutput(i).markAsStructuralParameter(checkType);
                 }
             } else {
-                size().markAsStructuralParameter(checkType, this);
+                size().markAsStructuralParameter(checkType);
             }
         }
     }

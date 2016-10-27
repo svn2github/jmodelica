@@ -69,7 +69,6 @@ CP = @CP@
 CPP = @CPP@
 CPPAD_HOME = @CPPAD_HOME@
 CPPFLAGS = @CPPFLAGS@
-CSPARSE_HOME = @CSPARSE_HOME@
 CURR_DIR = @CURR_DIR@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -244,9 +243,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/Lapack/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu ThirdParty/Lapack/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign ThirdParty/Lapack/Makefile
+	  $(AUTOMAKE) --gnu ThirdParty/Lapack/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

@@ -3276,7 +3276,9 @@ algorithm
 fclass FunctionTests.AlgorithmTypeIf5
  Real x;
 algorithm
+ if true then
   x := 1.0;
+ end if;
 end FunctionTests.AlgorithmTypeIf5;
 ")})));
 end AlgorithmTypeIf5;
@@ -6913,47 +6915,6 @@ end FunctionTests.ArrayExpInFunc45;
 ")})));
 end ArrayExpInFunc45;
 
-
-model ArrayExpInFunc46
-    function f
-        input Real x[:];
-        output Real y[size(x,1)-1];
-    algorithm
-        for i in 1:2 loop
-            y := x[2:end];
-        end for;
-	end f;
-    
-    parameter Real[:] x1 = f({1,2,3,4,5}) annotation(Evaluate=true);
-    parameter Real[:] x2 = f({6,7,8}) annotation(Evaluate=true);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="ArrayExpInFunc46",
-            description="Check that we don't crash due to cached size for range expression in for loop in function",
-            flatModel="
-fclass FunctionTests.ArrayExpInFunc46
- eval parameter Real x1[4] = {2, 3, 4, 5} /* { 2, 3, 4, 5 } */;
- eval parameter Real x2[2] = {7, 8} /* { 7, 8 } */;
-
-public
- function FunctionTests.ArrayExpInFunc46.f
-  input Real[:] x;
-  output Real[:] y;
- algorithm
-  init y as Real[size(x, 1) - 1];
-  for i in 1:2 loop
-   y[:] := x[2:size(x, 1)];
-  end for;
-  return;
- end FunctionTests.ArrayExpInFunc46.f;
-
-end FunctionTests.ArrayExpInFunc46;
-")})));
-end ArrayExpInFunc46;
-
-
-
 model ArrayOutputScalarization1
  function f
   output Real x[2] = {1,2};
@@ -7266,29 +7227,27 @@ end ArrayOutputScalarization6;
 
 model ArrayOutputScalarization7
  function f1
-  input Real i;
   output Real x[2] = {1, 2};
  algorithm
  end f1;
  
  function f2
-  input Real i;
   output Real x;
   protected Real y[2];
  algorithm
-  if sum(f1(i)) < 4 then
+  if sum(f1()) < 4 then
    x := 1;
-   y := {1,2} + f1(i);
-  elseif sum(f1(i)) < 5 then
+   y := {1,2} + f1();
+  elseif sum(f1()) < 5 then
    y := {3,4};
   else
    x := 1;
-   y := f1(i);
+   y := f1();
   end if;
   x := y[1];
  end f2;
  
- Real x = f2(1);
+ Real x = f2();
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
@@ -7299,11 +7258,10 @@ model ArrayOutputScalarization7
 fclass FunctionTests.ArrayOutputScalarization7
  Real x;
 equation
- x = FunctionTests.ArrayOutputScalarization7.f2(1);
+ x = FunctionTests.ArrayOutputScalarization7.f2();
 
 public
  function FunctionTests.ArrayOutputScalarization7.f2
-  input Real i;
   output Real x;
   Real[:] y;
   Real[:] temp_1;
@@ -7312,13 +7270,13 @@ public
  algorithm
   init y as Real[2];
   init temp_1 as Real[2];
-  (temp_1) := FunctionTests.ArrayOutputScalarization7.f1(i);
+  (temp_1) := FunctionTests.ArrayOutputScalarization7.f1();
   init temp_2 as Real[2];
-  (temp_2) := FunctionTests.ArrayOutputScalarization7.f1(i);
+  (temp_2) := FunctionTests.ArrayOutputScalarization7.f1();
   if temp_1[1] + temp_1[2] < 4 then
    x := 1;
    init temp_3 as Real[2];
-   (temp_3) := FunctionTests.ArrayOutputScalarization7.f1(i);
+   (temp_3) := FunctionTests.ArrayOutputScalarization7.f1();
    y[1] := 1 + temp_3[1];
    y[2] := 2 + temp_3[2];
   elseif temp_2[1] + temp_2[2] < 5 then
@@ -7326,14 +7284,13 @@ public
    y[2] := 4;
   else
    x := 1;
-   (y) := FunctionTests.ArrayOutputScalarization7.f1(i);
+   (y) := FunctionTests.ArrayOutputScalarization7.f1();
   end if;
   x := y[1];
   return;
  end FunctionTests.ArrayOutputScalarization7.f2;
 
  function FunctionTests.ArrayOutputScalarization7.f1
-  input Real i;
   output Real[:] x;
  algorithm
   init x as Real[2];
@@ -8438,76 +8395,6 @@ public
 end FunctionTests.ArrayOutputScalarization27;
 ")})));
 end ArrayOutputScalarization27;
-
-model ArrayOutputScalarization28
-    function F
-        input Integer[:] x;
-        output Real[sum(x)] y;
-    algorithm
-        for i in 1:sum(x) loop
-            y[i] := i + sum(x);
-        end for;
-    end F;
-    
-    model B
-        parameter Real p1 = 0;
-    end B;
-    
-    parameter Integer p2[:] = {2};
-    
-    parameter Real a = 0.1;
-    
-    B b[2](p1 = a * F(p2));
-
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ArrayOutputScalarization28",
-            description="Scalarization of function type with mutable record size",
-            flatModel="
-fclass FunctionTests.ArrayOutputScalarization28
- structural parameter Integer p2[1] = 2 /* 2 */;
- parameter Real a = 0.1 /* 0.1 */;
- parameter Real temp_1[1];
- parameter Real temp_2[2];
- parameter Real b[1].p1;
- parameter Real b[2].p1;
-parameter equation
- ({temp_1[1], }) = FunctionTests.ArrayOutputScalarization28.F({2});
- ({, temp_2[2]}) = FunctionTests.ArrayOutputScalarization28.F({2});
- b[1].p1 = a * temp_1[1];
- b[2].p1 = a * temp_2[2];
-
-public
- function FunctionTests.ArrayOutputScalarization28.F
-  input Integer[:] x;
-  output Real[:] y;
-  Integer temp_1;
-  Integer temp_2;
-  Integer temp_3;
- algorithm
-  temp_1 := 0;
-  for i1 in 1:size(x, 1) loop
-   temp_1 := temp_1 + x[i1];
-  end for;
-  init y as Real[temp_1];
-  temp_2 := 0;
-  for i1 in 1:size(x, 1) loop
-   temp_2 := temp_2 + x[i1];
-  end for;
-  for i in 1:temp_2 loop
-   temp_3 := 0;
-   for i1 in 1:size(x, 1) loop
-    temp_3 := temp_3 + x[i1];
-   end for;
-   y[i] := i + temp_3;
-  end for;
-  return;
- end FunctionTests.ArrayOutputScalarization28.F;
-
-end FunctionTests.ArrayOutputScalarization28;
-")})));
-end ArrayOutputScalarization28;
 
 
 /* ======================= Unknown array sizes ======================*/
@@ -12626,8 +12513,6 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
-
- type AssertionLevel = enumeration(error, warning);
 
 end FunctionTests.Lapack_QR;
 ")})));

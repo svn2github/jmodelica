@@ -1131,7 +1131,7 @@ aspect FlatAPI {
                 res += fv.type().numScalarElements();
         return res;
     }
-    
+
     syn int FType.numScalarElements() = size().numElements();
     eq FRecordType.numScalarElements() {
         int res = 0;
@@ -1180,61 +1180,6 @@ aspect FlatAPI {
     
     syn int FExp.numScalarElements() = type().numScalarElements();
     eq FNoExp.numScalarElements() = 0;
-    
-    public int AbstractEquationBlock.numScalarTemporaries() {
-        int n = 0;
-        for (FAbstractEquation eqn : allEquations()) {
-            n += eqn.numScalarTemporaries();
-        }
-        return n;
-    }
-    
-    syn int ASTNode.numScalarTemporaries() {
-        int n = 0;
-        for (ASTNode node : this) {
-            n += node.numScalarTemporaries();
-        }
-        return n;
-    }
-    eq FFunctionCall.numScalarTemporaries() {
-        int n = 0;
-        for (FExp exp : getArgs()) { 
-            if (exp.replaceWithTemp(false)) {
-                ++n;
-            }
-        }
-        if (isStringExp()) {
-            ++n;
-        }
-        return n;
-    }
-    
-    eq Size.numScalarTemporaries() = 0;
-    eq MutableSize.numScalarTemporaries() {
-        int n = 0;
-        if (isUnknown()) {
-            for (int i = 0; i < size.length; i++) {
-                if (size[i] == Size.UNKNOWN) {
-                    ++n;
-                }
-            }
-        } else {
-            return super.numScalarTemporaries();
-        }
-    }
-    eq FFunctionCallLeft.numScalarTemporaries() = replaceWithTemp() ? 1 : 0;
-    eq FAbstractEquation.numScalarTemporaries() {
-        int n = 0;
-        ASTNode attributeList = getFAttributeList();
-        for (ASTNode node : this) {
-            if (node != attributeList) {
-                n += node.numScalarTemporaries();
-            }
-        }
-        return n;
-    }
-    eq FIfEquation.numScalarTemporaries() = getTest().numScalarTemporaries();
-    eq FVariable.numScalarTemporaries() = isTemporary() ? 1 : 0;
     
     public Iterable<FExp> FFunctionCallLeft.flatChildFExps() {
         ArrayList<FExp> res = new ArrayList<FExp>();
@@ -2383,17 +2328,18 @@ aspect FlatTypes {
     eq FClass.getChild().inRecord()      = false;
     eq FForIndex.getChild().inRecord()   = false;
 
-    inh boolean InstNode.inRecord();
+    inh boolean InstComponentDecl.inRecord();
+    inh boolean InstExtends.inRecord();
+    eq InstNode.getInstComponentDecl().inRecord()               = false;
     eq Root.getChild().inRecord()                               = false;
-    eq InstClassDecl.getChild().inRecord()                      = false;
     eq InstForIndex.getInstPrimitive().inRecord()               = false;
-    eq InstRecord.getChild().inRecord()                         = true;
-    eq InstRecordConstructor.getChild().inRecord()              = true;
+    eq InstRecord.getInstComponentDecl().inRecord()             = true;
+    eq InstRecord.getInstExtends().inRecord()                   = true;
     eq InstArrayComponentDecl.getInstComponentDecl().inRecord() = inRecord();
     eq InstExtends.getInstComponentDecl().inRecord()            = inRecord();
+    eq InstRecordConstructor.getInstComponentDecl().inRecord()  = true;
 
     inh boolean InstNode.inRecordDecl();
-    eq Root.getChild().inRecordDecl()           = false;
     eq InstNode.getChild().inRecordDecl()       = false;
     eq InstClassDecl.getChild().inRecordDecl()  = isRecord();
     eq InstAssignable.getChild().inRecordDecl() = inRecordDecl();
@@ -3912,9 +3858,7 @@ aspect FlatExternalFunctionAPI {
     syn String FExternalStmt.include()            = include;
     syn String FExternalStmt.libraryDirectory()   = libraryDir;
     syn String FExternalStmt.includeDirectory()   = includeDir;
-    syn boolean FExternalStmt.isIncluded() = !(include() == null || include().equals(""));
-    syn boolean FExternalStmt.isInLibrary() = !(libraryDirectory() == null || libraryDirectory().equals(""));
-    
+
     private String[] FExternalStmt.library;
     private String FExternalStmt.include;
     private String FExternalStmt.libraryDir;

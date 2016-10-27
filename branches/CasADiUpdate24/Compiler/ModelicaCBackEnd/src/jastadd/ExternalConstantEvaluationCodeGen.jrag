@@ -19,7 +19,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-aspect CCodeGenExternalCeval {
+aspect Serialize {
     public class DeclPrinter_ECE extends DeclPrinter_C {
         private CodeGenContext cgc;
         private Map<String,String> tempMap;
@@ -110,37 +110,26 @@ aspect CCodeGenExternalCeval {
     public class FreePrinter_ECE extends InitPrinter_C {
         private CodeGenContext cgc;
         private Map<String,String> tempMap;
-
         public FreePrinter_ECE(CodePrinter p, CodeStream str, Map<String,String> tempMap, CodeGenContext cgc) {
             super(p, str);
             this.tempMap = tempMap;
             this.cgc = cgc;
         }
-
-        @Override
         protected String acquireTemp(String key) {
             return tempMap.get(key);
         }
-
-        @Override
         public void print(FType type) {
             
         }
-
-        @Override
         protected void printScalar(FType type) {
             
         }
-
-        @Override
         protected void printComps(FType type) {
             if (type.isExternalObject()) {
                 printComps((FExternalObjectType) type);
                 printExt((FExternalObjectType) type);
             }
         }
-
-        @Override
         protected void printExt(FExternalObjectType type) {
             FExternalStmt stmt = type.myDestructorStmt();
             ArrayList<FExp> args = stmt.myConstructorArgs();
@@ -149,8 +138,6 @@ aspect CCodeGenExternalCeval {
             stmt.prettyPrint_C(p, str, indent());
             stmt.setCodeGenContext(null);
         }
-
-        @Override
         public boolean initMaxInd() { return false; }
     }
    

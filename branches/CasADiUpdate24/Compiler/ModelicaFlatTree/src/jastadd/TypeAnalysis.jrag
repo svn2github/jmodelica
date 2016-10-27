@@ -1070,7 +1070,7 @@ aspect BuiltInFlatTypes {
         (s == Size.SCALAR) ? scalarType() : arrayType(s);
 
     syn FType FType.scalarType() {
-        if (isScalar() && !isFunction())
+        if (isScalar())
             return this;
         FType copy = (FType) fullCopy();
         copy.setSize(Size.SCALAR);

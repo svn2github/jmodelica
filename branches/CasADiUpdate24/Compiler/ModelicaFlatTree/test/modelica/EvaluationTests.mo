@@ -1492,65 +1492,6 @@ end EvaluationTests.FunctionEval42;
 ")})));
 end FunctionEval42;
 
-model FunctionEval43
-    function F
-        input Integer[:] x;
-        output Real[sum(x)] y;
-    algorithm
-        for i in 1:sum(x) loop
-            y[i] := i + sum(x);
-        end for;
-    end F;
-    
-    parameter Integer[:] p1 = {1,1};
-    parameter Integer[:] p2 = {2};
-    parameter Real[2] a1 = F(p1) + F(p2);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionEval43",
-            description="Test array caching bug #5118",
-            flatModel="
-fclass EvaluationTests.FunctionEval43
- structural parameter Integer p1[2] = {1, 1} /* { 1, 1 } */;
- structural parameter Integer p2[1] = {2} /* { 2 } */;
- structural parameter Real a1[2] = {6, 8} /* { 6, 8 } */;
-
-public
- function EvaluationTests.FunctionEval43.F
-  input Integer[:] x;
-  output Real[:] y;
- algorithm
-  init y as Real[sum(x[:])];
-  for i in 1:sum(x[:]) loop
-   y[i] := i + sum(x[:]);
-  end for;
-  return;
- end EvaluationTests.FunctionEval43.F;
-
-end EvaluationTests.FunctionEval43;
-")})));
-end FunctionEval43;
-
-model FunctionEval44
-    constant Real[:] x = {sum(j for j in i:3) for i in 1:3};
-
-    annotation(__JModelica(UnitTesting(tests={
-        EvalTestCase(
-            name="FunctionEval44",
-            description="Constant evaluation of iter exp containing function call",
-            variables="
-x[1]
-x[2]
-x[3]
-",
-            values="
-6.0
-5.0
-3.0
-")})));
-end FunctionEval44;
-
 
 model VectorFuncEval1
     function f
@@ -4555,36 +4496,5 @@ fclass EvaluationTests.ConstantInFunction1
 end EvaluationTests.ConstantInFunction1;
 ")})));
 end ConstantInFunction1;
-
-model ConstantInFunction2
-    record R
-        Real x;
-    end R;
-    
-    constant R[:] r = {R(1),R(2)};
-    
-    function f
-        input Integer i;
-        output Real y = r[i].x;
-    algorithm
-        y := y + r[i].x;
-    end f;
-    
-    constant Real y1 = f(2);
-    constant Real y2 = f(1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ConstantInFunction2",
-            description="Constant eval of composite array package constant in function",
-            flatModel="
-fclass EvaluationTests.ConstantInFunction2
- constant Real r[1].x = 1;
- constant Real r[2].x = 2;
- constant Real y1 = 4.0;
- constant Real y2 = 2.0;
-end EvaluationTests.ConstantInFunction2;
-")})));
-end ConstantInFunction2;
 
 end EvaluationTests;

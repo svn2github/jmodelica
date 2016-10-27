@@ -134,17 +134,6 @@ namespace ModelicaCasADi
 
 }
 
-void Block::markTearingResiduals() {
-    for(std::vector< Ref<Equation> >::iterator it_eq=equations.begin(); it_eq != equations.end();++it_eq) {
-        for(std::vector< Ref<Equation> >::iterator it=unSolvedEquations.begin(); it != unSolvedEquations.end(); ++it) {
-            if((*it)->getLhs().getRepresentation()==(*it_eq)->getLhs().getRepresentation() &&
-               (*it)->getRhs().getRepresentation()==(*it_eq)->getRhs().getRepresentation()) {
-                (*it_eq)->setAsTearing();
-                (*it)->setAsTearing();
-            }
-        }
-    }
-}
 
 void Block::moveAllEquationsToUnsolvable() {
     unSolvedEquations.clear();
@@ -350,11 +339,7 @@ std::vector< Ref<Equation> > Block::getEquationsforModel() const
 
     for(std::vector< Ref<Equation> >::const_iterator it=unSolvedEquations.begin();
     it != unSolvedEquations.end();++it) {
-        Ref<Equation> eq = new Equation((*it)->getLhs(),(*it)->getRhs());
-        if ((*it)->isTearing()) {
-            eq->setAsTearing();
-        }
-        modelEqs.push_back(eq);
+        modelEqs.push_back(new Equation((*it)->getLhs(),(*it)->getRhs()));;
     }
     return modelEqs;
 }

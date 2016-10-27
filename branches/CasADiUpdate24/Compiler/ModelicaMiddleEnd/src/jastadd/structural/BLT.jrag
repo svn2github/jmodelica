@@ -3169,7 +3169,7 @@ aspect BLTPrettyPrinting {
 
 aspect IVPrettyPrinting{
     
-    public void BLT.writeIterationVariablesToFile(File file) throws IOException {
+    public void BLT.writeIterationVariablesToFile(File file) throws FileNotFoundException {
         CodeStream out = new CodeStream(file);
         for (AbstractEquationBlock block : this)
             block.printIterationVariables(out);
@@ -3505,7 +3505,7 @@ aspect AutomaticTearing {
 }
 
 aspect TearingPrinting {
-    public void BLT.writeTearingPairsToFile(File file) throws IOException {
+    public void BLT.writeTearingPairsToFile(File file) throws FileNotFoundException {
         CodeStream out = new CodeStream(file);
         for (AbstractEquationBlock block : this)
             block.printTearingPairs(out);

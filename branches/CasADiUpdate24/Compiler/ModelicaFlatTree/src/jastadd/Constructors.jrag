@@ -563,11 +563,7 @@ aspect Constructors {
      * Constructs an FRecordConstructor for a record with the given name and no arguments.
      */
     public FRecordConstructor.FRecordConstructor(String name) {
-        this(new FIdUse(name), new List<FExp>());
-    }
-    
-    public FRecordConstructor.FRecordConstructor(FIdUse name, List<FExp> args) {
-        this(new List<InstFunctionArgument>(), name, args);
+        this(new FIdUse(name), new List());
     }
 
     public EnumLiteralDecl.EnumLiteralDecl(IdDecl name, Comment comment) {
@@ -1467,51 +1463,5 @@ aspect InheritedFactoryMethods {
         }
         return new FFunctionType(Size.SCALAR, name, in, out, fclass);
     }
-    
-    
-    public static List<InstFunctionArgument> FBuiltInFunctionCall.emptyArgs() { return new List<InstFunctionArgument>(); }
-    
-    public FDelayExp  FDelayExp.createNode(FExp exp, FExp delay, Opt<FExp> max)    { return new FDelayExp(exp, delay, max); }
-    public FAssert    FAssert.createNode(FExp test, FExp flatten, Opt<FExp> level) { return new FAssert(test, flatten, level); }
-    
-    
-    
-    public FAbsExp.FAbsExp(FExp a1)                      { this(emptyArgs(), a1); }
-    public FSqrtExp.FSqrtExp(FExp a1)                    { this(emptyArgs(), a1); }
-    public FDerStream.FDerStream(FExp a1)                { this(emptyArgs(), a1); }
-    public FInStream.FInStream(FExp a1)                  { this(emptyArgs(), a1); }
-    public FNoEventExp.FNoEventExp(FExp a1)              { this(emptyArgs(), a1); }
-    public FLogExp.FLogExp(FExp a1)                      { this(emptyArgs(), a1); }
-    public FEnumIntegerExp.FEnumIntegerExp(FExp a1)      { this(emptyArgs(), a1); }
-    public FSinExp.FSinExp(FExp a1)                      { this(emptyArgs(), a1); }
-    public FSinhExp.FSinhExp(FExp a1)                    { this(emptyArgs(), a1); }
-    public FCosExp.FCosExp(FExp a1)                      { this(emptyArgs(), a1); }
-    public FCoshExp.FCoshExp(FExp a1)                    { this(emptyArgs(), a1); }
-    public FIntegerFuncExp.FIntegerFuncExp(FExp a1)      { this(emptyArgs(), a1); }
-    public FFloorFuncExp.FFloorFuncExp(FExp a1)          { this(emptyArgs(), a1); }
-    public FIdentity.FIdentity(FExp a1)                  { this(emptyArgs(), a1); }
-    
-    public FReinit.FReinit(FExp a1, FExp a2)             { this(emptyArgs(), a1, a2); }
-    public FCross.FCross(FExp a1, FExp a2)               { this(emptyArgs(), a1, a2); }
-    public FSampleExp.FSampleExp(FExp a1, FExp a2)       { this(emptyArgs(), a1, a2); }
-    public FDivFuncExp.FDivFuncExp(FExp a1, FExp a2)     { this(emptyArgs(), a1, a2); }
-    public FOuterProduct.FOuterProduct(FExp a1, FExp a2) { this(emptyArgs(), a1, a2); }
-    public FSmoothExp.FSmoothExp(FExp a1, FExp a2)       { this(emptyArgs(), a1, a2); }
-    public FHomotopyExp.FHomotopyExp(FExp a1, FExp a2)   { this(emptyArgs(), a1, a2); }
-    
-    public FMaxExp.FMaxExp(FExp a1,   Opt<FExp> a2)      { this(emptyArgs(), a1, a2); }
-    public FSizeExp.FSizeExp(FExp a1, Opt<FExp> a2)      { this(emptyArgs(), a1, a2); }
-    
-    public FSemiLinearExp.FSemiLinearExp(FExp a1, FExp a2, FExp a3) { this(emptyArgs(), a1, a2, a3); }
-    public FLinspace.FLinspace(FExp a1, FExp a2, FExp a3)           { this(emptyArgs(), a1, a2, a3); }
-    
-    public FDelayExp.FDelayExp(FExp a1, FExp a2, Opt<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
-    public FAssert.FAssert(FExp a1, FExp a2, Opt<FExp> a3)     { this(emptyArgs(), a1, a2, a3); }
-    
-    public FFillExp.FFillExp(List<FExp> dims, FExp exp)              { this(emptyArgs(), dims, exp); }
-    public FSpatialDistExp.FSpatialDistExp(FExp a1, FExp a2, FExp a3, FExp a4, FExp a5, FExp a6) { 
-        this(emptyArgs(), a1, a2, a3, a4, a5, a6);
-    }
-    public FExInStream.FExInStream(FExp a1, FExp a2, List<FExp> a3) { this(emptyArgs(), a1, a2, a3); }
     
 }

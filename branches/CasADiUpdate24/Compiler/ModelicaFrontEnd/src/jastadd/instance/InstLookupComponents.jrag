@@ -337,7 +337,6 @@ aspect InstLookupComponents {
     eq InstExtendsShortClass.getInstClassModification().lookupInstComponent(String name)  = getLookupNode().lookupInstComponent(name);
     eq InstShortClassDecl.getChild().lookupInstComponent(String name)                     = lookupInstComponent(name);
     eq InstSimpleShortClassDecl.getChild().lookupInstComponent(String name)               = lookupInstComponent(name);
-    eq InstLibNode.getChild().lookupInstComponent(String name)                            = lookupInstComponent(name);
     eq InstExternalObject.getDestructorCall().lookupInstComponent(String name)            = lookupInstComponent(name);
     eq InstConstrainingComponent.getChild().lookupInstComponent(String name)              = 
         (getInstRedeclare() != null) ? getInstRedeclare().lookupInstComponent(name) : lookupInstComponent(name);
@@ -419,7 +418,6 @@ aspect InstLookupComponents {
             return myDefaultConstrainingDecl();
         }
     }
-    eq InstLibNode.myConstrainingDecl() = resolveLib().myConstrainingDecl();
 
     syn InstNode InstNode.myDefaultConstrainingDecl()                = this;
     eq InstReplacingFullClassDecl.myDefaultConstrainingDecl()        = getOriginalInstClass();
@@ -584,7 +582,6 @@ aspect InstLookupComponents {
         return genericLookupInstConstant(name);
     }
     eq InstSimpleShortClassDecl.genericLookupInstComponent(String name) = actualInstClass().genericLookupInstComponent(name);
-    eq InstLibNode.genericLookupInstComponent(String name)              = actualInstClass().genericLookupInstComponent(name);
 
     syn InstLookupResult<InstComponentDecl> InstNode.genericLookupInstConstant(String name) = lookupInstConstant(name);
     eq InstComponentDecl.genericLookupInstConstant(String name)                             = myInstClass().lookupInstConstant(name);
@@ -597,7 +594,6 @@ aspect InstLookupComponents {
         return getInstComponentDecl(0).arrayMemberInstComponent(name, ndims - 1);
     }
     eq InstSimpleShortClassDecl.arrayMemberInstComponent(String name, int ndims) = actualInstClass().arrayMemberInstComponent(name, ndims);
-    eq InstLibNode.arrayMemberInstComponent(String name, int ndims)              = actualInstClass().arrayMemberInstComponent(name, ndims);
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstComponent(String name)  {
         if (isArray()) {
@@ -617,7 +613,6 @@ aspect InstLookupComponents {
         }
     }
     eq InstSimpleShortClassDecl.memberInstComponent(String name) = actualInstClass().memberInstComponent(name);
-    eq InstLibNode.memberInstComponent(String name)              = actualInstClass().memberInstComponent(name);
     
     public InstLookupResult InstNode.findInnerComponentIfAny(InstComponentDecl icd) {
         if (icd.isOuter()) {
@@ -628,9 +623,8 @@ aspect InstLookupComponents {
     
     
     inh lazy InstLookupResult<InstComponentDecl> InstNode.lookupInstConstant(String name);
-    eq Root.getChild().lookupInstConstant(String name)        = InstLookupResult.notFound();
-    eq InstNode.getChild().lookupInstConstant(String name)    = memberInstConstantFirst(name);
-    eq InstLibNode.getChild().lookupInstConstant(String name) = lookupInstConstant(name);
+    eq Root.getChild().lookupInstConstant(String name)     = InstLookupResult.notFound();
+    eq InstNode.getChild().lookupInstConstant(String name) = memberInstConstantFirst(name);
 
     syn InstLookupResult<InstComponentDecl> InstNode.memberInstConstantFirst(String name) {
         InstLookupResult<InstComponentDecl> res = memberInstConstantWithExtends(name);
@@ -646,7 +640,6 @@ aspect InstLookupComponents {
         return lookupInstConstant(name);
     }
     eq InstSimpleShortClassDecl.memberInstConstantFirst(String name) = actualInstClass().memberInstConstantFirst(name);
-    eq InstLibNode.memberInstConstantFirst(String name)              = actualInstClass().memberInstConstantFirst(name);
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstConstantWithExtends(String name) {
         InstLookupResult<InstComponentDecl> res = memberInstConstant(name);
@@ -662,7 +655,6 @@ aspect InstLookupComponents {
         return InstLookupResult.notFound();
     }
     eq InstSimpleShortClassDecl.memberInstConstantWithExtends(String name) = actualInstClass().memberInstConstantWithExtends(name);
-    eq InstLibNode.memberInstConstantWithExtends(String name)              = actualInstClass().memberInstConstantWithExtends(name);
 
     syn lazy InstLookupResult<InstComponentDecl> InstNode.memberInstConstant(String name) {
         for (InstComponentDecl ic : getInstComponentDecls()) 
@@ -672,7 +664,6 @@ aspect InstLookupComponents {
         return InstLookupResult.notFound();
     }
     eq InstSimpleShortClassDecl.memberInstConstant(String name) = actualInstClass().memberInstConstant(name);
-    eq InstLibNode.memberInstConstant(String name)              = actualInstClass().memberInstConstant(name);
 
     syn InstLookupResult<InstComponentDecl> InstImport.lookupInstConstantInImport(String name) {
         // Assume import points to a single (constant) component

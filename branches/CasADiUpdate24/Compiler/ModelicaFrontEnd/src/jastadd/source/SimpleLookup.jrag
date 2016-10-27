@@ -178,9 +178,8 @@ aspect SimpleClassLookup {
 	
 	eq ShortClassDecl.simpleLookupClassMemberScope(String name) = 
 		getExtendsClauseShortClass().findClassDecl().simpleLookupClassMemberScope(name);
-    eq LibNode.simpleLookupClassMemberScope(String name)        = 
-        myClass().simpleLookupClassMemberScope(name);
-
+	
+	
 	syn ClassDecl ImportClause.simpleLookupClassInImport(String name) = 
 		matches(name) ? findClassDecl() : unknownClassDecl();
 	eq ImportClauseUnqualified.simpleLookupClassInImport(String name) = 
@@ -231,21 +230,16 @@ aspect SimpleClassLookup {
 	public static ClassDecl ASTNode.simpleLookupInLibNodeList(List<LibNode> list, String name) {
 		for (LibNode ln : list)
 			if (ln.matches(name))
-				return (ClassDecl) ln;
+				return (ClassDecl) ln.getStoredDefinition().getElement(0);
 		return null;
 	}
-
-
-    eq IdDecl.matches(String str)                = getID().equals(str);
-    eq BaseClassDecl.matches(String str)         = getName().matches(str);
-    eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
-    eq ImportClauseQualified.matches(String str) = 
-        getPackageName().getLastAccess().matches(str);
-    eq LibNode.matches(String str) {
-        if (equalsLowerCase(name(), str)) {
-            myClass();
-        }
-        return getName().matches(str);
-    }
+	
+	
+	eq IdDecl.matches(String str)                = getID().equals(str);
+	eq LibNode.matches(String str)               = getName().equals(str);
+	eq BaseClassDecl.matches(String str)         = getName().matches(str);
+	eq ImportClauseRename.matches(String str)    = getIdDecl().matches(str);
+	eq ImportClauseQualified.matches(String str) = 
+		getPackageName().getLastAccess().matches(str);
 
 }

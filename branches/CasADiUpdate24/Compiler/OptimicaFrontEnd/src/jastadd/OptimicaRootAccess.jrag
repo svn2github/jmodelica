@@ -69,7 +69,7 @@ aspect OptimicaParsers {
         return parseOptimicaFile(uif, fileName);
     }
 
-    refine Parsers public static SourceRoot ParserHandler.parseStringNoCatch(UtilInterface uif, String str, String fileName)  
+    refine Parsers public static SourceRoot ParserHandler.parseString(UtilInterface uif, String str, String fileName)  
             throws ParserException, beaver.Parser.Exception, FileNotFoundException, IOException {
         return parseOptimicaString(uif, str, fileName);
     }

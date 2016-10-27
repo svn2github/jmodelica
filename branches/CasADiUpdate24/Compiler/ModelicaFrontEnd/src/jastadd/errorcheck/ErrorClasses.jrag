@@ -151,9 +151,5 @@ aspect ErrorClasses {
 			badNodeInfo.collectErrors(checkType);
 		super.collectErrors(checkType);
 	}
-
-    public BadClassDecl.BadClassDecl(String name) {
-        super(new IdDecl(name));
-    }
-
+	
 }

@@ -107,7 +107,6 @@ aspect InstVariability {
     eq InstComponentDecl.getChild().inEvalAnnotated()      = false;
     eq InstAssignable.getChild().inEvalAnnotated()         = isEvalAnnotated();
     eq InstArrayComponentDecl.getChild().inEvalAnnotated() = inEvalAnnotated();
-    eq InstRecordConstructor.getChild().inEvalAnnotated()  = false;
     
     syn boolean InstAssignable.isSetAsInitial() = isPrimitive() && 
             attributeCValueSet(defaultVariableEvaluator(), FAttribute.FIXED) != null && 

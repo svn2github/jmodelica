@@ -393,10 +393,10 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * Returns false if the constant value is NaN, infinity or unknown.
+         * Returns true if the constant value is NaN, infinity or unknown.
          */
         public boolean isValid() {
-            return true;
+            return false;
         }
 
         /**
@@ -678,6 +678,11 @@ aspect ConstantEvaluation {
             return value < 0;
         }
 
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
     
 	/**
@@ -849,6 +854,11 @@ aspect ConstantEvaluation {
         public boolean isBoolean() {
             return true;
         }
+        
+        @Override
+        public boolean isValid() {
+            return true;
+        }
 
       }
       
@@ -896,6 +906,11 @@ aspect ConstantEvaluation {
         public boolean isString() {
             return true;
         }
+        
+        @Override
+        public boolean isValid() {
+            return true;
+        }
 
       }
     
@@ -911,25 +926,21 @@ aspect ConstantEvaluation {
          * 
          * @return The string. 
          */
-        public String toString() { 
-            return "(unknown value)"; 
-        }
-
-        public boolean isUnknown() {
-            return true;
-        }
-
-        public boolean isValid() {
-            return false;
-        }
-
-        /**
-         * Get a string describing this CValue for use in 
-         *        ConstantEvaluationExceptions.
-         */
-        public String errorDesc() {
-            return getClass().getSimpleName();
-        }
+    	public String toString() { 
+      		return "(unknown value)"; 
+      	}
+      	
+      	public boolean isUnknown() {
+      		return true;
+      	}
+	    
+	    /**
+	     * Get a string describing this CValue for use in 
+	     *        ConstantEvaluationExceptions.
+	     */
+	    public String errorDesc() {
+	    	return getClass().getSimpleName();
+	    }
 
     }
     
@@ -1531,6 +1542,11 @@ aspect ConstantEvaluation {
             return res;
         }
 
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
 
 
@@ -1621,6 +1637,11 @@ aspect ConstantEvaluation {
             return new CValuePartialFunction(func, resValues);
         }
 
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
     }
 
     /**
@@ -1662,29 +1683,20 @@ aspect ConstantEvaluation {
             value = this.type.getFEnumLiteralType(index - 1).getName();
         }
 
-        @Override
         public int intValue() {
             return index;
         }
 
-        @Override
         public double realValue() {
             return index;
         }
 
-        @Override
         public String stringValue() {
             return value;
         }
 
-        @Override
         public String toString() {
             return type.getName() + "." + value;
-        }
-
-        @Override
-        public boolean isEnum() {
-            return true;
         }
 
         /**
@@ -1704,6 +1716,11 @@ aspect ConstantEvaluation {
             if (!max.isUnknown() && max.intValue() < index)
                 return max;
             return this;
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
         }
 
     }
@@ -3229,7 +3246,7 @@ aspect ConstantEvaluation {
         public void setLocalCachedEvaluationValue(CValue val);
         public CValue getLocalCachedEvaluationValue();
         public void clearLocalCachedEvaluationValue();
-        public void resetAfterCeval();
+        public void prepareForFunctionEval();
         public CValue evaluationValue(VariableEvaluator evaluator);
         public CValue ceval();
         public CValue ceval(VariableEvaluator evaluator);
@@ -3271,6 +3288,7 @@ aspect ConstantEvaluation {
 	  Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
 	  int i = 0;
 	  for (CommonVariableDecl var : myCallInputs()) {
+		  var.prepareForFunctionEval();
 		  FExp arg = argument(i++);
             if (arg != null) {
                 values.put(var, arg.ceval(evaluator));
@@ -3385,59 +3403,64 @@ aspect ConstantEvaluation {
         evaluationValue.evaluatePartialFunction(this, values);
     syn CValue FFunctionVariable.evaluatePartial(Map<CommonVariableDecl, CValue> values) =
         evaluationValue.evaluatePartialFunction(this, values);
-    
-    public void InstBaseClassDecl.resetAfterCeval(ASTNode n) {
-        for (InstComponentDecl var : allInstComponentDecls())
-            var.resetAfterCeval();
-        n.resetAfterCeval();
+  
+  /**
+   * Prepare a function fro being function evaluation.
+   * 
+   * This entails: 
+   * <ul>
+   * <li>Make sure all size() attributes are calculated.</li>
+   * <li>Clear cached getArray() values for expressions with unknown size.</li>
+   * </ul>
+   */
+  public void ASTNode.prepareForFunctionEval() {
+	  for (ASTNode n : this)
+		  n.prepareForFunctionEval();
+  }
+  
+  public void InstAssignable.prepareForFunctionEval() {
+	  super.prepareForFunctionEval();
+	  if (hasBindingFExp())
+		  myBindingInstExp().prepareForFunctionEval();
+	  size();
+  }
+  
+  public void FExp.prepareForFunctionEval() {
+	  super.prepareForFunctionEval();
+	  flushUnknownSizes();
+  }
+  
+    public void InstComponentAccess.prepareForFunctionEval() {
+        super.prepareForFunctionEval();
+        myInstLookup_reset();
     }
     
-    public void FFunctionDecl.resetAfterCeval(ASTNode n) {
-        for (FFunctionVariable var : getFFunctionVariables())
-            var.resetAfterCeval();
-        n.resetAfterCeval();
+    public void InstComponentArrayAccess.prepareForFunctionEval() {
+        super.prepareForFunctionEval();
+        myInstLookup_reset();
     }
-    
-    public void ASTNode.resetAfterCeval() {
-        for (ASTNode n : this) {
-            n.resetAfterCeval();
+
+    public void FExp.flushUnknownSizes() {
+        // Flush so that getArray() is cleared for unknown sizes, and then recalculate size and make sure it is evaluated
+        if (size().flushUnknownSizes()) {
+            flushCache();
+            size().isUnknown();
         }
     }
     
-    public void FFunctionVariable.resetAfterCeval() {
-        super.resetAfterCeval();
-        clearLocalCachedEvaluationValue();
-        size().resetAfterCeval();
+    public boolean Size.flushUnknownSizes() {
+        return false;
     }
     
-    public void InstAssignable.resetAfterCeval() {
-        super.resetAfterCeval();
-        clearLocalCachedEvaluationValue();
-        if (hasBindingFExp()) {
-            myBindingInstExp().resetAfterCeval();
-        }
-        size().resetAfterCeval();
+    public boolean MutableSize.flushUnknownSizes() {
+        for (FExp e : exps)
+            if (e != null)
+                return true;
+        return false;
     }
-    
-    public void Size.resetAfterCeval() {
-        
-    }
-    
-    public void MutableSize.resetAfterCeval() {
-        for (int i = 0; i < exps.length; i++) {
-            if (exps[i] != null) {
-                exps[i].resetAfterCeval();
-                evaluated[i] = false;
-                size[i] = Size.UNKNOWN;
-            }
-        }
-    }
-    
-    
-    public void FExp.resetAfterCeval() {
-        flushAllRecursive();
-    }
-    
+
+    public void FFunctionCall.flushUnknownSizes() {}
+
     // TODO: reduce code duplication
 
     /**
@@ -3452,6 +3475,9 @@ aspect ConstantEvaluation {
         currentEvaluationValues = values;
         for (FFunctionVariable var : getFFunctionVariables())
             var.clearLocalCachedEvaluationValue();
+        fab.prepareForFunctionEval();
+        for (FFunctionVariable var : myNonInputs())
+            var.prepareForFunctionEval();
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
@@ -3469,7 +3495,8 @@ aspect ConstantEvaluation {
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(name(), myOutputs(), e);
         } finally {
-            resetAfterCeval(fab);
+            for (FFunctionVariable var : getFFunctionVariables())
+                var.clearLocalCachedEvaluationValue();
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
@@ -3490,6 +3517,8 @@ aspect ConstantEvaluation {
      */
     public CValue InstClassDecl.evaluateFirst(VariableEvaluator evaluator, Iterable<FExp> args) {
         Map<CommonVariableDecl, CValue> values = new HashMap<CommonVariableDecl, CValue>();
+        for (CommonVariableDecl var : myInputs()) 
+            var.prepareForFunctionEval();
         int i = 0;
         for (FExp arg : args) {
             if (i < myInputs().size()) {
@@ -3528,9 +3557,13 @@ aspect ConstantEvaluation {
     public void InstSimpleShortClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
        actualInstClass().evaluate(evaluator, values);
     }
-
-    public void InstLibNode.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
-       actualInstClass().evaluate(evaluator, values);
+    
+    public void InstBaseClassDecl.prepareForFunctionEval(FAlgorithm fab) {
+        for (InstComponentDecl var : allInstComponentDecls())
+            var.clearLocalCachedEvaluationValue();
+        for (InstComponentDecl var : allInstComponentDecls())
+            var.prepareForFunctionEval();
+        fab.prepareForFunctionEval();
     }
 
     public void InstBaseClassDecl.evaluate(VariableEvaluator evaluator, Map<CommonVariableDecl, CValue> values) {
@@ -3548,6 +3581,7 @@ aspect ConstantEvaluation {
         
         Map<CommonVariableDecl, CValue> oldVal = currentEvaluationValues;
         currentEvaluationValues = values;
+        prepareForFunctionEval(fab);
         
         AlgorithmEvaluator algoEvaluator = evaluator.createAlgorithmEvaluator(values);
         try {
@@ -3560,7 +3594,7 @@ aspect ConstantEvaluation {
         } catch (ConstantEvaluationException e) {
             algoEvaluator.failed(qualifiedName(), myOutputs(), e);
         } finally {
-            resetAfterCeval(fab);
+            prepareForFunctionEval(fab);
             if (oldVal != null)
                 for (CommonVariableDecl var : oldVal.keySet())
                     var.setLocalCachedEvaluationValue(oldVal.get(var));
@@ -4259,8 +4293,8 @@ aspect ConstantEvaluation {
         int res = EVAL_CONT;
         for (Index i : ivals.indices()) {
             getIndex().setEvaluationValue(defaultVariableEvaluator(), ivals.getCell(i));
+            getForStmts().prepareForFunctionEval();
             res = getForStmts().evaluateList(evaluator);
-            getForStmts().resetAfterCeval();
             if (res != EVAL_CONT) {
                 break;
             }
@@ -4269,94 +4303,84 @@ aspect ConstantEvaluation {
         return (res == EVAL_BREAK) ? EVAL_CONT : res;
     }
 
-    @Override
-    public int InstForStmt.evaluate(AlgorithmEvaluator evaluator) {
-        return getInstForIndex(0).evaluateInFunc(evaluator, getInstForIndexList(), 0, getForStmts());
-    }
-    
-    /**
-     * Evaluate statement list over this for index during function evaluation.
-     * 
-     * @param values  constant values for the variables. 
-     */
-    public int InstForIndex.evaluateInFunc(AlgorithmEvaluator evaluator, 
-            List<InstForIndex> indices, int i, List<FStatement> stmts) {
-        InstComponentDecl var = getInstPrimitive();
-        CValue oldVal = var.evaluationValue(evaluator);
-        boolean last = i == indices.getNumChild() - 1;
-        CValueArray ivals = getFExp().ceval(evaluator).array();
-        for (Index j : ivals.indices()) {
-            var.setEvaluationValue(evaluator, ivals.getCell(j));
-            int res = last ? stmts.evaluateList(evaluator) : 
-                    indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
-              stmts.resetAfterCeval();
-            if (res != FStatement.EVAL_CONT) {
-                var.setEvaluationValue(evaluator, oldVal);
-                return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
-            }
-        }
-        var.setEvaluationValue(evaluator, oldVal);
-        return FStatement.EVAL_CONT;
-    }
+  @Override
+  public int InstForStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  return getInstForIndex(0).evaluateInFunc(evaluator, getInstForIndexList(), 0, getForStmts());
+  }
+  
+  /**
+   * Evaluate statement list over this for index during function evaluation.
+   * 
+   * @param values  constant values for the variables. 
+   */
+  public int InstForIndex.evaluateInFunc(AlgorithmEvaluator evaluator, 
+		  List<InstForIndex> indices, int i, List<FStatement> stmts) {
+	  InstComponentDecl var = getInstPrimitive();
+	  CValue oldVal = var.evaluationValue(evaluator);
+	  boolean last = i == indices.getNumChild() - 1;
+	  CValueArray ivals = getFExp().ceval(evaluator).array();
+	  for (Index j : ivals.indices()) {
+		  var.setEvaluationValue(evaluator, ivals.getCell(j));
+		  stmts.prepareForFunctionEval();
+		  int res = last ? stmts.evaluateList(evaluator) : 
+				  indices.getChild(i + 1).evaluateInFunc(evaluator, indices, i + 1, stmts);
+		  if (res != FStatement.EVAL_CONT) {
+			  var.setEvaluationValue(evaluator, oldVal);
+			  return (res == FStatement.EVAL_BREAK) ? FStatement.EVAL_CONT : res;
+		  }
+	  }
+	  var.setEvaluationValue(evaluator, oldVal);
+	  return FStatement.EVAL_CONT;
+  }
 
-    @Override
-    public int InstForIndexNoExp.evaluateInFunc(AlgorithmEvaluator evaluator, 
-            List<InstForIndex> indices, int i, List<FStatement> stmts) {
-        if (hasFExp()) {
-            return super.evaluateInFunc(evaluator, indices, i, stmts);
-        } else {
-            throw new ConstantEvaluationException();
-        }
-    }
+  @Override
+  public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
+	  int res = EVAL_CONT;
+	  while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
+		  res = getWhileStmts().evaluateList(evaluator);
+	  return (res == EVAL_BREAK) ? EVAL_CONT : res;
+  }
 
-    @Override
-    public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
-        int res = EVAL_CONT;
-        while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
-            res = getWhileStmts().evaluateList(evaluator);
-        return (res == EVAL_BREAK) ? EVAL_CONT : res;
-    }
+  
+  /**
+   * Addition of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.add(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
+  eq FRealType.add(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue() + v2.realValue());
+  eq FIntegerType.add(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue() + v2.intValue());
+  eq FStringType.add(CValue v1, CValue v2) = 
+	  new CValueString(v1.stringValue() + v2.stringValue());
 
-    
-    /**
-     * Addition of constant values.
-     * 
-     * @param v1 Constant value of left operand.
-     * @param v2 Constant value of right operand.
-     * @return Resulting constant value.
-     */
-    syn CValue FType.add(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
-    eq FRealType.add(CValue v1, CValue v2) = 
-        new CValueReal(v1.realValue() + v2.realValue());
-    eq FIntegerType.add(CValue v1, CValue v2) = 
-        new CValueInteger(v1.intValue() + v2.intValue());
-    eq FStringType.add(CValue v1, CValue v2) = 
-        new CValueString(v1.stringValue() + v2.stringValue());
+  /**
+   * Subtraction of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.sub(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
+  eq FRealType.sub(CValue v1, CValue v2) = 
+	  new CValueReal(v1.realValue() - v2.realValue());
+  eq FIntegerType.sub(CValue v1, CValue v2) = 
+	  new CValueInteger(v1.intValue() - v2.intValue());
 
-    /**
-     * Subtraction of constant values.
-     * 
-     * @param v1 Constant value of left operand.
-     * @param v2 Constant value of right operand.
-     * @return Resulting constant value.
-     */
-    syn CValue FType.sub(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
-    eq FRealType.sub(CValue v1, CValue v2) = 
-        new CValueReal(v1.realValue() - v2.realValue());
-    eq FIntegerType.sub(CValue v1, CValue v2) = 
-        new CValueInteger(v1.intValue() - v2.intValue());
-
-    /**
-     * Multiplication of constant values.
-     * 
-     * @param v1 Constant value of left operand.
-     * @param v2 Constant value of right operand.
-     * @return Resulting constant value.
-     */
-    syn CValue FType.mul(CValue v1, CValue v2) = 
-        CValue.UNKNOWN;
+  /**
+   * Multiplication of constant values.
+   * 
+   * @param v1 Constant value of left operand.
+   * @param v2 Constant value of right operand.
+   * @return Resulting constant value.
+   */
+  syn CValue FType.mul(CValue v1, CValue v2) = 
+	  CValue.UNKNOWN;
     eq FRealType.mul(CValue v1, CValue v2) {
         return new CValueReal(v1.realValue()*v2.realValue());
     }
@@ -4622,19 +4646,17 @@ aspect ArrayConstantEvaluation {
 }
 
 aspect LiteralExpressions {
-
-    syn boolean FExp.hasOnlyLiterals() {
-        for (FExp e : childFExps())
-            if (!e.hasOnlyLiterals())
-                return false;
-        return true;
-    }
-
-    eq FIdUseExp.hasOnlyLiterals()      = false;
-    eq FFunctionCall.hasOnlyLiterals()  = false;
-    eq FTimeExp.hasOnlyLiterals()       = false;
-    eq FEndExp.hasOnlyLiterals()        = !inFunction();
-
+	
+	syn boolean FExp.hasOnlyLiterals() {
+		for (FExp e : childFExps())
+			if (!e.hasOnlyLiterals())
+				return false;
+		return true;
+	}
+	
+	eq FIdUseExp.hasOnlyLiterals()      = false;
+	eq FFunctionCall.hasOnlyLiterals()  = false;
+	
 }
 
 aspect CircularExpressions {
@@ -4670,7 +4692,7 @@ aspect CircularExpressions {
     syn boolean FIdUse.isCircular(int dim)  = myFV().isCircular();
     eq FIdUseInstAccess.isCircular(int dim) = getInstAccess().myInstComponentDecl().isCircular(dim);
 
-	syn lazy boolean FForIndex.isCircular() circular [true] = getFExp().isCircular(); // TODO: test without when it works
+	syn lazy boolean FForIndex.isCircular() circular [true] = hasFExp() && getFExp().isCircular();
 
 	eq FSizeExp.isCircularCalc() { 
 		Size s = getFExp().size();
@@ -4721,18 +4743,15 @@ aspect CircularExpressions {
 		}
 	}
 
-    eq FIterExp.isCircularCalc() {
-        if (getFExp().isCircular()) 
-            return true;
-        for (CommonForIndex i : getForIndexList()) 
-            if (i.isCircular()) 
-                return true;
-        return false;
-    }
-
-    syn boolean CommonForIndex.isCircular() = getFExp().isCircular();
-    eq InstForIndexNoExp.isCircular()       = hasFExp() && getFExp().isCircular();
-
+	eq FIterExp.isCircularCalc() {
+		if (getFExp().isCircular()) 
+			return true;
+		for (CommonForIndex i : getForIndexList()) 
+			if (i.hasFExp() && i.getFExp().isCircular()) 
+				return true;
+		return false;
+	}
+	
 	eq InstFunctionCall.isCircularCalc() {
 		for (InstFunctionArgument a : getArgs())
 			if (a.isCircular())
