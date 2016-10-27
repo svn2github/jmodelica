@@ -34,8 +34,8 @@ def run_demo():
     
     """
     # Locate the model and file paths 
-    file_path = os.path.join(get_files_path(), "DrumBoiler.mop")
-    model_name = "DrumBoilerpackage.DrumBoiler"
+    file_path = os.path.join(get_files_path(), "DrumBoiler.mo")
+    modelPath = "DrumBoiler"
 
     # Load measurement data
     RCdata = get_test_data()
@@ -46,8 +46,10 @@ def run_demo():
     inputs['uc']= measurements.pop('uc')
     inputs['fc']= measurements.pop('fc')
 
+    # MLClasspath = "DrumBoilerpackage.DrumBoiler"
+    # modelPath = "DrumBoiler.mop"
     # Transfer model to Casadi interface
-    op = transfer_optimization_problem(model_name, file_path, accept_model = True)
+    op = transfer_optimization_problem(modelPath, file_path, accept_model=True )
     op_opts = op.optimize_options()
 
     # Create greybox object
