@@ -706,6 +706,7 @@ aspect ContentCheck {
         return getNumFAbstractEquation() == 0;
     }
     eq InstSimpleShortClassDecl.isOkPackage() = actualInstClass().isOkPackage();
+    eq InstLibNode.isOkPackage()              = actualInstClass().isOkPackage();
 
     /**
      * If this class is in an operator record or in a package in an operator record, find that operator record.

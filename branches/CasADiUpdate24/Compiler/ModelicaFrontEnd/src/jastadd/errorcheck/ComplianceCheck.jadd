@@ -239,26 +239,22 @@ aspect ComplianceCheck {
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
 
-    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX =
-            new SimpleErrorProducer("UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX", ProblemKind.COMPLIANCE, "Unknown size array as a for index is not supported in functions");
-
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION =
             new SimpleErrorProducer("UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION", ProblemKind.COMPLIANCE, "For index without in expression isn't supported");
 
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_FOR_INDEX =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_FOR_INDEX", ProblemKind.COMPLIANCE, "For index with higher than parameter variability is not supported in equations and algorithms");
-    
-    public void InstForIndex.complianceCheck(ErrorCheckType checkType) {
+
+    public void InstForIndexWithExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (hasFExp() && getFExp().size().isUnknown() && getFExp().isAccess() && inFunction()) {
-            UNSUPPORTED_IN_FUNCTION_UNKNOWN_SIZE_ARRAY_FOR_INDEX.invoke(this);
-        }
-        if (!hasFExp()) {
-            UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
-        }
-        if (hasFExp() && !getFExp().variability().parameterOrLess() && !inFunction()) {
+        if (!getFExp().variability().parameterOrLess() && !inFunction()) {
             UNSUPPORTED_NON_FIXED_FOR_INDEX.invoke(this);
         }
+    }
+
+    public void InstForIndexNoExp.complianceCheck(ErrorCheckType checkType) {
+        super.complianceCheck(checkType);
+        UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
     }
 
 	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
@@ -298,17 +294,18 @@ aspect ComplianceCheck {
 
     public void FStringExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
-        if (hasMinimumLength()) {
+        boolean func = inFunction();
+        if (!func && hasMinimumLength()) {
             getMinimumLength().markAsStructuralParameter(checkType);
             if (!getMinimumLength().variability().parameterOrLess())
                 UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getMinimumLength(), "minimumLength");
         }
-        if (hasLeftJustified()) {
+        if (!func && hasLeftJustified()) {
             getLeftJustified().markAsStructuralParameter(checkType);
            if (!getLeftJustified().variability().parameterOrLess())
                UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getLeftJustified(), "leftJustified");
         }
-        if (hasSignificantDigits()) {
+        if (!func && hasSignificantDigits()) {
             getSignificantDigits().markAsStructuralParameter(checkType);
             if (!getSignificantDigits().variability().parameterOrLess())
                 UNSUPPORTED_NON_FIXED_STRING_ARGUMENT.invoke(getSignificantDigits(), "significantDigits");

@@ -538,7 +538,7 @@ aspect PrettyPrint {
 	// For debugging
 	public void LibNode.prettyPrint(Printer p, CodeStream str, String indent) {
 		str.format("%s%structured library '%s' at '%s'\n", indent, 
-				(getStructured() ? "S" : "Uns"), getName(), getFileName());
+				(getStructured() ? "S" : "Uns"), name(), getFileName());
 	}
 
 	public void ComponentDecl.prettyPrint(Printer p, CodeStream str, String indent) {
@@ -1942,25 +1942,18 @@ aspect FlatPrettyPrint {
 		getFAbstractEquationList().prettyPrintWithFix(p, str, p.indent(indent), "", ";\n");
 		str.print(indent + "end for");
 	}
-	
-	public abstract void CommonForIndex.prettyPrint(Printer p, CodeStream str, String indent);
-	
-    public void FForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.print(getFVariable().name());
-        if (hasFExp()) {
-            str.print(" in ");
+
+    public void CommonForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
+        str.print(name());
+        str.print(" in ");
         p.print(getFExp(), str, indent);
-        }
     }
-	
-    public void InstForIndex.prettyPrint(Printer p, CodeStream str, String indent) {
+
+    @Override
+    public void InstForIndexNoExp.prettyPrint(Printer p, CodeStream str, String indent) {
         str.print(getInstPrimitive().name());
-        if (hasFExp()) {
-            str.print(" in ");
-        p.print(getFExp(), str, indent);
-        }
     }
-	
+
 	protected void FArray.prettyPrintExp(Printer p, CodeStream str, String indent) {
 		str.print("{");
 		getFExps().prettyPrintWithSep(p, str, indent, ", ");

@@ -1298,6 +1298,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myInputs() = actualInstClass().myInputs();
+     eq InstLibNode.myInputs()              = actualInstClass().myInputs();
      eq InstPartialFunction.myInputs()      = myInstClass().myInputs();
      
      /**
@@ -1321,6 +1322,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myNonInputs() = actualInstClass().myNonInputs();
+     eq InstLibNode.myNonInputs()              = actualInstClass().myNonInputs();
      
      /**
       * Returns a list of all InstComponentDecls declared as "output".
@@ -1343,6 +1345,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myOutputs() = actualInstClass().myOutputs();
+     eq InstLibNode.myOutputs()              = actualInstClass().myOutputs();
      eq InstPartialFunction.myOutputs()      = myInstClass().myOutputs();
      
      /**
@@ -1356,6 +1359,7 @@ aspect FlatFunctionUtils {
          return l;
      }
      eq InstSimpleShortClassDecl.myModifiableComponents() = actualInstClass().myModifiableComponents();
+     eq InstLibNode.myModifiableComponents()              = actualInstClass().myModifiableComponents();
      
      /**
       * May this component be altered by a modification?
@@ -1972,7 +1976,9 @@ aspect FlatExpressions {
     eq FExp.numFExp() {
         return super.numFExp() + 1;
     }
-    
+
+    public abstract FExp CommonForIndex.getFExp();
+
 }
 
 

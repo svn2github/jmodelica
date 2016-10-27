@@ -460,10 +460,12 @@ aspect Variability {
             total = getArray().iteratorFExp().next().variability();
         
         for (CommonForIndex ind : getForIndexList())
-            if (ind.hasFExp())
-                total = total.combine(ind.getFExp().variability());
+            total = total.combine(ind.variability());
         return total;
     }
+
+    syn FTypePrefixVariability CommonForIndex.variability() = getFExp().variability();
+    eq InstForIndexNoExp.variability()                      = fParameter();
 
     eq InstFunctionCall.expVariability() {
         FTypePrefixVariability total = fConstant();
@@ -508,8 +510,6 @@ aspect Variability {
             return (fContinuous());
         }
     }
-
-	syn FTypePrefixVariability FForIndex.variability() = hasFExp() ? getFExp().variability() : fParameter();
 
     syn FTypePrefixVariability FSubscript.variability() = fConstant();
 	eq FExpSubscript.variability() = getFExp().variability();

@@ -28,12 +28,13 @@ equation
 	x2 = true;
 	r1 = p1;
 	r2 = p1 + x1;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="VariabilityInference",
-			description="Tests if variability 
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="VariabilityInference",
+            description="Tests if variability 
 			inferred from equations is propagated to declarations",
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.VariabilityInference
  constant Real x1 = 1;
  constant Boolean x2 = true;
@@ -54,11 +55,11 @@ equation
 	x1 = 1 + 2 * 3 - 4 / 8 + 6 * 7 - 8 * 9;
 	x2 = true and false or true or false and true;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="SimplifyLitExps",
-			description="Tests if literal expressions are folded",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SimplifyLitExps",
+            description="Tests if literal expressions are folded",
+            flatModel="
 fclass VariabilityPropagationTests.SimplifyLitExps
  constant Real x1 = -23.5;
  constant Boolean x2 = true;
@@ -73,12 +74,13 @@ equation
 	x2 = x3 + x1;
 	x3 = x1;
 	x4 = x2;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantFolding1",
-			description="Tests if constant values inferred from equations are moved to equations and folded.",
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantFolding1",
+            description="Tests if constant values inferred from equations are moved to equations and folded.",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.ConstantFolding1
  constant Real x1 = 1;
  constant Real x2 = 2.0;
@@ -108,12 +110,12 @@ equation
 	end when;
 	
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantFolding2",
-			description="Tests folding of some more advanced expressions and some which shouldn't be folded.",
-			inline_functions="none",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantFolding2",
+            description="Tests folding of some more advanced expressions and some which shouldn't be folded.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.ConstantFolding2
  input Real i;
  Real x;
@@ -130,7 +132,7 @@ equation
 public
  function VariabilityPropagationTests.ConstantFolding2.f
   input Real ii;
-  input Real[:, :] i;
+  input Real[:,:] i;
   output Real o;
  algorithm
   o := i[1,1];
@@ -138,7 +140,6 @@ public
  end VariabilityPropagationTests.ConstantFolding2.f;
 
 end VariabilityPropagationTests.ConstantFolding2;
-			
 ")})));
 end ConstantFolding2;
 
@@ -185,11 +186,11 @@ equation
 	StringCompare("medium      ", String(enumVar, minimumLength=12));
 	StringCompare("      medium", String(enumVar, minimumLength=12, leftJustified=false));
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantFolding3",
-			description="Tests folding of string operator.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantFolding3",
+            description="Tests folding of string operator.",
+            flatModel="
 fclass VariabilityPropagationTests.ConstantFolding3
  constant Real realVar = 3.14;
  constant Integer intVar = 42;
@@ -225,12 +226,14 @@ public
  function VariabilityPropagationTests.ConstantFolding3.StringCompare
   input String expected;
   input String actual;
-algorithm
+ algorithm
   assert(actual == expected, \"Compare failed, expected: \" + expected + \", actual: \" + actual);
   return;
  end VariabilityPropagationTests.ConstantFolding3.StringCompare;
 
  type VariabilityPropagationTests.ConstantFolding3.E = enumeration(small, medium, large, xlarge);
+
+ type AssertionLevel = enumeration(error, warning);
 
 end VariabilityPropagationTests.ConstantFolding3;
 ")})));
@@ -244,11 +247,11 @@ equation
 		x = 1;
 	end when;
 	
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantFolding4",
-			description="Rewrite parameter pre expressions",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantFolding4",
+            description="Rewrite parameter pre expressions",
+            flatModel="
 fclass VariabilityPropagationTests.ConstantFolding4
  discrete Real x;
  parameter Real y;
@@ -260,7 +263,6 @@ parameter equation
 equation
  x = if temp_1 and not temp_1 then 1 else pre(x);
 end VariabilityPropagationTests.ConstantFolding4;
-			
 ")})));
 end ConstantFolding4;
 
@@ -269,12 +271,12 @@ model NoExp
 equation
 	x-0.1 = cos(x);
 	
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="NoExp",
-			description="Tests that an equation with a single 
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="NoExp",
+            description="Tests that an equation with a single 
 			variable but no solution is not changed.",
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.NoExp
  Real x(start = 0.5);
 equation
@@ -289,16 +291,16 @@ model Output
 equation
 	x = 5;
 	
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Output",
-			description="This tests that we do not propagate variability to output variables",
-			inline_functions="none",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Output",
+            description="This tests that we do not propagate variability to output variables",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.Output
-  output Real x;
+ output Real x;
 equation
-  x = 5;
+ x = 5;
 end VariabilityPropagationTests.Output;
 ")})));
 end Output;
@@ -320,11 +322,11 @@ equation
 	(a,b) = f();
 	
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Output2",
-			description="This tests that we do not propagate variability to output variables",
-			inline_functions="none",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="Output2",
+            description="This tests that we do not propagate variability to output variables",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.Output2
  output Real a;
  constant Real b = 2;
@@ -357,12 +359,13 @@ equation
     der(x4) = 3;
     x5 = der(x6);
     x6 = p1 + 1;
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Der1",
-			description="Tests some propagation to and through derivative expressions.",
+        TransformCanonicalTestCase(
+            name="Der1",
+            description="Tests some propagation to and through derivative expressions.",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.Der1
  constant Real x1 = 3;
  constant Real x2 = 0.0;
@@ -379,7 +382,6 @@ equation
  x3 = der(x4);
  der(x4) = 3;
 end VariabilityPropagationTests.Der1;
-			
 ")})));
 end Der1;
 
@@ -390,11 +392,12 @@ equation
 	z = time;
 	y = x * der(z) + 1;
 	x = 0;
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="Der2",
-			description="Test removal of der var",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="Der2",
+            description="Test removal of der var",
+            flatModel="
 fclass VariabilityPropagationTests.Der2
  constant Real x = 0;
  constant Real y = 1.0;
@@ -414,23 +417,23 @@ equation
 		x1 = x2 + 1;
 	end when;
 	x2 = 3;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEq1",
-			description="Tests that folding occurs, but not propagation, in when equations.",
-			flatModel="
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEq1",
+            description="Tests that folding occurs, but not propagation, in when equations.",
+            flatModel="
 fclass VariabilityPropagationTests.WhenEq1
  discrete Real x1;
  constant Real x2 = 3;
  discrete Boolean temp_1;
-initial equation
+initial equation 
  pre(x1) = 0.0;
  pre(temp_1) = false;
 equation
  temp_1 = time > 3;
  x1 = if temp_1 and not pre(temp_1) then 4.0 else pre(x1);
 end VariabilityPropagationTests.WhenEq1;
-			
 ")})));
 end WhenEq1;
 
@@ -447,12 +450,13 @@ equation
 		x1 = x2 - 1;		
 	end if;
 	x2 = 3;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEq1",
-			description="Tests if-expressions",
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEq1",
+            description="Tests if-expressions",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.IfEq1
  constant Real p1 = 4;
  constant Real x1 = 3.0;
@@ -479,12 +483,13 @@ equation
 		x2 = 4;
 	end if;
 	x4 = 3;
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEq2",
-			description="Tests if-expressions",
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEq2",
+            description="Tests if-expressions",
             eliminate_alias_variables=false,
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.IfEq2
  constant Real c1 = 4;
  parameter Real p1 = 1 /* 1 */;
@@ -495,7 +500,6 @@ fclass VariabilityPropagationTests.IfEq2
 parameter equation
  x2 = p1 + 2;
 end VariabilityPropagationTests.IfEq2;
-			
 ")})));
 end IfEq2;
 
@@ -509,11 +513,12 @@ model FunctionCall1
     end f;
 equation
     c_out = f() * 5.0;
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCall1",
-			description="Tests a constant function call with no parameters.",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="FunctionCall1",
+            description="Tests a constant function call with no parameters.",
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCall1
  constant Real c_out = 5.0;
 end VariabilityPropagationTests.FunctionCall1;
@@ -546,12 +551,13 @@ equation
     (x3,x4) = f(p);
     x5 = 5;
     (x6,x7) = e(1);
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCallEquation1",
-			description="Tests that variability is propagated through function call equations with multiple destinations.",
-			inline_functions="none",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation1",
+            description="Tests that variability is propagated through function call equations with multiple destinations.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation1
  constant Real x1 = 5.0;
  constant Real x2 = 10.0;
@@ -584,7 +590,7 @@ public
   external \"C\" e(i1, o1, o2);
   return;
  end VariabilityPropagationTests.FunctionCallEquation1.e;
- 
+
 end VariabilityPropagationTests.FunctionCallEquation1;
 ")})));
 end FunctionCallEquation1;
@@ -612,12 +618,13 @@ equation
     (z1) = f(1);
     (z2) = f(p);
     (z3) = e(1);
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCallEquation2",
-			description="Tests that variability is propagated through function call equations with array destinations.",
-			inline_functions="none",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation2",
+            description="Tests that variability is propagated through function call equations with array destinations.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation2
  constant Real z1[1] = 1;
  constant Real z1[2] = 2.0;
@@ -649,7 +656,7 @@ public
   external \"C\" e(i1, c, size(c, 1));
   return;
  end VariabilityPropagationTests.FunctionCallEquation2.e;
- 
+
 end VariabilityPropagationTests.FunctionCallEquation2;
 ")})));
 end FunctionCallEquation2;
@@ -676,12 +683,13 @@ model FunctionCallEquation3
 equation
     (a, ) = f(3);
     (b, ) = f(p);
+
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCallEquation3",
-			description="Tests that variability is propagated through function call equations with record destinations.",
-			inline_functions="none",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation3",
+            description="Tests that variability is propagated through function call equations with record destinations.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation3
  constant Real a.a = 3;
  constant Real a.b = 6.0;
@@ -722,15 +730,13 @@ equation
 	a = {{1,2},{3,4}};
 	
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCallEquation4",
-			description="
-Tests that parameters in function call equations are folded. 
-Also tests that when it is constant and can't evaluate, variability is propagated as parameter.
-",
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation4",
+            description="Tests that parameters in function call equations are folded. 
+Also tests that when it is constant and can't evaluate, variability is propagated as parameter.",
             eliminate_alias_variables=false,
             inline_functions="none",
-			flatModel="
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation4
  constant Real a[1,1] = 1;
  constant Real a[1,2] = 2;
@@ -785,6 +791,8 @@ no or infinitely many solutions (A is singular).\");
   return;
  end Modelica.Math.Matrices.LAPACK.dgesv_vec;
 
+ type AssertionLevel = enumeration(error, warning);
+
 end VariabilityPropagationTests.FunctionCallEquation4;
 ")})));
 end FunctionCallEquation4;
@@ -804,11 +812,11 @@ model FunctionCallEquation5
 	Real x1[2,2] = f(a,a);
 	
     annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="FunctionCallEquation5",
-			description="Tests evaluation of matrix multiplication in function.",
-			inline_functions="none",
-			flatModel="
+        TransformCanonicalTestCase(
+            name="FunctionCallEquation5",
+            description="Tests evaluation of matrix multiplication in function.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.FunctionCallEquation5
  constant Real a[1,1] = 1;
  constant Real a[1,2] = 2;
@@ -872,6 +880,7 @@ algorithm
     y := x;
 equation
     x = p;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Algorithm3",
@@ -897,6 +906,7 @@ model Algorithm4
 algorithm
     x := p;
     y := x;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="Algorithm4",
@@ -922,9 +932,10 @@ model Algorithm5
 algorithm
     x := p;
     y := x;
+
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
-            name="Algorithm",
+            name="Algorithm5",
             description="Parameter algorithm code generation",
             template="
 $C_set_start_values$
@@ -933,21 +944,31 @@ $C_DAE_initial_dependent_parameter_assignments$
             generatedCode="
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _p_0 = (0.0);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
+
+int jmi_set_start_values_0_0(jmi_t* jmi);
+
 
 int jmi_set_start_values_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef |= jmi_set_start_values_0_0(jmi);
     model_init_eval_parameters(jmi);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 
+
 int model_init_eval_parameters_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     _x_1 = _p_0;
     _y_2 = _x_1;
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -1227,6 +1248,7 @@ end FunctionCallEquationPartial7;
             y[2] := x2;
         end f;
         Real[2] y = f(2,time);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite1",
@@ -1269,6 +1291,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite1;
             y.b := x2;
         end f;
         R y = f(2,time);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite2",
@@ -1298,7 +1321,6 @@ public
  end VariabilityPropagationTests.PartiallyKnownComposite2.R;
 
 end VariabilityPropagationTests.PartiallyKnownComposite2;
-
 ")})));
     end PartiallyKnownComposite2;
     
@@ -1313,6 +1335,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite2;
         end f;
         parameter Real p = 2;
         Real[2] y = f(2,p);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite3",
@@ -1357,6 +1380,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite3;
         end f;
         parameter Real p = 2;
         R y = f(2,p);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite4",
@@ -1404,6 +1428,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite4;
         z[1:3] = y[2:4] .+ 1;
         y = f(4,z);
         z[4] = 3.14;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite5",
@@ -1433,6 +1458,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite5;
             y := x;
         end f;
         Real[2] y = f({1,1-time}, 3);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite6",
@@ -1475,6 +1501,7 @@ end VariabilityPropagationTests.PartiallyKnownComposite6;
             y := x;
         end f;
         R y = f(R(1,1-time), 3);
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite7",
@@ -1526,18 +1553,19 @@ end VariabilityPropagationTests.PartiallyKnownComposite7;
         R1 r;
       equation
         r = f(1,time);
+
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="PartiallyKnownComposite8",
             description="Test cleanup of record/array outputs",
             inline_functions="none",
             eliminate_alias_constants=false,
-            template="
-$C_ode_derivatives$
-",
+            template="$C_ode_derivatives$",
             generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R1_1_r, tmp_1)
     JMI_RECORD_STATIC(R2_0_r, tmp_2)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 2, 1)
@@ -1546,6 +1574,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     tmp_1->r2 = tmp_2;
     func_VariabilityPropagationTests_PartiallyKnownComposite8_f_def0(AD_WRAP_LITERAL(1), _time, tmp_1);
     _r_y2_2 = (tmp_1->y2);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -1572,6 +1601,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         Real x,y;
     equation
         (x,y) = f2(f1(3,time,time));
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite9",
@@ -1625,20 +1655,22 @@ end VariabilityPropagationTests.PartiallyKnownComposite9;
         end f2;
         
         Real[:] x = f2(f1(time));
+
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="PartiallyKnownComposite10",
             description="Test cleanup of record/array outputs",
-            template="
-$C_ode_derivatives$
-",
+            template="$C_ode_derivatives$",
             generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2)
     JMI_ARRAY_INIT_2(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 2, 2, 2)
     func_VariabilityPropagationTests_PartiallyKnownComposite10_f1_def0(_time, tmp_1);
     memcpy(&_x_1_0, &jmi_array_val_2(tmp_1, 1,1), 2 * sizeof(jmi_real_t));
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -1661,22 +1693,24 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     R r;
   equation
     r = f(time, 3);
+
     annotation(__JModelica(UnitTesting(tests={
         CCodeGenTestCase(
             name="PartiallyKnownComposite11",
             description="Test cleanup of record/array outputs",
-            template="
-$C_ode_derivatives$
-",
+            template="$C_ode_derivatives$",
             generatedCode="
+
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_RECORD_STATIC(R_0_r, tmp_1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
     tmp_1->z = tmp_2;
     func_VariabilityPropagationTests_PartiallyKnownComposite11_f_def0(_time, AD_WRAP_LITERAL(3), tmp_1);
     _r_x_0 = (tmp_1->x);
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));
@@ -1702,6 +1736,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     equation
         (y1,y2) = f(1,y3);
         y3 = 3;
+
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="PartiallyKnownComposite12",
@@ -1747,11 +1782,11 @@ model ConstantRecord1
 
 	A c = A({1, 2, 3}, 4);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantRecord1",
-			description="Tests propagation of a constant record.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantRecord1",
+            description="Tests propagation of a constant record.",
+            flatModel="
 fclass VariabilityPropagationTests.ConstantRecord1
  constant Real c.a[1] = 1;
  constant Real c.a[2] = 2;
@@ -1770,19 +1805,19 @@ model ConstantStartFunc1
 	
 	Real x[2](start = f()) = {3,4};
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ConstantStartFunc1",
-			description="Tests that a constant right hand in a function call equation is not folded. It should only be propagated.",
-			inline_functions="none",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantStartFunc1",
+            description="Tests that a constant right hand in a function call equation is not folded. It should only be propagated.",
+            inline_functions="none",
+            flatModel="
 fclass VariabilityPropagationTests.ConstantStartFunc1
  constant Real x[1](start = temp_1[1]) = 3;
  constant Real x[2](start = temp_1[2]) = 4;
  parameter Real temp_1[1];
  parameter Real temp_1[2];
 parameter equation
- ({temp_1[1],temp_1[2]}) = VariabilityPropagationTests.ConstantStartFunc1.f();
+ ({temp_1[1], temp_1[2]}) = VariabilityPropagationTests.ConstantStartFunc1.f();
 
 public
  function VariabilityPropagationTests.ConstantStartFunc1.f
@@ -1804,11 +1839,11 @@ model InitialEquation1
 initial equation
     pre(b) = false;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InitialEquation1",
-			description="Tests that corresponding initial equations are removed",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquation1",
+            description="Tests that corresponding initial equations are removed",
+            flatModel="
 fclass VariabilityPropagationTests.InitialEquation1
  parameter Boolean c = false /* false */;
  parameter Boolean b;
@@ -1826,11 +1861,11 @@ equation
 	x = y + 1;
 	y = p1 + 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="InitialEquation2",
-			description="Check fixed=true",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="InitialEquation2",
+            description="Check fixed=true",
+            flatModel="
 fclass VariabilityPropagationTests.InitialEquation2
  parameter Real y;
  parameter Real x(fixed = true,start = 3.14);
@@ -1839,7 +1874,6 @@ parameter equation
  y = p1 + 1;
  x = y + 1;
 end VariabilityPropagationTests.InitialEquation2;
-			
 ")})));
 end InitialEquation2;
 
@@ -2221,6 +2255,8 @@ public
   return;
  end VariabilityPropagationTests.EvalFail1.f;
 
+ type AssertionLevel = enumeration(error, warning);
+
 end VariabilityPropagationTests.EvalFail1;
 ")})));
 end EvalFail1;
@@ -2252,6 +2288,8 @@ public
   assert(false, \"nope\");
   return;
  end VariabilityPropagationTests.EvalFail2.f;
+
+ type AssertionLevel = enumeration(error, warning);
 
 end VariabilityPropagationTests.EvalFail2;
 ")})));

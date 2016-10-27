@@ -199,13 +199,6 @@ my_fmu = compile_fmu(model_name, mo_file, target='cs')
         </listitem>
 
         <listitem>
-          <para>Setting the <code>'extra_lib_dirs'</code> compiler option to
-          the path to the directory containing the library directory. This is
-          equivalent to adding it to the <code>MODELICAPATH</code>, but only
-          for that compilation.</para>
-        </listitem>
-
-        <listitem>
           <para>Giving the path to the library directory in the
           <code>file_name</code> argument of the compilation function. This
           allows adding a specific library to the search list (as opposed to
@@ -228,10 +221,7 @@ from pymodelica import compile_fmu
 fmu1 = compile_fmu('Modelica.Mechanics.Rotational.Examples.First')
 
 # Compile a model from the library MyLibrary, located in C:\MyLibs
-fmu2 = compile_fmu('MyLibrary.MyModel', compiler_options = {'extra_lib_dirs':'C:/MyLibs'})
-
-# The same as the last command, if no other libraries in C:\MyLibs are needed
-fmu3 = compile_fmu('MyLibrary.MyModel', 'C:/MyLibs/MyLibrary')
+fmu2 = compile_fmu('MyLibrary.MyModel', 'C:/MyLibs/MyLibrary')
 </programlisting>
     </section>
 
@@ -274,15 +264,6 @@ The different scenarios are:
       compiler will be selected based on model file ending, i.e.
       ModelicaCompiler if a .mo file and OptimicaCompiler if a .mop file is
       found in file_name list.
-
-Library directories can be added to MODELICAPATH by listing them in a
-special compiler option 'extra_lib_dirs', for example:
-
-    compiler_options =
-        {'extra_lib_dirs':['c:\MyLibs1','c:\MyLibs2']}
-
-Other options for the compiler should also be listed in the compiler_options
-dict.
 
 The compiler target is 'me' by default which means that the shared
 file contains the FMI for Model Exchange API. Setting this parameter to

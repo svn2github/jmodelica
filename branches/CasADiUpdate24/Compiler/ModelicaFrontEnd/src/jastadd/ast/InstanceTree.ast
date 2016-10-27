@@ -42,6 +42,7 @@ InstProgramRoot : InstRoot ::= <Program:Program>
 
 abstract InstClassDecl: InstBaseNode ::= <ClassDecl:ClassDecl> /[ClassAnnotation:InstClassModification]/ /FunctionType:FType/;
 abstract InstBaseClassDecl : InstClassDecl ::= [InstConstrainingClass] InstRestriction;
+InstLibNode              : InstClassDecl ::= /ActualInstClass:InstClassDecl/;
 InstFullClassDecl        : InstBaseClassDecl ::= [InstExternal];
 InstExtendClassDecl      : InstFullClassDecl;
 abstract InstAbstractShortClassDecl : InstBaseClassDecl;
@@ -51,7 +52,7 @@ InstPrimitiveClassDecl   : InstFullClassDecl;
 InstEnumClassDecl        : InstPrimitiveClassDecl;
 InstBuiltInClassDecl     : InstClassDecl;
 UnknownInstClassDecl     : InstFullClassDecl;
-BadInstClassDecl         : InstFullClassDecl;
+BadInstClassDecl         : InstClassDecl;
 
 InstReplacingFullClassDecl        : InstFullClassDecl  ::= 
                                      <OriginalClassDecl:ClassDecl> 
@@ -164,7 +165,9 @@ InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;
 InstGlobalAccess          : InstAccess ::= InstAccess;
 
-InstForIndex : CommonForIndex ::= InstPrimitive;
+abstract InstForIndex : CommonForIndex ::= InstPrimitive;
+InstForIndexWithExp : InstForIndex ::= FExp;
+InstForIndexNoExp   : InstForIndex ::= /[FExp]/;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;

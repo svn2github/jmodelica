@@ -1,9 +1,39 @@
 package org.jmodelica.api.problemHandling;
 
-public enum ProblemKind { 
-    OTHER(2), LEXICAL("Syntax", 1), SYNTACTIC("Syntax", 1), SEMANTIC(2), COMPLIANCE("Compliance", 2);
+/**
+ * A class representing a {@link Problem}'s kind.
+ */
+public enum ProblemKind {
+    /**
+     * Represents any kind not specified by the other kinds.
+     */
+    OTHER(2),
+
+    /**
+     * Represents lexical problems.
+     */
+    LEXICAL("Syntax", 1),
+
+    /**
+     * Represents syntactical problems.
+     */
+    SYNTACTIC("Syntax", 1),
+
+    /**
+     * Represents semantical problems.
+     */
+    SEMANTIC(2),
+
+    /**
+     * Represents compliance problems.
+     */
+    COMPLIANCE("Compliance", 2);
 
     private String desc = null;
+
+    /**
+     * Represents the order of the problem kind (1 or 2).
+     */
     public final int order;
 
     private ProblemKind(int order) {
@@ -15,6 +45,15 @@ public enum ProblemKind {
         this.order = order;
     }
 
+    /**
+     * Writes the problem severity and kind to a message {@code StringBuilder}.
+     * 
+     * @param sb
+     *            The string builder which to add the severity and kind
+     *            information to.
+     * @param sev
+     *            The problem severity.
+     */
     public void writeKindAndSeverity(StringBuilder sb, ProblemSeverity sev) {
         String s = sev.toString().toLowerCase();
         if (desc != null) {

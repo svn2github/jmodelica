@@ -2785,6 +2785,10 @@ initial equation
  algorithm
   assert(p, \"p should not be false\");
 ;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.InitialEqTest18;
 ")})));
 end InitialEqTest18;
@@ -2803,6 +2807,10 @@ fclass TransformCanonicalTests.InitialEqTest19
  parameter Boolean p = true /* true */;
 initial equation 
  assert(p, \"p should not be false\");
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.InitialEqTest19;
 ")})));
 end InitialEqTest19;
@@ -6028,15 +6036,15 @@ equation
 w[1] := time
 
 --- Solved function call equation ---
-({temp_6, temp_7}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
-  Assigned variables: temp_6
-                      temp_7
+({temp_8, temp_9}) = TransformCanonicalTests.BlockTest10.F({w[1], 2.0})
+  Assigned variables: temp_8
+                      temp_9
 
 --- Solved equation ---
-z[1] := - temp_6
+z[1] := - temp_8
 
 --- Solved equation ---
-z[2] := - temp_7
+z[2] := - temp_9
 -------------------------------
 ")})));
 end BlockTest10;
@@ -7195,6 +7203,10 @@ fclass TransformCanonicalTests.AssertEval1
  Real x;
 equation
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.AssertEval1;
 ")})));
 end AssertEval1;
@@ -7242,6 +7254,10 @@ initial equation
 equation
  temp_1 = time > 1;
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end TransformCanonicalTests.AssertEval3;
 ")})));
 end AssertEval3;
@@ -7280,6 +7296,9 @@ equation
   end if;
  end if;
  x = time;
+
+public
+ type AssertionLevel = enumeration(error, warning);
 end TransformCanonicalTests.AssertEval4;
 ")})));
 end AssertEval4;
@@ -7767,15 +7786,12 @@ equation
 fclass TransformCanonicalTests.Sample2
  discrete Real x;
  discrete Boolean temp_1;
- discrete Boolean temp_2;
 initial equation 
  pre(x) = 0.0;
  pre(temp_1) = false;
- pre(temp_2) = false;
 equation
- temp_1 = temp_2 and time < 20;
+ temp_1 = sample(0, 1) and time < 20;
  x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
- temp_2 = sample(0, 1);
 end TransformCanonicalTests.Sample2;
 ")})));
 end Sample2;
@@ -8061,5 +8077,271 @@ equation
 end TransformCanonicalTests.ScalarizeIfInLoop4;
 ")})));
 end ScalarizeIfInLoop4;
+
+
+model ForOfUnknownSize1
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize1",
+            description="Scalarization of for loop over unknown size array: array variable",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize1
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize1.f({y[1], y[2], y[3], y[4]});
+ y[1] = time;
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize1.f
+  input Real[:] y;
+  output Real x;
+ algorithm
+  x := 0;
+  for v in y loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize1.f;
+
+end TransformCanonicalTests.ForOfUnknownSize1;
+")})));
+end ForOfUnknownSize1;
+
+
+model ForOfUnknownSize2
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in 1:n loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize2",
+            description="Scalarization of for loop over unknown size array: range exp",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize2
+ discrete Integer n;
+ Real x;
+initial equation 
+ pre(n) = 0;
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize2.f(n);
+ n = if time < pre(n) or time >= pre(n) + 1 or initial() then integer(time) else pre(n);
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize2.f
+  input Integer n;
+  output Real x;
+ algorithm
+  x := 0;
+  for i in 1:n loop
+   x := x + i;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize2.f;
+
+end TransformCanonicalTests.ForOfUnknownSize2;
+")})));
+end ForOfUnknownSize2;
+
+
+model ForOfUnknownSize3
+    function f
+        input Integer n;
+        output Real x;
+    algorithm
+        x := 0;
+        for i in (1:n).^2 loop
+            x := x + i;
+        end for;
+    end f;
+    
+    Integer n = integer(time);
+    Real x = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize3",
+            description="Scalarization of for loop over unknown size array: general array exp",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize3
+ discrete Integer n;
+ Real x;
+initial equation 
+ pre(n) = 0;
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize3.f(n);
+ n = if time < pre(n) or time >= pre(n) + 1 or initial() then integer(time) else pre(n);
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize3.f
+  input Integer n;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[max(n, 0)];
+  for i1 in 1:max(n, 0) loop
+   temp_1[i1] := i1 .^ 2;
+  end for;
+  for i in temp_1 loop
+   x := x + i;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize3.f;
+
+end TransformCanonicalTests.ForOfUnknownSize3;
+")})));
+end ForOfUnknownSize3;
+
+
+model ForOfUnknownSize4
+    function f
+        input Real[:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y[2:end] loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize4",
+            description="Scalarization of for loop over unknown size array: slice",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize4
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1];
+ Real y[2];
+ Real y[3];
+ Real y[4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize4.f({y[1], y[2], y[3], y[4]});
+ y[1] = time;
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize4.f
+  input Real[:] y;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[max(integer(size(y, 1) - 2) + 1, 0)];
+  for i1 in 1:max(integer(size(y, 1) - 2) + 1, 0) loop
+   temp_1[i1] := y[2 + (i1 - 1)];
+  end for;
+  for v in temp_1 loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize4.f;
+
+end TransformCanonicalTests.ForOfUnknownSize4;
+")})));
+end ForOfUnknownSize4;
+
+
+model ForOfUnknownSize5
+    function f
+        input Real[2,:] y;
+        output Real x;
+    algorithm
+        x := 0;
+        for v in y[2,:] loop
+            x := x + v;
+        end for;
+    end f;
+    
+    parameter Integer n = 4;
+    Real x = f(y);
+    Real y[2,n] = {1:n, 2:n+1} * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForOfUnknownSize5",
+            description="Scalarization of for loop over unknown size array: select one row from matrix",
+            flatModel="
+fclass TransformCanonicalTests.ForOfUnknownSize5
+ structural parameter Integer n = 4 /* 4 */;
+ Real x;
+ Real y[1,1];
+ Real y[1,2];
+ Real y[1,3];
+ Real y[1,4];
+ Real y[2,1];
+ Real y[2,2];
+ Real y[2,3];
+ Real y[2,4];
+equation
+ x = TransformCanonicalTests.ForOfUnknownSize5.f({{y[1,1], y[1,2], y[1,3], y[1,4]}, {y[2,1], y[2,2], y[2,3], y[2,4]}});
+ y[1,1] = time;
+ y[1,2] = 2 * time;
+ y[1,3] = 3 * time;
+ y[1,4] = 4 * time;
+ y[2,1] = 2 * time;
+ y[2,2] = 3 * time;
+ y[2,3] = 4 * time;
+ y[2,4] = 5 * time;
+
+public
+ function TransformCanonicalTests.ForOfUnknownSize5.f
+  input Real[:,:] y;
+  output Real x;
+  Real[:] temp_1;
+ algorithm
+  x := 0;
+  init temp_1 as Real[size(y, 2)];
+  for i1 in 1:size(y, 2) loop
+   temp_1[i1] := y[2,i1];
+  end for;
+  for v in temp_1 loop
+   x := x + v;
+  end for;
+  return;
+ end TransformCanonicalTests.ForOfUnknownSize5.f;
+
+end TransformCanonicalTests.ForOfUnknownSize5;
+")})));
+end ForOfUnknownSize5;
 
 end TransformCanonicalTests;

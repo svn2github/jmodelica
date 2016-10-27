@@ -1744,28 +1744,28 @@ end FunctionInlining.IfStatementInline6;
         Real v = 3;
         Real z = f(v);
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="ForStatementInline1",
-			description="",
-			variability_propagation=false,
-			inline_functions="all",
-			eliminate_alias_variables=false,
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ForStatementInline1",
+            description="",
+            variability_propagation=false,
+            inline_functions="all",
+            eliminate_alias_variables=false,
+            flatModel="
 fclass FunctionInlining.ForStatementInline1
  Real v;
  Real z;
- Real temp_1;
- Real temp_5;
- Real temp_7;
- Real temp_9;
+ Real temp_2;
+ Real temp_10;
+ Real temp_12;
+ Real temp_14;
 equation
  v = 3;
- z = 1 + temp_5 * temp_5 + temp_7 * temp_7 + temp_9 * temp_9;
- temp_1 = v;
- temp_5 = 1 + (temp_1 - 1) / 3;
- temp_7 = 1 + 2 * ((temp_1 - 1) / 3);
- temp_9 = 1 + 3 * ((temp_1 - 1) / 3);
+ z = 1 + temp_10 * temp_10 + temp_12 * temp_12 + temp_14 * temp_14;
+ temp_2 = v;
+ temp_10 = 1 + (temp_2 - 1) / 3;
+ temp_12 = 1 + 2 * ((temp_2 - 1) / 3);
+ temp_14 = 1 + 3 * ((temp_2 - 1) / 3);
 end FunctionInlining.ForStatementInline1;
 ")})));
     end ForStatementInline1;
@@ -3882,6 +3882,10 @@ equation
  z = 2 / (temp_1 - 5);
  temp_1 = time;
  assert(noEvent(temp_1 < 5), \"Bad x: \" + String(temp_1));
+
+public
+ type AssertionLevel = enumeration(error, warning);
+
 end FunctionInlining.AssertInline1;
 ")})));
 end AssertInline1;
@@ -4580,6 +4584,41 @@ end FunctionInlining.ChainedCallInlining12;
 ")})));
 end ChainedCallInlining12;
 
+model ChainedCallInlining13
+    record R
+        Real[2] x;
+    end R;
+    
+    function f1
+        input Real[:] x;
+        output R r = if size(x,1) >= 2 then R(x[1:2]) else R(cat(1,x,{1}));
+    algorithm
+        annotation(Inline=true);
+    end f1;
+    
+    function f2
+        input R r;
+        output Real y = sum(r.x);
+        algorithm
+        annotation(Inline=true);
+    end f2;
+    
+    parameter R r = f1({1,2});
+    parameter Real y = f2(f1({1}));
+    
+  annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ChainedCallInlining13",
+            description="Test bug in #5165",
+            flatModel="
+fclass FunctionInlining.ChainedCallInlining13
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
+ parameter Real y = 2 /* 2 */;
+end FunctionInlining.ChainedCallInlining13;
+")})));
+end ChainedCallInlining13;
+
 
 model InputAsIndex1
     function f
@@ -4726,5 +4765,61 @@ equation
 end FunctionInlining.InputAsIndex4;
 ")})));
 end InputAsIndex4;
+
+
+model SizeParam1
+    function f
+      input Integer m;
+      output Real y[m];
+      constant Real pi = 3.1415;
+    algorithm
+      if mod(m, 2) == 0 then
+        if m == 2 then
+          y[1] := 0;
+          y[2] := pi/2;
+        else
+          y[1:integer(m/2)] := f(integer(m/2));
+          y[integer(m/2) + 1:m] := f(integer(m/2)) - fill(pi/m, integer(m/2));
+        end if;
+      else
+        y := {(k - 1)*2*pi/m for k in 1:m};
+      end if;
+    end f;
+
+    function g
+        input Real x[:];
+        output Real y[2];
+    protected 
+        parameter Integer m=size(x, 1);
+        parameter Real phi[m] = f(m);
+        parameter Real z[2, m] = 2 / m * {cos(phi), sin(phi)};
+    algorithm 
+        y := z * x;
+        annotation (Inline=true);
+    end g;
+
+    Real x[3] = (1:3) * time;
+    Real y[2] = g(x);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="SizeParam1",
+            description="Check that function inliner handles sizes that depend on local variables correctly",
+            flatModel="
+fclass FunctionInlining.SizeParam1
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real y[1];
+ Real y[2];
+equation
+ x[1] = time;
+ x[2] = 2 * time;
+ x[3] = 3 * time;
+ y[1] = 0.6666666666666666 * x[1] + -0.33329767031411434 * x[2] + -0.33340465555621845 * x[3];
+ y[2] = 0.5773708577748173 * x[2] + -0.5773090854108254 * x[3];
+end FunctionInlining.SizeParam1;
+")})));
+end SizeParam1;
 
 end FunctionInlining;

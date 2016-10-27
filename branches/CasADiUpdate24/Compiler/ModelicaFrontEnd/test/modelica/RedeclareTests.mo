@@ -4675,6 +4675,43 @@ end RedeclareTests.RedeclareTest76;
 end RedeclareTest76;
 
 
+model RedeclareTest77
+    record R1
+        constant Real x = 1;
+	end R1;
+    
+    record R2
+        constant Real x = 2;
+        constant Real y = 3;
+	end R2;
+    
+    model A
+        replaceable record R = R1;
+        R r;
+	end A;
+    
+    A a(redeclare record R = R2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RedeclareTest77",
+            description="Check that automatically generated binding expressions for records of redeclared types use the correct name",
+            flatModel="
+fclass RedeclareTests.RedeclareTest77
+ constant RedeclareTests.RedeclareTest77.a.R a.r = RedeclareTests.RedeclareTest77.a.R(2, 3);
+
+public
+ record RedeclareTests.RedeclareTest77.a.R
+  constant Real x;
+  constant Real y;
+ end RedeclareTests.RedeclareTest77.a.R;
+
+end RedeclareTests.RedeclareTest77;
+")})));
+end RedeclareTest77;
+
+
+
 model RedeclareElement1
   model A
     replaceable model B

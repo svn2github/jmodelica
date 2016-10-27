@@ -3262,6 +3262,61 @@ end RecordTests.RecordConstructor34;
 ")})));
 end RecordConstructor34;
 
+model RecordConstructor35
+    record R1
+        parameter Real x1;
+        parameter Real x2;
+    end R1;
+    
+    record R2
+        extends R1(x2=2);
+    end R2;
+    
+    record R3
+        parameter R2[:] r2 = {R2(x1=-1)};
+    end R3;
+    
+    R3 r3;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor35",
+            description="",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordConstructor35
+ parameter Real r3.r2[1].x1 = -1 /* -1 */;
+ parameter Real r3.r2[1].x2 = 2 /* 2 */;
+end RecordTests.RecordConstructor35;
+")})));
+end RecordConstructor35;
+
+model RecordConstructor36
+    record R1
+        Real x;
+    end R1;
+    
+    model M
+        R1 r1;
+    end M;
+    
+    M[2] m(r1={R1(i+time) for i in 1:2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor36",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor36
+ Real m[1].r1.x;
+ Real m[2].r1.x;
+equation
+ m[1].r1.x = 1 + time;
+ m[2].r1.x = 2 + time;
+end RecordTests.RecordConstructor36;
+")})));
+end RecordConstructor36;
+
 model RecordScalarize1
  record A
   Real a;
@@ -7512,6 +7567,49 @@ end RecordTests.RecordEval7;
 ")})));
 end RecordEval7;
 
+model RecordEval8
+    record R2
+        function f1
+            Real t = 0;
+            output Real x = t;
+            algorithm
+        end f1;
+        function f2
+            extends f1;
+        end f2;
+        constant Real x = f2();
+    end R2;
+    
+    record R3
+        extends R2;
+    end R3;
+    
+    R3 r3;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordEval8",
+            description="Test bug in #5153",
+            flatModel="
+fclass RecordTests.RecordEval8
+ constant RecordTests.RecordEval8.R3 r3 = RecordTests.RecordEval8.R3(0);
+
+public
+ function RecordTests.RecordEval8.r3.f2
+  Real t;
+  output Real x;
+ algorithm
+  t := 0;
+  x := t;
+  return;
+ end RecordTests.RecordEval8.r3.f2;
+
+ record RecordTests.RecordEval8.R3
+  constant Real x;
+ end RecordTests.RecordEval8.R3;
+
+end RecordTests.RecordEval8;
+")})));
+end RecordEval8;
 
 model RecordModification1
   record R

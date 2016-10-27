@@ -33,6 +33,7 @@ import org.jmodelica.util.problemHandling.WarningFilteredProblem;
 public class Problem implements Comparable<Problem>, LoggingUnit {
     private static final long serialVersionUID = 2;
     
+    @Override
     public int compareTo(Problem other) {
         if (kind.order != other.kind.order)
             return kind.order - other.kind.order;
@@ -56,58 +57,121 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
     }
 
     protected final String identifier;
+    
+    /**
+     * @return a string identifier specifying the problem.
+     */
     public String identifier() {
         return identifier;
     }
     
     protected final int beginLine;
     protected final int beginColumn;
+
+    /**
+     * @return the line in the source file where the problem was encountered.
+     */
     public int beginLine() { return beginLine; }
+    
+    /**
+     * @return the column in the source file where the problem was encountered.
+     */
     public int beginColumn() { return beginColumn; }
   
     protected String fileName;
+
+    /**
+     * @return the name of the source file of the problem.
+     */
     public String fileName() { return fileName; }
+
+    /** 
+     * @param fileName the name of the file to set as the problem's source.
+     */
     public void setFileName(String fileName) { this.fileName = fileName; }
 
+    /**
+     * @return {@code true} if the source file of the problem is known, {@code false} otherwise.
+     */
     public boolean hasLocation() { return fileName != null; }
 
     protected final String message;
+
+    /**
+     * @return the problem message (presented when the error is reported).
+     */
     public String message() { return message; }
 
     protected final ProblemSeverity severity;
+
+    /**
+     * @return the problem severity.
+     */
     public ProblemSeverity severity() { return severity; }
 
     protected final ProblemKind kind;
+
+    /**
+     * @return the problem type.
+     */
     public ProblemKind kind() { return kind; }
 
     protected Set<String> components = new TreeSet<String>(); // TreeSet is used so that we get a sorted set
 
+    /**
+     * @param component
+     *          The component to add to the problem.
+     */
     public void addComponent(String component) {
         if (component != null)
             components.add(component);
     }
 
+    /**
+     * @return a collection of the problem's components.
+     */
     public Collection<String> components() { return components; }
 
+    /**
+     * Deprecated in favour of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
+     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     */
     @Deprecated
     public Problem(String fileName, String message) {
         this(fileName, message, ProblemSeverity.ERROR);
     }
 
+    /**
+     * Deprecated in favour of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
+     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     */
     @Deprecated
     public Problem(String fileName, String message, ProblemSeverity severity) {
         this(fileName, message, severity, ProblemKind.OTHER);
     }
 
+    /**
+     * Deprecated in favour of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
+     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     */
     @Deprecated
     public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind) {
         this(null, fileName, message, severity, kind, 0, 0);
     }
 
+    /**
+     * Deprecated in favour of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
+     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     */
     @Deprecated
     public Problem(String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
         this(null, fileName, message, severity, kind, beginLine, beginColumn);
     }
+
+    /**
+     * Deprecated in favour of {@link Problem#createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)
+     * createProblem(String, ReporterNode, ProblemSeverity, ProblemKind, String)}.
+     */
     @Deprecated
     protected Problem(String identifier, String fileName, String message, ProblemSeverity severity, ProblemKind kind, int beginLine, int beginColumn) {
         this.identifier = identifier;
@@ -129,6 +193,22 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
 //        }
 //    }
 //    
+    /**
+     * Creates a {@code Problem} object.
+     * 
+     * @param identifier
+     *      The problem's identifier.
+     * @param src
+     *      The node which reported the problem (the problem source).
+     * @param severity
+     *      The severity level of the problem (error, warning).
+     * @param kind
+     *      The type of the problem (syntactical, semantical, et.c.).
+     * @param message
+     *      The message to present when the error is reported.
+     * @return
+     *      a {@code Problem} instance.
+     */
     public static Problem createProblem(String identifier, ReporterNode src, ProblemSeverity severity, ProblemKind kind, String message) {
         Problem p;
         if (src == null) {
@@ -148,19 +228,37 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return p;
     }
 
+    /**
+     * @param checkAll
+     *      A flag specifying whether or not to include all problems.
+     * @return
+     *      {@code true} if the error is for testing, {@code false} otherwise.
+     */
     public boolean isTestError(boolean checkAll) {
         return checkAll || (severity == ProblemSeverity.ERROR && kind != ProblemKind.COMPLIANCE);
     }
 
+    @Override
     public boolean equals(Object o) {
         return (o instanceof Problem) && (compareTo((Problem) o) == 0);
     }
 
+    /**
+     * @param o
+     *      The object whose string representation should be capitalized.
+     * @return a capitalized string representation of {@code o}.
+     */
     public static String capitalize(Object o) {
         String name = o.toString();
         return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
     }
 
+    /**
+     * Joins together two problems.
+     * 
+     * @param p
+     *      The {@code Problem} to join with {@code this}.
+     */
     public void merge(Problem p) {
         components.addAll(p.components);
     }
@@ -170,6 +268,12 @@ public class Problem implements Comparable<Problem>, LoggingUnit {
         return toString(false);
     }
 
+    /**
+     * @param printIdentifier
+     *          A flag specifying whether or not the identifier should be included in the string representation.
+     * @return
+     *          A string representation of the {@code Problem}.
+     */
     public String toString(boolean printIdentifier) {
         StringBuilder sb = new StringBuilder();
         kind.writeKindAndSeverity(sb, severity);
