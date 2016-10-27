@@ -300,11 +300,13 @@ model LoadResource1
 end LoadResource1;
 
 model StringArray1
-    function strlen
+    function fstrlen
         input String s;
         output Integer n;
-        external;
-    end strlen;
+    external "C" n = fStrlen(s) annotation(
+        Library="externalFunctionsC",
+        Include="#include \"externalFunctionsC.h\"");
+    end fstrlen;
     
     function stringify
         input Real[:] x;
