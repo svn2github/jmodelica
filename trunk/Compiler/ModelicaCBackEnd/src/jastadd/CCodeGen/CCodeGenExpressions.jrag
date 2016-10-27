@@ -167,7 +167,32 @@ aspect CCodeGenExpressions {
             str.print(")");
         }
     }
-
+    
+    @Override
+    public void FIfExp.genTempVars_C(CodePrinter p, CodeStream ostr, String indent) {
+        p.printPreSteps(getIfExp(), ostr, indent);
+        ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
+        String next = p.indent(indent);
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("if (");
+        p.print(getIfExp(), str, next);
+        str.print(") {\n");
+        str.setBufferMode(false);
+        p.printPreSteps(getThenExp(), str, next);
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("}");
+        str.clear();
+        str.print(" else {\n");
+        str.setBufferMode(false);
+        p.printPreSteps(getElseExp(), str, next);
+        str.setBufferMode(true);
+        str.print(indent);
+        str.print("}\n");
+        str.close();
+    }
+    
     @Override
     public void FIfExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print(FEqExp.macro_C);
@@ -179,7 +204,7 @@ aspect CCodeGenExpressions {
         p.print(getElseExp(),str,indent);
         str.print(")");
     }
-
+    
     @Override
     public void FInitialExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
         str.print("_atInitial");
