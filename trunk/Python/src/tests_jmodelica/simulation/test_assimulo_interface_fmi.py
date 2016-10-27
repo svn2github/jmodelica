@@ -924,8 +924,8 @@ class Test_FMI_ODE_CS:
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
         file_name_time_event = os.path.join(get_files_path(), 'Modelica', 'TimeEvents.mo')
 
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs")
-        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs")
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, target="cs", version=1.0)
+        _t1_name = compile_fmu("TimeEvents.Advanced5", file_name_time_event, target="cs", version=1.0)
        
     @testattr(stddist = True)
     def test_time_event_at_do_step_end(self):
@@ -965,6 +965,72 @@ class Test_FMI_ODE_CS:
             assert res["der(x)"][i] == 0.0
             
 
+class Test_FMI_ODE_2:
+    """
+    This class tests pyfmi.simulation.assimulo.FMIODE and together
+    with Assimulo. Requires that Assimulo is installed.
+    """
+    
+    @classmethod
+    def setUpClass(cls):
+        """
+        Compile the test model.
+        """
+        file_name = os.path.join(get_files_path(), 'Modelica', 'noState.mo')
+        file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
+        file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
+
+        _ex1_name = compile_fmu("NoState.Example1", file_name, version=2.0)
+        _ex2_name = compile_fmu("NoState.Example2", file_name, version=2.0)
+        #_in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
+        #_in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
+        #_cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
+        #_in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+    
+    @testattr(stddist = True)
+    def test_no_state1(self):
+        """
+        Tests simulation when there is no state in the model (Example1).
+        """
+        model = load_fmu("NoState_Example1.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-2.000000000)
+        nose.tools.assert_almost_equal(res.initial('y') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('y'),-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('z'),4.000000000)
+        
+    @testattr(stddist = True)
+    def test_no_state2(self):
+        """
+        Tests simulation when there is no state in the model (Example2).
+        """
+        model = load_fmu("NoState_Example2.fmu")
+        
+        res = model.simulate(final_time=10)
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-1.000000000)
+        
+    @testattr(stddist = True)
+    def test_no_state1_radau(self):
+        """
+        Tests simulation when there is no state in the model (Example1).
+        """
+        model = load_fmu("NoState_Example1.fmu")
+        
+        res = model.simulate(final_time=10, options={"solver": "Radau5ODE"})
+        
+        nose.tools.assert_almost_equal(res.initial('x') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('x'),-2.000000000)
+        nose.tools.assert_almost_equal(res.initial('y') ,-1.000000000)
+        nose.tools.assert_almost_equal(res.final('y'),-1.000000000)
+        nose.tools.assert_almost_equal(res.initial('z') ,1.000000000)
+        nose.tools.assert_almost_equal(res.final('z'),4.000000000)
+
 class Test_FMI_ODE:
     """
     This class tests pyfmi.simulation.assimulo.FMIODE and together
@@ -980,12 +1046,12 @@ class Test_FMI_ODE:
         file_name_in = os.path.join(get_files_path(), 'Modelica', 'InputTests.mo')
         file_name_linear = os.path.join(get_files_path(), 'Modelica', 'Linear.mo')
 
-        _ex1_name = compile_fmu("NoState.Example1", file_name)
-        _ex2_name = compile_fmu("NoState.Example2", file_name)
-        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in)
-        _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in)
-        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches")
-        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear)
+        _ex1_name = compile_fmu("NoState.Example1", file_name, version=1.0)
+        _ex2_name = compile_fmu("NoState.Example2", file_name, version=1.0)
+        _in1_name = compile_fmu("Inputs.SimpleInput", file_name_in, version=1.0)
+        _in3_name = compile_fmu("Inputs.SimpleInput3", file_name_in, version=1.0)
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", version=1.0)
+        _in3_name = compile_fmu("LinearTest.Linear1", file_name_linear, version=1.0)
         
     def setUp(self):
         """
