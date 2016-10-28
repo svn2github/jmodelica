@@ -136,8 +136,8 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
                 indexBlockVariables.insert(it->first);
                 
                 // Mark unsolved variables in non-scalar blocks as tearing variables
-                if (block_equations.size() > 1) { 
-                    it->second->setAsTearing();
+                if (block_equations.size() > 1 && ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations()) { 
+                    it->second->setTearing(true);
                 }
                 
                 ciBlock->addVariable(it->second.getNode(), false);
@@ -237,7 +237,7 @@ std::map<int,ModelicaCasADi::Ref<ModelicaCasADi::Variable> >& indexToVariable)
         //Setting Jacobian always with casadi
         ciBlock->computeJacobianCasADi();
 
-        //Mark tearing variables and residuals and then move everything to Unsolvable
+        //Mark tearing residuals and then move everything to Unsolvable
         if(ciBlock->getNumUnsolvedEquations()>0 && (ciBlock->getNumEquations()!=ciBlock->getNumUnsolvedEquations() || !ciBlock->getSolutionMap().empty())) {
             ciBlock->markTearingResiduals();
             ciBlock->moveAllEquationsToUnsolvable();

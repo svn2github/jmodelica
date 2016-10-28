@@ -85,15 +85,15 @@ class Variable : public OwnedNode {
         /** @return True if this variable is negated */
         bool isNegated() const;
         /** @return True if this variable is a tearing variable */
-        bool isTearing() const;
+        bool getTearing() const;
         /** @return True if this variable is an eliminable variable */
         bool isEliminable() const;
         /** @return True if this variable was marked as eliminated variable */
         bool wasEliminated() const;
         /** @param Bool negated . Only possible for Alias variables*/
         void setNegated(bool negated);
-        /** @param none. */
-        void setAsTearing();       
+        /** @param bool. */
+        void setTearing(bool);       
         /** @param none. */
         void setAsEliminable();       
         /** @param none. */
@@ -234,8 +234,8 @@ inline void Variable::setNegated(bool negated) {
     }
     this->negated = negated; 
 }
-inline void Variable::setAsTearing() {
-    this->tearing = true; 
+inline void Variable::setTearing(bool ntearing) {
+    this->tearing = ntearing; 
 }
 inline void Variable::setAsEliminated() { 
     if (!isEliminable() && !isAlias()) {
@@ -243,7 +243,7 @@ inline void Variable::setAsEliminated() {
     }
     this->eliminated = true; 
 }
-inline bool Variable::isTearing() const {return tearing;}
+inline bool Variable::getTearing() const {return tearing;}
 inline bool Variable::isEliminable() const {return eliminable;}
 inline bool Variable::wasEliminated() const {return eliminated;}
 inline void Variable::setAsEliminable() {eliminable=true;}

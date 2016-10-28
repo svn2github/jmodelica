@@ -43,26 +43,10 @@ class EliminationOptions(dict):
             Default: False
 
         tearing --
-            How to tear algebraic loops. Possible values: ['automatic', 'disabled', 'manual']
+            Whether to tear algebraic loops.
 
-            automatic: Choice of tearing variables and residuals is done automatically.
-
-            disabled: Tearing is not used.
-
-            manual: Tearing variables and residuals are selected manually with options tear_vars and tear_res_indices.
-
-            Type: str
-            Default: 'automatic'
-
-        tear_vars --
-            List of names of selected tearing variables. Only applicable if tearing is 'manual'.
-
-            Default: []
-
-        tear_res_indices --
-            List of global equation indices of selected tearing residuals. Only applicable if tearing is 'manual'.
-
-            Default: []
+            Type: bool
+            Default: True
 
         inline --
             Whether to inline function calls (such as creation of linear systems).
@@ -128,9 +112,7 @@ class EliminationOptions(dict):
         self['draw_blt_strings'] = False
         self['solve_blocks'] = False
         self['solve_torn_linear_blocks'] = False
-        self['tearing'] = 'automatic'
-        self['tear_vars'] = []
-        self['tear_res'] = []
+        self['tearing'] = True
         self['inline'] = True
         self['closed_form'] = False
         self['inline_solved'] = False
@@ -298,11 +280,8 @@ class Component(object):
                 self.debug_tearing()
                 raise RuntimeError("Number of tearing variables does not match number of residuals for block. " +
                                    "See above printouts for block variables and equations.")
-            if len(self.block_tear_vars) > 0:
-                if self.n == 1:
-                    raise RuntimeError("Tearing variable %s selected for scalar block." % var.name)
-                else:
-                    return True
+            if 0 < len(self.block_tear_vars) < self.n:
+                return True
             else:
                 return False
         else:
@@ -1038,15 +1017,11 @@ class BLTModel(object):
         self.options = elimination_options
 
         # Identify tearing variables
-        if self.options['tearing'] == 'automatic':
+        if self.options['tearing']:
             self.tear_vars = [var.getName() for var in model.getVariables(model.REAL_ALGEBRAIC)
-                              if not var.isAlias() and var.isTearing()]
-        elif self.options['tearing'] == 'manual':
-            self.tear_vars = list(self.options['tear_vars'])
-        elif self.options['tearing'] == 'disabled':
-            self.tear_vars = []
+                              if not var.isAlias() and var.getTearing()]
         else:
-            raise ValueError("Unknown tearing option %s." % self.tearing)
+            self.tear_vars = []
         
         # Check that uneliminables exist and replace with aliases
         for (i, name) in enumerate(self.options['uneliminable']):
@@ -1146,17 +1121,18 @@ class BLTModel(object):
         i = 0
         for vk in ["dx", "w"]:
             for (mvar, mx_var) in itertools.izip(mvar_vectors[vk], mx_var_struct[vk]):
-                tearing = mvar.getName() in self.tear_vars
+                if self.options['tearing'] and mvar.getTearing():
+                    tearing = True
+                else:
+                    tearing = False
                 variables.append(Variable(mvar.getName(), i, i, vk=="dx", tearing, mvar, mx_var))
                 i += 1
 
         # Create equations
         i = 0
         for (named_res, named_eq) in itertools.izip(named_dae, named_dae_equations):
-            if self.options['tearing'] == "manual":
-                tearing = i in self.options['tear_res']
-            elif self.options['tearing'] == "automatic":
-                tearing = named_eq.isTearing()
+            if self.options['tearing'] and named_eq.getTearing():
+                tearing = True
             else:
                 tearing = False
             equations.append(Equation(named_eq.__str__()[4:-2], i, i, tearing, named_res))
