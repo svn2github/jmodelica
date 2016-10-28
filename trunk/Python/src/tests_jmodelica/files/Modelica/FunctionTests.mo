@@ -335,7 +335,7 @@ model StringArray1
         String tx = stringcat(sx);
       algorithm
         Modelica.Utilities.Streams.print(tx);
-        n := strlen(tx);
+        n := fstrlen(tx);
     end f;
     
     Integer n;
