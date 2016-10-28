@@ -184,35 +184,39 @@ aspect CCodeGenExpressions {
     @Override
     public void FIfExp.genTempVars_C(CodePrinter p, CodeStream ostr, String indent) {
         boolean arg = isFunctionCallArg();
-        p.printPreSteps(getIfExp(), ostr, indent);
-        ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
-        String next = p.indent(indent);
-        str.setBufferMode(true);
-        str.print(indent);
-        str.print("if (");
-        p.print(getIfExp(), str, next);
-        str.print(") {\n");
-        str.setBufferMode(false);
         if (arg) {
-            getThenExp().genTempArg(p.PreStep, str, next);
+            p.printPreSteps(getIfExp(), ostr, indent);
+            ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
+            String next = p.indent(indent);
+            str.setBufferMode(true);
+            str.print(indent);
+            str.print("if (");
+            p.print(getIfExp(), str, next);
+            str.print(") {\n");
+            str.setBufferMode(false);
+            if (arg) {
+                getThenExp().genTempArg(p.PreStep, str, next);
+            } else {
+                p.printPreSteps(getThenExp(), str, indent);
+            }
+            str.setBufferMode(true);
+            str.print(indent);
+            str.print("}");
+            str.clear();
+            str.print(" else {\n");
+            str.setBufferMode(false);
+            if (arg) {
+                getElseExp().genTempArg(p.PreStep, str, next);
+            } else {
+                p.printPreSteps(getElseExp(), str, indent);
+            }
+            str.setBufferMode(true);
+            str.print(indent);
+            str.print("}\n");
+            str.close();
         } else {
-            p.printPreSteps(getThenExp(), str, indent);
+            super.genTempVars_C(p, ostr, indent);
         }
-        str.setBufferMode(true);
-        str.print(indent);
-        str.print("}");
-        str.clear();
-        str.print(" else {\n");
-        str.setBufferMode(false);
-        if (arg) {
-            getElseExp().genTempArg(p.PreStep, str, next);
-        } else {
-            p.printPreSteps(getElseExp(), str, indent);
-        }
-        str.setBufferMode(true);
-        str.print(indent);
-        str.print("}\n");
-        str.close();
     }
     
     @Override
