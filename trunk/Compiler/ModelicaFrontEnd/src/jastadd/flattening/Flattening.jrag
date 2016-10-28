@@ -2258,20 +2258,21 @@ aspect FlatExpressions {
     
     inh boolean InstAccess.flattenFASContext();
     inh boolean FIdUseInstAccess.flattenFASContext();
-    inh boolean FIdUseExp.flattenFASContext();
+    inh boolean FExp.flattenFASContext();
     eq BaseNode.getChild().flattenFASContext()             = true;
+    eq FUnknownSizeExp.getFExp().flattenFASContext()       = false;
+    eq FExternalStmt.getChild().flattenFASContext()        = false;
     eq InstDot.getInstAccess(int i).flattenFASContext()    = i != getNumInstAccess() - 1 || flattenFASContext();
     eq FIdUseInstAccess.getChild().flattenFASContext()     = flattenFASContext();
-    eq FIdUseExp.getChild().flattenFASContext()            = flattenFASContext();
-    eq InstFunctionArgument.getChild().flattenFASContext() = !inFunction() || getFExp().isSlice();
-    eq FFunctionCallLeft.getFExp().flattenFASContext()     = !inFunction() || getFExp().isSlice();
-    eq FSizeExp.getFExp().flattenFASContext()              = !getFExp().isCircular() && (!inFunction() || getFExp().isSlice());
-    eq FUnknownSizeExp.getFExp().flattenFASContext()       = false;
-    eq InstForIndexWithExp.getFExp().flattenFASContext()   = !inFunction() || getFExp().isSlice();
-    eq InstForIndexNoExp.getFExp().flattenFASContext()     = !inFunction() || hasFExp() && getFExp().isSlice();
+    eq FIfExp.getChild().flattenFASContext()               = flattenFASContext();
+    eq FIdUseExp.getChild().flattenFASContext()            = flattenFASContext() || isSlice();
+    
+    eq InstFunctionArgument.getChild().flattenFASContext() = !inFunction();
+    eq FFunctionCallLeft.getFExp().flattenFASContext()     = !inFunction();
+    eq InstForIndex.getChild().flattenFASContext()         = !inFunction();
+    eq FSizeExp.getFExp().flattenFASContext()              = !getFExp().isCircular() && !inFunction();
     eq FAssignStmt.getLeft().flattenFASContext()           = !scalarizedAsFFunctionCallStmt();
-    eq FExternalStmt.getArg(int i).flattenFASContext()     = getArg(i).isSlice();
-    eq FExternalStmt.getReturnVar().flattenFASContext()    = getReturnVar().isSlice();
+    
     
     /**
      * Flatten part of this name.

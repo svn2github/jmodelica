@@ -411,28 +411,58 @@ aspect FlatTypeCheck {
                 if (exp.type().isUnknown())
                     return;
             typeError(checkType);
-        } else if (!inFunction()) {
+        } else {
             size().markAsStructuralParameter(checkType, this);
         }
-    }
-    
-    protected static boolean FExp.isUnknownFExp(ASTNode n) {
-        return n instanceof FExp && ((FExp) n).type().isUnknown();
     }
     
     public void Size.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {}
     
     public void MutableSize.markAsStructuralParameter(ErrorCheckType checkType, FExp src) {
-        for (int i = 0; i < ndims(); i++) {
-            FExp exp = exps[i];
-            if (exp != null) {
-                exp.markAsStructuralParameter(checkType);
-                if (!exp.variability().parameterOrLess()) {
-                    ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
+        if (src.errorCheckUnknownSize()) {
+            for (int i = 0; i < ndims(); i++) {
+                FExp exp = exps[i];
+                if (exp != null) {
+                    exp.markAsStructuralParameter(checkType);
+                    if (!exp.variability().parameterOrLess()) {
+                        ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION.invoke(src, exp, i, src);
+                    }
                 }
             }
         }
     }
+    
+    syn boolean FExp.errorCheckUnknownSize() = !inFunction(); // && !allowUnknownSize();
+    
+    syn boolean BaseNode.allowUnknownSize()    = false;
+    eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
+    eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize();
+    
+    inh boolean BaseNode.inAllowUnknownSize();
+    eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().allowUnknownSizeInputs();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().allowUnknownSizeInputs();
+    
+    interface CommonCallable { public boolean allowUnknownSizeInputs(); }
+    syn boolean InstClassDecl.allowUnknownSizeInputs()       = isExternalFunction();
+    syn boolean FFunctionDecl.allowUnknownSizeInputs()       = isExternalFunction();
+    syn boolean InstPartialFunction.allowUnknownSizeInputs() = false;
+    syn boolean FFunctionVariable.allowUnknownSizeInputs()   = false;
+    
+    syn boolean InstClassDecl.isExternalFunction() = hasInstExternal();
+    syn boolean FFunctionDecl.isExternalFunction() {
+        for (FStatement stmt : getFAlgorithm().getFStatements()) {
+            if (stmt.isExternalStatement()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    syn boolean FStatement.isExternalStatement() = false;
+    eq FExternalStmt.isExternalStatement()       = true;
     
     public static final ErrorProducerUnlessDisabled ASTNode.NON_PARAMETER_SIZE_IN_EXPRESSION =
             new ErrorProducerUnlessDisabled("NON_PARAMETER_SIZE_IN_EXPRESSION", ProblemKind.COMPLIANCE,
@@ -685,8 +715,6 @@ aspect FlatTypeCheck {
             if ((inner == 0 || inner == Size.UNKNOWN) && type().matchOverloadedZero() == null) 
                 error("Matrix multiplication of operator records with an inner dimension of 0 or : requires that an '0' operator is defined");
         }
-        getLeft().size().forceVariability(checkType, fStructParameter());
-        getRight().size().forceVariability(checkType, fStructParameter());
         super.typeCheck(checkType);
     }
 
@@ -1170,21 +1198,19 @@ aspect FlatTypeCheck {
     public void InstFunctionCall.typeCheck(ErrorCheckType checkType) {
         if (!isFunctionCallClause() && !getName().myInstClassDecl().isRecord() && !hasOutputs() && !isPartialFunctionCall()) {
             error("Function " + getName().name() + "() has no outputs, but is used in expression");
-        } else if (!isFunctionCallClause() && !inFunction() && size().isUnknown()) {
+        } else if (!isFunctionCallClause() && size().isUnknown() && errorCheckUnknownSize()) {
             CANNOT_INFER_ARRAY_SIZE_OF_OUTPUT.invoke(this, expOutput().name());
         }
         if (myCallOutputs().size() < myLefts().size()) {
             error("Too many components assigned from function call: " + getName().name() + 
                     "() has " + myCallOutputs().size() + " output(s)");
         }
-        if (!inFunction()) {
-            if (isFunctionCallClause()) {
-                for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
-                    sizeOfOutput(i).markAsStructuralParameter(checkType, this);
-                }
-            } else {
-                size().markAsStructuralParameter(checkType, this);
+        if (isFunctionCallClause()) {
+            for (int i = 0, n = myCallOutputs().size(); i < n; i++) {
+                sizeOfOutput(i).markAsStructuralParameter(checkType, this);
             }
+        } else {
+            size().markAsStructuralParameter(checkType, this);
         }
     }
   

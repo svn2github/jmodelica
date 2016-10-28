@@ -1602,24 +1602,11 @@ aspect FlatFunctionUtils {
      /**
       * Check is this node is in a function.
       */
-     inh boolean FQName.inFunction();
-     inh boolean InstFunctionArgument.inFunction();
-     inh boolean InstComponentDecl.inFunction();
-     inh boolean InstExternal.inFunction();
-     inh boolean InstAccess.inFunction();
-     inh boolean InstForIndex.inFunction();
-     inh boolean FExp.inFunction();
-     inh boolean FIdUse.inFunction();
-     inh boolean FStatement.inFunction();
-     inh boolean FAbstractEquation.inFunction();
-     inh boolean FSubscript.inFunction();
-     inh boolean FFunctionCallLeft.inFunction();
-     inh boolean FAttribute.inFunction();
-     inh boolean InstExtends.inFunction();
-     eq InstBaseClassDecl.getChild().inFunction() = isFunction();
-     eq FFunctionDecl.getChild().inFunction()     = true;
-     eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
+     inh boolean ASTNode.inFunction();
      eq Root.getChild().inFunction()              = false;
+     eq FFunctionDecl.getChild().inFunction()     = true;
+     eq InstBaseClassDecl.getChild().inFunction() = isFunction();
+     eq InstAssignable.getChild().inFunction()    = (temporarilyInFunction != null) || inFunction();
      eq InstNormalExtends.getInstClassModification().inFunction() = extendsInFunction();
      
      inh boolean InstExtends.extendsInFunction();
@@ -1729,13 +1716,15 @@ aspect FlatFunctionUtils {
      eq InstFunctionCall.findOutput(int i)                         = 
          (i >= myCallOutputs().size()) ? unknownInstComponentDecl() : myCallOutputs().get(i);
      
-     inh boolean FAbstractFunctionCall.functionCallIsExp();
+     inh boolean FExp.functionCallIsExp();
      eq FExp.getChild().functionCallIsExp()                 = true;
      eq FClass.getChild().functionCallIsExp()               = true;
      eq InstNode.getChild().functionCallIsExp()             = true;
      eq FFunctionCallEquation.getCall().functionCallIsExp() = false;
      eq FFunctionCallStmt.getCall().functionCallIsExp()     = false;
      eq FFunctionCall.getArg(int i).functionCallIsExp()     = !getArg(i).isComposite();
+     eq FIfExp.getThenExp().functionCallIsExp()             = functionCallIsExp();
+     eq FIfExp.getElseExp().functionCallIsExp()             = functionCallIsExp();
      
      inh lazy ArrayList<FFunctionCallLeft> FAbstractFunctionCall.myLefts();
      eq FExp.getChild().myLefts()                 = new ArrayList<FFunctionCallLeft>();

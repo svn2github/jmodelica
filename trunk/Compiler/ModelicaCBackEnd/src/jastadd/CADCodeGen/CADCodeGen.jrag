@@ -1408,13 +1408,14 @@ aspect CADCodeGen {
      */
     @Override
     public void FFunctionCall.genTempVars_CAD(CodePrinter p, CodeStream str, String indent) {
-        for (FExp arg : getArgs()) {
-            arg.genTempArg(p.PreStep, str, indent);
+        getArgs().genTempArg(p.PreStep, str, indent);
+        if (isFunctionCallArg()) {
+            type().printInit_C(p, str, indent, tempName_var_CAD(), this);
+            type().printInit_C(p, str, indent, tempName_der_CAD(), this);
         }
-        p.printPreSteps(getArgs(), str, indent);
         // This seems strage, why is there a spearate genADStatement_CAD?
         genADStatement_CAD(p, str, indent);
-        p.printPostSteps(getArgs(), str, indent);
+        getArgs().genTempArg(p.PostStep, str, indent);
     }
 
 	@Override
@@ -1579,9 +1580,7 @@ aspect CADCodeGen {
                 str.println(derName_CAD() + ";");
             }
         }
-        for (FExp arg : getArgs()) {
-            arg.genTempArg(p.DeclStep, str, indent);
-        }
+        getArgs().genTempArg(p.DeclStep, str, indent);
     }
 
     @Override

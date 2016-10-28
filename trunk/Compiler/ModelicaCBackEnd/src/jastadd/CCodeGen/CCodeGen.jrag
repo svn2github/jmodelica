@@ -145,12 +145,9 @@ aspect CCodeGen {
     
     @Override
     public void FFunctionCall.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(getArgs(), str, indent);
+        getArgs().genTempArg(p.DeclStep, str, indent);
         if (!functionCallIsExp() && myFCallable().isPartialFunction() && !isPartialFunctionCall()) {
             str.formatln("%s%s %s;", indent, myFCallable().actualFFunctionDecl().funcNameUnderscore(C_SUFFIX_FPOUT), tempName_C());
-        }
-        for (FExp arg : getArgs()) {
-            arg.genTempArg(p.DeclStep, str, indent);
         }
         if (isStringExp()) {
             type().printScalarDecl_C(str, indent, false, tempName_C());
@@ -159,10 +156,7 @@ aspect CCodeGen {
     
     @Override
     public void FFunctionCall.genTempVars_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPreSteps(getArgs(), str, indent);
-        for (FExp arg : getArgs()) {
-            arg.genTempArg(p.PreStep, str, indent);
-        }
+        getArgs().genTempArg(p.PreStep, str, indent);
         if (isStringExp()) {
             str.print(indent);
             str.print(tempName_C());
@@ -183,7 +177,7 @@ aspect CCodeGen {
 
     @Override
     public void FFunctionCall.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        p.printPostSteps(getArgs(), str, indent);
+        getArgs().genTempArg(p.PostStep, str, indent);
         if (isStringExp()) {
             type().printFree_C(str, indent, false, tempName_C());
         }

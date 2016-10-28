@@ -2888,8 +2888,10 @@ aspect FVariableUses {
     eq InstRoot.getChild().inFunctionCall()      = false;
     
     inh boolean FExp.isFunctionCallArg();
-    eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq BaseNode.getChild().isFunctionCallArg()    = false;
+    eq FFunctionCall.getArg().isFunctionCallArg() = true;
+    eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
+    eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
     
     /**
      * Returnes the function input that this expressions corresponds to.

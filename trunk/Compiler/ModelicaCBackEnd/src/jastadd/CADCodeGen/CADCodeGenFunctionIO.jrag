@@ -58,15 +58,6 @@ aspect CADCodeGenFunctionIO {
     public void FExp.genTempInputDecl_CAD(CodePrinter p, CodeStream str, String indent) {
         if (replaceWithTemp(false)) {
             printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
-        } else {
-            genVarDecls_CAD(p, str, indent);
-        }
-    }
-    
-    public void FFunctionCall.genTempInputDecl_CAD(CodePrinter p, CodeStream str, String indent) {
-        if (replaceWithTemp(false)) {
-            printDecls_CAD(p, str, indent, tempName_var_CAD(), tempName_der_CAD());
-            genVarDecls_CAD(p, str, indent);
         }
     }
     
@@ -80,8 +71,7 @@ aspect CADCodeGenFunctionIO {
     
     @Override
     public void FFunctionCall.genTempInputs_CAD(CodePrinter p, CodeStream str, String indent) {
-        type().printInit_C(p, str, indent, tempName_var_CAD(), this);
-        type().printInit_C(p, str, indent, tempName_der_CAD(), this);
+        
     }
 
     @Override

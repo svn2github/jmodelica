@@ -169,7 +169,21 @@ aspect CCodeGenExpressions {
     }
     
     @Override
+    public void FIfExp.genVarDecls_C(CodePrinter p, CodeStream str, String indent) {
+        boolean arg = isFunctionCallArg();
+        p.printVarDecls(getIfExp(), str, indent);
+        if (arg) {
+            getThenExp().genTempArg(p.DeclStep, str, indent);
+            getElseExp().genTempArg(p.DeclStep, str, indent);
+        } else {
+            p.printVarDecls(getThenExp(), str, indent);
+            p.printVarDecls(getElseExp(), str, indent);
+        }
+    }
+    
+    @Override
     public void FIfExp.genTempVars_C(CodePrinter p, CodeStream ostr, String indent) {
+        boolean arg = isFunctionCallArg();
         p.printPreSteps(getIfExp(), ostr, indent);
         ConditionalCodeStream  str = new ConditionalCodeStream(ostr);
         String next = p.indent(indent);
@@ -179,14 +193,22 @@ aspect CCodeGenExpressions {
         p.print(getIfExp(), str, next);
         str.print(") {\n");
         str.setBufferMode(false);
-        p.printPreSteps(getThenExp(), str, next);
+        if (arg) {
+            getThenExp().genTempArg(p.PreStep, str, next);
+        } else {
+            p.printPreSteps(getThenExp(), str, indent);
+        }
         str.setBufferMode(true);
         str.print(indent);
         str.print("}");
         str.clear();
         str.print(" else {\n");
         str.setBufferMode(false);
-        p.printPreSteps(getElseExp(), str, next);
+        if (arg) {
+            getElseExp().genTempArg(p.PreStep, str, next);
+        } else {
+            p.printPreSteps(getElseExp(), str, indent);
+        }
         str.setBufferMode(true);
         str.print(indent);
         str.print("}\n");
@@ -195,14 +217,28 @@ aspect CCodeGenExpressions {
     
     @Override
     public void FIfExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        boolean arg = isFunctionCallArg();
         str.print(FEqExp.macro_C);
         str.print("(");
         p.print(getIfExp(), str, indent);
         str.print(", JMI_TRUE, ");
-        p.print(getThenExp(),str,indent);
+        if (arg) {
+            getThenExp().genTempArg(p.ExecStep, str, indent);
+        } else {
+            p.print(getThenExp(),str,indent);
+        }
         str.print(", ");
-        p.print(getElseExp(),str,indent);
+        if (arg) {
+            getElseExp().genTempArg(p.ExecStep, str, indent);
+        } else {
+            p.print(getElseExp(),str,indent);
+        }
         str.print(")");
+    }
+    
+    @Override
+    public void FIfExp.genTempFree_C(CodePrinter p, CodeStream ostr, String indent) {
+
     }
     
     @Override
@@ -1330,11 +1366,8 @@ aspect CCodeGenExpressions {
      * Generate temp declarations for the initialization of spatialDistribution blocks.
      */
     public void FSpatialDistExp.genInitVarDecls_C(CodePrinter p, CodeStream str, String indent) {
-        p.printVarDecls(getX(), str, indent);
         getX().genTempArg(p.DeclStep, str, indent);
-        p.printVarDecls(getInitialPoints(), str, indent);
         getInitialPoints().genTempArg(p.DeclStep, str, indent);
-        p.printVarDecls(getInitialValues(), str, indent);
         getInitialValues().genTempArg(p.DeclStep, str, indent);
     }
 
@@ -1346,11 +1379,8 @@ aspect CCodeGenExpressions {
         //int jmi_spatialdist_init(jmi_t *jmi, int index, jmi_boolean no_event,
         // jmi_real_t x0, jmi_real_t *x_init, jmi_real_t *y_init, int n_init);
         
-        p.printPreSteps(getX(), str, indent);
         getX().genTempArg(p.PreStep, str, indent);
-        p.printPreSteps(getInitialPoints(), str, indent);
         getInitialPoints().genTempArg(p.PreStep, str, indent);
-        p.printPreSteps(getInitialValues(), str, indent);
         getInitialValues().genTempArg(p.PreStep, str, indent);
         
         str.format("%sjmi_spatialdist_init(jmi, %d, ", indent, mySpatialDistIndex());
@@ -1363,9 +1393,9 @@ aspect CCodeGenExpressions {
         getInitialValues().genTempArg(p.ExecStep, str, indent); // jmi_real_t *y_init
         str.println(");");
         
-        p.printPostSteps(getX(), str, indent);
-        p.printPostSteps(getInitialPoints(), str, indent);
-        p.printPostSteps(getInitialValues(), str, indent);
+        getX().genTempArg(p.PostStep, str, indent);
+        getInitialPoints().genTempArg(p.PostStep, str, indent);
+        getInitialValues().genTempArg(p.PostStep, str, indent);
     }
 
     /**

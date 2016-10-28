@@ -10785,11 +10785,14 @@ public
   Real[:] temp_1;
  algorithm
   init y as Real[size(x, 1)];
-  init temp_1 as Real[size(x, 1)];
-  for i1 in 1:size(x, 1) loop
-   temp_1[i1] := if size(x, 1) > 1 then x[i1] else x[i1] .+ 1;
-  end for;
-  (y) := FunctionTests.UnknownArray46.f2(temp_1);
+  if size(x, 1) > 1 then
+  else
+   init temp_1 as Real[size(x, 1)];
+   for i1 in 1:size(x, 1) loop
+    temp_1[i1] := x[i1] .+ 1;
+   end for;
+  end if;
+  (y) := FunctionTests.UnknownArray46.f2(if size(x, 1) > 1 then x else temp_1);
   return;
  end FunctionTests.UnknownArray46.f1;
 
