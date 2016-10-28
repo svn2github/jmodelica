@@ -619,7 +619,7 @@ aspect FlatTypeAnalysis {
         return new FFunctionType(size(), name(), inputs, outputs, myFClass());
     }
 
-    // TODO: expand to handle boolean end enum index
+    // TODO: expand to handle boolean and enum index (see #3597)
     syn lazy FType FSubscript.type();
     eq FColonSubscript.type()   = fIntegerArrayType(size());
     eq FIntegerSubscript.type() = fIntegerScalarType();

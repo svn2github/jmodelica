@@ -2852,23 +2852,30 @@ aspect ArrayHelpers {
 				res.addFSubscript(createExpandedFSubscript(i));
 			return res;
 		}
-		
-		/**
-		 * Create an FSubscript that spans the length of dimension <code>d</code>.
-		 * 
-		 * If nothing is known of the length of the dimension, an FColonSubscript is created.
-		 */
-		public FSubscript createExpandedFSubscript(int d) {
-			if (!isUnknown(d)) {
-				List<FExp> lim = new List<FExp>();
-				lim.add(new FIntegerLitExp(1));
-				lim.add(createFExp(d));
-				return new FExpSubscript(new FRangeExp(lim));
-			} else {
-				return new FColonSubscript();
-			}
-		}
-		
+
+        /**
+         * Create an FSubscript that spans the length of dimension <code>d</code>.
+         * 
+         * If nothing is known of the length of the dimension, an FColonSubscript is created.
+         */
+        public FSubscript createExpandedFSubscript(int d) {
+            if (!isUnknown(d)) {
+                return new FExpSubscript(createRangeExp(d));
+            } else {
+                return new FColonSubscript();
+            }
+        }
+
+        /**
+         * Create a range expression spanning this size.
+         */
+        public FRangeExp createRangeExp(int d) {
+            List<FExp> lim = new List<FExp>();
+            lim.add(new FIntegerLitExp(1));
+            lim.add(createFExp(d));
+            return new FRangeExp(lim);
+        }
+
 		/**
 		 * Create an FExp that describes this size.
 		 * 

@@ -348,12 +348,12 @@ aspect FlatNames {
     
     syn String FQNamePart.name() = getName();
 
-    syn String FIdUse.name()           = getFQName().name();
-    syn String FIdUseExp.name()        = getFIdUse().name();
-    eq FAbstractDerExp.name()          = derName(order());
-    eq FPreExp.name()                  = preName();
-    syn String FIdUseInstAccess.name() = getInstAccessNoTransform().name();
-    
+    syn String FIdUse.name()    = getFQName().name();
+    syn String FIdUseExp.name() = getFIdUse().name();
+    eq FAbstractDerExp.name()   = derName(order());
+    eq FPreExp.name()           = preName();
+    eq FIdUseInstAccess.name()  = getInstAccessNoTransform().name();
+
     syn String FIdDecl.name() = getFQNameNoTransform().name();
 
     syn String FClass.name()        = getFQNameNoTransform().name();
@@ -458,6 +458,11 @@ aspect FlatNames {
     syn String FFunctionCall.funcNameUnderscore(String suffix)     = getName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionDecl.funcNameUnderscore(String suffix)     = getFQName().funcNameUnderscore(suffix) + functionIndex();
     syn String FFunctionVariable.funcNameUnderscore(String suffix) = myFCallable().funcNameUnderscore(suffix);
+
+    syn boolean FExp.isIdentifier(String name) = false;
+    eq FIdUseExp.isIdentifier(String name) = name.equals(name());
+    eq FDSRefExp.isIdentifier(String name) = getOrg().isIdentifier(name);
+
 
     public interface FCallable {
         public String funcNameUnderscore(String suffix);
