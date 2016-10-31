@@ -1103,7 +1103,6 @@ aspect FunctionInlining {
      */
     syn boolean FAbstractFunctionCall.isOkTrivialInline() = isIgnored();
     eq FFunctionCall.isOkTrivialInline()                  = true;
-    eq FAssert.isOkTrivialInline()                        = true;
 
     /**
      * Helper method to unsupported statements in isTrivialInlinable().

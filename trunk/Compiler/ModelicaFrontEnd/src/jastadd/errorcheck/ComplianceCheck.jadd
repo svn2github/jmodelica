@@ -239,6 +239,9 @@ aspect ComplianceCheck {
 	syn boolean FUnaryBuiltIn.unknownSizeSupported() = true;
 	eq FSymmetric.unknownSizeSupported()             = false;
 
+    public static final SimpleProblemProducer ASTNode.UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION =
+            new SimpleErrorProducer("UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION", ProblemKind.COMPLIANCE, "For index without in expression isn't supported");
+
     public static final SimpleProblemProducer ASTNode.UNSUPPORTED_NON_FIXED_FOR_INDEX =
             new SimpleErrorProducer("UNSUPPORTED_NON_FIXED_FOR_INDEX", ProblemKind.COMPLIANCE, "For index with higher than parameter variability is not supported in equations and algorithms");
 
@@ -249,8 +252,13 @@ aspect ComplianceCheck {
         }
     }
 
-    public void InstForIndex.contentCheck(ErrorCheckType checkType) {
+    public void InstForIndexNoExp.complianceCheck(ErrorCheckType checkType) {
+        super.complianceCheck(checkType);
+        UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION.invoke(this);
     }
+
+	public void InstForIndex.contentCheck(ErrorCheckType checkType) {
+	}
 
     public void FPowExp.complianceCheck(ErrorCheckType checkType) {
         super.complianceCheck(checkType);
