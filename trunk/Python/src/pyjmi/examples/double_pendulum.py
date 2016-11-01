@@ -20,6 +20,7 @@ from pyjmi import transfer_optimization_problem, get_files_path
 from pymodelica.common.io import ResultDymolaTextual
 from pymodelica import compile_fmu
 from pyfmi import load_fmu
+from pyjmi.symbolic_elimination import BLTOptimizationProblem
 
 # Import other stuff
 import matplotlib.pyplot as plt
@@ -50,6 +51,9 @@ def run_demo(with_plots=True):
     opts['n_e'] = 100
     opts['init_traj'] = init_res
     opts['nominal_traj'] = init_res
+
+    # Symbolic elimination
+    op = BLTOptimizationProblem(op)
 
     # Solve optimization problem
     res = op.optimize(options=opts)

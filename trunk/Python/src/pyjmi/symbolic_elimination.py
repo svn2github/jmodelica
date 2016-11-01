@@ -24,8 +24,9 @@ import itertools
 from collections import OrderedDict
 from modelicacasadi_wrapper import Model
 from pyjmi.common.core import ModelBase
+from pyjmi.common.algorithm_drivers import OptionBase
 
-class EliminationOptions(dict):
+class EliminationOptions(OptionBase):
 
     """
     dict-like options class for the elimination.
@@ -46,11 +47,6 @@ class EliminationOptions(dict):
             Whether to tear algebraic loops.
 
             Type: bool
-            Default: True
-
-        inline --
-            Whether to inline function calls (such as creation of linear systems).
-
             Default: True
 
         uneliminable --
@@ -88,6 +84,11 @@ class EliminationOptions(dict):
 
             Default: False
 
+        inline --
+            Whether to inline function calls (such as creation of linear systems).
+
+            Default: True
+
         linear_solver --
             Which linear solver to use.
             See http://casadi.sourceforge.net/api/html/d8/d6a/classcasadi_1_1LinearSolver.html for possibilities
@@ -105,24 +106,25 @@ class EliminationOptions(dict):
 
             Default: False
     """
-
-    def __init__(self):
-        self['plots'] = False
-        self['draw_blt'] = False
-        self['draw_blt_strings'] = False
-        self['solve_blocks'] = False
-        self['solve_torn_linear_blocks'] = False
-        self['tearing'] = True
-        self['inline'] = True
-        self['closed_form'] = False
-        self['inline_solved'] = False
-        self['uneliminable'] = []
-        self['linear_solver'] = "symbolicqr"
-        self['dense_tol'] = 15
-        self['dense_measure'] = 'lmfi'
-
-        # Experimental options to be removed
-        self['analyze_var'] = None
+    
+    def __init__(self, *args, **kw):
+        _defaults = {
+                'plots': False,
+                'draw_blt': False,
+                'draw_blt_strings': False,
+                'solve_blocks': False,
+                'solve_torn_linear_blocks': False,
+                'tearing': True,
+                'inline': True,
+                'closed_form': False,
+                'inline_solved': False,
+                'uneliminable': [],
+                'linear_solver': "symbolicqr",
+                'dense_tol': 15,
+                'dense_measure': 'lmfi'}
+        
+        super(EliminationOptions, self).__init__(_defaults)
+        self._update_keep_dict_defaults(*args, **kw)
 
 def scale_axis(figure=plt, xfac=0.08, yfac=0.08):
     """
@@ -1038,8 +1040,6 @@ class BLTModel(object):
         self._compute_blt()
         self._create_residuals()
         self._print_statistics()
-        if self.options['closed_form']:
-            dh()
 
     def __getattr__(self, name):
         """
@@ -1135,7 +1135,7 @@ class BLTModel(object):
                 tearing = True
             else:
                 tearing = False
-            equations.append(Equation(named_eq.__str__()[4:-2], i, i, tearing, named_res))
+            equations.append(Equation(named_eq.__str__(), i, i, tearing, named_res))
             i += 1
 
         # Create edges
@@ -1235,21 +1235,6 @@ class BLTModel(object):
                     for alpha in ["A", "B", "C", "D", "a", "b"]:
                         eq_sys[alpha] = co.fcn[alpha].call(inputs, self.options['inline'])[0]
 
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        # Get nominal values
-                        known_mvars = [self.getVariable(var.getName()) for var in known_vars[1:]]
-                        solved_mvars = [self.getVariable(var.getName()) for var in solved_vars]
-                        attr = "initialGuess" # "nominal"
-                        nominal_known = [0.] + [self.get_attr(var, attr) for var in known_mvars]
-                        nominal_solved = [self.get_attr(var, attr) for var in solved_mvars]
-
-                        # Compute nominal components
-                        for alpha in ["A", "B", "C", "D", "a", "b"]:
-                            alpha_fcn = casadi.MXFunction(known_vars + solved_vars, [eq_sys[alpha]])
-                            alpha_fcn.init()
-                            eq_sys[alpha] = alpha_fcn.call(nominal_known + nominal_solved)[0].toArray()
-
                     # Extract equation system components
                     A = eq_sys["A"]
                     B = eq_sys["B"]
@@ -1273,15 +1258,6 @@ class BLTModel(object):
                                                 b - casadi.mul(CAinv, a), options['linear_solver'])
                     causal_sol = casadi.mul(Ainv, a - casadi.mul(B, torn_sol))
                     sol = casadi.vertcat([causal_sol, torn_sol])
-
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        A_big = casadi.vertcat([casadi.horzcat([A, B]), casadi.horzcat([C, D])]).toArray()
-                        b_big = casadi.vertcat([a, b]).toArray()
-                        res = casadi.mul(A_big, sol) - b_big
-                        sol = sol.toArray()
-                        res = res.toArray()
-                        dh()
 
                     # Store causal solution
                     for (i, var) in enumerate(co.causalized_vars + co.block_tear_vars):
@@ -1329,31 +1305,6 @@ class BLTModel(object):
                     else:
                         sol = casadi.solve(A, b, options['linear_solver'])
 
-                    # Analyze block matrix solution
-                    if options['analyze_var'] in [var.name for var in co.variables]:
-                        # Get nominal values
-                        known_mvars = [self.getVariable(var.getName()) for var in known_vars[1:]]
-                        solved_mvars = [self.getVariable(var.getName()) for var in solved_vars]
-                        attr = "initialGuess" # "nominal"
-                        nominal_known = [0.] + [self.get_attr(var, attr) for var in known_mvars]
-                        nominal_solved = [self.get_attr(var, attr) for var in solved_mvars]
-
-                        # Compute nominal A and b
-                        A_fcn = casadi.MXFunction(known_vars + solved_vars, [A])
-                        A_fcn.init()
-                        b_fcn = casadi.MXFunction(known_vars + solved_vars, [b])
-                        b_fcn.init()
-                        A_nom = A_fcn.call(nominal_known + nominal_solved)[0].toArray()
-                        b_nom = b_fcn.call(nominal_known + nominal_solved)[0].toArray()
-
-                        if False:
-                            sol_nom = [1e-3, 2e4]
-                            b = casadi.mul(A_nom, casadi.vertcat(sol_nom))
-                        
-                        sol = casadi.solve(A_nom, b_nom, options['linear_solver']).toArray()
-                        res = (casadi.mul(A_nom, sol) - b_nom).toArray()
-                        dh()
-
                     # Create residuals
                     for (i, var) in enumerate(co.variables):
                         if var.is_der or var.name in self.options['uneliminable']:
@@ -1398,12 +1349,14 @@ class BLTModel(object):
                             if options['closed_form']:
                                 if options['inline_solved']:
                                     something = [] # tear_sx_vars
+                                    # TODO: something
                                     b_input = causal_co.n * [1.] + sx_known_vars + solved_expr + something
-                                    dh() # TODO: something
+                                    raise NotImplementedError('Closed form is not supported for tearing')
                                 else:
                                     something = [] # tear_sx_vars
+                                    # TODO: something
                                     b_input = causal_co.n * [1.] + sx_known_vars + sx_solved_vars + something
-                                    dh() # TODO: something
+                                    raise NotImplementedError('Closed form is not supported for tearing')
                             else:
                                 b_input = causal_co.n * [1.] + known_vars + solved_expr + tear_mx_vars
                             b = causal_co.b_fcn.call(b_input, self.options['inline'])[0]
