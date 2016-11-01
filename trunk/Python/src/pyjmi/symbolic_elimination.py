@@ -49,7 +49,7 @@ class EliminationOptions(OptionBase):
             Type: bool
             Default: True
 
-        uneliminable --
+        ineliminable --
             Names of variables that should not be eliminated. Particularly useful for variables with bounds.
 
             Default: []
@@ -118,7 +118,7 @@ class EliminationOptions(OptionBase):
                 'inline': True,
                 'closed_form': False,
                 'inline_solved': False,
-                'uneliminable': [],
+                'ineliminable': [],
                 'linear_solver': "symbolicqr",
                 'dense_tol': 15,
                 'dense_measure': 'lmfi'}
@@ -301,9 +301,9 @@ class Component(object):
         if not self.options['solve_blocks'] and self.n > 1:
             return False
 
-        # Blocks containing derivatives or uneliminable variables are not solvable
+        # Blocks containing derivatives or ineliminable variables are not solvable
         for var in self.variables:
-            if var.is_der or var.name in self.options['uneliminable']:
+            if var.is_der or var.name in self.options['ineliminable']:
                 return False
 
         return True
@@ -672,7 +672,7 @@ class BipartiteGraph(object):
             linear_clr = 'ForestGreen'
             dense_clr = 'Gold'
             nonlinear_clr = 'Red'
-            uneliminable_clr = 'DarkOrange'
+            ineliminable_clr = 'DarkOrange'
             derivative_clr = 'Blue'
             unknown_clr = 'Black'
             for component in self.components:
@@ -700,8 +700,8 @@ class BipartiteGraph(object):
                         if component.torn:
                             color = nonlinear_clr
                             for (j, causal_co) in enumerate(component.causal_graph.components):
-                                if causal_co.variables[0].name in self.options['uneliminable']:
-                                    causal_color = uneliminable_clr
+                                if causal_co.variables[0].name in self.options['ineliminable']:
+                                    causal_color = ineliminable_clr
                                 elif causal_co.sparsity_preserving:
                                     causal_color = linear_clr
                                 else:
@@ -719,8 +719,8 @@ class BipartiteGraph(object):
                                 RuntimeError("BUG?")
                         else:
                             color = nonlinear_clr
-                elif component.n == 1 and component.variables[0].name in self.options['uneliminable']:
-                    color = uneliminable_clr
+                elif component.n == 1 and component.variables[0].name in self.options['ineliminable']:
+                    color = ineliminable_clr
                 else:
                     color = derivative_clr
                 plt.plot([i, i_new], [-i, -i], color, lw=lw)
@@ -1032,7 +1032,7 @@ class BLTModel(object):
 
         # Get to work
         self._model = model
-        self._process_uneliminables()
+        self._process_ineliminables()
         self._create_bipgraph()
         self._setup_dependencies()
         self._compute_blt()
@@ -1045,13 +1045,13 @@ class BLTModel(object):
         """
         return self._model.__getattribute__(name)
 
-    def _process_uneliminables(self):
-        # Check that uneliminables exist and replace with aliases.
-        for (i, name) in enumerate(self.options['uneliminable']):
+    def _process_ineliminables(self):
+        # Check that ineliminables exist and replace with aliases.
+        for (i, name) in enumerate(self.options['ineliminable']):
             var = self._model.getVariable(name)
             if var is None:
-                raise ValueError('Uneliminable variable %s does not exist.' % name)
-            self.options['uneliminable'][i] = var.getModelVariable().getName()
+                raise ValueError('Ineliminable variable %s does not exist.' % name)
+            self.options['ineliminable'][i] = var.getModelVariable().getName()
 
     def _create_bipgraph(self):
         # Initialize structures
@@ -1161,7 +1161,7 @@ class BLTModel(object):
             for var in self._mx_var_struct[vk]:
                 dependencies[var.getName()] = [var.getName()]
 
-        for var_name in self.options['uneliminable']:
+        for var_name in self.options['ineliminable']:
             dependencies[var_name] = [var_name]
 
         for var in self.tear_vars:
@@ -1313,7 +1313,7 @@ class BLTModel(object):
 
                     # Create residuals
                     for (i, var) in enumerate(co.variables):
-                        if var.is_der or var.name in self.options['uneliminable']:
+                        if var.is_der or var.name in self.options['ineliminable']:
                             if options['closed_form']:
                                 residuals.append(var.sx_var - sol[i])
                             else:
@@ -1337,7 +1337,7 @@ class BLTModel(object):
                             raise NotImplementedError('Causalized equations must be lower triangular')
                         # Eliminate causal variable
                         if (self._sparsity_preserving(causal_co) and
-                            causal_co.variables[0].name not in self.options['uneliminable']):
+                            causal_co.variables[0].name not in self.options['ineliminable']):
                             causal_co.create_lin_eq(known_vars, solved_vars, tear_mx_vars)
                             
                             # Compute A
@@ -1653,12 +1653,12 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
     Emulates CasADi Interface's OptimizationProblem class using BLT.
     """
 
-    def _process_uneliminables(self):
-        # Mark variables with timed variables as uneliminable
+    def _process_ineliminables(self):
+        # Mark variables with timed variables as ineliminable
         for var in self._model.getTimedVariables():
-            self.options['uneliminable'] += [var.getBaseVariable().getName()]
-        self.options['uneliminable'] = list(set(self.options['uneliminable']))
-        super(BLTOptimizationProblem, self)._process_uneliminables()
+            self.options['ineliminable'] += [var.getBaseVariable().getName()]
+        self.options['ineliminable'] = list(set(self.options['ineliminable']))
+        super(BLTOptimizationProblem, self)._process_ineliminables()
 
     def _default_options(self, algorithm):
         """ 

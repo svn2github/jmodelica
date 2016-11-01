@@ -49,7 +49,7 @@ def run_demo(with_plots=True):
 
     # Set elimination options
     elim_opts = EliminationOptions()
-    elim_opts['uneliminable'] = ['plant.sigma']
+    elim_opts['ineliminable'] = ['plant.sigma']
     if with_plots:
         elim_opts['draw_blt'] = True
 

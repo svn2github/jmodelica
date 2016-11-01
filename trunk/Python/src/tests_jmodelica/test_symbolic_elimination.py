@@ -143,16 +143,16 @@ class TestSymbolicElimination(object):
                 eq.setTearing(True)
         
     @testattr(casadi = True)
-    def test_uneliminable(self):
+    def test_ineliminable(self):
         """
-        Test uneliminable variables for both manual and automatic tearing.
+        Test ineliminable variables for both manual and automatic tearing.
         """
         cost_ref = 1.22316281
         u_norm_ref = 0.433955911
 
-        # Mark bounded varible as uneliminable
+        # Mark bounded varible as ineliminable
         elim_opts = EliminationOptions()
-        elim_opts['uneliminable'] = ['y1']
+        elim_opts['ineliminable'] = ['y1']
 
         # Manual tearing
         op_manual = self.op_illust_manual_bound
