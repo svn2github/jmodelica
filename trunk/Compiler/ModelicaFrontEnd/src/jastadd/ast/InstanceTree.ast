@@ -106,7 +106,7 @@ abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess
                                               /[Annotation:InstClassModification]/
                                               /[ClassAnnotation:InstClassModification]/;
 InstComposite                 : InstComponentDecl;
-abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
+abstract InstAssignable       : InstComponentDecl;
 InstPrimitive                 : InstAssignable;
 InstEnum                      : InstPrimitive;
 InstRecord                    : InstAssignable;
