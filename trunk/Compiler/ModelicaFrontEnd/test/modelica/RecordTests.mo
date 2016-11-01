@@ -1668,7 +1668,7 @@ model RecordBinding30
             description="Flattening and scalarization of record with if binding expression",
             flatModel="
 fclass RecordTests.RecordBinding30
- parameter Boolean b.b = false /* false */;
+ structural parameter Boolean b.b = false /* false */;
  structural parameter Integer b.rw.r.n = 1 /* 1 */;
  constant Real b.rw.r.x[1] = 1;
 end RecordTests.RecordBinding30;

@@ -702,6 +702,7 @@ aspect Names {
     eq InstGlobalAccess.enclosingName()  = name().substring(0, name().lastIndexOf('.'));
 
     eq InstComponentDecl.getInstModification().calcInstanceName() = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
+    eq InstAssignable.getBindingFExp().calcInstanceName()         = buildInstanceName(surroundingInstClass(), getFQNamePrefix());
     eq InstComponentDecl.getChild().calcInstanceName()            = buildInstanceName(surroundingInstClass(), getFQName());
     eq InstClassDecl.getChild().calcInstanceName()                = buildInstanceName(this, new FQNameEmpty());
     eq InstProgramRoot.getChild().calcInstanceName() {

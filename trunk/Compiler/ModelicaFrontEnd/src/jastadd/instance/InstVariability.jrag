@@ -99,7 +99,7 @@ aspect InstVariability {
     
     syn boolean InstAssignable.isFinalIndependent() {
         InstValueModification mod = myInstValueMod();
-        return mod != null && mod.isFinal() && getBindingFExp().isIndependentParameterExp();
+        return mod != null && mod.isFinal() && mod.getFExp().isIndependentParameterExp();
     }
     syn boolean InstAssignable.isEvalAnnotated() = annotation().forPath("Evaluate").bool() || inEvalAnnotated();
     inh boolean InstComponentDecl.inEvalAnnotated();
@@ -138,10 +138,11 @@ aspect InstVariability {
     syn FTypePrefixVariability InstComponentDecl.bExpVariability() = fContinuous();
     eq InstAssignable.bExpVariability() {
         FTypePrefixVariability v = super.bExpVariability();
-        if (!circularVariability && hasBindingFExp()) {
-            if (!getBindingFExp().type().isUnknown()) {
+        if (!circularVariability) {
+            InstValueModification ivm = myInstValueMod();
+            if (ivm != null && !ivm.getFExp().type().isUnknown()) {
                 circularVariability = true;
-                v = getBindingFExp().variability();
+                v = ivm.getFExp().variability();
                 circularVariability = false;
             }
         }

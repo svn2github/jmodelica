@@ -105,25 +105,7 @@ aspect OperatorRecordTypes {
 
     public FExp FOperatorRecordType.zeroLiteral() {
         InstClassDecl func = matchOverloadedZero();
-        if (func != null && func.myOutputs().size() > 0) {
-            try {
-                Map<CommonVariableDecl,CValue> map = new HashMap<CommonVariableDecl,CValue>();
-                func.evaluate(ASTNode.defaultVariableEvaluator(), map);
-                return map.get(func.myOutputs().get(0)).buildInstLiteral();
-            } catch (ConstantEvaluationException e) {
-                
-            }
-        }
-        return super.zeroLiteral();
-    }
-    
-    public FExp FType.flattenZeroLiteral() {
-        return sizedZeroLiteral();
-    }
-    
-    public FExp FOperatorRecordType.flattenZeroLiteral() {
-        InstClassDecl func = matchOverloadedZero();
-        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : zeroLiteral();
+        return (func != null) ? func.flattenOverloadedFunctionCall(new FQNameEmpty()) : super.zeroLiteral();
     }
 
 }

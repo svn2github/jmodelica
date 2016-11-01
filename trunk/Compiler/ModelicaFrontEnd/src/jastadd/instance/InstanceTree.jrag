@@ -1806,9 +1806,9 @@ aspect InstaceConstrainingClauses {
     }
 
     syn lazy FExp InstValueModification.getFExp() = getValueModification().instantiateExp();
-    eq InstValueRecordModification.getFExp()      = getValue();
-    eq InstDefaultRecordModification.getFExp()    = getArg().getFExp();
-    eq InstArrayModification.getFExp()            = getCell();
+    eq InstValueRecordModification.getFExp()      = getValue().unboundCopy();
+    eq InstDefaultRecordModification.getFExp()    = getArg().getFExp().unboundCopy();
+    eq InstArrayModification.getFExp()            = getCell().unboundCopy();
 
     syn FExp ValueModification.instantiateExp() = getExp().instantiate();
     eq DummyModification.instantiateExp()       = myFExp().treeCopy();

@@ -467,8 +467,8 @@ aspect Connections {
                 e = cse.buildFlow(e);
             // Only possible types here are operator record scalar, Integer and Real (the two latter either array or scalar)
             FType t = first().getVar().type();
-            FExp zero = t.isNumeric() ? t.size().createZeroFExp() : t.flattenZeroLiteral();
-            eqns.add(new FEquation(e, zero));
+            FExp zero = t.isNumeric() ? t.size().createZeroFExp() : t.zeroLiteral();
+            eqns.add(new FEquation(e, zero));   
         }
 
 	}

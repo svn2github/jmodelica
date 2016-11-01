@@ -1349,7 +1349,7 @@ aspect Flattening {
      * Always false for components that are not assignable.
      */
     syn boolean InstComponentDecl.hasBindingFExp() = false;
-    eq InstAssignable.hasBindingFExp()             = getBindingFExp() != null;
+    eq InstAssignable.hasBindingFExp()             = myBindingInstExp() != null;
 
     /**
      * Retrieve the part of the binding expression that applies to this InstAssignable.
@@ -1357,30 +1357,19 @@ aspect Flattening {
     syn FExp InstComponentDecl.getBindingFExp() = null;
     syn lazy FExp InstAssignable.getBindingFExp() {
         //log.debug("In file: " + fileName() + " at line: " + beginLine() + ": " + prettyPrint(""));
-        FExp exp = parentBindingFExp();
-        if (exp != null) {
-            exp = exp.component(name());
-        } else if (hasInstValueMod()) {
+        if (hasInstValueMod()) {
             InstValueModification im = myInstValueMod();
-            exp = im.getFExp();
-            if (ndims() < exp.ndims()) {
-                InstNode decl = im.myInstNode();
+            FExp fe = im.getFExp();
+            boolean hasEach = im.hasEach() || 
+                (!declaredSize().isUnknown() && type().typeCompatible(fe.type()));  // Assume each if types match
+            InstNode decl = im.myInstNode();
+            if (!hasEach && decl != this) {
                 decl = matchingAncestor(decl);
-                exp = exp.dynamicFExp(splitBindingFExp(exp, decl));
+                fe = splitBindingFExp(fe, decl);
             }
+            return fe.unboundCopy();
         }
-        return exp;
-    }
-    
-    inh FExp InstComponentDecl.parentBindingFExp();
-    eq Root.getChild().parentBindingFExp()                   = null;
-    eq InstClassDecl.getChild().parentBindingFExp()          = null;
-    eq FExp.getChild().parentBindingFExp()                   = null;
-    eq InstComponentDecl.getChild().parentBindingFExp()      = null;
-    eq InstAssignable.getChild().parentBindingFExp()         = getBindingFExp();
-    eq InstArrayComponentDecl.getChild().parentBindingFExp() {
-        FExp exp = parentBindingFExp();
-        return exp != null && getIndex() > 0 ? exp.dynamicFExp(exp.splitArrayExp(getIndex())) : exp;
+        return null;
     }
     
     public FExp InstAssignable.flattenBindingFExp() {
@@ -1594,19 +1583,15 @@ aspect Flattening {
      * not have a binding expression, return <code>null</code>.
      */
     syn InstValueModification InstComponentDecl.myInstValueMod() = null;
-    syn lazy InstValueModification InstAssignable.myInstValueMod() = myInstValueModCalc();
-    syn InstValueModification InstArrayComponentDecl.myInstValueMod() = myInstValueModCalc();
-    
-    syn InstValueModification InstComponentDecl.myInstValueModCalc() {
-        InstValueModification ivm = parentInstValueMod();
-        if (ivm != null) {
-            return ivm;
+    syn lazy InstValueModification InstAssignable.myInstValueMod() {
+        if (inRecord()) {
+            InstValueModification ivm = parentInstValueMod();
+            if (ivm != null)
+                return ivm.matchInstRecordModification(name());
         }
-        for (InstModification im : totalMergedEnvironment()) {
-            if (im.hasInstValueMod()) {
+        for (InstModification im : totalMergedEnvironment()) 
+            if (im.hasInstValueMod()) 
                 return im.getInstValueMod();
-            }
-        }
         return null;
     }
 
@@ -1617,11 +1602,31 @@ aspect Flattening {
      * If the parent component is not an assignable, or is an assignable that does 
      * not have a binding expression, return <code>null</code>.
      */
-    inh InstValueModification InstComponentDecl.parentInstValueMod();
-    eq Root.getChild().parentInstValueMod()              = null;
-    eq FExp.getChild().parentInstValueMod()              = null;
-    eq InstClassDecl.getChild().parentInstValueMod()     = null;
-    eq InstComponentDecl.getChild().parentInstValueMod() = myInstValueMod();
+    inh InstValueModification InstAssignable.parentInstValueMod();
+    inh InstValueModification InstArrayComponentDecl.parentInstValueMod();
+    eq InstComponentDecl.getChild().parentInstValueMod()      = myInstValueMod();
+    eq InstClassDecl.getChild().parentInstValueMod()          = null;
+    eq Root.getChild().parentInstValueMod()                   = null;
+    eq InstArrayComponentDecl.getChild().parentInstValueMod() {
+        InstValueModification ivm = parentInstValueMod();
+        return (ivm != null) ? ivm.arrayInstModification(getIndex()) : null;
+    }
+    eq InstRecordConstructor.getChild().parentInstValueMod() = null;
+    
+    syn boolean InstAssignable.hasInstValueModTop() = myInstValueModTop() != null;
+    
+    syn InstValueModification InstAssignable.myInstValueModTop() {
+        InstValueModification top = inheritedInstValueModTop();
+        if (top == null)
+            top = myInstValueMod();
+        return top;
+    }
+    
+    inh InstValueModification InstAssignable.inheritedInstValueModTop();
+    inh InstValueModification InstExtends.inheritedInstValueModTop();
+    eq BaseNode.getChild().inheritedInstValueModTop()          = null;
+    eq InstAssignable.getChild().inheritedInstValueModTop()    = myInstValueModTop();
+    eq InstExtends.getChild().inheritedInstValueModTop()       = inheritedInstValueModTop();
     
     /**
      * Check if this InstValueModification is part of a modification 

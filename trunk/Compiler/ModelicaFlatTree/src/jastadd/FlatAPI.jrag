@@ -2936,6 +2936,11 @@ aspect FVariableUses {
     eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
     eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
     
+    inh boolean FExp.inBindingExp();
+    eq Root.getChild().inBindingExp() = false;
+    eq InstAssignable.getBindingFExp().inBindingExp() = true;
+    eq FVariable.getBindingExp().inBindingExp() = true;
+    
     /**
      * Check if this is exp is bound in a declaration
      */

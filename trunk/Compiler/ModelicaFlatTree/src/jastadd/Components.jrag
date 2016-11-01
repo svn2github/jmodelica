@@ -21,22 +21,12 @@ aspect Components {
      * Similar to getArray() for arrays.
      */
     syn FExp FExp.component(String name) = dynamicFExp(extractRecordFExp(name));
-    eq InstRecordConstructor.component(String name) {
-        int i = 0;
-        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
-            if (icd.name().equals(name)) {
-                break;
-            }
-            i++;
-        }
-        return getArg(i).getFExp();
-    }
-    eq FRecordConstructor.component(String name)    = getRecord().myFRecordDecl().extractArg(this, name);
+    eq FRecordConstructor.component(String name) = getRecord().myFRecordDecl().extractArg(this, name);
     eq FIfExp.component(String name) = dynamicFExp(new FIfExp(getIfExp().treeCopy(), getThenExp().component(name).unboundCopy(), getElseExp().component(name).unboundCopy()));
     eq FSubscriptedExp.component(String name) {
         if (indexVariability().indexParameterOrLess()) {
             try {
-                return dynamicFExp(select().extractRecordFExp(name));
+                return select().component(name);
             } catch (ConstantEvaluationException e) {
                 
             }
