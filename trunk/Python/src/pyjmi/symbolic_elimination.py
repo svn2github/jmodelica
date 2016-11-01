@@ -1016,7 +1016,8 @@ class BLTModel(object):
         """
         Creates a BLTModel from a Model.
         """
-        self.options = elimination_options
+        self.original_options = elimination_options
+        self.options = copy.deepcopy(self.original_options)
 
         # Identify tearing variables
         if self.options['tearing']:
@@ -1024,17 +1025,14 @@ class BLTModel(object):
                               if not var.isAlias() and var.getTearing()]
         else:
             self.tear_vars = []
-        
-        # Check that uneliminables exist and replace with aliases
-        for (i, name) in enumerate(self.options['uneliminable']):
-            var = model.getVariable(name)
-            if var is None:
-                raise ValueError('Uneliminable variable %s does not exist.' % name)
-            self.options['uneliminable'][i] = var.getModelVariable().getName()
 
+        # Check validity of options
         if self.options['closed_form'] and not self.options['inline']:
             raise ValueError("inline has to be true when closed_form is")
+
+        # Get to work
         self._model = model
+        self._process_uneliminables()
         self._create_bipgraph()
         self._setup_dependencies()
         self._compute_blt()
@@ -1046,6 +1044,14 @@ class BLTModel(object):
         Emulate Model by default (particularly useful for enums).
         """
         return self._model.__getattribute__(name)
+
+    def _process_uneliminables(self):
+        # Check that uneliminables exist and replace with aliases.
+        for (i, name) in enumerate(self.options['uneliminable']):
+            var = self._model.getVariable(name)
+            if var is None:
+                raise ValueError('Uneliminable variable %s does not exist.' % name)
+            self.options['uneliminable'][i] = var.getModelVariable().getName()
 
     def _create_bipgraph(self):
         # Initialize structures
@@ -1646,6 +1652,13 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
     """
     Emulates CasADi Interface's OptimizationProblem class using BLT.
     """
+
+    def _process_uneliminables(self):
+        # Mark variables with timed variables as uneliminable
+        for var in self._model.getTimedVariables():
+            self.options['uneliminable'] += [var.getBaseVariable().getName()]
+        self.options['uneliminable'] = list(set(self.options['uneliminable']))
+        super(BLTOptimizationProblem, self)._process_uneliminables()
 
     def _default_options(self, algorithm):
         """ 
