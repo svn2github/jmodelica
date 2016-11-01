@@ -202,11 +202,13 @@ public class CGenerator extends GenericGenerator {
 		public void generate(CodeStream genPrinter) {
             CodePrinter p = ASTNode.printer_C.eventIndicatorPrinter();
 			if (!fclass.onlyInitBLT()) {
+                ASTNode.genFunctionStart(genPrinter, INDENT);
                 for (FExp e : fclass.stateEventExps()) 
                     e.genEventResidualVarDecls_C(p, genPrinter, INDENT);
-				Enumerator enumerator = new Enumerator();
+                Enumerator enumerator = new Enumerator();
                 for (FExp e : fclass.stateEventExps())
                     e.genEventResidual_C(p, genPrinter, INDENT, enumerator);
+                ASTNode.genFunctionEnd(genPrinter, INDENT);
 			} else {
 				genPrinter.print("  model_init_R0(jmi, res);\n");
 			}
@@ -248,6 +250,7 @@ public class CGenerator extends GenericGenerator {
 		}
 	
 		public void generate(CodeStream genPrinter) {
+            ASTNode.genFunctionStart(genPrinter, INDENT);
             CodePrinter printer = ASTNode.printer_C.initialSystemPrinter().eventIndicatorPrinter();
             for (FExp e : fclass.stateEventExps()) 
                 e.genEventResidualVarDecls_C(printer, genPrinter, INDENT);
@@ -258,6 +261,7 @@ public class CGenerator extends GenericGenerator {
                 e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
             for (FExp e : fclass.eventExpInInitialEquations())
                 e.genEventResidual_C(printer, genPrinter, INDENT, enumerator);
+            ASTNode.genFunctionEnd(genPrinter, INDENT);
 		}
 	}
 	

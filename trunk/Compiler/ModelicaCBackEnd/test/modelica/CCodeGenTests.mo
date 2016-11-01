@@ -195,11 +195,19 @@ $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (_one_1);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, _time - (_two_2), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (_one_1);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, _time - (_two_2), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end CCodeGenTest6;
 
@@ -227,6 +235,10 @@ $C_DAE_event_indicator_residuals$
     (*res)[0] = _y_2 - (_der_x_3);
     (*res)[1] = (COND_EXP_EQ(COND_EXP_LE(_time, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(0), COND_EXP_EQ(COND_EXP_GE(_time, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_LT(_x_1, AD_WRAP_LITERAL(2), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(2), COND_EXP_EQ(COND_EXP_GT(_x_1, AD_WRAP_LITERAL(4), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), COND_EXP_EQ(COND_EXP_EQ(_z_0, AD_WRAP_LITERAL(3), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(4), AD_WRAP_LITERAL(7))))))) - (_der_x_3);
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end CCodeGenTest7;
 
@@ -288,7 +300,11 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[4] = 2 * (_z_2 + _x_0 + COND_EXP_EQ(COND_EXP_GE(_z_2, AD_WRAP_LITERAL(-1.5), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(-3), AD_WRAP_LITERAL(3))) - (_y_1);
     (*res)[5] = - _y_1 - _x_0 + COND_EXP_EQ(_sw_init(0), JMI_TRUE, AD_WRAP_LITERAL(-1), AD_WRAP_LITERAL(1)) - (_z_2);
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _y_1 - (AD_WRAP_LITERAL(0.5));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end CCodeGenTest9;
 
@@ -324,9 +340,13 @@ $C_DAE_initial_event_indicator_residuals$
     (*res)[4] = _z_2 + _x_0 + COND_EXP_EQ(_sw_init(1), JMI_TRUE, AD_WRAP_LITERAL(-3), AD_WRAP_LITERAL(3)) - (_y_1);
     (*res)[5] = - _y_1 - _x_0 + COND_EXP_EQ(_sw_init(2), JMI_TRUE, AD_WRAP_LITERAL(-1), AD_WRAP_LITERAL(1)) - (_z_2);
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(1));
     (*res)[1] = _z_2 - (AD_WRAP_LITERAL(-1.5));
     (*res)[2] = _y_1 - (AD_WRAP_LITERAL(0.5));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end CCodeGenTest10;
 
@@ -542,9 +562,13 @@ $C_ode_initialization$
             generatedCode="
 3
 0
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(5));
     (*res)[1] = _time - (AD_WRAP_LITERAL(1));
     (*res)[2] = COND_EXP_EQ(LOG_EXP_NOT(_sw_init(0)), JMI_TRUE, _time - (AD_WRAP_LITERAL(2)), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 
 int model_ode_initialize_base(jmi_t* jmi) {
@@ -6704,6 +6728,8 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = COND_EXP_EQ(pre_z_5, JMI_TRUE, _y_2 - (2), AD_WRAP_LITERAL(1));
     (*res)[1] = COND_EXP_EQ(_z_5, JMI_TRUE, _y_2 - (2), AD_WRAP_LITERAL(1));
     (*res)[2] = _x_1 - (2);
@@ -6713,6 +6739,8 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     (*res)[6] = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_AND(_sw(3), _sw(4))), _sw(5)), JMI_TRUE, _time - (2.1), AD_WRAP_LITERAL(1));
     (*res)[7] = COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6)))), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1));
     (*res)[8] = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_AND(_sw(3), _sw(4)), LOG_EXP_AND(_sw(5), _sw(6)))), _sw(7)), JMI_TRUE, _time - (3.1), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end WhenTest1;
 
@@ -12970,8 +12998,12 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _y_1 - (_x_0 * 3);
     (*res)[1] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, _y_1 - 1 - (_x_0), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Algorithm12;
 
@@ -13040,10 +13072,14 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (0.5);
     (*res)[1] = _time - (1);
     (*res)[2] = _time - (0.7);
     (*res)[3] = _time - (1.5);
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Algorithm13;
 
@@ -13098,7 +13134,11 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (1);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -13189,7 +13229,11 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (1);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -13323,10 +13367,14 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _x_0 - (0.7);
     (*res)[1] = _x_0 - (0.7);
     (*res)[2] = _x_0 - (0.8);
     (*res)[3] = _x_0 - (0.8);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -16135,6 +16183,8 @@ $C_DAE_event_indicator_residuals$
 $C_DAE_initial_event_indicator_residuals$
 ",
             generatedCode="
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1, 1)
@@ -16143,7 +16193,11 @@ $C_DAE_initial_event_indicator_residuals$
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_ref_1(tmp_2, 1) = pre_y2_1;
     (*res)[1] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_2));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 1, 1, 1)
@@ -16152,6 +16206,8 @@ $C_DAE_initial_event_indicator_residuals$
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 1, 1, 1)
     jmi_array_ref_1(tmp_2, 1) = pre_y2_1;
     (*res)[1] = _time - (func_CCodeGenTests_TestRelationalOp7_f_exp0(tmp_2));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end TestRelationalOp7;
 
@@ -16388,11 +16444,15 @@ model TestRelationalOp11
             description="Guarded event indicators",
             template="$C_DAE_event_indicator_residuals$",
             generatedCode="
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _x_0 - (AD_WRAP_LITERAL(1));
     (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(2)), AD_WRAP_LITERAL(1));
     (*res)[2] = COND_EXP_EQ(LOG_EXP_NOT(_sw(0)), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(3)), AD_WRAP_LITERAL(1));
     (*res)[3] = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(_sw(0)), LOG_EXP_NOT(_sw(2))), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(4)), AD_WRAP_LITERAL(1));
     (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_AND(LOG_EXP_NOT(_sw(0)), LOG_EXP_NOT(_sw(2))), _sw(3)), JMI_TRUE, _x_0 - (AD_WRAP_LITERAL(5)), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end TestRelationalOp11;
 
@@ -16417,6 +16477,8 @@ $C_DAE_event_indicator_residuals$
 $C_ode_derivatives$
 ",
             generatedCode="
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 2, 1)
     (*res)[0] = _x_0 - (AD_WRAP_LITERAL(4));
     (*res)[1] = _x_0 - (AD_WRAP_LITERAL(4));
@@ -16424,6 +16486,8 @@ $C_ode_derivatives$
     jmi_array_ref_1(tmp_1, 1) = _sw(0);
     jmi_array_ref_1(tmp_1, 2) = _sw(1);
     (*res)[2] = COND_EXP_EQ(func_CCodeGenTests_TestRelationalOp12_f_exp0(tmp_1), JMI_TRUE, _x_0 - (5), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 
 int model_ode_derivatives_base(jmi_t* jmi) {
@@ -16633,9 +16697,13 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
     (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     (*res)[2] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end TestRelationalOp15;
 model TestRelationalOp16
@@ -16685,11 +16753,15 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     return ef;
 }
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = sin(_time) - (AD_WRAP_LITERAL(0));
     (*res)[1] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     (*res)[2] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(1)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     (*res)[3] = COND_EXP_EQ(_sw(0), JMI_TRUE, cos(_time) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
     (*res)[4] = COND_EXP_EQ(LOG_EXP_AND(_sw(0), _sw(3)), JMI_TRUE, cos(_time + AD_WRAP_LITERAL(0.5)) - (AD_WRAP_LITERAL(0)), AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end TestRelationalOp16;
 
@@ -18281,9 +18353,17 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 C_DAE_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 C_DAE_initial_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _p_1 - (AD_WRAP_LITERAL(3.14));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static const int N_sw = 0 + 0;
 static const int N_sw_init = 1;
@@ -18394,9 +18474,17 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 C_DAE_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 C_DAE_initial_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _p1_0 - (AD_WRAP_LITERAL(0));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static const int N_sw = 0 + 0;
 static const int N_sw_init = 1;
@@ -18466,10 +18554,18 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 C_DAE_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 C_DAE_initial_event_indicator_residuals
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(1));
+    JMI_DYNAMIC_FREE()
+    return ef;
 
 static const int N_sw = 1 + 0;
 static const int N_sw_init = 0;
@@ -20177,7 +20273,15 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Delay1;
 
@@ -20245,11 +20349,19 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     jmi_delay_first_event_indicator(jmi, 3, _x2_1, &(*res)[0]);
     jmi_delay_second_event_indicator(jmi, 3, _x2_1, &(*res)[1]);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Delay2;
 
@@ -20322,11 +20434,19 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     jmi_delay_first_event_indicator(jmi, 3, _x2_1, &(*res)[0]);
     jmi_delay_second_event_indicator(jmi, 3, _x2_1, &(*res)[1]);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Delay3;
 
@@ -20450,15 +20570,23 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_12, 2, 1)
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_12, 2, 1, 2)
     jmi_array_ref_1(tmp_12, 1) = _t_2;
     jmi_array_ref_1(tmp_12, 2) = _t_2;
     jmi_delay_first_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_12), &(*res)[0]);
     jmi_delay_second_event_indicator(jmi, 1, func_CCodeGenTests_Delay4_f_exp0(tmp_12), &(*res)[1]);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Delay4;
 
@@ -20529,13 +20657,21 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(1));
     jmi_delay_first_event_indicator(jmi, 0, _y_1, &(*res)[1]);
     jmi_delay_second_event_indicator(jmi, 0, _y_1, &(*res)[2]);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = _time - (AD_WRAP_LITERAL(1));
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[2] = JMI_DELAY_INITIAL_EVENT_RES;
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end Delay5;
 
@@ -20631,11 +20767,19 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     ef = jmi_spatialdist_event_indicator(jmi, 0, _time + AD_WRAP_LITERAL(3), JMI_TRUE, &(*res)[0]);
     ef = jmi_spatialdist_event_indicator(jmi, 1, _time + AD_WRAP_LITERAL(3), JMI_FALSE, &(*res)[1]);
+    JMI_DYNAMIC_FREE()
+    return ef;
 
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
     (*res)[0] = JMI_DELAY_INITIAL_EVENT_RES;
     (*res)[1] = JMI_DELAY_INITIAL_EVENT_RES;
+    JMI_DYNAMIC_FREE()
+    return ef;
 ")})));
 end SpatialDist1;
 
