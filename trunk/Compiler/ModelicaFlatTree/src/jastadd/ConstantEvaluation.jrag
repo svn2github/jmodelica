@@ -4312,8 +4312,10 @@ aspect ConstantEvaluation {
     @Override
     public int FWhileStmt.evaluate(AlgorithmEvaluator evaluator) {
         int res = EVAL_CONT;
-        while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue())
+        while (res == EVAL_CONT && getTest().ceval(evaluator).booleanValue()) {
             res = getWhileStmts().evaluateList(evaluator);
+            resetAfterCeval();
+        }
         return (res == EVAL_BREAK) ? EVAL_CONT : res;
     }
 
@@ -5083,6 +5085,20 @@ aspect VariableEvaluator {
         
         public AlgorithmEvaluator(Map<CommonVariableDecl, CValue> values) {
             this.values = values;
+        }
+        
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(super.toString());
+            sb.append("\n");
+            for (CommonVariableDecl cvd : values.keySet()) {
+                sb.append(cvd.toString());
+                sb.append(" = ");
+                sb.append(values.get(cvd).toString());
+                sb.append("\n");
+            }
+            return sb.toString();
         }
         
         public CValue ceval(FExp exp) {
