@@ -1589,5 +1589,22 @@ Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRES
 ")})));
 end FunctionOutputSize1;
 
+model UnknownSizeArrayIndexBounds1
+    parameter Real[:] x;
+    Real y = x[1];
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnknownSizeArrayIndexBounds1",
+            description="",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end UnknownSizeArrayIndexBounds1;
+
 
 end CheckTests;

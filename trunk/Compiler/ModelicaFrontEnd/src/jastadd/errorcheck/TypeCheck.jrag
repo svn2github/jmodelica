@@ -807,7 +807,7 @@ aspect FlatTypeCheck {
         } else if (!inFunction()) { 
               if (!getFExp().variability().fixedParameterOrLess()) {
                 warning("Variable array index in equation can result in slow simulation time");
-            } else if (!reportedOutOfBound && !inUnknownAccess()) {
+              } else if (!reportedOutOfBound && !inUnknownAccess() && !mySize().isUnknown()) {
                 // Check array bounds
                 // TODO: Perform bounds check in functions if index has parameter variability or lower?
                 try {
