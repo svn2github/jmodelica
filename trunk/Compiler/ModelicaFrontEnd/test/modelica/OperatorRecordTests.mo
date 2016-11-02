@@ -2694,8 +2694,6 @@ end OperatorRecordTests.OperatorLimitations24;
 ")})));
     end OperatorLimitations24;
 
-
-// TODO: This is wrong! Function OperatorRecordTests.OperatorLimitations25.A.'0' is not present in flat model.
     model OperatorLimitations25
         operator record A
             Real x;
@@ -2729,7 +2727,7 @@ fclass OperatorRecordTests.OperatorLimitations25
  structural parameter Integer n = 0 /* 0 */;
  OperatorRecordTests.OperatorLimitations25.A a[2,0] = fill(OperatorRecordTests.OperatorLimitations25.A(time), 2, 0);
  OperatorRecordTests.OperatorLimitations25.A b[0,2] = fill(OperatorRecordTests.OperatorLimitations25.A(time + 1), 0, 2);
- OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}, {OperatorRecordTests.OperatorLimitations25.A.'0'(), OperatorRecordTests.OperatorLimitations25.A.'0'()}};
+ OperatorRecordTests.OperatorLimitations25.A c[2,2] = {{OperatorRecordTests.OperatorLimitations25.A(0), OperatorRecordTests.OperatorLimitations25.A(0)}, {OperatorRecordTests.OperatorLimitations25.A(0), OperatorRecordTests.OperatorLimitations25.A(0)}};
 
 public
  function OperatorRecordTests.OperatorLimitations25.A.'*'

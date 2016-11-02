@@ -295,7 +295,6 @@ aspect InstBindingType {
      */
     syn boolean InstModification.allModificationsMatchesSize(Size s)     = true;
     eq InstArrayModification.allModificationsMatchesSize(Size s)         = true;
-    eq InstRecordModification.allModificationsMatchesSize(Size s)        = true;
     eq InstElementRedeclare.allModificationsMatchesSize(Size s)          = true;
     eq InstValueModification.allModificationsMatchesSize(Size s)         = getFExp().size().equivalent(s, true);
     eq InstCompleteModification.allModificationsMatchesSize(Size s)      = 

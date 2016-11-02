@@ -1668,12 +1668,42 @@ model RecordBinding30
             description="Flattening and scalarization of record with if binding expression",
             flatModel="
 fclass RecordTests.RecordBinding30
- structural parameter Boolean b.b = false /* false */;
+ parameter Boolean b.b = false /* false */;
  structural parameter Integer b.rw.r.n = 1 /* 1 */;
  constant Real b.rw.r.x[1] = 1;
 end RecordTests.RecordBinding30;
 ")})));
 end RecordBinding30;
+
+model RecordBinding31
+    record R1
+        Real x;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+    end R2;
+    
+    record R3
+        R2 r2;
+    end R3;
+    
+    constant R2 r2(r1(x={1,2}));
+    constant R3[1] r3(r2={r2});
+    constant Real s = sum(r3[1].r2.r1.x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding31",
+            description="",
+            flatModel="
+fclass RecordTests.RecordBinding31
+ constant Real r2.r1[1].x = 1;
+ constant Real r2.r1[2].x = 2;
+ constant Real s = 3.0;
+end RecordTests.RecordBinding31;
+")})));
+end RecordBinding31;
 
 model UnmodifiableComponent1
     record R
@@ -2257,7 +2287,10 @@ model RecordConstructor5
             description="Record constructors: too few args",
             variability_propagation=false,
             errorMessage="
-1 errors found:
+2 errors found:
+
+Error at line 2252, column 8, in file '...':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, )).c'
 
 Error at line 2166, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: missing argument for required input c
@@ -2280,7 +2313,10 @@ model RecordConstructor6
             description="Record constructors: too many args",
             variability_propagation=false,
             errorMessage="
-1 errors found:
+2 errors found:
+
+Error at line 2275, column 8, in file '...':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, \"foo\")).c'
 
 Error at line 2189, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: too many positional arguments
@@ -2550,8 +2586,8 @@ model RecordConstructor15
 fclass RecordTests.RecordConstructor15
  structural parameter Integer n = 2 /* 2 */;
  structural parameter Integer r.n = 2 /* 2 */;
- structural parameter Real r.x[1] = 1 /* 1 */;
- structural parameter Real r.x[2] = 2 /* 2 */;
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
 end RecordTests.RecordConstructor15;
 ")})));
 end RecordConstructor15;

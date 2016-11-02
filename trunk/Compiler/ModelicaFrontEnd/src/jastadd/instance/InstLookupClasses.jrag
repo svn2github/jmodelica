@@ -47,8 +47,6 @@ aspect InstLookupClasses {
     eq InstComponentDecl.getInstExtends().lookupInstClass(String name)           = superLookupInstClassInComponent(name);
     eq InstArrayComponentDecl.getInstExtends().lookupInstClass(String name)      = instComponentDecl().superLookupInstClassInComponent(name);
 
-    eq InstAssignable.getBindingFExp().lookupInstClass(String name)              = myInstValueMod().lookupInstClass(name);
-
     eq InstArrayComponentDecl.getChild().lookupInstClass(String name)            = lookupInstClass(name);
     eq InstExternalObject.getDestructorCall().lookupInstClass(String name)       = lookupInstClass(name);
 
@@ -105,9 +103,7 @@ aspect InstLookupClasses {
     eq InstConstrainingClass.getInstNode().lookupInstClass(String name) = getClassName().myInstClassDecl().lookupInstClass(name);
 
     eq InstGeneratedInner.getChild().lookupInstClass(String name) = getCopiedOuter().lookupInstClass(name);
-
-    eq InstDefaultRecordModification.getChild().lookupInstClass(String name)     = 
-        (sourceInstMod() != null) ? sourceInstMod().lookupInstClass(name) : lookupInstClass(name);
+    
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClass(String name) = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClass(String name) = 

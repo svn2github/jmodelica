@@ -117,16 +117,13 @@ aspect InstFunctionBinding {
         InstComponentDecl bi = getBoundInput();
         if (bi != boundInput) {
             InstValueModification mod = bi.myInstValueMod();
-            if (mod != null && !mod.isDefaultRecordMod()) {
+            if (mod != null) {
                 return mod.getFExp();
             }
         }
         return getDeclarationFExp();
     }
-
-    syn boolean InstModification.isDefaultRecordMod()     = false;
-    eq InstDefaultRecordModification.isDefaultRecordMod() = true;
-
+    
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 

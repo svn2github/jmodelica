@@ -4772,7 +4772,7 @@ aspect CircularExpressions {
 	            }
 	        }
 	    }
-	    return (myBindingInstExp() != null && myBindingInstExp().isCircular());
+        return (hasBindingFExp() && getBindingFExp().isCircular());
 	}	
 	
 	syn boolean FArraySubscripts.isCircular() {
