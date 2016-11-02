@@ -1169,7 +1169,7 @@ aspect FlatTypeCheck {
                 FType outType = type();
                 if (use.isForIndex()) {
                     error("Can not assign a value to a for loop index");
-                } else if (outType.size().isUnknown() && !inFunction()) {
+                } else if (outType.size().isUnknown() && !inFunction() && !checkType.allowIncompleteSizes()) {
                     error(functionCallDecription() + ": could not evaluate array size of output " + 
                             myOutput().name());
                 } else if (!useType.typeCompatible(outType, true)) {

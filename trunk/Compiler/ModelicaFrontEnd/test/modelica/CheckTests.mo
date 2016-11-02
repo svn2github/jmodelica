@@ -1563,4 +1563,31 @@ end CheckTests.NegativeFill2;
 ")})));
 end NegativeFill2;
 
+model FunctionOutputSize1
+    function f
+        input Integer x;
+        output Integer[x] y1 = 1:x;
+        output Integer[x] y2 = 1:x;
+        algorithm
+    end f;
+    parameter Integer[:] x;
+    Real[1] y1;
+    Real[1] y2;
+equation
+    (y1,y2) = f(size(x,1));
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="InnerOuter1",
+            description="Check that error for function outputs does not trigger in inactive branch",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end FunctionOutputSize1;
+
+
 end CheckTests;
