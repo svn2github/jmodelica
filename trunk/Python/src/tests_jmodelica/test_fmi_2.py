@@ -23,6 +23,7 @@ import nose
 import os
 import numpy as N
 import sys as S
+import scipy.sparse.csc
 
 from tests_jmodelica import testattr, get_files_path
 from pymodelica.compiler import compile_fmu
@@ -560,6 +561,7 @@ class Test_State_Space_Repr:
     def setUpClass(cls):
         cls.directional1 = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.directional2 = compile_fmu("JacFuncTests.BasicJacobianTest2",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+        cls.cc           = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
     
     def _run_test(self, name, matrix):
         model = load_fmu(name)
@@ -591,7 +593,19 @@ class Test_State_Space_Repr:
         
         for i in range(len(M1)):
             nose.tools.assert_almost_equal(M1[i], M2[i], places=4)
-            
+    
+    @testattr(fmi = True)
+    def test_sparse_dense_repr(self):
+        model = load_fmu(self.cc)
+        model.setup_experiment()
+        model.initialize()
+        
+        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
+        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
+        
+        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
+        assert isinstance(A2, N.ndarray)
+    
     @testattr(fmi = True)
     def test_directional_without_initialize(self):
 		model = load_fmu(self.directional1)
