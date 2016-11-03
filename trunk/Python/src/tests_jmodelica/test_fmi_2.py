@@ -605,6 +605,13 @@ class Test_State_Space_Repr:
         
         assert isinstance(A1, scipy.sparse.csc.csc_matrix)
         assert isinstance(A2, N.ndarray)
+        
+        model.force_finite_differences = True
+        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
+        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
+        
+        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
+        assert isinstance(A2, N.ndarray)
     
     @testattr(fmi = True)
     def test_directional_without_initialize(self):
