@@ -60,6 +60,13 @@ class TestSymbolicElimination(object):
         self.op_illust_manual_bound = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
         
+        class_path = "IllustExampleLagrangeConstraintAndObjective"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.op_illust_automatic_constraint = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_automatic)
+        self.op_illust_manual_constraint = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_manual)
+        
     @testattr(casadi = True)
     def test_automatic_tearing(self):
         """
@@ -147,8 +154,8 @@ class TestSymbolicElimination(object):
         """
         Test ineliminable variables for both manual and automatic tearing.
         """
-        cost_ref = 1.22316281
-        u_norm_ref = 0.433955911
+        cost_ref = 1.08181340
+        u_norm_ref = 0.399868319
 
         # Mark bounded varible as ineliminable
         elim_opts = EliminationOptions()
@@ -253,9 +260,6 @@ class TestSymbolicElimination(object):
         """
         Test creation of closed form expressions when not using tearing.
         """
-        cost_ref = 1.06183273
-        u_norm_ref = 0.398219663
-
         # Perform elimination
         elim_opts = EliminationOptions()
         elim_opts['inline_solved'] = True
@@ -265,3 +269,45 @@ class TestSymbolicElimination(object):
             if 'y1)*y2)*' in res.getRepresentation():
                 residual = res.getRepresentation()
         N.testing.assert_string_equal(residual, "SX(((((2*y1)*y2)*sqrt(y5))-sqrt(x1)))")
+
+    @testattr(casadi = True)
+    def test_constraint_and_objective(self):
+        """
+        Test eliminating variables occurring in constraints and objective.
+        """
+        cost_ref = 1.08181340
+        u_norm_ref = 0.399868319
+
+        # Mark bounded varible as ineliminable for reference
+        inelim_opts = EliminationOptions()
+        inelim_opts['ineliminable'] = ['y1']
+        elim_opts = EliminationOptions()
+
+        # Manual tearing
+        op = self.op_illust_manual_constraint
+        op.getVariable('y3').setTearing(True)
+        for eq in op.getDaeEquations():
+            if 'y1)*y2)*y4)' in eq.getResidual().getRepresentation():
+                eq.setTearing(True)
+        blt_op_inelim = BLTOptimizationProblem(op, inelim_opts)
+        blt_op_elim = BLTOptimizationProblem(op, elim_opts)
+
+        # Check remaining variables
+        var_inelim = sorted([var.getName() for var in blt_op_inelim.getVariables(blt_op_inelim.REAL_ALGEBRAIC)
+                             if not var.isAlias()])
+        var_elim = sorted([var.getName() for var in blt_op_elim.getVariables(blt_op_elim.REAL_ALGEBRAIC)
+                           if not var.isAlias()])
+        N.testing.assert_array_equal(var_inelim, ['y1', 'y3', 'y5'])
+        N.testing.assert_array_equal(var_elim, ['y3', 'y5'])
+
+        # Optimize and check result
+        res_inelim = blt_op_inelim.optimize()
+        res_elim = blt_op_elim.optimize()
+        assert_results(res_inelim, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_elim, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+        # Reset tearing choices
+        op.getVariable('y3').setTearing(False)
+        for eq in op.getDaeEquations():
+            if 'y1)*y2)*y4)' in eq.getResidual().getRepresentation():
+                eq.setTearing(False)

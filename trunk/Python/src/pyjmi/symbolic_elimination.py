@@ -20,6 +20,7 @@ import numpy as np
 import copy
 import scipy
 import casadi
+import modelicacasadi_wrapper as ci
 import itertools
 from collections import OrderedDict
 from modelicacasadi_wrapper import Model
@@ -1213,6 +1214,8 @@ class BLTModel(object):
         self._solved_vars = solved_vars = []
         self._explicit_solved_vars = explicit_solved_vars = []
         self._explicit_unsolved_vars = explicit_unsolved_vars = []
+        if options['closed_form']:
+            self._explicit_unsolved_sx_vars = explicit_unsolved_sx_vars = []
         self._solved_expr = solved_expr = []
         self._explicit_solved_algebraics = explicit_solved_algebraics = []
         self._explicit_unsolved_algebraics = explicit_unsolved_algebraics = []
@@ -1396,21 +1399,17 @@ class BLTModel(object):
                             explicit_unsolved_algebraics.extend([var.mvar for var in causal_co.variables
                                                                  if not var.is_der])
                             explicit_unsolved_vars.extend(causal_co.mx_vars)
+                            res = casadi.vertcat(causal_co.eq_expr)
+                            all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
+                            res_f = casadi.MXFunction(all_vars , [res])
+                            res_f.init()
                             if options['closed_form']:
-                                # Create SX residual
-                                res = casadi.vertcat(causal_co.eq_expr)
-                                all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
-                                res_f = casadi.MXFunction(all_vars , [res])
-                                res_f.init()
+                                explicit_unsolved_sx_vars.extend(causal_co.sx_vars)
                                 sx_res = casadi.SXFunction(res_f)
                                 sx_res.init()
                                 residuals.extend(sx_res.call(causal_co.sx_vars + sx_known_vars + solved_expr, True))
                                 solved_expr.extend(causal_co.sx_vars)
                             else:
-                                res = casadi.vertcat(causal_co.eq_expr)
-                                all_vars = causal_co.mx_vars + known_vars + solved_vars + tear_mx_vars
-                                res_f = casadi.MXFunction(all_vars , [res])
-                                res_f.init()
                                 residuals.extend(res_f.call(causal_co.mx_vars + known_vars +
                                                             solved_expr + tear_mx_vars))
                                 solved_expr.extend(causal_co.mx_vars)
@@ -1421,6 +1420,7 @@ class BLTModel(object):
                     explicit_unsolved_vars.extend([var.mx_var for var in co.block_tear_vars])
                     if options['closed_form']:
                         # Create SX residual
+                        explicit_unsolved_sx_vars.extend([var.sx_var for var in co.block_tear_vars])
                         res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
                         co.tear_mx_vars = tear_mx_vars = [var.mx_var for var in co.block_tear_vars]
                         all_vars = tear_mx_vars + known_vars + solved_vars
@@ -1430,7 +1430,7 @@ class BLTModel(object):
                         sx_res.init()
                         residuals.extend(sx_res.call(tear_mx_vars + known_vars + solved_expr, True))
 
-                        dh()
+                        raise NotImplementedError
                         #~ solved_expr.extend(co.sx_vars) # Need to figure out what do here
                     else:
                         res = casadi.vertcat([eq.expression for eq in co.block_tear_res])
@@ -1448,21 +1448,17 @@ class BLTModel(object):
                     n_unsolvable += co.n
                     explicit_unsolved_algebraics.extend([var.mvar for var in co.variables if not var.is_der])
                     explicit_unsolved_vars.extend(co.mx_vars)
+                    res = casadi.vertcat(co.eq_expr)
+                    all_vars = co.mx_vars + known_vars + solved_vars 
+                    res_f = casadi.MXFunction(all_vars , [res])
+                    res_f.init()
                     if options['closed_form']:
-                        # Create SX residual
-                        res = casadi.vertcat(co.eq_expr)
-                        all_vars = co.mx_vars + known_vars + solved_vars 
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
+                        explicit_unsolved_sx_vars.extend(co.sx_vars)
                         sx_res = casadi.SXFunction(res_f)
                         sx_res.init()
                         residuals.extend(sx_res.call(co.sx_vars + sx_known_vars + solved_expr, True))
                         solved_expr.extend(co.sx_vars)
                     else:
-                        res = casadi.vertcat(co.eq_expr)
-                        all_vars = co.mx_vars + known_vars + solved_vars 
-                        res_f = casadi.MXFunction(all_vars , [res])
-                        res_f.init()
                         residuals.extend(res_f.call(co.mx_vars + known_vars + solved_expr))
                         solved_expr.extend(co.mx_vars)
                     solved_vars.extend(co.mx_vars)
@@ -1653,12 +1649,79 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
     Emulates CasADi Interface's OptimizationProblem class using BLT.
     """
 
+    def __init__(self, op, elimination_options=EliminationOptions()):
+        """
+        Creates a BLTModel from a Model.
+        """
+        self._op = op
+        super(BLTOptimizationProblem, self).__init__(op, elimination_options)
+        self._substitute_objective_and_constraint()
+
     def _process_ineliminables(self):
         # Mark variables with timed variables as ineliminable
         for var in self._model.getTimedVariables():
             self.options['ineliminable'] += [var.getBaseVariable().getName()]
         self.options['ineliminable'] = list(set(self.options['ineliminable']))
         super(BLTOptimizationProblem, self)._process_ineliminables()
+
+    def _substitute_objective_and_constraint(self):
+        """
+        Substitute eliminated variables in objectiveIntegrand and path constraints.
+        """
+        # Find solved variables and their solutions
+        solved_vars = []
+        solved_expr = []
+        for (i, var) in self._explicit_solved_algebraics:
+            if self.options['closed_form']:
+                solved_vars.append(var.sx_var)
+            else:
+                solved_vars.append(var.mx_var)
+            solved_expr.append(self._solved_expr[i])
+
+        # Copy original path constraints
+        path_constraints = [ci.Constraint(constraint) for constraint in self._op.getPathConstraints()]
+        n_path = len(path_constraints)
+        if n_path > 0:
+            [path_lhs, path_rhs] = \
+                    map(list, zip(*[(constraint.getLhs(), constraint.getRhs()) for constraint in path_constraints]))
+        else:
+            path_lhs = []
+            path_rhs = []
+
+        # Substitute
+        objective_integrand = [self._op.getObjectiveIntegrand()]
+        if self.options['closed_form']:
+            all_vars = self._explicit_unsolved_vars + self._known_vars + self._explicit_solved_vars
+            mx_f = casadi.MXFunction(all_vars, path_lhs + path_rhs + objective_integrand)
+            mx_f.init()
+            sx_f = casadi.SXFunction(mx_f)
+            sx_f.init()
+            new_expr = sx_f.call(self._explicit_unsolved_sx_vars + self._sx_known_vars + solved_expr,
+                                 self.options['inline'])
+        else:
+            new_expr = casadi.substitute(path_lhs + path_rhs + objective_integrand, solved_vars, solved_expr)
+
+        # Unpack new expressions
+        path_lhs = new_expr[:n_path]
+        path_rhs = new_expr[n_path:-1]
+        objective_integrand = new_expr[-1]
+
+        # Update objective and path constraints
+        if self.options['closed_form']:
+            self._path_constraints = np.array(path_lhs) - np.array(path_rhs)
+            self._objective_integrand = objective_integrand
+        else:
+            for (path, lhs, rhs) in itertools.izip(path_constraints, path_lhs, path_rhs):
+                path.setLhs(lhs)
+                path.setRhs(rhs)
+            self._path_constraints = np.array(path_constraints)
+            self._objective_integrand = objective_integrand
+
+    def getObjectiveIntegrand(self):
+        return self._objective_integrand
+
+    def getPathConstraints(self):
+        return self._path_constraints
 
     def _default_options(self, algorithm):
         """ 
@@ -1779,6 +1842,10 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
         # Return result
         res.solver = op_res.solver
         return res
+
+    # Make solve synonymous with optimize
+    solve_options = optimize_options
+    solve = optimize
 
     def prepare_optimization(self, algorithm='LocalDAECollocationPrepareAlg', options={}):
         """

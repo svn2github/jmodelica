@@ -21,11 +21,13 @@ optimization IllustExampleLagrange(finalTime=4, objectiveIntegrand=(x1-0.647)^2+
     extends IllustExample;
 end IllustExampleLagrange;
 
-optimization IllustExampleLagrangeBound(finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2)
-    extends IllustExample(y1(max=0.35));
+optimization IllustExampleLagrangeBound(finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2+(y1-0.289)^2)
+    extends IllustExample(y1(max=0.41));
 end IllustExampleLagrangeBound;
 
-optimization IllustExampleLagrangeConstraint(finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2)
+optimization IllustExampleLagrangeConstraintAndObjective(
+        finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2+(y1-0.289)^2)
+extends IllustExample;
 constraint
-    y1 <= 0.35;
-end IllustExampleLagrangeConstraint;
+    y1 <= 0.41;
+end IllustExampleLagrangeConstraintAndObjective;
