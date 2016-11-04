@@ -2510,44 +2510,6 @@ Error at line 2467, column 17, in file '...':
 end Functional8;
 
 
-model FunctionArgument1
-    record R
-        Real[1]  r;
-    end R;
-
-        Real arr1[1] = { 0 };
-        Real arr2[2] = { 0, 0 };
-        R   rec1;
-        R   rec2;
-    algorithm
-        rec1 := if size(arr1, 1) == 1 then R(r = arr1) else R(r = arr2);
-        rec2 := if size(arr2, 1) == 1 then R(r = arr2) else R(r = arr1);
-
-    annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
-            name="FunctionArgument1",
-            description="Verifies that for functional arguments within if-statements
-                    only the used branch is type-checked.",
-            flatModel="
-fclass TypeTests.FunctionArgument1
- Real arr1[1] = {0};
- Real arr2[2] = {0, 0};
- TypeTests.FunctionArgument1.R rec1;
- TypeTests.FunctionArgument1.R rec2;
-algorithm
- rec1 := TypeTests.FunctionArgument1.R(arr1[1:1]);
- rec2 := TypeTests.FunctionArgument1.R(arr1[1:1]);
-
-public
- record TypeTests.FunctionArgument1.R
-  Real r[1];
- end TypeTests.FunctionArgument1.R;
-
-end TypeTests.FunctionArgument1;
-")})));
-end FunctionArgument1;
-
-
 model Delay1
     Real x1 = sin(time);
     Real d;

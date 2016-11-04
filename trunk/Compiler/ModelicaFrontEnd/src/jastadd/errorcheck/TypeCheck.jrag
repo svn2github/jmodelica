@@ -1198,7 +1198,7 @@ aspect FlatTypeCheck {
         if (!type.isUnknown()) {
             if (argumentDefinedTypeValid()) {
                 FType boundType = getBoundInput().type();
-                if (!boundType.isUnknown() && !lockBranch(checkType)) {
+                if (!boundType.isUnknown()) {
                     if (isVectorized()) 
                         boundType = boundType.sizedType(boundType.size().expand(vectorizedSize()));
                     else if (isDestructorArgument())
