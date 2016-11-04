@@ -67,6 +67,13 @@ class TestSymbolicElimination(object):
         self.op_illust_manual_constraint = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
         
+        class_path = "LinearLoopLagrangeConstraint"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.op_loop_automatic = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_automatic)
+        self.op_loop_manual = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_manual)
+        
     @testattr(casadi = True)
     def test_automatic_tearing(self):
         """
@@ -311,3 +318,93 @@ class TestSymbolicElimination(object):
         for eq in op.getDaeEquations():
             if 'y1)*y2)*y4)' in eq.getResidual().getRepresentation():
                 eq.setTearing(False)
+
+    @testattr(casadi = True)
+    def test_block_solve(self):
+        """
+        Test solution of linear blocks both symbolically with SX and numerically with MX.
+        """
+        cost_ref = 2.5843277
+        u_norm_ref = 0.647282415
+
+        # Select linear solver
+        dae_opts = EliminationOptions()
+        dae_opts['solve_blocks'] = False
+        symbolic_opts = EliminationOptions()
+        symbolic_opts['solve_blocks'] = True
+        symbolic_opts['linear_solver'] = "symbolicqr"
+        numeric_opts = EliminationOptions()
+        numeric_opts['solve_blocks'] = True
+        numeric_opts['linear_solver'] = "lapackqr"
+        numeric_op_opts = {'expand_to_sx': 'no'}
+
+        # Eliminate
+        op = self.op_loop_manual
+        blt_op_dae = BLTOptimizationProblem(op, dae_opts)
+        blt_op_symbolic = BLTOptimizationProblem(op, symbolic_opts)
+        blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
+
+        # Check remaining variables
+        var_dae = sorted([var.getName() for var in blt_op_dae.getVariables(blt_op_dae.REAL_ALGEBRAIC)
+                          if not var.isAlias()])
+        var_symbolic = sorted([var.getName() for var in blt_op_symbolic.getVariables(blt_op_symbolic.REAL_ALGEBRAIC)
+                               if not var.isAlias()])
+        var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
+                              if not var.isAlias()])
+        N.testing.assert_array_equal(var_dae, ['y1', 'y2'])
+        N.testing.assert_array_equal(var_symbolic, [])
+        N.testing.assert_array_equal(var_numeric, [])
+
+        # Optimize and check result
+        res_dae = blt_op_dae.optimize()
+        res_symbolic = blt_op_symbolic.optimize()
+        res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
+        assert_results(res_dae, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+    @testattr(casadi = True)
+    def test_linear_tearing(self):
+        """
+        Test solution of torn linear blocks both symbolically with SX and numerically with MX.
+        """
+        cost_ref = 2.5843277
+        u_norm_ref = 0.647282415
+
+        # Select linear solver
+        nonlinear_opts = EliminationOptions()
+        nonlinear_opts['solve_blocks'] = False
+        symbolic_opts = EliminationOptions()
+        symbolic_opts['solve_blocks'] = True
+        symbolic_opts['solve_torn_linear_blocks'] = True
+        symbolic_opts['linear_solver'] = "symbolicqr"
+        numeric_opts = EliminationOptions()
+        numeric_opts['solve_blocks'] = True
+        numeric_opts['solve_torn_linear_blocks'] = True
+        numeric_opts['linear_solver'] = "lapackqr"
+        numeric_op_opts = {'expand_to_sx': 'no'}
+
+        # Eliminate
+        op = self.op_loop_automatic
+        blt_op_nonlinear = BLTOptimizationProblem(op, nonlinear_opts)
+        blt_op_symbolic = BLTOptimizationProblem(op, symbolic_opts)
+        blt_op_numeric = BLTOptimizationProblem(op, numeric_opts)
+
+        # Check remaining variables
+        var_nonlinear = sorted([var.getName() for var in blt_op_nonlinear.getVariables(blt_op_nonlinear.REAL_ALGEBRAIC)
+                                if not var.isAlias()])
+        var_symbolic = sorted([var.getName() for var in blt_op_symbolic.getVariables(blt_op_symbolic.REAL_ALGEBRAIC)
+                               if not var.isAlias()])
+        var_numeric = sorted([var.getName() for var in blt_op_numeric.getVariables(blt_op_numeric.REAL_ALGEBRAIC)
+                              if not var.isAlias()])
+        N.testing.assert_array_equal(var_nonlinear, ['y1'])
+        N.testing.assert_array_equal(var_symbolic, [])
+        N.testing.assert_array_equal(var_numeric, [])
+
+        # Optimize and check result
+        res_nonlinear = blt_op_nonlinear.optimize()
+        res_symbolic = blt_op_symbolic.optimize()
+        res_numeric = blt_op_numeric.optimize(options=numeric_op_opts)
+        assert_results(res_nonlinear, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)

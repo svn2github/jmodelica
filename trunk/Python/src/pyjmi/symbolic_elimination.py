@@ -442,7 +442,7 @@ class Component(object):
 
         # Create new bipartite graph for block
         causal_edges = create_edges(causal_equations, causal_variables)
-        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, CausalizationOptions())
+        causal_graph = BipartiteGraph(causal_equations, causal_variables, causal_edges, EliminationOptions())
 
         # Compute components and verify scalarity
         causal_graph.maximum_match()

@@ -31,3 +31,24 @@ extends IllustExample;
 constraint
     y1 <= 0.41;
 end IllustExampleLagrangeConstraintAndObjective;
+
+model LinearLoop
+    Real x(start=1, fixed=true);
+    Real y1;
+    Real y2;
+    input Real u;
+equation
+    der(x) = y1 + y2;
+    y1 + y2 = x + u;
+    y1 + 2*y2 = sqrt(x+1) + x + u;
+end LinearLoop;
+
+optimization LinearLoopLagrange(finalTime=5, objectiveIntegrand=x^2 + u^2)
+    extends LinearLoop;
+end LinearLoopLagrange;
+
+optimization LinearLoopLagrangeConstraint(finalTime=5, objectiveIntegrand=x^2 + u^2)
+    extends LinearLoop;
+constraint
+    y1 >= -2;
+end LinearLoopLagrangeConstraint;
