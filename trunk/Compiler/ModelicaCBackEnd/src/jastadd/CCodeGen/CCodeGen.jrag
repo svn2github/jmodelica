@@ -955,7 +955,7 @@ aspect CCodeGen {
 
     public void FFunctionVariable.print(TypePrinter_C tp, String name, String indent) {
         setDummyExp();
-        tp.reset(name, getBindingExp(), size().isUnknown(), false, indent);
+        tp.reset(name, getBindingExp(), size(), false, indent);
         type().print(tp);
         resetDummyExp();
     }
@@ -982,7 +982,7 @@ aspect CCodeGen {
     }
 
     public void FType.print(TypePrinter_C tp, String indent, String name, FExp src, boolean external) {
-        tp.reset(name, src, size().isUnknown(), external, indent);
+        tp.reset(name, src, size(), external, indent);
         print(tp);
     }
 
@@ -1004,15 +1004,15 @@ aspect CCodeGen {
             this.str = str;
         }
         
-        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, boolean dynamic, boolean external) {
+        public TypePrinter_C(CodePrinter p, CodeStream str, String indent, String name, FExp src, Size s, boolean external) {
             this(p, str);
-            reset(name, src, dynamic, external, indent);
+            reset(name, src, s, external, indent);
         }
         
-        public void reset(String name, FExp src, boolean dynamic, boolean external, String indent) {
+        public void reset(String name, FExp src, Size s, boolean external, String indent) {
             this.src = src;
             levels = new Stack<Level>();
-            levels.push(new Level(name, indent, dynamic || external));
+            levels.push(new Level(name, indent, !s.variability().knownParameterOrLess() || external));
             this.external = external;
         }
         
@@ -1033,8 +1033,8 @@ aspect CCodeGen {
             }
         }
         
-        protected void pushLevel(String name, boolean indent, boolean dynamic) {
-            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), dynamic || dynamic()));
+        protected void pushLevel(String name, boolean indent, Size s) {
+            levels.push(new Level(name, indent ? p.indent(indent()) : indent(), !s.variability().knownParameterOrLess() || dynamic()));
         }
         
         protected void popLevel() {
@@ -1070,7 +1070,7 @@ aspect CCodeGen {
                     printDynArray(type);
                 } else {
                     for (Index i : type.indices()) {
-                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, false);
+                        pushLevel(type.arrayAccess(type.ndims(), name(), i.toUnclosedString()), false, Size.SCALAR);
                         printComps(type);
                         popLevel();
                     }
@@ -1092,7 +1092,7 @@ aspect CCodeGen {
                     String compName = name() + "->" + comp.getName();
                     boolean useTempName = !dynamic() && comp.getFType().isComposite();
                     String tempName = useTempName ? acquireTemp(compName) : compName;
-                    pushLevel(tempName, false, comp.getFType().size().isUnknown());
+                    pushLevel(tempName, false, comp.getFType().size());
                     comp.getFType().print(this);
                     popLevel();
                     if (useTempName)
@@ -1113,7 +1113,7 @@ aspect CCodeGen {
             int i = 0;
             String name = acquireTemp(name());
             for (FExp arg : type.myConstructorStmt().myConstructorArgs()) {
-                pushLevel(name + "_arg" + i, false, arg.size().isUnknown());
+                pushLevel(name + "_arg" + i, false, arg.size());
                 FType t = arg.type();
                 boolean b = t.parent == null;
                 if (b) {
@@ -1205,14 +1205,14 @@ aspect CCodeGen {
             String ind    = acquireTemp(name());
             String maxind = ind + "_max";
             print = true;
-            pushLevel(ind, false, false);
+            pushLevel(ind, false, Size.SCALAR);
             type.fRealScalarType().print(this);
             popLevel();
-            pushLevel(maxind, false, false);
+            pushLevel(maxind, false, Size.SCALAR);
             type.fRealScalarType().print(this);
             popLevel();
             print = type.isExternalObject();
-            pushLevel(type.arrayAccess(1, name(), ind), false, true);
+            pushLevel(type.arrayAccess(1, name(), ind), false, new MutableSize(1));
             printComps(type);
             popLevel();
             print = true;
@@ -1247,7 +1247,7 @@ aspect CCodeGen {
                 str.println(" + 1;");
             }
             str.formatln("%sfor (%s = 1; %s < %s; %s++) {", indent(), ind, ind, maxind, ind);
-            pushLevel(type.arrayAccess(1, name(), ind), true, true);
+            pushLevel(type.arrayAccess(1, name(), ind), true, new MutableSize(1));
             printComps(type);
             popLevel();
             str.println(indent() + "}");
@@ -1311,8 +1311,8 @@ aspect CCodeGen {
         boolean calced = false;
         for (int i = 0; i < size.length; i++) {
             // TODO: this will fail if hasValue(i) == false
-            if (size[i] == UNKNOWN) {
-                FExp exp = exps[i];
+            FExp exp = exps[i];
+            if (exp != null) {
                 if (printed)
                     str.print(" * ");
                 boolean addParenthesis = exp.addParenthesis(FExp.PRECEDENCE_MULTIPLICATIVE);
@@ -1341,11 +1341,11 @@ aspect CCodeGen {
 
 	@Override
 	public void MutableSize.printDimensions_C(CodePrinter p, CodeStream str, String indent, ASTNode src) {
-		if (isUnknown()) {
+        if (!variability().knownParameterOrLess()) {
 			for (int i = 0; i < size.length; i++) {
 				if (i > 0)
 					str.print(", ");
-				if (size[i] != Size.UNKNOWN || exps[i] == null) {
+                if (exps[i] == null) {
 					str.print(size[i]);
 				} else {
                     FExp exp = exps[i];
@@ -1543,12 +1543,12 @@ aspect CCodeGen {
             String next = p.indent(indent);
             String iniName = name + C_SUFFIX_NULL;
             str.print(indent + "if (" + name + " == NULL) {\n");
-            tp.reset(iniName, fv.getBindingExp(), type.size().isUnknown(), false, next);
+            tp.reset(iniName, fv.getBindingExp(), type.size(), false, next);
             type.print(tp);
             str.print(next + name + " = " + iniName + ";\n");
             str.print(indent + "}\n");
         } else {
-            tp.reset(name, fv.getBindingExp(), type.size().isUnknown(), false, indent);
+            tp.reset(name, fv.getBindingExp(), type.size(), false, indent);
             type.print(tp);
         }
         fv.resetDummyExp();

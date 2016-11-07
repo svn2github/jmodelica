@@ -166,7 +166,7 @@ aspect CCodeGenExternalCeval {
     public void FExternalStmt.genSerialize_C(TypePrinter_C tp, String indent,
             CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             tp.reset(cvd.name_C(), null, cvd.size(), false, indent);
              cvd.type().print(tp);
         }
     }
@@ -174,7 +174,7 @@ aspect CCodeGenExternalCeval {
     public void FExternalStmt.genSerializeComps_C(TypePrinter_C tp, String indent,
             CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             tp.reset(cvd.name_C(), null, cvd.size(), false, indent);
              tp.printComps((FExternalObjectType)cvd.type());
         }
     }
@@ -182,7 +182,7 @@ aspect CCodeGenExternalCeval {
     public void FExternalStmt.genSerializeNoComps_C(TypePrinter_C tp, String indent,
             CodeGenContext cgc, Map<String,String> tempMap, Iterable<CommonVariableDecl> cvds) {
         for (CommonVariableDecl cvd : cvds) {
-             tp.reset(cvd.name_C(), null, cvd.size().isUnknown(), false, indent);
+             tp.reset(cvd.name_C(), null, cvd.size(), false, indent);
              tp.printExt((FExternalObjectType)cvd.type());
         }
     }

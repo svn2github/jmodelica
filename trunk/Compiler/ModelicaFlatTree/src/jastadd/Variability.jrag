@@ -418,25 +418,18 @@ aspect Variability {
     eq FUnknownSizeExp.expVariability() = fParameter().combine(getDim().variability());
     
     public FTypePrefixVariability Size.variability() {
-        return ASTNode.fConstant();
-    }
-    public FTypePrefixVariability MutableSize.variability() {
-        FTypePrefixVariability res = super.variability();
-        for (int i = 0; i < exps.length; i++) {
+        FTypePrefixVariability res = ASTNode.fConstant();
+        for (int i = 0; i < ndims(); i++) {
             res = res.combine(variability(i));
         }
         return res;
     }
     
     public FTypePrefixVariability Size.variability(int d) {
-        return ASTNode.fConstant();
+        return (size[d] == Size.UNKNOWN) ? ASTNode.fDiscrete() : ASTNode.fConstant();
     }
     public FTypePrefixVariability MutableSize.variability(int d) {
-        FTypePrefixVariability res = super.variability(d);
-        if (hasFExp(d)) {
-            res = res.combine(getFExp(d).variability());
-        }
-        return res;
+        return (exps[d] != null) ? getFExp(d).variability() : super.variability(d);
     }
     
     eq FSignExp.expVariability() = getFExp().variability().combineDown(fDiscrete());
