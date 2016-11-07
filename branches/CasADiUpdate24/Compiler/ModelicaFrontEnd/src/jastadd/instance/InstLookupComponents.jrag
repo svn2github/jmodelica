@@ -328,8 +328,6 @@ aspect InstLookupComponents {
     eq InstComponentDecl.getFArraySubscripts().lookupInstComponent(String name)          = lookupInstComponent(name);
     eq InstComponentDecl.getLocalFArraySubscripts().lookupInstComponent(String name)     = lookupInstComponent(name);
 
-    eq InstAssignable.getBindingFExp().lookupInstComponent(String name) = myInstValueMod().lookupInstComponentForBindingExp(name);
-
     eq InstReplacingRecord.getOriginalInstComponent().lookupInstComponent(String name)    = lookupInstComponent(name);
     eq InstReplacingComposite.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
     eq InstReplacingPrimitive.getOriginalInstComponent().lookupInstComponent(String name) = lookupInstComponent(name);
@@ -349,10 +347,8 @@ aspect InstLookupComponents {
     eq InstScalarAccess.getExpandedSubscripts().lookupInstComponent(String name) = getTopInstAccess().lookupInstComponent(name);
     eq InstArrayAccess.getFArraySubscripts().lookupInstComponent(String name)    = getTopInstAccess().lookupInstComponent(name);
     eq InstGlobalAccess.getInstAccess().lookupInstComponent(String name)         = InstLookupResult.notFound();
-
-    eq InstDefaultRecordModification.getChild().lookupInstComponent(String name) = lookupInstComponentForBindingExp(name);
-
-
+    
+    
     syn InstLookupResult<InstComponentDecl> InstAccess.qualifiedLookupInstComponent(String name) {
         InstLookupResult<InstComponentDecl> res = qualifiedLookupInstComponentUnconstrained(name);
         if (res.successful()) { // TODO: limit to only replaceable and replaced components and their children?
@@ -437,12 +433,7 @@ aspect InstLookupComponents {
     eq InstComponentDecl.getChild().localLookupInstComponent(String name) = memberInstComponent(name);
 
     syn InstLookupResult<InstComponentDecl> InstValueModification.lookupInstComponentForBindingExp(String name) = lookupInstComponent(name);
-    eq InstDefaultRecordModification.lookupInstComponentForBindingExp(String name)                              = 
-        (sourceInstMod() != null) ? sourceInstMod().lookupInstComponent(name) : lookupInstComponentInSurrounding(name);
-
-    inh InstLookupResult<InstComponentDecl> InstDefaultRecordModification.lookupInstComponentInSurrounding(String name);
-    eq InstNode.getChild().lookupInstComponentInSurrounding(String name) = genericLookupInstComponent(name);
-    eq Root.getChild().lookupInstComponentInSurrounding(String name)     = InstLookupResult.notFound();
+    
     /**
      * Get a specific child access, triggering transformations on that child, but *not* on the entire list.
      */

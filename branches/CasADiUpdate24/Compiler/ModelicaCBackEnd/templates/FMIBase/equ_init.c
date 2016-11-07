@@ -36,5 +36,4 @@ int model_ode_initialize(jmi_t* jmi) {
 
 int model_init_R0(jmi_t* jmi, jmi_real_t** res) {
 $C_DAE_initial_event_indicator_residuals$
-    return 0;
 }

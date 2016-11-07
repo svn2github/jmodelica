@@ -450,6 +450,10 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
                                     algorithm, options)
 
+    # Make solve synonymous with optimize
+    solve_options = optimize_options
+    solve = optimize
+
     def prepare_optimization(self, algorithm='LocalDAECollocationPrepareAlg', options={}):
         """
         Prepare the solution of an optimization problem.

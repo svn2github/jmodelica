@@ -20,9 +20,11 @@ CF = $(CFLAGS) $(CPPFLAGS) $(TARGET_ARCH) -O2 -fPIC -msse2 -mfpmath=sse
 I = -I../Include
 RANLIB = ranlib
 ARCHIVE = $(AR) $(ARFLAGS)
+SHARED  = $(CC) $(CF) $(SHARED_LDFLAGS) 
 CP = cp -f
 
 AR_TARGET = $(LIBRARY).a
+SO_TARGET = $(LIBRARY)$(SHAREDEXT) 
 
 all: install
 
@@ -46,8 +48,11 @@ $(AR_TARGET): $(CS)
 	$(ARCHIVE)  $@ $^
 	- $(RANLIB) $@
 
+$(SO_TARGET): $(CS)
+	$(SHARED)  -o $@ $^	
+
 # install CSparse in this directory
-install: $(AR_TARGET)
+install: $(AR_TARGET) $(SO_TARGET)
 
 # uninstall CSparse
 uninstall: purge

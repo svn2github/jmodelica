@@ -91,3 +91,8 @@ void fRecord(fRec_t *r, fRec_t *y)
 {
     y->x = r->x;
 }
+
+int fStrlen(const char *str)
+{
+    return (int) strlen(str);
+}

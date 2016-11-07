@@ -134,6 +134,17 @@ namespace ModelicaCasADi
 
 }
 
+void Block::markTearingResiduals() {
+    for(std::vector< Ref<Equation> >::iterator it_eq=equations.begin(); it_eq != equations.end();++it_eq) {
+        for(std::vector< Ref<Equation> >::iterator it=unSolvedEquations.begin(); it != unSolvedEquations.end(); ++it) {
+            if((*it)->getLhs().getRepresentation()==(*it_eq)->getLhs().getRepresentation() &&
+               (*it)->getRhs().getRepresentation()==(*it_eq)->getRhs().getRepresentation()) {
+                (*it_eq)->setTearing(true);
+                (*it)->setTearing(true);
+            }
+        }
+    }
+}
 
 void Block::moveAllEquationsToUnsolvable() {
     unSolvedEquations.clear();
@@ -331,6 +342,9 @@ std::set<const Variable*> Block::eliminableVariables() const
 
 std::vector< Ref<Equation> > Block::getEquationsforModel() const
 {
+    // This function (and the surrounding framework) needs to be redesigned.
+    // It should not return copies of the solved equations, as this makes it impossible for the user to modifty the
+    // actual equations.
     std::vector< Ref<Equation> > modelEqs;
     for(std::map<const Variable*, casadi::MX>::const_iterator it = variableToSolution_.begin();
     it!=variableToSolution_.end();++it) {
@@ -339,7 +353,7 @@ std::vector< Ref<Equation> > Block::getEquationsforModel() const
 
     for(std::vector< Ref<Equation> >::const_iterator it=unSolvedEquations.begin();
     it != unSolvedEquations.end();++it) {
-        modelEqs.push_back(new Equation((*it)->getLhs(),(*it)->getRhs()));;
+        modelEqs.push_back(*it);
     }
     return modelEqs;
 }

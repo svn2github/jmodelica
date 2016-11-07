@@ -106,7 +106,7 @@ abstract InstComponentDecl : InstBaseNode ::= ClassName:InstAccess
                                               /[Annotation:InstClassModification]/
                                               /[ClassAnnotation:InstClassModification]/;
 InstComposite                 : InstComponentDecl;
-abstract InstAssignable       : InstComponentDecl ::= /BindingFExp:FExp/;
+abstract InstAssignable       : InstComponentDecl;
 InstPrimitive                 : InstAssignable;
 InstEnum                      : InstPrimitive;
 InstRecord                    : InstAssignable;
@@ -165,7 +165,9 @@ InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;
 InstGlobalAccess          : InstAccess ::= InstAccess;
 
-InstForIndex : CommonForIndex ::= InstPrimitive;
+abstract InstForIndex : CommonForIndex ::= InstPrimitive;
+InstForIndexWithExp : InstForIndex ::= FExp;
+InstForIndexNoExp   : InstForIndex ::= /[FExp]/;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;
@@ -177,14 +179,10 @@ FDeferExpSubscript : FExpSubscript ::= <Defer:FExpSubscript>;
 // error checking.	
 abstract InstModification : BaseNode ::= <Modification:Modification>;
 InstCompleteModification : InstModification ::= InstClassModification [InstValueModification];
-InstValueModification    : InstModification ::= /FExp/ 
-                                                /InstRecordModification*/ 
+InstValueModification    : InstModification ::= /FExp/
                                                 /InstArrayModification*/;
 InstClassModification    : InstModification ::= InstArgument*;
 //Virtual modification for member of record type modification.
-abstract InstRecordModification : InstValueModification ::= <Name:String>;
-InstValueRecordModification : InstRecordModification ::= <Value:FExp>;
-InstDefaultRecordModification : InstRecordModification ::= <Arg:InstDefaultArgument>;
 //Virtual modification for cell of array constant value modification.
 InstArrayModification : InstValueModification ::= <Cell:FExp>;
 

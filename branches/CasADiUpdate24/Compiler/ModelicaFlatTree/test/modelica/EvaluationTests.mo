@@ -1532,6 +1532,65 @@ end EvaluationTests.FunctionEval43;
 ")})));
 end FunctionEval43;
 
+model FunctionEval44
+    constant Real[:] x = {sum(j for j in i:3) for i in 1:3};
+
+    annotation(__JModelica(UnitTesting(tests={
+        EvalTestCase(
+            name="FunctionEval44",
+            description="Constant evaluation of iter exp containing function call",
+            variables="
+x[1]
+x[2]
+x[3]
+",
+            values="
+6.0
+5.0
+3.0
+")})));
+end FunctionEval44;
+
+model FunctionEval45
+    function f
+        input Real[:] x;
+        output Real y = 0;
+        Integer i = 1;
+    algorithm
+        while i <= size(x,1) loop
+            y := y + sum(x[i:size(x,1)]);
+            i := i + 1;
+        end while;
+    end f;
+    constant Real y = f({1,2,3});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval45",
+            description="Constant evaluation of functions: records",
+            flatModel="
+fclass EvaluationTests.FunctionEval45
+ constant Real y = 14.0;
+
+public
+ function EvaluationTests.FunctionEval45.f
+  input Real[:] x;
+  output Real y;
+  Integer i;
+ algorithm
+  y := 0;
+  i := 1;
+  while i <= size(x, 1) loop
+   y := y + sum(x[i:size(x, 1)]);
+   i := i + 1;
+  end while;
+  return;
+ end EvaluationTests.FunctionEval45.f;
+
+end EvaluationTests.FunctionEval45;
+")})));
+end FunctionEval45;
+
 
 model VectorFuncEval1
     function f

@@ -1519,6 +1519,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
+    JMI_DYNAMIC_INIT()
     if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 0;
     } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
@@ -1562,6 +1563,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             (*res)[0] = _der_x_3 - (_der_y_2);
         }
     }
+    JMI_DYNAMIC_FREE()
     return ef;
 }
 ")})));

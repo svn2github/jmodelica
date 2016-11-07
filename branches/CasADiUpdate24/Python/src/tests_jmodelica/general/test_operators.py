@@ -392,7 +392,7 @@ class TestLoadResource(SimulationTest):
 
     @classmethod
     def setUpClass(cls):
-        SimulationTest.setup_class_base('OperatorTests.mo', 'OperatorTests.LoadResource', 
+        SimulationTest.setup_class_base('LoadResourceTest/package.mo', 'LoadResourceTest.LoadResource', 
             options={'variability_propagation':False})
 
     @testattr(stddist = True)
@@ -405,9 +405,9 @@ class TestLoadResource(SimulationTest):
         """
         Test that results match the expected ones.
         """
-        self.assert_end_value('x', 110)
-        self.assert_end_value('y', 110)
-        self.assert_end_value('z', 110)
+        self.assert_end_value('x', 9)
+        self.assert_end_value('y', 9)
+        self.assert_end_value('z', 9)
 
 class TestOutOfRangeOps(SimulationTest):
     """

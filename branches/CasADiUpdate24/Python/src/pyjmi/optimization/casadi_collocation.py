@@ -2242,7 +2242,7 @@ class LocalDAECollocator(CasadiCollocator):
             timed_variables = []
         else:
             # Compute constraint points
-            collocation_constraint_points=\
+            self._collocation_constraint_points = \
                 self._compute_collocation_constrained_points(time)
 
             # Compose timed variables and corresponding scaling factors and
@@ -2255,7 +2255,7 @@ class LocalDAECollocator(CasadiCollocator):
                     cp = self._tp2cp(tp)
                 else:
                     cp = self.op.evaluateExpression(tp)
-                (i, k) = collocation_constraint_points[cp]
+                (i, k) = self._collocation_constraint_points[cp]
                 name = tv.getBaseVariable().getName()
                 (index, vt) = self.name_map[name]
                 if vt == "elim_u":
@@ -2980,6 +2980,7 @@ class LocalDAECollocator(CasadiCollocator):
             s_scaled_expressions = casadi.substitute(s_ocp_expressions,
                                                      s_unscaled_var,
                                                      s_scaled_var)
+
             # Scale variables in expressions
             if self.eliminate_der_var:
                 print "TODO scaling for the additional constraints elim_der_var"
@@ -3083,6 +3084,11 @@ class LocalDAECollocator(CasadiCollocator):
         # Note that sym_input is needed as input since the point constraints
         # may depend on free parameters
         s_point_constraint_input = s_sym_input_no_der + self._timed_variables
+
+        # Add scaling factors for free parameters
+        if self.variable_scaling:
+            if sym_sf.shape[0] > 0:
+                s_point_constraint_input.append(sym_sf)
 
         G_e_fcn = self._FXFunction(s_point_constraint_input,
                                    [casadi.vertcat(G_e)])
@@ -3763,6 +3769,10 @@ class LocalDAECollocator(CasadiCollocator):
         # Point constraints
         s_fcn_input = self._get_z_l0(i, k, with_der=False)
         s_fcn_input += self._nlp_timed_variables
+        if self.variable_scaling:
+            # Get scaling factors for free parameters.
+            scaling_symbols = self._get_affine_scaling_symbols_communication_point(1, 1)
+            s_fcn_input += scaling_symbols
         [G_e_constr] = self.G_e_l0_fcn.call(s_fcn_input)
         [G_i_constr] = self.G_i_l0_fcn.call(s_fcn_input)
 

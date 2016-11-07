@@ -33,7 +33,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-subdir = Python/src/tests_jmodelica/files/Modelica/Resources
+subdir = ThirdParty/CSparse
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/libtool.m4 \
@@ -69,6 +69,7 @@ CP = @CP@
 CPP = @CPP@
 CPPAD_HOME = @CPPAD_HOME@
 CPPFLAGS = @CPPFLAGS@
+CSPARSE_HOME = @CSPARSE_HOME@
 CURR_DIR = @CURR_DIR@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -208,8 +209,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-TESTLIBRARY_BUILD_DIR = $(abs_builddir)/build
-TESTLIBRARY_SRC_DIR = $(abs_top_srcdir)/Python/src/tests_jmodelica/files/Modelica/Resources
+CSPARSE_DIR = $(abs_builddir)/csparse_build
+CSPARSE_DIR64 = $(abs_builddir)/csparse_build64
 all: all-am
 
 .SUFFIXES:
@@ -222,9 +223,9 @@ $(srcdir)/Makefile.in:  $(srcdir)/Makefile.am  $(am__configure_deps)
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu Python/src/tests_jmodelica/files/Modelica/Resources/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign ThirdParty/CSparse/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --gnu Python/src/tests_jmodelica/files/Modelica/Resources/Makefile
+	  $(AUTOMAKE) --foreign ThirdParty/CSparse/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -289,7 +290,7 @@ distdir: $(DISTFILES)
 check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) check-local
 check: check-am
-all-am: Makefile
+all-am: Makefile all-local
 installdirs:
 install: install-am
 install-exec: install-exec-am
@@ -384,41 +385,74 @@ uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
-.PHONY: all all-am check check-am check-local clean clean-generic \
-	clean-libtool clean-local distclean distclean-generic \
-	distclean-libtool distdir dvi dvi-am html html-am info info-am \
-	install install-am install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-exec-local \
-	install-html install-html-am install-info install-info-am \
-	install-man install-pdf install-pdf-am install-ps \
-	install-ps-am install-strip installcheck installcheck-am \
-	installdirs maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-generic mostlyclean-libtool pdf pdf-am \
-	ps ps-am uninstall uninstall-am
+.PHONY: all all-am all-local check check-am check-local clean \
+	clean-generic clean-libtool clean-local distclean \
+	distclean-generic distclean-libtool distdir dvi dvi-am html \
+	html-am info info-am install install-am install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-exec-local install-html \
+	install-html-am install-info install-info-am install-man \
+	install-pdf install-pdf-am install-ps install-ps-am \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	uninstall uninstall-am
 
+# This is to ensure that the install target of the CSparse
+# make system is run whenever make all is run. This is needed
+# in order to trigger a complete install, local in the build
+# directory, early in the build process.
 
-$(TESTLIBRARY_BUILD_DIR):
-	mkdir -p $(TESTLIBRARY_BUILD_DIR) && \
-	cd $(TESTLIBRARY_BUILD_DIR) && \
-	case $(build) in \
-	*-cygwin*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_Fortran_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	*-mingw*) \
-	cmake -G "MSYS Makefiles" -DCMAKE_C_FLAGS="-m32" -DCMAKE_Fortran_FLAGS="-m32" -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	*-apple*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	*) \
-	cmake -DCMAKE_INSTALL_DIR:PATH=$(prefix) $(TESTLIBRARY_SRC_DIR) -DTOP_SRC=$(abs_top_srcdir) ;; \
-	esac
+$(CSPARSE_DIR):
+	mkdir -p $(CSPARSE_DIR)
+	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR)/
+	mkdir -p $(abs_builddir)/../../csparse_install/lib
+	mkdir -p $(abs_builddir)/../../csparse_install/include
 
-install-exec-local: $(TESTLIBRARY_BUILD_DIR)
-	cd $(TESTLIBRARY_BUILD_DIR) && VERBOSE=1 make $(AM_MAKEFLAGS) install
+@JM_WIN64_TRUE@$(CSPARSE_DIR64):
+@JM_WIN64_TRUE@	mkdir -p $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(abs_top_srcdir)/ThirdParty/CSparse/csparse/* $(CSPARSE_DIR64)/	
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/lib
+@JM_WIN64_TRUE@	mkdir -p $(abs_builddir)/../../csparse_install64/include
+
+@JM_WIN64_TRUE@all-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	case $(build) in \
+@JM_WIN64_TRUE@	*-cygwin*|*-mingw*) \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m64 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
+@JM_WIN64_TRUE@	*) \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ; \
+@JM_WIN64_TRUE@	cd $(CSPARSE_DIR64) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
+@JM_WIN64_TRUE@	esac
+
+@JM_WIN64_TRUE@install-exec-local: $(CSPARSE_DIR) $(CSPARSE_DIR64)
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install/lib/libcsparse$(SHAREDEXT)
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install64/lib/libcsparse.a
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install64/lib/libcsparse$(SHAREDEXT)
+@JM_WIN64_TRUE@	cp -r $(CSPARSE_DIR64)/Include/* $(abs_builddir)/../../csparse_install64/include/
+
+@JM_WIN64_FALSE@all-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	case $(build) in \
+@JM_WIN64_FALSE@	*-cygwin*|*-mingw*) \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) CC=gcc TARGET_ARCH=-m32 SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS)  install DESTDIR= ;; \
+@JM_WIN64_FALSE@	*) \
+@JM_WIN64_FALSE@	cd $(CSPARSE_DIR) && make $(AM_MAKEFLAGS) SHAREDEXT=$(SHAREDEXT) SHARED_LDFLAGS=$(SHARED_LDFLAGS) install DESTDIR= ;; \
+@JM_WIN64_FALSE@	esac
+
+@JM_WIN64_FALSE@install-exec-local: $(CSPARSE_DIR)
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse.a $(abs_builddir)/../../csparse_install/lib/libcsparse.a
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Lib/libcsparse$(SHAREDEXT) $(abs_builddir)/../../csparse_install/lib/libcsparse$(SHAREDEXT)
+@JM_WIN64_FALSE@	cp -r $(CSPARSE_DIR)/Include/* $(abs_builddir)/../../csparse_install/include/
 
 check-local:
-	cd $(TESTLIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+	cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) test
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) test
 
 clean-local:
-	-cd $(TESTLIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+	-cd $(CSPARSE_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
+@JM_WIN64_TRUE@	-cd $(CSPARSE_DIR64) && $(MAKE) $(AM_MAKEFLAGS) clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

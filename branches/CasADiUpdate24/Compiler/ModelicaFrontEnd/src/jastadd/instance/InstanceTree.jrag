@@ -162,7 +162,7 @@ aspect Environment {
             StringBuilder str = new StringBuilder();
             str.append("{");
             for (InstModification im : this) {
-                str.append("  " + im.modification().prettyPrint("") + ",");
+                str.append("  " + im.getModification().prettyPrint("") + ",");
                 str.append(im.myInstNode().toString());
                 str.append("\n");
             }
@@ -176,9 +176,9 @@ aspect Environment {
             for (int i = 0; i < size(); i++) {
                 InstModification im = get(i);
                 if (i==0) {
-                    str.append(im.modification().prettyPrint(""));
+                    str.append(im.getModification().prettyPrint(""));
                 } else {
-                    str.append(indent + " " + im.modification().prettyPrint(""));
+                    str.append(indent + " " + im.getModification().prettyPrint(""));
                 }
                 str.append(": ");
                 str.append(im.myInstNode().name());
@@ -262,12 +262,12 @@ aspect InstModifications{
 	}
 
 
-    syn CompleteModification InstCompleteModification.getCompleteModification()    = (CompleteModification)  modification();
-    syn ClassModification InstClassModification.getClassModification()             = (ClassModification)     modification();
-    syn ValueModification InstValueModification.getValueModification()             = (ValueModification)     modification();
-    syn ComponentModification InstComponentModification.getComponentModification() = (ComponentModification) modification();
-    syn ClassRedeclare InstClassRedeclare.getClassRedeclare()                      = (ClassRedeclare)        modification();
-    syn ComponentRedeclare InstComponentRedeclare.getComponentRedeclare()          = (ComponentRedeclare)    modification();
+    syn CompleteModification InstCompleteModification.getCompleteModification()    = (CompleteModification)  getModification();
+    syn ClassModification InstClassModification.getClassModification()             = (ClassModification)     getModification();
+    syn ValueModification InstValueModification.getValueModification()             = (ValueModification)     getModification();
+    syn ComponentModification InstComponentModification.getComponentModification() = (ComponentModification) getModification();
+    syn ClassRedeclare InstClassRedeclare.getClassRedeclare()                      = (ClassRedeclare)        getModification();
+    syn ComponentRedeclare InstComponentRedeclare.getComponentRedeclare()          = (ComponentRedeclare)    getModification();
 
 }
 
@@ -534,18 +534,12 @@ aspect Environments {
 	eq Program.getInstProgramRoot().myEnvironment() = new Environment();
 	eq Program.getInstProgramRoot().myEnvironment(String name) = new Environment();
 
-    syn lazy List<InstRecordModification> InstValueModification.getInstRecordModificationList() {
-        List<InstRecordModification> res = new List<InstRecordModification>();
-        getFExp().populateInstRecordModificationList(res, this);
-        return res;
-    }
-
     syn lazy List<InstArrayModification> InstValueModification.getInstArrayModificationList() {
         List<InstArrayModification> res = new List<InstArrayModification>();
         if (getFExp().isArray()) {
             for (int i = 1, n = getFExp().size().get(0) + 1; i < n; i++) {
                 FExp exp = getFExp().splitArrayExp(i);
-                res.add(new InstArrayModification(modification(), exp));
+                res.add(new InstArrayModification(getModification(), exp));
             }
         }
         return res;
@@ -580,14 +574,7 @@ aspect Environments {
             return hasInstModification() ? getInstModification() : null;
         return null;
     }
-
-    syn InstValueModification InstValueModification.matchInstRecordModification(String name) {
-        for (InstRecordModification im : getInstRecordModifications())
-            if (im.getName().equals(name))
-                return im;
-        return null;
-    }
-
+    
     // Only add modifiers in constraining clauses
     eq InstComponentRedeclare.matchInstModification(String name) {
         if (name().equals(name) && hasConstrainingModification())
@@ -602,75 +589,7 @@ aspect Environments {
         return null;
     }
     
-    public void FExp.populateInstRecordModificationList(
-            List<InstRecordModification> list, InstValueModification org) {
-        Modification mod = org.modification();
-        FType t = type();
-        if (t.isRecord()) {
-            FRecordType rt = (FRecordType)t;
-            for (FRecordComponentType frct : rt.getComponents()) {
-                String name = frct.getName();
-                FExp exp = dynamicFExp(extractRecordFExp(name));
-                list.add(new InstValueRecordModification(mod, name, exp));
-            }
-        }
-    }
     
-    public void InstRecordConstructor.populateInstRecordModificationList(
-            List<InstRecordModification> list, InstValueModification org) {
-        Modification mod = org.modification();
-        int i = 0;
-        for (InstComponentDecl icd : getRecord().myInstClassDecl().allInstComponentDecls()) {
-            list.add(getArg(i++).createInstRecordModification(mod, icd.name()));
-        }
-    }
-
-    public InstRecordModification InstFunctionArgument.createInstRecordModification(Modification mod, String name) {
-        return new InstValueRecordModification(mod, name, getFExp());
-    }
-
-    public InstRecordModification InstDefaultArgument.createInstRecordModification(Modification mod, String name) {
-        return new InstDefaultRecordModification(mod, name, this);
-    }
-
-    syn lazy InstModification InstDefaultRecordModification.sourceInstMod() {
-        InstComponentDecl cmp = getArg().getFExp().findComponentWithThisBindingExp();
-        return (cmp == null || cmp.myInstValueMod() == null) ? getArg().getFExp().surroundingInstModification() : cmp.myInstValueMod();
-    }
-
-    syn Modification InstModification.modification() = getModification();
-    eq InstDefaultRecordModification.modification()  = 
-        (sourceInstMod() != null) ? sourceInstMod().modification() : super.modification();
-
-	public void FIdUseExp.populateInstRecordModificationList(
-			List<InstRecordModification> list, InstValueModification org) {
-		getFIdUse().populateInstRecordModificationList(list, org, this);
-	}
-	
-	public void FIdUse.populateInstRecordModificationList(
-			List<InstRecordModification> list, InstValueModification org, FExp exp) {}
-	
-	public void FIdUseInstAccess.populateInstRecordModificationList(
-			List<InstRecordModification> list, InstValueModification org, FExp exp) {
-		getInstAccess().populateInstRecordModificationList(list, org, exp);
-	}
-
-    public void InstAccess.populateInstRecordModificationList(
-            List<InstRecordModification> list, InstValueModification org, FExp exp) {
-        InstComponentDecl var = myInstComponentDecl();
-        if (var.isRecord()) {
-            Modification mod = org.modification();
-            while (var.isArray()) {
-                var = var.getInstComponentDecl(0);
-            }
-            for (InstComponentDecl comp : var.allInstComponentDecls()) {
-                String name = comp.name();
-                FExp val = exp.dynamicFExp(new FIdUseExp(new FIdUseInstAccess(copyAndAppend(name))));
-                list.add(new InstValueRecordModification(mod, name, val));
-            }
-        }
-    }
-
 	/**
 	 * Find the InstModification containing this expression, if any.
 	 */
@@ -1804,12 +1723,10 @@ aspect InstaceConstrainingClauses {
         ClassDecl classToExpand = getClassName().myInstClassDecl().getClassDecl();
         return classToExpand.newInstClassDecl();
     }
-
+    
     syn lazy FExp InstValueModification.getFExp() = getValueModification().instantiateExp();
-    eq InstValueRecordModification.getFExp()      = getValue().unboundCopy();
-    eq InstDefaultRecordModification.getFExp()    = getArg().getFExp().unboundCopy();
-    eq InstArrayModification.getFExp()            = getCell().unboundCopy();
-
+    eq InstArrayModification.getFExp()            = getCell();
+    
     syn FExp ValueModification.instantiateExp() = getExp().instantiate();
     eq DummyModification.instantiateExp()       = myFExp().treeCopy();
 
@@ -2861,7 +2778,7 @@ aspect InstanceDumpTree {
 //		return toString("");
 //    }
     public String InstModification.toString(String indent) {
-        return modification().prettyPrint(indent);
+        return getModification().prettyPrint(indent);
     }
 
     public String InstClassDecl.toString() {
@@ -2881,7 +2798,7 @@ aspect InstanceDumpTree {
     }
 
     public String InstModification.toString() {
-        return modification().toString();
+        return getModification().toString();
     }
 
 }

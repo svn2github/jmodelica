@@ -19,6 +19,7 @@
 from pyjmi import transfer_optimization_problem, get_files_path
 from pyjmi.optimization.casadi_collocation import BlockingFactors
 from pymodelica.common.io import ResultDymolaTextual
+from pyjmi.symbolic_elimination import BLTOptimizationProblem
 
 # Import other stuff
 import matplotlib.pyplot as plt
@@ -59,6 +60,9 @@ def run_demo(with_plots=True, use_ma57=False):
     init_path = os.path.join(get_files_path(), "vehicle_turn_dymola.txt")
     init_guess = ResultDymolaTextual(init_path)
     opts['init_traj'] = init_guess
+
+    # Symbolic elimination
+    op = BLTOptimizationProblem(op)
 
     # Solve optimization problem
     res = op.optimize(options=opts)

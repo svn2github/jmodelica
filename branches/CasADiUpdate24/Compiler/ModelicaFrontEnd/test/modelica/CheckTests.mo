@@ -570,6 +570,8 @@ equation
  end if;
 
 public
+ type AssertionLevel = enumeration(error, warning);
+
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end CheckTests.IfEquationElse1;
@@ -612,6 +614,8 @@ equation
  end if;
 
 public
+ type AssertionLevel = enumeration(error, warning);
+
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
 
 end CheckTests.IfEquationElse2;
@@ -1558,5 +1562,49 @@ equation
 end CheckTests.NegativeFill2;
 ")})));
 end NegativeFill2;
+
+model FunctionOutputSize1
+    function f
+        input Integer x;
+        output Integer[x] y1 = 1:x;
+        output Integer[x] y2 = 1:x;
+        algorithm
+    end f;
+    parameter Integer[:] x;
+    Real[1] y1;
+    Real[1] y2;
+equation
+    (y1,y2) = f(size(x,1));
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="InnerOuter1",
+            description="Check that error for function outputs does not trigger in inactive branch",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end FunctionOutputSize1;
+
+model UnknownSizeArrayIndexBounds1
+    parameter Real[:] x;
+    Real y = x[1];
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="UnknownSizeArrayIndexBounds1",
+            description="",
+            checkType=check,
+            errorMessage="
+1 warnings found:
+
+Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRESSION:
+  The parameter x does not have a binding expression
+
+")})));
+end UnknownSizeArrayIndexBounds1;
+
 
 end CheckTests;

@@ -2888,8 +2888,10 @@ aspect FVariableUses {
     eq InstRoot.getChild().inFunctionCall()      = false;
     
     inh boolean FExp.isFunctionCallArg();
-    eq FFunctionCall.getArg().isFunctionCallArg() = true;
     eq BaseNode.getChild().isFunctionCallArg()    = false;
+    eq FFunctionCall.getArg().isFunctionCallArg() = true;
+    eq FIfExp.getThenExp().isFunctionCallArg()    = isFunctionCallArg();
+    eq FIfExp.getElseExp().isFunctionCallArg()    = isFunctionCallArg();
     
     /**
      * Returnes the function input that this expressions corresponds to.
@@ -2933,11 +2935,6 @@ aspect FVariableUses {
     eq FAssignStmt.getLeft().isAssignedTo()       = true;
     eq FFunctionCallStmt.getLeft().isAssignedTo() = true;
     eq FFunctionCallLeft.getFExp().isAssignedTo() = isAssignedTo();
-    
-    inh boolean FExp.inBindingExp();
-    eq Root.getChild().inBindingExp() = false;
-    eq InstAssignable.getBindingFExp().inBindingExp() = true;
-    eq FVariable.getBindingExp().inBindingExp() = true;
     
     /**
      * Check if this is exp is bound in a declaration
@@ -3912,7 +3909,9 @@ aspect FlatExternalFunctionAPI {
     syn String FExternalStmt.include()            = include;
     syn String FExternalStmt.libraryDirectory()   = libraryDir;
     syn String FExternalStmt.includeDirectory()   = includeDir;
-
+    syn boolean FExternalStmt.isIncluded() = !(include() == null || include().equals(""));
+    syn boolean FExternalStmt.isInLibrary() = !(libraryDirectory() == null || libraryDirectory().equals(""));
+    
     private String[] FExternalStmt.library;
     private String FExternalStmt.include;
     private String FExternalStmt.libraryDir;

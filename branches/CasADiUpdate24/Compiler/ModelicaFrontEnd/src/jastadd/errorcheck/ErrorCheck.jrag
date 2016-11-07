@@ -418,12 +418,17 @@ aspect ErrorCheck {
   inh boolean FExp.lockBranch(ErrorCheckType checkType);
   inh boolean FExpSubscript.lockBranch(ErrorCheckType checkType);
   inh boolean FAbstractEquation.lockBranch(ErrorCheckType checkType);
+  inh boolean FStatement.lockBranch(ErrorCheckType checkType);
+  inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
   inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
   inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
   eq FIfEquation.getFAbstractEquation().lockBranch(ErrorCheckType checkType)      = lockMyBranch(checkType, true);
   eq FIfEquation.getElse().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, false);
+  eq FIfClause.getFStatement().lockBranch(ErrorCheckType checkType)               = lockMyBranch(checkType, true);
+  eq FIfStmt.getFIfWhenClause(int i).lockBranch(ErrorCheckType checkType)         = lockMyBranch(checkType, i);
+  eq FIfStmt.getElseStmt().lockBranch(ErrorCheckType checkType)                   = lockMyBranch(checkType, getNumFIfWhenClause());
   eq FConnectClause.getConnector1().lockBranch(ErrorCheckType checkType)          = getConnector2().isDisabled() || lockBranch(checkType);
   eq FConnectClause.getConnector2().lockBranch(ErrorCheckType checkType)          = getConnector1().isDisabled() || lockBranch(checkType);
   eq InstComponentDecl.getChild().lockBranch(ErrorCheckType checkType)            = isDisabled() || lockBranch(checkType);
@@ -479,6 +484,23 @@ aspect ErrorCheck {
 		  return lockBranch(checkType);
 	  }
   }
+    
+    public boolean FIfWhenClause.lockMyBranch(ErrorCheckType checkType, boolean then) {
+        if (getTest().lockable(then)) {
+            getTest().markAsStructuralParameter(checkType);
+            return true;
+        } else {
+            return lockBranch(checkType);
+        }
+    }
+    
+    public boolean FIfStmt.lockMyBranch(ErrorCheckType checkType, int i) {
+        if (i == 0) {
+            return lockBranch(checkType);
+        } else {
+            return getFIfWhenClause(i-1).lockMyBranch(checkType, false);
+        }
+    }
 
   
     /**
@@ -558,7 +580,6 @@ aspect ErrorCheck {
         }
     }
     eq InstComponentDecl.getFAbstractEquation().errorEnclosingComponent() = this;
-    eq InstAssignable.getBindingFExp().errorEnclosingComponent() = myInstValueMod().errorEnclosingComponent();
     
     eq FlatRoot.getChild().errorEnclosingComponent() = null;
     eq InstRoot.getChild().errorEnclosingComponent() = null;
@@ -911,30 +932,26 @@ aspect InstanceErrorCheck {
             new SimpleWarningProducer("PARAMETER_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The parameter %s does not have a binding expression");
     public static final SimpleProblemProducer ASTNode.CONSTANT_MISSING_BINDING_EXPRESSION =
             new SimpleWarningProducer("CONSTANT_MISSING_BINDING_EXPRESSION", ProblemKind.SEMANTIC, "The constant %s does not have a binding expression");
-
-    syn boolean InstModification.collectErrorsInBindingExp() = true;
-    eq InstDefaultRecordModification.collectErrorsInBindingExp() = false;
     
     public void InstAssignable.collectErrors(ErrorCheckType checkType) {
         //log.debug(toString());
         if (!errorChecked) {
             super.collectErrors(checkType);
             errorChecked = true;
-
-            // Check binding expression
-            FExp bexp = myBindingInstExp();
-            if (bexp != null) {
-                String type = isParameter() ? "parameter" : "constant";
-                // TODO: Check structural parameters as well
-                if (myInstValueMod().collectErrorsInBindingExp()) {
-                    bexp.collectErrors(checkType);
-                }
+            
+            // Check modification
+            if (hasInstValueMod()) {
+                myInstValueMod().collectErrors(checkType);
+            }
+            
+            if (hasBindingFExp()) {
                 // Check if the binding expression of constants can be evaluated
-                if (isConstant() && !bexp.type().isUnknown()) 
+                FExp bexp = getBindingFExp();
+                if (isConstant() && !bexp.type().isUnknown()) {
                     bexp.checkConstantExpression(checkType, "constant", qualifiedName());
-                else if (isParameter() && bexp.isCircular())
-                    bexp.error("Circularity in binding expression of parameter: %s = %s", 
-                            qualifiedName(), bexp);
+                } else if (isParameter() && bexp.isCircular()) {
+                    bexp.error("Circularity in binding expression of parameter: %s = %s", qualifiedName(), bexp);
+                }
             } else {
                 // Warn if constant or parameter does not have a binding expression (start is used)
                 if (variability().fixedParameterOrLess() && !isForIndex() && !isRecord() && 
@@ -1261,26 +1278,33 @@ aspect InstanceErrorCheck {
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         throw new UnsupportedOperationException();
     }
-    
+
+    @Override
     public void InstForIndex.collectErrorsForAllIndices(
+        List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
+        InstComponentDecl var = getInstPrimitive();
+        CValue oldVal = var.evaluationValue;
+        boolean last = i == indices.getNumChild() - 1;
+        CommonForIndex next = last ? null : indices.getChild(i + 1);
+        CValueArray ivals = getFExp().ceval().array();
+        for (Index j : ivals.indices()) {
+            var.setLocalCachedEvaluationValue(ivals.getCell(j));
+            if (last) {
+                child.resetCollectErrors();
+                child.collectErrors(checkType);
+                child.flushAllRecursive();
+            } else {
+                next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
+            }
+        }
+        var.setLocalCachedEvaluationValue(oldVal);
+    }
+
+    @Override
+    public void InstForIndexNoExp.collectErrorsForAllIndices(
             List<? extends CommonForIndex> indices, int i, ASTNode child, ErrorCheckType checkType) {
         if (hasFExp()) {
-            InstComponentDecl var = getInstPrimitive();
-            CValue oldVal = var.evaluationValue;
-            boolean last = i == indices.getNumChild() - 1;
-            CommonForIndex next = last ? null : indices.getChild(i + 1);
-            CValueArray ivals = getFExp().ceval().array();
-            for (Index j : ivals.indices()) {
-                var.setLocalCachedEvaluationValue(ivals.getCell(j));
-                if (last) {
-                    child.resetCollectErrors();
-                    child.collectErrors(checkType);
-                    child.flushAllRecursive();
-                } else {
-                    next.collectErrorsForAllIndices(indices, i + 1, child, checkType);
-                }
-            }
-            var.setLocalCachedEvaluationValue(oldVal);
+            super.collectErrorsForAllIndices(indices, i, child, checkType);
         }
     }
 

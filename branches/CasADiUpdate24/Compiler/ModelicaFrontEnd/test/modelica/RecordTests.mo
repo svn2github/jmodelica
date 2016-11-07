@@ -1668,12 +1668,42 @@ model RecordBinding30
             description="Flattening and scalarization of record with if binding expression",
             flatModel="
 fclass RecordTests.RecordBinding30
- structural parameter Boolean b.b = false /* false */;
+ parameter Boolean b.b = false /* false */;
  structural parameter Integer b.rw.r.n = 1 /* 1 */;
  constant Real b.rw.r.x[1] = 1;
 end RecordTests.RecordBinding30;
 ")})));
 end RecordBinding30;
+
+model RecordBinding31
+    record R1
+        Real x;
+    end R1;
+    
+    record R2
+        R1[2] r1;
+    end R2;
+    
+    record R3
+        R2 r2;
+    end R3;
+    
+    constant R2 r2(r1(x={1,2}));
+    constant R3[1] r3(r2={r2});
+    constant Real s = sum(r3[1].r2.r1.x);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding31",
+            description="",
+            flatModel="
+fclass RecordTests.RecordBinding31
+ constant Real r2.r1[1].x = 1;
+ constant Real r2.r1[2].x = 2;
+ constant Real s = 3.0;
+end RecordTests.RecordBinding31;
+")})));
+end RecordBinding31;
 
 model UnmodifiableComponent1
     record R
@@ -2257,7 +2287,10 @@ model RecordConstructor5
             description="Record constructors: too few args",
             variability_propagation=false,
             errorMessage="
-1 errors found:
+2 errors found:
+
+Error at line 2252, column 8, in file '...':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, )).c'
 
 Error at line 2166, column 8, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: missing argument for required input c
@@ -2280,7 +2313,10 @@ model RecordConstructor6
             description="Record constructors: too many args",
             variability_propagation=false,
             errorMessage="
-1 errors found:
+2 errors found:
+
+Error at line 2275, column 8, in file '...':
+  Could not evaluate binding expression for structural parameter 'x.c': '(A(1.0, 2, \"foo\")).c'
 
 Error at line 2189, column 25, in file 'Compiler/ModelicaFrontEnd/test/modelica/RecordTests.mo':
   Record constructor for A: too many positional arguments
@@ -2550,8 +2586,8 @@ model RecordConstructor15
 fclass RecordTests.RecordConstructor15
  structural parameter Integer n = 2 /* 2 */;
  structural parameter Integer r.n = 2 /* 2 */;
- structural parameter Real r.x[1] = 1 /* 1 */;
- structural parameter Real r.x[2] = 2 /* 2 */;
+ parameter Real r.x[1] = 1 /* 1 */;
+ parameter Real r.x[2] = 2 /* 2 */;
 end RecordTests.RecordConstructor15;
 ")})));
 end RecordConstructor15;
@@ -3290,6 +3326,32 @@ fclass RecordTests.RecordConstructor35
 end RecordTests.RecordConstructor35;
 ")})));
 end RecordConstructor35;
+
+model RecordConstructor36
+    record R1
+        Real x;
+    end R1;
+    
+    model M
+        R1 r1;
+    end M;
+    
+    M[2] m(r1={R1(i+time) for i in 1:2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor36",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor36
+ Real m[1].r1.x;
+ Real m[2].r1.x;
+equation
+ m[1].r1.x = 1 + time;
+ m[2].r1.x = 2 + time;
+end RecordTests.RecordConstructor36;
+")})));
+end RecordConstructor36;
 
 model RecordScalarize1
  record A
@@ -7541,6 +7603,49 @@ end RecordTests.RecordEval7;
 ")})));
 end RecordEval7;
 
+model RecordEval8
+    record R2
+        function f1
+            Real t = 0;
+            output Real x = t;
+            algorithm
+        end f1;
+        function f2
+            extends f1;
+        end f2;
+        constant Real x = f2();
+    end R2;
+    
+    record R3
+        extends R2;
+    end R3;
+    
+    R3 r3;
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordEval8",
+            description="Test bug in #5153",
+            flatModel="
+fclass RecordTests.RecordEval8
+ constant RecordTests.RecordEval8.R3 r3 = RecordTests.RecordEval8.R3(0);
+
+public
+ function RecordTests.RecordEval8.r3.f2
+  Real t;
+  output Real x;
+ algorithm
+  t := 0;
+  x := t;
+  return;
+ end RecordTests.RecordEval8.r3.f2;
+
+ record RecordTests.RecordEval8.R3
+  constant Real x;
+ end RecordTests.RecordEval8.R3;
+
+end RecordTests.RecordEval8;
+")})));
+end RecordEval8;
 
 model RecordModification1
   record R

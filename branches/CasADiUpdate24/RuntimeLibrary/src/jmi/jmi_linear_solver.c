@@ -361,7 +361,11 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
         /* In case of singular system, use the last point in the calculation of the b-vector */
         info = block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
     } else {
+        /* Ignore bounds when calculating RHS with zero vector*/
+        int current_enforce_bounds_flag = block->options->enforce_bounds_flag;;
+        block->options->enforce_bounds_flag = FALSE;
         info = block->F(block->problem_data,solver->zero_vector, solver->rhs, JMI_BLOCK_EVALUATE);
+        block->options->enforce_bounds_flag = current_enforce_bounds_flag;
     }
     if(info) {
         /* Close the LinearSolve log node and generate the Error/Warning node and return. */

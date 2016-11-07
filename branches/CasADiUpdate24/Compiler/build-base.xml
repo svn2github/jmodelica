@@ -464,16 +464,16 @@
     </target>
     
     <!-- Generate JavaDoc. -->
+    <target name="artifacts" depends="build,doc" description="Generates artifacts, i.e. all jars and JavaDoc." />
+    
+    <!-- Generate JavaDoc. -->
     <target name="doc" depends="gen" description="Generate JavaDoc.">
         <if>
             <isset property="javadoc.packages"/>
             <then>
-                <echo>
-                    sourcepath="${java_output}:${java_dirs}"
-                    packagenames="${javadoc.packages}"
-                </echo>
                 <mkdir dir="${javadoc_output}" />
                 <javadoc 
+                    access="public" 
                     sourcepath="${java_output}:${java_dirs}" 
                     destdir="${javadoc_output}" 
                     packagenames="${javadoc.packages}" 

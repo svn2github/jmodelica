@@ -1,5 +1,5 @@
 TESTLIBRARY_BUILD_DIR=$(abs_builddir)/build
-TESTLIBRARY_SRC_DIR=$(abs_top_srcdir)/Python/src/tests_jmodelica/files/Modelica/Resources
+TESTLIBRARY_SRC_DIR=$(abs_top_srcdir)/Python
 
 $(TESTLIBRARY_BUILD_DIR):
 	mkdir -p $(TESTLIBRARY_BUILD_DIR) && \
@@ -23,4 +23,3 @@ check-local:
 
 clean-local:
 	-cd $(TESTLIBRARY_BUILD_DIR) && $(MAKE) $(AM_MAKEFLAGS) clean
-
