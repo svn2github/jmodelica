@@ -432,13 +432,13 @@ aspect FlatTypeCheck {
         }
     }
     
-    syn boolean FExp.errorCheckUnknownSize() = !inFunction() && !allowUnknownSize();
+    syn boolean FExp.errorCheckUnknownSize() = !inFunction(); // && !allowUnknownSize();
     
     syn boolean BaseNode.allowUnknownSize()    = false;
     eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
     eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().allowUnknownSizeInputs();
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().allowUnknownSizeInputs();
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize();
     
     inh boolean BaseNode.inAllowUnknownSize();
     eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
