@@ -410,7 +410,7 @@ aspect ErrorCheck {
    * 
    * Any parameters used in the test will be marked as structural.
    * 
-   * NB: This has side-effects, dispite being an inherited attribute.
+   * NB: This has side-effects, despite being an inherited attribute.
    * 
    * @param checkType  the type of error checks to use when marking structural parameters
    */
@@ -421,6 +421,7 @@ aspect ErrorCheck {
   inh boolean FStatement.lockBranch(ErrorCheckType checkType);
   inh boolean FIfWhenClause.lockBranch(ErrorCheckType checkType);
   inh boolean InstComponentDecl.lockBranch(ErrorCheckType checkType);
+  inh boolean InstFunctionArgument.lockBranch(ErrorCheckType checkType); 
   inh boolean FFunctionCallLeft.lockBranch(ErrorCheckType checkType);
   eq FIfExp.getThenExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, true);
   eq FIfExp.getElseExp().lockBranch(ErrorCheckType checkType)                     = lockMyBranch(checkType, false);
@@ -437,8 +438,8 @@ aspect ErrorCheck {
   eq FClass.getChild().lockBranch(ErrorCheckType checkType)                       = false;
   
   /**
-   * Lock this if-expression and return true if it only has only parameter-expression 
-   * tests and evaluates to the branch not indicated by <code>then</code>. Otherwise 
+   * Lock this if-expression and return true if it only has parameter-expression 
+   * tests and evaluates the branch not indicated by <code>then</code>. Otherwise 
    * delegates to {@link #lockBranch(ErrorCheckType)}.
    * 
    * Any parameters used in the test will be marked as structural.
