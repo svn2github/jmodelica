@@ -543,29 +543,37 @@ public class CGenerator extends GenericGenerator {
     }
     
     
-	/**
-	 * Generates code for BLT block residuals
-	 */
-	/**
-	 * C: C functions for the DAE BLT block residuals
-	 */
-	public class DAETag_C_dae_blocks_residual_functions extends DAETag {
-		
-		public DAETag_C_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_blocks_residual_functions", myGenerator, fclass);
+    /**
+     * Generates code for BLT block residuals
+     */
+    /**
+     * C: C functions for the DAE BLT block residuals
+     */
+    public class DAETag_C_dae_blocks_residual_functions extends DAETag {
+        
+        public DAETag_C_dae_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dae_blocks_residual_functions", myGenerator, fclass);
             addOptions("generate_ode");
-		}
-		
+        }
+        
         @Override
         public boolean isActive() {
             return !fclass.onlyInitBLT() && super.isActive();
         }
 
-		public void generate(CodeStream genPrinter) {
-			for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-				block.genBlockResidualFunction_C(ASTNode.blockPrinter_C, genPrinter, "");
-		}
-	}
+        public void generate(CodeStream genPrinter) {
+            String indent = "";
+            CodePrinter printer = ASTNode.blockPrinter_C;
+            boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
+
+            for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks()) {
+                block.genBlockResidualFunction_C(printer, genPrinter, indent);
+                if (generateSparse) {
+                    block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, false);
+                }
+            }
+        }
+    }
 
     /**
      * Generates code for adding BLT blocks 
@@ -589,8 +597,12 @@ public class CGenerator extends GenericGenerator {
             if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
+                OptionRegistry options = fclass.myOptions();
+
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, false, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, false,
+                            false, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            options.getStringOption("nonlinear_solver"), -1);
             }
         }
 	}
@@ -615,25 +627,33 @@ public class CGenerator extends GenericGenerator {
         }
 	}
 
-	/**
-	 * Generates code for BLT block residuals (DAE initialization system)
-	 */
-	/**
-	 * C: C functions for the DAE BLT block residuals
-	 */
-	public class DAETag_C_dae_init_blocks_residual_functions extends DAETag {
-		
-		public DAETag_C_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
-			super("C_dae_init_blocks_residual_functions", myGenerator, fclass);
-            addOptions("generate_ode");
-		}
+    /**
+     * Generates code for BLT block residuals (DAE initialization system)
+     */
+    /**
+     * C: C functions for the DAE BLT block residuals
+     */
+    public class DAETag_C_dae_init_blocks_residual_functions extends DAETag {
 
-		public void generate(CodeStream genPrinter) {
+        public DAETag_C_dae_init_blocks_residual_functions(AbstractGenerator myGenerator, FClass fclass) {
+            super("C_dae_init_blocks_residual_functions", myGenerator, fclass);
+            addOptions("generate_ode");
+        }
+
+        public void generate(CodeStream genPrinter) {
+            String indent = "";
             CodePrinter printer = ASTNode.blockPrinter_C.initialSystemPrinter();
-			for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-				block.genBlockResidualFunction_C(printer, genPrinter, ""); 
-		}
-	}
+            boolean generateSparse = fclass.myOptions().getBooleanOption("generate_sparse_block_jacobian");
+
+            for (AbstractEquationBlock block : fclass.getDAEInitBLT()) {
+                block.genBlockResidualFunction_C(printer, genPrinter, indent);
+
+                if (generateSparse) {
+                    block.genBlockResidualFunction_sparse_jacobian(printer, genPrinter, indent, true);
+                }
+            } 
+        }
+    }
 
     /**
      * Generates code for adding BLT blocks 
@@ -652,8 +672,12 @@ public class CGenerator extends GenericGenerator {
             if (!CADGenerator.shouldGenerateBlockJacobians(fclass)) {
                 CodePrinter p = ASTNode.printer_C;
                 String indent = p.indent("");
+                OptionRegistry options = fclass.myOptions();
+
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, false, true, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, false,
+                            true, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            fclass.myOptions().getStringOption("nonlinear_solver"), -1);
             }
         }
     }

@@ -182,8 +182,12 @@ public class CADGenerator extends CGenerator {
             if (shouldGenerateBlockJacobians(fclass)) {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
+                OptionRegistry options = fclass.myOptions();
+
                 for (AbstractEquationBlock block : fclass.getDAEStructuredBLT().getAllBlocks())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, false, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, true,
+                            false, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            options.getStringOption("nonlinear_solver"), -1);
             }
         }
 	    }
@@ -201,8 +205,12 @@ public class CADGenerator extends CGenerator {
             if (shouldGenerateBlockJacobians(fclass)) {
                 CodePrinter p = ASTNode.printer_CAD;
                 String indent = p.indent("");
+                OptionRegistry options = fclass.myOptions();
+
                 for (AbstractEquationBlock block : fclass.getDAEInitBLT())
-                    block.genBlockAddCall_C(p, genPrinter, indent, true, true, fclass.myOptions().getStringOption("nonlinear_solver"), -1);
+                    block.genBlockAddCall_C(p, genPrinter, indent, true,
+                            true, options.getBooleanOption("generate_sparse_block_jacobian"),
+                            options.getStringOption("nonlinear_solver"), -1);
             }
         }
     }

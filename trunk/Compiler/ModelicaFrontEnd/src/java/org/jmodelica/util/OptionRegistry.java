@@ -303,6 +303,12 @@ abstract public class OptionRegistry {
              Category.internal,
              false, 
              "If enabled, then code for solving DAEs are generated."),
+        GENERATE_SPARSE_BLOCK_JACOBIAN
+            ("generate_sparse_block_jacobian", 
+             OptionType.compiler, 
+             Category.experimental,
+             false, 
+             "If enabled, then a sparse Jacobian is additionally generated for linear blocks."),
         GEN_DAE_JAC
             ("generate_dae_jacobian", 
              OptionType.compiler, 
