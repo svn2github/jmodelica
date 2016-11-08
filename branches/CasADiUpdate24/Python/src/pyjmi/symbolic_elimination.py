@@ -214,18 +214,6 @@ class DigraphVertex(object):
         self.number = None
         self.lowlink = None
 
-def find_deps(expr, mx_vars, deps=None):
-    """
-    Recursively finds which mx_vars expr depends on.
-    """
-    if deps is None:
-        deps = len(mx_vars) * [False]
-    for i in xrange(expr.getNdeps()):
-        dep = expr.getDep(i)
-        deps = map(any, zip(deps, [casadi.isEqual(dep, var) for var in mx_vars]))
-        deps = find_deps(dep, mx_vars, deps)
-    return deps
-
 class Component(object):
 
     def __init__(self, vertices, causalization_options, edges):
@@ -316,24 +304,27 @@ class Component(object):
         Solvability in this method is considered to be equivalent to linear dependence of
         all unknowns.
         """
-        # Check if block is linear
-        res_f = casadi.MXFunction(self.mx_vars, self.eq_expr)
+        # Compute sparsity of Jacobian
+        res_f = casadi.MXFunction([casadi.vertcat(self.mx_vars)], [casadi.vertcat(self.eq_expr)])
         res_f.setOption("name", "block_residual_for_solvability")
         res_f.init()
-        is_linear = True
-        for i in xrange(self.n):
-            for j in xrange(self.n):
-                # Check if jac[i, j] depends on block unknowns
-                if casadi.dependsOn(res_f.jac(i, j), casadi.vertcat(self.mx_vars)):
-                    is_linear = False
-                    found_edges = 0
-                    for edge in edges:
-                        if (casadi.isEqual(self.eq_expr[j], edge.eq.expression) and
-                            casadi.isEqual(self.mx_vars[i], edge.var.mx_var)):
-                            edge.linear = False
-                            found_edges += 1
-                    if found_edges != 1:
-                        dh()
+        jac_f = res_f.jacobian()
+        jac_f.init()
+        sp = jac_f.jacSparsity()
+        is_linear = sp.nnz() == 0
+
+        # Identify nonlinear edges
+        [rows, cols] = map(np.array, sp.getTriplet())
+        rows = np.unique(rows / self.n)
+        for (row, col) in itertools.izip(rows, cols):
+            found_edges = 0
+            for edge in edges:
+                if (casadi.isEqual(self.eq_expr[row], edge.eq.expression) and
+                    casadi.isEqual(self.mx_vars[col], edge.var.mx_var)):
+                    edge.linear = False
+                    found_edges += 1
+            if found_edges != 1:
+                raise RuntimeError()
         if not self.options['solve_torn_linear_blocks'] and self.torn:
             return False
         return is_linear
@@ -991,17 +982,21 @@ def create_edges(equations, variables):
         """
         Create edges between Equations and Variables.
         """
-        # This can probably be made more efficient by analyzing Jacobian sparsity of a SISO function with latest CasADi
+        eqs = casadi.vertcat([eq.expression for eq in equations])
+        vrs = casadi.vertcat([var.mx_var for var in variables])
+        fcn = casadi.MXFunction([vrs], [eqs])
+        fcn.init()
+        [col_ptrs, row_inds] = fcn.jacSparsity().getCCS()
+        
+        old_col_ptr = col_ptrs[0]
+        col = 0
         edges = []
-        mx_vars = [var.mx_var for var in variables]
-        for equation in equations:
-            expr = equation.expression
-            deps_incidence = np.array(find_deps(expr, mx_vars))
-            deps_equal = np.array(map(lambda mx_var: casadi.isEqual(expr, mx_var), mx_vars))
-            deps = deps_incidence + deps_equal
-            for (i, var) in enumerate(variables):
-                if deps[i]:
-                    edges.append(Edge(equation, var))
+        for col_ptr in col_ptrs[1:]:
+            for row_ind in xrange(old_col_ptr, col_ptr):
+                row = row_inds[row_ind]
+                edges.append(Edge(equations[row], variables[col]))
+            old_col_ptr = col_ptr
+            col += 1
         return edges
 
 class BLTModel(object):
@@ -1486,7 +1481,7 @@ class BLTModel(object):
         """
         Check whether system sparsity is sufficiently preserved if block is solved.
         """
-        # We never solve non-scalar blocks, so mark as sparsity preserving for plotting reasons
+        # Sparsity preservation not considered for non-scalar blocks, so mark as sparsity preserving for plotting
         if len(co.variables) > 1:
             for var in co.variables:
                 self._dependencies[var.name] = [var.name]
@@ -1496,12 +1491,12 @@ class BLTModel(object):
 
         # Find untorn dependencies, excluding block variable
         deps = []
-        for i in xrange(co.n):
-            for vk in ['dx', 'x', 'u', 'w']:
-                for dae_var in self._mx_var_struct[vk]:
-                    if casadi.dependsOn(co.eq_expr[i], dae_var) and dae_var.getName() != var.name:
-                        deps.append(dae_var)
-        deps = list(set(deps))
+        eq_expr = co.eq_expr[0]
+        dae_vars = casadi.vertcat(reduce(list.__add__, [self._mx_var_struct[vk] for vk in ['dx', 'x', 'u', 'w']]))
+        fcn = casadi.MXFunction([dae_vars], [eq_expr])
+        fcn.init()
+        [_, dep_indices] = fcn.jacSparsity().getTriplet()
+        deps = [dae_var for dae_var in dae_vars[dep_indices] if dae_var.getName() != var.name]
 
         # Find torn dependencies
         torn_dep_names = []
