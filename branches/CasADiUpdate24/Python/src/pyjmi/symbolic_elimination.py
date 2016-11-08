@@ -546,19 +546,22 @@ class Component(object):
                                "See above printouts for block variables and equations.")
         causal_graph.scc(global_index)
         if causal_graph.n != len(causal_graph.components):
+            for component in causal_graph.components:
+                component.sparsity_preserving = True
             self.debug_tearing()
             if self.options['draw_blt']:
                 causal_graph.draw_blt("Failed torn block", True)
             raise RuntimeError("Causalized equations in torn block are not lower triangular. " +
                                "See above printouts for block variables and equations.")
         for co in causal_graph.components:
-            if not co.linear or not co.solvable:
+            if not co.linear or (not co.solvable and not co.variables[0].is_der):
+                for component in causal_graph.components:
+                    component.sparsity_preserving = True
                 self.debug_tearing()
                 if self.options['draw_blt']:
                     causal_graph.draw_blt("Failed torn block", True)
                 raise RuntimeError("Causalized equations in torn block are not solvable and linear. " +
                                    "See above printouts for block variables and equations.")
-        # TODO: Also check sparsity preservation of causalized equations!
 
         return causal_graph
 
@@ -703,6 +706,8 @@ class BipartiteGraph(object):
                             for (j, causal_co) in enumerate(component.causal_graph.components):
                                 if causal_co.variables[0].name in self.options['ineliminable']:
                                     causal_color = ineliminable_clr
+                                elif causal_co.variables[0].is_der:
+                                    causal_color = derivative_clr
                                 elif causal_co.sparsity_preserving:
                                     causal_color = linear_clr
                                 else:
@@ -1340,7 +1345,8 @@ class BLTModel(object):
                             raise NotImplementedError('Causalized equations must be lower triangular')
                         # Eliminate causal variable
                         if (self._sparsity_preserving(causal_co) and
-                            causal_co.variables[0].name not in self.options['ineliminable']):
+                            causal_co.variables[0].name not in self.options['ineliminable'] and
+                            not causal_co.variables[0].is_der):
                             causal_co.create_lin_eq(known_vars, solved_vars, tear_mx_vars)
                             
                             # Compute A

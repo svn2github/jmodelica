@@ -52,3 +52,16 @@ optimization LinearLoopLagrangeConstraint(finalTime=5, objectiveIntegrand=x^2 + 
 constraint
     y1 >= -2;
 end LinearLoopLagrangeConstraint;
+
+optimization DerivativeLoop(finalTime=5, objectiveIntegrand=x^2 + u^2)
+    Real x(start=1, fixed=true, min=0.1);
+    Real y1;
+    Real y2;
+    input Real u;
+equation
+    der(x) = y1 + y2 + 2;
+    3*y1 + y2 = x + u;
+    y1 + 2*y2 = sqrt(x+1) + x + u + 2*der(x);
+constraint
+    y1 >= -2;
+end DerivativeLoop;

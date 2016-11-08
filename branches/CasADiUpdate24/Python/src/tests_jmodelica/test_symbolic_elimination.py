@@ -74,6 +74,13 @@ class TestSymbolicElimination(object):
         self.op_loop_manual = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
         
+        class_path = "DerivativeLoop"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.op_der_loop_automatic = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_automatic)
+        self.op_der_loop_manual = transfer_optimization_problem(
+                class_path, file_path, self.compiler_opts_manual)
+        
     @testattr(casadi = True)
     def test_automatic_tearing(self):
         """
@@ -408,3 +415,32 @@ class TestSymbolicElimination(object):
         assert_results(res_nonlinear, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_symbolic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_numeric, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+    @testattr(casadi = True)
+    def test_derivative_elimination(self):
+        """
+        Test that state derivatives are not eliminated even if causalized in torn blocks.
+        """
+        cost_ref = 88.740458
+        u_norm_ref = 4.242559212
+        
+        op_manual = self.op_der_loop_manual
+        op_automatic = self.op_der_loop_automatic
+
+        # Eliminate
+        blt_op_manual = BLTOptimizationProblem(op_manual)
+        blt_op_automatic = BLTOptimizationProblem(op_automatic)
+
+        # Check remaining variables
+        var_manual = sorted([var.getName() for var in blt_op_manual.getVariables(blt_op_manual.REAL_ALGEBRAIC)
+                             if not var.isAlias()])
+        var_automatic = sorted([var.getName() for var in blt_op_automatic.getVariables(blt_op_automatic.REAL_ALGEBRAIC)
+                                if not var.isAlias()])
+        N.testing.assert_array_equal(var_manual, ['y1', 'y2'])
+        N.testing.assert_array_equal(var_automatic, ['y2'])
+
+        # Optimize and check result
+        res_manual = blt_op_manual.optimize()
+        res_automatic = blt_op_automatic.optimize()
+        assert_results(res_manual, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_automatic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)

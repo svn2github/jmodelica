@@ -562,7 +562,8 @@ class Test_State_Space_Repr:
         cls.directional1 = compile_fmu("JacFuncTests.BasicJacobianTest",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.directional2 = compile_fmu("JacFuncTests.BasicJacobianTest2",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
         cls.cc           = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
-    
+        cls.quadratic = compile_fmu("JacFuncTests.Quadratic",os.path.join(path_to_mofiles,"JacTest.mo"), target="me", version="2.0", compiler_options={'generate_ode_jacobian':True})
+        
     def _run_test(self, name, matrix):
         model = load_fmu(name)
         model.setup_experiment()
@@ -606,13 +607,43 @@ class Test_State_Space_Repr:
         assert isinstance(A1, scipy.sparse.csc.csc_matrix)
         assert isinstance(A2, N.ndarray)
         
-        model.force_finite_differences = True
+        model.force_finite_differences = 1
         A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
         A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
         
         assert isinstance(A1, scipy.sparse.csc.csc_matrix)
         assert isinstance(A2, N.ndarray)
-    
+        
+        model.force_finite_differences = 2
+        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
+        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
+        
+        assert isinstance(A1, scipy.sparse.csc.csc_matrix)
+        assert isinstance(A2, N.ndarray)
+        
+    @testattr(fmi = True)
+    def test_finite_difference(self):
+        model = load_fmu(self.quadratic)
+        model.setup_experiment()
+        model.initialize()
+        
+        model.force_finite_differences = 1 #Forward difference
+        
+        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
+        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
+        
+        nose.tools.assert_almost_equal(A1.todense()[0,0], 6)
+        nose.tools.assert_almost_equal(A2[0,0], 6)
+        
+        model.force_finite_differences = 2 #Central difference
+        
+        A1,B1,C1,D1 = model.get_state_space_representation(A=True, B=False, C=False, D=False)
+        A2,B2,C2,D2 = model.get_state_space_representation(A=True, B=False, C=False, D=False, use_structure_info=False)
+        
+        nose.tools.assert_almost_equal(A1.todense()[0,0], 6, places=8)
+        nose.tools.assert_almost_equal(A2[0,0], 6, places=8)
+        
+        
     @testattr(fmi = True)
     def test_directional_without_initialize(self):
 		model = load_fmu(self.directional1)

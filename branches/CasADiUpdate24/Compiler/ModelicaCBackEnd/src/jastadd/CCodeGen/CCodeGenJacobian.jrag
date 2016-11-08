@@ -1,0 +1,621 @@
+aspect CCodeGenJacobian{
+
+    public abstract class AbstractEquationBlock {
+
+        /**
+         * Describes a quadrant in an {@code EquationBlock}.
+         */
+        protected enum Quadrant {
+            L, A12, A21, A22;
+
+            /**
+             * Enum values.
+             */
+            public static final Quadrant[] values = values();
+
+            /**
+             * All {@code name} entries for the enums.
+             */
+            public static final String[] names = buildNames();
+
+            private static String[] buildNames() {
+                int length = values.length;
+                String[] names = new String[length];
+
+                for (int i = 0; i < length; ++i) {
+                    names[i] = values[i].name();
+                }
+                return names;
+            }
+        }
+
+        /**
+         * Describes an equation block's structural information.
+         */
+        protected class SparseJacobian {
+            private FExp[][] jacobian;
+            private int cols;
+            private int rows;
+            private int colPivot;
+            private int rowPivot;
+
+            /**
+             * Creates an instance of a block's structural information.
+             * 
+             * @param n1
+             *            The column pivot, i.e. the first unsolved column.
+             * @param n2
+             *            The row pivot, i.e. the first unsolved row.
+             */
+            public SparseJacobian(FExp[][] jacobian, int n1, int n2) {
+                this.jacobian = jacobian();
+                this.colPivot = n1;
+                this.rowPivot = n2;
+                this.cols = jacobian[0].length;
+                this.rows = jacobian.length;
+            }
+
+            /**
+             * Returns the starting column of the specified quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the starting column.
+             * @return
+             *         Text.
+             */
+            public int colStart(Quadrant quadrant) {
+                if (quadrant == Quadrant.L || quadrant == Quadrant.A21) {
+                    return 0;
+                }
+                return colPivot;
+            }
+    
+            /**
+             * Returns the last column of the specified quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the last column.
+             * @return
+             *         Text.
+             */
+            public int colEnd(Quadrant quadrant) {
+                if (quadrant == Quadrant.L || quadrant == Quadrant.A21) {
+                    return colPivot;
+                }
+                return cols;
+            }
+    
+            /**
+             * Returns the starting row of the specified quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the starting row.
+             * @return
+             *         Text.
+             */
+            public int rowStart(Quadrant quadrant) {
+                if (quadrant == Quadrant.L || quadrant == Quadrant.A12) {
+                    return 0;
+                }
+                return rowPivot;
+            }
+    
+            /**
+             * Returns the last row of the specified quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the last row.
+             * @return
+             *         Text.
+             */
+            public int rowEnd(Quadrant quadrant) {
+                if (quadrant == Quadrant.L || quadrant == Quadrant.A12) {
+                    return rowPivot;
+                }
+                return rows;
+            }
+    
+            /**
+             * Returns the number of columns in the quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the number of columns.
+             * @return
+             *         Text.
+             */
+            public int numCols(Quadrant quadrant) {
+                return colEnd(quadrant) - colStart(quadrant);
+            }
+    
+            /**
+             * Returns the number of rows in the quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the number of rows.
+             * @return
+             *         Text.
+             */
+            public int numRows(Quadrant quadrant) {
+                return rowEnd(quadrant) - rowStart(quadrant);
+            }
+    
+            /**
+             * Returns the expression at the specified coordinates.
+             */
+            public FExp at(int row, int col) {
+                if (row >= rows || col > cols) {
+                    return null;
+                }
+                return jacobian[row][col];
+            }
+    
+            /**
+             * Returns the number of non-zero fields in the quadrant.
+             * 
+             * @param quadrant
+             *            The quadrant for which to return the number of rows.
+             * @return
+             *         Text.
+             */
+            public int numNonZero(Quadrant quadrant) {
+                int numNonZero = 0;
+
+                for (int row = rowStart(quadrant); row < rowEnd(quadrant); ++row) {
+                    for (int col = colStart(quadrant); col < colEnd(quadrant); ++col) {
+
+                        numNonZero = numNonZero + (jacobian[row][col] == null ? 0 : 1);
+                    }
+                }
+                return numNonZero;
+            }
+        }
+    
+        /**
+         * Maps an evaluation aspect of a quadrant to a variable name.
+         */
+        protected enum EvaluationFunction {
+            /**
+             * The dimension i.e. the number of non-zero elements.
+             */
+            DIMENSIONS("dim"),
+            /**
+             * The columns.
+             */
+            COLPTR("col"),
+            /**
+             * The rows.
+             */
+            ROWIND("row"),
+            /**
+             * The evaluation.
+             */
+            EVAL("eval");
+    
+            /**
+             * Enum values.
+             */
+            public static final EvaluationFunction[] values = values();
+            /**
+             * All {@code name} values for the respective enums.
+             */
+            public static final String[] names = buildNames();
+            /**
+             * All {@code var} values for the respective enums.
+             */
+            public static final String[] vars = buildVars();
+            public final String var;
+    
+            private EvaluationFunction(String var) {
+                this.var = var;
+            }
+    
+            private static String[] buildNames() {
+                int length = values.length;
+                String[] names = new String[length];
+
+                for (int i = 0; i < length; ++i) {
+                    names[i] = values[i].name();
+                }
+                return names;
+            }
+    
+            private static String[] buildVars() {
+                int length = values.length;
+                String[] names = new String[length];
+
+                for (int i = 0; i < length; ++i) {
+                    names[i] = values[i].var;
+                }
+                return names;
+            }
+        }
+    
+    }
+
+    /*
+     *  Constants.
+     */
+    protected static String AbstractEquationBlock.STRUCT_TYPE_TAG               = "_t";
+    protected static String AbstractEquationBlock.JACOBIAN_STRUCT_C             = "jacobian";
+    protected static String AbstractEquationBlock.JACOBIAN_FUNCTION_C           = "jacobian";
+    protected static String AbstractEquationBlock.JACOBIAN_STRUCT_FUNCTION_C    = "jacobian_struct";
+    protected static String AbstractEquationBlock.JACOBIAN_INIT_FUNCTION_C      = "jacobian_init";
+    protected static String AbstractEquationBlock.JACOBIAN_TYPE_C               = JACOBIAN_STRUCT_C + STRUCT_TYPE_TAG;
+    protected static String AbstractEquationBlock.JACOBIAN_PARAM_C              = "jac";
+    protected static String AbstractEquationBlock.JACOBIAN_INSTANCE_C           = "jc";
+    protected static String AbstractEquationBlock.INT_TYPE_C                    = "jmi_int_t";
+    protected static String AbstractEquationBlock.REAL_TYPE_C                   = "jmi_real_t";
+    protected static String AbstractEquationBlock.QUADRANT_STRUCT_C             = "jacobian_quadrant";
+    protected static String AbstractEquationBlock.QUADRANT_TYPE_C               = QUADRANT_STRUCT_C + STRUCT_TYPE_TAG;
+    protected static String AbstractEquationBlock.EVAL_BASE                     = "JMI_BLOCK_JACOBIAN";
+    protected static String AbstractEquationBlock.EVAL                          = EVAL_BASE + "_EVALUATE_";
+    protected static String AbstractEquationBlock.EVAL_MODE_VAR                 = "evaluation_mode";
+    protected static String AbstractEquationBlock.INIT_TAG                      = "_init";
+    protected static String AbstractEquationBlock.MODE_VAR                      = "mode";
+    protected static String AbstractEquationBlock.INTERNAL_TAG                  = "internal";
+
+    /**
+     * Do nothing unless the block is torn.
+     */
+    public void AbstractEquationBlock.genBlockResidualFunction_sparse_jacobian(CodePrinter p, CodeStream str,
+            String indent, boolean initial) { }
+
+    /**
+     *  Generate a sparse jacobian along with structures for structural information and evaluation.
+     *  
+     *  @param initial
+     *          Set to {@code true} when in the initial system.
+     */
+    public void TornEquationBlock.genBlockResidualFunction_sparse_jacobian(CodePrinter p, CodeStream str,
+            String indent, boolean initial) {
+
+        SparseJacobian jacobian = new SparseJacobian(jacobian(),
+                localSolvedRealBlocks().size() - localMetaBlocks().size(), unsolvedBlocks().size());
+
+        genUniTypeStruct(p, str, indent, QUADRANT_STRUCT_C, "void ", EvaluationFunction.vars, "%s%s (*%s)();\n");
+        genUniTypeStruct(p, str, indent, JACOBIAN_STRUCT_C, QUADRANT_TYPE_C, Quadrant.names, "%s%s %s;\n");
+
+        String initialSuffix = initial ? INIT_TAG : "";
+
+        for (EvaluationFunction eval : EvaluationFunction.values()) {
+            for (Quadrant quadrant : Quadrant.values) {
+                genEval(p, str, indent, jacobian, eval, quadrant, initialSuffix, eval == EvaluationFunction.EVAL);
+            }
+        }
+        str.format("\n");
+
+        genStructInitDecl(p, str, indent, initialSuffix);
+
+        generateJacobianFunction(p, str, indent, jacobian, initialSuffix);
+        generateJacobianStructFunction(p, str, indent, jacobian, initialSuffix);
+    }
+    
+    /**
+     * Prints a struct definition with all members of equal type.
+     * 
+     * @param structName
+     *          The name of the struct.
+     * @param memberTypes
+     *          The members' type.
+     * @param memberNames
+     *          The names of the struct members.
+     * @param memberFormat
+     *          The format string to use when printing a member entry.
+     */
+    protected void AbstractEquationBlock.genUniTypeStruct(CodePrinter p, CodeStream str, String indent,
+        String structName, String memberType, String[] memberNames, String memberFormat) {
+
+        String innerIndent = p.indent(indent);
+        str.format("%stypedef struct %s {\n", indent, structName);
+
+        for (int i = 0; i < memberNames.length; ++i) {
+            str.format(memberFormat, innerIndent, memberType, memberNames[i]);
+        }
+        
+        str.format("%s} %s;\n\n", indent, structName + STRUCT_TYPE_TAG);
+    }
+
+    /**
+     * Generates the evaluation methods, one for each structural datum for a block,
+     * as well as the actual evaluation.
+     * 
+     * @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     * @param eval
+     *          The evaluation function to generate.
+     * @param quadrant
+     *          The quadrant to generate the evaluation function for.
+     * @param initialSuffix
+     *          The string suffix to append to the function name, to be used for the initial system.
+     * @param real
+     *          Set to {@code true} when to use {@link REAL_TYPE_C} and false when to use {@code INT_TYPE_C}.
+     */
+    protected void AbstractEquationBlock.genEval(CodePrinter p, CodeStream str, String indent, SparseJacobian jacobian,
+            EvaluationFunction evalFunction, Quadrant quadrant, String initialSuffix, boolean real) {
+
+        String instanceType = real ? REAL_TYPE_C : INT_TYPE_C;
+        String innerIndent = p.indent(indent);
+        str.format("%svoid %s_%d_%s%s(%s **%s) {\n", indent, quadrant.name(), getSequenceNumber(),
+                evalFunction.var, initialSuffix, instanceType, JACOBIAN_PARAM_C);
+
+        switch (evalFunction) {
+            case DIMENSIONS :
+                genStructDim(p, str, innerIndent, jacobian, quadrant);
+                break;
+            case COLPTR :
+                genStructCol(p, str, innerIndent, jacobian, quadrant);
+                break;
+            case ROWIND :
+                genStructRow(p, str, innerIndent, jacobian, quadrant);
+                break;
+            case EVAL :
+                genStructEval(p, str, innerIndent, jacobian, quadrant);
+                break;
+            default:
+                throw new IllegalArgumentException("Support for evaluation function " + evalFunction.var +
+                    " is not implemented.");
+        }
+        str.format("}\n");
+    }
+
+    /**
+     *  The dimension evaluation function.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param quadrant
+     *          The quadrant to generate evaluation data for.
+     */
+    protected void AbstractEquationBlock.genStructDim(CodePrinter p, CodeStream str, String indent,
+            SparseJacobian jacobian, Quadrant quadrant) {
+
+        str.format("%s(*%s)[0] = %d;\n", indent, JACOBIAN_PARAM_C, jacobian.numNonZero(quadrant));
+        str.format("%s(*%s)[1] = %d;\n", indent, JACOBIAN_PARAM_C, jacobian.numCols(quadrant));
+        str.format("%s(*%s)[2] = %d;\n", indent, JACOBIAN_PARAM_C, jacobian.numRows(quadrant));
+    }
+
+    /**
+     *  The column evaluation function.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param quadrant
+     *          The quadrant to generate evaluation data for.
+     */
+    protected void AbstractEquationBlock.genStructCol(CodePrinter p, CodeStream str, String indent,
+            SparseJacobian jacobian, Quadrant quadrant) {
+
+        for (int i = 0; i < jacobian.numCols(quadrant); ++i) {
+            str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, (i + 1));
+        }
+    }
+
+    /**
+     *  The row evaluation function.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param quadrant
+     *          The quadrant to generate evaluation data for.
+     */
+    protected void AbstractEquationBlock.genStructRow(CodePrinter p, CodeStream str, String indent,
+            SparseJacobian jacobian, Quadrant quadrant) {
+
+        for (int i = 0; i < jacobian.numNonZero(quadrant); ++i) {
+            str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, 1);
+        }
+    }
+
+    /**
+     *  The jacobian evaluation function.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param quadrant
+     *          The quadrant to generate evaluation data for.
+     */
+    protected void AbstractEquationBlock.genStructEval(CodePrinter p, CodeStream str, String indent,
+            SparseJacobian jacobian, Quadrant quadrant) {
+
+        int evaluated = 0;
+        for (int col = jacobian.colStart(quadrant); col < jacobian.colEnd(quadrant); ++col) {
+            for (int row = jacobian.rowStart(quadrant); row < jacobian.rowEnd(quadrant); ++row) {
+
+                FExp exp = null;
+                if ((exp = jacobian.at(row, col)) != null) {
+                    p.printPreSteps(exp, str, indent);
+                    str.format("%s(*%s)[%d] = ", indent, JACOBIAN_PARAM_C, evaluated++);
+                    p.print(exp, str, indent);
+                    str.format(";\n");
+                    p.printPostSteps(exp, str, indent);
+                }
+            }
+        }
+    }
+
+    /**
+     * Generates a wrapper function for a function taking a {@code jmi_t*} parameter.
+     * <p>
+     * The wrapper function instead takes a {@code void*} pointer and casts it to {@code jmi_t*}.
+     * This avoids type-warnings generated by GCC.
+     * 
+     * @param functionName
+     *          The name of the generated wrapper function.
+     * @param real
+     *          Set to {@code true} when to use {@link REAL_TYPE_C} and false when to use {@code INT_TYPE_C}.
+     */
+    protected void AbstractEquationBlock.generateWrapperFunction(CodePrinter p, CodeStream str,
+            String indent, String functionName, boolean real) {
+
+        int suffix = getSequenceNumber();
+        String name = functionName + "_" + suffix;
+        String type = real ? REAL_TYPE_C : INT_TYPE_C;
+        String param = JACOBIAN_PARAM_C;
+        String cast = "(jmi_t*) problem_data";
+
+        str.format("%sstatic int %s(void *problem_data, jmi_real_t *x, %s **%s, int mode) {\n", indent, name,
+                type, param);
+
+        str.format("%sreturn %s(%s, x, %s, mode);\n", p.indent(indent), name + "_" + INTERNAL_TAG, cast, param);
+        str.format("%s}\n\n", indent);
+    }
+
+    /**
+     *  Generates the jacobian function which to call in order to evaluate a block.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param initialSuffix
+     *          The string suffix to append to the function name, to be used for the initial system.
+     */
+    protected void AbstractEquationBlock.generateJacobianFunction(CodePrinter p, CodeStream str,
+            String indent, SparseJacobian jacobian, String initialSuffix) {
+
+        String functionName = JACOBIAN_FUNCTION_C;
+        String innerIndent = p.indent(indent);
+        String innermostIndent = p.indent(innerIndent);
+
+        beginJacobianFunction(p, str, indent, functionName, initialSuffix, true);
+        
+        Quadrant[] quadrants = Quadrant.values();
+        int length = quadrants.length;
+        
+        for (int i = 0; i < length; ++i) {
+            Quadrant quadrant = quadrants[i];
+            String quadrantName = quadrant.name();
+
+            genOpenEvalMode_C(str, innerIndent, EVAL + quadrantName);
+            str.format("%s%s->%s.%s(%s);\n", innermostIndent, JACOBIAN_INSTANCE_C, quadrantName,
+                    EvaluationFunction.EVAL.var, JACOBIAN_PARAM_C);
+            
+            if (i + 1 == length) {
+                break;
+            }
+            
+            genCloseEvalMode_C(str, innerIndent);
+        }
+
+        endJacobianFunction(p, str, indent);
+        generateWrapperFunction(p, str, indent, functionName, true);
+    }
+
+    /**
+     *  Generates the jacobian function which to call in order to evaluate a specific datum for a quadrant.
+     *  
+     *  @param jacobian
+     *          The {@link Jacobian} instance describing the Jacobian structure.
+     *  @param initialSuffix
+     *          The string suffix to append to the function name, to be used for the initial system.
+     */
+    protected void AbstractEquationBlock.generateJacobianStructFunction(CodePrinter p, CodeStream str,
+        String indent, SparseJacobian jacobian, String initialSuffix) {
+
+        String functionName = JACOBIAN_STRUCT_FUNCTION_C;
+        String innerIndent = p.indent(indent);
+        String innermostIndent = p.indent(innerIndent);
+
+        beginJacobianFunction(p, str, indent, functionName, initialSuffix, false);
+
+        EvaluationFunction[] evalFunctions = EvaluationFunction.values();
+        Quadrant[] quadrants = Quadrant.values();
+        int evalLength = evalFunctions.length;
+        int quadrantLength = quadrants.length;
+
+        for (int i = 0; i < quadrantLength; ++i) {
+            String quadrantName = quadrants[i].name();
+            String modeBase = EVAL_BASE + "_" + quadrantName + "_";
+
+            for (int j = 0; j < evalLength; ++j) {
+                EvaluationFunction evalFunction = evalFunctions[j];
+
+                if (evalFunction == EvaluationFunction.EVAL) {
+                    continue;
+                }
+
+                genOpenEvalMode_C(str, innerIndent, modeBase + evalFunction.name());
+
+                str.format("%s%s->%s.%s(%s);\n", innermostIndent, JACOBIAN_INSTANCE_C, quadrantName,
+                        evalFunction.var, JACOBIAN_PARAM_C);
+
+                if (i + 1 == quadrantLength && j + 2 == evalLength) {
+                    break;
+                }
+
+                genCloseEvalMode_C(str, innerIndent);
+            }
+        }
+        endJacobianFunction(p, str, indent);
+        generateWrapperFunction(p, str, indent, functionName, false);
+    }
+
+    /**
+     *  Generates the beginning statements required for the two evaluation functions
+     *  {@link AbstractEquationBlock#generateJacobianFunction() generateJacobianFunction()} and
+     *  {@link AbstractEquationBlock#generateJacobianStructFunction() generateJacobianStructFunction()}.
+     *  
+     *  @param functionName
+     *          The name of the function being generated.
+     *  @param initialSuffix
+     *          The string suffix to append to the function name, to be used for the initial system.
+     *  @param real
+     *          Set to {@code true} when to use {@link REAL_TYPE_C} and false when to use {@code INT_TYPE_C}.
+     */
+    protected void AbstractEquationBlock.beginJacobianFunction(CodePrinter p, CodeStream str,
+            String indent, String functionName, String initialSuffix, boolean real) {
+
+        int numberSuffix = getSequenceNumber();
+        String instanceType = real ? REAL_TYPE_C : INT_TYPE_C;
+        String innerIndent = p.indent(indent);
+
+        str.format("%sstatic int %s(jmi_t *jmi, jmi_real_t *x, %s **%s, int mode) {\n", indent, functionName + "_" +
+                    numberSuffix + "_" + INTERNAL_TAG, instanceType, JACOBIAN_PARAM_C);
+        str.format("%sint ef = 0;\n", innerIndent);
+        str.format("%s%s *%s = %s_%d%s();\n", innerIndent, JACOBIAN_TYPE_C, JACOBIAN_INSTANCE_C,
+                JACOBIAN_INIT_FUNCTION_C, numberSuffix, initialSuffix);
+        str.format("%sint %s = %s;\n\n%s", innerIndent, EVAL_MODE_VAR, MODE_VAR, innerIndent);
+    }
+
+    /**
+     *  Generates the end statements required for the two evaluation functions 
+     *  {@link AbstractEquationBlock#generateJacobianFunction() generateJacobianFunction()} and
+     *  {@link AbstractEquationBlock#generateJacobianStructFunction() generateJacobianStructFunction()}.
+     */
+    protected void AbstractEquationBlock.endJacobianFunction(CodePrinter p, CodeStream str, String indent) {
+        String innerIndent = p.indent(indent);
+
+        str.format("%s}\n\n", innerIndent);
+        str.format("%sfree(%s);\n", innerIndent, JACOBIAN_INSTANCE_C);
+        str.format("%sreturn ef;\n", innerIndent);
+        str.format("%s}\n\n", indent);
+    }
+
+    /**
+     *  Generates a function for initializing a jacobian struct.
+     *  
+     *  @param initialSuffix
+     *          The string suffix to append to the function name, to be used for the initial system.
+     */
+    protected void AbstractEquationBlock.genStructInitDecl(CodePrinter p, CodeStream str,
+            String indent, String initialSuffix) {
+
+        int numberSuffix = getSequenceNumber();
+
+        str.format("%s%s *%s_%d%s() {\n", indent, JACOBIAN_TYPE_C, JACOBIAN_INIT_FUNCTION_C,
+                numberSuffix, initialSuffix);
+        String innerIndent = p.indent(indent);
+        str.format("%s%s *%s = (%s *) malloc(sizeof(%s));\n", innerIndent, JACOBIAN_TYPE_C,
+                JACOBIAN_INSTANCE_C, JACOBIAN_TYPE_C, JACOBIAN_TYPE_C);
+
+        for (Quadrant quadrant : Quadrant.values()) {
+            String quadrantName = quadrant.name();
+            for (EvaluationFunction eval : EvaluationFunction.values()) {
+                String evalVar = eval.var;
+                str.format("%s%s->%s.%s = &%s_%d_%s%s;\n", innerIndent, JACOBIAN_INSTANCE_C, quadrantName, evalVar,
+                        quadrantName, numberSuffix, eval.var, initialSuffix);
+            }
+        }
+        str.format("%sreturn %s;", innerIndent, JACOBIAN_INSTANCE_C);
+        str.format("%s\n}\n\n", indent);
+    }
+
+}

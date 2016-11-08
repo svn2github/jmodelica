@@ -199,6 +199,8 @@ struct jmi_block_residual_t {
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
  * @param dF A jmi_block_dir_der_func_t function
+ * @param jacobian_func A jmi_block_solver_jacobian_func_t function
+ * @param jacobian_struct A jmi_block_solver_jacobian_structure_func_t function
  * @param n Integer size of the block of real variables
  * @param n_sr Integer size of the block of solved real variables
  * @param n_dr Number discrete real variables in the block
@@ -214,7 +216,7 @@ struct jmi_block_residual_t {
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_solver_jacobian_func_t jacobian_func, jmi_block_solver_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 /**
  * \brief Register an initialization block residual function in a jmi_t struct.
@@ -222,6 +224,8 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param jmi A jmi_t struct.
  * @param F A jmi_block_residual_func_t function
  * @param dF A jmi_block_dir_der_func_t function
+ * @param jacobian_func A jmi_block_solver_jacobian_func_t function
+ * @param jacobian_struct A jmi_block_solver_jacobian_structure_func_t function
  * @param n Integer size of the block of real variables
  * @param n_sr Integer size of the block of solved real variables
  * @param n_dr Number discrete real variables in the block
@@ -237,7 +241,7 @@ int jmi_dae_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_bloc
  * @param parent_index Index of parent block.
  * @return Error code.
  */
-int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
+int jmi_dae_init_add_equation_block(jmi_t* jmi, jmi_block_residual_func_t F, jmi_block_dir_der_func_t dF, jmi_block_solver_jacobian_func_t jacobian_func, jmi_block_solver_jacobian_structure_func_t jacobian_struct, int n, int n_sr, int n_dr, int n_nr, int n_dinr, int n_nrt, int n_as, int n_das, int jacobian_variability, int attribute_variability, jmi_block_solver_kind_t solver, int index, jmi_string_t label, int parent_index);
 
 
 /**

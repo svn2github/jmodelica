@@ -10480,16 +10480,17 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_2, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 0, 1, 1, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_3, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_4, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 4, \"5\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_2, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 0, 1, 1, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_3, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_4, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 4, \"5\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_2, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_3, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_2, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_3, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
+
 ")})));
 end BlockTest7;
 
@@ -10598,9 +10599,10 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+
 ")})));
 end BlockTest8;
 
@@ -12867,8 +12869,8 @@ $C_dae_blocks_residual_functions$
 $C_ode_derivatives$
 ",
             generatedCode="
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 3, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 3, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -12954,6 +12956,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
 end Algorithm11;
 
@@ -14009,13 +14012,13 @@ $C_ode_derivatives$
 $C_ode_initialization$
 ",
             generatedCode="
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"2\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"1(Homotopy).1\", 0);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 0, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1(Homotopy)\", -1);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_2, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 2, \"1(Simplified).1\", -1);
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_3, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 3, \"1(Simplified).2\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"1(Homotopy).1\", 0);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1(Homotopy)\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_2, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 2, \"1(Simplified).1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_3, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 3, \"1(Simplified).2\", -1);
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
@@ -14499,9 +14502,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 3, 0, 3, 2, 0, 2, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 3, 0, 3, 2, 0, 2, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 3, 0, 2, 2, 0, 2, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 3, 0, 2, 2, 0, 2, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end TearingTest2;
 
@@ -14910,7 +14913,7 @@ $C_reinit_temp_decls$
 $C_dae_blocks_residual_functions$
 ",
             generatedCode="
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 2, 1, 0, 2, 2, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 2, 1, 0, 2, 2, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
 static jmi_ad_var_t tmp_1;
 
@@ -18078,9 +18081,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, 0, 1, 1, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 1, 1, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 0, 0, 1, 1, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 1, 1, 0, 1, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end ActiveSwitches1;
 
@@ -18238,10 +18241,10 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 2, 0, 0, 0, 0, 3, 3, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 2, 0, 0, 0, 0, 3, 3, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end ActiveSwitches2;
 
@@ -18330,7 +18333,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 
 
 C_dae_init_add_blocks_residual_functions
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 1, 0, 0, 0, 0, 1, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 1, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
 C_ode_derivatives
 
@@ -18448,7 +18451,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 
 
 C_dae_init_add_blocks_residual_functions
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 1, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 1, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
 C_ode_derivatives
 
@@ -18739,9 +18742,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 1, 0, 2, 1, 0, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 1, 0, 2, 1, 0, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 1, 0, 2, 1, 0, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 1, 0, 2, 1, 0, 2, 1, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end DirectlyActiveSwitches1;
 
@@ -18836,9 +18839,9 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
-    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 1, 1, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
 end DirectlyActiveSwitches2;
 
