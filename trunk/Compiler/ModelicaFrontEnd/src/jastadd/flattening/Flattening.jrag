@@ -1466,7 +1466,7 @@ aspect Flattening {
     eq FIterExp.splitArrayExp(int index) {
         Map<String,FExp> repl = new HashMap<String,FExp>();
         repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
-        FExp res = getFExp().fullCopy().replaceIndices(repl);
+        FExp res = dynamicFExp(getFExp().treeCopy()).replaceIndices(repl);
         if (getNumForIndex() > 1) {
             List<CommonForIndex> indices = new List<CommonForIndex>();
             for (int i = 1, n = getNumForIndex(); i < n; i++)
