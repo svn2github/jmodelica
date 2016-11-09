@@ -1813,8 +1813,44 @@ aspect Scalarization {
         for (FExp arg : getArgs()) {
             args.add(arg.scalarize(indexMap));
         }
-        return createScalarized(getName().fullCopy(), args, getFType().scalarType());
-	}
+        FFunctionCall res = createScalarized(getName().fullCopy(), args, null);
+        res.setFType(getFType().scalarize(indexMap, res));
+        return res;
+    }
+    
+    public FType FType.scalarize(Map<String,FExp> indexMap, FExp context) {
+        FType res = treeCopy();
+        res.scalarizeTypeSizes(indexMap, context);
+        return res;
+    }
+    
+    public void ASTNode.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
+        for (ASTNode n : this) {
+            n.scalarizeTypeSizes(indexMap, context);
+        }
+    }
+    
+    public void FType.scalarizeTypeSizes(Map<String,FExp> indexMap, FExp context) {
+        setSize(getSize().scalarize(indexMap, context));
+        super.scalarizeTypeSizes(indexMap, context);
+    }
+    
+    public Size Size.scalarize(Map<String,FExp> indexMap, FExp context) {
+        return this;
+    }
+    
+    @Override
+    public Size MutableSize.scalarize(Map<String,FExp> indexMap, FExp context) {
+        MutableSize res = new MutableSize(ndims());
+        for (int i = 0; i < exps.length; i++) {
+            res.size[i] = size[i];
+            if (exps[i] != null) {
+                res.exps[i] = exps[i].scalarize(indexMap);
+                context.dynamicFExp(res.exps[i]);
+            }
+        }
+        return res;
+    }
     
     protected FFunctionCall FFunctionCall.createScalarized(FIdUse name, List<FExp> args, FType type) {
         return new FFunctionCall(name, args, type); 
