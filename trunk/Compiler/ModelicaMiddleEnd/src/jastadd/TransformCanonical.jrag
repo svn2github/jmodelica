@@ -3484,7 +3484,7 @@ aspect SemiLinear {
                 FEquation last  = chain.remove(chain.size()-1);
                 FExp chainPos   = first.zeroFlowGetPos();
                 FExp chainNeg   = last.zeroFlowGetNeg();
-                FExp chainX     = chain.get(0).zeroFlowGetX();
+                FExp chainX     = first.zeroFlowGetX();
                 
                 // S(1) = if X >= 0 SA else SB
                 newEquations.add(new FEquation(

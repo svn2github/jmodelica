@@ -14725,6 +14725,29 @@ end FunctionTests.FunctionLike.Special.SemiLinear7;
 ")})));
 end SemiLinear7;
 
+model SemiLinear8
+    Real y,x;
+    parameter Real sa=1,s1=2,s2=3;
+equation
+    y = semiLinear(x, sa, s1+1); 
+    y = semiLinear(x, s1, s2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="FunctionLike_Special_SemiLinear8",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error in flattened model:
+  Could not construct zero flow chain for a set of semilinear equations. This leads to an undetermined system. Involved equations:
+y = semiLinear(x, sa, s1 + 1)
+y = semiLinear(x, s1, s2)
+
+")})));
+end SemiLinear8;
+
+
 end Special;
 
 package EventRel
