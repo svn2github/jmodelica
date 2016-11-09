@@ -377,7 +377,7 @@ $ECE_free$
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
         extern void my_constructor2(double*, int*, void**, int*, const char**);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, -1, 1)
-        JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, -1, 1)
+        JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, 2, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg2, -1, 1)
         JMI_ARR(DYNA, jmi_string_t, jmi_string_array_t, tmp_15_arg3, -1, 1)
 
@@ -386,7 +386,7 @@ $ECE_free$
         JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, d[0], 1, d[0])
         JMCEVAL_parseArray(Real, tmp_15_arg0);
         JMCEVAL_parseArrayDims(1);
-        JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, d[0], 1, d[0])
+        JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, d[0], 1, d[0])
         JMCEVAL_parseArray(Integer, tmp_15_arg1);
         JMCEVAL_parseArrayDims(1);
         JMI_ARRAY_INIT_1(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg2, d[0], 1, d[0])

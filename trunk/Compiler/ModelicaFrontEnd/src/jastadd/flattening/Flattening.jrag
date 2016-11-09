@@ -2723,7 +2723,7 @@ aspect FlatExpressions {
         for (FExp e : getArgs()) 
             args.add(e.flatten(prefix));
         getFTypeNoTransform().clearFlattened();
-        return new FFunctionCall(getName().flatten(new FQNameEmpty()), args, getFType().flatten(prefix, null, true));
+        return new FFunctionCall(getName().flatten(new FQNameEmpty()), args, getFType().flatten(new FQNameEmpty(), null, true));
     }
     
     public void ASTNode.clearFlattened() {
@@ -2740,7 +2740,7 @@ aspect FlatExpressions {
             args.add(e.flatten(prefix));
         InstCallable target = myInstCallable().actualInstCallable();
         FIdUse name = new FIdUse(new FQNameString(target.qualifiedName()));
-        return createFFunctionCall(name, args, getFType().flatten(prefix, null, true));
+        return createFFunctionCall(name, args, getFType().flatten(new FQNameEmpty(), null, true));
     }
 
     public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {

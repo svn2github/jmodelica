@@ -1614,10 +1614,10 @@ aspect CADCodeGen {
 
     protected void FExp.printDecls_CAD(CodePrinter p, CodeStream str, String indent, String varName, String derName) {
         TypePrinter_C dp = p.createDeclPrinter(str);
-        dp.reset(varName, this, size(), false, indent);
+        dp.reset(varName, this, size().isUnknown(), false, indent);
         dp.setSubDecls(true);
         type().print(dp);
-        dp.reset(derName, this, size(), false, indent);
+        dp.reset(derName, this, size().isUnknown(), false, indent);
         dp.setSubDecls(false);
         type().print(dp);
     }
