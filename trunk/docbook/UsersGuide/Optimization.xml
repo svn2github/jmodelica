@@ -79,7 +79,7 @@ import matplotlib.pyplot as plt
     <para>Next, we transfer the model:</para>
 
     <programlisting language="python"># Transfer the optimization problem to casadi
-	op = transfer_optimization_problem("VDP_pack.VDP_Opt2", "VDP_Opt.mop")
+	op = transfer_optimization_problem("VDP_Opt", "VDP_Opt.mop")
 </programlisting>
 
     <para>The function <literal>transfer_optimization_problem</literal>
