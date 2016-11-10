@@ -1074,6 +1074,17 @@ class Test_FMI_ODE:
         
         for i in range(len(res["der(x)"])):
             assert res["der(x)"][i] == 0.0
+            
+    @testattr(stddist = True)
+    def test_maxord_is_set(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        opts = model.simulate_options()
+        opts["solver"] = "CVode"
+        opts["CVode_options"]["maxord"] = 1
+        
+        res = model.simulate(final_time=1.5,options=opts)
+        
+        assert res.solver.maxord == 1
     
     @testattr(stddist = True)
     def test_cc_with_cvode(self):
