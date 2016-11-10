@@ -305,17 +305,18 @@ class Component(object):
         all unknowns.
         """
         # Compute sparsity of Jacobian
-        res_f = casadi.MXFunction([casadi.vertcat(self.mx_vars)], [casadi.vertcat(self.eq_expr)])
+        mx_vars = [casadi.vertcat(self.mx_vars)]
+        res_f = casadi.MXFunction(mx_vars, [casadi.vertcat(self.eq_expr)])
         res_f.setOption("name", "block_residual_for_solvability")
         res_f.init()
-        jac_f = res_f.jacobian()
+        jac_f = casadi.MXFunction(mx_vars, [casadi.transpose(res_f.jac())])
         jac_f.init()
         sp = jac_f.jacSparsity()
         is_linear = sp.nnz() == 0
 
         # Identify nonlinear edges
         [rows, cols] = map(np.array, sp.getTriplet())
-        rows = np.unique(rows / self.n)
+        rows = rows / self.n
         for (row, col) in itertools.izip(rows, cols):
             found_edges = 0
             for edge in edges:
