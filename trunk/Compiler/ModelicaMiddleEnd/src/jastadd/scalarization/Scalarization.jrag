@@ -1167,12 +1167,8 @@ aspect Scalarization {
 	 */
     public void FFunctionCallEquation.scalarize(Scalarizer.Equation s) {
         createArrayTemporaries(s);
-	    if (getCall().isVectorizedOperatorWithoutOutputs()) { // Special case
-	        for (FExp e : getCall().getArray().iterable()) {
-                FAbstractFunctionCall call = (FAbstractFunctionCall) e.scalarizeExp(s.map());
-	            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
-                s.add(new FFunctionCallEquation(lefts, call));
-	        }
+	    if (getCall().isOperatorWithoutOutputs()) { // Special case
+	        getCall().scalarizeOperatorWithoutOutputs(s);
 	    } else {
 	        List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
             for (FFunctionCallLeft id : getLefts()) {
@@ -1181,9 +1177,26 @@ aspect Scalarization {
 	        s.add(new FFunctionCallEquation(lefts, (FAbstractFunctionCall) getCall().scalarizeExp(s.map())));
 	    }
 	}
-	
-	syn boolean FAbstractFunctionCall.isVectorizedOperatorWithoutOutputs() = false;
-	eq FReinit.isVectorizedOperatorWithoutOutputs()                        = getVar().isArray();
+    
+    syn boolean FAbstractFunctionCall.isOperatorWithoutOutputs() = false;
+    eq FReinit.isOperatorWithoutOutputs()                        = true;
+    eq FAssert.isOperatorWithoutOutputs()                        = true;
+    
+    public void FExp.scalarizeOperatorWithoutOutputs(Scalarizer.Equation s) {
+        if (isArray()) {
+            for (FExp e : getArray().iterable()) {
+                e.scalarizeOperatorWithoutOutputs(s);
+            }
+        } else if (type().isRecord()) {
+            for (FRecordComponentType frct : ((FRecordType)type()).getComponents()) {
+                component(frct.getName()).scalarizeOperatorWithoutOutputs(s);
+            }
+        } else {
+            FAbstractFunctionCall call = (FAbstractFunctionCall) scalarizeExp(s.map());
+            List<FFunctionCallLeft> lefts = new List<FFunctionCallLeft>();
+            s.add(new FFunctionCallEquation(lefts, call));
+        }
+    }
     
     public FExp FEndExp.scalarizeExp(Map<String,FExp> indexMap) {
         return mySize().createFExp(0);

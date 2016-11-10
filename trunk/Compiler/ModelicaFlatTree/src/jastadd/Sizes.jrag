@@ -286,9 +286,11 @@ aspect FunctionCallSizes {
     }
     
     public Size Size.createSizeFExp(InstFunctionCall call) {
-        
-        if (!isUnknown() || call.isCircular())
-            return this;
+        return this;
+    }
+    
+    @Override
+    public Size MutableSize.createSizeFExp(InstFunctionCall call) {
         
         HashMap<InstComponentDecl, InstFunctionArgument> varMap = new HashMap<InstComponentDecl, InstFunctionArgument>();
         for (int j = 0; j < call.getNumArg(); j++) {

@@ -2,7 +2,7 @@
 
 #include <string.h>
 #include <ModelicaUtilities.h>
-
+#include <time.h>
 
 double fRealScalar(double in)
 {
@@ -95,4 +95,11 @@ void fRecord(fRec_t *r, fRec_t *y)
 int fStrlen(const char *str)
 {
     return (int) strlen(str);
+}
+
+int get_time()
+{
+    time_t seconds;
+    seconds = time(NULL);
+    return seconds; 
 }

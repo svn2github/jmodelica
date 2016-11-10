@@ -137,9 +137,7 @@ aspect CCodeGenFunctionIO {
     
     @Override
     public void FFunctionCallLeft.genTempFree_C(CodePrinter p, CodeStream str, String indent) {
-        if (replaceWithTemp()) {
-            type().printFree_C(str, indent, false, getFExp().tempName_C());
-        }
+        
     }
 }
 
@@ -195,7 +193,7 @@ aspect CodeFuncCallInOutArgPrinters {
         }
         
         public final void printUse(CodeStream str, String indent, String name, FIdUseExp use) {
-            if (!useMemcpy) {
+            if (!useMemcpy || use.type().isString()) {
                 printCellUse(str, indent, name, use);
                 return;
             }
@@ -296,6 +294,7 @@ aspect CodeFuncCallInOutArgPrinters {
     public void FFunctionCallLeft.genWriteBackAssignment_C(CodeStream str, String indent, Collection<FVariable> forVariables) {
         if (replaceWithTemp()) {
             printer_C.printWriteBackAssignment(str, indent, this, forVariables);
+            type().printFree_C(str, indent, false, getFExp().tempName_C());
         }
     }
 
@@ -335,6 +334,9 @@ aspect CodeFuncCallInOutArgPrinters {
     public void FFunctionCallLeft.genWriteBackResidual_C(CodeStream str, String indent, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
         if (hasFExp()) 
             printer_C.printWriteBackResidual(str, indent, this, enumerator, forIndices, indexCounter);
+        if (replaceWithTemp()) {
+            type().printFree_C(str, indent, false, getFExp().tempName_C());
+        }
     }
 
     public void FIdUseExp.genWriteBackResidual_C(CodeStream str, String indent, String name, Enumerator enumerator, Set<Integer> forIndices, Enumerator indexCounter) {
@@ -498,7 +500,12 @@ aspect CodeFuncCallInOutArg {
         if (forVariables != null && !forVariables.contains(myFV()))
             return; // This variable is not in the set of variables to generate code for.
         if (type().isString()) {
-            str.format("%sJMI_ASG(STR, ", indent);
+            str.print(indent);
+            str.print("JMI_ASG(STR");
+            if (!inFunction()) {
+                str.print("_Z");
+            }
+            str.print(", ");
             genAssignedRef_C(ASTNode.printer_C, str, indent);
             str.print(", ");
             str.print(name);

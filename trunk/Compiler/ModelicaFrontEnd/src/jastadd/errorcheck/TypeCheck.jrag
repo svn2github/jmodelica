@@ -437,21 +437,19 @@ aspect FlatTypeCheck {
     syn boolean BaseNode.allowUnknownSize()    = false;
     eq InstFunctionArgument.allowUnknownSize() = inAllowUnknownSize();
     eq FIfExp.allowUnknownSize()               = inAllowUnknownSize();
-    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().allowUnknownSizeInputs();
-    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().allowUnknownSizeInputs();
+    eq InstFunctionCall.allowUnknownSize()     = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
+    eq FFunctionCall.allowUnknownSize()        = inAllowUnknownSize() && myCommonCallable().isExternalFunction();
     
     inh boolean BaseNode.inAllowUnknownSize();
     eq BaseNode.getChild().inAllowUnknownSize()         = allowUnknownSize();
-    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().allowUnknownSizeInputs();
-    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().allowUnknownSizeInputs();
+    eq InstFunctionCall.getChild().inAllowUnknownSize() = allowUnknownSize() || myCommonCallable().isExternalFunction();
+    eq FFunctionCall.getChild().inAllowUnknownSize()    = allowUnknownSize() || myCommonCallable().isExternalFunction();
     
-    interface CommonCallable { public boolean allowUnknownSizeInputs(); }
-    syn boolean InstClassDecl.allowUnknownSizeInputs()       = isExternalFunction();
-    syn boolean FFunctionDecl.allowUnknownSizeInputs()       = isExternalFunction();
-    syn boolean InstPartialFunction.allowUnknownSizeInputs() = false;
-    syn boolean FFunctionVariable.allowUnknownSizeInputs()   = false;
+    interface CommonCallable { public boolean isExternalFunction(); }
+    syn boolean InstPartialFunction.isExternalFunction() = false;
+    syn boolean FFunctionVariable.isExternalFunction()   = false;
     
-    syn boolean InstClassDecl.isExternalFunction() = hasInstExternal();
+    syn boolean InstClassDecl.isExternalFunction() = findFunctionExternal() != null;
     syn boolean FFunctionDecl.isExternalFunction() {
         for (FStatement stmt : getFAlgorithm().getFStatements()) {
             if (stmt.isExternalStatement()) {

@@ -343,8 +343,24 @@ class TestAssertEqu2(SimulationTest):
             assert False, 'Simulation not stopped by failed assertions'
         except FMUException, e:
             self.assert_equals('Simulation stopped at wrong time', self.model.time, 2.0)
+            
+class TestAssertEqu3(SimulationTest):
+    '''Test structural verification assert'''
+    @classmethod
+    def setUpClass(cls):
+        SimulationTest.setup_class_base(
+            "ExtFunctionTests.mo",
+            'ExtFunctionTests.StructuralAsserts')
+            
+    @testattr(stddist = True)
+    def test_simulate(self):
+        try:
+            self.setup_base()
+            self.run()
+            assert False, 'Simulation not stopped by failed assertions'
+        except FMUException, e:
+            pass
     
-     
 class TestAssertFunc(SimulationTest):
     
     @classmethod

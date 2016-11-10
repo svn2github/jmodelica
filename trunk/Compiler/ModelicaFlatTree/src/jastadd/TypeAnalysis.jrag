@@ -355,8 +355,13 @@ aspect FlatTypeAnalysis {
         if (shouldUseOverloadedOperator()) 
             return getLeft().type().matchOverloadedOperatorType(getRight().type(), operatorName());
         FType left = getLeft().type();
-        if (left.equivalentTo(getRight().type()) && left.isScalar())
-            return fBooleanScalarType();
+        if (left.equivalentTo(getRight().type()) && left.isScalar()) {
+            if (left.isRecord()) {
+                return left;
+            } else {
+                return fBooleanScalarType();
+            }
+        }
         else
             return fUnknownType();
     }
@@ -426,7 +431,7 @@ aspect FlatTypeAnalysis {
 
     eq FTerminate.type() = fNoType();
     eq FReinit.type() = fNoType();
-    eq FAssert.type() = fNoType();
+    eq FAssert.type() = getTest().type();
     eq FGetInstanceName.type() = fStringScalarType();
 
     eq FDelayExp.type() = getFExp().type();

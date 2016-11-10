@@ -21,4 +21,6 @@ typedef struct fRec {
 
 void fRecord(fRec_t *r, fRec_t *y);
 
+int get_time();
+
 #endif

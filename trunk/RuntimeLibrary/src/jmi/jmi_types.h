@@ -26,6 +26,9 @@
 
 #include <stdio.h>
 
+
+void jmi_set_str(char **dest, const char* src);
+
 /* Typedef for the doubles used in the interface. */
 typedef double jmi_real_t; /*< Typedef for the real number
                < representation used in the Runtime
@@ -124,10 +127,18 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
         jmi_array_ref_1(DEST,i) = jmi_array_val_1(SRC,i); \
       }\
     }
+
+/* Assign string not in z vector */
 #define JMI_ASG_STR(DEST,SRC) \
-    JMI_SET_STR(DEST, SRC) \
+    jmi_set_str(&(DEST), SRC); \
     JMI_DYNAMIC_ADD_POINTER(DEST)
+
+/* Assign string in z vector */
+#define JMI_ASG_STR_Z(DEST,SRC) \
+    JMI_FREE(DEST) \
+    jmi_set_str(&(DEST), SRC);
     
+/* Assign string array not in z vector */
 #define JMI_ASG_STR_ARR(DEST, SRC) \
     { \
       int i; \
@@ -135,10 +146,6 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
         JMI_ASG_STR(jmi_array_ref_1(DEST,i), jmi_array_val_1(SRC,i)) \
       }\
     }
-    
-#define JMI_SET_STR(DEST, SRC) \
-    DEST = calloc(JMI_MIN(JMI_LEN(SRC), JMI_STR_MAX) + 1, 1); \
-    strcpy(DEST,SRC);
     
 /* Handle return value */
 #define JMI_RET(TYPE, DEST, SRC) \
@@ -148,7 +155,7 @@ typedef struct jmi_chattering_t jmi_chattering_t;                   /**< \brief 
 #define JMI_RET_GEN(DEST, SRC) \
     *DEST = SRC;
 #define JMI_RET_STR(DEST, SRC) \
-    JMI_SET_STR(*DEST, SRC)
+    jmi_set_str(DEST, SRC);
 #define JMI_RET_STR_ARR(DEST, SRC) \
     { \
       int i; \

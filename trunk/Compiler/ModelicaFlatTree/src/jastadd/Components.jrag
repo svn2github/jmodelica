@@ -48,4 +48,17 @@ aspect Components {
         }
         return dynamicFExp(new FSubscriptedExp(e.treeCopy(), fas));
     }
+    
+    eq FAssert.component(String name) = dynamicFExp(new FAssert(
+            getTest().component(name).treeCopy(), getMsg().treeCopy(), getLevelOpt().treeCopy()));
+    
+    eq FBinExp.component(String name) = dynamicFExp(createNode(getLeft().component(name), getRight().component(name)));
+    
+    eq FFunctionCall.component(String name) {
+        FClass fc = myFClass();
+        if (!isComposite() || fc == null) {
+            return super.component(name);
+        }
+        return dynamicFExp(dynamicFExp(new FIdUseExp(tempVarName())).component(name));
+    }
 }

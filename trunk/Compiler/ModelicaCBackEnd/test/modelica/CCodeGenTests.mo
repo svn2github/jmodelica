@@ -1316,22 +1316,22 @@ int jmi_set_start_values_0_0(jmi_t* jmi) {
     _reg4_3 = (JMI_TRUE);
     _dummy_1_20 = (0.0);
     _dummy_2_21 = (0.0);
-    _s_pi_reg5_4 = (\"string\");
+    JMI_ASG(STR_Z, _s_pi_reg5_4, (\"string\"));
     _struct1_5 = (1);
     _struct2_6 = (1);
     _struct3_7 = (1);
     _struct4_8 = (JMI_TRUE);
-    _s_pi_struct5_9 = (\"string\");
+    JMI_ASG(STR_Z, _s_pi_struct5_9, (\"string\"));
     _final1_10 = (1);
     _final2_11 = (1);
     _final3_12 = (1);
     _final4_13 = (JMI_TRUE);
-    _s_pi_final5_14 = (\"string\");
+    JMI_ASG(STR_Z, _s_pi_final5_14, (\"string\"));
     _eval1_15 = (1);
     _eval2_16 = (1);
     _eval3_17 = (1);
     _eval4_18 = (JMI_TRUE);
-    _s_pi_eval5_19 = (\"string\");
+    JMI_ASG(STR_Z, _s_pi_eval5_19, (\"string\"));
     _n_22 = (2);
     JMI_DYNAMIC_FREE()
     return ef;
@@ -1406,13 +1406,13 @@ o->n = 7;
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _s_ci_ci_0 = (\"s1\");
-    _s_ci_cd_1 = (\"s1\");
-    _s_pi_pi_2 = (\"s2\");
-    _s_pi_ps_3 = (\"s3\");
-    _s_pi_pf_4 = (\"s4\");
-    _s_pi_pe_5 = (\"s5\");
-    _s_pi_pd_6 = (\"s2\");
+    JMI_ASG(STR_Z, _s_ci_ci_0, (\"s1\"));
+    JMI_ASG(STR_Z, _s_ci_cd_1, (\"s1\"));
+    JMI_ASG(STR_Z, _s_pi_pi_2, (\"s2\"));
+    JMI_ASG(STR_Z, _s_pi_ps_3, (\"s3\"));
+    JMI_ASG(STR_Z, _s_pi_pf_4, (\"s4\"));
+    JMI_ASG(STR_Z, _s_pi_pe_5, (\"s5\"));
+    JMI_ASG(STR_Z, _s_pi_pd_6, (\"s2\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }
@@ -10490,7 +10490,6 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_2, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_3, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
-
 ")})));
 end BlockTest7;
 
@@ -10602,7 +10601,6 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
     jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
 
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 2, 0, 0, 1, 1, 0, 1, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
-
 ")})));
 end BlockTest8;
 
@@ -12956,7 +12954,6 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end Algorithm11;
 
@@ -17762,7 +17759,7 @@ $C_ode_derivatives$
 int jmi_set_start_values_0_0(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
-    _s_pi_s_0 = (\"\\xc2\\xb0\"\"C\");
+    JMI_ASG(STR_Z, _s_pi_s_0, (\"\\xc2\\xb0\"\"C\"));
     JMI_DYNAMIC_FREE()
     return ef;
 }

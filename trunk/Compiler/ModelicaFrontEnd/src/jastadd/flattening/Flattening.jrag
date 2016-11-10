@@ -1028,13 +1028,62 @@ aspect Flattening {
 
     public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
         if (useInFlattening()) {
+            if (hasBindingFExp()) {
+                getBindingFExp().flattenAssertExternal(fc, myInstValueMod().myInstNode().retrieveFQName());
+            }
             HashMap<InstNode,Integer> oldLevels = setModificationLevel(level);
             fc.addFVariableNoTransform(createFVariable(name, excludeBinding));
             flattenMyType(fc);
             clearModificationLevel(oldLevels);
         }
     }
-
+    
+    public void ASTNode.flattenAssertExternal(FClass fc, FQName prefix) {
+        for (ASTNode n : this) {
+            n.flattenAssertExternal(fc, prefix);
+        }
+    }
+    
+    public void InstFunctionCall.flattenAssertExternal(FClass fc, FQName prefix) {
+        if (variability().knownParameterOrLess() && myInstCallable().isExternalFunction()) {
+            try {
+                String msg = runtimeErrorString("Structural parameter external function call '"
+                        + name() + "' did not evaluate to same result as during compilation");
+                fc.addFParameterEquation(new FFunctionCallEquation(new List<FFunctionCallLeft>(), 
+                    new FAssert(new FEqExp(ceval().buildLiteral(), flatten(prefix)),
+                            new FStringLitExp(msg), new Opt<FExp>())));
+            } catch (ConstantEvaluationException e) {
+                
+            }
+        }
+    }
+    
+    public String ASTNode.runtimeErrorString(String msg) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Error at line ");
+        sb.append(lineNumber());
+        sb.append(", column ");
+        sb.append(columnNumber());
+        sb.append(", in file '");
+        sb.append(fileName().replace("\\", "\\\\"));
+        sb.append("': ");
+        sb.append(msg);
+        return sb.toString();
+    }
+    
+    syn boolean ASTNode.externalDependency() {
+        for (ASTNode n : this) {
+            if (n.externalDependency()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    eq InstFunctionCall.externalDependency() =  ((InstNode)myInstCallable()).externalDependency();
+    
+    syn lazy boolean InstFullClassDecl.externalDependency() = hasInstExternal() || super.externalDependency();
+    
+    
     public abstract void InstAssignable.flattenMyType(FClass fc);
 
     public void InstPrimitive.flattenMyType(FClass fc) {

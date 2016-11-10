@@ -3092,8 +3092,14 @@ aspect CCodeGen {
             eo.genDestructorCall_C(p, str, indent);
         }
         str.print(indent);
-        p.print(left.getFIdUse(), str, "");
-        str.print(" = ");
+        if (left.type().isString()) {
+             str.print("JMI_ASG(STR_Z, ");
+             p.print(left.getFIdUse(), str, "");
+             str.print(", ");
+        } else {
+            p.print(left.getFIdUse(), str, "");
+            str.print(" = ");
+        }
         if (getLeft().isNegated()) {
             str.print("-");
         }
@@ -3105,7 +3111,11 @@ aspect CCodeGen {
             str.print(left.myFV().valueReference());
             str.print(")");
         }
-        str.print(";\n");
+        if (left.type().isString()) {
+            str.print(")");
+        } else {
+            str.print(";\n");
+        }
         
         p.printPostSteps(this, str, indent);
 	}
@@ -3534,7 +3544,15 @@ aspect CCodeGen {
 
     public void FVariable.genStartValue_C(CodePrinter p, CodeStream str, String indent) {
         p.printPreSteps(this, str, indent);
-		str.print(indent + name_C() + " = ");
+        str.print(indent);
+        if (isString()) {
+             str.print("JMI_ASG(STR_Z, ");
+             str.print(name_C());
+             str.print(", ");
+        } else {
+            str.print(name_C());
+            str.print(" = ");
+        }
 		FExp exp = useBindingExpAsStart() ? getBindingExp() : startAttributeExp();
 		boolean noExp = exp == null;
 		if (noExp)
@@ -3545,6 +3563,9 @@ aspect CCodeGen {
 		str.print(")");
 		if (isReal() && opt.getBooleanOption("enable_variable_scaling"))
 			str.format("/sf(%d)", valueReference());
+        if (isString()) {
+            str.print(")");
+        }
 		if (noExp)
 			setBindingExpOpt(new Opt());
 		str.print(";\n");

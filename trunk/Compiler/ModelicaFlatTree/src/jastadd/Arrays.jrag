@@ -222,6 +222,9 @@ aspect Arrays {
 
     eq FDelayExp.ndims()       = vectorizedNdims();
     eq FSpatialDistExp.ndims() = vectorizedNdims();
+    
+    eq FReinit.ndims()         = vectorizedNdims();
+    eq FAssert.ndims()         = vectorizedNdims();
 
 	eq FSizeExp.ndims() = hasDim() ? 0 : 1;
 	eq FNdimsExp.ndims() = 0;
@@ -924,6 +927,9 @@ aspect Arrays {
 
     eq FDelayExp.size()                 = vectorizedSize();
     eq FSpatialDistExp.size()           = vectorizedSize();
+    
+    eq FReinit.size()                   = vectorizedSize();
+    eq FAssert.size()                   = vectorizedSize();
     
     eq FStringExp.size()                = getValue().size();
 
@@ -1733,14 +1739,33 @@ aspect Arrays {
     }
 
     eq FReinit.getArray() {
-        if (!getVar().isArray())
+        if (!isArray()) {
             return super.getArray();
+        }
         
-        Array arr = new Array(getVar().indices());
+        Array arr = new Array(indices());
         Array inner1 = getVar().getArray();
         Array inner2 = getFExp().getArray();
         for (Index i : arr.indices())
             arr.set(i, new FReinit(inner1.get(i), inner2.get(i)));
+        return arr;
+    }
+    
+    eq FAssert.getArray() {
+        if (!isArray()) {
+            return super.getArray();
+        }
+        
+        Array arr = new Array(indices());
+        Array inner1 = getTest().getArray();
+        Array inner2 = getMsg().getArray();
+        Array inner3 = null;
+        if (hasLevel()) {
+            inner3 = getLevel().getArray();
+        }
+        for (Index i : arr.indices()) {
+            arr.set(i, new FAssert(inner1.get(i), inner2.get(i), hasLevel() ? new Opt<FExp>(inner3.get(i)) : new Opt<FExp>()));
+        }
         return arr;
     }
 
