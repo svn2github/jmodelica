@@ -196,41 +196,8 @@ fclass VariabilityPropagationTests.ConstantFolding3
  constant Integer intVar = 42;
  constant Boolean boolVar = false;
  constant VariabilityPropagationTests.ConstantFolding3.E enumVar = VariabilityPropagationTests.ConstantFolding3.E.medium;
-equation
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42\", \"42\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"42          \", \"42          \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"          42\", \"          42\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000\", \"3.14000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.14000     \", \"3.14000     \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"     3.14000\", \"     3.14000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000\", \"3.1400000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"3.1400000   \", \"3.1400000   \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"   3.1400000\", \"   3.1400000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000\", \"-3.14000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.14000    \", \"-3.14000    \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"    -3.14000\", \"    -3.14000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000\", \"-3.1400000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"-3.1400000  \", \"-3.1400000  \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"  -3.1400000\", \"  -3.1400000\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false\", \"false\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"false       \", \"false       \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"       false\", \"       false\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true\", \"true\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"true        \", \"true        \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"        true\", \"        true\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium\", \"medium\");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"medium      \", \"medium      \");
- VariabilityPropagationTests.ConstantFolding3.StringCompare(\"      medium\", \"      medium\");
 
 public
- function VariabilityPropagationTests.ConstantFolding3.StringCompare
-  input String expected;
-  input String actual;
- algorithm
-  assert(actual == expected, \"Compare failed, expected: \" + expected + \", actual: \" + actual);
-  return;
- end VariabilityPropagationTests.ConstantFolding3.StringCompare;
-
  type VariabilityPropagationTests.ConstantFolding3.E = enumeration(small, medium, large, xlarge);
 
  type AssertionLevel = enumeration(error, warning);
@@ -2233,6 +2200,7 @@ model EvalFail1
         output Real y = 1;
     algorithm
         assert(false,"nope");
+        annotation(Inline=false);
     end f;
     
     Real y = f();
@@ -2253,6 +2221,7 @@ public
   y := 1;
   assert(false, \"nope\");
   return;
+ annotation(Inline=false);
  end VariabilityPropagationTests.EvalFail1.f;
 
  type AssertionLevel = enumeration(error, warning);
@@ -2266,6 +2235,7 @@ model EvalFail2
         output Real[1] y = {1};
     algorithm
         assert(false,"nope");
+        annotation(Inline=false);
     end f;
     
     Real[:] y = f();
@@ -2287,6 +2257,7 @@ public
   y[1] := 1;
   assert(false, \"nope\");
   return;
+ annotation(Inline=false);
  end VariabilityPropagationTests.EvalFail2.f;
 
  type AssertionLevel = enumeration(error, warning);
