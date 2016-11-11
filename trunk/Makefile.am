@@ -360,7 +360,7 @@ endif
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CSparse  
 	cp -r $(CSPARSE_HOME)/* $(DESTDIR)$(prefix)/ThirdParty/CSparse 
 	cp $(abs_top_srcdir)/ThirdParty/CSparse/csparse/Doc/License.txt $(DESTDIR)$(prefix)/ThirdParty/CSparse
-	cp $(abs_top_srcdir)/ThirdParty/CSparse/README.txt $(DESTDIR)$(prefix)/ThirdParty/CSparse
+	cp $(abs_top_srcdir)/ThirdParty/CSparse/README_CSPARSE.txt $(DESTDIR)$(prefix)/ThirdParty/CSparse
 	cp $(abs_top_srcdir)/ThirdParty/CSparse/csparse_adding_inplace_methods.patch $(DESTDIR)$(prefix)/ThirdParty/CSparse
 	mkdir -p $(DESTDIR)$(prefix)/ThirdParty/CppAD
 	cp $(CPPAD_HOME)/COPYING $(DESTDIR)$(prefix)/ThirdParty/CppAD
