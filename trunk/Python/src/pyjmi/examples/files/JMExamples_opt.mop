@@ -220,7 +220,25 @@ package JMExamples_opt
 	  u<=20;
 	  8*(time-0.5).^2-0.5-x2 >= 0;
    end ContState_opt;
-   
+
+    optimization EliminationExample(finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2+(y1-0.289)^2)
+	Real x1(start=1, fixed=true);
+	Real x2(start=1, fixed=true);
+	Real y1(start=0.3, max=0.41);
+	Real y2(start=1);
+	Real y3(start=1);
+	Real y4(start=1);
+	Real y5(start=1);
+	input Real u;
+    equation
+	der(x1) = x2;
+	der(x2) + y1 + y2 - y3 = u;
+	x1*y3 + y2 - sqrt(x1) - 2 = 0;
+	2*y1*y2*y4 - sqrt(x1) = 0;
+	y1*y4 + sqrt(y3) - x1 - y4 = u;
+	y4 - sqrt(y5) = 0;
+	y5^2 - x1 = 0;
+    end EliminationExample;
    
    optimization Distillation1_opt(objective = cost(finalTime), startTime=0, finalTime=50)
     extends JMExamples.Distillation.Distillation1Input(rr(min=1,max=5));

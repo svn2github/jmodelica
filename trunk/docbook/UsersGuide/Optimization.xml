@@ -392,23 +392,24 @@ x1 = res['x1']
     <section>
       <title>Algorithm overview</title>
 
-      <para>The direct collocation method can be used to solve dynamic
-      optimization problems, including optimal control problems and parameter
-      optimization problems. In the collocation method, the dynamic model
-      variable profiles are approximated by piecewise polynomials. This method
-      of approximating a differential equation corresponds to a fixed step
-      implicit Runge-Kutta scheme, where the mesh defines the length of each
-      step. Also, the number of collocation points in each element, or step,
-      needs to be provided. This number corresponds to the stage order of the
-      Runge-Kutta scheme. The selection of mesh is analogous to the choice of
-      step length in a one-step algorithm for solving differential equations.
-      Accordingly, the mesh needs to be fine-grained enough to ensure
-      sufficiently accurate approximation of the differential constraint. For
-      an overview of simultaneous optimization algorithms, see [2]. The
-      nonlinear programming solvers IPOPT and WORHP can be used to solve the
-      nonlinear program resulting from collocation. The needed first- and
-      second-order derivatives are obtained using CasADi by algorithmic
-      differentiation.</para>
+      <para>The direct collocation method described in this section can be
+      used to solve dynamic optimization problems, including optimal control
+      problems and parameter optimization problems. In the collocation method,
+      the dynamic model variable profiles are approximated by piecewise
+      polynomials. This method of approximating a differential equation
+      corresponds to a fixed step implicit Runge-Kutta scheme, where the mesh
+      defines the length of each step. Also, the number of collocation points
+      in each element, or step, needs to be provided. This number corresponds
+      to the stage order of the Runge-Kutta scheme. The selection of mesh is
+      analogous to the choice of step length in a one-step algorithm for
+      solving differential equations. Accordingly, the mesh needs to be
+      fine-grained enough to ensure sufficiently accurate approximation of the
+      differential constraint. The nonlinear programming (NLP) solvers IPOPT
+      and WORHP can be used to solve the nonlinear program resulting from
+      collocation. The needed first- and second-order derivatives are obtained
+      using CasADi by algorithmic differentiation. For more details on the
+      inner workings of the algorithm, see <citation>Mag2015</citation> and
+      Chapter 3 in <citation>Mag2016</citation>.</para>
 
       <para>The NLP solvers require that the model equations are twice
       continuously differentiable with respect to all of the variables. This
@@ -874,8 +875,7 @@ opts["IPOPT_options"]["max_iter"] = 10000</programlisting>
       <para>Some statistics from the NLP solver can be obtained by issuing the
       command</para>
 
-      <programlisting>res_opt.get_solver_statistics()
-</programlisting>
+      <programlisting>res_opt.get_solver_statistics()</programlisting>
 
       <para>The return argument of this function can be found by using the
       interactive help:</para>
@@ -2744,6 +2744,412 @@ solver.print_jacobian_entries(entries) # Print them
 
         <para>See the docstring for the respective method for more
         information.</para>
+      </section>
+    </section>
+
+    <section>
+      <title>Eliminating algebraic variables</title>
+
+      <para>When the algorithm of this section is used, it is applied on the
+      full DAE, meaning that all of the algebraic variables and equations are
+      exposed to the numerical discretization and need to be solved by the NLP
+      solver. It is often beneficial to instead solve some of these algebraic
+      equations in a symbolic pre-processing step. This subsection describes
+      how this can be done.</para>
+
+      <para>JModelica.org has two different frameworks for performing such
+      eliminations. The first one is not described in this User's Guide, but
+      an example demonstrating its use can be found in
+      <filename>pyjmi.examples.ccpp_elimination</filename>. It is implemented
+      as a part of CasADi Interface, whereas the second framework, which is
+      the focus of this subsection, is implemented in Python. The elimination
+      framework in CasADi Interface has faster pre-processing, but has
+      limitations regarding what kind of algebraic variables it can eliminate
+      and also lacks important features such as tearing and sparsity
+      preservation. For more details on the inner workings of the Python-based
+      framework, see Chapter 4 in <citation>Mag2016</citation>.</para>
+
+      <section>
+        <title>Basic use</title>
+
+        <para>To leave everything in the hands of the framework, simply
+        transfer an optimization problem as per usual and use the following
+        Python code snippet.</para>
+
+        <programlisting>from pyjmi.symbolic_elimination import BLTOptimizationProblem
+op = transfer_optimization_problem(class_name, file_name) # Regular compilation
+op = BLTOptimizationProblem(op) # Symbolically eliminate algebraic variables</programlisting>
+
+        <para>You can then proceed as usual. There is however one caveat. The
+        min and max attributes of eliminated algebraic variables will not be
+        respected. If this is undesired, these bounds should either be
+        converted into constraints (not recommended), or the corresponding
+        variables should be marked as ineliminable as described in <xref
+        linkend="opt-elimination-example"/>.</para>
+      </section>
+
+      <section xml:id="opt-elimination-example">
+        <title>Small example</title>
+
+        <para>To demonstrate the use and effects of the framework, we consider
+        the example <filename>pyjmi.examples.elimination_example</filename>.
+        Note that this example is intended to be pedagogical, rather than
+        showing the performance gains of the techniques. For a real-world
+        example where the framework offers significant performance gains, see
+        <filename>pyjmi.examples.ccpp_sym_elim</filename>, where the solution
+        time is reduced by a factor of 5.</para>
+
+        <para>The following artificial Modelica and Optimica code is used in
+        this example.</para>
+
+        <para><programlisting>optimization EliminationExample(finalTime=4,
+        objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2+(y1-0.289)^2)
+    Real x1(start=1, fixed=true);
+    Real x2(start=1, fixed=true);
+    Real y1(start=0.3, max=0.41);
+    Real y2(start=1);
+    Real y3(start=1);
+    Real y4(start=1);
+    Real y5(start=1);
+    input Real u;
+equation
+    der(x1) = x2;
+    der(x2) + y1 + y2 - y3 = u;
+    x1*y3 + y2 - sqrt(x1) - 2 = 0;
+    2*y1*y2*y4 - sqrt(x1) = 0;
+    y1*y4 + sqrt(y3) - x1 - y4 = u;
+    y4 - sqrt(y5) = 0;
+    y5^2 - x1 = 0;
+end EliminationExample;</programlisting>We start as usual by transferring the
+        optimization problem to CasADi Interface.</para>
+
+        <para><programlisting>op = transfer_optimization_problem("EliminationExample", file_path, compiler_options={})</programlisting>Next
+        we prepare the symbolic elimination. An important part of this is the
+        manual selection of algebraic variables that are not allowed to be
+        eliminated. In general, it is recommended to not eliminate the
+        following variables:</para>
+
+        <itemizedlist>
+          <listitem>
+            <para><emphasis role="bold">Variables with potentially active
+            bounds (min or max attributes)</emphasis><emphasis
+            role="bold">.</emphasis> When variables are eliminated, their min
+            and max attributes are neglected. This is because many Modelica
+            variables have min and max attributes that are not intended to
+            constrain the optimization solution. Preserving these bounds
+            during elimination is highly inefficient. Since there is no way
+            for the toolchain to know which variables may be actively
+            constrained by their min and max attributes, it is up to the user
+            to provide the names of these variables.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis role="bold">Variables that occur in the objective
+            or constraints</emphasis><emphasis role="bold">.</emphasis>
+            Marking these variables as ineliminable is less important, but can
+            yield performance improvements.</para>
+          </listitem>
+
+          <listitem>
+            <para><emphasis role="bold">Variables that lead to numerically
+            unstable pivots.</emphasis> When employing tearing, one runs the
+            risk of causing numerically unstable computations. This is
+            difficult to predict, but experienced users may know that certain
+            variables should be selected for tearing to prevent instability,
+            which can be achieved by marking them as ineliminable, which does
+            not require a corresponding tearing residual to be chosen. Further
+            details on manual tearing is described in <xref
+            linkend="opt-elimination-tearing"/>.</para>
+          </listitem>
+        </itemizedlist>
+
+        <para>In our small example, the only thing we have to worry about is
+        y1, which has an upper bound. To mark y1 as ineliminable, we use the
+        following code.</para>
+
+        <para><programlisting>elim_opts = EliminationOptions()
+elim_opts['ineliminable'] = ['y1'] # List of variable names</programlisting>The
+        elim_opts dictionary object is used to set any other elimination
+        options, which are described in <xref
+        linkend="opt-elimination-features"/>. For now, we just enable the
+        option to make a plot of the block-lower triangular (BLT)
+        decomposition of the DAE incidence matrix, which gives insight
+        regarding the performed eliminations (see
+        <citation>Mag2016</citation>).</para>
+
+        <para><programlisting>elim_opts['draw_blt'] = True
+elim_opts['draw_blt_strings'] = True</programlisting>Now we are ready to
+        symbolically transform the optimization problem.</para>
+
+        <para><programlisting>op = BLTOptimizationProblem(op, elim_opts)</programlisting>This
+        prints the following simple problem statistics.</para>
+
+        <programlisting>System has 5 algebraic variables before elimination and 4 after.
+The three largest BLT blocks have sizes 3, 1, and 1.</programlisting>
+
+        <para>Since we enable the BLT drawing, we also get the following
+        plot.</para>
+
+        <para><figure xml:id="opt-fig-blt">
+            <title>Simple example BLT decomposition.</title>
+
+            <mediaobject>
+              <imageobject>
+                <imagedata fileref="images/example_blt.svg" scale="30"/>
+              </imageobject>
+            </mediaobject>
+          </figure>The only variable we were able to eliminate was y4. For
+        details on what all the colors mean in the figure, see <xref
+        linkend="opt-elimination-colors"/>.</para>
+      </section>
+
+      <section>
+        <title xml:id="opt-elimination-colors">The many colors of symbolic
+        elimination</title>
+
+        <para>In the plots generated by enabling the option
+        <code>draw_blt</code>, linear (with respect to the block variables)
+        incidences are marked by green dots, and nonlinear incidences are
+        marked by red dots. There is no distinction made between linear and
+        nonlinear incidences outside of the diagonal blocks. Hence, such
+        incidences are marked by black dots. Torn blocks are marked by red
+        edges. Variables, and their respective matched equations, that have
+        been user-specified as actively bounded (and hence are not eliminated)
+        are marked by orange edges. State variable derivatives (which are not
+        eliminated) and their respective matched equations are marked by blue
+        edges. Blue edges are also used to mark non-scalar blocks that have
+        not been torn. Variable–equation pairs along the diagonal that are not
+        sparsity preserving are marked by yellow edges. The remaining
+        variable–equation pairs along the diagonal are the ones used for
+        elimination, which are marked by green edges.</para>
+      </section>
+
+      <section xml:id="opt-elimination-tearing">
+        <title>Tearing</title>
+
+        <para>By default, tearing is not used in the elimination. The use of
+        tearing enables the elimination of variables in algebraic loops. In
+        this example, we can also eliminate y2 through tearing. Tearing can
+        either be done automatically or manually. Manual tearing is performed
+        on the <code>OptimizationProblem</code> object, prior to symbolic
+        transformation. To eliminate y2, we select the other variables in the
+        algebraic loop for y2—that is, y3 and y1—as tearing variables as
+        follows.</para>
+
+        <programlisting>op.getVariable('y1').setTearing(True)
+op.getVariable('y3').setTearing(True)</programlisting>
+
+        <para>We also have to select tearing residuals. This is less
+        convenient, as there is no straightforward way to identify an
+        equation. We can either manually inspect the equations obtained from
+        <code>op.getDaeEquations()</code>, or search through the string
+        representations of all of them. We will adopt the second
+        approach.</para>
+
+        <para><programlisting>for eq in op_manual.getDaeEquations():
+    eq_string = eq.getResidual().getRepresentation()
+    if 'y1)*y2)*y4)' in eq_string or 'y1*y4' in eq_string:
+        eq.setTearing(True)</programlisting>Once the tearing selection is
+        finished, the symbolic transformation can be performed as before by
+        instantiating <code>BLTOptimizationProblem</code>.</para>
+
+        <para>For this example, we can get the same result by automatic
+        tearing, which is enabled during compilation. We previously used
+        <code>compiler_options={}</code>. By instead using</para>
+
+        <para><programlisting>compiler_options = {'equation_sorting': True, 'automatic_tearing': True}</programlisting>tearing
+        will be performed automatically. This will mark the same variables and
+        equations as tearing variables as we just did manually. Hence, it may
+        be a good idea to first perform tearing automatically and then make
+        any needed changes manually, rather than doing manual tearing from
+        scratch. Automatic tearing will yield satisfactory performance for
+        most problems, so manual tearing is only recommended for experts. For
+        this example, we can also eliminate y1 through manual tearing, but
+        since we have a bound on y1, this is not recommended anyway.</para>
+      </section>
+
+      <section xml:id="opt-elimination-features">
+        <title>Available options</title>
+
+        <para>The standard elimination options are listed below. All of these
+        have been explained in the above subsections, except for the last two
+        related to sparsity preservation. A higher density tolerance will
+        allow for the elimination of more algebraic variables, but the
+        resulting DAE will be more dense. This parameter thus allows a
+        trade-off between the sparsity and dimension of the DAE, both of which
+        affect the performance of the optimization.</para>
+
+        <table xml:id="opt-tab-casadi-dae-opts">
+          <title>Standard options for the symbolic elimination.</title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="1*"/>
+
+            <colspec align="left" colname="col–desc" colwidth="1*"/>
+
+            <colspec align="left" colname="col–def" colwidth="2*"/>
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>draw_blt</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to plot the BLT form.</entry>
+              </row>
+
+              <row>
+                <entry><literal>draw_blt_strings</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to annotate plot of the BLT form with strings
+                for variables and equations.</entry>
+              </row>
+
+              <row>
+                <entry><literal>tearing</literal></entry>
+
+                <entry>True</entry>
+
+                <entry>Whether to tear algebraic loops.</entry>
+              </row>
+
+              <row>
+                <entry><literal>ineliminable</literal></entry>
+
+                <entry>[]</entry>
+
+                <entry>List of names of variables that should not be
+                eliminated. Particularly useful for variables with
+                bounds.</entry>
+              </row>
+
+              <row>
+                <entry><literal>dense_measure</literal></entry>
+
+                <entry>'lmfi'</entry>
+
+                <entry>Density measure for controlling density in causalized
+                system. Possible values: ['lmfi', 'Markowitz']. Markowitz uses
+                the Markowitz criterion and lmfi uses local minimum fill-in to
+                estimate density.</entry>
+              </row>
+
+              <row>
+                <entry><literal>dense_tol</literal></entry>
+
+                <entry>15</entry>
+
+                <entry>Tolerance for controlling density in causalized system.
+                Possible values: [-inf, inf]</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
+
+        <para>The below table lists the experimental and debugging elimination
+        options, which should not be used by the typical user.</para>
+
+        <table xml:id="opt-tab-casadi-dae-opts">
+          <title>Experimental and debugging options for the symbolic
+          elimination.</title>
+
+          <tgroup cols="3">
+            <colspec align="left" colname="col–opt" colwidth="1*"/>
+
+            <colspec align="left" colname="col–desc" colwidth="1*"/>
+
+            <colspec align="left" colname="col–def" colwidth="2*"/>
+
+            <thead>
+              <row>
+                <entry align="center">Option</entry>
+
+                <entry align="center">Default</entry>
+
+                <entry align="center">Description</entry>
+              </row>
+            </thead>
+
+            <tbody>
+              <row>
+                <entry><literal>plots</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to plot intermediate results for matching and
+                component computation.</entry>
+              </row>
+
+              <row>
+                <entry><literal>solve_blocks</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to factorize coefficient matrices in
+                non-scalar, linear blocks.</entry>
+              </row>
+
+              <row>
+                <entry><literal>solve_torn_linear_blocks</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to solve causalized equations in torn blocks,
+                rather than doing forward substitution as for nonlinear
+                blocks.</entry>
+              </row>
+
+              <row>
+                <entry><literal>inline</literal></entry>
+
+                <entry>True</entry>
+
+                <entry>Whether to inline function calls (such as creation of
+                linear systems).</entry>
+              </row>
+
+              <row>
+                <entry><literal>linear_solver</literal></entry>
+
+                <entry>"symbolicqr"</entry>
+
+                <entry>Which linear solver to use. See
+                http://casadi.sourceforge.net/api/html/d8/d6a/classcasadi_1_1LinearSolver.html
+                for possibilities</entry>
+              </row>
+
+              <row>
+                <entry><literal>closed_form</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to create a closed form expression for
+                residuals and solutions. Disables computations.</entry>
+              </row>
+
+              <row>
+                <entry><literal>inline_solved</literal></entry>
+
+                <entry>False</entry>
+
+                <entry>Whether to inline solved expressions in the closed form
+                expressions (only applicable if closed_form == True).</entry>
+              </row>
+            </tbody>
+          </tgroup>
+        </table>
       </section>
     </section>
   </section>

@@ -51,7 +51,7 @@ class EliminationOptions(OptionBase):
             Default: True
 
         ineliminable --
-            Names of variables that should not be eliminated. Particularly useful for variables with bounds.
+            List of names of variables that should not be eliminated. Particularly useful for variables with bounds.
 
             Default: []
 
@@ -63,7 +63,7 @@ class EliminationOptions(OptionBase):
             Default: 'lmfi'
 
         dense_tol --
-            Tolerance for controlling density in causalized system. Possible values: [0, inf]
+            Tolerance for controlling density in causalized system. Possible values: [-inf, inf]
 
             Default: 15
 
@@ -660,7 +660,13 @@ class BipartiteGraph(object):
         if self.components:
             plt.close(idx)
             fig = plt.figure(idx, frameon=False)
-            if not strings:
+            if strings:
+                plt.tick_params(
+                    axis='both',       # changes apply to both axes
+                    which='both',        # ticks along the top edge are off
+                    left='off',
+                    labelleft='off')
+            else:
                 fig.gca().set_frame_on(False)
                 plt.tick_params(
                     axis='both',       # changes apply to both axes
