@@ -6,15 +6,18 @@ model IllustExample
     Real y3(start=1);
     Real y4(start=1);
     Real y5(start=1);
+    parameter Real p1 = 2;
+    parameter Real p2 = 2;
+    parameter Real p3 = 1;
     input Real u;
 equation
     der(x1) = x2;
     der(x2) + y1 + y2 - y3 = u;
     x1*y3 + y2 - sqrt(x1) - 2 = 0;
-    2*y1*y2*y4 - sqrt(x1) = 0;
+    p1*y1*y2*y4 - sqrt(x1) = 0;
     y1*y4 + sqrt(y3) - x1 - y4 = u;
-    y4 - sqrt(y5) = 0;
-    y5^2 - x1 = 0;
+    y4 - p3*sqrt(y5) = 0;
+    y5^p2 - x1 = 0;
 end IllustExample;
 
 optimization IllustExampleLagrange(finalTime=4, objectiveIntegrand=(x1-0.647)^2+x2^2+(u-0.0595)^2)
@@ -31,6 +34,10 @@ extends IllustExample;
 constraint
     y1 <= 0.41;
 end IllustExampleLagrangeConstraintAndObjective;
+
+optimization IllustExampleEst(finalTime=4)
+extends IllustExample(p1(free=true,min=0.5), p3(free=true,min=0.5));
+end IllustExampleEst;
 
 model LinearLoop
     Real x(start=1, fixed=true);

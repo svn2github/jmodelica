@@ -1163,7 +1163,7 @@ class BLTModel(object):
         Setup structure for computing variable dependencies for preserving sparsity.
         """
         self._dependencies = dependencies = {}
-        for vk in ['x', 'u']:
+        for vk in ['x', 'u', 'p_opt']:
             for var in self._mx_var_struct[vk]:
                 dependencies[var.getName()] = [var.getName()]
 
@@ -1497,7 +1497,7 @@ class BLTModel(object):
         # Find untorn dependencies, excluding block variable
         deps = []
         for i in xrange(co.n):
-            for vk in ['dx', 'x', 'u', 'w']:
+            for vk in ['dx', 'x', 'u', 'w', 'p_opt']:
                 for dae_var in self._mx_var_struct[vk]:
                     if casadi.dependsOn(co.eq_expr[i], [dae_var]) and dae_var.getName() != var.name:
                         deps.append(dae_var)

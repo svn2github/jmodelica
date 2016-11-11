@@ -26,6 +26,10 @@ from pyjmi import transfer_optimization_problem
 import numpy as N
 import os
 import casadi
+from pyfmi import load_fmu
+from pymodelica import compile_fmu
+from pyjmi.optimization.casadi_collocation import ExternalData
+from collections import OrderedDict
 
 def assert_results(res, cost_ref, u_norm_ref,
                    cost_rtol=1e-3, u_norm_rtol=1e-4, input_name="u"):
@@ -48,6 +52,10 @@ class TestSymbolicElimination(object):
         self.compiler_opts_automatic = {'equation_sorting': True, 'automatic_tearing': True}
         self.compiler_opts_manual = {}
         
+        class_path = "IllustExample"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.model_illust = load_fmu(compile_fmu(class_path, file_path))
+        
         class_path = "IllustExampleLagrange"
         file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
         self.op_illust_automatic = transfer_optimization_problem(class_path, file_path, self.compiler_opts_automatic)
@@ -66,6 +74,11 @@ class TestSymbolicElimination(object):
                 class_path, file_path, self.compiler_opts_automatic)
         self.op_illust_manual_constraint = transfer_optimization_problem(
                 class_path, file_path, self.compiler_opts_manual)
+        
+        class_path = "IllustExampleEst"
+        file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
+        self.op_illust_est_automatic = transfer_optimization_problem(class_path, file_path, self.compiler_opts_automatic)
+        self.op_illust_est_manual = transfer_optimization_problem(class_path, file_path, self.compiler_opts_manual)
         
         class_path = "LinearLoopLagrangeConstraint"
         file_path = os.path.join(get_files_path(), 'Modelica', 'SymbolicElimination.mop')
@@ -448,3 +461,62 @@ class TestSymbolicElimination(object):
         res_automatic = blt_op_automatic.optimize()
         assert_results(res_manual, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
         assert_results(res_automatic, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+
+    @testattr(casadi = True)
+    def test_par_est(self):
+        """
+        Test parameter estimation.
+        """
+        cost_ref = 1.1109779e-2
+        u_norm_ref = 0.556018602
+
+        model = self.model_illust
+        op = self.op_illust_est_automatic
+
+        # Simulate with nominal parameters
+        n_meas = 16
+        sim_res = model.simulate(input=('u', lambda t: -0.2 + N.sin(t)), final_time=4.,
+                                 options={'ncp': n_meas, 'CVode_options': {'rtol': 1e-10}})
+
+        # Assemble external data by adding noise to simulation
+        Q = N.diag([1., 1.])
+        N.random.seed(1)
+        t_meas = sim_res['time']
+        sigma = 0.05
+        x1_meas = sim_res['x1'] + sigma*N.random.randn(n_meas+1)
+        x2_meas = sim_res['x2'] + sigma*N.random.randn(n_meas+1)
+        u_meas = sim_res['u']
+        data_x1 = N.vstack([t_meas, x1_meas])
+        data_x2 = N.vstack([t_meas, x2_meas])
+        data_u1 = N.vstack([t_meas, u_meas])
+        quad_pen = OrderedDict()
+        quad_pen['x1'] = data_x1
+        quad_pen['x2'] = data_x2
+        eliminated = OrderedDict()
+        eliminated['u'] = data_u1
+        external_data = ExternalData(Q=Q, quad_pen=quad_pen, eliminated=eliminated)
+
+        # Eliminate
+        blt_op = BLTOptimizationProblem(op)
+
+        # Check remaining variables
+        alg_vars = sorted([var.getName() for var in blt_op.getVariables(blt_op.REAL_ALGEBRAIC) if not var.isAlias()])
+        N.testing.assert_array_equal(alg_vars, ['y1', 'y3', 'y5'])
+
+        # Set up options
+        dae_opts = op.optimize_options()
+        dae_opts['init_traj'] = sim_res
+        dae_opts['nominal_traj'] = sim_res
+        dae_opts['external_data'] = external_data
+        blt_opts = blt_op.optimize_options()
+        blt_opts['init_traj'] = sim_res
+        blt_opts['nominal_traj'] = sim_res
+        blt_opts['external_data'] = external_data
+
+        # Optimize and check result
+        res_dae = op.optimize(options=dae_opts)
+        res_blt = blt_op.optimize(options=blt_opts)
+        assert_results(res_dae, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        assert_results(res_blt, cost_ref, u_norm_ref, u_norm_rtol=1e-2)
+        N.testing.assert_allclose([res_dae['p1'][0], res_dae['p3'][0]], [2.022765, 0.992965], rtol=2e-3)
+        N.testing.assert_allclose([res_blt['p1'][0], res_blt['p3'][0]], [2.022765, 0.992965], rtol=2e-3)
