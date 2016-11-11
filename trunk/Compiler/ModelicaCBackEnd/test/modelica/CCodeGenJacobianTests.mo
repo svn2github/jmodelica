@@ -36,7 +36,7 @@ $C_dae_blocks_residual_functions$
 ------
 $C_dae_add_blocks_residual_functions$
 ",
-generatedCode="
+            generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -101,65 +101,69 @@ typedef struct jacobian {
 } jacobian_t;
 
 void L_0_dim(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-    (*jac)[1] = 2;
-    (*jac)[2] = 1;
-}
-void A12_0_dim(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-    (*jac)[1] = 1;
-    (*jac)[2] = 1;
-}
-void A21_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 3;
     (*jac)[1] = 2;
     (*jac)[2] = 2;
 }
-void A22_0_dim(jmi_int_t **jac) {
+void A12_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 1;
     (*jac)[1] = 1;
     (*jac)[2] = 2;
 }
-void L_0_col(jmi_int_t **jac) {
+void A21_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 1;
     (*jac)[1] = 2;
+    (*jac)[2] = 1;
 }
-void A12_0_col(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-}
-void A21_0_col(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-    (*jac)[1] = 2;
-}
-void A22_0_col(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-}
-void L_0_row(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-}
-void A12_0_row(jmi_int_t **jac) {
-    (*jac)[0] = 1;
-}
-void A21_0_row(jmi_int_t **jac) {
+void A22_0_dim(jmi_int_t **jac) {
     (*jac)[0] = 1;
     (*jac)[1] = 1;
     (*jac)[2] = 1;
 }
+void L_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 2;
+    (*jac)[2] = 3;
+}
+void A12_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void A21_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+    (*jac)[2] = 1;
+}
+void A22_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void L_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 1;
+}
+void A12_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void A21_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
 void A22_0_row(jmi_int_t **jac) {
-    (*jac)[0] = 1;
+    (*jac)[0] = 0;
 }
-void L_0_eval(jmi_real_t **jac) {
+void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -2;
+    (*jac)[1] = -1.0;
+    (*jac)[2] = -2;
 }
-void A12_0_eval(jmi_real_t **jac) {
+void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -1.0;
 }
-void A21_0_eval(jmi_real_t **jac) {
+void A21_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -1.0;
-    (*jac)[1] = -2;
-    (*jac)[2] = -1.0;
 }
-void A22_0_eval(jmi_real_t **jac) {
+void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
     (*jac)[0] = -2;
 }
 
@@ -184,30 +188,26 @@ jacobian_t *jacobian_init_0() {
     return jc;
 }
 
-static int jacobian_0_internal(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
+static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
     int ef = 0;
     jacobian_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
 
     if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
-        jc->L.eval(jac);
+        jc->L.eval(jmi, jac);
     } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A12) {
-        jc->A12.eval(jac);
+        jc->A12.eval(jmi, jac);
     } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A21) {
-        jc->A21.eval(jac);
+        jc->A21.eval(jmi, jac);
     } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A22) {
-        jc->A22.eval(jac);
+        jc->A22.eval(jmi, jac);
     }
 
     free(jc);
     return ef;
 }
 
-static int jacobian_0(void *problem_data, jmi_real_t *x, jmi_real_t **jac, int mode) {
-    return jacobian_0_internal((jmi_t*) problem_data, x, jac, mode);
-}
-
-static int jacobian_struct_0_internal(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
+static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
     int ef = 0;
     jacobian_t *jc = jacobian_init_0();
     int evaluation_mode = mode;
@@ -240,10 +240,6 @@ static int jacobian_struct_0_internal(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac
 
     free(jc);
     return ef;
-}
-
-static int jacobian_struct_0(void *problem_data, jmi_real_t *x, jmi_int_t **jac, int mode) {
-    return jacobian_struct_0_internal((jmi_t*) problem_data, x, jac, mode);
 }
 
 
