@@ -5997,6 +5997,7 @@ public
   input Real[:] i;
   output Real[:] o;
  algorithm
+  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction1.C.B', component 'i', dimension '1'\");
   init o as Real[2];
   o[1:2] := i[1:2];
   return;
@@ -6048,6 +6049,7 @@ public
   input Real[:] i;
   output RedeclareTests.RedeclareFunction2.C.D o;
  algorithm
+  assert(2 == size(i, 1), \"Mismatching sizes in function 'RedeclareTests.RedeclareFunction2.C.B', component 'i', dimension '1'\");
   o.a[1:2] := i[1:2];
   return;
  end RedeclareTests.RedeclareFunction2.C.B;

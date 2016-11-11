@@ -1899,6 +1899,8 @@ public
   input Real[:] y;
   output Real[:,:] z;
  algorithm
+  assert(3 == size(x, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'x', dimension '1'\");
+  assert(3 == size(y, 1), \"Mismatching sizes in function 'TypeTests.Primitive4.f', component 'y', dimension '1'\");
   init z as Real[3, 3];
   z[1:3,1:3] := {x[1:3], cross(x[1:3], y[1:3]), y[1:3]};
   return;

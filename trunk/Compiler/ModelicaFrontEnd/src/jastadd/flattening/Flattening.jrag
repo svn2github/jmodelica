@@ -707,9 +707,11 @@ aspect Flattening {
             if (isOutput())
                 ffv.setFTypePrefixInputOutput(new FOutput());
             ffd.addFFunctionVariable(ffv);
+            List<FStatement> stmts = ffd.getFAlgorithm().getFStatements();
+            if (isComposite()) {
+                addFInitArrayStmt(stmts, isInput(), expandedFQNameCalc(), new ForNames());
+            }
             if (!isInput()) {
-                List<FStatement> stmts = ffd.getFAlgorithm().getFStatements();
-                addFInitArrayStmt(stmts);
                 addBindingAssignments(stmts);
             }
             myInstClass().flattenRecord(fc);
@@ -717,19 +719,61 @@ aspect Flattening {
         }
     }
     
-    public void InstComponentDecl.addFInitArrayStmt(List<FStatement> l) {
+    public void InstComponentDecl.addFInitArrayStmt(List<FStatement> l, boolean input, FQName fqn, ForNames names) {
         
     }
     
-    public void InstAssignable.addFInitArrayStmt(List<FStatement> l) {
+    public void InstAssignable.addFInitArrayStmt(List<FStatement> l, boolean input, FQName fqn, ForNames names) {
         if (isArray()) {
-            FInitArrayStmt stmt = new FInitArrayStmt(new FIdUseExp(expandedFQNameCalc()));
-            stmt.shouldBeSorted = true;
-            l.add(stmt);
-        } else {
-            super.addFInitArrayStmt(l);
+            if (input) {
+                size().addSizeCheck(l, this, fqn);
+            } else {
+                FInitArrayStmt stmt = new FInitArrayStmt(new FIdUseExp(fqn));
+                stmt.shouldBeSorted = true;
+                l.add(stmt);
+            }
         }
     }
+    
+    public void InstRecord.addFInitArrayStmt(List<FStatement> l, boolean input, FQName fqn, ForNames names) {
+        super.addFInitArrayStmt(l, input, fqn, names);
+        if (input) {
+            if (isArray()) {
+                InstComponentDecl rec = scalar();
+                if (rec == null) {
+                    return;
+                }
+                names.addLayer(ndims());
+                names.fillLayer(null);
+                rec.addFInitArrayStmtCell(names.createForLoops(l, fqn), input, fqn.copyAndAddFas(names.createFArraySubscripts()), names);
+                names.removeLayer();
+            } else {
+                addFInitArrayStmtCell(l, input, fqn, names);
+            }
+        }
+    }
+    
+    public void InstComponentDecl.addFInitArrayStmtCell(List<FStatement> l, boolean input, FQName fqn, ForNames names) {
+        for (InstComponentDecl icd : allInstComponentDecls()) {
+            icd.addFInitArrayStmt(l, input, fqn.copyAndAppend(icd.name()), names);
+        }
+    }
+    
+    public void Size.addSizeCheck(List<FStatement> l, InstAssignable n, FQName fqn) {
+        for (int i = 0; i < ndims(); i++) {
+            if (needSizeCheck(i)) {
+                String msg = "Mismatching sizes in function '" + n.surroundingInstClass().qualifiedName() +
+                        "', component '" + fqn.toString() + "', dimension '" + (i+1) + "'";
+                FAssert call = new FAssert(new FEqExp(flattenFExp(i), new FUnknownSizeExp(new FIdUseExp(fqn.treeCopy()), i)), new FStringLitExp(msg), new Opt<FExp>());
+                FFunctionCallStmt stmt = new FFunctionCallStmt(new List<FFunctionCallLeft>(), call);
+                stmt.shouldBeSorted = true;
+                l.add(stmt);
+            }
+        }
+    }
+    
+    public boolean Size.needSizeCheck(int i) { return size[i] != UNKNOWN; }
+    public boolean MutableSize.needSizeCheck(int i) { return (exps[i] != null && !(exps[i] instanceof FColonSizeExp)) || super.needSizeCheck(i); }
     
     public void InstComponentDecl.addBindingAssignments(List<FStatement> l) {
         for (InstComponentDecl icd : allInstComponentDecls()) {
@@ -1091,17 +1135,25 @@ aspect Flattening {
         flattenUsedFuncsAndEnums(fc);
     }
 
+    
+    syn InstComponentDecl InstComponentDecl.scalar() {
+        InstComponentDecl rec = this;
+        for (int i = 0; i < ndims(); i++) {
+            if (rec.getNumInstComponentDecl() == 0) {
+                return null;
+            } else {
+                rec = rec.getInstComponentDecl(0);
+            }
+        }
+        return rec;
+    }
+    
     public void InstRecord.flattenMyType(FClass fc) {
         if (flattenRedeclaredType()) {
-            InstComponentDecl rec = this;
-            for (int i = 0; i < ndims(); i++) {
-                if (rec.getNumInstComponentDecl() == 0) {
-                    break;
-                } else {
-                    rec = rec.getInstComponentDecl(0);
-                }
+            InstComponentDecl rec = scalar();
+            if (rec != null) {
+                rec.flattenThisRecord(fc);
             }
-            rec.flattenThisRecord(fc);
         } else {
             myInstClass().flattenRecord(fc);
         }

@@ -1658,6 +1658,10 @@ aspect Scalarization {
         }
 	}
 	
+    public FExp FUnknownSizeExp.scalarizeExp(Map<String,FExp> indexMap) {
+        return new FSizeExp(getFExp().scalarize(indexMap), new Opt<FExp>(getDim().scalarize(indexMap)));
+    }
+	
 	public FExp FNdimsExp.scalarizeExp(Map<String,FExp> indexMap) {
 		return ceval().buildLiteral();
 	}

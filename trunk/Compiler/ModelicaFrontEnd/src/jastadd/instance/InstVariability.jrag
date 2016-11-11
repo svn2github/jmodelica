@@ -84,11 +84,9 @@ aspect InstVariability {
     }
     
     eq InstRecord.calcVariability() {
-        InstComponentDecl rec = this;
-        for (int i = 0; i < ndims(); i++) {
-            if (rec.getNumInstComponentDecl() == 0)
-                return fContinuous();
-            rec = rec.getInstComponentDecl(0);
+        InstComponentDecl rec = scalar();
+        if (rec == null) {
+            return fContinuous();
         }
         List<FComponentVariability> l = new List<FComponentVariability>();
         for (InstComponentDecl icd : rec.allInstComponentDecls()) {

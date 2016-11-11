@@ -113,6 +113,9 @@ aspect AlgorithmScalarization {
     
     @Override
     public void FForStmt.scalarize(Scalarizer.Algorithm s) {
+        if (getNumForStmt() == 0) {
+            return;
+        }
         getIndex().createArrayTemporaries(s);
         FForStmt stmt = new FForStmt();
         stmt.setIndex(getIndex().scalarize(s.map()));
@@ -136,6 +139,7 @@ aspect AlgorithmScalarization {
     @Override
     public void FInitArrayStmt.scalarize(Scalarizer.Algorithm s) {
         type().scalarizeInitArray(s, null);
+        
         super.scalarize(s);
     }
     

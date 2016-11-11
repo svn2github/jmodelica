@@ -4147,6 +4147,9 @@ public
   output Real o;
   input RecordTests.RecordScalarize22.A[:] x;
  algorithm
+  for i1 in 1:3 loop
+   assert(2 == size(x[i1].b, 1), \"Mismatching sizes in function 'RecordTests.RecordScalarize22.f1', component 'x[i1].b', dimension '1'\");
+  end for;
   o := x[1].b[2].c;
   return;
  end RecordTests.RecordScalarize22.f1;

@@ -4224,10 +4224,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining4
  Real y;
- Real temp_11;
+ Real temp_14;
 equation
- y = temp_11 + 4 + (temp_11 + 5);
- temp_11 = time;
+ y = temp_14 + 4 + (temp_14 + 5);
+ temp_14 = time;
 end FunctionInlining.ChainedCallInlining4;
 ")})));
 end ChainedCallInlining4;
@@ -4265,10 +4265,10 @@ annotation(__JModelica(UnitTesting(tests={
             flatModel="
 fclass FunctionInlining.ChainedCallInlining5
  Real y;
- Real temp_11;
+ Real temp_14;
 equation
- y = (temp_11 + 4) / (temp_11 + 5);
- temp_11 = time;
+ y = (temp_14 + 4) / (temp_14 + 5);
+ temp_14 = time;
 end FunctionInlining.ChainedCallInlining5;
 ")})));
 end ChainedCallInlining5;
@@ -4306,12 +4306,12 @@ model ChainedCallInlining6
             flatModel="
 fclass FunctionInlining.ChainedCallInlining6
  Real y;
- Real temp_11;
- Real temp_30;
+ Real temp_14;
+ Real temp_36;
 equation
- y = (temp_11 + 4) / (temp_11 + 5);
- temp_11 = (temp_30 + 4) / (temp_30 + 5);
- temp_30 = time;
+ y = (temp_14 + 4) / (temp_14 + 5);
+ temp_14 = (temp_36 + 4) / (temp_36 + 5);
+ temp_36 = time;
 end FunctionInlining.ChainedCallInlining6;
 ")})));
 end ChainedCallInlining6;
@@ -4356,12 +4356,12 @@ model ChainedCallInlining7
             flatModel="
 fclass FunctionInlining.ChainedCallInlining7
  Real y;
- Real temp_13;
- Real temp_32;
+ Real temp_16;
+ Real temp_38;
 equation
- y = (temp_13 + 4) / (temp_13 + 5);
- temp_13 = (temp_32 + 4) / (temp_32 + 5);
- temp_32 = time;
+ y = (temp_16 + 4) / (temp_16 + 5);
+ temp_16 = (temp_38 + 4) / (temp_38 + 5);
+ temp_38 = time;
 end FunctionInlining.ChainedCallInlining7;
 ")})));
 end ChainedCallInlining7;

@@ -1934,6 +1934,7 @@ public
   input ArrayTests.Subscripts.EndSubscript2.R r;
   output Real x;
  algorithm
+  assert(r.n == size(r.x, 1), \"Mismatching sizes in function 'ArrayTests.Subscripts.EndSubscript2.f', component 'r.x', dimension '1'\");
   x := r.x[r.n];
   return;
  end ArrayTests.Subscripts.EndSubscript2.f;

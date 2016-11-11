@@ -868,7 +868,7 @@ aspect FunctionScalarizationHelpers {
             int l = last();
             do {
                 name = "i" + (++l);
-            } while (!context.lookupFV(new FQNameString(name)).isUnknown()); 
+            } while (context != null && !context.lookupFV(new FQNameString(name)).isUnknown()); 
             add(name);
             last.set(last.size()-1, l);
             return name;

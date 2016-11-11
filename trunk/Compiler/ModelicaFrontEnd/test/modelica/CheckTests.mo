@@ -393,6 +393,7 @@ public
   input Integer[:] x;
   output Integer[:] y;
  algorithm
+  assert(n == size(x, 1), \"Mismatching sizes in function 'CheckTests.ArraySize2.f', component 'x', dimension '1'\");
   init y as Integer[n];
   for k in 1:n loop
    y[1:k] := y[1:k] + fill(x[k], k);

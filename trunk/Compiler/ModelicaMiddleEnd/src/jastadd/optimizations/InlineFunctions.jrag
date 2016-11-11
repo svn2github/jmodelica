@@ -1109,6 +1109,7 @@ aspect FunctionInlining {
      */
     syn boolean FStatement.isOkTrivialInlineInFor() = false;
     eq FAssignStmt.isOkTrivialInlineInFor()         = getLeft().isOkTrivialInlineInFor();
+    eq FFunctionCallStmt.isOkTrivialInlineInFor()   = getNumLeft() == 0;
     eq FForStmt.isOkTrivialInlineInFor() {
         for (FStatement stmt : getForStmts())
             if (!stmt.isOkTrivialInlineInFor())

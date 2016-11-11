@@ -72,6 +72,8 @@ public
   input Real[:] i2;
   output Real[:] o;
  algorithm
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
@@ -122,6 +124,8 @@ public
   input Real[:] i2;
   output Real[:] o;
  algorithm
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
@@ -689,6 +693,8 @@ public
   input Real[:] i2;
   output Real[:] o;
  algorithm
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;
@@ -743,6 +749,8 @@ public
   input Real[:] i2;
   output Real[:] o;
  algorithm
+  assert(2 == size(i1, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i1', dimension '1'\");
+  assert(2 == size(i2, 1), \"Mismatching sizes in function 'OverconstrainedConnection.T1.equalityConstraint', component 'i2', dimension '1'\");
   init o as Real[1];
   o[1:1] := sum(i1[1:2] .+ i2[1:2]);
   return;

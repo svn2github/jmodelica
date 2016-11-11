@@ -636,6 +636,9 @@ public
    y[i1].a[2] := x[i1].a[2];
   end for;
   t := size(x, 1);
+  for i1 in 1:size(x, 1) loop
+   assert(2 == size(x[i1].a, 1), \"Mismatching sizes in function 'AlgorithmTests.TempAssign3.f', component 'x[i1].a', dimension '1'\");
+  end for;
   init temp_1 as AlgorithmTests.TempAssign3.R[max(t, 0)];
   init temp_2 as Integer[max(t, 0)];
   for i1 in 1:max(t, 0) loop

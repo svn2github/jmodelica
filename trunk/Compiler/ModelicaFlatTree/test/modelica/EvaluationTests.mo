@@ -548,6 +548,19 @@ public
   input EvaluationTests.FunctionEval15.R2[:] a;
   output Real x;
  algorithm
+  assert(2 == size(a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a', dimension '1'\");
+  for i1 in 1:size(a, 1) loop
+   assert(2 == size(a[i1].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a', dimension '1'\");
+   for i2 in 1:size(a[i1].a, 1) loop
+    assert(2 == size(a[i1].a[i2].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a[i2].a', dimension '1'\");
+    assert(3 == size(a[i1].a[i2].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].a[i2].b', dimension '1'\");
+   end for;
+   assert(3 == size(a[i1].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b', dimension '1'\");
+   for i2 in 1:size(a[i1].b, 1) loop
+    assert(2 == size(a[i1].b[i2].a, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b[i2].a', dimension '1'\");
+    assert(3 == size(a[i1].b[i2].b, 1), \"Mismatching sizes in function 'EvaluationTests.FunctionEval15.f1', component 'a[i1].b[i2].b', dimension '1'\");
+   end for;
+  end for;
   x := sum(a[1:2].a[1:2].a[1:2]) + sum(a[1:2].a[1:2].b[1:3]) + sum(a[1:2].b[1:3].a[1:2]) + sum(a[1:2].b[1:3].b[1:3]);
   return;
  end EvaluationTests.FunctionEval15.f1;
@@ -4127,6 +4140,7 @@ public
   input Real[:] x;
   output EvaluationTests.AssigningCached3.R y;
  algorithm
+  assert(2 == size(x, 1), \"Mismatching sizes in function 'EvaluationTests.AssigningCached3.f', component 'x', dimension '1'\");
   y := EvaluationTests.AssigningCached3.R(x);
   y.a[2] := 3;
   return;
@@ -4172,6 +4186,7 @@ public
   Real[:] t;
   output EvaluationTests.AssigningCached4.R y1;
  algorithm
+  assert(3 == size(x, 1), \"Mismatching sizes in function 'EvaluationTests.AssigningCached4.f', component 'x', dimension '1'\");
   init t as Real[3];
   t[1:3] := x[1:3];
   y1 := EvaluationTests.AssigningCached4.R(t);

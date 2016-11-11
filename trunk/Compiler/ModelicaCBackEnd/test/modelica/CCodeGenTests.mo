@@ -5985,6 +5985,14 @@ jmi_ad_var_t func_CCodeGenTests_CRecordDecl16_f_exp0(A_1_ra* x_a);
 void func_CCodeGenTests_CRecordDecl16_f_def0(A_1_ra* x_a, jmi_ad_var_t* o_o) {
     JMI_DYNAMIC_INIT()
     JMI_DEF(REA, o_v)
+    jmi_ad_var_t i1_0i;
+    jmi_ad_var_t i1_0ie;
+    i1_0ie = 3 + 1 / 2.0;
+    for (i1_0i = 1; i1_0i < i1_0ie; i1_0i += 1) {
+        if (COND_EXP_EQ(AD_WRAP_LITERAL(2), jmi_array_size(jmi_array_rec_1(x_a, i1_0i)->b, 0), JMI_TRUE, JMI_FALSE) == JMI_FALSE) {
+            jmi_assert_failed(\"Mismatching sizes in function 'CCodeGenTests.CRecordDecl16.f', component 'x[i1].b', dimension '1'\", JMI_ASSERT_ERROR);
+        }
+    }
     o_v = jmi_array_rec_1(jmi_array_rec_1(x_a, 1)->b, 2)->c;
     JMI_RET(GEN, o_o, o_v)
     JMI_DYNAMIC_FREE()

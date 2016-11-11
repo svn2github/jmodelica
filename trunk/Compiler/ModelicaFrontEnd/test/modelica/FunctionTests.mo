@@ -8295,6 +8295,10 @@ public
   output Real dummy;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
+  for i1 in 1:2 loop
+   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].x', dimension '1'\");
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.fwrap', component 'i[i1].y', dimension '1'\");
+  end for;
   (o) := FunctionTests.ArrayOutputScalarization25.f(i);
   dummy := 1;
   return;
@@ -8305,6 +8309,10 @@ public
   output FunctionTests.ArrayOutputScalarization25.R[:] o;
  algorithm
   init o as FunctionTests.ArrayOutputScalarization25.R[2];
+  for i1 in 1:2 loop
+   assert(2 == size(i[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].x', dimension '1'\");
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.ArrayOutputScalarization25.f', component 'i[i1].y', dimension '1'\");
+  end for;
   o[1].x[1] := i[1].x[1];
   o[1].x[2] := i[1].x[2];
   o[1].y[1] := i[1].y[1];
@@ -8812,6 +8820,7 @@ public
   Real[:,:] d;
   Real[:,:] e;
  algorithm
+  assert(size(a, 2) == size(b, 2), \"Mismatching sizes in function 'FunctionTests.UnknownArray9.f', component 'b', dimension '2'\");
   init c as Real[size(d, 1), size(d, 2)];
   init d as Real[size(a, 1) + size(b, 1), size(a, 2)];
   d := cat(1, a[:,:], b[:,:]);
@@ -10435,6 +10444,9 @@ public
  algorithm
   init o as FunctionTests.UnknownArray40.R[size(i, 1)];
   for i1 in 1:size(i, 1) loop
+   assert(2 == size(i[i1].y, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray40.f', component 'i[i1].y', dimension '1'\");
+  end for;
+  for i1 in 1:size(i, 1) loop
    o[i1].y[1] := i[i1].y[1];
    o[i1].y[2] := i[i1].y[2];
   end for;
@@ -10687,6 +10699,9 @@ public
   input FunctionTests.UnknownArray44.R1[:] r1;
   output FunctionTests.UnknownArray44.R2 r2;
  algorithm
+  for i1 in 1:size(r1, 1) loop
+   assert(1 == size(r1[i1].x, 1), \"Mismatching sizes in function 'FunctionTests.UnknownArray44.f', component 'r1[i1].x', dimension '1'\");
+  end for;
   assert(size(r1, 1) == 1, \"Mismatching sizes in FunctionTests.UnknownArray44.f\");
   r2.y[1].x[1] := r1[1].x[1];
   return;
@@ -11198,6 +11213,7 @@ public
   output Real q;
   Real a;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc2.f', component 'x', dimension '2'\");
   a := y + 2;
   external \"C\" f(x, size(x, 1), size(x, 2), y, z, q, a);
   return;
@@ -11235,6 +11251,7 @@ public
   output Real z;
   output Real q;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc3.f', component 'x', dimension '2'\");
   external \"C\" foo(size(x, 1), 2, x, z, y, q);
   return;
  end FunctionTests.ExternalFunc3.f;
@@ -11271,6 +11288,7 @@ public
   output Real z;
   output Real q;
  algorithm
+  assert(2 == size(x, 2), \"Mismatching sizes in function 'FunctionTests.ExternalFunc4.f', component 'x', dimension '2'\");
   external \"C\" q = foo(size(x, 1), 2, x, z, y);
   return;
  end FunctionTests.ExternalFunc4.f;
