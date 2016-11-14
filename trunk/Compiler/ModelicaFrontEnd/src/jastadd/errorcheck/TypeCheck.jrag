@@ -773,8 +773,64 @@ aspect FlatTypeCheck {
         hasFExp(); // Force eval of NTA, thus checking if a consistent range can be computed
     }
 
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NON_INTEGER =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NON_INTEGER", ProblemKind.COMPLIANCE, 
+                    "Non-integer for iteration range not supported");
+
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_INCONSISTENT =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_INCONSISTENT", ProblemKind.SEMANTIC, 
+                    "For index with implicit iteration range used for inconsistent sizes, here used for size %s and earlier for size %s");
+
+    public static final SimpleErrorProducer InstForIndexNoExp.IMPLICIT_FOR_RANGE_NOT_USED =
+            new SimpleErrorProducer("IMPLICIT_FOR_RANGE_NOT_USED", ProblemKind.SEMANTIC, 
+                    "For index with implicit iteration range must be used as array index");
+
+    // TODO: handle other index types than integer (see #3597)
     syn lazy Opt<FExp> InstForIndexNoExp.getFExpOpt() {
-        return new Opt();
+        Size size = null;
+        for (FExpSubscript use : mySubscriptUses()) {
+            Size useSize = use.mySize();
+            if (!use.myIndexType().isInteger()) {
+                IMPLICIT_FOR_RANGE_NON_INTEGER.invoke(use);
+            }
+            if (size == null) {
+                size = useSize;
+            } else if (!size.equivalent(useSize, true)) {
+                IMPLICIT_FOR_RANGE_INCONSISTENT.invoke(use, useSize, size);
+            }
+        }
+        if (size == null) {
+            IMPLICIT_FOR_RANGE_NOT_USED.invoke(this);
+            return new Opt();
+        } else {
+            return new Opt(size.createRangeExp(0));
+        }
+    }
+
+    syn lazy Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses() = mySubscriptUses(name());
+
+    inh Collection<FExpSubscript> InstForIndexNoExp.mySubscriptUses(String name);
+    eq InstForClauseE.getInstForIndex(int i).mySubscriptUses(String name) = collectSubscriptUses(name);
+    eq InstForStmt.getInstForIndex(int i).mySubscriptUses(String name)    = collectSubscriptUses(name);
+    eq FIterExp.getForIndex(int i).mySubscriptUses(String name)           = collectSubscriptUses(name);
+
+    public Collection<FExpSubscript> ASTNode.collectSubscriptUses(String name) {
+        Collection<FExpSubscript> nodes = new ArrayList<FExpSubscript>();
+        collectSubscriptUses(name, nodes);
+        return nodes;
+    }
+
+    public void ASTNode.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
+        for (ASTNode n : this) {
+            n.collectSubscriptUses(name, nodes);
+        }
+    }
+
+    public void FExpSubscript.collectSubscriptUses(String name, Collection<FExpSubscript> nodes) {
+        if (getFExp().isIdentifier(name)) {
+            nodes.add(this);
+        }
+        super.collectSubscriptUses(name, nodes);
     }
 
   public void FExpSubscript.typeCheckAsSize(ErrorCheckType checkType) {

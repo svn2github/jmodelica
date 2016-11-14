@@ -61,6 +61,7 @@ aspect FlatStatements {
     public abstract boolean FStatement.flatten(List<FStatement> sl, FClass fc, FQName prefix);
     
     public boolean FAssignStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+        addForIndexRangeAsserts(sl, fc, prefix);
         sl.add(new FAssignStmt((FAssignableExp)getLeft().flatten(prefix), getRight().flatten(prefix)));
         return false;
     }
@@ -70,6 +71,7 @@ aspect FlatStatements {
     }
     
     public boolean FFunctionCallStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+        addForIndexRangeAsserts(sl, fc, prefix);
         List<FFunctionCallLeft> l = new List<FFunctionCallLeft>();
         for (FFunctionCallLeft a : getLefts())
             l.add(a.flatten(prefix));
@@ -89,6 +91,9 @@ aspect FlatStatements {
     }
     
     public boolean FIfStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+        for (FIfWhenClause c : getFIfWhenClauses()) {
+            c.getTest().addForIndexRangeAsserts(sl, fc, prefix);
+        }
         boolean res = false;
         boolean hasBroken = false;
         List cl = new List();
@@ -147,6 +152,7 @@ aspect FlatStatements {
     }
         
     public boolean FWhileStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
+        getTest().addForIndexRangeAsserts(sl, fc, prefix);
         List l = new List();
         boolean res = FStatement.flattenFStatementList(getWhileStmts(), l, fc, prefix);
         sl.add(new FWhileStmt(getTest().flatten(prefix), l));
@@ -155,6 +161,7 @@ aspect FlatStatements {
     
     public boolean InstForStmt.flatten(List<FStatement> sl, FClass fc, FQName prefix) {
         if (inFunction()) {
+            getInstForIndexList().addForIndexRangeAsserts(sl, fc, prefix);
             List fsl = new List();
             FStatement.flattenFStatementList(getForStmts(), fsl, fc, prefix);
             int i = getNumInstForIndex() - 1;
@@ -236,6 +243,38 @@ aspect FlatStatements {
         sl.add(new FReturnStmt());
         return false;
     }
-    
+
+    public void ASTNode.addForIndexRangeAsserts(List<FStatement> l, FClass fc, FQName prefix) {
+        for (ASTNode n : this) {
+            n.addForIndexRangeAsserts(l, fc, prefix);
+        }
+    }
+
+    private final static String InstForIndexNoExp.SIZE_CONSISTENCE_ASSERT_MSG = 
+            "For index with implicit iteration range used for inconsistent sizes, %s used for different sizes in %s and %s";
+
+    public void InstForIndexNoExp.addForIndexRangeAsserts(List<FStatement> l, FClass fc, FQName prefix) {
+        FExpSubscript cmpUse = null;
+        Size cmpSize = null;
+        // Find first known size, or if all are unknown, the first one
+        for (FExpSubscript use : mySubscriptUses()) {
+            Size size = use.mySize();
+            if (cmpUse == null || (cmpSize.isUnknown() && !size.isUnknown())) {
+                cmpUse = use;
+                cmpSize = size;
+            }
+        }
+        for (FExpSubscript use : mySubscriptUses()) {
+            Size size = use.mySize();
+            if (use != cmpUse && size.isUnknown()) {
+                FExp test = getFExp().dynamicFExp(new FEqExp(size.createFExp(0), cmpSize.createFExp(0))).flatten(prefix);
+                String msg = String.format(SIZE_CONSISTENCE_ASSERT_MSG, 
+                        use, use.myInstAccess(), cmpUse.myInstAccess());
+                FAssert as = new FAssert(test, new FStringLitExp(msg), new Opt());
+                l.add(new FFunctionCallStmt(new List<FFunctionCallLeft>(), as));
+            }
+        }
+    }
+
 }
 

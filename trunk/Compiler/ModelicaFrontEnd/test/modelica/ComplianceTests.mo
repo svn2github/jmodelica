@@ -605,23 +605,22 @@ Compliance error at line 619, column 7, in file 'Compiler/ModelicaFrontEnd/src/t
 end Error2;
 
 model ArrayIterTest
- Real x[1,1] = { i * j for i, j };
+    type E = enumeration(a, b, c);
+    Real x[E];
+    Real y[E] = { x[i] for i };
 
     annotation(__JModelica(UnitTesting(tests={
         ComplianceErrorTestCase(
             name="UnknownArraySizes_ArrayIterTest",
-            description="Array constructor with iterators: without in",
+            description="Array constructor with iterators: without in for non-integer indexed array",
             errorMessage="
-3 errors found:
+2 errors found:
 
-Error at line 643, column 16, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', ARRAY_SIZE_MISMATCH_IN_DECLARATION:
-  Array size mismatch in declaration of x, size of declaration is [1, 1] and size of binding expression is [:, :]
+Error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo':
+  Expected array index of type 'ComplianceTests.UnknownArraySizes.ArrayIterTest.E' found 'Integer'
 
-Compliance error at line 643, column 28, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
-  For index without in expression isn't supported
-
-Compliance error at line 643, column 31, in file 'Compiler/ModelicaFrontEnd/src/test/ComplianceTests.mo', UNSUPPORTED_FOR_INDEX_WITHOUT_EXPRESSION:
-  For index without in expression isn't supported
+Compliance error at line 610, column 21, in file 'Compiler/ModelicaFrontEnd/test/modelica/ComplianceTests.mo', IMPLICIT_FOR_RANGE_NON_INTEGER:
+  Non-integer for iteration range not supported
 ")})));
 end ArrayIterTest;
 

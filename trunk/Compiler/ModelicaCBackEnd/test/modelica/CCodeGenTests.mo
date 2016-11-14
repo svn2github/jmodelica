@@ -864,6 +864,7 @@ model CStringExp
 		input String actual;
 	algorithm
 		assert(actual == expected, "Compare failed, expected: " + expected + ", actual: " + actual);
+        annotation(Inline=false);
 	end StringCompare;
 	type E = enumeration(small, medium, large, xlarge);
 	parameter Real realVar = 3.14;
@@ -17583,6 +17584,7 @@ model TestAssert1
         assert(x < 3, "x is too high.");
         assert(y < 4, "y is too high.", AssertionLevel.error);
         assert(x + y < 5, "sum is a bit high.", AssertionLevel.warning);
+        annotation(Inline=false);
     end f;
     
     Real x = time + 1;
