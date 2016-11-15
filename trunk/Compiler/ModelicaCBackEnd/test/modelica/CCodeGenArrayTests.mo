@@ -140,4 +140,41 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 ")})));
 end UnknownSizeInEquation3;
 
+model UnknownSizeInEquation4
+    function mysum
+        input Real[:] x;
+        output Real y;
+        external;
+    end mysum;
+    
+    function f
+        input Real x;
+        output Real[integer(x)] y;
+        external;
+    end f;
+    
+    parameter Real p = 1;
+    Real y = mysum(f(p));
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="UnknownSizeInEquation4",
+            description="",
+            inline_functions="none",
+            template="$C_DAE_initial_dependent_parameter_assignments$",
+            generatedCode="
+int model_init_eval_parameters_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, -1, 1)
+    JMI_ARRAY_INIT_1(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_1, floor(_p_0), 1, floor(_p_0))
+    func_CCodeGenArrayTests_UnknownSizeInEquation4_f_def1(_p_0, tmp_1);
+    _y_1 = (func_CCodeGenArrayTests_UnknownSizeInEquation4_mysum_exp0(tmp_1));
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+")})));
+end UnknownSizeInEquation4;
+
 end CCodeGenArrayTests;
