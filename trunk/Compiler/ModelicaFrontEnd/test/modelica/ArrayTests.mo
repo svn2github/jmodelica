@@ -1711,6 +1711,40 @@ end ArrayTests.Subscripts.SubscriptExpression10;
 ")})));
 end SubscriptExpression10;
 
+model SubscriptExpression11
+    parameter Integer n1 = 2;
+    parameter Integer n2[n1] = {2,3};
+    Real x[sum(n2)];
+equation
+    for i in 1:n1 loop
+        for j in 1:n2[i] loop
+            x[sum(n2[k] for k in 1:(i - 1)) + j] = sin(time) * i * j;
+        end for;
+    end for;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_SubscriptExpression10",
+            description="Scalarization of subscript expression #5216",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression11
+ structural parameter Integer n1 = 2 /* 2 */;
+ structural parameter Integer n2[2] = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+equation
+ x[1] = sin(time);
+ x[2] = sin(time) * 2;
+ x[3] = sin(time) * 2;
+ x[4] = sin(time) * 2 * 2;
+ x[5] = sin(time) * 2 * 3;
+end ArrayTests.Subscripts.SubscriptExpression11;
+")})));
+end SubscriptExpression11;
 
 
 model NumSubscripts1

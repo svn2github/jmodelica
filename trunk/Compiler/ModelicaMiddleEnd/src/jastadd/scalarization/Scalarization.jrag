@@ -1555,6 +1555,9 @@ aspect Scalarization {
 	}
 	
 	public FSubscript FExpSubscript.scalarize(Map<String,FExp> indexMap) {
+        if (getFExp().variability().indexParameterOrLess() && !inFunction()) {
+            return new FExpSubscript(getFExp().ceval().convertInteger().buildLiteral());
+        }
 		return new FExpSubscript(getFExp().scalarize(indexMap));
 	}
 	

@@ -1567,7 +1567,7 @@ aspect Arrays {
 		return new FIterExp(exp, fil);
 	}
 	
-    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), getFExp().myFClass() != null);
+    syn lazy Array FIterExp.createArray() = getFExp().getArray().createExpanded(getForIndexList(), false);
 	eq FIterExp.getArray() = copyArray();
 	
     eq FSubscriptedExp.getArray() {
