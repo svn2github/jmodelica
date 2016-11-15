@@ -44,6 +44,7 @@ extern int dlaqge_(int *m, int *n, double *a, int * lda, double *r__, double *c_
     *colcnd, double *amax, char *equed);
 
 typedef struct jmi_linear_solver_t jmi_linear_solver_t;
+typedef struct jmi_linear_solver_sparse_t jmi_linear_solver_sparse_t;
 
 int jmi_linear_solver_new(jmi_linear_solver_t** solver, jmi_block_solver_t* block);
 
@@ -54,6 +55,25 @@ int jmi_linear_solver_evaluate_jacobian(jmi_block_solver_t* block, jmi_real_t* j
 int jmi_linear_solver_evaluate_jacobian_factorization(jmi_block_solver_t* block, jmi_real_t* factorization);
 
 void jmi_linear_solver_delete(jmi_block_solver_t* block);
+
+int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block);
+
+void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block);
+
+int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block);
+
+int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block);
+
+struct jmi_linear_solver_sparse_t {
+    jmi_matrix_sparse_csc_t *L;
+    jmi_matrix_sparse_csc_t *A12;
+    jmi_matrix_sparse_csc_t *A21;
+    jmi_matrix_sparse_csc_t *A22;
+    jmi_matrix_sparse_csc_t *M1;
+    jmi_int_t** nz_patterns;
+    jmi_int_t* nz_sizes;
+    double *work_x;
+};
 
 struct jmi_linear_solver_t {
     int* ipiv;                     /**< \brief Work vector needed for dgesv */
@@ -78,6 +98,7 @@ struct jmi_linear_solver_t {
     double* dgesdd_work;            /**< \brief Work vector for dgesdd */
     int     dgesdd_lwork;           /**< \brief Work vector for dgesdd */
     int*    dgesdd_iwork;           /**< \brief Work vector for dgesdd */
+    jmi_linear_solver_sparse_t *Jsp;
 };
 
 #endif /* _JMI_LINEAR_SOLVER_H */

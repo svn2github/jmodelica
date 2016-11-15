@@ -196,4 +196,36 @@ typedef char jmi_boolean;
 typedef const char* jmi_string;
 typedef unsigned int jmi_value_reference;
 
+typedef enum {
+    JMI_MATRIX_DENSE,     /* Dense */
+    JMI_MATRIX_SPARSE_CSC /* Compressed Sparse Column*/
+} jmi_matrix_type_t;
+
+typedef struct jmi_matrix_t {
+    jmi_matrix_type_t type;
+} jmi_matrix_t;
+
+typedef enum {
+    JMI_MATRIX_DENSE_COLUMN_MAJOR,
+    JMI_MATRIX_DENSE_ROW_MAJOR
+} jmi_matrix_dense_order_t;
+
+typedef struct jmi_matrix_dense_t {
+    jmi_matrix_t type; /* Type of matrix */
+    jmi_matrix_dense_order_t order; /* Order of the matrix (column/row major) */
+    size_t nbr_cols; /* Number of columns */
+    size_t nbr_rows; /* Number of rows */
+    double *x;       /* Data values */
+} jmi_matrix_dense_t;
+
+typedef struct jmi_matrix_sparse_csc_t {
+    jmi_matrix_t type; /* Type of matrix */
+    size_t nbr_cols;   /* Number of columns */
+    size_t nbr_rows;   /* Number of rows */
+    size_t nnz;        /* Number of non zero elements */
+    size_t *col_ptrs;  /* Column pointers (size nbr_cols+1) */ 
+    size_t *row_ind;   /* Row indices (size nnz) */
+    double *x;         /* Data values (size nnz) */
+} jmi_matrix_sparse_csc_t;
+
 #endif
