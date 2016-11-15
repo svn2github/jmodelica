@@ -404,8 +404,10 @@ aspect Variability {
         if (hasDim()) {
             if (getDim().variability().knownParameterOrLess()) {
                 try {
-                    CValue v = getDim().ceval();
-                    return getFExp().size().variability(v.intValue() - 1);
+                    int dim = getDim().ceval().intValue() - 1;
+                    if (getFExp().size().has(dim)) {
+                        return getFExp().size().variability(dim);
+                    }
                 } catch (ConstantEvaluationException e) {
                     
                 }

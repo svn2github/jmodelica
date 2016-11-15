@@ -1282,6 +1282,38 @@ end ArrayTests.General.ArrayTest47;
 ")})));
 end ArrayTest47;
 
+model ArrayTest48
+    constant Integer n = 2;
+    function f
+        output Real[n] y = 1:n;
+        algorithm
+    end f;
+    constant Real[n] y1 = f();
+    constant Real[n] y2 = f();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="General_ArrayTest48",
+            description="",
+            flatModel="
+fclass ArrayTests.General.ArrayTest48
+ constant Integer n = 2;
+ constant Real y1[2] = {1, 2};
+ constant Real y2[2] = {1, 2};
+
+public
+ function ArrayTests.General.ArrayTest48.f
+  output Real[:] y;
+ algorithm
+  init y as Real[2];
+  y := 1:2;
+  return;
+ end ArrayTests.General.ArrayTest48.f;
+
+end ArrayTests.General.ArrayTest48;
+")})));
+end ArrayTest48;
+
 end General;
 
 

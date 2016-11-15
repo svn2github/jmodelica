@@ -361,6 +361,9 @@ aspect FlatNames {
     syn String FRecordDecl.name()   = getFQNameNoTransform().name();
     syn String FAttribute.name()    = getName().name();
     
+    syn String FFunctionDecl.qualifiedName()     = name();
+    syn String FFunctionVariable.qualifiedName() = name();
+    
     syn String FAbstractFunctionCall.name();
     eq InstFunctionCall.name()      = getNameNoTransform().name();
     eq FFunctionCall.name()         = getNameNoTransform().name();
@@ -1237,8 +1240,10 @@ aspect FlatFunctionUtils {
      */
     public interface CommonCallable {
         public String name();
+        public String qualifiedName();
         public ArrayList<? extends CommonVariableDecl> myInputs();
         public ArrayList<? extends CommonVariableDecl> myOutputs();
+        public ArrayList<? extends CommonVariableDecl> myNonInputs();
     }
     
     public interface FCallable        extends CommonCallable {}
@@ -1255,6 +1260,7 @@ aspect FlatFunctionUtils {
     public interface FCallable {
         public ArrayList<FFunctionVariable> myInputs();
         public ArrayList<FFunctionVariable> myOutputs();
+        public ArrayList<FFunctionVariable> myNonInputs();
         public FFunctionVariable myInput(int i);
         public boolean hasOutputs();
         public FFunctionVariable expOutput();
@@ -1384,7 +1390,9 @@ aspect FlatFunctionUtils {
          return l;
      }
      
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs() = myFCallable().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myInputs()    = myFCallable().myInputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs()   = myFCallable().myOutputs();
+     syn ArrayList<FFunctionVariable> FFunctionVariable.myNonInputs() = myFCallable().myNonInputs();
      
     /**
      * Returns the i:th FFunctionVariable that is  declared as "input".
@@ -1424,8 +1432,6 @@ aspect FlatFunctionUtils {
                  l.add(var);
          return l;
      }
-     
-     syn ArrayList<FFunctionVariable> FFunctionVariable.myOutputs() = myFCallable().myOutputs();
      
     /**
      * \brief List of CommonVariableDecl used as inputs in this function call

@@ -567,17 +567,28 @@ aspect SizesUtil {
      * @param varMap  a map of variables to replace and expressions to replace them with
      */
     public FExp Size.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
-        if (d < 0 || d >= ndims()) {
+        checkDimension(d);
+        if (isUnknown(d)) {
             throw new ConstantEvaluationException();
         }
-        return createFExp(d);
+        return new FIntegerLitExp(get(d));
     }
     
     public FExp MutableSize.copyReplaceAccess(int d, FExp.ContextReplacer crp) {
-        evaluate(d);
-        return (okExp(d, true)) ?
-                exps[d].copyReplaceAccess(crp) :
-                super.copyReplaceAccess(d, crp);
+        checkDimension(d);
+        FExp exp = exps[d];
+        if (exp == null || exp.variability().knownParameterOrLess()) {
+            evaluate(d);
+            return super.copyReplaceAccess(d, crp);
+        } else {
+            return exps[d].copyReplaceAccess(crp);
+        }
+    }
+    
+    public void Size.checkDimension(int d) {
+        if (d < 0 || d >= ndims() || isCircular(d)) {
+            throw new ConstantEvaluationException();
+        }
     }
     
 }
