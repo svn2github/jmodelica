@@ -6420,6 +6420,28 @@ public
 end ArrayTests.Constructors.Iterators.ArrayIterTest17; 
 ")}))); 
 end ArrayIterTest17;
+
+model ArrayIterTest18
+    parameter Integer n = 10;
+    Real a[n] = ones(n);
+    Real x;
+equation
+    x = sum(if a[i] > 0 then 2 else 0 for i in 1:n - 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Constructors_Iterators_ArrayIterTest18",
+            description="",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest18
+ structural parameter Integer n = 10 /* 10 */;
+ Real a[10] = ones(10);
+ Real x;
+equation
+ x = sum({if a[1] > 0 then 2 else 0, if a[2] > 0 then 2 else 0, if a[3] > 0 then 2 else 0, if a[4] > 0 then 2 else 0, if a[5] > 0 then 2 else 0, if a[6] > 0 then 2 else 0, if a[7] > 0 then 2 else 0, if a[8] > 0 then 2 else 0});
+end ArrayTests.Constructors.Iterators.ArrayIterTest18;
+")})));
+end ArrayIterTest18;
     
 model ArrayIterTestUnknown1
     function f
