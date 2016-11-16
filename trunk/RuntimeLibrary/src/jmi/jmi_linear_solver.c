@@ -574,7 +574,7 @@ static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_
 }
 
 static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
-    jmi_int_t i, B_p, L_p, col_L;
+    jmi_int_t i, B_p, L_p;
     
     for (i = 0; i < nz_size; i++) { work[nz_pattern[i]] = 0.0; }
     
@@ -583,12 +583,14 @@ static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, 
     }
     
     for (i = 0; i < nz_size; i++) {
-        col_L = nz_pattern[i];
+        size_t col_L = nz_pattern[i];
+        double val;
         
         work[col_L] /= L->x[L->col_ptrs[col_L]];
+        val = work[col_L];
         
         for (L_p = L->col_ptrs[col_L]+1; L_p < L->col_ptrs[col_L+1]; L_p++) {
-            work[L->row_ind[L_p]] -= L->x[L_p]*work[col_L]; 
+            work[L->row_ind[L_p]] -= L->x[L_p]*val; 
         }
     }
     
@@ -610,18 +612,17 @@ static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A
 
 /* C (dense) = -A (sparse)*B (sparse) */
 static int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C, double *work_b) {
-    int col, p;
-    int col_ind, B_col, B_p;
-    
+    size_t B_col, B_p, p;
+
     for (B_col = 0; B_col < B->nbr_cols; B_col++) {
-        memset(work_b, 0, sizeof(double)*B->nbr_rows);
+        size_t col_ind = A->nbr_rows*B_col;
+        
         for (B_p = B->col_ptrs[B_col]; B_p < B->col_ptrs[B_col+1]; B_p++) {
-            work_b[B->row_ind[B_p]] = B->x[B_p];
-        }
-        col_ind = A->nbr_rows*B_col;
-        for (col = 0; col < A->nbr_cols; col++) {
+            double val = B->x[B_p];
+            size_t col = B->row_ind[B_p];
+            
             for (p = A->col_ptrs[col]; p < A->col_ptrs[col+1]; p++) {
-                C[col_ind + A->row_ind[p]] -=  A->x[p]*work_b[col];
+                C[col_ind + A->row_ind[p]] -=  A->x[p]*val;
             }
         }
     }
