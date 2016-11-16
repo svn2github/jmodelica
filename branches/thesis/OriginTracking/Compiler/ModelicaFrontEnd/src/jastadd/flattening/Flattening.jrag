@@ -2642,7 +2642,7 @@ aspect FlatExpressions {
     }
     
      public FDerExp FIdUseExp.flattenDer(FQName prefix, int order) {
-         return new FDerExp(getFIdUse().flatten(prefix), order);
+    	 return (FDerExp)parent.setLocationOf(new FDerExp(getFIdUse().flatten(prefix), order));
      }
 
     public FInfArgsFunctionCall FInfArgsFunctionCall.flatten(FQName prefix) {

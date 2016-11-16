@@ -356,6 +356,25 @@ aspect NodeMethods {
         return node;
     }
     
+    protected boolean BaseNode.locationContainedBy(ASTNode node){
+    	if(node instanceof Opt || node instanceof List){
+    		node = node.parent;
+    	}
+    	if(node instanceof BaseNode){
+    		BaseNode bNode = (BaseNode)node;
+    		if(fName != null){
+    			if(bNode.fName != null){
+    				if(fName.equals(bNode.fName) && start >= bNode.start && end <= bNode.end){
+    					return true;
+    				}
+    			}else{
+    				return locationContainedBy(bNode.parent);
+    			}
+    		}	
+    	}
+    	return false;
+    }
+    
     public int ASTNode.beginLine()   { return getLine(getStart()); }
     public int ASTNode.beginColumn() { return getColumn(getStart()); }
     public int ASTNode.endLine()     { return getLine(getEnd()); }

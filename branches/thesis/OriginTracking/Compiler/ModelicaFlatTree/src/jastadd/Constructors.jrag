@@ -1179,6 +1179,14 @@ aspect InheritedFactoryMethods {
     public FCardinality       FCardinality.createEmptyNode()       { return new FCardinality();       }
     public FDecouple          FDecouple.createEmptyNode()          { return new FDecouple();          }
 
+    
+ /*   public FBinExp FExp.createNode2(FExp left, FExp right, BaseNode source) {
+    	FExp node = createNode(left, right);
+    	node.setLocationNoTree(source);
+    	return node;
+    }*/
+    
+    
 	/**
 	 * Create new node of same class as this, with the specified children.
 	 */
@@ -1186,6 +1194,7 @@ aspect InheritedFactoryMethods {
 		FBinExp node = createEmptyNode();
 		node.setLeft(left);
 		node.setRight(right);
+		node.setLocationNoTree(this);
 		return node;
 	}
 	
@@ -1195,6 +1204,7 @@ aspect InheritedFactoryMethods {
 	public FUnaryExp FUnaryExp.createNode(FExp exp) {
 		FUnaryExp node = createEmptyNode();
 		node.setFExp(exp);
+		node.setLocationNoTree(this);
 		return node;
 	}
 	
@@ -1204,6 +1214,7 @@ aspect InheritedFactoryMethods {
 	public FIdUseExp FIdUseExp.createNode(FIdUse use) {
 		FIdUseExp node = createEmptyNode();
 		node.setFIdUse(use);
+		node.setLocationNoTree(this);
 		return node;
 	}
 
@@ -1214,6 +1225,7 @@ aspect InheritedFactoryMethods {
         FAbstractDerExp node = createEmptyNode();
         node.setFIdUse(use);
         node.setOrder(order());
+        node.setLocationNoTree(this);
         return node;
     }
 

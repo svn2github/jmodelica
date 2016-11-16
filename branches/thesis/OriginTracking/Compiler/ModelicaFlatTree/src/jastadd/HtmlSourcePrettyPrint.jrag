@@ -1,4 +1,6 @@
-	//fabstractequaton
+import beaver.Symbol;
+
+//fabstractequaton
 	//fabstractvariable
 	//fexp
 
@@ -26,7 +28,8 @@ aspect HtmlSourcePrettyPrint {
 		prettyPrint(p, str, indent);
 	}
 	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
-		str.println("<html>\n<head>\n<title>Derp</title>\n");
+		//str.println("<html>\n<head>\n<title>Derp</title>\n");
+		str.println("<html>\n<head>\n");
 		str.println(htmlStyle());
 		str.println("</head><body>");
 		htmlSourcePrettyPrint(new HtmlSourcePrettyPrinter(), str, indent);
@@ -89,6 +92,7 @@ aspect HtmlSourcePrettyPrint {
         for (FAbstractEquation e : getFAbstractEquations()) {
             if (e instanceof FAlgorithm) {
                 p.print(e, str, indent);
+                str.print("<br>");
                 wroteEquation = false;
             } else {
                 if (!e.isIgnored()) {
@@ -98,7 +102,7 @@ aspect HtmlSourcePrettyPrint {
                         wroteEquation = true;
                     }
                     p.print(e, str, nextInd);
-                    str.print(";<br>\n");
+                   // str.print(";\n");
                 }
             }
         }
@@ -122,17 +126,32 @@ aspect HtmlSourcePrettyPrint {
 	
 	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		String s = this.getClass().toString();
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
+		String file = fName;
+		if(fName != null && p instanceof HtmlSourcePrettyPrinter && !locationContainedBy(parent)){
+			String dir = System.getProperty("user.dir");
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + fName + hp.htmlLineDepth + "\">");
+			try{
+				if(fName.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))){
+				   	file = fName.substring(dir.lastIndexOf("\\") + 1);
+				}
+			}catch(IndexOutOfBoundsException e){} 				//keep file = fname
+			
+			//str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + fName + "\">");
+			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + file + " " + Symbol.getLine(start) + ":" + Symbol.getColumn(start) 
+					+ " " + Symbol.getLine(end) + ":" + Symbol.getColumn(end) + "\">");  						// for debugging positions
 			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
 			prettyPrint(p, str, indent);
-			hp.decLineDepth()--;
+			hp.decLineDepth();
 			str.print("</span>");
 		}else{
 			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
 			prettyPrint(p, str, indent);
 		}
+	}
+	
+	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+		super.htmlSourcePrettyPrint(p, str, indent);
+		str.print(";<br>\n");
 	}
 	
 	/*public void FEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
@@ -145,6 +164,7 @@ aspect HtmlSourcePrettyPrint {
 		}else{
 			super.htmlSourcePrettyPrint(p, str, indent);
 		}
+		prettyPrint(p, str, indent);
 	}*/
 	
 	/*public void FExp.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
@@ -182,4 +202,11 @@ aspect HtmlSourcePrettyPrint {
 			super.htmlSourcePrettyPrint(p, str, indent);
 		}
 	}*/
+	
+	public String ASTNode.htmlSourcePrettyPrint(String indent) {
+		ByteArrayOutputStream os = new ByteArrayOutputStream();
+		CodeStream str = new NotNullCodeStream(os);
+		htmlSourcePrettyPrint(str, indent);
+		return os.toString();
+	}
 }

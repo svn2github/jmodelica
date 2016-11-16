@@ -1588,10 +1588,10 @@ aspect Scalarization {
 
     public FExp FIdUseExp.scalarizeExp(Map<String,FExp> indexMap) {
         if (indexMap.containsKey(name())) {
-            return this.setLocationOf(indexMap.get(name()).fullCopy());
+        	return indexMap.get(name()).fullCopy();
         }
         if (indexNames != null){
-            return this.setLocationOf(createUseFas(name()));
+        	return createUseFas(name());
     	}
         return this.setLocationOf(new FIdUseExp(getFIdUse().scalarize(indexMap)));
     }
@@ -1751,7 +1751,7 @@ aspect Scalarization {
 	public FExp FBooleanLitExp.scalarizeExp(Map<String,FExp> indexMap) { 
 	    return inArraySubscripts() ? new FIntegerLitExp(ceval().intValue()) : super.scalarizeExp(indexMap);
     }
-    public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return new FDerExp(getFIdUse().scalarize(indexMap), order()); }
+    public FExp FDerExp.scalarizeExp(Map<String,FExp> indexMap) { return createNode(getFIdUse().scalarize(indexMap)); }
     public FExp FPreExp.scalarizeExp(Map<String,FExp> indexMap) { return new FPreExp(getFIdUse().scalarize(indexMap)); }
 	
 	public FExp FSmoothExp.scalarizeExp(Map<String,FExp> indexMap)     { return new FSmoothExp(getOrder().scalarize(indexMap), getFExp().scalarize(indexMap)); }

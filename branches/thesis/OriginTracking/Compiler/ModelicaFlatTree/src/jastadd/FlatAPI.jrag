@@ -16,6 +16,7 @@
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
+import java.util.Scanner;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import java.io.PipedOutputStream;
 import java.io.PrintStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.DigestOutputStream;
 import java.security.NoSuchAlgorithmException;
@@ -1071,6 +1073,24 @@ aspect FlatAPI {
                 res += fv.getBindingExp().type().numScalarElements();
        return res;
     }
+    
+    
+    coll ArrayList<BaseNode> FClass.baseNodes() 			//Used for sourceDiagnostic. Memory inefficient?
+    	[new ArrayList<BaseNode>()] with add root FClass;
+    FVariable contributes
+    	this when fName != null
+    to FClass.baseNodes() for myFClass();
+    		
+    FExp contributes
+        this when fName != null
+    to FClass.baseNodes() for myFClass();
+    		
+	FEquation contributes
+    	this when fName != null
+    to FClass.baseNodes() for myFClass();
+		
+		
+		
     syn lazy int FClass.numScalarEquationsAtInitialization() {
         int res = 0;
         for (FAbstractEquation e : equations())
@@ -3650,6 +3670,19 @@ aspect FlatDiagnostics {
         }
         return sb.toString();
     }
+    
+    
+    public String FClass.sourceDiagnostics(){		//v2
+    	StringBuilder sb = new StringBuilder();
+    	String fName;
+    	String dir = System.getProperty("user.dir");
+    	
+    	sb.append(htmlSourcePrettyPrint(""));
+    		
+    	return sb.toString();
+    	
+    }
+    
     
     public Set<FVariable> FVariable.directDependencies() {
         Set<FVariable> res = new LinkedHashSet<FVariable>();

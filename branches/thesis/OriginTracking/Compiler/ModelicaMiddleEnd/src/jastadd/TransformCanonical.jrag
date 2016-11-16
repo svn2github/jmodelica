@@ -285,6 +285,7 @@ aspect TransformCanonical {
                 sourcePrettyPrint(out, "");
                 htmlSourcePrettyPrint(htmlOut, "");
                 out.close();
+                htmlOut.close();
             } catch (IOException e) {
                 log.warning("Failed to write step info to file " + file);
             }
@@ -1390,8 +1391,8 @@ aspect TransformCanonical {
                         generate = true;
                     
                     if (generate) {
-                        FExp lhs = fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp();
-                        FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp().fullCopy() : fv.type().zeroLiteral();
+                        FExp lhs = fv.setLocationOf(fv.isDiscrete() ? fv.createFPreExp() : fv.createUseExp());
+                        FExp rhs = fv.setLocationOf(fv.startAttributeSet() ? fv.startAttributeExp().fullCopy() : fv.type().zeroLiteral());
                         addFInitialEquation(new FEquation(lhs, rhs));
                     }
                 }
