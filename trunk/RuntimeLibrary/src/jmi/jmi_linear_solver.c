@@ -575,7 +575,7 @@ static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_
 
 /* L (sparse, tringular) x (sparse) = B (sparse) */
 static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
-    size_t i, B_p, L_p;
+    jmi_int_t i, B_p, L_p;
     
     for (i = 0; i < nz_size; i++) { work[nz_pattern[i]] = 0.0; }
     
@@ -584,7 +584,7 @@ static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, 
     }
     
     for (i = 0; i < nz_size; i++) {
-        size_t col_L = nz_pattern[i];
+        jmi_int_t col_L = nz_pattern[i];
         double val;
         
         /* if (work[col_L] == 0.0) { continue; } */
@@ -602,10 +602,10 @@ static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, 
 
 /* C (dense) += A (sparse) */
 static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, double *C) {
-    size_t col, p;
+    jmi_int_t col, p;
 
     for (col = 0 ; col < A->nbr_cols ; col++) {
-        size_t col_ind = A->nbr_cols*col;
+        jmi_int_t col_ind = A->nbr_cols*col;
         for (p = A->col_ptrs[col] ; p < A->col_ptrs[col+1] ; p++) {
             C[col_ind+A->row_ind[p]] += A->x[p];
         }
@@ -615,14 +615,14 @@ static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A
 
 /* C (dense) = -A (sparse)*B (sparse) */
 static int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C) {
-    size_t B_col, B_p, p;
+    jmi_int_t B_col, B_p, p;
 
     for (B_col = 0; B_col < B->nbr_cols; B_col++) {
-        size_t col_ind = A->nbr_rows*B_col;
+        jmi_int_t col_ind = A->nbr_rows*B_col;
         
         for (B_p = B->col_ptrs[B_col]; B_p < B->col_ptrs[B_col+1]; B_p++) {
             double val = B->x[B_p];
-            size_t col = B->row_ind[B_p];
+            jmi_int_t col = B->row_ind[B_p];
             
             for (p = A->col_ptrs[col]; p < A->col_ptrs[col+1]; p++) {
                 C[col_ind + A->row_ind[p]] -=  A->x[p]*val;
@@ -688,8 +688,8 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
 
 static int compare( const void* a, const void* b)
 {
-     size_t int_a = * ( (size_t*) a );
-     size_t int_b = * ( (size_t*) b );
+     jmi_int_t int_a = * ( (jmi_int_t*) a );
+     jmi_int_t int_b = * ( (jmi_int_t*) b );
 
      if ( int_a == int_b ) return 0;
      else if ( int_a < int_b ) return -1;
@@ -768,7 +768,7 @@ void jmi_linear_solver_sparse_delete(jmi_block_solver_t* block) {
     
     if (Jsp != NULL) {
         if (Jsp->nz_patterns != NULL) {
-            size_t col;
+            jmi_int_t col;
             for (col = 0; col < Jsp->A12->nbr_cols; col++) {
                 free(Jsp->nz_patterns[col]);
             }
@@ -805,12 +805,12 @@ int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
     }
     /* Jsp->L = cs_spalloc(dim[2], dim[1], dim[0], 1, 0); */
     Jsp->L = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->L->col_ptrs)),  JMI_BLOCK_JACOBIAN_L_COLPTR);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->L->col_ptrs),  JMI_BLOCK_JACOBIAN_L_COLPTR);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for L) in <block: %s> failed.", block->label);
         return -1;
     }
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->L->row_ind)),  JMI_BLOCK_JACOBIAN_L_ROWIND);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->L->row_ind),  JMI_BLOCK_JACOBIAN_L_ROWIND);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for L) in <block: %s> failed.", block->label);
         return -1;
@@ -823,12 +823,12 @@ int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
     }
     /* Jsp->A12 = cs_spalloc(dim[2], dim[1], dim[0], 1, 0); */
     Jsp->A12 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A12->col_ptrs)),  JMI_BLOCK_JACOBIAN_A12_COLPTR);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A12->col_ptrs),  JMI_BLOCK_JACOBIAN_A12_COLPTR);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A12) in <block: %s> failed.", block->label);
         return -1;
     }
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A12->row_ind)),  JMI_BLOCK_JACOBIAN_A12_ROWIND);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A12->row_ind),  JMI_BLOCK_JACOBIAN_A12_ROWIND);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A12) in <block: %s> failed.", block->label);
         return -1;
@@ -841,12 +841,12 @@ int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
     }
     /* Jsp->A21 = cs_spalloc(dim[2], dim[1], dim[0], 1, 0); */
     Jsp->A21 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A21->col_ptrs)),  JMI_BLOCK_JACOBIAN_A21_COLPTR);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A21->col_ptrs),  JMI_BLOCK_JACOBIAN_A21_COLPTR);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A21) in <block: %s> failed.", block->label);
         return -1;
     }
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A21->row_ind)),  JMI_BLOCK_JACOBIAN_A21_ROWIND);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A21->row_ind),  JMI_BLOCK_JACOBIAN_A21_ROWIND);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A21) in <block: %s> failed.", block->label);
         return -1;
@@ -859,12 +859,12 @@ int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
     }
     /* Jsp->A22 = cs_spalloc(dim[2], dim[1], dim[0], 1, 0); */
     Jsp->A22 = jmi_linear_solver_create_sparse_matrix(dim[2], dim[1], dim[0]);
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A22->col_ptrs)),  JMI_BLOCK_JACOBIAN_A22_COLPTR);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A22->col_ptrs),  JMI_BLOCK_JACOBIAN_A22_COLPTR);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian column pointers (for A22) in <block: %s> failed.", block->label);
         return -1;
     }
-    info = block->Jacobian_structure(block->problem_data,NULL, (jmi_int_t**)(&(Jsp->A22->row_ind)),  JMI_BLOCK_JACOBIAN_A22_ROWIND);
+    info = block->Jacobian_structure(block->problem_data,NULL, &(Jsp->A22->row_ind),  JMI_BLOCK_JACOBIAN_A22_ROWIND);
     if (info) {
         jmi_log_node(block->log, logError, "JacobianSparsity", "The method to retrieve the Jacobian row indices (for A22) in <block: %s> failed.", block->label);
         return -1;
