@@ -228,4 +228,25 @@ typedef struct jmi_matrix_sparse_csc_t {
     double *x;         /* Data values (size nnz) */
 } jmi_matrix_sparse_csc_t;
 
+/**
+ * \brief Allocates a jmi_matrix_sparse_csc_t instance.
+ *
+ * @param rows Number of rows in the matrix.
+ * @param cols Number of columns in the matrix.
+ * @param nnz Number of structural non-zeros in the matrix.
+ * @return An instance of jmi_matrix_sparse_csc_t.
+  */
+jmi_matrix_sparse_csc_t *jmi_linear_solver_create_sparse_matrix(size_t rows, size_t cols, size_t nnz);
+
+/**
+ * \brief Destroy a jmi_matrix_sparse_csc_t instance.
+ *
+ * @param A jmi_matrix_sparse_csc_t instance.
+ * @param method A jmi_ode_method_t struct. 
+ * @param step_size The step size for the mehtod.
+ * @param rel_tol The relative tolerance for the method.
+ * @return Error code.
+  */
+void jmi_linear_solver_delete_sparse_matrix(jmi_matrix_sparse_csc_t *A);
+
 #endif

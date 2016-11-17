@@ -573,8 +573,9 @@ static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_
     return 0;
 }
 
+/* L (sparse, tringular) x (sparse) = B (sparse) */
 static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
-    jmi_int_t i, B_p, L_p;
+    size_t i, B_p, L_p;
     
     for (i = 0; i < nz_size; i++) { work[nz_pattern[i]] = 0.0; }
     
@@ -586,9 +587,11 @@ static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, 
         size_t col_L = nz_pattern[i];
         double val;
         
+        /* if (work[col_L] == 0.0) { continue; } */
+        
         work[col_L] /= L->x[L->col_ptrs[col_L]];
         val = work[col_L];
-        
+
         for (L_p = L->col_ptrs[col_L]+1; L_p < L->col_ptrs[col_L+1]; L_p++) {
             work[L->row_ind[L_p]] -= L->x[L_p]*val; 
         }
@@ -691,27 +694,6 @@ static int compare( const void* a, const void* b)
      if ( int_a == int_b ) return 0;
      else if ( int_a < int_b ) return -1;
      else return 1;
-}
-
-jmi_matrix_sparse_csc_t *jmi_linear_solver_create_sparse_matrix(size_t rows, size_t cols, size_t nnz)
-{
-    jmi_matrix_sparse_csc_t *A = calloc(1, sizeof(jmi_matrix_sparse_csc_t));
-    if (!A) { return NULL; }
-    A->type.type = JMI_MATRIX_SPARSE_CSC;
-    A->nbr_rows = rows;
-    A->nbr_cols = cols;
-    A->nnz = nnz;
-    A->col_ptrs = calloc(cols+1, sizeof(size_t));
-    A->row_ind = calloc(nnz, sizeof(size_t));
-    A->x = calloc(nnz, sizeof(double));
-    return A;
-}
-
-void jmi_linear_solver_delete_sparse_matrix(jmi_matrix_sparse_csc_t *A) {
-    free(A->col_ptrs);
-    free(A->row_ind);
-    free(A->x);
-    free(A);
 }
 
 int jmi_linear_solver_sparse_setup(jmi_block_solver_t* block) {
