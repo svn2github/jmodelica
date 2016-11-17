@@ -942,7 +942,7 @@ aspect Flattening {
         if (keepSizeExpressions) {
             for (int i = 0; i < exps.length; i++) {
                 if (exps[i] != null && !(exps[i] instanceof FColonSizeExp) && 
-                        (size[i] == Size.UNKNOWN || !variability(i).knownParameterOrLess())) {
+                        (size[i] == Size.UNKNOWN || !exps[i].inFunction())) {
                     res.exps[i] = context.affixExpression(exps[i].flatten(prefix));
                 }
             }

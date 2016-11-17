@@ -177,4 +177,54 @@ int model_init_eval_parameters_base(jmi_t* jmi) {
 ")})));
 end UnknownSizeInEquation4;
 
+model PrimitiveInRecord1
+    record R
+        parameter Integer n = 3;
+        Real[n] x = 1:3;
+    end R;
+    
+    function f
+        input Real x;
+        output Real y = x;
+    protected
+        R r;
+    algorithm
+        annotation(Inline=false);
+    end f;
+    
+    Real y = f(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="PrimitiveInRecord1",
+            description="",
+            inline_functions="none",
+            template="$C_functions$",
+            generatedCode="
+void func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
+    JMI_RECORD_STATIC(R_0_r, r_v)
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
+    r_v->x = tmp_1;
+    y_v = x_v;
+    r_v->n = 3;
+    jmi_array_ref_1(r_v->x, 1) = 1;
+    jmi_array_ref_1(r_v->x, 2) = 2;
+    jmi_array_ref_1(r_v->x, 3) = 3;
+    JMI_RET(GEN, y_o, y_v)
+    JMI_DYNAMIC_FREE()
+    return;
+}
+
+jmi_ad_var_t func_CCodeGenArrayTests_PrimitiveInRecord1_f_exp0(jmi_ad_var_t x_v) {
+    JMI_DEF(REA, y_v)
+    func_CCodeGenArrayTests_PrimitiveInRecord1_f_def0(x_v, &y_v);
+    return y_v;
+}
+
+")})));
+end PrimitiveInRecord1;
+
 end CCodeGenArrayTests;
