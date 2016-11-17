@@ -96,6 +96,19 @@ aspect Environment {
             return env;
         }
 
+        /**
+         * Find the first modification matching the given name, or null if none are found.
+         */
+        public InstModification find(String name) {
+            for (InstModification im : this) {
+                InstModification match = im.matchInstModification(name);
+                if (match != null) {
+                    return match;
+                }
+            }
+            return null;
+        }
+
         /** 
          * Creates a new environment that is a copy of this one, filtered for a named class or component.
          * 

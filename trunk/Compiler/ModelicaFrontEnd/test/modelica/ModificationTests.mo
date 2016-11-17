@@ -3321,4 +3321,112 @@ end ModificationTests.ModificationFlattening1;
 end ModificationFlattening1;
 
 
+
+model SupersededModification1
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        parameter Real y = x[2];
+    end A;
+    
+    A a(n = 1, y = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification1",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification1
+ structural parameter Integer a.n = 1 /* 1 */;
+ structural parameter Real a.x[1] = {1} /* { 1 } */;
+ parameter Real a.y = 2 /* 2 */;
+end ModificationTests.SupersededModification1;
+")})));
+end SupersededModification1;
+
+
+model SupersededModification2
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        parameter Real y;
+    end A;
+    
+    model B
+        A a(y = a.x[2]);
+    end B;
+    
+    B b(a(n = 1, y = 2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification2",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification2
+ structural parameter Integer b.a.n = 1 /* 1 */;
+ structural parameter Real b.a.x[1] = {1} /* { 1 } */;
+ parameter Real b.a.y = 2 /* 2 */;
+end ModificationTests.SupersededModification2;
+")})));
+end SupersededModification2;
+
+
+model SupersededModification3
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        Real y(start = x[2]);
+    equation
+        der(y) = -time;
+    end A;
+    
+    A a(n = 1, y(start = 2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification3",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification3
+ structural parameter Integer a.n = 1 /* 1 */;
+ structural parameter Real a.x[1] = {1} /* { 1 } */;
+ Real a.y(start = 2);
+equation
+ der(a.y) = - time;
+end ModificationTests.SupersededModification3;
+")})));
+end SupersededModification3;
+
+
+model SupersededModification4
+    model A
+        parameter Integer n = 2;
+        parameter Real x[n] = 1:n;
+        Real y;
+    end A;
+    
+    model B
+        A a(y(start = a.x[2]));
+    equation
+        der(a.y) = -time;
+    end B;
+    
+    B b(a(n = 1, y(start = 2)));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="SupersededModification4",
+            description="Index out of bounds in modification that has been superseded",
+            flatModel="
+fclass ModificationTests.SupersededModification4
+ structural parameter Integer b.a.n = 1 /* 1 */;
+ structural parameter Real b.a.x[1] = {1} /* { 1 } */;
+ Real b.a.y(start = 2);
+equation
+ der(b.a.y) = - time;
+end ModificationTests.SupersededModification4;
+")})));
+end SupersededModification4;
+
 end ModificationTests;
