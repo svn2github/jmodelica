@@ -76,6 +76,40 @@ class Test_When:
         assert res.final("nextTime2") == 3.0
         assert res.final("nextTime3") == 8.0
         
+class Test_Sparse_Linear_Block:
+    @classmethod
+    def setUpClass(cls):
+
+        _cc_name = compile_fmu("Modelica.Mechanics.Rotational.Examples.CoupledClutches", 
+                                version=1.0,
+                                compiler_options={"generate_sparse_block_jacobian": True})
+    
+        file_name = os.path.join(get_files_path(), 'Modelica', 'TearingTests.mo')
+
+        _in3_name = compile_fmu("TearingTests.TearingTest1", file_name, version=1.0)
+    
+    @testattr(stddist = True)
+    def test_cc(self):
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        
+        res1 = model.simulate()
+        
+        model = load_fmu("Modelica_Mechanics_Rotational_Examples_CoupledClutches.fmu")
+        model.set("_le_sparse_jacobian_threshold", 1)
+        
+        res2 = model.simulate()
+        
+        #Assert that sparse handling has no impact on the number of steps
+        assert res1.solver.statistics["nsteps"] == res2.solver.statistics["nsteps"]
+        nose.tools.assert_almost_equal(res1.final("J1.w"), res2.final("J1.w"), 3)
+        
+    @testattr(stddist = True)
+    def test_no_sparse_generation(self):
+        model = load_fmu("TearingTests_TearingTest1.fmu")
+        model.set("_le_sparse_jacobian_threshold", 1)
+
+        nose.tools.assert_raises(FMUException, model.simulate)
+        
 class Test_Sensitivities_FMI2:
     @classmethod
     def setUpClass(cls):

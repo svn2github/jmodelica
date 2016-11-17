@@ -599,10 +599,10 @@ static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, 
 
 /* C (dense) += A (sparse) */
 static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, double *C) {
-    int col, p;
+    size_t col, p;
 
     for (col = 0 ; col < A->nbr_cols ; col++) {
-        int col_ind = A->nbr_cols*col;
+        size_t col_ind = A->nbr_cols*col;
         for (p = A->col_ptrs[col] ; p < A->col_ptrs[col+1] ; p++) {
             C[col_ind+A->row_ind[p]] += A->x[p];
         }
@@ -611,7 +611,7 @@ static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A
 }
 
 /* C (dense) = -A (sparse)*B (sparse) */
-static int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C, double *work_b) {
+static int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C) {
     size_t B_col, B_p, p;
 
     for (B_col = 0; B_col < B->nbr_cols; B_col++) {
@@ -671,7 +671,7 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
         memset(block->J->data, 0, sizeof(double)*block->n*block->n);
         
         /* Compute A21L^(-1)A12 */
-        jmi_linear_solver_sparse_multiply(Jsp->A21, Jsp->M1, block->J->data, Jsp->work_x);
+        jmi_linear_solver_sparse_multiply(Jsp->A21, Jsp->M1, block->J->data);
         /* Compute A22 - A21L^(-1)A12 */
         jmi_linear_solver_sparse_add_inplace(Jsp->A22, block->J->data);
     } else {
