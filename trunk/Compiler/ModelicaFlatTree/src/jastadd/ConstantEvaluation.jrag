@@ -2767,7 +2767,9 @@ aspect ConstantEvaluation {
             return cevalNoBExpCell(evaluator, allInstComponentDecls());
         }
     }
-    
+
+    eq InstExternalObject.cevalNoBExp(VariableEvaluator evaluator, Index i) = CValue.UNKNOWN;
+
     public void InstComponentDecl.cevalNoBExpArray(VariableEvaluator evaluator, InstRecord top, CValueArray a, int ndims) {
         if (ndims > 0) {
             for (InstComponentDecl icd : allInstComponentDecls()) {

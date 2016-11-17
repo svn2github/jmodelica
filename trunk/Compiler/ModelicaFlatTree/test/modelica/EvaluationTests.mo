@@ -2393,6 +2393,53 @@ end EvaluationTests.EvalNoBinding4;
 ")})));
 end EvalNoBinding4;
 
+model EvalNoBinding5
+    class A
+        extends ExternalObject;
+        
+        function constructor
+            input Real b;
+            output A a;
+            external;
+        end constructor;
+        
+        function destructor
+            input A a;
+            external;
+        end destructor;
+    end A;
+    
+    function f
+        input A a;
+        output Integer b;
+        external;
+    end f;
+    
+    parameter A a;
+    parameter Integer n = f(a);
+    Real x[n] = (1:n) * time;
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="EvalNoBinding5",
+            description="Constant eval of external object lacking binding exp",
+            errorMessage="
+3 errors found:
+
+Error at line 2416, column 10, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+  Missing binding expression for external object
+
+Error at line 2419, column 27, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+  Could not evaluate binding expression for structural parameter 'n': 'f(a)'
+    in function 'EvaluationTests.EvalNoBinding5.f'
+    Failed to evaluate external function 'f', external function cache unavailable
+
+Error at line 2420, column 12, in file 'Compiler/ModelicaFlatTree/test/modelica/EvaluationTests.mo':
+  Could not evaluate array size expression: n
+")})));
+end EvalNoBinding5;
+
+
 
 model EvalColonSizeCell
     function f
