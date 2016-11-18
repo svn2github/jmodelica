@@ -1955,9 +1955,9 @@ parameter equation
 
 public
  function NameTests.ConstantLookup36.f
-  NameTests.ConstantLookup36.B[:] a;
   input Integer i;
   output Real x;
+  NameTests.ConstantLookup36.B[:] a;
  algorithm
   init a as NameTests.ConstantLookup36.B[2];
   a[1].b[1] := 1;

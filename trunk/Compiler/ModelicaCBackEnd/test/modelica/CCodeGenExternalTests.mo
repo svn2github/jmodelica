@@ -1171,9 +1171,9 @@ jmi_ad_var_t func_CCodeGenExternalTests_ExternalConstant1_f2_exp1(jmi_ad_var_t x
 
 void func_CCodeGenExternalTests_ExternalConstant1_f1_def0(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
-    JMI_DEF(REA, y_v)
     extern double f(double, double, double*);
     c_v = 3;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
@@ -1192,9 +1192,9 @@ jmi_ad_var_t func_CCodeGenExternalTests_ExternalConstant1_f1_exp0(jmi_ad_var_t x
 
 void func_CCodeGenExternalTests_ExternalConstant1_f2_def1(jmi_ad_var_t x_v, jmi_ad_var_t* y_o) {
     JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, y_v)
     JMI_DEF(REA, c_v)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1)
-    JMI_DEF(REA, y_v)
     extern double f2(double, double, double*, size_t);
     c_v = 3;
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, d_a, 1, 1, 1)
