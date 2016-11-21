@@ -720,6 +720,7 @@ aspect TransformCanonical {
                     FIdUseExp lhs = fv.isPreVariable() ? fv.createFPreExp() : fv.createUseExp();
                     FExp rhs = fv.startAttributeSet() ? fv.startAttributeExp() : fv.type().zeroLiteral();
                     fe = new FEquation(lhs, rhs);
+                    fe.setLocationNoTree(fv);
                     addFInitialEquation(fe);
                 }
                 g.addEquations(Collections.singletonList(fe), VAR_TYPES_ALL);
@@ -1752,6 +1753,7 @@ aspect TransformCanonical {
             if (myFV().isFVariable() && myFV().isAlias()) {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
+                new_exp.setLocationNoTree(this);
                 new_exp.setOriginalVariable(this, fv);
                 new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 

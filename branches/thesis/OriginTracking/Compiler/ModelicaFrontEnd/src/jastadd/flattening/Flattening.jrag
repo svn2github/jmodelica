@@ -2747,7 +2747,7 @@ aspect FlatExpressions {
     }
 
     public FFunctionCall InstFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
-        return new FFunctionCall(name, args, type);
+        return this.setLocationOf(new FFunctionCall(name, args, type));
     }
     
     public FFunctionCall InstPartialFunctionCall.createFFunctionCall(FIdUse name, List args, FType type) {
