@@ -21,7 +21,8 @@ import java.util.Collections;
 
 aspect InstVariability {
 
-    syn lazy FTypePrefixVariability InstComponentDecl.definedVariability() = localDefinedVariability().combineDown(overrideVariability());
+    syn lazy FTypePrefixVariability InstComponentDecl.definedVariability() = 
+        overrideVariability(localDefinedVariability(), bExpVariability());
 
     syn lazy FTypePrefixVariability InstComponentDecl.localDefinedVariability() {
         ComponentDecl cd = getComponentDecl();
@@ -33,12 +34,23 @@ aspect InstVariability {
     eq InstReplacingRecord.noDefinedVariability()    = getOriginalInstComponent().localDefinedVariability();
     eq InstReplacingPrimitive.noDefinedVariability() = getOriginalInstComponent().localDefinedVariability();
 
-    inh FTypePrefixVariability InstNode.overrideVariability();
-    eq Root.getChild().overrideVariability()                  = fContinuous();
-    eq InstClassDecl.getChild().overrideVariability()         = fContinuous();
-    eq InstComponentDecl.getChild().overrideVariability()     = definedVariability();
-    eq InstRecordConstructor.getChild().overrideVariability() = variability();
-    
+    inh FTypePrefixVariability InstNode.overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar);
+    eq InstBaseNode.getChild().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var;
+    eq Root.getChild().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var;
+    eq InstPrimitive.getChild().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var;
+    eq InstComponentDecl.getInstComponentDecl().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var.combineDown(definedVariability());
+    eq InstComponentDecl.getInstExtends().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var.combineDown(definedVariability());
+    eq InstRecordConstructor.getInstComponentDecl().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var.combineDown(bexpVar);
+    eq InstRecordConstructor.getInstExtends().overrideVariability(
+            FTypePrefixVariability var, FTypePrefixVariability bexpVar) = var.combineDown(bexpVar);
+
     syn boolean InstComponentDecl.isConstant()   = variability().constantVariability();
     syn boolean InstComponentDecl.isParameter()  = variability().parameterVariability();
     syn boolean InstComponentDecl.isDiscrete()   = variability().discreteVariability();
@@ -55,11 +67,7 @@ aspect InstVariability {
     
     eq InstAssignable.calcVariability() {
         FTypePrefixVariability v =  super.calcVariability();
-        if (v.constantVariability()) {
-            if (inFunction()) {
-                v = ASTNode.fDiscrete();
-            }
-        } else if (v.parameterVariability()) {
+        if (v.parameterVariability()) {
             
             if (isSetAsInitial()) {
                 v = fInitialParameter();
@@ -248,22 +256,6 @@ aspect InstVariability {
         return variability;
     }
 
-}
-
-aspect InstExpVariability {
-    eq InstFunctionCall.expVariability()      = InstFunctionArgument.variability(getArgs());
-    eq InstRecordConstructor.expVariability() = InstFunctionArgument.variability(getArgs());
-    
-    public static FTypePrefixVariability InstFunctionArgument.variability(List<InstFunctionArgument> args) {
-        FTypePrefixVariability total = fConstant();
-        for (InstFunctionArgument arg : args) {
-            total = total.combine(arg.variability().combine());
-        }
-        return total;
-    }
-    
-    syn FTypePrefixVariability InstFunctionArgument.variability() = isOKArg() ? getFExp().variability() : fConstant();
-    eq InstDefaultArgument.variability()                          = fConstant();
 }
 
 

@@ -263,29 +263,20 @@ model FunctionFlatten4
  Real x = TestFunctionWithConst(2);
 
     annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
+        FlatteningTestCase(
             name="FunctionFlatten4",
             description="Flattening functions: function containing constants",
             variability_propagation=false,
-            inline_functions="none",
             flatModel="
 fclass FunctionTests.FunctionFlatten4
- Real x;
-equation
- x = FunctionTests.TestFunctionWithConst(2);
+ Real x = FunctionTests.TestFunctionWithConst(2);
 
 public
  function FunctionTests.TestFunctionWithConst
   input Real x;
   output Real y;
-  Real A;
-  Real B;
-  Real C;
  algorithm
-  A := 1;
-  B := 2;
-  C := 3;
-  y := x + A + B + C;
+  y := x + 1.0 + 2.0 + 3.0;
   return;
  end FunctionTests.TestFunctionWithConst;
 
@@ -1091,13 +1082,13 @@ equation
 
 public
  function FunctionTests.FunctionFlatten23.f
+  FunctionTests.FunctionFlatten23.R r;
   input Real x;
   output Real y;
-  FunctionTests.FunctionFlatten23.R r;
  algorithm
   r.n := 1;
   r.a[1] := 3.14;
-  for i in 1:r.n loop
+  for i in 1:1 loop
    y := r.a[i] * x;
   end for;
   return;
@@ -15798,112 +15789,5 @@ public
 end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
-
-model ConstantInFunction1
-    function f
-        constant input Real x = 0;
-        output Real y;
-        algorithm
-    end f;
-    
-    Real y = f(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantInFunction1",
-            description="Constant input",
-            errorMessage="
-1 errors found:
-
-Error at line 15794, column 14, in file '...', CONSTANT_INPUT:
-  Function input may not be constant
-
-")})));
-end ConstantInFunction1;
-
-model ConstantInFunction2
-    record R
-        constant Real x = 0;
-    end R;
-    
-    function f
-        input R r;
-        output Real y = r.x;
-        algorithm
-    end f;
-    
-    R r(x=2);
-    Real y = f(r);
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ConstantInFunction2",
-            description="",
-            flatModel="
-fclass FunctionTests.ConstantInFunction2
- constant Real y = 2;
-end FunctionTests.ConstantInFunction2;
-")})));
-end ConstantInFunction2;
-
-
-model ConstantInFunction3
-    package P1
-        record R
-            constant Real x = 0;
-        end R;
-        function f
-            input R r;
-            output Real y = r.x;
-        algorithm
-        end f;
-        
-        constant R r;
-        
-        model M
-            Real y = f(r);
-        end M;
-    end P1;
-    
-    package P2
-        extends P1(r(x=2));
-    end P2;
-    
-    P2.M m;
-    
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="ConstantInFunction3",
-            description="",
-            flatModel="
-fclass FunctionTests.ConstantInFunction3
- constant Real m.y = 2;
-end FunctionTests.ConstantInFunction3;
-
-")})));
-end ConstantInFunction3;
-
-model ConstantInFunction4
-    function f
-        input Real x;
-        output Real y = z;
-        constant Real z = x;
-        algorithm
-    end f;
-    
-    Real y = f(time);
-
-    annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
-            name="ConstantInFunction1",
-            description="Constant input",
-            errorMessage="
-1 errors found:
-
-Error at line 15890, column 27, in file '...':
-  Could not evaluate binding expression for constant 'z': 'x'
-
-")})));
-end ConstantInFunction4;
 
 end FunctionTests;

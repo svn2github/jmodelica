@@ -2505,17 +2505,11 @@ aspect FlatExpressions {
         }
     }
     
-    public FExp FReductionExp.flatten(FQName prefix) {
-        if (isArray() && !size().isUnknown()) {
-            return getArray().buildFlattened(prefix, this);
-        }
+    public FReductionExp FReductionExp.flatten(FQName prefix) {
         return (FReductionExp) createNode(getFExp().flatten(prefix));
     }
     
     public FExp FIterExp.flatten(FQName prefix) {
-        if (!size().isUnknown()) {
-            return getArray().buildFlattened(prefix, this);
-        }
         List<CommonForIndex> fil = new List<CommonForIndex>();
         for (CommonForIndex fi : getForIndexList())
             fil.add(fi.flatten(prefix));
