@@ -915,6 +915,10 @@ public class ModelicaCompiler {
             FileOutputStream dest = new FileOutputStream(unitFile);
             ZipOutputStream out = new ZipOutputStream(new BufferedOutputStream(dest));
             out.setMethod(ZipOutputStream.DEFLATED);
+            if(!options.getBooleanOption("copy_source_files_to_fmu")) {
+            	recursiveDelete(sourceDir);
+            	sourceDir = null;
+            }
             zipDir(outDir, out);
             out.close();
         } catch (CompilationAbortedException e) {
@@ -970,6 +974,7 @@ public class ModelicaCompiler {
     }
 
     private static final int ZIP_BUFFER_SIZE = 2048;
+    
 
     /**
      * Write all files in a directory and its subdirectories to a zip stream.

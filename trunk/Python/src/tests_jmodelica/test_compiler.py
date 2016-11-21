@@ -22,6 +22,7 @@
 import os, os.path
 import sys
 import shutil
+import zipfile
 
 import nose
 import nose.tools
@@ -465,6 +466,29 @@ class Test_Compiler_functions:
         assert os.access(fmuname, os.F_OK) == True, \
                fmuname+" was not created."
         os.remove(fmuname)
+
+    @testattr(stddist = True)
+    def test_no_source_files_in_fmu(self):
+        """
+        Test that no c source files are added to the fmu when copy_source_files_to_fmu is false
+        """
+        fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], compiler_options={'copy_source_files_to_fmu':False})
+        zf = zipfile.ZipFile(fmuname, 'r')
+        includedFiles = zf.namelist()
+        for f in includedFiles:
+            assert f != 'sources/', 'Source files should not be present when copy_source_files_to_fmu is set to false'
+            assert '.c' not in f, f + ' should not be present when copy_source_files_to_fmu is set to false'
+            
+    @testattr(stddist = True)
+    def test_source_files_in_fmu(self):
+        """
+        Test that c source files are added to the fmu when copy_source_files_to_fmu is true
+        """
+        fmuname = compile_fmu("BouncingBall", [os.path.join(get_files_path(), 'Modelica', 'BouncingBall.mo')], compiler_options={'copy_source_files_to_fmu':True})
+        zf = zipfile.ZipFile(fmuname, 'r')
+        includedFiles = zf.namelist()
+        assert 'sources/' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
+        assert 'sources/BouncingBall.c' in includedFiles, 'Source files should be present when copy_source_files_to_fmu is set to true'
 
 # 64-bit FMUs no longer supported by SDK
 #    @testattr(windows = True)

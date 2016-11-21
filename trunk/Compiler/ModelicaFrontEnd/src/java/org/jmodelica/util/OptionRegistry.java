@@ -706,6 +706,12 @@ abstract public class OptionRegistry {
              Category.uncommon,
              4,
              "The maximum number of processes used during c-code compilation."),
+        COPY_SOURCE_FILES_TO_FMU
+        	("copy_source_files_to_fmu",
+        	OptionType.compiler,
+        	Category.user,
+        	false,
+        	"If enabled, the generated source files will be copied to the FMU."),
         CC_EXTRA_FLAGS_APPLIES_TO
             ("cc_extra_flags_applies_to",
             OptionType.compiler,
