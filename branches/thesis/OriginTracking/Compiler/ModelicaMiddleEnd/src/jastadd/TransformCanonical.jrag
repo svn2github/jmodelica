@@ -276,14 +276,16 @@ aspect TransformCanonical {
             TRANSFORMATION_STEP_HTML_DIR.mkdir();
             String fileName = String.format("%02d_%s.mof", completedTransformationSteps, lastCompletedTransformationStep);
             String htmlFileName = String.format("%02d_%s.html", completedTransformationSteps, lastCompletedTransformationStep);
+            String cssFileName = "style.css";
             File file = new File(TRANSFORMATION_STEP_DIR, fileName);
             File htmlFile = new File(TRANSFORMATION_STEP_HTML_DIR, htmlFileName);
+            File cssFile = new File(TRANSFORMATION_STEP_HTML_DIR, cssFileName);
             log.debug("Writing flat tree after step " + lastCompletedTransformationStep + " to " + fileName);
             try {
                 CodeStream out = new CodeStream(file);
                 CodeStream htmlOut = new CodeStream(htmlFile);
                 sourcePrettyPrint(out, "");
-                htmlSourcePrettyPrint(htmlOut, "");
+                htmlSourcePrettyPrint(htmlOut, "", cssFile);
                 out.close();
                 htmlOut.close();
             } catch (IOException e) {

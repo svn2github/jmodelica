@@ -1,3 +1,5 @@
+import java.io.File;
+
 import beaver.Symbol;
 
 //fabstractequaton
@@ -35,14 +37,22 @@ aspect HtmlSourcePrettyPrint {
 	public void ASTNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
-	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
-		//str.println("<html>\n<head>\n<title>Derp</title>\n");
-		str.println("<html>\n<head>\n");
-		str.println(HtmlSourcePrettyPrinter.htmlStyle());
-		str.println("</head><body>");
-		htmlSourcePrettyPrint(new HtmlSourcePrettyPrinter(), str, indent);
-		str.println("</body>\n</html>");
+	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent, File css) {
 		
+		str.println("<html>\n<head>\n");
+		str.println("<link rel=\"stylesheet\" href=\"" + css.getName() + "\">\n");
+		str.println("</head>\n<body>");
+		HtmlSourcePrettyPrinter p = new HtmlSourcePrettyPrinter();
+		htmlSourcePrettyPrint(p, str, indent);
+		str.println("</body>\n</html>");
+		try{
+			if(css != null){
+				CodeStream cssStr = new CodeStream(css);
+				cssStr.println(p.htmlStyle());
+			}
+	 	} catch (IOException e) {
+	 		//Do nothing
+	 	}
 	}
 	
 	/*public static String HtmlSourcePrettyPrinter.htmlStyle(){
@@ -61,7 +71,17 @@ aspect HtmlSourcePrettyPrint {
 		
 	}*/
 	
-	public static String HtmlSourcePrettyPrinter.htmlStyle(){
+	public String HtmlSourcePrettyPrinter.htmlStyle(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("s" + 0 + " {\n\t    background-color:rgba(255,0,0,0.5);\n}\n");
+		sb.append("s" + 1 + " {\n\t    background-color:rgba(0,255,0,0.5);\n}\n");
+		sb.append("s" + 2 + " {\n\t    background-color:rgba(0,0,255,0.5);\n}\n");
+		
+		return sb.toString();
+	}
+	
+	
+/*	public static String HtmlSourcePrettyPrinter.htmlStyle(){
 		StringBuilder sb = new StringBuilder();
 		sb.append("<style>\n");
 		for(Integer i = 0; i < 2; i++){
@@ -75,7 +95,7 @@ aspect HtmlSourcePrettyPrint {
 		sb.append("</style>\n");
 		return sb.toString();
 		
-	}
+	}*/
 	
 	
 	/**
@@ -135,7 +155,7 @@ aspect HtmlSourcePrettyPrint {
         
         if (getNumFFunctionDecl() > 0 || getNumFRecordDecl() > 0 || 
                 getNumFEnumDecl() > 0 || getNumFDerivedType() > 0) {
-            str.print("\n" + indent + "<b>public</b>\n");
+            str.print("\n" + indent + "<b>public</b><br>\n");
             p.print(getFFunctionDecls(), str, nextInd);
             p.print(getFRecordDecls(), str, nextInd);
             p.print(getFEnumDecls(), str, nextInd);
@@ -224,6 +244,21 @@ aspect HtmlSourcePrettyPrint {
 		((HtmlSourcePrettyPrinter)p).prevNode = null;
 	}
 	
+	public void FFunctionDecl.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+    	str.print(indent + "function " + name() + "<br>\n");
+    	getFFunctionVariables().prettyPrintWithIndent(p, str, p.indent(indent), ";<br>");
+    	p.print(getFAlgorithm(), str, indent);
+        getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";<br>\n");
+    	str.print(indent + "end " + name() + ";<br><br>\n\n");
+    }
+	
+    public void FAlgorithm.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
+		str.print(indent);
+		p.print(getType(),str,"");
+		str.print("algorithm<br>\n");
+		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";<br>");
+	}
+	
 	/*public void FEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		if(fName != null && p instanceof HtmlSourcePrettyPrinter){
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
@@ -276,7 +311,7 @@ aspect HtmlSourcePrettyPrint {
 	public String ASTNode.htmlSourcePrettyPrint(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		CodeStream str = new NotNullCodeStream(os);
-		htmlSourcePrettyPrint(str, indent);
+		htmlSourcePrettyPrint(str, indent, null);
 		return os.toString();
 	}
 }
