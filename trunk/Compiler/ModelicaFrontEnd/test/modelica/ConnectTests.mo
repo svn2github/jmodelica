@@ -2718,9 +2718,9 @@ fclass ConnectTests.StreamTest6
  Real a[2].c;
 equation
  a[1].a = time;
- a[2].a = 2 * a[1].a;
- a[1].c = -2 * (- time);
- a[2].c = -2 * (-2 * a[1].a);
+ a[2].a = 2 * time;
+ a[1].c = a[1].a * 2;
+ a[2].c = a[2].a * 2;
  x[1] = a[2].c * time;
  x[2] = a[2].c + time;
 end ConnectTests.StreamTest6;
@@ -2924,7 +2924,6 @@ equation
         TransformCanonicalTestCase(
             name="Cardinality7",
             description="cardinality(): array test as test of if expression",
-            eliminate_linear_equations=false,
             flatModel="
 fclass ConnectTests.Cardinality7
  structural parameter Integer n = 2 /* 2 */;

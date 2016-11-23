@@ -1,15 +1,3 @@
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
-
 /*
     Copyright (C) 2016 Modelon AB
 
@@ -27,337 +15,82 @@ import java.util.Set;
 */
 
 aspect eliminateLinearEquations {
-
     public class FClass {
-        private static final int ALIAS_SIZE = 1;
-
-        /**
-         *  <h1>Eliminate Linear Equations</h1>
-         *  <p>
-         *  Eliminates <i>simple</i> linear equations from a set of equations.
-         */
         public class eliminateLinearEquations extends Transformation {
-
+            
             public eliminateLinearEquations() {
                 super("eliminate_linear_equations");
             }
-
+            
             @Override
             public void perform() {
-                ArrayList<FAbstractEquation> equations = new ArrayList<FAbstractEquation>();
-                for (FAbstractEquation faq : getFAbstractEquations()) {
-                    equations.add(faq);
-                }
-
-                Set<FAbstractEquation> modified = new HashSet<FAbstractEquation>();
-                Map<FAbstractEquation, Map<String, Integer>> equationMap =
-                        new LinkedHashMap<FAbstractEquation, Map<String, Integer>>();
-                for (int i = 0; i < equations.size(); ++i) {
-                    FAbstractEquation src = equations.get(i);
-
-                    if (!src.isSimpleLinear()) {
+                Map<String, Collection<FAbstractEquation>> aliasesMap = new HashMap<String, Collection<FAbstractEquation>>();
+                for (FAbstractEquation eqn : getFAbstractEquations()) {
+                    if (eqn.containsActiveAnnotations()) {
                         continue;
                     }
-
-                    equationMap.put(src, src.coefficientMap());
-
-                    for (int j = i + 1; j < equations.size(); ++j) {
-                        FAbstractEquation dest = equations.get(j);
-
-                        if (modified.contains(dest) || !dest.isSimpleLinear()) {
-                            continue;
-                        }
-
-                        equationMap.put(dest, dest.coefficientMap());
-                        FAbstractEquation newEquation = null;
-                        if ((newEquation = removeAliasesFromEquations(equationMap, src, dest)) != null) {
-                            equations.set(j, newEquation);
-                            modified.add(newEquation);
-                        }
+                    FExp linearExp = eqn.simpleLinearExp();
+                    if (linearExp == null) {
+                        continue;
+                    }
+                    Collection<FAbstractEquation> aliases = aliasesMap.get(linearExp.toString());
+                    if (aliases == null) {
+                        aliases = new ArrayList<FAbstractEquation>();
+                        aliasesMap.put(linearExp.toString(), aliases);
+                    }
+                    aliases.add(eqn);
+                }
+                for (Collection<FAbstractEquation> aliases : aliasesMap.values()) {
+                    if (aliases.size() <= 1) {
+                        continue;
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    Iterator<FAbstractEquation> it = aliases.iterator();
+                    FAbstractEquation eqnToKeep = it.next();
+                    FExp firstAssignedExp = eqnToKeep.expAssignedFromSimpleLinearExp();
+                    log.verbose("Rewriting %d equations that all equal %s", aliases.size() - 1, eqnToKeep.simpleLinearExp());
+                    log.debug("  %s", firstAssignedExp);
+                    while (it.hasNext()) {
+                        FAbstractEquation eqn = it.next();
+                        FExp assignedExp = eqn.expAssignedFromSimpleLinearExp();
+                        log.debug("  %s", assignedExp);
+                        eqn.simpleLinearExp().replaceMe(firstAssignedExp.fullCopy());
                     }
                 }
+                change();
             }
-
-            /**
-             *  Removes an alias expression mutual for two equations.
-             *  
-             *  @param  equationMap
-             *          An equation map; each equation key maps to another map which maps the terms used in the
-             *          equation to their respective coefficients.
-             *  @param  source
-             *          The equation to compare against {@code dest}.
-             *  @param  dest
-             *          The equation to compare against {@code source}. This equation will be overwritten in case a
-             *          sub-expression is eliminated.
-             *  @return
-             *          The modified equation, {@code null} otherwise.
-             */
-            protected FAbstractEquation removeAliasesFromEquations(
-                    Map<FAbstractEquation, Map<String, Integer>> equationMap,
-                    FAbstractEquation source, FAbstractEquation dest) {
-
-                Map<String, Integer> coeffSource = equationMap.get(source);
-                Map<String, Integer> coeffDest   = equationMap.get(dest);
-
-                Set<String> mutual              = new LinkedHashSet<String>();
-                Set<String> uniqueSource        = new LinkedHashSet<String>();
-                Set<String> uniqueDest          = new LinkedHashSet<String>();
-
-                if (!coefficientSort(mutual, uniqueSource, uniqueDest, coeffSource.keySet(), coeffDest.keySet())) {
-                    return null;
-                }
-
-                String litKey = FLitExp.coeffKey;
-                String pivot = null;
-                for (String key : mutual) {
-                    if (!key.equals(litKey)) {
-                        pivot = key;
-                        break;
-                    }
-                }
-
-                if (pivot == null) {
-                    return null;
-                }
-                mutual.remove(pivot);
-
-                ArrayList<FExp> leftExps = new ArrayList<FExp>();
-                ArrayList<FExp> rightExps = new ArrayList<FExp>();
-
-                // Using FNegExp over absolute values instead of FDivExp avoids losing negations to flushing.
-                int c1 = coeffSource.get(pivot);
-                int c2 = coeffDest.get(pivot);
-                FExp coeff = newDivision(Math.abs(c2), Math.abs(c1));
-                if (c1 * c2 < 0) {
-                    coeff = new FNegExp(coeff);
-                }
-
-                /*
-                 * Put all constants on the same side.
-                 */
-                FExp constant = null;
-                if (c2 % c1 == 0) {
-                    constant = new FIntegerLitExp((c2 / c1) * coeffSource.get(litKey) - coeffDest.get(litKey));
-                } else {
-                    constant = new FSubExp(new FMulExp(coeff, new FIntegerLitExp(coeffSource.get(litKey))),
-                            new FIntegerLitExp(coeffDest.get(litKey)));
-                }
-
-                for (String key : uniqueDest) {
-                    leftExps.add(newTerm(coeffDest.get(key), key));
-                }
-                for (String key : uniqueSource) {
-                    rightExps.add(newTerm(coeffSource.get(key), key));
-                }
-
-                FExp lhs = FExp.createBalancedBinaryTree(new FAddExp(), leftExps);
-                FExp rhs = new FMulExp(coeff, addTree(rightExps));
-                rightExps.clear();
-
-                for (String key : mutual) {
-                    rightExps.add(new FMulExp(newDivision(c2 * coeffSource.get(key) - c1 * coeffDest.get(key),
-                            c1), newTerm(key)));
-                }
-
-                rhs = new FAddExp(addTree(rhs, rightExps), constant);
-                FAbstractEquation newEquation = new FEquation(new FNormalEquation(), lhs, rhs);
-                dest.replaceMe(newEquation);
-                return newEquation;
-            }
-
-            /**
-             * Sorts coefficient keys according to whether or not they exist in both equations' key sets or not.
-             * 
-             * @param   mutual
-             *          The set in which to put keys present in both equations.
-             * @param   sourceUnique
-             *          The set in which to put keys only present in the source equation.
-             * @param   destUnique
-             *          The set in which to put keys only present in the destination equation.
-             * @param   sourceKeys
-             *          The coefficient keys of the source equation.
-             * @param   destKeys
-             *          The coefficient keys of the destination equation.
-             */
-            private boolean coefficientSort(Set<String> mutual, Set<String> sourceUnique, Set<String> destUnique,
-                    Set<String> sourceKeys, Set<String> destKeys) {
-
-                destUnique.addAll(destKeys);
-
-                for (String key : sourceKeys) {
-                    if (destKeys.contains(key)) {
-                        mutual.add(key);
-                    } else {
-                        sourceUnique.add(key);
-                    }
-                }
-                destUnique.removeAll(mutual);
-
-                mutual.remove(FIntegerLitExp.coeffKey);
-                if (mutual.size() <= 0) {
-                    return false;
-                }
-
-                return !(sourceUnique.isEmpty() || destUnique.isEmpty() || sourceUnique.size() > ALIAS_SIZE ||
-                        destUnique.size() > ALIAS_SIZE);
-            }
-
-            /* ========================= *
-             *  Create new expressions.  *
-             * ========================= */
-
-            private FExp addTree(ArrayList<FExp> exps) {
-                if (exps.size() == 0) {
-                    return new FIntegerLitExp(0);
-                }
-                if (exps.size() == 1) {
-                    return exps.get(0);
-                }
-                if (exps.size() % 2 != 0) {
-                    exps.add(new FIntegerLitExp(0));
-                }
-                return FExp.createBalancedBinaryTree(new FAddExp(), exps);
-            }
-
-            private FExp addTree(FExp exp, ArrayList<FExp> exps) {
-                return new FAddExp(exp, addTree(exps));
-            }
-
-            private FExp newDivision(int nominator, int denominator) {
-                if (nominator % denominator == 0) {
-                    return new FIntegerLitExp(nominator / denominator);
-                }
-                return new FDivExp(new FIntegerLitExp(nominator), new FIntegerLitExp(denominator));
-            }
-
-            private FExp newTerm(String expKey) {
-                if (expKey.equals(FLitExp.coeffKey)) {
-                    return new FIntegerLitExp(1);
-                } else if (expKey.equals(FTimeExp.coeffKey)) {
-                    return new FTimeExp();
-                }
-                return new FIdUseExp(expKey);
-            }
-
-            private FExp newTerm(int coeff, String expKey) {
-                return new FMulExp(new FIntegerLitExp(coeff), newTerm(expKey));
-            }
+            
         }
-
     }
-
-    /* ============================ *
-     *  Collect term coefficients.  *
-     * ============================ */
-
-    syn Map<String, Integer> FAbstractEquation.coefficientMap() { return new LinkedHashMap<String, Integer>(); }
-    eq FEquation.coefficientMap() {
-        Map<String, Integer> coefficientMap = new LinkedHashMap<String, Integer>();
-        coefficientMap.put(FLitExp.coeffKey, 0);
-
-        for (FExp exp : linearTerms()) {
-            String coeffKey = exp.myCoeffKey();
-            int oldValue = coefficientMap.containsKey(coeffKey) ? coefficientMap.get(coeffKey) : 0;
-            coefficientMap.put(coeffKey, oldValue + exp.coeff());
-        }
-
-        return coefficientMap;
-    }
-
-    syn ArrayList<FExp> FAbstractEquation.linearTerms() = new ArrayList<FExp>();
-    eq FEquation.linearTerms() {
-        ArrayList<FExp> linearTerms = new ArrayList<FExp>();
-        linearTerms.addAll(collectUses());
-        linearTerms.addAll(timeExps());
-        for (FExp exp : terms()) {
-            if (exp.isLiteralExp()) {
-                linearTerms.add(exp);
-            }
-        }
-        return linearTerms;
-    }
-
-    /* ======================== *
-     *  Calculate coefficient.  *
-     * ======================== */
-
-    syn int FExp.coeff() = myCoeff() * outerCoeff();
-
-    syn int FExp.myCoeff()                       = 1;
-    eq FIntegerLitExp.myCoeff()                     = getValue();
-    eq FRealLitExp.myCoeff()                        = (int) getValue();
-
-    inh int FExp.outerCoeff();
-    eq FAbstractEquation.getChild().outerCoeff()    = 1;
-    eq FEquation.getRight().outerCoeff()            = -1;
-
-    eq FLitExp.getChild().outerCoeff()              = outerCoeff() * myCoeff();
-    eq FDotSubExp.getRight().outerCoeff()           = - coeff();
-    eq FNegExp.getChild().outerCoeff()              = - coeff();
-
-    eq FDotMulExp.getChild(int index).outerCoeff()  {
-        FExp literal = getLiteral();
-        if (literal == getChild(index)) {
-            return coeff();
-        }
-        return literal.coeff();
-    }
-
-    syn FExp FDotMulExp.getLiteral() {
-        FExp exp = null;
-        if ((exp = getLeft()).isLiteralExp()) {
-            return exp;
-        }
-        if ((exp = getRight()).isLiteralExp()) {
-            return exp;
-        }
-        return null;
-    }
-
-    syn FExp FDotMulExp.getTerm() {
-        FExp exp = null;
-        if ((exp = getLeft()).isLiteralExp()) {
-            return getRight();
-        }
-        return exp;
-    }
-
-    /* ============================ *
-     *  Keys for coefficient maps.  *
-     * ============================ */
-
-    public static final String FLitExp.coeffKey     = "#const";
-    public static final String FTimeExp.coeffKey    = "time";
-    syn lazy String FExp.myCoeffKey()               = toString();
-
-    eq FIdUseExp.myCoeffKey()                       = name();
-    eq FLitExp.myCoeffKey()                         = coeffKey;
-    eq FNegExp.myCoeffKey()                         = getFExp().myCoeffKey();
-    eq FTimeExp.myCoeffKey()                        = coeffKey;
-
-    /* ==================================================== *
-     *  Determine whether or not to eliminate an equation.  *
-     * ==================================================== */
     
-    syn boolean FAbstractEquation.isSimpleLinear() = false;
-    eq FEquation.isSimpleLinear() = !containsActiveAnnotations() && !isAliasEquation() &&
-            getLeft().isSimpleLinearExp() && getRight().isSimpleLinearExp();
-
-    syn boolean FExp.isSimpleLinearExp()    = false;
-    eq FBinExp.isSimpleLinearExp()          = (getLeft().isAccess() || getLeft().isSimpleLinearExp()) &&
-                                                    (getRight().isAccess() || getRight().isSimpleLinearExp());
-    eq FBoolBinExp.isSimpleLinearExp()      = false;
-    eq FDotDivExp.isSimpleLinearExp()       = false;
-    eq FDotMulExp.isSimpleLinearExp()       = getLiteral() != null && super.isSimpleLinearExp();
-    eq FDotPowExp.isSimpleLinearExp()       = false;
-
-    eq FDerExp.isSimpleLinearExp()          = false;
-    eq FNegExp.isSimpleLinearExp()          = getFExp().isSimpleLinearExp();
-    eq FRelExp.isSimpleLinearExp()          = false;
-
-    eq FIdUseExp.isSimpleLinearExp()        = true;
-    eq FTimeExp.isSimpleLinearExp()         = true;
-    eq FIntegerLitExp.isSimpleLinearExp()   = true;
-    eq FRealLitExp.isSimpleLinearExp()      = getValue() == ((int) getValue()) && !isLiteralZero();
-
+    syn FExp FAbstractEquation.simpleLinearExp() = null;
+    eq FEquation.simpleLinearExp() {
+        if (getLeft().isSimpleLinearExp() && getRight().shouldExtractLinearAlias()) {
+            return getLeft();
+        } else if (getRight().isSimpleLinearExp() && getLeft().shouldExtractLinearAlias()) {
+            return getRight();
+        } else {
+            return null;
+        }
+    }
+    syn FExp FAbstractEquation.expAssignedFromSimpleLinearExp() = null;
+    eq FEquation.expAssignedFromSimpleLinearExp() {
+        FExp linearExp = simpleLinearExp();
+        if (linearExp == getLeft()) {
+            return getRight();
+        } else if (linearExp == getRight()) {
+            return getLeft();
+        } else {
+            return null;
+        }
+    }
+    
+    syn boolean FExp.isSimpleLinearExp() = false;
+    eq FBinExp.isSimpleLinearExp() = (getLeft().isAccess() || getLeft().isSimpleLinearExp()) && (getRight().isAccess() || getRight().isSimpleLinearExp());
+    
+    syn boolean FExp.shouldExtractLinearAlias() = false;
+    eq FBinExp.shouldExtractLinearAlias() = getLeft().shouldExtractLinearAlias() && getRight().shouldExtractLinearAlias();
+    eq FIdUseExp.shouldExtractLinearAlias() = true;
+    eq FLitExp.shouldExtractLinearAlias() = true;
+    
 }

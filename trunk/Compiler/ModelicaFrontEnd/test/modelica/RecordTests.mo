@@ -1008,19 +1008,19 @@ end RecordBinding7;
 
 
 model RecordBinding8
-    record A
-        Real a;
-        Real b;
-    end A;
-    
-    function f
-        input Real x;
-        output A y;
-    algorithm
-        y := A(x, x*x);
-    end f;
-    
-    Real[2] x = time * (1:2);
+	record A
+		Real a;
+		Real b;
+	end A;
+	
+	function f
+		input Real x;
+		output A y;
+	algorithm
+		y := A(x, x*x);
+	end f;
+	
+	Real[2] x = time * (1:2);
     A[2] y1 = { A(x[i], time) for i in 1:2 };
     A[2] y2 = { f(x[1]), f(x[2]) };
 
@@ -1028,7 +1028,6 @@ model RecordBinding8
         TransformCanonicalTestCase(
             name="RecordBinding8",
             description="Generating binding equations for records with array binding expressions that cannot be split",
-            eliminate_linear_equations=false,
             inline_functions="trivial",
             flatModel="
 fclass RecordTests.RecordBinding8
@@ -1514,7 +1513,6 @@ model RecordBinding25
         TransformCanonicalTestCase(
             name="RecordBinding25",
             description="Final parameter record component",
-            eliminate_linear_equations=false,
             flatModel="
 fclass RecordTests.RecordBinding25
  Real sub1.r2.x;
@@ -1565,8 +1563,8 @@ fclass RecordTests.RecordBinding27
  Real r.x[2,1];
 equation
  r.t[1] = time;
- r.t[2] = r.t[1] + 1;
- r.x[1,1] = -2 * (- time);
+ r.t[2] = time + 1;
+ r.x[1,1] = r.t[1] + r.t[1];
  r.x[2,1] = r.t[1] + r.t[2];
 end RecordTests.RecordBinding27;
 ")})));
@@ -2402,7 +2400,7 @@ fclass RecordTests.RecordConstructor9
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordConstructor9;
 ")})));
 end RecordConstructor9;
@@ -3350,7 +3348,7 @@ fclass RecordTests.RecordConstructor36
  Real m[2].r1.x;
 equation
  m[1].r1.x = 1 + time;
- m[2].r1.x = m[1].r1.x + 1;
+ m[2].r1.x = 2 + time;
 end RecordTests.RecordConstructor36;
 ")})));
 end RecordConstructor36;
@@ -4765,7 +4763,6 @@ model RecordScalarize38
         TransformCanonicalTestCase(
             name="RecordScalarize38",
             description="Scalarizing record with binding expressions.",
-            eliminate_linear_equations=false,
             inline_functions="none",
             variability_propagation=false,
             flatModel="
@@ -5074,7 +5071,6 @@ model RecordScalarize47
             name="RecordScalarize47",
             description="",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass RecordTests.RecordScalarize47
  parameter Boolean p = true /* true */;
@@ -7157,7 +7153,6 @@ model RecordParam7
         TransformCanonicalTestCase(
             name="RecordParam7",
             description="Variability calculation for records involving inheritance",
-            eliminate_linear_equations=false,
             flatModel="
 fclass RecordTests.RecordParam7
  structural parameter Integer b.n = 2 /* 2 */;
@@ -7354,11 +7349,13 @@ model RecordMerge2
             description="",
             flatModel="
 fclass RecordTests.RecordMerge2
+ Real b.b.a;
  Real b.c;
  Real c.a;
 equation
+ b.b.a = time;
+ b.c = time + 1;
  c.a = time;
- b.c = c.a + 1;
 end RecordTests.RecordMerge2;
 ")})));
 end RecordMerge2;
@@ -7386,7 +7383,7 @@ fclass RecordTests.RecordEval1
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval1;
 ")})));
 end RecordEval1;
@@ -7414,7 +7411,7 @@ fclass RecordTests.RecordEval2
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval2;
 ")})));
 end RecordEval2;
@@ -7444,7 +7441,7 @@ fclass RecordTests.RecordEval3
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval3;
 ")})));
 end RecordEval3;
@@ -7474,7 +7471,7 @@ fclass RecordTests.RecordEval4
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval4;
 ")})));
 end RecordEval4;
@@ -7516,27 +7513,26 @@ fclass RecordTests.RecordEval5
  Real z[2];
 equation
  z[1] = time;
- z[2] = 2 * z[1];
+ z[2] = 2 * time;
 end RecordTests.RecordEval5;
 ")})));
 end RecordEval5;
 
 model RecordEval6
-    record R
-        parameter Integer n1 = 1;
-        Real x;
-    end R;
-    R r(n1 = n2, x = time);
-    parameter Integer n2 = 2;
-    Real y[n2] = ones(n2) * time;
-    Real z = y * (1:r.n1);
+	record R
+		parameter Integer n1 = 1;
+		Real x;
+	end R;
+	R r(n1 = n2, x = time);
+	parameter Integer n2 = 2;
+	Real y[n2] = ones(n2) * time;
+	Real z = y * (1:r.n1);
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="RecordEval6",
             description="Test that evaluation before scalarization of record variable works",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass RecordTests.RecordEval6
  structural parameter Integer r.n1 = 2 /* 2 */;
@@ -7672,7 +7668,7 @@ fclass RecordTests.RecordModification1
  Real z.x;
 equation
  y = time;
- z.x = time + 2;
+ z.x = y + 2;
 end RecordTests.RecordModification1;
 ")})));
 end RecordModification1;

@@ -2704,7 +2704,6 @@ model FuncInArrayExpEval1
             description="Constant evaluation of array binary expression containing function call returning array",
             variability_propagation=false,
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass EvaluationTests.FuncInArrayExpEval1
  structural parameter Real a[1] = 1 /* 1 */;

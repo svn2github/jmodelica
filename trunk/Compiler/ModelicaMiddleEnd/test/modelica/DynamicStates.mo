@@ -214,7 +214,6 @@ der(_ds.1.s2) := dsDer(1, 2)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_ThreeDSTwoEq",
                 description="Three dynamic states in two equation",
-                eliminate_linear_equations=false,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -292,7 +291,6 @@ der(_ds.1.s1) := dsDer(1, 1)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_FourDSTwoEq",
                 description="Four dynamic states in two equation",
-                eliminate_linear_equations=false,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -668,7 +666,6 @@ der(_ds.1.s1) := dsDer(1, 1)
             FClassMethodTestCase(
                 name="DynamicStates_Basic_TwoDSSetForced",
                 description="Two dynamic states sets where one is forced by the other",
-                eliminate_linear_equations=false,
                 methodName="printDAEBLT",
                 methodResult="
 --- Dynamic state block ---
@@ -782,10 +779,10 @@ der(_ds.2.s1) := dsDer(2, 1)
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---
-a5 := - time + 1
+a7 := time
 
 --- Solved equation ---
-a7 := time
+a5 := - a7 + 1
 
 --- Dynamic state block ---
   --- States: a1, a4 ---
@@ -917,7 +914,7 @@ Coefficient variability: continuous-time
 _der_a7 := 1.0
 
 --- Solved equation ---
-_der_a5 := -1.0
+_der_a5 := - _der_a7
 
 --- Torn linear system (Block 2) of 3 iteration variables and 4 solved variables ---
 Coefficient variability: continuous-time
@@ -1169,7 +1166,6 @@ der(_ds.1.s1) := dsDer(1, 1)
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_AlwaysVar1",
                 description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
-                eliminate_linear_equations=false,
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---
@@ -1224,7 +1220,6 @@ Jacobian:
             FClassMethodTestCase(
                 name="DynamicStates_StateSelectBias_AlwaysVar2",
                 description="Test so that StateSelect.always prevents the dss algorithm from moving variables.",
-                eliminate_linear_equations=false,
                 methodName="printDAEBLT",
                 methodResult="
 --- Unsolved system (Block 1) of 2 variables ---

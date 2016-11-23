@@ -1148,7 +1148,6 @@ model NoEventNonlinear2
         FClassMethodTestCase(
             name="NoEventNonlinear2",
             description="",
-            eliminate_linear_equations=false,
             methodName="printDAEBLT",
             methodResult="
 --- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---

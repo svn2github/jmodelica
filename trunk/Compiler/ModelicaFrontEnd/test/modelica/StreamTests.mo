@@ -298,7 +298,6 @@ equation
             name="StreamMinMax1",
             description="Expansion of actualStream() with max on flow variable",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamMinMax1
@@ -393,7 +392,6 @@ equation
             name="StreamMinMax2",
             description="Expansion of actualStream() with max on flow variable",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamMinMax2
@@ -530,7 +528,6 @@ equation
             name="StreamN2M0",
             description="Test stream connectors connected N=2, M=0",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN2M0
@@ -573,7 +570,6 @@ equation
             name="StreamN1M1",
             description="Test stream connectors connected N=1, M=1",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN1M1
@@ -625,7 +621,6 @@ equation
             name="StreamN0M2",
             description="Test stream connectors connected N=0, M=2",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN0M2
@@ -683,7 +678,6 @@ equation
             name="StreamN3M0",
             description="Test stream connectors connected N=3, M=0",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN3M0
@@ -737,7 +731,6 @@ equation
             name="StreamN2M1",
             description="Test stream connectors connected N=2, M=1",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN2M1
@@ -791,7 +784,6 @@ equation
             name="StreamN1M2",
             description="Test stream connectors connected N=1, M=2",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN1M2
@@ -856,7 +848,6 @@ equation
             name="StreamN0M3",
             description="Test stream connectors connected N=0, M=3",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN0M3
@@ -931,7 +922,6 @@ equation
             name="StreamN2M2",
             description="Test stream connectors connected N=2, M=2",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamN2M2
@@ -994,7 +984,6 @@ equation
             name="StreamMinMax3",
             description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamMinMax3
@@ -1053,7 +1042,6 @@ equation
             name="StreamMinMax4",
             description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamMinMax4
@@ -1112,7 +1100,6 @@ equation
             name="StreamMinMax5",
             description="Test stream connectors connected N=2, M=2, with min/max limiting which connectors contribute",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamMinMax5
@@ -1181,7 +1168,6 @@ equation
             name="StreamNominal1",
             description="Test affect on inStream() from nomainals on flow vars",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamNominal1
@@ -1264,7 +1250,6 @@ equation
             name="StreamNominal2",
             description="Test affect on inStream() from nomainals on flow vars",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamNominal2
@@ -1349,7 +1334,6 @@ equation
             name="StreamAttributesOnType",
             description="Test that attributes on types affect generation of stream equations",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.StreamAttributesOnType
@@ -1438,7 +1422,6 @@ equation
             name="InStreamDer1",
             description="Test that attributes on types affect generation of stream equations",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass StreamTests.InStreamDer1
@@ -1519,7 +1502,6 @@ equation
             name="InStreamDer2",
             description="Test handling of derivative of inStream()",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.InStreamDer2
  constant Real a.c1.p = 7;
@@ -1575,7 +1557,6 @@ equation
             name="StreamWithConst1",
             description="Test stream connectors connected N=0, M=3, with some constant flows",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.StreamWithConst1
  constant Real a1.c.p = 0;
@@ -1625,7 +1606,6 @@ equation
             name="StreamWithConst2",
             description="Test stream connectors connected N=2, M=2, with some constant flows",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.StreamWithConst2
  constant Real a1.c.p = 4;
@@ -1673,7 +1653,6 @@ equation
             name="StreamWithConst3",
             description="Test array stream connectors connected N=2, M=2, with some constant flows",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.StreamWithConst3
  constant Real a1[1].c.p = 3;
@@ -1745,7 +1724,6 @@ equation
             name="StreamWithConst4",
             description="Constant evaluation of inStream() where only one constant stream variable with a non-constant flow contributes to the result",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.StreamWithConst4
  constant Real a1.c.p = 0;
@@ -2069,8 +2047,8 @@ equation
  der(y1) = time * time;
  a1.c.s = 2 * time;
  der(y2) = 2 * time * time;
- a2.c.s = 3 / 2 * a1.c.s;
- a3.c.s = 2 * a1.c.s;
+ a2.c.s = 3 * time;
+ a3.c.s = 4 * time;
 end StreamTests.StreamDerAlias1;
 ")})));
 end StreamDerAlias1;
@@ -2092,7 +2070,6 @@ equation
             name="StreamSemiLinear1",
             description="",
             eliminate_alias_variables=false,
-            eliminate_linear_equations=false,
             flatModel="
 fclass StreamTests.StreamSemiLinear1
  constant Real a.c1.p = 1;

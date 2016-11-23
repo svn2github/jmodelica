@@ -465,13 +465,12 @@ Input variables:
     x5 = x6;  
    
 
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="AliasTest1",
-            methodName="aliasDiagnostics",
-            description="Test computation of alias sets.",
-            eliminate_linear_equations=false,
-            methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="AliasTest1",
+			methodName="aliasDiagnostics",
+			description="Test computation of alias sets.",
+			methodResult="
 Alias sets:
 {x1,-x3,-x4}
 {x2,-x5,-x6}
@@ -1465,30 +1464,29 @@ end AliasPropMinMax2;
 
 
 model AliasPropNominal1
-    type A = Real(nominal = 2);
-    
-    model B
-        Real x(nominal = 3);
-    end B;
-    
-    Real x1 = time;
-    A x2 = x1;
-    
-    Real y1 = time + 1;
-    A y2 = y1;
-    B y3(x = y1);
+	type A = Real(nominal = 2);
+	
+	model B
+		Real x(nominal = 3);
+	end B;
+	
+	Real x1 = time;
+	A x2 = x1;
+	
+	Real y1 = time + 1;
+	A y2 = y1;
+	B y3(x = y1);
     
     Real z1 = time + 2;
     A z2 = z1;
     B z3(x = z1);
-    Real z4(nominal = 4) = z1;
+	Real z4(nominal = 4) = z1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AliasPropNominal1",
-            description="Test propagation of nominal attribute in alias set",
-            eliminate_linear_equations=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropNominal1",
+			description="Test propagation of nominal attribute in alias set",
+			flatModel="
 fclass TransformCanonicalTests.AliasPropNominal1
  TransformCanonicalTests.AliasPropNominal1.A x2;
  TransformCanonicalTests.AliasPropNominal1.A y2(nominal = 3);
@@ -1524,12 +1522,11 @@ model AliasPropStart1
     B z3(x = z1);
     Real z4(start = 4) = z1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AliasPropStart1",
-            description="Test propagation of start attribute in alias set",
-            eliminate_linear_equations=false,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasPropStart1",
+			description="Test propagation of start attribute in alias set",
+			flatModel="
 fclass TransformCanonicalTests.AliasPropStart1
  TransformCanonicalTests.AliasPropStart1.A x2;
  TransformCanonicalTests.AliasPropStart1.A y2(start = 3);
@@ -1668,29 +1665,28 @@ end AliasPropFixed1;
 
 
 model AliasStateSelect1
-    package A
+	package A
         constant StateSelect ss[5] = { StateSelect.always, StateSelect.prefer, StateSelect.default, StateSelect.avoid, StateSelect.never };
-        
-        model B
+		
+		model B
             constant StateSelect s1;
             constant StateSelect s2;
-            Real x1(stateSelect = s1);
+		    Real x1(stateSelect = s1);
             Real x2(stateSelect = s2);
-        equation
-            x1 = time;
-            x1 = x2;
+		equation
+			x1 = time;
+			x1 = x2;
         end B;
-    end A;
-    
-    A.B b[10](s1 = A.ss[{1, 1, 1, 1, 2, 2, 2, 3, 3, 4}], s2 = A.ss[{2, 3, 4, 5, 3, 4, 5, 4, 5, 5}]);
+	end A;
+	
+	A.B b[10](s1 = A.ss[{1, 1, 1, 1, 2, 2, 2, 3, 3, 4}], s2 = A.ss[{2, 3, 4, 5, 3, 4, 5, 4, 5, 5}]);
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="AliasStateSelect1",
-            description="Test propagation of stateSelect attribute in alias set",
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="AliasStateSelect1",
+			description="Test propagation of stateSelect attribute in alias set",
             eliminate_alias_constants=false,
-            eliminate_linear_equations=false,
-            flatModel="
+			flatModel="
 fclass TransformCanonicalTests.AliasStateSelect1
  constant StateSelect b[1].s1 = StateSelect.always;
  constant StateSelect b[1].s2 = StateSelect.prefer;
@@ -2165,25 +2161,27 @@ end TransformCanonicalTests.InitialEqTest1;
     v9 + v10 = 1;
     v10 = 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="InitialEqTest2",
-            description="Test algorithm for adding additional initial equations.",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="InitialEqTest2",
+			description="Test algorithm for adding additional initial equations.",
+			flatModel="
 fclass TransformCanonicalTests.InitialEqTest2
  constant Real v1 = 1;
  Real v3;
  Real v4;
+ Real v5;
  Real v6;
  Real v7;
  Real v8;
  constant Real v9 = 0.0;
 equation
+ 2.0 + v3 + v4 + v5 = 1;
  2.0 + v3 + v4 + v6 = 1;
  2.0 + v3 + v4 = 1;
  2.0 + v3 + v4 = 1;
- v6 + v6 + v8 + v7 = 1;
- v6 + v6 + v8 = 0;
+ v5 + v6 + v8 + v7 = 1;
+ v5 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;
 ")})));
   end InitialEqTest2;
@@ -3118,24 +3116,24 @@ end TransformCanonicalTests.WhenEqu15;
 end WhenEqu15;
 
 model WhenEqu1
-    discrete Real x[3];
+	discrete Real x[3];
         Real z[3];
 equation
-    der(z) = z .* { 0.1, 0.2, 0.3 };
-    when { z[i] > 2 for i in 1:3 } then
-        x = 1:3;
-    elsewhen { z[i] < 0 for i in 1:3 } then
-        x = 4:6;
-    elsewhen sum(z) > 4.5 then
-        x = 7:9;
-    end when;
+	der(z) = z .* { 0.1, 0.2, 0.3 };
+	when { z[i] > 2 for i in 1:3 } then
+		x = 1:3;
+	elsewhen { z[i] < 0 for i in 1:3 } then
+		x = 4:6;
+	elsewhen sum(z) > 4.5 then
+		x = 7:9;
+	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu1",
-            description="Basic test of when equations",
-            equation_sorting=true,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu1",
+			description="Basic test of when equations",
+			equation_sorting=true,
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu1
  discrete Real x[1];
  discrete Real x[2];
@@ -3179,6 +3177,7 @@ equation
  x[2] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 2 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 5 elseif temp_7 and not pre(temp_7) then 8 else pre(x[2]);
  x[3] = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) or temp_3 and not pre(temp_3) then 3 elseif temp_4 and not pre(temp_4) or temp_5 and not pre(temp_5) or temp_6 and not pre(temp_6) then 6 elseif temp_7 and not pre(temp_7) then 9 else pre(x[3]);
 end TransformCanonicalTests.WhenEqu1;
+			
 ")})));
 end WhenEqu1;
 
@@ -5588,7 +5587,6 @@ end TransformCanonicalTests.SolveEqTest9;
         FClassMethodTestCase(
             name="SolveEqTest10",
             description="Test bug found in solution framework",
-            eliminate_linear_equations=false,
             equation_sorting=true,
             variability_propagation=false,
             methodName="printDAEBLT",
@@ -5869,15 +5867,14 @@ x2 = z + p;
 x1 + x2 = z;
 x1 - x2 = z*p;
 
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="BlockTest6",
-            description="Test of linear systems of equations",
-            eliminate_linear_equations=false,
-            equation_sorting=true,
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest6",
+			description="Test of linear systems of equations",
+			equation_sorting=true,
             automatic_tearing = false,
-            methodName="printDAEBLT",
-            methodResult="
+			methodName="printDAEBLT",
+			methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
 Coefficient variability: parameter
 Unknown variables:
@@ -5909,14 +5906,14 @@ equation
     a = 1 - b;
     a = b * (if d then 1 else 2);
     d = b < 0;
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="BlockTest7",
-            description="Test of linear systems of equations with if expression",
-            equation_sorting=true,
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="BlockTest7",
+			description="Test of linear systems of equations with if expression",
+			equation_sorting=true,
             automatic_tearing = false,
-            methodName="printDAEBLT",
-            methodResult="
+			methodName="printDAEBLT",
+			methodResult="
 --- Unsolved mixed linear system (Block 1) of 3 variables ---
 Coefficient variability: discrete-time
 Unknown continuous variables:
@@ -6369,14 +6366,14 @@ equation
   x[15] = x[12] + x[3];
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        FClassMethodTestCase(
-            name="VarDependencyTest1",
-            methodName="dependencyDiagnostics",
-            equation_sorting=true,
-            eliminate_alias_variables=false,
-            description="Test computation of direct dependencies",
-            methodResult="
+	annotation(__JModelica(UnitTesting(tests={
+		FClassMethodTestCase(
+			name="VarDependencyTest1",
+			methodName="dependencyDiagnostics",
+			equation_sorting=true,
+			eliminate_alias_variables=false,
+			description="Test computation of direct dependencies",
+			methodResult="
 Variable dependencies:
 Derivative variables: 
 
@@ -6407,16 +6404,16 @@ Algebraic real variables:
  x[11]
     u[1]
  x[12]
-    u[2]
     u[1]
+    u[2]
  x[13]
     u[3]
  x[14]
     u[3]
     u[4]
  x[15]
-    u[2]
     u[1]
+    u[2]
     u[3]
 ")})));
 end VarDependencyTest1;
@@ -7688,7 +7685,7 @@ pre(b) := false
 end LinearBlockTest2;
 
 model LinearBlockTest3
-    Real a, b, c, d, e;
+    Real a,b,c,d,e;
 equation
     a = time + d * 2;
     e = a * 2 - d;
@@ -7703,7 +7700,6 @@ algorithm
         FClassMethodTestCase(
             name="LinearBlockTest3",
             description="Test generation of linear blocks with non-scalar algorithm block in the solved part",
-            eliminate_linear_equations=false,
             methodName="printDAEBLT",
             methodResult="
 --- Torn mixed linear system (Block 1) of 1 iteration variables and 4 solved variables ---
@@ -8113,9 +8109,9 @@ fclass TransformCanonicalTests.ForOfUnknownSize1
 equation
  x = TransformCanonicalTests.ForOfUnknownSize1.f({y[1], y[2], y[3], y[4]});
  y[1] = time;
- y[2] = 2 * y[1];
- y[3] = 3 * y[1];
- y[4] = 4 * y[1];
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
 
 public
  function TransformCanonicalTests.ForOfUnknownSize1.f
@@ -8259,9 +8255,9 @@ fclass TransformCanonicalTests.ForOfUnknownSize4
 equation
  x = TransformCanonicalTests.ForOfUnknownSize4.f({y[1], y[2], y[3], y[4]});
  y[1] = time;
- y[2] = 2 * y[1];
- y[3] = 3 * y[1];
- y[4] = 4 * y[1];
+ y[2] = 2 * time;
+ y[3] = 3 * time;
+ y[4] = 4 * time;
 
 public
  function TransformCanonicalTests.ForOfUnknownSize4.f
@@ -8319,13 +8315,13 @@ fclass TransformCanonicalTests.ForOfUnknownSize5
 equation
  x = TransformCanonicalTests.ForOfUnknownSize5.f({{y[1,1], y[1,2], y[1,3], y[1,4]}, {y[2,1], y[2,2], y[2,3], y[2,4]}});
  y[1,1] = time;
- y[1,2] = 2 * y[1,1];
- y[1,3] = 3 * y[1,1];
- y[1,4] = 4 * y[1,1];
- y[2,1] = 2 * y[1,1];
- y[2,2] = 3 * y[1,1];
- y[2,3] = 4 * y[1,1];
- y[2,4] = 5 * y[1,1];
+ y[1,2] = 2 * time;
+ y[1,3] = 3 * time;
+ y[1,4] = 4 * time;
+ y[2,1] = 2 * time;
+ y[2,2] = 3 * time;
+ y[2,3] = 4 * time;
+ y[2,4] = 5 * time;
 
 public
  function TransformCanonicalTests.ForOfUnknownSize5.f

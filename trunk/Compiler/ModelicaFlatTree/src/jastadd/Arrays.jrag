@@ -745,13 +745,10 @@ aspect Arrays {
  	public FExp FBooleanType.wrapRangeSizeExp(FExp exp) {
  		return new FIfExp(exp, new FIntegerLitExp(2), new FIntegerLitExp(1));
  	}
-
-    syn boolean FExp.isIntegerLiteral(int v)    = false;
-    eq FIntegerLitExp.isIntegerLiteral(int v)   = getValue() == v;
-
-    syn boolean FExp.isIntegerLiteral()         = false;
-    eq FIntegerLitExp.isIntegerLiteral()        = true;
- 
+ 	
+ 	syn boolean FExp.isIntegerLiteral(int v)  = false;
+ 	eq FIntegerLitExp.isIntegerLiteral(int v) = getValue() == v;
+ 	
  	eq FLinspace.size() {
 		MutableSize s = new MutableSize(ndims());
  		s.append(getN());
