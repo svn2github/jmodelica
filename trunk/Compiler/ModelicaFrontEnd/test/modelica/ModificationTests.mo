@@ -2992,6 +2992,7 @@ model ModificationLevel4
         FClassMethodTestCase(
             name="ModificationLevel4",
             description="Test merging attribute level",
+            eliminate_linear_equations=false,
             methodName="attributeLevels",
             methodResult="
 Variables:
@@ -3014,6 +3015,7 @@ model ModificationLevel5
         FClassMethodTestCase(
             name="ModificationLevel5",
             description="Test merging attribute level of array",
+            eliminate_linear_equations=false,
             methodName="attributeLevels",
             methodResult="
 Variables:

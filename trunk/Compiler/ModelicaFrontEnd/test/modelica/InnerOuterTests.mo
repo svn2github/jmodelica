@@ -91,6 +91,7 @@ model InnerOuterTest2
             name="InnerOuterTest2",
             description="Basic test of inner outer.",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             equation_sorting=true,
             flatModel="
 fclass InnerOuterTests.InnerOuterTest2

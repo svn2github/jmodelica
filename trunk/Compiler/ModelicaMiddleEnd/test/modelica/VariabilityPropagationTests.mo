@@ -2081,6 +2081,7 @@ model ZeroFactor3
             name="ZeroFactor3",
             description="Test elimination of factors that can be reduced to zero.",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass VariabilityPropagationTests.ZeroFactor3
  constant Real c = 0;

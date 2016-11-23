@@ -147,7 +147,7 @@ model Block1
   equation
     x1 = a;
     x2 = b;
-    y1 = y2 + a;
+    y1 = y2 + sin(a);
     y2 = y1 + b;
     y3 = y1 + y2;
 
