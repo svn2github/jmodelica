@@ -692,11 +692,9 @@ aspect Environments {
     inh InstNode InstModification.myInstNode();
     inh InstNode InstNode.myInstNode();
     inh InstNode FAbstractEquation.myInstNode();
+    eq Root.getChild().myInstNode()                       = null;
     eq InstNode.getChild().myInstNode()                   = this;
     eq InstNode.getElementInstModification().myInstNode() = myInstNode();
-    eq Root.getChild().myInstNode() {
-        throw new UnsupportedOperationException();
-    }
 
     //The lexical scope of modifiers for short classes are "outside" of the short declaration
     eq InstExtendsShortClass.getChild().myInstNode() = getLookupNode();
