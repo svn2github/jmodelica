@@ -125,11 +125,11 @@ end IndexReduction.IndexReduction1b_PlanarPendulum;
     damper(phi_rel(stateSelect=StateSelect.always),w_rel(stateSelect=StateSelect.always)));
 
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IndexReduction2_Mechanical",
-            description="Test of index reduction",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IndexReduction2_Mechanical",
+			description="Test of index reduction",
+			flatModel="
 fclass IndexReduction.IndexReduction2_Mechanical
  parameter Modelica.SIunits.Torque amplitude = 10 \"Amplitude of driving torque\" /* 10 */;
  parameter Modelica.SIunits.Frequency freqHz = 5 \"Frequency of driving torque\" /* 5 */;
@@ -149,6 +149,7 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Modelica.SIunits.AngularAcceleration inertia1.a \"Absolute angular acceleration of component (= der(w))\";
  parameter Modelica.SIunits.MomentOfInertia inertia3.J(min = 0,start = 1) \"Moment of inertia\";
  Modelica.SIunits.Angle idealGear.phi_a \"Angle between left shaft flange and support\";
+ Modelica.SIunits.Angle idealGear.phi_b \"Angle between right shaft flange and support\";
  Modelica.SIunits.Torque idealGear.flange_a.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.flange_b.tau \"Cut torque in the flange\";
  Modelica.SIunits.Torque idealGear.support.tau \"Reaction torque in the support/housing\";
@@ -189,11 +190,13 @@ fclass IndexReduction.IndexReduction2_Mechanical
  Real inertia1._der_w;
  Real inertia2._der_phi;
  Real inertia2._der_w;
- Real inertia2._der_der_phi;
- Real damper._der_der_phi_rel;
  Real idealGear._der_phi_a;
+ Real idealGear._der_phi_b;
  Real inertia1._der_der_phi;
+ Real inertia2._der_der_phi;
  Real idealGear._der_der_phi_a;
+ Real idealGear._der_der_phi_b;
+ Real damper._der_der_phi_rel;
 protected
  parameter Modelica.SIunits.Angle torque.phi_support \"Absolute angle of support flange\";
  parameter Modelica.SIunits.Angle idealGear.phi_support \"Absolute angle of support flange\";
@@ -220,8 +223,8 @@ equation
  inertia1.a = inertia1._der_w;
  inertia1.J * inertia1._der_w = torque.tau + (- idealGear.flange_a.tau);
  idealGear.phi_a = inertia1.phi - torque.phi_support;
- - damper.phi_rel = inertia2.phi - torque.phi_support;
- idealGear.phi_a = idealGear.ratio * (- damper.phi_rel);
+ idealGear.phi_b = inertia2.phi - torque.phi_support;
+ idealGear.phi_a = idealGear.ratio * idealGear.phi_b;
  0 = idealGear.ratio * idealGear.flange_a.tau + idealGear.flange_b.tau;
  inertia2.w = inertia2._der_phi;
  inertia2.a = inertia2._der_w;
@@ -233,21 +236,24 @@ equation
  inertia3.J * der(inertia3.w) = - spring.tau;
  damper.tau = damper.d * der(damper.phi_rel);
  damper.lossPower = damper.tau * der(damper.phi_rel);
+ damper.phi_rel = torque.phi_support - inertia2.phi;
  damper.w_rel = der(damper.phi_rel);
  damper.a_rel = der(damper.w_rel);
  torque.tau = sine.offset + (if time < sine.startTime then 0 else sine.amplitude * sin(6.283185307179586 * sine.freqHz * (time - sine.startTime) + sine.phase));
  - damper.tau + inertia2.flange_b.tau + (- spring.tau) = 0;
  damper.tau + fixed.flange.tau + idealGear.support.tau + torque.tau = 0;
  idealGear.support.tau = - idealGear.flange_a.tau - idealGear.flange_b.tau;
- - der(damper.phi_rel) = inertia2._der_phi;
- inertia2._der_w = inertia2._der_der_phi;
- der(damper.w_rel) = damper._der_der_phi_rel;
- - damper._der_der_phi_rel = inertia2._der_der_phi;
  idealGear._der_phi_a = inertia1._der_phi;
- idealGear._der_phi_a = idealGear.ratio * (- der(damper.phi_rel));
+ idealGear._der_phi_b = inertia2._der_phi;
+ idealGear._der_phi_a = idealGear.ratio * idealGear._der_phi_b;
  inertia1._der_w = inertia1._der_der_phi;
+ inertia2._der_w = inertia2._der_der_phi;
  idealGear._der_der_phi_a = inertia1._der_der_phi;
- idealGear._der_der_phi_a = idealGear.ratio * (- damper._der_der_phi_rel);
+ idealGear._der_der_phi_b = inertia2._der_der_phi;
+ idealGear._der_der_phi_a = idealGear.ratio * idealGear._der_der_phi_b;
+ der(damper.phi_rel) = - inertia2._der_phi;
+ der(damper.w_rel) = damper._der_der_phi_rel;
+ damper._der_der_phi_rel = - inertia2._der_der_phi;
 
 public
  type StateSelect = enumeration(never \"Do not use as state at all.\", avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\", default \"Use as state if appropriate, but only if variable appears differentiated.\", prefer \"Prefer it as state over those having the default value (also variables can be selected, which do not appear differentiated). \", always \"Do use it as a state.\");
@@ -3242,7 +3248,6 @@ model FunctionCallEquation7
         TransformCanonicalTestCase(
             name="FunctionCallEquation7",
             description="Test so that non scalar equations such as FunctionCallEquations are handled correctly. The equation \"b = a + 1;\" should not be differentiated",
-            eliminate_linear_equations=false,
             inline_functions="none",
             variability_propagation=false,
             flatModel="
@@ -4653,8 +4658,8 @@ fclass IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall
  Real _der_a2;
  Real _der_b1;
  Real _der_b2;
- Real _der_a4;
  Real _der_b4;
+ Real _der_a4;
  Real _der_der_a1;
  Real _der_der_a4;
  Real _der_der_b4;
@@ -4665,19 +4670,19 @@ equation
  _der_b1 = b2;
  _der_b2 = b3;
  a4 = time;
- b4 = 2 * a4;
+ b4 = time * 2;
  a4 = a1;
  b4 = b1;
- _der_a4 = 1.0;
- _der_b4 = 2 * _der_a4;
+ _der_b4 = 2;
  _der_a4 = _der_a1;
  _der_b4 = _der_b1;
+ _der_a4 = 1.0;
  _der_der_a1 = _der_a2;
- _der_der_a4 = 0.0;
  _der_der_a4 = _der_der_a1;
  _der_der_b4 = _der_der_b1;
+ _der_der_a4 = 0.0;
  _der_der_b1 = _der_b2;
- _der_der_b4 = 2 * _der_der_a4;
+ _der_der_b4 = 0;
 end IndexReduction.IncidencesThroughFunctions.InlinedFunctionCall;
 ")})));
         end InlinedFunctionCall;

@@ -127,8 +127,8 @@ model DisplayUnit5
             generatedCode="
 <UnitDefinitions>
     <BaseUnit unit=\"N\">
-        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
         <DisplayUnitDefinition displayUnit=\"kN\" gain=\"0.001\" />
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
     </BaseUnit>
     <BaseUnit unit=\"J\">
         <DisplayUnitDefinition displayUnit=\"kW.h\" gain=\"2.7777777777777776E-7\" />
@@ -156,8 +156,8 @@ model DisplayUnit6
 <UnitDefinitions>
     <Unit name=\"N\">
         <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
-        <DisplayUnit name=\"mN\" factor=\"1000.0\" />
         <DisplayUnit name=\"kN\" factor=\"0.001\" />
+        <DisplayUnit name=\"mN\" factor=\"1000.0\" />
     </Unit>
     <Unit name=\"J\">
         <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" />
@@ -184,6 +184,9 @@ model DisplayUnit7
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
+    <BaseUnit unit=\"kN\">
+        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000000.0\" />
+    </BaseUnit>
     <BaseUnit unit=\"N\">
         <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000.0\" />
     </BaseUnit>
@@ -192,9 +195,6 @@ model DisplayUnit7
     </BaseUnit>
     <BaseUnit unit=\"W.h\">
         <DisplayUnitDefinition displayUnit=\"J\" gain=\"3600.0\" />
-    </BaseUnit>
-    <BaseUnit unit=\"kN\">
-        <DisplayUnitDefinition displayUnit=\"mN\" gain=\"1000000.0\" />
     </BaseUnit>
 </UnitDefinitions>
 ")})));
@@ -216,6 +216,10 @@ model DisplayUnit8
             template="$unitDefinitions$",
             generatedCode="
 <UnitDefinitions>
+    <Unit name=\"kN\">
+        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" factor=\"1000.0\" />
+        <DisplayUnit name=\"mN\" factor=\"1000000.0\" />
+    </Unit>
     <Unit name=\"N\">
         <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" />
         <DisplayUnit name=\"mN\" factor=\"1000.0\" />
@@ -227,10 +231,6 @@ model DisplayUnit8
     <Unit name=\"W.h\">
         <BaseUnit m=\"2\" s=\"-2\" kg=\"1\" factor=\"3600.0\" />
         <DisplayUnit name=\"J\" factor=\"3600.0\" />
-    </Unit>
-    <Unit name=\"kN\">
-        <BaseUnit m=\"1\" s=\"-2\" kg=\"1\" factor=\"1000.0\" />
-        <DisplayUnit name=\"mN\" factor=\"1000000.0\" />
     </Unit>
 </UnitDefinitions>
 ")})));

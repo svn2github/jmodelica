@@ -573,8 +573,7 @@ class TestModel_RLC:
         fpath_rlc = os.path.join(get_files_path(), 'Modelica', "RLC_Circuit.mo")
         cpath_rlc = "RLC_Circuit"
         fname_vdp = compile_jmu(cpath_rlc, fpath_rlc, 
-                    compiler_options={'eliminate_alias_variables':True,
-                                        'eliminate_linear_equations':False})
+                    compiler_options={'eliminate_alias_variables':True})
         # compile RLC_Circuit with alias variables elimination
 
     
