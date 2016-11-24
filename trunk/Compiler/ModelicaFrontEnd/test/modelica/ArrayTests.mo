@@ -1122,6 +1122,7 @@ model ArrayTest43
             name="General_ArrayTest43",
             description="Splitting expression with access in array subscripts in part of dotted access",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.General.ArrayTest43
  structural parameter Integer n = 3 /* 3 */;
@@ -1171,9 +1172,9 @@ fclass ArrayTests.General.ArrayTest44
  Real b.x[2,2];
 equation
  b.x[1,1] = 1.0 + time;
- b.x[2,1] = 1.0 + 2 * time;
- b.x[1,2] = 2.0 + time;
- b.x[2,2] = 2.0 + 2 * time;
+ b.x[2,1] = 2 * b.x[1,1] + -1;
+ b.x[1,2] = b.x[1,1] + 1;
+ b.x[2,2] = 2 * b.x[1,1];
 end ArrayTests.General.ArrayTest44;
 ")})));
 end ArrayTest44;
@@ -1926,6 +1927,7 @@ model EndSubscript1
         TransformCanonicalTestCase(
             name="Subscripts_EndSubscript1",
             description="Using end in access to member of last record in array of records",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Subscripts.EndSubscript1
  Real a[1].x;
@@ -5770,7 +5772,7 @@ fclass ArrayTests.Constructors.EmptyArray.EmptyArray5
  structural parameter Real D[2,2] = 4 /* 4 */;
 equation
  y[1] = u[1] + 2.0 * u[2];
- y[2] = 2.0 * u[1] + 4.0 * u[2];
+ y[2] = 2 * y[1];
 end ArrayTests.Constructors.EmptyArray.EmptyArray5;
 ")})));
 end EmptyArray5;
@@ -5939,6 +5941,7 @@ model ArrayIterTest6
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest6",
             description="Iteration expressions as members of array constructor",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest6
  Real x[1,1];
@@ -5978,6 +5981,7 @@ model ArrayIterTest7
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest7",
             description="Iteration expressions with generated temporaries",
+            eliminate_linear_equations=false,
             inline_functions="none",
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest7
@@ -6039,6 +6043,7 @@ model ArrayIterTest8
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest8",
             description="Iteration expressions with generated temporaries",
+            eliminate_linear_equations=false,
             inline_functions="none",
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest8
@@ -6106,6 +6111,7 @@ model ArrayIterTest9
             name="Constructors_Iterators_ArrayIterTest9",
             description="Iteration expressions with generated temporaries",
             inline_functions="none",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest9
  Real z[1];
@@ -6206,6 +6212,7 @@ model ArrayIterTest12
             name="Constructors_Iterators_ArrayIterTest12",
             description="Nested iteration expressions",
             inline_functions="none",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest12
  Real r.t[1];
@@ -6270,6 +6277,7 @@ model ArrayIterTest14
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest14",
             description="Varying size in iteration expression",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest14
  Real L[1];
@@ -6311,6 +6319,7 @@ model ArrayIterTest15
         TransformCanonicalTestCase(
             name="Constructors_Iterators_ArrayIterTest15",
             description="Varying size in iteration expression",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.Constructors.Iterators.ArrayIterTest15
  structural parameter Integer n = 3 /* 3 */;
@@ -7889,6 +7898,7 @@ model RecordArrayEquation1
         TransformCanonicalTestCase(
             name="VariableIndex_RecordArrayEquation1",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.RecordArrayEquation1
  Real x[1].y;
@@ -7939,6 +7949,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_RecordArrayEquation2",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.RecordArrayEquation2
  Real x[1,1].x;
@@ -7981,6 +7992,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_ExpEquationCombination",
             description="Test of variable array index access",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.ExpEquationCombination
  Real x[1,1,1,1];
@@ -8268,6 +8280,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice1",
             description="Using variable index in slice",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice1
  Real y;
@@ -8292,6 +8305,7 @@ model Slice2
         TransformCanonicalTestCase(
             name="VariableIndex_Slice2",
             description="Using variable index in slice with matrix result",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice2
  Real x[1,1,1];
@@ -8342,6 +8356,7 @@ model Slice3
         TransformCanonicalTestCase(
             name="VariableIndex_Slice3",
             description="Using variable index in slice with no index on record",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice3
  Real r[1].x[1];
@@ -8378,6 +8393,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice4",
             description="Using variable index in slice over models",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice4
  Real y;
@@ -8413,6 +8429,7 @@ equation
         TransformCanonicalTestCase(
             name="VariableIndex_Slice5",
             description="Using variable index in slice over models, complex example",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayTests.VariableIndex.Slice5
  Real y[1];

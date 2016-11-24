@@ -205,6 +205,7 @@ model VectorizedCall4
         TransformCanonicalTestCase(
             name="VectorizedCall4",
             description="Vectorization: vectorised array arg, continous",
+            eliminate_linear_equations=false,
             variability_propagation=false,
             flatModel="
 fclass VectorizedFunctionTests.Basic.VectorizedCall4
@@ -525,6 +526,7 @@ model VectorizedCall7
         TransformCanonicalTestCase(
             name="VectorizedCall7",
             description="",
+            eliminate_linear_equations=false,
             flatModel="
 fclass VectorizedFunctionTests.Basic.VectorizedCall7
  Real d[1];
@@ -1204,14 +1206,12 @@ fclass VectorizedFunctionTests.PredefinedFunctions.Delay
  Real y1[2];
  Real y2[1];
  Real y2[2];
- Real x[1];
  Real x[2];
 equation
- y1[1] = delay(x[1], 1, 2);
+ y1[1] = delay(x[2], 1, 2);
  y1[2] = delay(x[2], 2, 2);
- y2[1] = delay(x[1], 1);
+ y2[1] = delay(x[2], 1);
  y2[2] = delay(x[2], 2);
- x[1] = time;
  x[2] = time;
 end VectorizedFunctionTests.PredefinedFunctions.Delay;
 ")})));
@@ -1233,16 +1233,14 @@ equation
 fclass VectorizedFunctionTests.PredefinedFunctions.SemiLinear1
  Real s[1];
  Real s[2];
- Real x[1];
  Real x[2];
  Real y[1];
  Real y[2];
 equation
- y[1] = noEvent(x[1] * s[1]);
+ y[1] = noEvent(x[2] * s[1]);
  y[2] = noEvent(x[2] * s[2]);
  s[1] = 1;
  s[2] = 2;
- x[1] = time;
  x[2] = time;
 end VectorizedFunctionTests.PredefinedFunctions.SemiLinear1;
 ")})));
@@ -1267,23 +1265,19 @@ equation
 fclass VectorizedFunctionTests.PredefinedFunctions.SemiLinear2
  Real s[1];
  Real s[2];
- Real x[1];
  Real x[2];
- Real x2;
  Real y[1,1];
  Real y[1,2];
  Real y[2,1];
  Real y[2,2];
 equation
- y[1,1] = noEvent(if x[1] >= 0 then x[1] * s[2] else x[1] * s[1]);
+ y[1,1] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[1]);
  y[1,2] = noEvent(x[2] * s[2]);
- y[2,1] = noEvent(x2 * s[1]);
- y[2,2] = noEvent(if x2 >= 0 then x2 * s[2] else x2 * s[1]);
+ y[2,1] = noEvent(x[2] * s[1]);
+ y[2,2] = noEvent(if x[2] >= 0 then x[2] * s[2] else x[2] * s[1]);
  s[1] = 1;
  s[2] = 2;
- x[1] = time;
  x[2] = time;
- x2 = time;
 end VectorizedFunctionTests.PredefinedFunctions.SemiLinear2;
 ")})));
 end SemiLinear2;
@@ -1360,12 +1354,10 @@ model SpatialDistribution
 fclass VectorizedFunctionTests.PredefinedFunctions.SpatialDistribution
  Real y[1];
  Real y[2];
- Real x[1];
  Real x[2];
 equation
- y[1] = spatialDistribution(x[1], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
+ y[1] = spatialDistribution(x[2], 1, 1, true, {0, 0.5, 1.0}, {1, 2, 3});
  y[2] = spatialDistribution(x[2], 2, 1, true, {0, 0.6, 1.0}, {1, 2, 3});
- x[1] = time;
  x[2] = time;
 end VectorizedFunctionTests.PredefinedFunctions.SpatialDistribution;
 ")})));
