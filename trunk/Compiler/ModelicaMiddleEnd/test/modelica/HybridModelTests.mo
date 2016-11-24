@@ -139,22 +139,24 @@ Discrete equations:
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.PreTest4",
+            name="PreTest4",
             description="Test interaction between continuous and discrete equations",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 2 variables ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
 Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
+  temp_2
 
 Continuous equations:
-  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+  x_d := if temp_2 and not pre(temp_2) then x_c + 1 else pre(x_d)
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
 
 --- Solved equation ---
 der(x_c) := - x_c + x_d
@@ -175,7 +177,7 @@ der(x_c) := - x_c + x_d
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.PreTest5",
+            name="PreTest5",
             description="TODO: this model should give an error",
             methodName="printDAEBLT",
             methodResult="
@@ -189,9 +191,10 @@ Iteration variables:
 
 Solved discrete variables:
   temp_1
+  temp_2
 
 Torn equations:
-  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+  x_d := if temp_2 and not pre(temp_2) then x_c + 1 else pre(x_d)
 
 Continuous residual equations:
   0 = - x_c + x_d
@@ -199,9 +202,10 @@ Continuous residual equations:
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
 
 Jacobian:
-  |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
+  |1.0, - (if temp_2 and not pre(temp_2) then 1.0 else 0.0)|
   |-1.0, 1.0|
 -------------------------------
 ")})));
@@ -220,24 +224,26 @@ Jacobian:
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.PreTest6",
+            name="PreTest6",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 3 variables ---
+--- Pre propagation mixed system (Block 1) of 4 variables ---
 Continuous variables:
   x_c
   x_d
 
 Solved discrete variables:
   temp_1
+  temp_2
 
 Continuous equations:
   x_c := pre(x_d)
-  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+  x_d := if temp_2 and not pre(temp_2) then x_c + 1 else pre(x_d)
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
 -------------------------------
 ")})));
     end PreTest6;
@@ -255,22 +261,24 @@ Discrete equations:
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.PreTest7",
+            name="PreTest7",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 2 variables ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
 Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
+  temp_2
 
 Continuous equations:
-  x_d := if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
+  x_d := if temp_2 and not pre(temp_2) then pre(x_c) + 1 else pre(x_d)
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
 
 --- Solved equation ---
 x_c := x_d
@@ -291,25 +299,27 @@ x_c := x_d
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.PreTest8",
+            name="PreTest8",
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 4 variables ---
+--- Pre propagation mixed system (Block 1) of 5 variables ---
 Continuous variables:
   y
   der(x)
 
 Solved discrete variables:
   temp_1
+  temp_2
   i
 
 Continuous equations:
-  y := if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
+  y := if temp_2 and not pre(temp_2) then pre(y) + 1 else pre(y)
   der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
   i := if time >= 3 then 1 else 0
 -------------------------------
 ")})));
@@ -382,24 +392,26 @@ Jacobian:
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="HybridModelTests.WhenAndPreTest1",
+            name="WhenAndPreTest1",
             description="Test complicated when and pre variable case",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 3 variables ---
+--- Pre propagation mixed system (Block 1) of 4 variables ---
 Continuous variables:
   y
   x
 
 Solved discrete variables:
   temp_1
+  temp_2
 
 Continuous equations:
-  y := if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
-  x := if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x)
+  y := if temp_2 and not pre(temp_2) then pre(y) + 1.1 else pre(y)
+  x := if temp_2 and not pre(temp_2) then pre(x) + 1.1 else pre(x)
 
 Discrete equations:
   temp_1 := sample(0, 1)
+  temp_2 := temp_1 and not pre(temp_1)
 
 --- Solved equation ---
 der(xx) := - x
@@ -407,28 +419,28 @@ der(xx) := - x
 --- Pre propagation mixed system (Block 2) of 4 variables ---
 
 Solved discrete variables:
-  temp_2
-  w
   temp_3
+  w
+  temp_4
   z
 
 
 Discrete equations:
-  temp_2 := y > 2 and pre(z)
-  w := if temp_2 and not pre(temp_2) then false else pre(w)
-  temp_3 := x > 2
-  z := if temp_3 and not pre(temp_3) then false else pre(z)
+  temp_3 := y > 2 and pre(z)
+  w := if temp_3 and not pre(temp_3) then false else pre(w)
+  temp_4 := x > 2
+  z := if temp_4 and not pre(temp_4) then false else pre(z)
 
 --- Pre propagation mixed system (Block 3) of 2 variables ---
 
 Solved discrete variables:
-  temp_4
+  temp_5
   v
 
 
 Discrete equations:
-  temp_4 := y > 2 and z
-  v := if temp_4 and not pre(temp_4) then false else pre(v)
+  temp_5 := y > 2 and z
+  v := if temp_5 and not pre(temp_5) then false else pre(v)
 -------------------------------
 ")})));
     end WhenAndPreTest1;

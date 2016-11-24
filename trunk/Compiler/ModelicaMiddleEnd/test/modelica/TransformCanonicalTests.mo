@@ -28,11 +28,11 @@ package TransformCanonicalTests
 		der(v) = 4;
                 y + v = 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="TransformCanonicalTest1",
-			description="Test basic canonical transformations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TransformCanonicalTest1",
+            description="Test basic canonical transformations",
+            flatModel="
 fclass TransformCanonicalTests.TransformCanonicalTest1
  Real x(start = 1,fixed = true);
  Real y(start = 3,fixed = true);
@@ -3508,31 +3508,36 @@ equation
  end when;
 
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu8",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu8",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu8
  discrete Real x;
  discrete Real y;
  Real dummy;
  discrete Boolean temp_1;
  discrete Boolean temp_2;
+ discrete Boolean temp_3;
+ discrete Boolean temp_4;
 initial equation 
+ pre(temp_1) = false;
+ pre(temp_2) = false;
  dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
- pre(temp_2) = false;
+ pre(temp_3) = false;
+ pre(temp_4) = false;
 equation
  der(dummy) = 0;
- temp_1 = sample(0, 0.3333333333333333);
- x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
- temp_2 = sample(0, 0.6666666666666666);
- y = if temp_2 and not pre(temp_2) then pre(y) + 1 else pre(y);
+ temp_3 = temp_2 and not pre(temp_2);
+ x = if temp_3 and not pre(temp_3) then pre(x) + 1 else pre(x);
+ temp_4 = temp_1 and not pre(temp_1);
+ y = if temp_4 and not pre(temp_4) then pre(y) + 1 else pre(y);
+ temp_1 = sample(0, 0.6666666666666666);
+ temp_2 = sample(0, 0.3333333333333333);
 end TransformCanonicalTests.WhenEqu8;
-			
 ")})));
 end WhenEqu8; 
 
@@ -3554,11 +3559,11 @@ equation
  end when;
  ref = if time <1 then 0 else 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu9",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu9",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu9
  Real x;
  Real ref;
@@ -3568,19 +3573,21 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
+ pre(temp_1) = false;
  x = 0.0;
  pre(I) = 0.0;
  pre(u) = 0.0;
- pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
  der(x) = - x + u;
- temp_1 = sample(0, h);
- I = if temp_1 and not pre(temp_1) then pre(I) + h * (ref - x) else pre(I);
- u = if temp_1 and not pre(temp_1) then K * (ref - x) + 1 / Ti * I else pre(u);
+ temp_2 = temp_1 and not pre(temp_1);
+ I = if temp_2 and not pre(temp_2) then pre(I) + h * (ref - x) else pre(I);
+ u = if temp_2 and not pre(temp_2) then K * (ref - x) + 1 / Ti * I else pre(u);
  ref = if time < 1 then 0 else 1;
+ temp_1 = sample(0, h);
 end TransformCanonicalTests.WhenEqu9;
-			
 ")})));
 end WhenEqu9; 
 
@@ -3609,11 +3616,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu10",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu10",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
  Real x_p(start = 1,fixed = true);
@@ -3627,19 +3634,21 @@ fclass TransformCanonicalTests.WhenEqu10
  parameter Real b_c = 1 /* 1 */;
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
+ discrete Boolean temp_1;
 initial equation 
  x_c = pre(x_c);
+ pre(temp_1) = false;
  x_p = 1;
  pre(sampleTrigger) = false;
  pre(u_c) = 0.0;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
- sampleTrigger = sample(0, h);
+ sampleTrigger = temp_1 and not pre(temp_1);
  u_c = if initial() or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if initial() or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
+ temp_1 = sample(0, h);
 end TransformCanonicalTests.WhenEqu10;
-			
 ")})));
 end WhenEqu10;
 
@@ -3669,11 +3678,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu11",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu11",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean sampleTrigger;
  Real x_p(start = 1);
@@ -3688,8 +3697,10 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
  discrete Boolean atInit;
+ discrete Boolean temp_1;
 initial equation 
  x_c = pre(x_c);
+ pre(temp_1) = false;
  x_p = 1;
  pre(sampleTrigger) = false;
  pre(x_c) = 0.0;
@@ -3698,12 +3709,12 @@ initial equation
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
- sampleTrigger = sample(0, h);
+ sampleTrigger = temp_1 and not pre(temp_1);
  u_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
  atInit = true and initial();
+ temp_1 = sample(0, h);
 end TransformCanonicalTests.WhenEqu11;
-			
 ")})));
 end WhenEqu11;
 
@@ -3723,28 +3734,31 @@ model WhenEqu12
 		(x,y) = F(time);
 	end when;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu12",
-			description="Basic test of when equations",
-			inline_functions="none",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu12",
+            description="Basic test of when equations",
+            inline_functions="none",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu12
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
+ pre(temp_1) = false;
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
- temp_1 = sample(0, 1);
- if temp_1 and not pre(temp_1) then
+ temp_2 = temp_1 and not pre(temp_1);
+ if temp_2 and not pre(temp_2) then
   (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
+ temp_1 = sample(0, 1);
 
 public
  function TransformCanonicalTests.WhenEqu12.F
@@ -3758,8 +3772,7 @@ public
  end TransformCanonicalTests.WhenEqu12.F;
 
 end TransformCanonicalTests.WhenEqu12;
-			
-")})));		
+")})));
 end WhenEqu12;
 
 model WhenEqu13
@@ -3786,41 +3799,43 @@ end when;
  der(v3) = if y>=0 then 0 else 1;
  der(v4) = if y>0 then 0 else 1;
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="WhenEqu13",
-			description="Basic test of when equations",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="WhenEqu13",
+            description="Basic test of when equations",
+            flatModel="
 fclass TransformCanonicalTests.WhenEqu13
- Real v1(start = - 1);
- Real v2(start = - 1);
- Real v3(start = - 1);
- Real v4(start = - 1);
+ Real v1(start = -1);
+ Real v2(start = -1);
+ Real v3(start = -1);
+ Real v4(start = -1);
  discrete Real y(start = 1);
  discrete Integer i(start = 0);
  discrete Boolean up(start = true);
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
  v1 = 0;
  v2 = 1;
  v3 = 0;
  v4 = 1;
+ pre(temp_1) = false;
  pre(y) = 1;
  pre(i) = 0;
  pre(up) = true;
- pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
- temp_1 = sample(0.1, 1);
- i = if temp_1 and not pre(temp_1) then if up then pre(i) + 1 else pre(i) - 1 else pre(i);
- up = if temp_1 and not pre(temp_1) then if pre(i) == 2 then false elseif pre(i) == -2 then true else pre(up) else pre(up);
- y = if temp_1 and not pre(temp_1) then i else pre(y);
+ temp_2 = temp_1 and not pre(temp_1);
+ i = if temp_2 and not pre(temp_2) then if up then pre(i) + 1 else pre(i) - 1 else pre(i);
+ up = if temp_2 and not pre(temp_2) then if pre(i) == 2 then false elseif pre(i) == -2 then true else pre(up) else pre(up);
+ y = if temp_2 and not pre(temp_2) then i else pre(y);
  der(v1) = if y <= 0 then 0 else 1;
  der(v2) = if y < 0 then 0 else 1;
  der(v3) = if y >= 0 then 0 else 1;
  der(v4) = if y > 0 then 0 else 1;
+ temp_1 = sample(0.1, 1);
 end TransformCanonicalTests.WhenEqu13;
-			
-")})));		
+")})));
 end WhenEqu13;
 model WhenEqu14
     Boolean a;
@@ -4598,22 +4613,24 @@ Compliance error in flattened model:
 	end when;
 			
 
-	annotation(__JModelica(UnitTesting(tests={
-		TransformCanonicalTestCase(
-			name="IfEqu19",
-			description="Check that if equations inside when equations are treated correctly.",
-			flatModel="
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="IfEqu19",
+            description="Check that if equations inside when equations are treated correctly.",
+            flatModel="
 fclass TransformCanonicalTests.IfEqu19
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ pre(x) = 0.0;
+ pre(temp_2) = false;
 equation
+ temp_2 = temp_1 and not pre(temp_1);
+ x = if temp_2 and not pre(temp_2) then if time >= 3 then pre(x) + 1 else pre(x) + 5 else pre(x);
  temp_1 = sample(1, 0);
- x = if temp_1 and not pre(temp_1) then if time >= 3 then pre(x) + 1 else pre(x) + 5 else pre(x);
 end TransformCanonicalTests.IfEqu19;
-			
 ")})));
   end IfEqu19;
 
@@ -7765,12 +7782,15 @@ equation
 fclass TransformCanonicalTests.Sample1
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ pre(x) = 0.0;
+ pre(temp_2) = false;
 equation
+ temp_2 = temp_1 and not pre(temp_1);
+ x = if temp_2 and not pre(temp_2) then time * 6.28 else pre(x);
  temp_1 = sample(0, 1);
- x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
 end TransformCanonicalTests.Sample1;
 ")})));
 end Sample1;
@@ -7790,12 +7810,15 @@ equation
 fclass TransformCanonicalTests.Sample2
  discrete Real x;
  discrete Boolean temp_1;
+ discrete Boolean temp_2;
 initial equation 
- pre(x) = 0.0;
  pre(temp_1) = false;
+ pre(x) = 0.0;
+ pre(temp_2) = false;
 equation
- temp_1 = sample(0, 1) and time < 20;
- x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
+ temp_2 = temp_1 and not pre(temp_1) and time < 20;
+ x = if temp_2 and not pre(temp_2) then time * 6.28 else pre(x);
+ temp_1 = sample(0, 1);
 end TransformCanonicalTests.Sample2;
 ")})));
 end Sample2;
