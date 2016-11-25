@@ -2250,6 +2250,7 @@ model ArrayCat12
         TransformCanonicalTestCase(
             name="Cat_ArrayCat12",
             description="Single argument cat",
+            eliminate_linear_equations=false,
             flatModel="
 fclass ArrayBuiltins.Cat.ArrayCat12
  constant Real k[1] = 1;

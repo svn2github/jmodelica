@@ -219,33 +219,34 @@ aspect EquationSolve {
         return FExp.createBalancedBinaryTree(new FMulExp(), expsCopies);
     }
 
-	// Get terms
-	syn ArrayList<FExp> FEquation.terms() {
-		ArrayList<FExp> t = new ArrayList<FExp>();
-		t.addAll(getLeft().terms());
-		t.addAll(getRight().terms());
-		return t;
-	}
-	
-	syn ArrayList<FExp> FExp.terms() {
-		ArrayList<FExp> t = new ArrayList<FExp>();
-		t.add(this);
-		return t;
-	}
-	
-	eq FDotAddExp.terms() {
-		ArrayList<FExp> t = new ArrayList<FExp>();
-		t.addAll(getLeft().terms());
-		t.addAll(getRight().terms());
-		return t;
-	}
+    syn ArrayList<FExp> FAbstractEquation.terms() = new ArrayList<FExp>();
 
-	eq FDotSubExp.terms() {
-		ArrayList<FExp> t = new ArrayList<FExp>();
-		t.addAll(getLeft().terms());
-		t.addAll(getRight().terms());
-		return t;
-	}
+    eq FEquation.terms() {
+        ArrayList<FExp> t = new ArrayList<FExp>();
+        t.addAll(getLeft().terms());
+        t.addAll(getRight().terms());
+        return t;
+    }
+
+    syn ArrayList<FExp> FExp.terms() {
+        ArrayList<FExp> t = new ArrayList<FExp>();
+        t.add(this);
+        return t;
+    }
+
+    eq FDotAddExp.terms() {
+        ArrayList<FExp> t = new ArrayList<FExp>();
+        t.addAll(getLeft().terms());
+        t.addAll(getRight().terms());
+        return t;
+    }
+
+    eq FDotSubExp.terms() {
+        ArrayList<FExp> t = new ArrayList<FExp>();
+        t.addAll(getLeft().terms());
+        t.addAll(getRight().terms());
+        return t;
+    }
 
 	// Get factors	
 	syn ArrayList<FExp> FExp.factors() {

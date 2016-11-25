@@ -14663,6 +14663,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear4",
             description="Test of the semiLinear() operator. Zero flow transformation.",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear4
  Real x;
@@ -14699,6 +14700,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear5",
             description="Test of the semiLinear() operator. Zero flow transformation.",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear5
  Real x;
@@ -14737,6 +14739,7 @@ equation
         ErrorTestCase(
             name="FunctionLike_Special_SemiLinear6",
             description="Test of the semiLinear() operator. Zero flow transformation error",
+            eliminate_linear_equations=false,
             variability_propagation=false,
             errorMessage="
 1 errors found:
@@ -14762,6 +14765,7 @@ equation
         TransformCanonicalTestCase(
             name="FunctionLike_Special_SemiLinear7",
             description="Check that semiLinear() with event-generating argument does not expand with smooth(0, ...)",
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.Special.SemiLinear7
  Real x;
@@ -14924,7 +14928,7 @@ fclass FunctionTests.FunctionLike.EventRel.Smooth2
  Real d;
 equation
  b = time;
- c = b * 2;
+ c = -2 * (- time);
  d = c + b;
  a = smooth(0, if a < 0.65 then b / c * d else 0.42250000000000004 / b + d * (b - 0.65) / c);
 end FunctionTests.FunctionLike.EventRel.Smooth2;
@@ -14932,20 +14936,21 @@ end FunctionTests.FunctionLike.EventRel.Smooth2;
 end Smooth2;
 
 model Pre1
-	discrete Integer x;
-	Real y = pre(x);
-	discrete Integer x2[2] = {x, x};
-	Real y2[2] = pre(x2);
+    discrete Integer x;
+    Real y = pre(x);
+    discrete Integer x2[2] = {x, x};
+    Real y2[2] = pre(x2);
 equation
-	when time > 1 then
-		x = 1;
-	end when;
+    when time > 1 then
+        x = 1;
+    end when;
 
     annotation(__JModelica(UnitTesting(tests={
         TransformCanonicalTestCase(
             name="FunctionLike_EventRel_Pre1",
             description="pre(): basic test",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Pre1
  discrete Integer x;
@@ -14997,6 +15002,7 @@ equation
             name="FunctionLike_EventRel_Edge1",
             description="edge(): basic test",
             eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Edge1
  discrete Boolean x;
@@ -15053,10 +15059,8 @@ equation
             description="change(): basic test",
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.Change1
- Real x;
  discrete Boolean y;
  Real x2[1];
- Real x2[2];
  discrete Boolean y2[1];
  discrete Boolean y2[2];
  discrete Boolean temp_1;
@@ -15067,12 +15071,10 @@ initial equation
  pre(temp_1) = false;
 equation
  temp_1 = time > 1;
- y = if temp_1 and not pre(temp_1) then x <> pre(x) else pre(y);
+ y = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y);
  y2[1] = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y2[1]);
- y2[2] = if temp_1 and not pre(temp_1) then x2[2] <> pre(x2[2]) else pre(y2[2]);
- x = time;
+ y2[2] = if temp_1 and not pre(temp_1) then x2[1] <> pre(x2[1]) else pre(y2[2]);
  x2[1] = time;
- x2[2] = time;
 end FunctionTests.FunctionLike.EventRel.Change1;
 ")})));
 end Change1;

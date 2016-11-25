@@ -7539,12 +7539,11 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
-
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _a_2 = _time;
-    _b_3 = _time * 2;
+    _b_3 = 2 * _a_2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }
@@ -7560,7 +7559,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     JMI_DEF(REA, tmp_1)
     JMI_DEF(REA, tmp_2)
     _a_2 = _time;
-    _b_3 = _time * 2;
+    _b_3 = 2 * _a_2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _time - (1), _sw(0), JMI_REL_GT);
     }
@@ -9696,6 +9695,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             automatic_tearing=false,
+            eliminate_linear_equations=false,
             variability_propagation=false,
             template="
 $C_dae_blocks_residual_functions$
@@ -10177,6 +10177,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             automatic_tearing=false,
+            eliminate_linear_equations=false,
             variability_propagation=false,
             template="
 $C_dae_blocks_residual_functions$
@@ -10517,6 +10518,7 @@ equation
             description="Test of mixed non-solved equation block",
             generate_ode=true,
             equation_sorting=true,
+            eliminate_linear_equations=false,
             automatic_tearing=false,
             template="
 $C_dae_blocks_residual_functions$
@@ -14340,6 +14342,7 @@ equation
             description="Test of code generation of torn mixed linear block",
             generate_ode=true,
             equation_sorting=true,
+            eliminate_linear_equations=false,
             variability_propagation=false,
             template="
 $C_dae_blocks_residual_functions$
@@ -14526,6 +14529,7 @@ equation
         CCodeGenTestCase(
             name="TearingTest3",
             description="Test code generation of torn blocks",
+            eliminate_linear_equations=false,
             template="$C_dae_blocks_residual_functions$",
             generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
@@ -14913,6 +14917,7 @@ equation
         CCodeGenTestCase(
             name="TornMetaEquation1",
             description="",
+            eliminate_linear_equations=false,
             template="
 $C_dae_add_blocks_residual_functions$
 $C_reinit_temp_decls$
@@ -15678,7 +15683,6 @@ algorithm
             description="Test of variable array index in LHS of algorithm",
             template="$C_ode_derivatives$",
             generatedCode="
-
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -15716,7 +15720,6 @@ algorithm
             description="Test of variable array index in LHS of algorithm",
             template="$C_ode_derivatives$",
             generatedCode="
-
 int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -15725,31 +15728,31 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1)
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(0) = jmi_turn_switch_time(jmi, _time - (pre_i_6), _sw(0), JMI_REL_LT);
+        _sw(0) = jmi_turn_switch_time(jmi, _time - (pre_i_4), _sw(0), JMI_REL_LT);
     }
     if (jmi->atInitial || jmi->atEvent) {
-        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_i_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
+        _sw(1) = jmi_turn_switch_time(jmi, _time - (pre_i_4 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_GEQ);
     }
-    _i_6 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_6);
-    pre_i_6 = _i_6;
-    _is_1_7 = _i_6 + -1;
-    pre_is_1_7 = _is_1_7;
-    _is_2_8 = _i_6 + -2;
-    pre_is_2_8 = _is_2_8;
-    _is_3_9 = _i_6 + -3;
-    pre_is_3_9 = _is_3_9;
-    _x_1_3 = _time;
-    _x_2_4 = _time;
-    _x_3_5 = _time;
+    _i_4 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(0), _sw(1)), _atInitial), JMI_TRUE, floor(_time), pre_i_4);
+    pre_i_4 = _i_4;
+    _is_1_5 = _i_4 + -1;
+    pre_is_1_5 = _is_1_5;
+    _is_2_6 = _is_1_5 + -1;
+    pre_is_2_6 = _is_2_6;
+    _is_3_7 = _is_1_5 + -2;
+    pre_is_3_7 = _is_3_7;
+    _x_2_3 = _time;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
-    memcpy(&jmi_array_ref_1(tmp_1, 1), &_is_1_7, 3 * sizeof(jmi_real_t));
+    memcpy(&jmi_array_ref_1(tmp_1, 1), &_is_1_5, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
     memcpy(&jmi_array_ref_1(tmp_2, 1), &_y_1_0, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
-    memcpy(&jmi_array_ref_1(tmp_3, 1), &_is_1_7, 3 * sizeof(jmi_real_t));
+    memcpy(&jmi_array_ref_1(tmp_3, 1), &_is_1_5, 3 * sizeof(jmi_real_t));
     JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_4, 3, 1, 3)
-    memcpy(&jmi_array_ref_1(tmp_4, 1), &_x_1_3, 3 * sizeof(jmi_real_t));
-    jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_6)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_6));
+    jmi_array_ref_1(tmp_4, 1) = _x_2_3;
+    jmi_array_ref_1(tmp_4, 2) = _x_2_3;
+    jmi_array_ref_1(tmp_4, 3) = _x_2_3;
+    jmi_array_val_1(tmp_2, jmi_array_val_1(tmp_1, _i_4)) = jmi_array_val_1(tmp_4, jmi_array_val_1(tmp_3, _i_4));
     memcpy(&_y_1_0, &jmi_array_val_1(tmp_2, 1), 3 * sizeof(jmi_real_t));
     JMI_DYNAMIC_FREE()
     return ef;
@@ -17645,7 +17648,6 @@ $C_ode_initialization$
 $C_ode_derivatives$
 ",
             generatedCode="
-
 int model_ode_initialize_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -17659,7 +17661,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     if (_sw(0) == JMI_FALSE) {
         jmi_assert_failed(\"x is too high.\", JMI_ASSERT_ERROR);
     }
-    _y_1 = _x_0 + 1;
+    _y_1 = _time + 2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(1) = jmi_turn_switch(jmi, _y_1 - (AD_WRAP_LITERAL(4)), _sw(1), JMI_REL_LT);
     }
@@ -17687,7 +17689,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     int ef = 0;
     JMI_DYNAMIC_INIT()
     _x_0 = _time + 1;
-    _y_1 = _x_0 + 1;
+    _y_1 = _time + 2;
     if (jmi->atInitial || jmi->atEvent) {
         _sw(0) = jmi_turn_switch(jmi, _x_0 - (AD_WRAP_LITERAL(3)), _sw(0), JMI_REL_LT);
     }
@@ -18898,6 +18900,7 @@ equation
         CCodeGenTestCase(
             name="TruncDivString1",
             description="Test code gen for active switch indexes in block.",
+            eliminate_linear_equations=false,
             template="$C_ode_derivatives$",
             generatedCode="
 
@@ -20996,6 +20999,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         CCodeGenTestCase(
             name="DynamicStates_ThreeDSTwoEqWithConstantCoefficients",
             description="Test code gen for dynamic state model with three states in two equation with some constant coefficients",
+            eliminate_linear_equations=false,
             dynamic_states=true,
             template="
 n_real_x = $n_real_x$
@@ -21289,8 +21293,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t tmp_1;
     jmi_ad_var_t tmp_2;
+    _a5_4 = - _time + 1;
     _a7_6 = _time;
-    _a5_4 = - _a7_6 + 1;
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
@@ -21322,8 +21326,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         __ds_1_a1_14 = _a1_0;
         __ds_2_a1_16 = _a4_3;
     }
+    _der_a5_9 = -1.0;
     _der_a7_12 = 1.0;
-    _der_a5_9 = - _der_a7_12;
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
     if (jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
         tmp_1 = _der_a1_20;
@@ -21340,6 +21344,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
 ")})));
         end TwoDSSetSameBlock;
     end DynamicStates;

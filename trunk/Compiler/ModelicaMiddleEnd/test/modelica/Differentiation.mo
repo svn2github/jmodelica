@@ -1366,7 +1366,7 @@ equation
  der(a1.c.s) = time / 2;
  der(a2.c.s) = time / 2;
  a1.c.p = time;
- a1.c.f = time - 1;
+ a1.c.f = a1.c.p + -1;
  a1.x = if a1.c.f > 0.0 then a2.c.s else a1.c.s;
  a1.dx = if a1.c.f > 0.0 then der(a2.c.s) else der(a1.c.s);
  a2.x = if - a1.c.f > 0.0 then a1.c.s else a2.c.s;
@@ -3721,17 +3721,17 @@ equation
  x4 = Differentiation.MultipleDerivativeAnnotation2.f(7, 8, time);
  _der_x4 = y4;
  t[1] = time;
- t[2] = 2 * time;
- t[3] = 3 * time;
- t[4] = 4 * time;
+ t[2] = 2 * t[1];
+ t[3] = 3 * t[1];
+ t[4] = 4 * t[1];
  _der_x4 = Differentiation.MultipleDerivativeAnnotation2.dfcxy(7, 8, time);
  _der_x1 = Differentiation.MultipleDerivativeAnnotation2.df(t[1], t[2], time, _der_t[1], _der_t[2]);
  _der_t[1] = 1.0;
- _der_t[2] = 2;
+ _der_t[2] = 2 * _der_t[1];
  _der_x2 = Differentiation.MultipleDerivativeAnnotation2.dfcy(t[3], 5, time, _der_t[3]);
- _der_t[3] = 3;
+ _der_t[3] = 3 * _der_t[1];
  _der_x3 = Differentiation.MultipleDerivativeAnnotation2.dfcx(6, t[4], time, _der_t[4]);
- _der_t[4] = 4;
+ _der_t[4] = 4 * _der_t[1];
 
 public
  function Differentiation.MultipleDerivativeAnnotation2.f
