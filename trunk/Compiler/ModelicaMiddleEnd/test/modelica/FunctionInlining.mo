@@ -2612,31 +2612,28 @@ equation
         (x,y) = F(time);
     end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEquationInline1",
-            description="Check variability of argument moved out of when equation",
-            inline_functions="trivial",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEquationInline1",
+			description="Check variability of argument moved out of when equation",
+			inline_functions="trivial",
+			flatModel="
 fclass FunctionInlining.WhenEquationInline1
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
- discrete Boolean temp_2;
 initial equation 
- pre(temp_1) = false;
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_2) = false;
+ pre(temp_1) = false;
 equation
- temp_2 = temp_1 and not pre(temp_1);
- if temp_2 and not pre(temp_2) then
+ temp_1 = sample(0, 1);
+ if temp_1 and not pre(temp_1) then
   (x, y) = FunctionInlining.WhenEquationInline1.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
- temp_1 = sample(0, 1);
 
 public
  function FunctionInlining.WhenEquationInline1.F
@@ -2650,6 +2647,7 @@ public
  end FunctionInlining.WhenEquationInline1.F;
 
 end FunctionInlining.WhenEquationInline1;
+			
 ")})));
 end WhenEquationInline1;
 	

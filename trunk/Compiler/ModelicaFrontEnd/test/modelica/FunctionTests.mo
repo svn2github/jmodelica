@@ -15100,13 +15100,10 @@ model SampleTest1
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.SampleTest1
  discrete Boolean x;
- discrete Boolean temp_1;
 initial equation 
- pre(temp_1) = false;
  pre(x) = false;
 equation
- x = temp_1 and not pre(temp_1);
- temp_1 = sample(0, 1);
+ x = sample(0, 1);
 end FunctionTests.FunctionLike.EventRel.SampleTest1;
 ")})));
 end SampleTest1;
