@@ -782,10 +782,10 @@ der(_ds.2.s1) := dsDer(2, 1)
                 methodName="printDAEBLT",
                 methodResult="
 --- Solved equation ---
-a5 := - time + 1
+a7 := time
 
 --- Solved equation ---
-a7 := time
+a5 := - a7 + 1
 
 --- Dynamic state block ---
   --- States: a1, a4 ---
@@ -917,7 +917,7 @@ Coefficient variability: continuous-time
 _der_a7 := 1.0
 
 --- Solved equation ---
-_der_a5 := -1.0
+_der_a5 := - _der_a7
 
 --- Torn linear system (Block 2) of 3 iteration variables and 4 solved variables ---
 Coefficient variability: continuous-time

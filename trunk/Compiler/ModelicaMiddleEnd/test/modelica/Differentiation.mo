@@ -1366,7 +1366,7 @@ equation
  der(a1.c.s) = time / 2;
  der(a2.c.s) = time / 2;
  a1.c.p = time;
- a1.c.f = a1.c.p + -1;
+ a1.c.f = time - 1;
  a1.x = if a1.c.f > 0.0 then a2.c.s else a1.c.s;
  a1.dx = if a1.c.f > 0.0 then der(a2.c.s) else der(a1.c.s);
  a2.x = if - a1.c.f > 0.0 then a1.c.s else a2.c.s;

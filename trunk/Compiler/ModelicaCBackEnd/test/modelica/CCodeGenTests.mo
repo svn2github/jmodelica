@@ -9384,6 +9384,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            eliminate_linear_equations=false,
             automatic_tearing=false,
             template="
 $C_dae_blocks_residual_functions$
@@ -9912,6 +9913,7 @@ equation
             generate_ode=true,
             equation_sorting=true,
             variability_propagation=false,
+            eliminate_linear_equations=false,
             automatic_tearing=false,
             template="$C_dae_blocks_residual_functions$",
             generatedCode="
@@ -21293,8 +21295,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
     JMI_DYNAMIC_INIT()
     jmi_ad_var_t tmp_1;
     jmi_ad_var_t tmp_2;
-    _a5_4 = - _time + 1;
     _a7_6 = _time;
+    _a5_4 = - _a7_6 + 1;
     if (jmi->atInitial || jmi->atEvent) {
         jmi_dynamic_state_update_states(jmi, 0);
     }
@@ -21326,8 +21328,8 @@ int model_ode_derivatives_base(jmi_t* jmi) {
         __ds_1_a1_14 = _a1_0;
         __ds_2_a1_16 = _a4_3;
     }
-    _der_a5_9 = -1.0;
     _der_a7_12 = 1.0;
+    _der_a5_9 = - _der_a7_12;
     ef |= jmi_solve_block_residual(jmi->dae_block_residuals[4]);
     if (jmi_dynamic_state_check_is_state(jmi, 0, 4)) {
         tmp_1 = _der_a1_20;

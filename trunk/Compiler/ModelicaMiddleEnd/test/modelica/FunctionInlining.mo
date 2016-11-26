@@ -791,7 +791,7 @@ end FunctionInlining.RecordInline4;
             d := R({1,2,3} * c, 2);
         end f;
         
-        Real y = 1;
+        Real y = time;
         R x = f(y);
 
     annotation(__JModelica(UnitTesting(tests={
@@ -809,9 +809,9 @@ fclass FunctionInlining.RecordInline5
 initial equation 
  pre(x.b) = 0;
 equation
- y = 1;
- x.a[2] = 2 * y;
- x.a[3] = -3 / -2 * x.a[2];
+ y = time;
+ x.a[2] = -2 * (- time);
+ x.a[3] = -3 * (- time);
  x.b = 2;
 end FunctionInlining.RecordInline5;
 ")})));
@@ -834,7 +834,7 @@ end FunctionInlining.RecordInline5;
             d := sum(e.a) + c * e.b;
         end f;
         
-        Real y = 1;
+        Real y = time;
         Real x = f(y);
 
 	annotation(__JModelica(UnitTesting(tests={
@@ -842,13 +842,14 @@ end FunctionInlining.RecordInline5;
 			name="RecordInline6",
 			description="",
 			variability_propagation=false,
+            eliminate_linear_equations=false,
 			inline_functions="all",
 			flatModel="
 fclass FunctionInlining.RecordInline6
  Real y;
  Real x;
 equation
- y = 1;
+ y = time;
  x = y + 2 * y + 3 * y + y * 4;
 end FunctionInlining.RecordInline6;
 ")})));
@@ -930,7 +931,7 @@ end FunctionInlining.RecordInline7;
             d.b := integer(5 - c);
         end f;
         
-        Real y = 1;
+        Real y = time;
         R x = f(y);
 
     annotation(__JModelica(UnitTesting(tests={
@@ -938,6 +939,7 @@ end FunctionInlining.RecordInline7;
             name="RecordInline8",
             description="",
             variability_propagation=false,
+            eliminate_linear_equations=false,
             inline_functions="all",
             flatModel="
 fclass FunctionInlining.RecordInline8
@@ -949,10 +951,10 @@ fclass FunctionInlining.RecordInline8
 initial equation 
  pre(x.b) = 0;
 equation
- y = 1;
+ y = time;
  x.a[1] = 2 / y;
  x.a[2] = 3 + y;
- x.a[3] = 4 * x.a[2] + -12;
+ x.a[3] = 4 * y;
  x.b = noEvent(integer(5 - y));
 end FunctionInlining.RecordInline8;
 ")})));
@@ -4236,7 +4238,7 @@ fclass FunctionInlining.ChainedCallInlining4
  Real temp_14;
 equation
  y = temp_14 + 4 + (temp_14 + 5);
- - time = 1 / -2 * y + 1 / -2 * -9;
+ temp_14 = time;
 end FunctionInlining.ChainedCallInlining4;
 ")})));
 end ChainedCallInlining4;
@@ -4410,8 +4412,8 @@ fclass FunctionInlining.ChainedCallInlining8
  Real y2[3];
 equation
  y2[1] = time;
- y1[2] = y2[1] + 1;
- y1[3] = y2[1] + 2;
+ y1[2] = time + 1;
+ y1[3] = y1[2] + 1;
  y2[2] = y2[1] + 1;
  y2[3] = y2[2] + 1;
 end FunctionInlining.ChainedCallInlining8;
@@ -4448,7 +4450,7 @@ fclass FunctionInlining.ChainedCallInlining9
  Real y[2];
 equation
  y[1] = time;
- y[2] = y[1] + 1;
+ y[2] = time + 1;
 end FunctionInlining.ChainedCallInlining9;
 ")})));
 end ChainedCallInlining9;
@@ -4483,7 +4485,7 @@ fclass FunctionInlining.ChainedCallInlining10
  Real y[2,1];
 equation
  y[1,1] = time;
- y[2,1] = y[1,1] + 1;
+ y[2,1] = time + 1;
 end FunctionInlining.ChainedCallInlining10;
 ")})));
 end ChainedCallInlining10;

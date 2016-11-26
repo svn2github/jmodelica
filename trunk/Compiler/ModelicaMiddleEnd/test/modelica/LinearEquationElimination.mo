@@ -183,6 +183,34 @@ end LinearEquationElimination.Constant1;
 ")})));
     end Constant1;
 
+    model Constant2
+        Real a, b, c;
+        Real x;
+    equation
+        sin(a + b) = 0;
+        a * b * c = time;
+        a + b + c = 0;
+        x = a + b + c;
+
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constant2",
+            description="Ensure that constants can be the unique part between two equations and elimination occurs",
+            flatModel="
+fclass LinearEquationElimination.Constant2
+ Real a;
+ Real b;
+ Real c;
+ Real x;
+equation
+ sin(a + b) = 0;
+ a * b * c = time;
+ a + b + c = 0;
+ x = 0;
+end LinearEquationElimination.Constant2;
+")})));
+    end Constant2;
+
 
     model Coefficient1
         Real a;

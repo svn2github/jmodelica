@@ -276,9 +276,9 @@ fclass StreamTests.StreamTest7
  Real h;
 equation
  h = g.b;
- - time = - h;
+ g.b = time;
  g.c = 2 / g.b;
- - f.e.b = - h;
+ g.b = f.e.b;
  f.e.c = g.c;
 end StreamTests.StreamTest7;
 ")})));

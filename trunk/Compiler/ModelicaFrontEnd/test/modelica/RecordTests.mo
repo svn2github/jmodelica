@@ -1565,7 +1565,7 @@ fclass RecordTests.RecordBinding27
  Real r.x[2,1];
 equation
  r.t[1] = time;
- r.t[2] = r.t[1] + 1;
+ r.t[2] = time + 1;
  r.x[1,1] = -2 * (- time);
  r.x[2,1] = r.t[1] + r.t[2];
 end RecordTests.RecordBinding27;
@@ -7358,7 +7358,7 @@ fclass RecordTests.RecordMerge2
  Real c.a;
 equation
  c.a = time;
- b.c = c.a + 1;
+ b.c = time + 1;
 end RecordTests.RecordMerge2;
 ")})));
 end RecordMerge2;
@@ -7672,7 +7672,7 @@ fclass RecordTests.RecordModification1
  Real z.x;
 equation
  y = time;
- z.x = time + 2;
+ z.x = y + 2;
 end RecordTests.RecordModification1;
 ")})));
 end RecordModification1;

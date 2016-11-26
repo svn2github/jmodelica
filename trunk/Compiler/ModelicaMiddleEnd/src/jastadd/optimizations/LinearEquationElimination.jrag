@@ -131,14 +131,6 @@ aspect eliminateLinearEquations {
                 /*
                  * Put all constants on the same side.
                  */
-                FExp constant = null;
-                if (c2 % c1 == 0) {
-                    constant = new FIntegerLitExp((c2 / c1) * coeffSource.get(litKey) - coeffDest.get(litKey));
-                } else {
-                    constant = new FSubExp(new FMulExp(coeff, new FIntegerLitExp(coeffSource.get(litKey))),
-                            new FIntegerLitExp(coeffDest.get(litKey)));
-                }
-
                 for (String key : uniqueDest) {
                     leftExps.add(newTerm(coeffDest.get(key), key));
                 }
@@ -155,7 +147,7 @@ aspect eliminateLinearEquations {
                             c1), newTerm(key)));
                 }
 
-                rhs = new FAddExp(addTree(rhs, rightExps), constant);
+                rhs = addTree(rhs, rightExps);
                 FAbstractEquation newEquation = new FEquation(new FNormalEquation(), lhs, rhs);
                 dest.replaceMe(newEquation);
                 return newEquation;
@@ -189,7 +181,6 @@ aspect eliminateLinearEquations {
                 }
                 destUnique.removeAll(mutual);
 
-                mutual.remove(FIntegerLitExp.coeffKey);
                 if (mutual.size() <= 0) {
                     return false;
                 }
@@ -249,7 +240,6 @@ aspect eliminateLinearEquations {
     syn Map<String, Integer> FAbstractEquation.coefficientMap() { return new LinkedHashMap<String, Integer>(); }
     eq FEquation.coefficientMap() {
         Map<String, Integer> coefficientMap = new LinkedHashMap<String, Integer>();
-        coefficientMap.put(FLitExp.coeffKey, 0);
 
         for (FExp exp : linearTerms()) {
             String coeffKey = exp.myCoeffKey();

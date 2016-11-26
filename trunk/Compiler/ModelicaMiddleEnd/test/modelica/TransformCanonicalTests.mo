@@ -5352,20 +5352,19 @@ end StateInitialPars8;
   model SolveEqTest1
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     y = x + 3;
-    z = x - y ;
+    z = x - y;
 
 	annotation(__JModelica(UnitTesting(tests={
 		FClassMethodTestCase(
 			name="SolveEqTest1",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := x + 3
@@ -5379,7 +5378,7 @@ z := x + (- y)
   model SolveEqTest2
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     - y = x + 3;
     - z = x - y ;
 
@@ -5387,12 +5386,11 @@ z := x + (- y)
 		FClassMethodTestCase(
 			name="SolveEqTest2",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := - x - 3
@@ -5518,7 +5516,7 @@ x / z = x - y
 
     Real x, y, z;
   equation
-    x = 1;
+    x = time;
     - y = x + 3 - y + 4*y;
     - z = x - y -z - 5*z;
 
@@ -5526,12 +5524,11 @@ x / z = x - y
 		FClassMethodTestCase(
 			name="SolveEqTest7",
 			description="Test solution of equations",
-			equation_sorting=true,
-			variability_propagation=false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Solved equation ---
-x := 1
+x := time
 
 --- Solved equation ---
 y := (x + 3) / (-1.0 + 1.0 + -4)
@@ -5798,6 +5795,7 @@ x1 - x2 = z*w;
 			description="Test of linear systems of equations",
 			equation_sorting=true,
             automatic_tearing = false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
@@ -5836,6 +5834,7 @@ x1 - x2 = z;
 			description="Test of linear systems of equations",
 			equation_sorting=true,
             automatic_tearing = false,
+            eliminate_linear_equations=false,
 			methodName="printDAEBLT",
 			methodResult="
 --- Unsolved linear system (Block 1) of 3 variables ---
