@@ -576,13 +576,13 @@ static int jmi_linear_solver_sparse_compute_sparsity_backsolve(const jmi_matrix_
 /* L (sparse, tringular) x (sparse) = B (sparse) */
 static int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work) {
     jmi_int_t i, B_p, L_p;
-    
-    for (i = 0; i < nz_size; i++) { work[nz_pattern[i]] = 0.0; }
-    
+
+    /* Copy the right-hand side into the work vector */
     for (B_p = B->col_ptrs[col]; B_p < B->col_ptrs[col+1]; B_p++) {
         work[B->row_ind[B_p]] = B->x[B_p];
     }
     
+    /* Perform the backsolve */
     for (i = 0; i < nz_size; i++) {
         jmi_int_t col_L = nz_pattern[i];
         double val;
@@ -606,7 +606,7 @@ static int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A
 
     for (col = 0 ; col < A->nbr_cols ; col++) {
         jmi_int_t col_ind = A->nbr_cols*col;
-        for (p = A->col_ptrs[col] ; p < A->col_ptrs[col+1] ; p++) {
+        for (p = A->col_ptrs[col]; p < A->col_ptrs[col+1]; p++) {
             C[col_ind+A->row_ind[p]] += A->x[p];
         }
     }
@@ -668,6 +668,7 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block) {
             
             for (i = 0; i < Jsp->nz_sizes[col]; i++) {
                 Jsp->M1->x[k] = Jsp->work_x[Jsp->nz_patterns[col][i]];
+                Jsp->work_x[Jsp->nz_patterns[col][i]] = 0.0; /* Reset work vector */
                 k = k + 1;
             }
         }
