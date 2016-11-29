@@ -44,6 +44,7 @@ end LinearEquationElimination.Simple1;
 ")})));
     end Simple1;
 
+
     model Simple2
         Real a;
         Real b;
@@ -210,6 +211,38 @@ equation
 end LinearEquationElimination.Constant2;
 ")})));
     end Constant2;
+
+
+    model Constant3
+
+        Real a;
+        Real b;
+        Real c;
+        Real x;
+    equation
+        x = a + b + c;
+        a + b + c = 1;
+        b = sin(time);
+        c = sin(time);
+
+        annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Constant3",
+            description="Find alias expressions when a variable should be equal to a constant.",
+            flatModel="
+fclass LinearEquationElimination.Constant3
+ Real a;
+ Real b;
+ Real c;
+ Real x;
+equation
+ x = a + b + c;
+ -1 = - x;
+ b = sin(time);
+ c = sin(time);
+end LinearEquationElimination.Constant3;
+")})));
+    end Constant3;
 
 
     model Coefficient1

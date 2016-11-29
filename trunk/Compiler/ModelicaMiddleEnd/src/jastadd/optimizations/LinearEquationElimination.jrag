@@ -71,6 +71,8 @@ aspect eliminateLinearEquations {
                         equationMap.put(dest, dest.coefficientMap());
                         FAbstractEquation newEquation = null;
                         if ((newEquation = removeAliasesFromEquations(equationMap, src, dest)) != null) {
+                            // ASTNode.log.debug("Rewriting " + dest + ", using\n\t" + src + "\n\tto\n" +
+                            //         newEquation + ".");
                             equations.set(j, newEquation);
                             modified.add(newEquation);
                         }
@@ -107,13 +109,10 @@ aspect eliminateLinearEquations {
                     return null;
                 }
 
-                String litKey = FLitExp.coeffKey;
                 String pivot = null;
                 for (String key : mutual) {
-                    if (!key.equals(litKey)) {
-                        pivot = key;
-                        break;
-                    }
+                    pivot = key;
+                    break;
                 }
 
                 if (pivot == null) {
@@ -131,11 +130,21 @@ aspect eliminateLinearEquations {
                 /*
                  * Put all constants on the same side.
                  */
-                for (String key : uniqueDest) {
-                    leftExps.add(newTerm(coeffDest.get(key), key));
+
+                if (uniqueDest.isEmpty()) {
+                    leftExps.add(new FIntegerLitExp(0));
+                } else {
+                    for (String key : uniqueDest) {
+                        leftExps.add(newTerm(coeffDest.get(key), key));
+                    }
                 }
-                for (String key : uniqueSource) {
-                    rightExps.add(newTerm(coeffSource.get(key), key));
+
+                if (uniqueSource.isEmpty()) {
+                    rightExps.add(new FIntegerLitExp(0));
+                } else {
+                    for (String key : uniqueSource) {
+                        rightExps.add(newTerm(coeffSource.get(key), key));
+                    }
                 }
 
                 FExp lhs = FExp.createBalancedBinaryTree(new FAddExp(), leftExps);
@@ -185,7 +194,7 @@ aspect eliminateLinearEquations {
                     return false;
                 }
 
-                return !(sourceUnique.isEmpty() || destUnique.isEmpty() || sourceUnique.size() > ALIAS_SIZE ||
+                return !(sourceUnique.isEmpty() && destUnique.isEmpty() || sourceUnique.size() > ALIAS_SIZE ||
                         destUnique.size() > ALIAS_SIZE);
             }
 
@@ -244,7 +253,7 @@ aspect eliminateLinearEquations {
         for (FExp exp : linearTerms()) {
             String coeffKey = exp.myCoeffKey();
             int newValue = exp.coeff() + (coefficientMap.containsKey(coeffKey) ? coefficientMap.get(coeffKey) : 0);
-            if (newValue == 0 && !coeffKey.equals(FLitExp.coeffKey)) {
+            if (newValue == 0) {
                 coefficientMap.remove(coeffKey);
             } else {
                 coefficientMap.put(coeffKey, newValue);
@@ -317,7 +326,7 @@ aspect eliminateLinearEquations {
 
     public static final String FLitExp.coeffKey     = "#const";
     public static final String FTimeExp.coeffKey    = "time";
-    syn lazy String FExp.myCoeffKey()               = toString();
+    syn String FExp.myCoeffKey()                    = toString();
 
     eq FIdUseExp.myCoeffKey()                       = name();
     eq FLitExp.myCoeffKey()                         = coeffKey;
@@ -327,7 +336,7 @@ aspect eliminateLinearEquations {
     /* ==================================================== *
      *  Determine whether or not to eliminate an equation.  *
      * ==================================================== */
-    
+
     syn boolean FAbstractEquation.isSimpleLinear() = false;
     eq FEquation.isSimpleLinear() = !containsActiveAnnotations() && !isSimpleAlias() &&
             getLeft().isSimpleLinearExp() && getRight().isSimpleLinearExp();
@@ -349,23 +358,10 @@ aspect eliminateLinearEquations {
     eq FIntegerLitExp.isSimpleLinearExp()   = true;
     eq FRealLitExp.isSimpleLinearExp()      = getValue() == ((int) getValue()) && !isLiteralZero();
 
-    /* ================= *
-     *  Helper methods.  *
-     * ================= */
-
-    public boolean FAbstractEquation.updateEquation(FExp lhs, FExp rhs) { return false; }
-    public boolean FEquation.updateEquation(FExp lhs, FExp rhs) {
-        setLeft(lhs);
-        setLeft(rhs);
-        return true;
-    }
-    
-    /*
-     * Debug.
-     */
     syn boolean FAbstractEquation.isSimpleAlias() = false;
     eq FEquation.isSimpleAlias() = getLeft().isSimpleAlias() && getRight().isSimpleAlias();
     syn boolean FExp.isSimpleAlias() = false;
     eq FIdUseExp.isSimpleAlias() = true;
+    eq FLitExp.isSimpleAlias() = true;
     eq FNegExp.isSimpleAlias() = getFExp().isSimpleAlias();
 }

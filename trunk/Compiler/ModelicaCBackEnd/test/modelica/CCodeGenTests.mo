@@ -10016,8 +10016,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 3;
         x[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 5;
-        (*res)[1] = 15;
+        (*res)[0] = 20;
+        (*res)[1] = 25;
         (*res)[2] = 5;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_2_2;
@@ -10028,12 +10028,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         init_with_lbound(x[2], 1, \"Resetting initial value for variable x[1]\");
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 9 * sizeof(jmi_real_t));
-        residual[0] = -1.0;
+        residual[0] = 1.0;
         residual[2] = -1.0;
-        residual[3] = -1.0;
-        residual[4] = -3;
+        residual[3] = -4;
+        residual[4] = -5;
         residual[5] = 1.0;
-        residual[6] = -1.0;
         residual[7] = -1.0;
         residual[8] = -1.0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -10046,15 +10045,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_1_1 = x[2];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-            (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+            (*res)[0] = - _x_2_2 + (4 * _y_3 + -2) - (0);
+            (*res)[1] = 5 * _y_3 + -5 - (- _x_1_1);
             (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end BlockTest5;
 
@@ -10113,8 +10111,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         x[1] = 5;
         x[2] = 3;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        (*res)[0] = 5;
-        (*res)[1] = 15;
+        (*res)[0] = 20;
+        (*res)[1] = 25;
         (*res)[2] = 5;
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_2_2;
@@ -10125,12 +10123,11 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
         init_with_lbound(x[2], 6.0, \"Resetting initial value for variable x[1]\");
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
         memset(residual, 0, 9 * sizeof(jmi_real_t));
-        residual[0] = -1.0;
+        residual[0] = 1.0;
         residual[2] = -1.0;
-        residual[3] = -1.0;
-        residual[4] = -3;
+        residual[3] = -4;
+        residual[4] = -5;
         residual[5] = 1.0;
-        residual[6] = -1.0;
         residual[7] = -1.0;
         residual[8] = -1.0;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -10143,15 +10140,14 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
             _x_1_1 = x[2];
         }
         if (evaluation_mode & JMI_BLOCK_EVALUATE) {
-            (*res)[0] = _x_1_1 + _y_3 + _x_2_2 - (3);
-            (*res)[1] = _x_1_1 + 3 * _y_3 - (5);
+            (*res)[0] = - _x_2_2 + (4 * _y_3 + -2) - (0);
+            (*res)[1] = 5 * _y_3 + -5 - (- _x_1_1);
             (*res)[2] = _x_1_1 - _y_3 + _x_2_2 - (3);
         }
     }
     JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end BlockTest6;
 

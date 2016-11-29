@@ -2157,7 +2157,7 @@ end TransformCanonicalTests.InitialEqTest1;
     v1 + v2 + v3 + v4 + v5 = 1;
     v1 + v2 + v3 + v4 + v6 = 1;
     v1 + v2 + v3 + v4 = 1;
-    v1 + v2 + v3 + v4 = 1;
+    v1 + v2 + v3 + v5 = 1;
     v5 + v6 + v8 + v7 + v9 = 1;
     v5 + v6 + v8 = 0;
     v1 = 1;
@@ -2180,8 +2180,8 @@ fclass TransformCanonicalTests.InitialEqTest2
  constant Real v9 = 0.0;
 equation
  2.0 + v3 + v4 + v6 = 1;
- 2.0 + v3 + v4 = 1;
- 2.0 + v3 + v4 = 1;
+ 0 = v6;
+ 0 = v4;
  v6 + v6 + v8 + v7 = 1;
  v6 + v6 + v8 = 0;
 end TransformCanonicalTests.InitialEqTest2;

@@ -587,15 +587,16 @@ equation
   x = 2*z + y;
   z = 2*x;
   
-	annotation(__JModelica(UnitTesting(tests={
-		FClassMethodTestCase(
-			name="AlgorithmTearingTest2",
-			methodName="printDAEBLT",
-			equation_sorting=true,
-			automatic_tearing=true,
-			inline_functions="none",
-			description="Test of algorithm tearing",
-			methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="AlgorithmTearingTest2",
+            methodName="printDAEBLT",
+            equation_sorting=true,
+            automatic_tearing=true,
+            eliminate_linear_equations=false,
+            inline_functions="none",
+            description="Test of algorithm tearing",
+            methodResult="
 --- Torn system (Block 1) of 1 iteration variables and 2 solved variables ---
 Torn variables:
   y
