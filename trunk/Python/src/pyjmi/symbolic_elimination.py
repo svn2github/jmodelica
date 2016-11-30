@@ -1311,11 +1311,11 @@ class BLTModel(object):
                     # Block variables need a (any) real value in order to find b
                     if options['closed_form']:
                         if options['inline_solved']:
-                            b_input = co.n * [1.] + sx_known_vars + solved_expr
+                            b_input = co.n * [0.] + sx_known_vars + solved_expr
                         else:
-                            b_input = co.n * [1.] + sx_known_vars + sx_solved_vars
+                            b_input = co.n * [0.] + sx_known_vars + sx_solved_vars
                     else:
-                        b_input = co.n * [1.] + known_vars + solved_expr
+                        b_input = co.n * [0.] + known_vars + solved_expr
                     b = co.b_fcn.call(b_input, self.options['inline'])[0]
                         
                     # Solve
