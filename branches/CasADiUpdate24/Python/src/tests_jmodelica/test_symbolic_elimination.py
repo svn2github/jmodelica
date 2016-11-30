@@ -282,7 +282,7 @@ class TestSymbolicElimination(object):
         for res in blt_op.getDaeResidual():
             if 'y1)*y2)*' in res.getRepresentation():
                 residual = res.getRepresentation()
-        N.testing.assert_string_equal(residual, "SX(@1=1, ((((2*y1)*y2)*(@1-(@1-sqrt(y5))))-sqrt(x1)))")
+        N.testing.assert_string_equal(residual, "SX(((((2*y1)*y2)*sqrt(y5))-sqrt(x1)))")
 
     @testattr(casadi = True)
     def test_constraint_and_objective(self):
