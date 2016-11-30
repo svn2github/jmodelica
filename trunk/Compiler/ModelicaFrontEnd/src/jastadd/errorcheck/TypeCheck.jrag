@@ -241,9 +241,13 @@ aspect FlatTypeCheck {
     }
 
     inh InstModification InstModification.parentInstModification();
-    eq InstComponentModification.getChild().parentInstModification()       = this;
-    eq InstNode.getElementInstModification(int i).parentInstModification() = getElementInstModification(i);
-    eq InstComponentDecl.getInstModification().parentInstModification()    = getInstModification();
+    eq InstComponentModification.getChild().parentInstModification()             = this;
+    eq InstNode.getElementInstModification(int i).parentInstModification()       = getElementInstModification(i);
+    eq InstComponentDecl.getInstModification().parentInstModification()          = getInstModification();
+    eq InstComponentDecl.getAnnotation().parentInstModification()                = getAnnotation();
+    eq InstClassDecl.getClassAnnotation().parentInstModification()               = getClassAnnotation();
+    eq InstConstraining.getInstClassModification().parentInstModification()      = getInstClassModification();
+    eq InstRecordConstructor.getInstModification(int i).parentInstModification() = getInstModification(i);
 
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
