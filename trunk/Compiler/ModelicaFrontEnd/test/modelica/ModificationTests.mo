@@ -2351,10 +2351,10 @@ model ArrayModifications67
             name="ArrayModifications67",
             description="Test each on other levels of modification",
             errorMessage="
-1 errors found:
+1 warnings found:
 
-Error at line 2286, column 33, in file 'Compiler/ModelicaFrontEnd/src/test/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
-  Array size mismatch in modification of y, expected size is (due to 'each') scalar and size of binding expression is [2]
+Warning at line 2347, column 27, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'y = {1,2}'
 ")})));
 end ArrayModifications67;
 
@@ -2624,6 +2624,139 @@ fclass ModificationTests.ArrayModifications77
 end ModificationTests.ArrayModifications77;
 ")})));
 end ArrayModifications77;
+
+
+model ArrayModifications78
+    model A
+        Real x = 1;
+        Real y = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = 2, y = {3, 4}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications78",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2639, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'y = {3,4}'
+")})));
+end ArrayModifications78;
+
+
+model ArrayModifications79
+    Real a[3](each start={1,2,3}) = zeros(3);
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications79",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2655, column 15, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'each start = {1,2,3}'
+")})));
+end ArrayModifications79;
+
+
+model ArrayModifications80
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](a(x = true));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications80",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2679, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ArrayModifications80;
+
+
+model ArrayModifications81
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = {true, false}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications81",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2703, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', BINDING_EXPRESSION_TYPE_MISMATCH:
+  The binding expression of the variable x does not match the declared type of the variable
+")})));
+end ArrayModifications81;
+
+
+model ArrayModifications82
+    model A
+        Real x = 1;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b[2](each a(x = {1, 2, 3}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications82",
+            description="",
+            errorMessage="
+1 errors found:
+
+Error at line 2703, column 23, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', ARRAY_SIZE_MISMATCH_IN_MODIFICATION_DUE_TO_EACH:
+  Array size mismatch in modification of x, expected size is (due to 'each') scalar and size of binding expression is [3]
+")})));
+end ArrayModifications82;
+
+
+model ArrayModifications83
+    model A
+        Real x = 1;
+    end A;
+    
+    A a[2](each x(start = {1, 2}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ArrayModifications83",
+            description="",
+            errorMessage="
+1 warnings found:
+
+Warning at line 2747, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelica/ModificationTests.mo', IGNORING_EACH:
+  Ignoring erroneous 'each' for the modification 'start = {1,2}'
+")})));
+end ArrayModifications83;
 
 
 /* ========= Modifications on type declarations ========= */

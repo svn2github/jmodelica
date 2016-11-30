@@ -158,6 +158,8 @@ aspect FlatTypeCheck {
                     "The binding expression of the variable %s does not match the declared type of the variable");
     public static final SimpleProblemProducer ASTNode.ASSUMING_EACH =
             new SimpleWarningProducer("ASSUMING_EACH", ProblemKind.SEMANTIC, "Assuming 'each' for the modification '%s'");
+    public static final SimpleProblemProducer ASTNode.IGNORING_EACH =
+            new SimpleWarningProducer("IGNORING_EACH", ProblemKind.SEMANTIC, "Ignoring erroneous 'each' for the modification '%s'");
     public static final ErrorProducerUnlessDisabled ASTNode.ARRAY_SIZE_MISMATCH_IN_DECLARATION =
             new ErrorProducerUnlessDisabled("ARRAY_SIZE_MISMATCH_IN_DECLARATION", ProblemKind.SEMANTIC,
                     "Array size mismatch in declaration of %s, size of declaration is %s and size of binding expression is %s");
@@ -198,10 +200,13 @@ aspect FlatTypeCheck {
             FType actualBT = bexp.type();
             if (!expectedBT.typeCompatible(actualBT, unknownAllowed) && !expectedBT.isUnknown()) {
                 InstModification needsEach = ivm.findModificationLackingEach(actualBT.size());
-                if (needsEach != null) {
-                    ASSUMING_EACH.invoke(needsEach, needsEach);
-                } else if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
+                if (!expectedBT.scalarType().typeCompatible(actualBT.scalarType())) {
                     BINDING_EXPRESSION_TYPE_MISMATCH.invoke(bexp, name());
+                } else if (needsEach != null) {
+                    ASSUMING_EACH.invoke(needsEach, needsEach);
+                } else if (ivm.expectedSizeNoEach().equivalent(actualBT.size(), unknownAllowed)) {
+                    InstModification parIM = ivm.parentInstModification();
+                    IGNORING_EACH.invoke(parIM, parIM);
                 } else {
                     ErrorProducerUnlessDisabled reporter;
                     if (ivm.myInstNode() == this) {
@@ -235,6 +240,11 @@ aspect FlatTypeCheck {
         super.typeCheck(checkType);
     }
 
+    inh InstModification InstModification.parentInstModification();
+    eq InstComponentModification.getChild().parentInstModification()       = this;
+    eq InstNode.getElementInstModification(int i).parentInstModification() = getElementInstModification(i);
+    eq InstComponentDecl.getInstModification().parentInstModification()    = getInstModification();
+
     inh boolean InstComponentDecl.inRecordWithBindingExp();
     eq InstRecord.getChild().inRecordWithBindingExp()             = myBindingInstExp() != null;
     eq InstArrayComponentDecl.getChild().inRecordWithBindingExp() = inRecordWithBindingExp();
@@ -266,12 +276,15 @@ aspect FlatTypeCheck {
             FExp valMod = getInstModification().instValueMod();
             if (!type().isUnknown() && !valMod.type().isUnknown()) {
                 Size attrSize = expectedSize();
+                Size modSize = valMod.size();
                 if (!type().typeCompatible(valMod.type().scalarType())) {
                     TYPE_MISMATCH_IN_ATTRIBUTE_MODIFICATION.invoke(this, name(), owner.kindDescription(), owner.name());
-                } else if (!attrSize.equivalent(valMod.size(), true)) {
-                    InstModification im = findModificationLackingEach(valMod.size());
+                } else if (!attrSize.equivalent(modSize, true)) {
+                    InstModification im = findModificationLackingEach(modSize);
                     if (im != null) {
                         ASSUMING_EACH.invoke(im, im);
+                    } else if (expectedSizeNoEach().equivalent(modSize, false)) {
+                        IGNORING_EACH.invoke(this, this);
                     } else {
                         ErrorProducerUnlessDisabled producer;
                         if (hasEach()) {
@@ -280,7 +293,7 @@ aspect FlatTypeCheck {
                             producer = ARRAY_SIZE_MISMATCH_IN_ATTRIBUTE_MODIFICATION;
                         }
                         producer.invokeWithCondition(this, attrSize.ndims() != valMod.ndims(), name(),
-                                owner.kindDescription(), owner.name(), attrSize, name(), valMod.size());
+                                owner.kindDescription(), owner.name(), attrSize, name(), modSize);
                     }
                 } else {
                     if (name().equals("nominal")) {
