@@ -814,7 +814,6 @@ class BipartiteGraph(object):
         L_union = copy.copy(L[0])
         E = []
         i = 0
-        bp = (L[0][0].string == "der(pendulum.boxBody1.body.w_a[3])-der(pendulum.revolute1.phi,2)")
         while set(L[-1]) & set(unmatched_varis) == set():
             if i % 2 == 0:
                 E_i = [(edge.var, edge.eq) for edge in self.edges if ((edge.eq in L[i]) and (edge.var not in L_union) and ((edge.eq, edge.var) not in self.matches))]
@@ -1237,11 +1236,11 @@ class BLTModel(object):
                     eq_sys = {}
                     if options['closed_form']:
                         if options['inline_solved']:
-                            inputs = co.n * [1.] + sx_known_vars + solved_expr
+                            inputs = co.n * [0.] + sx_known_vars + solved_expr
                         else:
-                            inputs = co.n * [1.] + sx_known_vars + sx_solved_vars
+                            inputs = co.n * [0.] + sx_known_vars + sx_solved_vars
                     else:
-                        inputs = co.n * [1.] + known_vars + solved_expr
+                        inputs = co.n * [0.] + known_vars + solved_expr
                     for alpha in ["A", "B", "C", "D", "a", "b"]:
                         eq_sys[alpha] = co.fcn[alpha].call(inputs, self.options['inline'])[0]
 
@@ -1361,15 +1360,15 @@ class BLTModel(object):
                                 if options['inline_solved']:
                                     something = [] # tear_sx_vars
                                     # TODO: something
-                                    b_input = causal_co.n * [1.] + sx_known_vars + solved_expr + something
+                                    b_input = causal_co.n * [0.] + sx_known_vars + solved_expr + something
                                     raise NotImplementedError('Closed form is not supported for tearing')
                                 else:
                                     something = [] # tear_sx_vars
                                     # TODO: something
-                                    b_input = causal_co.n * [1.] + sx_known_vars + sx_solved_vars + something
+                                    b_input = causal_co.n * [0.] + sx_known_vars + sx_solved_vars + something
                                     raise NotImplementedError('Closed form is not supported for tearing')
                             else:
-                                b_input = causal_co.n * [1.] + known_vars + solved_expr + tear_mx_vars
+                                b_input = causal_co.n * [0.] + known_vars + solved_expr + tear_mx_vars
                             b = causal_co.b_fcn.call(b_input, self.options['inline'])[0]
                                 
                             # Solve
