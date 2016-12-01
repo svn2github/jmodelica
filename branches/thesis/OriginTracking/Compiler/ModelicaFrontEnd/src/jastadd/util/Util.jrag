@@ -299,8 +299,8 @@ aspect NodeMethods {
      * @param end    the node to copy the <code>end</code> member from.
      */
     public void BaseNode.setLocation(ASTNode start, ASTNode end) {
-        super.setLocation(start, end);
-        fName = start.fileName();
+        super.setLocation(start, end);        
+        fName = start.fileNames();
     }
     
     /**
@@ -356,7 +356,46 @@ aspect NodeMethods {
         return node;
     }
     
+    protected void BaseNode.addLocation(ASTNode node){
+    	int l1 = 0;
+    	int l2 = 0;
+    	if(fName == null || !(node instanceof BaseNode)){
+    		setLocationNoTree(node);
+    		return;
+    	}
+    	BaseNode sourceNode = (BaseNode)node; 
+    	if(fName instanceof String){
+    		l1 = 1;
+    	}else{
+    		l1 = ((String[])fName).length;
+    	}
+    	if(sourceNode.fName == null){
+    		return;
+    	}else if(sourceNode.fName instanceof String){
+    		l2 = 1;
+    	}else{
+    		l2 = ((String[])sourceNode.fName).length;
+    	}
+    	
+    	String[] newFName = new String[l1 + l2];
+    	if(l1 == 1){
+    		newFName[0] = (String)fName;
+    	}else{
+    		System.arraycopy((String[])fName, 0, newFName, 0, l1);
+    	}
+    	if(l2 == 1){
+    		newFName[l1] = (String)sourceNode.fName;
+    	}else{
+    		System.arraycopy((String[])sourceNode.fName, 0, newFName, l1, l2);
+    	}
+    	fName = newFName;
+    	
+    }
+    
+    
     protected boolean BaseNode.locationContainedBy(ASTNode node){
+    	if(!(fName instanceof String))
+    		return false;
     	if(node instanceof Opt || node instanceof List){
     		node = node.parent;
     	}
@@ -554,7 +593,16 @@ aspect NodeMethods {
 
 aspect FileNames {
     
-    protected String BaseNode.fName = null;
+    protected Object BaseNode.fName = null;
+    
+    public Object BaseNode.fileNames() {
+    	if (fName == null)
+    	    fName = retrieveFileName();
+   		return fName;
+    }
+    public Object ASTNode.fileNames() {
+    	return fileName();
+    }
 
     public String ASTNode.fileName() { 
     	return retrieveFileName(); 
@@ -562,10 +610,13 @@ aspect FileNames {
     public String BaseNode.fileName() {
     	if (fName == null)
     	    fName = retrieveFileName();
-    	return fName;
+    	if(fName != null && !(fName instanceof String))
+    		return ((String[])fName)[0];
+   		return (String)fName;
     }
-    public String Root.fileName() { 
-    	return fName; 
+    public String Root.fileName() {
+    		return (String)fName;
+    	
     }
     public String LibNode.fileName() {
         return getStructured() ? myPackageFile().getPath() : getFileName();

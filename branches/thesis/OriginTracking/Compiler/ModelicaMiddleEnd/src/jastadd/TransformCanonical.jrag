@@ -1756,6 +1756,7 @@ aspect TransformCanonical {
                 FVariable fv = (FVariable) myFV();
                 FIdUseExp new_exp = fv.alias().createUseExp();
                 new_exp.setLocationNoTree(this);
+                new_exp.addLocation(fv);
                 new_exp.setOriginalVariable(this, fv);
                 new_exp.rewriteAlias = true;
                 if (fv.isNegated()) 

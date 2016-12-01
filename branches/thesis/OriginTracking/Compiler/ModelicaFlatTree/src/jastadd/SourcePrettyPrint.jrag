@@ -40,11 +40,11 @@ aspect SourcePrettyPrint {
 		prettyPrint(p, str, indent);
 	}
 	
-	public void FIdUse.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// ignore
+	public void FIdUse.sourcePrettyPrint(Printer p, CodeStream str, String indent){			// to ignore the error output
 		prettyPrint(p, str, indent);
 	}
 	
-	public void FQNameString.sourcePrettyPrint(Printer p, CodeStream str, String indent){	// ignore
+	public void FQNameString.sourcePrettyPrint(Printer p, CodeStream str, String indent){	// to ignore the error output
 		prettyPrint(p, str, indent);
 	}
 	
