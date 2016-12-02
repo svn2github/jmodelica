@@ -2776,7 +2776,7 @@ solver.print_jacobian_entries(entries) # Print them
         transfer an optimization problem as per usual and use the following
         Python code snippet.</para>
 
-        <programlisting>from pyjmi.symbolic_elimination import BLTOptimizationProblem
+        <programlisting>from pyjmi.symbolic_elimination import BLTOptimizationProblem, EliminationOptions
 op = transfer_optimization_problem(class_name, file_name) # Regular compilation
 op = BLTOptimizationProblem(op) # Symbolically eliminate algebraic variables</programlisting>
 
