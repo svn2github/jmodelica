@@ -730,7 +730,7 @@ aspect DynamicStateSelect{
     }
     
     public boolean SCCBlock.containsDynamicStates() {
-        for (E eqn : members)
+        for (E eqn : this)
             if (!eqn.isMeta() && eqn.getMatching().getVariable().isFDynamicAlgebraicVariable())
                 return true;
         return false;
