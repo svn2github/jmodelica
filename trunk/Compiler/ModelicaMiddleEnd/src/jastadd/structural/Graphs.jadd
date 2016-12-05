@@ -34,10 +34,6 @@ import org.jmodelica.util.collections.LinkedHashListMap;
 import org.jmodelica.util.collections.FilteredIterator;
 import org.jmodelica.util.collections.HashStack;
 
-import org.jmodelica.util.tarjan.Tarjan;
-import org.jmodelica.util.tarjan.SimpleTarjan;
-import org.jmodelica.util.tarjan.TarjanComponent;
-
 aspect Graphs {
 
 public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> {
@@ -1103,10 +1099,6 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
          * Surounding BiPGraph is provided for convenience
          */
         public abstract <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph);
-        
-        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, C extends SCCBlock<E, V>> Collection<C> mergeComponents(Collection<C> components, AbstractBiPGraph<E, V, ?> graph) {
-            return components;
-        }
     }
     
     private static final GroupMemberContributor GROUP_MEMBER_CONTRIBUTOR = new GroupMemberContributor();
@@ -1134,6 +1126,59 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         }
     }
     
+    public static final PreVariableContributor PRE_VARIABLE_CONTRIBUTOR = new PreVariableContributor();
+    
+    /**
+     * Contributor that ensures that discrete variables are bound with their
+     * pre variable.
+     */
+    private static class PreVariableContributor extends SCCContributor {
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> members(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            Collection<E> depends = Collections.emptyList();
+            for (FVariable var : equation.getEquation().discretePreVariables()) {
+                FAbstractVariable nonPre = var.myNonPreVariable();
+                if (nonPre.isUnknown())
+                    continue;
+                V v = graph.getVariable(nonPre.name());
+                if (v == null)
+                    continue;
+                if (depends.isEmpty())
+                    depends = new ArrayList<E>();
+                depends.add(v.getMatching());
+            }
+            if (!equation.isMeta()) {
+                V var = equation.getMatching();
+                FVariable fVar = var.getVariable();
+                if (fVar.isDiscrete()) {
+                    FAbstractVariable preVar = fVar.myPreVariable();
+                    for (FIdUseExp exp : preVar.uses()) {
+                        FAbstractEquation fae = exp.myFEquation().outermostEnclosingEquation();
+                        if (fae == null || fae.isPrePropagationEquation() != null)
+                            continue;
+                        Collection<E> eqns = graph.getEquations(fae);
+                        if (eqns != null) {
+                            if (depends.isEmpty())
+                                depends = new ArrayList<E>();
+                            depends.addAll(eqns);
+                        }
+                    }
+                }
+            }
+            return depends;
+        }
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Collection<E> sameBlockMembers(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> Map<E, Collection<? extends Object>> memberSets(E equation, AbstractBiPGraph<E, V, ?> graph) {
+            return Collections.emptyMap();
+        }
+    }
     
     private static final HomotopyContributor HOMOTOPY_CONTRIBUTOR = addSCCContributor(new HomotopyContributor());
     
@@ -1178,6 +1223,9 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
 
     public Collection<C> tarjan(OptionRegistry options, Collection<SCCContributor> extraContributors,
             boolean forceGroupMembersIntoSameBlock) {
+        Enumerator indexer = new Enumerator();
+        HashStack<E> stack = new HashStack<E>();
+        Collection<C> components = new ArrayList<C>();
         tarjanReset();
         
         Collection<SCCContributor> groupMemberContributers;
@@ -1186,120 +1234,107 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
         } else {
             groupMemberContributers = Collections.<SCCContributor>emptyList();
         }
-        
+
         Collection<SCCContributor> contributors = new ArrayList<SCCContributor>();
+        Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
+        Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
+
         for (SCCContributor contributor : new ChainedIterable<SCCContributor>(getSCCContributors(), groupMemberContributers, extraContributors)) {
             if (!contributor.isActive(options))
                 continue;
             contributors.add(contributor);
-        }
-        
-        
-        BiPTarjan tarjan = new BiPTarjan(contributors);
-        Collection<C> components = tarjan.tarjan(getEquations());
-        for (SCCContributor contributor : contributors) {
-            components = contributor.mergeComponents(components, this);
-        }
-        return components;
-    }
-
-    private class BiPTarjan extends Tarjan<E, C> {
-        
-        private final Collection<SCCContributor> contributors;
-        Map<E, Collection<Collection<E>>> keepTogetherMap = new LinkedHashMap<E, Collection<Collection<E>>>();
-        
-        public BiPTarjan(Collection<SCCContributor> contributors) {
-            this.contributors = contributors;
-            Map<Object, Collection<E>> memberSetsMap = new HashMap<Object, Collection<E>>();
-            for (SCCContributor contributor : contributors) {
-                for (E equation : getEquations()) {
-                    for (Map.Entry<E, Collection<? extends Object>> eqIdent : contributor.memberSets(equation, AbstractBiPGraph.this).entrySet()) {
-                        for (Object identifier : eqIdent.getValue()) {
-                            Collection<E> memberSet = memberSetsMap.get(identifier);
-                            if (memberSet == null) {
-                                memberSet = new ArrayList<E>();
-                                memberSetsMap.put(identifier, memberSet);
-                            }
-                            Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(eqIdent.getKey());
-                            if (keepTogetherLists == null) {
-                                keepTogetherLists = new ArrayList<Collection<E>>();
-                                keepTogetherMap.put(eqIdent.getKey(), keepTogetherLists);
-                            }
-                            memberSet.add(eqIdent.getKey());
-                            keepTogetherLists.add(memberSet);
+            for (E equation : getEquations()) {
+                for (Map.Entry<E, Collection<? extends Object>> eqIdent : contributor.memberSets(equation, this).entrySet()) {
+                    for (Object identifier : eqIdent.getValue()) {
+                        Collection<E> memberSet = memberSetsMap.get(identifier);
+                        if (memberSet == null) {
+                            memberSet = new ArrayList<E>();
+                            memberSetsMap.put(identifier, memberSet);
                         }
+                        Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(eqIdent.getKey());
+                        if (keepTogetherLists == null) {
+                            keepTogetherLists = new ArrayList<Collection<E>>();
+                            keepTogetherMap.put(eqIdent.getKey(), keepTogetherLists);
+                        }
+                        memberSet.add(eqIdent.getKey());
+                        keepTogetherLists.add(memberSet);
                     }
                 }
             }
         }
 
-        @Override
-        protected boolean visited(E e) {
-            return e.isVisited();
+        Map<E, Collection<E>> eqToVisitMap = new HashMap<E, Collection<E>>();
+
+        for (E e : getEquations()) {
+            if (!e.isVisited() && e.tarjanVisit())
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, e);
         }
 
-        @Override
-        protected void setVisited(E e, boolean val) {
-            e.setVisited(val);
+        return components;
+    }
+
+    private void tarjan(Enumerator indexer, HashStack<E> stack, Collection<C> components, Collection<SCCContributor> contributors, Map<E, Collection<Collection<E>>> keepTogetherMap, Map<E, Collection<E>> eqToVisitMap,  E e) {
+        int index = indexer.next();
+        
+        Collection<E> sameBlock = new LinkedHashSet<E>();
+        sameBlock.add(e);
+
+        Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(e);
+        if (keepTogetherLists != null)
+            for (Collection<E> keepTogether : keepTogetherLists)
+                for (E ee : keepTogether)
+                    if (ee != e && ee.tarjanVisit())
+                        sameBlock.add(ee);
+        
+        for (SCCContributor contributor : contributors) {
+            sameBlock.addAll(contributor.sameBlockMembers(e, this));
         }
 
-        @Override
-        protected boolean shouldVisit(E e) {
-            return e.tarjanVisit();
+        for (E eqn : sameBlock) {
+            eqn.setTarjanNbr(index);
+            eqn.setTarjanLowLink(index);
+            eqn.setVisited(true);
+            stack.push(eqn);
         }
 
-        @Override
-        protected void addPredecessors(E e, Collection<E> predecessors) {
-            for (V v : e.getVariables()) {
+        Collection<E> eqToVisit = new LinkedHashSet<E>();
+        
+        for (E eqn : sameBlock) {
+            for (V v : eqn.getVariables()) {
                 E ee = v.getMatching();
-                if (ee != null && e != ee && v.tarjanVisit())
-                    predecessors.add(ee);
+                if (ee != null && eqn != ee && v.tarjanVisit())
+                    eqToVisit.add(ee);
             }
             for (SCCContributor contributor : contributors)
-                for (E ee : contributor.members(e, AbstractBiPGraph.this))
-                    if (e != ee && ee.tarjanVisit())
-                        predecessors.add(ee);
+                for (E ee : contributor.members(eqn, this))
+                    if (eqn != ee && ee.tarjanVisit())
+                        eqToVisit.add(ee);
+            eqToVisitMap.put(eqn, eqToVisit);
         }
 
-        @Override
-        protected int getIndex(E e) {
-            return e.getTarjanNbr();
-        }
-
-        @Override
-        protected void setIndex(E e, int val) {
-            e.setTarjanNbr(val);
-        }
-
-        @Override
-        protected int getLowLink(E e) {
-            return e.getTarjanLowLink();
-        }
-
-        @Override
-        protected void setLowLink(E e, int val) {
-            e.setTarjanLowLink(val);
-        }
-
-        @Override
-        protected void forceIntoSame(E e, Collection<E> members) {
-            Collection<Collection<E>> keepTogetherLists = keepTogetherMap.get(e);
-            if (keepTogetherLists != null)
-                for (Collection<E> keepTogether : keepTogetherLists)
-                    for (E ee : keepTogether)
-                        if (ee != e && ee.tarjanVisit())
-                            members.add(ee);
-            
-            for (SCCContributor contributor : contributors) {
-                members.addAll(contributor.sameBlockMembers(e, AbstractBiPGraph.this));
+        for (E ee : eqToVisit) {
+            if (!ee.isVisited()) {
+                tarjan(indexer, stack, components, contributors, keepTogetherMap, eqToVisitMap, ee);
+                for (E eqn : sameBlock) {
+                    eqn.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanLowLink()));
+                }
+            } else if (stack.contains(ee)) { //TODO: should not be stack.contains, it's slow...
+                for (E eqn : sameBlock) {
+                    eqn.setTarjanLowLink(Math.min(e.getTarjanLowLink(), ee.getTarjanNbr()));
+                }
             }
         }
 
-        @Override
-        protected C createComponent() {
-            return createComponentBlock();
+        if (e.getTarjanNbr() == e.getTarjanLowLink()) {
+            C component = createComponentBlock();
+            E ee;
+            do {
+                ee = stack.pop();
+                component.addMember(ee);
+                component.addPredecessors(eqToVisitMap.remove(ee));
+            } while (ee != e);
+            components.add(component);
         }
-        
     }
 
     public void reset() {
@@ -1531,13 +1566,50 @@ public abstract class AbstractBiPGraph<E extends AbstractEq<E, V>, V extends Abs
  * It is basically a list of equations that depends on eachother and a list of
  * equations that they depend upon.
  */
-public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> extends TarjanComponent<E> {
+public class SCCBlock<E extends AbstractEq<E, V>, V extends AbstractVar<E, V>> implements Iterable<E> {
+    private Collection<E> members = new LinkedHashSet<E>();
+    private Collection<E> predecessors = null;
     private boolean containsHomotopy = false;
 
+    
+    public SCCBlock() {}
+    
+    public void addPredecessors(Collection<E> newPredecessors) {
+        if (predecessors == null)
+            predecessors = new LinkedHashSet<E>();
+        for (E eqn : newPredecessors)
+            if (!members.contains(eqn))
+                predecessors.add(eqn);
+    }
+
     public void addMember(E member) {
-        super.addMember(member);
+        // Ensure that the member isn't in the list of predecessors
+        if (predecessors != null)
+            predecessors.remove(member);
+        members.add(member);
         if (!containsHomotopy && member.getEquation().containsFHomotopyExp())
             containsHomotopy = true;
+    }
+    
+    public Collection<E> getMembers() {
+        return members;
+    }
+    
+    @Override
+    public Iterator<E> iterator() {
+        return members.iterator();
+    }
+    
+    public boolean hasPredecessorInfo() {
+        return predecessors != null;
+    }
+    
+    public Collection<E> getPredecessors() {
+        return predecessors;
+    }
+    @Override
+    public String toString() {
+        return members.toString();
     }
     
     public boolean containsHomotopy() {
