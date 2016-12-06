@@ -821,6 +821,101 @@ end RecordTests.RecordType9;
 ")})));
 end RecordType9;
 
+model RecordType10
+record R
+  parameter Real x[:];
+end R;
+record R1 = R(x = {1});
+record R2 = R(x = {2, 3});
+
+R1 r1;
+R2 r2;
+R r[2] = { r1, r2 };
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordType10",
+            description="Records: array type calculation",
+            flatModel="
+fclass RecordTests.RecordType10
+ parameter Real r1.x[1] = 1 /* 1 */;
+ parameter Real r2.x[1] = 2 /* 2 */;
+ parameter Real r2.x[2] = 3 /* 3 */;
+ parameter Real r[1].x[1];
+ parameter Real r[2].x[1];
+ parameter Real r[2].x[2];
+parameter equation
+ r[1].x[1] = r1.x[1];
+ r[2].x[1] = r2.x[1];
+ r[2].x[2] = r2.x[2];
+end RecordTests.RecordType10;
+")})));
+end RecordType10;
+
+model RecordType11
+record R
+  parameter Real x[:];
+end R;
+record R1
+  parameter Real x[1] = 1:1;
+end R1;
+record R2
+  parameter Real x[2] = 1:2;
+end R2;
+
+R1 r1;
+R2 r2;
+R r[2] = { r1, r2};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordType11",
+            description="Records: array type calculation",
+            flatModel="
+fclass RecordTests.RecordType11
+ parameter Real r1.x[1] = 1 /* 1 */;
+ parameter Real r2.x[1] = 1 /* 1 */;
+ parameter Real r2.x[2] = 2 /* 2 */;
+ parameter Real r[1].x[1];
+ parameter Real r[2].x[1];
+ parameter Real r[2].x[2];
+parameter equation
+ r[1].x[1] = r1.x[1];
+ r[2].x[1] = r2.x[1];
+ r[2].x[2] = r2.x[2];
+end RecordTests.RecordType11;
+")})));
+end RecordType11;
+
+model RecordType12
+record R
+    parameter Integer n;
+    parameter Real x[n] = 1:n;
+end R;
+
+record R1
+    extends R;
+end R1;
+
+record R2
+    extends R;
+end R2;
+
+R r[2] = { R1(1), R2(3)};
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordType12",
+            description="Records: array type calculation",
+            flatModel="
+fclass RecordTests.RecordType12
+ structural parameter Integer r[1].n = 1 /* 1 */;
+ parameter Real r[1].x[1] = 1 /* 1 */;
+ structural parameter Integer r[2].n = 3 /* 3 */;
+ parameter Real r[2].x[1] = 1 /* 1 */;
+ parameter Real r[2].x[2] = 2 /* 2 */;
+ parameter Real r[2].x[3] = 3 /* 3 */;
+end RecordTests.RecordType12;
+")})));
+end RecordType12;
+
 model RecordBinding1
  record A
   Real a;
