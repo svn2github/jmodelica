@@ -2072,12 +2072,12 @@ aspect FlatExpressions {
         // flattened during error checks, when using qualifiedName()
         InstAccess ia = iae.asInstAccess();
         if (variability().indexParameterOrLess()) {
-            try {
-                FType t = iae.type();
-                if (t.isEmpty()) {
-                    return t.createEmptyExp();
-                }
-                if (iae.canInlineConstant()) {
+            if (iae.canInlineConstant()) {
+                try {
+                    FType t = iae.type();
+                    if (t.isEmpty()) {
+                        return t.createEmptyExp();
+                    }
                     // Check if we have non-constant array subscripts
                     if (ia.hasUnknownIndices()) {
                         // If this is a package constant, then the variable will not be available in the flattened model 
@@ -2094,10 +2094,10 @@ aspect FlatExpressions {
                             cval = cval.convertReal();
                         return cval.buildLiteral();
                     }
+                } catch (ConstantEvaluationException e) {
+                    // In this case, simply don't inline value if we aren't in a function
+                    // TODO: Really? isn't this an error?
                 }
-            } catch (ConstantEvaluationException e) {
-                // In this case, simply don't inline value if we aren't in a function
-                // TODO: Really? isn't this an error?
             }
             if (ia.inFunction() && flattenAsFunctionConstant())
                 return ia.topInstAssignable().flattenAccessToConstInFunction(prefix, ia);
@@ -2423,11 +2423,17 @@ aspect FlatExpressions {
         }
     }
     
-    public FReductionExp FReductionExp.flatten(FQName prefix) {
+    public FExp FReductionExp.flatten(FQName prefix) {
+        if (isArray() && !size().isUnknown()) {
+            return getArray().buildFlattened(prefix, this);
+        }
         return (FReductionExp) createNode(getFExp().flatten(prefix));
     }
     
     public FExp FIterExp.flatten(FQName prefix) {
+        if (!size().isUnknown()) {
+            return getArray().buildFlattened(prefix, this);
+        }
         List<CommonForIndex> fil = new List<CommonForIndex>();
         for (CommonForIndex fi : getForIndexList())
             fil.add(fi.flatten(prefix));

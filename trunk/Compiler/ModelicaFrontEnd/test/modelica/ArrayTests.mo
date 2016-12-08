@@ -1744,6 +1744,40 @@ end ArrayTests.Subscripts.SubscriptExpression10;
 ")})));
 end SubscriptExpression10;
 
+model SubscriptExpression11
+    parameter Integer n1 = 2;
+    parameter Integer n2[n1] = {2,3};
+    Real x[sum(n2)];
+equation
+    for i in 1:n1 loop
+        for j in 1:n2[i] loop
+            x[sum(n2[k] for k in 1:(i - 1)) + j] = sin(time) * i * j;
+        end for;
+    end for;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="Subscripts_SubscriptExpression10",
+            description="Scalarization of subscript expression #5216",
+            inline_functions="none",
+            flatModel="
+fclass ArrayTests.Subscripts.SubscriptExpression11
+ structural parameter Integer n1 = 2 /* 2 */;
+ structural parameter Integer n2[2] = 3 /* 3 */;
+ Real x[1];
+ Real x[2];
+ Real x[3];
+ Real x[4];
+ Real x[5];
+equation
+ x[1] = sin(time);
+ x[2] = sin(time) * 2;
+ x[3] = sin(time) * 2;
+ x[4] = sin(time) * 2 * 2;
+ x[5] = sin(time) * 2 * 3;
+end ArrayTests.Subscripts.SubscriptExpression11;
+")})));
+end SubscriptExpression11;
 
 
 model NumSubscripts1
@@ -6395,6 +6429,28 @@ public
 end ArrayTests.Constructors.Iterators.ArrayIterTest17; 
 ")}))); 
 end ArrayIterTest17;
+
+model ArrayIterTest18
+    parameter Integer n = 10;
+    Real a[n] = ones(n);
+    Real x;
+equation
+    x = sum(if a[i] > 0 then 2 else 0 for i in 1:n - 2);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="Constructors_Iterators_ArrayIterTest18",
+            description="",
+            flatModel="
+fclass ArrayTests.Constructors.Iterators.ArrayIterTest18
+ structural parameter Integer n = 10 /* 10 */;
+ Real a[10] = ones(10);
+ Real x;
+equation
+ x = sum({if a[1] > 0 then 2 else 0, if a[2] > 0 then 2 else 0, if a[3] > 0 then 2 else 0, if a[4] > 0 then 2 else 0, if a[5] > 0 then 2 else 0, if a[6] > 0 then 2 else 0, if a[7] > 0 then 2 else 0, if a[8] > 0 then 2 else 0});
+end ArrayTests.Constructors.Iterators.ArrayIterTest18;
+")})));
+end ArrayIterTest18;
     
 model ArrayIterTestUnknown1
     function f
