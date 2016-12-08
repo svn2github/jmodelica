@@ -1259,11 +1259,12 @@ aspect FlatFunctionUtils {
     }
     
     public interface FCallable        extends CommonCallable {}
-    public interface InstCallable extends CommonCallable {}
+    public interface InstCallable     extends CommonCallable {}
     
     syn CommonCallable FAbstractFunctionCall.myCommonCallable() = null;
-    eq FFunctionCall.myCommonCallable()    = myFCallable();
-    eq InstFunctionCall.myCommonCallable() = myInstCallable();
+    eq FFunctionCall.myCommonCallable()         = myFCallable();
+    eq InstFunctionCall.myCommonCallable()      = myInstCallable();
+    eq InstRecordConstructor.myCommonCallable() = myInstClassDecl();
     
     /**
      * Interface for a flat callable (function declaration or partial 

@@ -279,8 +279,6 @@ public
  annotation(Inline = false);
  end CommonSubexpressionEliminationTests.FunctionCall7.f2;
 
- type AssertionLevel = enumeration(error, warning);
-
 end CommonSubexpressionEliminationTests.FunctionCall7;
 ")})));
 end FunctionCall7;

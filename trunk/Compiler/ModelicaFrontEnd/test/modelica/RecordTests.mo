@@ -3450,6 +3450,58 @@ end RecordTests.RecordConstructor36;
 ")})));
 end RecordConstructor36;
 
+model RecordConstructor37
+    partial record A
+        parameter Real x;
+        parameter Real y = 1;
+    end A;
+    
+    record B
+        extends A(x=y);
+    end B;
+    
+    parameter A a = B();
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor37",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor37
+ parameter Real a.x = 1 /* 1 */;
+ parameter Real a.y = 1 /* 1 */;
+end RecordTests.RecordConstructor37;
+")})));
+end RecordConstructor37;
+
+model RecordConstructor38
+    partial record A
+        parameter Real x;
+        parameter Real y = 1;
+    end A;
+    
+    record B
+        extends A(x=y);
+    end B;
+    
+    record C
+        A a;
+    end C;
+    
+    parameter C z(a=B());
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordConstructor38",
+            description="",
+            flatModel="
+fclass RecordTests.RecordConstructor38
+ parameter Real z.a.x = 1 /* 1 */;
+ parameter Real z.a.y = 1 /* 1 */;
+end RecordTests.RecordConstructor38;
+")})));
+end RecordConstructor38;
+
 model RecordScalarize1
  record A
   Real a;

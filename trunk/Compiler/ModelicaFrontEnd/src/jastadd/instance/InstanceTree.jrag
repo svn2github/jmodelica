@@ -1525,8 +1525,9 @@ aspect InstanceTreeConstruction {
      * Returns the FExp associated with this argument, if any, without triggering rewrites.
      */
     public FExp InstFunctionArgument.getFExpNoTransform() { return null; }
-
-    public FExp InstDefaultArgument.getFExpNoTransform() { return getDeclarationFExp(); }
+    
+    public FExp InstFunctionArgument.getOriginalFExp() { return null; }
+    public FExp InstGivenArgument.getOriginalFExp()    { return getFExpNoTransform(); }
 
 	syn lazy FFunctionCallStmt InstExternalObject.getDestructorCall() {
 		InstAccess name = getClassName().copyAndAppend("destructor");

@@ -8831,7 +8831,7 @@ model ArraySize5
             description="",
             flatModel="
 fclass ArrayTests.Other.ArraySize5
- Real y[2] = ArrayTests.Other.ArraySize5.f(2, 1:3, 1:3);
+ Real y[2] = ArrayTests.Other.ArraySize5.f(2, 1:3, (1:3)[1:2]);
 
 public
  function ArrayTests.Other.ArraySize5.f

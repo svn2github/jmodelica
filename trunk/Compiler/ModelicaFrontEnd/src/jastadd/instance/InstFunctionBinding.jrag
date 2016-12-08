@@ -113,17 +113,35 @@ aspect InstFunctionBinding {
     /**
      * Get the expression to use for this argument.
      */
-    syn FExp InstDefaultArgument.getFExp() {
-        InstComponentDecl bi = getBoundInput();
-        if (bi != boundInput) {
-            InstValueModification mod = bi.myInstValueMod();
-            if (mod != null) {
-                return mod.getFExp();
-            }
-        }
-        return getDeclarationFExp();
+    syn lazy FExp InstDefaultArgument.getFExp() {
+        FExp exp = getOriginalFExp();
+        FAbstractFunctionCall call = myCall();
+        FExp.FunctionContextReplacer crp = new FExp.FunctionContextReplacer(call.inputArgMap());
+        return exp.copyReplaceAccess(crp);
     }
-    
+
+    inh FAbstractFunctionCall InstFunctionArgument.myCall();
+    eq FAbstractFunctionCall.getChild().myCall() = this;
+
+    syn Map<InstComponentDecl, InstFunctionArgument> FAbstractFunctionCall.inputArgMap() =
+            Collections.<InstComponentDecl, InstFunctionArgument>emptyMap();
+    eq InstFunctionCall.inputArgMap() {
+        Map<InstComponentDecl,InstFunctionArgument> res = new HashMap<InstComponentDecl, InstFunctionArgument>();
+        int i = 0;
+        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
+            res.put(icd, icd.isInput() ? getArg(i++) : null);
+        }
+        return res;
+    }
+    eq InstRecordConstructor.inputArgMap() {
+        Map<InstComponentDecl,InstFunctionArgument> res = new HashMap<InstComponentDecl, InstFunctionArgument>();
+        int i = 0;
+        for (InstComponentDecl icd : myInstClassDecl().allInstComponentDecls()) {
+            res.put(icd, getArg(i++));
+        }
+        return res;
+    }
+
 	/**
 	 * Argument nodes representing arguments that are missing or given multiple times do 
 	 * not get a location set when they are created. Set the location for those nodes, do nothing 
@@ -375,7 +393,7 @@ aspect InstFunctionBinding {
 				}
 				
 				protected static FExp extractFExp(InstFunctionArgument arg) {
-					return arg.getFExpNoTransform().fullCopy();
+                    return arg.getOriginalFExp().fullCopy();
 				}
 				
                 public boolean match(BIT t) {
@@ -556,7 +574,7 @@ aspect InstFunctionBinding {
             int i = 0;
             for (InstFunctionArgument arg : bound) {
                 if (arg.isOKArg()) {
-                    FType argType = arg.getFExpNoTransform().type();
+                    FType argType = arg.getOriginalFExp().type();
                     FType inType = modifiableInputs.get(i).type();
                     if (!inType.dimensionCompatible(argType, true))
                         score++;

@@ -1824,6 +1824,81 @@ end FunctionTests.FunctionBinding22;
 ")})));
 end FunctionBinding22;
 
+model FunctionBinding23
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=x);
+    end f2;
+    
+    Real y = f2(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding23",
+            description="Test default argument using function call where arguments use another argument of the outer function",
+            flatModel="
+fclass FunctionTests.FunctionBinding23
+ Real y = FunctionTests.FunctionBinding23.f2(1, 1);
+
+public
+ function FunctionTests.FunctionBinding23.f2
+  input Real x;
+  input Real z;
+  output Real y;
+ algorithm
+  y := z;
+  return;
+ end FunctionTests.FunctionBinding23.f2;
+
+end FunctionTests.FunctionBinding23;
+")})));
+end FunctionBinding23;
+
+model FunctionBinding24
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=t);
+    protected
+        Real t = x;
+    end f2;
+    
+    Real y = f2(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding24",
+            description="Test default arguments",
+            flatModel="
+fclass FunctionTests.FunctionBinding24
+ Real y = FunctionTests.FunctionBinding24.f2(time, time);
+
+public
+ function FunctionTests.FunctionBinding24.f2
+  input Real x;
+  input Real z;
+  output Real y;
+  Real t;
+ algorithm
+  y := z;
+  t := x;
+  return;
+ end FunctionTests.FunctionBinding24.f2;
+
+end FunctionTests.FunctionBinding24;
+")})));
+end FunctionBinding24;
 
 
 model BadFunctionCall1
@@ -12679,8 +12754,6 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   external \"FORTRAN 77\" dorgqr(size(QR, 1), size(QR, 2), size(tau, 1), Q, lda, tau, work, lwork, info);
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
-
- type AssertionLevel = enumeration(error, warning);
 
 end FunctionTests.Lapack_QR;
 ")})));

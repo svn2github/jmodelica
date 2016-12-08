@@ -570,8 +570,9 @@ aspect InstLookupClasses {
     
     syn InstLookupResult<InstClassDecl> InstAccess.myInstLookupClass() = lookupInstClass(name());
 
-    syn InstClassDecl InstFunctionCall.myInstClassDecl()      = getName().myInstClassDecl(); 
-    syn InstClassDecl InstRecordConstructor.myInstClassDecl() = getRecord().myInstClassDecl(); 
+    syn InstClassDecl FAbstractFunctionCall.myInstClassDecl() = null;
+    eq InstFunctionCall.myInstClassDecl()                     = getName().myInstClassDecl(); 
+    eq InstRecordConstructor.myInstClassDecl()                = getRecord().myInstClassDecl(); 
 
     syn InstClassDecl InstNode.myInstClass()  = unknownInstClassDecl(); 
     eq InstComponentDecl.myInstClass()        = getClassName().myInstClassDecl();

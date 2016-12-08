@@ -1991,10 +1991,10 @@ aspect FlatPrettyPrint {
         str.print(getName());
     }
 	
-	protected void FArgumentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		p.print(copiedFExp(), str, indent);
-	}
-	
+    protected void FDeferExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        p.print(getFExp(), str, indent);
+    }
+    
     syn String FTypePrefixInputOutput.toString();
     eq FInput.toString()      = "input";
     eq FOutput.toString()     = "output";

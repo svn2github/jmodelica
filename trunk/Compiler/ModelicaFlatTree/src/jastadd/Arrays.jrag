@@ -244,7 +244,7 @@ aspect Arrays {
     eq InstDefaultArgument.ndims()       = getFExp().ndims();
     eq InstGivenArgument.ndims()         = getFExp().ndims();
 
-	eq FArgumentExp.ndims() = copiedFExp().ndims();
+    eq FDeferExp.ndims() = getFExp().ndims();
 
     eq FBinExp.ndims()   = overloadNdims();
     eq FUnaryExp.ndims() = overloadNdims();

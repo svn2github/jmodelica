@@ -1235,11 +1235,6 @@ FMatrix : FAbstractCat;
 FMatrixRow : FAbstractCat;
 
 /**
- * Generated expression referring to the value of another argument to the same function call.
- */
-FArgumentExp : FAbstractArrayExp ::= <Index:int> <Depth:int>;
-
-/**
  * Internal expression that describes an unknown size (for a single dimension).
  * 
  * Only used in Size objects.
@@ -1346,7 +1341,7 @@ InstMultipleBoundArgument : InstFunctionArgument ::= Arg:InstFunctionArgument*;
 /**
  * Function call argument using default value in the instance tree.
  */
-InstDefaultArgument : InstFunctionArgument ::= <DeclarationFExp:FExp>;
+InstDefaultArgument : InstFunctionArgument ::= <OriginalFExp:FExp> /FExp/;
 
 // Built in functions
 /**
