@@ -2633,18 +2633,22 @@ fclass FunctionInlining.WhenEquationInline1
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
+ discrete Integer _sampleItr_1;
 initial equation 
+ pre(temp_1) = false;
+ _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
  pre(y) = 0.0;
- pre(temp_1) = false;
 equation
- temp_1 = sample(0, 1);
  if temp_1 and not pre(temp_1) then
   (x, y) = FunctionInlining.WhenEquationInline1.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
+ temp_1 = not initial() and time >= pre(_sampleItr_1);
+ _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
+ assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 
 public
  function FunctionInlining.WhenEquationInline1.F
@@ -2658,7 +2662,6 @@ public
  end FunctionInlining.WhenEquationInline1.F;
 
 end FunctionInlining.WhenEquationInline1;
-			
 ")})));
 end WhenEquationInline1;
 	

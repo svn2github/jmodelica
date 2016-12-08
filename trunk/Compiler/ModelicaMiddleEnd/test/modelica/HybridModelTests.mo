@@ -143,18 +143,24 @@ Discrete equations:
             description="Test interaction between continuous and discrete equations",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 2 variables ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
 Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Continuous equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 
 --- Solved equation ---
 der(x_c) := - x_c + x_d
@@ -189,6 +195,7 @@ Iteration variables:
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Torn equations:
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
@@ -198,7 +205,11 @@ Continuous residual equations:
     Iteration variables: x_c
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 
 Jacobian:
   |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
@@ -224,20 +235,26 @@ Jacobian:
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 3 variables ---
+--- Pre propagation mixed system (Block 1) of 4 variables ---
 Continuous variables:
   x_c
   x_d
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Continuous equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   x_c := pre(x_d)
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 -------------------------------
 ")})));
     end PreTest6;
@@ -259,18 +276,24 @@ Discrete equations:
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 2 variables ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
 Continuous variables:
   x_d
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Continuous equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   x_d := if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 
 --- Solved equation ---
 x_c := x_d
@@ -295,22 +318,28 @@ x_c := x_d
             description="A case which gives bigger block with local pre handling, but avoid global iteration",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 4 variables ---
+--- Pre propagation mixed system (Block 1) of 5 variables ---
 Continuous variables:
   y
   der(x)
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
   i
 
 Continuous equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   y := if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
   der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
   i := if time >= 3 then 1 else 0
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 -------------------------------
 ")})));
     end PreTest8;
@@ -386,20 +415,26 @@ Jacobian:
             description="Test complicated when and pre variable case",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation mixed system (Block 1) of 3 variables ---
+--- Pre propagation mixed system (Block 1) of 4 variables ---
 Continuous variables:
   y
   x
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Continuous equations:
   y := if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   x := if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x)
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 
 --- Solved equation ---
 der(xx) := - x

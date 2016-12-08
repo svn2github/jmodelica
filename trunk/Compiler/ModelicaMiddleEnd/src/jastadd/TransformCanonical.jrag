@@ -977,19 +977,25 @@ aspect TransformCanonical {
 			}
 		}
 	}
-	
-	/**
-	 * Visitor pattern for inserting new statements in an algorithm
-	 * <code>transform(FAlgorithm)</code> is called at start of algorithm
-	 * <code>transform(FStatement)</code> is called at each statement
-	 */
-	public abstract class AlgorithmTransformer {
-		private ArrayList<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
-		
-		protected void add(FStatement stmt) {
-			blocks.get(blocks.size()-1).add(stmt);
-		}
-		
+    
+    /**
+     * Visitor pattern for inserting new statements in an algorithm
+     * <code>transform(FAlgorithm)</code> is called at start of algorithm
+     * <code>transform(FStatement)</code> is called at each statement
+     */
+    public abstract class AlgorithmTransformer {
+        private ArrayList<ArrayList<FStatement>> blocks = new ArrayList<ArrayList<FStatement>>();
+        
+        protected void add(FStatement stmt) {
+            blocks.get(blocks.size()-1).add(stmt);
+        }
+
+        protected void addAll(Collection<? extends FStatement> stmts) {
+            for (FStatement stmt : stmts) {
+                add(stmt);
+            }
+        }
+
 		public static void visit(Collection<FAlgorithm> algs, AlgorithmTransformer tf) {
 			for (FAlgorithm alg : algs)
 				tf.visit(alg);
@@ -3243,78 +3249,211 @@ aspect EventGeneratingExps {
         public class extractEventGeneratingExps extends Transformation {
             public void perform() {
                 HashSet<FAlgorithm> algs = new HashSet<FAlgorithm>();
-                ArrayList<FEventGenExp> eventExps = eventGenExps();
+                ArrayList<FExp> eventExps = eventGenExps();
                 Collections.reverse(eventExps);
-                
+
                 // Equations
-                for (FEventGenExp exp: eventExps) {
-                	FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(), 
-							new FQNameFull(exp.tempVarName()), exp.variability());
-					addFVariable(fv);
-					addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
-                	if (exp.inAlgorithm()) {
-                		algs.add((FAlgorithm) exp.myFEquation());
-                		continue;
-                	}
-                    exp.replaceMe(exp.tempUseExp());
-                    addFEquation(new FEquation(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
+                for (FExp exp: eventExps) {
+                    FVariable fv = exp.type().createFVariable(new FPublicVisibilityType(),
+                            new FQNameFull(exp.tempVarName()), exp.variability());
+                    addFVariable(fv);
+                    addFInitialEquation(new FEquation(exp.tempPreExp(), fv.createStartAttributeExp()));
+
+                    if (exp.inAlgorithm()) {
+                        algs.add((FAlgorithm) exp.myFEquation());
+                        continue;
+                    }
+                    addFEquation(new FEquation(exp.tempUseExp(), exp.eventTempExpCalc()));
+                    exp.replaceMe(exp.eventTempExpUse());
+
+                    addFEquations(exp.extractEventGenEquation());
+                    addFInitialEquations(exp.extractEventGenInitialEquation());
                 }
-                
+
                 // Algorithms
                 AlgorithmTransformer.visit(algs, new EventAlgoTransformer());
-                
+
                 root().flushAllRecursive();
             }
         }
     }
-		
-	/**
-	 * Collects all event generating expressions
-	 */
-	coll ArrayList<FEventGenExp> FClass.eventGenExps() 
-		[new ArrayList<FEventGenExp>()] with add root FClass;
+
+    /**
+     * Collects all event generating expressions
+     */
+    coll ArrayList<FExp> FClass.eventGenExps() 
+        [new ArrayList<FExp>()] with add root FClass;
 	FEventGenExp contributes this
 		when inEquationSection() && generatesEvent()
 		to FClass.eventGenExps()
 		for myFClass();
-	
-	/**
-	 * Collects event generating expressions in this statements
-	 */
-	coll ArrayList<FEventGenExp> FStatement.eventGenExps() 
-		[new ArrayList<FEventGenExp>()] with add root FAlgorithm;
-	FEventGenExp contributes this
-		when inEquationSection() && generatesEvent()
-		to FStatement.eventGenExps()
-		for myFStatement();
-		
-	/**
-	 * Extracts event generating expressions into if-expressions
-	 */
-	public class EventAlgoTransformer extends AlgorithmTransformer {
-		public void transform(FStatement stmt) {
-			ArrayList<FEventGenExp> eventExps = stmt.eventGenExps();
-			Collections.reverse(eventExps);
-			for (FEventGenExp exp : eventExps) {
-				exp.replaceMe(exp.tempUseExp());
-				add(new FAssignStmt(exp.tempUseExp(), exp.asIfExp(exp.tempPreExp())));
-			}
-			add(stmt);
-		}
-	}
-	
-	/**
-	 * Creates an if-expression to replace this expression
-	 */
-	syn FIfExp FEventGenExp.asIfExp(FExp preExp) {
-		FExp guards = new FOrExp(createGuardExp(preExp), new FInitialExp());
-		FIfExp e = new FIfExp();
-		e.setIfExp(guards);
-		e.setThenExp(fullCopy());
-		e.setElseExp(preExp.unboundCopy());
-		return e;
-	}
-	
+    FSampleExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FClass.eventGenExps()
+        for myFClass();
+
+    /**
+     * Collects event generating expressions in this statements
+     */
+    coll ArrayList<FExp> FStatement.eventGenExps() 
+        [new ArrayList<FExp>()] with add root FAlgorithm;
+    FEventGenExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FStatement.eventGenExps()
+        for myFStatement();
+    FSampleExp contributes this
+        when inEquationSection() && generatesEvent()
+        to FStatement.eventGenExps()
+        for myFStatement();
+
+    /**
+     * Extracts event generating expressions into if-expressions
+     */
+    public class EventAlgoTransformer extends AlgorithmTransformer {
+        public void transform(FStatement stmt) {
+            ArrayList<FExp> eventExps = stmt.eventGenExps();
+            Collections.reverse(eventExps);
+            for (FExp exp : eventExps) {
+                add(new FAssignStmt(exp.tempUseExp(), exp.eventTempExpCalc()));
+                exp.replaceMe(exp.eventTempExpUse());
+                addAll(exp.extractEventGenStatement());
+            }
+            add(stmt);
+        }
+    }
+
+    public java.util.List<FAbstractEquation> FExp.extractEventGenEquation() {
+        return Collections. <FAbstractEquation> emptyList();
+    }
+
+    public java.util.List<FAbstractEquation> FExp.extractEventGenInitialEquation() {
+        return Collections. <FAbstractEquation> emptyList();
+    }
+
+    public java.util.List<FStatement> FExp.extractEventGenStatement() {
+        return Collections. <FStatement> emptyList();
+    }
+
+    public java.util.List<FAbstractEquation> FSampleExp.extractEventGenEquation() {
+        FExp interval = getInterval();
+        FExp offset = getOffset();
+        FAssignableExp var = tempUseExp();
+
+        /*
+         *  Create the when statement.
+         */
+        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
+        FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
+
+        FAbstractEquation assign = new FEquation(indexVariable().createUseExp(),
+                new FAddExp(preExp, new FIntegerLitExp(1)));
+        FAbstractEquation when = new FWhenEquation(new FNormalEquation(), new List<FAbstractEquation>(assign),
+                var.treeCopyNoTransform(), new Opt<FIfWhenElseEquation>());
+
+        /*
+         *  Create the assert statement.
+         */
+        FExp ltExp = new FLtExp(new FTimeExp(), addExp);
+        FAbstractEquation assertEq = new FFunctionCallEquation(new List<FFunctionCallLeft>(),
+                new FAssert(ltExp, new FStringLitExp(SAMPLE_ASSERT_MESSAGE), new Opt<FExp>()));
+
+        /*
+         *  Add statements to the result list.
+         */
+        java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        eqns.add(when);
+        eqns.add(assertEq);
+
+        return eqns;
+    }
+    
+    //initial equation
+    // sampleInd1 = if time < offset then 0 else ceil((initial_time - offset) / interval);
+    public java.util.List<FAbstractEquation> FSampleExp.extractEventGenInitialEquation() {
+        java.util.List<FAbstractEquation> eqns = new ArrayList<FAbstractEquation>();
+        FExp offset = getOffset();
+        
+        FExp subExp = new FSubExp(new FTimeExp(), offset.treeCopyNoTransform());
+        FExp eval = new FCeilFuncExp(new List<InstFunctionArgument>(),
+                new FDivExp(subExp, getInterval().treeCopyNoTransform())); 
+
+        FExp guards = new FLtExp(new FTimeExp(), offset.treeCopyNoTransform());
+        FIfExp ifExp = new FIfExp(guards, new FIntegerLitExp(0), eval);
+        eqns.add(new FEquation(indexVariable().createUseExp(), ifExp));
+        return eqns;
+    }
+
+    public java.util.List<FStatement> FSampleExp.extractEventGenStatement() {
+        FExp interval = getInterval();
+        FExp offset = getOffset();
+        FAssignableExp var = tempUseExp();
+
+        /*
+         *  Create the when statement.
+         */
+        FPreExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)), interval);
+        FExp addExp = new FAddExp(offset.treeCopyNoTransform(), mulExp);
+
+        FStatement assignStmt = new FAssignStmt(indexVariable().createUseExp(),
+                new FAddExp(preExp.treeCopyNoTransform(), new FIntegerLitExp(1)));
+        FStatement when = new FWhenStmt(new List<FIfWhenClause>(new FWhenClause(
+                var.treeCopyNoTransform(), new List<FStatement>(assignStmt))));
+
+        /*
+         *  Create the assert statement.
+         */
+        FExp ltExp = new FLtExp(new FTimeExp(), addExp);
+        FStatement assertEq = new FFunctionCallStmt(new List<FFunctionCallLeft>(),
+                new FAssert(ltExp, new FStringLitExp(SAMPLE_ASSERT_MESSAGE), new Opt<FExp>()));
+
+        /*
+         *  Add statements to the result list.
+         */
+        java.util.List<FStatement> stmts = new ArrayList<FStatement>();
+        stmts.add(when);
+        stmts.add(assertEq);
+
+        return stmts;
+    }
+
+    private static final String FSampleExp.SAMPLE_ASSERT_MESSAGE = "Too long time steps relative to sample interval.";
+    
+    private FVariable FSampleExp.indexVariable = null;
+    private FVariable FSampleExp.indexVariable() {
+        if (indexVariable == null) {
+            indexVariable = new FIntegerVariable(new FPublicVisibilityType(),
+                    fDiscrete(), new FQNameFull(calcIndexVarName()));
+            myFClass().addFVariable(indexVariable);
+        }
+        return indexVariable;
+    }
+
+    syn FExp FExp.eventTempExpUse()     = null;
+    eq FSampleExp.eventTempExpUse()     = tempUseExp();
+    eq FEventGenExp.eventTempExpUse()   = tempUseExp();
+    
+    // Use TreeCopyNoTransform
+    syn FExp FExp.eventTempExpCalc()    = null;
+    eq FSampleExp.eventTempExpCalc() {
+        FExp preExp = new FPreExp(indexVariable().createFIdUse());
+        FExp mulExp = new FMulExp(preExp, getInterval().treeCopyNoTransform());
+        FExp addExp = new FAddExp(getOffset().treeCopyNoTransform(), mulExp);
+        FExp notInitial = new FNotExp(new FInitialExp());
+        FExp geqExp = new FGeqExp(new FTimeExp(), addExp);
+        return new FAndExp(notInitial, geqExp);
+    }
+    
+    eq FEventGenExp.eventTempExpCalc() {
+        FExp guards = new FOrExp(createGuardExp(tempPreExp()), new FInitialExp());
+        FIfExp e = new FIfExp();
+        e.setIfExp(guards);
+        e.setThenExp(treeCopy());
+        e.setElseExp(tempPreExp());
+        return e;
+    }
+    
 	/**
 	 * Creates a guard expression for an event generating expression
 	 * extracted to a when equation. (Integer inherits from floor.)
