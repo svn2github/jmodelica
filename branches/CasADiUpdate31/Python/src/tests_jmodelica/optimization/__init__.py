@@ -16,4 +16,4 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 """ Tests for the optimization package. """
-__all__ = ['test_casadi_collocation', 'test_ipopt', 'test_polynomial', 'test_mpc']
+__all__ = ['test_casadi_collocation', 'test_ipopt', 'test_polynomial', 'test_mpc', 'test_static_optimization']

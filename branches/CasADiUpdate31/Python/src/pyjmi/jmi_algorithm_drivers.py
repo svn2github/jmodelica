@@ -68,6 +68,7 @@ except:
     
 if casadi_present:
     from pyjmi.optimization.casadi_collocation import *
+    from pyjmi.optimization.static_optimization import *
     from pyjmi.optimization import casadi_collocation
     from pyjmi.optimization.polynomial import *
     from pyjmi.common.xmlparser import XMLException
@@ -1191,7 +1192,6 @@ class LocalDAECollocationPrepareAlg(AlgorithmBase):
     def get_result(self):
         return self.solver
 
-
 class LocalDAECollocationAlg(AlgorithmBase):
     
     """
@@ -1911,6 +1911,294 @@ class LocalDAECollocationAlgOptions(OptionBase):
                 'WORHP_options': {}}
         
         super(LocalDAECollocationAlgOptions, self).__init__(_defaults)
+        self._update_keep_dict_defaults(*args, **kw)
+
+class StaticOptimizationAlg(AlgorithmBase):
+    
+    """
+    The algorithm solves static optimization problems encoded in CasADi Interface.
+    """
+    
+    def __init__(self, op, options):
+        """
+        Create a StaticOptimizationAlg algorithm.
+        
+        Parameters::
+              
+            op -- 
+                OptimizationProblem from CasADiInterface
+
+            options -- 
+                The options that should be used by the algorithm. For 
+                details on the options, see:
+                
+                op.optimize_options('StaticOptimizationAlgOptions')
+                
+                or look at the docstring with help:
+                
+                help(pyjmi.jmi_algorithm_drivers.StaticOptimizationAlgOptions)
+                
+                Valid values are: 
+                - A dict that overrides some or all of the default values
+                  provided by StaticOptimizationAlgOptions. An empty
+                  dict will thus give all options with default values.
+                - A StaticOptimizationAlgOptions object.
+        """
+        t0_init = time.clock()
+        self.op = op
+        model = op
+        self.model = model
+
+        # Check that model does not contain any unsupported variables
+        var_kinds = [(model.BOOLEAN_DISCRETE, "Boolean discrete"),
+                     (model.BOOLEAN_INPUT, "Boolean input"),
+                     (model.INTEGER_DISCRETE, "integer discrete"),
+                     (model.INTEGER_INPUT, "integer input"),
+                     (model.REAL_DISCRETE, "real discrete"),
+                     (model.STRING_DISCRETE, "string discrete"),
+                     (model.STRING_INPUT, "string input")]
+        error_str = ''
+        for (kind, name) in var_kinds:
+            variables = model.getVariables(kind)
+            if len(variables) == 1:
+                var_name = variables[0].getName()
+                error_str += ("The following variable is %s, which " % name +
+                              "is not supported: %s.\n\n" % var_name)
+            elif len(variables) > 1:
+                error_str += ("The following variables are %s, " % name +
+                              "which is not supported: ")
+                for var in variables[:-1]:
+                    error_str += var.getName() + ", "
+                error_str += variables[-1].getName() + ".\n\n"
+
+        # Check for unsupported free parameters
+        var_kinds = [(model.BOOLEAN_PARAMETER_DEPENDENT,
+                      "Boolean parameter dependent"),
+                     (model.BOOLEAN_PARAMETER_INDEPENDENT,
+                      "Boolean parameter independent"),
+                     (model.INTEGER_PARAMETER_DEPENDENT,
+                      "integer parameter dependent"),
+                     (model.INTEGER_PARAMETER_INDEPENDENT,
+                      "integer parameter independent"),
+                     (model.STRING_PARAMETER_DEPENDENT,
+                      "string parameter dependent"),
+                     (model.STRING_PARAMETER_INDEPENDENT,
+                      "string parameter independent")]
+        for (kind, name) in var_kinds:
+            variables = [var for var in model.getVariables(kind)
+                         if op.get_attr(var, "free")]
+            if len(variables) == 1:
+                var_name = variables[0].getName()
+                error_str += ("The following parameter is %s and free, "%name +
+                              "which is not supported: %s.\n\n" % var_name)
+            elif len(variables) > 1:
+                error_str += ("The following parameters are %s and " % name +
+                              "free, which is not supported: ")
+                for var in variables[:-1]:
+                    error_str += var.getName() + ", "
+                error_str += variables[-1].getName() + ".\n\n"
+        if len(error_str) > 0:
+            raise Exception(error_str)
+        
+        # handle options argument
+        if isinstance(options, dict):
+            # user has passed dict with options or empty dict = default
+            self.options = StaticOptimizationAlgOptions(options)
+        elif isinstance(options, StaticOptimizationAlgOptions):
+            # user has passed StaticOptimizationAlgOptions instance
+            self.options = options
+        else:
+            raise InvalidAlgorithmOptionException(options)
+
+        # set options
+        self._set_options()
+            
+        if not casadi_present:
+            raise Exception(
+                    'Could not find CasADi. Check pyjmi.check_packages()')
+        
+        self.nlp = StaticOptimizer(self.op, self.options)
+        
+        # set solver options
+        self._set_solver_options()
+        self.nlp.solver_object.init()
+
+        # record the initialization time including initialization within the algorithm object
+        self.nlp.times['init'] = time.clock() - t0_init
+        
+    def _set_options(self):
+        """ 
+        Set algorithm options and assert their validity.
+        """
+        self.__dict__.update(self.options)
+        defaults = self.get_default_options()
+        
+        # Solver options
+        if self.solver == "IPOPT":
+            self.solver_options = self.IPOPT_options
+        elif self.solver == "WORHP":
+            self.solver_options = self.WORHP_options
+        else:
+            raise ValueError('Unknown nonlinear programming solver %s.' %
+                             self.solver)
+        
+    def _set_solver_options(self):
+        """ 
+        Helper function that sets options for the solver.
+        """
+        for (k, v) in self.solver_options.iteritems():
+            self.nlp.set_solver_option(k, v)
+            
+    def solve(self):
+        """ 
+        Solve the optimization problem using ipopt solver. 
+        """
+        self.nlp.solve_and_write_result()
+
+    def get_result(self):
+        """ 
+        Load result data and create a StaticOptimizationAlgResult object.
+        
+        Returns::
+        
+            The StaticOptimizationAlgResult object.
+        """
+        return self.nlp.get_result_object()
+
+    @classmethod
+    def get_default_options(cls):
+        """ 
+        Get an instance of the options class for the LocalDAECollocationAlg
+        algorithm, prefilled with default values. (Class method.)
+        """
+        return StaticOptimizationAlgOptions()
+    
+class StaticOptimizationAlgOptions(OptionBase):
+    
+    """
+    Options for solving static optimization problems from CasADi Interface. 
+
+    Standard options::
+        
+        expand_to_sx --
+            Whether to expand the CasADi MX graphs to SX graphs. Possible values: "NLP", "DAE", "no".
+
+            "NLP": The entire NLP graph is expanded into SX. This will lead to high evaluation speed and high memory
+            consumption.
+
+            "DAE": The DAE, objective and constraint graphs are expanded into SX, but the full NLP graph is an MX graph.
+            This will lead to moderate evaluation speed and moderate memory consumption. This is only significantly
+            different from "NLP" if multiple instances of the DAE occur in the NLP, which typically happens when
+            ExternalData is used.
+
+            "no": All constructed graphs are MX graphs. This will lead to low evaluation speed and low memory
+            consumption.
+            
+            Type: str
+            Default: "NLP"
+        
+        init_guess --
+            An object from which initial guesses will be extracted for all optimization variables. Suitably obtained by
+            either initializing an FMU or solving another optimization problem.
+
+            If static_external_data is used with multiple problem instances, init_guess should either be
+            
+             * A list of objects from which values can be extracted with as many elements as there are problem instances
+             * A single object with several "time" points, where each integral time point (starting from 0) corresponds
+               to an instance
+            
+            Type: None, List, pyjmi.common.io.ResultDymolaTextual or pyjmi.common.algorithm_drivers.JMResultBase
+            Default: None
+        
+        static_external_data --
+            Data used to penalize or fix certain variables.
+            
+            Type: None or
+            pyjmi.optimization.static_optimization.ExternalData
+            Default: None
+
+        solver --
+            Specifies the nonlinear programming solver to be used. Possible
+            choices are 'IPOPT' and 'WORHP'.
+
+            Type: String
+            Default: 'IPOPT'
+
+        verbosity --
+            Sets verbosity of algorithm output. 0 prints nothing, 3 prints everything.
+
+            Type: int
+            Default: 3
+
+    Collocation algorithm experimental/debug options::
+
+        named_vars --
+            If enabled, the solver will create a duplicated set of NLP
+            variables which have names corresponding to the Modelica/Optimica
+            variable names. Symbolic expressions of the NLP consisting of the
+            named variables can then be obtained using the get_named_var_expr
+            method of the collocator class.
+
+            This option is only intended for investigative purposes.
+
+            Type: bool
+            Default: False
+
+        variable_scaling --
+            Whether to scale the variables according to their nominal values or
+            the trajectories provided with the nominal_traj option.
+            
+            Type: bool
+            Default: True
+        
+        write_scaled_result --
+            Return the scaled optimization result if set to True, otherwise
+            return the unscaled optimization result. This option is only
+            applicable when variable_scaling is enabled and is only intended
+            for debugging.
+            
+            Type: bool
+            Default: False
+        
+        result_file_name --
+            Specifies the name of the file where the result is written. Setting
+            this option to an empty string results in a default file name that
+            is based on the name of the model class.
+
+            Type: str
+            Default: ""
+
+    Options are set by using the syntax for dictionaries::
+
+        >>> opts = my_model.optimize_options(algorithm='StaticOptimization')
+        >>> opts['solver'] = 'IPOPT'
+    
+    Options for the nonlinear programming solver can be provided in the option
+    <solver name>_options, using the syntax for dictionaries::
+        
+        >>> opts['IPOPT_options']['max_iter'] = 500
+    """
+    
+    def __init__(self, *args, **kw):
+        _defaults = {
+                'expand_to_sx': "NLP",
+                'named_vars': False,
+                'init_guess': None,
+                'variable_scaling': True,
+                'result_file_name': "",
+                'write_scaled_result': False,
+                'external_data': None,
+                'solver': 'IPOPT',
+                'verbosity': 3,
+                'IPOPT_options': {'dual_inf_tol': 1e100,
+                                  'constr_viol_tol': 1e100,
+                                  'compl_inf_tol': 1e100,
+                                  'acceptable_dual_inf_tol': 1e100,
+                                  'acceptable_constr_viol_tol': 1e100,
+                                  'acceptable_compl_inf_tol': 1e100},
+                'WORHP_options': {}}
+        
+        super(StaticOptimizationAlgOptions, self).__init__(_defaults)
         self._update_keep_dict_defaults(*args, **kw)
             
 class MPCAlgResult(JMResultBase):

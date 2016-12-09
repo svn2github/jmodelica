@@ -444,11 +444,7 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        if algorithm != "LocalDAECollocationAlg":
-            raise ValueError("LocalDAECollocationAlg is the only supported " +
-                             "algorithm.")
-        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers',
-                                    algorithm, options)
+        return self._exec_algorithm('pyjmi.jmi_algorithm_drivers', algorithm, options)
 
     # Make solve synonymous with optimize
     solve_options = optimize_options
