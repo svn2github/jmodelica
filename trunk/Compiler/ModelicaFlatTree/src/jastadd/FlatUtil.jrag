@@ -1221,26 +1221,14 @@ aspect FlatNames {
     
     syn boolean FAbstractEquation.isIgnored() = false;
     eq FFunctionCallEquation.isIgnored()      = getCall().isIgnored();
-
+    
     /**
      * Add an equation to the first equation block.
      */
     public void FClass.addFEquation(FAbstractEquation feq) {
         addFAbstractEquationNoTransform(feq);
     }
-
-    public void FClass.addFInitialEquations(Collection<? extends FAbstractEquation> eqns) {
-        for (FAbstractEquation feq : eqns) {
-            addFInitialEquation(feq);
-        }
-    }
-
-    public void FClass.addFEquations(Collection<? extends FAbstractEquation> eqns) {
-        for (FAbstractEquation feq : eqns) {
-            addFEquation(feq);
-        }
-    }
-
+    
 }
 
 
@@ -1777,12 +1765,10 @@ aspect FlatFunctionUtils {
      }
      private String FAssignStmt.myTempVarName;
      
-     syn String FExp.calcTempVarName()          = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
-     syn String FAssignStmt.calcTempVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     syn String FExp.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
+     syn String FAssignStmt.calcTempVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.TEMP);
      
-     syn String FRelExp.calcIndicatorVarName()  = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
-     
-     syn String FSampleExp.calcIndexVarName()   = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.SAMPLE);
+     syn String FRelExp.calcIndicatorVarName() = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.INDICATOR);
      
      inh String FExp.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
      inh String FAssignStmt.calcGeneratedVarName(FlatVariableMap.GeneratedVarType gvt);
@@ -1854,8 +1840,7 @@ aspect FlatFunctionUtils {
          
          public enum GeneratedVarType {
              TEMP("temp_"),
-             INDICATOR("_eventIndicator_"),
-             SAMPLE("_sampleItr_");
+             INDICATOR("_eventIndicator_");
              
              private String prefix;
              

@@ -1427,7 +1427,7 @@ aspect Scalarization {
     }
 
 	/**
-	 * Creates a new temporary variable with the given name and variability.
+	 * Creates a new temporary variable with the given visibility, name and visibility.
 	 * 
 	 * All optional children in the new variable are empty.
 	 * 

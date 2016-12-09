@@ -15178,51 +15178,13 @@ model SampleTest1
             flatModel="
 fclass FunctionTests.FunctionLike.EventRel.SampleTest1
  discrete Boolean x;
- discrete Integer _sampleItr_1;
 initial equation 
  pre(x) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time);
 equation
- x = not initial() and time >= pre(_sampleItr_1);
- _sampleItr_1 = if x and not pre(x) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
+ x = sample(0, 1);
 end FunctionTests.FunctionLike.EventRel.SampleTest1;
 ")})));
 end SampleTest1;
-
-model SampleTest2
-   Real y;
-   parameter Boolean x(start=true);
-equation
-    when x and sample(0.01, 0.01) then
-        y = time;
-   end when;
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="FunctionLike_EventRel_SampleTest1",
-            description="sample(): basic test",
-            flatModel="
-fclass FunctionTests.FunctionLike.EventRel.SampleTest2
- discrete Real y;
- parameter Boolean x(start = true);
- discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
- discrete Boolean temp_2;
-initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0.01 then 0 else ceil((time - 0.01) / 0.01);
- pre(y) = 0.0;
- pre(temp_2) = false;
-equation
- temp_2 = x and temp_1;
- y = if temp_2 and not pre(temp_2) then time else pre(y);
- temp_1 = not initial() and time >= 0.01 + pre(_sampleItr_1) * 0.01;
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < 0.01 + (pre(_sampleItr_1) + 1) * 0.01, \"Too long time steps relative to sample interval.\");
-end FunctionTests.FunctionLike.EventRel.SampleTest2;
-")})));
-end SampleTest2;
 
 end EventRel;
 

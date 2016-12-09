@@ -281,7 +281,7 @@ aspect eliminateLinearEquations {
 
     syn int FExp.coeff() = myCoeff() * outerCoeff();
 
-    syn int FExp.myCoeff()                          = 1;
+    syn int FExp.myCoeff()                       = 1;
     eq FIntegerLitExp.myCoeff()                     = getValue();
     eq FRealLitExp.myCoeff()                        = (int) getValue();
 

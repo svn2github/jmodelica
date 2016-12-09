@@ -3499,38 +3499,32 @@ equation
    y = pre(y) + 1;
  end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu8",
-            description="Basic test of when equations",
-            flatModel="
+
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu8",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu8
  discrete Real x;
  discrete Real y;
  Real dummy;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
  discrete Boolean temp_2;
- discrete Integer _sampleItr_2;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.6666666666666666);
- pre(temp_2) = false;
- _sampleItr_2 = if time < 0 then 0 else ceil(time / 0.3333333333333333);
  dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ pre(temp_1) = false;
+ pre(temp_2) = false;
 equation
  der(dummy) = 0;
- x = if temp_2 and not pre(temp_2) then pre(x) + 1 else pre(x);
- y = if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y);
- temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.6666666666666666;
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < (pre(_sampleItr_1) + 1) * (2 / 3), \"Too long time steps relative to sample interval.\");
- temp_2 = not initial() and time >= pre(_sampleItr_2) * 0.3333333333333333;
- _sampleItr_2 = if temp_2 and not pre(temp_2) then pre(_sampleItr_2) + 1 else pre(_sampleItr_2);
- assert(time < (pre(_sampleItr_2) + 1) * (1 / 3), \"Too long time steps relative to sample interval.\");
+ temp_1 = sample(0, 0.3333333333333333);
+ x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
+ temp_2 = sample(0, 0.6666666666666666);
+ y = if temp_2 and not pre(temp_2) then pre(y) + 1 else pre(y);
 end TransformCanonicalTests.WhenEqu8;
+			
 ")})));
 end WhenEqu8; 
 
@@ -3552,11 +3546,11 @@ equation
  end when;
  ref = if time <1 then 0 else 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu9",
-            description="Basic test of when equations",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu9",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu9
  Real x;
  Real ref;
@@ -3566,22 +3560,19 @@ fclass TransformCanonicalTests.WhenEqu9
  parameter Real Ti = 0.1 /* 0.1 */;
  parameter Real h = 0.05 /* 0.05 */;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
  x = 0.0;
  pre(I) = 0.0;
  pre(u) = 0.0;
+ pre(temp_1) = false;
 equation
  der(x) = - x + u;
+ temp_1 = sample(0, h);
  I = if temp_1 and not pre(temp_1) then pre(I) + h * (ref - x) else pre(I);
  u = if temp_1 and not pre(temp_1) then K * (ref - x) + 1 / Ti * I else pre(u);
  ref = if time < 1 then 0 else 1;
- temp_1 = not initial() and time >= pre(_sampleItr_1) * h;
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu9;
+			
 ")})));
 end WhenEqu9; 
 
@@ -3600,7 +3591,7 @@ model WhenEqu10
  parameter Real c_c = 1;
  parameter Real h = 0.1;
 initial equation
- x_c = pre(x_c);     
+ x_c = pre(x_c); 	
 equation
  der(x_p) = a_p*x_p + b_p*u_p;
  u_p = c_c*x_c;
@@ -3610,11 +3601,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu10",
-            description="Basic test of when equations",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu10",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu10
  discrete Boolean sampleTrigger;
  Real x_p(start = 1,fixed = true);
@@ -3628,27 +3619,24 @@ fclass TransformCanonicalTests.WhenEqu10
  parameter Real b_c = 1 /* 1 */;
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
- discrete Integer _sampleItr_1;
 initial equation 
  x_c = pre(x_c);
- pre(sampleTrigger) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
  x_p = 1;
+ pre(sampleTrigger) = false;
  pre(u_c) = 0.0;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
+ sampleTrigger = sample(0, h);
  u_c = if initial() or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if initial() or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
- sampleTrigger = not initial() and time >= pre(_sampleItr_1) * h;
- _sampleItr_1 = if sampleTrigger and not pre(sampleTrigger) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu10;
+			
 ")})));
 end WhenEqu10;
 
-model WhenEqu11    
-        
+model WhenEqu11	
+		
  discrete Boolean sampleTrigger;
  Real x_p(start=1);
  Real u_p;
@@ -3663,7 +3651,7 @@ model WhenEqu11
  parameter Real h = 0.1;
  discrete Boolean atInit = true and initial();
 initial equation
- x_c = pre(x_c);     
+ x_c = pre(x_c); 	
 equation
  der(x_p) = a_p*x_p + b_p*u_p;
  u_p = c_c*x_c;
@@ -3673,11 +3661,11 @@ equation
    x_c = a_c*pre(x_c) + b_c*u_c;
  end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu11",
-            description="Basic test of when equations",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu11",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu11
  discrete Boolean sampleTrigger;
  Real x_p(start = 1);
@@ -3692,70 +3680,63 @@ fclass TransformCanonicalTests.WhenEqu11
  parameter Real c_c = 1 /* 1 */;
  parameter Real h = 0.1 /* 0.1 */;
  discrete Boolean atInit;
- discrete Integer _sampleItr_1;
 initial equation 
  x_c = pre(x_c);
- pre(sampleTrigger) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time / h);
  x_p = 1;
+ pre(sampleTrigger) = false;
  pre(x_c) = 0.0;
  pre(u_c) = 0.0;
  pre(atInit) = false;
 equation
  der(x_p) = a_p * x_p + b_p * u_p;
  u_p = c_c * x_c;
+ sampleTrigger = sample(0, h);
  u_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then c_p * x_p else pre(u_c);
  x_c = if atInit and not pre(atInit) or sampleTrigger and not pre(sampleTrigger) then a_c * pre(x_c) + b_c * u_c else pre(x_c);
  atInit = true and initial();
- sampleTrigger = not initial() and time >= pre(_sampleItr_1) * h;
- _sampleItr_1 = if sampleTrigger and not pre(sampleTrigger) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < (pre(_sampleItr_1) + 1) * h, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu11;
+			
 ")})));
 end WhenEqu11;
 
 model WhenEqu12
-    
-    function F
-        input Real x;
-        output Real y1;
-        output Real y2;
-    algorithm
-        y1 := 1;
-        y2 := 2;
-    end F;
-    Real x,y;
-    equation
-    when sample(0,1) then
-        (x,y) = F(time);
-    end when;
+	
+	function F
+		input Real x;
+		output Real y1;
+		output Real y2;
+	algorithm
+		y1 := 1;
+		y2 := 2;
+	end F;
+	Real x,y;
+	equation
+	when sample(0,1) then
+		(x,y) = F(time);
+	end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu12",
-            description="Basic test of when equations",
-            inline_functions="none",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu12",
+			description="Basic test of when equations",
+			inline_functions="none",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu12
  discrete Real x;
  discrete Real y;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
  pre(y) = 0.0;
+ pre(temp_1) = false;
 equation
+ temp_1 = sample(0, 1);
  if temp_1 and not pre(temp_1) then
   (x, y) = TransformCanonicalTests.WhenEqu12.F(time);
  else
   x = pre(x);
   y = pre(y);
  end if;
- temp_1 = not initial() and time >= pre(_sampleItr_1);
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 
 public
  function TransformCanonicalTests.WhenEqu12.F
@@ -3769,7 +3750,8 @@ public
  end TransformCanonicalTests.WhenEqu12.F;
 
 end TransformCanonicalTests.WhenEqu12;
-")})));
+			
+")})));		
 end WhenEqu12;
 
 model WhenEqu13
@@ -3796,32 +3778,31 @@ end when;
  der(v3) = if y>=0 then 0 else 1;
  der(v4) = if y>0 then 0 else 1;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="WhenEqu13",
-            description="Basic test of when equations",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="WhenEqu13",
+			description="Basic test of when equations",
+			flatModel="
 fclass TransformCanonicalTests.WhenEqu13
- Real v1(start = -1);
- Real v2(start = -1);
- Real v3(start = -1);
- Real v4(start = -1);
+ Real v1(start = - 1);
+ Real v2(start = - 1);
+ Real v3(start = - 1);
+ Real v4(start = - 1);
  discrete Real y(start = 1);
  discrete Integer i(start = 0);
  discrete Boolean up(start = true);
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
  v1 = 0;
  v2 = 1;
  v3 = 0;
  v4 = 1;
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0.1 then 0 else ceil(time - 0.1);
  pre(y) = 1;
  pre(i) = 0;
  pre(up) = true;
+ pre(temp_1) = false;
 equation
+ temp_1 = sample(0.1, 1);
  i = if temp_1 and not pre(temp_1) then if up then pre(i) + 1 else pre(i) - 1 else pre(i);
  up = if temp_1 and not pre(temp_1) then if pre(i) == 2 then false elseif pre(i) == -2 then true else pre(up) else pre(up);
  y = if temp_1 and not pre(temp_1) then i else pre(y);
@@ -3829,11 +3810,9 @@ equation
  der(v2) = if y < 0 then 0 else 1;
  der(v3) = if y >= 0 then 0 else 1;
  der(v4) = if y > 0 then 0 else 1;
- temp_1 = not initial() and time >= 0.1 + pre(_sampleItr_1);
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < 0.1 + (pre(_sampleItr_1) + 1), \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.WhenEqu13;
-")})));
+			
+")})));		
 end WhenEqu13;
 model WhenEqu14
     Boolean a;
@@ -4602,34 +4581,31 @@ Compliance error in flattened model:
   model IfEqu19
     Real x;
   equation
-    when sample(1,0) then
-        if time>=3 then
-            x = pre(x) + 1;
+	when sample(1,0) then
+		if time>=3 then
+			x = pre(x) + 1;
         else
-            x = pre(x) + 5;
-        end if;
-    end when;
-            
+	        x = pre(x) + 5;
+		end if;
+	end when;
+			
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="IfEqu19",
-            description="Check that if equations inside when equations are treated correctly.",
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="IfEqu19",
+			description="Check that if equations inside when equations are treated correctly.",
+			flatModel="
 fclass TransformCanonicalTests.IfEqu19
  discrete Real x;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 1 then 0 else ceil((time - 1) / 0);
  pre(x) = 0.0;
+ pre(temp_1) = false;
 equation
+ temp_1 = sample(1, 0);
  x = if temp_1 and not pre(temp_1) then if time >= 3 then pre(x) + 1 else pre(x) + 5 else pre(x);
- temp_1 = not initial() and time >= 1;
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < 1, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.IfEqu19;
+			
 ")})));
   end IfEqu19;
 
@@ -7769,16 +7745,12 @@ equation
 fclass TransformCanonicalTests.Sample1
  discrete Real x;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
+ pre(temp_1) = false;
 equation
+ temp_1 = sample(0, 1);
  x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
- temp_1 = not initial() and time >= pre(_sampleItr_1);
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
 end TransformCanonicalTests.Sample1;
 ")})));
 end Sample1;
@@ -7798,51 +7770,15 @@ equation
 fclass TransformCanonicalTests.Sample2
  discrete Real x;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
- discrete Boolean temp_2;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time);
  pre(x) = 0.0;
- pre(temp_2) = false;
+ pre(temp_1) = false;
 equation
- temp_2 = temp_1 and time < 20;
- x = if temp_2 and not pre(temp_2) then time * 6.28 else pre(x);
- temp_1 = not initial() and time >= pre(_sampleItr_1);
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
+ temp_1 = sample(0, 1) and time < 20;
+ x = if temp_1 and not pre(temp_1) then time * 6.28 else pre(x);
 end TransformCanonicalTests.Sample2;
-
 ")})));
 end Sample2;
-
-model Sample3
-    parameter input Integer a;
-    parameter input Integer b;
-    Boolean s;
-  equation
-    s = sample(a, b);
-
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="Sample3",
-            description="Test so that a sample equation is correctly transformed to a when-equation.",
-            flatModel="
-fclass TransformCanonicalTests.Sample3
- parameter input Integer a;
- parameter input Integer b;
- discrete Boolean s;
- discrete Integer _sampleItr_1;
-initial equation 
- pre(s) = false;
- _sampleItr_1 = if time < a then 0 else ceil((time - a) / b);
-equation
- s = not initial() and time >= a + pre(_sampleItr_1) * b;
- _sampleItr_1 = if s and not pre(s) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < a + (pre(_sampleItr_1) + 1) * b, \"Too long time steps relative to sample interval.\");
-end TransformCanonicalTests.Sample3;
-")})));
-end Sample3;
 
 model InsertTempLHS1
     record R

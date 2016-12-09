@@ -383,13 +383,13 @@ x = pre(x) + 1.1;
 y = pre(y) + 1.1; 
 end when; 
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="HybridFMU1",
-            description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-            generate_ode=true,
-            checkAll=true,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="HybridFMU1",
+			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+			generate_ode=true,
+			checkAll=true,
+			flatModel="
 fclass ComplianceTests.HybridFMU1
  Real xx(start = 2);
  discrete Real x;
@@ -400,19 +400,17 @@ fclass ComplianceTests.HybridFMU1
  parameter Real p1 = 1.2 /* 1.2 */;
  parameter Real p2;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
  discrete Boolean temp_2;
  discrete Boolean temp_3;
  discrete Boolean temp_4;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time);
  xx = 2;
  pre(x) = 0.0;
  pre(y) = 0.0;
  pre(w) = true;
  pre(v) = true;
  pre(z) = true;
+ pre(temp_1) = false;
  pre(temp_2) = false;
  pre(temp_3) = false;
  pre(temp_4) = false;
@@ -420,17 +418,15 @@ parameter equation
  p2 = floor(p1);
 equation
  der(xx) = - x;
- temp_2 = y > 2 and pre(z);
- w = if temp_2 and not pre(temp_2) then false else pre(w);
- temp_3 = y > 2 and z;
- v = if temp_3 and not pre(temp_3) then false else pre(v);
- temp_4 = x > 2;
- z = if temp_4 and not pre(temp_4) then false else pre(z);
- x = if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x);
- y = if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y);
- temp_1 = not initial() and time >= pre(_sampleItr_1);
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\");
+ temp_1 = y > 2 and pre(z);
+ w = if temp_1 and not pre(temp_1) then false else pre(w);
+ temp_2 = y > 2 and z;
+ v = if temp_2 and not pre(temp_2) then false else pre(v);
+ temp_3 = x > 2;
+ z = if temp_3 and not pre(temp_3) then false else pre(z);
+ temp_4 = sample(0, 1);
+ x = if temp_4 and not pre(temp_4) then pre(x) + 1.1 else pre(x);
+ y = if temp_4 and not pre(temp_4) then pre(y) + 1.1 else pre(y);
 end ComplianceTests.HybridFMU1;
 ")})));
 end HybridFMU1;
@@ -494,33 +490,30 @@ equation
    y = pre(y) + 1;
  end when;
 
-    annotation(__JModelica(UnitTesting(tests={
-        TransformCanonicalTestCase(
-            name="HybridFMU2",
-            description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
-            generate_ode=true,
-            checkAll=true,
-            flatModel="
+	annotation(__JModelica(UnitTesting(tests={
+		TransformCanonicalTestCase(
+			name="HybridFMU2",
+			description="Test that compliance warnings for hybrid elements aren't issued when compiling FMU",
+			generate_ode=true,
+			checkAll=true,
+			flatModel="
 fclass ComplianceTests.HybridFMU2
  discrete Real x;
  discrete Real y;
  Real dummy;
  discrete Boolean temp_1;
- discrete Integer _sampleItr_1;
 initial equation 
- pre(temp_1) = false;
- _sampleItr_1 = if time < 0 then 0 else ceil(time / 0.3333333333333333);
  dummy = 0.0;
  pre(x) = 0.0;
  pre(y) = 0.0;
+ pre(temp_1) = false;
 equation
  der(dummy) = 0;
+ temp_1 = sample(0, 0.3333333333333333);
  x = if temp_1 and not pre(temp_1) then pre(x) + 1 else pre(x);
  y = if initial() then pre(y) + 1 else pre(y);
- temp_1 = not initial() and time >= pre(_sampleItr_1) * 0.3333333333333333;
- _sampleItr_1 = if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1);
- assert(time < (pre(_sampleItr_1) + 1) * (1 / 3), \"Too long time steps relative to sample interval.\");
 end ComplianceTests.HybridFMU2;
+			
 ")})));
 end HybridFMU2;
 
