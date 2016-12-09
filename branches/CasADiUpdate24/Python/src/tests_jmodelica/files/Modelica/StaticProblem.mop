@@ -1,0 +1,29 @@
+model StaticProblem
+    Real x(start=2, min=0.1);
+    Real y(start=0.5, min=0.1);
+    input Real u(start=1);
+    parameter Real p(start=1.5) = 1.5;
+equation
+    der(x) = x^p - y*u;
+    x*y = 1;
+initial equation
+    der(x) = 0;
+end StaticProblem;
+
+optimization StaticProblemControl(objectiveIntegrand=(y-0.5)^2)
+    extends StaticProblem;
+end StaticProblemControl;
+
+optimization StaticProblemBound(objectiveIntegrand=(y-0.5)^2)
+    extends StaticProblem(p(free=true), y(min=0.6));
+end StaticProblemBound;
+
+optimization StaticProblemConstraint(objectiveIntegrand=(y-0.5)^2)
+    extends StaticProblem(p(free=true));
+constraint
+    y >= 0.6;
+end StaticProblemConstraint;
+
+optimization StaticProblemEst
+    extends StaticProblem(p(free=true));
+end StaticProblemEst;

@@ -18,4 +18,4 @@
 """
 The JModelica Python Optimization toolkit.
 """
-__all__ = ['ipopt','casadi_collocation','dfo','polynomial','mpc','realtimecontrol']
+__all__ = ['ipopt','casadi_collocation','dfo','polynomial','mpc','realtimecontrol','static_optimization']

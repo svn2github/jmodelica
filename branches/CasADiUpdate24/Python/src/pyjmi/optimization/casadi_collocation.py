@@ -16,7 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-Module containing the CasADi interface Python wrappers.
+Module containing the classes for CasADi-based collocation.
 """
 
 import struct
