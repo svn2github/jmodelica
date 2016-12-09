@@ -1076,7 +1076,7 @@ aspect Flattening {
                 exps[i].variability().knownParameterOrLess()) {
             return super.flattenFSubscript(i);
         }
-        return new FExpSubscript(exps[i].flatten(new FQNameEmpty()));
+        return new FExpSubscript(exps[i].flatten(exps[i].sizeFlatteningPrefix()));
     }
 
     public void InstAssignable.flatten(FClass fc, FQName name, boolean excludeBinding, int level) {
