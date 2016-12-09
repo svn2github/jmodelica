@@ -1903,6 +1903,42 @@ end FunctionTests.FunctionBinding24;
 ")})));
 end FunctionBinding24;
 
+model FunctionBinding25
+    function f
+        input Real x;
+        input Real y = x;
+        output Real z = y;
+        algorithm
+    end f;
+    
+    parameter Integer n = 1;
+    parameter Real[n] x = 1:n;
+    parameter Real z = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding25",
+            description="Test default arguments: variability of call",
+            flatModel="
+fclass FunctionTests.FunctionBinding25
+ structural parameter Integer n = 1 /* 1 */;
+ structural parameter Real x[1] = {1} /* { 1 } */;
+ parameter Real z = FunctionTests.FunctionBinding25.f(1, 1) /* 1 */;
+
+public
+ function FunctionTests.FunctionBinding25.f
+  input Real x;
+  input Real y;
+  output Real z;
+ algorithm
+  z := y;
+  return;
+ end FunctionTests.FunctionBinding25.f;
+
+end FunctionTests.FunctionBinding25;
+")})));
+end FunctionBinding25;
+
 
 model BadFunctionCall1
   Real x = NonExistingFunction(1, 2);

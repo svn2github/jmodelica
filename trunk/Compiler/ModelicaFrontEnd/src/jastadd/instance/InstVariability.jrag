@@ -242,7 +242,15 @@ aspect InstVariability {
 }
 
 aspect InstExpVariability {
-    eq InstFunctionCall.expVariability()      = InstFunctionArgument.variability(getArgs());
+    eq InstFunctionCall.expVariability() {
+        FTypePrefixVariability total = fConstant();
+        for (InstFunctionArgument arg : getArgs()) {
+            if (arg.isOKArg()) {
+                total = total.combine(arg.getOriginalFExp().variability().combine());
+            }
+        }
+        return total;
+    }
     eq InstRecordConstructor.expVariability() = InstFunctionArgument.variability(getArgs());
     
     public static FTypePrefixVariability InstFunctionArgument.variability(List<InstFunctionArgument> args) {
