@@ -8628,6 +8628,74 @@ end FunctionTests.ArrayOutputScalarization28;
 end ArrayOutputScalarization28;
 
 
+model ArrayOutputScalarization29
+    function f
+        input Real x;
+        input Integer n;
+        input Real z[n];
+        output Real[n] y;
+    algorithm
+        assert(x > 2, "Too low!");
+        y := x * z;
+        annotation(Inline=false);
+    end f;
+    
+    record R
+        final parameter Real z1[n] = f(w1, n, z2);
+        final parameter Real z2[n] = f(1, n, {2, 3});
+        parameter Integer n;
+        parameter Real w1;
+        parameter Real w2;
+    end R;
+    
+    R r(final w1 = 1, final n = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayOutputScalarization29",
+            description="Do not replace final parameter function call that fails eval with zeroes",
+            flatModel="
+fclass FunctionTests.ArrayOutputScalarization29
+ parameter Real temp_2[1];
+ parameter Real temp_2[2];
+ structural parameter Real r.z2[1];
+ structural parameter Real r.z2[2];
+ structural parameter Integer r.n = 2 /* 2 */;
+ final parameter Real r.w1 = 1 /* 1 */;
+ parameter Real r.w2;
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ final parameter Real r.z1[1];
+ final parameter Real r.z1[2];
+parameter equation
+ ({temp_2[1], temp_2[2]}) = FunctionTests.ArrayOutputScalarization29.f(1, 2, {2, 3});
+ r.z2[1] = temp_2[1];
+ r.z2[2] = temp_2[2];
+ ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization29.f(1.0, 2, {r.z2[1], r.z2[2]});
+ r.z1[1] = temp_1[1];
+ r.z1[2] = temp_1[2];
+
+public
+ function FunctionTests.ArrayOutputScalarization29.f
+  input Real x;
+  input Integer n;
+  input Real[:] z;
+  output Real[:] y;
+ algorithm
+  init y as Real[n];
+  assert(x > 2, \"Too low!\");
+  for i1 in 1:size(z, 1) loop
+   y[i1] := x * z[i1];
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayOutputScalarization29.f;
+
+end FunctionTests.ArrayOutputScalarization29;
+")})));
+end ArrayOutputScalarization29;
+
+
 /* ======================= Unknown array sizes ======================*/
 
 model UnknownArray1
