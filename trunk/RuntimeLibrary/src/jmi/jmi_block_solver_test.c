@@ -123,7 +123,7 @@ int main() {
     cb.allocate_memory = calloc;
     cb.free_memory = free;
     cb.model_name = "test";
-    cb.instance_name = "test instance";  
+    cb.instance_name = "test_instance";  
     cb.model_data = &sw;      
 
     log = jmi_log_init(&cb);
