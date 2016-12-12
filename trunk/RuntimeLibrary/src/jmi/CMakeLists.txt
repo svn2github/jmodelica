@@ -93,6 +93,36 @@ set(JMISources
     jmi_ode_problem.c
 )
 
+set(JMIBlockSources
+    # Common
+    jmi_types.h
+    jmi_types.c
+    
+    # Logging sources
+	jmi_callbacks.h
+    jmi_log.h
+    jmi_log_impl.h
+    jmi_log.c
+    
+    # Block solver sources
+    jmi_block_solver.h
+    jmi_block_solver_impl.h
+	jmi_block_log.h
+    jmi_kinsol_solver.h
+    jmi_brent_solver.h
+    jmi_minpack_solver.h
+    jmi_linear_solver.h
+    jmi_simple_newton.h
+
+    jmi_block_solver.c
+	jmi_block_log.c
+    jmi_kinsol_solver.c
+    jmi_brent_solver.c
+    jmi_minpack_solver.c
+    jmi_linear_solver.c
+    jmi_simple_newton.c
+)
+
 # Source files for ModelicaExternalC
 set(MODELICAEXTERNALCSources
     jmi_global.h
@@ -142,9 +172,15 @@ if(WIN32)
     add_definitions(-DCMINPACK_NO_DLL)
 endif()
 
+#Build block library
+add_library(jmi_block_solver STATIC ${JMIBlockSources})
+if(NOT MSVC)
+    set_target_properties(jmi PROPERTIES COMPILE_FLAGS "-Wall -g -std=c89 -pedantic -Werror -Wno-long-long -O2")
+endif()
+
 if(JMI_SUNDIALS AND JMI_LAPACK AND JMI_MINPACK)
     add_executable(jmi_block_solver_test jmi_block_solver_test.c)
-    target_link_libraries(jmi_block_solver_test jmi ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK})
+    target_link_libraries(jmi_block_solver_test jmi_block_solver ${JMI_SUNDIALS} ${JMI_LAPACK} ${JMI_MINPACK})
 endif()
 
 #Build ModelicaExternalC library
