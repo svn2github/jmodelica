@@ -726,10 +726,20 @@ class StaticOptimizer(object):
             return self.op.get_attr(var, "initialGuess")
         else:
             name = var.getName()
-            if isinstance(self.init_guess, ResultDymolaTextual):
-                return self.init_guess.get_variable_data(name).x[i]
-            else:
-                return self.init_guess[i].get_variable_data(name).x[0]
+            try:
+                if isinstance(self.init_guess, ResultDymolaTextual):
+                    return self.init_guess.get_variable_data(name).x[i]
+                else:
+                    return self.init_guess[i].get_variable_data(name).x[0]
+            except VariableNotFoundError:
+                if self.verbosity >= 2:
+                    if self.n_instances > 1:
+                        index = '_%d' % i
+                    else:
+                        index = ''
+                    print('Warning: Could not find initial guess for variable ' + name + index + '. ' +
+                          'Using initialGuess attribute value instead.')
+                return self.op.get_attr(var, "initialGuess")
 
     def _scale_nlp(self):
         if self.variable_scaling:
