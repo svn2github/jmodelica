@@ -2054,7 +2054,11 @@ aspect CCodeGen {
         String nextIndent = p.indent(indent);
         str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
                 outerIndent, (p.inInitialSystem() ? "init_": ""), getSequenceNumber());
-        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", getLabel());
+        String label = getLabel();
+        if (label == null) {
+            label = getClass().getSimpleName();
+        }
+        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", label);
         str.print(indent + "jmi_real_t** res = &residual;\n");
         ASTNode.genFunctionStart(str, indent);
         genVarDecls(p, str, indent, null);
