@@ -1795,8 +1795,6 @@ class BLTOptimizationProblem(BLTModel, ModelBase):
             
             A result object, subclass of algorithm_drivers.ResultBase.
         """
-        if algorithm != "LocalDAECollocationAlg":
-            raise ValueError("LocalDAECollocationAlg is the only supported algorithm.")
         op_res = self._exec_algorithm('pyjmi.jmi_algorithm_drivers', algorithm, options)
 
         # Create result

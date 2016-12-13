@@ -32,6 +32,7 @@ try:
     from pyjmi import transfer_to_casadi_interface
     from pyjmi.optimization.static_optimization import *
     import casadi
+    from pyjmi.symbolic_elimination import BLTOptimizationProblem, EliminationOptions
 except (NameError, ImportError):
     pass
 
@@ -72,6 +73,13 @@ class TestStaticOptimizer(object):
         
         class_path = "StaticProblemEst"
         self.sp_op_est = transfer_to_casadi_interface(class_path, sp_file_path)
+
+        class_path = 'AlgebraicProblem'
+        fmu_alg_sim = compile_fmu(class_path, sp_file_path, separate_process=True)
+        self.alg_model = load_fmu(fmu_alg_sim)
+        
+        class_path = "AlgebraicProblemEst"
+        self.alg_op_est = transfer_to_casadi_interface(class_path, sp_file_path)
         
         self.algorithm = "StaticOptimizationAlg"
 
@@ -112,7 +120,6 @@ class TestStaticOptimizer(object):
         op = self.sp_op_est
         model = self.sp_model
         opts = op.optimize_options(algorithm=self.algorithm)
-        opts['IPOPT_options']['linear_solver'] = "ma27"
         eliminated = OrderedDict()
 
         # Define experiment input and outputs
@@ -138,3 +145,47 @@ class TestStaticOptimizer(object):
         res = op.optimize(options=opts, algorithm=self.algorithm)
         N.testing.assert_allclose(res['y'], [1., 0.76837, 0.658618, 0.590393, 0.542379], rtol=1e-2)
         N.testing.assert_allclose(res.initial('p'), 1.63070498, rtol=1e-3)
+
+    @testattr(casadi = True)
+    def test_alg_elim(self):
+        """
+        Test algebraic problem with elimination.
+        """
+        op = self.alg_op_est
+        model = self.alg_model
+        opts = op.optimize_options(algorithm=self.algorithm)
+        eliminated = OrderedDict()
+
+        # Define experiment input and outputs
+        u = N.array([0.1, 0.2, 0.3, 0.4, 0.5])
+        eliminated['u'] = u
+        quad_pen = OrderedDict()
+        y_exact = (N.arccos(0.5)/u)**2
+        y = y_exact + N.array([2, -4, 6, -8, 10])
+        quad_pen['y'] = y
+        Q = 5 * [1.]
+        sed = StaticExternalData(Q=Q, eliminated=eliminated, quad_pen=quad_pen)
+        opts['external_data'] = sed
+
+        # Simulate to get initial guesses
+        init_guess = []
+        for u_val in u:
+            model.set('u', u_val)
+            init_guess.append(model.simulate(final_time=0.0))
+            model.reset()
+        opts['init_guess'] = init_guess
+
+        # Eliminate algebraic
+        elim_opts = EliminationOptions()
+        elim_opts['ineliminable'] = ['y']
+        blt_op = BLTOptimizationProblem(op, elim_opts)
+
+        
+        # Check remaining variables
+        var = sorted([var.getName() for var in blt_op.getVariables(blt_op.REAL_ALGEBRAIC) if not var.isAlias()])
+        N.testing.assert_array_equal(var, ['x', 'y'])
+
+        # Solve and check result
+        res = op.optimize(options=opts, algorithm=self.algorithm)
+        N.testing.assert_allclose(res['y'], [111.112416, 27.778104, 12.345824, 6.944526, 4.444497], rtol=1e-2)
+        N.testing.assert_allclose(res.initial('p'), 0.49401153, rtol=1e-3)
