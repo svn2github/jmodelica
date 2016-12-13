@@ -295,8 +295,8 @@ aspect Connections {
             if (cse != null) {
                 // Get the name of the single flow variable of the connector, then get the variables.
                 FQName flowVarName = cse.getFQName();
-                FRealVariable var = (FRealVariable) varName.myFV();
-                FRealVariable flowVar = (FRealVariable) varName.lookupFV(cse.name());
+                FRealVariable var = (FRealVariable) lookupFV(varName);
+                FRealVariable flowVar = (FRealVariable) lookupFV(flowVarName);
                 
                 // Decide what parts are valid
                 boolean constant = flowVar.isConstant();

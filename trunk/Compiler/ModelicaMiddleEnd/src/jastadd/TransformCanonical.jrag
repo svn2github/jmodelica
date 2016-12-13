@@ -1521,7 +1521,7 @@ aspect TransformCanonical {
 
     syn boolean FAbstractVariable.canBeAlias() = false;
     // TODO: Use meDifferentiated instead of myDerivativeVariable()
-    eq FVariable.canBeAlias() = !getFQName().myDerFV(order() + 1).isDummyDerivativeVariable() 
+    eq FVariable.canBeAlias() = !lookupDerFV(getFQName(), order() + 1).isDummyDerivativeVariable() 
             && !isPreVariable() && !isAbstractDerivativeVariable()
             && !isInput() && !isOutput();
 

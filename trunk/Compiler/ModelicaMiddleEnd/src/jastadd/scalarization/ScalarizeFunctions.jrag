@@ -777,14 +777,11 @@ aspect FunctionScalarizationHelpers {
      * A node that can look up variable names in the flat tree.
      */
     public interface FlatLookupNode {
-        public FAbstractVariable lookupFV(String name);
+        public FAbstractVariable lookupFV(FQName fqn);
     }
     FFunctionVariable implements FlatLookupNode;
     FExp implements FlatLookupNode;
-
-    inh FAbstractVariable FFunctionVariable.lookupFV(String name);
-    inh FAbstractVariable FExp.lookupFV(String name);
-
+    
     /**
      * Creates and organizes names of for indices for generated for loops.
      */
@@ -871,7 +868,7 @@ aspect FunctionScalarizationHelpers {
             int l = last();
             do {
                 name = "i" + (++l);
-            } while (context != null && !context.lookupFV(name).isUnknown()); 
+            } while (context != null && !context.lookupFV(new FQNameString(name)).isUnknown()); 
             add(name);
             last.set(last.size()-1, l);
             return name;
