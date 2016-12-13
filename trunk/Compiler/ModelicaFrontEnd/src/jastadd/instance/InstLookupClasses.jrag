@@ -319,10 +319,12 @@ aspect InstLookupClasses {
 
     syn InstLookupResult<InstClassDecl> InstAccess.qualifiedLookupInstClassUnconstrained(String name) = 
         InstLookupResult.notFound();
-    eq InstClassAccess.qualifiedLookupInstClassUnconstrained(String name)                                 = 
+    eq InstClassAccess.qualifiedLookupInstClassUnconstrained(String name)                             = 
         myInstClassDecl().memberInstClass(name);
-    eq InstComponentAccess.qualifiedLookupInstClassUnconstrained(String name)                             = 
-        lookupArrayElement(myInstComponentDecl()).memberInstClass(name);
+    eq InstComponentAccess.qualifiedLookupInstClassUnconstrained(String name)                         = 
+        myInstComponentDecl().memberInstClass(name);
+    eq InstComponentArrayAccess.qualifiedLookupInstClassUnconstrained(String name)                    = 
+       lookupArrayElement(myInstComponentDecl()).memberInstClass(name);
 
 
     eq InstClassAccess.lookupConstrainingInstNode() = 

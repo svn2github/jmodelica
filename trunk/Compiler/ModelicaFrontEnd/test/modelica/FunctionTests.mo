@@ -13150,7 +13150,7 @@ model ComponentFunc3
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ComponentFunc3",
-            description="",
+            description="Calling a function through a component",
             flatModel="
 fclass FunctionTests.ComponentFunc3
  Real a.x = 1;
@@ -13169,6 +13169,136 @@ public
 end FunctionTests.ComponentFunc3;
 ")})));
 end ComponentFunc3;
+
+
+model ComponentFunc4
+    model A
+        function f = f2(a = c);
+        parameter Real c = 1;
+    end A;
+    
+    function f2
+        input Real a;
+        output Real b;
+    algorithm
+        b := a + 1;
+        b := b + a;
+    end f2;
+    
+    A a(c = 2);
+    Real y = a.f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc4",
+            description="Calling a function through a component",
+            flatModel="
+fclass FunctionTests.ComponentFunc4
+ parameter Real a.c = 2 /* 2 */;
+ Real y = FunctionTests.ComponentFunc4.a.f(a.c);
+
+public
+ function FunctionTests.ComponentFunc4.a.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a + 1;
+  b := b + a;
+  return;
+ end FunctionTests.ComponentFunc4.a.f;
+
+end FunctionTests.ComponentFunc4;
+")})));
+end ComponentFunc4;
+
+
+model ComponentFunc5
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b;
+    parameter Real z = b.a.f(b.a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc5",
+            description="Calling function through nested components",
+            errorMessage="
+1 errors found:
+
+Error at line 13196, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS:
+  Can not access function through component unless only the first part of the name is a component: 'b.a.f'
+")})));
+end ComponentFunc5;
+
+
+model ComponentFunc6
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a[1].f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc6",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13224, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a[1].f'
+")})));
+end ComponentFunc6;
+
+
+model ComponentFunc7
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a.f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc7",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13252, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a.f'
+")})));
+end ComponentFunc7;
+
 
 model MinOnInput1
     function F
