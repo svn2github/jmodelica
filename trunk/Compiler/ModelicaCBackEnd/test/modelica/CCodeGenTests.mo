@@ -13739,6 +13739,84 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 ")})));
 end Algorithm20;
 
+model Algorithm21
+    Real a;
+algorithm
+    a:=time;
+    if a < 1 then
+        a := a + 1;
+    end if;
+    if a < 1 then
+        a := a + 1;
+    end if;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm21",
+            description="",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _a_0 = _time;
+    __eventIndicator_1_1 = _a_0 - 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _a_0 - (1), _sw(0), JMI_REL_LT);
+    }
+    if (_sw(0)) {
+        _a_0 = _a_0 + 1;
+    }
+    __eventIndicator_2_2 = _a_0 - 1;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(1) = jmi_turn_switch(jmi, _a_0 - (1), _sw(1), JMI_REL_LT);
+    }
+    if (_sw(1)) {
+        _a_0 = _a_0 + 1;
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end Algorithm21;
+
+model Algorithm22
+    Real a;
+    Real b = time;
+algorithm
+    if b < 1 then
+        a := a + 1;
+    end if;
+    if b < 1 then
+        a := a + 1;
+    end if;
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            name="Algorithm22",
+            description="",
+            template="$C_ode_derivatives$",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _b_1 = _time;
+    _a_0 = 0.0;
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1), _sw(0), JMI_REL_LT);
+    }
+    if (_sw(0)) {
+        _a_0 = _a_0 + 1;
+    }
+    if (jmi->atInitial || jmi->atEvent) {
+        _sw(0) = jmi_turn_switch(jmi, _b_1 - (1), _sw(0), JMI_REL_LT);
+    }
+    if (_sw(0)) {
+        _a_0 = _a_0 + 1;
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end Algorithm22;
 
 model OutputTest1
 

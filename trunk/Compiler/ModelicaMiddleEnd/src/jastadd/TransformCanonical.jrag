@@ -3739,6 +3739,10 @@ aspect EliminateEqualSwitches{
     }
     
     public void FRelExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
+        FAlgorithm alg = myFAlgorithm();
+        if (alg != null && dependsOn(alg.referencedFVariablesInLHS())) {
+            return;
+        }
         String key = toString();
         Collection<FRelExp> list = candidates.get(key);
         if (list == null) {
