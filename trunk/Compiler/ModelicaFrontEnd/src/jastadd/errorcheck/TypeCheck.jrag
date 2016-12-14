@@ -1375,27 +1375,27 @@ aspect FlatTypeCheck {
     }
 
     public void InstAccess.checkMixedAccessRight(
-            InstClassDecl icd, InstAccess top, ErrorCheckType checkType, int i, int n) {}
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {}
 
     public void InstComponentAccess.checkMixedAccessRight(
-            InstClassDecl icd, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        checkMixedAccessRightForComponent(icd, top, checkType, i, n);
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, i, n);
     }
 
     public void InstComponentArrayAccess.checkMixedAccessRight(
-            InstClassDecl icd, InstAccess top, ErrorCheckType checkType, int i, int n) {
-        checkMixedAccessRightForComponent(icd, top, checkType, i, n);
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, i, n);
     }
 
     public void InstAccess.checkMixedAccessRightForComponent(
-            InstClassDecl icd, InstAccess top, ErrorCheckType checkType, int i, int n) {
+            InstClassDecl left, InstAccess top, ErrorCheckType checkType, int i, int n) {
         String type = null;
-        if (icd.extendsEnum()) {
+        if (left.extendsEnum()) {
             if (!myInstComponentDecl().isEnumLiteral())
                 type = "attribute of primitive with dot notation";
-        } else if (icd.isPackage()) {
-            icd.checkRestriction(checkType);
-        } else if (!icd.isOkPackage()) {
+        } else if (left.isPackage()) {
+            left.checkRestriction(checkType);
+        } else if (!left.isOkPackage()) {
             type = "component in non-package class";
         }
         if (type != null) {
@@ -1404,11 +1404,11 @@ aspect FlatTypeCheck {
     }
 
     public void InstAccess.checkMixedAccessRight(
-            InstComponentDecl icd, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {}
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {}
 
     public void InstClassAccess.checkMixedAccessRight(
-            InstComponentDecl icd, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        if (!myInstClassDecl().isFunction()) {
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        if (!top.myInstClassDecl().isFunction()) {
             ACCESS_TO_CLASS_THROUGH_COMPONENT.invoke(top, top);
         } else if (i != 0) {
             ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS.invoke(top, top);
@@ -1418,18 +1418,18 @@ aspect FlatTypeCheck {
     }
 
     public void InstComponentAccess.checkMixedAccessRight(
-            InstComponentDecl icd, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        checkMixedAccessRightForComponent(icd, top, checkType, array, i, n);
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
     }
 
     public void InstComponentArrayAccess.checkMixedAccessRight(
-            InstComponentDecl icd, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        checkMixedAccessRightForComponent(icd, top, checkType, array, i, n);
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        checkMixedAccessRightForComponent(left, top, checkType, array, i, n);
     }
 
     public void InstAccess.checkMixedAccessRightForComponent(
-            InstComponentDecl icd, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
-        if (icd.isPrimitive()) {
+            InstComponentDecl left, InstAccess top, ErrorCheckType checkType, boolean array, int i, int n) {
+        if (left.isPrimitive()) {
             top.error("Can not access attribute of primitive with dot notation: " + top.name());
         }
     }

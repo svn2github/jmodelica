@@ -13300,6 +13300,46 @@ Error at line 13252, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica
 end ComponentFunc7;
 
 
+model ComponentFunc8
+    model A
+        package B
+            function f
+                input Real x;
+                output Real y;
+            algorithm
+                y := x * 2;
+            end f;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a;
+    parameter Real z = a.B.f(a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc8",
+            description="Calling function through component, then package",
+            flatModel="
+fclass FunctionTests.ComponentFunc8
+ parameter Real a.y = 2 /* 2 */;
+ parameter Real z = FunctionTests.ComponentFunc8.a.B.f(a.y);
+
+public
+ function FunctionTests.ComponentFunc8.a.B.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * 2;
+  return;
+ end FunctionTests.ComponentFunc8.a.B.f;
+
+end FunctionTests.ComponentFunc8;
+")})));
+end ComponentFunc8;
+
+
 model MinOnInput1
     function F
         input Real x(min=0) = 3.14;
