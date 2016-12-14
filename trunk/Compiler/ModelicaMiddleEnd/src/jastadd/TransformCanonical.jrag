@@ -603,9 +603,9 @@ aspect TransformCanonical {
                 g.isComplete()) {
             BLT daeBLT;
             try {
-                daeBLT = g.computeDAEBLT(myOptions());
+                daeBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 if (blockFunctionExtraction(daeBLT, g)) {
-                    daeBLT = g.computeDAEBLT(myOptions());
+                    daeBLT = g.computeBLT(myOptions(), Arrays.<AbstractBiPGraph.SCCContributor>asList(AbstractBiPGraph.PRE_VARIABLE_CONTRIBUTOR));
                 }
             } catch (BLTException e) {
                 error(e.getMessage());
@@ -743,9 +743,9 @@ aspect TransformCanonical {
             g.tarjanReset();
             BLT daeInitBLT;
             try {
-                daeInitBLT = g.computeInitDAEBLT(myOptions());
+                daeInitBLT = g.computeBLT(myOptions());
                 if (blockFunctionExtraction(daeInitBLT, g)) {
-                    daeInitBLT = g.computeInitDAEBLT(myOptions());
+                    daeInitBLT = g.computeBLT(myOptions());
                 }
             } catch (BLTException e) {
                 error(e.getMessage());

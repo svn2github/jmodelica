@@ -113,20 +113,20 @@ aspect BLT{
             
             errorCheckWhenEquations(subBlocks);
             
-//            Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
-//            boolean allOk = true;
-//            for (SCCBlock<Eq, Var> subBlock : subBlocks) {
-//                SimpleEquationBlock subSEB = createSimpleEquationBlock(subBlock, producer, true);
-//                if (subSEB != null && subSEB.isSolvable()) {
-//                    solvedBlocks.add(subSEB);
-//                } else {
-//                    allOk = false;
-//                    break;
-//                }
-//            }
-//            if (allOk) {
-//                return new PrePropagationEquationBlock(producer, component.computeBlockDependency(), solvedBlocks, Collections.<SimpleEquationBlock>emptyList());
-//            }
+            Collection<SimpleEquationBlock> solvedBlocks = new ArrayList<SimpleEquationBlock>();
+            boolean allOk = true;
+            for (SCCBlock<Eq, Var> subBlock : subBlocks) {
+                SimpleEquationBlock subSEB = createSimpleEquationBlock(subBlock, producer, true);
+                if (subSEB != null && subSEB.isSolvable()) {
+                    solvedBlocks.add(subSEB);
+                } else {
+                    allOk = false;
+                    break;
+                }
+            }
+            if (allOk) {
+                return new PrePropagationEquationBlock(producer, component.computeBlockDependency(), solvedBlocks, Collections.<SimpleEquationBlock>emptyList());
+            }
             
             Collection<E> realEquations = new LinkedHashSet<E>();
             Collection<E> nonRealEquations = new ArrayList<E>();
@@ -302,26 +302,22 @@ aspect BLT{
         
         public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>, T extends BLT>
         T computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean inInitial,
-                boolean handleHomotopy, boolean mergePre, Collection<? extends SCCBlock<E, V>> components) {
+                boolean handleHomotopy, Collection<? extends SCCBlock<E, V>> components) {
             Set<SCCBlock<E,V>> homotopyComponents = Collections.emptySet();
             if (inInitial && handleHomotopy) {
                 ASTNode.log.verbose("Initial system contains homotopy, computing homotopy block components...");
                 homotopyComponents = computeHomotopyComponents(components);
                 ASTNode.log.verbose("... block components computed: %s", homotopyComponents);
             }
-            if (!inInitial && mergePre) {
-                blt = computeBLTWithPreMerge(options, producer, blt, components);
-            } else {
-                int homotopyCounter = 0;
-                for (SCCBlock<E,V> component : components) {
-                    if (homotopyComponents.contains(component)) {
-                        if (++homotopyCounter < homotopyComponents.size()) {
-                            continue;
-                        }
-                        blt.add(computeHomotopyBlock(homotopyComponents, producer, options));
-                    } else {
-                        blt.add(component.createEquationBlock(producer, options, inInitial));
+            int homotopyCounter = 0;
+            for (SCCBlock<E,V> component : components) {
+                if (homotopyComponents.contains(component)) {
+                    if (++homotopyCounter < homotopyComponents.size()) {
+                        continue;
                     }
+                    blt.add(computeHomotopyBlock(homotopyComponents, producer, options));
+                } else {
+                    blt.add(createEquationBlock(component, producer, options, inInitial));
                 }
             }
             blt.setLabels();
@@ -419,27 +415,26 @@ aspect BLT{
         }
     }
 
-    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer,
-            T blt, boolean handleHomotopy, boolean mergePre, Collection<SCCContributor> extraContributors) {
+    public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy, Collection<SCCContributor> extraContributors) {
         ASTNode.beginStep("computeBLT()");
         try {
             Collection<C> components = tarjan(options, extraContributors, true);
-            return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, mergePre, components);
+            return EquationBlockFactory.computeBLT(options, producer, blt, isInitialSystem(), handleHomotopy, components);
         } finally {
             ASTNode.endStep("computeBLT()");
         }
     }
 
-    public BLT AbstractBiPGraph.computeDAEBLT(OptionRegistry options) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, true, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options) {
+        return computeBLT(options, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
-    public BLT AbstractBiPGraph.computeInitDAEBLT(OptionRegistry options) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+    public BLT AbstractBiPGraph.computeBLT(OptionRegistry options, Collection<SCCContributor> extraContributors) {
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, new BLT(), true, extraContributors);
     }
     
     public <T extends BLT> T AbstractBiPGraph.computeBLT(OptionRegistry options, EquationBlockFactory.BlockProducer producer, T blt, boolean handleHomotopy) {
-        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, handleHomotopy, false, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
+        return computeBLT(options, EquationBlockFactory.DEFAULT_BLOCK_PRODUCER, blt, handleHomotopy, Collections.<AbstractBiPGraph.SCCContributor>emptyList());
     }
 
     public Collection<SimpleEquationBlock> AbstractBiPGraph.computeNonRealBlocks(EquationBlockFactory.BlockProducer producer, OptionRegistry options) {
@@ -478,7 +473,7 @@ aspect BLT{
             mergedComponent.addPredecessors(component.getPredecessors());
         }
         
-        BLT homotopyBLT = computeBLT(options, producer, new BLT(), true, false, false, components);
+        BLT homotopyBLT = computeBLT(options, producer, new BLT(), true, false, components);
         HomotopySubBlock homotopySubBlock = new HomotopySubBlock(producer, mergedComponent.computeBlockDependency(), homotopyBLT);
         ASTNode.log.debug("Homotopy sub block:");
         ASTNode.log.debug(homotopySubBlock);
@@ -1773,18 +1768,8 @@ aspect BLT{
      */
     public class PrePropagationEquationBlock extends EquationBlock {
 
-        public PrePropagationEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<AbstractEquationBlock> subBlocks) {
-            super(producer, blockDependency, subBlocks, Collections.<SimpleEquationBlock>emptyList());
-        }
-
-        @Override
-        protected void setLabel(String prefix, boolean inSubBlock, Enumerator nestedEnum, Enumerator seqEnum) {
-            super.setLabel(prefix, false, null, seqEnum);
-        }
-
-        @Override
-        protected boolean needLabel(boolean inSubBlock) {
-            return false;
+        public PrePropagationEquationBlock(EquationBlockFactory.BlockProducer producer, BlockDependency blockDependency, Collection<SimpleEquationBlock> solvedBlocks, Collection<SimpleEquationBlock> unsolvedBlocks) {
+            super(producer, blockDependency, solvedBlocks, unsolvedBlocks);
         }
 
     }
@@ -2708,15 +2693,10 @@ aspect BlockDependencies {
      * class.
      */
     public BlockDependency SCCBlock.computeBlockDependency() {
-        return computeBlockDependency(this);
-    }
-    
-    public static <E extends AbstractEq<E, V>, V extends AbstractVar<E, V>>
-    BlockDependency SCCBlock.computeBlockDependency(TarjanComponent<E> block) {
-        if (!block.hasPredecessorInfo())
+        if (!hasPredecessorInfo())
             return new NoBlockDependency();
         Collection<FVariable> vars = new ArrayList<FVariable>();
-        for (E eqn : block.getPredecessors())
+        for (E eqn : getPredecessors())
             vars.addAll(eqn.getMatching().getVariable().bltDependencyVars());
         return new SimpleBlockDependency(vars);
     }
@@ -2834,7 +2814,7 @@ aspect BLTPrettyPrinting {
         prettyPrintNumVarStr(str);
         str.println(" ---");
         if (isLinear())
-            str.formatln("%sCoefficient variability: %s", indent, variability().toStringLiteral());
+            str.formatln("Coefficient variability: %s", variability().toStringLiteral());
         prettyPrintBeforeVariablesStr(p, str, indent);
         prettyPrintUnsolvedVariablesStr(p, str, indent);
         for (SimpleEquationBlock seb : unsolvedBlocks())
@@ -2882,16 +2862,6 @@ aspect BLTPrettyPrinting {
     public void HomotopySubBlock.prettyPrint(Printer p, CodeStream str, String indent) {
         for (AbstractEquationBlock aeb : solvedBlocks())
             aeb.prettyPrint(p, str, indent);
-    }
-
-    @Override
-    public void PrePropagationEquationBlock.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.formatln("%s--- Pre propagation block ---", indent);
-        String innerIndent = p.indent(indent);
-        for (AbstractEquationBlock block : solvedBlocks()) {
-            block.prettyPrint(p, str, innerIndent);
-        }
-        
     }
 
     @Override

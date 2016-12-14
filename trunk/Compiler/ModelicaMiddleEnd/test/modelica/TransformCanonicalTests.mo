@@ -7450,11 +7450,11 @@ model IllegalWhen2_Err
 
 Error in flattened model:
   A when-guard is involved in an algebraic loop, consider breaking it using pre() expressions. Equations in block:
-temp_3 = z >= 1
 y = if temp_3 and not pre(temp_3) then 3 else pre(y)
 x = y - 1
 temp_2 = x >= 0.5
 z = if temp_1 and not pre(temp_1) or temp_2 and not pre(temp_2) then 2 else pre(z)
+temp_3 = z >= 1
 ")})));
 end IllegalWhen2_Err;
   

@@ -16,272 +16,320 @@
 
 
 package HybridModelTests
-    package PreMerge
-        /**
-         * Tests that ensure that all pre(x) variable references are merged
-         * into the same block that assigns x.
-         */
-        model Test1
-            Integer i;
-            Real x, y;
-            Boolean b;
-        equation
-            der(x) = if pre(i) == 0 then 0 else 1;
-            der(y) = if i == 0 then 2 else 3;
-            b = sin(time) >= 0;
-            i = if b then 1 else 0;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test1",
-                description="Testing of hybrid models with pre variable that don't need to be iterated in block",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  b := sin(time) >= 0
-  --- Solved equation ---
-  i := if b then 1 else 0
-  --- Solved equation ---
+    model PreTest1
+        Integer i;
+        Real x, y;
+        Boolean b;
+    equation
+        der(x) = if pre(i) == 0 then 0 else 1;
+        der(y) = if i == 0 then 2 else 3;
+        b = sin(time) >= 0;
+        i = if b then 1 else 0;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest1",
+            description="Testing of hybrid models with pre variable that don't need to be iterated in block",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+b := sin(time) >= 0
+
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
+  der(x)
+
+Solved discrete variables:
+  i
+
+Continuous equations:
   der(x) := if pre(i) == 0 then 0 else 1
+
+Discrete equations:
+  i := if b then 1 else 0
 
 --- Solved equation ---
 der(y) := if i == 0 then 2 else 3
 -------------------------------
 ")})));
-        end Test1;
-        
-        model Test2
-            Real x, y;
-            Integer i;
-        equation
-            x + pre(i) = y;
-            i = if x >= 0 then 1 else 2;
-            y = 3 * sin(time);
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test2",
-                description="Testing of hybrid models with pre variable that need to be iterated in block",
-                methodName="printDAEBLT",
-                methodResult="
+    end PreTest1;
+
+    model PreTest2
+        Real x, y;
+        Integer i;
+    equation
+        x + pre(i) = y;
+        i = if x >= 0 then 1 else 2;
+        y = 3 * sin(time);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest2",
+            description="Testing of hybrid models with pre variable that need to be iterated in block",
+            methodName="printDAEBLT",
+            methodResult="
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Pre propagation block ---
-  --- Solved equation ---
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
+  x
+
+Solved discrete variables:
+  i
+
+Continuous equations:
   x := - pre(i) + y
-  --- Solved equation ---
+
+Discrete equations:
   i := if x >= 0 then 1 else 2
 -------------------------------
 ")})));
-        end Test2;
+    end PreTest2;
+
+    model PreTest3
+        Real x, y, z;
+        Integer i, j;
+    equation
+        y = 3 * sin(time);
+        x + pre(i) = y;
+        i = if x >= 0 then 1 else 2;
+        z + pre(i) + pre(j) = y;
+        j = if x >= 0 and z>=0 then 1 else 2;
     
-        model Test3
-            Real x, y, z;
-            Integer i, j;
-        equation
-            y = 3 * sin(time);
-            x + pre(i) = y;
-            i = if x >= 0 then 1 else 2;
-            z + pre(i) + pre(j) = y;
-            j = if x >= 0 and z>=0 then 1 else 2;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test3",
-                description="Testing of hybrid models with pre variables that need to be iterated in two separate blocks",
-                methodName="printDAEBLT",
-                methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest3",
+            description="Testing of hybrid models with pre variables that need to be iterated in two separate blocks",
+            methodName="printDAEBLT",
+            methodResult="
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Pre propagation block ---
-  --- Solved equation ---
+--- Pre propagation mixed system (Block 1) of 4 variables ---
+Continuous variables:
+  x
+  z
+
+Solved discrete variables:
+  j
+  i
+
+Continuous equations:
   x := - pre(i) + y
-  --- Solved equation ---
   z := - pre(i) + (- pre(j)) + y
-  --- Solved equation ---
+
+Discrete equations:
   j := if x >= 0 and z >= 0 then 1 else 2
-  --- Solved equation ---
   i := if x >= 0 then 1 else 2
 -------------------------------
 ")})));
-        end Test3;
+    end PreTest3;
+
+    model PreTest4
+        discrete Real x_d;
+        Real x_c;
+    initial equation
+        x_c = 1;
+    equation
+        der(x_c) = (-x_c) + x_d;
+        when sample(0, 1) then
+            x_d = x_c + 1;
+        end when;
     
-        model Test4
-            discrete Real x_d;
-            Real x_c;
-        initial equation
-            x_c = 1;
-        equation
-            der(x_c) = (-x_c) + x_d;
-            when sample(0, 1) then
-                x_d = x_c + 1;
-            end when;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test4",
-                description="Test interaction between continuous and discrete equations",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  temp_1 := sample(0, 1)
-  --- Solved equation ---
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest4",
+            description="Test interaction between continuous and discrete equations",
+            methodName="printDAEBLT",
+            methodResult="
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
+  x_d
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+
+Discrete equations:
+  temp_1 := sample(0, 1)
 
 --- Solved equation ---
 der(x_c) := - x_c + x_d
 -------------------------------
 ")})));
-        end Test4;
+    end PreTest4;
+
+    model PreTest5
+        discrete Real x_d;
+        Real x_c;
+    initial equation
+        x_c = 1;
+    equation
+        0 = (-x_c) + x_d;
+        when sample(0, 1) then
+            x_d = x_c + 1;
+        end when;
     
-        model Test5
-            discrete Real x_d;
-            Real x_c;
-        initial equation
-            x_c = 1;
-        equation
-            0 = (-x_c) + x_d;
-            when sample(0, 1) then
-                x_d = x_c + 1;
-            end when;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test5",
-                description="TODO: this model should give an error",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  temp_1 := sample(0, 1)
-  --- Torn linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-  Coefficient variability: discrete-time
-  Torn variables:
-    x_d
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest5",
+            description="TODO: this model should give an error",
+            methodName="printDAEBLT",
+            methodResult="
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
+Coefficient variability: discrete-time
+Torn variables:
+  x_d
 
-  Iteration variables:
-    x_c
+Iteration variables:
+  x_c
 
-  Torn equations:
-    x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+Solved discrete variables:
+  temp_1
 
-  Residual equations:
-    0 = - x_c + x_d
-      Iteration variables: x_c
-
-  Jacobian:
-    |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
-    |-1.0, 1.0|
--------------------------------
-")})));
-        end Test5;
-    
-        model Test6
-            discrete Real x_d;
-            Real x_c;
-        initial equation
-            x_c = 1;
-        equation
-            0 = (-x_c) + pre(x_d);
-            when sample(0, 1) then
-                x_d = x_c + 1;
-            end when;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test6",
-                description="A case which gives bigger block with local pre handling, but avoid global iteration",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  temp_1 := sample(0, 1)
-  --- Solved equation ---
-  x_c := pre(x_d)
-  --- Solved equation ---
+Torn equations:
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+
+Continuous residual equations:
+  0 = - x_c + x_d
+    Iteration variables: x_c
+
+Discrete equations:
+  temp_1 := sample(0, 1)
+
+Jacobian:
+  |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
+  |-1.0, 1.0|
 -------------------------------
 ")})));
-        end Test6;
+    end PreTest5;
+
+    model PreTest6
+        discrete Real x_d;
+        Real x_c;
+    initial equation
+        x_c = 1;
+    equation
+        0 = (-x_c) + pre(x_d);
+        when sample(0, 1) then
+            x_d = x_c + 1;
+        end when;
     
-        model Test7
-            discrete Real x_d;
-            Real x_c;
-        initial equation
-            x_c = 1;
-        equation
-            0 = (-x_c) + x_d;
-            when sample(0, 1) then
-                x_d = pre(x_c) + 1;
-            end when;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test7",
-                description="A case which gives bigger block with local pre handling, but avoid global iteration",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest6",
+            description="A case which gives bigger block with local pre handling, but avoid global iteration",
+            methodName="printDAEBLT",
+            methodResult="
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
+  x_c
+  x_d
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
+  x_c := pre(x_d)
+  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+
+Discrete equations:
   temp_1 := sample(0, 1)
-  --- Solved equation ---
+-------------------------------
+")})));
+    end PreTest6;
+
+    model PreTest7
+        discrete Real x_d;
+        Real x_c;
+    initial equation
+        x_c = 1;
+    equation
+        0 = (-x_c) + x_d;
+        when sample(0, 1) then
+            x_d = pre(x_c) + 1;
+        end when;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest7",
+            description="A case which gives bigger block with local pre handling, but avoid global iteration",
+            methodName="printDAEBLT",
+            methodResult="
+--- Pre propagation mixed system (Block 1) of 2 variables ---
+Continuous variables:
+  x_d
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
   x_d := if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
+
+Discrete equations:
+  temp_1 := sample(0, 1)
 
 --- Solved equation ---
 x_c := x_d
 -------------------------------
 ")})));
-        end Test7;
+    end PreTest7;
+
+    model PreTest8
+        Real x;
+        discrete Real y;
+        Integer i;
+    equation
+        i = if time >= 3 then 1 else 0;
+        when sample(0, 1) then
+            y = pre(y) + 1;
+        end when;
+        der(x) = (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6);
     
-        model Test8
-            Real x;
-            discrete Real y;
-            Integer i;
-        equation
-            i = if time >= 3 then 1 else 0;
-            when sample(0, 1) then
-                y = pre(y) + 1;
-            end when;
-            der(x) = (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6);
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test8",
-                description="A case which gives bigger block with local pre handling, but avoid global iteration",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
-  --- Solved equation ---
-  temp_1 := sample(0, 1)
-  --- Solved equation ---
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest8",
+            description="A case which gives bigger block with local pre handling, but avoid global iteration",
+            methodName="printDAEBLT",
+            methodResult="
+--- Pre propagation mixed system (Block 1) of 4 variables ---
+Continuous variables:
+  y
+  der(x)
+
+Solved discrete variables:
+  temp_1
+  i
+
+Continuous equations:
   y := if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
-  --- Solved equation ---
+  der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
+
+Discrete equations:
+  temp_1 := sample(0, 1)
   i := if time >= 3 then 1 else 0
 -------------------------------
 ")})));
-        end Test8;
+    end PreTest8;
+
+    model PreTest9
+        parameter Real tau0_max = 0.15, tau0 = 0.10;
+        Real sa;
+        Boolean locked(start=true), startForward(start=false);
+    equation
+        sa = if locked then tau0_max+1e-4 else tau0+1e-4;
+        startForward = sa > tau0_max or pre(startForward) and sa > tau0;
+        locked = not startForward;
     
-        model Test9
-            parameter Real tau0_max = 0.15, tau0 = 0.10;
-            Real sa;
-            Boolean locked(start=true), startForward(start=false);
-        equation
-            sa = if locked then tau0_max+1e-4 else tau0+1e-4;
-            startForward = sa > tau0_max or pre(startForward) and sa > tau0;
-            locked = not startForward;
-        
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="PreMerge.Test9",
-                description="A test that simulates the common friction problems",
-                methodName="printDAEBLT",
-                methodResult="
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="HybridModelTests.PreTest9",
+            description="A test that simulates the common friction problems",
+            methodName="printDAEBLT",
+            methodResult="
 --- Unsolved mixed linear system (Block 1) of 3 variables ---
 Coefficient variability: constant
 Unknown continuous variables:
@@ -303,339 +351,7 @@ Jacobian:
   |1.0|
 -------------------------------
 ")})));
-        end Test9;
-    end PreMerge;
-    
-    package EventPreMerge
-        /**
-         * Tests that tests so that upstream event generating exps are merged
-         * into the same block as all downstream pre variable references.
-         */
-        model Simple1 // FAILS
-            Boolean a = time > 0.5;
-            Boolean b = a and not pre(a);
-            Boolean c = b and true;
-            Real x;
-        equation
-            when c then
-                x = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.Simple1",
-                description="A simple testcase that ensure that equations asigning a and x are in the same block",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := time > 0.5
-  --- Solved equation ---
-  b := a and not pre(a)
-  --- Solved equation ---
-  c := b and true
-  --- Solved equation ---
-  x := if c and not pre(c) then time else pre(x)
--------------------------------
-")})));
-        end Simple1;
-        
-        model Simple2
-            Boolean a = sample(0.5, 1);
-            Boolean b = a and true;
-            Real x;
-        equation
-            when b then
-                x = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.Simple2",
-                description="A simple testcase that ensure that equations asigning a and x are in the same block",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := sample(0.5, 1)
-  --- Solved equation ---
-  b := a and true
-  --- Solved equation ---
-  x := if b and not pre(b) then time else pre(x)
--------------------------------
-")})));
-        end Simple2;
-        
-        model TwoSeparate1
-            Boolean a = sample(0.5, 1);
-            Boolean b = a and true;
-            Boolean c = time > 0.75;
-            Real x;
-            Real y;
-        equation
-            when b then
-                x = time;
-            end when;
-            when c then
-                y = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.TwoSeparate1",
-                description="There are two independent parts of the system which have event equations and pre uses which shouldn't be merged",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := sample(0.5, 1)
-  --- Solved equation ---
-  b := a and true
-  --- Solved equation ---
-  x := if b and not pre(b) then time else pre(x)
-
---- Pre propagation block ---
-  --- Solved equation ---
-  c := time > 0.75
-  --- Solved equation ---
-  y := if c and not pre(c) then time else pre(y)
--------------------------------
-")})));
-        end TwoSeparate1;
-        
-        model SameUpstream1
-            Boolean a = time > 0.75;
-            Boolean b = a and not pre(a);
-            Boolean c1 = (b or b) and true;
-            Boolean c2 = (b or b) and true;
-            Real x1;
-            Real x2;
-        equation
-            when c1 then
-                x1 = time;
-            end when;
-            when c2 then
-                x2 = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.SameUpstream1",
-                description="Two when equations which share the same upstream block to merge",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := time > 0.75
-  --- Solved equation ---
-  b := a and not pre(a)
-  --- Solved equation ---
-  c2 := (b or b) and true
-  --- Solved equation ---
-  x2 := if c2 and not pre(c2) then time else pre(x2)
-  --- Solved equation ---
-  c1 := (b or b) and true
-  --- Solved equation ---
-  x1 := if c1 and not pre(c1) then time else pre(x1)
--------------------------------
-")})));
-        end SameUpstream1;
-        
-        model TwoUpstream1
-            Boolean a1 = time > 0.75;
-            Boolean b1 = a1 and not pre(a1);
-            Boolean a2 = time > 0.5;
-            Boolean b2 = a2 and not pre(a2);
-            Boolean c = (b1 or b2) and true;
-            Real x;
-        equation
-            when c then
-                x = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.TwoUpstream1",
-                description="One when equation which has two upstream blocks to merge",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a1 := time > 0.75
-  --- Solved equation ---
-  b1 := a1 and not pre(a1)
-  --- Solved equation ---
-  a2 := time > 0.5
-  --- Solved equation ---
-  b2 := a2 and not pre(a2)
-  --- Solved equation ---
-  c := (b1 or b2) and true
-  --- Solved equation ---
-  x := if c and not pre(c) then time else pre(x)
--------------------------------
-")})));
-        end TwoUpstream1;
-        
-        model IndependentMiddle1
-            Boolean a;
-            Boolean b;
-            Boolean c;
-            Real m;
-            Real x;
-        equation
-            a = time > 0.5;
-            b = a and not pre(a);
-            c = b and true;
-            m = sin(time);
-            when c then
-                x = m;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.IndependentMiddle1",
-                description="Ensures that m equation is ordered correctly and not merged",
-                methodName="printDAEBLT",
-                methodResult="
---- Solved equation ---
-m := sin(time)
-
---- Pre propagation block ---
-  --- Solved equation ---
-  a := time > 0.5
-  --- Solved equation ---
-  b := a and not pre(a)
-  --- Solved equation ---
-  c := b and true
-  --- Solved equation ---
-  x := if c and not pre(c) then m else pre(x)
--------------------------------
-")})));
-        end IndependentMiddle1;
-        
-        model IndependentMiddle2
-            Boolean a;
-            Boolean b;
-            Boolean c;
-            Real m;
-            Real x;
-        equation
-            a = time > 0.5;
-            b = a and not pre(a);
-            m = if b then 1 else 0;
-            c = b and true;
-            when c then
-                x = time;
-            end when;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.IndependentMiddle2",
-                description="Ensures that m equation is ordered correctly and not merged",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := time > 0.5
-  --- Solved equation ---
-  b := a and not pre(a)
-  --- Solved equation ---
-  c := b and true
-  --- Solved equation ---
-  x := if c and not pre(c) then time else pre(x)
-
---- Solved equation ---
-m := if b then 1 else 0
--------------------------------
-")})));
-        end IndependentMiddle2;
-        
-        model IndependentDownstream1
-            Boolean a = time > 0.5;
-            Boolean b = a and not pre(a);
-            Boolean c = b and true;
-            Real x;
-            Real y;
-        equation
-            when c then
-                x = time;
-            end when;
-            y = sin(x);
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.IndependentDownstream1",
-                description="Ensures that y equation is ordered correctly and not merged",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  a := time > 0.5
-  --- Solved equation ---
-  b := a and not pre(a)
-  --- Solved equation ---
-  c := b and true
-  --- Solved equation ---
-  x := if c and not pre(c) then time else pre(x)
-
---- Solved equation ---
-y := sin(x)
--------------------------------
-")})));
-        end IndependentDownstream1;
-        
-        model Big1
-            Boolean d1; 
-            Boolean d2; 
-            Boolean d3;
-            Boolean d4;
-            Boolean d5;
-            Boolean d6(start=true);
-            Boolean d7; 
-            Boolean d8;
-            Boolean d9(start=false);
-            Boolean d16(start=true);
-        initial equation
-            d1=false;
-            pre(d2)=pre(d1);
-            d3 = true;
-            pre(d4)=pre(d3);
-            d7 = false;
-            pre(d8)=pre(d7);
-        equation 
-            d1 = pre(d2);
-            d3 = pre(d4);
-            d5 = d3 and not d1;
-            d6 = d1 or d5;
-            d7 = pre(d8);
-            d9 = d7 and not d6;
-            d16 = d1 and not d7;
-            d8 = (d16 or d7 and not d9);
-            d2 = ((d5 or d9) or d1 and not d16);
-            d4 = d3 and not d5;
-        annotation(__JModelica(UnitTesting(tests={
-            FClassMethodTestCase(
-                name="EventPreMerge.Big1",
-                description="An bigger \"real world\" example",
-                methodName="printDAEBLT",
-                methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  d1 := pre(d2)
-  --- Solved equation ---
-  d3 := pre(d4)
-  --- Solved equation ---
-  d5 := d3 and not d1
-  --- Solved equation ---
-  d6 := d1 or d5
-  --- Solved equation ---
-  d7 := pre(d8)
-  --- Solved equation ---
-  d16 := d1 and not d7
-  --- Solved equation ---
-  d9 := d7 and not d6
-  --- Solved equation ---
-  d8 := d16 or d7 and not d9
-  --- Solved equation ---
-  d4 := d3 and not d5
-  --- Solved equation ---
-  d2 := d5 or d9 or d1 and not d16
--------------------------------
-")})));
-        end Big1;
-    end EventPreMerge;
+    end PreTest9;
     
     model WhenAndPreTest1
         Real xx(start=2);
@@ -666,32 +382,53 @@ y := sin(x)
     
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="WhenAndPreTest1",
+            name="HybridModelTests.WhenAndPreTest1",
             description="Test complicated when and pre variable case",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  temp_1 := sample(0, 1)
-  --- Solved equation ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
+  y
+  x
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
   y := if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
-  --- Solved equation ---
   x := if temp_1 and not pre(temp_1) then pre(x) + 1.1 else pre(x)
-  --- Solved equation ---
-  temp_3 := x > 2
-  --- Solved equation ---
-  z := if temp_3 and not pre(temp_3) then false else pre(z)
-  --- Solved equation ---
-  temp_4 := y > 2 and z
-  --- Solved equation ---
-  v := if temp_4 and not pre(temp_4) then false else pre(v)
-  --- Solved equation ---
-  temp_2 := y > 2 and pre(z)
-  --- Solved equation ---
-  w := if temp_2 and not pre(temp_2) then false else pre(w)
+
+Discrete equations:
+  temp_1 := sample(0, 1)
 
 --- Solved equation ---
 der(xx) := - x
+
+--- Pre propagation mixed system (Block 2) of 4 variables ---
+
+Solved discrete variables:
+  temp_2
+  w
+  temp_3
+  z
+
+
+Discrete equations:
+  temp_2 := y > 2 and pre(z)
+  w := if temp_2 and not pre(temp_2) then false else pre(w)
+  temp_3 := x > 2
+  z := if temp_3 and not pre(temp_3) then false else pre(z)
+
+--- Pre propagation mixed system (Block 3) of 2 variables ---
+
+Solved discrete variables:
+  temp_4
+  v
+
+
+Discrete equations:
+  temp_4 := y > 2 and z
+  v := if temp_4 and not pre(temp_4) then false else pre(v)
 -------------------------------
 ")})));
     end WhenAndPreTest1;
@@ -718,17 +455,24 @@ der(xx) := - x
         
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="NoResTest1",
+            name="HybridModelTests.NoResTest1",
             description="Verify that no residuals are added to the block even though it contains continuous equations",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
-  temp_1 := time >= pre(next)
-  --- Solved equation ---
+--- Pre propagation mixed system (Block 1) of 3 variables ---
+Continuous variables:
+  next
+  x
+
+Solved discrete variables:
+  temp_1
+
+Continuous equations:
   next := if temp_1 and not pre(temp_1) then pre(next) + 1 else pre(next)
-  --- Solved equation ---
   x := HybridModelTests.NoResTest1.F(next, pre(next))
+
+Discrete equations:
+  temp_1 := time >= pre(next)
 -------------------------------
 ")})));
     end NoResTest1;
@@ -743,7 +487,7 @@ der(xx) := - x
         
     annotation(__JModelica(UnitTesting(tests={
         FClassMethodTestCase(
-            name="MixedVariabilityMatch1",
+            name="HybridModelTests.MixedVariabilityMatch1",
             description="Verify that a noncontinuous variable can be matched to and continuous equation in the initial system",
             methodName="printDAEInitBLT",
             methodResult="

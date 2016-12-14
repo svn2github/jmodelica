@@ -139,7 +139,7 @@ aspect CCodeGenBlocks {
     @Override
     protected void SimpleEquationBlock.genSolved(CodePrinter p, CodeStream str, String indent,
             boolean inResFunc, Set<FAbstractEquation> visited) {
-        if (hasResidualFunction()) {
+        if (getSequenceNumber() >= 0) {
             genBlockResidualCall(p, str, indent);
         } else if (genBlockEnabled()) {
             Collection<FVariable> forVariables = allLocalVariables();
@@ -345,9 +345,14 @@ aspect CCodeGenBlocks {
      * an residual function and hence need to produce one.
      */
     public boolean AbstractEquationBlock.hasResidualFunction() {
-        return getSequenceNumber() >= 0;
+        return getLabel() != null;
     }
 
+    @Override
+    public boolean AbstractSubBLTBlock.hasResidualFunction() {
+        return false;
+    }
+    
     /**
      * Generates residual equations for all unsolved equations in this block.
      * This method is usually called when generating residual functions
