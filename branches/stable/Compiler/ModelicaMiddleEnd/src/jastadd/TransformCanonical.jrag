@@ -828,14 +828,7 @@ aspect TransformCanonical {
     }
     
     public FExp InstRecordConstructor.extractRecordFExp(String suffix) {
-        InstLookupResult<InstComponentDecl> res = localLookupInstComponent(suffix);
-        if (res.successful()) {
-            int i = res.target().argIndexInRecordConstructor();
-            if (i >= 0 && i < getNumArg()) {
-                return getArg(i).getFExp().fullCopy();
-            }
-        }
-        return super.extractRecordFExp(suffix);
+        return component(suffix).fullCopy();
     }
 	
 	public FExp FArray.extractRecordFExp(String suffix) {
@@ -3746,6 +3739,10 @@ aspect EliminateEqualSwitches{
     }
     
     public void FRelExp.collectEqualSwitches(Map<String, Collection<FRelExp>> candidates) {
+        FAlgorithm alg = myFAlgorithm();
+        if (alg != null && dependsOn(alg.referencedFVariablesInLHS())) {
+            return;
+        }
         String key = toString();
         Collection<FRelExp> list = candidates.get(key);
         if (list == null) {

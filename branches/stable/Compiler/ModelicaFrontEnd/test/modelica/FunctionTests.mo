@@ -263,13 +263,16 @@ model FunctionFlatten4
  Real x = TestFunctionWithConst(2);
 
     annotation(__JModelica(UnitTesting(tests={
-        FlatteningTestCase(
+        TransformCanonicalTestCase(
             name="FunctionFlatten4",
             description="Flattening functions: function containing constants",
             variability_propagation=false,
+            inline_functions="none",
             flatModel="
 fclass FunctionTests.FunctionFlatten4
- Real x = FunctionTests.TestFunctionWithConst(2);
+ Real x;
+equation
+ x = FunctionTests.TestFunctionWithConst(2);
 
 public
  function FunctionTests.TestFunctionWithConst
@@ -1824,6 +1827,117 @@ end FunctionTests.FunctionBinding22;
 ")})));
 end FunctionBinding22;
 
+model FunctionBinding23
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=x);
+    end f2;
+    
+    Real y = f2(1);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding23",
+            description="Test default argument using function call where arguments use another argument of the outer function",
+            flatModel="
+fclass FunctionTests.FunctionBinding23
+ Real y = FunctionTests.FunctionBinding23.f2(1, 1);
+
+public
+ function FunctionTests.FunctionBinding23.f2
+  input Real x;
+  input Real z;
+  output Real y;
+ algorithm
+  y := z;
+  return;
+ end FunctionTests.FunctionBinding23.f2;
+
+end FunctionTests.FunctionBinding23;
+")})));
+end FunctionBinding23;
+
+model FunctionBinding24
+    function f
+        input Real x;
+        input Real z;
+        output Real y = z;
+        algorithm
+    end f;
+    
+    function f2
+        extends f(z=t);
+    protected
+        Real t = x;
+    end f2;
+    
+    Real y = f2(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding24",
+            description="Test default arguments",
+            flatModel="
+fclass FunctionTests.FunctionBinding24
+ Real y = FunctionTests.FunctionBinding24.f2(time, time);
+
+public
+ function FunctionTests.FunctionBinding24.f2
+  input Real x;
+  input Real z;
+  output Real y;
+  Real t;
+ algorithm
+  y := z;
+  t := x;
+  return;
+ end FunctionTests.FunctionBinding24.f2;
+
+end FunctionTests.FunctionBinding24;
+")})));
+end FunctionBinding24;
+
+model FunctionBinding25
+    function f
+        input Real x;
+        input Real y = x;
+        output Real z = y;
+        algorithm
+    end f;
+    
+    parameter Integer n = 1;
+    parameter Real[n] x = 1:n;
+    parameter Real z = f(n);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionBinding25",
+            description="Test default arguments: variability of call",
+            flatModel="
+fclass FunctionTests.FunctionBinding25
+ structural parameter Integer n = 1 /* 1 */;
+ structural parameter Real x[1] = {1} /* { 1 } */;
+ parameter Real z = FunctionTests.FunctionBinding25.f(1, 1) /* 1 */;
+
+public
+ function FunctionTests.FunctionBinding25.f
+  input Real x;
+  input Real y;
+  output Real z;
+ algorithm
+  z := y;
+  return;
+ end FunctionTests.FunctionBinding25.f;
+
+end FunctionTests.FunctionBinding25;
+")})));
+end FunctionBinding25;
 
 
 model BadFunctionCall1
@@ -8550,6 +8664,74 @@ end FunctionTests.ArrayOutputScalarization28;
 end ArrayOutputScalarization28;
 
 
+model ArrayOutputScalarization29
+    function f
+        input Real x;
+        input Integer n;
+        input Real z[n];
+        output Real[n] y;
+    algorithm
+        assert(x > 2, "Too low!");
+        y := x * z;
+        annotation(Inline=false);
+    end f;
+    
+    record R
+        final parameter Real z1[n] = f(w1, n, z2);
+        final parameter Real z2[n] = f(1, n, {2, 3});
+        parameter Integer n;
+        parameter Real w1;
+        parameter Real w2;
+    end R;
+    
+    R r(final w1 = 1, final n = 2);
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ArrayOutputScalarization29",
+            description="Do not replace final parameter function call that fails eval with zeroes",
+            flatModel="
+fclass FunctionTests.ArrayOutputScalarization29
+ parameter Real temp_2[1];
+ parameter Real temp_2[2];
+ structural parameter Real r.z2[1];
+ structural parameter Real r.z2[2];
+ structural parameter Integer r.n = 2 /* 2 */;
+ final parameter Real r.w1 = 1 /* 1 */;
+ parameter Real r.w2;
+ parameter Real temp_1[1];
+ parameter Real temp_1[2];
+ final parameter Real r.z1[1];
+ final parameter Real r.z1[2];
+parameter equation
+ ({temp_2[1], temp_2[2]}) = FunctionTests.ArrayOutputScalarization29.f(1, 2, {2, 3});
+ r.z2[1] = temp_2[1];
+ r.z2[2] = temp_2[2];
+ ({temp_1[1], temp_1[2]}) = FunctionTests.ArrayOutputScalarization29.f(1.0, 2, {r.z2[1], r.z2[2]});
+ r.z1[1] = temp_1[1];
+ r.z1[2] = temp_1[2];
+
+public
+ function FunctionTests.ArrayOutputScalarization29.f
+  input Real x;
+  input Integer n;
+  input Real[:] z;
+  output Real[:] y;
+ algorithm
+  init y as Real[n];
+  assert(x > 2, \"Too low!\");
+  for i1 in 1:size(z, 1) loop
+   y[i1] := x * z[i1];
+  end for;
+  return;
+ annotation(Inline = false);
+ end FunctionTests.ArrayOutputScalarization29.f;
+
+end FunctionTests.ArrayOutputScalarization29;
+")})));
+end ArrayOutputScalarization29;
+
+
 /* ======================= Unknown array sizes ======================*/
 
 model UnknownArray1
@@ -12680,8 +12862,6 @@ This is not allowed when calling Modelica.Matrices.QR(A).\");
   return;
  end Modelica.Math.Matrices.LAPACK.dorgqr;
 
- type AssertionLevel = enumeration(error, warning);
-
 end FunctionTests.Lapack_QR;
 ")})));
 end Lapack_QR;
@@ -12970,7 +13150,7 @@ model ComponentFunc3
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
             name="ComponentFunc3",
-            description="",
+            description="Calling a function through a component",
             flatModel="
 fclass FunctionTests.ComponentFunc3
  Real a.x = 1;
@@ -12989,6 +13169,176 @@ public
 end FunctionTests.ComponentFunc3;
 ")})));
 end ComponentFunc3;
+
+
+model ComponentFunc4
+    model A
+        function f = f2(a = c);
+        parameter Real c = 1;
+    end A;
+    
+    function f2
+        input Real a;
+        output Real b;
+    algorithm
+        b := a + 1;
+        b := b + a;
+    end f2;
+    
+    A a(c = 2);
+    Real y = a.f();
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc4",
+            description="Calling a function through a component",
+            flatModel="
+fclass FunctionTests.ComponentFunc4
+ parameter Real a.c = 2 /* 2 */;
+ Real y = FunctionTests.ComponentFunc4.a.f(a.c);
+
+public
+ function FunctionTests.ComponentFunc4.a.f
+  input Real a;
+  output Real b;
+ algorithm
+  b := a + 1;
+  b := b + a;
+  return;
+ end FunctionTests.ComponentFunc4.a.f;
+
+end FunctionTests.ComponentFunc4;
+")})));
+end ComponentFunc4;
+
+
+model ComponentFunc5
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    model B
+        A a;
+    end B;
+    
+    B b;
+    parameter Real z = b.a.f(b.a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc5",
+            description="Calling function through nested components",
+            errorMessage="
+1 errors found:
+
+Error at line 13196, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_MULTIPLE_COMPONENTS:
+  Can not access function through component unless only the first part of the name is a component: 'b.a.f'
+")})));
+end ComponentFunc5;
+
+
+model ComponentFunc6
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a[1].f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc6",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13224, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a[1].f'
+")})));
+end ComponentFunc6;
+
+
+model ComponentFunc7
+    model A
+        function f
+            input Real x;
+            output Real y;
+        algorithm
+            y := x * 2;
+        end f;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a[2];
+    parameter Real z = a.f(a[1].y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ComponentFunc7",
+            description="Calling function through array component",
+            errorMessage="
+1 errors found:
+
+Error at line 13252, column 24, in file 'Compiler/ModelicaFrontEnd/test/modelica/FunctionTests.mo', ACCESS_TO_FUNCTION_THROUGH_ARRAY_COMPONENT:
+  Can not access function through array component access: 'a.f'
+")})));
+end ComponentFunc7;
+
+
+model ComponentFunc8
+    model A
+        package B
+            function f
+                input Real x;
+                output Real y;
+            algorithm
+                y := x * 2;
+            end f;
+        end B;
+        
+        parameter Real y = 2;
+    end A;
+    
+    A a;
+    parameter Real z = a.B.f(a.y);
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ComponentFunc8",
+            description="Calling function through component, then package",
+            flatModel="
+fclass FunctionTests.ComponentFunc8
+ parameter Real a.y = 2 /* 2 */;
+ parameter Real z = FunctionTests.ComponentFunc8.a.B.f(a.y);
+
+public
+ function FunctionTests.ComponentFunc8.a.B.f
+  input Real x;
+  output Real y;
+ algorithm
+  y := x * 2;
+  return;
+ end FunctionTests.ComponentFunc8.a.B.f;
+
+end FunctionTests.ComponentFunc8;
+")})));
+end ComponentFunc8;
+
 
 model MinOnInput1
     function F
@@ -15791,5 +16141,156 @@ public
 end FunctionTests.AnnotationFlattening1;
 ")})));
 end AnnotationFlattening1;
+
+model ConstantInFunction1
+    function f
+        constant input Real x = 0;
+        output Real y;
+        algorithm
+    end f;
+    
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantInFunction1",
+            description="Constant input",
+            errorMessage="
+1 errors found:
+
+Error at line 15794, column 14, in file '...', CONSTANT_INPUT:
+  Function input may not be constant
+
+")})));
+end ConstantInFunction1;
+
+model ConstantInFunction2
+    record R
+        constant Real x = 0;
+    end R;
+    
+    function f
+        input R r;
+        output Real y = r.x;
+        algorithm
+    end f;
+    
+    R r(x=2);
+    Real y = f(r);
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantInFunction2",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction2
+ constant Real y = 2;
+end FunctionTests.ConstantInFunction2;
+")})));
+end ConstantInFunction2;
+
+
+model ConstantInFunction3
+    package P1
+        record R
+            constant Real x = 0;
+        end R;
+        function f
+            input R r;
+            output Real y = r.x;
+        algorithm
+        end f;
+        
+        constant R r;
+        
+        model M
+            Real y = f(r);
+        end M;
+    end P1;
+    
+    package P2
+        extends P1(r(x=2));
+    end P2;
+    
+    P2.M m;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="ConstantInFunction3",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction3
+ constant Real m.y = 2;
+end FunctionTests.ConstantInFunction3;
+
+")})));
+end ConstantInFunction3;
+
+model ConstantInFunction4
+    function f
+        input Real x;
+        output Real y = z;
+        constant Real z = x;
+        algorithm
+    end f;
+    
+    Real y = f(time);
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="ConstantInFunction1",
+            description="Constant input",
+            errorMessage="
+1 errors found:
+
+Error at line 15890, column 27, in file '...':
+  Could not evaluate binding expression for constant 'z': 'x'
+
+")})));
+end ConstantInFunction4;
+
+model ConstantInFunction5
+    record R
+        constant Real x = 1;
+    end R;
+    
+    function f
+        function g
+            output Real y = r1.x;
+            algorithm
+        end g;
+        output Real y = g();
+        constant R r1;
+    algorithm
+    end f;
+    
+    Real y = f();
+    
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ConstantInFunction5",
+            description="",
+            flatModel="
+fclass FunctionTests.ConstantInFunction5
+ Real y = FunctionTests.ConstantInFunction5.f();
+
+public
+ function FunctionTests.ConstantInFunction5.f
+  output Real y;
+ algorithm
+  y := FunctionTests.ConstantInFunction5.f.g();
+  return;
+ end FunctionTests.ConstantInFunction5.f;
+
+ function FunctionTests.ConstantInFunction5.f.g
+  output Real y;
+ algorithm
+  y := 1.0;
+  return;
+ end FunctionTests.ConstantInFunction5.f.g;
+
+end FunctionTests.ConstantInFunction5;
+")})));
+end ConstantInFunction5;
 
 end FunctionTests;

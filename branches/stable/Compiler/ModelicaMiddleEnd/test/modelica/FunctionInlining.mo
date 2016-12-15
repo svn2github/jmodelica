@@ -3893,10 +3893,6 @@ equation
  z = 2 / (temp_1 - 5);
  temp_1 = time;
  assert(noEvent(temp_1 < 5), \"Bad x: \" + String(temp_1));
-
-public
- type AssertionLevel = enumeration(error, warning);
-
 end FunctionInlining.AssertInline1;
 ")})));
 end AssertInline1;

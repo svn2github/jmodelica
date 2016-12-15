@@ -341,7 +341,7 @@ aspect FlatTypeAnalysis {
     eq FBooleanType.canBeRange()   = true;
     eq FEnumType.canBeRange()      = true;
 
-    eq FArgumentExp.type() = copiedFExp().type();
+    eq FDeferExp.type() = getFExp().type();
 
     eq FLinspace.type() {
         // TODO: check that endpoints are real

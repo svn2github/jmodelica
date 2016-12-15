@@ -727,10 +727,6 @@ aspect Derivatives {
         return diffWrap(name, getFExp());
     }
 
-    public FExp FArgumentExp.diff(String name) {
-        return copiedFExp().diff(name);
-    }
-
     public FExp FIterExp.diff(String name) {
         return dynamicFExp(new FIterExp(getFExp().diff(name), getForIndexs().treeCopy()));
     }

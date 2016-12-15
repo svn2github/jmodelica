@@ -110,10 +110,12 @@ aspect Scalarization {
             }
             
             public Scalarizer.Equation select(FTypePrefixVariability variability) {
-                switch (variability.variabilityLevel()) {
-                    case FFixedParameter.VARIABILITY_LEVEL: return sp;
-                    case FInitialParameter.VARIABILITY_LEVEL: return si;
-                    default: return sc;
+                if (variability.fixedParameterOrLess()) {
+                    return sp;
+                } else if (variability.parameterOrLess()) {
+                    return si;
+                } else {
+                    return sc;
                 }
             }
         }

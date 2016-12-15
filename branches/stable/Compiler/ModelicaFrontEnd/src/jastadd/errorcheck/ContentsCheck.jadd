@@ -246,12 +246,29 @@ aspect ContentCheck {
         }
     }
 
+    
+    public static final SimpleProblemProducer ASTNode.CONSTANT_INPUT =
+        new SimpleErrorProducer("CONSTANT_INPUT", ProblemKind.SEMANTIC, "Function input may not be constant");
+
     public void InstClassDecl.contentCheck(ErrorCheckType checkType) {
         if (isExternalObject()) {
             checkContentsOKInExternalObject();
             myConstructor().checkConstructor(this);
             myDestructor().checkDestructor(this);
         }
+        
+        if (isFunction()) {
+            for (InstComponentDecl icd : allInstComponentDecls()) {
+                if (icd.definedVariability().constantVariability()) {
+                    if (icd.isInput()) {
+                        ASTNode.CONSTANT_INPUT.invoke(icd);
+                    } else if (icd.hasBindingFExp()) {
+                        icd.getBindingFExp().checkConstantExpression(checkType, "constant", icd.qualifiedName());
+                    }
+                }
+            }
+        }
+        
         checkQuotedIdentifier(getClassDecl(), getClassDecl().getName().getID());
     }
 

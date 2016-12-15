@@ -2100,6 +2100,9 @@ aspect ConstantEvaluation {
           throw new ConstantEvaluationException();
         return res;
     }
+    
+    eq FDeferExp.cevalArray(VariableEvaluator evaluator, Index i) = getFExp().cevalArray(evaluator, i);
+    
     // Bypass for nodes with inherent support for constant evaluation of arrays.
     eq FFunctionCall.cevalArray(VariableEvaluator evaluator, Index i)    = cevalCalc(evaluator);
     eq InstFunctionCall.cevalArray(VariableEvaluator evaluator, Index i) = cevalCalc(evaluator);
@@ -2113,7 +2116,9 @@ aspect ConstantEvaluation {
      */
     syn CValue FExp.cevalCalc(VariableEvaluator evaluator) = CValue.UNSUPPORTED;
     
-    syn CValue FTimeExp.cevalCalc(VariableEvaluator evaluator) = evaluator.timeValue();
+    eq FTimeExp.cevalCalc(VariableEvaluator evaluator) = evaluator.timeValue();
+    
+    eq FDeferExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator);
     
     eq FBinExp.cevalCalc(VariableEvaluator evaluator) = evaluator.evalBinOp(this, getLeft().ceval(evaluator), getRight().ceval(evaluator));
     eq FDotMulExp.cevalCalc(VariableEvaluator evaluator) {

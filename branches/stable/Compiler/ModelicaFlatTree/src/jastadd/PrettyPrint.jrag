@@ -1991,24 +1991,26 @@ aspect FlatPrettyPrint {
         str.print(getName());
     }
 	
-	protected void FArgumentExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
-		p.print(copiedFExp(), str, indent);
-	}
-	
+    protected void FDeferExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        p.print(getFExp(), str, indent);
+    }
+    
     syn String FTypePrefixInputOutput.toString();
     eq FInput.toString()      = "input";
     eq FOutput.toString()     = "output";
     syn String FTypePrefixVariability.toString();
-    eq FFixedParameter.toString()    = "parameter ";
-    eq FInitialParameter.toString() = "initial parameter ";
-    eq FIndexParameter.toString()  = "index parameter";
-    eq FEvalParameter.toString()   = "eval parameter ";
-    eq FFinalParameter.toString()  = "final parameter ";
-    eq FStructParameter.toString() = "structural parameter ";
-    eq FDiscrete.toString()        = "discrete ";
-    eq FConstant.toString()        = "constant ";
-    eq FContinuous.toString()      = "";	
+    eq FFixedParameter.toString()       = "parameter ";
+    eq FInitialParameter.toString()     = "initial parameter ";
+    eq FIndexParameter.toString()       = "index parameter";
+    eq FEvalParameter.toString()        = "eval parameter ";
+    eq FFinalParameter.toString()       = "final parameter ";
+    eq FStructParameter.toString()      = "structural parameter ";
+    eq FDiscrete.toString()             = "discrete ";
+    eq FConstant.toString()             = "constant ";
+    eq FContinuous.toString()           = "";
     eq FCompositeVariability.toString() = combine().toString();
+    syn String FComponentVariability.toString() = 
+        getVariability().toString() + " /* " + getName() + " */ ";
 
     syn String FTypePrefixVariability.toStringLiteral();
     eq FParameter.toStringLiteral()       = "parameter";
