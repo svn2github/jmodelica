@@ -173,3 +173,61 @@ public void ASTNode.sourceDiagnosticsPrint(CodeStream str, String indent) {
 	
 	
 }
+
+
+
+aspect Temp_CValue{
+	
+	
+	/*public CValue FExp.ceval(BaseNode sourceCollector) {
+        ASTNode$State state = state();
+        CValue ceval_value = ceval(defaultVariableEvaluator(), sourceCollector);
+
+        return ceval_value;
+	}
+		
+	public CValue FExp.ceval(VariableEvaluator evaluator, BaseNode sourceCollector) {
+        ASTNode$State state = state();
+        try {
+                if (isCircular()) 
+                    return CValue.UNKNOWN;
+                if (isArray()) {
+                    if (size().evaluated().isUnknown())
+                        return CValue.UNKNOWN;
+                    return cevalArray(evaluator, Index.NULL);
+                }
+                CValue resOver = cevalOverloaded(evaluator);
+                return (resOver != null) ? resOver : cevalCalc(evaluator, sourceCollector);
+            }
+        finally {
+        }
+    }
+	public CValue FExp.cevalCalc(VariableEvaluator evaluator, BaseNode sourceCollector){
+		return cevalCalc(evaluator);
+	}
+	
+	public CValue FBinExp.cevalCalc(VariableEvaluator evaluator, BaseNode sourceCollector) {
+        ASTNode$State state = state();
+        CValue cevalCalc_VariableEvaluator_value = evaluator.evalBinOp(this,
+        		getLeft().ceval(evaluator, sourceCollector), getRight().ceval(evaluator, sourceCollector));
+        sourceCollector.addLocation(getLeft());
+        sourceCollector.addLocation(getRight());
+
+        return cevalCalc_VariableEvaluator_value;
+    }
+	
+	public CValue FUnaryExp.cevalCalc(VariableEvaluator evaluator, BaseNode sourceCollector) {
+        ASTNode$State state = state();
+        CValue cevalCalc_VariableEvaluator_value = evaluator.evalUnOp(this, getFExp().ceval(evaluator, sourceCollector));
+        sourceCollector.addLocation(getFExp());
+
+        return cevalCalc_VariableEvaluator_value;
+    }
+	
+	public CValue FLitExp.cevalCalc(VariableEvaluator evaluator, BaseNode sourceCollector){
+		sourceCollector.addLocation(this);
+		return cevalCalc(evaluator);
+	}*/
+
+
+}

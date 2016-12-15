@@ -166,40 +166,43 @@ aspect HtmlSourcePrettyPrint {
         getFAttributeList().prettyPrintFAnnotationAttributeList(str, p, indent, ";\n");
 
         str.print(indent);
-        str.print("<b>end ");
+        str.print("<br><b>end ");
         str.print(name());
         str.print(";</b>\n");
     }
 	
 	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		String s = this.getClass().toString();
-		String file = null;
+		SourceLocation[] file = null;
 		if(fName instanceof String){
-			file = (String)fName;
+			file = new SourceLocation[1];
+			file[0] = new SourceLocation((String)fName, start, end);
 		}else if(fName != null){
-			String[] sv = (String[])fName;
-			file = sv[0];
-			for(int i = 1; i < sv.length; i++)
-				file += "\n" + sv[i];				// works, but produces linebreaks in the html code
+			file = (SourceLocation[])fName;			
 		}
-		if(fName != null && p instanceof HtmlSourcePrettyPrinter){// && !locationContainedBy(parent)){
+		if(file != null && fName != null && p instanceof HtmlSourcePrettyPrinter){// && !locationContainedBy(parent)){
 			String dir = System.getProperty("user.dir");
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			try{					// TODO, Fix the pathcutting for multiple files
-				if(file.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))){
-				   	file = file.substring(dir.lastIndexOf("\\") + 1);
-				}
-			}catch(IndexOutOfBoundsException e){} 				//keep file = fname
 			
-			//str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + fName + "\">");
-			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"" + file + " " + Symbol.getLine(start) + ":" + Symbol.getColumn(start) 
-					+ " " + Symbol.getLine(end) + ":" + Symbol.getColumn(end) + "\">");  						// for debugging positions
-			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
+			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"");
+			for(int i = 0; i < file.length; i++){
+				String fileName = file[i].getFile();
+				try{
+					if(fileName.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))){
+					   	fileName = fileName.substring(dir.lastIndexOf("\\") + 1);
+					}
+				}catch(IndexOutOfBoundsException e){} 				//keep fileName whole
+				if(i > 0)
+					str.print("\n");								// works, but produces linebreaks in the html code
+				str.print(fileName + " " + Symbol.getLine(file[i].getStart()) + ":" + Symbol.getColumn(file[i].getStart()) 
+					+ " " + Symbol.getLine(file[i].getEnd()) + ":" + Symbol.getColumn(file[i].getEnd()));
+			}
+			
+			str.print("\">");
 			prettyPrint(p, str, indent);
 			hp.decLineDepth();
 			str.print("</span>");
 		}else{
-			//str.print(escapeHTML("" + s.substring(s.lastIndexOf('.') + 1) + "."));
 			prettyPrint(p, str, indent);
 		}
 	}
@@ -267,6 +270,21 @@ aspect HtmlSourcePrettyPrint {
 		str.print("algorithm<br>\n");
 		getFStatements().prettyPrintWithIndent(p, str, p.indent(indent), ";<br>");
 	}
+    
+    public void FDerivedType.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+    	if (!getBaseType().isEnum()) {
+	    	str.print(indent + "<b>type</b><i> " + getName() + "</i> = ");
+	    	str.print(getBaseType());
+	    	getFAttributeList().prettyPrintFAttributeList(str, p);
+	    	str.print(";<br>\n");
+    	}
+    }
+    
+    public void FRecordDecl.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
+    	str.print(indent + "<b>record</b> " + name() + "<br>\n");
+    	getFVariables().prettyPrintWithFix(p, str, p.indent(indent), "", ";<br>\n");
+    	str.print(indent + "<b>end</b> " + name() + ";<br><br>\n\n");
+    }
 	
 	/*public void FEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		if(fName != null && p instanceof HtmlSourcePrettyPrinter){

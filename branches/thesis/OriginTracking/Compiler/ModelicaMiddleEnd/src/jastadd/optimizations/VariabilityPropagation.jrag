@@ -319,6 +319,7 @@ aspect VariabilityPropagation {
 		if (solutionVariability.knownParameterOrLess()) {
 			try {
 				solution = solution.ceval().buildLiteral();
+				getRight().collectLocations(solution);
 			} catch (ConstantEvaluationException e) {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
