@@ -4,6 +4,17 @@ aspect CCodeGenJacobian{
 
         /**
          * Describes a quadrant in an {@code EquationBlock}.
+         * +-------+-----+
+         * |       |     |
+         * |   L   | A12 |
+         * |       |     |
+         * +-------+-----+
+         * |  A21  | A22 |
+         * +-------+-----+
+         * - L is torn part
+         * - A12 is incidences between torn equations and iteration variables
+         * - A21 is incidences between torn variables and residual equations
+         * - A22 is incidences between residual equations and iteration variables
          */
         protected enum Quadrant {
             L, A12, A21, A22;
@@ -32,12 +43,12 @@ aspect CCodeGenJacobian{
         /**
          * Describes an equation block's structural information.
          */
-        protected class SparseJacobian {
-            private FExp[][] jacobian;
-            private int cols;
-            private int rows;
-            private int colPivot;
-            private int rowPivot;
+        protected static class SparseJacobian {
+            private final FExp[][] jacobian;
+            private final int cols;
+            private final int rows;
+            private final int colPivot;
+            private final int rowPivot;
 
             /**
              * Creates an instance of a block's structural information.
@@ -48,7 +59,7 @@ aspect CCodeGenJacobian{
              *            The size of the remaining equations
              */
             public SparseJacobian(FExp[][] jacobian, int n1, int n2) {
-                this.jacobian = jacobian();
+                this.jacobian = jacobian;
                 this.colPivot = n1;
                 this.rowPivot = n1;
                 this.cols = n1+n2;
@@ -168,8 +179,89 @@ aspect CCodeGenJacobian{
                 }
                 return numNonZero;
             }
+            
+            /**
+             * Returns an iterable for a specific quadrant of the jacobian.
+             * This iterable can then be used to visit all the set elements of
+             * the quadrant.
+             */
+            public Iterable<JacobianCell> quadrantIterable(final Quadrant quadrant) {
+                return new Iterable<JacobianCell>() {
+                    
+                    @Override
+                    public Iterator<JacobianCell> iterator() {
+                        return new QuadrantIterator(quadrant);
+                    }
+                };
+            }
+            
+            private class QuadrantIterator implements Iterator<JacobianCell> {
+                private final int rowOffset;
+                private final int colOffset;
+                private final int numRows;
+                private final int numCols;
+                
+                private int row = -1;
+                private int col = 0;
+                private FExp next;
+                
+                public QuadrantIterator(Quadrant quadrant) {
+                    rowOffset = rowStart(quadrant);
+                    colOffset = colStart(quadrant);
+                    numRows = numRows(quadrant);
+                    numCols = numCols(quadrant);
+                    update();
+                }
+                
+                private void update() {
+                    do {
+                        row++;
+                        if (row == numRows) {
+                            row = 0;
+                            col++;
+                        }
+                        if (col == numCols) {
+                            next = null;
+                            break;
+                        }
+                        next = at(rowOffset + row, colOffset + col);
+                    } while (next == null && col < numCols);
+                }
+
+                @Override
+                public boolean hasNext() {
+                    return next != null;
+                }
+
+                @Override
+                public JacobianCell next() {
+                    if (next == null) {
+                        throw new NoSuchElementException("End of iterator has been reached!");
+                    }
+                    JacobianCell res = new JacobianCell(row, col, next);
+                    update();
+                    return res;
+                }
+
+                @Override
+                public void remove() {
+                    throw new UnsupportedOperationException("Remove operation is not supported on this iterator");
+                }
+            }
         }
     
+        private static class JacobianCell {
+            private final int row;
+            private final int col;
+            private final FExp exp;
+            
+            private JacobianCell(int row, int col, FExp exp) {
+                this.row = row;
+                this.col = col;
+                this.exp = exp;
+            }
+        }
+        
         /**
          * Maps an evaluation aspect of a quadrant to a variable name.
          */
@@ -381,40 +473,43 @@ aspect CCodeGenJacobian{
     }
 
     /**
-     *  The column evaluation function.
-     *  
+     * Prints the index of the first incidence in each quadrant column.
+     * Note that there may be some columns which doesn't have any incidences,
+     * in those situations we print the previous index.
+     * 
+     * See http://netlib.org/linalg/html_templates/node92.html
+     * 
      *  @param jacobian
      *          The {@link Jacobian} instance describing the Jacobian structure.
      *  @param quadrant
      *          The quadrant to generate evaluation data for.
      */
-    protected void AbstractEquationBlock.genStructCol(CodePrinter p, CodeStream str, String indent,
+    private void AbstractEquationBlock.genStructCol(CodePrinter p, CodeStream str, String indent,
             SparseJacobian jacobian, Quadrant quadrant) {
-
-        //for (int i = 0; i < jacobian.numCols(quadrant); ++i) {
-        //    str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, (i + 1));
-        //}
-        
         int i = 0;
-        int colStart = jacobian.colStart(quadrant);
-        int rowStart = jacobian.rowStart(quadrant);
-        for (int col = 0; col < jacobian.numCols(quadrant); col++) { 
-            str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, col, i);
-            //str.format("%sA->p[%d] = %d;\n", indent, col, i); 
-            for (int row = 0; row < jacobian.numRows(quadrant); row++) { 
-                if (jacobian.at(rowStart+row,colStart+col) != null) { 
-                    //str.format("%sA->i[%d] = %d;\n", indent, i, row); 
-                    //str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, row);
-                    i = i + 1;
-                } 
-            } 
+        int lastCol = 0;
+        for (JacobianCell cell : jacobian.quadrantIterable(quadrant)) {
+            // We need to loop since there might be columns without incidences,
+            // especially A21.
+            for (; lastCol <= cell.col; lastCol++) {
+                str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, lastCol, i);
+            }
+            i++;
         }
-        str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, jacobian.numCols(quadrant), i); 
+        // ... and the once at the end which doesn't have any incidences
+        for (; lastCol <= jacobian.numCols(quadrant); lastCol++) {
+            str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, lastCol, i);
+        }
     }
 
     /**
-     *  The row evaluation function.
+     * Prints the row for each incidence in the quadrant. This method differs
+     * drastically from genStructCol(), this one prints one row for each
+     * incidence. genStructCol() prints one row for each column and specifies
+     * the index of the first incidence in the column.
      *  
+     * See http://netlib.org/linalg/html_templates/node92.html
+     * 
      *  @param jacobian
      *          The {@link Jacobian} instance describing the Jacobian structure.
      *  @param quadrant
@@ -422,25 +517,11 @@ aspect CCodeGenJacobian{
      */
     protected void AbstractEquationBlock.genStructRow(CodePrinter p, CodeStream str, String indent,
             SparseJacobian jacobian, Quadrant quadrant) {
-
-        //for (int i = 0; i < jacobian.numNonZero(quadrant); ++i) {
-        //    str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, 1);
-        //}
-        
         int i = 0;
-        int colStart = jacobian.colStart(quadrant);
-        int rowStart = jacobian.rowStart(quadrant);
-        for (int col = 0; col < jacobian.numCols(quadrant); col++) { 
-            //str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, col, i);
-            //str.format("%sA->p[%d] = %d;\n", indent, col, i); 
-            for (int row = 0; row < jacobian.numRows(quadrant); row++) { 
-                if (jacobian.at(rowStart+row,colStart+col) != null) { 
-                    //str.format("%sA->i[%d] = %d;\n", indent, i, row); 
-                    str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, row);
-                    i = i + 1;
-                } 
-            } 
-        } 
+        for (JacobianCell cell : jacobian.quadrantIterable(quadrant)) {
+            str.format("%s(*%s)[%d] = %d;\n", indent, JACOBIAN_PARAM_C, i, cell.row);
+            i++;
+        }
     }
 
     /**
@@ -453,20 +534,16 @@ aspect CCodeGenJacobian{
      */
     protected void AbstractEquationBlock.genStructEval(CodePrinter p, CodeStream str, String indent,
             SparseJacobian jacobian, Quadrant quadrant) {
-
-        int evaluated = 0;
-        for (int col = jacobian.colStart(quadrant); col < jacobian.colEnd(quadrant); ++col) {
-            for (int row = jacobian.rowStart(quadrant); row < jacobian.rowEnd(quadrant); ++row) {
-
-                FExp exp = null;
-                if ((exp = jacobian.at(row, col)) != null) {
-                    p.printPreSteps(exp, str, indent);
-                    str.format("%s(*%s)[%d] = ", indent, JACOBIAN_PARAM_C, evaluated++);
-                    p.print(exp, str, indent);
-                    str.format(";\n");
-                    p.printPostSteps(exp, str, indent);
-                }
-            }
+        for (JacobianCell cell : jacobian.quadrantIterable(quadrant)) {
+            p.printVarDecls(cell.exp, str, indent);
+        }
+        int cellIndex = 0;
+        for (JacobianCell cell : jacobian.quadrantIterable(quadrant)) {
+            p.printPreSteps(cell.exp, str, indent);
+            str.format("%s(*%s)[%d] = ", indent, JACOBIAN_PARAM_C, cellIndex++);
+            p.print(cell.exp, str, indent);
+            str.format(";\n");
+            p.printPostSteps(cell.exp, str, indent);
         }
     }
 
@@ -479,13 +556,12 @@ aspect CCodeGenJacobian{
      *          The string suffix to append to the function name, to be used for the initial system.
      */
     protected void AbstractEquationBlock.generateJacobianFunction(CodePrinter p, CodeStream str,
-            String indent, SparseJacobian jacobian, String initialSuffix) {
+            String outerIndent, SparseJacobian jacobian, String initialSuffix) {
 
-        String functionName = JACOBIAN_FUNCTION_C;
+        String indent = p.indent(outerIndent);
         String innerIndent = p.indent(indent);
-        String innermostIndent = p.indent(innerIndent);
 
-        beginJacobianFunction(p, str, indent, functionName, initialSuffix, true);
+        beginJacobianFunction(p, str, outerIndent, JACOBIAN_FUNCTION_C, initialSuffix, true);
         
         Quadrant[] quadrants = Quadrant.values();
         int length = quadrants.length;
@@ -494,18 +570,18 @@ aspect CCodeGenJacobian{
             Quadrant quadrant = quadrants[i];
             String quadrantName = quadrant.name();
 
-            genOpenEvalMode_C(str, innerIndent, EVAL + quadrantName);
-            str.format("%s%s->%s.%s(jmi, %s);\n", innermostIndent, JACOBIAN_INSTANCE_C, quadrantName,
+            genOpenEvalMode_C(str, indent, EVAL + quadrantName);
+            str.format("%s%s->%s.%s(jmi, %s);\n", innerIndent, JACOBIAN_INSTANCE_C, quadrantName,
                     EvaluationFunction.EVAL.var, JACOBIAN_PARAM_C);
             
             if (i + 1 == length) {
                 break;
             }
             
-            genCloseEvalMode_C(str, innerIndent);
+            genCloseEvalMode_C(str, indent);
         }
 
-        endJacobianFunction(p, str, indent);
+        endJacobianFunction(p, str, outerIndent);
     }
 
     /**
@@ -517,13 +593,12 @@ aspect CCodeGenJacobian{
      *          The string suffix to append to the function name, to be used for the initial system.
      */
     protected void AbstractEquationBlock.generateJacobianStructFunction(CodePrinter p, CodeStream str,
-        String indent, SparseJacobian jacobian, String initialSuffix) {
+        String outerIndent, SparseJacobian jacobian, String initialSuffix) {
 
-        String functionName = JACOBIAN_STRUCT_FUNCTION_C;
+        String indent = p.indent(outerIndent);
         String innerIndent = p.indent(indent);
-        String innermostIndent = p.indent(innerIndent);
 
-        beginJacobianFunction(p, str, indent, functionName, initialSuffix, false);
+        beginJacobianFunction(p, str, outerIndent, JACOBIAN_STRUCT_FUNCTION_C, initialSuffix, false);
 
         EvaluationFunction[] evalFunctions = EvaluationFunction.values();
         Quadrant[] quadrants = Quadrant.values();
@@ -541,19 +616,19 @@ aspect CCodeGenJacobian{
                     continue;
                 }
 
-                genOpenEvalMode_C(str, innerIndent, modeBase + evalFunction.name());
+                genOpenEvalMode_C(str, indent, modeBase + evalFunction.name());
 
-                str.format("%s%s->%s.%s(%s);\n", innermostIndent, JACOBIAN_INSTANCE_C, quadrantName,
+                str.format("%s%s->%s.%s(%s);\n", innerIndent, JACOBIAN_INSTANCE_C, quadrantName,
                         evalFunction.var, JACOBIAN_PARAM_C);
 
                 if (i + 1 == quadrantLength && j + 2 == evalLength) {
                     break;
                 }
 
-                genCloseEvalMode_C(str, innerIndent);
+                genCloseEvalMode_C(str, indent);
             }
         }
-        endJacobianFunction(p, str, indent);
+        endJacobianFunction(p, str, outerIndent);
     }
 
     /**
