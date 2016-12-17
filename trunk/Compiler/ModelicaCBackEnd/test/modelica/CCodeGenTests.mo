@@ -6610,7 +6610,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -6842,7 +6842,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -6867,7 +6867,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -6963,7 +6963,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7070,7 +7070,7 @@ $C_ode_initialization$
 ",
             generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7327,7 +7327,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 }
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
+    /***** Block: 1.1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7352,7 +7352,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7382,7 +7382,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
+    /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7428,7 +7428,7 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 2 *****/
+    /***** Block: 3 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -7843,7 +7843,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8400,7 +8400,7 @@ $C_ode_derivatives$
 ",
             generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8565,7 +8565,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 -----
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8688,7 +8688,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 -----
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8716,7 +8716,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8837,7 +8837,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 -----
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -8963,7 +8963,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 -----
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -9147,7 +9147,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
 
 -----
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10169,7 +10169,7 @@ $C_dae_init_add_blocks_residual_functions$
 ",
             generatedCode="
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
+    /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10203,7 +10203,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 2 *****/
+    /***** Block: 3 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10237,7 +10237,7 @@ static int dae_block_2(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10267,7 +10267,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 3 *****/
+    /***** Block: 4 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10301,7 +10301,7 @@ static int dae_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_4(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 4 *****/
+    /***** Block: 5 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -10472,11 +10472,11 @@ static int dae_init_block_3(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"1\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_2, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"2\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 0, 1, 1, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"null\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_3, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"3\", -1);
-    jmi_dae_add_equation_block(*jmi, dae_block_4, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 4, \"4\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_2, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 2, \"3\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 0, 1, 1, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_3, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_DISCRETE_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 3, \"4\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_4, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 4, \"5\", -1);
 
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_0, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
     jmi_dae_init_add_equation_block(*jmi, dae_init_block_1, NULL, NULL, NULL, 2, 0, 0, 0, 0, 0, 0, 0, JMI_PARAMETER_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 1, \"2\", -1);
@@ -11648,7 +11648,7 @@ $C_dae_add_blocks_residual_functions$
 ",
             generatedCode="
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
+    /***** Block: 1.1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -11671,7 +11671,7 @@ static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -11706,8 +11706,8 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 
-    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"1\", 0);
-    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 0, 3, 2, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"null\", -1);
+    jmi_dae_add_equation_block(*jmi, dae_block_1, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_KINSOL_SOLVER, 1, \"1.1\", 0);
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 0, 3, 2, 1, 1, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 
 ")})));
 end NestedUnsolvedScalarInSolvedBlock;
@@ -12600,7 +12600,7 @@ static int dae_init_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int
 
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -12630,7 +12630,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
 }
 
 static int dae_block_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: 1 *****/
+    /***** Block: 2 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -13221,7 +13221,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -13316,7 +13316,7 @@ int model_ode_initialize_base(jmi_t* jmi) {
     return ef;
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
@@ -17738,7 +17738,7 @@ int model_ode_derivatives_base(jmi_t* jmi) {
 }
 
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()

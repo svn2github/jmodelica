@@ -541,26 +541,6 @@ aspect BLT{
 		
         private Enumerator indexEnumerator;
 
-		public ArrayList<Integer> unsolvedBlockSizes() {
-			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
-			for (AbstractEquationBlock b : this) {
-				if (!b.isSolvable()) {
-					blockSizes.add(new Integer(b.allVariables().size()));
-				}		
-			}
-			return blockSizes;
-		}
-
-		public ArrayList<Integer> unsolvedBlockIterationSizes() {
-			ArrayList<Integer> blockSizes = new ArrayList<Integer>();
-			for (AbstractEquationBlock b : this) {
-				if (!b.isSolvable()) {
-					blockSizes.add(new Integer(b.unsolvedVariables().size()));
-				}
-			}
-			return blockSizes;
-		}
-
         public void setLabels() {
             Enumerator nestedEnum = new Enumerator(1);
             Enumerator seqEnum = new Enumerator(0);
@@ -1769,16 +1749,6 @@ aspect BLT{
             super(producer, blockDependency, subBlocks, Collections.<SimpleEquationBlock>emptyList());
         }
 
-        @Override
-        protected void setLabel(String prefix, boolean inBlockResidual, Enumerator nestedEnum, Enumerator seqEnum) {
-            super.setLabel(prefix, false, null, seqEnum);
-        }
-
-        @Override
-        protected boolean needLabel(boolean inSubBlock) {
-            return false;
-        }
-
     }
 
     /**
@@ -2559,6 +2529,52 @@ aspect BLT{
 
     }
     
+    
+    public ArrayList<Integer> BLT.unsolvedBlockSizes() {
+        ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+        for (AbstractEquationBlock b : this) {
+            b.unsolvedBlockSizes(blockSizes);
+        }
+        return blockSizes;
+    }
+
+    public ArrayList<Integer> BLT.unsolvedBlockIterationSizes() {
+        ArrayList<Integer> blockSizes = new ArrayList<Integer>();
+        for (AbstractEquationBlock b : this) {
+            b.unsolvedBlockIterationSizes(blockSizes);
+        }
+        return blockSizes;
+    }
+    
+    public void AbstractEquationBlock.unsolvedBlockSizes(Collection<Integer> blockSizes) {
+        if (!isSolvable()) {
+            blockSizes.add(allVariables().size());
+        }
+    }
+    
+    @Override
+    public void PrePropagationEquationBlock.unsolvedBlockSizes(Collection<Integer> blockSizes) {
+        for (AbstractEquationBlock b : solvedBlocks()) {
+            b.unsolvedBlockSizes(blockSizes);
+        }
+    }
+    
+    public void AbstractEquationBlock.unsolvedBlockIterationSizes(Collection<Integer> blockSizes) {
+        if (!isSolvable()) {
+            blockSizes.add(unsolvedVariables().size());
+        }
+    }
+    
+    @Override
+    public void PrePropagationEquationBlock.unsolvedBlockIterationSizes(Collection<Integer> blockSizes) {
+        for (AbstractEquationBlock b : solvedBlocks()) {
+            b.unsolvedBlockIterationSizes(blockSizes);
+        }
+    }
+    
+
+
+    
 }
 
 
@@ -2878,7 +2894,7 @@ aspect BLTPrettyPrinting {
 
     @Override
     public void PrePropagationEquationBlock.prettyPrint(Printer p, CodeStream str, String indent) {
-        str.formatln("%s--- Pre propagation block ---", indent);
+        str.formatln("%s--- Pre propagation block (Block %s) ---", indent, getLabel());
         String innerIndent = p.indent(indent);
         for (AbstractEquationBlock block : solvedBlocks()) {
             block.prettyPrint(p, str, innerIndent);

@@ -37,7 +37,7 @@ package HybridModelTests
                 description="Testing of hybrid models with pre variable that don't need to be iterated in block",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   b := sin(time) >= 0
   --- Solved equation ---
@@ -68,7 +68,7 @@ der(y) := if i == 0 then 2 else 3
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   x := - pre(i) + y
   --- Solved equation ---
@@ -96,7 +96,7 @@ y := 3 * sin(time)
 --- Solved equation ---
 y := 3 * sin(time)
 
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   x := - pre(i) + y
   --- Solved equation ---
@@ -126,7 +126,7 @@ y := 3 * sin(time)
                 description="Test interaction between continuous and discrete equations",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   temp_1 := sample(0, 1)
   --- Solved equation ---
@@ -200,7 +200,7 @@ Jacobian:
                 description="A case which gives bigger block with local pre handling, but avoid global iteration",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   temp_1 := sample(0, 1)
   --- Solved equation ---
@@ -228,7 +228,7 @@ Jacobian:
                 description="A case which gives bigger block with local pre handling, but avoid global iteration",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   temp_1 := sample(0, 1)
   --- Solved equation ---
@@ -257,7 +257,7 @@ x_c := x_d
                 description="A case which gives bigger block with local pre handling, but avoid global iteration",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
   --- Solved equation ---
@@ -329,7 +329,7 @@ Jacobian:
                 description="A simple testcase that ensure that equations asigning a and x are in the same block",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := time > 0.5
   --- Solved equation ---
@@ -356,7 +356,7 @@ Jacobian:
                 description="A simple testcase that ensure that equations asigning a and x are in the same block",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := sample(0.5, 1)
   --- Solved equation ---
@@ -386,7 +386,7 @@ Jacobian:
                 description="There are two independent parts of the system which have event equations and pre uses which shouldn't be merged",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := sample(0.5, 1)
   --- Solved equation ---
@@ -394,7 +394,7 @@ Jacobian:
   --- Solved equation ---
   x := if b and not pre(b) then time else pre(x)
 
---- Pre propagation block ---
+--- Pre propagation block (Block 2) ---
   --- Solved equation ---
   c := time > 0.75
   --- Solved equation ---
@@ -423,7 +423,7 @@ Jacobian:
                 description="Two when equations which share the same upstream block to merge",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := time > 0.75
   --- Solved equation ---
@@ -457,7 +457,7 @@ Jacobian:
                 description="One when equation which has two upstream blocks to merge",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a1 := time > 0.75
   --- Solved equation ---
@@ -497,7 +497,7 @@ Jacobian:
 --- Solved equation ---
 m := sin(time)
 
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := time > 0.5
   --- Solved equation ---
@@ -530,7 +530,7 @@ m := sin(time)
                 description="Ensures that m equation is ordered correctly and not merged",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := time > 0.5
   --- Solved equation ---
@@ -563,7 +563,7 @@ m := if b then 1 else 0
                 description="Ensures that y equation is ordered correctly and not merged",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   a := time > 0.5
   --- Solved equation ---
@@ -596,7 +596,7 @@ y := sin(x)
                 description="Ensures event and pre merge interacts well with pre merge",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   sample1 := sample(1, 0.4)
   --- Solved equation ---
@@ -692,7 +692,7 @@ Jacobian:
                 description="An bigger \"real world\" example",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   d1 := pre(d2)
   --- Solved equation ---
@@ -751,7 +751,7 @@ Jacobian:
             description="Test complicated when and pre variable case",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   temp_1 := sample(0, 1)
   --- Solved equation ---
@@ -803,7 +803,7 @@ der(xx) := - x
             description="Verify that no residuals are added to the block even though it contains continuous equations",
             methodName="printDAEBLT",
             methodResult="
---- Pre propagation block ---
+--- Pre propagation block (Block 1) ---
   --- Solved equation ---
   temp_1 := time >= pre(next)
   --- Solved equation ---

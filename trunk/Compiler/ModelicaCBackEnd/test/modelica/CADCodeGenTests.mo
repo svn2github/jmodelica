@@ -6093,7 +6093,7 @@ $CAD_dae_blocks_residual_functions$
     ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[0]);
 
 static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
+    /***** Block: 1 *****/
     jmi_ad_var_t v_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
