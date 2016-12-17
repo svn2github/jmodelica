@@ -155,27 +155,30 @@ der(x_c) := - x_c + x_d
                 description="TODO: this model should give an error",
                 methodName="printDAEBLT",
                 methodResult="
---- Pre propagation block ---
-  --- Solved equation ---
+--- Torn mixed linear system (Block 1) of 1 iteration variables and 1 solved variables ---
+Coefficient variability: discrete-time
+Torn variables:
+  x_d
+
+Iteration variables:
+  x_c
+
+Solved discrete variables:
+  temp_1
+
+Torn equations:
+  x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+
+Continuous residual equations:
+  0 = - x_c + x_d
+    Iteration variables: x_c
+
+Discrete equations:
   temp_1 := sample(0, 1)
-  --- Torn linear system (Block 1) of 1 iteration variables and 1 solved variables ---
-  Coefficient variability: discrete-time
-  Torn variables:
-    x_d
 
-  Iteration variables:
-    x_c
-
-  Torn equations:
-    x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
-
-  Residual equations:
-    0 = - x_c + x_d
-      Iteration variables: x_c
-
-  Jacobian:
-    |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
-    |-1.0, 1.0|
+Jacobian:
+  |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
+  |-1.0, 1.0|
 -------------------------------
 ")})));
         end Test5;
@@ -605,6 +608,54 @@ y := sin(x)
 -------------------------------
 ")})));
         end PreMergeInteraction;
+        
+        model DiscreteRealMerge
+            discrete Real x;
+            discrete Real y;
+        equation
+            when time > 0.25 then
+                x = 2*x + y + 1;
+            end when;
+            when time > 0.5 then
+                y = 3*x - 4*y + 1;
+            end when;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            FClassMethodTestCase(
+                name="EventPreMerge.DiscreteRealMerge",
+                description="Ensures that we merge discrete reals into the pre block and not nested",
+                methodName="printDAEBLT",
+                methodResult="
+--- Torn mixed linear system (Block 1) of 2 iteration variables and 0 solved variables ---
+Coefficient variability: discrete-time
+Torn variables:
+
+Iteration variables:
+  y
+  x
+
+Solved discrete variables:
+  temp_2
+  temp_1
+
+Torn equations:
+
+Continuous residual equations:
+  y = if temp_2 and not pre(temp_2) then 3 * x - 4 * y + 1 else pre(y)
+    Iteration variables: y
+  x = if temp_1 and not pre(temp_1) then 2 * x + y + 1 else pre(x)
+    Iteration variables: x
+
+Discrete equations:
+  temp_2 := time > 0.5
+  temp_1 := time > 0.25
+
+Jacobian:
+  |1.0 - (if temp_2 and not pre(temp_2) then -4 else 0.0), - (if temp_2 and not pre(temp_2) then 3 else 0.0)|
+  |- (if temp_1 and not pre(temp_1) then 1.0 else 0.0), 1.0 - (if temp_1 and not pre(temp_1) then 2 else 0.0)|
+-------------------------------
+")})));
+        end DiscreteRealMerge;
         
         model Big1
             Boolean d1; 

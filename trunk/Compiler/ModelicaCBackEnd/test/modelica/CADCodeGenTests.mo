@@ -5455,7 +5455,7 @@ equation
             generate_block_jacobian=true,
             template="$CAD_dae_blocks_residual_functions$",
             generatedCode="
-static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
     JMI_DEF(REA, tmp_var_0)
     JMI_DEF(REA, tmp_der_0)
@@ -5468,67 +5468,36 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
     if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _x_0;
+        x[0] = _b_3;
         return 0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         dz = jmi->dz_active_variables;
-        (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[0];
-        _x_0 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = dx[0];
+        _b_3 = x[0];
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
         dz = jmi->dz;
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         dz = jmi->dz;
-        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[0];
-    } else {
-        return -1;
-    }
-    _b_3 = _time * _x_0;
-    (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = (*dz)[jmi->offs_t] * _x_0 + _time * AD_WRAP_LITERAL(0);
-    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        if (LOG_EXP_AND(_temp_1_4, v_0)) {
-            func_CADCodeGenTests_WhenEqu9_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
-            (*res)[0] = tmp_var_0 - (_x_0);
-        } else {
-            (*res)[0] = pre_x_0 - (_x_0);
-        }
-        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-    }
-        JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
-    JMI_DEF(REA, tmp_var_0)
-    JMI_DEF(REA, tmp_der_0)
-    JMI_DEF(REA, tmp_var_1)
-    JMI_DEF(REA, tmp_der_1)
-    jmi_ad_var_t v_0;
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    jmi_real_t** dF = &dRes;
-    jmi_real_t** dz;
-    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        return 0;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        dz = jmi->dz_active_variables;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
-        dz = jmi->dz;
-    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = -(*dF)[0];
     } else {
         return -1;
     }
     _temp_1_4 = _sw(0);
-    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
     if (LOG_EXP_AND(_temp_1_4, v_0)) {
         func_CADCodeGenTests_WhenEqu9_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
         _y_1 = tmp_var_1;
     } else {
         _y_1 = pre_y_1;
     }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+        _x_0 = tmp_var_0;
+    } else {
+        _x_0 = pre_x_0;
+    }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        (*res)[0] = _time * _x_0 - (_b_3);
+        (*dF)[0] = (*dz)[jmi->offs_t] * _x_0 + _time * AD_WRAP_LITERAL(0) - ((*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx]);
+        (*dz)[jmi_get_index_from_value_ref(1)-jmi->offs_real_dx] = 0;
     }
         JMI_DYNAMIC_FREE()
     return ef;
@@ -5570,19 +5539,19 @@ equation
             generate_block_jacobian=true,
             template="$CAD_dae_blocks_residual_functions$",
             generatedCode="
-static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
+static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
     /***** Block: 1 *****/
     JMI_DEF(REA, tmp_var_0)
     JMI_DEF(REA, tmp_der_0)
     JMI_DEF(REA, tmp_var_1)
     JMI_DEF(REA, tmp_der_1)
     jmi_ad_var_t v_0;
-    jmi_ad_var_t v_1;
-    jmi_ad_var_t v_2;
     JMI_DEF(REA, tmp_var_2)
     JMI_DEF(REA, tmp_der_2)
     JMI_DEF(REA, tmp_var_3)
     JMI_DEF(REA, tmp_der_3)
+    jmi_ad_var_t v_1;
+    jmi_ad_var_t v_2;
     jmi_ad_var_t v_3;
     jmi_real_t** res = &residual;
     int ef = 0;
@@ -5590,76 +5559,51 @@ static int dae_block_dir_der_1(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     jmi_real_t** dF = &dRes;
     jmi_real_t** dz;
     if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        x[0] = _b_3;
-        x[1] = _a_2;
+        x[0] = _y_1;
+        x[1] = _x_0;
         return 0;
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
         dz = jmi->dz_active_variables;
-        (*dz)[ jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = dx[0];
-        _b_3 = x[0];
-        (*dz)[ jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = dx[1];
-        _a_2 = x[1];
+        (*dz)[ jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = dx[0];
+        _y_1 = x[0];
+        (*dz)[ jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = dx[1];
+        _x_0 = x[1];
     } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
         dz = jmi->dz;
     } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
         dz = jmi->dz;
-        (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = -(*dF)[0];
-        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = -(*dF)[1];
-    } else {
-        return -1;
-    }
-    if (LOG_EXP_OR(v_0, v_1)) {
-        func_CADCodeGenTests_WhenEqu10_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
-        _y_1 = tmp_var_1;
-    } else {
-        _y_1 = pre_y_1;
-    }
-    if (LOG_EXP_OR(v_0, v_1)) {
-        _x_0 = tmp_var_0;
-    } else {
-        _x_0 = pre_x_0;
-    }
-    if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
-        if (LOG_EXP_AND(_temp_1_4, v_3)) {
-            func_CADCodeGenTests_WhenEqu10_f_der_AD0(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
-            (*res)[0] = tmp_var_3 - (_b_3);
-        } else {
-            (*res)[0] = pre_b_3 - (_b_3);
-        }
-        if (LOG_EXP_AND(_temp_1_4, v_3)) {
-            (*res)[1] = tmp_var_2 - (_a_2);
-        } else {
-            (*res)[1] = pre_a_2 - (_a_2);
-        }
-        (*dz)[jmi_get_index_from_value_ref(5)-jmi->offs_real_dx] = 0;
-        (*dz)[jmi_get_index_from_value_ref(4)-jmi->offs_real_dx] = 0;
-    }
-        JMI_DYNAMIC_FREE()
-    return ef;
-}
-
-static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_real_t* residual, jmi_real_t* dRes, int evaluation_mode) {
-    /***** Block: PrePropagationEquationBlock *****/
-    jmi_real_t** res = &residual;
-    int ef = 0;
-    JMI_DYNAMIC_INIT()
-    jmi_real_t** dF = &dRes;
-    jmi_real_t** dz;
-    if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
-        return 0;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE) {
-        dz = jmi->dz_active_variables;
-    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE) {
-        dz = jmi->dz;
-    } else if (evaluation_mode == JMI_BLOCK_WRITE_BACK) {
-        dz = jmi->dz;
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = -(*dF)[0];
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = -(*dF)[1];
     } else {
         return -1;
     }
     _temp_2_5 = _sw(0);
     _temp_1_4 = _sw(0);
-    ef |= jmi_ode_unsolved_block_dir_der(jmi, jmi->dae_block_residuals[1]);
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+        func_CADCodeGenTests_WhenEqu10_f_der_AD0(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+        _b_3 = tmp_var_1;
+    } else {
+        _b_3 = pre_b_3;
+    }
+    if (LOG_EXP_AND(_temp_1_4, v_0)) {
+        _a_2 = tmp_var_0;
+    } else {
+        _a_2 = pre_a_2;
+    }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
+        if (LOG_EXP_OR(v_1, v_2)) {
+            func_CADCodeGenTests_WhenEqu10_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_2, &tmp_var_3, &tmp_der_2, &tmp_der_3);
+            (*res)[0] = tmp_var_3 - (_y_1);
+        } else {
+            (*res)[0] = pre_y_1 - (_y_1);
+        }
+        if (LOG_EXP_OR(v_1, v_2)) {
+            (*res)[1] = tmp_var_2 - (_x_0);
+        } else {
+            (*res)[1] = pre_x_0 - (_x_0);
+        }
+        (*dz)[jmi_get_index_from_value_ref(3)-jmi->offs_real_dx] = 0;
+        (*dz)[jmi_get_index_from_value_ref(2)-jmi->offs_real_dx] = 0;
     }
         JMI_DYNAMIC_FREE()
     return ef;

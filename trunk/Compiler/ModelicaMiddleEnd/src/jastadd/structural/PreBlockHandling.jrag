@@ -304,10 +304,10 @@ aspect PreBlockHandling {
                                 continue;
                             }
                             for (E eqn : subComponent) {
-                                if (!eqn.isMeta() && !eqn.getMatching().getVariable().isReal()) {
-                                    // Yes this is a strange way to check if it
-                                    // is real, but this is how it is done in
-                                    // other parts of the BLT/graph parts.
+                                if (!eqn.isMeta() && !eqn.getMatching().getVariable().isContinuous()) {
+                                    // If the matched variable and in effect the
+                                    // equation is discrete, then we need to
+                                    // extract all sub-blocks into one block.
                                     containsNestedDiscrete = true;
                                     break;
                                 }
