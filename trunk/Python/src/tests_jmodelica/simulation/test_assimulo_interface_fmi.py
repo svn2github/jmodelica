@@ -174,8 +174,15 @@ class Test_Time_Events:
         compile_fmu("TimeEvents.Advanced4", file_name, compiler_options={"relational_time_events":True})
         
         compile_fmu("TimeEvents.Mixed1", file_name, compiler_options={"relational_time_events":True})
-        compile_fmu("TimeEvents.TestSampling", file_name)
+        compile_fmu("TimeEvents.TestSampling1", file_name)
         compile_fmu("TimeEvents.TestSampling2", file_name)
+        compile_fmu("TimeEvents.TestSampling3", file_name)
+        compile_fmu("TimeEvents.TestSampling4", file_name)
+        compile_fmu("TimeEvents.TestSampling5", file_name)
+        compile_fmu("TimeEvents.TestSampling6", file_name)
+        compile_fmu("TimeEvents.TestSampling7", file_name)
+        compile_fmu("TimeEvents.TestSampling8", file_name)
+        compile_fmu("TimeEvents.TestSampling9", file_name)
         compile_fmu("TimeEvents.StateEventAfterTimeEvent", file_name)
     
     @testattr(stddist = True)
@@ -290,21 +297,88 @@ class Test_Time_Events:
         
         assert res.solver.statistics["ntimeevents"] == 2
         assert res.solver.statistics["nstateevents"] == 2
-        
-    @testattr(stddist = True)
-    def test_time_event_sampling(self):
-        model = load_fmu("TimeEvents_TestSampling.fmu")
+
+    """                 """
+    """ Sampling tests. """
+    """                 """
+
+    """ Basic test using only interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling1(self):
+        model = load_fmu("TimeEvents_TestSampling1.fmu")
         model.initialize()
-        res = model.simulate(0, 1e4, options={"initialize":False});
-        assert res.solver.statistics["ntimeevents"] == 1e5
-        
-    @testattr(stddist = True)
+        res = model.simulate(0, 1e3, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Only small interval. """
+
+    @testattr(sample = True)
     def test_time_event_sampling2(self):
         model = load_fmu("TimeEvents_TestSampling2.fmu")
         model.initialize()
         res = model.simulate(0,1e-6, options={"initialize":False});
         assert res.solver.statistics["ntimeevents"] == 1e4
-        
+
+    """ Only big interval. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling3(self):
+        model = load_fmu("TimeEvents_TestSampling3.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Basic test using offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling4(self):
+        model = load_fmu("TimeEvents_TestSampling4.fmu")
+        model.initialize()
+        res = model.simulate(0,2e-6, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == (1e4)+1
+
+    """ Big interval, small offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling5(self):
+        model = load_fmu("TimeEvents_TestSampling5.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Big interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling6(self):
+        model = load_fmu("TimeEvents_TestSampling6.fmu")
+        model.initialize()
+        res = model.simulate(0,1e64, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    @testattr(sample = True)
+    def test_time_event_sampling7(self):
+        model = load_fmu("TimeEvents_TestSampling7.fmu")
+        model.initialize()
+        res = model.simulate(0,1e5, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 1e4
+
+    """ Test 8 verifies that sampling raises an exception when a too small step is required. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling8(self):
+        model = load_fmu("TimeEvents_TestSampling8.fmu")
+        nose.tools.assert_raises(model.initialize)
+
+    """ Same interval and offset. """
+
+    @testattr(sample = True)
+    def test_time_event_sampling9(self):
+        model = load_fmu("TimeEvents_TestSampling9.fmu")
+        model.initialize()
+        res = model.simulate(0,1, options={"initialize":False});
+        assert res.solver.statistics["ntimeevents"] == 10
+
     @testattr(stddist = True)
     def test_time_event_state_event_after_time_event(self):
         model = load_fmu("TimeEvents_StateEventAfterTimeEvent.fmu")

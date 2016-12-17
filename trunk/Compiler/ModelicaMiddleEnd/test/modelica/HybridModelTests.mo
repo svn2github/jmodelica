@@ -127,14 +127,19 @@ y := 3 * sin(time)
                 methodName="printDAEBLT",
                 methodResult="
 --- Pre propagation block (Block 1) ---
+  --- Meta equation block ---
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   --- Solved equation ---
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
   --- Solved equation ---
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
+  --- Solved equation ---
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 
 --- Solved equation ---
 der(x_c) := - x_c + x_d
 -------------------------------
+
 ")})));
         end Test4;
     
@@ -165,6 +170,7 @@ Iteration variables:
 
 Solved discrete variables:
   temp_1
+  _sampleItr_1
 
 Torn equations:
   x_d := if temp_1 and not pre(temp_1) then x_c + 1 else pre(x_d)
@@ -174,7 +180,11 @@ Continuous residual equations:
     Iteration variables: x_c
 
 Discrete equations:
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
+
+Meta equations:
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
 
 Jacobian:
   |1.0, - (if temp_1 and not pre(temp_1) then 1.0 else 0.0)|
@@ -201,8 +211,12 @@ Jacobian:
                 methodName="printDAEBLT",
                 methodResult="
 --- Pre propagation block (Block 1) ---
+  --- Meta equation block ---
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   --- Solved equation ---
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
+  --- Solved equation ---
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
   --- Solved equation ---
   x_c := pre(x_d)
   --- Solved equation ---
@@ -229,10 +243,14 @@ Jacobian:
                 methodName="printDAEBLT",
                 methodResult="
 --- Pre propagation block (Block 1) ---
+  --- Meta equation block ---
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   --- Solved equation ---
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
   --- Solved equation ---
   x_d := if temp_1 and not pre(temp_1) then pre(x_c) + 1 else pre(x_d)
+  --- Solved equation ---
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 
 --- Solved equation ---
 x_c := x_d
@@ -258,12 +276,16 @@ x_c := x_d
                 methodName="printDAEBLT",
                 methodResult="
 --- Pre propagation block (Block 1) ---
+  --- Meta equation block ---
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
   --- Solved equation ---
   der(x) := (if pre(y) >= 3 then 1 else 2) + (if pre(i) == 4 then 5 else 6)
   --- Solved equation ---
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
   --- Solved equation ---
   y := if temp_1 and not pre(temp_1) then pre(y) + 1 else pre(y)
+  --- Solved equation ---
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
   --- Solved equation ---
   i := if time >= 3 then 1 else 0
 -------------------------------
@@ -358,11 +380,15 @@ Jacobian:
                 methodResult="
 --- Pre propagation block (Block 1) ---
   --- Solved equation ---
-  a := sample(0.5, 1)
+  a := not initial() and time >= 0.5 + pre(_sampleItr_1)
   --- Solved equation ---
   b := a and true
   --- Solved equation ---
   x := if b and not pre(b) then time else pre(x)
+  --- Meta equation block ---
+  assert(time < 0.5 + (pre(_sampleItr_1) + 1), \"Too long time steps relative to sample interval.\")
+  --- Solved equation ---
+  _sampleItr_1 := if a and not pre(a) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 -------------------------------
 ")})));
         end Simple2;
@@ -388,11 +414,15 @@ Jacobian:
                 methodResult="
 --- Pre propagation block (Block 1) ---
   --- Solved equation ---
-  a := sample(0.5, 1)
+  a := not initial() and time >= 0.5 + pre(_sampleItr_1)
   --- Solved equation ---
   b := a and true
   --- Solved equation ---
   x := if b and not pre(b) then time else pre(x)
+  --- Meta equation block ---
+  assert(time < 0.5 + (pre(_sampleItr_1) + 1), \"Too long time steps relative to sample interval.\")
+  --- Solved equation ---
+  _sampleItr_1 := if a and not pre(a) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 
 --- Pre propagation block (Block 2) ---
   --- Solved equation ---
@@ -598,13 +628,17 @@ y := sin(x)
                 methodResult="
 --- Pre propagation block (Block 1) ---
   --- Solved equation ---
-  sample1 := sample(1, 0.4)
+  sample1 := not initial() and time >= 1 + pre(_sampleItr_1) * 0.4
   --- Solved equation ---
   a := if sample1 and not pre(sample1) then sin(time) else pre(a)
   --- Solved equation ---
   b := a + 2
+  --- Meta equation block ---
+  assert(time < 1 + (pre(_sampleItr_1) + 1) * 0.4, \"Too long time steps relative to sample interval.\")
   --- Solved equation ---
   c := if sample1 and not pre(sample1) then b - 2 else pre(c)
+  --- Solved equation ---
+  _sampleItr_1 := if sample1 and not pre(sample1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 -------------------------------
 ")})));
         end PreMergeInteraction;
@@ -753,7 +787,7 @@ Jacobian:
             methodResult="
 --- Pre propagation block (Block 1) ---
   --- Solved equation ---
-  temp_1 := sample(0, 1)
+  temp_1 := not initial() and time >= pre(_sampleItr_1)
   --- Solved equation ---
   y := if temp_1 and not pre(temp_1) then pre(y) + 1.1 else pre(y)
   --- Solved equation ---
@@ -770,6 +804,10 @@ Jacobian:
   temp_2 := y > 2 and pre(z)
   --- Solved equation ---
   w := if temp_2 and not pre(temp_2) then false else pre(w)
+  --- Meta equation block ---
+  assert(time < pre(_sampleItr_1) + 1, \"Too long time steps relative to sample interval.\")
+  --- Solved equation ---
+  _sampleItr_1 := if temp_1 and not pre(temp_1) then pre(_sampleItr_1) + 1 else pre(_sampleItr_1)
 
 --- Solved equation ---
 der(xx) := - x
