@@ -1802,6 +1802,33 @@ end RecordTests.RecordBinding31;
 ")})));
 end RecordBinding31;
 
+model RecordBinding32
+    record R
+        parameter Integer n;
+        Real[n] x = 1:n;
+    end R;
+    
+    model M
+        R r;
+    end M;
+    
+    M[2] m(r(n={2,1}));
+    R r = m[1].r;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding32",
+            description="",
+            flatModel="
+fclass RecordTests.RecordBinding32
+ structural parameter Integer m[2].r.n = 1 /* 1 */;
+ constant Real m[2].r.x[1] = 1;
+ structural parameter Integer r.n = 2 /* 2 */;
+ constant Real r.x[2] = 2;
+end RecordTests.RecordBinding32;
+")})));
+end RecordBinding32;
+
 model UnmodifiableComponent1
     record R
         Real x1 = -1;

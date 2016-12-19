@@ -210,7 +210,7 @@ aspect CADCodeGen {
 	syn String FIdUse.toString_var_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return getFQName().genRecordUse_var_CAD(p, myRecordFV(), type);
+			return getFQName().genRecordUse_var_CAD(p, getFQName().myOutermostFV(), type);
 		} else {
 			return myFV().genUse_var_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
@@ -219,7 +219,7 @@ aspect CADCodeGen {
 	syn String FIdUse.toString_der_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return getFQName().genRecordUse_der_CAD(p, myRecordFV(), type);
+			return getFQName().genRecordUse_der_CAD(p, getFQName().myOutermostFV(), type);
 		} else {
 			return myFV().genUse_der_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
@@ -2066,7 +2066,7 @@ aspect CADCodeGen {
     
     @Override
     public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
-        FFunctionVariable fv = getFIdUseExp().myFuncVar();
+        FFunctionVariable fv = getFIdUseExp().myFuncFV();
         FInitArrayStmt.genInit_C(p, str, indent, fv.varName_CAD(), fv, type());
         FInitArrayStmt.genInit_C(p, str, indent, fv.derName_CAD(), fv, type());
     }

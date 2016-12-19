@@ -2381,9 +2381,7 @@ aspect ConstantEvaluation {
     syn CValue FIdUse.ceval(VariableEvaluator evaluator) {
         boolean func = inFunction();
         FQName name = getFQName();
-        if (func)
-            name = name.resolveSubscripts(evaluator);
-        FAbstractVariable var = func ? lookupFV(name) : myFV();
+        FAbstractVariable var = myFV();
         if (var != null && !var.isUnknown()) {
             Index i = Index.NULL;
             if (hasFArraySubscripts() && !name.isScalarized() && !isArray()) {
@@ -2403,52 +2401,6 @@ aspect ConstantEvaluation {
     eq FIdUseInstAccess.ceval(VariableEvaluator evaluator) = getInstAccess().ceval(evaluator);
 
     /**
-     * Create a copy with all array subscripts replaced by literals.
-     */
-    public FQName FQName.resolveSubscripts(VariableEvaluator evaluator) {
-        return fullCopy();
-    }
-
-    public FQNameFull FQNameFull.resolveSubscripts(VariableEvaluator evaluator) {
-        FQNameFull res = new FQNameFull();
-        for (FQNamePart part : getFQNameParts())
-          res.addFQNamePart(part.resolveSubscripts(evaluator));
-        return res;
-    }
-
-    /**
-     * Create a copy with all array subscripts replaced by literals.
-     */
-    public FQNamePart FQNamePart.resolveSubscripts(VariableEvaluator evaluator) {
-        return fullCopy();
-    }
-
-    public FQNamePartArray FQNamePartArray.resolveSubscripts(VariableEvaluator evaluator) {
-        return new FQNamePartArray(getName(), getFArraySubscripts().resolveSubscripts(evaluator));
-    }
-
-    /**
-     * Create a copy with all array subscripts replaced by literals.
-     */
-    public FArraySubscripts FArraySubscripts.resolveSubscripts(VariableEvaluator evaluator) {
-        FArraySubscripts res = new FArraySubscripts();
-        for (FSubscript fs : getFSubscripts())
-          res.addFSubscript(fs.resolveSubscripts(evaluator));
-        return res;
-    }
-
-    /**
-     * Create a copy with all array subscripts replaced by literals.
-     */
-    syn FSubscript FSubscript.resolveSubscripts(VariableEvaluator evaluator) {
-        throw new ConstantEvaluationException();
-    }
-    
-    eq FIntegerSubscript.resolveSubscripts(VariableEvaluator evaluator) = fullCopy();
-    eq FExpSubscript.resolveSubscripts(VariableEvaluator evaluator) = 
-            new FExpSubscript(ceval(evaluator).buildLiteral());
-    
-    /**
      * Perform constant evaluation of an access to a record member.
      */
     syn CValue FIdUse.cevalRecordMember(VariableEvaluator evaluator, FQName name) {
@@ -2457,7 +2409,7 @@ aspect ConstantEvaluation {
         String last = name.lastActualPartName();
         FQName prefix = name.copyPrefix();
         prefix.parent = this;
-        FAbstractVariable var = lookupFV(prefix.copyWithoutSubscripts());
+        FAbstractVariable var = prefix.myFV();
         CValue res = var.inRecord() ? cevalRecordMember(evaluator, prefix) : evaluator.ceval(var);
         if (prefix.hasFArraySubscripts())
           res = res.array().getCell(prefix.getFArraySubscripts().createIndex());
@@ -4026,12 +3978,12 @@ aspect ConstantEvaluation {
   }
 
   public void FQNameString.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
-	  FFunctionVariable var = (FFunctionVariable) context.lookupFV(this);
+	  FFunctionVariable var = myFuncFV();
 	  var.setEvaluationValue(evaluator, right);
   }
     
     public void FQNameFull.assignToInFuncEval(AlgorithmEvaluator evaluator, CValue right, FIdUse context) {
-        FFunctionVariable var = (FFunctionVariable) context.lookupOutermostFV(this);
+        FFunctionVariable var = myFuncFV();
         FQNamePart firstPart = getFQNamePart(0);
         CValue val = var.type().assignToPartInFuncEval(firstPart, var.evaluationValue(evaluator), right);
         evaluator.setEvaluationValue(var, val);
