@@ -2098,8 +2098,9 @@ class StaticOptimizationAlgOptions(OptionBase):
             Default: "NLP"
         
         init_guess --
-            An object from which initial guesses will be extracted for all optimization variables. Suitably obtained by
-            either initializing an FMU or solving another optimization problem.
+            An object from which initial guesses will be extracted for all optimization variables. These values will
+            also be used for scaling purposes. Suitably obtained by either initializing an FMU or solving another
+            optimization problem.
 
             If static_external_data is used with multiple problem instances, init_guess should either be
             
@@ -2111,7 +2112,7 @@ class StaticOptimizationAlgOptions(OptionBase):
             Default: None
         
         static_external_data --
-            Data used to penalize or fix certain variables.
+            Data used to penalize or fix certain variables. Particularly useful for parameter estimation.
             
             Type: None or
             pyjmi.optimization.static_optimization.ExternalData
@@ -2145,11 +2146,18 @@ class StaticOptimizationAlgOptions(OptionBase):
             Default: False
 
         variable_scaling --
-            Whether to scale the variables according to their nominal values or
-            the trajectories provided with the nominal_traj option.
+            Whether to scale the variables according to their nominal or initial guess values.
             
             Type: bool
             Default: True
+        
+        result_file_name --
+            Specifies the name of the file where the result is written. Setting
+            this option to an empty string results in a default file name that
+            is based on the name of the model class.
+
+            Type: str
+            Default: ""
         
         write_scaled_result --
             Return the scaled optimization result if set to True, otherwise
@@ -2159,14 +2167,6 @@ class StaticOptimizationAlgOptions(OptionBase):
             
             Type: bool
             Default: False
-        
-        result_file_name --
-            Specifies the name of the file where the result is written. Setting
-            this option to an empty string results in a default file name that
-            is based on the name of the model class.
-
-            Type: str
-            Default: ""
 
     Options are set by using the syntax for dictionaries::
 

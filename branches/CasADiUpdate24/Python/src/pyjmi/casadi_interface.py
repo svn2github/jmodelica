@@ -470,6 +470,30 @@ class OptimizationProblem(Model, CI_OP, ModelBase):
         return [var.getName() for var in self.getVariables(self.DIFFERENTIATED)\
          if not var.isAlias()]
 
+    def generate_static_guess(self, fmu, static_external_data):
+        """
+        Automatic generation of initial guesses for StaticOptimizationAlg when using multiple experiments.
+
+        Sets the eliminated inputs for each data point in a StaticExternalData object to an FMU. The FMU is then
+        initialized (simulated for 0 seconds) to compute values for all model variables corresponding to the inputs. The
+        results are assembled in a list which can be passed as 'init_guess' to StaticOptimizationAlg.
+
+        Parameters::
+
+            fmu --
+                FMU which should have the same variables as the OptimizationProblem.
+
+            static_external_data --
+                StaticExternalData containing data for each inputs for each experiment.
+        """
+        eliminated = static_external_data.eliminated
+        N = len(eliminated.values()[0])
+        init_guess = []
+        for i in xrange(N):
+            fmu.set(eliminated.keys(), [value[i] for value in eliminated.values()])
+            init_guess.append(fmu.simulate(final_time=0.0, options={'CVode_options': {'verbosity': 50}}))
+            fmu.reset()
+
     def create_timed_sensitivities(self, outputs, parameters, time_points):
         """
         Creates variables for output sensitivities at time points.

@@ -23,7 +23,7 @@ from tests_jmodelica import testattr
 # Will catch import errors in the examples.
 try:
     from pyjmi.examples import (cart_pendulum, ccpp, ccpp_elimination, ccpp_sym_elim,
-                                vdp_casadi, vdp_minimum_time_casadi,
+                                vdp_casadi, vdp_minimum_time_casadi, kinematic_robot_calibration,
                                 cstr_casadi, qt_par_est_casadi, vehicle_turn, fed_batch_oed,
                                 distillation4_opt, cstr_mpc_casadi, ccpp_elimination, double_pendulum, fourbar1, greybox_identification)
 except (NameError, ImportError):
@@ -113,3 +113,8 @@ def test_double_pendulum():
 def test_fourbar1():
     """Run the fourbar1 optimization example."""
     fourbar1.run_demo(False)
+
+@testattr(casadi = True)
+def test_kinematic_robot_calibration():
+    """Run the static robot calibration example."""
+    kinematic_robot_calibration.run_demo(False)

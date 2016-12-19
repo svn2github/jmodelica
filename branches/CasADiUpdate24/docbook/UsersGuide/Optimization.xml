@@ -170,6 +170,15 @@ plt.show()
       </listitem>
 
       <listitem>
+        <para><emphasis role="bold">Static optimization using
+        CasADi.</emphasis> This algorithm is similar to the dynamic
+        optimization algorithm with CasADi, but is instead designed for static
+        (steady-state or algebraic) problems. The nonlinear program is solved
+        with IPOPT or WORHP using CasADi to compute first- and second-order
+        derivatives.</para>
+      </listitem>
+
+      <listitem>
         <para><emphasis role="bold">Derivative free calibration and
         optimization of ODEs with FMUs.</emphasis> This algorithm solves
         parameter optimization and model calibration problems and is based on
@@ -2774,6 +2783,416 @@ solver.print_jacobian_entries(entries) # Print them
         <para>See the docstring for the respective method for more
         information.</para>
       </section>
+    </section>
+  </section>
+
+  <section>
+    <title>Static optimization with CasADi</title>
+
+    <section>
+      <title>Algorithm overview</title>
+
+      <para>The default algorithm in CasADi Interface is the one described in
+      <xref linkend="opt-sec-dae-casadi"/>, which is designed for dynamic
+      problems. The algorithm in this section is instead designed for static
+      (steady-state or algebraic) optimization problems such as optimal
+      design, real-time optimization, or parameter estimation. This algorithm
+      has regularity conditions analogous to those of the dynamic algorithm,
+      for example, all equations need to be twice continuously differentiable
+      with respect to all variables. The nonlinear programming solvers IPOPT
+      and WORHP can be used to solve the nonlinear programs. The needed first-
+      and second-order derivatives are obtained using CasADi by algorithmic
+      differentiation.</para>
+
+      <para>The interface is similar to that of the dynamic algorithm. The
+      reader is assumed to be familiar with the basic functionality such as
+      compilation, setting options, and extracting the solution, the details
+      of which can be found in the section of the dynamic algorithm. The
+      biggest difference in using the static instead of dynamic algorithm is
+      that the <code>algorithm</code> argument has to be set to
+      <code>StaticOptimizationAlg</code> in the <code>optimize</code> and
+      <code>optimize_options</code> methods.</para>
+
+      <para>The standard options for the algorithm are shown in <xref
+      linkend="opt-tab-casadi-static-opts"/>. Additional documentation is
+      available in the Python docstrings. The algorithm also has some
+      experimental options, which are not as well tested and some are intended
+      for debugging purposes. These are shown in <xref
+      linkend="opt-tab-casadi-static-experimental-opts"/>, and caution is
+      advised when changing their default values.</para>
+
+      <table xml:id="opt-tab-casadi-static-opts">
+        <title>Standard options for the CasADi-based static optimization
+        algorithm</title>
+
+        <tgroup cols="3">
+          <colspec align="left" colname="col–opt" colwidth="1*"/>
+
+          <colspec align="left" colname="col–desc" colwidth="1*"/>
+
+          <colspec align="left" colname="col–def" colwidth="2*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Option</entry>
+
+              <entry align="center">Default</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>expand_to_sx</literal></entry>
+
+              <entry>"NLP"</entry>
+
+              <entry>Whether to expand the CasADi MX graphs to SX graphs.
+              Possible values: "NLP", "DAE", "no". "NLP": The entire NLP graph
+              is expanded into SX. This will lead to high evaluation speed and
+              high memory consumption. "DAE": The DAE, objective and
+              constraint graphs for the dynamic optimization problem
+              expressions are expanded into SX, but the full NLP graph is an
+              MX graph. This will lead to moderate evaluation speed and
+              moderate memory consumption. "no": All constructed graphs are MX
+              graphs. This will lead to low evaluation speed and low memory
+              consumption.</entry>
+            </row>
+
+            <row>
+              <entry><literal>init_guess</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>An object from which initial guesses will be extracted
+              for all optimization variables. These values will also be used
+              for scaling purposes. Suitably obtained by either initializing
+              an FMU or solving another optimization problem. If
+              <code>static_external_data</code> is used with multiple problem
+              instances, <literal>init_guess</literal> should either be a list
+              of objects from which values can be extracted with as many
+              elements as there are problem instances or a single object with
+              several "time" points, where each integral time point (starting
+              from 0) corresponds to an instance.</entry>
+            </row>
+
+            <row>
+              <entry><literal>static_external_data</literal></entry>
+
+              <entry>None</entry>
+
+              <entry>Data used to penalize or fix certain variables.
+              Particularly useful for parameter estimation.</entry>
+            </row>
+
+            <row>
+              <entry><literal>solver</literal></entry>
+
+              <entry>'IPOPT'</entry>
+
+              <entry>Specifies the nonlinear programming solver to be used.
+              Possible choices are 'IPOPT' and 'WORHP'.</entry>
+            </row>
+
+            <row>
+              <entry><literal>verbosity</literal></entry>
+
+              <entry>3</entry>
+
+              <entry>Sets verbosity of algorithm output. 0 prints nothing, 3
+              prints everything.</entry>
+            </row>
+
+            <row>
+              <entry><literal>IPOPT_options</literal></entry>
+
+              <entry>IPOPT defaults</entry>
+
+              <entry>IPOPT options for solution of NLP. See IPOPT's
+              documentation for available options.</entry>
+            </row>
+
+            <row>
+              <entry><literal>WORHP_options</literal></entry>
+
+              <entry>WORHP defaults</entry>
+
+              <entry>WORHP options for solution of NLP. See WORHP's
+              documentation for available options.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+
+      <table xml:id="opt-tab-casadi-static-experimental-opts">
+        <title>Experimental and debugging options for the CasADi-based static
+        optimization algorithm</title>
+
+        <tgroup cols="3">
+          <colspec align="left" colname="col–opt" colwidth="1*"/>
+
+          <colspec align="left" colname="col–desc" colwidth="1*"/>
+
+          <colspec align="left" colname="col–def" colwidth="2*"/>
+
+          <thead>
+            <row>
+              <entry align="center">Option</entry>
+
+              <entry align="center">Default</entry>
+
+              <entry align="center">Description</entry>
+            </row>
+          </thead>
+
+          <tbody>
+            <row>
+              <entry><literal>named_vars</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>If enabled, the solver will create a duplicated set of
+              NLP variables which have names corresponding to the
+              Modelica/Optimica variable names. Symbolic expressions of the
+              NLP consisting of the named variables can then be obtained using
+              the get_named_var_expr method of the collocator class. This
+              option is only intended for investigative purposes.</entry>
+            </row>
+
+            <row>
+              <entry><literal>variable_scaling</literal></entry>
+
+              <entry>True</entry>
+
+              <entry>Whether to scale the variables according to their nominal
+              or initial guess values.</entry>
+            </row>
+
+            <row>
+              <entry><literal>result_file_name</literal></entry>
+
+              <entry>""</entry>
+
+              <entry>Specifies the name of the file where the result is
+              written. Setting this option to an empty string results in a
+              default file name that is based on the name of the model
+              class.</entry>
+            </row>
+
+            <row>
+              <entry><literal>write_scaled_result</literal></entry>
+
+              <entry>False</entry>
+
+              <entry>Return the scaled optimization result if set to True,
+              otherwise return the unscaled optimization result. This option
+              is only applicable when variable_scaling is enabled and is only
+              intended for debugging.</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </table>
+    </section>
+
+    <section>
+      <title>Basic use</title>
+
+      <para>Problems are formulated using Optimica. Path constraints and
+      <literal>objectiveIntegrand</literal> can be used; point constraints and
+      <literal>objective</literal> are ignored. External data for variables
+      (fixed inputs or reference measurements) are provided from Python using
+      the option <literal>static_external_data</literal>. Below is a generic
+      code snippet to get started.</para>
+
+      <programlisting>from pyjmi import transfer_optimization_problem
+op = transfer_optimization_problem(class_name, file_path)
+opts = op.optimize_options(algorithm='StaticOptimizationAlg')
+res = op.optimize(algorithm='StaticOptimizationAlg', options=opts)
+p = res['p'][0] # Optimal value for parameter p
+</programlisting>
+
+      <para>It is recommended to generate initial guesses by compiling an FMU
+      for the model, setting all degrees of freedom to some initial guess,
+      initialize the FMU (simulate for 0 seconds), and provide the result as
+      initial guess to the algorithm. Alternatives to this are either using
+      the <literal>initialGuess</literal> attribute or by solving another
+      optimization problem.</para>
+    </section>
+
+    <section>
+      <title>Example: Kinematic calibration of a robot arm</title>
+
+      <para>In this example we consider the problem of kinematic calibration
+      of a simple robot. Complete code for the example can be found in
+      <code>pyjmi.examples.kinematic_robot_calibration.py</code>. The robot
+      consists of three revolute joints with associated links, where the
+      lengths of links two and three as well as the angle between the rotation
+      axis of the first and the second links are to be estimated based on
+      experimental data. The robot is parameterized using the
+      Denavit-Hartenberg convention, meaning that each link is described using
+      the parameters a, d, alpha, and theta. The identification is performed
+      based on measurements (x, y, z) of the end-effector position of the
+      robot and measurement of the joint angles theta. The measurements used
+      in this example are simulated and subject to noise drawn from a Gaussian
+      distribution. In the parameter estimation, a cost function composed of
+      the sum of the squared residuals between the predicted robot positions
+      and the corresponding measurements is employed.</para>
+
+      <para>The following Modelica code is used to model the robot. The
+      measurements have been generated using alpha = pi/2 for the first link,
+      a = 1 for the second link, and a = 2 for the third link. In the model,
+      we set the values of these parameters to 90% of these values, which are
+      the parameter values for the initial guess that we later compute.</para>
+
+      <programlisting>model Link
+    input Real theta;
+    parameter Real a;
+    parameter Real alpha;
+    parameter Real d;
+    Real A[4,4] = {{cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha), a*cos(theta)},
+                   {sin(theta), cos(theta)*cos(alpha), -cos(theta)*sin(alpha), a*sin(theta)}, 
+                   {0, sin(alpha), cos(alpha), d},
+                   {0, 0, 0, 1}};
+end Link;
+
+model RobotArm
+    input Real theta[3];
+    Link l1(a=0, alpha=0.9*Modelica.Constants.pi/2, d=0);
+    Link l2(a=0.9*1, alpha=0, d=0);
+    Link l3(a=0.9*2, alpha=0, d=0);
+    Real T[4,4] = l1.A*l2.A*l3.A;
+    output Real x = T[1, 4];
+    output Real y = T[2, 4];
+    output Real z = T[3, 4];
+equation
+    l1.theta = theta[1];
+    l2.theta = theta[2];
+    l3.theta = theta[3];
+end RobotArm;</programlisting>
+
+      <para>The following Optimica code is used to formulate the problem of
+      estimating the parameter a for the second and third link as well as
+      alpha for the first link. The quadratic objective is later specified
+      from Python.</para>
+
+      <programlisting>optimization RobotArmEst
+    extends RobotArm(l1(alpha(free=true)), l2(a(free=true)), l3(a(free=true)));
+end RobotArmEst;</programlisting>
+
+      <para>Our Python script starts by importing a bunch of
+      functionality.</para>
+
+      <programlisting># Import stuff
+import os
+from pyjmi import transfer_optimization_problem, get_files_path
+from pyjmi.optimization.static_optimization import StaticExternalData
+from collections import OrderedDict
+import numpy as np
+from pymodelica import compile_fmu
+from pyfmi import load_fmu
+from pyjmi.symbolic_elimination import BLTOptimizationProblem, EliminationOptions
+import scipy</programlisting>
+
+      <para>We next compile an FMU of the model, which we use to compute
+      initial guesses, and also transfer the optimization problem to CasADi
+      Interface.</para>
+
+      <programlisting># Compilation
+file_path = os.path.join(get_files_path(), "robot_arm.mop")
+fmu = load_fmu(compile_fmu('RobotArm', file_path))
+op = transfer_optimization_problem('RobotArmEst', file_path)</programlisting>
+
+      <para>Next we load the measurement data for the tool position and joint
+      angles. The position data is used to form the quadratic objective and
+      the joint data is used to eliminate the top-level input theta from the
+      problem by substitution. The data contains measurements for N = 1922
+      points. The quadratic objective is weighted by a matrix Q in each
+      measurement point, which we always choose as identity.</para>
+
+      <programlisting># Load data
+data = scipy.io.loadmat(os.path.join(get_files_path(), 'robot_data.mat'))
+N = data['joint_pos'].shape[1] # Numer of measurements
+
+# Joint data
+eliminated = OrderedDict()
+theta = data['joint_pos'][:, :N]
+eliminated['theta[1]'] = theta[0, :]
+eliminated['theta[2]'] = theta[1, :]
+eliminated['theta[3]'] = theta[2, :]
+
+# Tool data
+quad_pen = OrderedDict()
+xyz = data['tool_pos'][:, :N]
+quad_pen['x'] = xyz[0, :]
+quad_pen['y'] = xyz[1, :]
+quad_pen['z'] = xyz[2, :]
+
+# Unitary weights for each variable and data point
+Q = N * [np.eye(3)]
+
+# Compose data
+sed = StaticExternalData(Q=Q, eliminated=eliminated, quad_pen=quad_pen)</programlisting>
+
+      <para>The NLP will contain N instances of the model variables and
+      equations, and all these variables need an initial guess. We compute
+      these by setting the parameter values to 90% of their true values, as
+      mentioned before, and also by setting the input according to the loaded
+      measurement data. Although this can be done manually with just a few
+      lines of code, we use a convenience method to perform this
+      automatically.</para>
+
+      <programlisting># Generates initial guess by initializing FMU for each data point
+init_guess = op.generate_static_guess(fmu, sed)</programlisting>
+
+      <para>We then set the initial guess and objective as options to the
+      algorithm.</para>
+
+      <programlisting># Set solver options
+algorithm = 'StaticOptimizationAlg'
+opts = op.optimize_options(algorithm=algorithm)
+opts['external_data'] = sed
+opts['init_guess'] = init_guess</programlisting>
+
+      <para>We can now proceed to solve the problem. However, because of the
+      size of the model and the number of measurement points, the resulting
+      NLP will have 92000 variables. To reduce the size of the NLP, we can use
+      the same symbolic elimination framework that is described in<xref
+      linkend="opt-sec-dae-casadi"/>. We just have to make sure that the
+      variables involved in the formulation of the quadratic objective using
+      <code>StaticExternalData</code> are marked as ineliminable. For this
+      example, all model variables except those three will be eliminated,
+      resulting in an NLP with less than 6000 variables.</para>
+
+      <programlisting># Eliminate variables
+elim_opts = EliminationOptions()
+elim_opts['ineliminable'] = ['x', 'y', 'z']
+op = BLTOptimizationProblem(op, elim_opts)</programlisting>
+
+      <para>Finally, we can solve the problem and print the solution.</para>
+
+      <programlisting># Solve
+res = op.optimize(options=opts, algorithm=algorithm)
+
+# Print result
+print('alpha1:\n\tTrue value %.4e\n\tEstimated value %.4e\n' % (np.pi/2, res['l1.alpha'][0]))
+print('a2:\n\tTrue value %.4e\n\tEstimated value %.4e\n' % (1.0, res['l2.a'][0]))
+print('a3:\n\tTrue value %.4e\n\tEstimated value %.4e\n' % (2.0, res['l3.a'][0]))</programlisting>
+
+      <para>If everything has gone according to plan, the following result
+      should be obtained.</para>
+
+      <programlisting>alpha1:
+    True value 1.5708e+00
+    Estimated value 1.5701e+00
+
+a2:
+    True value 1.0000e+00
+    Estimated value 1.0007e+00
+
+a3:
+    True value 2.0000e+00
+    Estimated value 1.9994e+00</programlisting>
     </section>
   </section>
 
