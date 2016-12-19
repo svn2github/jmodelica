@@ -310,7 +310,9 @@ jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, in
      * x <= 0
      * x <  0
      */
+    jmi_real_t t = jmi_get_t(jmi)[0];
     jmi_real_t eps = jmi->time_events_epsilon;
+    eps = eps*jmi_max(1.0, t);
     if (sw == 1.0) {
         if ((ev_ind <  -eps && rel == JMI_REL_GEQ)  ||
             (ev_ind <=  eps && rel == JMI_REL_GT)   ||
