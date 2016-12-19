@@ -1,0 +1,33 @@
+model Link
+    "Forward kinematic for a single link."
+    input Real theta;
+    parameter Real a;
+    parameter Real alpha;
+    parameter Real d;
+    Real A[4,4] = {{cos(theta), -sin(theta)*cos(alpha), sin(theta)*sin(alpha), a*cos(theta)},
+                   {sin(theta), cos(theta)*cos(alpha), -cos(theta)*sin(alpha), a*sin(theta)}, 
+                   {0, sin(alpha), cos(alpha), d},
+                   {0, 0, 0, 1}};
+end Link;
+
+model RobotArm
+    "Robot arm consisting of three links."
+    input Real theta[3]; // Top-level inputs
+    Link l1(a=0, alpha=0.9*Modelica.Constants.pi/2, d=0);
+    Link l2(a=0.9*1, alpha=0,         d=0);
+    Link l3(a=0.9*2, alpha=0,         d=0);
+    Real T[4,4] = l1.A*l2.A*l3.A;
+    output Real x = T[1, 4];
+    output Real y = T[2, 4];
+    output Real z = T[3, 4];
+equation
+    l1.theta = theta[1];
+    l2.theta = theta[2];
+    l3.theta = theta[3];
+end RobotArm;
+
+optimization RobotArmEst
+    "Specifies the parameters to be estimated."
+    extends RobotArm(l1(alpha(free=true)), l2(a(free=true)), l3(a(free=true)));
+end RobotArmEst;
+
