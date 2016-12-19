@@ -119,7 +119,7 @@ aspect FlatNameBinding {
     }
 
     eq FQNameFull.myFV() {
-        FAbstractVariable res = super.myFV();
+        FAbstractVariable res = lookupFV(resolvedName());
         if (!res.isUnknown()) {
             return res;
         }
