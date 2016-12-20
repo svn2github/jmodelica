@@ -3317,8 +3317,8 @@ void func_CCodeGenTests_CForLoop4_f_def0(jmi_ad_var_t i_v, jmi_ad_var_t* o_o) {
     jmi_ad_var_t i_0ie;
     o_v = 1.0;
     x_v = 0;
-    i_0ie = 1 + i_v / 2.0;
-    for (i_0i = 3; i_0i * i_v < i_0ie * i_v; i_0i += i_v) {
+    i_0ie = 1 + i_0i / 2.0;
+    for (i_0i = 3; i_0i * i_0i < i_0ie * i_0i; i_0i += i_0i) {
         x_v = x_v + i_0i;
     }
     JMI_RET(GEN, o_o, o_v)

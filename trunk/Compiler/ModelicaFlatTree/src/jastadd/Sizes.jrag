@@ -54,13 +54,21 @@ aspect AccessSizes {
     eq FIdUse.getChild().mySize() = getFQName().calcMySize(getFQName().numParts());
     eq FQNameFull.getFQNamePart(int i).mySize() = calcMySize(i+1);
     
-    syn Size FQName.calcMySize(int i) = myFV().size();
+    syn Size FQName.calcMySize(int i) = lookupFV(asFQNameFull()).size();
     eq FQNameFull.calcMySize(int i) {
-        for (int j = 0; j < i; j++) {
-            FAbstractVariable fv = getFQNamePart(j).myFV(false);
-            if (!fv.isUnknown()) {
-                return fv.lookupHierarchicalSize(this, j, i);
+        if (numParts() > 1) {
+            int j;
+            FAbstractVariable fv = null;
+            FQNameFull fqn = new FQNameFull();
+            fqn.parent = this;
+            for (j = 0; j < i; j++) {
+                fqn.addFQNamePart(getFQNamePart(j).copyFirstElement());
+                fv = lookupFV(fqn);
+                if (!fv.isUnknown()) {
+                    break;
+                }
             }
+            return fv.lookupHierarchicalSize(this, j, i);
         }
         return super.calcMySize(i);
     }

@@ -248,7 +248,6 @@ aspect FlatNames {
         FArraySubscripts res = new FArraySubscripts(new List());
         for (FSubscript fs : getFSubscripts())
             res.addFSubscript(fs.createEvaluated());
-        res.setParent(getParent());
         return res;
     }
 
@@ -2192,11 +2191,11 @@ aspect JastAddHacks{
         }
     }
     
-    eq FIndexReductionResolver.getChild().lookupFV(String name) {
-        FVariable var = lookupMap.get(name);
+    eq FIndexReductionResolver.getChild().lookupFV(FQName fqn) {
+        FVariable var = lookupMap.get(fqn.name());
         if (var != null)
             return var;
-        return getFClass().lookupFV(name);
+        return getFClass().lookupFV(fqn);
     }
     
 }

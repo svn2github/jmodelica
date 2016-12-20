@@ -1536,7 +1536,7 @@ aspect CCodeGen {
     
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        FFunctionVariable fv = getFIdUseExp().myFuncFV();
+        FFunctionVariable fv = getFIdUseExp().myFuncVar();
         FInitArrayStmt.genInit_C(p, str, indent, fv.name_C(), fv, type());
     }
     
