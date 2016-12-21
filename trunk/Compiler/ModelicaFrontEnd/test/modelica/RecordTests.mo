@@ -1802,6 +1802,33 @@ end RecordTests.RecordBinding31;
 ")})));
 end RecordBinding31;
 
+model RecordBinding32
+    record R
+        parameter Integer n;
+        Real[n] x = 1:n;
+    end R;
+    
+    model M
+        R r;
+    end M;
+    
+    M[2] m(r(n={2,1}));
+    R r = m[1].r;
+    
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordBinding32",
+            description="",
+            flatModel="
+fclass RecordTests.RecordBinding32
+ structural parameter Integer m[2].r.n = 1 /* 1 */;
+ constant Real m[2].r.x[1] = 1;
+ structural parameter Integer r.n = 2 /* 2 */;
+ constant Real r.x[2] = 2;
+end RecordTests.RecordBinding32;
+")})));
+end RecordBinding32;
+
 model UnmodifiableComponent1
     record R
         Real x1 = -1;
@@ -5523,6 +5550,57 @@ equation
 end RecordTests.RecordScalarize54;
 ")})));
 end RecordScalarize54;
+
+model RecordScalarize55
+
+function f
+  input Integer n;
+  output R1 r1(n=n);
+algorithm
+  for i in 1:n loop
+    r1.r2s[i] := R2(i=i);
+  end for;
+end f;
+
+record R1
+  parameter Integer n = 1;
+  R2 r2s[n];
+end R1;
+
+record R2
+  parameter Real i = 1;
+end R2;
+
+  parameter Integer n = 3;
+  Real is[n];
+  R1 r1(n=n) = f(n);
+equation
+  for i in 1:n loop
+    r1.r2s[i].i = sin(is[i]);
+  end for;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RecordScalarize55",
+            description="Test of lookup of variable in a record within an array of record.",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass RecordTests.RecordScalarize55
+ structural parameter Integer n = 3 /* 3 */;
+ Real is[1];
+ Real is[2];
+ Real is[3];
+ structural parameter Integer r1.n = 3 /* 3 */;
+ structural parameter Real r1.r2s[1].i = 1 /* 1 */;
+ structural parameter Real r1.r2s[2].i = 2 /* 2 */;
+ structural parameter Real r1.r2s[3].i = 3 /* 3 */;
+equation
+ 1.0 = sin(is[1]);
+ 2.0 = sin(is[2]);
+ 3.0 = sin(is[3]);
+end RecordTests.RecordScalarize55;
+")})));
+end RecordScalarize55;
 
 model RecordFunc1
  record A
