@@ -45,6 +45,9 @@ int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *
 /**< \brief Notifies Brent that an integrator step has been accepted */
 int jmi_brent_completed_integrator_step(jmi_block_solver_t* block_solver);
 
+/**< \brief Test if the best guess is good enough */
+int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fBest);
+
 /**< \brief Data structure used by the Brent algorithm */
 struct jmi_brent_solver_t {
     double y;              /**< \brief current/last iterate */
