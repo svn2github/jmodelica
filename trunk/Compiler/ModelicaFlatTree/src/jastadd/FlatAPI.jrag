@@ -2806,6 +2806,7 @@ aspect Nominals {
             return variableNominal();
         }
     }
+    eq UnknownFVariable.nominal() = variableNominal();
     
     syn FExp FAbstractVariable.variableNominal() {
         return FExp.nominalDefault();
