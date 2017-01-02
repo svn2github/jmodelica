@@ -220,38 +220,24 @@ int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fB
     /* Calculate scaling */
     int flag;
     double dfBest = 0.0;
+    double scaled_max_norm = 0;
+
     jmi_block_solver_options_t* bsop = block->options;
     flag = brentdf(xBest, fBest, &dfBest, block);
-    dfBest = JMI_ABS(dfBest);
-    if (dfBest == 0.0 || flag) {
-        dfBest = block->residual_heuristic_nominal[0];
-        if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL && !flag) {
-            jmi_log_node(block->log, logInfo, "BrentZeroDerivative", 
-                    "The derivative is equal to 0. Using heuristic residual nominal for scaling in <block: %s>", block->label);
-        }
-        if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL && flag) {
-            jmi_log_node(block->log, logError, "Error", "Residual derivative function evaluation failed in <iv_lower_bound: %f> for block "
-                    "<block: %s>", xBest, block->label);
-        }
+    block->J->data[0] = dfBest;
+    jmi_update_f_scale(block);
         
-    } else {
-        if(1/dfBest <= bsop->min_residual_scaling_factor/block->residual_heuristic_nominal[0]) {
-            dfBest = bsop->min_residual_scaling_factor/block->residual_heuristic_nominal[0];
-        } else if (1/dfBest >= bsop->max_residual_scaling_factor) {
-            dfBest = bsop->max_residual_scaling_factor;
-        } else {
-            dfBest = 1/dfBest;
-        }
-    }
-    if(JMI_ABS(fBest*dfBest) <= bsop->res_tol) {
+    flag = jmi_scaled_vector_norm(&fBest, N_VGetArrayPointer(block->f_scale), block->n, JMI_NORM_MAX, &scaled_max_norm);
+    
+    if(JMI_ABS(scaled_max_norm) <= bsop->res_tol) {
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL)
-            jmi_log_node(block->log, logInfo, "BrentLowerBoundSuccess", 
-                    "The lower bound scaled residual <res_scaled: %f>, with <scaling: %f> is small enough in <block: %s>", JMI_ABS(fBest*dfBest), dfBest, block->label);
+            jmi_log_node(block->log, logInfo, "BrentSmallestResidualSuccess", 
+                    "The smallest scaled residual computed, <res_scaled: %f>, is small enough in <block: %s>", scaled_max_norm, block->label);
         return JMI_BRENT_SUCCESS;
     } else {
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL)
-            jmi_log_node(block->log, logInfo, "BrentLowerBoundFailure", 
-                    "The lower bound sclaed residual is not good enough in <block: %s>. Scaling <scaling: %f>, scaled residual <res_scaled: %f>, <iv_lower_bound: %f>, <tolerance: %f> ", block->label, dfBest, JMI_ABS(fBest*dfBest), xBest, bsop->res_tol);
+            jmi_log_node(block->log, logInfo, "BrentSmallestResidualFailure", 
+            "The smallest scaled residual computed is not good enough in <block: %s>. Scaled residual <res_scaled: %f>, <iv_lower_bound: %f>, <tolerance: %f> ", block->label, scaled_max_norm, xBest, bsop->res_tol);
         return JMI_BRENT_FAILED;
     }
 }
@@ -755,7 +741,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                 /* Check if fBest satisfies convergence criteria */
                 flag = jmi_brent_test_best_guess(block, xBest, fBest);
                 if (flag == JMI_BRENT_SUCCESS) {
-                    jmi_log_node(log, logInfo, "BrentLowerBoundUsed", "Could not bracket the root but lower bound of residual accepted in <block: %s>.", block->label);
+                    jmi_log_node(log, logInfo, "BrentBracketingResidualAccepted", "Could not bracket the root but accepting the smallest residual computed during bracketing in <block: %s>.", block->label);
                     block->x[0] = xBest;
                     block->F(block->problem_data,block->x, NULL, JMI_BLOCK_WRITE_BACK);
                     jmi_brent_solver_print_solve_end(block, &topnode, JMI_BRENT_SUCCESS);
