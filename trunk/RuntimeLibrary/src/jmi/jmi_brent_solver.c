@@ -229,7 +229,7 @@ int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fB
         
     flag = jmi_scaled_vector_norm(&fBest, N_VGetArrayPointer(block->f_scale), block->n, JMI_NORM_MAX, &scaled_max_norm);
     
-    if(JMI_ABS(scaled_max_norm) <= bsop->res_tol) {
+    if(flag != -1 && JMI_ABS(scaled_max_norm) <= bsop->res_tol) {
         if (block->callbacks->log_options.log_level >= BRENT_BASE_LOG_LEVEL)
             jmi_log_node(block->log, logInfo, "BrentSmallestResidualSuccess", 
                     "The smallest scaled residual computed, <res_scaled: %f>, is small enough in <block: %s>", scaled_max_norm, block->label);
