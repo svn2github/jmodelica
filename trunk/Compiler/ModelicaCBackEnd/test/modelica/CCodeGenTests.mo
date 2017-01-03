@@ -10176,7 +10176,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
         x[1] = 5;
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
-        x[0] = 16.0;
+        x[0] = 4 * _p1_0;
         x[2] = 1;
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
         x[1] = -2;
@@ -10271,10 +10271,10 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
         x[1] = 5;
     } else if (evaluation_mode == JMI_BLOCK_MIN) {
-        x[0] = 12.0;
-        x[2] = 6.0;
+        x[0] = _temp_1_2_5;
+        x[2] = _temp_1_1_4;
     } else if (evaluation_mode == JMI_BLOCK_MAX) {
-        x[1] = -6.0;
+        x[1] = - func_CCodeGenTests_BlockTest6_f1_exp1(AD_WRAP_LITERAL(2));
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 4;
         x[1] = 5;
@@ -11720,14 +11720,19 @@ model BlockTest21
         CCodeGenTestCase(
             name="BlockTest21",
             description="Start value in block",
-            template="$C_dae_blocks_residual_functions$",
+            template="
+$C_dae_add_blocks_residual_functions$
+$C_dae_blocks_residual_functions$",
             generatedCode="
+    jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, NULL, NULL, 1, 0, 0, 0, 0, 0, 0, 0, JMI_CONTINUOUS_VARIABILITY, JMI_PARAMETER_VARIABILITY, JMI_KINSOL_SOLVER, 0, \"1\", -1);
+
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (evaluation_mode == JMI_BLOCK_START) {
+        x[0] = _p_0;
     } else if (evaluation_mode == JMI_BLOCK_START_SET) {
         x[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
@@ -11788,13 +11793,15 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     int ef = 0;
     JMI_DYNAMIC_INIT()
     if (evaluation_mode == JMI_BLOCK_NOMINAL) {
-        x[0] = 3.0;
+        JMI_RECORD_STATIC(R_0_r, tmp_1)
+        tmp_1->y = _p_y_0;
+        x[0] = func_CCodeGenTests_BlockTest22_f_exp0(tmp_1);
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
         x[0] = 1;
     } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
-        JMI_RECORD_STATIC(R_0_r, tmp_1)
-        tmp_1->y = _p_y_0;
-        (*res)[0] = jmi_max(jmi_abs(func_CCodeGenTests_BlockTest22_f_exp0(tmp_1)), AD_WRAP_LITERAL(1));
+        JMI_RECORD_STATIC(R_0_r, tmp_2)
+        tmp_2->y = _p_y_0;
+        (*res)[0] = jmi_max(jmi_abs(func_CCodeGenTests_BlockTest22_f_exp0(tmp_2)), AD_WRAP_LITERAL(1));
     } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
         x[0] = _x_1;
     } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
@@ -14968,6 +14975,7 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DEF(INT, tmp_2)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_3, 1, 1)
     if (evaluation_mode == JMI_BLOCK_START) {
+        x[1] = 2;
     } else if (evaluation_mode == JMI_BLOCK_START_SET) {
         x[1] = 1;
     } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {

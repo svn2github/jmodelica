@@ -1999,10 +1999,15 @@ aspect CCodeGen {
     
     public void AbstractEquationBlock.genEvalModeAttribute_C(CodePrinter p, CodeStream str, String indent, 
             String mode, String attr, Map<FVariable,String> solverArrayMap) {
+        genEvalModeAttribute_C(p, str, indent, mode, attr, solverArrayMap, false);
+    }
+    
+    public void AbstractEquationBlock.genEvalModeAttribute_C(CodePrinter p, CodeStream str, String indent, 
+            String mode, String attr, Map<FVariable,String> solverArrayMap, boolean set) {
         if (p.C_blockResidualAttributePrinter.attributeSet(attr, solverArrayMap)) {
             String nextIndent = p.indent(indent);
             genOpenEvalMode_C(str, indent, mode);
-            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, attr, solverArrayMap);
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, attr, solverArrayMap, set);
             genCloseEvalMode_C(str, indent);
         }
     }
@@ -2064,22 +2069,12 @@ aspect CCodeGen {
         genVarDecls(p, str, indent, null);
         
         str.print(indent);
-        
-        // Nominal values
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_NOMINAL", FAttribute.NOMINAL, solverArrayMap); 
-        
-        // Start values
-        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.START, solverArrayMap)) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START");
-            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.START, solverArrayMap);
-            genCloseEvalMode_C(str, indent);
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START_SET");
-            p.C_blockResidualAttributePrinter.printSet(p, str, nextIndent, FAttribute.START, solverArrayMap);
-            genCloseEvalMode_C(str, indent);
-        }
 
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MIN", FAttribute.MIN, solverArrayMap);
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MAX", FAttribute.MAX, solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_NOMINAL",   FAttribute.NOMINAL, solverArrayMap); 
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_START",     FAttribute.START,   solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_START_SET", FAttribute.START,   solverArrayMap, true);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MIN",       FAttribute.MIN,     solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MAX",       FAttribute.MAX,     solverArrayMap);
 
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_VALUE_REFERENCE",
                 localUnsolvedVariables());
@@ -2205,23 +2200,51 @@ aspect CCodeGen {
     
     public abstract class CodePrinter {
         public static class C_blockResidualAttributePrinter {
-            public void print(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
-                if (attr.equals(FAttribute.START))
-                    return;
+            public void print(CodePrinter p, CodeStream str, String indent, String attr, 
+                    Map<FVariable, String> iterVarMap, boolean set) {
+                if (!set) {
+                    for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
+                        FExp exp = attributeExp(iterEntry.getKey(), attr);
+                        if (exp != null) {
+                            p.printVarDecls(exp, str, indent);
+                        }
+                    }
+                }
                 for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
                     FVariable iv = iterEntry.getKey();
-                    FExp exp = iv.attributeExp(attr);
-                    if (exp != null)
-                        str.format("%s%s = %s;\n", indent, iterEntry.getValue(), exp.ceval());
+                    if (attributeSet(iv, attr)) {
+                        if (set) {
+                            str.format("%s%s = 1;\n", indent, iterEntry.getValue());
+                        } else {
+                            FExp exp = attributeExp(iv, attr);
+                            if (exp != null) {
+                                p.printPreSteps(exp, str, indent);
+                                str.print(indent);
+                                str.print(iterEntry.getValue());
+                                str.print(" = ");
+                                p.print(exp, str, indent);
+                                str.print(";\n");
+                                p.printPostSteps(exp, str, indent);
+                            }
+                        }
+                    }
                 }
             }
             
-            public void printSet(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
-                for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
-                    if (attributeSet(iterEntry.getKey(),attr)) {
-                        str.format("%s%s = 1;\n", indent, iterEntry.getValue());
+            private Collection<String> attributes = Arrays.asList(FAttribute.START, FAttribute.MIN, FAttribute.MAX, FAttribute.NOMINAL);
+
+            public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
+                FTypePrefixVariability variability = ASTNode.fConstant();
+                for (FVariable var : iterVars) {
+                    for (String attr : attributes) {
+                        FExp exp = attributeExp(var, attr);
+                        if (exp != null) {
+                            variability = variability.combine(exp.variability());
+                        }
                     }
+                    
                 }
+                str.print(variability.genJMIVariabilityConstant_C() + ", ");
             }
             
             public boolean attributeSet(String attr, Map<FVariable, String> iterVarMap) {
@@ -2237,9 +2260,10 @@ aspect CCodeGen {
                 return var.attributeSet(attr);
             }
             
-            public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
-                str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");
+            public FExp attributeExp(FVariable var, String attr) {
+                return var.attributeExp(attr);
             }
+
         }
     }
     
