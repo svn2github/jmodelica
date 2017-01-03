@@ -64,6 +64,15 @@ int jmi_linear_solver_sparse_compute_jacobian(jmi_block_solver_t* block);
 
 int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block);
 
+/** \brief Computes C (dense) = -A (sparse)*B (sparse) */
+int jmi_linear_solver_sparse_multiply(const jmi_matrix_sparse_csc_t *A, const jmi_matrix_sparse_csc_t *B, double *C);
+
+/** \brief Computes C (dense) += A (sparse) */
+int jmi_linear_solver_sparse_add_inplace(const jmi_matrix_sparse_csc_t *A, double *C);
+
+/** \brief Solves L (sparse, tringular) x (sparse) = B (sparse) */
+int jmi_linear_solver_sparse_backsolve(const jmi_matrix_sparse_csc_t *L, const jmi_matrix_sparse_csc_t *B, jmi_int_t* nz_pattern, jmi_int_t nz_size, jmi_int_t col, double *work);
+
 struct jmi_linear_solver_sparse_t {
     jmi_matrix_sparse_csc_t *L;
     jmi_matrix_sparse_csc_t *A12;
