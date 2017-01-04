@@ -49,8 +49,8 @@ aspect ExternalConstantEvaluation {
      * Check if this external function should be cached as a live process.
      */
     syn boolean FExternalStmt.shouldCacheExternalObject() {
-        return cachedExternalObject() != null && 
-            myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;
+        return true; /*cachedExternalObject() != null && 
+            myOptions().getIntegerOption("external_constant_evaluation_max_proc") > 0;*/
     }
     
     /**
@@ -471,7 +471,7 @@ aspect ExternalConstantEvaluationCaching {
              */
             private ExternalFunction getActual(FExternalStmt ext, Map<CommonVariableDecl, CValue> values, int timeout) {
                 CommonVariableDecl cvd = ext.cachedExternalObject();
-                String name = cvd.ceval().getMarkedExternalObject();
+                String name = cvd == null ? "hej" : cvd.ceval().getMarkedExternalObject();
                 ExternalFunction ef = lives.get(name);
                 if (ef == null) {
                     LiveExternalFunction lef = new LiveExternalFunction(name);

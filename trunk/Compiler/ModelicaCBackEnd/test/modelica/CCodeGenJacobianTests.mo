@@ -493,4 +493,150 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
     
 end SparseBlockJacobian;
 
+model MultipleSolvedRealInAlgorithm
+    Real x(min=0,start=5),y,z;
+    Real a;
+algorithm
+    when sample(0,1) then
+        y := x;
+        a := time;
+    end when;
+equation
+    der(z) = integer(time);
+    der(z) = x;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            CCodeGenTestCase(
+                name="MultipleSolvedRealInAlgorithm",
+                description="Test bug in #5252",
+                template="
+$C_dae_blocks_residual_functions$
+",
+                generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(BOO, tmp_2)
+    JMI_DEF(INT, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    if (evaluation_mode == JMI_BLOCK_START) {
+        x[0] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_START_SET) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 5;
+        x[1] = 6;
+        x[2] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 5;
+        x[1] = 6;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        init_with_lbound(x[0], 0, \"Resetting initial value for variable x\");
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+            jmi_real_t* Q1 = calloc(3, sizeof(jmi_real_t));
+            jmi_real_t* Q2 = calloc(3, sizeof(jmi_real_t));
+            jmi_real_t* Q3 = residual;
+            int i;
+            char trans = 'N';
+            double alpha = -1;
+            double beta = 1;
+            int n1 = 3;
+            int n2 = 1;
+            for (i = 0; i < 3; i += 3) {
+                Q1[i + 0] = (Q1[i + 0]) / (1.0);
+                Q1[i + 1] = (Q1[i + 1]) / (1.0);
+                Q1[i + 2] = (Q1[i + 2]) / (1.0);
+            }
+            Q2[2] = 1.0;
+            memset(Q3, 0, 1 * sizeof(jmi_real_t));
+            Q3[0] = -1.0;
+            dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+            free(Q1);
+            free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            check_lbound(x[0], 0, \"Out of bounds for variable x\");
+            _x_0 = x[0];
+        }
+        tmp_2 = _temp_1_4;
+        tmp_3 = __sampleItr_1_6;
+        tmp_4 = _y_1;
+        tmp_5 = _a_3;
+        __sampleItr_1_6 = pre__sampleItr_1_6;
+        _y_1 = pre_y_1;
+        _a_3 = pre_a_3;
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6), _sw(0), JMI_REL_GEQ);
+        }
+        _temp_1_4 = LOG_EXP_AND(LOG_EXP_NOT(_atInitial), _sw(0));
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+            __sampleItr_1_6 = pre__sampleItr_1_6 + 1;
+        }
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(1) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+        }
+        if (_sw(1) == JMI_FALSE) {
+            jmi_assert_failed(\"Too long time steps relative to sample interval.\", JMI_ASSERT_ERROR);
+        }
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+            _y_1 = _x_0;
+            _a_3 = _time;
+        }
+        tmp_1 = _temp_1_4;
+        _temp_1_4 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = __sampleItr_1_6;
+        __sampleItr_1_6 = tmp_3;
+        tmp_3 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_4;
+        tmp_4 = tmp_1;
+        tmp_1 = _a_3;
+        _a_3 = tmp_5;
+        tmp_5 = tmp_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _temp_1_4 = (tmp_2);
+            __sampleItr_1_6 = (tmp_3);
+        }
+        _y_1 = (tmp_4);
+        _a_3 = (tmp_5);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(2) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5), _sw(2), JMI_REL_LT);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(3) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5 + AD_WRAP_LITERAL(1)), _sw(3), JMI_REL_GEQ);
+            }
+            _temp_2_5 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(2), _sw(3)), _atInitial), JMI_TRUE, floor(_time), pre_temp_2_5);
+        }
+        _der_z_12 = _temp_2_5;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x_0 - (_der_z_12);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+")})));
+end MultipleSolvedRealInAlgorithm;
+
 end CCodeGenJacobianTests;
