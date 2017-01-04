@@ -509,6 +509,7 @@ equation
             CCodeGenTestCase(
                 name="MultipleSolvedRealInAlgorithm",
                 description="Test bug in #5252",
+                generate_sparse_block_jacobian=true,
                 template="
 $C_dae_blocks_residual_functions$
 ",
@@ -636,6 +637,165 @@ static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int eval
     JMI_DYNAMIC_FREE()
     return ef;
 }
+
+
+typedef struct jacobian_quadrant {
+    void  (*dim)();
+    void  (*col)();
+    void  (*row)();
+    void  (*eval)();
+} jacobian_quadrant_t;
+
+typedef struct jacobian {
+    jacobian_quadrant_t L;
+    jacobian_quadrant_t A12;
+    jacobian_quadrant_t A21;
+    jacobian_quadrant_t A22;
+} jacobian_t;
+
+void L_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 3;
+    (*jac)[1] = 3;
+    (*jac)[2] = 3;
+}
+void A12_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 3;
+}
+void A21_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 3;
+    (*jac)[2] = 1;
+}
+void A22_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 1;
+    (*jac)[2] = 1;
+}
+void L_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 2;
+    (*jac)[3] = 3;
+}
+void A12_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+}
+void A21_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+    (*jac)[2] = 0;
+    (*jac)[3] = 1;
+}
+void A22_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void L_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 2;
+}
+void A12_0_row(jmi_int_t **jac) {
+}
+void A21_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void A22_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = 1.0;
+    (*jac)[1] = 1.0;
+    (*jac)[2] = 1.0;
+}
+void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+}
+void A21_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = 1.0;
+}
+void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = -1.0;
+}
+
+jacobian_t *jacobian_init_0() {
+    jacobian_t *jc = (jacobian_t *) malloc(sizeof(jacobian_t));
+    jc->L.dim = &L_0_dim;
+    jc->L.col = &L_0_col;
+    jc->L.row = &L_0_row;
+    jc->L.eval = &L_0_eval;
+    jc->A12.dim = &A12_0_dim;
+    jc->A12.col = &A12_0_col;
+    jc->A12.row = &A12_0_row;
+    jc->A12.eval = &A12_0_eval;
+    jc->A21.dim = &A21_0_dim;
+    jc->A21.col = &A21_0_col;
+    jc->A21.row = &A21_0_row;
+    jc->A21.eval = &A21_0_eval;
+    jc->A22.dim = &A22_0_dim;
+    jc->A22.col = &A22_0_col;
+    jc->A22.row = &A22_0_row;
+    jc->A22.eval = &A22_0_eval;
+    return jc;
+}
+
+static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
+        jc->L.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A12) {
+        jc->A12.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A21) {
+        jc->A21.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A22) {
+        jc->A22.eval(jmi, jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_DIMENSIONS) {
+        jc->L.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_COLPTR) {
+        jc->L.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_ROWIND) {
+        jc->L.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_DIMENSIONS) {
+        jc->A12.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_COLPTR) {
+        jc->A12.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_ROWIND) {
+        jc->A12.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_DIMENSIONS) {
+        jc->A21.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_COLPTR) {
+        jc->A21.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_ROWIND) {
+        jc->A21.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_DIMENSIONS) {
+        jc->A22.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_COLPTR) {
+        jc->A22.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_ROWIND) {
+        jc->A22.row(jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+
 ")})));
 end MultipleSolvedRealInAlgorithm;
 

@@ -362,7 +362,7 @@ aspect CCodeGenJacobian{
             String indent, boolean initial) {
 
         SparseJacobian jacobian = new SparseJacobian(jacobian(),
-                localSolvedRealBlocks().size() - localMetaBlocks().size(), unsolvedBlocks().size());
+                localSolvedRealVariables().size(), unsolvedVariables().size());
 
         genUniTypeStruct(p, str, indent, QUADRANT_STRUCT_C, "void ", EvaluationFunction.vars, "%s%s (*%s)();\n");
         genUniTypeStruct(p, str, indent, JACOBIAN_STRUCT_C, QUADRANT_TYPE_C, Quadrant.names, "%s%s %s;\n");
