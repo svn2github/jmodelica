@@ -183,8 +183,9 @@ aspect FlatTypeCheck {
         FExp bexp = myBindingInstExp();
         boolean function = inFunction();
         boolean record = inRecordDecl();
+        boolean input = isInput();
         boolean output = isOutput();
-        boolean incompleteAllowed = (function && !output) || record;
+        boolean incompleteAllowed = ((function && !output) || record) && (bexp != null || input);
         boolean unknownAllowed = function || record;
         Size componentSize = size();
         if (!componentSize.isComplete() && !incompleteAllowed && !checkType.allowIncompleteSizes()) {
