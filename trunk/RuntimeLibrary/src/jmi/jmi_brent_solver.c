@@ -481,6 +481,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 #endif
                 return flag;
             }
+            if(block->nominal[0] < 0) /* According to spec negative nominal is fine but solver expects positive.*/
+                block->nominal[0] = -block->nominal[0];
         }
 
 
