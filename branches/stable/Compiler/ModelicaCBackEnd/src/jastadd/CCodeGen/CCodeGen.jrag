@@ -1536,7 +1536,7 @@ aspect CCodeGen {
     
     @Override
     public void FInitArrayStmt.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
-        FFunctionVariable fv = getFIdUseExp().myFuncVar();
+        FFunctionVariable fv = getFIdUseExp().myFuncFV();
         FInitArrayStmt.genInit_C(p, str, indent, fv.name_C(), fv, type());
     }
     
@@ -1999,10 +1999,15 @@ aspect CCodeGen {
     
     public void AbstractEquationBlock.genEvalModeAttribute_C(CodePrinter p, CodeStream str, String indent, 
             String mode, String attr, Map<FVariable,String> solverArrayMap) {
+        genEvalModeAttribute_C(p, str, indent, mode, attr, solverArrayMap, false);
+    }
+    
+    public void AbstractEquationBlock.genEvalModeAttribute_C(CodePrinter p, CodeStream str, String indent, 
+            String mode, String attr, Map<FVariable,String> solverArrayMap, boolean set) {
         if (p.C_blockResidualAttributePrinter.attributeSet(attr, solverArrayMap)) {
             String nextIndent = p.indent(indent);
             genOpenEvalMode_C(str, indent, mode);
-            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, attr, solverArrayMap);
+            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, attr, solverArrayMap, set);
             genCloseEvalMode_C(str, indent);
         }
     }
@@ -2054,28 +2059,22 @@ aspect CCodeGen {
         String nextIndent = p.indent(indent);
         str.format("%sstatic int dae_%sblock_%d(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {\n", 
                 outerIndent, (p.inInitialSystem() ? "init_": ""), getSequenceNumber());
-        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", getLabel());
+        String label = getLabel();
+        if (label == null) {
+            label = getClass().getSimpleName();
+        }
+        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", label);
         str.print(indent + "jmi_real_t** res = &residual;\n");
         ASTNode.genFunctionStart(str, indent);
         genVarDecls(p, str, indent, null);
         
         str.print(indent);
-        
-        // Nominal values
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_NOMINAL", FAttribute.NOMINAL, solverArrayMap); 
-        
-        // Start values
-        if (p.C_blockResidualAttributePrinter.attributeSet(FAttribute.START, solverArrayMap)) {
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START");
-            p.C_blockResidualAttributePrinter.print(p, str, nextIndent, FAttribute.START, solverArrayMap);
-            genCloseEvalMode_C(str, indent);
-            genOpenEvalMode_C(str, indent, "JMI_BLOCK_START_SET");
-            p.C_blockResidualAttributePrinter.printSet(p, str, nextIndent, FAttribute.START, solverArrayMap);
-            genCloseEvalMode_C(str, indent);
-        }
 
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MIN", FAttribute.MIN, solverArrayMap);
-        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MAX", FAttribute.MAX, solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_NOMINAL",   FAttribute.NOMINAL, solverArrayMap); 
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_START",     FAttribute.START,   solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_START_SET", FAttribute.START,   solverArrayMap, true);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MIN",       FAttribute.MIN,     solverArrayMap);
+        genEvalModeAttribute_C(p, str, indent, "JMI_BLOCK_MAX",       FAttribute.MAX,     solverArrayMap);
 
         genEvalModeValueReferences_C(p, str, indent, "JMI_BLOCK_VALUE_REFERENCE",
                 localUnsolvedVariables());
@@ -2201,23 +2200,51 @@ aspect CCodeGen {
     
     public abstract class CodePrinter {
         public static class C_blockResidualAttributePrinter {
-            public void print(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
-                if (attr.equals(FAttribute.START))
-                    return;
+            public void print(CodePrinter p, CodeStream str, String indent, String attr, 
+                    Map<FVariable, String> iterVarMap, boolean set) {
+                if (!set) {
+                    for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
+                        FExp exp = attributeExp(iterEntry.getKey(), attr);
+                        if (exp != null) {
+                            p.printVarDecls(exp, str, indent);
+                        }
+                    }
+                }
                 for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
                     FVariable iv = iterEntry.getKey();
-                    FExp exp = iv.attributeExp(attr);
-                    if (exp != null)
-                        str.format("%s%s = %s;\n", indent, iterEntry.getValue(), exp.ceval());
+                    if (attributeSet(iv, attr)) {
+                        if (set) {
+                            str.format("%s%s = 1;\n", indent, iterEntry.getValue());
+                        } else {
+                            FExp exp = attributeExp(iv, attr);
+                            if (exp != null) {
+                                p.printPreSteps(exp, str, indent);
+                                str.print(indent);
+                                str.print(iterEntry.getValue());
+                                str.print(" = ");
+                                p.print(exp, str, indent);
+                                str.print(";\n");
+                                p.printPostSteps(exp, str, indent);
+                            }
+                        }
+                    }
                 }
             }
             
-            public void printSet(CodePrinter p, CodeStream str, String indent, String attr, Map<FVariable, String> iterVarMap) {
-                for (Map.Entry<FVariable, String> iterEntry : iterVarMap.entrySet()) {
-                    if (attributeSet(iterEntry.getKey(),attr)) {
-                        str.format("%s%s = 1;\n", indent, iterEntry.getValue());
+            private Collection<String> attributes = Arrays.asList(FAttribute.START, FAttribute.MIN, FAttribute.MAX, FAttribute.NOMINAL);
+
+            public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
+                FTypePrefixVariability variability = ASTNode.fConstant();
+                for (FVariable var : iterVars) {
+                    for (String attr : attributes) {
+                        FExp exp = attributeExp(var, attr);
+                        if (exp != null) {
+                            variability = variability.combine(exp.variability());
+                        }
                     }
+                    
                 }
+                str.print(variability.genJMIVariabilityConstant_C() + ", ");
             }
             
             public boolean attributeSet(String attr, Map<FVariable, String> iterVarMap) {
@@ -2233,9 +2260,10 @@ aspect CCodeGen {
                 return var.attributeSet(attr);
             }
             
-            public void printVariability(CodePrinter p, CodeStream str, String indent, Collection<FVariable> iterVars) {
-                str.print(ASTNode.fConstant().genJMIVariabilityConstant_C() + ", ");
+            public FExp attributeExp(FVariable var, String attr) {
+                return var.attributeExp(attr);
             }
+
         }
     }
     
@@ -2406,8 +2434,8 @@ aspect CCodeGen {
     public void TornEquationBlock.genBlockResidualFunction_jacobian_C(CodePrinter p, CodeStream str, String indent) {
         if (!isLinear())
             return;
-        int n1 = localSolvedRealBlocks().size() - localMetaBlocks().size();
-        int n2 = unsolvedBlocks().size();
+        int n1 = localSolvedRealVariables().size();
+        int n2 = unsolvedVariables().size();
         if (n1 == 0) {
             /* This block should not be a torn block. #4691. */
             super.genBlockResidualFunction_jacobian_C(p, str, indent);
@@ -2468,7 +2496,7 @@ aspect CCodeGen {
         for (int col = 0; col < n1; col++) {
             for (int row = n1; row < n1 + n2; row++) {
                 if (jacobian[row][col] != null) {
-                	p.printPreSteps(jacobian[row][col], str, indent);
+                    p.printPreSteps(jacobian[row][col], str, indent);
                     str.format("%sQ2[%d] = ", indent, n2 * col + (row - n1));
                     p.print(jacobian[row][col], str, indent);
                     str.format(";\n");

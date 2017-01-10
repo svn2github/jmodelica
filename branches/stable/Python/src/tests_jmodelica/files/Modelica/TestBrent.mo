@@ -69,6 +69,16 @@ model TestBrent
   equation
     asin(x) = y;
   end Arcsin;
+  
+  model BrentWithBracketingFailure
+    Real y(min=0, start=1), z(min=1, start=1e4, nominal=1e4);
+    Real x(max = 0, nominal=1.0);
+    parameter Real y0=160000;
+  equation
+    y^2+z^2=y0;
+    abs(y)-abs(z)=-sqrt(y0);
+    exp(x)= 1+abs(abs(z)-sqrt(y0));
+  end BrentWithBracketingFailure;
     
   annotation (uses(Modelica(version="3.2.1")));
 end TestBrent;

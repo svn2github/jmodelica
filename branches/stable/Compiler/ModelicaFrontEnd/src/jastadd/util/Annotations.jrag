@@ -824,7 +824,7 @@ aspect AnnotationAPI {
 		}
 		
 		public String name() {
-			return mod.annotationName();
+			return mod.parentAnnotationName();
 		}
 		
 		public ClassModification ast() {
@@ -951,7 +951,7 @@ aspect AnnotationAPI {
 		}
 		
 		public String name() {
-			return mod.annotationName();
+			return mod.parentAnnotationName();
 		}
 	}
 	
@@ -1062,7 +1062,7 @@ aspect AnnotationAPI {
 		
 		@Override
 		public String name() {
-			return mod.annotationName();
+			return mod.parentAnnotationName();
 		} 
 		
 		@Override
@@ -1326,10 +1326,6 @@ aspect AnnotationAPI {
 	
 	syn boolean NamedArgument.matches(String str) = getName().name().equals(str);
 	
-	inh String Modification.annotationName();
-	eq NamedModification.getChild().annotationName()    = getName().name();
-	eq CompleteModification.getChild().annotationName() = annotationName();
-	eq BaseNode.getChild().annotationName()             = null;
 	
 	syn boolean Exp.isFunctionCall() = false;
 	eq FunctionCall.isFunctionCall() = true;

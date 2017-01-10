@@ -595,7 +595,7 @@ end CADabs;
 
 package FSubscriptedExp
     model Use1
-        Integer i = mod(integer(time), size(y, 1));
+        Integer i = noEvent(mod(integer(time), size(y, 1)));
         Real[:] y = {sin(time), cos(time)};
         Real x = y[i] + 1;
     
@@ -607,28 +607,12 @@ package FSubscriptedExp
             template="$CAD_ode_derivatives$",
             generatedCode="
 
-/******** Declarations *******/
+    /******** Declarations *******/
     jmi_ad_var_t v_0;
     jmi_ad_var_t v_1;
     jmi_ad_var_t v_2;
     jmi_ad_var_t v_3;
     jmi_ad_var_t v_4;
-    jmi_ad_var_t v_5;
-    jmi_ad_var_t v_6;
-    jmi_ad_var_t v_7;
-    jmi_ad_var_t v_8;
-    jmi_ad_var_t v_9;
-    jmi_ad_var_t v_10;
-    jmi_ad_var_t v_11;
-    jmi_ad_var_t v_12;
-    jmi_ad_var_t v_13;
-    jmi_ad_var_t v_14;
-    jmi_ad_var_t v_15;
-    jmi_ad_var_t v_16;
-    jmi_ad_var_t v_17;
-    jmi_ad_var_t v_18;
-    jmi_ad_var_t v_19;
-    jmi_ad_var_t v_20;
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_var_0, 2, 1)
     JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_der_0, 2, 1)
     jmi_real_t** dz = jmi->dz;
@@ -636,46 +620,12 @@ package FSubscriptedExp
     /*********** Real outputs **********/
     /*** Integer and boolean outputs ***/
     /********* Other variables *********/
-    v_2 = _sw(4);
-    v_3 = _sw(5);
-    v_1 = LOG_EXP_OR(v_2, v_3);
-    v_4 = _atInitial;
-    if (LOG_EXP_OR(v_1, v_4)) {
-        v_5 = floor(_time);
-        v_0 = v_5;
-    } else {
-        v_0 = pre_temp_3_6;
-    }
-    _temp_3_6 = v_0;
-    pre_temp_3_6 = _temp_3_6;
-    v_8 = _sw(2);
-    v_9 = _sw(3);
-    v_7 = LOG_EXP_OR(v_8, v_9);
-    v_10 = _atInitial;
-    if (LOG_EXP_OR(v_7, v_10)) {
-        v_11 = floor(_time);
-        v_6 = v_11;
-    } else {
-        v_6 = pre_temp_1_4;
-    }
-    _temp_1_4 = v_6;
-    pre_temp_1_4 = _temp_1_4;
-    v_14 = _sw(0);
-    v_15 = _sw(1);
-    v_13 = LOG_EXP_OR(v_14, v_15);
-    v_16 = _atInitial;
-    if (LOG_EXP_OR(v_13, v_16)) {
-        v_18 = jmi_divide_equation(jmi, _temp_1_4,AD_WRAP_LITERAL(2),\"temp_1 / 2\");
-        v_17 = floor(v_18);
-        v_12 = v_17;
-    } else {
-        v_12 = pre_temp_2_5;
-    }
-    _temp_2_5 = v_12;
-    pre_temp_2_5 = _temp_2_5;
-    v_20 = _temp_2_5 * 2;
-    v_19 = (- v_20);
-    _i_0 = _temp_3_6 + v_19;
+    v_0 = floor(_time);
+    v_4 = floor(_time);
+    v_3 = jmi_divide_equation(jmi, v_4,AD_WRAP_LITERAL(2),\"integer(time) / 2\");
+    v_2 = floor(v_3);
+    v_1 = v_2 * AD_WRAP_LITERAL(2);
+    _i_0 = (v_0 - v_1);
     pre_i_0 = _i_0;
     _y_1_1 = sin(_time);
     (*dz)[jmi_get_index_from_value_ref(0)-jmi->offs_real_dx] = (*dz)[jmi->offs_t] * cos(_time);
@@ -3653,6 +3603,7 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     } else {
         return -1;
     }
+    _d_2 = _sw(0);
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         if (_d_2) {
             v_0 = AD_WRAP_LITERAL(1);
@@ -5533,15 +5484,15 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     }
     _temp_1_4 = _sw(0);
     if (LOG_EXP_AND(_temp_1_4, v_0)) {
-      func_CADCodeGenTests_WhenEqu9_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
-      _y_1 = tmp_var_1;
+        func_CADCodeGenTests_WhenEqu9_f_der_AD0(_a_2, _b_3, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+        _y_1 = tmp_var_1;
     } else {
-      _y_1 = pre_y_1;
+        _y_1 = pre_y_1;
     }
     if (LOG_EXP_AND(_temp_1_4, v_0)) {
-      _x_0 = tmp_var_0;
+        _x_0 = tmp_var_0;
     } else {
-      _x_0 = pre_x_0;
+        _x_0 = pre_x_0;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         (*res)[0] = _time * _x_0 - (_b_3);
@@ -5551,7 +5502,6 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end WhenEqu9;
 
@@ -5630,15 +5580,15 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     _temp_2_5 = _sw(0);
     _temp_1_4 = _sw(0);
     if (LOG_EXP_AND(_temp_1_4, v_0)) {
-      func_CADCodeGenTests_WhenEqu10_f_der_AD0(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
-      _b_3 = tmp_var_1;
+        func_CADCodeGenTests_WhenEqu10_f_der_AD0(_x_0, _y_1, AD_WRAP_LITERAL(0), AD_WRAP_LITERAL(0), &tmp_var_0, &tmp_var_1, &tmp_der_0, &tmp_der_1);
+        _b_3 = tmp_var_1;
     } else {
-      _b_3 = pre_b_3;
+        _b_3 = pre_b_3;
     }
     if (LOG_EXP_AND(_temp_1_4, v_0)) {
-      _a_2 = tmp_var_0;
+        _a_2 = tmp_var_0;
     } else {
-      _a_2 = pre_a_2;
+        _a_2 = pre_a_2;
     }
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
         if (LOG_EXP_OR(v_1, v_2)) {
@@ -5658,7 +5608,6 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
         JMI_DYNAMIC_FREE()
     return ef;
 }
-
 ")})));
 end WhenEqu10;
 
@@ -6165,6 +6114,16 @@ static int dae_block_dir_der_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* dx,jmi_rea
     } else {
         return -1;
     }
+    v_2 = _sw(0);
+    v_3 = _sw(1);
+    _b1_0 = LOG_EXP_AND(v_2, v_3);
+    v_5 = LOG_EXP_NOT(pre_b1_0);
+    if (LOG_EXP_AND(_b1_0, v_5)) {
+        v_4 = AD_WRAP_LITERAL(1);
+    } else {
+        v_4 = pre_i1_1;
+    }
+    _i1_1 = v_4;
     if (evaluation_mode == JMI_BLOCK_EVALUATE_INACTIVE || evaluation_mode == JMI_BLOCK_EVALUATE) {
     }
         JMI_DYNAMIC_FREE()

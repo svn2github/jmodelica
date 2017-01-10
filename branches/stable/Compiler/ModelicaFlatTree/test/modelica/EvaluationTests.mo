@@ -4502,12 +4502,40 @@ fclass EvaluationTests.RelExpAlmost1
  constant Real eps = 1.0E-16;
  constant Boolean b1 = true;
  constant Boolean b2 = true;
- constant Boolean b3 = false;
+ constant Boolean b3 = true;
  constant Boolean b4 = false;
  constant Boolean b5 = true;
 end EvaluationTests.RelExpAlmost1;
 ")})));
 end RelExpAlmost1;
+
+
+model RelExpAlmost2
+    constant Real eps = 1e-20;
+    constant Boolean b1 = 0 > -eps;
+    constant Boolean b2 = 0 < -eps;
+    constant Boolean b3 = 0 > eps;
+    constant Boolean b4 = 0 < eps;
+    constant Boolean b5 = 1 > 1;
+    constant Boolean b6 = 1 < 1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="RelExpAlmost2",
+            description="Very close real comparisons",
+            eliminate_alias_variables=false,
+            flatModel="
+fclass EvaluationTests.RelExpAlmost2
+ constant Real eps = 1.0E-20;
+ constant Boolean b1 = true;
+ constant Boolean b2 = false;
+ constant Boolean b3 = false;
+ constant Boolean b4 = true;
+ constant Boolean b5 = false;
+ constant Boolean b6 = false;
+end EvaluationTests.RelExpAlmost2;
+")})));
+end RelExpAlmost2;
 
 
 model FScalarExpEval

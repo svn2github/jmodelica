@@ -2806,6 +2806,7 @@ aspect Nominals {
             return variableNominal();
         }
     }
+    eq UnknownFVariable.nominal() = variableNominal();
     
     syn FExp FAbstractVariable.variableNominal() {
         return FExp.nominalDefault();
@@ -2913,8 +2914,8 @@ aspect FVariableUses {
      */
     coll HashSet<FIdUseExp> FFunctionVariable.assigningUses() [new HashSet<FIdUseExp>()] 
         with add root FFunctionDecl;
-    FIdUseExp contributes this when isAssignedTo() && myFuncVar() != null
-        to FFunctionVariable.assigningUses() for myFuncVar();
+    FIdUseExp contributes this when isAssignedTo() && myFuncFV() != null
+        to FFunctionVariable.assigningUses() for myFuncFV();
     
     /**
      * Check if this is the left hand side of an equation.
@@ -3139,7 +3140,7 @@ aspect FVariableUses {
      * TODO: this is incorrect what if order=2!
      */
     syn FRealVariable FAbstractDerivativeVariable.myDifferentiatedVariable() =
-        (FRealVariable) lookupFV(getFQName());
+        (FRealVariable) getFQName().myFV();
 
     /**
      * Get the derivative variabel (FDerivativeVariable) corresponding to 
@@ -3147,25 +3148,19 @@ aspect FVariableUses {
      * TODO: this is sort of the same as meDifferentiated()
      */
     syn FDerivativeVariable FVariable.myDerivativeVariable() =
-        (FDerivativeVariable) lookupDerFV(getFQName(), order() + 1);
+            (FDerivativeVariable) getFQName().myDerFV(order() + 1);
     
     /**
      * Get the pre variable connected to a normal variable, if any.
      */
-    syn FAbstractVariable FAbstractVariable.myPreVariable() = lookupPreFV(getFQName());
+    syn FAbstractVariable FAbstractVariable.myPreVariable() = getFQName().myPreFV();
     
     /**
      * Get the normal variable connected to a pre variable.
      * 
      * Will be unknown for non-pre variables.
      */
-    syn FAbstractVariable FAbstractVariable.myNonPreVariable() = unknownFVariable();
-    eq FPreBooleanVariable.myNonPreVariable() = lookupFV(getFQName());
-    eq FPreIntegerVariable.myNonPreVariable() = lookupFV(getFQName());
-    eq FPreRealVariable.myNonPreVariable()    = lookupFV(getFQName());
-    eq FPreStringVariable.myNonPreVariable()  = lookupFV(getFQName());
-    eq FPreEnumVariable.myNonPreVariable()    = lookupFV(getFQName());
-    
+    syn FAbstractVariable FAbstractVariable.myNonPreVariable() = getFQName().myFV();
 }
 
 aspect LinearFVariables {

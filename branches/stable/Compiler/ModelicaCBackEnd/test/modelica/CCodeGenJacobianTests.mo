@@ -17,26 +17,27 @@
 
 package CCodeGenJacobianTests
 
-
-model SparseJacobianLinearBlock1
-    Real x[3];
-    parameter Real b[3] = {2, 1, 4};
-equation
-    b[1] = 2 * x[1] + x[2];
-    b[2] = x[1] + 2 * x[3];
-    b[3] = 2 * x[2] + x[3];
+package SparseBlockJacobian
     
-    annotation(__JModelica(UnitTesting(tests={
-        CCodeGenTestCase(
-            name="SparseJacobianLinearBlock1",
-            description="Test generation of sparse Jacobians for linear systems.",
-            generate_sparse_block_jacobian=true,
-            template="
+    model Simple1
+        Real x[3];
+        parameter Real b[3] = {2, 1, 4};
+    equation
+        b[1] = 2 * x[1] + x[2];
+        b[2] = x[1] + 2 * x[3];
+        b[3] = 2 * x[2] + x[3];
+        
+        annotation(__JModelica(UnitTesting(tests={
+            CCodeGenTestCase(
+                name="SparseBlockJacobian_Simple1",
+                description="Test generation of sparse block jacobians for linear systems",
+                generate_sparse_block_jacobian=true,
+                template="
 $C_dae_blocks_residual_functions$
 ------
 $C_dae_add_blocks_residual_functions$
 ",
-            generatedCode="
+                generatedCode="
 static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
     /***** Block: 1 *****/
     jmi_real_t** res = &residual;
@@ -246,7 +247,556 @@ static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mod
 ------
     jmi_dae_add_equation_block(*jmi, dae_block_0, NULL, jacobian_0, jacobian_struct_0, 1, 2, 0, 0, 0, 0, 0, 0, JMI_CONSTANT_VARIABILITY, JMI_CONSTANT_VARIABILITY, JMI_LINEAR_SOLVER, 0, \"1\", -1);
 ")})));
-end SparseJacobianLinearBlock1;
+    end Simple1;
+    
+    model Simple2
+        function F
+            input Real[:] x;
+            output Real y;
+        algorithm
+            y := sum(x);
+        annotation(Inline=false);
+        end F;
+        Real x[3];
+        parameter Real b[3] = {2, 1, 4};
+        parameter Real[:] p1 = {1,2,3,4};
+    equation
+        b[1] = 2 * x[1] + x[2];
+        b[2] = x[1] + F(p1) * x[3];
+        b[3] = 2 * x[2] + x[3];
+        
+        annotation(__JModelica(UnitTesting(tests={
+            CCodeGenTestCase(
+                name="SparseBlockJacobian_Simple2",
+                description="Test generation of temporary variables in sparse block jacobians",
+                generate_sparse_block_jacobian=true,
+                template="
+$C_dae_blocks_residual_functions$
+",
+                generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1)
+    if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 9;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 7;
+        x[1] = 8;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = jmi_max(jmi_abs(_b_3_5), jmi_max(jmi_abs(AD_WRAP_LITERAL(2)), AD_WRAP_LITERAL(1)));
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_3_2;
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+        JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
+            jmi_real_t* Q1 = calloc(2, sizeof(jmi_real_t));
+            jmi_real_t* Q2 = calloc(2, sizeof(jmi_real_t));
+            jmi_real_t* Q3 = residual;
+            int i;
+            char trans = 'N';
+            double alpha = -1;
+            double beta = 1;
+            int n1 = 2;
+            int n2 = 1;
+            JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
+            memcpy(&jmi_array_ref_1(tmp_2, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
+            Q1[0] = - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_2);
+            for (i = 0; i < 2; i += 2) {
+                Q1[i + 0] = (Q1[i + 0]) / (-1.0);
+                Q1[i + 1] = (Q1[i + 1] - (-2) * Q1[i + 0]) / (-1.0);
+            }
+            Q2[1] = -2;
+            memset(Q3, 0, 1 * sizeof(jmi_real_t));
+            Q3[0] = -1.0;
+            dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+            free(Q1);
+            free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            _x_3_2 = x[0];
+        }
+        JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_1, 4, 1, 4)
+        memcpy(&jmi_array_ref_1(tmp_1, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
+        _x_1_0 = _b_2_4 - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_1) * _x_3_2;
+        _x_2_1 = _b_1_3 - 2 * _x_1_0;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = 2 * _x_2_1 + _x_3_2 - (_b_3_5);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
 
+typedef struct jacobian_quadrant {
+    void  (*dim)();
+    void  (*col)();
+    void  (*row)();
+    void  (*eval)();
+} jacobian_quadrant_t;
+
+typedef struct jacobian {
+    jacobian_quadrant_t L;
+    jacobian_quadrant_t A12;
+    jacobian_quadrant_t A21;
+    jacobian_quadrant_t A22;
+} jacobian_t;
+
+void L_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 3;
+    (*jac)[1] = 2;
+    (*jac)[2] = 2;
+}
+void A12_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 1;
+    (*jac)[2] = 2;
+}
+void A21_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 2;
+    (*jac)[2] = 1;
+}
+void A22_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 1;
+    (*jac)[2] = 1;
+}
+void L_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 2;
+    (*jac)[2] = 3;
+}
+void A12_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void A21_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+    (*jac)[2] = 1;
+}
+void A22_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void L_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 1;
+}
+void A12_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void A21_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void A22_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = -1.0;
+    (*jac)[1] = -2;
+    (*jac)[2] = -1.0;
+}
+void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    JMI_ARR(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1)
+    JMI_ARRAY_INIT_1(STATREAL, jmi_ad_var_t, jmi_array_t, tmp_2, 4, 1, 4)
+    memcpy(&jmi_array_ref_1(tmp_2, 1), &_p1_1_6, 4 * sizeof(jmi_real_t));
+    (*jac)[0] = - func_CCodeGenJacobianTests_SparseBlockJacobian_Simple2_F_exp0(tmp_2);
+}
+void A21_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = -2;
+}
+void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = -1.0;
+}
+
+jacobian_t *jacobian_init_0() {
+    jacobian_t *jc = (jacobian_t *) malloc(sizeof(jacobian_t));
+    jc->L.dim = &L_0_dim;
+    jc->L.col = &L_0_col;
+    jc->L.row = &L_0_row;
+    jc->L.eval = &L_0_eval;
+    jc->A12.dim = &A12_0_dim;
+    jc->A12.col = &A12_0_col;
+    jc->A12.row = &A12_0_row;
+    jc->A12.eval = &A12_0_eval;
+    jc->A21.dim = &A21_0_dim;
+    jc->A21.col = &A21_0_col;
+    jc->A21.row = &A21_0_row;
+    jc->A21.eval = &A21_0_eval;
+    jc->A22.dim = &A22_0_dim;
+    jc->A22.col = &A22_0_col;
+    jc->A22.row = &A22_0_row;
+    jc->A22.eval = &A22_0_eval;
+    return jc;
+}
+
+static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
+        jc->L.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A12) {
+        jc->A12.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A21) {
+        jc->A21.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A22) {
+        jc->A22.eval(jmi, jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_DIMENSIONS) {
+        jc->L.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_COLPTR) {
+        jc->L.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_ROWIND) {
+        jc->L.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_DIMENSIONS) {
+        jc->A12.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_COLPTR) {
+        jc->A12.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_ROWIND) {
+        jc->A12.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_DIMENSIONS) {
+        jc->A21.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_COLPTR) {
+        jc->A21.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_ROWIND) {
+        jc->A21.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_DIMENSIONS) {
+        jc->A22.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_COLPTR) {
+        jc->A22.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_ROWIND) {
+        jc->A22.row(jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+")})));
+    end Simple2;
+    
+end SparseBlockJacobian;
+
+model MultipleSolvedRealInAlgorithm
+    Real x(min=0,start=5),y,z;
+    Real a;
+algorithm
+    when sample(0,1) then
+        y := x;
+        a := time;
+    end when;
+equation
+    der(z) = integer(time);
+    der(z) = x;
+        
+        annotation(__JModelica(UnitTesting(tests={
+            CCodeGenTestCase(
+                name="MultipleSolvedRealInAlgorithm",
+                description="Test bug in #5252",
+                generate_sparse_block_jacobian=true,
+                template="
+$C_dae_blocks_residual_functions$
+",
+                generatedCode="
+static int dae_block_0(jmi_t* jmi, jmi_real_t* x, jmi_real_t* residual, int evaluation_mode) {
+    /***** Block: 1 *****/
+    jmi_real_t** res = &residual;
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    JMI_DEF(REA, tmp_1)
+    JMI_DEF(BOO, tmp_2)
+    JMI_DEF(INT, tmp_3)
+    JMI_DEF(REA, tmp_4)
+    JMI_DEF(REA, tmp_5)
+    if (evaluation_mode == JMI_BLOCK_START) {
+        x[0] = 5;
+    } else if (evaluation_mode == JMI_BLOCK_START_SET) {
+        x[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_MIN) {
+        x[0] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_VALUE_REFERENCE) {
+        x[0] = 2;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_REAL_VALUE_REFERENCE) {
+        x[0] = 5;
+        x[1] = 6;
+        x[2] = 0;
+    } else if (evaluation_mode == JMI_BLOCK_DISCRETE_REAL_VALUE_REFERENCE) {
+        x[0] = 5;
+        x[1] = 6;
+    } else if (evaluation_mode == JMI_BLOCK_SOLVED_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
+    } else if (evaluation_mode == JMI_BLOCK_DIRECTLY_IMPACTING_NON_REAL_VALUE_REFERENCE) {
+        x[0] = 536870921;
+        x[1] = 268435464;
+        x[2] = 268435463;
+    } else if (evaluation_mode == JMI_BLOCK_EQUATION_NOMINAL_AUTO) {
+        (*res)[0] = 1;
+    } else if (evaluation_mode == JMI_BLOCK_INITIALIZE) {
+        x[0] = _x_0;
+        init_with_lbound(x[0], 0, \"Resetting initial value for variable x\");
+    } else if (evaluation_mode == JMI_BLOCK_EVALUATE_JACOBIAN) {
+            jmi_real_t* Q1 = calloc(3, sizeof(jmi_real_t));
+            jmi_real_t* Q2 = calloc(3, sizeof(jmi_real_t));
+            jmi_real_t* Q3 = residual;
+            int i;
+            char trans = 'N';
+            double alpha = -1;
+            double beta = 1;
+            int n1 = 3;
+            int n2 = 1;
+            for (i = 0; i < 3; i += 3) {
+                Q1[i + 0] = (Q1[i + 0]) / (1.0);
+                Q1[i + 1] = (Q1[i + 1]) / (1.0);
+                Q1[i + 2] = (Q1[i + 2]) / (1.0);
+            }
+            Q2[2] = 1.0;
+            memset(Q3, 0, 1 * sizeof(jmi_real_t));
+            Q3[0] = -1.0;
+            dgemm_(&trans, &trans, &n2, &n2, &n1, &alpha, Q2, &n2, Q1, &n1, &beta, Q3, &n2);
+            free(Q1);
+            free(Q2);
+    } else if (evaluation_mode & JMI_BLOCK_EVALUATE || evaluation_mode & JMI_BLOCK_WRITE_BACK) {
+        if ((evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) == 0) {
+            check_lbound(x[0], 0, \"Out of bounds for variable x\");
+            _x_0 = x[0];
+        }
+        tmp_2 = _temp_1_4;
+        tmp_3 = __sampleItr_1_6;
+        tmp_4 = _y_1;
+        tmp_5 = _a_3;
+        __sampleItr_1_6 = pre__sampleItr_1_6;
+        _y_1 = pre_y_1;
+        _a_3 = pre_a_3;
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(0) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6), _sw(0), JMI_REL_GEQ);
+        }
+        _temp_1_4 = LOG_EXP_AND(LOG_EXP_NOT(_atInitial), _sw(0));
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+            __sampleItr_1_6 = pre__sampleItr_1_6 + 1;
+        }
+        if (jmi->atInitial || jmi->atEvent) {
+            _sw(1) = jmi_turn_switch_time(jmi, _time - (pre__sampleItr_1_6 + AD_WRAP_LITERAL(1)), _sw(1), JMI_REL_LT);
+        }
+        if (_sw(1) == JMI_FALSE) {
+            jmi_assert_failed(\"Too long time steps relative to sample interval.\", JMI_ASSERT_ERROR);
+        }
+        if (LOG_EXP_AND(_temp_1_4, LOG_EXP_NOT(pre_temp_1_4))) {
+            _y_1 = _x_0;
+            _a_3 = _time;
+        }
+        tmp_1 = _temp_1_4;
+        _temp_1_4 = tmp_2;
+        tmp_2 = tmp_1;
+        tmp_1 = __sampleItr_1_6;
+        __sampleItr_1_6 = tmp_3;
+        tmp_3 = tmp_1;
+        tmp_1 = _y_1;
+        _y_1 = tmp_4;
+        tmp_4 = tmp_1;
+        tmp_1 = _a_3;
+        _a_3 = tmp_5;
+        tmp_5 = tmp_1;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            _temp_1_4 = (tmp_2);
+            __sampleItr_1_6 = (tmp_3);
+        }
+        _y_1 = (tmp_4);
+        _a_3 = (tmp_5);
+        if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(2) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5), _sw(2), JMI_REL_LT);
+            }
+            if (evaluation_mode & JMI_BLOCK_EVALUATE_NON_REALS) {
+                _sw(3) = jmi_turn_switch_time(jmi, _time - (pre_temp_2_5 + AD_WRAP_LITERAL(1)), _sw(3), JMI_REL_GEQ);
+            }
+            _temp_2_5 = COND_EXP_EQ(LOG_EXP_OR(LOG_EXP_OR(_sw(2), _sw(3)), _atInitial), JMI_TRUE, floor(_time), pre_temp_2_5);
+        }
+        _der_z_12 = _temp_2_5;
+        if (evaluation_mode & JMI_BLOCK_EVALUATE) {
+            (*res)[0] = _x_0 - (_der_z_12);
+        }
+    }
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+
+
+typedef struct jacobian_quadrant {
+    void  (*dim)();
+    void  (*col)();
+    void  (*row)();
+    void  (*eval)();
+} jacobian_quadrant_t;
+
+typedef struct jacobian {
+    jacobian_quadrant_t L;
+    jacobian_quadrant_t A12;
+    jacobian_quadrant_t A21;
+    jacobian_quadrant_t A22;
+} jacobian_t;
+
+void L_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 3;
+    (*jac)[1] = 3;
+    (*jac)[2] = 3;
+}
+void A12_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 3;
+}
+void A21_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 3;
+    (*jac)[2] = 1;
+}
+void A22_0_dim(jmi_int_t **jac) {
+    (*jac)[0] = 1;
+    (*jac)[1] = 1;
+    (*jac)[2] = 1;
+}
+void L_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 2;
+    (*jac)[3] = 3;
+}
+void A12_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+}
+void A21_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 0;
+    (*jac)[2] = 0;
+    (*jac)[3] = 1;
+}
+void A22_0_col(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+}
+void L_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+    (*jac)[1] = 1;
+    (*jac)[2] = 2;
+}
+void A12_0_row(jmi_int_t **jac) {
+}
+void A21_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void A22_0_row(jmi_int_t **jac) {
+    (*jac)[0] = 0;
+}
+void L_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = 1.0;
+    (*jac)[1] = 1.0;
+    (*jac)[2] = 1.0;
+}
+void A12_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+}
+void A21_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = 1.0;
+}
+void A22_0_eval(jmi_t *jmi, jmi_real_t **jac) {
+    (*jac)[0] = -1.0;
+}
+
+jacobian_t *jacobian_init_0() {
+    jacobian_t *jc = (jacobian_t *) malloc(sizeof(jacobian_t));
+    jc->L.dim = &L_0_dim;
+    jc->L.col = &L_0_col;
+    jc->L.row = &L_0_row;
+    jc->L.eval = &L_0_eval;
+    jc->A12.dim = &A12_0_dim;
+    jc->A12.col = &A12_0_col;
+    jc->A12.row = &A12_0_row;
+    jc->A12.eval = &A12_0_eval;
+    jc->A21.dim = &A21_0_dim;
+    jc->A21.col = &A21_0_col;
+    jc->A21.row = &A21_0_row;
+    jc->A21.eval = &A21_0_eval;
+    jc->A22.dim = &A22_0_dim;
+    jc->A22.col = &A22_0_col;
+    jc->A22.row = &A22_0_row;
+    jc->A22.eval = &A22_0_eval;
+    return jc;
+}
+
+static int jacobian_0(jmi_t *jmi, jmi_real_t *x, jmi_real_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_L) {
+        jc->L.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A12) {
+        jc->A12.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A21) {
+        jc->A21.eval(jmi, jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_EVALUATE_A22) {
+        jc->A22.eval(jmi, jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+static int jacobian_struct_0(jmi_t *jmi, jmi_real_t *x, jmi_int_t **jac, int mode) {
+    int ef = 0;
+    jacobian_t *jc = jacobian_init_0();
+    int evaluation_mode = mode;
+
+    if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_DIMENSIONS) {
+        jc->L.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_COLPTR) {
+        jc->L.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_L_ROWIND) {
+        jc->L.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_DIMENSIONS) {
+        jc->A12.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_COLPTR) {
+        jc->A12.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A12_ROWIND) {
+        jc->A12.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_DIMENSIONS) {
+        jc->A21.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_COLPTR) {
+        jc->A21.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A21_ROWIND) {
+        jc->A21.row(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_DIMENSIONS) {
+        jc->A22.dim(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_COLPTR) {
+        jc->A22.col(jac);
+    } else if (evaluation_mode == JMI_BLOCK_JACOBIAN_A22_ROWIND) {
+        jc->A22.row(jac);
+    }
+
+    free(jc);
+    return ef;
+}
+
+
+")})));
+end MultipleSolvedRealInAlgorithm;
 
 end CCodeGenJacobianTests;

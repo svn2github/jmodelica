@@ -441,6 +441,35 @@ Error at line 430, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/A
 ")})));
 end ArrayTest15_Err;
 
+model ArrayTest16_Err
+  function f
+  input Integer n;
+  input Integer v[:];
+  Integer x[n];
+  Integer y[:];
+  Integer z[2];
+  output Integer o;
+algorithm
+  o := v[1] + x[1] + y[1] + z[1];
+  x := fill(-1, 2);
+  y := ones(o);
+  z := zeros(2);
+end f;
+
+Integer x = f(2, {2, 2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        ErrorTestCase(
+            name="General_ArrayTest16_Err",
+            description="Test type checking of arrays for unknown-size, non-input arrays in functions",
+            errorMessage="
+1 errors found:
+
+Error at line 430, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
+  Can not infer array size of the variable y
+")})));
+end ArrayTest16_Err;
+
 model ArrayTest17
   model N
     model M

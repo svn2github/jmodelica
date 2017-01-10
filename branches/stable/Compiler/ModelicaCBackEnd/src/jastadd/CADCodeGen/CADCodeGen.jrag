@@ -210,7 +210,7 @@ aspect CADCodeGen {
 	syn String FIdUse.toString_var_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return getFQName().genRecordUse_var_CAD(p, myRecordFV(), type);
+			return getFQName().genRecordUse_var_CAD(p, getFQName().myOutermostFV(), type);
 		} else {
 			return myFV().genUse_var_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
@@ -219,7 +219,7 @@ aspect CADCodeGen {
 	syn String FIdUse.toString_der_CAD(CodePrinter p) {
 		String type = myFV().funcArrayType(isAssignUse());
 		if (myFV().inRecord() && inFunction()) {
-			return getFQName().genRecordUse_der_CAD(p, myRecordFV(), type);
+			return getFQName().genRecordUse_der_CAD(p, getFQName().myOutermostFV(), type);
 		} else {
 			return myFV().genUse_der_CAD(p, getFQName().getFArraySubscripts(), type);
 		}
@@ -957,7 +957,11 @@ aspect CADCodeGen {
         String indent = ASTNode.printer_CAD.indent(outerIndent);
         String innerIndent = ASTNode.printer_CAD.indent(indent);
         
-        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", getLabel());
+        String label = getLabel();
+        if (label == null) {
+            label = getClass().getSimpleName();
+        }
+        str.format("%s/***** %s: %s *****/\n", indent, p.inInitialSystem() ? "Init block" : "Block", label);
         
         genVarDecls(p, str, indent, null);
         
@@ -1060,15 +1064,15 @@ aspect CADCodeGen {
 
     @Override
     public void EquationBlock.genBlockResidualFunctionBeforeEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
-        for (SimpleEquationBlock block : unsolvedBlocks())
-            block.genBlockResidualFunctionBeforeEqns_CAD(p, str, indent, visited);
-    }
-
-    @Override
-    public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
         for (AbstractEquationBlock aeb : solvedBlocks())
             aeb.genBlockResidualFunctionBeforeSubEqns_CAD(p, str, indent, visited);
     }
+
+//    @Override
+//    public void TornEquationBlock.genBlockResidualFunctionBeforeEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
+//        for (AbstractEquationBlock aeb : solvedBlocks())
+//            aeb.genBlockResidualFunctionBeforeSubEqns_CAD(p, str, indent, visited);
+//    }
 
     @Override
     public void AbstractSubBLTBlock.genBlockResidualFunctionBeforeEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
@@ -1101,6 +1105,10 @@ aspect CADCodeGen {
         p.genBlockResidualCall(this, str, indent);
     }
 
+    @Override
+    public void EquationBlock.genBlockResidualFunctionBeforeSubEqns_CAD(CodePrinter p, CodeStream str, String indent, Set<FAbstractEquation> visited) {
+        p.genBlockResidualCall(this, str, indent);
+    }
     /**
      * Generates AD code for this equation and a variable in it . Typically called from within 
      * a solved block when printing AD code. Empty standard implementation and other blocks override. 
@@ -2058,7 +2066,7 @@ aspect CADCodeGen {
     
     @Override
     public void FInitArrayStmt.prettyPrint_CAD(CodePrinter p, CodeStream str, String indent) {
-        FFunctionVariable fv = getFIdUseExp().myFuncVar();
+        FFunctionVariable fv = getFIdUseExp().myFuncFV();
         FInitArrayStmt.genInit_C(p, str, indent, fv.varName_CAD(), fv, type());
         FInitArrayStmt.genInit_C(p, str, indent, fv.derName_CAD(), fv, type());
     }

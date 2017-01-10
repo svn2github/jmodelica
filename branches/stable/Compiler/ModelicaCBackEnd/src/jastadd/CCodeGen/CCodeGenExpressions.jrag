@@ -593,7 +593,7 @@ aspect CCodeGenExpressions {
     syn String FIdUse.toString_C(CodePrinter p) {
         String type = myFV().funcArrayType(isAssignUse());
         if (myFV().inRecord() && inFunction())
-            return getFQName().genRecordUse_C(p, myRecordFV(), type);
+            return getFQName().genRecordUse_C(p, getFQName().myOutermostFV(), type);
         else
             return myFV().genUse_C(p, getFQName().getFArraySubscripts(), type);
     }

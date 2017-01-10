@@ -748,7 +748,7 @@ public class DiagnosticsGenerator {
 public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
     Deque<FVariable> orderList = new ArrayDeque<FVariable>();
     for (AbstractEquationBlock aeb : this) {
-        orderList.addAll(aeb.allVariables());
+        orderList.addAll(aeb.diagnostics_generateBLTTable_variables());
     }
     FVariable[] order = orderList.toArray(new FVariable[orderList.size()]);
 
@@ -765,6 +765,19 @@ public void BLT.diagnostics_generateBLTTable(CodeStream out, boolean isInit) {
     }
 
     out.println("</div>");
+}
+
+protected Collection<FVariable> AbstractEquationBlock.diagnostics_generateBLTTable_variables() {
+    return allVariables();
+}
+
+@Override
+protected Collection<FVariable> PrePropagationEquationBlock.diagnostics_generateBLTTable_variables() {
+    Collection<FVariable> variables = new ArrayList<FVariable>();
+    for (AbstractEquationBlock block : solvedBlocks()) {
+        variables.addAll(block.diagnostics_generateBLTTable_variables());
+    }
+    return variables;
 }
 
 protected abstract String AbstractEquationBlock.diagnostics_generateBLTTable_color();
@@ -784,6 +797,10 @@ protected String EquationBlock.diagnostics_generateBLTTable_color() {
     return "#CCCCF0";
 }
 
+protected String PrePropagationEquationBlock.diagnostics_generateBLTTable_color() {
+    return "#EEFF22";
+}
+
 protected String AbstractSubBLTBlock.diagnostics_generateBLTTable_color() {
     return "#FF00FF";
 }
@@ -793,19 +810,32 @@ protected Map<FVariable, Integer> AbstractEquationBlock.EMPTY_VAR_FILTER = Colle
 public static final int AbstractEquationBlock.DIAGNOSTICS_CELL_SIZE = 15;
 
 public void AbstractEquationBlock.diagnostics_generateBLTTable_block(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm) {
+    int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
     int numReal = realVariables().size();
     int numNonReal = nonRealVariables().size();
-    int start = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
-    int sizeReal = numReal * DIAGNOSTICS_CELL_SIZE + 1;
+    int sizeFrame;
     int sizeNonReal = (numReal + numNonReal) * DIAGNOSTICS_CELL_SIZE + 1;
-    if (numNonReal > 0)
-        out.formatln("    <div class=\"block\" style=\"background:#F0E7CC;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", start, start, sizeNonReal, sizeNonReal);
+    if (diagnostics_generateBLTTable_printDiscreteFrame()) {
+        sizeFrame = numReal * DIAGNOSTICS_CELL_SIZE + 1;
+        if (numNonReal > 0)
+            out.formatln("    <div class=\"block\" style=\"background:#F0E7CC;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", start, start, sizeNonReal, sizeNonReal);
+    } else {
+        sizeFrame = (numReal + numNonReal) * DIAGNOSTICS_CELL_SIZE + 1;
+    }
     if (numReal > 0)
-        out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, sizeReal, sizeReal);
+        out.formatln("    <div class=\"block\" style=\"background:%s;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", diagnostics_generateBLTTable_color(), start, start, sizeFrame, sizeFrame);
     diagnostics_generateBLTTable_rows(order, out, tm, false, -1, EMPTY_VAR_FILTER);
 }
 
-public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+protected boolean AbstractEquationBlock.diagnostics_generateBLTTable_printDiscreteFrame() {
+    return true;
+}
+
+protected boolean PrePropagationEquationBlock.diagnostics_generateBLTTable_printDiscreteFrame() {
+    return false;
+}
+
+public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     for (FAbstractEquation equation : allEquations()) {
         if (varFilter == EMPTY_VAR_FILTER)
             size = equation.numScalarEquations();
@@ -819,7 +849,7 @@ public void AbstractEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] 
                         || equation.initialParameters().contains(var))
                         && (pos == null || pos == i);
                 if (contains)
-                    out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var, inTearBlock)));
+                    out.formatln("    <div class=\"incidence\" style=\"left:%dpx;top:%dpx;z-index:10000;\" title=\"%s&#13;&#13;%s\" onmouseover=\"hightlight(this);\" onmouseout=\"unhighlight(this);\" onclick=\"lockHighlight(this);\"><div>%s</div></div>", tm.getXPos() * DIAGNOSTICS_CELL_SIZE, tm.getYPos() * DIAGNOSTICS_CELL_SIZE, ASTNode.escapeHTML(var.name()), equationStr, diagnostics_generateBLTTable_solvabilitySymbol(equation.isSolved(var, nested)));
                 tm.newCol();
             }
             tm.newRow();
@@ -839,14 +869,14 @@ private String AbstractEquationBlock.diagnostics_generateBLTTable_solvabilitySym
     throw new IllegalArgumentException("Unsupported solvability type " + s);
 }
 
-public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     int numSolved = realVariables().size() - localUnsolvedVariables().size();
     int solvedStart = tm.getYPos() * DIAGNOSTICS_CELL_SIZE;
     int solvedSize = numSolved * DIAGNOSTICS_CELL_SIZE + 1;
     int unsolvedStart = (tm.getYPos() + numSolved) * DIAGNOSTICS_CELL_SIZE;
     int unsolvedSize = localUnsolvedVariables().size() * DIAGNOSTICS_CELL_SIZE + 1;
     int numNonReal = localNonRealVariables().size();
-    if (inTearBlock)
+    if (nested)
         out.formatln("    <div class=\"block\" style=\"background:#F0C7C7;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize + unsolvedSize - 1, solvedSize + unsolvedSize - 1);
     out.formatln("    <div class=\"block\" style=\"background:#F0E4E4;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", solvedStart, solvedStart, solvedSize, solvedSize);
     out.formatln("    <div class=\"block\" style=\"background:#F0C0C0;left:%dpx;top:%dpx;width:%dpx;height:%dpx;\"></div>", unsolvedStart, unsolvedStart, unsolvedSize, unsolvedSize);
@@ -859,7 +889,14 @@ public void TornEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] orde
     }
 }
 
-public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void PrePropagationEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
+    for (AbstractEquationBlock seb : solvedBlocks()) {
+        seb.diagnostics_generateBLTTable_rows(order, out, tm, true, size, varFilter);
+    }
+}
+
+
+public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     varFilter = new HashMap<FVariable, Integer>();
     int index = 0;
     for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -872,10 +909,10 @@ public void FunctionCallEquationBlock.diagnostics_generateBLTTable_rows(FVariabl
     for (FVariable var : equation().referencedFVariablesInRHS()) {
         varFilter.remove(var);
     }
-    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+    super.diagnostics_generateBLTTable_rows(order, out, tm, nested, activeVars.size(), varFilter);
 }
 
-public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, int size, Map<FVariable, Integer> varFilter) {
+public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, int size, Map<FVariable, Integer> varFilter) {
     varFilter = new HashMap<FVariable, Integer>();
     int index = 0;
     for (FVariable var : equation().referencedFVariablesInLHS()) {
@@ -888,10 +925,10 @@ public void AlgorithmBlock.diagnostics_generateBLTTable_rows(FVariable[] order, 
     for (FVariable var : equation().referencedFVariablesInRHS()) {
         varFilter.remove(var);
     }
-    super.diagnostics_generateBLTTable_rows(order, out, tm, inTearBlock, activeVars.size(), varFilter);
+    super.diagnostics_generateBLTTable_rows(order, out, tm, nested, activeVars.size(), varFilter);
 }
 
-public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean inTearBlock, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
+public void AbstractEquationBlock.diagnostics_generateBLTTable_row(FVariable[] order, CodeStream out, DiagnosticsGenerator.TableManager tm, boolean nested, FAbstractEquation equation, Map<FVariable, Integer> varMap) {
 }
 
 protected static String ASTNode.escapeHTML(Object o) {

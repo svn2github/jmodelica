@@ -1,0 +1,133 @@
+import org.jmodelica.util.annotations.GenericAnnotationNode;
+import org.jmodelica.util.annotations.AnnotationProvider;
+import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.collections.TransformerIterable;
+
+aspect SrcAnnotations {
+
+    public class SrcAnnotation extends GenericAnnotationNode<SrcAnnotation, SrcAnnotationProvider, Exp> {
+        
+        public static final SrcAnnotation MISSING_ANNOTATION = new SrcAnnotation(null, null);
+        public static final SrcAnnotation AMBIGUOUS_ANNOTATION =  new SrcAnnotation(null, null);
+        
+        protected SrcAnnotation(String name, SrcAnnotationProvider node) {
+            super(name, node);
+        }
+
+        @Override
+        protected SrcAnnotation self() {
+            return this;
+        }
+
+        @Override
+        protected SrcAnnotation createNode(String name, SrcAnnotationProvider node) {
+            return new SrcAnnotation(name, node);
+        }
+
+        @Override
+        protected SrcAnnotation missingNode() {
+            return MISSING_ANNOTATION;
+        }
+
+        @Override
+        protected SrcAnnotation ambiguousNode() {
+            return AMBIGUOUS_ANNOTATION;
+        }
+
+    }
+    
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, Exp> {
+        public String annotationName();
+    }
+    
+    /*******************
+     *  Modifications   
+     ******************/
+    Modification implements SrcAnnotationProvider;
+    
+    syn String Modification.annotationName() = parentAnnotationName();
+    eq NamedModification.annotationName() = getName().name();
+
+    inh String Modification.parentAnnotationName();
+    eq NamedModification.getChild().parentAnnotationName()    = getName().name();
+    eq CompleteModification.getChild().parentAnnotationName() = parentAnnotationName();
+    eq BaseNode.getChild().parentAnnotationName()             = null;
+
+    syn Exp Modification.annotationValue() = null;
+    eq CompleteModification.annotationValue() = hasValueModification() ? getValueModification().getExp() : null;
+    eq ComponentModification.annotationValue() = hasModification() ? getModification().annotationValue() : null;
+    eq ValueModification.annotationValue() = getExp();
+    
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> Modification.annotationSubNodes() = Collections.emptyList();
+    eq CompleteModification.annotationSubNodes() = getClassModification().annotationSubNodes();
+    eq ComponentModification.annotationSubNodes() = 
+            hasModification() ? getModification().annotationSubNodes() : super.annotationSubNodes();
+    eq ClassModification.annotationSubNodes() {
+        return new TransformerIterable<Argument, SubNodePair<SrcAnnotationProvider>>(getArguments()) {
+            @Override
+            protected SubNodePair<SrcAnnotationProvider> transform(Argument a) {
+                return new SubNodePair<SrcAnnotationProvider>(a.annotationName(), a);
+            }
+        };
+    }
+
+    /*******************
+     *   Class Decls    
+     ******************/
+    ClassDecl implements SrcAnnotationProvider;
+    
+    syn String ClassDecl.annotationName() = null;
+    
+    syn Exp ClassDecl.annotationValue() = null;
+    
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> ClassDecl.annotationSubNodes() = Collections.emptyList();
+    eq FullClassDecl.annotationSubNodes() = hasAnnotation() ?
+            getAnnotation().annotationSubNodes() : Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+    eq ShortClassDecl.annotationSubNodes() = getExtendsClauseShortClass().getComment().annotationSubNodes();
+
+    /*******************
+     *    Components    
+     ******************/
+    ComponentDecl implements SrcAnnotationProvider;
+    
+    syn String ComponentDecl.annotationName() = null;
+    
+    syn Exp ComponentDecl.annotationValue() = null;
+    
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> ComponentDecl.annotationSubNodes() =
+            getComment().annotationSubNodes();
+
+    /*******************
+     *     Extends      
+     ******************/
+    ExtendsClause implements SrcAnnotationProvider;
+    
+    syn String ExtendsClause.annotationName() = null;
+    
+    syn Exp ExtendsClause.annotationValue() = null;
+    
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> ExtendsClause.annotationSubNodes() = hasAnnotation() ?
+            getAnnotation().annotationSubNodes() :  Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+
+    /*******************
+     *    Equations     
+     ******************/
+    AbstractEquation implements SrcAnnotationProvider;
+    
+    syn String AbstractEquation.annotationName() = null;
+    
+    syn Exp AbstractEquation.annotationValue() = null;
+    
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> AbstractEquation.annotationSubNodes() =
+            getComment().annotationSubNodes();
+
+    /*******************
+     *     Helpers      
+     ******************/
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> Comment.annotationSubNodes() = hasAnnotation() ?
+            getAnnotation().annotationSubNodes() : Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+
+    syn Iterable<SubNodePair<SrcAnnotationProvider>> Annotation.annotationSubNodes() = Collections.emptyList();
+    eq ParseAnnotation.annotationSubNodes() = getClassModification().annotationSubNodes();
+
+}
