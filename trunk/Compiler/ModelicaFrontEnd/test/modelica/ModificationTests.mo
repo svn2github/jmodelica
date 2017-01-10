@@ -2759,6 +2759,32 @@ Warning at line 2747, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelic
 end ArrayModifications83;
 
 
+model ArrayModifications84
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n={i + j for i in 1:2, j in 3:3:6}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications84",
+            description="Expression splitting for iteration expressions",
+            flatModel="
+fclass ModificationTests.ArrayModifications84
+ parameter Integer b[1].a[1].n = 1 + 3 /* 4 */;
+ parameter Integer b[1].a[2].n = 2 + 3 /* 5 */;
+ parameter Integer b[2].a[1].n = 1 + 6 /* 7 */;
+ parameter Integer b[2].a[2].n = 2 + 6 /* 8 */;
+end ModificationTests.ArrayModifications84;
+")})));
+end ArrayModifications84;
+
+
 /* ========= Modifications on type declarations ========= */
 
 type TypeA = Real(final quantity="A", unit="1");

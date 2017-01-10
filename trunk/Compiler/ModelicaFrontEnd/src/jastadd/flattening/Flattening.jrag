@@ -1546,7 +1546,7 @@ aspect Flattening {
     }
     
     /**
-     * \Return the expression corresponding to the given index in this array expression. 
+     * Return the expression corresponding to the given index in this array expression. 
      * 
      * Will not create new nodes unless necessary.
      */
@@ -1575,7 +1575,7 @@ aspect Flattening {
     }
     eq FIterExp.splitArrayExp(int index) {
         Map<String,FExp> repl = new HashMap<String,FExp>();
-        repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
+        getForIndex(0).addReplacementEntry(repl, index);
         FExp res = dynamicFExp(getFExp().treeCopy()).replaceIndices(repl);
         if (getNumForIndex() > 1) {
             List<CommonForIndex> indices = new List<CommonForIndex>();
@@ -1586,7 +1586,15 @@ aspect Flattening {
         return res;
     }
     // TODO: consider if expressions
-    
+
+    /**
+     * Add an entry to an index replacement map for this for index, for the i:th element 
+     * in the resulting array.
+     */
+    public void CommonForIndex.addReplacementEntry(Map<String,FExp> repl, int i) {
+        repl.put(name(), getFExp().getArray().get(i).treeCopy());
+    }
+
     /**
      * Return a new access that has index instead of the first array subscript with ndims() > 1.
      * 
