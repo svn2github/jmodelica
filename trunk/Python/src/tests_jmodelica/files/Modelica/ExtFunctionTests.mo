@@ -613,7 +613,7 @@ package CEval
             input Boolean b;
             input String s;
             output Obj1 o1;
-            external "C" o1 = my_constructor1(x,y,b,s);
+            external "C" o1 = my_constructor1(x,y,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -631,7 +631,7 @@ package CEval
             input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
-            external "C" my_constructor2(x,y,o2,b,s);
+            external "C" my_constructor2(x,y,o2,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -646,7 +646,7 @@ package CEval
             input Os.Obj1 o1;
             input Obj2[:] o2;
             output Obj3 o3;
-            external "C" my_constructor3(o1,o2,o3);
+            external "C" my_constructor3(o1,o2,o3)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
