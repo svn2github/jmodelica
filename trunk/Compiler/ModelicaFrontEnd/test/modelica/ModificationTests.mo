@@ -2785,6 +2785,58 @@ end ModificationTests.ArrayModifications84;
 end ArrayModifications84;
 
 
+model ArrayModifications85
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](each a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications85",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications85
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications85;
+")})));
+end ArrayModifications85;
+
+
+model ArrayModifications86
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications86",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications86
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications86;
+")})));
+end ArrayModifications86;
+
+
 /* ========= Modifications on type declarations ========= */
 
 type TypeA = Real(final quantity="A", unit="1");
