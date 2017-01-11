@@ -1,3 +1,18 @@
+/*
+    Copyright (C) 2017 Modelon AB
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, version 3 of the License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
 package org.jmodelica.util.annotations;
 
 import java.io.IOException;
@@ -14,6 +29,12 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
  * Generic class for handling traversal over different types of annotations.
  * Mainly in the source and flat tree.
  * 
+ * In several places in the code we have to upcast a variable in order to
+ * assign a field or call a method. This is due to the field or method being
+ * private and the local variable of a subtype. See
+ * http://stackoverflow.com/questions/20672840/has-private-access-error-with-generics
+ * for a good explanation.
+ * 
  * @param <T> The sub-type of AnnotationNode which we are operating on
  * @param <N> The base node type which we deal with
  * @param <V> The value that is returned by the nodes
@@ -21,7 +42,8 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N, V>, N extends AnnotationProvider<N, V>, V> {
     
     private final String name;
-    private final N node;
+    private N node;
+    private final T parent;
 
     private volatile Collection<T> subNodes_cache;
     private volatile Map<String, T> subNodesNameMap_cache;
@@ -34,9 +56,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * @param name Name of the node, optionally null.
      * @param node The node that this annotation node represent.
      */
-    protected GenericAnnotationNode(String name, N node) {
+    protected GenericAnnotationNode(String name, N node, T parent) {
         this.name = name;
         this.node = node;
+        this.parent = parent;
     }
 
     private void computeSubNodesCache() {
@@ -51,7 +74,16 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         List<T> subNodes = new ArrayList<T>();
         Map<String, T> subNodesNameMap = new HashMap<String, T>();
         for (SubNodePair<N> subNodePair : node.annotationSubNodes()) {
-            T subNode = createNode(subNodePair.name, subNodePair.node);
+            
+            // Might already exist
+            T subNode = subNodesNameMap.get(subNodePair.name);
+            GenericAnnotationNode<?, N, V> subNodeUC = subNode; //Upcast
+            if (subNode == null) {
+                subNode = createNode(subNodePair.name, subNodePair.node);
+            } else if (subNodeUC.node != subNodePair.node) {
+                subNodeUC.node = node;
+                subNodeUC.resetSubNodesCache();
+            }
             if (subNode == null) {
                 continue;
             }
@@ -65,6 +97,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         subNodesNameMap_cache = Collections.unmodifiableMap(subNodesNameMap);
     }
 
+    private void resetSubNodesCache() {
+        subNodes_cache = null;
+    }
+
     /**
      * Navigate downwards in the annotation tree. The first element in the path
      * list is resolved relative this node. Then the resolved node is used to
@@ -76,10 +112,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         return forPath(path, 0);
     }
 
-    protected T forPath(String[] paths, int currentIndex) {
-        if (!exists()) {
-            return missingNode();
-        }
+    private T forPath(String[] paths, int currentIndex) {
         if (isAmbiguous()) {
             return ambiguousNode();
         }
@@ -87,9 +120,9 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             return self();
         }
         computeSubNodesCache();
-        T subNode = subNodesNameMap_cache.get(paths[currentIndex]);
+        GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            return missingNode();
+            return createNode(paths[currentIndex], null);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
@@ -115,6 +148,15 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      */
     protected abstract T createNode(String name, N node);
 
+    private N createChild(GenericAnnotationNode<T, N, V> child) throws AnnotationEditException {
+        N res = node().addAnnotationSubNode(child.name());
+        if (res == null) {
+            throw new AnnotationEditException(child, "Unable to create sub node");
+        }
+        resetSubNodesCache();
+        return res;
+    }
+
     /**
      * Method for checking if this node has sub-nodes.
      * 
@@ -136,10 +178,20 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     }
 
     /**
-     * 
      * @return the node that this annotation node represents
+     * 
+     * @throws AnnotationEditException may be thrown if the node doesn't exist
+     *          and it wasn't possible to create.
      */
-    public N getNode() {
+    public N node() throws AnnotationEditException {
+        if (!exists()) {
+            if (parent == null) {
+                // This is an null pattern node without hope of creating
+                return null;
+            }
+            node = ((GenericAnnotationNode<T, N, V>) parent).createChild(this);
+            resetSubNodesCache();
+        }
         return node;
     }
 
@@ -168,6 +220,22 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
             return null;
         }
         return node.annotationValue();
+    }
+
+    /**
+     * Assigns a new value to this annotation and the actual node that this
+     * annotation represents.
+     * 
+     * @param newValue The new value
+     * @throws AnnotationEditException if it either wasn't possible to create
+     *          the node or set the value of the node.
+     */
+    public void setValue(V newValue) throws AnnotationEditException {
+        try {
+            node().setAnnotationValue(newValue);
+        } catch (FailedToSetAnnotationValueException e) {
+            throw new AnnotationEditException(this, e);
+        }
     }
 
     @Override
@@ -213,10 +281,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
 
     /**
      * 
-     * @return true if this node doesn't exist.
+     * @return true if this node does exist.
      */
     public boolean exists() {
-        return this != missingNode();
+        return node != null || isAmbiguous();
     }
 
     /**
@@ -228,11 +296,21 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     protected abstract T ambiguousNode();
 
     /**
-     * Should return a singleton object which represent an missing node.
-     * It is crucial that this is the same object each time!
+     * Returns true if the each keyword is set
      * 
-     * @return a node representing a missing node
+     * @return true if each is set
      */
-    protected abstract T missingNode();
+    public boolean isEach() {
+        return node().isEach();
+    }
+
+    /**
+     * Returns true if the final keyword is set
+     * 
+     * @return true if final is set
+     */
+    public boolean isFinal() {
+        return node().isFinal();
+    }
 
 }
