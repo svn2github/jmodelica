@@ -1327,7 +1327,8 @@ aspect FlatTypeCheck {
     eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
 
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
-      if (myInstComponentDecl().size().isUndefined() && !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
+      if (myInstComponentDecl().size().isUndefined() && myInstComponentDecl().inFunction() && 
+              !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
           compliance("Using variables with undefined size is not supported");
       }
   }
