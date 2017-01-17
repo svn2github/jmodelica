@@ -373,7 +373,9 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* Compute right hand side at initial x*/ 
     if (solver->singular_jacobian == 1) {
         /* In case of singular system, use the last point in the calculation of the b-vector */
+        for (i = 0; i < block->n; i++) { block->x[i] = block->last_accepted_x[i]; }
         info = block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
+        /* info = block->F(block->problem_data,block->last_accepted_x, solver->rhs, JMI_BLOCK_EVALUATE); */
     } else {
         /* Ignore bounds when calculating RHS with zero vector*/
         int current_enforce_bounds_flag = block->options->enforce_bounds_flag;;
@@ -871,6 +873,27 @@ int jmi_linear_solver_init_sparse_matrices(jmi_block_solver_t* block) {
         return -1;
     }
     return info;
+}
+
+int jmi_linear_completed_integrator_step(jmi_block_solver_t* block) {
+    if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
+        int flag;
+        
+        flag = block->F(block->problem_data,block->last_accepted_x,block->res,JMI_BLOCK_INITIALIZE);
+        if (flag) {
+            jmi_log_node(block->log, logError, "ReadLastIterationVariables",
+                         "Failed to read the iteration variables, <errorCode: %d> in <block: %s>", flag, block->label);
+            return flag;
+        }
+        
+        if((block->callbacks->log_options.log_level >= 6)) {
+			jmi_log_node_t node;
+            node = jmi_log_enter_fmt(block->log, logInfo, "LinearSaveState", "Saving the Linear state in <block:%s>", block->label);
+            jmi_log_reals(block->log, node, logInfo, "ivs", block->last_accepted_x, block->n);
+            jmi_log_leave(block->log, node);
+        }
+    }
+    return 0;
 }
 
 void jmi_linear_solver_delete(jmi_block_solver_t* block) {
