@@ -15,31 +15,38 @@
 */
 
 import java.util.Collection;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-public class FClassMethodTestCase extends TestCase {
+public abstract class MethodTestCase extends TestCase {
     private String output = null;
     private String methodName = null;
 
     /**
-     * Perform tests on flat class after transform canonical step.
-     * 
-     * @return  <code>true</code> if test case shoule stop after this method
+     * Invoke a method with no arguments on the specified object and compare 
+     * the result to the expected result.
      */
-    protected boolean testTransformed(FClass fc) {
+    protected void testMethod(Object o) {
         try {
-            Method method = fc.getClass().getMethod(getMethodName());
+            Method method = o.getClass().getMethod(getMethodName());
 
-            String test = method.invoke(fc).toString();
+            String test = method.invoke(o).toString();
             String correct = filter(getOutput());
 
             if (!removeWhitespace(test).equals(removeWhitespace(correct)))
                 assertEquals("Method result does not match expected.", correct, test);
-        } catch (Exception e) {
+        } catch (NoSuchMethodException e) {
             fail(e);
-            return false;
+        } catch (IllegalAccessException e) {
+            fail(e);
+        } catch (InvocationTargetException e) {
+            Throwable t = e.getCause();
+            if (t instanceof RuntimeException) {
+                throw (RuntimeException) t;
+            } else {
+                fail(t);
+            }
         }
-        return true;
     }
 
     /**
@@ -77,4 +84,28 @@ public class FClassMethodTestCase extends TestCase {
         this.methodName = methodName;
     }
 
+}
+
+public class FClassMethodTestCase extends MethodTestCase {
+    /**
+     * Perform tests on flat class after transform canonical step.
+     * 
+     * @return  <code>true</code> if test case should stop after this method
+     */
+    protected boolean testTransformed(FClass fc) {
+        testMethod(fc);
+        return true;
+    }
+}
+
+public class InstClassMethodTestCase extends MethodTestCase {
+    /**
+     * Perform tests on instantiated class.
+     * 
+     * @return  <code>true</code> if test case should stop after this method
+     */
+    protected boolean testInstantiated(InstClassDecl icd) {
+        testMethod(icd);
+        return true;
+    }
 }
