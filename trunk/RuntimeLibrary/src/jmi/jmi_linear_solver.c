@@ -373,7 +373,9 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
     /* Compute right hand side at initial x*/ 
     if (solver->singular_jacobian == 1) {
         /* In case of singular system, use the last point in the calculation of the b-vector */
-        for (i = 0; i < block->n; i++) { block->x[i] = block->last_accepted_x[i]; }
+        if (jmi_block_solver_use_save_restore_state_behaviour(block)) {
+            for (i = 0; i < block->n; i++) { block->x[i] = block->last_accepted_x[i]; }
+        }
         info = block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
         /* info = block->F(block->problem_data,block->last_accepted_x, solver->rhs, JMI_BLOCK_EVALUATE); */
     } else {

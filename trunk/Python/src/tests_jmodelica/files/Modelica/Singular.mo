@@ -155,6 +155,15 @@ package Singular "Some tests for singular systems"
         der(v) = time;
     end LinearEvent2;
     
+    model LinearEvent3
+		Real x(start=0), y1, y2;
+		parameter Real p1=1, p2=0, p3=2;
+	equation
+	  y1 = noEvent(if - time >= 0.5 then (- p3) * p1 else (- p3) * x);
+	  y2 = - p2 - y1;
+	  y2 = noEvent(if time >= 0.5 then p3 * 0.01 else p3 * x);
+	end LinearEvent3;
+    
     model NonLinear4 "Actually Linear"
         parameter Real a11 = 1;
         parameter Real a12 = 0;
