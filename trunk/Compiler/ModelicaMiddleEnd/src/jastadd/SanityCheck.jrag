@@ -118,10 +118,9 @@ aspect Sanity {
     
     public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc, FAbstractEquation eqn) {
         FAbstractVariable fv = getFIdUse().myFV();
-        if (!fv.isParameter()) {
-            fc.sanityProblem(this, "Non-parameter set in parameter equation: %s", this);
-        } else if (fv.variability().initialParameterVariability()) {
-            fc.sanityProblem(this, "Initial parameter set in parameter equation: %s", this);
+        if (!variability().fixedParameterVariability()) {
+            String s = variability() + " set in parameter equation: %s" + this;
+            fc.sanityProblem(this, s);
         }
     }
     
