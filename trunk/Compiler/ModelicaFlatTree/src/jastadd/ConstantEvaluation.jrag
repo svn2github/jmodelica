@@ -2118,6 +2118,8 @@ aspect ConstantEvaluation {
     
     eq FTimeExp.cevalCalc(VariableEvaluator evaluator) = evaluator.timeValue();
     
+    eq FInStreamEpsExp.cevalCalc(VariableEvaluator evaluator) = evaluator.inStreamEpsilon();
+
     eq FDeferExp.cevalCalc(VariableEvaluator evaluator) = getFExp().ceval(evaluator);
     
     eq FBinExp.cevalCalc(VariableEvaluator evaluator) = evaluator.evalBinOp(this, getLeft().ceval(evaluator), getRight().ceval(evaluator));
@@ -4884,6 +4886,10 @@ aspect VariableEvaluator {
         }
         
         public CValue timeValue() {
+            return CValue.UNKNOWN;
+        }
+        
+        public CValue inStreamEpsilon() {
             return CValue.UNKNOWN;
         }
         

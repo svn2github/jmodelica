@@ -636,6 +636,13 @@ jmi_real_t jmi_turn_switch(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel
 jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, int rel);
 
 /**
+ * \brief Returns the epsilon used when computing inStream operator.
+ * 
+ * @param jmi The jmi struct
+ */
+jmi_real_t jmi_in_stream_eps(jmi_t* jmi);
+
+/**
  * \brief Check if file exists.
  *
  * @param file File path

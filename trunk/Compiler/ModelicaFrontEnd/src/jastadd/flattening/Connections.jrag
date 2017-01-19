@@ -475,7 +475,7 @@ aspect Connections {
 
     public class StreamConnectionSet extends ConnectionSet {
 
-        private double eps = Double.MAX_VALUE;
+        private double nominal = Double.MAX_VALUE;
 
         public StreamConnectionSet(ConnectionSetEntry e) {
             super(e);
@@ -486,9 +486,9 @@ aspect Connections {
         }
 
         public void generateEquations(List<FAbstractEquation> eqns) {
-            for (ConnectionSetEntry e : this)
-                eps = Math.min(e.flowEps(), eps);
-            
+            for (ConnectionSetEntry e : this) {
+                nominal = Math.min(e.flowNominal(), nominal);
+            }
             for (ConnectionSetEntry e : this) {
                 if (e.isOutside()) {
                     FExp left = e.createFIdUseExp();
@@ -537,7 +537,7 @@ aspect Connections {
             if (vars.getNumChildNoTransform() < 6) {
                 return stream;
             } else {
-                return new FExInStream(def, new FRealLitExp(eps), vars);
+                return new FExInStream(def, new FMulExp(new FInStreamEpsExp(), new FRealLitExp(nominal)), vars);
             }
 
 //            FExp stream = null;
@@ -988,7 +988,7 @@ aspect Connections {
          * 
          * Only valid for stream connection entries.
          */
-         public double flowEps() {
+         public double flowNominal() {
              throw new UnsupportedOperationException("Only supported for stream connection sets");
         }
 
@@ -1017,7 +1017,7 @@ aspect Connections {
         private static class StreamConnectionSetEntry extends ConnectionSetEntry {
 
             private FExp flowExp;
-            private double eps = 1e-8;
+            private double nominal = 1;
             private boolean contribute = true;
 
             public StreamConnectionSetEntry(InstComponentDecl cd, boolean outside, FQName fqName) {
@@ -1025,7 +1025,7 @@ aspect Connections {
                 InstComponentDecl flow = cd.myFlowVar();
                 flowExp = new FIdUseExp(flow.flattenedAccess());
                 try {
-                    eps *= Math.abs(flow.nominalAttributeCValue().realValue());
+                    nominal = Math.abs(flow.nominalAttributeCValue().realValue());
                 } catch (ConstantEvaluationException e) {}
                 try {
                     contribute = isOutside() ? 
@@ -1042,8 +1042,8 @@ aspect Connections {
                 return flowExp.fullCopy();
             }
 
-            public double flowEps() {
-                return eps;
+            public double flowNominal() {
+                return nominal;
             }
 
             public boolean contributesToStream() {

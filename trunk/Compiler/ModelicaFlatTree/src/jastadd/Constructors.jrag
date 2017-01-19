@@ -1083,7 +1083,8 @@ aspect InheritedFactoryMethods {
 	public FAssert         FAssert.createEmptyNode()         { return new FAssert();         }
 	public FNoExp          FNoExp.createEmptyNode()          { return new FNoExp();          }
     public FColonSizeExp   FColonSizeExp.createEmptyNode()   { return new FColonSizeExp();   }
-	
+    public FInStreamEpsExp FInStreamEpsExp.createEmptyNode() { return new FInStreamEpsExp(); }
+
     // Identifier expressions
     public FIdUseExp      FIdUseExp.createEmptyNode()      { return new FIdUseExp();      }
     public InstDerExp     InstDerExp.createEmptyNode()     { return new InstDerExp();     }

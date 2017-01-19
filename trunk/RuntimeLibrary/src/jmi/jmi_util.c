@@ -339,6 +339,10 @@ jmi_real_t jmi_turn_switch_time(jmi_t* jmi, jmi_real_t ev_ind, jmi_real_t sw, in
     return sw;
 }
 
+jmi_real_t jmi_in_stream_eps(jmi_t* jmi) {
+    return 1e-8;
+}
+
 int jmi_file_exists(const char* file) {
     FILE *fp;
     if (file && (fp = fopen(file,"r")))

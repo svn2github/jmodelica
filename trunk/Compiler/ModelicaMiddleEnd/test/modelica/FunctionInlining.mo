@@ -564,7 +564,7 @@ fclass FunctionInlining.BasicInline14
  constant Real a3.c[1].s = 5;
  Real x1;
 equation
- x1 = (max(- a2.c[1].f, 1.0E-8) * 4.0 + max(- a3.c[1].f, 1.0E-8) * 5.0) / (max(- a2.c[1].f, 1.0E-8) + max(- a3.c[1].f, 1.0E-8));
+ x1 = (max(- a2.c[1].f, _inStreamEpsilon) * 4.0 + max(- a3.c[1].f, _inStreamEpsilon) * 5.0) / (max(- a2.c[1].f, _inStreamEpsilon) + max(- a3.c[1].f, _inStreamEpsilon));
  a1.c[1].f + a2.c[1].f + a3.c[1].f = 0;
  a1.c[1].f = time;
  a2.c[1].f = time / 2;

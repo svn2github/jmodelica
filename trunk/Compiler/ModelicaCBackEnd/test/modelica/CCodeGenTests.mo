@@ -1024,6 +1024,80 @@ equation
 ")})));
 end CStringExp;
 
+package FInStreamEpsExp
+    model Simple1
+        connector StreamConnector
+            Real p;
+            flow Real f;
+            stream Real s;
+        end StreamConnector;
+        model A
+            StreamConnector c1(f(nominal=0.1));
+            StreamConnector c2;
+            StreamConnector c3(f(nominal=2));
+            Real x1 = inStream(c1.s);
+            Real x2 = inStream(c2.s);
+            Real x3 = inStream(c3.s);
+        equation
+            connect(c1, c2);
+            connect(c1, c3);
+        end A;
+        
+        model B
+            StreamConnector c4(p = 7, f = 8, s = 4);
+            StreamConnector c5(s = 5);
+            StreamConnector c6(s = 6, f = 9);
+        end B;
+        
+        A a;
+        B b;
+    equation
+        connect(a.c1, b.c4);
+        connect(a.c2, b.c5);
+        connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            description="Ensure that epsilon for InStream is generated correctly",
+            eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$ 
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _b_c4_p_12 = 7;
+    _a_c1_p_0 = _b_c4_p_12;
+    _b_c4_f_13 = 8;
+    _a_c1_f_1 = - _b_c4_f_13;
+    _b_c6_f_19 = 9;
+    _a_c3_f_7 = - _b_c6_f_19;
+    _a_c2_f_4 = - _a_c1_f_1 - _a_c3_f_7;
+    _b_c5_s_17 = 5;
+    _b_c6_s_20 = 6;
+    _a_c1_s_2 = jmi_divide_equation(jmi, (jmi_max(_a_c2_f_4, jmi_in_stream_eps(jmi) * 0.1) * _b_c5_s_17 + jmi_max(_a_c3_f_7, jmi_in_stream_eps(jmi) * 0.1) * _b_c6_s_20),(jmi_max(_a_c2_f_4, jmi_in_stream_eps(jmi) * 0.1) + jmi_max(_a_c3_f_7, jmi_in_stream_eps(jmi) * 0.1)),\"(max(a.c2.f, _inStreamEpsilon * 0.1) * b.c5.s + max(a.c3.f, _inStreamEpsilon * 0.1) * b.c6.s) / (max(a.c2.f, _inStreamEpsilon * 0.1) + max(a.c3.f, _inStreamEpsilon * 0.1))\");
+    _a_c2_p_3 = _a_c1_p_0;
+    _b_c4_s_14 = 4;
+    _a_c2_s_5 = jmi_divide_equation(jmi, (jmi_max(_a_c1_f_1, jmi_in_stream_eps(jmi) * 0.1) * _b_c4_s_14 + jmi_max(_a_c3_f_7, jmi_in_stream_eps(jmi) * 0.1) * _b_c6_s_20),(jmi_max(_a_c1_f_1, jmi_in_stream_eps(jmi) * 0.1) + jmi_max(_a_c3_f_7, jmi_in_stream_eps(jmi) * 0.1)),\"(max(a.c1.f, _inStreamEpsilon * 0.1) * b.c4.s + max(a.c3.f, _inStreamEpsilon * 0.1) * b.c6.s) / (max(a.c1.f, _inStreamEpsilon * 0.1) + max(a.c3.f, _inStreamEpsilon * 0.1))\");
+    _a_c3_p_6 = _a_c2_p_3;
+    _a_c3_s_8 = jmi_divide_equation(jmi, (jmi_max(_a_c1_f_1, jmi_in_stream_eps(jmi) * 0.1) * _b_c4_s_14 + jmi_max(_a_c2_f_4, jmi_in_stream_eps(jmi) * 0.1) * _b_c5_s_17),(jmi_max(_a_c1_f_1, jmi_in_stream_eps(jmi) * 0.1) + jmi_max(_a_c2_f_4, jmi_in_stream_eps(jmi) * 0.1)),\"(max(a.c1.f, _inStreamEpsilon * 0.1) * b.c4.s + max(a.c2.f, _inStreamEpsilon * 0.1) * b.c5.s) / (max(a.c1.f, _inStreamEpsilon * 0.1) + max(a.c2.f, _inStreamEpsilon * 0.1))\");
+    _a_x1_9 = _b_c4_s_14;
+    _a_x2_10 = _b_c5_s_17;
+    _a_x3_11 = _b_c6_s_20;
+    _b_c5_p_15 = _a_c2_p_3;
+    _b_c5_f_16 = - _a_c2_f_4;
+    _b_c6_p_18 = _a_c3_p_6;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+ ")})));
+    end Simple1;
+end FInStreamEpsExp;
+
+
 
 
 

@@ -418,6 +418,7 @@ aspect FlatTypeAnalysis {
     eq FStringLitExp.type()   = fStringScalarType();
     eq FTimeExp.type()        = fRealScalarType();
     eq FAbstractDerExp.type() = fRealType(size());
+    eq FInStreamEpsExp.type() = fRealScalarType();
 
     eq FVectUnaryBuiltIn.type() = scalarType().sizedType(size());
 

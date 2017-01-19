@@ -363,6 +363,11 @@ aspect CCodeGenExpressions {
         str.print("_time");
     }
 
+    @Override
+    public void FInStreamEpsExp.prettyPrint_C(CodePrinter p, CodeStream str, String indent) {
+        str.print("jmi_in_stream_eps(jmi)");
+    }
+
     /*=========================================================================
      * Numeric Literal Expressions
      ========================================================================*/

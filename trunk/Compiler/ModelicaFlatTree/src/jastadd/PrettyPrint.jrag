@@ -1684,6 +1684,10 @@ aspect FlatPrettyPrint {
 		str.print("false");
 	}
 	
+    protected void FInStreamEpsExp.prettyPrintExp(Printer p, CodeStream str, String indent) {
+        str.print("_inStreamEpsilon");
+    }
+
 	public void FIdUse.prettyPrint(Printer p, CodeStream str, String indent) {
 		if (getFQName().isScalarized())
 			str.print(name());
