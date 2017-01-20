@@ -111,26 +111,6 @@ aspect Connections {
     eq FExInStream.needsLaterInStreamRewrite()   = true;
     eq FDerStream.needsLaterInStreamRewrite()    = true;
 
-
-    public void ASTNode.enableExpandedInStreamRewrite() {
-        for (ASTNode n : this)
-            n.enableExpandedInStreamRewrite();
-    }
-
-    public void FExInStream.enableExpandedInStreamRewrite() {
-        super.enableExpandedInStreamRewrite();
-        rewriteExpandedInStream = true;
-        is$Final = false;
-    }
-
-    public void FDerStream.enableExpandedInStreamRewrite() {
-        super.enableExpandedInStreamRewrite();
-        rewriteStreams = true;
-        is$Final = false;
-    }
-
-    protected boolean FExInStream.rewriteExpandedInStream = false;
-
     public class FClass {
         public class enableExpandedInStreamRewrite extends Transformation {
             // Depends on variabilityPropagationIfSet and the following aliasEliminationIfSet being done
@@ -140,40 +120,126 @@ aspect Connections {
             }
         }
     }
+    
+    public void ASTNode.enableExpandedInStreamRewrite() {
+        for (ASTNode n : this)
+            n.enableExpandedInStreamRewrite();
+    }
+    
+    public void FDerStream.enableExpandedInStreamRewrite() {
+        super.enableExpandedInStreamRewrite();
+        rewriteStreams = true;
+        is$Final = false;
+    }
 
-    /**
-     * Rewrite the expanded form of the inSteam operator to resulting expression.
-     */
-    rewrite FExInStream {
-        when (rewriteExpandedInStream) to FExp {
-            FExp stream = getDefault().treeCopy();
-            FExp sum = null;
-            FExp div = null;
-            FExp eps = getEps();
-            int n = 0;
-            for (InStreamPart cont : contributors()) {
-                stream = cont.stream.treeCopy();
-                FExp flow = cont.flow.treeCopy();
-                if (!cont.outside) {
-                    flow = new FNegExp(flow);
-                }
-                FExp divP = new FMaxExp(flow, new Opt(eps.treeCopyNoTransform()));
-                FExp sumP = new FMulExp(divP.treeCopyNoTransform(), stream);
-                if (sum == null) {
-                    sum = sumP;
-                    div = divP;
-                } else {
-                    sum = new FAddExp(sum, sumP);
-                    div = new FAddExp(div, divP);
-                }
-                n++;
-            }
-            if (n < 2) {
-                return stream;
-            } else {
-                return new FDivExp(sum, div);
+    public void FExInStream.enableExpandedInStreamRewrite() {
+        super.enableExpandedInStreamRewrite();
+        
+        // We don't need to add anything for < 2 contributors
+        FExp stream = getDefault().treeCopy();
+        int n = 0;
+        for (InStreamPart cont : contributors()) {
+            stream = cont.stream.treeCopy();
+            n++;
+            if (n > 1) {
+                break;
             }
         }
+        if (n < 2) {
+            replaceMe(stream);
+            return;
+        }
+        
+        FExp eps   = getEps();
+        FExp s     = generateS();
+        FExp alpha = generateAlpha(eps, s);
+        
+        // Generate replacement expression
+        FExp sum = null;
+        FExp div = null;
+        for (InStreamPart cont : contributors()) {
+            stream = cont.stream.treeCopy();
+            FExp flow = cont.flow.treeCopy();
+            if (!cont.outside) {
+                flow = new FNegExp(flow);
+            }
+            FExp divP = positiveMax(eps, flow, s);
+            FExp sumP = new FMulExp(divP.treeCopyNoTransform(), stream);
+            if (sum == null) {
+                sum = sumP;
+                div = divP;
+            } else {
+                sum = new FAddExp(sum, sumP);
+                div = new FAddExp(div, divP);
+            }
+        }
+        replaceMe(new FDivExp(sum, div));
+    }
+
+    private void FExInStream.addEquation(String name, FExp exp) {
+        myFClass().addFVariable(type().createTempFVariable(new FQNameString(name), variability()));
+        myFClass().addFAbstractEquation(new FEquation(new FIdUseExp(name), exp));
+    }
+
+    private FExp FExInStream.generateS() {
+        FExp sSum = null;
+        for (InStreamPart cont : contributors()) {
+            FExp flow = cont.flow.treeCopy();
+            if (!cont.outside) {
+                flow = new FNegExp(flow);
+            }
+            FExp sTerm = new FMaxExp(flow, new Opt<FExp>(new FIntegerLitExp(0)));
+            if (sSum == null) {
+                sSum = sTerm;
+            } else {
+                sSum = new FAddExp(sTerm, sSum);
+            }
+        }
+        String sName = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.STREAM_S);
+        addEquation(sName, sSum);
+        return new FIdUseExp(sName);
+    }
+
+    private FExp FExInStream.generateAlpha(FExp eps, FExp s) {
+        FExp sDivEps = new FDivExp(s.treeCopyNoTransform(), eps.treeCopyNoTransform());
+        FExp alpha = new FSmoothExp(
+                new FIntegerLitExp(1), 
+                new FIfExp(
+                        new FGtExp(
+                                s.treeCopyNoTransform(),
+                                eps.treeCopyNoTransform()),
+                        new FIntegerLitExp(1),
+                        new FIfExp(
+                                new FGtExp(
+                                        s.treeCopyNoTransform(),
+                                        new FIntegerLitExp(0)),
+                                new FMulExp(
+                                        sDivEps.treeCopyNoTransform(), 
+                                        new FMulExp(
+                                                sDivEps.treeCopyNoTransform(),
+                                                new FSubExp(
+                                                        new FIntegerLitExp(3),
+                                                        new FMulExp(
+                                                                new FIntegerLitExp(2),
+                                                                s.treeCopyNoTransform())))),
+                                new FIntegerLitExp(0))));
+        String alphaName = calcGeneratedVarName(FlatVariableMap.GeneratedVarType.STREAM_ALPHA);
+        addEquation(alphaName, alpha);
+        return new FIdUseExp(alphaName);
+    }
+
+    private FExp FExInStream.positiveMax(FExp eps, FExp flow, FExp alpha) {
+        return new FAddExp(
+                new FMulExp(
+                        alpha.treeCopyNoTransform(),
+                        new FMaxExp(
+                                flow,
+                                new Opt<FExp>(new FIntegerLitExp(0)))),
+                new FMulExp(
+                        new FSubExp(
+                                new FIntegerLitExp(1),
+                                alpha.treeCopyNoTransform()),
+                        eps.treeCopyNoTransform()));
     }
 
 
@@ -539,39 +605,7 @@ aspect Connections {
             } else {
                 return new FExInStream(def, new FMulExp(new FInStreamEpsExp(), new FRealLitExp(nominal)), vars);
             }
-
-//            FExp stream = null;
-//            FExp sum = null;
-//            FExp div = null;
-//            int numContributors = 0;
-//            final boolean ignoreMinMax = size() == 2;
-//            for (ConnectionSetEntry e : this) {
-//                if (cse != e && (ignoreMinMax || e.contributesToStream())) {
-//                    numContributors++;
-//                    FExp flow = e.createFlowFIdUseExp();
-//                    stream = (name == null) ? e.createFIdUseExp() : e.createFIdUseExp(name, cse);
-//                    if (e.isOutside()) 
-//                        stream = new FInStream(stream);
-//                    else
-//                        flow = new FNegExp(flow);
-//                    FExp divP = new FMaxExp(flow, new Opt(new FRealLitExp(eps)));
-//                    FExp sumP = new FMulExp(divP.fullCopy(), stream);
-//                    if (sum == null) {
-//                        sum = sumP;
-//                        div = divP;
-//                    } else {
-//                        sum = new FAddExp(sum, sumP);
-//                        div = new FAddExp(div, divP);
-//                    }
-//                }
-//            }
-//            
-//            if (numContributors < 2) 
-//                return stream;
-//            else 
-//                return new FDivExp(sum, div);
         }
-
     }
 
     /**

@@ -1856,7 +1856,9 @@ aspect FlatFunctionUtils {
          public enum GeneratedVarType {
              TEMP("temp_"),
              INDICATOR("_eventIndicator_"),
-             SAMPLE("_sampleItr_");
+             SAMPLE("_sampleItr_"),
+             STREAM_S("_stream_s_"),
+             STREAM_ALPHA("_stream_alpha_");
              
              private String prefix;
              
