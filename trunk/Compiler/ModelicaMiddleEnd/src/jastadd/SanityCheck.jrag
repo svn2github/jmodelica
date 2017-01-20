@@ -119,7 +119,7 @@ aspect Sanity {
     public void FIdUseExp.sanityCheckParameterEquationLeft(FClass fc, FAbstractEquation eqn) {
         FAbstractVariable fv = getFIdUse().myFV();
         if (!variability().fixedParameterVariability()) {
-            String s = variability() + " set in parameter equation: %s" + this;
+            String s = variability() + " set in parameter equation: " + this;
             fc.sanityProblem(this, s);
         }
     }
