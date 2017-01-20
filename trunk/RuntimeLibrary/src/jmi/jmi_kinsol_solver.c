@@ -312,40 +312,24 @@ static void kin_char_log(jmi_kinsol_solver_t* solver, char c) {
     }
 }
 
-static double kin_dot_product(double* y, double* x, int n) {
-    double prod = 0;
-    int i;
-    for(i=0; i<n; i++)
-        prod+= y[i]*x[i];
-    return prod;
-}
-
-static void kin_sum_vectors(double* y, double* x, int n, double* z) {
-    int i;
-    for(i=0; i<n; i++)
-        z[i] = y[i]+ x[i];
-}
-
-static void kin_prod_vectors(double* y, double* x, int n, double* z) {
-    int i;
-    for(i=0; i<n; i++)
-        z[i] = y[i]*x[i];
-}
-
 int jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
     jmi_kinsol_solver_t* solver = (jmi_kinsol_solver_t*)block->solver;
     int N = block->n;
     int leftColumns = N;
     int i, group = 0;
-    realtype* rows_r = N_VGetArrayPointer(solver->work_vector2);
-    N_VConst_Serial(0.0, solver->work_vector);
+    N_Vector col_i = N_VCloneEmpty(solver->work_vector);
+
+    N_VConst(0.0, solver->work_vector);
     while(leftColumns > 0 && group <N) {
         group++;
-        N_VConst_Serial(0.0, solver->work_vector2);
+        N_VConst(0.0, solver->work_vector2);
         for(i = 0; i<N; i++) {
             if(Ith(solver->work_vector, i) == 0.0) {
-                if(kin_dot_product(rows_r, solver->J_Dependency->cols[i], N)==0.0) { /* Column can be added */
-                    kin_sum_vectors(rows_r, solver->J_Dependency->cols[i], N, rows_r);
+                N_VSetArrayPointer(DENSE_COL(solver->J_Dependency, i), col_i);
+                
+                if(N_VDotProd(solver->work_vector2, col_i) == 0.0) { /* Column can be added */                  
+                    N_VLinearSum(1.0, solver->work_vector2, 1.0, col_i, solver->work_vector2);
+
                     solver->jac_compression_groups[N-leftColumns]=group;
                     solver->jac_compression_group_index[N-leftColumns]=i;
                     Ith(solver->work_vector, i) = 1.0;
@@ -354,6 +338,8 @@ int jmi_kin_setup_column_partition(jmi_block_solver_t * block) {
             }
         }
     }
+    N_VDestroy(col_i);
+    
     if(leftColumns != 0) {
         jmi_log_node(block->log, logWarning, "ColumnPartitioning", "Column partitioning error, dependency data may be corrupt.");
         return -1;
@@ -637,8 +623,11 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
                     /* Generate the jth col of Jac(u) */
                     N_VSetArrayPointer(DENSE_COL(J, solver->jac_compression_group_index[k]), jthCol);
                     N_VLinearSum(inc_inv, ftemp, -inc_inv, fu, jthCol);
-                    kin_prod_vectors(solver->J_Dependency->cols[solver->jac_compression_group_index[k]], N_VGetArrayPointer(jthCol), N, N_VGetArrayPointer(jthCol));
-                } 
+                    
+                    N_VSetArrayPointer(DENSE_COL(solver->J_Dependency, solver->jac_compression_group_index[k]), solver->work_vector3);
+                    N_VProd(solver->work_vector3, jthCol, jthCol);
+                    
+                }
                 /* Restore original array pointer in tmp2 */
                 N_VSetArrayPointer(tmp2_data, tmp2);
                 first_index_in_group = i+1;
@@ -1799,8 +1788,8 @@ static int jmi_kin_lsetup(struct KINMemRec * kin_mem) {
     }
 
     if(block->force_rescaling) {
-		if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
-			kin_char_log(solver, 's');
+        if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
+            kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
     }
@@ -2133,7 +2122,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
         int i;
         jmi_log_node_t node = jmi_log_enter_fmt(block->log, logInfo, "AggressiveResidualScalingUpdate", "Updating f_scale aggressively");
         N_VScale(1.0, block->f_scale, solver->work_vector);
-		kin_char_log(solver, 's');
+        kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
         for(i=0; i<block->n; i++) {
@@ -2250,7 +2239,7 @@ static int jmi_kin_lsolve(struct KINMemRec * kin_mem, N_Vector x, N_Vector b, re
             
         } else if (solver->handling_of_singular_jacobian_flag == JMI_MINIMUM_NORM) {
             /*
-             *   DGELSS - compute the minimum norm solution to	a real 
+             *   DGELSS - compute the minimum norm solution to  a real 
              *   linear least squares problem
              * 
              * SUBROUTINE DGELSS( M, N, NRHS, A, LDA, B, LDB, S, RCOND, RANK,WORK, LWORK, INFO )
@@ -2458,6 +2447,7 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
 
     solver->work_vector = N_VNew_Serial(n);
     solver->work_vector2 = N_VNew_Serial(n);
+    solver->work_vector3 = N_VNewEmpty_Serial(n);
     solver->lapack_work = (realtype*)calloc(4*(n+1),sizeof(realtype));
     solver->lapack_iwork = (int *)calloc(n+2, sizeof(int));
     solver->lapack_ipiv = (int *)calloc(n+2, sizeof(int));
@@ -2577,6 +2567,7 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     free(solver->jac_compression_group_index);
     N_VDestroy_Serial(solver->work_vector);
     N_VDestroy_Serial(solver->work_vector2);
+    N_VDestroy_Serial(solver->work_vector3);
     free(solver->lapack_work);
     free(solver->lapack_iwork);
     free(solver->lapack_ipiv);
@@ -2821,9 +2812,9 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
 
     /* update the scaling only once per time step */
     if(block->init || (block->options->rescale_each_step_flag && (curtime > block->scale_update_time)) || block->force_rescaling) {
-		if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
-			kin_char_log(solver, 's');
-		jmi_update_f_scale(block);
+        if(block->options->residual_equation_scaling_mode != jmi_residual_scaling_none)
+            kin_char_log(solver, 's');
+        jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
     }
     
@@ -2897,7 +2888,7 @@ int jmi_kinsol_solver_solve(jmi_block_solver_t * block){
                          "solution in <block: %s>", block->label);
         }
         /* Update the scaling  */
-		kin_char_log(solver, 's');
+        kin_char_log(solver, 's');
         jmi_update_f_scale(block);
         jmi_regularize_and_do_condition_estimate_on_scaled_jacobian(block);
         
