@@ -255,7 +255,7 @@ int jmi_compare_discrete_reals(jmi_real_t* dr_pre, jmi_real_t* dr_post, jmi_real
     int i, all_discrete_reals_equal = 1;
     
     for (i = 0; i < size; i++){
-        if (RAbs(dr_pre[i] - dr_post[i])/nominals[i] > JMI_ALMOST_EPS ){
+        if (JMI_ABS(dr_pre[i] - dr_post[i])/nominals[i] > JMI_ALMOST_EPS ){
             all_discrete_reals_equal = 0;
             break;
         }
