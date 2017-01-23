@@ -74,16 +74,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         List<T> subNodes = new ArrayList<T>();
         Map<String, T> subNodesNameMap = new HashMap<String, T>();
         for (SubNodePair<N> subNodePair : node.annotationSubNodes()) {
-            
-            // Might already exist
-            T subNode = subNodesNameMap.get(subNodePair.name);
-            GenericAnnotationNode<?, N, V> subNodeUC = subNode; //Upcast
-            if (subNode == null) {
-                subNode = createNode(subNodePair.name, subNodePair.node);
-            } else if (subNodeUC.node != subNodePair.node) {
-                subNodeUC.node = node;
-                subNodeUC.resetSubNodesCache();
-            }
+            T subNode = createNode(subNodePair.name, subNodePair.node);
             if (subNode == null) {
                 continue;
             }
