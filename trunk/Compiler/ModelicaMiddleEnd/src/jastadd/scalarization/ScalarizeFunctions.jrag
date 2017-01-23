@@ -284,6 +284,7 @@ aspect FunctionScalarization {
         for (Index i : indices()) {
             FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
             name.scalarized = true;
+            arr.get(i).createArrayTemporaries(s);
             s.add(new FIdUseExp(name), arr.get(i).scalarize(s));
         }
         useTempVar = true;
