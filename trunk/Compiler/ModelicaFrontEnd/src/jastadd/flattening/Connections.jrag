@@ -174,11 +174,12 @@ aspect Connections {
     /**
      * Generate and add variable with varType, add an equation for the variable with rhs <code>exp</code>.
      */
-    private void FExInStream.addEquation(FlatVariableMap.GeneratedVarType varType, FExp exp) {
-        String sName = calcGeneratedVarName(varType);
+    private FExp FExInStream.addEquation(FlatVariableMap.GeneratedVarType varType, FExp exp) {
+        String name = calcGeneratedVarName(varType);
         FTypePrefixVariability v = variability().combine(ASTNode.fFixedParameter());
         myFClass().addFVariable(type().createTempFVariable(new FQNameString(name), variability()));
         myFClass().equationList(v).add(new FEquation(new FIdUseExp(name), exp));
+        return new FIdUseExp(name);
     }
     
     /**
