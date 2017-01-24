@@ -303,5 +303,14 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
     public boolean isFinal() {
         return node().isFinal();
     }
+    
+    /**
+     * Returns the parent node.
+     * 
+     * @return the parent node.
+     */
+    protected T parent() {
+        return parent;
+    }
 
 }
