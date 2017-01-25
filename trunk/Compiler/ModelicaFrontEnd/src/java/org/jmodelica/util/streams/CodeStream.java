@@ -20,6 +20,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.Collection;
 
 public class CodeStream {
     
@@ -99,5 +100,16 @@ public class CodeStream {
     
     public void formatln(String format, Object... args) {
         println(String.format(format, args));
+    }
+
+    public void print(Collection<? extends Object> collection, String separator) {
+        boolean first = true;
+        for (Object o : collection) {
+            if (!first) {
+                print(separator);
+            }
+            first = false;
+            print(o);
+        }
     }
 }
