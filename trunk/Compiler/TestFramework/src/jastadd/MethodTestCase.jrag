@@ -33,8 +33,9 @@ public abstract class MethodTestCase extends TestCase {
             String test = method.invoke(o).toString();
             String correct = filter(getOutput());
 
-            if (!removeWhitespace(test).equals(removeWhitespace(correct)))
+            if (!checkEquals(correct, test)) {
                 assertEquals("Method result does not match expected.", correct, test);
+            }
         } catch (NoSuchMethodException e) {
             fail(e);
         } catch (IllegalAccessException e) {
