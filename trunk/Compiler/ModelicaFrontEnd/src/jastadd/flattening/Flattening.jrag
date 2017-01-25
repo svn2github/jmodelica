@@ -1303,11 +1303,12 @@ aspect Flattening {
                 indexStack.push(i++);
                 icd.addAttributesToFV(attr, indexStack, excludeBinding, isBound);
                 indexStack.pop();
-                isBound = true;
             }
         } else {
             for (InstComponentDecl icd : allInstComponentDecls()) {
-                icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
+                if (icd.useInFlattening()) {
+                    icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
+                }
             }
         }
     }
@@ -1341,7 +1342,6 @@ aspect Flattening {
         FAttribute a = findMatching(attr, name());
         boolean create = (a == null);
         boolean canBind = hasBindingFExp() || variability().knownParameterOrLess();
-        isBound = isBound || (a != null && a.hasValue());
         List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
         if (!excludeBinding && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
@@ -1364,10 +1364,7 @@ aspect Flattening {
         }
         
         if (!isBound && canBind) {
-            a.setValue(flattenBindingFExp());
-            if (indexStack.size() > 0) {
-                a.setFEach(new FEach());
-            }
+            a.setValue(flattenBindingFExp().addInDim(indexStack, 0, (FArray)a.getValue()));
         }
     }
     
@@ -1817,6 +1814,9 @@ aspect Flattening {
     public void InstClassRedeclare.collectAttributes(
             List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {}
 
+    syn boolean InstComponentDecl.isBuiltIn() = false;
+    eq InstBuiltIn.isBuiltIn()                = true;
+
     public void InstComponentModification.collectAttributes(
             List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
         if (hasInstModification()) {
@@ -1827,7 +1827,7 @@ aspect Flattening {
                 FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
                 FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
                 FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
-                if (getInstModification().hasInstValueMod()) {
+                if (im.hasInstValueMod() && getName().myInstComponentDecl().isBuiltIn()) {
                     InstValueModification ivm = im.getInstValueMod();
                     a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
                 }
@@ -1836,7 +1836,9 @@ aspect Flattening {
                 if (getComponentModification().hasFinal())
                     a.setFFinal(new FFinal());
                 im.collectAttributes(a.getFAttributes(), prefix, aer, cls);
-                attrs.add(a);
+                if (a.hasValue() || a.getNumFAttributeNoTransform() > 0) {
+                    attrs.add(a);
+                }
             }
         }
     }
