@@ -18,6 +18,8 @@ import org.jmodelica.util.annotations.GenericAnnotationNode;
 import org.jmodelica.util.annotations.FailedToSetAnnotationValueException;
 import org.jmodelica.util.annotations.AnnotationProvider;
 import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
+import org.jmodelica.util.annotations.PossiblyAnnotation;
+import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.collections.TransformerIterable;
 
 aspect SrcAnnotations {
@@ -76,9 +78,7 @@ aspect SrcAnnotations {
         
     }
     
-    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, Exp> {
-        public String annotationName();
-    }
+    public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, Exp> {}
     
     /*******************
      *  Modifications   
@@ -184,11 +184,6 @@ aspect SrcAnnotations {
         }
 
         @Override
-        public String annotationName() {
-            return null;
-        }
-
-        @Override
         public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
             if (opt.getNumChild() > 0) {
                 return opt.getChild(0).annotationSubNodes();
@@ -221,6 +216,11 @@ aspect SrcAnnotations {
             return false;
         }
 
+        @Override
+        public String resolveURI(String str) {
+            return opt.resolveURI(str);
+        }
+
     }
 
     public class SrcAnnotation {
@@ -231,6 +231,155 @@ aspect SrcAnnotations {
             return new AnnotationOptAnnotationProvider(opt);
         }
     }
+
+    /*******************
+     *       Exp        
+     ******************/
+    /*
+     * Exp cant implement SrcAnnotationProvider since then it will be both the
+     * provider and the value of an annotation, take for example
+     * ArrayConstructor. We want to use it as an annotation node when it
+     * represents the list of graphical primitives in an diagram or icon. But
+     * in some situations we want to treat it as the value of annother
+     * annotation node. When it is a provider, what would  annotationValue()
+     * return? If it returns this, then that would be wrong, since when it is
+     * the provider, then it is the RHS of the equal sign that is the value,
+     * which doesn't exist for an ArrayConstructor, implying it should return
+     * null. Mean while if it actually was the RHS of another exp, then it
+     * should return this. So we need this class.
+     * 
+     * Remember a provider points to the entire annotation node, e.g.:
+     *      a(b,c,d)=e
+     * while annotationValue() points at 'e' in this case.
+     */
+    Exp implements PossiblyAnnotation<SrcAnnotationProvider>;
+
+    syn SrcAnnotationProvider Exp.asAnnotationProvider() = null;
+    eq ArrayConstructor.asAnnotationProvider()           = getFunctionArguments();
+    eq FunctionCall.asAnnotationProvider()               = new SrcSingeltonProvider(name(), getFunctionArguments());
+
+    syn SrcAnnotationProvider Exp.asNamedAnnotationProvider() = null;
+    eq FunctionCall.asNamedAnnotationProvider() = hasFunctionArguments() ? getFunctionArguments() : null;
+
+    syn String Exp.namedAnnotationProviderName() {
+        throw new IllegalArgumentException("Can't call namedAnnotationName() for the type " + getClass().getSimpleName());
+    }
+    eq FunctionCall.namedAnnotationProviderName() = name();
+
+    FunctionArguments implements SrcAnnotationProvider;
+    
+    @Override
+    public Exp FunctionArguments.annotationValue() {
+        return null;
+    }
+    
+    @Override
+    public Iterable<SubNodePair<SrcAnnotationProvider>> FunctionArguments.annotationSubNodes() {
+        return new ChainedIterable(new TransformerIterable<Exp, SubNodePair<SrcAnnotationProvider>>(getExps()) {
+            @Override
+            protected SubNodePair<SrcAnnotationProvider> transform(Exp exp) {
+                if (exp.asNamedAnnotationProvider() == null) {
+                    return new SubNodePair<SrcAnnotationProvider>(null, new ExpValueProvider(exp));
+                } else {
+                    return new SubNodePair<SrcAnnotationProvider>(exp.namedAnnotationProviderName(),
+                            exp.asNamedAnnotationProvider());
+                }
+            }
+        }, new TransformerIterable<NamedArgument, SubNodePair<SrcAnnotationProvider>>(getNamedArguments()) {
+            @Override
+            protected SubNodePair<SrcAnnotationProvider> transform(NamedArgument arg) {
+                return new SubNodePair<SrcAnnotationProvider>(arg.getName().name(), arg);
+            }
+        });
+    }
+
+    @Override
+    public void FunctionArguments.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+        throw new FailedToSetAnnotationValueException();
+    }
+
+    @Override
+    public SrcAnnotationProvider FunctionArguments.addAnnotationSubNode(String name) {
+        return null;
+    }
+
+    @Override
+    public boolean FunctionArguments.isEach() {
+        return false;
+    }
+
+    @Override
+    public boolean FunctionArguments.isFinal() {
+        return false;
+    }
+    
+    NamedArgument implements SrcAnnotationProvider;
+    
+    @Override
+    public Exp NamedArgument.annotationValue() {
+        return getExp();
+    }
+    
+    @Override
+    public Iterable<SubNodePair<SrcAnnotationProvider>> NamedArgument.annotationSubNodes() {
+        return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+    }
+    
+    @Override
+    public void NamedArgument.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+        throw new FailedToSetAnnotationValueException();
+    }
+    
+    @Override
+    public SrcAnnotationProvider NamedArgument.addAnnotationSubNode(String name) {
+        return null;
+    }
+    
+    @Override
+    public boolean NamedArgument.isEach() {
+        return false;
+    }
+    
+    @Override
+    public boolean NamedArgument.isFinal() {
+        return false;
+    }
+//    ArrayConstructor implements SrcAnnotationProvider;
+//
+//    @Override
+//    public Exp ArrayConstructor.annotationValue() {
+//        return null;
+//    }
+//
+//    @Override
+//    public Iterable<SubNodePair<SrcAnnotationProvider>> ArrayConstructor.annotationSubNodes() {
+//        return new TransformerIterable<Exp, SubNodePair<SrcAnnotationProvider>>(getFunctionArguments().getExps()) {
+//            @Override
+//            protected SubNodePair<SrcAnnotationProvider> transform(Exp exp) {
+//                return new SubNodePair<SrcAnnotationProvider>(null, new ExpAnnotationProvider(exp));
+//            }
+//        };
+//    }
+//
+//    @Override
+//    public void ArrayConstructor.setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+//        throw new FailedToSetAnnotationValueException();
+//    }
+//
+//    @Override
+//    public SrcAnnotationProvider ArrayConstructor.addAnnotationSubNode(String name) {
+//        return null;
+//    }
+//
+//    @Override
+//    public boolean ArrayConstructor.isEach() {
+//        return false;
+//    }
+//
+//    @Override
+//    public boolean ArrayConstructor.isFinal() {
+//        return false;
+//    }
 
     /*******************
      *     Helpers      
@@ -245,5 +394,95 @@ aspect SrcAnnotations {
     public SrcAnnotationProvider ParseAnnotation.addAnnotationSubNode(String name) {
         return getClassModification().addAnnotationSubNode(name);
     }
+
+    public class SrcSingeltonProvider implements SrcAnnotationProvider {
+
+        private final SrcAnnotationProvider provider;
+        private final String name;
+
+        public SrcSingeltonProvider(String name, SrcAnnotationProvider provider) {
+            this.provider = provider;
+            this.name = name;
+        }
+
+        @Override
+        public Exp annotationValue() {
+            return null;
+        }
+
+        @Override
+        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
+            return Collections.singletonList(new SubNodePair<SrcAnnotationProvider>(name, provider));
+        }
+
+        @Override
+        public void setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+            throw new FailedToSetAnnotationValueException();
+        }
+
+        @Override
+        public SrcAnnotationProvider addAnnotationSubNode(String name) {
+            return null;
+        }
+
+        @Override
+        public boolean isEach() {
+            return false;
+        }
+
+        @Override
+        public boolean isFinal() {
+            return false;
+        }
+
+        @Override
+        public String resolveURI(String str) {
+            return provider.resolveURI(str);
+        }
+    }
     
+    public class ExpValueProvider implements SrcAnnotationProvider {
+
+        private final Exp exp;
+
+        public ExpValueProvider(Exp exp) {
+            this.exp = exp;
+        }
+
+        @Override
+        public Exp annotationValue() {
+            return exp;
+        }
+
+        @Override
+        public Iterable<SubNodePair<SrcAnnotationProvider>> annotationSubNodes() {
+            return Collections.<SubNodePair<SrcAnnotationProvider>>emptyList();
+        }
+
+        @Override
+        public void setAnnotationValue(Exp newValue) throws FailedToSetAnnotationValueException {
+            throw new FailedToSetAnnotationValueException();
+        }
+
+        @Override
+        public SrcAnnotationProvider addAnnotationSubNode(String name) {
+            return null;
+        }
+
+        @Override
+        public boolean isEach() {
+            return false;
+        }
+
+        @Override
+        public boolean isFinal() {
+            return false;
+        }
+
+        @Override
+        public String resolveURI(String str) {
+            return exp.resolveURI(str);
+        }
+
+    }
 }

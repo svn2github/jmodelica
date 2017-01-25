@@ -15,6 +15,8 @@
 */
 package org.jmodelica.util.annotations;
 
+import org.jmodelica.util.values.Evaluable;
+
 /**
  * Generic interface which all nodes that are supposed to be navigable by
  * {@code GenericAnnotationNode}.
@@ -22,13 +24,14 @@ package org.jmodelica.util.annotations;
  * @param <N> The base node type which we deal with
  * @param <V> The value that is returned by the nodes
  */
-public interface AnnotationProvider<N, V> {
+public interface AnnotationProvider<N extends AnnotationProvider<N, V>, V extends Evaluable & PossiblyAnnotation<N>> {
     public Iterable<SubNodePair<N>> annotationSubNodes();
     public V annotationValue();
     public void setAnnotationValue(V newValue) throws FailedToSetAnnotationValueException;
     public N addAnnotationSubNode(String name) throws AnnotationEditException;
     public boolean isEach();
     public boolean isFinal();
+    public String resolveURI(String str);
 
     public class SubNodePair<N> {
         public final String name;

@@ -22,6 +22,11 @@ import java.util.Map;
 import org.jmodelica.util.BinaryOperation;
 import org.jmodelica.util.collections.ConstArrayIterator;
 import org.jmodelica.util.collections.SingleIterator;
+import org.jmodelica.util.values.ConstValue;
+import org.jmodelica.util.values.Evaluable;
+import org.jmodelica.util.values.ConstantEvaluationException;
+import org.jmodelica.util.values.ConstantEvaluationNotReadyException;
+import org.jmodelica.util.values.FunctionEvaluationException;
 
 
 /**
@@ -43,89 +48,12 @@ import org.jmodelica.util.collections.SingleIterator;
  * 
  */
 aspect ConstantEvaluation {
-	
-	// TODO: shouldn't this inherit ModelicaException?
-	/**
-	 * An exception denoting a failure in constant evaluation.
-	 */
-	public class ConstantEvaluationException extends RuntimeException {
-		
-		private CValue val;
-		
-		public ConstantEvaluationException(CValue val, String op) {
-			super(op);
-			this.val = val;
-		}
-		
-		public ConstantEvaluationException() {
-			super("Unspecified constant evaluation failure");
-			this.val = null;
-		}
-		
-		/**
-		 * Gets the CValue that caused the failure.
-		 */
-		public CValue getCValue() {
-			return val;
-		}
-		
-		/**
-		 * Gets the error message.
-		 */
-		public String getMessage() {
-			return (val == null) ? super.getMessage() :
-				"Cannot " + super.getMessage() + val.errorDesc();
-		}
-		
-        public String getModelicaStackTrace() {
-            StringBuilder sb = new StringBuilder();
-            buildStackTrace(sb);
-            return sb.toString();
-        }
-        
-        static final String STACK_SEP = "\n    ";
-        
-        public void buildStackTrace(StringBuilder sb) {
-            sb.append(STACK_SEP);
-            sb.append(getMessage());
-        }
-    }
-    
-    public class FunctionEvaluationException extends ConstantEvaluationException {
-        private String functionName;
-        private ConstantEvaluationException source;
-        
-        public FunctionEvaluationException(String functionName, ConstantEvaluationException source) {
-            this.functionName = functionName;
-            this.source = source;
-        }
-        
-        public String getMessage() {
-            return source.getMessage();
-        }
-        
-        public void buildStackTrace(StringBuilder sb) {
-            sb.append(STACK_SEP);
-            sb.append("in function '");
-            sb.append(functionName);
-            sb.append("'");
-            source.buildStackTrace(sb);
-        }
-    }
-    
-	public class ConstantEvaluationNotReadyException extends ConstantEvaluationException {
-		
-		public ConstantEvaluationNotReadyException() {
-			super(null, "Cannot evaluate expression yet");
-		}
-		
-	}
-  
+
 	/**
 	 * CValue represents a constant value and serves as the super class 
 	 * for constant value classes of the primitive types.
 	 */
-	public abstract class CValue implements Iterable<CValue>, Cloneable {
+	public abstract class CValue extends ConstValue implements Iterable<CValue>, Cloneable {
 		
 		/**
 		 * An unknown value.
@@ -155,96 +83,7 @@ aspect ConstantEvaluation {
 			}
 	    }
 	    
-	    /**
-	     * Get a string describing this CValue for use in 
-	     *        ConstantEvaluationExceptions.
-	     */
-	    public String errorDesc() {
-	    	return getClass().getSimpleName() + " (" + toString() + ")";
-	    }
 
-	    /**
-	     * Convert to int, default implementation.
-	     * 
-	     * @return Value converted to int.
-	     */
-	    public int intValue() { 
-	    	throw new ConstantEvaluationException(this, "get int value of "); 
-	    }
-	    
-	    /**
-	     * Convert to double, default implementation.
-	     * 
-	     * @return Value converted to double.
-	     */
-	    public double realValue() { 
-	    	throw new ConstantEvaluationException(this, "get real value of "); 
-	    }
-	    
-        /**
-         * Convert to a vector of double, default implementation.
-         * 
-         * @return Value converted to double vector.
-         */
-        public double[] realVector() { 
-            throw new ConstantEvaluationException(this, "get real vector of "); 
-        }
-        
-        /**
-         * Convert to a matrix of doubles, default implementation.
-         * 
-         * @return Value converted to double matrix.
-         */
-        public double[][] realMatrix() { 
-            throw new ConstantEvaluationException(this, "get real matrix of "); 
-        }
-        
-	    /**
-	     * Convert to boolean, default implementation.
-	     * 
-	     * @return Value converted to boolean.
-	     */
-	    public boolean booleanValue() { 
-	    	throw new ConstantEvaluationException(this, "get boolean value of "); 
-	    }
-	    
-	    /**
-	     * Convert to string, default implementation.
-	     * 
-	     * @return Value converted to string.
-	     */
-	    public String stringValue() { 
-	    	throw new ConstantEvaluationException(this, "get string value of "); 
-	    }
-	    
-        /**
-         * Convert to a vector of strings, default implementation.
-         * 
-         * @return Value converted to string vector.
-         */
-        public String[] stringVector() { 
-            throw new ConstantEvaluationException(this, "get string vector of "); 
-        }
-
-        /**
-         * Calculate the min value of this constant value.
-         * Works for integer, real and array CValues.
-         * 
-         * @return The smallest value that this CValue represent
-         */
-        public double minValue() {
-            throw new ConstantEvaluationException(this, "get min value of "); 
-        }
-
-        /**
-         * Calculate the max value of this constant value.
-         * Works for integer, real and array CValues.
-         * 
-         * @return The largest value that this CValue represent
-         */
-        public double maxValue() {
-            throw new ConstantEvaluationException(this, "get max value of "); 
-        }
 
         /**
          * Create a literal AST node from constant, for use in flat tree.
@@ -300,171 +139,6 @@ aspect ConstantEvaluation {
         }
 
         /**
-         * Returns true if the constant value is of integer type or array that
-         * only contain integer types.
-         * 
-         * @return True if the constant is an integer value.
-         */
-        public boolean isInteger() {
-            return false;
-        }
-
-        /**
-         * Returns true if the constant value is of real type or array that
-         * only contain real types.
-         * 
-         * @return True if the constant is a real value.
-         */
-        public boolean isReal() {
-            return false;
-        }
-
-        /**
-         * Returns true if the constant value is of boolean type or array that
-         * only contain boolean types.
-         * 
-         * @return True if the constant is a boolean value.
-         */
-        public boolean isBoolean() {
-            return false;
-        }
-
-        /**
-         * Returns true if the constant value is of string type or array that
-         * only contain string types.
-         * 
-         * @return True if the constant is a string value.
-         */
-        public boolean isString() {
-            return false;
-        }
-
-        /**
-         * Returns true if the constant value is of enum type or array that
-         * only contain enum types.
-         * 
-         * @return True if the constant is a enum value.
-         */
-        public boolean isEnum() {
-            return false;
-        }
-
-	    /**
-	     * Returns true if the constant value is of numeric type.
-	     * 
-	     * @return True if the constant is a numerical value.
-	     */
-	    public boolean isNumeric() {
-	    	return false;
-	    }
-	    
-	    /**
-	     * Check if there was an error in the evaluation.
-	     *
-	     * @return true if there was an error, otherwise false. 
-	     */
-	    public boolean isUnknown() {
-      		return false;
-      	}
-	    
-        /**
-         * Check if there was an error in any part of the evaluation.
-         *
-         * @return true if there was an error, otherwise false. 
-         */
-        public boolean isPartlyUnknown() {
-            return isUnknown();
-        }
-    	
-	    /**
-	     * Check if there was a compliance error in the evaluation.
-	     *
-	     * @return true if there was a compliance error, otherwise false. 
-	     */
-    	public boolean isUnsupported() {
-    		return false;
-    	}
-
-        /**
-         * Returns true if the constant value is of scalar numeric type and has a negative value.
-         */
-        public boolean isNegative() {
-            return false;
-        }
-
-        /**
-         * Returns false if the constant value is NaN, infinity or unknown.
-         */
-        public boolean isValid() {
-            return true;
-        }
-
-        /**
-         * Overloading of the toString() method.
-         * 
-         * @return The string.
-         */
-        public String toString() { 
-        	return stringValue(); 
-        }
-	   
-        /**
-         * 
-         * Returns true if the constant value represents a scalar value.
-         * @return True if constant is a scalar
-         */
-        public final boolean isScalar() {
-            return !isArray();
-        }
-
-        /**
-         * Returns true if the constant value represents an array.
-         * ,
-         * @return True if constant is an array.
-         */
-        public boolean isArray() {
-        	return false;
-        }
-        
-        /**
-         * Returns true if the constant value is a vector.
-         * 
-         * @return True if the constant is a vector
-         */
-        public final boolean isVector() {
-            return isArray(-1);
-        }
-
-        /**
-         * Returns true if the constant value is a matrix.
-         * 
-         * @return True if the constant is a matrix
-         */
-        public final boolean isMatrix() {
-            return isArray(-1, -1);
-        }
-
-        /**
-         * Returns true if the constant value is an array with the given
-         * dimention sizes.
-         * It is possible to allow dimention of unknown size by providing a
-         * negative number for that dimention.
-         * 
-         * @param dims Sizes of each dimention. 
-         * @return True if the constant is an array with given dimention sizes.
-         */
-        public final boolean isArray(int ... dims) {
-            return isArray(0, dims);
-        }
-
-        /**
-         * Internal method for doing array dimention size check.
-         */
-        protected boolean isArray(int pos, int[] dims) {
-            return false;
-        }
-
-        /**
          * Convenience method for accessing an array CValue as CValueArray.
          * 
          * Only valid for arrays.
@@ -490,13 +164,6 @@ aspect ConstantEvaluation {
         	return res;
         }
  	   
-        /**
-         * Check if this is a record.
-         */
-        public boolean isRecord() {
-        	return false;
-        }
-       
         /**
          * Convenience method for accessing a record CValue as CValueRecord.
          * 
@@ -1112,6 +779,14 @@ aspect ConstantEvaluation {
             for (CValue cvalue : values)
                 res &= cvalue.isValid();
             return res;
+        }
+
+        @Override
+        public int[] intVector() {
+            int[] vector = new int[values.length];
+            for (int i = 0; i < values.length; i++)
+                vector[i] = values[i].intValue();
+            return vector;
         }
 
         @Override
@@ -4832,12 +4507,23 @@ aspect SourceCeval {
 }
 
 aspect ConstantEvaluable {
-    public interface ConstantEvaluable {
-        public CValue ceval();
-        public CValue ceval(VariableEvaluator evaluator);
+    Exp implements Evaluable;
+    FExp implements Evaluable;
+    
+    public ConstValue Exp.evaluateValue() {
+        try {
+            return ceval();
+        } catch (ConstantEvaluationException e) {
+            return CValue.UNKNOWN;
+        }
     }
-    Exp implements ConstantEvaluable;
-    FExp implements ConstantEvaluable;
+    public ConstValue FExp.evaluateValue() {
+        try {
+            return ceval();
+        } catch (ConstantEvaluationException e) {
+            return CValue.UNKNOWN;
+        }
+    }
 }
 
 aspect VariableEvaluator {
