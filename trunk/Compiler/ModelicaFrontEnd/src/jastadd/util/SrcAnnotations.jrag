@@ -29,6 +29,9 @@ aspect SrcAnnotations {
 
     public SrcAnnotation ComponentDecl.srcAnnotation(String ... path) {     return getComment().srcAnnotation(path); }
     public SrcAnnotation InstComponentDecl.srcAnnotation(String ... path) { return getComponentDecl().srcAnnotation(path); }
+    
+    public SrcAnnotation ExtendsClause.srcAnnotation(String ... path) {     return SrcAnnotation.createFor(getAnnotationOpt(), path); }
+    public SrcAnnotation InstExtends.srcAnnotation(String ... path) {       return getExtendsClause().srcAnnotation(path); }
 
     public SrcAnnotation AbstractEquation.srcAnnotation(String ... path) {  return getComment().srcAnnotation(path); }
 
