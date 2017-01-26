@@ -2465,7 +2465,7 @@ model ArrayModifications71
             flatModel="
 fclass ModificationTests.ArrayModifications71
  ModificationTests.ArrayModifications71.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications71.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications71.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications71.B
@@ -2496,7 +2496,7 @@ model ArrayModifications72
             flatModel="
 fclass ModificationTests.ArrayModifications72
  ModificationTests.ArrayModifications72.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications72.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications72.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications72.B

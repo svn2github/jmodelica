@@ -2221,7 +2221,7 @@ model ArrayCat11
 fclass ArrayBuiltins.Cat.ArrayCat11
  ArrayBuiltins.Cat.ArrayCat11.A a1[2];
  ArrayBuiltins.Cat.ArrayCat11.A a2[3];
- ArrayBuiltins.Cat.ArrayCat11.A a3[5](x = 1:5) = cat(1, a1[1:2], a2[1:3]);
+ ArrayBuiltins.Cat.ArrayCat11.A a3[5] = cat(1, a1[1:2], a2[1:3]);
 
 public
  record ArrayBuiltins.Cat.ArrayCat11.A
