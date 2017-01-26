@@ -504,35 +504,41 @@ aspect InstLookupComponents {
         return (icd == null) ? unknownInstComponentDecl() : icd;
     }
 
+    inh InstLookupResult<InstComponentDecl> FIterExp.lookupInstComponent(String name);
+    inh InstLookupResult<InstComponentDecl> InstForClauseE.lookupInstComponent(String name);
+    inh InstLookupResult<InstComponentDecl> InstForStmt.lookupInstComponent(String name);
+    inh InstLookupResult<InstComponentDecl> InstForIndex.lookupInstComponent(String name);
+
+    /*
+     * Ensures that lookup of for-indices is only performed from right to left in order
+     * to avoid lookup loops within them.
+     */
+    eq InstForClauseE.getChild().lookupInstComponent(String name) =
+            getInstForIndex(getNumInstForIndex() - 1).localLookupInstComponent(name);
+    eq InstForClauseE.getInstForIndex(int index).lookupInstComponent(String name) =
+            index == 0 ? lookupInstComponent(name) : getInstForIndex(index - 1).localLookupInstComponent(name);
+    eq InstForStmt.getChild().lookupInstComponent(String name) =
+            getInstForIndex(getNumInstForIndex() - 1).localLookupInstComponent(name);
+    eq InstForStmt.getInstForIndex(int index).lookupInstComponent(String name) =
+            index == 0 ? lookupInstComponent(name) : getInstForIndex(index - 1).localLookupInstComponent(name);
+    eq FIterExp.getChild().lookupInstComponent(String name) =
+            getForIndex(getNumForIndex() - 1).localLookupInstComponent(name);
+    eq FIterExp.getForIndex(int index).lookupInstComponent(String name) =
+            index == 0 ? lookupInstComponent(name) : getForIndex(index - 1).localLookupInstComponent(name);
+
+    syn InstLookupResult<InstComponentDecl> CommonForIndex.localLookupInstComponent(String name) = null;
+    syn InstLookupResult<InstComponentDecl> InstForIndex.localLookupInstComponent(String name) {
+        InstPrimitive var = getInstPrimitive();
+        if (var.name().equals(name)) {
+            return InstLookupResult.<InstComponentDecl> found(var);
+        }
+        return lookupInstComponent(name);
+    }
+
     eq SourceRoot.getChild().lookupInstComponent(String name) = InstLookupResult.notFound();
     // This equation is necessary since InstAccesses may be present in FExps.
     eq FlatRoot.getChild().lookupInstComponent(String name)   = InstLookupResult.notFound();
 
-    inh lazy InstLookupResult<InstComponentDecl> InstForClauseE.lookupInstComponent(String name);
-    eq InstForClauseE.getChild().lookupInstComponent(String name) {
-        for (InstForIndex ifi : getInstForIndexs()) 
-            if (ifi.matches(name))
-                return InstLookupResult.<InstComponentDecl>found(ifi.getInstPrimitive());
-        return lookupInstComponent(name);
-    }
-
-    inh lazy InstLookupResult<InstComponentDecl> InstForStmt.lookupInstComponent(String name);
-    eq InstForStmt.getChild().lookupInstComponent(String name) {
-        for (InstForIndex ifi : getInstForIndexs()) 
-            if (ifi.matches(name))
-                return InstLookupResult.<InstComponentDecl>found(ifi.getInstPrimitive());
-        return lookupInstComponent(name);
-    }
-
-    inh lazy InstLookupResult<InstComponentDecl> FIterExp.lookupInstComponent(String name);
-    eq FIterExp.getChild().lookupInstComponent(String name) {
-        for (CommonForIndex fi : getForIndexs()) 
-            if (fi.matches(name) && fi instanceof InstForIndex)
-                return InstLookupResult.<InstComponentDecl>found(((InstForIndex) fi).getInstPrimitive());
-        return lookupInstComponent(name);
-    }
-
-    
     inh InstLookupResult<InstComponentDecl> InstRecordConstructor.lookupInstComponent(String name);
     eq InstRecordConstructor.getChild().lookupInstComponent(String name)             = lookupInstComponent(name);
     eq InstRecordConstructor.getInstComponentDecl().lookupInstComponent(String name) = genericLookupInstComponent(name);

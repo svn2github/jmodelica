@@ -3315,9 +3315,11 @@ aspect InstantiatedExpressions {
         // Create InstFunctionCall
         return copyLocationTo(createInstNode(getName().newInstAccess(), args));
     }
-  
+
     public InstForIndex ForIndex.instantiate() {
-        InstPrimitive ip = new InstCreateForIndexPrimitive(getForIndexDecl());
+        InstForIndexPrimitive ip = new InstForIndexPrimitive(new InstParseAccess("Integer"),
+                new Opt<FArraySubscripts>(), getForIndexDecl(), new Opt<InstModification>(),
+                new Opt<InstConstrainingComponent>(), new Opt<FExp>());
         InstForIndex res;
         if (hasExp()) {
             res = new InstForIndexWithExp(ip, getExp().instantiate());

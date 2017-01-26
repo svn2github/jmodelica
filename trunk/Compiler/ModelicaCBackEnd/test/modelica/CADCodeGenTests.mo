@@ -2097,10 +2097,10 @@ model CADFunction10
         y := 0;
         for i in 1:size(m,1)/2 loop
             for j in 1:size(m,1)/2 loop
-                if m[i + j * 2] > x then
+                if m[integer(i + j * 2)] > x then
                     break;
                 end if;
-                y := y + m[i + j * 2] * x;
+                y := y + m[integer(i + j * 2)] * x;
             end for;
         end for;
     annotation(Inline=false,smoothOrder=1);
@@ -2154,11 +2154,11 @@ void func_CADCodeGenTests_CADFunction10_F1_der_AD0(jmi_ad_var_t x_var_v, jmi_ad_
     for (i_0i = 1; i_0i < i_0ie; i_0i += 1) {
         j_1ie = v_1 + 1 / 2.0;
         for (j_1i = 1; j_1i < j_1ie; j_1i += 1) {
-            if (COND_EXP_GT(jmi_array_val_1(m_var_a, i_0i + j_1i * 2), x_var_v, JMI_TRUE, JMI_FALSE)) {
+            if (COND_EXP_GT(jmi_array_val_1(m_var_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))), x_var_v, JMI_TRUE, JMI_FALSE)) {
                 break;
             }
-            v_2 = jmi_array_val_1(m_var_a, i_0i + j_1i * 2) * x_var_v;
-            d_2 = jmi_array_val_1(m_der_a, i_0i + j_1i * 2) * x_var_v + jmi_array_val_1(m_var_a, i_0i + j_1i * 2) * x_der_v;
+            v_2 = jmi_array_val_1(m_var_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))) * x_var_v;
+            d_2 = jmi_array_val_1(m_der_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))) * x_var_v + jmi_array_val_1(m_var_a, floor(i_0i + j_1i * AD_WRAP_LITERAL(2))) * x_der_v;
             y_var_v = y_var_v + v_2;
             y_der_v = y_der_v + d_2;
         }

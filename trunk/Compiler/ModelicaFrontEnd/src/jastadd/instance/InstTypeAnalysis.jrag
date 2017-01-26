@@ -58,9 +58,17 @@ aspect InstTypeAnalysis {
             return new FExternalObjectType(Size.SCALAR, "ExternalObject", new FIdUse("ExternalObject.constructor"), new FIdUse("ExternalObject.destructor"));
         return fUnknownType();
     }
-    eq InstEnum.primitiveScalarType()      = myInstClass().enumType();
-    eq InstClassDecl.primitiveScalarType() = isEnum() ? enumType() : super.primitiveScalarType();
-    eq InstExternalObject.primitiveScalarType() = myInstClass().enumType();
+
+    eq InstEnum.primitiveScalarType()              = myInstClass().enumType();
+    eq InstClassDecl.primitiveScalarType()         = isEnum() ? enumType() : super.primitiveScalarType();
+    eq InstExternalObject.primitiveScalarType()    = myInstClass().enumType();
+    eq InstForIndexPrimitive.primitiveScalarType() = myInstForIndexType();
+
+    inh FType InstForIndexPrimitive.myInstForIndexType();
+    eq InstForIndexWithExp.getInstPrimitive().myInstForIndexType() = getFExp().type().scalarType();
+    eq InstForIndexNoExp.getInstPrimitive().myInstForIndexType()   = hasFExp() ? 
+            getFExp().type().scalarType() : fUnknownType();
+    eq InstNode.getChild().myInstForIndexType()                  = fUnknownType();
 
     syn nta FType InstExternalObject.getType() {
         FIdUseInstAccess con = new FIdUseInstAccess(InstAccess.fromName(myConstructor().qualifiedName()));
