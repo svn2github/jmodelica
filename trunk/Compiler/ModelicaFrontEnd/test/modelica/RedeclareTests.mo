@@ -3161,11 +3161,11 @@ public
 
  record RedeclareTests.RedeclareTest37.G.D
   parameter Real x;
-  parameter RedeclareTests.RedeclareTest37.G.E e;
+  parameter RedeclareTests.RedeclareTest37.G.E e(y = x);
  end RedeclareTests.RedeclareTest37.G.D;
 
  record RedeclareTests.RedeclareTest37.A
-  parameter RedeclareTests.RedeclareTest37.G.D c;
+  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1);
  end RedeclareTests.RedeclareTest37.A;
 
 end RedeclareTests.RedeclareTest37;
@@ -7359,15 +7359,15 @@ public
  end RedeclareTests.RedeclareInRecord5.B2;
 
  record RedeclareTests.RedeclareInRecord5:a1
-  RedeclareTests.RedeclareInRecord5.B2 b;
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
  end RedeclareTests.RedeclareInRecord5:a1;
 
  record RedeclareTests.RedeclareInRecord5.A2
-  RedeclareTests.RedeclareInRecord5.B2 b;
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
  end RedeclareTests.RedeclareInRecord5.A2;
 
  record RedeclareTests.RedeclareInRecord5.A3
-  RedeclareTests.RedeclareInRecord5.B2 b;
+  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
  end RedeclareTests.RedeclareInRecord5.A3;
 
 end RedeclareTests.RedeclareInRecord5;
@@ -7416,7 +7416,7 @@ model RedeclareInRecord7
             description="Redeclare primitive in record array",
             flatModel="
 fclass RedeclareTests.RedeclareInRecord7
- RedeclareTests.RedeclareInRecord7:b b[2](x = {time + 2, time + 2});
+ RedeclareTests.RedeclareInRecord7:b b[2](each x = time + 2);
 
 public
  record RedeclareTests.RedeclareInRecord7:b
