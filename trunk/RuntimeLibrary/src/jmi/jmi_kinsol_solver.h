@@ -97,8 +97,6 @@ struct jmi_kinsol_solver_t {
     int handling_of_singular_jacobian_flag; /**< \brief A flag for determining how singular systems should be treated */
     DlsMat J_LU;                    /**< \brief Jacobian matrix/it's LU decomposition */
     DlsMat J_sing;                  /**< \brief Jacobian matrix/it's right singular vectors */
-    DlsMat J_SVD_U;                 /**< \brief The left singular vectors */
-    DlsMat J_SVD_VT;                /**< \brief The right singular vectors */
     DlsMat J_Dependency;            /**< \brief Dependency matrix with value 1 at (i,j) if iv j depends on residual i, 0 otherwise */ 
 
     int is_first_newton_solve_flag; /**< \brief Flag indicating if the current solve is the first Newton solve */

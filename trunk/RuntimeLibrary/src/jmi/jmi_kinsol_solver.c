@@ -139,6 +139,41 @@ static realtype jmi_kinsol_calc_v1twwv2(N_Vector v1, N_Vector v2, N_Vector w) {
     return(sum);
 }
 
+/* compare analytical/external and finite differences Jacobians */
+static int jmi_kinsol_check_jacobian(jmi_block_solver_t* block, jmi_real_t* jac_finite_difference, jmi_real_t* jac_analytical) {
+    int N = block->n, i, j;
+    jmi_kinsol_solver_t* solver = block->solver;
+    
+    if (   block->dF 
+        ||(block->Jacobian && (solver->has_compression_setup_flag 
+        || block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode)))
+    {
+        for (i = 0; i < N; i++) {
+            for (j = 0; j < N; j++) {
+                realtype fd_val = jac_finite_difference[i * N + j];
+                realtype a_val = jac_analytical[i * N + j];
+                realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
+                if (rel_error >= block->options->block_jacobian_check_tol) {
+                    if(block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode) {
+                        jmi_log_node(block->log, logError, "JacobianCheck",
+                            "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
+                            j, i, a_val, fd_val, rel_error);
+                    }
+                    else {
+                        jmi_log_node(block->log, logError, "JacobianCheck",
+                            "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
+                            j, i, a_val, fd_val, rel_error);
+                    }
+                }
+            }
+        }
+    } else {
+        jmi_log_node(block->log, logError, "JacobianCheck", 
+            "No block jacobian specified, unable to do jacobian check");
+    }
+    return 0;
+}
+
 int jmi_kinsol_one_sided_differences_for_one_column(jmi_block_solver_t * block, realtype delta, int column_index, N_Vector jthCol) {
     int ret;
     jmi_kinsol_solver_t* solver = block->solver;
@@ -655,34 +690,10 @@ int kin_dF(int N, N_Vector u, N_Vector fu, DlsMat J, jmi_block_solver_t * block,
             block->dx[i] = 0;
         }       
     }
-
+    
+    /* Verify Jacobian */
     if (block->options->block_jacobian_check) {
-        /* compare analytical/external and finite differences Jacobians */
-        if (block->dF || (block->Jacobian && (solver->has_compression_setup_flag 
-            || (block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode)))) {
-                for (i = 0; i < N; i++) {
-                    for (j = 0; j < N; j++) {
-                        realtype fd_val = jac_fd[i * N + j];
-                        realtype a_val = J->data[i * N + j];
-                        realtype rel_error = RAbs(a_val - fd_val) / (RAbs(fd_val) + 1);
-                        if (rel_error >= block->options->block_jacobian_check_tol) {
-                            if(block->options->jacobian_calculation_mode == jmi_calculate_externally_jacobian_calculation_mode) {
-                                jmi_log_node(block->log, logError, "JacobianCheck",
-                                    "<j: %d, i: %d, external: %e, finiteDifference: %e, relativeError: %e>", 
-                                    j, i, a_val, fd_val, rel_error);
-                            }
-                            else {
-                                jmi_log_node(block->log, logError, "JacobianCheck",
-                                    "<j: %d, i: %d, analytic: %e, finiteDifference: %e, relativeError: %e>", 
-                                    j, i, a_val, fd_val, rel_error);
-                            }
-                        }
-                    }
-                }
-        } else {
-            jmi_log_node(block->log, logError, "JacobianCheck", 
-                "No block jacobian specified, unable to do jacobian check");
-        }
+        jmi_kinsol_check_jacobian(block, jac_fd, J->data);
         free(jac_fd);
     }
 
@@ -1225,11 +1236,8 @@ static int jmi_kinsol_init(jmi_block_solver_t * block) {
     solver->max_nw_step = block->options->step_limit_factor*max_nominal;
     KINSetMaxNewtonStep(solver->kin_mem, solver->max_nw_step);
     
-    if(block->options->iteration_variable_scaling_mode)
-    {
-        /* 
-            Set variable scaling based on nominal values.          
-        */
+    /* Set variable scaling based on nominal values. */
+    if(block->options->iteration_variable_scaling_mode) {
         int i;
         for(i=0;i< block->n;++i){
             double nominal = RAbs(block->nominal[i]);
@@ -1717,7 +1725,10 @@ static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * blo
     double J_norm = 1.0;
     double J_recip_cond = 1.0;
     int info;
-
+    
+    /* Compute infinity norm of J to be used with dgecon */
+    J_norm = dlange_(&norm, &N, &N, block->J->data, &N, solver->lapack_work);
+    
     /* Copy Jacobian to factorization matrix */
     DenseCopy(block->J, solver->J_LU);
     /* Perform LU factorization to be used with dgecon */
@@ -1726,10 +1737,6 @@ static realtype jmi_calculate_jacobian_condition_number(jmi_block_solver_t * blo
         /* If matrix i singular, return something very large to be evaluated*/
         return 1e100;
     }
-
-    /* Compute infinity norm of J to be used with dgecon */
-    J_norm = dlange_(&norm, &N, &N, block->J->data, &N, solver->lapack_work);
-
     /* Compute reciprocal condition number */
     dgecon_(&norm, &N, solver->J_LU->data, &N, &J_norm, &J_recip_cond, solver->lapack_work, solver->lapack_iwork,&info);
     /* To be evaluated - why is this needed? Error handling due to J being used instead of J_LU?
@@ -2431,8 +2438,6 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     solver->JTJ = NewDenseMat(n ,n);
     solver->J_LU = NewDenseMat(n ,n);
     solver->J_sing = NewDenseMat(n, n);
-    solver->J_SVD_U = NewDenseMat(n, n);
-    solver->J_SVD_VT = NewDenseMat(n, n);
     solver->J_Dependency = NewDenseMat(n,n);
     solver->J_is_singular_flag = 0;
 
@@ -2471,22 +2476,10 @@ int jmi_kinsol_solver_new(jmi_kinsol_solver_t** solver_ptr, jmi_block_solver_t* 
     jmi_kinsol_error_handling(block, flag);
     
     /*Attach linear solver*/
-    /*Dense Kinsol solver*/
-    /*flag = KINDense(solver->kin_mem, block->n);
-      jmi_kinsol_error_handling(flag);*/
-     
-     
-   /*Dense Kinsol using regularization*/
-    /*    flag = KINPinv(solver->kin_mem, block->n);
-    jmi_kinsol_error_handling(jmi, flag);
-    KINDlsSetDenseJacFn(solver->kin_mem, (KINDlsDenseJacFn)kin_dF);
-
-    */
     kin_mem->kin_lsetup = jmi_kin_lsetup;
     kin_mem->kin_lsolve = jmi_kin_lsolve;
     kin_mem->kin_setupNonNull = TRUE;
     kin_mem->kin_inexact_ls = FALSE;
-    
     /*End linear solver*/
     
     /*Set problem data to Kinsol*/
@@ -2556,8 +2549,6 @@ void jmi_kinsol_solver_delete(jmi_block_solver_t* block) {
     DestroyMat(solver->JTJ);
     DestroyMat(solver->J_LU);
     DestroyMat(solver->J_sing);
-    DestroyMat(solver->J_SVD_U);
-    DestroyMat(solver->J_SVD_VT);
     DestroyMat(solver->J_Dependency);
     free(solver->cScale);
     free(solver->rScale);

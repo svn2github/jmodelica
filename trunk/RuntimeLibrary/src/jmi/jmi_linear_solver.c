@@ -377,7 +377,6 @@ int jmi_linear_solver_solve(jmi_block_solver_t * block){
             for (i = 0; i < block->n; i++) { block->x[i] = block->last_accepted_x[i]; }
         }
         info = block->F(block->problem_data,block->x, solver->rhs, JMI_BLOCK_EVALUATE);
-        /* info = block->F(block->problem_data,block->last_accepted_x, solver->rhs, JMI_BLOCK_EVALUATE); */
     } else {
         /* Ignore bounds when calculating RHS with zero vector*/
         int current_enforce_bounds_flag = block->options->enforce_bounds_flag;;
