@@ -1531,6 +1531,16 @@ aspect FlatAPI {
     to FAbstractEquation.relExpInInitialEquation() for myFEquation();
     
     syn int FRelExp.relExpInInitialEquationsIndex()  = checkIndex(myFClass().relExpInInitialEquations().indexOf(originalFExp()));
+
+    /**
+     * Collects event generating expressions in this statements
+     */
+    coll ArrayList<FExp> FAbstractEquation.eventGenExps() 
+        [new ArrayList<FExp>()] with add root FClass;
+    FExp contributes this
+        when generatesEvent()
+        to FAbstractEquation.eventGenExps()
+        for myFEquation();
 /*  
 
     coll ArrayList<FVariable> FClass.structuralParameters() [new ArrayList<FVariable>()] with add root FClass;

@@ -215,7 +215,7 @@ aspect PreBlockHandling {
             if (!res) {
                 for (C block : component) {
                     for (E eqn : block.getMembers()) {
-                        if (eqn.getEquation().generatesEvents() || eqn.getEquation().isSampleEquation()) {
+                        if (eqn.getEquation().eventGenExps().size() > 0 || eqn.getEquation().isSampleEquation()) {
                             res = true;
                             break;
                         }
