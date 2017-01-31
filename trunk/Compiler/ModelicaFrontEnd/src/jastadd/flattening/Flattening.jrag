@@ -122,7 +122,25 @@ aspect Flattening {
     /**
      * Delegate for adding extra flattening code to top-level model.
      */
-    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {}
+    
+    class InstClassDecl {
+        private static final ArrayList<ExtraFlattener> extraFlatteners = new ArrayList<ExtraFlattener>();
+        
+        public static ExtraFlattener addExtraFlattener(ExtraFlattener ef) {
+            extraFlatteners.add(ef);
+            return ef;
+        }
+        
+        public static abstract class ExtraFlattener {
+            public abstract void flattenExtra(InstClassDecl icd, FClass fc);
+        }
+    }
+    
+    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {
+        for (ExtraFlattener ef : extraFlatteners) {
+            ef.flattenExtra(this, fc);
+        }
+    }
 
     /**
      * Find functions, record and enumeration declarations that need to be flattened.
