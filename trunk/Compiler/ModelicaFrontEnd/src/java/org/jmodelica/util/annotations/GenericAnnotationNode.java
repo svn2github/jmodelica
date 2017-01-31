@@ -27,6 +27,7 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
+import org.jmodelica.util.values.Evaluator;
 
 /**
  * Generic class for handling traversal over different types of annotations.
@@ -501,7 +502,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
      * 
      * @return string value of the entry value
      * @throws ConstantEvaluationException
-     *      if there is no value or it can't be interpreted as scalar boolean
+     *      if there is no value or it can't be interpreted as scalar string
      */
     public String valueAsString() throws ConstantEvaluationException {
         return getAndCheckConstValue(ValueType.STRING, ValueSize.SCALAR, true).stringValue();
@@ -546,7 +547,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         STRING {
             @Override
             public boolean check(ConstValue value) {
-                return value.isString();
+                return value.isString() || value.isEnum();
             }
         },
         REAL {
@@ -619,7 +620,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
                 return null;
             }
         }
-        ConstValue value = value().evaluateValue();
+        ConstValue value = evaluatedValue();
         if (type.check(value) && type.check(value)) {
             return value;
         } else if (throwOnIncorrect) {
@@ -627,6 +628,10 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         } else {
             return null;
         }
+    }
+
+    protected ConstValue evaluatedValue() {
+        return value().evaluateValue();
     }
 
 }

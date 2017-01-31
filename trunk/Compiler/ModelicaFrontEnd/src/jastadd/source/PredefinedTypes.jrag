@@ -79,7 +79,10 @@ aspect PredefinedTypes {
               + "parameter StringType quantity=\"\";\n"
               + "parameter StringType start=\"\";\n"
               + "end String;\n"
-                
+
+              + "partial model ExternalObject\n"
+              + "end ExternalObject;\n"
+
               + "type StateSelect = enumeration("
               + " never \"Do not use as state at all.\","
               + " avoid \"Use as state, if it cannot be avoided (but only if variable appears differentiated and no other potential state with attribute default, prefer, or always can be selected).\","
@@ -89,9 +92,19 @@ aspect PredefinedTypes {
               + ");\n"
                 
               + "type AssertionLevel = enumeration(error, warning);\n"
-                
-              + "partial model ExternalObject\n"
-              + "end ExternalObject;\n";
+
+              + "type Color = Integer[3](min=0, max=255) \"RGB representation\";\n"
+//              + "constant Color Black = zeros(3);\n"
+
+              + "type LinePattern = enumeration(None, Solid, Dash, Dot, DashDot, DashDotDot);\n"
+              + "type FillPattern = enumeration(None, Solid, Horizontal, Vertical, Cross, Forward, Backward, "
+                  + "CrossDiag, HorizontalCylinder, VerticalCylinder, Sphere);\n"
+              + "type BorderPattern = enumeration(None, Raised, Sunken, Engraved);\n"
+              + "type Smooth = enumeration(None, Bezier);\n"
+
+              + "type Arrow = enumeration(None, Open, Filled, Half);\n"
+              + "type TextStyle = enumeration(Bold, Italic, UnderLine);\n"
+              + "type TextAlignment = enumeration(Left, Center, Right);\n";
 
         PrimitiveClassDecl pcd = null;
 
@@ -102,10 +115,16 @@ aspect PredefinedTypes {
             return l;
         }
         
+        Set<String> primitives = new HashSet<String>();
+        primitives.add("Real");
+        primitives.add("Integer");
+        primitives.add("Boolean");
+        primitives.add("String");
+        primitives.add("ExternalObject");
+        
         for (Element elem : p.getUnstructuredEntity(0).getElements()) {
-            FullClassDecl cd = (FullClassDecl) elem;
-            
-            if (!cd.name().equals("StateSelect") && !cd.name().equals("AssertionLevel")) {
+            if (primitives.contains(elem.name())) {
+                FullClassDecl cd = (FullClassDecl) elem;
                 pcd = new PrimitiveClassDecl(cd.getName(),
                         new PublicVisibilityType(),
                         new Opt(),
@@ -131,32 +150,7 @@ aspect PredefinedTypes {
                         cd.getEndDecl());
                 l.add(pcd); 
             } else {
-                pcd = new EnumClassDecl(cd.getName(),
-                        new PublicVisibilityType(),
-                        new Opt(),
-                        new Opt(),
-                        cd.getRestriction(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        new Opt(),
-                        cd.getEquationList(),
-                        cd.getAlgorithmList(),
-                        cd.getSuperList(),
-                        cd.getImportList(),
-                        cd.getClassDeclList(),
-                        cd.getComponentDeclList(),
-                        cd.getElementModificationList(),
-                        new Opt(),
-                        cd.getAnnotationOpt(),
-                        cd.getEndDecl(),
-                        new Symbol("enumeration"));
-                pcd.originalComposition = cd.originalComposition;
-                l.add(pcd);
+                l.add(elem);
             }
         }
         

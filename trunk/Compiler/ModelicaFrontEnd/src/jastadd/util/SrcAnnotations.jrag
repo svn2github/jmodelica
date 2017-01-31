@@ -21,35 +21,89 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.annotations.PossiblyAnnotation;
 import org.jmodelica.util.collections.FilteredIterable;
 import org.jmodelica.util.collections.TransformerIterable;
+import org.jmodelica.util.values.Evaluator;
+
 
 aspect SrcAnnotations {
 
-    public SrcAnnotation ClassDecl.srcAnnotation(String ... path) {         return SrcAnnotation.createFor(srcAnnotationProvider(), path); }
-    public SrcAnnotation InstClassDecl.srcAnnotation(String ... path) {     return getClassDecl().srcAnnotation(path); }
+    public SrcAnnotation ClassDecl.srcAnnotation(String ... path) { 
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+    public SrcAnnotation InstClassDecl.srcAnnotation(String ... path) {
+        return getClassDecl().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
+    }
 
-    public SrcAnnotation ComponentDecl.srcAnnotation(String ... path) {     return getComment().srcAnnotation(path); }
-    public SrcAnnotation InstComponentDecl.srcAnnotation(String ... path) { return getComponentDecl().srcAnnotation(path); }
-    
-    public SrcAnnotation ExtendsClause.srcAnnotation(String ... path) {     return SrcAnnotation.createFor(getAnnotationOpt(), path); }
-    public SrcAnnotation InstExtends.srcAnnotation(String ... path) {       return getExtendsClause().srcAnnotation(path); }
+    public SrcAnnotation ComponentDecl.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+    public SrcAnnotation InstComponentDecl.srcAnnotation(String ... path) {
+        return getComponentDecl().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
+    }
 
-    public SrcAnnotation AbstractEquation.srcAnnotation(String ... path) {  return getComment().srcAnnotation(path); }
+    public SrcAnnotation ExtendsClause.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+    public SrcAnnotation InstExtends.srcAnnotation(String ... path) {
+        return getExtendsClause().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
+    }
 
-    public SrcAnnotation ExternalClause.srcAnnotation(String ... path) {    return SrcAnnotation.createFor(getAnnotationOpt(), path); }
-    public SrcAnnotation InstExternal.srcAnnotation(String ... path) {      return getExternalClause().srcAnnotation(path); }
+    public SrcAnnotation AbstractEquation.srcAnnotation(String ... path) {
+        return getComment().srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
 
-    public SrcAnnotation Comment.srcAnnotation(String ... path) {           return SrcAnnotation.createFor(getAnnotationOpt(), path); }
-    
+    public SrcAnnotation ExternalClause.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+    public SrcAnnotation InstExternal.srcAnnotation(String ... path) {
+        return getExternalClause().srcAnnotation(new SrcAnnotation.InstEvaluator(this), path);
+    }
+
+    public SrcAnnotation Comment.srcAnnotation(String ... path) {
+        return srcAnnotation(SrcAnnotation.defaultEvaluator(), path);
+    }
+
+
+
+    public SrcAnnotation ClassDecl.srcAnnotation(Evaluator<Exp> evaluator, String ... path) { 
+        return SrcAnnotation.createFor(srcAnnotationProvider(), evaluator, path);
+    }
+    public SrcAnnotation ComponentDecl.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return getComment().srcAnnotation(evaluator, path);
+    }
+    public SrcAnnotation ExtendsClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
+    }
+    public SrcAnnotation ExternalClause.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
+    }
+    public SrcAnnotation Comment.srcAnnotation(Evaluator<Exp> evaluator, String ... path) {
+        return SrcAnnotation.createFor(getAnnotationOpt(), evaluator, path);
+    }
+
+
+
+    class InstClassDecl     implements SrcAnnotation.InstEvaluator.Context {}
+    class InstComponentDecl implements SrcAnnotation.InstEvaluator.Context {}
+    class InstExtends       implements SrcAnnotation.InstEvaluator.Context {}
+    class InstExternal      implements SrcAnnotation.InstEvaluator.Context {}
+
+
+
     /*******************
      *    Java Stuff    
      ******************/
     
     public class SrcAnnotation extends GenericAnnotationNode<SrcAnnotation, SrcAnnotationProvider, Exp> {
         
-        public static final SrcAnnotation AMBIGUOUS_ANNOTATION =  new SrcAnnotation(null, null, null);
+        public static final SrcAnnotation AMBIGUOUS_ANNOTATION =  new SrcAnnotation(null, null, null,
+                SrcAnnotation.defaultEvaluator());
         
-        protected SrcAnnotation(String name, SrcAnnotationProvider node, SrcAnnotation parent) {
+        private Evaluator<Exp> evaluator;
+        
+        protected SrcAnnotation(String name, SrcAnnotationProvider node, SrcAnnotation parent,
+                Evaluator<Exp> evaluator) {
             super(name, node, parent);
+            this.evaluator = evaluator;
         }
 
         @Override
@@ -59,7 +113,7 @@ aspect SrcAnnotations {
 
         @Override
         protected SrcAnnotation createNode(String name, SrcAnnotationProvider node) {
-            return new SrcAnnotation(name, node, this);
+            return new SrcAnnotation(name, node, this, evaluator);
         }
 
         @Override
@@ -67,18 +121,48 @@ aspect SrcAnnotations {
             return AMBIGUOUS_ANNOTATION;
         }
         
-        public static SrcAnnotation createFor(SrcAnnotationProvider node, String[] path) {
+        public static SrcAnnotation createFor(SrcAnnotationProvider node, Evaluator<Exp> evaluator, String[] path) {
             if (node == null) {
-                return createNull(path);
+                return createNull(evaluator, path);
             } else {
-                return new SrcAnnotation(null, node, null).forPath(path);
+                return new SrcAnnotation(null, node, null, evaluator).forPath(path);
             }
         }
 
-        public static SrcAnnotation createNull(String[] path) {
-            return new SrcAnnotation(null, null, null).forPath(path);
+        public static SrcAnnotation createNull(Evaluator<Exp> evaluator, String[] path) {
+            return new SrcAnnotation(null, null, null, evaluator).forPath(path);
         }
-        
+
+        @Override
+        protected ConstValue evaluatedValue() {
+            return evaluator.evaluate(value());
+        }
+
+        public static Evaluator defaultEvaluator() { return SrcAnnotation.defaultEvaluator; }
+        private static final Evaluator defaultEvaluator = new Evaluator<Exp>() {
+            public ConstValue evaluate(Exp evaluable) {
+                return evaluable.evaluateValue();
+            }
+        };
+
+        public static class InstEvaluator implements Evaluator<Exp> {
+            
+            private Context context;
+            
+            public InstEvaluator(Context context) {
+                this.context = context;
+            }
+            
+            @Override
+            public ConstValue evaluate(Exp evaluable) {
+                FExp fexp = context.dynamicFExp(evaluable.instantiate());
+                return fexp.evaluateValue();
+            }
+            
+            public interface Context {
+                public FExp dynamicFExp(FExp exp);
+            }
+        }
     }
     
     public interface SrcAnnotationProvider extends AnnotationProvider<SrcAnnotationProvider, Exp> {}
@@ -227,8 +311,8 @@ aspect SrcAnnotations {
     }
 
     public class SrcAnnotation {
-        public static SrcAnnotation createFor(Opt<Annotation> opt, String[] path) {
-            return createFor(createProviderFor(opt), path);
+        public static SrcAnnotation createFor(Opt<Annotation> opt, Evaluator<Exp> evaluator, String[] path) {
+            return createFor(createProviderFor(opt), evaluator, path);
         }
         public static SrcAnnotationProvider createProviderFor(Opt<Annotation> opt) {
             return new AnnotationOptAnnotationProvider(opt);
