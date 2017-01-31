@@ -1335,20 +1335,13 @@ aspect ComponentDeclMethods {
      * Check if this component is or is part of a component that is declared input or output on the top level.
      */
     syn boolean InstComponentDecl.isTopLevelInputOutput() {
-        if (isTopLevel())
-            return isDeclaredInput() || isDeclaredOutput();
-        InstComponentDecl source = inheritsInputOutputFrom();
-        return source != null && source.isTopLevel();
+        return isTopLevel() && (isInput() || isOutput());
     }
     
-    /**
-     * Check if this component is declared at the top level, i.e. not part of any other component.
-     */
     inh boolean InstComponentDecl.isTopLevel();
-    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isTopLevel()     = true;
-    eq InstRoot.getChild().isTopLevel()          = true;
-    eq Root.getChild().isTopLevel()              = true;
+    eq Root.getChild().isTopLevel()              = false;
 
     /**
      * Check if this equation is declared initial.

@@ -3177,5 +3177,24 @@ end ConnectTests.ConditionalCompInConnector2;
 ")})));
 end ConditionalCompInConnector2;
 
+model TopLevelIO
+    connector C
+        input Real x;
+    end C;
+    
+    C[2] c1;
+
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="TopLevelIO",
+            description="",
+            flatModel="
+fclass ConnectTests.TopLevelIO
+ input Real c1[1].x;
+ input Real c1[2].x;
+end ConnectTests.TopLevelIO;
+")})));
+end TopLevelIO;
+
 
 end ConnectTests;
