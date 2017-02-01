@@ -108,36 +108,66 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 	}
     
+    private static Collection<String> vendorAnnotationChildren = new ArrayList<String>();
+    /**
+     * Used for registering new sub nodes to this node. Returns the name
+     * for conveninence.
+     */
+    public static String addVendorAnnotationChild(String childName) {
+        vendorAnnotationChildren.add(childName);
+        return childName;
+    }
+    
     /**
 	 * Internal class used to generate a VendorAnnotations tag.
 	 * 
 	 * @see XMLTag
 	 */
 	public class XMLTag_vendorAnnotations extends XMLTag {
-		
+
 		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
 			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
 		}
-		
-		public String[] children() { return new String[] {"tool"}; }
-	}
+
+        public String[] children() {
+            return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+        }
+
+    }
 	
+    /**
+     * Internal class used to generate a Tool tag.
+     * 
+     * @see XMLTag
+     */
+    public abstract class XMLTag_tool extends XMLTag {
+
+        private final String vendorName;
+
+        public XMLTag_tool(String tagName, String vendorName, AbstractGenerator myGenerator, FClass fclass) {
+            super(tagName, "Tool", myGenerator, fclass);
+            this.vendorName = vendorName;
+        }
+
+        public final void generateAttributes(CodeStream genPrinter) {
+            generateAttribute("name", vendorName, genPrinter);
+        }
+    }
+
+	public static final String vendorTooltagName = addVendorAnnotationChild("vendorTool");
 	/**
-	 * Internal class used to generate a Tool tag.
+	 * Internal class used to generate a Vendor Tool tag.
 	 * 
 	 * @see XMLTag
 	 */
-	public class XMLTag_tool extends XMLTag {
+	public class XMLTag_vendorTool extends XMLTag_tool {
+	    
 		
-		public XMLTag_tool(AbstractGenerator myGenerator, FClass fclass) {
-			super("tool", "Tool", myGenerator, fclass);
+		public XMLTag_vendorTool(AbstractGenerator myGenerator, FClass fclass) {
+			super(vendorTooltagName, ASTNode.vendorName(), myGenerator, fclass);
 		}
 		
 		public String[] children() { return new String[] {"annotation"}; }
-		
-		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", ASTNode.vendorName(), genPrinter);
-		}
 	}
 	
 	/**
@@ -1602,20 +1632,6 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             abstract Set<FVariable> dependentVariables(FVariable var);
             abstract boolean isInitialKnown(FVariable var);
             
-            private void generateDependenciesAttribute(TreeSet<Integer> dependencyIndex, CodeStream genPrinter) {
-                //Organize and generate the dependencies.
-                StringBuilder dependencies = new StringBuilder();
-                String prefix = "";
-                Iterator<Integer> itr = dependencyIndex.iterator();
-                while(itr.hasNext()) {
-                    dependencies.append(prefix);
-                    dependencies.append(itr.next());
-                    prefix = " ";
-                }
-                
-                generateAttribute("dependencies", dependencies , genPrinter);
-            }
-            
             public void generateAttributes(CodeStream genPrinter) {
 				
 				generateAttribute("index", variableIndexMap.get(variable.name()), genPrinter);
@@ -1626,7 +1642,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                     if (isInitialKnown(vv))
                         dependencyIndex.add(variableIndexMap.get(vv.name()));
                 }
-                generateDependenciesAttribute(dependencyIndex, genPrinter);
+                generateListAttribute("dependencies", dependencyIndex , genPrinter);
             }
         }
         
