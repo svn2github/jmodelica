@@ -1252,7 +1252,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an input component.
      */
-    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput() || (isDeclaredFlow() && !isOutput());
     
     /**
      * Check if this component inherits input from the surrounding component.
@@ -1334,10 +1334,10 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is or is part of a component that is declared input or output on the top level.
      */
-    syn boolean InstComponentDecl.isTopLevelInputOutput() {
-        return isTopLevel() && (isInput() || isOutput());
-    }
-    
+    syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
+    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && 
+            (isInput() || isOutput()) && !isProtected() && isPublicVar();
+
     inh boolean InstComponentDecl.isTopLevel();
     eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isTopLevel()     = true;

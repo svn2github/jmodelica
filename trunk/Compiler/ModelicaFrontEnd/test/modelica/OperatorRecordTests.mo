@@ -1488,18 +1488,15 @@ end OperatorRecordTests.OperatorOverload29;
             flatModel="
 fclass OperatorRecordTests.OperatorRecordConnect1
  OperatorRecordTests.Cplx c1.x;
- OperatorRecordTests.Cplx c1.y;
+ input OperatorRecordTests.Cplx c1.y;
  OperatorRecordTests.Cplx c2.x;
- OperatorRecordTests.Cplx c2.y;
+ input OperatorRecordTests.Cplx c2.y;
  OperatorRecordTests.Cplx c3.x;
- OperatorRecordTests.Cplx c3.y;
+ input OperatorRecordTests.Cplx c3.y;
 equation
  c1.x = c2.x;
  c2.x = c3.x;
  OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.sub(OperatorRecordTests.Cplx.'-'.neg(c1.y), c2.y), c3.y) = OperatorRecordTests.Cplx.'0'();
- c1.y = OperatorRecordTests.Cplx.'0'();
- c2.y = OperatorRecordTests.Cplx.'0'();
- c3.y = OperatorRecordTests.Cplx.'0'();
 
 public
  function OperatorRecordTests.Cplx.'0'
@@ -1715,9 +1712,7 @@ end OperatorRecordTests.OperatorRecordConnect3;
             flatModel="
 fclass OperatorRecordTests.OperatorRecordConnect4
  OperatorRecordTests.Cplx c.x;
- OperatorRecordTests.Cplx c.y;
-equation
- c.y = OperatorRecordTests.Cplx.'0'();
+ input OperatorRecordTests.Cplx c.y;
 
 public
  function OperatorRecordTests.Cplx.'0'

@@ -6962,9 +6962,7 @@ model RedeclarePrefix9
             description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
             flatModel="
 fclass RedeclareTests.RedeclarePrefix9
- Real c.x;
-equation
- c.x = 0;
+ input Real c.x;
 end RedeclareTests.RedeclarePrefix9;
 ")})));
 end RedeclarePrefix9;
@@ -6975,7 +6973,10 @@ model RedeclarePrefix10
         replaceable stream Real x;
     end C;
     
-    C c(redeclare flow Real x);
+    C c1(redeclare flow Real x);
+    C c2(redeclare flow Real x);
+equation
+    connect(c1, c2);
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -6983,9 +6984,10 @@ model RedeclarePrefix10
             description="Check that flow/stream can be changed in a redeclare",
             flatModel="
 fclass RedeclareTests.RedeclarePrefix10
- Real c.x;
+ input Real c1.x;
+ input Real c2.x;
 equation
- c.x = 0;
+ - c1.x - c2.x = 0;
 end RedeclareTests.RedeclarePrefix10;
 ")})));
 end RedeclarePrefix10;

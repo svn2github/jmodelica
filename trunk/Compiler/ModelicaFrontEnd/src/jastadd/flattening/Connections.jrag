@@ -547,11 +547,15 @@ aspect Connections {
 		}
 
         public void generateEquations(List<FAbstractEquation> eqns) {
+            InstComponentDecl icd = first().getVar();
+            if (size() == 1 && icd.isTopLevelInputOutput()) {
+                return;
+            }
             FExp e = null;
             for (ConnectionSetEntry cse : this) 
                 e = cse.buildFlow(e);
             // Only possible types here are operator record scalar, Integer and Real (the two latter either array or scalar)
-            FType t = first().getVar().type();
+            FType t = icd.type();
             FExp zero = t.isNumeric() ? t.size().createZeroFExp() : t.flattenZeroLiteral();
             eqns.add(new FEquation(e, zero));
         }

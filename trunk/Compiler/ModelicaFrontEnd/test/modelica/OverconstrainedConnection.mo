@@ -261,9 +261,7 @@ end C1;
             flatModel="
 fclass OverconstrainedConnection.OverconstrainedCorrect6
  Real c1.x;
- Real c1.y;
-equation
- c1.y = 0;
+ input Real c1.y;
 end OverconstrainedConnection.OverconstrainedCorrect6;
 ")})));
 end OverconstrainedCorrect6;
