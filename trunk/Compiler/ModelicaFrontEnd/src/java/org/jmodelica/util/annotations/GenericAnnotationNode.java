@@ -27,7 +27,6 @@ import org.jmodelica.util.annotations.AnnotationProvider.SubNodePair;
 import org.jmodelica.util.values.ConstValue;
 import org.jmodelica.util.values.ConstantEvaluationException;
 import org.jmodelica.util.values.Evaluable;
-import org.jmodelica.util.values.Evaluator;
 
 /**
  * Generic class for handling traversal over different types of annotations.
@@ -45,7 +44,12 @@ import org.jmodelica.util.values.Evaluator;
  */
 public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N, V>,
         N extends AnnotationProvider<N, V>, V extends Evaluable & PossiblyAnnotation<N>> {
-    
+
+    /**
+     * Vendor name.
+     */
+    public static final String VENDOR_NAME = "__Modelon";
+
     private final String name;
     private N node;
     private final T parent;
@@ -120,7 +124,7 @@ public abstract class GenericAnnotationNode<T extends GenericAnnotationNode<T, N
         computeSubNodesCache();
         GenericAnnotationNode<T, N, V> subNode = subNodesNameMap_cache.get(paths[currentIndex]);
         if (subNode == null) {
-            return createNode(paths[currentIndex], null);
+            subNode = createNode(paths[currentIndex], null);
         }
         return subNode.forPath(paths, currentIndex + 1);
     }
