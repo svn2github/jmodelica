@@ -561,6 +561,7 @@ class CasadiCollocator(object):
         # Evaluate the Jacobian
         self.residual_jac_fcn.setInput(self.xx_init, 'x0')
         self.residual_jac_fcn.setInput(self._par_vals, 'p')
+        raise Exception('deprecated syntax')
         self.residual_jac_fcn.evaluate()
         J = self.residual_jac_fcn.getOutput(0)
         J = csr_matrix(J.toCsc_matrix())
@@ -607,6 +608,7 @@ class CasadiCollocator(object):
         t0 = time.clock()
         self.extra_update = t0-t0_update
         self.times['update'] += self.extra_update # should be reset by warm start framework in each optimize, allows adding more update time from that
+        raise Exception('deprecated syntax')
         self.solver_object.evaluate()
 
         # Get the result
@@ -2186,6 +2188,7 @@ class LocalDAECollocator(CasadiCollocator):
             cnstr_points_f.init()
             cnstr_points_f.setInput(0., 0)
             cnstr_points_f.setInput(1., 1)
+            raise Exception('deprecated syntax')
             cnstr_points_f.evaluate()
             constraint_points = cnstr_points_f.getOutput().toArray().reshape(-1)
             constraint_points = sorted(set(constraint_points))
@@ -4150,6 +4153,7 @@ class LocalDAECollocator(CasadiCollocator):
         cp_f.init()
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)
+        raise Exception('deprecated syntax')
         cp_f.evaluate()
         return float(cp_f.getOutput())
     
@@ -5137,6 +5141,7 @@ class LocalDAECollocator(CasadiCollocator):
                             var_input = var_opt[vk][t_index,:]
                         self.elimination_fcn.setInput(var_input,j)
                         j+=1
+                raise Exception('deprecated syntax')
                 self.elimination_fcn.evaluate()
                 result = self.elimination_fcn.getOutput()
                 for index_v in range(n_eliminations):
@@ -5514,6 +5519,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         nlp_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
+        raise Exception('deprecated syntax')
         nlp_fcn.evaluate()
         return (float(nlp_fcn.getOutput(0)), nlp_fcn.getOutput(1).toArray().ravel())
 
@@ -5558,6 +5564,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
         J_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
+        raise Exception('deprecated syntax')
         J_fcn.evaluate()
         result = J_fcn.getOutput(0)
         if dense: result = result.toArray()
@@ -5628,6 +5635,7 @@ class LocalDAECollocator(CasadiCollocator):
                     dual]
         else:
             raise ValueError("Unkonwn point value: " + repr(point))
+        raise Exception('deprecated syntax')
         H_fcn.evaluate()
         return H_fcn.getOutput(0).toArray()
 
@@ -5709,6 +5717,7 @@ class LocalDAECollocator(CasadiCollocator):
         grad_fcn = self.solver_object.gradF()
         grad_fcn.setInput(self.xx_init, 'x')
         grad_fcn.setInput(self.get_par_vals(scaled_residuals=scaled_residuals), 'p')
+        raise Exception('deprecated syntax')
         grad_fcn.evaluate()
         grad = grad_fcn.getOutput(0).toArray()
         sigma_inv = N.linalg.norm(grad, N.inf)
