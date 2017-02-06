@@ -26,6 +26,7 @@
 #ifndef _JMI_BRENT_SOLVER_H
 #define _JMI_BRENT_SOLVER_H
 
+#include "jmi_types.h"
 #include "jmi_block_solver.h"
 
 typedef struct jmi_brent_solver_t jmi_brent_solver_t;
@@ -40,25 +41,25 @@ int jmi_brent_solver_solve(jmi_block_solver_t* block_solver);
 void jmi_brent_solver_delete(jmi_block_solver_t* block_solver);
 
 /**< \brief Newton before Brent */
-int jmi_brent_newton(jmi_block_solver_t *block, double *x0, double *f0, double *d);
+int jmi_brent_newton(jmi_block_solver_t *block, jmi_real_t *x0, jmi_real_t *f0, jmi_real_t *d);
 
 /**< \brief Notifies Brent that an integrator step has been accepted */
 int jmi_brent_completed_integrator_step(jmi_block_solver_t* block_solver);
 
 /**< \brief Test if the best guess is good enough */
-int jmi_brent_test_best_guess(jmi_block_solver_t *block, double xBest, double fBest);
+int jmi_brent_test_best_guess(jmi_block_solver_t *block, jmi_real_t xBest, jmi_real_t fBest);
 
 /**< \brief Data structure used by the Brent algorithm */
 struct jmi_brent_solver_t {
-    double y;              /**< \brief current/last iterate */
-    double f;              /**< \brief Residual at "y" */
+    jmi_real_t y;              /**< \brief current/last iterate */
+    jmi_real_t f;              /**< \brief Residual at "y" */
 
-    double originalStart; /**< \brief The start value used during the first call */
+    jmi_real_t originalStart; /**< \brief The start value used during the first call */
     
-    double y_pos_min;      /**< \brief Iteration variable value for minimal known positive f */
-    double f_pos_min;       /**< \brief Residual at y_pos_min */
-    double y_neg_max;       /**< \brief Iteration variable value for maximum known negativ f*/
-    double f_neg_max;       /**< \brief Residual at y_neg_max */
+    jmi_real_t y_pos_min;      /**< \brief Iteration variable value for minimal known positive f */
+    jmi_real_t f_pos_min;       /**< \brief Residual at y_pos_min */
+    jmi_real_t y_neg_max;       /**< \brief Iteration variable value for maximum known negativ f*/
+    jmi_real_t f_neg_max;       /**< \brief Residual at y_neg_max */
 };
 
 

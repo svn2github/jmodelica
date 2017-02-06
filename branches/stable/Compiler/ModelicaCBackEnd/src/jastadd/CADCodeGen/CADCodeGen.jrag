@@ -675,6 +675,13 @@ aspect CADCodeGen {
         getFExp().prettyPrint_CAD(p, str, indent);
     }
 
+    @Override
+    public void FInStreamEpsExp.genDerExp_CAD(CodePrinter p, CodeStream str, String indent) {
+        str.print("0");
+    }
+    syn boolean FInStreamEpsExp.inlineVar_CAD() = true;
+    syn boolean FInStreamEpsExp.inlineDer_CAD() = true;
+
 
 	/**
 	 * If expressions need special handling during CAD since it is not possible to

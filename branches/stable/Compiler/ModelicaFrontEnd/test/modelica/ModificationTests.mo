@@ -2465,7 +2465,7 @@ model ArrayModifications71
             flatModel="
 fclass ModificationTests.ArrayModifications71
  ModificationTests.ArrayModifications71.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications71.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications71.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications71.B
@@ -2496,7 +2496,7 @@ model ArrayModifications72
             flatModel="
 fclass ModificationTests.ArrayModifications72
  ModificationTests.ArrayModifications72.B b1[1] = b2[1:1];
- ModificationTests.ArrayModifications72.B b2[1](each x = 0);
+ ModificationTests.ArrayModifications72.B b2[1](x = {0});
 
 public
  record ModificationTests.ArrayModifications72.B
@@ -2757,6 +2757,84 @@ Warning at line 2747, column 18, in file 'Compiler/ModelicaFrontEnd/test/modelic
   Ignoring erroneous 'each' for the modification 'start = {1,2}'
 ")})));
 end ArrayModifications83;
+
+
+model ArrayModifications84
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n={i + j for i in 1:2, j in 3:3:6}));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications84",
+            description="Expression splitting for iteration expressions",
+            flatModel="
+fclass ModificationTests.ArrayModifications84
+ parameter Integer b[1].a[1].n = 1 + 3 /* 4 */;
+ parameter Integer b[1].a[2].n = 2 + 3 /* 5 */;
+ parameter Integer b[2].a[1].n = 1 + 6 /* 7 */;
+ parameter Integer b[2].a[2].n = 2 + 6 /* 8 */;
+end ModificationTests.ArrayModifications84;
+")})));
+end ArrayModifications84;
+
+
+model ArrayModifications85
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](each a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications85",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications85
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications85;
+")})));
+end ArrayModifications85;
+
+
+model ArrayModifications86
+    model A
+        parameter Integer n;
+    end A;
+    
+    model B
+        A a[2];
+    end B;
+    
+    B b[2](a(n=1:2));
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="ArrayModifications86",
+            description="Split binding expressions on the correct level",
+            flatModel="
+fclass ModificationTests.ArrayModifications86
+ parameter Integer b[1].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[1].a[2].n = (1:2)[2] /* 2 */;
+ parameter Integer b[2].a[1].n = (1:2)[1] /* 1 */;
+ parameter Integer b[2].a[2].n = (1:2)[2] /* 2 */;
+end ModificationTests.ArrayModifications86;
+")})));
+end ArrayModifications86;
 
 
 /* ========= Modifications on type declarations ========= */

@@ -549,6 +549,10 @@ aspect Derivatives {
         return dynamicFExp(new FRealLitExp(val));
     }
 
+    public FExp FInStreamEpsExp.diff(String name) {
+        return dynamicFExp(new FRealLitExp(0));
+    }
+
     private int FFunctionCall.order = 0;
 
     public FExp FFunctionCall.diff(String name) {

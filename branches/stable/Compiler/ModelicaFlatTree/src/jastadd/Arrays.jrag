@@ -1227,27 +1227,6 @@ aspect Arrays {
 	}
 	
 	/**
-	 * Collect all ForIndexs used in the expression of this FExpSubscript.
-	 */
-	coll HashSet<CommonForIndex> FExpSubscript.collectForIndices() 
-		[new HashSet<CommonForIndex>()] with add root FExpSubscript;
-	FIdUse contributes myForIndex() when isForIndex()
-		to FExpSubscript.collectForIndices() for each allSurroundingFExpSubscripts();
-	
-	/**
-	 * Return the FForIndex or InstForIndex that this variable belongs to, if any.
-	 */
-	syn CommonForIndex FIdUse.myForIndex()            = myFV().myForIndex();
-	syn CommonForIndex FIdUseInstAccess.myForIndex()  = getInstAccess().myInstComponentDecl().myForIndex();
-	inh CommonForIndex FAbstractVariable.myForIndex();
-	inh CommonForIndex InstComponentDecl.myForIndex();
-	eq FForIndex.getFVariable().myForIndex()        = this;
-	eq InstForIndex.getInstPrimitive().myForIndex() = this;
-	eq FClass.getChild().myForIndex()               = null;
-	eq FFunctionDecl.getChild().myForIndex()        = null;
-	eq InstNode.getChild().myForIndex()             = null;
-	
-	/**
 	 * Find the closest ancestor that is an FExpSubscript, if any.
 	 */
 	inh FExpSubscript FIdUse.surroundingFExpSubscript();

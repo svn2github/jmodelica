@@ -1603,5 +1603,37 @@ Warning at line 1572, column 10, in file '...', PARAMETER_MISSING_BINDING_EXPRES
 ")})));
 end UnknownSizeArrayIndexBounds1;
 
+model ExternalFunctionAnnotation1
+    function f
+        input Real x;
+        output Real y;
+        external "C" y = f(x);
+        annotation(Include="", IncludeDirectory="", Library="", LibraryDirectory="", LegalAnnotation="");
+    end f;
+    
+    Real y = f(time);
+    annotation(__JModelica(UnitTesting(tests={
+        WarningTestCase(
+            name="ExternalFunctionAnnotation1",
+            description="",
+            checkType=check,
+            errorMessage="
+4 errors found:
+
+Error at line 9, column 19, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 30, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 51, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+Error at line 9, column 63, in file '...', EXTERNAL_FUNCTION_ANNOTATION:
+  External function annotations only allowed on external statement annotations. This annotation is attached to a class. There might be a semicolon you want to remove.
+
+")})));
+end ExternalFunctionAnnotation1;
+
 
 end CheckTests;

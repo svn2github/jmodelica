@@ -46,16 +46,22 @@ aspect OptimicaFlattening {
 			getInstClassModification().flattenUsedFuncsAndEnums(fc);
 		super.flattenUsedFuncsAndEnums(fc);
     }
-        
-    protected void InstOptClassDecl.flattenInstClassDeclExtra(FClass fc) {
-		FOptClass foc = (FOptClass) fc;
-		FQName empty = new FQNameEmpty();
-		if (hasInstClassModification()) {
-			List attr = new List();
-			getInstClassModification().collectAttributes(attr, empty, AttributeExpRetriever.DEFAULT, true);
-			foc.setFAttributeList(attr);
-		}
-    }
+
+    private static final ExtraFlattener InstOptClassDecl.optimicaExtraFlattener = InstClassDecl.addExtraFlattener(
+            new InstClassDecl.ExtraFlattener() {
+                public void flattenExtra(InstClassDecl icd, FClass fc) {
+                    if (!(fc instanceof FOptClass)) {
+                        return;
+                    }
+                    FOptClass foc = (FOptClass) fc;
+                    FQName empty = new FQNameEmpty();
+                    if (icd.hasInstClassModification()) {
+                        List attr = new List();
+                        icd.getInstClassModification().collectAttributes(attr, empty, AttributeExpRetriever.DEFAULT, true);
+                        foc.setFAttributeList(attr);
+                    }
+                }
+            });
 
 	refine Flattening public void InstNode.flattenEquations(FQName name, FClass fc) {
         for (FAbstractEquation ae : getFAbstractEquations()) 

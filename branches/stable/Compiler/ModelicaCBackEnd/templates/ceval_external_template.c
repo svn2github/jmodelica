@@ -102,9 +102,7 @@ void* jmi_global_calloc(size_t n, size_t s)
 
 jmp_buf jmceval_try_location;
 
-int JMCEVAL_try() {
-    return setjmp(jmceval_try_location) == 0;
-}
+#define JMCEVAL_try() (setjmp(jmceval_try_location) == 0)
 
 void jmi_throw()
 {

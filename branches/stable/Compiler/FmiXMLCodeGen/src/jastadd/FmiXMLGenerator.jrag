@@ -108,36 +108,66 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 	}
     
+    private static Collection<String> vendorAnnotationChildren = new ArrayList<String>();
+    /**
+     * Used for registering new sub nodes to this node. Returns the name
+     * for conveninence.
+     */
+    public static String addVendorAnnotationChild(String childName) {
+        vendorAnnotationChildren.add(childName);
+        return childName;
+    }
+    
     /**
 	 * Internal class used to generate a VendorAnnotations tag.
 	 * 
 	 * @see XMLTag
 	 */
 	public class XMLTag_vendorAnnotations extends XMLTag {
-		
+
 		public XMLTag_vendorAnnotations(AbstractGenerator myGenerator, FClass fclass) {
 			super("vendorAnnotations", "VendorAnnotations", myGenerator, fclass);
 		}
-		
-		public String[] children() { return new String[] {"tool"}; }
-	}
+
+        public String[] children() {
+            return vendorAnnotationChildren.toArray(new String[vendorAnnotationChildren.size()]);
+        }
+
+    }
 	
+    /**
+     * Internal class used to generate a Tool tag.
+     * 
+     * @see XMLTag
+     */
+    public abstract class XMLTag_tool extends XMLTag {
+
+        private final String vendorName;
+
+        public XMLTag_tool(String tagName, String vendorName, AbstractGenerator myGenerator, FClass fclass) {
+            super(tagName, "Tool", myGenerator, fclass);
+            this.vendorName = vendorName;
+        }
+
+        public final void generateAttributes(CodeStream genPrinter) {
+            generateAttribute("name", vendorName, genPrinter);
+        }
+    }
+
+	public static final String vendorTooltagName = addVendorAnnotationChild("vendorTool");
 	/**
-	 * Internal class used to generate a Tool tag.
+	 * Internal class used to generate a Vendor Tool tag.
 	 * 
 	 * @see XMLTag
 	 */
-	public class XMLTag_tool extends XMLTag {
+	public class XMLTag_vendorTool extends XMLTag_tool {
+	    
 		
-		public XMLTag_tool(AbstractGenerator myGenerator, FClass fclass) {
-			super("tool", "Tool", myGenerator, fclass);
+		public XMLTag_vendorTool(AbstractGenerator myGenerator, FClass fclass) {
+			super(vendorTooltagName, ASTNode.vendorName(), myGenerator, fclass);
 		}
 		
 		public String[] children() { return new String[] {"annotation"}; }
-		
-		public void generateAttributes(CodeStream genPrinter) {
-			generateAttribute("name", ASTNode.vendorName(), genPrinter);
-		}
 	}
 	
 	/**
@@ -188,6 +218,49 @@ public abstract class FmiXMLGenerator extends GenericXMLGenerator {
 		}
 	}
     
+    /**
+     * Used for finding the indices for scalar variable tags.
+     */
+    protected HashMap<String, Integer> variableIndexMap;
+
+    /**
+     * Abstract class for handling printing of variables. Things that are
+     * common between the different FMI versions should be in this class.
+     * Each sub class must have a class named XMLTag_variables!
+     */
+    public abstract class ModelVariablesBase extends XMLTag {
+        
+        protected FVariable variable;
+        
+        public ModelVariablesBase(AbstractGenerator myGenerator, FClass fclass) {
+            super("modelVariables", "ModelVariables", myGenerator, fclass);
+        }
+        
+        public String[] children() { return new String[] {"variables"}; }
+        
+        public void generateChildren(CodeStream genPrinter) {
+            // get and sort all FVariables
+            ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
+            VariableNameComparator comp = new VariableNameComparator();
+            Collections.sort(variables, comp);
+            
+            //Create map for the indices of the scalar variables.
+            variableIndexMap = new HashMap<String, Integer>();
+            int index = 1;
+            for (FVariable var : variables) {
+                if (var.isXMLVariable())
+                    variableIndexMap.put(var.name(), index++);
+            }
+
+            for (FVariable var : variables) {
+                if (var.isXMLVariable()) {
+                    variable = var;
+                    super.generateChildren(genPrinter);
+                }
+            }
+        }
+    }
+
     /**
      * Checks if a variable is real and has a unit associated with it.
      *
@@ -600,30 +673,12 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
 	 * 
 	 * @see XMLTag
 	 */
-	public class XMLTag_modelVariables extends XMLTag {
-		
-		private FVariable variable;
-		
-		public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
-			super("modelVariables", "ModelVariables", myGenerator, fclass);
-		}
-		
-		public String[] children() { return new String[] {"variables"}; }
-		
-		public void generateChildren(CodeStream genPrinter) {
-			// get and sort all FVariables
-			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
-			VariableNameComparator comp = new VariableNameComparator();
-			Collections.sort(variables, comp);
+	public class XMLTag_modelVariables extends ModelVariablesBase {
 
-			for (FVariable var : variables) {
-                if (var.isXMLVariable()) {
-					variable = var;
-					super.generateChildren(genPrinter);
-				}
-			}
-		}
-		
+        public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+            super(myGenerator, fclass);
+        }
+
 		public class XMLTag_variables extends XMLTag {
 
 			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
@@ -785,10 +840,7 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
                 if (variable.isOutput()) {
                     generateOpening(xml, genPrinter);
                     for (FVariable dv : variable.directDependencies()) {
-                        generateTagStart("Name", genPrinter);
-                        generateOpenEnd(genPrinter);
-                        genPrinter.print(dv.name());
-                        generateClosing("Name", genPrinter);
+                        generateOneLineTag("Name", dv.name(), genPrinter);
                     }
                     generateClosing(xml, genPrinter);
                 }
@@ -859,8 +911,6 @@ public class Fmi1XMLGenerator extends FmiXMLGenerator {
  * 
  */
 public class Fmi2XMLGenerator extends FmiXMLGenerator {
-	
-	private HashMap<String, Integer> variableIndexMap; //Used for finding the indices for scalar variable tags.
 	
     public static final Creator CREATOR = new Creator()
     {
@@ -1272,45 +1322,20 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
     protected String getParameterVariability() {
         return "fixed";
     }
-    
+
 	/**
 	 * Internal class used to generate a ModelVariables tag.
 	 * 
 	 * @see XMLTag
 	 */
-	public class XMLTag_modelVariables extends XMLTag {
+	public class XMLTag_modelVariables extends ModelVariablesBase {
 		
-		private FVariable variable;
-		private String startValue;
-		
-		public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
-			super("modelVariables", "ModelVariables", myGenerator, fclass);
-		}
-		
-		public String[] children() { return new String[] {"variables"}; }
-		
-		public void generateChildren(CodeStream genPrinter) {
-			// get and sort all FVariables
-			ArrayList<FVariable> variables = (ArrayList<FVariable>) fclass.allVariables().clone();
-			VariableNameComparator comp = new VariableNameComparator();
-			Collections.sort(variables, comp);
-			
-			//Create map for the indices of the scalar variables.
-			variableIndexMap = new HashMap<String, Integer>();
-			int index = 1;
-			for (FVariable var : variables) {
-                if (var.isXMLVariable())
-                    variableIndexMap.put(var.name(), index++);
-			}
+        protected String startValue;
 
-			for (FVariable var : variables) {
-                if (var.isXMLVariable()) {
-					variable = var;
-					super.generateChildren(genPrinter);
-				}
-			}
-		}
-		
+        public XMLTag_modelVariables(AbstractGenerator myGenerator, FClass fclass) {
+            super(myGenerator, fclass);
+        }
+
 		public class XMLTag_variables extends XMLTag {
 
 			public XMLTag_variables(AbstractGenerator myGenerator, FClass fclass) {
@@ -1602,20 +1627,6 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
             abstract Set<FVariable> dependentVariables(FVariable var);
             abstract boolean isInitialKnown(FVariable var);
             
-            private void generateDependenciesAttribute(TreeSet<Integer> dependencyIndex, CodeStream genPrinter) {
-                //Organize and generate the dependencies.
-                StringBuilder dependencies = new StringBuilder();
-                String prefix = "";
-                Iterator<Integer> itr = dependencyIndex.iterator();
-                while(itr.hasNext()) {
-                    dependencies.append(prefix);
-                    dependencies.append(itr.next());
-                    prefix = " ";
-                }
-                
-                generateAttribute("dependencies", dependencies , genPrinter);
-            }
-            
             public void generateAttributes(CodeStream genPrinter) {
 				
 				generateAttribute("index", variableIndexMap.get(variable.name()), genPrinter);
@@ -1626,7 +1637,7 @@ public class Fmi2XMLGenerator extends FmiXMLGenerator {
                     if (isInitialKnown(vv))
                         dependencyIndex.add(variableIndexMap.get(vv.name()));
                 }
-                generateDependenciesAttribute(dependencyIndex, genPrinter);
+                generateListAttribute("dependencies", dependencyIndex , genPrinter);
             }
         }
         

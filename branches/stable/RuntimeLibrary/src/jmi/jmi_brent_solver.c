@@ -42,7 +42,7 @@
    @param f - output - residual value
    @param problem_data - solver object propagated as opaques data
 */
-int brentf(realtype y, realtype* f, void* problem_data) {
+int brentf(jmi_real_t y, jmi_real_t* f, void* problem_data) {
     jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
     int ret = 0;
     
@@ -73,13 +73,11 @@ int brentf(realtype y, realtype* f, void* problem_data) {
     return ret;
 }
 
-int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
+int brentdf(jmi_real_t y, jmi_real_t f, jmi_real_t* df, void* problem_data) {
     jmi_block_solver_t *block = (jmi_block_solver_t*)problem_data;
     int ret = 0;
-    realtype y0 = y;
-    realtype ftemp;
+    jmi_real_t y0 = y, ftemp, inc;
     int sign;
-    realtype inc;
 
     /* Check that arguments are valid */
     ret = jmi_check_and_log_illegal_iv_input(block, &y, 1);
@@ -105,8 +103,8 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
             return ret;
         }
     } else {
-        sign = (y >= 0) ? 1 : -1;
-        inc = MAX(ABS(y), block->nominal[0])*sign*1e-8;
+        sign = (y >= 0)  ? 1 : -1;
+        inc = JMI_MAX(JMI_ABS(y), block->nominal[0])*sign*1e-8;
         y += inc;
         /* make sure we're inside bounds*/
         if((y > block->max[0]) || (y < block->min[0])) {
@@ -139,7 +137,7 @@ int brentdf(realtype y, realtype f, realtype* df, void* problem_data) {
     
     /* Check that outputs are valid */    
     {
-        realtype v = *df;
+        jmi_real_t v = *df;
         if (v- v != 0) {
              jmi_log_t* log = block->log;
              jmi_log_node_t node = jmi_log_enter_fmt(block->log, logWarning, "NaNOutput", "Not a number in derivative from <block: %s>", block->label);
@@ -481,6 +479,8 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 #endif
                 return flag;
             }
+            if(block->nominal[0] < 0) /* According to spec negative nominal is fine but solver expects positive.*/
+                block->nominal[0] = -block->nominal[0];
         }
 
 
@@ -516,7 +516,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
 
 
         if ((init > max) || (init < min)) {
-            realtype old_init = init;
+            jmi_real_t old_init = init;
             init = init > max ? max : min;
             block->x[0] = block->initial[0] = init;
             jmi_log_node(block->log, logWarning, "StartOutOfBounds",
@@ -795,7 +795,7 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
                  solver->y_neg_max, solver->y_pos_min, solver->f_neg_max, solver->f_pos_min);
 
     {            
-        realtype u, f;
+        jmi_real_t u, f;
         flag = jmi_brent_search(brentf, solver->y_neg_max,  solver->y_pos_min, 
                                 solver->f_neg_max, solver->f_pos_min, 0, &u, &f,block);
         block->x[0] = u;
@@ -826,21 +826,17 @@ int jmi_brent_solver_solve(jmi_block_solver_t * block){
     return JMI_BRENT_SUCCESS;
 }
 
-int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtype f_min, realtype f_max, realtype tolerance, realtype* u_out, realtype* f_out,void *data) {
-    realtype a=u_min; /* left point */
-    realtype fa = f_min;
-    realtype b=u_max; /* right point */
-    realtype fb = f_max;
-    realtype c = u_min; /* Intermediate point a <= c <= b */
-    realtype fc = f_min;
-    realtype e= u_max - u_min;
-    realtype d=e;
-    realtype m;
-    realtype s;
-    realtype p;
-    realtype q;
-    realtype r;
-    realtype tol; /* absolute tolerance for the current "b" */
+int jmi_brent_search(jmi_brent_func_t f, jmi_real_t u_min, jmi_real_t u_max, jmi_real_t f_min, jmi_real_t f_max, jmi_real_t tolerance, jmi_real_t* u_out, jmi_real_t* f_out,void *data) {
+    jmi_real_t a=u_min; /* left point */
+    jmi_real_t fa = f_min;
+    jmi_real_t b=u_max; /* right point */
+    jmi_real_t fb = f_max;
+    jmi_real_t c = u_min; /* Intermediate point a <= c <= b */
+    jmi_real_t fc = f_min;
+    jmi_real_t e= u_max - u_min;
+    jmi_real_t d=e;
+    jmi_real_t m,s,p,q,r;
+    jmi_real_t tol; /* absolute tolerance for the current "b" */
     int flag;
     jmi_block_solver_t* block = (jmi_block_solver_t*)data;
     jmi_log_t* log = block->log;
@@ -859,7 +855,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
     }
 #endif
     while(1) {
-        if (RAbs(fc) < RAbs(fb)) {
+        if (JMI_ABS(fc) < JMI_ABS(fb)) {
             a = b;
             b = c;
             c = a;
@@ -872,12 +868,12 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
                      "Root is bracketed between <iv_best: %g> and <iv_second: %g>, residuals <f_best: %g> and <f_second: %g>",
                      b, c, fb, fc);
 
-        tol = 2*UNIT_ROUNDOFF*RAbs(b) + tolerance;
+        tol = 2*UNIT_ROUNDOFF*JMI_ABS(b) + tolerance;
         m = (c - b)/2;
         
-        if ((RAbs(m) <= tol) || (fb == 0.0)) {
+        if ((JMI_ABS(m) <= tol) || (fb == 0.0)) {
             /* root found (interval is small enough) */
-            if (RAbs(fb) < RAbs(fc)) {
+            if (JMI_ABS(fb) < JMI_ABS(fc)) {
                 *u_out = b;
                 *f_out = fb;
             }
@@ -892,7 +888,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
         }
         /* Find the new point: */
         /* Determine if a bisection is needed */
-        if ((RAbs(e) < tol) || ( RAbs(fa) <= RAbs(fb))) {
+        if ((JMI_ABS(e) < tol) || ( JMI_ABS(fa) <= JMI_ABS(fb))) {
             e = m;
             d = e;
         }
@@ -917,7 +913,7 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
             s = e;
             e = d;
             
-            if ((2*p < 3*m*q - RAbs(tol*q)) && (p < RAbs(0.5*s*q)))
+            if ((2*p < 3*m*q - JMI_ABS(tol*q)) && (p < JMI_ABS(0.5*s*q)))
                 /* interpolation successful */
                 d = p/q;
             else {
@@ -931,10 +927,10 @@ int jmi_brent_search(jmi_brent_func_t f, realtype u_min, realtype u_max, realtyp
         /* Best guess value is saved into "a" */
         a = b;
         fa = fb;
-        b = b + ((RAbs(d) > tol) ? d : ((m > 0) ? tol: -tol));
+        b = b + ((JMI_ABS(d) > tol) ? d : ((m > 0) ? tol: -tol));
         flag = f(b, &fb, data);
         if (flag) {
-             if (RAbs(fa) < RAbs(fc)) {
+             if (JMI_ABS(fa) < JMI_ABS(fc)) {
                 *u_out = a;
                 *f_out = fa;
             }

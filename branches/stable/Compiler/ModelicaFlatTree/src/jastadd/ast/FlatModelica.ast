@@ -1261,6 +1261,10 @@ FTimeExp : FAbstractScalarExp;
  */
 FEndExp : FAbstractScalarExp;
 
+/**
+ * Epsilon for inStream connections which is calculated by runtime
+ */
+FInStreamEpsExp : FAbstractScalarExp;
 
 // Functions and function-like operators
 /**

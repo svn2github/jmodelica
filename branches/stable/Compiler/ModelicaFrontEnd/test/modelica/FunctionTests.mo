@@ -11291,6 +11291,64 @@ Compliance error at line 10925, column 5, in file '...', CANNOT_INFER_ARRAY_SIZE
 ")})));
 end UnknownArray52;
 
+model UnknownArray53
+    record R
+        Real[2] a;
+    end R;
+    function F
+        input Real[:] X;
+        output R r;
+    algorithm
+        r := R(cat(1, X, {1 - sum(X)}));
+    end F;
+    R r = F({(sin(time) + 1) / 2});
+    annotation(__JModelica(UnitTesting(tests={
+        TransformCanonicalTestCase(
+            name="UnknownArray53",
+            description="Bug in #5272",
+            inline_functions="none",
+            flatModel="
+fclass FunctionTests.UnknownArray53
+ Real r.a[1];
+ Real r.a[2];
+equation
+ (FunctionTests.UnknownArray53.R({r.a[1], r.a[2]})) = FunctionTests.UnknownArray53.F({(sin(time) + 1) / 2});
+
+public
+ function FunctionTests.UnknownArray53.F
+  input Real[:] X;
+  output FunctionTests.UnknownArray53.R r;
+  Real[:] temp_1;
+  Real[:] temp_2;
+  Real temp_3;
+ algorithm
+  assert(size(X, 1) + 1 == 2, \"Mismatching sizes in FunctionTests.UnknownArray53.F\");
+  init temp_1 as Real[size(X, 1) + 1];
+  for i1 in 1:size(X, 1) loop
+   temp_1[i1] := X[i1];
+  end for;
+  init temp_2 as Real[1];
+  temp_3 := 0.0;
+  for i2 in 1:size(X, 1) loop
+   temp_3 := temp_3 + X[i2];
+  end for;
+  temp_2[1] := 1 - temp_3;
+  for i1 in 1:1 loop
+   temp_1[i1 + size(X, 1)] := temp_2[i1];
+  end for;
+  r.a[1] := temp_1[1];
+  r.a[2] := temp_1[2];
+  return;
+ end FunctionTests.UnknownArray53.F;
+
+ record FunctionTests.UnknownArray53.R
+  Real a[2];
+ end FunctionTests.UnknownArray53.R;
+
+end FunctionTests.UnknownArray53;
+")})));
+end UnknownArray53;
+
 // TODO: need more complex cases
 model IncompleteFunc1
  function f

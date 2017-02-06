@@ -3392,7 +3392,7 @@ aspect CCodeGen {
         }
         str.println(") {");
         
-        str.format("%sjmi_min_time_event(&%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
+        str.format("%sjmi_min_time_event(%s, 1, %s, ", p.indent(indent), res, phased ? "1" : "0");
         p.print(solutionForTime(), str, indent);
         str.formatln(");\n%s}", indent);
         printIndicator(p.PostStep, str, indent, true);
@@ -3418,7 +3418,7 @@ aspect CCodeGen {
         str.print("  if (SURELY_LT_ZERO(_t - (");
         getOffset().prettyPrint_C(str,"");
         str.print("))) {\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
+        str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
         getOffset().prettyPrint_C(str,"");
         str.println(");");
         //str.print("printf(\"Hepp: %f %f\\n\",_t,nextTimeEventTmp);\n");
@@ -3435,7 +3435,7 @@ aspect CCodeGen {
         str.print(")) / (");
         getInterval().prettyPrint_C(str,"");
         str.print("));\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
+        str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
         str.print("(nSamp + 1.0) * (");
         getInterval().prettyPrint_C(str,"");
         str.print(") + (");
@@ -3465,7 +3465,7 @@ aspect CCodeGen {
         str.print(")) / (");
         getInterval().prettyPrint_C(str,"");
         str.print("));\n");
-        str.format("%sjmi_min_time_event(&%s, 1, 0, ", indent, res);
+        str.format("%sjmi_min_time_event(%s, 1, 0, ", indent, res);
         str.print("(nSamp + 1.0) * (");
         getInterval().prettyPrint_C(str,"");
         str.print(") + (");

@@ -24,29 +24,27 @@ public class ErrorTestCase extends TestCase {
 
     protected String errorMessage;
 
-	/**
-	 * Perform tests on a set of semantic problems.
-	 * 
-	 * @return  <code>true</code> if test case shoule stop after this method
-	 */
-	protected boolean testProblems(Collection<Problem> problems) {
-		filterProblems(problems);
-		
-		if (problems.size() == 0)
-			return getCheckType() == ErrorCheckType.CHECK;
-		
-		String test = new CompilerException(problems).getMessage(true);
-		String correct = getErrorMessage();
+    /**
+     * Perform tests on a set of semantic problems.
+     * 
+     * @return  <code>true</code> if test case shoule stop after this method
+     */
+    protected boolean testProblems(Collection<Problem> problems) {
+        filterProblems(problems);
+        
+        if (problems.size() == 0)
+            return getCheckType() == ErrorCheckType.CHECK;
+        
+        String test = new CompilerException(problems).getMessage(true);
+        String correct = getErrorMessage();
         String f_test = filterTestResult(test, resultFilters);
         String f_correct = filterTestResult(correct, resultFilters);
-		String sf_test = removeWhitespace(f_test);
-		String sf_correct = removeWhitespace(f_correct);
-		
-		if (!sf_test.equals(sf_correct))
-			assertEquals("Wrong errors reported.", correct, test);
-			
-		return true;
-	}
+        
+        if (!checkEquals(f_correct, f_test)) {
+            assertEquals("Wrong errors reported.", correct, test);
+        }
+        return true;
+    }
 
 	/**
 	 * Perform tests on the set of semantic problems found after transform canonical step.

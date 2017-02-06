@@ -800,6 +800,16 @@ aspect Names {
      * 
      * Supports file URI and modelica URI only.
      * Returns null for unsupported schemes and malformed URIs.
+     */
+    public String ASTNode.resolveURI(String str) {
+        return resolveURI(str, false);
+    }
+
+    /**
+     * Resolves <code>str</code> to an absolute file path.
+     * 
+     * Supports file URI and modelica URI only.
+     * Returns null for unsupported schemes and malformed URIs.
      * If error is true, also generate an error for unsupported schemes.
      */
     public String ASTNode.resolveURI(String str, boolean error) {
@@ -1242,7 +1252,7 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is an input component.
      */
-    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput();
+    syn boolean InstComponentDecl.isInput() = isDeclaredInput() || inheritsInput() || (isDeclaredFlow() && !isOutput());
     
     /**
      * Check if this component inherits input from the surrounding component.
@@ -1324,21 +1334,14 @@ aspect ComponentDeclMethods {
     /**
      * Check if this component is or is part of a component that is declared input or output on the top level.
      */
-    syn boolean InstComponentDecl.isTopLevelInputOutput() {
-        if (isTopLevel())
-            return isDeclaredInput() || isDeclaredOutput();
-        InstComponentDecl source = inheritsInputOutputFrom();
-        return source != null && source.isTopLevel();
-    }
-    
-    /**
-     * Check if this component is declared at the top level, i.e. not part of any other component.
-     */
+    syn boolean InstComponentDecl.isTopLevelInputOutput() = false;
+    eq InstAssignable.isTopLevelInputOutput() = isTopLevel() && 
+            (isInput() || isOutput()) && !isProtected() && isPublicVar();
+
     inh boolean InstComponentDecl.isTopLevel();
-    eq InstComponentDecl.getChild().isTopLevel() = false;
+    eq InstComponentDecl.getChild().isTopLevel() = (isAssignable() || isConnector()) && isTopLevel();
     eq InstClassDecl.getChild().isTopLevel()     = true;
-    eq InstRoot.getChild().isTopLevel()          = true;
-    eq Root.getChild().isTopLevel()              = true;
+    eq Root.getChild().isTopLevel()              = false;
 
     /**
      * Check if this equation is declared initial.

@@ -459,14 +459,17 @@ end f;
 Integer x = f(2, {2, 2});
 
     annotation(__JModelica(UnitTesting(tests={
-        ErrorTestCase(
+        WarningTestCase(
             name="General_ArrayTest16_Err",
             description="Test type checking of arrays for unknown-size, non-input arrays in functions",
             errorMessage="
-1 errors found:
+2 errors found:
 
-Error at line 430, column 16, in file 'Compiler/ModelicaFrontEnd/test/modelica/ArrayTests.mo', CANNOT_INFER_ARRAY_SIZE_OF_VARIABLE:
-  Can not infer array size of the variable y
+Compliance error at line 453, column 22, in file '...':
+  Using variables with undefined size is not supported
+
+Compliance error at line 455, column 3, in file '...':
+  Using variables with undefined size is not supported
 ")})));
 end ArrayTest16_Err;
 

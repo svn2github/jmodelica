@@ -283,7 +283,7 @@ aspect FunctionInlining {
                 return;
             }
             FVariable var = addVar(oldName, variability, type);
-            if (variability.constantVariability()) {
+            if (variability.knownParameterOrLess()) {
                 try {
                     value = value.ceval().buildLiteral();
                     var.setBindingExp(value);

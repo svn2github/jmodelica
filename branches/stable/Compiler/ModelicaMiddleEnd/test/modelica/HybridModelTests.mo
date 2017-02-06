@@ -875,5 +875,40 @@ b = sin(a + time)
 -------------------------------
 ")})));
     end MixedVariabilityMatch1;
+    
+    model ParameterVarEventExp1
+        parameter Boolean p1 = true;
+        Real a = if p1 then time else -time;
+        
+        Boolean b = a > 0.5;
+        Boolean c = b and not pre(b);
+        Boolean d = c and true;
+        Real x;
+    equation
+        when d then
+            x = time;
+        end when;
+        
+    annotation(__JModelica(UnitTesting(tests={
+        FClassMethodTestCase(
+            name="ParameterVarEventExp1",
+            description="Verify that event generating expressions with parameter variability ins't merged'",
+            methodName="printDAEBLT",
+            methodResult="
+--- Solved equation ---
+a := if p1 then time else - time
+
+--- Pre propagation block (Block 1) ---
+  --- Solved equation ---
+  b := a > 0.5
+  --- Solved equation ---
+  c := b and not pre(b)
+  --- Solved equation ---
+  d := c and true
+  --- Solved equation ---
+  x := if d and not pre(d) then time else pre(x)
+-------------------------------
+")})));
+    end ParameterVarEventExp1;
 
 end HybridModelTests;

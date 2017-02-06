@@ -1579,7 +1579,7 @@ model RecordBinding24
 fclass RecordTests.RecordBinding24
  parameter Real r1.y1 = 52 /* 52 */;
  final parameter Real r1.r2.y2 = 51 /* 51 */;
- final parameter Real r1.r2.r3.x3 = 51.0 /* 51 */;
+ final parameter Real r1.r2.r3.x3 = 51 /* 51 */;
  parameter Real r1.r2.r3.y3;
 parameter equation
  r1.r2.r3.y3 = r1.y1;
@@ -2119,7 +2119,7 @@ model RecordArray4
             variability_propagation=false,
             flatModel="
 fclass RecordTests.RecordArray4
- RecordTests.RecordArray4.A x[2](each a = 1,b = {1, 2});
+ RecordTests.RecordArray4.A x[2](a = {1, 1},b = {1, 2});
 
 public
  record RecordTests.RecordArray4.A
@@ -2557,7 +2557,7 @@ model RecordConstructor10
             flatModel="
 fclass RecordTests.RecordConstructor10
  parameter Real b.d = 2 /* 2 */;
- RecordTests.RecordConstructor10.b.C b.e.f(b = b.d) = RecordTests.RecordConstructor10.b.C(1, b.d);
+ RecordTests.RecordConstructor10.b.C b.e.f = RecordTests.RecordConstructor10.b.C(1, b.d);
 
 public
  record RecordTests.RecordConstructor10.b.C
@@ -2824,7 +2824,7 @@ model RecordConstructor18
             description="Record constructor for inherited record with components of short class decls from different locations",
             flatModel="
 fclass RecordTests.RecordConstructor18
- RecordTests.RecordConstructor18.D.F g.f(b = 2) = RecordTests.RecordConstructor18.D.F(2, 4);
+ RecordTests.RecordConstructor18.D.F g.f = RecordTests.RecordConstructor18.D.F(2, 4);
 
 public
  record RecordTests.RecordConstructor18.D.F
@@ -2865,7 +2865,7 @@ model RecordConstructor19
             description="Record constructor for record with modifier depending on class that is not by original declaration",
             flatModel="
 fclass RecordTests.RecordConstructor19
- RecordTests.RecordConstructor19.C.E f.b(y = 3.0) = RecordTests.RecordConstructor19.C.E(4, 3.0);
+ RecordTests.RecordConstructor19.C.E f.b = RecordTests.RecordConstructor19.C.E(4, 3.0);
 
 public
  record RecordTests.RecordConstructor19.C.E
@@ -3145,7 +3145,7 @@ model RecordConstructor26
             description="Flattening of constant record constructor",
             flatModel="
 fclass RecordTests.RecordConstructor26
- RecordTests.RecordConstructor26.R2 r(n = 1,x(size() = {3})) = RecordTests.RecordConstructor26.R2(3, 1:3);
+ RecordTests.RecordConstructor26.R2 r(x(size() = {3})) = RecordTests.RecordConstructor26.R2(3, 1:3);
 
 public
  record RecordTests.RecordConstructor26.R2
@@ -3181,7 +3181,7 @@ model RecordConstructor27
             description="",
             flatModel="
 fclass RecordTests.RecordConstructor27
- RecordTests.RecordConstructor27.A.D d(c = RecordTests.RecordConstructor27.A.C(2)) = RecordTests.RecordConstructor27.A.D(RecordTests.RecordConstructor27.A.C(2));
+ RecordTests.RecordConstructor27.A.D d = RecordTests.RecordConstructor27.A.D(RecordTests.RecordConstructor27.A.C(2));
 
 public
  record RecordTests.RecordConstructor27.A.C
@@ -7807,7 +7807,7 @@ equation
             description="Test that evaluation before scalarization of record variable works",
             flatModel="
 fclass RecordTests.RecordEval7
- parameter RecordTests.RecordEval7.A a1(x = 3,b(final n = 2,y = a1.b.x + 1));
+ parameter RecordTests.RecordEval7.A a1(x = 3,b(y = a1.b.x + 1,n = 2));
  parameter RecordTests.RecordEval7.B b1 = a1.b;
  Real x;
 equation
@@ -7822,7 +7822,7 @@ public
 
  record RecordTests.RecordEval7.A
   parameter Real x;
-  parameter RecordTests.RecordEval7.SB b(final n = 2);
+  parameter RecordTests.RecordEval7.SB b;
  end RecordTests.RecordEval7.A;
 
  record RecordTests.RecordEval7.B
@@ -7983,6 +7983,33 @@ end RecordTests.RecordModification3;
 ")})));
 end RecordModification3;
 
+model RecordModification4
+record R
+        parameter Real a=b*c;
+        parameter Real b;
+        parameter Real c;
+end R;
+
+R r[2](each b=2, c={3,2});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="RecordModification4",
+            description="Test bug in #5275",
+            flatModel="
+fclass RecordTests.RecordModification4
+ parameter RecordTests.RecordModification4.R r[2](a = {r[1].b * r[1].c, r[2].b * r[2].c},b = {2, 2},c = {3, 2});
+
+public
+ record RecordTests.RecordModification4.R
+  parameter Real a;
+  parameter Real b;
+  parameter Real c;
+ end RecordTests.RecordModification4.R;
+
+end RecordTests.RecordModification4;
+")})));
+end RecordModification4;
 
 model RecordConnector1
     record A

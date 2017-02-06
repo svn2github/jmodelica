@@ -26,13 +26,8 @@
 #define _JMI_BLOCK_SOLVER_H
 
 #include "jmi_log.h"
+#include "jmi_types.h"
 #include <time.h>
-#include <sundials/sundials_math.h>
-#include <sundials/sundials_direct.h>
-#include <nvector/nvector_serial.h>
-#include <kinsol/kinsol_direct.h>
-#include <kinsol/kinsol_impl.h>
-#include <sundials/sundials_dense.h>
 
 /** \brief Evaluation modes for the residual function.*/
 #define JMI_BLOCK_INITIALIZE                                    0
@@ -443,8 +438,8 @@ void jmi_setup_f_residual_scaling(jmi_block_solver_t *block);
 int jmi_scaled_vector_norm(jmi_real_t *x, jmi_real_t *scale, jmi_int_t n, jmi_int_t NORM, jmi_real_t* out);
 
 /** \brief Check and log illegal iv inputs */
-int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, double* ivs, int N);
+int jmi_check_and_log_illegal_iv_input(jmi_block_solver_t* block, jmi_real_t* ivs, int N);
 
 /** \brief Check and log illegal residual output(s) */
-int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, double* f, double* ivs, double* heuristic_nominal,int N);
+int jmi_check_and_log_illegal_residual_output(jmi_block_solver_t *block, jmi_real_t* f, jmi_real_t* ivs, jmi_real_t* heuristic_nominal,int N);
 #endif /* _JMI_BLOCK_SOLVER_H */

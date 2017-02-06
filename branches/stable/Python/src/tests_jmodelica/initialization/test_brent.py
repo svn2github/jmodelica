@@ -177,3 +177,12 @@ def test_bracketing_failure_Brent():
     y0 = m.get('y0')
     z = m.get('z')
     assert N.exp(x)-(1+abs(abs(z)-N.sqrt(y0))) < 1e-10
+    
+@testattr(stddist = True)
+def test_negative_nominal_Brent():
+    m = load_model('TestBrent.NegativeNominal')
+    m.initialize(relativeTolerance=1e-6)
+    x = m.get('x')
+    y = m.get('y')
+    assert N.abs(x + 11) < 1e-3
+    assert N.abs(y**2 - 6) < 1e-3

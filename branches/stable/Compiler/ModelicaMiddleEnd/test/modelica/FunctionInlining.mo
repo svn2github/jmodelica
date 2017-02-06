@@ -563,12 +563,21 @@ fclass FunctionInlining.BasicInline14
  Real a3.c[1].f;
  constant Real a3.c[1].s = 5;
  Real x1;
+ Real _stream_s_1;
+ Real _stream_alpha_1;
+ Real _stream_positiveMax_1;
+ Real _stream_positiveMax_2;
 equation
- x1 = (max(- a2.c[1].f, 1.0E-8) * 4.0 + max(- a3.c[1].f, 1.0E-8) * 5.0) / (max(- a2.c[1].f, 1.0E-8) + max(- a3.c[1].f, 1.0E-8));
+ x1 = (_stream_positiveMax_1 * 4.0 + _stream_positiveMax_2 * 5.0) / (_stream_positiveMax_1 + _stream_positiveMax_2);
  a1.c[1].f + a2.c[1].f + a3.c[1].f = 0;
  a1.c[1].f = time;
  a2.c[1].f = time / 2;
+ _stream_s_1 = max(- a2.c[1].f, 0) + max(- a3.c[1].f, 0);
+ _stream_alpha_1 = smooth(1, if _stream_s_1 > _inStreamEpsilon then 1 elseif _stream_s_1 > 0 then _stream_s_1 / _inStreamEpsilon * (_stream_s_1 / _inStreamEpsilon * (3 - 2 * _stream_s_1)) else 0);
+ _stream_positiveMax_1 = _stream_alpha_1 * max(- a2.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
+ _stream_positiveMax_2 = _stream_alpha_1 * max(- a3.c[1].f, 0) + (1 - _stream_alpha_1) * _inStreamEpsilon;
 end FunctionInlining.BasicInline14;
+
 ")})));
     end BasicInline14;
 

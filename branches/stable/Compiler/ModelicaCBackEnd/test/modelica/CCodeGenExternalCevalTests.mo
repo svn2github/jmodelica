@@ -281,7 +281,7 @@ package Os
             input Boolean b;
             input String s;
             output Obj1 o1;
-            external "C" o1 = my_constructor1(x,y,b,s);
+            external "C" o1 = my_constructor1(x,y,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -300,7 +300,7 @@ model ExtObj1
             input Boolean[:] b;
             input String[:] s;
             output Obj2 o2;
-            external "C" my_constructor2(x,y,o2,b,s);
+            external "C" my_constructor2(x,y,o2,b,s)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -315,7 +315,7 @@ model ExtObj1
             input Os.Obj1 o1;
             input Obj2[:] o2;
             output Obj3 o3;
-            external "C" my_constructor3(o1,o2,o3);
+            external "C" my_constructor3(o1,o2,o3)
                 annotation(Library="extObjects", Include="#include \"extObjects.h\"");
         end constructor;
         function destructor
@@ -375,7 +375,6 @@ $ECE_free$
 ---
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_13, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_14, -1, 1)
-        extern void my_constructor2(double*, int*, void**, int*, const char**);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_15_arg0, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg1, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_15_arg2, -1, 1)
@@ -459,11 +458,9 @@ $ECE_free$
         JMI_DEF(EXO, o3_v)
 
 ---
-        extern void my_constructor3(void*, void**, void**);
         JMI_DEF(EXO, tmp_16_arg0)
         JMI_DEF(INT_EXT, tmp_17)
         JMI_DEF(BOO_EXT, tmp_18)
-        extern void* my_constructor1(double, int, int, const char*);
         JMI_DEF(REA, tmp_19_arg0)
         JMI_DEF(INT, tmp_19_arg1)
         JMI_DEF(BOO, tmp_19_arg2)
@@ -473,7 +470,6 @@ $ECE_free$
         JMI_DEF(REA, tmp_20_max)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_21, -1, 1)
         JMI_ARR(DYNA, jmi_int_t, jmi_int_array_t, tmp_22, -1, 1)
-        extern void my_constructor2(double*, int*, void**, int*, const char**);
         JMI_ARR(DYNAREAL, jmi_ad_var_t, jmi_array_t, tmp_23_arg0, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg1, -1, 1)
         JMI_ARR(DYNA, jmi_ad_var_t, jmi_array_t, tmp_23_arg2, -1, 1)

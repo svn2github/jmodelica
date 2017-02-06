@@ -817,6 +817,7 @@ class Test_Singular_Systems:
         compile_fmu("Singular.NoMinimumNormSolution", file_name)
         compile_fmu("Singular.ZeroColumnJacobian", file_name)
         compile_fmu("Singular.ZeroColumnJacobian2", file_name)
+        compile_fmu("Singular.LinearEvent3", file_name)
     
     @testattr(stddist = True)
     def test_linear_event_1(self):
@@ -834,6 +835,22 @@ class Test_Singular_Systems:
         res = model.simulate(final_time=4)
         nose.tools.assert_almost_equal(res.final('y') ,1.000000000)
         nose.tools.assert_almost_equal(res.final('w') ,2.000000000)
+        
+    @testattr(stddist = True)
+    def test_linear_event_3(self):
+        model = load_fmu("Singular_LinearEvent3.fmu", log_level=3)
+        model.set("_log_level", 3)
+        
+        opts = model.simulate_options()
+        opts["ncp"] = 7
+        opts["CVode_options"]["maxh"] = 0.49
+        
+        res = model.simulate(final_time=1, options=opts)
+        x = res["x"]
+        for i in range(4):
+            nose.tools.assert_almost_equal(x[i] ,0.000000000)
+        for i in range(4,8):
+            nose.tools.assert_almost_equal(x[i] ,0.0100000)
     
     @testattr(stddist = True)
     def test_linear_inf_1(self):

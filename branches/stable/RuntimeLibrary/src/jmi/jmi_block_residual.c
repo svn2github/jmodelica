@@ -273,7 +273,7 @@ jmi_block_solver_status_t jmi_block_update_discrete_variables(void* b, int* non_
         }
 
         for (i=0;i<block->n_dr; i++) {
-            if (RAbs(pre_discrete_reals[i] - discrete_reals[i])/block->discrete_nominals[i] > JMI_ALMOST_EPS) {
+            if (JMI_ABS(pre_discrete_reals[i] - discrete_reals[i])/block->discrete_nominals[i] > JMI_ALMOST_EPS) {
                 jmi_log_node(jmi->log, logInfo, "Info", " <discrete_real: #r%d#> <from: %g> <to: %g>  ", block->dr_vref[i], pre_discrete_reals[i], discrete_reals[i]);
             }
         }

@@ -776,6 +776,7 @@ int jmi_event_iteration(jmi_t* jmi, jmi_boolean intermediate_results,
 
 int jmi_next_time_event(jmi_t* jmi) {
     int retval;
+    jmi->nextTimeEvent.defined = 0;
     
     retval = jmi_ode_next_time_event(jmi, &jmi->nextTimeEvent);
     if(retval != 0) {
@@ -784,11 +785,9 @@ int jmi_next_time_event(jmi_t* jmi) {
     
     /* See if the delay blocks need to update the next event time. Need to do this after sampling them,
        if the next event is caused by a delay of the current one. */
-    {
-        jmi_real_t t_delay = jmi_delay_next_time_event(jmi);
-        if (t_delay != JMI_INF) {
-            jmi_min_time_event(&jmi->nextTimeEvent, 1, 0, t_delay);
-        }
+    retval = jmi_delay_next_time_event(jmi, &jmi->nextTimeEvent);
+    if (retval != 0) {
+        return -1;
     }
     
     return 0;

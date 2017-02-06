@@ -165,9 +165,11 @@ InstAmbiguousArrayAccess  : InstArrayAccess;
 InstComponentArrayAccess  : InstArrayAccess;
 InstGlobalAccess          : InstAccess ::= InstAccess;
 
-abstract InstForIndex : CommonForIndex ::= InstPrimitive;
+abstract InstForIndex : CommonForIndex ::= InstPrimitive:InstForIndexPrimitive;
 InstForIndexWithExp : InstForIndex ::= FExp;
 InstForIndexNoExp   : InstForIndex ::= /[FExp]/;
+
+InstForIndexPrimitive : InstPrimitive;
 
 InstForClauseE : FAbstractEquation ::= InstForIndex* FAbstractEquation*;
 InstForStmt    : FStatement        ::= InstForIndex* ForStmt:FStatement*;

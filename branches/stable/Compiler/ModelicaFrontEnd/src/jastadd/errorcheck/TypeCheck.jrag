@@ -183,9 +183,8 @@ aspect FlatTypeCheck {
         FExp bexp = myBindingInstExp();
         boolean function = inFunction();
         boolean record = inRecordDecl();
-        boolean input = isInput();
         boolean output = isOutput();
-        boolean incompleteAllowed = ((function && !output) || record) && (bexp != null || input);
+        boolean incompleteAllowed = (function && !output) || record;
         boolean unknownAllowed = function || record;
         Size componentSize = size();
         if (!componentSize.isComplete() && !incompleteAllowed && !checkType.allowIncompleteSizes()) {
@@ -963,12 +962,6 @@ aspect FlatTypeCheck {
               return false;
       return true;
   }
-  
-  
-  public void InstComponentAccess.typeCheck(ErrorCheckType checkType) {
-	//  log.debug("InstComponentAccess.typeCheck: " + printSlice());
-  }
-  
 
   public void FAssignStmt.typeCheck(ErrorCheckType checkType) {
       FType left = getLeft().type();
@@ -1334,9 +1327,28 @@ aspect FlatTypeCheck {
     eq InstNamedArgument.argumentDesc()      = "named argument " + getName();
 
   public void InstAccess.typeCheck(ErrorCheckType checkType) {
-//	  if (getTopInstAccess() == this && !type().isUnknown()) {
-		  // TODO: if this is a slice, check that all branches are of equal size
-//	  }
+      if (myInstComponentDecl().size().isUndefined() && myInstComponentDecl().inFunction() && 
+              !myInstComponentDecl().isInput() && !checkType.allowIncompleteSizes()) {
+          compliance("Using variables with undefined size is not supported");
+      }
+  }
+  
+  public boolean Size.isUndefined() {
+      for (int i = 0; i < ndims(); i++) {
+          if (size[i] == Size.UNKNOWN) {
+              return true;
+          }
+      }
+      return false;
+  }
+
+  public boolean MutableSize.isUndefined() {
+      for (int i = 0; i < ndims(); i++) {
+          if (size[i] == Size.UNKNOWN && (exps[i] == null || exps[i] instanceof FColonSizeExp)) {
+              return true;
+          }
+      }
+      return false;
   }
 
     public static final SimpleProblemProducer ASTNode.ACCESS_TO_CLASS_THROUGH_COMPONENT = 

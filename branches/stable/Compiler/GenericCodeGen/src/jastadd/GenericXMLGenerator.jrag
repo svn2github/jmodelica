@@ -205,6 +205,26 @@ public abstract class GenericXMLGenerator extends GenericGenerator {
         printer.format(" %s=\"%s\"", name, XMLUtil.escape(value.toString()));
     }
     
+    /**
+     * Generate and XML attribute representing a list, the entires will be
+     * space separated.
+     * 
+     * @param name     the name of the attribute
+     * @param values   the values of the attribute
+     * @param printer  the print stream to use
+     */
+    protected void generateListAttribute(String name, Iterable<? extends Object> values, CodeStream printer) {
+        printer.format(" %s=\"", name);
+        boolean first = true;
+        for (Object value : values) {
+            if (!first) {
+                printer.print(" ");
+            }
+            first = false;
+            printer.print(XMLUtil.escape(value.toString()));
+        }
+        printer.print("\"");
+    }
     
     /**
      * Print the current indentation to printer.

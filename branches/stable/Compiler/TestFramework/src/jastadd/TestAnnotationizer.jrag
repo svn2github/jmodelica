@@ -981,67 +981,132 @@ abstract public class TestAnnotationizerHelper {
 
 	}
 
-	/**
-	 * An FClass method test case.
-	 */
-	public static class FClassMethodTestCase extends TestAnnotationizerHelper {
+    /**
+     * A generic method test case.
+     */
+    public static abstract class MethodTestCase extends TestAnnotationizerHelper {
 
-		private String methodName;
-		private String methodResult;
-		protected FClass fc;
-		
-		/**
-		 * Constructor for FClass method test case.
-		 * 
-		 * Compiles the model.
-		 */
-		public FClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
-			super(filePath, className, description, opts, data);
-		}
-		
-		/**
-		 * Test regeneration constructor for FClass method test case.
-		 * 
-		 * Delegates to superclass implementation.
-		 * 
-		 * @param filePath     the path to the Modelica file containing the test model
-		 * @param className    the name of the test model
-		 */
-		public FClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
-			super(cd, filePath, className);
-		}
-		
-		protected String dataName() {
-			return "methodName";
-		}
-		
-		protected void process() throws Exception {
-			super.process();
-			fc = compile();
-			checkData(data);
-			methodName = data;
-	    	Method method = fc.getClass().getMethod(methodName);
-			methodResult = method.invoke(fc).toString();
-		}
-		
-		/**
-		 * Generate and print the part of the annotation that is specific to 
-	     *        this test case type.
-		 */
-		@Override
-		protected void printSpecific(PrintStream out, String indent) throws Exception {
-			printSpecificLine(out, indent, "methodName", methodName, false);
-			printSpecificLine(out, indent, "methodResult", methodResult, true);
-		}
-		
-		/**
-		 * Prints a usage message for this test case type.
-		 */
-		public static void usage(String cl, String extra) {
-			TestAnnotationizerHelper.usage(cl, "method name");
-		}
+        private String methodName;
+        private String methodResult;
+        
+        /**
+         * Constructor for generic method test case.
+         * 
+         * Performs any specified processing.
+         */
+        public MethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+            super(filePath, className, description, opts, data);
+        }
+        
+        /**
+         * Test regeneration constructor for generic method test case.
+         * 
+         * Delegates to superclass implementation.
+         * 
+         * @param filePath     the path to the Modelica file containing the test model
+         * @param className    the name of the test model
+         */
+        public MethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+            super(cd, filePath, className);
+        }
+        
+        protected String dataName() {
+            return "methodName";
+        }
+        
+        protected void callMethod(Object o) throws Exception {
+            checkData(data);
+            methodName = data;
+            Method method = o.getClass().getMethod(methodName);
+            methodResult = method.invoke(o).toString();
+        }
+        
+        /**
+         * Generate and print the part of the annotation that is specific to 
+         *        this test case type.
+         */
+        @Override
+        protected void printSpecific(PrintStream out, String indent) throws Exception {
+            printSpecificLine(out, indent, "methodName", methodName, false);
+            printSpecificLine(out, indent, "methodResult", prepare(methodResult), true);
+        }
+        
+        /**
+         * Prints a usage message for this test case type.
+         */
+        public static void usage(String cl, String extra) {
+            TestAnnotationizerHelper.usage(cl, "method name");
+        }
 
-	}
+    }
+
+    /**
+     * An FClass method test case.
+     */
+    public static class FClassMethodTestCase extends MethodTestCase {
+
+        
+        /**
+         * Constructor for FClass method test case.
+         * 
+         * Compiles the model.
+         */
+        public FClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+            super(filePath, className, description, opts, data);
+        }
+        
+        /**
+         * Test regeneration constructor for FClass method test case.
+         * 
+         * Delegates to superclass implementation.
+         * 
+         * @param filePath     the path to the Modelica file containing the test model
+         * @param className    the name of the test model
+         */
+        public FClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+            super(cd, filePath, className);
+        }
+        
+        protected void process() throws Exception {
+            super.process();
+            callMethod(compile());
+        }
+
+    }
+
+    /**
+     * An FClass method test case.
+     */
+    public static class InstClassMethodTestCase extends MethodTestCase {
+
+        
+        /**
+         * Constructor for InstClassDecl method test case.
+         * 
+         * Compiles the model.
+         */
+        public InstClassMethodTestCase(String filePath, String className, String description, String[] opts, String data) throws Exception {
+            super(filePath, className, description, opts, data);
+        }
+        
+        /**
+         * Test regeneration constructor for InstClassDecl method test case.
+         * 
+         * Delegates to superclass implementation.
+         * 
+         * @param filePath     the path to the Modelica file containing the test model
+         * @param className    the name of the test model
+         */
+        public InstClassMethodTestCase(ClassDecl cd, String filePath, String className) throws Exception {
+            super(cd, filePath, className);
+        }
+        
+        protected void process() throws Exception {
+            super.process();
+            callMethod(instantiate());
+        }
+
+    }
 
 	/**
 	 * A constant evaluation test case.

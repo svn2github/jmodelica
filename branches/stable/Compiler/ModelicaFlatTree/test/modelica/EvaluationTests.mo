@@ -1604,6 +1604,46 @@ end EvaluationTests.FunctionEval45;
 ")})));
 end FunctionEval45;
 
+model FunctionEval46
+    function f
+        input Real[:] xs1;
+        input Real[:] xs2;
+        output Real y;
+    algorithm
+        y := 0;
+        for x1 in xs1, x2 in xs2 loop
+            y := x1 + x2;
+        end for;
+    end f;
+    
+    constant Real y = f({0.5},{0.5});
+
+    annotation(__JModelica(UnitTesting(tests={
+        FlatteningTestCase(
+            name="FunctionEval46",
+            description="Constant evaluation of functions: real for index",
+            flatModel="
+fclass EvaluationTests.FunctionEval46
+ constant Real y = 1.0;
+
+public
+ function EvaluationTests.FunctionEval46.f
+  input Real[:] xs1;
+  input Real[:] xs2;
+  output Real y;
+ algorithm
+  y := 0;
+  for x1 in xs1 loop
+   for x2 in xs2 loop
+    y := x1 + x2;
+   end for;
+  end for;
+  return;
+ end EvaluationTests.FunctionEval46.f;
+
+end EvaluationTests.FunctionEval46;
+")})));
+end FunctionEval46;
 
 model VectorFuncEval1
     function f

@@ -122,7 +122,25 @@ aspect Flattening {
     /**
      * Delegate for adding extra flattening code to top-level model.
      */
-    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {}
+    
+    class InstClassDecl {
+        private static final ArrayList<ExtraFlattener> extraFlatteners = new ArrayList<ExtraFlattener>();
+        
+        public static ExtraFlattener addExtraFlattener(ExtraFlattener ef) {
+            extraFlatteners.add(ef);
+            return ef;
+        }
+        
+        public static abstract class ExtraFlattener {
+            public abstract void flattenExtra(InstClassDecl icd, FClass fc);
+        }
+    }
+    
+    protected void InstClassDecl.flattenInstClassDeclExtra(FClass fc) {
+        for (ExtraFlattener ef : extraFlatteners) {
+            ef.flattenExtra(this, fc);
+        }
+    }
 
     /**
      * Find functions, record and enumeration declarations that need to be flattened.
@@ -1303,11 +1321,12 @@ aspect Flattening {
                 indexStack.push(i++);
                 icd.addAttributesToFV(attr, indexStack, excludeBinding, isBound);
                 indexStack.pop();
-                isBound = true;
             }
         } else {
             for (InstComponentDecl icd : allInstComponentDecls()) {
-                icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
+                if (icd.useInFlattening()) {
+                    icd.generateAdditionalAttributes(attr, indexStack, excludeBinding, isBound);
+                }
             }
         }
     }
@@ -1322,7 +1341,7 @@ aspect Flattening {
                     InstNode decl = im.myInstNode();
                     InstNode ancestor = InstAssignable.this.matchingAncestor(decl);
                     return (isEach || decl == InstAssignable.this || !exp.isArray()) ? 
-                            exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor));
+                            exp : exp.dynamicFExp(splitBindingFExp(exp, ancestor, ndims()));
                 }
             };
             addAttributes(attr, totalMergedEnvironment(), mut, false);
@@ -1341,7 +1360,6 @@ aspect Flattening {
         FAttribute a = findMatching(attr, name());
         boolean create = (a == null);
         boolean canBind = hasBindingFExp() || variability().knownParameterOrLess();
-        isBound = isBound || (a != null && a.hasValue());
         List<FAttribute> list = create ? new List<FAttribute>() : a.getFAttributes();
         if (!excludeBinding && declaredSizeCalc().isUnknownNoEval()) {
             FInternalAttribute ia = (FInternalAttribute)findMatching(list, "size()");
@@ -1364,10 +1382,7 @@ aspect Flattening {
         }
         
         if (!isBound && canBind) {
-            a.setValue(flattenBindingFExp());
-            if (indexStack.size() > 0) {
-                a.setFEach(new FEach());
-            }
+            a.setValue(flattenBindingFExp().addInDim(indexStack, 0, (FArray)a.getValue()));
         }
     }
     
@@ -1476,7 +1491,7 @@ aspect Flattening {
             if (ndims() < exp.ndims()) {
                 InstNode decl = im.myInstNode();
                 decl = matchingAncestor(decl);
-                exp = exp.dynamicFExp(splitBindingFExp(exp, decl));
+                exp = exp.dynamicFExp(splitBindingFExp(exp, decl, ndims()));
             }
         }
         return exp;
@@ -1516,21 +1531,27 @@ aspect Flattening {
      * 
      * @param fe    the expression to split
      * @param node  the node where the binding expression was declared 
+     * @param dims  the expected number of dimensions of the resulting expression
      */
-    inh FExp InstNode.splitBindingFExp(FExp fe, InstNode node);
-    eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) = fe;
-    eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node)      = fe;
-    eq Root.getChild().splitBindingFExp(FExp fe, InstNode node)          = fe;
-    eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node) =
-        (node == this) ? fe : splitBindingFExp(fe, node);
-    eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node) =
-        (node == this) ? fe : fe.dynamicFExp(splitBindingFExp(fe, node)).splitArrayExp(getIndex());
-    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node) {
-        FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node);
-        for (int i = 0; i < nTypeDims(); i++) {
-            nfe = fe.dynamicFExp(nfe).splitArrayExp(size().get(i));
+    inh FExp InstNode.splitBindingFExp(FExp fe, InstNode node, int dims);
+    eq InstClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) = fe;
+    eq InstRoot.getChild().splitBindingFExp(FExp fe, InstNode node, int dims)      = fe;
+    eq Root.getChild().splitBindingFExp(FExp fe, InstNode node, int dims)          = fe;
+    eq InstNode.getChild().splitBindingFExp(FExp fe, InstNode node, int dims)      =
+        (node == this) ? fe : splitBindingFExp(fe, node, dims);
+    eq InstArrayComponentDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) =
+        (node == this || fe.ndims() <= dims) ? fe : 
+            fe.dynamicFExp(splitBindingFExp(fe, node, dims + 1)).splitArrayExp(getIndex());
+    eq InstShortClassDecl.getChild().splitBindingFExp(FExp fe, InstNode node, int dims) {
+        if (fe.ndims() <= dims) {
+            return fe;
+        } else {
+            FExp nfe = (node == this) ? fe : splitBindingFExp(fe, node, dims + nTypeDims());
+            for (int i = 0; i < nTypeDims(); i++) {
+                nfe = fe.dynamicFExp(nfe).splitArrayExp(size().get(i));
+            }
+            return nfe;
         }
-        return nfe;
     }
     
     /**
@@ -1546,7 +1567,7 @@ aspect Flattening {
     }
     
     /**
-     * \Return the expression corresponding to the given index in this array expression. 
+     * Return the expression corresponding to the given index in this array expression. 
      * 
      * Will not create new nodes unless necessary.
      */
@@ -1575,7 +1596,7 @@ aspect Flattening {
     }
     eq FIterExp.splitArrayExp(int index) {
         Map<String,FExp> repl = new HashMap<String,FExp>();
-        repl.put(getForIndex(0).name(), new FIntegerLitExp(index));
+        getForIndex(0).addReplacementEntry(repl, index);
         FExp res = dynamicFExp(getFExp().treeCopy()).replaceIndices(repl);
         if (getNumForIndex() > 1) {
             List<CommonForIndex> indices = new List<CommonForIndex>();
@@ -1586,7 +1607,15 @@ aspect Flattening {
         return res;
     }
     // TODO: consider if expressions
-    
+
+    /**
+     * Add an entry to an index replacement map for this for index, for the i:th element 
+     * in the resulting array.
+     */
+    public void CommonForIndex.addReplacementEntry(Map<String,FExp> repl, int i) {
+        repl.put(name(), getFExp().getArray().get(i).treeCopy());
+    }
+
     /**
      * Return a new access that has index instead of the first array subscript with ndims() > 1.
      * 
@@ -1803,6 +1832,9 @@ aspect Flattening {
     public void InstClassRedeclare.collectAttributes(
             List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {}
 
+    syn boolean InstComponentDecl.isBuiltIn() = false;
+    eq InstBuiltIn.isBuiltIn()                = true;
+
     public void InstComponentModification.collectAttributes(
             List<FAttribute> attrs, FQName prefix, AttributeExpRetriever aer, boolean cls) {
         if (hasInstModification()) {
@@ -1813,7 +1845,7 @@ aspect Flattening {
                 FIdUse typeName = new FIdUse(getName().myInstComponentDecl().myInstClass().name());
                 FIdDecl name = new FIdDecl(new FQNameString(getName().name()));
                 FAttribute a = new FAttribute(typeName, name, true, modificationLevel());
-                if (getInstModification().hasInstValueMod()) {
+                if (im.hasInstValueMod() && getName().myInstComponentDecl().isBuiltIn()) {
                     InstValueModification ivm = im.getInstValueMod();
                     a.setValue(aer.retrieve(ivm, ivm.hasEach()).flatten(prefix));
                 }
@@ -1822,7 +1854,9 @@ aspect Flattening {
                 if (getComponentModification().hasFinal())
                     a.setFFinal(new FFinal());
                 im.collectAttributes(a.getFAttributes(), prefix, aer, cls);
-                attrs.add(a);
+                if (a.hasValue() || a.getNumFAttributeNoTransform() > 0) {
+                    attrs.add(a);
+                }
             }
         }
     }
@@ -3299,9 +3333,11 @@ aspect InstantiatedExpressions {
         // Create InstFunctionCall
         return copyLocationTo(createInstNode(getName().newInstAccess(), args));
     }
-  
+
     public InstForIndex ForIndex.instantiate() {
-        InstPrimitive ip = new InstCreateForIndexPrimitive(getForIndexDecl());
+        InstForIndexPrimitive ip = new InstForIndexPrimitive(new InstParseAccess("Integer"),
+                new Opt<FArraySubscripts>(), getForIndexDecl(), new Opt<InstModification>(),
+                new Opt<InstConstrainingComponent>(), new Opt<FExp>());
         InstForIndex res;
         if (hasExp()) {
             res = new InstForIndexWithExp(ip, getExp().instantiate());

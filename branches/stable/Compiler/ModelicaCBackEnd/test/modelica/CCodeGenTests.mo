@@ -1024,6 +1024,92 @@ equation
 ")})));
 end CStringExp;
 
+package FInStreamEpsExp
+    model Simple1
+        connector StreamConnector
+            Real p;
+            flow Real f;
+            stream Real s;
+        end StreamConnector;
+        model A
+            StreamConnector c1(f(nominal=0.1));
+            StreamConnector c2;
+            StreamConnector c3(f(nominal=2));
+            Real x1 = inStream(c1.s);
+            Real x2 = inStream(c2.s);
+            Real x3 = inStream(c3.s);
+        equation
+            connect(c1, c2);
+            connect(c1, c3);
+        end A;
+        
+        model B
+            StreamConnector c4(p = 7, f = 8, s = 4);
+            StreamConnector c5(s = 5);
+            StreamConnector c6(s = 6, f = 9);
+        end B;
+        
+        A a;
+        B b;
+    equation
+        connect(a.c1, b.c4);
+        connect(a.c2, b.c5);
+        connect(a.c3, b.c6);
+
+    annotation(__JModelica(UnitTesting(tests={
+        CCodeGenTestCase(
+            description="Ensure that epsilon for InStream is generated correctly",
+            eliminate_alias_variables=false,
+            eliminate_linear_equations=false,
+            variability_propagation=false,
+            template="
+$C_ode_derivatives$ 
+",
+            generatedCode="
+int model_ode_derivatives_base(jmi_t* jmi) {
+    int ef = 0;
+    JMI_DYNAMIC_INIT()
+    _b_c4_p_12 = 7;
+    _a_c1_p_0 = _b_c4_p_12;
+    _b_c4_f_13 = 8;
+    _a_c1_f_1 = - _b_c4_f_13;
+    _b_c6_f_19 = 9;
+    _a_c3_f_7 = - _b_c6_f_19;
+    _a_c2_f_4 = - _a_c1_f_1 - _a_c3_f_7;
+    __stream_s_1_21 = jmi_max(_a_c2_f_4, AD_WRAP_LITERAL(0)) + jmi_max(_a_c3_f_7, AD_WRAP_LITERAL(0));
+    __stream_alpha_1_22 = (COND_EXP_EQ(COND_EXP_GT(__stream_s_1_21, jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_GT(__stream_s_1_21, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, jmi_divide_equation(jmi, __stream_s_1_21,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_1 / (_inStreamEpsilon * 0.1)\") * (jmi_divide_equation(jmi, __stream_s_1_21,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_1 / (_inStreamEpsilon * 0.1)\") * (AD_WRAP_LITERAL(3) - AD_WRAP_LITERAL(2) * __stream_s_1_21)), AD_WRAP_LITERAL(0))));
+    __stream_positiveMax_1_23 = __stream_alpha_1_22 * jmi_max(_a_c2_f_4, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_1_22) * (jmi_in_stream_eps(jmi) * 0.1);
+    _b_c5_s_17 = 5;
+    __stream_positiveMax_2_24 = __stream_alpha_1_22 * jmi_max(_a_c3_f_7, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_1_22) * (jmi_in_stream_eps(jmi) * 0.1);
+    _b_c6_s_20 = 6;
+    _a_c1_s_2 = jmi_divide_equation(jmi, (__stream_positiveMax_1_23 * _b_c5_s_17 + __stream_positiveMax_2_24 * _b_c6_s_20),(__stream_positiveMax_1_23 + __stream_positiveMax_2_24),\"(_stream_positiveMax_1 * b.c5.s + _stream_positiveMax_2 * b.c6.s) / (_stream_positiveMax_1 + _stream_positiveMax_2)\");
+    _a_c2_p_3 = _a_c1_p_0;
+    __stream_s_2_25 = jmi_max(_a_c1_f_1, AD_WRAP_LITERAL(0)) + jmi_max(_a_c3_f_7, AD_WRAP_LITERAL(0));
+    __stream_alpha_2_26 = (COND_EXP_EQ(COND_EXP_GT(__stream_s_2_25, jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_GT(__stream_s_2_25, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, jmi_divide_equation(jmi, __stream_s_2_25,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_2 / (_inStreamEpsilon * 0.1)\") * (jmi_divide_equation(jmi, __stream_s_2_25,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_2 / (_inStreamEpsilon * 0.1)\") * (AD_WRAP_LITERAL(3) - AD_WRAP_LITERAL(2) * __stream_s_2_25)), AD_WRAP_LITERAL(0))));
+    __stream_positiveMax_3_27 = __stream_alpha_2_26 * jmi_max(_a_c1_f_1, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_2_26) * (jmi_in_stream_eps(jmi) * 0.1);
+    _b_c4_s_14 = 4;
+    __stream_positiveMax_4_28 = __stream_alpha_2_26 * jmi_max(_a_c3_f_7, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_2_26) * (jmi_in_stream_eps(jmi) * 0.1);
+    _a_c2_s_5 = jmi_divide_equation(jmi, (__stream_positiveMax_3_27 * _b_c4_s_14 + __stream_positiveMax_4_28 * _b_c6_s_20),(__stream_positiveMax_3_27 + __stream_positiveMax_4_28),\"(_stream_positiveMax_3 * b.c4.s + _stream_positiveMax_4 * b.c6.s) / (_stream_positiveMax_3 + _stream_positiveMax_4)\");
+    _a_c3_p_6 = _a_c2_p_3;
+    __stream_s_3_29 = jmi_max(_a_c1_f_1, AD_WRAP_LITERAL(0)) + jmi_max(_a_c2_f_4, AD_WRAP_LITERAL(0));
+    __stream_alpha_3_30 = (COND_EXP_EQ(COND_EXP_GT(__stream_s_3_29, jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1), JMI_TRUE, JMI_FALSE), JMI_TRUE, AD_WRAP_LITERAL(1), COND_EXP_EQ(COND_EXP_GT(__stream_s_3_29, AD_WRAP_LITERAL(0), JMI_TRUE, JMI_FALSE), JMI_TRUE, jmi_divide_equation(jmi, __stream_s_3_29,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_3 / (_inStreamEpsilon * 0.1)\") * (jmi_divide_equation(jmi, __stream_s_3_29,(jmi_in_stream_eps(jmi) * AD_WRAP_LITERAL(0.1)),\"_stream_s_3 / (_inStreamEpsilon * 0.1)\") * (AD_WRAP_LITERAL(3) - AD_WRAP_LITERAL(2) * __stream_s_3_29)), AD_WRAP_LITERAL(0))));
+    __stream_positiveMax_5_31 = __stream_alpha_3_30 * jmi_max(_a_c1_f_1, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_3_30) * (jmi_in_stream_eps(jmi) * 0.1);
+    __stream_positiveMax_6_32 = __stream_alpha_3_30 * jmi_max(_a_c2_f_4, AD_WRAP_LITERAL(0)) + (1 - __stream_alpha_3_30) * (jmi_in_stream_eps(jmi) * 0.1);
+    _a_c3_s_8 = jmi_divide_equation(jmi, (__stream_positiveMax_5_31 * _b_c4_s_14 + __stream_positiveMax_6_32 * _b_c5_s_17),(__stream_positiveMax_5_31 + __stream_positiveMax_6_32),\"(_stream_positiveMax_5 * b.c4.s + _stream_positiveMax_6 * b.c5.s) / (_stream_positiveMax_5 + _stream_positiveMax_6)\");
+    _a_x1_9 = _b_c4_s_14;
+    _a_x2_10 = _b_c5_s_17;
+    _a_x3_11 = _b_c6_s_20;
+    _b_c5_p_15 = _a_c2_p_3;
+    _b_c5_f_16 = - _a_c2_f_4;
+    _b_c6_p_18 = _a_c3_p_6;
+    JMI_DYNAMIC_FREE()
+    return ef;
+}
+ ")})));
+    end Simple1;
+end FInStreamEpsExp;
+
+
 
 
 
@@ -6737,15 +6823,21 @@ equation
             equation_sorting=true,
             generate_ode=true,
             variability_propagation=false,
-            relational_time_events=false,
             template="
 $C_ode_guards$
                    $C_ode_time_events$
 ",
             generatedCode="
-                       jmi_time_event_t nextEvent = {0};
-    jmi_real_t nSamp;
-    *event = nextEvent;
+                       jmi_real_t nSamp;
+    if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1));
+    }
+    if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(_atInitial), JMI_TRUE, _time - (pre__sampleItr_1_8 * _h_6), AD_WRAP_LITERAL(1)))) {
+        jmi_min_time_event(nextTimeEvent, 1, 0, pre__sampleItr_1_8 * _h_6);
+    }
+    if (SURELY_LT_ZERO(_time - ((pre__sampleItr_1_8 + AD_WRAP_LITERAL(1)) * _h_6))) {
+        jmi_min_time_event(nextTimeEvent, 1, 0, (pre__sampleItr_1_8 + AD_WRAP_LITERAL(1)) * _h_6);
+    }
 ")})));
 end WhenTest2; 
 
@@ -6778,21 +6870,19 @@ $C_dae_blocks_residual_functions$
 $C_dae_init_blocks_residual_functions$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
     jmi_real_t nSamp;
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(_atInitial), JMI_TRUE, _time - (pre__sampleItr_1_4 * jmi_divide_equation(jmi, 2,3,\"(2 / 3)\")), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, pre__sampleItr_1_4 * jmi_divide_equation(jmi, 2,3,\"(2 / 3)\"));
+        jmi_min_time_event(nextTimeEvent, 1, 0, pre__sampleItr_1_4 * jmi_divide_equation(jmi, 2,3,\"(2 / 3)\"));
     }
     if (SURELY_LT_ZERO(_time - ((pre__sampleItr_1_4 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"(2 / 3)\")))) {
-        jmi_min_time_event(&nextEvent, 1, 0, (pre__sampleItr_1_4 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"(2 / 3)\"));
+        jmi_min_time_event(nextTimeEvent, 1, 0, (pre__sampleItr_1_4 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(2),AD_WRAP_LITERAL(3),\"(2 / 3)\"));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(_atInitial), JMI_TRUE, _time - (pre__sampleItr_2_6 * jmi_divide_equation(jmi, 1,3,\"(1 / 3)\")), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, pre__sampleItr_2_6 * jmi_divide_equation(jmi, 1,3,\"(1 / 3)\"));
+        jmi_min_time_event(nextTimeEvent, 1, 0, pre__sampleItr_2_6 * jmi_divide_equation(jmi, 1,3,\"(1 / 3)\"));
     }
     if (SURELY_LT_ZERO(_time - ((pre__sampleItr_2_6 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"(1 / 3)\")))) {
-        jmi_min_time_event(&nextEvent, 1, 0, (pre__sampleItr_2_6 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"(1 / 3)\"));
+        jmi_min_time_event(nextTimeEvent, 1, 0, (pre__sampleItr_2_6 + AD_WRAP_LITERAL(1)) * jmi_divide_equation(jmi, AD_WRAP_LITERAL(1),AD_WRAP_LITERAL(3),\"(1 / 3)\"));
     }
-    *event = nextEvent;
 
  
 
@@ -16642,33 +16732,33 @@ static const int DAE_relations[] = { -1 };
 static const int N_sw = 0 + 8;
 
 C_ode_time_events
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_sw(0), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 1, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_AND(_sw(0), _sw(1))), JMI_TRUE, _time - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_AND(_sw(0), _sw(1))), JMI_TRUE, _time - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 1, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_AND(_sw(0), _sw(1))), _sw(2)), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3)))), JMI_TRUE, _time - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3)))), JMI_TRUE, _time - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 1, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3)))), _sw(4)), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3))), LOG_EXP_AND(_sw(4), _sw(5)))), JMI_TRUE, _time - (AD_WRAP_LITERAL(1)), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1));
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3))), LOG_EXP_AND(_sw(4), _sw(5)))), _sw(6)), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(LOG_EXP_AND(LOG_EXP_NOT(LOG_EXP_OR(LOG_EXP_OR(LOG_EXP_AND(_sw(0), _sw(1)), LOG_EXP_AND(_sw(2), _sw(3))), LOG_EXP_AND(_sw(4), _sw(5)))), _sw(6)), JMI_TRUE, AD_WRAP_LITERAL(1) - (_time), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, AD_WRAP_LITERAL(1));
+        jmi_min_time_event(nextTimeEvent, 1, 1, AD_WRAP_LITERAL(1));
     }
-    *event = nextEvent;
+
 
 
 
@@ -16744,30 +16834,30 @@ C_ode_time_events
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1)
     JMI_ARR(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1)
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_1, 3, 1, 3)
     jmi_array_ref_1(tmp_1, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_1, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_1, 3) = AD_WRAP_LITERAL(3);
     if (SURELY_LT_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1))) || (!jmi->eventPhase && ALMOST_ZERO(_time - (func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1));
+        jmi_min_time_event(nextTimeEvent, 1, 1, func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_1));
     }
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_2, 3, 1, 3)
     jmi_array_ref_1(tmp_2, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_2, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_2, 3) = AD_WRAP_LITERAL(3);
     if (SURELY_LT_ZERO(COND_EXP_EQ(LOG_EXP_NOT(_atInitial), JMI_TRUE, _time - (1 + pre__sampleItr_1_2 * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2)), AD_WRAP_LITERAL(1)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, 1 + pre__sampleItr_1_2 * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2));
+        jmi_min_time_event(nextTimeEvent, 1, 0, 1 + pre__sampleItr_1_2 * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_2));
     }
     JMI_ARRAY_INIT_1(STAT, jmi_ad_var_t, jmi_array_t, tmp_3, 3, 1, 3)
     jmi_array_ref_1(tmp_3, 1) = AD_WRAP_LITERAL(1);
     jmi_array_ref_1(tmp_3, 2) = AD_WRAP_LITERAL(2);
     jmi_array_ref_1(tmp_3, 3) = AD_WRAP_LITERAL(3);
     if (SURELY_LT_ZERO(_time - (AD_WRAP_LITERAL(1) + (pre__sampleItr_1_2 + AD_WRAP_LITERAL(1)) * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_3)))) {
-        jmi_min_time_event(&nextEvent, 1, 0, AD_WRAP_LITERAL(1) + (pre__sampleItr_1_2 + AD_WRAP_LITERAL(1)) * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_3));
+        jmi_min_time_event(nextTimeEvent, 1, 0, AD_WRAP_LITERAL(1) + (pre__sampleItr_1_2 + AD_WRAP_LITERAL(1)) * func_CCodeGenTests_TestRelationalOp9_f_exp0(tmp_3));
     }
-    *event = nextEvent;
+
 
 
 
@@ -16946,18 +17036,18 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
     if (SURELY_LT_ZERO(COND_EXP_EQ(_sw(2), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_sw(2), JMI_TRUE, _time - (3), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, 3);
+        jmi_min_time_event(nextTimeEvent, 1, 1, 3);
     }
     if (SURELY_LT_ZERO(COND_EXP_EQ(_b1_2, JMI_TRUE, _time - (2), AD_WRAP_LITERAL(1))) || (!jmi->eventPhase && ALMOST_ZERO(COND_EXP_EQ(_b1_2, JMI_TRUE, _time - (2), AD_WRAP_LITERAL(1))))) {
-        jmi_min_time_event(&nextEvent, 1, 1, 2);
+        jmi_min_time_event(nextTimeEvent, 1, 1, 2);
     }
     if (SURELY_LT_ZERO(_time - (1)) || (!jmi->eventPhase && ALMOST_ZERO(_time - (1)))) {
-        jmi_min_time_event(&nextEvent, 1, 1, 1);
+        jmi_min_time_event(nextTimeEvent, 1, 1, 1);
     }
-    *event = nextEvent;
+
 
 
 
@@ -17009,9 +17099,9 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
-    *event = nextEvent;
+
 
 
 
@@ -17049,9 +17139,9 @@ $C_ode_time_events$
 $C_ode_derivatives$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
-    *event = nextEvent;
+
 
 
 
@@ -17086,9 +17176,9 @@ $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
-    *event = nextEvent;
+
 
 
 
@@ -17136,9 +17226,9 @@ $C_ode_derivatives$
 $C_DAE_event_indicator_residuals$
 ",
             generatedCode="
-    jmi_time_event_t nextEvent = {0};
+
     jmi_real_t nSamp;
-    *event = nextEvent;
+
 
 
 

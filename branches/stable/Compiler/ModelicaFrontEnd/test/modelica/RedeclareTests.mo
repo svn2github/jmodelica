@@ -3161,11 +3161,11 @@ public
 
  record RedeclareTests.RedeclareTest37.G.D
   parameter Real x;
-  parameter RedeclareTests.RedeclareTest37.G.E e(y = x);
+  parameter RedeclareTests.RedeclareTest37.G.E e;
  end RedeclareTests.RedeclareTest37.G.D;
 
  record RedeclareTests.RedeclareTest37.A
-  parameter RedeclareTests.RedeclareTest37.G.D c(x = 1);
+  parameter RedeclareTests.RedeclareTest37.G.D c;
  end RedeclareTests.RedeclareTest37.A;
 
 end RedeclareTests.RedeclareTest37;
@@ -6962,9 +6962,7 @@ model RedeclarePrefix9
             description="Check that flow/stream is retained from original declaration in a redeclare if none exist in new declaration",
             flatModel="
 fclass RedeclareTests.RedeclarePrefix9
- Real c.x;
-equation
- c.x = 0;
+ input Real c.x;
 end RedeclareTests.RedeclarePrefix9;
 ")})));
 end RedeclarePrefix9;
@@ -6975,7 +6973,10 @@ model RedeclarePrefix10
         replaceable stream Real x;
     end C;
     
-    C c(redeclare flow Real x);
+    C c1(redeclare flow Real x);
+    C c2(redeclare flow Real x);
+equation
+    connect(c1, c2);
 
     annotation(__JModelica(UnitTesting(tests={
         FlatteningTestCase(
@@ -6983,9 +6984,10 @@ model RedeclarePrefix10
             description="Check that flow/stream can be changed in a redeclare",
             flatModel="
 fclass RedeclareTests.RedeclarePrefix10
- Real c.x;
+ input Real c1.x;
+ input Real c2.x;
 equation
- c.x = 0;
+ - c1.x - c2.x = 0;
 end RedeclareTests.RedeclarePrefix10;
 ")})));
 end RedeclarePrefix10;
@@ -7359,15 +7361,15 @@ public
  end RedeclareTests.RedeclareInRecord5.B2;
 
  record RedeclareTests.RedeclareInRecord5:a1
-  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+  RedeclareTests.RedeclareInRecord5.B2 b;
  end RedeclareTests.RedeclareInRecord5:a1;
 
  record RedeclareTests.RedeclareInRecord5.A2
-  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+  RedeclareTests.RedeclareInRecord5.B2 b;
  end RedeclareTests.RedeclareInRecord5.A2;
 
  record RedeclareTests.RedeclareInRecord5.A3
-  RedeclareTests.RedeclareInRecord5.B2 b(x = time + 2);
+  RedeclareTests.RedeclareInRecord5.B2 b;
  end RedeclareTests.RedeclareInRecord5.A3;
 
 end RedeclareTests.RedeclareInRecord5;
@@ -7416,7 +7418,7 @@ model RedeclareInRecord7
             description="Redeclare primitive in record array",
             flatModel="
 fclass RedeclareTests.RedeclareInRecord7
- RedeclareTests.RedeclareInRecord7:b b[2](each x = time + 2);
+ RedeclareTests.RedeclareInRecord7:b b[2](x = {time + 2, time + 2});
 
 public
  record RedeclareTests.RedeclareInRecord7:b

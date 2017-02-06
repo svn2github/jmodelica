@@ -24,7 +24,13 @@ aspect FunctionScalarization {
         Map<String,FExp> emptyIndexMap = Collections.emptyMap();
         List<FStatement> stmts = new List<FStatement>();
         List<FAttribute> attrs = new List<FAttribute>();
-        FStatement.scalarizeStmtList(Scalarizer.function(getFFunctionVariables(), stmts), getFAlgorithm().getFStatements());
+        try {
+            FStatement.scalarizeStmtList(Scalarizer.function(getFFunctionVariables(), stmts), getFAlgorithm().getFStatements());
+        } catch (ModelicaException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new org.jmodelica.util.exceptions.InternalCompilerError("Exception caught while scalarizing function'" + name() + "'", e);
+        }
         setFAlgorithm(new FAlgorithm(stmts));
         clearScalarized();  // Functions need scalarized = false in FQNames
         flushAllRecursive();
@@ -284,6 +290,7 @@ aspect FunctionScalarization {
         for (Index i : indices()) {
             FQName name = new FQNameFull(tempVarName(), i.createFArraySubscripts());
             name.scalarized = true;
+            arr.get(i).createArrayTemporaries(s);
             s.add(new FIdUseExp(name), arr.get(i).scalarize(s));
         }
         useTempVar = true;

@@ -138,7 +138,7 @@ aspect BLT{
                     torn = true;
                 }
             }
-            Set<FAbstractEquation> activeRealEquations = new HashSet<FAbstractEquation>();
+            Set<FAbstractEquation> activeRealEquations = new LinkedHashSet<FAbstractEquation>();
             if (torn) {
                 // Check if an equation block is mixed, i.e., contains both continous
                 // and discrete variables, and if it is linear in the unknowns

@@ -170,6 +170,7 @@ int jmi_new_block_solver(jmi_block_solver_t** block_solver_ptr,
             block_solver->solver = solver;
             block_solver->solve = jmi_linear_solver_solve;
             block_solver->delete_solver = jmi_linear_solver_delete;
+            block_solver->completed_integrator_step = jmi_linear_completed_integrator_step;
         }
         break;
 
