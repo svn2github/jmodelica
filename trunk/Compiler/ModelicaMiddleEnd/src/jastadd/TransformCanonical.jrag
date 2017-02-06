@@ -1102,7 +1102,7 @@ aspect TransformCanonical {
 	 * A reference to the FVariable set as indicator for a FRelExp
 	 * Only used in algorithms
 	 */
-    syn nta Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
+    syn Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
 	
 	/**
 	 * Creates an indicator for this FRelExp

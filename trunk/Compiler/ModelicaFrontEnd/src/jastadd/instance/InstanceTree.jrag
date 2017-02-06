@@ -937,7 +937,7 @@ aspect InstanceTreeConstruction {
     eq InstPrimitive.getInstComponentDeclList() = new List();
     eq InstPrimitive.getInstClassDeclList() = new List();
 
-    syn nta List<InstComponentDecl> InstRecordConstructor.getInstComponentDeclList() {
+    syn List<InstComponentDecl> InstRecordConstructor.getInstComponentDeclList() {
         InstClassDecl rec = getRecord().myInstClassDecl().actualInstClass();
         List<InstComponentDecl> l = new List<InstComponentDecl>();
         for (ComponentDecl cd : rec.components()) 
@@ -945,7 +945,7 @@ aspect InstanceTreeConstruction {
         return l;
     }
 
-    syn nta List<InstExtends> InstRecordConstructor.getInstExtendsList() {
+    syn List<InstExtends> InstRecordConstructor.getInstExtendsList() {
         InstClassDecl rec = getRecord().myInstClassDecl().actualInstClass();
         List l = new List();
         InstNode lookup = myInstClassDecl().instLookupNodeForShortClassExtends();
@@ -954,7 +954,7 @@ aspect InstanceTreeConstruction {
         return l;
     }
 
-    syn nta List<InstModification> InstRecordConstructor.getInstModificationList() {
+    syn List<InstModification> InstRecordConstructor.getInstModificationList() {
         List<InstModification> res = new List<InstModification>();
         for (InstFunctionArgument ifa : getArgs()) {
             ifa.populateInstModifications(res);
