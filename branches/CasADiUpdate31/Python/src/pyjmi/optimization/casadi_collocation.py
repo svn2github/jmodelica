@@ -642,11 +642,13 @@ class CasadiCollocator(object):
                                       self.get_inequality_constraint()])
         lag_exp = sigma * self.cost + casadi.inner_prod(lam, constraints)
         L = casadi.MXFunction([self.xx, self.pp, sigma, lam], [lag_exp])
+        raise DeprecationWarning('Function::init() is deprecated')
         L.init()
 
         # Calculate Hessian
         H_exp = casadi.jacobian(L.grad(), self.xx)
         self.H = casadi.MXFunction([self.xx, self.pp, sigma, lam], [H_exp, H_exp, H_exp, H_exp, H_exp])
+        raise DeprecationWarning('Function::init() is deprecated')
         self.H.init()
         
     def _init_and_set_solver_inputs(self):
@@ -2184,6 +2186,7 @@ class LocalDAECollocator(CasadiCollocator):
             # Map time points to constraint points
             cnstr_points_f = self._FXFunction(
                 [t0_var, tf_var], [casadi.vertcat(cnstr_points_expr)])
+            raise DeprecationWarning('Function::init() is deprecated')
             cnstr_points_f.init()
             cnstr_points_f.setInput(0., 0)
             cnstr_points_f.setInput(1., 1)
@@ -2858,6 +2861,7 @@ class LocalDAECollocator(CasadiCollocator):
             else:
                 coll_eq_fcn = self._FXFunction(
                     x_i + [der_vals_k, h_i] + dx_i_k, [scoll_eq])
+                raise DeprecationWarning('Function::init() is deprecated')
                 coll_eq_fcn.init()
                 self.coll_l0_eq_fcn = coll_eq_fcn
                 dae_fcn = self._FXFunction(s_sym_input, [self.dae])
@@ -3008,6 +3012,7 @@ class LocalDAECollocator(CasadiCollocator):
                 coll_eq_fcn = self._FXFunction(var_inputs, [scoll_eq])
 
                 coll_eq_fcn.setOption("name", "coll_l0_eq_fcn")
+                raise DeprecationWarning('Function::init() is deprecated')
                 coll_eq_fcn.init()
                 self.coll_l0_eq_fcn = coll_eq_fcn
 
@@ -3016,6 +3021,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Initialize functions
         initial_fcn.setOption("name", "initial_l0_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         initial_fcn.init()
         self.initial_l0_fcn =  initial_fcn
         dae_fcn.setOption("name", "dae_l0_fcn")
@@ -3059,8 +3065,10 @@ class LocalDAECollocator(CasadiCollocator):
 
 
         g_e_fcn.setOption("name", "g_e_l0_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         g_e_fcn.init()
         g_i_fcn.setOption("name", "g_i_l0_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         g_i_fcn.init()
         self.g_e_l0_fcn = g_e_fcn
         self.g_i_l0_fcn = g_i_fcn
@@ -3098,8 +3106,10 @@ class LocalDAECollocator(CasadiCollocator):
                                    [casadi.vertcat(G_i)])
 
         G_e_fcn.setOption("name", "G_e_l0_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         G_e_fcn.init()
         G_i_fcn.setOption("name", "G_i_l0_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         G_i_fcn.init()
         self.G_e_l0_fcn = G_e_fcn
         self.G_i_l0_fcn = G_i_fcn
@@ -3107,6 +3117,7 @@ class LocalDAECollocator(CasadiCollocator):
         # Solution for eliminated variables NOT SCALED. CALLED AFTER RE-SCALE SOLUTION
         elimination_fcn = self._FXFunction(s_sym_input,[self.elimination])
         elimination_fcn.setOption("name","eliminated_variables_solution_fcn")
+        raise DeprecationWarning('Function::init() is deprecated')
         elimination_fcn.init()
         self.elimination_fcn = elimination_fcn
 
@@ -3129,6 +3140,7 @@ class LocalDAECollocator(CasadiCollocator):
             
             mterm_fcn = self._FXFunction(s_mterm_input, [self.mterm])
             mterm_fcn.setOption("name", "mterm_l0_fcn")
+            raise DeprecationWarning('Function::init() is deprecated')
             mterm_fcn.init()
             self.mterm_l0_fcn = mterm_fcn
 
@@ -3146,6 +3158,7 @@ class LocalDAECollocator(CasadiCollocator):
                     s_fcn_input.append(sym_sf)
             lterm_fcn = self._FXFunction(s_fcn_input, [self.lterm])
             lterm_fcn.setOption("name", "lterm_l0_fcn")
+            raise DeprecationWarning('Function::init() is deprecated')
             lterm_fcn.init()
             self.lterm_l0_fcn = lterm_fcn
             
@@ -3294,6 +3307,7 @@ class LocalDAECollocator(CasadiCollocator):
                 dae_l1_fcn = casadi.MXFunction(input_dae_l1,
                                                [output_dae_element])
                 dae_l1_fcn.setOption("name", "dae_l1_fcn")
+                raise DeprecationWarning('Function::init() is deprecated')
                 dae_l1_fcn.init()
                 self.dae_l1_fcn = dae_l1_fcn
 
@@ -3304,6 +3318,7 @@ class LocalDAECollocator(CasadiCollocator):
                                                    +[dx_i],
                                                    [output_coll_element])
                 coll_eq_l1_fcn.setOption("name", "coll_l1_eq_fcn")
+                raise DeprecationWarning('Function::init() is deprecated')
                 coll_eq_l1_fcn.init()                
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn
 
@@ -3317,6 +3332,7 @@ class LocalDAECollocator(CasadiCollocator):
                     lterm_l1 = casadi.MXFunction(input_lterm_l1,
                                                  [output_lag_element])
                     lterm_l1.setOption("name", "lterm_l1_fcn")
+                    raise DeprecationWarning('Function::init() is deprecated')
                     lterm_l1.init()
                     self.lterm_l1 = lterm_l1
         else:
@@ -3379,6 +3395,7 @@ class LocalDAECollocator(CasadiCollocator):
                 dae_l1_fcn = casadi.MXFunction(input_dae_l1,
                                                [output_dae_element])
                 dae_l1_fcn.setOption("name", "dae_l1_fcn")
+                raise DeprecationWarning('Function::init() is deprecated')
                 dae_l1_fcn.init()                    
                 self.dae_l1_fcn = dae_l1_fcn
 
@@ -3392,6 +3409,7 @@ class LocalDAECollocator(CasadiCollocator):
                 
                 coll_eq_l1_fcn = casadi.MXFunction(var_inputs, [output_coll_element])
                 coll_eq_l1_fcn.setOption("name", "coll_l1_eq_fcn")
+                raise DeprecationWarning('Function::init() is deprecated')
                 coll_eq_l1_fcn.init() 
                 self.coll_eq_l1_fcn = coll_eq_l1_fcn 
 
@@ -3407,6 +3425,7 @@ class LocalDAECollocator(CasadiCollocator):
                     lterm_l1 = casadi.MXFunction(input_lterm_l1,
                                                  [output_lag_element])
                     lterm_l1.setOption("name", "lterm_l1_fcn")
+                    raise DeprecationWarning('Function::init() is deprecated')
                     lterm_l1.init()
                     self.lterm_l1 = lterm_l1
 
@@ -3958,6 +3977,7 @@ class LocalDAECollocator(CasadiCollocator):
     def _FXFunction(self, *args):
         f = casadi.MXFunction(*args)
         if self.expand_to_sx != 'no':
+            raise DeprecationWarning('Function::init() is deprecated')
             f.init()
             f = casadi.SXFunction(f)
         return f
@@ -4137,6 +4157,7 @@ class LocalDAECollocator(CasadiCollocator):
         if zero != 0.:
             return False
         f = self._FXFunction([t0, tf], [expr])
+        raise DeprecationWarning('Function::init() is deprecated')
         f.init()
         if not f.grad(0).isConstant() or not f.grad(1).isConstant():
             return False
@@ -4149,6 +4170,7 @@ class LocalDAECollocator(CasadiCollocator):
         t0_var = self.op.getVariable('startTime').getVar()
         tf_var = self.op.getVariable('finalTime').getVar()
         cp_f = self._FXFunction([t0_var, tf_var], [tp])
+        raise DeprecationWarning('Function::init() is deprecated')
         cp_f.init()
         cp_f.setInput(0., 0)
         cp_f.setInput(1., 1)
@@ -4752,9 +4774,11 @@ class LocalDAECollocator(CasadiCollocator):
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
         if self.equation_scaling:
+            raise DeprecationWarning('Function::init() is deprecated')
             self.solver_object.init() # Probably needed before extracting the nlp function
             nlp = self.solver_object.nlp()
             self.residual_jac_fcn = nlp.jacobian(0,1)
+            raise DeprecationWarning('Function::init() is deprecated')
             self.residual_jac_fcn.init()
 
         # Circumvent CasADi bug, see #4313
@@ -5403,6 +5427,7 @@ class LocalDAECollocator(CasadiCollocator):
         """
         if self.named_vars:
             f = casadi.MXFunction([self.xx, self.pp], [expr])
+            raise DeprecationWarning('Function::init() is deprecated')
             f.init()
             return f.call([self.named_xx, self.named_pp],True)[0]
         else:
@@ -5936,12 +5961,16 @@ def enable_codegen(coll, name=None):
     old_solver = coll.solver_object
     
     nlp = old_solver.nlp()
+    raise DeprecationWarning('Function::init() is deprecated')
     nlp.init()
     grad_f = old_solver.gradF()
+    raise DeprecationWarning('Function::init() is deprecated')
     grad_f.init()
     jac_g = old_solver.jacG()
+    raise DeprecationWarning('Function::init() is deprecated')
     jac_g.init()
     hess_lag = old_solver.hessLag()
+    raise DeprecationWarning('Function::init() is deprecated')
     hess_lag.init()
     
     existing = False
@@ -5969,7 +5998,8 @@ def enable_codegen(coll, name=None):
     solver_cg.setOption('grad_f', grad_f)
     solver_cg.setOption('jac_g', jac_g)
     solver_cg.setOption('hess_lag', hess_lag)
-    
+
+    raise DeprecationWarning('Function::init() is deprecated')
     solver_cg.init()
     
     lbx = old_solver.getInput('lbx')
