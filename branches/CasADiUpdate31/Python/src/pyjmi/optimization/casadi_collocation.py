@@ -535,7 +535,7 @@ class CasadiCollocator(object):
         """
         stats = self.solver_object.getStats()
         nbr_iter = stats['iter_count']
-        objective = float(self.solver_object.getOutput('f'))
+        objective = float(self.solver_res['f'])
         total_exec_time = stats['t_mainloop.proc']
         
         # 'Maximum_CPU_Time_Exceeded' and 'Feasible_Point_for_Square_Problem_Found' fail
@@ -594,33 +594,32 @@ class CasadiCollocator(object):
         # Initialize solver
         if self.warm_start:
             # Initialize primal variables and set parameters
-            self.solver_object.setInput(self.get_xx_init(), 'x0')
-            self.solver_object.setInput(self._par_vals, 'p')
+            self.solver_arg['x0'] = self.get_xx_init()
+            self.solver_arg['p'] = self._par_vals
 
             # Initialize dual variables
             # The stored dual variables are unscaled, so that we can change
             # the scaling without invalidating them
-            self.solver_object.setInput(self._inv_scale_residuals(self.dual_opt['g']), 'lam_g0')
-            self.solver_object.setInput(self.dual_opt['x'], 'lam_x0')
+            self.solver_arg['lam_g0'] = self._inv_scale_residuals(self.dual_opt['g'])
+            self.solver_arg['lam_x0'] = self.dual_opt['x']
         else:
             self._init_and_set_solver_inputs()
         # Solve the problem
         t0 = time.clock()
         self.extra_update = t0-t0_update
         self.times['update'] += self.extra_update # should be reset by warm start framework in each optimize, allows adding more update time from that
-        raise Exception('deprecated syntax')
-        self.solver_object.evaluate()
+        self.solver_res = self.solver_object(self.solver_arg)
 
         # Get the result
-        primal_opt = N.array(self.solver_object.getOutput('x'))
+        primal_opt = N.array(self.solver_res['x'])
         self.primal_opt = primal_opt.reshape(-1)
         if self.order != "default":
             self.primal_opt = self.primal_opt[self.var_ordering]
-        dual_g_opt = N.array(self.solver_object.getOutput('lam_g'))
+        dual_g_opt = N.array(self.solver_res['lam_g'])
         # The stored dual variables are unscaled, so that we can change
         # the scaling without invalidating them
         dual_g_opt = self._scale_residuals(dual_g_opt.reshape(-1))
-        dual_x_opt = N.array(self.solver_object.getOutput('lam_x'))
+        dual_x_opt = N.array(self.solver_res['lam_x'])
         dual_x_opt = dual_x_opt.reshape(-1)
         self.dual_opt = {'g': dual_g_opt, 'x': dual_x_opt}
         sol_time = time.clock() - t0
@@ -654,21 +653,21 @@ class CasadiCollocator(object):
         # self.solver_object.init() # Already done in LocalDAECollocationAlg constructor
 
         # Primal initial guess and parameter values
-        self.solver_object.setInput(self.get_xx_init(), 'x0')
-        self.solver_object.setInput(self._get_par_vals(), 'p')
+        self.solver_arg['x0'] = self.get_xx_init()
+        self.solver_arg['p'] = self._get_par_vals()
 
         # Dual initial guess
         if self.init_dual is not None:
-            self.solver_object.setInput(self.init_dual['g'], 'lam_g0')
-            self.solver_object.setInput(self.init_dual['x'], 'lam_x0')
+            self.solver_arg['lam_g0'] = self.init_dual['g']
+            self.solver_arg['lam_x0'] = self.init_dual['x']
 
         # Bounds on x
-        self.solver_object.setInput(self.get_xx_lb(), 'lbx')
-        self.solver_object.setInput(self.get_xx_ub(), 'ubx')
+        self.solver_arg['lbx'] = self.get_xx_lb()
+        self.solver_arg['ubx'] = self.get_xx_ub()
 
         # Bounds on the constraints
-        self.solver_object.setInput(self._scale_residuals(self.gllb), 'lbg')
-        self.solver_object.setInput(self._scale_residuals(self.glub), 'ubg')
+        self.solver_arg['lbg'] = self._scale_residuals(self.gllb)
+        self.solver_arg['ubg'] = self._scale_residuals(self.glub)
 
 
 def _create_trajectory_function(data):
@@ -4748,6 +4747,7 @@ class LocalDAECollocator(CasadiCollocator):
         else:
             raise CasadiCollocatorException(
                     "Unknown nonlinear programming solver %s." % self.solver)
+        self.solver_arg = {}
 
         # Expand to SX
         self.solver_object.setOption("expand", self.expand_to_sx == "NLP")
