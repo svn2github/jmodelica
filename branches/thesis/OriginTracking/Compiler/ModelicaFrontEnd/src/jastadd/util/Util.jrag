@@ -383,22 +383,28 @@ aspect NodeMethods {
     		sourceA2[0] = new SourceLocation((String)sourceNode.fName, sourceNode.start, sourceNode.end);
     	}else{
     		l2 = ((SourceLocation[])sourceNode.fName).length;
-    		sourceA2 = ((SourceLocation[])sourceNode.fName);
+    		sourceA2 = ((SourceLocation[])sourceNode.fName).clone();
     	}
     	
     	ArrayList<SourceLocation> tempLocations = new ArrayList<SourceLocation>();
     	for(int i = 0; i < l1; i++){
+    		boolean ignoreSourceA = false; 
 			for(int j = 0; j < l2; j++){
-				if(sourceA[i].locationContainedBy(sourceA2[j]))
-					tempLocations.add(sourceA2[j]);
-				else if(sourceA2[j].locationContainedBy(sourceA[i]))
-					tempLocations.add(sourceA[i]);
-				else{
-					tempLocations.add(sourceA[i]);
-					tempLocations.add(sourceA2[j]);
+				if(sourceA2[j] == null){
+					continue;
 				}
-					
+				if(sourceA[i].locationContainedBy(sourceA2[j])){
+					tempLocations.add(sourceA2[j]);
+					sourceA2[j] = null;
+					ignoreSourceA = true;
+				}
+				else if(!sourceA2[j].locationContainedBy(sourceA[i])){
+					tempLocations.add(sourceA2[j]);
+					sourceA2[j] = null;
+				}
 			}
+			if(!ignoreSourceA)
+				tempLocations.add(sourceA[i]);
 		}
     	if(tempLocations.size() == 1){
     		fName = tempLocations.get(0).getFile();
@@ -411,7 +417,28 @@ aspect NodeMethods {
     }
     
     
-    protected boolean BaseNode.locationContainedBy(ASTNode node){
+    syn boolean BaseNode.locationContainedBy() {
+    	if(!(fName instanceof String))
+    		return false;
+    	BaseNode parentWithLocation = parentWithLocation();
+    	if (parentWithLocation == null) {
+    		return false;
+    	}
+		return fName.equals(parentWithLocation.fName) && start >= parentWithLocation.start && end <= parentWithLocation.end;		
+    }
+    inh BaseNode BaseNode.parentWithLocation();
+    eq BaseNode.getChild().parentWithLocation() {
+    	if (fName != null) {
+    		return this;
+    	} else {
+    		return parentWithLocation();
+    	}
+    }
+    //eq InstRoot.parentWithLocation() = null;
+    //eq FlatRoot.parentWithLocation() = null;
+    eq Root.getChild().parentWithLocation() = null;
+
+   /* protected boolean BaseNode.locationContainedBy(ASTNode node){
     	if(!(fName instanceof String))
     		return false;
     	if(node instanceof Opt || node instanceof List){
@@ -430,7 +457,7 @@ aspect NodeMethods {
     		}	
     	}
     	return false;
-    }
+    }*/
     
     public boolean SourceLocation.locationContainedBy(SourceLocation location){
     	if(fName == null || location.fName == null)
@@ -443,6 +470,13 @@ aspect NodeMethods {
     
     
     public void FExp.collectLocations(BaseNode collector){
+		return;
+	}
+    
+    public void FEquation.collectLocations(BaseNode collector){
+    	collector.addLocation(this);
+		getLeft().collectLocations(collector);
+		getRight().collectLocations(collector);
 		return;
 	}
     
@@ -460,12 +494,11 @@ aspect NodeMethods {
 	public void FLitExp.collectLocations(BaseNode collector){
 		collector.addLocation(this);
 	}
-	// not pretty. Find better solution?
+	
 	public void FIdUseExp.collectLocations(BaseNode collector){
-		if(this.myFV_value != null){
-    		if(this.myFV_value.getChild(4) != null){
-    			collector.addLocation((((Opt<BaseNode>)this.myFV_value.getChild(4)).getChild(0)));
-    		}
+		FAbstractVariable fv = myFV();
+		if(fv.hasBindingExp()){
+    		collector.addLocation(((FVariable)fv).getBindingExp());
     	}
 	}
     
@@ -663,10 +696,14 @@ aspect FileNames {
     	public void setLocation(String fName, int start, int end){
     		this.fName = fName;
     		this.start = start;
-    		this.end = end;
-    		
-    		
+    		this.end = end;	
     	}
+    	public int getStartLine(){ return Symbol.getLine(start); }
+    	public int getStartColumn(){ return Symbol.getColumn(start); }
+    	public int getEndLine(){ return Symbol.getLine(end); }
+    	public int getEndColumn(){ return Symbol.getColumn(end); }
+    	
+    	//getStartLine() ...
     }
     
     
@@ -678,19 +715,34 @@ aspect FileNames {
     public Object ASTNode.fileNames() {
     	return fileName();
     }
+    
 
     public String ASTNode.fileName() { 
     	return retrieveFileName(); 
     }
     public String BaseNode.fileName() {
-    	if (fName == null)
+    	/*String fName = null;
+    	if (this.fName == null){
     	    fName = retrieveFileName();
-    	if(fName != null && !(fName instanceof String))
-    		return ((SourceLocation[])fName)[0].getFile();
+    	    this.fName = new SourceLocation[1];
+    	    ((SourceLocation[])this.fName)[0] = new SourceLocation(fName, start, end);
+    	}
+    	else if(this.fName != null && !(this.fName instanceof String)){
+    		return ((SourceLocation[])this.fName)[0].getFile();
+    	}
+    	else if(this.fName instanceof String){
+    		fName = (String)this.fName;
+    	}*/
+    	if(fName instanceof SourceLocation){
+    		return ((SourceLocation[])this.fName)[0].getFile();
+    	}
    		return (String)fName;
     }
     public String Root.fileName() {
-    		return (String)fName;
+    	if(fName instanceof SourceLocation[]){
+			return ((SourceLocation[])fName)[0].getFile();
+		}
+		return (String)fName;
     	
     }
     public String LibNode.fileName() {

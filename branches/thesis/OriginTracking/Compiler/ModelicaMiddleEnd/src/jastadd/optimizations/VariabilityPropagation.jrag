@@ -317,13 +317,17 @@ aspect VariabilityPropagation {
 		}
 
 		if (solutionVariability.knownParameterOrLess()) {
+			//spara solution
+			FExp newSolution;
 			try {
-				solution = solution.ceval().buildLiteral();
-				getRight().collectLocations(solution);
+				newSolution = solution.ceval().buildLiteral();
+				solution.collectLocations(newSolution);
+				solution = newSolution;
 			} catch (ConstantEvaluationException e) {
 				// If we can't evaluate right now, set it as parameter
 				solutionVariability = fParameter();
 			}
+			//collect för solution här?
 		}
 		
         if (!solutionVariability.knownParameterOrLess()) {

@@ -2,27 +2,19 @@ import java.io.File;
 
 import beaver.Symbol;
 
-//fabstractequaton
-	//fabstractvariable
-	//fexp
 
 aspect HtmlSourcePrettyPrint {
 
 	public class HtmlSourcePrettyPrinter extends PrettyPrinter {
 		
 			private int htmlLineDepth;
-			//private int nextColour;
-			public BaseNode prevNode;
 			
-			public TreeMap<String,Integer> fileColour;
+			private int htmlContainedLDepth;
 			
 		
 			public HtmlSourcePrettyPrinter() {
 				super();
 				htmlLineDepth = 0;
-				//nextColour = 0;
-				//fileColour = new TreeMap<String,Integer>();
-				prevNode = null;
 			}
 			
 	 		public void print(ASTNode node, CodeStream str, String indent) { 
@@ -31,21 +23,31 @@ aspect HtmlSourcePrettyPrint {
 	 		}
 	 		
 	 		public int incLineDepth(){ return htmlLineDepth++; }
+	 		public int incContainedLDepth(){ return htmlContainedLDepth++; }
 	 		
 	 		public int decLineDepth(){ return htmlLineDepth--; }
+	 		public int decContainedLDepth(){ return htmlContainedLDepth--; }
+	 		
+	 		public int getLineDepth(){ return htmlLineDepth; }
+	 		public int getContainedLDepth(){ return htmlContainedLDepth; }
 	}
 	public void ASTNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
 		prettyPrint(p, str, indent);
 	}
-	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent, File css) {
+	public void ASTNode.htmlSourcePrettyPrint(CodeStream str, String indent) {
 		
-		str.println("<html>\n<head>\n");
-		str.println("<link rel=\"stylesheet\" href=\"" + css.getName() + "\">\n");
-		str.println("</head>\n<body>");
 		HtmlSourcePrettyPrinter p = new HtmlSourcePrettyPrinter();
+		str.println("<html>\n<head>\n");
+		//str.println("<link rel=\"stylesheet\" href=\"" + css.getName() + "\">\n");
+		str.println(p.htmlStyle());
+		str.println(p.htmlScriptHeader());
+		str.println("</head>\n<body>\n");
+		str.println("<div class=\"font\">\n");
+		str.println("<button class=\"button\" type=\"button\" onclick=\"classIdSwitch()\">Full underlining</button><br>\n");
+		
 		htmlSourcePrettyPrint(p, str, indent);
-		str.println("</body>\n</html>");
-		try{
+		str.println("</div>\n</body>\n</html>");
+		/*try{
 			if(css != null){
 				CodeStream cssStr = new CodeStream(css);
 				cssStr.println(p.htmlStyle());
@@ -53,24 +55,86 @@ aspect HtmlSourcePrettyPrint {
 			}
 	 	} catch (IOException e) {
 	 		//Do nothing
-	 	}
+	 	}*/
 	}
 	
 	public static String HtmlSourcePrettyPrinter.htmlStyle(){
 		StringBuilder sb = new StringBuilder();
+		/*
+		 * span.constantUse {
+		 * 	color:#999900;
+		 * }
+		 */
+		sb.append("<style>\n");
 		sb.append("span {\n");
-		sb.append("\tline-height: 20px;\n");
+		/*sb.append("\tline-height: 20px;\n");
 		sb.append("\tbackground: linear-gradient(0deg, blue 1px, white 1px, transparent 1px);\n");
 		sb.append("\tbackground-position: 0 100%;\n}\n");
-		for(Integer i = 1; i < 6; i++){
+		for(Integer i = 1; i < 12; i++){
 			sb.append(".s" + i + " {\n");
 			sb.append("\tline-height: " + (i * 4 + 20) + "px;\n");
 			sb.append("\tpadding-bottom: " + (i * 4) + "px;\n}\n");
-		}
+		}*/
+		sb.append("\tdisplay:inline-block\n}\n");
+		sb.append("span.newLevel,\n");
+		sb.append("span.forceLevel {\n");
+		sb.append("\tborder-bottom:1px solid blue;\n");
+		sb.append("\tmargin-bottom:2px;\n}\n");
+		sb.append(".constantUse{\n");
+		sb.append("color:#999900;\n}\n");
+		sb.append(".parameterUse{\n");
+		sb.append("color:#990099;\n}\n");
+		sb.append(".discreteUse{\n");
+		sb.append("color:#009999;\n}\n");
+		sb.append(".continuousUse{\n");
+		sb.append("color:#009900;\n}\n");
+		
+		sb.append(".button{\n");
+		sb.append("position: fixed;\n");
+		sb.append("right: 10px;\n}\n");
+		sb.append("div.font{\n");
+		sb.append("font-family:\"Courier New\";\n}\n");
+		sb.append("</style>\n");
 		sb.append("\n");
 		return sb.toString();
 		
 	}
+	
+	public static String HtmlSourcePrettyPrinter.htmlScriptHeader(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("<script>\n");
+		sb.append("var forceLevel = false;\n");
+		sb.append("function classIdSwitch(){\n");
+		sb.append("forceLevel = !forceLevel;\n");
+		sb.append("var allSpans = document.getElementsByTagName(\"span\");\n");
+		sb.append("for(i = 1; i < allSpans.length; i++){\n");
+		sb.append("\tvar clazz = allSpans[i].className;\n");
+		sb.append("\tif (clazz.match(/(^|\\s)newLevel($|\\s)/)) {\n");
+		sb.append("\t\tcontinue;\n}\n");
+		sb.append("\tif (forceLevel) {\n");
+		sb.append("\t\tclazz += \" forceLevel\";\n");
+		sb.append("\t} else {\n");
+		sb.append("\t\tclazz = clazz.replace(/(^|\\s)forceLevel($|\\s)/, '$2');\n}\n");
+		sb.append("allSpans[i].className = clazz;\n}\n}\n");
+		sb.append("</script>");
+		
+		return sb.toString();
+	}
+	
+	
+	/*public static String HtmlSourcePrettyPrinter.htmlScriptHeader(){
+		StringBuilder sb = new StringBuilder();
+		sb.append("<script>\n");
+		sb.append("function classIdSwitch(){\n");
+		sb.append("\tvar allSpans = document.getElementsByTagName(\"span\");\n");
+		sb.append("\tfor(i = 1; i < allSpans.length; i++){\n");
+		sb.append("\t\tvar temp = allSpans[i].className;\n");
+		sb.append("\t\tallSpans[i].className = allSpans[i].id;\n");
+		sb.append("\t\tallSpans[i].id = temp;\n\t}\n}\n");
+		sb.append("</script>");
+		
+		return sb.toString();
+	}*/
 	
 	/*public String HtmlSourcePrettyPrinter.htmlStyle(){
 		StringBuilder sb = new StringBuilder();
@@ -114,7 +178,6 @@ aspect HtmlSourcePrettyPrint {
                 } else {
                     p.print(fv, str, nextInd);
                     str.print(";<br>\n");
-                    ((HtmlSourcePrettyPrinter)p).prevNode = null;
                 }
             }
         }
@@ -123,7 +186,6 @@ aspect HtmlSourcePrettyPrint {
             for (FVariable fv : protectedVars) {
                 p.print(fv, str, nextInd);
                 str.print(";<br>\n");
-                ((HtmlSourcePrettyPrinter)p).prevNode = null;
             }
         }
 
@@ -171,8 +233,17 @@ aspect HtmlSourcePrettyPrint {
         str.print(";</b>\n");
     }
 	
+	syn String BaseNode.htmlSourceNodeClass() = null;
+	eq FTypePrefixVariability.htmlSourceNodeClass() = "variabilityPrefix";
+	eq FIdUseExp.htmlSourceNodeClass() = variability().htmlSourceVarUseClass();
+	
+	syn String FTypePrefixVariability.htmlSourceVarUseClass() = null;
+	eq FConstant.htmlSourceVarUseClass() = "constantUse";
+	eq FParameter.htmlSourceVarUseClass() = "parameterUse";
+	eq FContinuous.htmlSourceVarUseClass() = "continuousUse";
+	eq FDiscrete.htmlSourceVarUseClass() = "discreteUse";
+	
 	public void BaseNode.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
-		String s = this.getClass().toString();
 		SourceLocation[] file = null;
 		if(fName instanceof String){
 			file = new SourceLocation[1];
@@ -180,27 +251,59 @@ aspect HtmlSourcePrettyPrint {
 		}else if(fName != null){
 			file = (SourceLocation[])fName;			
 		}
-		if(file != null && fName != null && p instanceof HtmlSourcePrettyPrinter){// && !locationContainedBy(parent)){
+		String nodeClass = htmlSourceNodeClass();
+		
+		if((file != null || htmlSourceNodeClass() != null) && p instanceof HtmlSourcePrettyPrinter){// && !locationContainedBy()){
 			String dir = System.getProperty("user.dir");
+			Boolean containedByParent = locationContainedBy();
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
 			
-			str.print("<span class=\"s" + hp.incLineDepth() + "\" title=\"");
-			for(int i = 0; i < file.length; i++){
-				String fileName = file[i].getFile();
-				try{
-					if(fileName.substring(0, dir.lastIndexOf("\\")).equals(dir.substring(0, dir.lastIndexOf("\\")))){
-					   	fileName = fileName.substring(dir.lastIndexOf("\\") + 1);
-					}
-				}catch(IndexOutOfBoundsException e){} 				//keep fileName whole
-				if(i > 0)
-					str.print("\n");								// works, but produces linebreaks in the html code
-				str.print(fileName + " " + Symbol.getLine(file[i].getStart()) + ":" + Symbol.getColumn(file[i].getStart()) 
-					+ " " + Symbol.getLine(file[i].getEnd()) + ":" + Symbol.getColumn(file[i].getEnd()));
+			//String spanClass = "";
+			
+			str.print("<span ");
+			/*if(file != null){
+				str.print("id=\"" + spanClass + "s" + hp.incLineDepth() + "\" ");
+			}*/
+			str.print("class=\"");
+			if(htmlSourceNodeClass() != null){
+				str.print(htmlSourceNodeClass());
 			}
+			
+			if(file != null ){
+				if(!containedByParent){
+					if(htmlSourceNodeClass() != null){
+						str.print(" ");
+					}
+					str.print("newLevel");
+				}	
+				/*	spanClass += "s" + (hp.getContainedLDepth()-1);
+				}else{
+					spanClass += "s" + hp.incContainedLDepth();
+				}*/
+				str.print("\" title=\"");
+				for(int i = 0; i < file.length; i++){
+					String fileName = cropAbsolutePath(file[i].getFile());
+					//&#10;
+					if(i > 0)
+						str.print("&#10;");								// works, but produces linebreaks in the html code
+					//string format
+					str.format("%s %d:%d %d:%d", fileName, file[i].getStartLine(), file[i].getStartColumn(),  file[i].getEndLine(), file[i].getEndColumn());
+					//str.print(fileName + " " + file[i].getStartRow() + ":" + file[i].getStartColumn() 
+					//	+ " " + file[i].getEndRow() + ":" + file[i].getEndColumn());
+				}
+			}/*else{
+				str.print(spanClass);
+			}*/
 			
 			str.print("\">");
 			prettyPrint(p, str, indent);
-			hp.decLineDepth();
+			/*if(file != null){
+				hp.decLineDepth();
+				if(!containedByParent){
+					hp.decContainedLDepth();
+				}
+			}*/
+			
 			str.print("</span>");
 		}else{
 			prettyPrint(p, str, indent);
@@ -212,13 +315,11 @@ aspect HtmlSourcePrettyPrint {
 		String file = fName;
 		if(fName != null && p instanceof HtmlSourcePrettyPrinter && !locationContainedBy(parent)){
 			HtmlSourcePrettyPrinter hp = (HtmlSourcePrettyPrinter)p;
-			BaseNode prev = hp.prevNode;
 			
 			if(prev != null)
 				str.print("</s" + hp.fileColour.get(cropAbsolutePath(prev.fName)) + ">");
 			
 			hp.printHTMLColour(this, str);
-			hp.prevNode = this; 
 			prettyPrint(p, str, indent);
 			str.print("</s" + hp.fileColour.get(cropAbsolutePath(fName)) + ">");
 			
@@ -253,7 +354,6 @@ aspect HtmlSourcePrettyPrint {
 	public void FAbstractEquation.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent){
 		super.htmlSourcePrettyPrint(p, str, indent);
 		str.print(";<br>\n");
-		((HtmlSourcePrettyPrinter)p).prevNode = null;
 	}
 	
 	public void FFunctionDecl.htmlSourcePrettyPrint(Printer p, CodeStream str, String indent) {
@@ -338,7 +438,7 @@ aspect HtmlSourcePrettyPrint {
 	public String ASTNode.htmlSourcePrettyPrint(String indent) {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		CodeStream str = new NotNullCodeStream(os);
-		htmlSourcePrettyPrint(str, indent, null);
+		htmlSourcePrettyPrint(str, indent);
 		return os.toString();
 	}
 }
