@@ -2184,10 +2184,8 @@ class LocalDAECollocator(CasadiCollocator):
             tf_var = self.op.getVariable('finalTime').getVar()
 
             # Map time points to constraint points
-            cnstr_points_f = self._FXFunction(
+            cnstr_points_f = self._FXFunction('cnstr_points_f',
                 [t0_var, tf_var], [casadi.vertcat(cnstr_points_expr)])
-            raise DeprecationWarning('Function::init() is deprecated')
-            cnstr_points_f.init()
             cnstr_points_f.setInput(0., 0)
             cnstr_points_f.setInput(1., 1)
             raise Exception('deprecated syntax')
@@ -2853,18 +2851,16 @@ class LocalDAECollocator(CasadiCollocator):
 
         if not self.variable_scaling:
             self._eliminate_der_var()
-            initial_fcn = self._FXFunction(s_sym_input, [self.initial])
+            initial_fcn = self._FXFunction('initial_l0_fcn', s_sym_input, [self.initial])
             
             if self.eliminate_der_var:
                 print "TODO define input for no derivative mode daeresidual"
                 raise NotImplementedError("eliminate_der_ver not supported yet")
             else:
-                coll_eq_fcn = self._FXFunction(
+                coll_eq_fcn = self._FXFunction('coll_eq_fcn',
                     x_i + [der_vals_k, h_i] + dx_i_k, [scoll_eq])
-                raise DeprecationWarning('Function::init() is deprecated')
-                coll_eq_fcn.init()
                 self.coll_l0_eq_fcn = coll_eq_fcn
-                dae_fcn = self._FXFunction(s_sym_input, [self.dae])
+                dae_fcn = self._FXFunction('dae_fcn', s_sym_input, [self.dae])
         else:
             # Compose scaling factors for collocation equations
             if self.n_var["x"] > 0:
@@ -2999,7 +2995,7 @@ class LocalDAECollocator(CasadiCollocator):
 
             # Create functions
             input_initial_fcn = s_sym_input + ([sym_sf] if sym_sf.shape[0] > 0 else [])
-            initial_fcn = self._FXFunction(input_initial_fcn, [self.initial])
+            initial_fcn = self._FXFunction('initial_fcn', input_initial_fcn, [self.initial])
                 
             if self.eliminate_der_var:
                 print "TODO define input for function with no derivatives"
@@ -3009,23 +3005,14 @@ class LocalDAECollocator(CasadiCollocator):
                 if self.n_var["x"] > 0:
                     var_inputs += [x_i_sf_d]+[x_i_sf_e]+[dx_i_k_sf_d]+[dx_i_k_sf_e]
                 
-                coll_eq_fcn = self._FXFunction(var_inputs, [scoll_eq])
-
-                coll_eq_fcn.setOption("name", "coll_l0_eq_fcn")
-                raise DeprecationWarning('Function::init() is deprecated')
-                coll_eq_fcn.init()
+                coll_eq_fcn = self._FXFunction('coll_l0_eq_fcn', var_inputs, [scoll_eq])
                 self.coll_l0_eq_fcn = coll_eq_fcn
 
                 input_dae_fcn = s_sym_input + ([sym_sf] if sym_sf.shape[0] > 0 else [])
-                dae_fcn = self._FXFunction(input_dae_fcn, [self.dae])
+                dae_fcn = self._FXFunction('dae_l0_fcn', input_dae_fcn, [self.dae])
 
         # Initialize functions
-        initial_fcn.setOption("name", "initial_l0_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        initial_fcn.init()
         self.initial_l0_fcn =  initial_fcn
-        dae_fcn.setOption("name", "dae_l0_fcn")
-        dae_fcn.init()
         self.dae_l0_fcn = dae_fcn
 
         # Manipulate and sort path constraints
@@ -3058,18 +3045,10 @@ class LocalDAECollocator(CasadiCollocator):
                 s_path_constraint_input.append(sym_sf)
 
 
-        g_e_fcn = self._FXFunction(s_path_constraint_input,
+        g_e_fcn = self._FXFunction('g_e_l0_fcn', s_path_constraint_input,
                                    [casadi.vertcat(g_e)])
-        g_i_fcn = self._FXFunction(s_path_constraint_input,
+        g_i_fcn = self._FXFunction('g_i_l0_fcn', s_path_constraint_input,
                                    [casadi.vertcat(g_i)])
-
-
-        g_e_fcn.setOption("name", "g_e_l0_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        g_e_fcn.init()
-        g_i_fcn.setOption("name", "g_i_l0_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        g_i_fcn.init()
         self.g_e_l0_fcn = g_e_fcn
         self.g_i_l0_fcn = g_i_fcn
 
@@ -3100,25 +3079,17 @@ class LocalDAECollocator(CasadiCollocator):
             if sym_sf.shape[0] > 0:
                 s_point_constraint_input.append(sym_sf)
 
-        G_e_fcn = self._FXFunction(s_point_constraint_input,
+        G_e_fcn = self._FXFunction('G_e_l0_fcn', s_point_constraint_input,
                                    [casadi.vertcat(G_e)])
-        G_i_fcn = self._FXFunction(s_point_constraint_input,
+        G_i_fcn = self._FXFunction('G_i_l0_fcn', s_point_constraint_input,
                                    [casadi.vertcat(G_i)])
 
-        G_e_fcn.setOption("name", "G_e_l0_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        G_e_fcn.init()
-        G_i_fcn.setOption("name", "G_i_l0_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        G_i_fcn.init()
         self.G_e_l0_fcn = G_e_fcn
         self.G_i_l0_fcn = G_i_fcn
         
         # Solution for eliminated variables NOT SCALED. CALLED AFTER RE-SCALE SOLUTION
-        elimination_fcn = self._FXFunction(s_sym_input,[self.elimination])
-        elimination_fcn.setOption("name","eliminated_variables_solution_fcn")
-        raise DeprecationWarning('Function::init() is deprecated')
-        elimination_fcn.init()
+        elimination_fcn = self._FXFunction('eliminated_variables_solution_fcn',
+                                           s_sym_input,[self.elimination])
         self.elimination_fcn = elimination_fcn
 
         #Define cost terms
@@ -3138,10 +3109,7 @@ class LocalDAECollocator(CasadiCollocator):
                 if sym_sf.shape[0] > 0:
                     s_mterm_input.append(sym_sf)
             
-            mterm_fcn = self._FXFunction(s_mterm_input, [self.mterm])
-            mterm_fcn.setOption("name", "mterm_l0_fcn")
-            raise DeprecationWarning('Function::init() is deprecated')
-            mterm_fcn.init()
+            mterm_fcn = self._FXFunction('mterm_l0_fcn', s_mterm_input, [self.mterm])
             self.mterm_l0_fcn = mterm_fcn
 
         # Lagrange term
@@ -3156,10 +3124,7 @@ class LocalDAECollocator(CasadiCollocator):
             if self.variable_scaling:
                 if sym_sf.shape[0] > 0:
                     s_fcn_input.append(sym_sf)
-            lterm_fcn = self._FXFunction(s_fcn_input, [self.lterm])
-            lterm_fcn.setOption("name", "lterm_l0_fcn")
-            raise DeprecationWarning('Function::init() is deprecated')
-            lterm_fcn.init()
+            lterm_fcn = self._FXFunction('lterm_l0_fcn', s_fcn_input, [self.lterm])
             self.lterm_l0_fcn = lterm_fcn
             
         
@@ -3977,9 +3942,7 @@ class LocalDAECollocator(CasadiCollocator):
     def _FXFunction(self, *args):
         f = casadi.MXFunction(*args)
         if self.expand_to_sx != 'no':
-            raise DeprecationWarning('Function::init() is deprecated')
-            f.init()
-            f = casadi.SXFunction(f)
+            f = f.expand()
         return f
 
     def _call_l1_functions(self):
@@ -4156,9 +4119,7 @@ class LocalDAECollocator(CasadiCollocator):
         [zero] = casadi.substitute([expr], [t0, tf], [0., 0.])
         if zero != 0.:
             return False
-        f = self._FXFunction([t0, tf], [expr])
-        raise DeprecationWarning('Function::init() is deprecated')
-        f.init()
+        f = self._FXFunction('f', [t0, tf], [expr])
         if not f.grad(0).isConstant() or not f.grad(1).isConstant():
             return False
         return True
