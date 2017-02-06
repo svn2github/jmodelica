@@ -562,7 +562,7 @@ aspect InstLookupClasses {
         if (equalsLowerCase(name(), str)) {
             resolveLib();
         }
-        return name().matches(str);
+        return name().equals(str);
     }
 
     syn InstClassDecl InstAccess.myInstClassDecl() = unknownInstClassDecl();
