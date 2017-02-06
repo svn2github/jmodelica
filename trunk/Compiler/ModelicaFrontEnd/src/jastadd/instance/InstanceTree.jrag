@@ -934,13 +934,8 @@ aspect InstanceTreeConstruction {
 
     syn InstNode InstClassRedeclare.instLookupNodeForShortClassExtends() = myInstNode();
 
-	eq InstPrimitive.getInstComponentDeclList() = new List();
-	eq InstPrimitive.getInstClassDeclList() = new List();
-
-    syn InstComponentDecl InstRecordConstructor.getInstComponentDeclNoTransform(int i) =
-        getInstComponentDeclListNoTransform().getChildNoTransform(i);
-    syn InstExtends InstRecordConstructor.getInstExtendsNoTransform(int i) =
-        getInstExtendsListNoTransform().getChildNoTransform(i);
+    eq InstPrimitive.getInstComponentDeclList() = new List();
+    eq InstPrimitive.getInstClassDeclList() = new List();
 
     syn nta List<InstComponentDecl> InstRecordConstructor.getInstComponentDeclList() {
         InstClassDecl rec = getRecord().myInstClassDecl().actualInstClass();

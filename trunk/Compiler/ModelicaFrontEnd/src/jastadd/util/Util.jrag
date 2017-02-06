@@ -260,7 +260,14 @@ aspect Logging {
 }
 
 aspect NodeMethods {
-	  
+
+    public class ASTNode<T extends ASTNode> implements Iterable<T> {
+        @Override
+        public Iterator<T> iterator() {
+            return astChildIterator();
+        }
+    }
+
     public class ASTNode {
         /**
          * Copies the member variables defining the location within 

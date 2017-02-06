@@ -116,10 +116,23 @@ aspect InstLookupClasses {
 
     inh InstLookupResult<InstClassDecl> InstExtendsShortClass.lookupInstClassInChain(String name);
     inh InstLookupResult<InstClassDecl> InstReplacingExtendsShortClass.lookupInstClassInChain(String name);
-    // Default to using normal lookup
-    // TODO: don't use JastAdd internal stuff (child)
-    eq InstNode.getChild().lookupInstClassInChain(String name)                             = 
-        ((InstNode) child).lookupInstClass(name);
+
+    /*
+     * Default to using normal lookup.
+     */
+    eq List.getChild(int index).lookupInstClassInChain(String name) {
+        InstLookupResult<InstClassDecl> result = null;
+        for (ASTNode child : this) {
+            result = ((InstNode) child).lookupInstClass(name);
+            if (result.successful()) {
+                return result;
+            }
+        }
+        return result;
+    }
+    eq InstNode.getChild(int index).lookupInstClassInChain(String name) {
+        return ((InstNode) getChild(index)).lookupInstClass(name);
+    }
     eq InstRecordConstructor.getInstComponentDecl().lookupInstClassInChain(String name)    = 
         myInstClassDecl().genericLookupInstClass(name);
     eq InstRecordConstructor.getInstExtends().lookupInstClassInChain(String name) = 
