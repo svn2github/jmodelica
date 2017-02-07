@@ -4714,8 +4714,7 @@ class LocalDAECollocator(CasadiCollocator):
 
         # Create solver object
         self.constraints = constraints
-        self.nlp = casadi.MXFunction('nlp', casadi.nlpIn(x=self.xx, p=self.pp),
-                                casadi.nlpOut(f=self.cost, g=constraints))
+        self.nlp = dict(x=self.xx, p=self.pp, f=self.cost, g=constraints)
         self.solver_opts = {}
         self.solver_arg = {}
 
