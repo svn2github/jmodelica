@@ -1097,13 +1097,13 @@ aspect TransformCanonical {
 	eq FIfStmt.getElseStmt().needsIndicatorInit()          = true;
 	eq FIfWhenClause.getFStatement().needsIndicatorInit()  = true;
 	eq FWhileStmt.getWhileStmt().needsIndicatorInit()      = true;
-	
-	/**
-	 * A reference to the FVariable set as indicator for a FRelExp
-	 * Only used in algorithms
-	 */
-    syn Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
-	
+
+    /**
+     * A reference to the FVariable set as indicator for a FRelExp
+     * Only used in algorithms
+     */
+    syn lazy Opt<FIdUseExp> FRelExp.getIndicatorOpt() = new Opt<FIdUseExp>();
+
 	/**
 	 * Creates an indicator for this FRelExp
 	 */

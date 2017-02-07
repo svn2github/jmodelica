@@ -2155,24 +2155,24 @@ aspect JastAddHacks{
             return var;
         }
     }
-    
+
     public class FClass {
         public <V extends FDynamicResolver> V dynamicResolver(V res) {
             getFDynamicResolverOpt().setChild(res, 0);
             return (V) getFDynamicResolverOpt().getChild(0);
         }
     }
-    
-    syn Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
-    syn Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
-    syn Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
-    
+
+    syn lazy Opt FClass.getFDynamicResolverOpt() = new DynamicOpt();
+    syn lazy Opt FIndexReductionResolver.getFVariableOpt() = new DynamicOpt();
+    syn lazy Opt FIndexReductionResolver.getFAbstractEquationOpt() = new DynamicOpt();
+
     /**
      * Dynamic resolver used during index reduction to handle differentiated
      * variables and equations.
      */
     public class FIndexReductionResolver {
-        
+
         private final Map<String, FVariable> lookupMap = new HashMap<String, FVariable>();
         /**
          * This method takes a variable and adds it to the tree. This is done by
